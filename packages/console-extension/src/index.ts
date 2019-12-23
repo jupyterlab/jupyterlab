@@ -40,7 +40,7 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { find } from '@lumino/algorithm';
 
-import { ReadonlyJSONObject, JSONObject } from '@lumino/coreutils';
+import { JSONObject, ReadonlyPartialJSONObject, UUID } from '@lumino/coreutils';
 
 import { DisposableSet } from '@lumino/disposable';
 
@@ -159,7 +159,8 @@ async function activateConsole(
           widget.content.console.sessionContext.kernelPreference.language
       }
     }),
-    name: widget => widget.content.console.sessionContext.session?.path,
+    name: widget =>
+      widget.content.console.sessionContext.session?.path ?? UUID.uuid4(),
     when: manager.ready
   });
 
@@ -180,7 +181,7 @@ async function activateConsole(
         let baseUrl = PageConfig.getBaseUrl();
         for (let name in specs.kernelspecs) {
           let rank = name === specs.default ? 0 : Infinity;
-          let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+          let kernelIconUrl = specs.kernelspecs[name]?.resources['logo-64x64'];
           if (kernelIconUrl) {
             let index = kernelIconUrl.indexOf('kernelspecs');
             kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
@@ -237,7 +238,7 @@ async function activateConsole(
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
-      setBusy: status && (() => status.setBusy()),
+      setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
     });
     const widget = new MainAreaWidget<ConsolePanel>({ content: panel });
@@ -334,8 +335,11 @@ async function activateConsole(
         const kernelPreference = args[
           'kernelPreference'
         ] as ISessionContext.IKernelPreference;
-        return manager.kernelspecs.specs.kernelspecs[kernelPreference.name]
-          .display_name;
+        // TODO: Lumino command functions should probably be allowed to return undefined?
+        return (
+          manager.kernelspecs?.specs?.kernelspecs[kernelPreference.name || '']
+            ?.display_name ?? ''
+        );
       }
       return 'Console';
     },
@@ -350,13 +354,13 @@ async function activateConsole(
   });
 
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: ReadonlyJSONObject): ConsolePanel | null {
+  function getCurrent(args: ReadonlyPartialJSONObject): ConsolePanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
       shell.activateById(widget.id);
     }
-    return widget.content;
+    return widget?.content ?? null;
   }
 
   commands.addCommand(CommandIDs.clear, {

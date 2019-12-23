@@ -153,7 +153,7 @@ function createApp(manager: ServiceManager.IManager): void {
   commands.addCommand('file-save', {
     execute: () => {
       let context = docManager.contextForWidget(activeWidget);
-      return context.save();
+      return context?.save();
     }
   });
   commands.addCommand('file-cut', {

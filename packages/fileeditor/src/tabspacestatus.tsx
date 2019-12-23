@@ -67,9 +67,8 @@ export class TabSpaceStatus extends VDomRenderer<TabSpaceStatus.Model> {
    * Create a new tab/space status item.
    */
   constructor(options: TabSpaceStatus.IOptions) {
-    super();
+    super(new TabSpaceStatus.Model());
     this._menu = options.menu;
-    this.model = new TabSpaceStatus.Model();
     this.addClass(interactiveItem);
   }
 

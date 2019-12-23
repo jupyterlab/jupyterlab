@@ -140,7 +140,7 @@ export class InspectorPanel extends Panel
     return widget;
   }
 
-  private _content: Widget = null;
+  private _content: Widget;
   private _source: IInspector.IInspectable | null = null;
 }
 

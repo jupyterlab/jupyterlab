@@ -230,7 +230,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     // Open the terminal if necessary.
     if (!this._termOpened) {
       this._term.open(this.node);
-      this._term.element.classList.add(TERMINAL_BODY_CLASS);
+      this._term.element?.classList.add(TERMINAL_BODY_CLASS);
       this._termOpened = true;
     }
 

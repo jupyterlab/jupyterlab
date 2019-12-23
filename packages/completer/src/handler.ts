@@ -359,6 +359,10 @@ export class CompletionHandler implements IDisposable {
           throw new Error('A newer completion request is pending');
         }
 
+        if (!reply) {
+          throw new Error(`Invalid request: ${request}`);
+        }
+
         this._onReply(state, reply);
       })
       .catch(reason => {

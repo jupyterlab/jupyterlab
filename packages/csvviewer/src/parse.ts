@@ -401,9 +401,11 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
       case NEW_ROW:
         nrows++;
 
-        // If we just parsed the first row and the ncols is undefined, set it to
-        // the number of columns we found in the first row.
-        if (nrows === 1 && ncols === undefined) {
+        // If ncols is undefined, set it to the number of columns in this row (first row implied).
+        if (ncols === undefined) {
+          if (nrows !== 1) {
+            throw new Error('Error parsing default number of columns');
+          }
           ncols = col;
         }
 
@@ -468,7 +470,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     }
   }
 
-  return { nrows, ncols: columnOffsets ? ncols : 0, offsets };
+  return { nrows, ncols: columnOffsets ? ncols ?? 0 : 0, offsets };
 }
 
 /**
@@ -571,5 +573,5 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
     currRow = rowEnd + rowDelimiterLength;
   }
 
-  return { nrows, ncols: columnOffsets ? ncols : 0, offsets };
+  return { nrows, ncols: columnOffsets ? ncols ?? 0 : 0, offsets };
 }

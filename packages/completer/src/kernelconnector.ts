@@ -33,7 +33,7 @@ export class KernelConnector extends DataConnector<
   async fetch(
     request: CompletionHandler.IRequest
   ): Promise<CompletionHandler.IReply> {
-    const kernel = this._session.kernel;
+    const kernel = this._session?.kernel;
 
     if (!kernel) {
       return Promise.reject(new Error('No kernel for completion request.'));
@@ -59,7 +59,7 @@ export class KernelConnector extends DataConnector<
     };
   }
 
-  private _session: Session.ISessionConnection;
+  private _session: Session.ISessionConnection | null;
 }
 
 /**
@@ -73,6 +73,6 @@ export namespace KernelConnector {
     /**
      * The session used by the kernel connector.
      */
-    session: Session.ISessionConnection;
+    session: Session.ISessionConnection | null;
   }
 }

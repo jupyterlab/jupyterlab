@@ -1282,8 +1282,8 @@ export namespace NotebookActions {
    * @param notebook - The target notebook widget.
    */
   export function selectLastRunCell(notebook: Notebook): void {
-    let latestTime: Date = null;
-    let latestCellIdx: number = null;
+    let latestTime: Date | null = null;
+    let latestCellIdx: number | null = null;
     notebook.widgets.forEach((cell, cellIndx) => {
       if (cell.model.type === 'code') {
         const execution = (cell as CodeCell).model.metadata.get('execution');
@@ -1294,7 +1294,7 @@ export namespace NotebookActions {
         ) {
           // The busy status is used as soon as a request is received:
           // https://jupyter-client.readthedocs.io/en/stable/messaging.html
-          const timestamp = execution['iopub.status.busy'].toString();
+          const timestamp = execution['iopub.status.busy']!.toString();
           if (timestamp) {
             const startTime = new Date(timestamp);
             if (!latestTime || startTime >= latestTime) {
@@ -1405,7 +1405,7 @@ namespace Private {
     /**
      * The active cell before the action.
      */
-    activeCell: Cell;
+    activeCell: Cell | null;
   }
 
   /**
@@ -1432,7 +1432,7 @@ namespace Private {
       notebook.activate();
     }
 
-    if (scrollIfNeeded) {
+    if (scrollIfNeeded && activeCell) {
       ElementExt.scrollIntoViewIfNeeded(node, activeCell.node);
     }
   }
@@ -1448,7 +1448,7 @@ namespace Private {
     if (state.wasFocused || notebook.mode === 'edit') {
       notebook.activate();
     }
-    if (scroll) {
+    if (scroll && state.activeCell) {
       // Scroll to the top of the previous active cell output.
       const rect = state.activeCell.inputArea.node.getBoundingClientRect();
 
@@ -1549,15 +1549,13 @@ namespace Private {
         break;
       case 'code':
         if (sessionContext) {
+          const deletedCells = notebook.model?.deletedCells ?? [];
           return CodeCell.execute(cell as CodeCell, sessionContext, {
-            deletedCells: notebook.model.deletedCells,
+            deletedCells,
             recordTiming: notebook.notebookConfig.recordTiming
           })
             .then(reply => {
-              notebook.model.deletedCells.splice(
-                0,
-                notebook.model.deletedCells.length
-              );
+              deletedCells.splice(0, deletedCells.length);
               if (cell.isDisposed) {
                 return false;
               }
@@ -1614,7 +1612,7 @@ namespace Private {
     notebook: Notebook,
     cell: Cell
   ) {
-    const setNextInput = content.payload.filter(i => {
+    const setNextInput = content.payload?.filter(i => {
       return (i as any).source === 'set_next_input';
     })[0];
 
@@ -1622,8 +1620,8 @@ namespace Private {
       return;
     }
 
-    const text = (setNextInput as any).text;
-    const replace = (setNextInput as any).replace;
+    const text = setNextInput.text as string;
+    const replace = setNextInput.replace;
 
     if (replace) {
       cell.model.value.text = text;
@@ -1631,8 +1629,8 @@ namespace Private {
     }
 
     // Create a new code cell and add as the next cell.
-    const newCell = notebook.model.contentFactory.createCodeCell({});
-    const cells = notebook.model.cells;
+    const newCell = notebook.model!.contentFactory.createCodeCell({});
+    const cells = notebook.model!.cells;
     const index = ArrayExt.firstIndexOf(toArray(cells), cell.model);
 
     newCell.value.text = text;
@@ -1697,7 +1695,7 @@ namespace Private {
     notebook: Notebook,
     value: nbformat.CellType
   ): void {
-    const model = notebook.model;
+    const model = notebook.model!;
     const cells = model.cells;
 
     cells.beginCompoundOperation();
@@ -1749,7 +1747,7 @@ namespace Private {
    * This action can be undone.
    */
   export function deleteCells(notebook: Notebook): void {
-    const model = notebook.model;
+    const model = notebook.model!;
     const cells = model.cells;
     const toDelete: number[] = [];
 
@@ -1761,7 +1759,7 @@ namespace Private {
 
       if (notebook.isSelectedOrActive(child) && deletable) {
         toDelete.push(index);
-        notebook.model.deletedCells.push(child.model.id);
+        model.deletedCells.push(child.model.id);
       }
     });
 

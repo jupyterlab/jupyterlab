@@ -65,13 +65,13 @@ export class FileUploadStatus extends VDomRenderer<FileUploadStatus.Model> {
    * Construct a new FileUpload status item.
    */
   constructor(opts: FileUploadStatus.IOptions) {
-    super();
+    super(
+      new FileUploadStatus.Model(
+        opts.tracker.currentWidget && opts.tracker.currentWidget.model
+      )
+    );
     this._tracker = opts.tracker;
     this._tracker.currentChanged.connect(this._onBrowserChange);
-
-    this.model = new FileUploadStatus.Model(
-      this._tracker.currentWidget && this._tracker.currentWidget.model
-    );
   }
 
   /**

@@ -54,7 +54,7 @@ describe('CodeMirrorEditor', () => {
 
   describe('#edgeRequested', () => {
     it('should emit a signal when the top edge is requested', () => {
-      let edge: CodeEditor.EdgeLocation = null;
+      let edge: CodeEditor.EdgeLocation | null = null;
       const event = generate('keydown', { keyCode: UP_ARROW });
       const listener = (sender: any, args: CodeEditor.EdgeLocation) => {
         edge = args;
@@ -66,7 +66,7 @@ describe('CodeMirrorEditor', () => {
     });
 
     it('should emit a signal when the bottom edge is requested', () => {
-      let edge: CodeEditor.EdgeLocation = null;
+      let edge: CodeEditor.EdgeLocation | null = null;
       const event = generate('keydown', { keyCode: DOWN_ARROW });
       const listener = (sender: any, args: CodeEditor.EdgeLocation) => {
         edge = args;
@@ -370,7 +370,7 @@ describe('CodeMirrorEditor', () => {
     it('should get the window coordinates given a cursor position', () => {
       model.value.text = TEXT;
       const coord = editor.getCoordinateForPosition({ line: 10, column: 1 });
-      const newPos = editor.getPositionForCoordinate(coord);
+      const newPos = editor.getPositionForCoordinate(coord)!;
       expect(newPos.line).to.be.ok;
       expect(newPos.column).to.be.ok;
     });

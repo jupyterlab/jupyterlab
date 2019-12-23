@@ -133,11 +133,11 @@ describe('outputarea/widget', () => {
       it('should execute code on a kernel and send outputs to the model', async () => {
         const future = sessionContext.session?.kernel?.requestExecute({
           code: CODE
-        });
+        })!;
         widget.future = future;
         const reply = await future.done;
-        expect(reply.content.execution_count).to.be.ok;
-        expect(reply.content.status).to.equal('ok');
+        expect(reply!.content.execution_count).to.be.ok;
+        expect(reply!.content.status).to.equal('ok');
         expect(model.length).to.equal(1);
       });
 
@@ -145,10 +145,10 @@ describe('outputarea/widget', () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
         const future = sessionContext.session?.kernel?.requestExecute({
           code: CODE
-        });
+        })!;
         widget.future = future;
         const reply = await future.done;
-        expect(reply.content.execution_count).to.be.ok;
+        expect(reply!.content.execution_count).to.be.ok;
         expect(model.length).to.equal(1);
       });
     });
@@ -250,15 +250,15 @@ describe('outputarea/widget', () => {
 
       it('should execute code on a kernel and send outputs to the model', async () => {
         const reply = await OutputArea.execute(CODE, widget, sessionContext);
-        expect(reply.content.execution_count).to.be.ok;
-        expect(reply.content.status).to.equal('ok');
+        expect(reply!.content.execution_count).to.be.ok;
+        expect(reply!.content.status).to.equal('ok');
         expect(model.length).to.equal(1);
       });
 
       it('should clear existing outputs', async () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
         const reply = await OutputArea.execute(CODE, widget, sessionContext);
-        expect(reply.content.execution_count).to.be.ok;
+        expect(reply!.content.execution_count).to.be.ok;
         expect(model.length).to.equal(1);
       });
 
@@ -326,8 +326,8 @@ describe('outputarea/widget', () => {
         const future2 = OutputArea.execute('a=1', widget1, ipySessionContext);
         const reply = await future1;
         const reply2 = await future2;
-        expect(reply.content.status).to.equal('error');
-        expect(reply2.content.status).to.equal('aborted');
+        expect(reply!.content.status).to.equal('error');
+        expect(reply2!.content.status).to.equal('aborted');
         expect(model.length).to.equal(1);
         widget1.dispose();
         await ipySessionContext.shutdown();
@@ -350,8 +350,8 @@ describe('outputarea/widget', () => {
         const future2 = OutputArea.execute('a=1', widget1, ipySessionContext);
         const reply = await future1;
         const reply2 = await future2;
-        expect(reply.content.status).to.equal('error');
-        expect(reply2.content.status).to.equal('ok');
+        expect(reply!.content.status).to.equal('error');
+        expect(reply2!.content.status).to.equal('ok');
         widget1.dispose();
         await ipySessionContext.shutdown();
       });

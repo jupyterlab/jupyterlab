@@ -183,8 +183,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
    */
   private async _setBase(data: string): Promise<string> {
     const doc = this._parser.parseFromString(data, 'text/html');
-    let base: HTMLBaseElement;
-    base = doc.querySelector('base');
+    let base = doc.querySelector('base');
     if (!base) {
       base = doc.createElement('base');
       doc.head.insertBefore(base, doc.head.firstChild);

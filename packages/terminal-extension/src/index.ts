@@ -171,7 +171,7 @@ function activate(
   // Subscribe to changes in theme. This is needed as the theme
   // is computed dynamically based on the string value and DOM
   // properties.
-  themeManager.themeChanged.connect((sender, args) => {
+  themeManager?.themeChanged.connect((sender, args) => {
     tracker.forEach(widget => {
       const terminal = widget.content;
       if (terminal.getOption('theme') === 'inherit') {
@@ -336,6 +336,7 @@ export function addCommands(
         Terminal = (await Private.ensureWidget()).Terminal;
       } catch (err) {
         Private.showErrorMessage(err);
+        return;
       }
 
       const name = args['name'] as string;
@@ -399,7 +400,7 @@ export function addCommands(
     label: 'Increase Terminal Font Size',
     execute: async () => {
       let { fontSize } = options;
-      if (fontSize < 72) {
+      if (fontSize && fontSize < 72) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
         } catch (err) {
@@ -413,7 +414,7 @@ export function addCommands(
     label: 'Decrease Terminal Font Size',
     execute: async () => {
       let { fontSize } = options;
-      if (fontSize > 9) {
+      if (fontSize && fontSize > 9) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
         } catch (err) {

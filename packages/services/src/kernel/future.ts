@@ -165,7 +165,7 @@ export abstract class KernelFutureHandler<
     this._stdin = Private.noOp;
     this._iopub = Private.noOp;
     this._reply = Private.noOp;
-    this._hooks = null;
+    this._hooks = null!;
     if (!this._testFlag(Private.KernelFutureFlag.IsDone)) {
       // TODO: Uncomment the following logging code, and check for any tests that trigger it.
       // let status = [];

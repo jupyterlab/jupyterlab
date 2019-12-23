@@ -4,7 +4,10 @@
 |----------------------------------------------------------------------------*/
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import {
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
 
 import { Message } from '@lumino/messaging';
 
@@ -55,7 +58,7 @@ export abstract class RenderedCommon extends Widget
   /**
    * The latexTypesetter.
    */
-  readonly latexTypesetter: IRenderMime.ILatexTypesetter;
+  readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
 
   /**
    * Render a mime model.
@@ -243,7 +246,9 @@ export class RenderedImage extends RenderedCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    let metadata = model.metadata[this.mimeType] as ReadonlyJSONObject;
+    let metadata = model.metadata[this.mimeType] as
+      | ReadonlyPartialJSONObject
+      | undefined;
     return renderers.renderImage({
       host: this.node,
       mimeType: this.mimeType,
@@ -322,7 +327,9 @@ export class RenderedSVG extends RenderedCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    let metadata = model.metadata[this.mimeType] as ReadonlyJSONObject;
+    let metadata = model.metadata[this.mimeType] as
+      | ReadonlyJSONObject
+      | undefined;
     return renderers.renderSVG({
       host: this.node,
       source: String(model.data[this.mimeType]),

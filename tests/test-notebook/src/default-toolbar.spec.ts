@@ -191,8 +191,8 @@ describe('@jupyterlab/notebook', () => {
             'select'
           )[0] as HTMLSelectElement;
           expect(node.value).to.equal('code');
-          const cell = panel.model.contentFactory.createCodeCell({});
-          panel.model.cells.insert(1, cell);
+          const cell = panel.model!.contentFactory.createCodeCell({});
+          panel.model!.cells.insert(1, cell);
           panel.content.select(panel.content.widgets[1]);
           await framePromise();
           expect(node.value).to.equal('code');

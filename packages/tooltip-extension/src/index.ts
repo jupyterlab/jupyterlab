@@ -106,7 +106,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
         }
 
         const anchor = parent.content.console;
-        const editor = anchor.promptCell.editor;
+        const editor = anchor.promptCell?.editor;
         const kernel = anchor.sessionContext.session?.kernel;
         const rendermime = anchor.rendermime;
 
@@ -141,7 +141,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         }
 
         const anchor = parent.content;
-        const editor = anchor.activeCell.editor;
+        const editor = anchor.activeCell?.editor;
         const kernel = parent.sessionContext.session?.kernel;
         const rendermime = anchor.rendermime;
 
@@ -232,8 +232,8 @@ const files: JupyterFrontEndPlugin<void> = {
         if (!kernel) {
           return;
         }
-        const anchor = parent.content;
-        const editor = anchor.editor;
+        const anchor = parent!.content;
+        const editor = anchor?.editor;
 
         // If all components necessary for rendering exist, create a tooltip.
         if (!!editor && !!kernel && !!rendermime) {

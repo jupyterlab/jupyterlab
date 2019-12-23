@@ -5,7 +5,7 @@ import { ServerConnection } from '../serverconnection';
 import { validateSpecModels } from './validate';
 
 import { URLExt } from '@jupyterlab/coreutils';
-import { JSONObject } from '@lumino/coreutils';
+import { PartialJSONObject } from '@lumino/coreutils';
 
 /**
  * The url for the kernelspec service.
@@ -41,7 +41,7 @@ export async function getSpecs(
  * #### Notes
  * See [Kernel specs](https://jupyter-client.readthedocs.io/en/latest/kernels.html#kernelspecs).
  */
-export interface ISpecModel extends JSONObject {
+export interface ISpecModel extends PartialJSONObject {
   /**
    * The name of the kernel spec.
    */
@@ -65,7 +65,7 @@ export interface ISpecModel extends JSONObject {
   /**
    * A dictionary of environment variables to set for the kernel.
    */
-  readonly env?: JSONObject;
+  readonly env?: PartialJSONObject;
 
   /**
    * A mapping of resource file name to download path.
@@ -75,7 +75,7 @@ export interface ISpecModel extends JSONObject {
   /**
    * A dictionary of additional attributes about this kernel; used by clients to aid in kernel selection.
    */
-  readonly metadata?: JSONObject;
+  readonly metadata?: PartialJSONObject;
 }
 
 /**
@@ -84,7 +84,7 @@ export interface ISpecModel extends JSONObject {
  * #### Notes
  * See the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/kernelspecs).
  */
-export interface ISpecModels extends JSONObject {
+export interface ISpecModels extends PartialJSONObject {
   /**
    * The name of the default kernel spec.
    */
@@ -93,5 +93,5 @@ export interface ISpecModels extends JSONObject {
   /**
    * A mapping of kernel spec name to spec.
    */
-  readonly kernelspecs: { [key: string]: ISpecModel };
+  readonly kernelspecs: { [key: string]: ISpecModel | undefined };
 }

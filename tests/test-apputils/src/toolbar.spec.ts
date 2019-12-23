@@ -14,7 +14,7 @@ import { toArray } from '@lumino/algorithm';
 
 import { CommandRegistry } from '@lumino/commands';
 
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { Widget } from '@lumino/widgets';
 
@@ -127,7 +127,7 @@ describe('@jupyterlab/apputils', () => {
     describe('.createFromCommand', () => {
       const commands = new CommandRegistry();
       const testLogCommandId = 'test:toolbar-log';
-      const logArgs: ReadonlyJSONObject[] = [];
+      const logArgs: ReadonlyPartialJSONObject[] = [];
       let enabled = false;
       let toggled = true;
       let visible = false;
@@ -246,13 +246,13 @@ describe('@jupyterlab/apputils', () => {
 
       it('should update the node content on command change event', async () => {
         const id = 'to-be-removed';
-        let iconClassValue: string | null = null;
+        let iconClassValue: string = '';
         const cmd = commands.addCommand(id, {
           execute: () => {
             /* no op */
           },
           label: 'Label-only button',
-          iconClass: () => iconClassValue
+          iconClass: () => iconClassValue ?? ''
         });
         const button = new CommandToolbarButton({
           commands,
@@ -310,7 +310,7 @@ describe('@jupyterlab/apputils', () => {
           Widget.attach(item, document.body);
           await framePromise();
           expect(
-            (item.node.firstChild.lastChild as HTMLElement).textContent
+            (item.node.firstChild!.lastChild as HTMLElement).textContent
           ).to.equal(sessionContext.kernelDisplayName);
         });
       });
@@ -332,7 +332,7 @@ describe('@jupyterlab/apputils', () => {
           });
           const future = sessionContext.session?.kernel?.requestExecute({
             code: 'a = 109\na'
-          });
+          })!;
           await future.done;
           expect(called).to.equal(true);
         });
@@ -344,7 +344,7 @@ describe('@jupyterlab/apputils', () => {
           let called = false;
           const future = sessionContext.session?.kernel?.requestExecute({
             code: 'a = 1'
-          });
+          })!;
           future.onIOPub = msg => {
             if (sessionContext.session?.kernel?.status === 'busy') {
               expect(item.node.title.toLowerCase()).to.contain('busy');

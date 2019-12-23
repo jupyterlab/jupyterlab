@@ -258,7 +258,7 @@ export function run(
  * Get a graph that has all of the package data for the local packages and their
  * first order dependencies.
  */
-export function getPackageGraph(): DepGraph<Dict<any>> {
+export function getPackageGraph(): DepGraph<Dict<unknown>> {
   // Pick up all the package versions.
   const paths = getLernaPaths();
   const locals: Dict<any> = {};
@@ -283,7 +283,7 @@ export function getPackageGraph(): DepGraph<Dict<any>> {
 
   // Build up a dependency graph from all our local packages and
   // their first order dependencies.
-  const graph = new DepGraph();
+  const graph = new DepGraph<Dict<unknown>>();
   Object.keys(locals).forEach(name => {
     const data = locals[name];
     graph.addNode(name, data);
@@ -341,18 +341,15 @@ export function ensureUnixPathSep(source: string) {
 /**
  * Get the last portion of a path, without its extension (if any).
  *
- * @param path - The file path.
+ * @param pathArg - The file path.
  *
  * @returns the last part of the path, sans extension.
  */
-export function stem(path: string): string {
+export function stem(pathArg: string): string {
   return path
-    .split('\\')
-    .pop()
-    .split('/')
-    .pop()
+    .basename(pathArg)
     .split('.')
-    .shift();
+    .shift()!;
 }
 
 /**

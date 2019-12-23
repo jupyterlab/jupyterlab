@@ -345,6 +345,26 @@ describe('@jupyterlab/notebook', () => {
       });
     });
 
+    describe('#initialize()', () => {
+      it('should add one code cell if the model is empty', () => {
+        const model = new NotebookModel();
+        expect(model.cells.length).to.equal(0);
+        model.initialize();
+        expect(model.cells.length).to.equal(1);
+        expect(model.cells.get(0).type).to.equal('code');
+      });
+
+      it('should clear undo state', () => {
+        const model = new NotebookModel();
+        const cell = model.contentFactory.createCodeCell({});
+        cell.value.text = 'foo';
+        model.cells.push(cell);
+        expect(model.cells.canUndo).to.equal(true);
+        model.initialize();
+        expect(model.cells.canUndo).to.equal(false);
+      });
+    });
+
     describe('.ContentFactory', () => {
       let factory = new NotebookModel.ContentFactory({});
 

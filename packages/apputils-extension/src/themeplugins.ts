@@ -48,7 +48,13 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
     const commands = app.commands;
     const url = URLExt.join(paths.urls.base, paths.urls.themes);
     const key = themesPlugin.id;
-    const manager = new ThemeManager({ key, host, settings, splash, url });
+    const manager = new ThemeManager({
+      key,
+      host,
+      settings,
+      splash: splash ?? undefined,
+      url
+    });
 
     // Keep a synchronously set reference to the current theme,
     // since the asynchronous setting of the theme in `changeTheme`

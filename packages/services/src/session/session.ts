@@ -37,7 +37,11 @@ export interface ISessionConnection extends IObservableDisposable {
    */
   kernelChanged: ISignal<
     this,
-    IChangedArgs<Kernel.IKernelConnection, 'kernel'>
+    IChangedArgs<
+      Kernel.IKernelConnection | null,
+      Kernel.IKernelConnection | null,
+      'kernel'
+    >
   >;
 
   /**
@@ -210,6 +214,7 @@ export namespace ISessionConnection {
    */
   export type IKernelChangedArgs = IChangedArgs<
     Kernel.IKernelConnection | null,
+    Kernel.IKernelConnection | null,
     'kernel'
   >;
 }
@@ -281,7 +286,7 @@ export interface IManager extends IDisposable {
    *
    * @returns A promise that resolves with the session's model.
    */
-  findById(id: string): Promise<IModel>;
+  findById(id: string): Promise<IModel | undefined>;
 
   /**
    * Find a session by path.
@@ -290,7 +295,7 @@ export interface IManager extends IDisposable {
    *
    * @returns A promise that resolves with the session's model.
    */
-  findByPath(path: string): Promise<IModel>;
+  findByPath(path: string): Promise<IModel | undefined>;
 
   /**
    * Connect to a running session.

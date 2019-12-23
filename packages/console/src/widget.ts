@@ -274,8 +274,8 @@ export class CodeConsole extends Widget {
       return;
     }
     this._cells.clear();
-    this._msgIdCells = null;
-    this._msgIds = null;
+    this._msgIdCells = null!;
+    this._msgIds = null!;
     this._history.dispose();
 
     super.dispose();
@@ -292,7 +292,7 @@ export class CodeConsole extends Widget {
    * incomplete before attempting submission anyway. The default value is `250`.
    */
   async execute(force = false, timeout = EXECUTION_TIMEOUT): Promise<void> {
-    if (this.sessionContext.session?.kernel.status === 'dead') {
+    if (this.sessionContext.session?.kernel?.status === 'dead') {
       return;
     }
 
@@ -448,6 +448,7 @@ export class CodeConsole extends Widget {
   private _evtMouseMove(event: MouseEvent) {
     const data = this._dragData;
     if (
+      data &&
       CellDragUtils.shouldStartDrag(
         data.pressX,
         data.pressY,
@@ -467,11 +468,11 @@ export class CodeConsole extends Widget {
     clientX: number,
     clientY: number
   ): Promise<void> {
-    const cellModel = this._focusedCell.model as ICodeCellModel;
+    const cellModel = this._focusedCell!.model as ICodeCellModel;
     let selected: nbformat.ICell[] = [cellModel.toJSON()];
 
     const dragImage = CellDragUtils.createCellDragImage(
-      this._focusedCell,
+      this._focusedCell!,
       selected
     );
 
@@ -698,10 +699,10 @@ export class CodeConsole extends Widget {
    */
   private _handleInfo(info: KernelMessage.IInfoReplyMsg['content']): void {
     if (info.status !== 'ok') {
-      this._banner.model.value.text = 'Error in getting kernel banner';
+      this._banner!.model.value.text = 'Error in getting kernel banner';
       return;
     }
-    this._banner.model.value.text = info.banner;
+    this._banner!.model.value.text = info.banner;
     let lang = info.language_info as nbformat.ILanguageInfoMetadata;
     this._mimetype = this._mimeTypeService.getMimeTypeByLanguage(lang);
     if (this.promptCell) {
@@ -790,7 +791,9 @@ export class CodeConsole extends Widget {
       this._banner = null;
     }
     this.addBanner();
-    this._handleInfo(await this.sessionContext.session?.kernel.info);
+    if (this.sessionContext.session?.kernel) {
+      this._handleInfo(await this.sessionContext.session.kernel.info);
+    }
   }
 
   /**
@@ -804,7 +807,7 @@ export class CodeConsole extends Widget {
     }
   }
 
-  private _banner: RawCell = null;
+  private _banner: RawCell | null = null;
   private _cells: IObservableList<Cell>;
   private _content: Panel;
   private _executed = new Signal<this, Date>(this);
@@ -815,9 +818,13 @@ export class CodeConsole extends Widget {
   private _msgIds = new Map<string, CodeCell>();
   private _msgIdCells = new Map<CodeCell, string>();
   private _promptCellCreated = new Signal<this, CodeCell>(this);
-  private _dragData: { pressX: number; pressY: number; index: number } = null;
-  private _drag: Drag = null;
-  private _focusedCell: Cell = null;
+  private _dragData: {
+    pressX: number;
+    pressY: number;
+    index: number;
+  } | null = null;
+  private _drag: Drag | null = null;
+  private _focusedCell: Cell | null = null;
 }
 
 /**

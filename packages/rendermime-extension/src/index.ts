@@ -77,7 +77,7 @@ function activate(
   return new RenderMimeRegistry({
     initialFactories: standardRendererFactories,
     linkHandler: !docManager
-      ? null
+      ? undefined
       : {
           handleLink: (node: HTMLElement, path: string, id?: string) => {
             // If node has the download attribute explicitly set, use the
@@ -91,6 +91,6 @@ function activate(
             });
           }
         },
-    latexTypesetter
+    latexTypesetter: latexTypesetter ?? undefined
   });
 }

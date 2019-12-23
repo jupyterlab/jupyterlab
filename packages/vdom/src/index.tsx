@@ -104,7 +104,7 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
     if (this._timer) {
       window.clearTimeout(this._timer);
     }
-    const kernel = this._sessionContext.session?.kernel;
+    const kernel = this._sessionContext?.session?.kernel;
     if (kernel) {
       this._timer = window.setTimeout(() => {
         if (!this._comms[targetName]) {

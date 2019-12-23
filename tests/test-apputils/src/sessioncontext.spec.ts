@@ -45,7 +45,7 @@ describe('@jupyterlab/apputils', () => {
         path,
         sessionManager,
         specsManager,
-        kernelPreference: { name: specsManager.specs.default }
+        kernelPreference: { name: specsManager.specs?.default }
       });
     });
 
@@ -104,7 +104,7 @@ describe('@jupyterlab/apputils', () => {
           called = true;
         });
         await sessionContext.initialize();
-        await sessionContext.session.kernel.info;
+        await sessionContext.session!.kernel!.info;
         expect(called).to.be.true;
       });
     });
@@ -117,7 +117,7 @@ describe('@jupyterlab/apputils', () => {
           called = true;
         });
         await sessionContext.initialize();
-        await sessionContext.session.kernel.info;
+        await sessionContext.session!.kernel!.info;
         expect(called).to.be.true;
       });
     });
@@ -131,7 +131,7 @@ describe('@jupyterlab/apputils', () => {
           expect(args).to.equal('path');
           called = true;
         });
-        await sessionContext.session.setPath('foo');
+        await sessionContext.session!.setPath('foo');
         expect(called).to.be.true;
       });
 
@@ -143,7 +143,7 @@ describe('@jupyterlab/apputils', () => {
           expect(args).to.equal('name');
           called = true;
         });
-        await sessionContext.session.setName('foo');
+        await sessionContext.session!.setName('foo');
         expect(called).to.be.true;
       });
 
@@ -156,7 +156,7 @@ describe('@jupyterlab/apputils', () => {
           expect(args).to.equal('type');
           called = true;
         });
-        await sessionContext.session.setType('foo');
+        await sessionContext.session!.setType('foo');
         expect(called).to.be.true;
       });
     });
@@ -193,7 +193,7 @@ describe('@jupyterlab/apputils', () => {
       it('should start the default kernel', async () => {
         await sessionContext.initialize();
         expect(sessionContext.session?.kernel?.name).to.equal(
-          specsManager.specs.default
+          specsManager.specs!.default
         );
       });
 
@@ -221,7 +221,7 @@ describe('@jupyterlab/apputils', () => {
           path: UUID.uuid4(),
           type: 'test'
         });
-        const kernelPreference = { id: other.kernel.id };
+        const kernelPreference = { id: other.kernel!.id };
 
         sessionContext = new SessionContext({
           sessionManager,
@@ -245,7 +245,7 @@ describe('@jupyterlab/apputils', () => {
         await sessionContext.initialize();
         await accept;
         expect(sessionContext.session?.kernel?.name).to.equal(
-          specsManager.specs.default
+          specsManager.specs!.default
         );
       });
 
@@ -265,8 +265,8 @@ describe('@jupyterlab/apputils', () => {
     describe('#kernelDisplayName', () => {
       it('should be the display name of the current kernel', async () => {
         await sessionContext.initialize();
-        let spec = await sessionContext.session.kernel.spec;
-        expect(sessionContext.kernelDisplayName).to.equal(spec.display_name);
+        let spec = await sessionContext.session!.kernel!.spec;
+        expect(sessionContext.kernelDisplayName).to.equal(spec!.display_name);
       });
 
       it('should display "No Kernel!" when there is no kernel', async () => {
@@ -286,7 +286,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#kernelDisplayStatus', () => {
       it('should be the status of the current kernel if connected', async () => {
         await sessionContext.initialize();
-        await sessionContext.session.kernel.info;
+        await sessionContext.session!.kernel!.info;
         expect(sessionContext.kernelDisplayStatus).to.be.equal(
           sessionContext.session?.kernel?.status
         );
@@ -294,7 +294,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should be the connection status of the current kernel if not connected', async () => {
         await sessionContext.initialize();
-        let reconnect = sessionContext.session.kernel.reconnect();
+        let reconnect = sessionContext.session!.kernel!.reconnect();
         expect(sessionContext.kernelDisplayStatus).to.be.equal(
           sessionContext.session?.kernel?.connectionStatus
         );
@@ -331,7 +331,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should not shut down the session by default', async () => {
         await sessionContext.initialize();
-        const id = sessionContext.session.id;
+        const id = sessionContext.session!.id;
         sessionContext.dispose();
         const sessions = await SessionAPI.listRunning();
         expect(sessions.find(s => s.id === id)).to.be.ok;
@@ -343,7 +343,7 @@ describe('@jupyterlab/apputils', () => {
           shutdownOnDispose: true
         };
         await sessionContext.initialize();
-        const id = sessionContext.session.id;
+        const id = sessionContext.session!.id;
         sessionContext.dispose();
         const sessions = await SessionAPI.listRunning();
         expect(sessions.find(s => s.id === id)).to.be.undefined;
@@ -356,7 +356,7 @@ describe('@jupyterlab/apputils', () => {
 
         const name = sessionContext.session?.kernel?.name;
         const id = sessionContext.session?.kernel?.id;
-        const kernel = await sessionContext.changeKernel({ name });
+        const kernel = (await sessionContext.changeKernel({ name }))!;
 
         expect(kernel.id).to.not.equal(id);
         expect(kernel.name).to.equal(name);
@@ -367,7 +367,7 @@ describe('@jupyterlab/apputils', () => {
       it('should select a kernel for the session', async () => {
         await sessionContext.initialize();
 
-        const { id, name } = sessionContext.session?.kernel;
+        const { id, name } = sessionContext.session?.kernel!;
         const accept = acceptDialog();
 
         await sessionContext.selectKernel();
@@ -380,7 +380,7 @@ describe('@jupyterlab/apputils', () => {
       it('should keep the existing kernel if dismissed', async () => {
         await sessionContext.initialize();
 
-        const { id, name } = sessionContext.session?.kernel;
+        const { id, name } = sessionContext.session?.kernel!;
         const dismiss = dismissDialog();
 
         await sessionContext.selectKernel();
@@ -449,10 +449,10 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         await sessionContext.initialize();
-        await sessionContext.session.kernel.info;
+        await sessionContext.session!.kernel!.info;
 
         const restart = SessionContext.restartKernel(
-          sessionContext.session?.kernel
+          sessionContext.session?.kernel!
         );
 
         await acceptDialog();
@@ -469,10 +469,10 @@ describe('@jupyterlab/apputils', () => {
           }
         });
         await sessionContext.initialize();
-        await sessionContext.session.kernel.info;
+        await sessionContext.session!.kernel!.info;
 
         const restart = SessionContext.restartKernel(
-          sessionContext.session?.kernel
+          sessionContext.session?.kernel!
         );
 
         await dismissDialog();
@@ -496,7 +496,9 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching name', () => {
-        const spec = specsManager.specs.kernelspecs[specsManager.specs.default];
+        const spec = specsManager.specs!.kernelspecs[
+          specsManager.specs!.default
+        ]!;
 
         expect(
           SessionContext.getDefaultKernel({
@@ -516,7 +518,9 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return a matching language', () => {
-        const spec = specsManager.specs.kernelspecs[specsManager.specs.default];
+        const spec = specsManager.specs!.kernelspecs[
+          specsManager.specs!.default
+        ]!;
         const kernelspecs: any = {};
 
         kernelspecs[spec.name] = spec;
@@ -532,7 +536,9 @@ describe('@jupyterlab/apputils', () => {
       });
 
       it('should return null if a language matches twice', () => {
-        const spec = specsManager.specs.kernelspecs[specsManager.specs.default];
+        const spec = specsManager.specs!.kernelspecs[
+          specsManager.specs!.default
+        ]!;
         const kernelspecs: any = {};
 
         kernelspecs['foo'] = spec;

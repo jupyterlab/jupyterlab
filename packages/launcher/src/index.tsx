@@ -120,7 +120,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
    * Construct a new launcher widget.
    */
   constructor(options: ILauncher.IOptions) {
-    super();
+    super(options.model);
     this._cwd = options.cwd;
     this._callback = options.callback;
     this._commands = options.commands;
@@ -151,7 +151,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): React.ReactElement<any> {
+  protected render(): React.ReactElement<any> | null {
     // Bail if there is no model.
     if (!this.model) {
       return null;
@@ -267,6 +267,11 @@ export namespace ILauncher {
    * The options used to create a Launcher.
    */
   export interface IOptions {
+    /**
+     * The model of the launcher.
+     */
+    model: LauncherModel;
+
     /**
      * The cwd of the launcher.
      */

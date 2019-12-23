@@ -304,7 +304,7 @@ export async function ensureIntegrity(): Promise<boolean> {
         return;
       }
       const depData = graph.getNodeData(depName);
-      if (depData.style) {
+      if (typeof depData.style === 'string') {
         cssData[depName] = [depData.style];
       }
     });

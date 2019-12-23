@@ -68,7 +68,11 @@ export interface ISessionContext extends IObservableDisposable {
    */
   readonly sessionChanged: ISignal<
     this,
-    IChangedArgs<Session.ISessionConnection | null, 'session'>
+    IChangedArgs<
+      Session.ISessionConnection | null,
+      Session.ISessionConnection | null,
+      'session'
+    >
   >;
 
   // Signals proxied from the session connection for convenience.
@@ -78,7 +82,11 @@ export interface ISessionContext extends IObservableDisposable {
    */
   readonly kernelChanged: ISignal<
     this,
-    IChangedArgs<Kernel.IKernelConnection | null, 'kernel'>
+    IChangedArgs<
+      Kernel.IKernelConnection | null,
+      Kernel.IKernelConnection | null,
+      'kernel'
+    >
   >;
 
   /**
@@ -242,11 +250,11 @@ export namespace ISessionContext {
 }
 
 /**
- * The default implementation of client session object.
+ * The default implementation for a session context object.
  */
 export class SessionContext implements ISessionContext {
   /**
-   * Construct a new client session.
+   * Construct a new session context.
    */
   constructor(options: SessionContext.IOptions) {
     this.sessionManager = options.sessionManager;
@@ -313,7 +321,11 @@ export class SessionContext implements ISessionContext {
    */
   get sessionChanged(): ISignal<
     this,
-    IChangedArgs<Session.ISessionConnection | null, 'session'>
+    IChangedArgs<
+      Session.ISessionConnection | null,
+      Session.ISessionConnection | null,
+      'session'
+    >
   > {
     return this._sessionChanged;
   }
@@ -491,7 +503,7 @@ export class SessionContext implements ISessionContext {
    */
   async changeKernel(
     options: Partial<Kernel.IModel> = {}
-  ): Promise<Kernel.IKernelConnection> {
+  ): Promise<Kernel.IKernelConnection | null> {
     await this.initialize();
     if (this.isDisposed) {
       throw new Error('Disposed');
@@ -598,7 +610,7 @@ export class SessionContext implements ISessionContext {
       return;
     }
 
-    let options: Partial<Kernel.IModel>;
+    let options: Partial<Kernel.IModel> | undefined;
     if (preference.id) {
       options = { id: preference.id };
     } else {
@@ -630,12 +642,12 @@ export class SessionContext implements ISessionContext {
    */
   private async _changeKernel(
     options: Partial<Kernel.IModel> = {}
-  ): Promise<Kernel.IKernelConnection> {
+  ): Promise<Kernel.IKernelConnection | null> {
     if (this.isDisposed) {
       throw new Error('Disposed');
     }
     let session = this._session;
-    if (session && session.kernel.status !== 'dead') {
+    if (session && session.kernel?.status !== 'dead') {
       try {
         return session.changeKernel(options);
       } catch (err) {
@@ -689,7 +701,7 @@ export class SessionContext implements ISessionContext {
    */
   private async _startSession(
     model: Partial<Kernel.IModel> = {}
-  ): Promise<Kernel.IKernelConnection> {
+  ): Promise<Kernel.IKernelConnection | null> {
     if (this.isDisposed) {
       throw 'Client session is disposed.';
     }
@@ -880,7 +892,7 @@ export class SessionContext implements ISessionContext {
   private _path = '';
   private _name = '';
   private _type = '';
-  private _prevKernelName = '';
+  private _prevKernelName: string | undefined = '';
   private _kernelPreference: ISessionContext.IKernelPreference;
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);
@@ -895,7 +907,11 @@ export class SessionContext implements ISessionContext {
   >(this);
   private _sessionChanged = new Signal<
     this,
-    IChangedArgs<Session.ISessionConnection | null, 'session'>
+    IChangedArgs<
+      Session.ISessionConnection | null,
+      Session.ISessionConnection | null,
+      'session'
+    >
   >(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
@@ -905,12 +921,12 @@ export class SessionContext implements ISessionContext {
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _dialog: Dialog<any> | null = null;
-  private _setBusy: () => IDisposable | undefined;
+  private _setBusy: (() => IDisposable) | undefined;
   private _busyDisposable: IDisposable | null = null;
 }
 
 /**
- * A namespace for `ClientSession` statics.
+ * A namespace for `SessionContext` statics.
  */
 export namespace SessionContext {
   /**
@@ -1115,7 +1131,7 @@ namespace Private {
     // Check for a single kernel matching the language.
     let matches: string[] = [];
     for (let specName in specs.kernelspecs) {
-      let kernelLanguage = specs.kernelspecs[specName].language;
+      let kernelLanguage = specs.kernelspecs[specName]?.language;
       if (language === kernelLanguage) {
         matches.push(specName);
       }
@@ -1166,7 +1182,7 @@ namespace Private {
     let displayNames: { [key: string]: string } = Object.create(null);
     let languages: { [key: string]: string } = Object.create(null);
     for (let name in specs.kernelspecs) {
-      let spec = specs.kernelspecs[name];
+      let spec = specs.kernelspecs[name]!;
       displayNames[name] = spec.display_name;
       languages[name] = spec.language;
     }
@@ -1246,11 +1262,12 @@ namespace Private {
     each(sessions, session => {
       if (
         language &&
+        session.kernel &&
         languages[session.kernel.name] === language &&
         session.kernel.id !== id
       ) {
         matchingSessions.push(session);
-      } else if (session.kernel.id !== id) {
+      } else if (session.kernel?.id !== id) {
         otherSessions.push(session);
       }
     });
@@ -1265,7 +1282,7 @@ namespace Private {
       });
 
       each(matchingSessions, session => {
-        let name = displayNames[session.kernel.name];
+        let name = session.kernel ? displayNames[session.kernel.name] : '';
         matching.appendChild(optionForSession(session, name));
       });
     }
@@ -1280,14 +1297,16 @@ namespace Private {
       });
 
       each(otherSessions, session => {
-        let name = displayNames[session.kernel.name] || session.kernel.name;
+        let name = session.kernel
+          ? displayNames[session.kernel.name] || session.kernel.name
+          : '';
         otherSessionsNode.appendChild(optionForSession(session, name));
       });
     }
   }
 
   /**
-   * Get the kernel search options given a client session and sesion manager.
+   * Get the kernel search options given a session context.
    */
   function getKernelSearch(
     sessionContext: SessionContext
@@ -1332,12 +1351,12 @@ namespace Private {
     let option = document.createElement('option');
     let sessionName = session.name || PathExt.basename(session.path);
     option.text = sessionName;
-    option.value = JSON.stringify({ id: session.kernel.id });
+    option.value = JSON.stringify({ id: session.kernel?.id });
     option.title =
       `Path: ${session.path}\n` +
       `Name: ${sessionName}\n` +
       `Kernel Name: ${displayName}\n` +
-      `Kernel Id: ${session.kernel.id}`;
+      `Kernel Id: ${session.kernel?.id}`;
     return option;
   }
 }

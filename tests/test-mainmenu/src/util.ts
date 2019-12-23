@@ -13,8 +13,8 @@ import { Widget } from '@lumino/widgets';
 function findExtender<E extends IMenuExtender<Widget>>(
   widget: Widget,
   s: Set<E>
-): E {
-  let extender: E;
+): E | undefined {
+  let extender: E | undefined;
   s.forEach(value => {
     if (value.tracker.has(widget)) {
       extender = value;

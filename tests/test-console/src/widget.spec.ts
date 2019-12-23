@@ -99,7 +99,7 @@ describe('console/widget', () => {
 
     describe('#executed', () => {
       it('should emit a date upon execution', async () => {
-        let called: Date = null;
+        let called: Date | null = null;
         const force = true;
         Widget.attach(widget, document.body);
         widget.executed.connect((sender, time) => {
@@ -170,7 +170,7 @@ describe('console/widget', () => {
         expect(widget.cells.length).to.be.greaterThan(0);
         widget.clear();
         expect(widget.cells.length).to.equal(0);
-        expect(widget.promptCell.model.value.text).to.equal('');
+        expect(widget.promptCell!.model.value.text).to.equal('');
       });
     });
 
@@ -205,7 +205,7 @@ describe('console/widget', () => {
         const force = false;
         const timeout = 9000;
         Widget.attach(widget, document.body);
-        widget.promptCell.model.value.text = 'for x in range(5):';
+        widget.promptCell!.model.value.text = 'for x in range(5):';
         expect(widget.cells.length).to.equal(0);
         const session = widget.sessionContext as SessionContext;
         session.kernelPreference = { name: 'ipython' };
@@ -229,7 +229,7 @@ describe('console/widget', () => {
       it('should insert a line break into the prompt', () => {
         Widget.attach(widget, document.body);
 
-        const model = widget.promptCell.model;
+        const model = widget.promptCell!.model;
         expect(model.value.text).to.be.empty;
         widget.insertLinebreak();
         expect(model.value.text).to.equal('\n');
@@ -239,7 +239,7 @@ describe('console/widget', () => {
     describe('#serialize()', () => {
       it('should serialize the contents of a console', () => {
         Widget.attach(widget, document.body);
-        widget.promptCell.model.value.text = 'foo';
+        widget.promptCell!.model.value.text = 'foo';
 
         const serialized = widget.serialize();
         expect(serialized).to.have.length(1);
@@ -283,7 +283,7 @@ describe('console/widget', () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
         expect(widget.methods).to.contain('onActivateRequest');
-        expect(widget.promptCell.editor.hasFocus()).to.equal(true);
+        expect(widget.promptCell!.editor.hasFocus()).to.equal(true);
       });
     });
 

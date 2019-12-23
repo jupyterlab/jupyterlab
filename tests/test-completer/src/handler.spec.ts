@@ -29,7 +29,7 @@ function createEditorWidget(): CodeEditorWrapper {
 class TestCompleterModel extends CompleterModel {
   methods: string[] = [];
 
-  createPatch(patch: string): Completer.IPatch {
+  createPatch(patch: string): Completer.IPatch | undefined {
     this.methods.push('createPatch');
     return super.createPatch(patch);
   }

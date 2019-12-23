@@ -4,7 +4,8 @@
 import {
   JSONObject,
   PromiseDelegate,
-  ReadonlyJSONObject
+  ReadonlyJSONObject,
+  ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
 
 import { Message } from '@lumino/messaging';
@@ -149,7 +150,7 @@ export class OutputArea extends Widget {
   get future(): Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
-  > | null {
+  > {
     return this._future;
   }
 
@@ -157,7 +158,7 @@ export class OutputArea extends Widget {
     value: Kernel.IShellFuture<
       KernelMessage.IExecuteRequestMsg,
       KernelMessage.IExecuteReplyMsg
-    > | null
+    >
   ) {
     // Bail if the model is disposed.
     if (this.model.isDisposed) {
@@ -199,8 +200,8 @@ export class OutputArea extends Widget {
   dispose(): void {
     if (this._future) {
       this._future.dispose();
+      this._future = null!;
     }
-    this._future = null;
     this._displayIdMap.clear();
     super.dispose();
   }
@@ -323,7 +324,7 @@ export class OutputArea extends Widget {
     let rect = this.node.getBoundingClientRect();
     this.node.style.minHeight = `${rect.height}px`;
     if (this._minHeightTimeout) {
-      clearTimeout(this._minHeightTimeout);
+      window.clearTimeout(this._minHeightTimeout);
     }
     this._minHeightTimeout = window.setTimeout(() => {
       if (this.isDisposed) {
@@ -488,7 +489,7 @@ export class OutputArea extends Widget {
     let output: nbformat.IOutput;
     let transient = ((msg.content as any).transient || {}) as JSONObject;
     let displayId = transient['display_id'] as string;
-    let targets: number[];
+    let targets: number[] | undefined;
 
     switch (msgType) {
       case 'execute_result':
@@ -550,11 +551,11 @@ export class OutputArea extends Widget {
     model.add(output);
   };
 
-  private _minHeightTimeout: number = null;
+  private _minHeightTimeout: number | null = null;
   private _future: Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
-  > | null = null;
+  >;
   private _displayIdMap = new Map<string, number[]>();
 }
 
@@ -613,7 +614,7 @@ export namespace OutputArea {
     output: OutputArea,
     sessionContext: ISessionContext,
     metadata?: JSONObject
-  ): Promise<KernelMessage.IExecuteReplyMsg> {
+  ): Promise<KernelMessage.IExecuteReplyMsg | undefined> {
     // Override the default for `stop_on_error`.
     let stopOnError = true;
     if (
@@ -639,7 +640,7 @@ export namespace OutputArea {
 
   export function isIsolated(
     mimeType: string,
-    metadata: ReadonlyJSONObject
+    metadata: ReadonlyPartialJSONObject
   ): boolean {
     let mimeMd = metadata[mimeType] as ReadonlyJSONObject | undefined;
     // mime-specific higher priority
@@ -828,8 +829,8 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _future: Kernel.IShellFuture = null;
-  private _input: HTMLInputElement = null;
+  private _future: Kernel.IShellFuture;
+  private _input: HTMLInputElement;
   private _value: string;
   private _promise = new PromiseDelegate<void>();
 }
@@ -909,16 +910,16 @@ namespace Private {
         // Workaround needed by Firefox, to properly render svg inside
         // iframes, see https://stackoverflow.com/questions/10177190/
         // svg-dynamically-added-to-iframe-does-not-render-correctly
-        iframe.contentDocument.open();
+        iframe.contentDocument!.open();
 
         // Insert the subarea into the iframe
         // We must directly write the html. At this point, subarea doesn't
         // contain any user content.
-        iframe.contentDocument.write(this._wrapped.node.innerHTML);
+        iframe.contentDocument!.write(this._wrapped.node.innerHTML);
 
-        iframe.contentDocument.close();
+        iframe.contentDocument!.close();
 
-        let body = iframe.contentDocument.body;
+        let body = iframe.contentDocument!.body;
 
         // Adjust the iframe height automatically
         iframe.style.height = body.scrollHeight + 'px';

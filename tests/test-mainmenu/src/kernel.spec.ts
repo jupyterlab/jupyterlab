@@ -59,11 +59,11 @@ describe('@jupyterlab/mainmenu', () => {
           },
           restartKernel: widget => {
             widget.state = 'restart';
-            return Promise.resolve(void 0);
+            return Promise.resolve(false);
           },
           restartKernelAndClear: widget => {
             widget.state = 'restartAndClear';
-            return Promise.resolve(void 0);
+            return Promise.resolve(false);
           },
           changeKernel: widget => {
             widget.state = 'change';

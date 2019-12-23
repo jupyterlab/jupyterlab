@@ -13,7 +13,6 @@ import {
   JSONExt,
   JSONObject,
   PromiseDelegate,
-  ReadonlyJSONValue,
   PartialJSONObject,
   ReadonlyPartialJSONValue,
   ReadonlyPartialJSONObject,
@@ -408,7 +407,7 @@ export namespace LayoutRestorer {
     /**
      * The data connector used for layout saving and fetching.
      */
-    connector: IDataConnector<ReadonlyJSONValue>;
+    connector: IDataConnector<ReadonlyPartialJSONValue>;
 
     /**
      * The initial promise that has to be resolved before restoration.
@@ -571,7 +570,9 @@ namespace Private {
       type: 'split-area',
       orientation: area.orientation,
       sizes: area.sizes,
-      children: area.children.map(serializeArea).filter(area => !!area)
+      children: area.children
+        .map(serializeArea)
+        .filter(area => !!area) as Array<ITabArea | ISplitArea>
     };
   }
 

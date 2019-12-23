@@ -140,7 +140,7 @@ describe('kernel/manager', () => {
       it('should find an existing kernel by id', async () => {
         const id = kernel.id;
         const model = await manager.findById(id);
-        expect(model.id).to.equal(id);
+        expect(model!.id).to.equal(id);
       });
     });
 

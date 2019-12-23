@@ -302,5 +302,5 @@ export class CellTypeSwitcher extends ReactWidget {
     );
   }
 
-  private _notebook: Notebook = null;
+  private _notebook: Notebook;
 }

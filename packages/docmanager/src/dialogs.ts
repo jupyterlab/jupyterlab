@@ -51,7 +51,7 @@ export function renameDialog(
     buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Rename' })]
   }).then(result => {
     if (!result.value) {
-      return;
+      return null;
     }
     if (!isValidFileName(result.value)) {
       void showErrorMessage(

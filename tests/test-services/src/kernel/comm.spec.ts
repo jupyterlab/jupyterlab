@@ -151,7 +151,7 @@ describe('jupyter.services - Comm', () => {
           true
         ).done;
         // If the assert was false, we would get an 'error' status
-        expect(reply.content.status).to.equal('ok');
+        expect(reply!.content.status).to.equal('ok');
 
         // Clean up
         kernel2.removeCommTarget('test', hook);

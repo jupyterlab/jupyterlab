@@ -133,7 +133,7 @@ export class SettingEditor extends Widget {
   /**
    * The currently loaded settings.
    */
-  get settings(): ISettingRegistry.ISettings {
+  get settings(): ISettingRegistry.ISettings | null {
     return this._editor.settings;
   }
 

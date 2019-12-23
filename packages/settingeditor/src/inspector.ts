@@ -67,12 +67,12 @@ class InspectorConnector extends DataConnector<
    */
   fetch(
     request: InspectionHandler.IRequest
-  ): Promise<InspectionHandler.IReply> {
-    return new Promise<InspectionHandler.IReply>(resolve => {
+  ): Promise<InspectionHandler.IReply | undefined> {
+    return new Promise<InspectionHandler.IReply | undefined>(resolve => {
       // Debounce requests at a rate of 100ms.
       const current = (this._current = window.setTimeout(() => {
         if (current !== this._current) {
-          return resolve(null);
+          return resolve(undefined);
         }
 
         const errors = this._validate(request.text);
@@ -125,7 +125,7 @@ namespace Private {
     switch (error.keyword) {
       case 'additionalProperties':
         return `**\`[additional property error]\`**
-          \`${error.params.additionalProperty}\` is not a valid property`;
+          \`${error.params?.additionalProperty}\` is not a valid property`;
       case 'syntax':
         return `**\`[syntax error]\`** *${error.message}*`;
       case 'type':

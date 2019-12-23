@@ -20,13 +20,15 @@ describe('Mode', () => {
   describe('#ensure', () => {
     it('should load a defined spec', async () => {
       CodeMirror.modeInfo.push(fakeMode('foo'));
-      CodeMirror.defineMode('foo', () => null);
-      let spec = await Mode.ensure('text/foo');
+      CodeMirror.defineMode('foo', () => {
+        return {};
+      });
+      let spec = (await Mode.ensure('text/foo'))!;
       expect(spec.name).to.equal('FOO');
     });
 
     it('should load a bundled spec', async () => {
-      let spec = await Mode.ensure('application/json');
+      let spec = (await Mode.ensure('application/json'))!;
       expect(spec.name).to.equal('JSON');
     });
 
@@ -48,7 +50,7 @@ describe('Mode', () => {
       let spec = await Mode.ensure('bar');
       expect(called).to.equal(1);
       expect(loaded).to.equal(1);
-      expect(spec.name).to.equal('BAR');
+      expect(spec!.name).to.equal('BAR');
 
       spec = await Mode.ensure('python');
       expect(called).to.equal(1);
@@ -64,7 +66,7 @@ describe('Mode', () => {
     });
 
     it('should default to plain text', async () => {
-      let spec = await Mode.ensure('this is not a mode');
+      let spec = (await Mode.ensure('this is not a mode'))!;
       expect(spec.name).to.equal('Plain Text');
     });
   });

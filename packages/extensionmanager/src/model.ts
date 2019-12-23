@@ -771,7 +771,7 @@ namespace Private {
       reName = new RegExp(kernelInfo.kernel_spec.display_name);
     }
     for (let key of Object.keys(specs.kernelspecs)) {
-      let spec = specs.kernelspecs[key];
+      let spec = specs.kernelspecs[key]!;
       let match = false;
       if (reLang) {
         match = reLang.test(spec.language);

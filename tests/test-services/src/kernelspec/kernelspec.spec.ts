@@ -128,7 +128,7 @@ describe('kernel', () => {
       const specs = await KernelSpecAPI.getSpecs(serverSettings);
 
       expect(specs.kernelspecs['python']).to.have.property('metadata');
-      const metadata = specs.kernelspecs['python'].metadata;
+      const metadata = specs.kernelspecs['python']!.metadata;
       expect(metadata).to.have.property('some_application');
       expect((metadata as any).some_application).to.have.property(
         'key',
@@ -149,7 +149,7 @@ describe('kernel', () => {
       const specs = await KernelSpecAPI.getSpecs(serverSettings);
 
       expect(specs.kernelspecs['python']).to.have.property('env');
-      const env = specs.kernelspecs['python'].env;
+      const env = specs.kernelspecs['python']!.env;
       expect(env).to.have.property('SOME_ENV', 'some_value');
       expect(env).to.have.property('LANG', 'en_US.UTF-8');
     });

@@ -44,8 +44,7 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
    * Construct a new CommandEdit status item.
    */
   constructor() {
-    super();
-    this.model = new CommandEditStatus.Model();
+    super(new CommandEditStatus.Model());
   }
 
   /**

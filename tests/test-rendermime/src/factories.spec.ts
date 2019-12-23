@@ -215,9 +215,9 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         Widget.attach(w, document.body);
-        const node = document.getElementById('Title-third-level');
+        const node = document.getElementById('Title-third-level')!;
         expect(node.localName).to.equal('h3');
-        const anchor = node.firstChild.nextSibling as HTMLAnchorElement;
+        const anchor = node.firstChild!.nextSibling as HTMLAnchorElement;
         expect(anchor.href).to.contain('#Title-third-level');
         expect(anchor.target).to.equal('_self');
         expect(anchor.className).to.contain('jp-InternalAnchorLink');

@@ -74,7 +74,7 @@ export class LogOutputModel extends OutputModel implements ILogOutputModel {
   /**
    * Date & time when output is logged.
    */
-  readonly timestamp: Date = null;
+  readonly timestamp: Date;
 
   /**
    * Log level
@@ -312,7 +312,7 @@ export class Logger implements ILogger {
     ) {
       return;
     }
-    let output: nbformat.IOutput = null;
+    let output: nbformat.IOutput | null = null;
     switch (log.type) {
       case 'text':
         output = {
@@ -384,7 +384,7 @@ export class Logger implements ILogger {
     }
     this._isDisposed = true;
     this.clear();
-    this._rendermime = null;
+    this._rendermime = null!;
     Signal.clearData(this);
   }
 

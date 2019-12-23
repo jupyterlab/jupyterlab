@@ -734,7 +734,7 @@ export class DirListing extends Widget {
 
     // Remove any excess item nodes.
     while (nodes.length > items.length) {
-      content.removeChild(nodes.pop());
+      content.removeChild(nodes.pop()!);
     }
 
     // Add any missing item nodes.
@@ -785,11 +785,11 @@ export class DirListing extends Widget {
     each(this._model.sessions(), session => {
       let index = ArrayExt.firstIndexOf(paths, session.path);
       let node = nodes[index];
-      let name = session.kernel.name;
+      let name = session.kernel?.name;
       let specs = this._model.specs;
 
       node.classList.add(RUNNING_CLASS);
-      if (specs) {
+      if (specs && name) {
         const spec = specs.kernelspecs[name];
         name = spec ? spec.display_name : 'unknown';
       }
@@ -1030,8 +1030,8 @@ export class DirListing extends Widget {
    * Handle the `drop` event for the widget.
    */
   private _evtNativeDrop(event: DragEvent): void {
-    let files = event.dataTransfer.files;
-    if (files.length === 0) {
+    let files = event.dataTransfer?.files;
+    if (!files || files.length === 0) {
       return;
     }
     event.preventDefault();
@@ -1233,7 +1233,7 @@ export class DirListing extends Widget {
             let prevWidget = widget;
             otherPaths.forEach(path => {
               const options: DocumentRegistry.IOpenOptions = {
-                ref: prevWidget.id,
+                ref: prevWidget?.id,
                 mode: 'tab-after'
               };
               prevWidget = this._manager.openOrReveal(
@@ -1242,7 +1242,7 @@ export class DirListing extends Widget {
                 void 0,
                 options
               );
-              this._manager.openOrReveal(item.path);
+              this._manager.openOrReveal(item!.path);
             });
           });
           firstWidgetPlaced.resolve(void 0);
@@ -1498,7 +1498,7 @@ export class DirListing extends Widget {
 
     void this.selectItemByName(name)
       .then(() => {
-        if (!this.isDisposed && newValue.type === 'directory') {
+        if (!this.isDisposed && newValue!.type === 'directory') {
           return this._doRename();
         }
       })
@@ -1813,7 +1813,7 @@ export namespace DirListing {
         if (this._iconRegistry) {
           // add icon as svg node. Can be styled using CSS
           this._iconRegistry.icon({
-            name: fileType.iconClass,
+            name: fileType.iconClass ?? '',
             className: ITEM_ICON_CLASS,
             title: fileType.iconLabel,
             fallback: true,

@@ -66,7 +66,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this
     );
     this.context.saveState.connect(this._onSave, this);
-
     void this.revealed.then(() => {
       if (this.isDisposed) {
         // this widget has already been disposed, bail
@@ -84,7 +83,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   _onSave(sender: DocumentRegistry.Context, state: DocumentRegistry.SaveState) {
-    if (state === 'started') {
+    if (state === 'started' && this.model) {
       // Find markdown cells
       const { cells } = this.model;
       each(cells, cell => {
@@ -121,8 +120,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   /**
    * The model for the widget.
    */
-  get model(): INotebookModel {
-    return this.content ? this.content.model : null;
+  get model(): INotebookModel | null {
+    return this.content.model;
   }
 
   /**
@@ -239,7 +238,7 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    * Update the kernel language.
    */
   private _updateLanguage(language: KernelMessage.ILanguageInfo): void {
-    this.model.metadata.set('language_info', language);
+    this.model!.metadata.set('language_info', language);
   }
 
   /**
@@ -250,10 +249,10 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     if (this.isDisposed) {
       return;
     }
-    this.model.metadata.set('kernelspec', {
+    this.model!.metadata.set('kernelspec', {
       name: kernel.name,
-      display_name: spec.display_name,
-      language: spec.language
+      display_name: spec?.display_name,
+      language: spec?.language
     });
   }
 

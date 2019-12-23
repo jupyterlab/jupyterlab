@@ -28,7 +28,7 @@ describe('Kernel.IKernel', () => {
   let kernelManager = new KernelManager();
 
   beforeAll(async () => {
-    jest.setTimeout(120000);
+    jest.setTimeout(12000);
     specs = await KernelSpecAPI.getSpecs();
   });
 
@@ -371,7 +371,7 @@ describe('Kernel.IKernel', () => {
   describe('#info', () => {
     it('should get the kernel info', async () => {
       const name = (await defaultKernel.info).language_info.name;
-      const defaultSpecs = specs.kernelspecs[specs.default];
+      const defaultSpecs = specs.kernelspecs[specs.default]!;
       expect(name).to.equal(defaultSpecs.language);
     });
   });
@@ -379,7 +379,7 @@ describe('Kernel.IKernel', () => {
   describe('#spec', () => {
     it('should resolve with the spec', async () => {
       const spec = await defaultKernel.spec;
-      expect(spec.name).to.equal(specs.default);
+      expect(spec!.name).to.equal(specs.default);
     });
   });
 
@@ -470,7 +470,7 @@ describe('Kernel.IKernel', () => {
       tester.onMessage(msg => {
         try {
           const decoder = new TextDecoder('utf8');
-          const item = msg.buffers[0] as DataView;
+          const item = msg.buffers![0] as DataView;
           expect(decoder.decode(item)).to.equal('hello');
         } catch (e) {
           done.reject(e);
@@ -722,7 +722,7 @@ describe('Kernel.IKernel', () => {
 
   describe('#requestKernelInfo()', () => {
     it('should resolve the promise', async () => {
-      const msg = await defaultKernel.requestKernelInfo();
+      const msg = (await defaultKernel.requestKernelInfo())!;
       if (msg.content.status !== 'ok') {
         throw new Error('Message error');
       }
@@ -822,7 +822,7 @@ describe('Kernel.IKernel', () => {
       const done = new PromiseDelegate<void>();
       tester.onMessage(msg => {
         expect(msg.header.msg_type).to.equal('input_reply');
-        done.resolve(null);
+        done.resolve(undefined);
       });
       kernel.sendInputReply({ status: 'ok', value: 'test' });
       await done.promise;
@@ -1036,7 +1036,7 @@ describe('Kernel.IKernel', () => {
         kernel.registerMessageHook(parentHeader.msg_id, msg => {
           calls.push('first');
           // not returning should also continue handling
-          return void 0;
+          return void 0 as any;
         });
 
         future.onIOPub = () => {
