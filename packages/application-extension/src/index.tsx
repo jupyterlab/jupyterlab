@@ -116,14 +116,6 @@ const main: JupyterFrontEndPlugin<void> = {
       app.commands.notifyCommandChanged();
     });
 
-    // when current tab changes, activate the new current tab
-    // if there isn't an active tab
-    app.shell.currentChanged.connect((sender, args) => {
-      if (!app.shell.activeWidget && args.newValue) {
-        app.shell.activateById(args.newValue.id);
-      }
-    });
-
     // If the connection to the server is lost, handle it with the
     // connection lost handler.
     connectionLost = connectionLost || ConnectionLost;
