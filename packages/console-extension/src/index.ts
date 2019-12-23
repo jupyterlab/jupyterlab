@@ -40,7 +40,13 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { find } from '@lumino/algorithm';
 
-import { JSONObject, ReadonlyPartialJSONObject, UUID } from '@lumino/coreutils';
+import {
+  JSONExt,
+  JSONObject,
+  ReadonlyPartialJSONObject,
+  UUID,
+  ReadonlyJSONValue
+} from '@lumino/coreutils';
 
 import { DisposableSet } from '@lumino/disposable';
 
@@ -181,7 +187,8 @@ async function activateConsole(
         let baseUrl = PageConfig.getBaseUrl();
         for (let name in specs.kernelspecs) {
           let rank = name === specs.default ? 0 : Infinity;
-          let kernelIconUrl = specs.kernelspecs[name]?.resources['logo-64x64'];
+          const spec = specs.kernelspecs[name]!;
+          let kernelIconUrl = spec.resources['logo-64x64'];
           if (kernelIconUrl) {
             let index = kernelIconUrl.indexOf('kernelspecs');
             kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
@@ -192,7 +199,12 @@ async function activateConsole(
               args: { isLauncher: true, kernelPreference: { name } },
               category: 'Console',
               rank,
-              kernelIconUrl
+              kernelIconUrl,
+              metadata: {
+                kernel: JSONExt.deepCopy(
+                  spec.metadata || {}
+                ) as ReadonlyJSONValue
+              }
             })
           );
         }

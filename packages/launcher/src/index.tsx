@@ -344,6 +344,12 @@ export namespace ILauncher {
      * spec.
      */
     kernelIconUrl?: string;
+
+    /**
+     * Metadata about the item.  This can be used by the launcher to
+     * affect how the item is displayed.
+     */
+    metadata?: ReadonlyJSONObject;
   }
 }
 
