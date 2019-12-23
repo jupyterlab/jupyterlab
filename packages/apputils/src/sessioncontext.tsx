@@ -571,9 +571,8 @@ export class SessionContext implements ISessionContext {
    * Otherwise we ask the user to select a kernel.
    */
   async initialize(): Promise<boolean> {
-    if (this._initializing || this._isReady) {
-      await this._ready.promise;
-      return false;
+    if (this._initializing) {
+      return this._initPromise.promise;
     }
     this._initializing = true;
     let manager = this.sessionManager;
@@ -591,8 +590,11 @@ export class SessionContext implements ISessionContext {
       }
     }
     const needsSelection = await this._startIfNecessary();
-    this._isReady = true;
-    this._ready.resolve(undefined);
+    if (!needsSelection) {
+      this._isReady = true;
+      this._ready.resolve(undefined);
+    }
+    this._initPromise.resolve(needsSelection);
     return needsSelection;
   }
 
@@ -693,6 +695,10 @@ export class SessionContext implements ISessionContext {
   ): Kernel.IKernelConnection | null {
     if (this.isDisposed) {
       throw Error('Disposed');
+    }
+    if (!this._isReady) {
+      this._isReady = true;
+      this._ready.resolve(undefined);
     }
     if (this._session) {
       this._session.dispose();
@@ -865,6 +871,7 @@ export class SessionContext implements ISessionContext {
   private _session: Session.ISessionConnection | null = null;
   private _ready = new PromiseDelegate<void>();
   private _initializing = false;
+  private _initPromise = new PromiseDelegate<boolean>();
   private _isReady = false;
   private _terminated = new Signal<this, void>(this);
   private _kernelChanged = new Signal<
