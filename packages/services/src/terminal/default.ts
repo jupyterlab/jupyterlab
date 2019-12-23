@@ -103,7 +103,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
     if (this._isDisposed || !message.content) {
       return;
     }
-    if (this.connectionStatus === 'connected') {
+    if (this.connectionStatus === 'connected' && this._ws) {
       const msg = [message.type, ...message.content];
       this._ws.send(JSON.stringify(msg));
     } else if (queue) {
