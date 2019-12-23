@@ -33,6 +33,10 @@ import {
 
 import { each, iter, toArray } from '@lumino/algorithm';
 
+import { PromiseDelegate } from '@lumino/coreutils';
+
+import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
+
 import { Widget, DockLayout } from '@lumino/widgets';
 
 import * as React from 'react';
@@ -247,63 +251,87 @@ const router: JupyterFrontEndPlugin<IRouter> = {
 };
 
 /**
- * The tree route handler provider.
+ * The default tree route resolver plugin.
  */
-const tree: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/application-extension:tree',
+const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
+  id: '@jupyterlab/application-extension:tree-resolver',
   autoStart: true,
   requires: [JupyterFrontEnd.IPaths, IRouter, IWindowResolver],
+  provides: JupyterFrontEnd.ITreeResolver,
   activate: (
     app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
     router: IRouter,
     resolver: IWindowResolver
-  ) => {
+  ): JupyterFrontEnd.ITreeResolver => {
     const { commands } = app;
     const treePattern = new RegExp(`^${paths.urls.tree}([^?]+)`);
     const workspacePattern = new RegExp(
       `^${paths.urls.workspaces}/[^?/]+/tree/([^?]+)`
     );
+    const set = new DisposableSet();
+    const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
 
-    commands.addCommand(CommandIDs.tree, {
-      execute: async (args: IRouter.ILocation) => {
-        const treeMatch = args.path.match(treePattern);
-        const workspaceMatch = args.path.match(workspacePattern);
-        const match = treeMatch || workspaceMatch;
-        const path = match ? decodeURI(match[1]) : undefined;
-        const workspace = PathExt.basename(resolver.name);
-        const query = URLExt.queryStringToObject(args.search ?? '');
-        const fileBrowserPath = query['file-browser-path'];
-
-        // Remove the file browser path from the query string.
-        delete query['file-browser-path'];
-
-        // Remove the tree portion of the URL.
-        const url =
-          (workspaceMatch
-            ? URLExt.join(paths.urls.workspaces, workspace)
-            : paths.urls.app) +
-          URLExt.objectToQueryString(query) +
-          args.hash;
-
-        router.navigate(url);
-
-        try {
-          await commands.execute('filebrowser:open-path', { path });
-
-          if (fileBrowserPath) {
-            await commands.execute('filebrowser:open-path', {
-              path: fileBrowserPath
-            });
+    set.add(
+      commands.addCommand(CommandIDs.tree, {
+        execute: async (args: IRouter.ILocation) => {
+          if (set.isDisposed) {
+            return;
           }
-        } catch (error) {
-          console.warn('Tree routing failed.', error);
-        }
-      }
-    });
 
-    router.register({ command: CommandIDs.tree, pattern: treePattern });
-    router.register({ command: CommandIDs.tree, pattern: workspacePattern });
+          const treeMatch = args.path.match(treePattern);
+          const workspaceMatch = args.path.match(workspacePattern);
+          const match = treeMatch || workspaceMatch;
+          const file = match ? decodeURI(match[1]) : '';
+          const workspace = PathExt.basename(resolver.name);
+          const query = URLExt.queryStringToObject(args.search ?? '');
+          const browser = query['file-browser-path'] || '';
+
+          // Remove the file browser path from the query string.
+          delete query['file-browser-path'];
+
+          // Remove the tree portion of the URL.
+          const url =
+            (workspaceMatch
+              ? URLExt.join(paths.urls.workspaces, workspace)
+              : paths.urls.app) +
+            URLExt.objectToQueryString(query) +
+            args.hash;
+
+          // Route to the cleaned URL.
+          router.navigate(url);
+
+          // Clean up artifacts immediately upon routing.
+          set.dispose();
+
+          delegate.resolve({ browser, file });
+        }
+      })
+    );
+    set.add(
+      router.register({ command: CommandIDs.tree, pattern: treePattern })
+    );
+    set.add(
+      router.register({ command: CommandIDs.tree, pattern: workspacePattern })
+    );
+
+    // If a route is handled by the router without the tree command being
+    // invoked, resolve to `null` and clean up artifacts.
+    const listener = () => {
+      if (set.isDisposed) {
+        return;
+      }
+      set.dispose();
+      delegate.resolve(null);
+    };
+    router.routed.connect(listener);
+    set.add(
+      new DisposableDelegate(() => {
+        router.routed.disconnect(listener);
+      })
+    );
+
+    return { paths: delegate.promise };
   }
 };
 

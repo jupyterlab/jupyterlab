@@ -338,41 +338,53 @@ export class FileBrowserModel implements IDisposable {
    *
    * @param id - The unique ID that is used to construct a state database key.
    *
+   * @param populate - If `false`, the restoration ID will be set but the file
+   * browser state will not be fetched from the state database.
+   *
    * @returns A promise when restoration is complete.
    *
    * #### Notes
    * This function will only restore the model *once*. If it is called multiple
    * times, all subsequent invocations are no-ops.
    */
-  restore(id: string): Promise<void> {
+  async restore(id: string, populate = true): Promise<void> {
+    const { manager } = this;
+    const key = `file-browser-${id}:cwd`;
     const state = this._state;
     const restored = !!this._key;
-    if (!state || restored) {
-      return Promise.resolve(void 0);
+
+    if (restored) {
+      return;
     }
 
-    const manager = this.manager;
-    const key = `file-browser-${id}:cwd`;
-    const ready = manager.services.ready;
-    return Promise.all([state.fetch(key), ready])
-      .then(([value]) => {
-        if (!value) {
-          this._restored.resolve(undefined);
-          return;
-        }
+    // Set the file browser key for state database fetch/save.
+    this._key = key;
 
-        const path = (value as ReadonlyJSONObject)['path'] as string;
-        const localPath = manager.services.contents.localPath(path);
-        return manager.services.contents
-          .get(path)
-          .then(() => this.cd(localPath))
-          .catch(() => state.remove(key));
-      })
-      .catch(() => state.remove(key))
-      .then(() => {
-        this._key = key;
+    if (!populate || !state) {
+      this._restored.resolve(undefined);
+      return;
+    }
+
+    await manager.services.ready;
+
+    try {
+      const value = await state.fetch(key);
+
+      if (!value) {
         this._restored.resolve(undefined);
-      }); // Set key after restoration is done.
+        return;
+      }
+
+      const path = (value as ReadonlyJSONObject)['path'] as string;
+      const localPath = manager.services.contents.localPath(path);
+
+      await manager.services.contents.get(path);
+      await this.cd(localPath);
+    } catch (error) {
+      await state.remove(key);
+    }
+
+    this._restored.resolve(undefined);
   }
 
   /**

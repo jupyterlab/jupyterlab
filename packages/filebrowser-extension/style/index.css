@@ -4,3 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 @import url('~@jupyterlab/filebrowser/style/index.css');
+
+#filebrowser.jp-mod-restoring .jp-DirListing-content {
+  display: none;
+}

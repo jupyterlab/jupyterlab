@@ -4,6 +4,7 @@
 import {
   ILabShell,
   ILayoutRestorer,
+  IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -134,7 +135,8 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
-  requires: [IIconRegistry, IDocumentManager, IStateDB]
+  requires: [IIconRegistry, IDocumentManager],
+  optional: [IStateDB, IRouter, JupyterFrontEnd.ITreeResolver]
 };
 
 /**
@@ -209,12 +211,14 @@ export default plugins;
 /**
  * Activate the file browser factory provider.
  */
-function activateFactory(
+async function activateFactory(
   app: JupyterFrontEnd,
   icoReg: IIconRegistry,
   docManager: IDocumentManager,
-  state: IStateDB
-): IFileBrowserFactory {
+  state: IStateDB | null,
+  router: IRouter | null,
+  tree: JupyterFrontEnd.ITreeResolver | null
+): Promise<IFileBrowserFactory> {
   const { commands } = app;
   const tracker = new WidgetTracker<FileBrowser>({ namespace });
   const createFileBrowser = (
@@ -226,12 +230,11 @@ function activateFactory(
       manager: docManager,
       driveName: options.driveName || '',
       refreshInterval: options.refreshInterval,
-      state: options.state === null ? undefined : options.state || state
+      state:
+        options.state === null ? undefined : options.state || state || undefined
     });
-    const widget = new FileBrowser({
-      id,
-      model
-    });
+    const restore = options.restore;
+    const widget = new FileBrowser({ id, model, restore });
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
@@ -248,9 +251,43 @@ function activateFactory(
 
     return widget;
   };
-  const defaultBrowser = createFileBrowser('filebrowser');
 
-  return { createFileBrowser, defaultBrowser, tracker };
+  // Manually restore the default file browser.
+  const id = 'filebrowser';
+  const defaultBrowser = createFileBrowser(id, { restore: false });
+  const plugin = { createFileBrowser, defaultBrowser, tracker };
+  const restoring = 'jp-mod-restoring';
+
+  defaultBrowser.addClass(restoring);
+
+  if (!router) {
+    void defaultBrowser.model.restore(id).then(() => {
+      defaultBrowser.removeClass(restoring);
+    });
+    return plugin;
+  }
+
+  const listener = async () => {
+    router.routed.disconnect(listener);
+
+    const paths = await tree?.paths;
+    if (paths) {
+      // Restore the model without populating it.
+      await defaultBrowser.model.restore(id, false);
+      if (paths.file) {
+        await commands.execute(CommandIDs.openPath, { path: paths.file });
+      }
+      if (paths.browser) {
+        await commands.execute(CommandIDs.openPath, { path: paths.browser });
+      }
+    } else {
+      await defaultBrowser.model.restore(id);
+    }
+    defaultBrowser.removeClass(restoring);
+  };
+  router.routed.connect(listener);
+
+  return plugin;
 }
 
 /**
@@ -263,8 +300,8 @@ function activateBrowser(
   labShell: ILabShell,
   restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
-  commandPalette: ICommandPalette,
-  mainMenu: IMainMenu
+  commandPalette: ICommandPalette | null,
+  mainMenu: IMainMenu | null
 ): void {
   const browser = factory.defaultBrowser;
   const { commands } = app;
