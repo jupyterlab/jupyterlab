@@ -194,7 +194,7 @@ export interface ISessionContext extends IObservableDisposable {
    */
   changeKernel(
     options?: Partial<Kernel.IModel>
-  ): Promise<Kernel.IKernelConnection>;
+  ): Promise<Kernel.IKernelConnection | null>;
 }
 
 /**
@@ -696,7 +696,7 @@ export class SessionContext implements ISessionContext {
       this._session.dispose();
     }
     this._session = session;
-    this._prevKernelName = session.kernel?.name;
+    this._prevKernelName = session.kernel?.name || '';
 
     session.disposed.connect(this._onSessionDisposed, this);
     session.propertyChanged.connect(this._onPropertyChanged, this);
@@ -856,7 +856,7 @@ export class SessionContext implements ISessionContext {
   private _path = '';
   private _name = '';
   private _type = '';
-  private _prevKernelName: string | undefined = '';
+  private _prevKernelName: string = '';
   private _kernelPreference: ISessionContext.IKernelPreference;
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);
@@ -969,14 +969,13 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
    * Select a kernel for the session.
    */
   async selectKernel(sessionContext: ISessionContext): Promise<void> {
-    const session = sessionContext.session;
-    if (session.isDisposed) {
+    if (sessionContext.isDisposed) {
       return Promise.resolve();
     }
     // If there is no existing kernel, offer the option
     // to keep no kernel.
     let label = 'Cancel';
-    if (!session.kernel) {
+    if (!sessionContext?.session?.kernel) {
       label = 'No Kernel';
     }
     const buttons = [
@@ -991,15 +990,15 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
     });
 
     const result = await dialog.launch();
-    if (session.isDisposed || !result.button.accept) {
+    if (sessionContext.isDisposed || !result.button.accept) {
       return;
     }
     let model = result.value;
-    if (model === null && session.kernel) {
-      return session.shutdown();
+    if (model === null && sessionContext?.session?.kernel) {
+      return sessionContext.shutdown();
     }
     if (model) {
-      await session.changeKernel(model);
+      await sessionContext.changeKernel(model);
     }
   },
 
