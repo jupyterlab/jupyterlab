@@ -7,11 +7,10 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  ISettingRegistry,
-  PageConfig,
-  SettingRegistry
-} from '@jupyterlab/coreutils';
+
+import { PageConfig } from '@jupyterlab/coreutils';
+
+import { SettingRegistry, ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { SettingConnector } from './settingconnector';
 

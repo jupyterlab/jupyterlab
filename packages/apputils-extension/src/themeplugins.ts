@@ -15,9 +15,11 @@ import {
   ThemeManager
 } from '@jupyterlab/apputils';
 
-import { ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { Menu } from '@lumino/widgets';
 

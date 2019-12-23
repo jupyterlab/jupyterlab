@@ -10,8 +10,6 @@ import {
   showDialog
 } from '@jupyterlab/apputils';
 
-import { nbformat } from '@jupyterlab/coreutils';
-
 import {
   ICellModel,
   ICodeCellModel,
@@ -19,6 +17,8 @@ import {
   Cell,
   MarkdownCell
 } from '@jupyterlab/cells';
+
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { ArrayExt, each, toArray } from '@lumino/algorithm';
 

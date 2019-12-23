@@ -5,7 +5,7 @@
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { IDataConnector, IRestorer } from '@jupyterlab/coreutils';
+import { IDataConnector, IRestorer } from '@jupyterlab/statedb';
 
 import { CommandRegistry } from '@lumino/commands';
 

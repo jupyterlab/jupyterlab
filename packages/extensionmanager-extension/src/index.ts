@@ -10,11 +10,11 @@ import {
 
 import { Dialog, showDialog, ICommandPalette } from '@jupyterlab/apputils';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ExtensionView } from '@jupyterlab/extensionmanager';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * IDs of the commands added by this extension.

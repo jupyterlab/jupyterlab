@@ -25,6 +25,9 @@
       "path": "../filebrowser"
     },
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../observables"
     },
     {

@@ -7,9 +7,9 @@ import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { CommandRegistry } from '@lumino/commands';
 

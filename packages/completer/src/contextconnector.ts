@@ -3,7 +3,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { DataConnector } from '@jupyterlab/coreutils';
+import { DataConnector } from '@jupyterlab/statedb';
 
 import { CompletionHandler } from './handler';
 

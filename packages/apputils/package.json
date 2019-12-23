@@ -37,6 +37,8 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^4.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
+    "@jupyterlab/settingregistry": "^2.0.0-alpha.4",
+    "@jupyterlab/statedb": "^2.0.0-alpha.4",
     "@jupyterlab/ui-components": "^2.0.0-alpha.4",
     "@lumino/algorithm": "^1.2.1",
     "@lumino/commands": "^1.9.0",

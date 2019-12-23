@@ -14,9 +14,6 @@
       "path": "../apputils"
     },
     {
-      "path": "../coreutils"
-    },
-    {
       "path": "../launcher"
     },
     {
@@ -27,6 +24,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../settingregistry"
     },
     {
       "path": "../terminal"

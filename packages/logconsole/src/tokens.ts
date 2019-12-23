@@ -1,11 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { nbformat, IChangedArgs } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IOutputAreaModel } from '@jupyterlab/outputarea';
+
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { Token } from '@lumino/coreutils';
 

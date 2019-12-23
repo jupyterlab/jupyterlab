@@ -7,7 +7,7 @@ import { ILabShell, LayoutRestorer } from '@jupyterlab/application';
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { StateDB } from '@jupyterlab/coreutils';
+import { StateDB } from '@jupyterlab/statedb';
 
 import { CommandRegistry } from '@lumino/commands';
 

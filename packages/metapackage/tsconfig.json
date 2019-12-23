@@ -154,6 +154,9 @@
       "path": "../mathjax2-extension"
     },
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../notebook"
     },
     {
@@ -196,7 +199,13 @@
       "path": "../settingeditor-extension"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../shortcuts-extension"
+    },
+    {
+      "path": "../statedb"
     },
     {
       "path": "../statusbar"

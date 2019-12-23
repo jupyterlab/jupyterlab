@@ -5,9 +5,11 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { IStateDB } from '@jupyterlab/statedb';
 
 import { CommandRegistry } from '@lumino/commands';
 

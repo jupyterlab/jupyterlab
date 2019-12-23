@@ -3,7 +3,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDataConnector } from '@jupyterlab/coreutils';
+import { IDataConnector } from '@jupyterlab/statedb';
 
 import { Token } from '@lumino/coreutils';
 

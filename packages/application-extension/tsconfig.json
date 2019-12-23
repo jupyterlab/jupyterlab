@@ -17,6 +17,12 @@
     },
     {
       "path": "../property-inspector"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
     }
   ]
 }

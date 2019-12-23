@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 import { UUID, JSONObject } from '@lumino/coreutils';
 
 export interface IOptions<T extends Message> {

@@ -14,7 +14,7 @@ import {
   CellModel
 } from '@jupyterlab/cells';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { UUID } from '@lumino/coreutils';
 

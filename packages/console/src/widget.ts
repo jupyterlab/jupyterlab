@@ -18,7 +18,7 @@ import {
 
 import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IObservableList, ObservableList } from '@jupyterlab/observables';
 

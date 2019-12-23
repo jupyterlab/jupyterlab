@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { DataConnector, ISchemaValidator } from '@jupyterlab/coreutils';
+import { DataConnector } from '@jupyterlab/statedb';
 
 import { InspectionHandler, InspectorPanel } from '@jupyterlab/inspector';
 
@@ -12,6 +12,8 @@ import {
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
+
+import { ISchemaValidator } from '@jupyterlab/settingregistry';
 
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 

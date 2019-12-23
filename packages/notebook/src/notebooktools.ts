@@ -24,7 +24,7 @@ import {
   JSONEditor
 } from '@jupyterlab/codeeditor';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 

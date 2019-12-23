@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DataConnector } from '@jupyterlab/coreutils';
+import { DataConnector } from '@jupyterlab/statedb';
 
 import { KernelConnector } from './kernelconnector';
 

@@ -64,7 +64,7 @@ namespace Private {
   /**
    * The internal prefix for private local storage keys.
    */
-  const PREFIX = '@jupyterlab/coreutils:StateDB';
+  const PREFIX = '@jupyterlab/statedb:StateDB';
 
   /**
    * The local storage beacon key.

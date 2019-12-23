@@ -32,7 +32,9 @@ import {
 
 import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
+
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IObservableMap, IObservableList } from '@jupyterlab/observables';
 

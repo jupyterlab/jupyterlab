@@ -14,8 +14,6 @@
   "dependencies": {
     "@jupyterlab/coreutils": "^4.0.0-alpha.4",
     "@jupyterlab/testutils": "^2.0.0-alpha.4",
-    "@lumino/coreutils": "^1.4.0",
-    "@lumino/disposable": "^1.3.2",
     "@lumino/signaling": "^1.3.2",
     "chai": "^4.2.0",
     "jest": "^24.9.0",

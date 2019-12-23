@@ -7,16 +7,13 @@ import { AttachmentsResolver } from '@jupyterlab/attachments';
 
 import { ISessionContext } from '@jupyterlab/apputils';
 
-import {
-  IChangedArgs,
-  ActivityMonitor,
-  nbformat,
-  URLExt
-} from '@jupyterlab/coreutils';
+import { IChangedArgs, ActivityMonitor, URLExt } from '@jupyterlab/coreutils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { DirListing } from '@jupyterlab/filebrowser';
+
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IObservableMap, IObservableJSON } from '@jupyterlab/observables';
 

@@ -19,7 +19,9 @@ import {
   Printing
 } from '@jupyterlab/apputils';
 
-import { IStateDB, StateDB, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
+
+import { IStateDB, StateDB } from '@jupyterlab/statedb';
 
 import { defaultIconRegistry } from '@jupyterlab/ui-components';
 

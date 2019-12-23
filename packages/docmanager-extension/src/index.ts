@@ -15,7 +15,7 @@ import {
   ICommandPalette
 } from '@jupyterlab/apputils';
 
-import { IChangedArgs, ISettingRegistry, Time } from '@jupyterlab/coreutils';
+import { IChangedArgs, Time } from '@jupyterlab/coreutils';
 
 import {
   renameDialog,
@@ -30,6 +30,8 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { Contents, Kernel } from '@jupyterlab/services';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 

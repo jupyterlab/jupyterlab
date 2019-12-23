@@ -24,6 +24,9 @@
       "path": "../../packages/services"
     },
     {
+      "path": "../../packages/statedb"
+    },
+    {
       "path": "../../testutils"
     },
     {

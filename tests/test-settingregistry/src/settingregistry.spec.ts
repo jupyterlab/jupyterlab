@@ -7,9 +7,10 @@ import {
   DefaultSchemaValidator,
   ISettingRegistry,
   SettingRegistry,
-  Settings,
-  StateDB
-} from '@jupyterlab/coreutils';
+  Settings
+} from '@jupyterlab/settingregistry';
+
+import { StateDB } from '@jupyterlab/statedb';
 
 import { signalToPromise } from '@jupyterlab/testutils';
 
@@ -39,7 +40,7 @@ class TestConnector extends StateDB {
   }
 }
 
-describe('@jupyterlab/coreutils', () => {
+describe('@jupyterlab/settingregistry', () => {
   describe('DefaultSchemaValidator', () => {
     describe('#constructor()', () => {
       it('should create a new schema validator', () => {

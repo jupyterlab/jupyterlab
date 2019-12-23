@@ -23,6 +23,9 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../notebook"
     },
     {
@@ -30,6 +33,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../settingregistry"
     },
     {
       "path": "../statusbar"

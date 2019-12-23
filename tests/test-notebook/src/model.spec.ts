@@ -7,7 +7,7 @@ import { ArrayExt, toArray } from '@lumino/algorithm';
 
 import { CodeCellModel } from '@jupyterlab/cells';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { NotebookModel } from '@jupyterlab/notebook';
 

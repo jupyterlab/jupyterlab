@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "build",
+    "types": ["jest"],
+    "composite": false,
+    "rootDir": "src"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../../packages/statedb"
+    },
+    {
+      "path": "../../testutils"
+    }
+  ]
+}

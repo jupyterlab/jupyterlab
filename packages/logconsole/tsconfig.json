@@ -11,6 +11,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../outputarea"
     },
     {

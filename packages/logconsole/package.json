@@ -33,6 +33,7 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^4.0.0-alpha.4",
+    "@jupyterlab/nbformat": "^2.0.0-alpha.4",
     "@jupyterlab/outputarea": "^2.0.0-alpha.4",
     "@jupyterlab/rendermime": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",

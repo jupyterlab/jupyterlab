@@ -38,6 +38,7 @@
     "@jupyterlab/apputils": "^2.0.0-alpha.4",
     "@jupyterlab/codemirror": "^2.0.0-alpha.4",
     "@jupyterlab/coreutils": "^4.0.0-alpha.4",
+    "@jupyterlab/nbformat": "^2.0.0-alpha.4",
     "@jupyterlab/observables": "^3.0.0-alpha.4",
     "@jupyterlab/rendermime-interfaces": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",

@@ -13,7 +13,7 @@ import {
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
 
