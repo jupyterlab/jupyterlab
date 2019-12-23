@@ -169,6 +169,9 @@
       "path": "../pdf-extension"
     },
     {
+      "path": "../property-inspector"
+    },
+    {
       "path": "../rendermime"
     },
     {

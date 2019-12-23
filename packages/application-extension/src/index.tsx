@@ -31,6 +31,11 @@ import {
   URLExt
 } from '@jupyterlab/coreutils';
 
+import {
+  IPropertyInspectorProvider,
+  SideBarPropertyInspectorProvider
+} from '@jupyterlab/property-inspector';
+
 import { each, iter, toArray } from '@lumino/algorithm';
 
 import { PromiseDelegate } from '@lumino/coreutils';
@@ -794,6 +799,24 @@ const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
 };
 
 /**
+ * The default property inspector provider.
+ */
+const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
+  id: '@jupyterlab/application-extension:property-inspector',
+  autoStart: true,
+  requires: [ILabShell],
+  provides: IPropertyInspectorProvider,
+  activate: (app: JupyterFrontEnd, labshell: ILabShell) => {
+    const widget = new SideBarPropertyInspectorProvider(labshell);
+    widget.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+    widget.title.caption = 'Property Inspector';
+    widget.id = 'jp-property-inspector';
+    labshell.add(widget, 'left');
+    return widget;
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -807,7 +830,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   shell,
   status,
   info,
-  paths
+  paths,
+  propertyInspector
 ];
 
 export default plugins;

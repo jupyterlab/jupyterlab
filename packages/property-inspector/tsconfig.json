@@ -11,12 +11,6 @@
     },
     {
       "path": "../apputils"
-    },
-    {
-      "path": "../coreutils"
-    },
-    {
-      "path": "../property-inspector"
     }
   ]
 }

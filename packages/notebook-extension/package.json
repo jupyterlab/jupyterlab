@@ -46,6 +46,7 @@
     "@jupyterlab/launcher": "^2.0.0-alpha.4",
     "@jupyterlab/mainmenu": "^2.0.0-alpha.4",
     "@jupyterlab/notebook": "^2.0.0-alpha.4",
+    "@jupyterlab/property-inspector": "^2.0.0-alpha.4",
     "@jupyterlab/rendermime": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
     "@jupyterlab/statusbar": "^2.0.0-alpha.4",
