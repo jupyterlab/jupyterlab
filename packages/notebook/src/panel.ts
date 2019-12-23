@@ -66,7 +66,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       this
     );
     this.context.saveState.connect(this._onSave, this);
-
     void this.revealed.then(() => {
       if (this.isDisposed) {
         // this widget has already been disposed, bail

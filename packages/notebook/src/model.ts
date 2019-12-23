@@ -282,9 +282,17 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
 
   /**
    * Initialize the model with its current state.
+   *
+   * # Notes
+   * Adds an empty code cell if the model is empty
+   * and clears undo state.
    */
   initialize(): void {
     super.initialize();
+    if (!this.cells.length) {
+      let factory = this.contentFactory;
+      this.cells.push(factory.createCodeCell({}));
+    }
     this.cells.clearUndo();
   }
 
