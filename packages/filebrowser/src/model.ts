@@ -338,24 +338,32 @@ export class FileBrowserModel implements IDisposable {
    *
    * @param id - The unique ID that is used to construct a state database key.
    *
+   * @param populate - If `false`, the restoration ID will be set but the file
+   * browser state will not be fetched from the state database.
+   *
    * @returns A promise when restoration is complete.
    *
    * #### Notes
    * This function will only restore the model *once*. If it is called multiple
    * times, all subsequent invocations are no-ops.
    */
-  restore(id: string): Promise<void> {
+  async restore(id: string, populate = true): Promise<void> {
+    const key = `file-browser-${id}:cwd`;
     const state = this._state;
-    const restored = !!this._key;
-    if (!state || restored) {
-      return Promise.resolve(void 0);
+    const restored = this._key !== key;
+
+    // Set the file browser key for state database fetch/save.
+    this._key = key;
+
+    if (!populate || !state || restored) {
+      this._restored.resolve(undefined);
+      return;
     }
 
     const manager = this.manager;
-    const key = `file-browser-${id}:cwd`;
     const ready = manager.services.ready;
     return Promise.all([state.fetch(key), ready])
-      .then(([value]) => {
+      .then(async ([value]) => {
         if (!value) {
           this._restored.resolve(undefined);
           return;
@@ -370,9 +378,8 @@ export class FileBrowserModel implements IDisposable {
       })
       .catch(() => state.remove(key))
       .then(() => {
-        this._key = key;
         this._restored.resolve(undefined);
-      }); // Set key after restoration is done.
+      });
   }
 
   /**

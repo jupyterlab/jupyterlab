@@ -79,6 +79,19 @@ export namespace IFileBrowserFactory {
     driveName?: string;
 
     /**
+     * The time interval for browser refreshing, in ms.
+     */
+    refreshInterval?: number;
+
+    /**
+     * Whether to restore the file browser state after instantiation.
+     *
+     * #### Notes
+     * The default value is `true`.
+     */
+    restore?: boolean;
+
+    /**
      * The state database to use for saving file browser state and restoring it.
      *
      * #### Notes
@@ -86,10 +99,5 @@ export namespace IFileBrowserFactory {
      * database will be automatically passed in and used for state restoration.
      */
     state?: IStateDB | null;
-
-    /**
-     * The time interval for browser refreshing, in ms.
-     */
-    refreshInterval?: number;
   }
 }

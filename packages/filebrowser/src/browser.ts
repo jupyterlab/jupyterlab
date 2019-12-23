@@ -99,9 +99,7 @@ export class FileBrowser extends Widget {
     layout.addWidget(this._listing);
     this.layout = layout;
 
-    if (options.restore !== false) {
-      void model.restore(this.id);
-    }
+    void model.restore(this.id, options.restore !== false);
   }
 
   /**
