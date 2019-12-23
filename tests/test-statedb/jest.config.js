@@ -1,2 +1,2 @@
 const func = require('@jupyterlab/testutils/lib/jest-config');
-module.exports = func('logconsole', __dirname);
+module.exports = func('statedb', __dirname);
