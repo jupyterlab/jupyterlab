@@ -29,8 +29,10 @@ export class NotebookHandler implements IDisposable {
     this._cellMap = new ObservableMap<EditorHandler>();
 
     const notebook = this._notebookPanel.content;
-    notebook.widgets.forEach(cell => this._addEditorHandler(cell));
     notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
+    notebook.model.cells.changed.connect(this._onCellsChanged, this);
+
+    this._onCellsChanged();
   }
 
   /**
@@ -52,17 +54,31 @@ export class NotebookHandler implements IDisposable {
   }
 
   /**
+   * Handle a notebook cells changed event.
+   */
+  private _onCellsChanged() {
+    this._notebookPanel.content.widgets.forEach(cell =>
+      this._addEditorHandler(cell)
+    );
+  }
+
+  /**
    * Add a new editor handler for the given cell.
    * @param cell The cell to add the handler to.
    */
   private _addEditorHandler(cell: Cell) {
-    if (cell.model.type !== 'code' || this._cellMap.has(cell.model.id)) {
+    const modelId = cell.model.id;
+    if (cell.model.type !== 'code' || this._cellMap.has(modelId)) {
       return;
     }
     const codeCell = cell as CodeCell;
     const editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,
       editor: codeCell.editor
+    });
+    codeCell.disposed.connect(() => {
+      this._cellMap.delete(modelId);
+      editorHandler.dispose();
     });
     this._cellMap.set(cell.model.id, editorHandler);
   }
