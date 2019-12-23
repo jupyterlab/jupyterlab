@@ -11,6 +11,7 @@
     "build:prod:release": "ensure-max-old-space webpack --config webpack.prod.release.config.js",
     "build:prod:stats": "ensure-max-old-space webpack --profile --config webpack.prod.minimize.config.js --json > stats.json",
     "build:stats": "webpack --profile --json > stats.json",
+    "deduplicate": "jlpm yarn-deduplicate -s fewer",
     "clean": "rimraf build",
     "prepublishOnly": "npm run build",
     "watch": "webpack --watch"
