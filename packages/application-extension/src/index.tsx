@@ -282,10 +282,10 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
           const treeMatch = args.path.match(treePattern);
           const workspaceMatch = args.path.match(workspacePattern);
           const match = treeMatch || workspaceMatch;
-          const file = match ? decodeURI(match[1]) : undefined;
+          const file = match ? decodeURI(match[1]) : '';
           const workspace = PathExt.basename(resolver.name);
           const query = URLExt.queryStringToObject(args.search ?? '');
-          const browser = query['file-browser-path'];
+          const browser = query['file-browser-path'] || '';
 
           // Remove the file browser path from the query string.
           delete query['file-browser-path'];

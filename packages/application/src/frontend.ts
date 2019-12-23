@@ -334,7 +334,7 @@ export namespace JupyterFrontEnd {
   export namespace ITreeResolver {
     /**
      * The browser and file paths if the tree resolver encountered and handled
-     * a tree URL or `null` if not.
+     * a tree URL or `null` if not. Empty string paths should be ignored.
      */
     export type Paths = { browser: string; file: string } | null;
   }

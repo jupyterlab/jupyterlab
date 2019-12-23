@@ -230,7 +230,8 @@ async function activateFactory(
       manager: docManager,
       driveName: options.driveName || '',
       refreshInterval: options.refreshInterval,
-      state: options.state === null ? undefined : options.state || state
+      state:
+        options.state === null ? undefined : options.state || state || undefined
     });
     const restore = options.restore;
     const widget = new FileBrowser({ id, model, restore });
