@@ -137,7 +137,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       opener,
       when,
       setBusy: (status && (() => status.setBusy())) ?? undefined,
-      sessionDialogs
+      sessionDialogs: sessionDialogs || undefined
     });
 
     // Register the file operations commands.

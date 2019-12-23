@@ -507,7 +507,7 @@ function activateNotebookHandler(
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
   settingRegistry: ISettingRegistry | null,
-  sessionDialogs: ISessionContextDialogs
+  sessionDialogs: ISessionContextDialogs | null
 ): INotebookTracker {
   const services = app.serviceManager;
 
@@ -1147,7 +1147,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return sessionDialogs.restart(current.sessionContext);
+        return sessionDialogs!.restart(current.sessionContext);
       }
     },
     isEnabled
@@ -1233,7 +1233,7 @@ function addCommands(
       if (current) {
         const { content, sessionContext } = current;
 
-        return sessionDialogs.restart(sessionContext).then(() => {
+        return sessionDialogs!.restart(sessionContext).then(() => {
           NotebookActions.clearAllOutputs(content);
         });
       }
@@ -1248,7 +1248,7 @@ function addCommands(
       if (current) {
         const { context, content, sessionContext } = current;
 
-        return sessionDialogs.restart(sessionContext).then(restarted => {
+        return sessionDialogs!.restart(sessionContext).then(restarted => {
           if (restarted) {
             void NotebookActions.runAll(content, context.sessionContext);
           }
@@ -1611,7 +1611,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return sessionDialogs.selectKernel(current.context.sessionContext);
+        return sessionDialogs!.selectKernel(current.context.sessionContext);
       }
     },
     isEnabled
@@ -2092,9 +2092,9 @@ function populateMenus(
       return Promise.resolve(void 0);
     },
     noun: 'All Outputs',
-    restartKernel: current => sessionDialogs.restart(current.sessionContext),
+    restartKernel: current => sessionDialogs!.restart(current.sessionContext),
     restartKernelAndClear: current => {
-      return sessionDialogs.restart(current.sessionContext).then(restarted => {
+      return sessionDialogs!.restart(current.sessionContext).then(restarted => {
         if (restarted) {
           NotebookActions.clearAllOutputs(current.content);
         }
@@ -2102,7 +2102,7 @@ function populateMenus(
       });
     },
     changeKernel: current =>
-      sessionDialogs.selectKernel(current.sessionContext),
+      sessionDialogs!.selectKernel(current.sessionContext),
     shutdownKernel: current => current.sessionContext.shutdown()
   } as IKernelMenu.IKernelUser<NotebookPanel>);
 
@@ -2169,7 +2169,7 @@ function populateMenus(
     },
     restartAndRunAll: current => {
       const { context, content } = current;
-      return sessionDialogs.restart(context.sessionContext).then(restarted => {
+      return sessionDialogs!.restart(context.sessionContext).then(restarted => {
         if (restarted) {
           void NotebookActions.runAll(content, context.sessionContext);
         }

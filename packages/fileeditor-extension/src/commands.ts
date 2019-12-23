@@ -704,7 +704,7 @@ export namespace Commands {
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
     consoleTracker: IConsoleTracker,
-    sessionDialogs?: ISessionContextDialogs
+    sessionDialogs: ISessionContextDialogs | null
   ) {
     // Add the editing commands to the settings menu.
     addEditingCommandsToSettingsMenu(menu, commands);

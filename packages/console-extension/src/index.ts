@@ -451,7 +451,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return sessionDialogs.restart(current.console.sessionContext);
+      return sessionDialogs!.restart(current.console.sessionContext);
     },
     isEnabled
   });
@@ -508,7 +508,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return sessionDialogs.selectKernel(current.console.sessionContext);
+      return sessionDialogs!.selectKernel(current.console.sessionContext);
     },
     isEnabled
   });
@@ -565,9 +565,9 @@ async function activateConsole(
     },
     noun: 'Console',
     restartKernel: current =>
-      sessionDialogs.restart(current.content.console.sessionContext),
+      sessionDialogs!.restart(current.content.console.sessionContext),
     restartKernelAndClear: current => {
-      return sessionDialogs
+      return sessionDialogs!
         .restart(current.content.console.sessionContext)
         .then(restarted => {
           if (restarted) {
@@ -577,7 +577,7 @@ async function activateConsole(
         });
     },
     changeKernel: current =>
-      sessionDialogs.selectKernel(current.content.console.sessionContext),
+      sessionDialogs!.selectKernel(current.content.console.sessionContext),
     shutdownKernel: current => current.content.console.sessionContext.shutdown()
   } as IKernelMenu.IKernelUser<MainAreaWidget<ConsolePanel>>);
 
