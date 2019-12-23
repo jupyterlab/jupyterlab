@@ -509,7 +509,7 @@ export class Completer extends Widget {
   private _activeIndex = 0;
   private _editor: CodeEditor.IEditor | null = null;
   private _model: Completer.IModel | null = null;
-  private _renderer: Completer.IRenderer | null = null;
+  private _renderer: Completer.IRenderer;
   private _resetFlag = false;
   private _selected = new Signal<this, string>(this);
   private _visibilityChanged = new Signal<this, void>(this);
@@ -519,7 +519,7 @@ export namespace Completer {
   /**
    * A type map that may add type annotations to completer matches.
    */
-  export type TypeMap = { [index: string]: string };
+  export type TypeMap = { [index: string]: string | null };
 
   /**
    * The initialization options for a completer widget.
@@ -820,7 +820,10 @@ namespace Private {
   export function itemValues(items: NodeList): string[] {
     let values: string[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
-      values.push((items[i] as HTMLElement).getAttribute('data-value'));
+      const attr = (items[i] as HTMLElement).getAttribute('data-value');
+      if (attr) {
+        values.push(attr);
+      }
     }
     return values;
   }

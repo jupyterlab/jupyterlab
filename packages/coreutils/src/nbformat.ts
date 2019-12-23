@@ -75,7 +75,7 @@ export namespace nbformat {
    * Media attachments (e.g. inline images).
    */
   export interface IAttachments {
-    [key: string]: IMimeBundle;
+    [key: string]: IMimeBundle | undefined;
   }
 
   /**

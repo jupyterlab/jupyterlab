@@ -63,22 +63,25 @@ export class StatusBar extends Widget implements IStatusBar {
     }
 
     // Populate defaults for the optional properties of the status item.
-    statusItem = { ...Private.statusItemDefaults, ...statusItem };
-    const { align, item, rank } = statusItem;
+    const fullStatusItem = {
+      ...Private.statusItemDefaults,
+      ...statusItem
+    } as Private.IFullItem;
+    const { align, item, rank } = fullStatusItem;
 
     // Connect the activeStateChanged signal to refreshing the status item,
     // if the signal was provided.
     const onActiveStateChanged = () => {
       this._refreshItem(id);
     };
-    if (statusItem.activeStateChanged) {
-      statusItem.activeStateChanged.connect(onActiveStateChanged);
+    if (fullStatusItem.activeStateChanged) {
+      fullStatusItem.activeStateChanged.connect(onActiveStateChanged);
     }
 
     let rankItem = { id, rank };
 
-    statusItem.item.addClass(itemStyle);
-    this._statusItems[id] = statusItem;
+    fullStatusItem.item.addClass(itemStyle);
+    this._statusItems[id] = fullStatusItem;
 
     if (align === 'left') {
       let insertIndex = this._findInsertIndex(this._leftRankItems, rankItem);
@@ -105,8 +108,8 @@ export class StatusBar extends Widget implements IStatusBar {
 
     const disposable = new DisposableDelegate(() => {
       delete this._statusItems[id];
-      if (statusItem.activeStateChanged) {
-        statusItem.activeStateChanged.disconnect(onActiveStateChanged);
+      if (fullStatusItem.activeStateChanged) {
+        fullStatusItem.activeStateChanged.disconnect(onActiveStateChanged);
       }
       item.parent = null;
       item.dispose();
@@ -158,7 +161,7 @@ export class StatusBar extends Widget implements IStatusBar {
 
   private _leftRankItems: Private.IRankItem[] = [];
   private _rightRankItems: Private.IRankItem[] = [];
-  private _statusItems: { [id: string]: IStatusBar.IItem } = {};
+  private _statusItems: { [id: string]: Private.IFullItem } = {};
   private _disposables = new DisposableSet();
   private _leftSide: Panel;
   private _middlePanel: Panel;
@@ -187,4 +190,12 @@ namespace Private {
     id: string;
     rank: number;
   }
+
+  export type DefaultKeys = 'align' | 'rank' | 'isActive';
+
+  /**
+   * Type of statusbar item with defaults filled in.
+   */
+  export type IFullItem = Required<Pick<IStatusBar.IItem, DefaultKeys>> &
+    Omit<IStatusBar.IItem, DefaultKeys>;
 }

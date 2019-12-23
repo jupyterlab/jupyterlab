@@ -213,7 +213,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   /**
    * Find a session by id.
    */
-  async findById(id: string): Promise<Session.IModel> {
+  async findById(id: string): Promise<Session.IModel | undefined> {
     if (this._models.has(id)) {
       return this._models.get(id);
     }
@@ -224,7 +224,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
   /**
    * Find a session by path.
    */
-  async findByPath(path: string): Promise<Session.IModel> {
+  async findByPath(path: string): Promise<Session.IModel | undefined> {
     for (let m of this._models.values()) {
       if (m.path === path) {
         return m;
@@ -282,7 +282,7 @@ export class SessionManager extends BaseManager implements Session.IManager {
 
     this._sessionConnections.forEach(sc => {
       if (this._models.has(sc.id)) {
-        sc.update(this._models.get(sc.id));
+        sc.update(this._models.get(sc.id)!);
       } else {
         sc.dispose();
       }

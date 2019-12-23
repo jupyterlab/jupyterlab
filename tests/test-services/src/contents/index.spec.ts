@@ -69,7 +69,7 @@ describe('contents', () => {
         expect(sender).to.equal(contents);
         expect(args.type).to.equal('new');
         expect(args.oldValue).to.be.null;
-        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        expect(args.newValue!.path).to.equal(DEFAULT_FILE.path);
         called = true;
       });
       await contents.newUntitled();
@@ -82,7 +82,7 @@ describe('contents', () => {
       handleRequest(drive, 201, DEFAULT_FILE);
       let called = false;
       contents.fileChanged.connect((sender, args) => {
-        expect(args.newValue.path).to.equal('other:' + DEFAULT_FILE.path);
+        expect(args.newValue!.path).to.equal('other:' + DEFAULT_FILE.path);
         called = true;
       });
       await contents.newUntitled({ path: 'other:' });
@@ -304,7 +304,7 @@ describe('contents', () => {
       contents.fileChanged.connect((sender, args) => {
         expect(args.type).to.equal('new');
         expect(args.oldValue).to.be.null;
-        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        expect(args.newValue!.path).to.equal(DEFAULT_FILE.path);
         called = true;
       });
       await contents.newUntitled({ type: 'file', ext: 'test' });
@@ -350,7 +350,7 @@ describe('contents', () => {
       let called = false;
       contents.fileChanged.connect((sender, args) => {
         expect(args.type).to.equal('delete');
-        expect(args.oldValue.path).to.equal('foo/bar.txt');
+        expect(args.oldValue!.path).to.equal('foo/bar.txt');
         called = true;
       });
       await contents.delete(path);
@@ -401,8 +401,8 @@ describe('contents', () => {
       let called = false;
       contents.fileChanged.connect((sender, args) => {
         expect(args.type).to.equal('rename');
-        expect(args.oldValue.path).to.equal('foo/bar.txt');
-        expect(args.newValue.path).to.equal('foo/test');
+        expect(args.oldValue!.path).to.equal('foo/bar.txt');
+        expect(args.newValue!.path).to.equal('foo/test');
         called = true;
       });
       await contents.rename('/foo/bar.txt', '/foo/baz.txt');
@@ -454,7 +454,7 @@ describe('contents', () => {
       contents.fileChanged.connect((sender, args) => {
         expect(args.type).to.equal('save');
         expect(args.oldValue).to.be.null;
-        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        expect(args.newValue!.path).to.equal(DEFAULT_FILE.path);
         called = true;
       });
       await contents.save('/foo', { type: 'file', name: 'test' });
@@ -497,7 +497,7 @@ describe('contents', () => {
       contents.fileChanged.connect((sender, args) => {
         expect(args.type).to.equal('new');
         expect(args.oldValue).to.be.null;
-        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        expect(args.newValue!.path).to.equal(DEFAULT_FILE.path);
         called = true;
       });
       await contents.copy('/foo/bar.txt', '/baz');
@@ -686,7 +686,7 @@ describe('drive', () => {
         expect(sender).to.equal(drive);
         expect(args.type).to.equal('new');
         expect(args.oldValue).to.be.null;
-        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        expect(args.newValue!.path).to.equal(DEFAULT_FILE.path);
         called = true;
       });
       await drive.newUntitled();
@@ -806,7 +806,7 @@ describe('drive', () => {
       drive.fileChanged.connect((sender, args) => {
         expect(args.type).to.equal('new');
         expect(args.oldValue).to.be.null;
-        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        expect(args.newValue!.path).to.equal(DEFAULT_FILE.path);
         called = true;
       });
       await drive.newUntitled({ type: 'file', ext: 'test' });
@@ -861,7 +861,7 @@ describe('drive', () => {
       let called = false;
       drive.fileChanged.connect((sender, args) => {
         expect(args.type).to.equal('delete');
-        expect(args.oldValue.path).to.equal('/foo/bar.txt');
+        expect(args.oldValue!.path).to.equal('/foo/bar.txt');
         called = true;
       });
       await drive.delete(path);
@@ -911,8 +911,8 @@ describe('drive', () => {
       let called = false;
       drive.fileChanged.connect((sender, args) => {
         expect(args.type).to.equal('rename');
-        expect(args.oldValue.path).to.equal('/foo/bar.txt');
-        expect(args.newValue.path).to.equal('foo/test');
+        expect(args.oldValue!.path).to.equal('/foo/bar.txt');
+        expect(args.newValue!.path).to.equal('foo/test');
         called = true;
       });
       await drive.rename('/foo/bar.txt', '/foo/baz.txt');
@@ -968,7 +968,7 @@ describe('drive', () => {
       drive.fileChanged.connect((sender, args) => {
         expect(args.type).to.equal('save');
         expect(args.oldValue).to.be.null;
-        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        expect(args.newValue!.path).to.equal(DEFAULT_FILE.path);
         called = true;
       });
       await drive.save('/foo', { type: 'file', name: 'test' });
@@ -1015,7 +1015,7 @@ describe('drive', () => {
       drive.fileChanged.connect((sender, args) => {
         expect(args.type).to.equal('new');
         expect(args.oldValue).to.be.null;
-        expect(args.newValue.path).to.equal(DEFAULT_FILE.path);
+        expect(args.newValue!.path).to.equal(DEFAULT_FILE.path);
         called = true;
       });
       await drive.copy('/foo/bar.txt', '/baz');

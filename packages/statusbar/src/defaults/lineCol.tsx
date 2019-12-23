@@ -225,8 +225,7 @@ export class LineCol extends VDomRenderer<LineCol.Model> {
    * Construct a new LineCol status item.
    */
   constructor() {
-    super();
-    this.model = new LineCol.Model();
+    super(new LineCol.Model());
     this.addClass(interactiveItem);
   }
 

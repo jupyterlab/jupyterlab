@@ -85,7 +85,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
    * Create a new RunningSessions widget.
    */
   constructor(opts: RunningSessions.IOptions) {
-    super();
+    super(new RunningSessions.Model());
     this._serviceManager = opts.serviceManager;
     this._handleClick = opts.onClick;
 
@@ -98,7 +98,6 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
       this
     );
 
-    this.model = new RunningSessions.Model();
     this.addClass(interactiveItem);
   }
 

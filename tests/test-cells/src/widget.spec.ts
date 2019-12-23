@@ -357,12 +357,6 @@ describe('cells/widget', () => {
       it('should not throw an error (full test in input area)', () => {
         const widget = new Cell({ model, contentFactory }).initializeState();
         expect(() => {
-          widget.setPrompt(void 0);
-        }).not.toThrow();
-        expect(() => {
-          widget.setPrompt(null);
-        }).not.toThrow();
-        expect(() => {
           widget.setPrompt('');
         }).not.toThrow();
         expect(() => {
@@ -750,7 +744,7 @@ describe('cells/widget', () => {
         widget.initializeState();
         let originalCount: number;
         widget.model.value.text = 'foo';
-        originalCount = widget.model.executionCount;
+        originalCount = widget.model.executionCount!;
         await CodeCell.execute(widget, sessionContext);
         const executionCount = widget.model.executionCount;
         expect(executionCount).not.toEqual(originalCount);

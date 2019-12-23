@@ -44,7 +44,7 @@ describe('session/manager', () => {
     manager = new SessionManager({ kernelManager, standby: 'never' });
     await manager.ready;
     session = await startNew(manager);
-    await session.kernel.info;
+    await session.kernel!.info;
   });
 
   afterEach(() => {
@@ -136,7 +136,7 @@ describe('session/manager', () => {
         manager.runningChanged.connect(() => {
           called = true;
         });
-        await session.changeKernel({ name: session.kernel.name });
+        await session.changeKernel({ name: session.kernel!.name });
         await manager.refreshRunning();
         expect(called).to.equal(true);
       });
@@ -172,14 +172,14 @@ describe('session/manager', () => {
     describe('#findByPath()', () => {
       it('should find an existing session by path', async () => {
         const newModel = await manager.findByPath(session.path);
-        expect(newModel.id).to.equal(session.id);
+        expect(newModel!.id).to.equal(session.id);
       });
     });
 
     describe('#findById()', () => {
       it('should find an existing session by id', async () => {
         const newModel = await manager.findById(session.id);
-        expect(newModel.id).to.equal(session.id);
+        expect(newModel!.id).to.equal(session.id);
       });
     });
 
@@ -187,7 +187,7 @@ describe('session/manager', () => {
       it('should connect to a running session', () => {
         const newSession = manager.connectTo({ model: session.model });
         expect(newSession.id).to.equal(session.id);
-        expect(newSession.kernel.id).to.equal(session.kernel.id);
+        expect(newSession.kernel!.id).to.equal(session.kernel!.id);
         expect(newSession).to.not.equal(session);
         expect(newSession.kernel).to.not.equal(session.kernel);
       });

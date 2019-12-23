@@ -228,7 +228,7 @@ export class Dialog<T> extends Widget {
     this._original = document.activeElement as HTMLElement;
     if (this._focusNodeSelector) {
       let body = this.node.querySelector('.jp-Dialog-body');
-      let el = body.querySelector(this._focusNodeSelector);
+      let el = body?.querySelector(this._focusNodeSelector);
 
       if (el) {
         this._primary = el as HTMLElement;
@@ -360,7 +360,7 @@ export class Dialog<T> extends Widget {
   private _defaultButton: number;
   private _host: HTMLElement;
   private _body: Dialog.Body<T>;
-  private _focusNodeSelector = '';
+  private _focusNodeSelector: string | undefined = '';
 }
 
 /**

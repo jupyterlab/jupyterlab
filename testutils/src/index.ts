@@ -55,8 +55,8 @@ export async function testEmission<T, U, V>(
     test?: (a: T, b: U) => void;
     value?: V;
   } = {}
-): Promise<V> {
-  const done = new PromiseDelegate<V>();
+): Promise<V | undefined> {
+  const done = new PromiseDelegate<V | undefined>();
   const object = {};
   signal.connect((sender: T, args: U) => {
     if (options.find?.(sender, args) ?? true) {
@@ -213,7 +213,7 @@ export async function createSessionContext(
     kernelPreference: options.kernelPreference ?? {
       shouldStart: true,
       canStart: true,
-      name: specsManager.specs.default
+      name: specsManager.specs?.default
     }
   });
 }
@@ -255,7 +255,7 @@ export async function createFileContextWithKernel(
     kernelPreference: {
       shouldStart: true,
       canStart: true,
-      name: specsManager.specs.default
+      name: specsManager.specs?.default
     }
   });
 }
@@ -286,7 +286,7 @@ export async function initNotebookContext(
       shouldStart: startKernel,
       canStart: startKernel,
       shutdownOnDispose: true,
-      name: manager.kernelspecs.specs.default
+      name: manager.kernelspecs.specs?.default
     }
   });
   await context.initialize(true);

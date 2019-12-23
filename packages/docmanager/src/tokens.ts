@@ -120,7 +120,7 @@ export interface IDocumentManager extends IDisposable {
     path: string,
     widgetName?: string,
     kernel?: Partial<Kernel.IModel>
-  ): Widget;
+  ): Widget | undefined;
 
   /**
    * Delete a file.

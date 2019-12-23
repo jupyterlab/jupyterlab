@@ -294,7 +294,7 @@ describe('rendermime/registry', () => {
 
     describe('#getFactory()', () => {
       it('should get a factory by mimeType', () => {
-        const f = r.getFactory('text/plain');
+        const f = r.getFactory('text/plain')!;
         expect(f.mimeTypes).to.contain('text/plain');
       });
 

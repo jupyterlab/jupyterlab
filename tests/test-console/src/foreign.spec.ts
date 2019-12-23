@@ -63,7 +63,6 @@ class TestHandler extends ForeignHandler {
     msg: KernelMessage.IIOPubMessage
   ): boolean {
     const injected = super.onIOPubMessage(sender, msg);
-    this.received.emit(msg);
     if (injected) {
       this.injected.emit(msg);
     } else {
@@ -72,12 +71,15 @@ class TestHandler extends ForeignHandler {
       const session = (msg.parent_header as KernelMessage.IHeader).session;
       const msgType = msg.header.msg_type;
       if (
-        session !== this.sessionContext.session?.kernel?.clientId &&
+        session !== this.sessionContext.session!.kernel!.clientId &&
         relevantTypes.has(msgType)
       ) {
         this.rejected.emit(msg);
+      } else {
+        console.log(session, this.sessionContext.session?.kernel?.clientId);
       }
     }
+    this.received.emit(msg);
     return injected;
   }
 }
@@ -112,7 +114,7 @@ describe('@jupyterlab/console', () => {
         createSession({ name: '', path, type: 'test' })
       ]);
       await sessionContext.initialize();
-      await sessionContext.session?.kernel?.info;
+      await sessionContext.session!.kernel!.info;
     });
 
     beforeEach(() => {
@@ -148,7 +150,8 @@ describe('@jupyterlab/console', () => {
         handler.injected.connect(() => {
           called = true;
         });
-        await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
+        await foreign.kernel!.requestExecute({ code, stop_on_error: true })
+          .done;
         expect(called).to.equal(true);
       });
 
@@ -159,7 +162,8 @@ describe('@jupyterlab/console', () => {
         handler.rejected.connect(() => {
           called = true;
         });
-        await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
+        await foreign.kernel!.requestExecute({ code, stop_on_error: true })
+          .done;
         expect(called).to.equal(true);
       });
     });
@@ -174,7 +178,7 @@ describe('@jupyterlab/console', () => {
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(handler.sessionContext.session.path).to.be.ok;
+        expect(handler.sessionContext.session!.path).to.be.ok;
       });
     });
 
@@ -214,7 +218,8 @@ describe('@jupyterlab/console', () => {
           called = true;
           promise.resolve(void 0);
         });
-        await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
+        await foreign.kernel!.requestExecute({ code, stop_on_error: true })
+          .done;
         await promise.promise;
         expect(called).to.equal(true);
       });
@@ -231,7 +236,8 @@ describe('@jupyterlab/console', () => {
           called = true;
           promise.resolve(void 0);
         });
-        await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
+        await foreign.kernel!.requestExecute({ code, stop_on_error: true })
+          .done;
         await promise.promise;
         expect(called).to.equal(true);
       });
@@ -250,7 +256,8 @@ describe('@jupyterlab/console', () => {
             promise.resolve(void 0);
           }
         });
-        await foreign.kernel.requestExecute({ code, stop_on_error: true }).done;
+        await foreign.kernel!.requestExecute({ code, stop_on_error: true })
+          .done;
         await promise.promise;
         expect(called).to.equal(true);
       });

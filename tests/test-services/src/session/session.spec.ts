@@ -100,7 +100,7 @@ describe('session', () => {
       const sessionModel = createSessionModel();
       const serverSettings = getRequestHandler(200, sessionModel);
       let sessionPromise = SessionAPI.startSession(
-        sessionModel,
+        sessionModel as any,
         serverSettings
       );
       await expectFailure(sessionPromise);
@@ -110,7 +110,7 @@ describe('session', () => {
       const serverSettings = getRequestHandler(500, {});
       const sessionModel = createSessionModel();
       let sessionPromise = SessionAPI.startSession(
-        sessionModel,
+        sessionModel as any,
         serverSettings
       );
       await expectFailure(sessionPromise, '');
@@ -121,7 +121,7 @@ describe('session', () => {
       (sessionModel as any).path = 1;
       const serverSettings = getRequestHandler(201, sessionModel);
       let sessionPromise = SessionAPI.startSession(
-        sessionModel,
+        sessionModel as any,
         serverSettings
       );
       const msg = `Property 'path' is not of type 'string'`;
@@ -136,7 +136,10 @@ describe('session', () => {
         notebook: { path: sessionModel.path }
       };
       const serverSettings = getRequestHandler(201, data);
-      let model = await SessionAPI.startSession(sessionModel, serverSettings);
+      let model = await SessionAPI.startSession(
+        sessionModel as any,
+        serverSettings
+      );
       console.log(model);
       expect(model.path).not.empty;
     });

@@ -131,8 +131,8 @@ function addKernelRunningSessionManager(
     }
     labelTitle() {
       let { kernel, path } = this._model;
-      let kernelName = kernel.name;
-      if (specsManager.specs) {
+      let kernelName = kernel?.name;
+      if (kernelName && specsManager.specs) {
         const spec = specsManager.specs.kernelspecs[kernelName];
         kernelName = spec ? spec.display_name : 'unknown';
       }

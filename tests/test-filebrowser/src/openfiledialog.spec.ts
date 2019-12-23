@@ -161,7 +161,7 @@ describe('@jupyterlab/filebrowser', () => {
       const result = await dialog;
 
       expect(result.button.accept).true;
-      let items = result.value;
+      let items = result.value!;
       expect(items.length).equal(1);
 
       document.body.removeChild(node);
@@ -201,16 +201,16 @@ describe('@jupyterlab/filebrowser', () => {
 
       // Emulate notebook file selection
       // Get node coordinates we need to be precised as code test for hit position
-      const rect = items.item(items.length - 1).getBoundingClientRect();
+      const rect = items.item(items.length - 1)!.getBoundingClientRect();
 
-      simulate(items.item(items.length - 1), 'mousedown', {
+      simulate(items.item(items.length - 1)!, 'mousedown', {
         clientX: 0.5 * (rect.left + rect.right),
         clientY: 0.5 * (rect.bottom + rect.top)
       });
 
       await acceptDialog();
       let result = await dialog;
-      let files = result.value;
+      let files = result.value!;
       expect(files.length).equal(1);
       expect(files[0].type).equal('notebook');
       expect(files[0].name).matches(/Untitled\d*.ipynb/);
@@ -227,7 +227,7 @@ describe('@jupyterlab/filebrowser', () => {
       await acceptDialog();
 
       const result = await dialog;
-      const items = result.value;
+      const items = result.value!;
 
       expect(items.length).equal(1);
       expect(items[0].type).equal('directory');
@@ -267,7 +267,7 @@ describe('@jupyterlab/filebrowser', () => {
       const result = await dialog;
 
       expect(result.button.accept).true;
-      expect(result.value.length).equal(1);
+      expect(result.value!.length).equal(1);
 
       document.body.removeChild(node);
     });
@@ -304,16 +304,16 @@ describe('@jupyterlab/filebrowser', () => {
 
       // Emulate notebook file selection
       // Get node coordinates we need to be precised as code test for hit position
-      const rect = items.item(items.length - 1).getBoundingClientRect();
+      const rect = items.item(items.length - 1)!.getBoundingClientRect();
 
-      simulate(items.item(items.length - 1), 'mousedown', {
+      simulate(items.item(items.length - 1)!, 'mousedown', {
         clientX: 0.5 * (rect.left + rect.right),
         clientY: 0.5 * (rect.bottom + rect.top)
       });
 
       await acceptDialog();
       let result = await dialog;
-      let files = result.value;
+      let files = result.value!;
       expect(files.length).equal(1);
       expect(files[0].type).equal('directory');
       expect(files[0].name).matches(/Untitled Folder( \d+)?/);
@@ -330,7 +330,7 @@ describe('@jupyterlab/filebrowser', () => {
       await acceptDialog();
 
       const result = await dialog;
-      const items = result.value;
+      const items = result.value!;
 
       expect(items.length).equal(1);
       expect(items[0].type).equal('directory');

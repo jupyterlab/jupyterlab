@@ -86,7 +86,7 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
     let item = new EditorSyntaxStatus({ commands: app.commands });
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
-      if (current && tracker.has(current)) {
+      if (current && tracker.has(current) && item.model) {
         item.model.editor = (current as IDocumentWidget<
           FileEditor
         >).content.editor;
@@ -99,8 +99,8 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
         align: 'left',
         rank: 0,
         isActive: () =>
-          labShell.currentWidget &&
-          tracker.currentWidget &&
+          !!labShell.currentWidget &&
+          !!tracker.currentWidget &&
           labShell.currentWidget === tracker.currentWidget
       }
     );
@@ -166,7 +166,9 @@ function activateEditorCommands(
     }
 
     theme = (settings.get('theme').composite as string | null) || theme;
-    scrollPastEnd = settings.get('scrollPastEnd').composite as boolean | null;
+    scrollPastEnd =
+      (settings.get('scrollPastEnd').composite as boolean | null) ??
+      scrollPastEnd;
     styleActiveLine =
       (settings.get('styleActiveLine').composite as
         | boolean
@@ -346,7 +348,7 @@ function activateEditorCommands(
       }
       modeMenu.addItem({
         command: CommandIDs.changeMode,
-        args: { ...spec }
+        args: { ...spec } as any // TODO: Casting to `any` until lumino typings are fixed
       });
     });
 

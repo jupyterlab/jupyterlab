@@ -10,6 +10,7 @@ import { ServerConnection } from '..';
 import * as Session from './session';
 
 import { shutdownSession, updateSession } from './restapi';
+import { UUID } from '@lumino/coreutils';
 
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
@@ -29,8 +30,8 @@ export class SessionConnection implements Session.ISessionConnection {
     this._name = options.model.name;
     this._path = options.model.path;
     this._type = options.model.type;
-    this._username = options.username;
-    this._clientId = options.clientId;
+    this._username = options.username ?? '';
+    this._clientId = options.clientId ?? UUID.uuid4();
     this._connectToKernel = options.connectToKernel;
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
@@ -113,7 +114,7 @@ export class SessionConnection implements Session.ISessionConnection {
    * #### Notes
    * This is a read-only property, and can be altered by [changeKernel].
    */
-  get kernel(): Kernel.IKernelConnection {
+  get kernel(): Kernel.IKernelConnection | null {
     return this._kernel;
   }
 
@@ -144,7 +145,7 @@ export class SessionConnection implements Session.ISessionConnection {
   get model(): Session.IModel {
     return {
       id: this.id,
-      kernel: { id: this.kernel.id, name: this.kernel.name },
+      kernel: this.kernel && { id: this.kernel.id, name: this.kernel.name },
       path: this._path,
       type: this._type,
       name: this._name
@@ -205,7 +206,8 @@ export class SessionConnection implements Session.ISessionConnection {
     }
     this._isDisposed = true;
     this._disposed.emit();
-    this._kernel.dispose();
+    this._kernel?.dispose();
+    this._kernel = null;
     Signal.clearData(this);
   }
 
@@ -258,7 +260,7 @@ export class SessionConnection implements Session.ISessionConnection {
    */
   async changeKernel(
     options: Partial<Kernel.IModel>
-  ): Promise<Kernel.IKernelConnection> {
+  ): Promise<Kernel.IKernelConnection | null> {
     if (this.isDisposed) {
       throw new Error('Session is disposed');
     }
@@ -392,9 +394,9 @@ export class SessionConnection implements Session.ISessionConnection {
   private _path = '';
   private _name = '';
   private _type = '';
-  private _username = '';
-  private _clientId = '';
-  private _kernel: Kernel.IKernelConnection;
+  private _username: string;
+  private _clientId: string;
+  private _kernel: Kernel.IKernelConnection | null = null;
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);
   private _kernelChanged = new Signal<

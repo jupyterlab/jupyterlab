@@ -99,8 +99,8 @@ function activateHTMLViewer(
     });
 
     // widget.node.appendChild(HTML5Icon);
-    widget.title.iconClass = ft.iconClass;
-    widget.title.iconLabel = ft.iconLabel;
+    widget.title.iconClass = ft.iconClass ?? '';
+    widget.title.iconLabel = ft.iconLabel ?? '';
   });
 
   // Add a command to trust the active HTML document,

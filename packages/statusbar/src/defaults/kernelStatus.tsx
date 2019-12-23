@@ -11,7 +11,7 @@ import { Session } from '@jupyterlab/services';
 
 import { interactiveItem, TextItem } from '..';
 
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, JSONArray } from '@lumino/coreutils';
 
 /**
  * A pure functional component for rendering kernel status.
@@ -22,7 +22,9 @@ function KernelStatusComponent(
   return (
     <TextItem
       onClick={props.handleClick}
-      source={`${props.kernelName} | ${Text.titleCase(props.status)}`}
+      source={`${props.kernelName} | ${Text.titleCase(
+        props.status ?? 'undefined'
+      )}`}
       title={`Change kernel for ${props.activityName}`}
     />
   );
@@ -55,7 +57,7 @@ namespace KernelStatusComponent {
     /**
      * The status of the kernel.
      */
-    status: string;
+    status?: string;
   }
 }
 
@@ -67,9 +69,8 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
    * Construct the kernel status widget.
    */
   constructor(opts: KernelStatus.IOptions) {
-    super();
+    super(new KernelStatus.Model());
     this._handleClick = opts.onClick;
-    this.model = new KernelStatus.Model();
     this.addClass(interactiveItem);
   }
 
@@ -185,22 +186,19 @@ export namespace KernelStatus {
       }
     };
 
-    private _getAllState(): [string, string, string] {
+    private _getAllState(): Private.State {
       return [this._kernelName, this._kernelStatus, this._activityName];
     }
 
-    private _triggerChange(
-      oldState: [string, string, string],
-      newState: [string, string, string]
-    ) {
-      if (JSONExt.deepEqual(oldState, newState)) {
+    private _triggerChange(oldState: Private.State, newState: Private.State) {
+      if (JSONExt.deepEqual(oldState as JSONArray, newState as JSONArray)) {
         this.stateChanged.emit(void 0);
       }
     }
 
     private _activityName: string = 'activity';
     private _kernelName: string = 'No Kernel!';
-    private _kernelStatus: string = '';
+    private _kernelStatus: string | undefined = '';
     private _sessionContext: ISessionContext | null = null;
   }
 
@@ -214,4 +212,8 @@ export namespace KernelStatus {
      */
     onClick: () => void;
   }
+}
+
+namespace Private {
+  export type State = [string, string | undefined, string];
 }

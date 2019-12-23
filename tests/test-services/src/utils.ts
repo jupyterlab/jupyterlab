@@ -205,14 +205,14 @@ class SocketTester implements IService {
       break;
     }
     this.serverSettings = ServerConnection.makeSettings({
-      wsUrl: `ws://localhost:${port}/`,
+      wsUrl: `ws://localhost:${port!}/`,
       WebSocket: WebSocket as any
     });
     this._ready = new PromiseDelegate<void>();
-    this._server.on('connection', ws => {
+    this._server!.on('connection', ws => {
       this._ws = ws;
       this.onSocket(ws);
-      this._ready.resolve();
+      this._ready!.resolve();
       const connect = this._onConnect;
       if (connect) {
         connect(ws);
@@ -223,7 +223,7 @@ class SocketTester implements IService {
   readonly serverSettings: ServerConnection.ISettings;
 
   get ready() {
-    return this._ready.promise;
+    return this._ready!.promise;
   }
 
   /**
@@ -233,7 +233,9 @@ class SocketTester implements IService {
     if (this.isDisposed) {
       return;
     }
-    this._server.close();
+    if (this._server) {
+      this._server.close();
+    }
     this._server = null;
   }
 
@@ -248,7 +250,7 @@ class SocketTester implements IService {
    * Send a raw message from the server to a connected client.
    */
   sendRaw(msg: string | ArrayBuffer) {
-    this._ws.send(msg);
+    this._ws!.send(msg);
   }
 
   /**
@@ -256,7 +258,7 @@ class SocketTester implements IService {
    */
   async close(): Promise<void> {
     this._ready = new PromiseDelegate<void>();
-    this._ws.close();
+    this._ws!.close();
   }
 
   /**
@@ -273,10 +275,10 @@ class SocketTester implements IService {
     /* no-op */
   }
 
-  private _ws: WebSocket = null;
-  private _ready: PromiseDelegate<void> = null;
-  private _server: WebSocket.Server = null;
-  private _onConnect: (ws: WebSocket) => void = null;
+  private _ws: WebSocket | null = null;
+  private _ready: PromiseDelegate<void> | null = null;
+  private _server: WebSocket.Server | null = null;
+  private _onConnect: ((ws: WebSocket) => void) | null = null;
   protected settings: ServerConnection.ISettings;
 }
 
@@ -547,7 +549,7 @@ export class KernelTester extends SocketTester {
   readonly serverSessionId = UUID.uuid4();
   private _kernelManager: Kernel.IManager;
   private _kernel: Kernel.IKernelConnection | null = null;
-  private _onMessage: (msg: KernelMessage.IMessage) => void = null;
+  private _onMessage: ((msg: KernelMessage.IMessage) => void) | null = null;
 }
 
 /**
@@ -582,7 +584,7 @@ export class SessionTester extends SocketTester {
    */
   async startSession(): Promise<Session.ISessionConnection> {
     handleRequest(this, 201, createSessionModel());
-    this._session = await this._sessionManager.startNew({
+    this._session = await this._sessionManager!.startNew({
       path: UUID.uuid4(),
       name: UUID.uuid4(),
       type: 'test'
@@ -606,7 +608,7 @@ export class SessionTester extends SocketTester {
     super.dispose();
     if (this._session) {
       this._session.dispose();
-      this._session = null;
+      this._session = null!;
     }
   }
 
@@ -679,8 +681,8 @@ export class SessionTester extends SocketTester {
 
   readonly serverSessionId = UUID.uuid4();
   private _session: Session.ISessionConnection;
-  private _onMessage: (msg: KernelMessage.IMessage) => void = null;
-  private _sessionManager: Session.IManager = null;
+  private _onMessage: ((msg: KernelMessage.IMessage) => void) | null = null;
+  private _sessionManager: Session.IManager | null = null;
 }
 
 /**
@@ -709,7 +711,7 @@ export class TerminalTester extends SocketTester {
     });
   }
 
-  private _onMessage: (msg: TerminalSession.IMessage) => void = null;
+  private _onMessage: ((msg: TerminalSession.IMessage) => void) | null = null;
 }
 
 /**

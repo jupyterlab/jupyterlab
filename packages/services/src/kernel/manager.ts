@@ -221,7 +221,7 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
    *
    * @returns A promise that resolves with the kernel's model.
    */
-  async findById(id: string): Promise<Kernel.IModel> {
+  async findById(id: string): Promise<Kernel.IModel | undefined> {
     if (this._models.has(id)) {
       return this._models.get(id);
     }

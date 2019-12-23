@@ -67,7 +67,7 @@ describe('kernel/manager', () => {
     describe('#specs', () => {
       it('should get the kernel specs', async () => {
         await manager.ready;
-        expect(manager.specs.default).to.be.ok;
+        expect(manager.specs!.default).to.be.ok;
       });
     });
 
@@ -80,11 +80,11 @@ describe('kernel/manager', () => {
           called = true;
         });
         await manager.ready;
-        expect(manager.specs.default).to.equal('echo');
+        expect(manager.specs!.default).to.equal('echo');
         specs.default = 'shell';
         manager.intercept = specs;
         await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal('shell');
+        expect(manager.specs!.default).to.equal('shell');
         expect(called).to.equal(true);
       });
     });
@@ -112,9 +112,9 @@ describe('kernel/manager', () => {
         await manager.ready;
         specs.default = 'shell';
         manager.intercept = specs;
-        expect(manager.specs.default).not.to.equal('shell');
+        expect(manager.specs!.default).not.to.equal('shell');
         await manager.refreshSpecs();
-        expect(manager.specs.default).to.equal('shell');
+        expect(manager.specs!.default).to.equal('shell');
       });
     });
   });

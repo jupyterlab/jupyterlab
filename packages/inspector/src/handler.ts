@@ -141,7 +141,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       .fetch({ offset, text })
       .then(reply => {
         // If handler has been disposed or a newer request is pending, bail.
-        if (this.isDisposed || pending !== this._pending) {
+        if (!reply || this.isDisposed || pending !== this._pending) {
           this._inspected.emit(update);
           return;
         }

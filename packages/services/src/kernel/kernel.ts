@@ -96,7 +96,7 @@ export interface IKernelConnection extends IObservableDisposable {
    * #### Notes
    * This may make a server request to retrieve the spec.
    */
-  readonly spec: Promise<KernelSpec.ISpecModel>;
+  readonly spec: Promise<KernelSpec.ISpecModel | undefined>;
 
   /**
    * Whether the kernel connection handles comm messages.
@@ -209,7 +209,7 @@ export interface IKernelConnection extends IObservableDisposable {
    * Fulfills with the `kernel_info_response` content when the shell reply is
    * received and validated.
    */
-  requestKernelInfo(): Promise<KernelMessage.IInfoReplyMsg>;
+  requestKernelInfo(): Promise<KernelMessage.IInfoReplyMsg | undefined>;
 
   /**
    * Send a `complete_request` message.

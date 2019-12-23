@@ -8,7 +8,7 @@ export interface IDisplayState {
   /**
    * The index of the currently selected match
    */
-  currentIndex: number;
+  currentIndex: number | null;
 
   /**
    * The total number of matches found in the document
@@ -33,7 +33,7 @@ export interface IDisplayState {
   /**
    * The query constructed from the text and the case/regex flags
    */
-  query: RegExp;
+  query: RegExp | null;
 
   /**
    * An error message (used for bad regex syntax)

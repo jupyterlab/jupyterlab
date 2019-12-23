@@ -56,9 +56,7 @@ export class PathStatus extends VDomRenderer<PathStatus.Model> {
    * Construct a new PathStatus status item.
    */
   constructor(opts: PathStatus.IOptions) {
-    super();
-    this._docManager = opts.docManager;
-    this.model = new PathStatus.Model(this._docManager);
+    super(new PathStatus.Model(opts.docManager));
     this.node.title = this.model.path;
   }
 
@@ -73,8 +71,6 @@ export class PathStatus extends VDomRenderer<PathStatus.Model> {
       />
     );
   }
-
-  private _docManager: IDocumentManager;
 }
 
 /**

@@ -91,7 +91,7 @@ describe('console/panel', () => {
         Widget.attach(panel, document.body);
         await acceptDialog();
         await panel.sessionContext.ready;
-        await panel.sessionContext.session.kernel.info;
+        await panel.sessionContext.session!.kernel!.info;
       });
     });
 
@@ -101,7 +101,7 @@ describe('console/panel', () => {
         Widget.attach(panel, document.body);
         MessageLoop.sendMessage(panel, Widget.Msg.ActivateRequest);
         expect(panel.methods).to.contain('onActivateRequest');
-        expect(panel.console.promptCell.editor.hasFocus()).to.equal(true);
+        expect(panel.console.promptCell!.editor.hasFocus()).to.equal(true);
         return dismissDialog();
       });
     });

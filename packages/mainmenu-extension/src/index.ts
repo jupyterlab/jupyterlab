@@ -742,7 +742,7 @@ export function createTabsMenu(
     },
     isToggled: args => {
       const id = args['id'] || '';
-      return app.shell.currentWidget && app.shell.currentWidget.id === id;
+      return !!app.shell.currentWidget && app.shell.currentWidget.id === id;
     },
     execute: args => app.shell.activateById((args['id'] as string) || '')
   });
@@ -828,7 +828,9 @@ namespace Private {
     label: keyof E
   ): string {
     let widget = app.shell.currentWidget;
-    const extender = find(s, value => value.tracker.has(widget));
+    const extender = widget
+      ? find(s, value => value.tracker.has(widget!))
+      : undefined;
     if (!extender) {
       return '';
     }
@@ -849,7 +851,9 @@ namespace Private {
   ): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = find(s, value => value.tracker.has(widget));
+      const extender = widget
+        ? find(s, value => value.tracker.has(widget!))
+        : undefined;
       if (!extender) {
         return Promise.resolve(void 0);
       }
@@ -857,7 +861,7 @@ namespace Private {
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a function.
       let f = (extender[executor] as any) as (w: Widget) => Promise<any>;
-      return f(widget);
+      return f(widget!);
     };
   }
 
@@ -872,11 +876,13 @@ namespace Private {
   ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = find(s, value => value.tracker.has(widget));
+      const extender = widget
+        ? find(s, value => value.tracker.has(widget!))
+        : undefined;
       return (
         !!extender &&
         !!extender[executor] &&
-        (extender.isEnabled ? extender.isEnabled(widget) : true)
+        (extender.isEnabled && widget ? extender.isEnabled(widget) : true)
       );
     };
   }
@@ -892,13 +898,16 @@ namespace Private {
   ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = find(s, value => value.tracker.has(widget));
+      const extender = widget
+        ? find(s, value => value.tracker.has(widget!))
+        : undefined;
       // Coerce extender[toggled] to be a function. When Typedoc is updated to use
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a function.
       return (
         !!extender &&
         !!extender[toggled] &&
+        !!widget &&
         !!((extender[toggled] as any) as (w: Widget) => () => boolean)(widget)
       );
     };

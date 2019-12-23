@@ -97,27 +97,27 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#splitCell({})', () => {
       it('should split the active cell into two cells', () => {
-        const cell = widget.activeCell;
+        const cell = widget.activeCell!;
         const source = 'thisisasamplestringwithnospaces';
         cell.model.value.text = source;
         const index = widget.activeCellIndex;
         const editor = cell.editor;
-        editor.setCursorPosition(editor.getPositionAt(10));
+        editor.setCursorPosition(editor.getPositionAt(10)!);
         NotebookActions.splitCell(widget);
-        const cells = widget.model.cells;
+        const cells = widget.model!.cells;
         const newSource =
           cells.get(index).value.text + cells.get(index + 1).value.text;
         expect(newSource).to.equal(source);
       });
 
       it('should preserve leading white space in the second cell', () => {
-        const cell = widget.activeCell;
+        const cell = widget.activeCell!;
         const source = 'this\n\n   is a test';
         cell.model.value.text = source;
         const editor = cell.editor;
-        editor.setCursorPosition(editor.getPositionAt(4));
+        editor.setCursorPosition(editor.getPositionAt(4)!);
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell.model.value.text).to.equal('   is a test');
+        expect(widget.activeCell!.model.value.text).to.equal('   is a test');
       });
 
       it('should clear the existing selection', () => {
@@ -147,9 +147,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should create two empty cells if there is no content', () => {
-        widget.activeCell.model.value.text = '';
+        widget.activeCell!.model.value.text = '';
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell.model.value.text).to.equal('');
+        expect(widget.activeCell!.model.value.text).to.equal('');
         const prev = widget.widgets[0];
         expect(prev.model.value.text).to.equal('');
       });
@@ -169,7 +169,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should be undo-able', () => {
-        const source = widget.activeCell.model.value.text;
+        const source = widget.activeCell!.model.value.text;
         const count = widget.widgets.length;
         NotebookActions.splitCell(widget);
         NotebookActions.undo(widget);
@@ -181,7 +181,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#mergeCells', () => {
       it('should merge the selected cells', () => {
-        let source = widget.activeCell.model.value.text + '\n\n';
+        let source = widget.activeCell!.model.value.text + '\n\n';
         let next = widget.widgets[1];
         widget.select(next);
         source += next.model.value.text + '\n\n';
@@ -191,7 +191,7 @@ describe('@jupyterlab/notebook', () => {
         const count = widget.widgets.length;
         NotebookActions.mergeCells(widget);
         expect(widget.widgets.length).to.equal(count - 2);
-        expect(widget.activeCell.model.value.text).to.equal(source);
+        expect(widget.activeCell!.model.value.text).to.equal(source);
       });
 
       it('should be a no-op if there is no model', () => {
@@ -201,11 +201,11 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should select the next cell if there is only one cell selected', () => {
-        let source = widget.activeCell.model.value.text + '\n\n';
+        let source = widget.activeCell!.model.value.text + '\n\n';
         const next = widget.widgets[1];
         source += next.model.value.text;
         NotebookActions.mergeCells(widget);
-        expect(widget.activeCell.model.value.text).to.equal(source);
+        expect(widget.activeCell!.model.value.text).to.equal(source);
       });
 
       it('should clear the outputs of a code cell', () => {
@@ -224,7 +224,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should be undo-able', () => {
-        const source = widget.activeCell.model.value.text;
+        const source = widget.activeCell!.model.value.text;
         const count = widget.widgets.length;
         NotebookActions.mergeCells(widget);
         NotebookActions.undo(widget);
@@ -263,9 +263,9 @@ describe('@jupyterlab/notebook', () => {
       it('should increment deletedCells model when cells deleted', () => {
         let next = widget.widgets[1];
         widget.select(next);
-        let count = widget.model.deletedCells.length;
+        let count = widget.model!.deletedCells.length;
         NotebookActions.deleteCells(widget);
-        expect(widget.model.deletedCells.length).to.equal(count + 2);
+        expect(widget.model!.deletedCells.length).to.equal(count + 2);
       });
 
       it('should be a no-op if there is no model', () => {
@@ -307,7 +307,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be undo-able', () => {
         const next = widget.widgets[1];
         widget.select(next);
-        const source = widget.activeCell.model.value.text;
+        const source = widget.activeCell!.model.value.text;
         const count = widget.widgets.length;
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
@@ -374,7 +374,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be the new active cell', () => {
         NotebookActions.insertAbove(widget);
-        expect(widget.activeCell.model.value.text).to.equal('');
+        expect(widget.activeCell!.model.value.text).to.equal('');
       });
     });
 
@@ -423,7 +423,7 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be the new active cell', () => {
         NotebookActions.insertBelow(widget);
-        expect(widget.activeCell.model.value.text).to.equal('');
+        expect(widget.activeCell!.model.value.text).to.equal('');
       });
     });
 
@@ -496,7 +496,7 @@ describe('@jupyterlab/notebook', () => {
         cell.model.outputs.clear();
         return NotebookActions.run(widget, sessionContext).then(result => {
           expect(result).to.equal(true);
-          expect(widget.model.deletedCells.length).to.equal(0);
+          expect(widget.model!.deletedCells.length).to.equal(0);
         });
       });
 
@@ -531,33 +531,33 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should handle no session', async () => {
-        const result = await NotebookActions.run(widget, null);
+        const result = await NotebookActions.run(widget, undefined);
         expect(result).to.equal(true);
         const cell = widget.activeCell as CodeCell;
         expect(cell.model.executionCount).to.be.null;
       });
 
       it('should stop executing code cells on an error', async () => {
-        let cell = widget.model.contentFactory.createCodeCell({});
+        let cell = widget.model!.contentFactory.createCodeCell({});
         cell.value.text = ERROR_INPUT;
-        widget.model.cells.insert(2, cell);
+        widget.model!.cells.insert(2, cell);
         widget.select(widget.widgets[2]);
-        cell = widget.model.contentFactory.createCodeCell({});
-        widget.model.cells.push(cell);
+        cell = widget.model!.contentFactory.createCodeCell({});
+        widget.model!.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.run(widget, ipySessionContext);
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
-        await ipySessionContext.session.kernel.restart();
+        await ipySessionContext.session!.kernel!.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
-        const cell = widget.model.contentFactory.createMarkdownCell({});
-        widget.model.cells.push(cell);
+        const cell = widget.model!.contentFactory.createMarkdownCell({});
+        widget.model!.cells.push(cell);
         const child = widget.widgets[widget.widgets.length - 1] as MarkdownCell;
         child.rendered = false;
         widget.select(child);
-        widget.activeCell.model.value.text = ERROR_INPUT;
+        widget.activeCell!.model.value.text = ERROR_INPUT;
         const result = await NotebookActions.run(widget, ipySessionContext);
         // Markdown rendering is asynchronous, but the cell
         // provides no way to hook into that. Sleep here
@@ -565,7 +565,7 @@ describe('@jupyterlab/notebook', () => {
         await sleep(100);
         expect(result).to.equal(false);
         expect(child.rendered).to.equal(true);
-        await ipySessionContext.session.kernel.restart();
+        await ipySessionContext.session!.kernel!.restart();
       }).timeout(120000); // Allow for slower CI
     });
 
@@ -603,7 +603,7 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(result).to.equal(false);
         expect(widget.isSelected(widget.widgets[0])).to.equal(false);
-        await ipySessionContext.session.kernel.restart();
+        await ipySessionContext.session!.kernel!.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should change to command mode', async () => {
@@ -653,9 +653,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should stop executing code cells on an error', async () => {
-        widget.activeCell.model.value.text = ERROR_INPUT;
-        const cell = widget.model.contentFactory.createCodeCell({});
-        widget.model.cells.push(cell);
+        widget.activeCell!.model.value.text = ERROR_INPUT;
+        const cell = widget.model!.contentFactory.createCodeCell({});
+        widget.model!.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAndAdvance(
           widget,
@@ -663,11 +663,11 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
-        await ipySessionContext.session.kernel.restart();
+        await ipySessionContext.session!.kernel!.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
-        widget.activeCell.model.value.text = ERROR_INPUT;
+        widget.activeCell!.model.value.text = ERROR_INPUT;
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
@@ -682,7 +682,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
-        await ipySessionContext.session.kernel.restart();
+        await ipySessionContext.session!.kernel!.restart();
       }).timeout(120000); // Allow for slower CI
     });
 
@@ -752,9 +752,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should stop executing code cells on an error', async () => {
-        widget.activeCell.model.value.text = ERROR_INPUT;
-        const cell = widget.model.contentFactory.createCodeCell({});
-        widget.model.cells.push(cell);
+        widget.activeCell!.model.value.text = ERROR_INPUT;
+        const cell = widget.model!.contentFactory.createCodeCell({});
+        widget.model!.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.runAndInsert(
           widget,
@@ -762,11 +762,11 @@ describe('@jupyterlab/notebook', () => {
         );
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
-        await ipySessionContext.session.kernel.restart();
+        await ipySessionContext.session!.kernel!.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
-        widget.activeCell.model.value.text = ERROR_INPUT;
+        widget.activeCell!.model.value.text = ERROR_INPUT;
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         widget.select(cell);
@@ -781,7 +781,7 @@ describe('@jupyterlab/notebook', () => {
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
         expect(widget.activeCellIndex).to.equal(2);
-        await ipySessionContext.session.kernel.restart();
+        await ipySessionContext.session!.kernel!.restart();
       }).timeout(120000); // Allow for slower CI
     });
 
@@ -829,18 +829,18 @@ describe('@jupyterlab/notebook', () => {
       }).timeout(30000); // Allow for slower CI
 
       it('should stop executing code cells on an error', async () => {
-        widget.activeCell.model.value.text = ERROR_INPUT;
-        const cell = widget.model.contentFactory.createCodeCell({});
-        widget.model.cells.push(cell);
+        widget.activeCell!.model.value.text = ERROR_INPUT;
+        const cell = widget.model!.contentFactory.createCodeCell({});
+        widget.model!.cells.push(cell);
         const result = await NotebookActions.runAll(widget, ipySessionContext);
         expect(result).to.equal(false);
         expect(cell.executionCount).to.be.null;
         expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
-        await ipySessionContext.session.kernel.restart();
+        await ipySessionContext.session!.kernel!.restart();
       }).timeout(30000); // Allow for slower CI
 
       it('should render all markdown cells on an error', async () => {
-        widget.activeCell.model.value.text = ERROR_INPUT;
+        widget.activeCell!.model.value.text = ERROR_INPUT;
         const cell = widget.widgets[1] as MarkdownCell;
         cell.rendered = false;
         const result = await NotebookActions.runAll(widget, ipySessionContext);
@@ -850,7 +850,7 @@ describe('@jupyterlab/notebook', () => {
         await sleep(100);
         expect(result).to.equal(false);
         expect(cell.rendered).to.equal(true);
-        await ipySessionContext.session.kernel.restart();
+        await ipySessionContext.session!.kernel!.restart();
       }).timeout(120000); // Allow for slower CI
     });
 
@@ -1006,14 +1006,14 @@ describe('@jupyterlab/notebook', () => {
       it('should deselect the current cell if the cell above is selected', () => {
         NotebookActions.extendSelectionBelow(widget);
         NotebookActions.extendSelectionBelow(widget);
-        const cell = widget.activeCell;
+        const cell = widget.activeCell!;
         NotebookActions.extendSelectionAbove(widget);
         expect(widget.isSelected(cell)).to.equal(false);
       });
 
       it('should select only the first cell if we move from the second to first', () => {
         NotebookActions.extendSelectionBelow(widget);
-        const cell = widget.activeCell;
+        const cell = widget.activeCell!;
         NotebookActions.extendSelectionAbove(widget);
         expect(widget.isSelected(cell)).to.equal(false);
         expect(widget.activeCellIndex).to.equal(0);
@@ -1066,7 +1066,7 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = last;
         NotebookActions.extendSelectionAbove(widget);
         NotebookActions.extendSelectionAbove(widget);
-        const current = widget.activeCell;
+        const current = widget.activeCell!;
         NotebookActions.extendSelectionBelow(widget);
         expect(widget.isSelected(current)).to.equal(false);
       });
@@ -1075,7 +1075,7 @@ describe('@jupyterlab/notebook', () => {
         const last = widget.widgets.length - 1;
         widget.activeCellIndex = last;
         NotebookActions.extendSelectionAbove(widget);
-        const current = widget.activeCell;
+        const current = widget.activeCell!;
         NotebookActions.extendSelectionBelow(widget);
         expect(widget.isSelected(current)).to.equal(false);
         expect(widget.activeCellIndex).to.equal(last);
@@ -1112,11 +1112,11 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be undo-able', () => {
         widget.activeCellIndex++;
-        const source = widget.activeCell.model.value.text;
+        const source = widget.activeCell!.model.value.text;
         NotebookActions.moveUp(widget);
-        expect(widget.model.cells.get(0).value.text).to.equal(source);
+        expect(widget.model!.cells.get(0).value.text).to.equal(source);
         NotebookActions.undo(widget);
-        expect(widget.model.cells.get(1).value.text).to.equal(source);
+        expect(widget.model!.cells.get(1).value.text).to.equal(source);
       });
     });
 
@@ -1143,11 +1143,11 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should be undo-able', () => {
-        const source = widget.activeCell.model.value.text;
+        const source = widget.activeCell!.model.value.text;
         NotebookActions.moveDown(widget);
-        expect(widget.model.cells.get(1).value.text).to.equal(source);
+        expect(widget.model!.cells.get(1).value.text).to.equal(source);
         NotebookActions.undo(widget);
-        expect(widget.model.cells.get(0).value.text).to.equal(source);
+        expect(widget.model!.cells.get(0).value.text).to.equal(source);
       });
     });
 
@@ -1214,7 +1214,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should be undo-able', () => {
-        const source = widget.activeCell.model.value.text;
+        const source = widget.activeCell!.model.value.text;
         NotebookActions.cut(widget);
         NotebookActions.undo(widget);
         expect(widget.widgets[0].model.value.text).to.equal(source);
@@ -1233,7 +1233,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#paste()', () => {
       it('should paste cells from a NBTestUtils.clipboard', () => {
-        const source = widget.activeCell.model.value.text;
+        const source = widget.activeCell!.model.value.text;
         const next = widget.widgets[1];
         widget.select(next);
         const count = widget.widgets.length;
@@ -1302,7 +1302,7 @@ describe('@jupyterlab/notebook', () => {
       it('should be a no-op if there are no cell actions to undo', () => {
         const count = widget.widgets.length;
         NotebookActions.deleteCells(widget);
-        widget.model.cells.clearUndo();
+        widget.model!.cells.clearUndo();
         NotebookActions.undo(widget);
         expect(widget.widgets.length).to.equal(count - 1);
       });
@@ -1342,7 +1342,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#toggleAllLineNumbers()', () => {
       it('should toggle line numbers on all cells', () => {
-        const state = widget.activeCell.editor.getOption('lineNumbers');
+        const state = widget.activeCell!.editor.getOption('lineNumbers');
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
           const lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
@@ -1351,7 +1351,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should be based on the state of the active cell', () => {
-        const state = widget.activeCell.editor.getOption('lineNumbers');
+        const state = widget.activeCell!.editor.getOption('lineNumbers');
         for (let i = 1; i < widget.widgets.length; i++) {
           widget.widgets[i].editor.setOption('lineNumbers', !state);
         }
@@ -1444,7 +1444,7 @@ describe('@jupyterlab/notebook', () => {
         const next = widget.widgets[1];
         widget.select(next);
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell.model.value.text.slice(0, 3)).to.equal('## ');
+        expect(widget.activeCell!.model.value.text.slice(0, 3)).to.equal('## ');
         expect(next.model.value.text.slice(0, 3)).to.equal('## ');
       });
 
@@ -1455,9 +1455,9 @@ describe('@jupyterlab/notebook', () => {
 
       it('should be clamped between 1 and 6', () => {
         NotebookActions.setMarkdownHeader(widget, -1);
-        expect(widget.activeCell.model.value.text.slice(0, 2)).to.equal('# ');
+        expect(widget.activeCell!.model.value.text.slice(0, 2)).to.equal('# ');
         NotebookActions.setMarkdownHeader(widget, 10);
-        expect(widget.activeCell.model.value.text.slice(0, 7)).to.equal(
+        expect(widget.activeCell!.model.value.text.slice(0, 7)).to.equal(
           '###### '
         );
       });
@@ -1469,15 +1469,15 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should replace an existing header', () => {
-        widget.activeCell.model.value.text = '# foo';
+        widget.activeCell!.model.value.text = '# foo';
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell.model.value.text).to.equal('## foo');
+        expect(widget.activeCell!.model.value.text).to.equal('## foo');
       });
 
       it('should replace leading white space', () => {
-        widget.activeCell.model.value.text = '      foo';
+        widget.activeCell!.model.value.text = '      foo';
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell.model.value.text).to.equal('## foo');
+        expect(widget.activeCell!.model.value.text).to.equal('## foo');
       });
 
       it('should unrender the cells', () => {
@@ -1488,8 +1488,8 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#trust()', () => {
       it('should trust the notebook cells if the user accepts', async () => {
-        const model = widget.model;
-        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        const model = widget.model!;
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         const cell = model.cells.get(0);
         expect(cell.trusted).to.not.equal(true);
         let promise = NotebookActions.trust(widget);
@@ -1499,7 +1499,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should not trust the notebook cells if the user aborts', async () => {
-        const model = widget.model;
+        const model = widget.model!;
         model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         const cell = model.cells.get(0);
         expect(cell.trusted).to.not.equal(true);
@@ -1515,8 +1515,8 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should show a dialog if all cells are trusted', async () => {
-        const model = widget.model;
-        widget.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        const model = widget.model!;
+        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         for (let i = 0; i < model.cells.length; i++) {
           const cell = model.cells.get(i);

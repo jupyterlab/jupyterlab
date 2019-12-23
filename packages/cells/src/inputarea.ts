@@ -138,15 +138,15 @@ export class InputArea extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._prompt = null;
-    this._editor = null;
-    this._rendered = null;
+    this._prompt = null!;
+    this._editor = null!;
+    this._rendered = null!;
     super.dispose();
   }
 
-  private _prompt: IInputPrompt = null;
-  private _editor: CodeEditorWrapper = null;
-  private _rendered: Widget = null;
+  private _prompt: IInputPrompt;
+  private _editor: CodeEditorWrapper;
+  private _rendered: Widget;
 }
 
 /**
@@ -223,7 +223,7 @@ export namespace InputArea {
       return new InputPrompt();
     }
 
-    private _editor: CodeEditor.Factory = null;
+    private _editor: CodeEditor.Factory;
   }
 
   /**
@@ -274,7 +274,7 @@ export interface IInputPrompt extends Widget {
   /**
    * The execution count of the prompt.
    */
-  executionCount: string;
+  executionCount: string | null;
 }
 
 /**
@@ -292,10 +292,10 @@ export class InputPrompt extends Widget implements IInputPrompt {
   /**
    * The execution count for the prompt.
    */
-  get executionCount(): string {
+  get executionCount(): string | null {
     return this._executionCount;
   }
-  set executionCount(value: string) {
+  set executionCount(value: string | null) {
     this._executionCount = value;
     if (value === null) {
       this.node.textContent = ' ';
@@ -304,5 +304,5 @@ export class InputPrompt extends Widget implements IInputPrompt {
     }
   }
 
-  private _executionCount: string = null;
+  private _executionCount: string | null = null;
 }

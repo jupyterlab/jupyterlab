@@ -55,7 +55,7 @@ describe('@jupyterlab/services', () => {
         expect(settings.baseUrl).to.equal(defaults.baseUrl);
         expect(settings.wsUrl).to.equal(defaults.wsUrl);
         expect(settings.token).to.equal(defaults.token);
-        expect(settings.init.credentials).to.equal(defaults.init.credentials);
+        expect(settings.init.credentials).to.equal(defaults.init!.credentials);
       });
     });
 

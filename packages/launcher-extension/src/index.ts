@@ -59,7 +59,7 @@ function activate(
       const callback = (item: Widget) => {
         labShell.add(item, 'main', { ref: id });
       };
-      const launcher = new Launcher({ cwd, callback, commands });
+      const launcher = new Launcher({ model, cwd, callback, commands });
 
       launcher.model = model;
       launcher.title.label = 'Launcher';

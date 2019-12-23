@@ -76,19 +76,21 @@ describe('session', () => {
       it('should emit when the kernel changes', async () => {
         let called: Session.ISessionConnection.IKernelChangedArgs | null = null;
         const object = {};
+        await defaultSession.kernel?.requestKernelInfo();
         defaultSession.kernelChanged.connect((s, args) => {
           called = args;
           Signal.disconnectReceiver(object);
         }, object);
-        const previous = defaultSession.kernel;
-        await defaultSession.changeKernel({ name: previous.name });
-        expect(previous).to.not.equal(defaultSession.kernel);
+        const original = defaultSession.kernel!;
+        // Create a new kernel with the same kernel name (same type)
+        await defaultSession.changeKernel({ name: original.name });
+        expect(original).to.not.equal(defaultSession.kernel);
         expect(called).to.deep.equal({
           name: 'kernel',
-          oldValue: previous,
+          oldValue: original,
           newValue: defaultSession.kernel
         });
-        previous.dispose();
+        original.dispose();
       });
     });
 
@@ -100,7 +102,7 @@ describe('session', () => {
             called = true;
           }
         });
-        await defaultSession.kernel.requestKernelInfo();
+        await defaultSession.kernel!.requestKernelInfo();
         expect(called).to.equal(true);
       });
     });
@@ -113,7 +115,7 @@ describe('session', () => {
             called = true;
           }
         });
-        await defaultSession.kernel.requestExecute({ code: 'a=1' }, true).done;
+        await defaultSession.kernel!.requestExecute({ code: 'a=1' }, true).done;
         expect(called).to.equal(true);
       });
     });
@@ -133,7 +135,7 @@ describe('session', () => {
           msgId,
           content: {}
         });
-        msg.parent_header = { session: session.kernel.clientId };
+        msg.parent_header = { session: session.kernel!.clientId };
         tester.send(msg);
         await emission;
         await tester.shutdown();
@@ -186,14 +188,14 @@ describe('session', () => {
         const model = defaultSession.model;
         expect(typeof model.id).to.equal('string');
         expect(typeof model.path).to.equal('string');
-        expect(typeof model.kernel.name).to.equal('string');
-        expect(typeof model.kernel.id).to.equal('string');
+        expect(typeof model.kernel!.name).to.equal('string');
+        expect(typeof model.kernel!.id).to.equal('string');
       });
     });
 
     describe('#kernel', () => {
       it('should be an IKernel object', () => {
-        expect(typeof defaultSession.kernel.id).to.equal('string');
+        expect(typeof defaultSession.kernel!.id).to.equal('string');
       });
     });
 
@@ -240,7 +242,7 @@ describe('session', () => {
 
       it('should be safe to call if the kernel is disposed', async () => {
         const session = await startNew();
-        session.kernel.dispose();
+        session.kernel!.dispose();
         session.dispose();
         expect(session.isDisposed).to.equal(true);
       });
@@ -347,22 +349,22 @@ describe('session', () => {
     describe('#changeKernel()', () => {
       it('should create a new kernel with the new name', async () => {
         session = await startNew();
-        const previous = session.kernel;
+        const previous = session.kernel!;
         await previous.info;
         await session.changeKernel({ name: previous.name });
-        expect(session.kernel.name).to.equal(previous.name);
-        expect(session.kernel.id).to.not.equal(previous.id);
+        expect(session.kernel!.name).to.equal(previous.name);
+        expect(session.kernel!.id).to.not.equal(previous.id);
         expect(session.kernel).to.not.equal(previous);
         previous.dispose();
       });
 
       it('should accept the id of the new kernel', async () => {
         session = await startNew();
-        const previous = session.kernel;
+        const previous = session.kernel!;
         await previous.info;
         const kernel = await KernelAPI.startNew();
         await session.changeKernel({ id: kernel.id });
-        expect(session.kernel.id).to.equal(kernel.id);
+        expect(session.kernel!.id).to.equal(kernel.id);
         expect(session.kernel).to.not.equal(previous);
         expect(session.kernel).to.not.equal(kernel);
         previous.dispose();
@@ -371,12 +373,12 @@ describe('session', () => {
 
       it('should update the session path if it has changed', async () => {
         session = await startNew();
-        const previous = session.kernel;
+        const previous = session.kernel!;
         await previous.info;
         const model = { ...session.model, path: 'foo.ipynb' };
         handleRequest(session, 200, model);
         await session.changeKernel({ name: previous.name });
-        expect(session.kernel.name).to.equal(previous.name);
+        expect(session.kernel!.name).to.equal(previous.name);
         expect(session.path).to.equal(model.path);
         previous.dispose();
       });

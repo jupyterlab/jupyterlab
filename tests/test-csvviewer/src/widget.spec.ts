@@ -113,7 +113,7 @@ describe('csvviewer/widget', () => {
       searchService.find(query);
       expect(fakeRenderCell(0, 1)).to.equal('currentMatch');
       expect(fakeRenderCell(1, 1)).to.equal('anotherMatch');
-      expect(fakeRenderCell(0, 0)).to.equal(undefined);
+      expect(fakeRenderCell(0, 0)).to.equal('');
 
       // search again, the current match "moves" to be (1,1)
       searchService.find(query);

@@ -5,7 +5,7 @@ import { URLExt, PathExt } from '@jupyterlab/coreutils';
 
 import { ModelDB } from '@jupyterlab/observables';
 
-import { JSONObject } from '@lumino/coreutils';
+import { PartialJSONObject } from '@lumino/coreutils';
 
 import { each } from '@lumino/algorithm';
 
@@ -597,9 +597,9 @@ export class ContentsManager implements Contents.IManager {
    * relevant backend. Returns `undefined` if the backend
    * does not provide one.
    */
-  getModelDBFactory(path: string): ModelDB.IFactory | undefined {
+  getModelDBFactory(path: string): ModelDB.IFactory | null {
     let [drive] = this._driveForPath(path);
-    return drive?.modelDBFactory;
+    return drive?.modelDBFactory ?? null;
   }
 
   /**
@@ -911,7 +911,7 @@ export class ContentsManager implements Contents.IManager {
     const driveName = this.driveName(path);
     const localPath = this.localPath(path);
     if (driveName) {
-      return [this._additionalDrives.get(driveName), localPath];
+      return [this._additionalDrives.get(driveName)!, localPath];
     } else {
       return [this._defaultDrive, localPath];
     }
@@ -1029,7 +1029,7 @@ export class Drive implements Contents.IDrive {
         delete options['format'];
       }
       let content = options.content ? '1' : '0';
-      let params: JSONObject = { ...options, content };
+      let params: PartialJSONObject = { ...options, content };
       url += URLExt.objectToQueryString(params);
     }
 

@@ -3,7 +3,11 @@
 
 import { IObservableJSON } from '@jupyterlab/observables';
 
-import { JSONExt, JSONObject } from '@lumino/coreutils';
+import {
+  JSONExt,
+  JSONObject,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
 
 import { Message } from '@lumino/messaging';
 
@@ -334,7 +338,7 @@ export class JSONEditor extends Widget {
   private _dataDirty = false;
   private _inputDirty = false;
   private _source: IObservableJSON | null = null;
-  private _originalValue = JSONExt.emptyObject;
+  private _originalValue: ReadonlyPartialJSONObject = JSONExt.emptyObject;
   private _changeGuard = false;
 }
 

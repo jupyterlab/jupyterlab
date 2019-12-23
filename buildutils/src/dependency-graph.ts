@@ -60,13 +60,13 @@ type Graph = { [key: string]: string[] };
 /**
  * Build a dependency graph based on the yarn data.
  */
-function buildYarnGraph(yarnData: any): Graph | undefined {
+function buildYarnGraph(yarnData: any): Graph {
   // 'a': ['b', 'c'] means 'a' depends on 'b' and 'c'
   const dependsOn: Graph = Object.create(null);
 
   Object.keys(yarnData).forEach(pkgName => {
     let pkg = yarnData[pkgName];
-    let pkgNode = getNode(yarnData, pkgName);
+    let pkgNode = getNode(yarnData, pkgName)!;
 
     // If multiple version specs resolve to the same actual package version, we
     // only want to record the dependency once.
@@ -78,7 +78,7 @@ function buildYarnGraph(yarnData: any): Graph | undefined {
     let deps = pkg.dependencies;
     if (deps) {
       Object.keys(deps).forEach(depName => {
-        let depNode = getNode(yarnData, `${depName}@${deps[depName]}`);
+        let depNode = getNode(yarnData, `${depName}@${deps[depName]}`)!;
         dependsOn[pkgNode].push(depNode);
       });
     }
@@ -215,7 +215,7 @@ function main({
             return getNode(yarnData, `${i}@${deps[i]}`);
           }
         })
-        .filter(i => i !== undefined);
+        .filter(i => i !== undefined) as string[];
       roots.push(...nodes);
     }
     return roots;

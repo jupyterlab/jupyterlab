@@ -107,7 +107,7 @@ describe('Kernel.IShellFuture', () => {
             ).to.equal('idle');
           }
           // not returning should also continue handling
-          return void 0;
+          return void 0 as any;
         });
 
         future.onIOPub = () => {

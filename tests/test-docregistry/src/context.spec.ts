@@ -254,7 +254,7 @@ describe('docregistry/context', () => {
 
         void context.initialize(true);
         await context.ready;
-        expect(context.contentsModel.path).to.equal(path);
+        expect(context.contentsModel!.path).to.equal(path);
       });
     });
 

@@ -35,7 +35,7 @@ export interface IThemeManager {
   /**
    * A signal fired when the application theme changes.
    */
-  readonly themeChanged: ISignal<this, IChangedArgs<string>>;
+  readonly themeChanged: ISignal<this, IChangedArgs<string, string | null>>;
 
   /**
    * Load a theme CSS file by path.

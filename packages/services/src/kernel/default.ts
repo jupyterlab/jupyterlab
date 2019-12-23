@@ -220,7 +220,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    *
    * @returns A promise that resolves to the kernel spec.
    */
-  get spec(): Promise<KernelSpec.ISpecModel> {
+  get spec(): Promise<KernelSpec.ISpecModel | undefined> {
     if (this._specPromise) {
       return this._specPromise;
     }
@@ -397,7 +397,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     // Send if the ws allows it, otherwise buffer the message.
     if (this.connectionStatus === 'connected') {
-      this._ws.send(serialize.serialize(msg));
+      this._ws!.send(serialize.serialize(msg));
       // console.log(`SENT WS message to ${this.id}`, msg);
     } else if (queue) {
       this._pendingMessages.push(msg);
@@ -531,7 +531,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Fulfills with the `kernel_info_response` content when the shell reply is
    * received and validated.
    */
-  async requestKernelInfo(): Promise<KernelMessage.IInfoReplyMsg> {
+  async requestKernelInfo(): Promise<KernelMessage.IInfoReplyMsg | undefined> {
     let msg = KernelMessage.createMessage({
       msgType: 'kernel_info_request',
       channel: 'shell',
@@ -539,12 +539,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
       session: this._clientId,
       content: {}
     });
-    let reply: KernelMessage.IInfoReplyMsg;
+    let reply: KernelMessage.IInfoReplyMsg | undefined;
     try {
-      reply = (await Private.handleShellMessage(
-        this,
-        msg
-      )) as KernelMessage.IInfoReplyMsg;
+      reply = (await Private.handleShellMessage(this, msg)) as
+        | KernelMessage.IInfoReplyMsg
+        | undefined;
     } catch (e) {
       // If we rejected because the future was disposed, ignore and return.
       if (this.isDisposed) {
@@ -555,11 +554,15 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
     this._errorIfDisposed();
 
+    if (!reply) {
+      return;
+    }
+
     // Kernels sometimes do not include a status field on kernel_info_reply
     // messages, so set a default for now.
     // See https://github.com/jupyterlab/jupyterlab/issues/6760
     if (reply.content.status === undefined) {
-      reply.content.status = 'ok';
+      (reply.content as any).status = 'ok';
     }
 
     if (reply.content.status !== 'ok') {
@@ -1436,7 +1439,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _status: KernelMessage.Status = 'unknown';
   private _connectionStatus: Kernel.ConnectionStatus = 'connecting';
   private _kernelSession = '';
-  private _clientId = '';
+  private _clientId: string;
   private _isDisposed = false;
   /**
    * Websocket to communicate with kernel.
@@ -1463,7 +1466,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   } = Object.create(null);
   private _info = new PromiseDelegate<KernelMessage.IInfoReply>();
   private _pendingMessages: KernelMessage.IMessage[] = [];
-  private _specPromise: Promise<KernelSpec.ISpecModel>;
+  private _specPromise: Promise<KernelSpec.ISpecModel | undefined>;
   private _statusChanged = new Signal<this, KernelMessage.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
     this
@@ -1474,7 +1477,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _displayIdToParentIds = new Map<string, string[]>();
   private _msgIdToDisplayIds = new Map<string, string[]>();
-  private _msgChain: Promise<void> | null = Promise.resolve();
+  private _msgChain: Promise<void> = Promise.resolve();
   private _noOp = () => {
     /* no-op */
   };

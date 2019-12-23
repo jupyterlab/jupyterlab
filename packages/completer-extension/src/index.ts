@@ -137,7 +137,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, widget) => {
       const anchor = widget.content.console;
-      const editor = anchor.promptCell?.editor;
+      const editor = anchor.promptCell?.editor ?? null;
       const session = anchor.sessionContext.session;
       // TODO: CompletionConnector assumes editor and session are not null
       const connector = new CompletionConnector({ session, editor });
@@ -226,7 +226,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     app.commands.addCommand(CommandIDs.invokeNotebook, {
       execute: () => {
         const panel = notebooks.currentWidget;
-        if (panel && panel.content.activeCell.model.type === 'code') {
+        if (panel && panel.content.activeCell?.model.type === 'code') {
           return app.commands.execute(CommandIDs.invoke, { id: panel.id });
         }
       }
