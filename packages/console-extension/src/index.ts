@@ -40,7 +40,13 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { find } from '@lumino/algorithm';
 
-import { JSONExt, JSONObject, ReadonlyPartialJSONObject, UUID, ReadonlyJSONValue } from '@lumino/coreutils';
+import {
+  JSONExt,
+  JSONObject,
+  ReadonlyPartialJSONObject,
+  UUID,
+  ReadonlyJSONValue
+} from '@lumino/coreutils';
 
 import { DisposableSet } from '@lumino/disposable';
 
@@ -194,7 +200,11 @@ async function activateConsole(
               category: 'Console',
               rank,
               kernelIconUrl,
-              metadata: { kernel: JSONExt.deepCopy(spec.metadata || {}) as ReadonlyJSONValue }
+              metadata: {
+                kernel: JSONExt.deepCopy(
+                  spec.metadata || {}
+                ) as ReadonlyJSONValue
+              }
             })
           );
         }
