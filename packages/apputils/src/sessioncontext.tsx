@@ -48,6 +48,8 @@ export interface ISessionContext extends IObservableDisposable {
   /**
    * Initialize the session context.
    *
+   * @returns A promise that resolves with whether to ask the user to select a kernel.
+   *
    * #### Notes
    * This includes starting up an initial kernel if needed.
    */
@@ -556,9 +558,9 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * Initialize the session.
+   * Initialize the session context
    *
-   * @returns Whether we need to ask the user to select a kernel.
+   * @returns A promise that resolves with whether to ask the user to select a kernel.
    *
    * #### Notes
    * If a server session exists on the current path, we will connect to it.
