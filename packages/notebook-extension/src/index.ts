@@ -32,7 +32,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { ArrayExt } from '@lumino/algorithm';
 
-import { UUID, JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
+import { UUID, JSONExt, JSONObject, ReadonlyPartialJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 
 import { DisposableSet } from '@lumino/disposable';
 
@@ -738,7 +738,7 @@ function activateNotebookHandler(
               category: 'Notebook',
               rank,
               kernelIconUrl,
-              metadata: { kernel: spec.metadata }
+              metadata: { kernel: JSONExt.deepCopy(spec.metadata || {}) as ReadonlyJSONValue }
             })
           );
         }
