@@ -1,11 +1,12 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { Message } from '@lumino/messaging';
-
 import { h, VirtualElement } from '@lumino/virtualdom';
-
 import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
-import { IconKindType } from '../style/icon';
 import { defaultIconRegistry } from './iconregistry';
+import { IconKindType } from '../style/icon';
 
 /**
  * A widget which displays titles as a single row or column of tabs. Tweaked
