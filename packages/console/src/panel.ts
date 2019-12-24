@@ -4,7 +4,8 @@
 import {
   ISessionContext,
   SessionContext,
-  sessionContextDialogs
+  sessionContextDialogs,
+  MainAreaWidget
 } from '@jupyterlab/apputils';
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
@@ -39,12 +40,12 @@ const CONSOLE_ICON_CLASS = 'jp-CodeConsoleIcon';
 /**
  * A panel which contains a console and the ability to add other children.
  */
-export class ConsolePanel extends Panel {
+export class ConsolePanel extends MainAreaWidget<Panel> {
   /**
    * Construct a console panel.
    */
   constructor(options: ConsolePanel.IOptions) {
-    super();
+    super(options);
     this.addClass(PANEL_CLASS);
     let {
       rendermime,
@@ -85,20 +86,20 @@ export class ConsolePanel extends Panel {
       contentFactory,
       modelFactory
     });
-    this.addWidget(this.console);
+    this.content.addWidget(this.console);
 
     void sessionContext.initialize().then(async value => {
       if (value) {
         await sessionContextDialogs.selectKernel(sessionContext);
       }
       this._connected = new Date();
-      this._updateTitle();
+      this._updateTitlePanel();
     });
 
     this.console.executed.connect(this._onExecuted, this);
-    this._updateTitle();
-    sessionContext.kernelChanged.connect(this._updateTitle, this);
-    sessionContext.propertyChanged.connect(this._updateTitle, this);
+    this._updateTitlePanel();
+    sessionContext.kernelChanged.connect(this._updateTitlePanel, this);
+    sessionContext.propertyChanged.connect(this._updateTitlePanel, this);
 
     this.title.icon = CONSOLE_ICON_CLASS;
     this.title.closable = true;
@@ -113,7 +114,7 @@ export class ConsolePanel extends Panel {
   /**
    * The console widget used by the panel.
    */
-  readonly console: CodeConsole;
+  console: CodeConsole;
 
   /**
    * The session used by the panel.
@@ -154,13 +155,13 @@ export class ConsolePanel extends Panel {
    */
   private _onExecuted(sender: CodeConsole, args: Date) {
     this._executed = args;
-    this._updateTitle();
+    this._updateTitlePanel();
   }
 
   /**
    * Update the console panel title.
    */
-  private _updateTitle(): void {
+  private _updateTitlePanel(): void {
     Private.updateTitle(this, this._connected, this._executed);
   }
 
@@ -177,6 +178,7 @@ export namespace ConsolePanel {
    * The initialization options for a console panel.
    */
   export interface IOptions {
+    content: Panel;
     /**
      * The rendermime instance used by the panel.
      */

@@ -12,7 +12,7 @@ import '../index.css';
 
 import { CommandRegistry } from '@lumino/commands';
 
-import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
+import { CommandPalette, SplitPanel, Widget, Panel } from '@lumino/widgets';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -70,6 +70,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   let editorFactory = editorServices.factoryService.newInlineEditor;
   let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
   let consolePanel = new ConsolePanel({
+    content: new Panel(),
     rendermime,
     manager,
     path,

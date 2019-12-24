@@ -136,10 +136,11 @@ const consoles: JupyterFrontEndPlugin<void> = {
   ): void => {
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, widget) => {
-      const anchor = widget.content.console;
+      const anchor = widget.console;
       const editor = anchor.promptCell?.editor ?? null;
       const session = anchor.sessionContext.session;
       // TODO: CompletionConnector assumes editor and session are not null
+
       const connector = new CompletionConnector({ session, editor });
       const handler = manager.register({ connector, editor, parent: widget });
 
