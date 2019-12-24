@@ -1,20 +1,21 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import React from 'react';
-
 import ReactDOM from 'react-dom';
-
 import { classes } from 'typestyle';
 
 import { iconStyle, IIconStyle } from '../style/icon';
-
 import { getReactAttrs } from '../utils';
 
 export class JLIcon {
-  constructor(
-    readonly name: string,
-    readonly svgstr: string,
-    readonly style: IIconStyle = {},
-    protected _debug: boolean = false
-  ) {}
+  constructor({ name, style = {}, svgstr, _debug = false }: JLIcon.IOptions) {
+    this.name = name;
+    this.style = style;
+    this.svgstr = svgstr;
+
+    this._debug = _debug;
+  }
 
   resolveSvg(title?: string): HTMLElement | null {
     const svgDoc = new DOMParser().parseFromString(
@@ -69,7 +70,7 @@ export class JLIcon {
     container = container || document.createElement(tag);
 
     // set the container class to style class + explicitly passed className
-    container.className = classNames;
+    container.classList.add(...(classNames ? classNames : []));
 
     // add the svg node to the container
     container.appendChild(svgElement);
@@ -85,15 +86,11 @@ export class JLIcon {
     ReactDOM.unmountComponentAtNode(host);
   }
 
-  bindStyle(propsStyle: IIconStyle = {}): JLIcon {
-    return new JLIcon(this.name, this.svgstr, propsStyle, this._debug);
-  }
-
   protected _initReact() {
     const component = React.forwardRef(
       (
         {
-          className,
+          className = '',
           container,
           title,
           tag = 'div',
@@ -124,11 +121,22 @@ export class JLIcon {
         );
 
         if (container) {
-          container.className = classNames;
+          container.classList.add(
+            ...(classNames ? classNames.split(/\s+/) : [])
+          );
 
           return svgComponent;
         } else {
-          return <Tag className={classNames}>{svgComponent}</Tag>;
+          return (
+            <Tag
+              className={classes(
+                className,
+                propsStyleComb ? iconStyle(propsStyleComb) : ''
+              )}
+            >
+              {svgComponent}
+            </Tag>
+          );
         }
       }
     );
@@ -137,15 +145,28 @@ export class JLIcon {
     return component;
   }
 
-  // NB: this._initReact() will be run after the property initializers
-  // defined by the constructor signature, but before the constructor body
+  readonly name: string;
   readonly react = this._initReact();
+  protected style: IIconStyle;
+  readonly svgstr: string;
+
+  protected _debug: boolean;
 }
 
 /**
  * A namespace for JLIcon statics.
  */
 export namespace JLIcon {
+  /**
+   * The type of the JLIcon contructor params
+   */
+  export interface IOptions {
+    name: string;
+    svgstr: string;
+    style?: IIconStyle;
+    _debug?: boolean;
+  }
+
   /**
    * The input props for creating a new JLIcon
    */
