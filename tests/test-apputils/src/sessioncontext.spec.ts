@@ -9,7 +9,12 @@ import {
   KernelSpecManager
 } from '@jupyterlab/services';
 
-import { SessionContext, Dialog, ISessionContext } from '@jupyterlab/apputils';
+import {
+  SessionContext,
+  Dialog,
+  ISessionContext,
+  sessionContextDialogs
+} from '@jupyterlab/apputils';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -236,28 +241,24 @@ describe('@jupyterlab/apputils', () => {
         other.dispose();
       });
 
-      it('should present a dialog if there is no distinct kernel to start', async () => {
+      it('should yield true if there is no distinct kernel to start', async () => {
         // Remove the kernel preference before initializing.
         sessionContext.kernelPreference = {};
-
-        const accept = acceptDialog();
-
-        await sessionContext.initialize();
-        await accept;
-        expect(sessionContext.session?.kernel?.name).to.equal(
-          specsManager.specs!.default
-        );
+        const result = await sessionContext.initialize();
+        expect(result).to.equal(true);
       });
 
       it('should be a no-op if the shouldStart kernelPreference is false', async () => {
         sessionContext.kernelPreference = { shouldStart: false };
-        await sessionContext.initialize();
+        const result = await sessionContext.initialize();
+        expect(result).to.equal(false);
         expect(sessionContext.session?.kernel).to.not.be.ok;
       });
 
       it('should be a no-op if the canStart kernelPreference is false', async () => {
         sessionContext.kernelPreference = { canStart: false };
-        await sessionContext.initialize();
+        const result = await sessionContext.initialize();
+        expect(result).to.equal(false);
         expect(sessionContext.session?.kernel).to.not.be.ok;
       });
     });
@@ -363,34 +364,6 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('#selectKernel()', () => {
-      it('should select a kernel for the session', async () => {
-        await sessionContext.initialize();
-
-        const { id, name } = sessionContext.session?.kernel!;
-        const accept = acceptDialog();
-
-        await sessionContext.selectKernel();
-        await accept;
-
-        expect(sessionContext.session?.kernel?.id).to.not.equal(id);
-        expect(sessionContext.session?.kernel?.name).to.equal(name);
-      });
-
-      it('should keep the existing kernel if dismissed', async () => {
-        await sessionContext.initialize();
-
-        const { id, name } = sessionContext.session?.kernel!;
-        const dismiss = dismissDialog();
-
-        await sessionContext.selectKernel();
-        await dismiss;
-
-        expect(sessionContext.session?.kernel?.id).to.equal(id);
-        expect(sessionContext.session?.kernel?.name).to.equal(name);
-      });
-    });
-
     describe('#shutdown', () => {
       it('should kill the kernel and shut down the session', async () => {
         await sessionContext.initialize();
@@ -398,87 +371,6 @@ describe('@jupyterlab/apputils', () => {
         await sessionContext.shutdown();
         expect(sessionContext.session?.kernel).to.not.be.ok;
       });
-    });
-
-    describe('#restart()', () => {
-      it('should restart if the user accepts the dialog', async () => {
-        const emission = testEmission(sessionContext.statusChanged, {
-          find: (_, args) => args === 'restarting'
-        });
-        await sessionContext.initialize();
-        await sessionContext.session?.kernel?.info;
-        const restart = sessionContext.restart();
-
-        await acceptDialog();
-        expect(await restart).to.equal(true);
-        await emission;
-      });
-
-      it('should not restart if the user rejects the dialog', async () => {
-        let called = false;
-
-        await sessionContext.initialize();
-        sessionContext.statusChanged.connect((sender, args) => {
-          if (args === 'restarting') {
-            called = true;
-          }
-        });
-
-        const restart = sessionContext.restart();
-
-        await dismissDialog();
-        expect(await restart).to.equal(false);
-        expect(called).to.equal(false);
-      });
-
-      it('should start the same kernel as the previously started kernel', async () => {
-        await sessionContext.initialize();
-        await sessionContext.shutdown();
-        await sessionContext.restart();
-        expect(sessionContext.session?.kernel).to.be.ok;
-      });
-    });
-
-    describe('#restartKernel()', () => {
-      it('should restart if the user accepts the dialog', async () => {
-        let called = false;
-
-        sessionContext.statusChanged.connect((sender, args) => {
-          if (args === 'restarting') {
-            called = true;
-          }
-        });
-        await sessionContext.initialize();
-        await sessionContext.session!.kernel!.info;
-
-        const restart = SessionContext.restartKernel(
-          sessionContext.session?.kernel!
-        );
-
-        await acceptDialog();
-        expect(await restart).to.equal(true);
-        expect(called).to.equal(true);
-      }, 30000); // Allow for slower CI
-
-      it('should not restart if the user rejects the dialog', async () => {
-        let called = false;
-
-        sessionContext.statusChanged.connect((sender, args) => {
-          if (args === 'restarting') {
-            called = true;
-          }
-        });
-        await sessionContext.initialize();
-        await sessionContext.session!.kernel!.info;
-
-        const restart = SessionContext.restartKernel(
-          sessionContext.session?.kernel!
-        );
-
-        await dismissDialog();
-        expect(await restart).to.equal(false);
-        expect(called).to.equal(false);
-      }, 30000); // Allow for slower CI
     });
 
     describe('.getDefaultKernel()', () => {
@@ -555,43 +447,73 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
-    describe('.populateKernelSelect()', () => {
-      beforeEach(() => {
-        sessionContext.dispose();
+    describe('.sessionContextDialogs', () => {
+      describe('#selectKernel()', () => {
+        it('should select a kernel for the session', async () => {
+          await sessionContext.initialize();
+          const session = sessionContext?.session;
+
+          const { id, name } = session!.kernel!;
+          const accept = acceptDialog();
+
+          await sessionContextDialogs.selectKernel(sessionContext);
+          await accept;
+
+          expect(session!.kernel!.id).to.not.equal(id);
+          expect(session!.kernel!.name).to.equal(name);
+        });
+
+        it('should keep the existing kernel if dismissed', async () => {
+          await sessionContext.initialize();
+          const session = sessionContext!.session;
+
+          const { id, name } = session!.kernel!;
+          const dismiss = dismissDialog();
+
+          await sessionContextDialogs.selectKernel(sessionContext);
+          await dismiss;
+
+          expect(session!.kernel!.id).to.equal(id);
+          expect(session!.kernel!.name).to.equal(name);
+        });
       });
 
-      it('should populate the select div', () => {
-        const div = document.createElement('select');
+      describe('#restart()', () => {
+        it('should restart if the user accepts the dialog', async () => {
+          const emission = testEmission(sessionContext.statusChanged, {
+            find: (_, args) => args === 'restarting'
+          });
+          await sessionContext.initialize();
+          await sessionContext!.session?.kernel?.info;
+          const restart = sessionContextDialogs.restart(sessionContext);
 
-        SessionContext.populateKernelSelect(div, {
-          specs: specsManager.specs,
-          preference: {}
+          await acceptDialog();
+          expect(await restart).to.equal(true);
+          await emission;
         });
-        expect(div.firstChild).to.be.ok;
-        expect(div.value).to.not.equal('null');
-      });
 
-      it('should select the null option', () => {
-        const div = document.createElement('select');
+        it('should not restart if the user rejects the dialog', async () => {
+          let called = false;
 
-        SessionContext.populateKernelSelect(div, {
-          specs: specsManager.specs,
-          preference: { shouldStart: false }
+          await sessionContext.initialize();
+          sessionContext.statusChanged.connect((sender, args) => {
+            if (args === 'restarting') {
+              called = true;
+            }
+          });
+
+          const restart = sessionContextDialogs.restart(sessionContext);
+          await dismissDialog();
+          expect(await restart).to.equal(false);
+          expect(called).to.equal(false);
         });
-        expect(div.firstChild).to.be.ok;
-        expect(div.value).to.equal('null');
-      });
 
-      it('should disable the node', () => {
-        const div = document.createElement('select');
-
-        SessionContext.populateKernelSelect(div, {
-          specs: specsManager.specs,
-          preference: { canStart: false }
+        it('should start the same kernel as the previously started kernel', async () => {
+          await sessionContext.initialize();
+          await sessionContext.shutdown();
+          await sessionContextDialogs.restart(sessionContext);
+          expect(sessionContext?.session?.kernel).to.be.ok;
         });
-        expect(div.firstChild).to.be.ok;
-        expect(div.value).to.equal('null');
-        expect(div.disabled).to.equal(true);
       });
     });
   });

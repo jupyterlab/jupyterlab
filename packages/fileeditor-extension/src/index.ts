@@ -7,7 +7,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
+import {
+  ICommandPalette,
+  WidgetTracker,
+  ISessionContextDialogs
+} from '@jupyterlab/apputils';
 
 import { CodeEditor, IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -52,7 +56,13 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
     IFileBrowserFactory,
     ISettingRegistry
   ],
-  optional: [ICommandPalette, ILauncher, IMainMenu, ILayoutRestorer],
+  optional: [
+    ICommandPalette,
+    ILauncher,
+    IMainMenu,
+    ILayoutRestorer,
+    ISessionContextDialogs
+  ],
   provides: IEditorTracker,
   autoStart: true
 };
@@ -148,7 +158,8 @@ function activate(
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   menu: IMainMenu | null,
-  restorer: ILayoutRestorer | null
+  restorer: ILayoutRestorer | null,
+  sessionDialogs: ISessionContextDialogs | null
 ): IEditorTracker {
   const id = plugin.id;
   const namespace = 'editor';
@@ -229,7 +240,13 @@ function activate(
   }
 
   if (menu) {
-    Commands.addMenuItems(menu, commands, tracker, consoleTracker);
+    Commands.addMenuItems(
+      menu,
+      commands,
+      tracker,
+      consoleTracker,
+      sessionDialogs
+    );
   }
 
   Commands.addContextMenuItems(app);

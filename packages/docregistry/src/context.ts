@@ -20,7 +20,8 @@ import {
   SessionContext,
   Dialog,
   ISessionContext,
-  showErrorMessage
+  showErrorMessage,
+  sessionContextDialogs
 } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
@@ -46,6 +47,7 @@ export class Context<T extends DocumentRegistry.IModel>
   constructor(options: Context.IOptions<T>) {
     let manager = (this._manager = options.manager);
     this._factory = options.factory;
+    this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
     const localPath = this._manager.contents.localPath(this._path);
@@ -477,7 +479,11 @@ export class Context<T extends DocumentRegistry.IModel>
       // Note: we don't wait on the session to initialize
       // so that the user can be shown the content before
       // any kernel has started.
-      void this.sessionContext.initialize();
+      void this.sessionContext.initialize().then(shouldSelect => {
+        if (shouldSelect) {
+          void this._dialogs.selectKernel(this.sessionContext);
+        }
+      });
     });
   }
 
@@ -802,6 +808,7 @@ export class Context<T extends DocumentRegistry.IModel>
   private _fileChanged = new Signal<this, Contents.IModel>(this);
   private _saveState = new Signal<this, DocumentRegistry.SaveState>(this);
   private _disposed = new Signal<this, void>(this);
+  private _dialogs: ISessionContext.IDialogs;
 }
 
 /**
@@ -846,6 +853,11 @@ export namespace Context {
      * A function to call when the kernel is busy.
      */
     setBusy?: () => IDisposable;
+
+    /**
+     * The dialogs used for the session context.
+     */
+    sessionDialogs?: ISessionContext.IDialogs;
   }
 }
 

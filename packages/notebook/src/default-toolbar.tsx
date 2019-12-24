@@ -17,7 +17,8 @@ import {
   UseSignal,
   addToolbarButtonClass,
   ReactWidget,
-  ToolbarButton
+  ToolbarButton,
+  ISessionContextDialogs
 } from '@jupyterlab/apputils';
 
 import * as nbformat from '@jupyterlab/nbformat';
@@ -197,7 +198,8 @@ export namespace ToolbarItems {
    * Get the default toolbar items for panel
    */
   export function getDefaultItems(
-    panel: NotebookPanel
+    panel: NotebookPanel,
+    sessionDialogs?: ISessionContextDialogs
   ): DocumentRegistry.IToolbarItem[] {
     return [
       { name: 'save', widget: createSaveButton(panel) },
@@ -212,13 +214,19 @@ export namespace ToolbarItems {
       },
       {
         name: 'restart',
-        widget: Toolbar.createRestartButton(panel.sessionContext)
+        widget: Toolbar.createRestartButton(
+          panel.sessionContext,
+          sessionDialogs
+        )
       },
       { name: 'cellType', widget: createCellTypeItem(panel) },
       { name: 'spacer', widget: Toolbar.createSpacerItem() },
       {
         name: 'kernelName',
-        widget: Toolbar.createKernelNameItem(panel.sessionContext)
+        widget: Toolbar.createKernelNameItem(
+          panel.sessionContext,
+          sessionDialogs
+        )
       },
       {
         name: 'kernelStatus',

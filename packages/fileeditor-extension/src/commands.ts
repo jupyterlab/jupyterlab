@@ -3,7 +3,12 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
+import {
+  ICommandPalette,
+  WidgetTracker,
+  ISessionContextDialogs,
+  sessionContextDialogs
+} from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -698,7 +703,8 @@ export namespace Commands {
     menu: IMainMenu,
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    consoleTracker: IConsoleTracker
+    consoleTracker: IConsoleTracker,
+    sessionDialogs: ISessionContextDialogs | null
   ) {
     // Add the editing commands to the settings menu.
     addEditingCommandsToSettingsMenu(menu, commands);
@@ -719,7 +725,13 @@ export namespace Commands {
     addConsoleCreatorToFileMenu(menu, commands, tracker);
 
     // Add a code runner to the run menu.
-    addCodeRunnersToRunMenu(menu, commands, tracker, consoleTracker);
+    addCodeRunnersToRunMenu(
+      menu,
+      commands,
+      tracker,
+      consoleTracker,
+      sessionDialogs
+    );
   }
 
   /**
@@ -857,7 +869,8 @@ export namespace Commands {
     menu: IMainMenu,
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    consoleTracker: IConsoleTracker
+    consoleTracker: IConsoleTracker,
+    sessionDialogs: ISessionContextDialogs | null
   ) {
     menu.runMenu.codeRunners.add({
       tracker,
@@ -875,12 +888,14 @@ export namespace Commands {
             widget.content.sessionContext.session?.path === current.context.path
         );
         if (widget) {
-          return widget.content.sessionContext.restart().then(restarted => {
-            if (restarted) {
-              void commands.execute(CommandIDs.runAllCode);
-            }
-            return restarted;
-          });
+          return (sessionDialogs || sessionContextDialogs)
+            .restart(widget.content.sessionContext)
+            .then(restarted => {
+              if (restarted) {
+                void commands.execute(CommandIDs.runAllCode);
+              }
+              return restarted;
+            });
         }
       }
     } as IRunMenu.ICodeRunner<IDocumentWidget<FileEditor>>);

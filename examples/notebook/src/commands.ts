@@ -2,6 +2,7 @@
  * Set up keyboard shortcuts & commands for notebook
  */
 import { CommandRegistry } from '@lumino/commands';
+import { sessionContextDialogs } from '@jupyterlab/apputils';
 import { CompletionHandler } from '@jupyterlab/completer';
 import { NotebookPanel, NotebookActions } from '@jupyterlab/notebook';
 import {
@@ -126,12 +127,13 @@ export const SetupCommands = (
   });
   commands.addCommand(cmdIds.restart, {
     label: 'Restart Kernel',
-    execute: async () =>
-      nbWidget.context.sessionContext.session?.kernel?.restart()
+    execute: () =>
+      sessionContextDialogs.restart(nbWidget.context.sessionContext)
   });
   commands.addCommand(cmdIds.switchKernel, {
     label: 'Switch Kernel',
-    execute: async () => nbWidget.context.sessionContext.selectKernel()
+    execute: () =>
+      sessionContextDialogs.selectKernel(nbWidget.context.sessionContext)
   });
   commands.addCommand(cmdIds.runAndAdvance, {
     label: 'Run and Advance',

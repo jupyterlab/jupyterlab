@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
@@ -48,6 +48,7 @@ export class DocumentManager implements IDocumentManager {
   constructor(options: DocumentManager.IOptions) {
     this.registry = options.registry;
     this.services = options.manager;
+    this._dialogs = options.sessionDialogs || sessionContextDialogs;
 
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
@@ -473,7 +474,8 @@ export class DocumentManager implements IDocumentManager {
       path,
       kernelPreference,
       modelDBFactory,
-      setBusy: this._setBusy
+      setBusy: this._setBusy,
+      sessionDialogs: this._dialogs
     });
     let handler = new SaveHandler({
       context,
@@ -598,6 +600,7 @@ export class DocumentManager implements IDocumentManager {
   private _autosaveInterval = 120;
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
+  private _dialogs: ISessionContext.IDialogs;
 }
 
 /**
@@ -632,6 +635,11 @@ export namespace DocumentManager {
      * A function called when a kernel is busy.
      */
     setBusy?: () => IDisposable;
+
+    /**
+     * The provider for session dialogs.
+     */
+    sessionDialogs?: ISessionContext.IDialogs;
   }
 
   /**

@@ -13,10 +13,12 @@ import {
 import {
   Dialog,
   ICommandPalette,
+  ISessionContextDialogs,
   ISplashScreen,
   IWindowResolver,
   WindowResolver,
-  Printing
+  Printing,
+  sessionContextDialogs
 } from '@jupyterlab/apputils';
 
 import { URLExt } from '@jupyterlab/coreutils';
@@ -442,6 +444,18 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 };
 
 /**
+ * The default session context dialogs extension.
+ */
+const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
+  id: '@jupyterlab/apputils-extension:sessionDialogs',
+  provides: ISessionContextDialogs,
+  autoStart: true,
+  activate: () => {
+    return sessionContextDialogs;
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -452,6 +466,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   settingsPlugin,
   state,
   splash,
+  sessionDialogs,
   themesPlugin,
   themesPaletteMenuPlugin
 ];

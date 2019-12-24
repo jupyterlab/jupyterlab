@@ -12,7 +12,8 @@ import {
   showDialog,
   showErrorMessage,
   Dialog,
-  ICommandPalette
+  ICommandPalette,
+  ISessionContextDialogs
 } from '@jupyterlab/apputils';
 
 import { IChangedArgs, Time } from '@jupyterlab/coreutils';
@@ -85,14 +86,21 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
   id: pluginId,
   provides: IDocumentManager,
   requires: [ISettingRegistry],
-  optional: [ILabStatus, ICommandPalette, ILabShell, IMainMenu],
+  optional: [
+    ILabStatus,
+    ICommandPalette,
+    ILabShell,
+    IMainMenu,
+    ISessionContextDialogs
+  ],
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
     status: ILabStatus | null,
     palette: ICommandPalette | null,
     labShell: ILabShell | null,
-    mainMenu: IMainMenu | null
+    mainMenu: IMainMenu | null,
+    sessionDialogs: ISessionContextDialogs | null
   ): IDocumentManager => {
     const { shell } = app;
     const manager = app.serviceManager;
@@ -128,7 +136,8 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
       manager,
       opener,
       when,
-      setBusy: (status && (() => status.setBusy())) ?? undefined
+      setBusy: (status && (() => status.setBusy())) ?? undefined,
+      sessionDialogs: sessionDialogs || undefined
     });
 
     // Register the file operations commands.

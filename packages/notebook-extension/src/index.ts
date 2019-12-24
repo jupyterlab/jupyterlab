@@ -11,9 +11,11 @@ import {
 import {
   Dialog,
   ICommandPalette,
+  ISessionContextDialogs,
   MainAreaWidget,
   showDialog,
-  WidgetTracker
+  WidgetTracker,
+  sessionContextDialogs
 } from '@jupyterlab/apputils';
 
 import { CodeCell } from '@jupyterlab/cells';
@@ -277,7 +279,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     ILauncher,
     ILayoutRestorer,
     IMainMenu,
-    ISettingRegistry
+    ISettingRegistry,
+    ISessionContextDialogs
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -503,7 +506,8 @@ function activateNotebookHandler(
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
-  settingRegistry: ISettingRegistry | null
+  settingRegistry: ISettingRegistry | null,
+  sessionDialogs: ISessionContextDialogs | null
 ): INotebookTracker {
   const services = app.serviceManager;
 
@@ -551,7 +555,14 @@ function activateNotebookHandler(
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
 
-  addCommands(app, docManager, services, tracker, clonedOutputs);
+  addCommands(
+    app,
+    docManager,
+    services,
+    tracker,
+    clonedOutputs,
+    sessionDialogs
+  );
   if (palette) {
     populatePalette(palette, services);
   }
@@ -637,7 +648,7 @@ function activateNotebookHandler(
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(app, mainMenu, tracker, services, palette);
+    populateMenus(app, mainMenu, tracker, services, palette, sessionDialogs);
   }
 
   // Utility function to create a new notebook.
@@ -856,9 +867,12 @@ function addCommands(
   docManager: IDocumentManager,
   services: ServiceManager,
   tracker: NotebookTracker,
-  clonedOutputs: WidgetTracker<MainAreaWidget>
+  clonedOutputs: WidgetTracker<MainAreaWidget>,
+  sessionDialogs: ISessionContextDialogs | null
 ): void {
   const { commands, shell } = app;
+
+  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyPartialJSONObject): NotebookPanel | null {
@@ -1133,7 +1147,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return current.sessionContext.restart();
+        return sessionDialogs!.restart(current.sessionContext);
       }
     },
     isEnabled
@@ -1219,7 +1233,7 @@ function addCommands(
       if (current) {
         const { content, sessionContext } = current;
 
-        return sessionContext.restart().then(() => {
+        return sessionDialogs!.restart(sessionContext).then(() => {
           NotebookActions.clearAllOutputs(content);
         });
       }
@@ -1234,7 +1248,7 @@ function addCommands(
       if (current) {
         const { context, content, sessionContext } = current;
 
-        return sessionContext.restart().then(restarted => {
+        return sessionDialogs!.restart(sessionContext).then(restarted => {
           if (restarted) {
             void NotebookActions.runAll(content, context.sessionContext);
           }
@@ -1597,7 +1611,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return current.context.sessionContext.selectKernel();
+        return sessionDialogs!.selectKernel(current.context.sessionContext);
       }
     },
     isEnabled
@@ -1975,9 +1989,12 @@ function populateMenus(
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
   services: ServiceManager,
-  palette: ICommandPalette | null
+  palette: ICommandPalette | null,
+  sessionDialogs: ISessionContextDialogs | null
 ): void {
   let { commands } = app;
+
+  sessionDialogs = sessionDialogs || sessionContextDialogs;
 
   // Add undo/redo hooks to the edit menu.
   mainMenu.editMenu.undoers.add({
@@ -2075,16 +2092,17 @@ function populateMenus(
       return Promise.resolve(void 0);
     },
     noun: 'All Outputs',
-    restartKernel: current => current.sessionContext.restart(),
+    restartKernel: current => sessionDialogs!.restart(current.sessionContext),
     restartKernelAndClear: current => {
-      return current.sessionContext.restart().then(restarted => {
+      return sessionDialogs!.restart(current.sessionContext).then(restarted => {
         if (restarted) {
           NotebookActions.clearAllOutputs(current.content);
         }
         return restarted;
       });
     },
-    changeKernel: current => current.sessionContext.selectKernel(),
+    changeKernel: current =>
+      sessionDialogs!.selectKernel(current.sessionContext),
     shutdownKernel: current => current.sessionContext.shutdown()
   } as IKernelMenu.IKernelUser<NotebookPanel>);
 
@@ -2151,7 +2169,7 @@ function populateMenus(
     },
     restartAndRunAll: current => {
       const { context, content } = current;
-      return context.sessionContext.restart().then(restarted => {
+      return sessionDialogs!.restart(context.sessionContext).then(restarted => {
         if (restarted) {
           void NotebookActions.runAll(content, context.sessionContext);
         }

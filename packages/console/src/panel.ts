@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
+import {
+  ISessionContext,
+  SessionContext,
+  sessionContextDialogs
+} from '@jupyterlab/apputils';
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
@@ -83,7 +87,10 @@ export class ConsolePanel extends Panel {
     });
     this.addWidget(this.console);
 
-    void sessionContext.initialize().then(() => {
+    void sessionContext.initialize().then(async value => {
+      if (value) {
+        await sessionContextDialogs.selectKernel(sessionContext);
+      }
       this._connected = new Date();
       this._updateTitle();
     });
