@@ -1087,7 +1087,7 @@ namespace Private {
       router.routed.disconnect(listener);
 
       const paths = await tree?.paths;
-      if (paths) {
+      if (paths?.file || paths?.browser) {
         // Restore the model without populating it.
         await browser.model.restore(browser.id, false);
         if (paths.file) {
