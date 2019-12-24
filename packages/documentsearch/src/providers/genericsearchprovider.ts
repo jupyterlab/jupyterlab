@@ -101,7 +101,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
         acceptNode: node => {
           // Filter subtrees of UNSUPPORTED_ELEMENTS and nodes that
           // do not contain our search text
-          let parentElement = node.parentElement;
+          let parentElement = node.parentElement!;
           while (parentElement !== this._widget.node) {
             if (
               parentElement.nodeName in
@@ -109,9 +109,9 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
             ) {
               return NodeFilter.FILTER_REJECT;
             }
-            parentElement = parentElement.parentElement;
+            parentElement = parentElement.parentElement!;
           }
-          return that._query.test(node.textContent)
+          return that._query.test(node.textContent!)
             ? NodeFilter.FILTER_ACCEPT
             : NodeFilter.FILTER_REJECT;
         }
@@ -129,7 +129,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
        * The o in world is found after the o in hello which means the pre could have been modified already
        * While there may be a better data structure to do this for performance, this was easy to reason about.
        */
-      originalNodes.push(node.parentElement.cloneNode(true));
+      originalNodes.push(node.parentElement!.cloneNode(true));
       node = walker.nextNode();
     }
     // We'll need to copy the regexp to ensure its 'g' and that we start the index count from 0
@@ -139,17 +139,17 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     nodes.forEach((node, nodeIndex) => {
       const q = new RegExp(query.source, flags);
       const subsections = [];
-      let match = q.exec(node.textContent);
+      let match = q.exec(node!.textContent!);
       while (match) {
         subsections.push({
           start: match.index,
           end: match.index + match[0].length,
           text: match[0]
         });
-        match = q.exec(node.textContent);
+        match = q.exec(node!.textContent!);
       }
       const originalNode = originalNodes[nodeIndex];
-      const originalLength = node.textContent.length; // Node length will change below
+      const originalLength = node!.textContent!.length; // Node length will change below
       let lastNodeAdded = null;
       // Go backwards as index may change if we go forwards
       let newMatches = [];
@@ -160,24 +160,24 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
         spannedNode.classList.add(...FOUND_CLASSES);
         spannedNode.innerText = text;
         // Splice the text out before we add it back in with a span
-        node.textContent = `${node.textContent.slice(
+        node!.textContent = `${node!.textContent!.slice(
           0,
           start
-        )}${node.textContent.slice(end)}`;
+        )}${node!.textContent!.slice(end)}`;
         // Are we replacing from the start?
         if (start === 0) {
-          node.parentNode.prepend(spannedNode);
+          node!.parentNode!.prepend(spannedNode);
           // Are we replacing at the end?
         } else if (end === originalLength) {
-          node.parentNode.append(spannedNode);
+          node!.parentNode!.append(spannedNode);
           // Are the two results are adjacent to each other?
         } else if (lastNodeAdded && end === subsections[idx + 1].start) {
-          node.parentNode.insertBefore(spannedNode, lastNodeAdded);
+          node!.parentNode!.insertBefore(spannedNode, lastNodeAdded);
           // Ok, we are replacing somewhere in the middle
         } else {
           // We know this is Text as we filtered for this in the walker above
           const endText = (node as Text).splitText(start);
-          node.parentNode.insertBefore(spannedNode, endText);
+          node!.parentNode!.insertBefore(spannedNode, endText);
         }
         lastNodeAdded = spannedNode;
         newMatches.unshift({
@@ -237,7 +237,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
       if (match.indexInOriginal !== 0) {
         return;
       }
-      match.spanElement.parentElement.replaceWith(match.originalNode);
+      match.spanElement.parentElement!.replaceWith(match.originalNode);
     });
     this._matches = [];
     this._currentMatch = null;
@@ -289,7 +289,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
       if (this.isSubProvider) {
         if (nextIndex < 0 || nextIndex >= this._matches.length) {
           this._currentMatch = null;
-          return null;
+          return undefined;
         }
       }
       // Cheap way to make this a circular buffer
@@ -354,7 +354,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
   /**
    * The current index of the selected match.
    */
-  get currentMatchIndex(): number {
+  get currentMatchIndex(): number | null {
     if (!this._currentMatch) {
       return null;
     }
@@ -373,7 +373,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
   readonly isReadOnly = true;
 
   clearSelection(): void {
-    return null;
+    return;
   }
 
   /**
@@ -393,7 +393,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
 
   private _query: RegExp;
   private _widget: Widget;
-  private _currentMatch: IGenericSearchMatch;
+  private _currentMatch: IGenericSearchMatch | null;
   private _matches: IGenericSearchMatch[] = [];
   private _mutationObserver: MutationObserver = new MutationObserver(
     this._onWidgetChanged.bind(this)
