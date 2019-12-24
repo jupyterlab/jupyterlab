@@ -24,12 +24,6 @@ import { Session } from '@jupyterlab/services';
 
 import { Debugger } from './debugger';
 
-import { ConsoleHandler } from './handlers/console';
-
-import { FileHandler } from './handlers/file';
-
-import { NotebookHandler } from './handlers/notebook';
-
 import { TrackerHandler } from './handlers/tracker';
 
 import { DebuggerService } from './service';
@@ -71,13 +65,17 @@ const consoles: JupyterFrontEndPlugin<void> = {
     consoleTracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
-    const handler = new DebuggerHandler<ConsoleHandler>(ConsoleHandler);
+    const handler = new DebuggerHandler({
+      type: 'console',
+      shell: app.shell,
+      service: debug
+    });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
     });
 
     const updateHandlerAndCommands = async (widget: ConsolePanel) => {
-      await handler.update(app.shell, debug, widget, widget.session);
+      await handler.update(widget, widget.session);
       app.commands.notifyCommandChanged();
     };
 
@@ -112,7 +110,11 @@ const files: JupyterFrontEndPlugin<void> = {
     editorTracker: IEditorTracker,
     labShell: ILabShell
   ) => {
-    const handler = new DebuggerHandler<FileHandler>(FileHandler);
+    const handler = new DebuggerHandler({
+      type: 'file',
+      shell: app.shell,
+      service: debug
+    });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
     });
@@ -134,7 +136,7 @@ const files: JupyterFrontEndPlugin<void> = {
           session = sessions.connectTo(model);
           activeSessions[model.id] = session;
         }
-        await handler.update(app.shell, debug, widget, session);
+        await handler.update(widget, session);
         app.commands.notifyCommandChanged();
       } catch {
         return;
@@ -178,13 +180,17 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     notebookTracker: INotebookTracker,
     labShell: ILabShell
   ) => {
-    const handler = new DebuggerHandler<NotebookHandler>(NotebookHandler);
+    const handler = new DebuggerHandler({
+      type: 'notebook',
+      shell: app.shell,
+      service: debug
+    });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
     });
 
     const updateHandlerAndCommands = async (widget: NotebookPanel) => {
-      await handler.update(app.shell, debug, widget, widget.session);
+      await handler.update(widget, widget.session);
       app.commands.notifyCommandChanged();
     };
 

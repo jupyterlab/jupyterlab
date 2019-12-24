@@ -9,6 +9,8 @@ import { ConsolePanel } from '@jupyterlab/console';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
+import { FileEditor } from '@jupyterlab/fileeditor';
+
 import { NotebookPanel } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
@@ -27,11 +29,10 @@ import { NotebookHandler } from './notebook';
 
 /**
  * Add a button to the widget toolbar to enable and disable debugging.
- * @param debug The debug service.
  * @param widget The widget to add the debug toolbar button to.
  */
 function updateToolbar(
-  widget: NotebookPanel | ConsolePanel | DocumentWidget,
+  widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
   onClick: () => void
 ) {
   const button = new ToolbarButton({
@@ -60,15 +61,15 @@ function updateToolbar(
 /**
  * A handler for debugging a widget.
  */
-export class DebuggerHandler<
-  H extends ConsoleHandler | NotebookHandler | FileHandler
-> {
+export class DebuggerHandler {
   /**
    * Instantiate a new DebuggerHandler.
-   * @param builder The debug handler builder.
+   * @param type The type of the debug handler.
    */
-  constructor(builder: new (option: any) => H) {
-    this._builder = builder;
+  constructor(options: DebuggerHandler.IOptions) {
+    this._type = options.type;
+    this._shell = options.shell;
+    this._service = options.service;
   }
 
   /**
@@ -94,14 +95,12 @@ export class DebuggerHandler<
    * @param debug The debug service.
    * @param widget The widget to update.
    */
-  async update<W extends ConsolePanel | NotebookPanel | DocumentWidget>(
-    shell: JupyterFrontEnd.IShell,
-    debug: IDebugger,
-    widget: W,
+  async update(
+    widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     client: IClientSession | Session.ISession
   ): Promise<void> {
     const updateHandler = async () => {
-      return this._update(shell, debug, widget, client);
+      return this._update(widget, client);
     };
 
     // setup handler when the kernel changes
@@ -142,20 +141,16 @@ export class DebuggerHandler<
    * @param debug The debug service.
    * @param widget The widget to update.
    */
-  private async _update<
-    W extends ConsolePanel | NotebookPanel | DocumentWidget
-  >(
-    shell: JupyterFrontEnd.IShell,
-    debug: IDebugger,
-    widget: W,
+  private async _update(
+    widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     client: IClientSession | Session.ISession
   ): Promise<void> {
-    if (!debug.model) {
+    if (!this._service.model) {
       return;
     }
 
     const hasFocus = () => {
-      return shell.currentWidget && shell.currentWidget === widget;
+      return this._shell.currentWidget && this._shell.currentWidget === widget;
     };
 
     const updateAttribute = () => {
@@ -170,10 +165,29 @@ export class DebuggerHandler<
       if (this._handlers[widget.id]) {
         return;
       }
-      this._handlers[widget.id] = new this._builder({
-        debuggerService: debug,
-        widget
-      });
+
+      switch (this._type) {
+        case 'notebook':
+          this._handlers[widget.id] = new NotebookHandler({
+            debuggerService: this._service,
+            widget: widget as NotebookPanel
+          });
+          break;
+        case 'console':
+          this._handlers[widget.id] = new ConsoleHandler({
+            debuggerService: this._service,
+            widget: widget as ConsolePanel
+          });
+          break;
+        case 'file':
+          this._handlers[widget.id] = new FileHandler({
+            debuggerService: this._service,
+            widget: widget as DocumentWidget<FileEditor>
+          });
+          break;
+        default:
+          throw Error(`No handler for the type ${this._type}`);
+      }
       updateAttribute();
     };
 
@@ -189,8 +203,8 @@ export class DebuggerHandler<
 
       // clear the model if the handler being removed corresponds
       // to the current active debug session
-      if (debug.session?.client?.path === client.path) {
-        const model = debug.model as DebuggerModel;
+      if (this._service.session?.client?.path === client.path) {
+        const model = this._service.model as DebuggerModel;
         model.clear();
       }
 
@@ -222,16 +236,16 @@ export class DebuggerHandler<
         return;
       }
 
-      if (debug.isStarted) {
-        await debug.stop();
+      if (this._service.isStarted) {
+        await this._service.stop();
         removeHandlers();
       } else {
-        await debug.restoreState(true);
+        await this._service.restoreState(true);
         await createHandler();
       }
     };
 
-    const debuggingEnabled = await debug.isAvailable(client);
+    const debuggingEnabled = await this._service.isAvailable(client);
     if (!debuggingEnabled) {
       removeHandlers();
       removeToolbarButton();
@@ -239,17 +253,17 @@ export class DebuggerHandler<
     }
 
     // update the active debug session
-    if (!debug.session) {
-      debug.session = new DebugSession({ client: client });
+    if (!this._service.session) {
+      this._service.session = new DebugSession({ client: client });
     } else {
-      debug.session.client = client;
+      this._service.session.client = client;
     }
 
-    await debug.restoreState(false);
+    await this._service.restoreState(false);
     addToolbarButton();
 
     // check the state of the debug session
-    if (!debug.isStarted) {
+    if (!this._service.isStarted) {
       removeHandlers();
       return;
     }
@@ -259,12 +273,64 @@ export class DebuggerHandler<
 
     // listen to the disposed signals
     widget.disposed.connect(removeHandlers);
-    debug.model.disposed.connect(removeHandlers);
+    this._service.model.disposed.connect(removeHandlers);
   }
 
-  private _handlers: { [id: string]: H } = {};
+  private _type: DebuggerHandler.SessionType;
+  private _shell: JupyterFrontEnd.IShell;
+  private _service: IDebugger;
+  private _handlers: {
+    [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
+  } = {};
   private _kernelChangedHandlers: { [id: string]: () => void } = {};
   private _statusChangedHandlers: { [id: string]: () => void } = {};
   private _buttons: { [id: string]: ToolbarButton } = {};
-  private _builder: new (option: any) => H;
+}
+
+/**
+ * A namespace for DebuggerHandler `statics`
+ */
+export namespace DebuggerHandler {
+  /**
+   * Instantiation options for a DebuggerHandler.
+   */
+  export interface IOptions {
+    /**
+     * The type of session.
+     */
+    type: SessionType;
+
+    /**
+     * The application shell.
+     */
+    shell: JupyterFrontEnd.IShell;
+
+    /**
+     * The debugger service.
+     */
+    service: IDebugger;
+  }
+
+  /**
+   * The types of sessions that can be debugged.
+   */
+  export type SessionType = keyof SessionHandler;
+
+  /**
+   * The types of handlers.
+   */
+  export type SessionHandler = {
+    notebook: NotebookHandler;
+    console: ConsoleHandler;
+    file: FileHandler;
+  };
+
+  /**
+   * The types of widgets that can be debugged.
+   */
+  export type SessionWidget = {
+    notebook: NotebookPanel;
+    console: ConsolePanel;
+    file: DocumentWidget;
+  };
 }
