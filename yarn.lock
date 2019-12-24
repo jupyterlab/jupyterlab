@@ -1948,7 +1948,7 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
-"@lumino/algorithm@^1.2.0", "@lumino/algorithm@^1.2.1", "@lumino/algorithm@^1.2.2":
+"@lumino/algorithm@^1.2.1", "@lumino/algorithm@^1.2.2":
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-1.2.2.tgz#7585b0ba1775cf715e7e76a9a880e1fcc75037f6"
   integrity sha512-oB+dX2nqy4WJmtPMGGz3j28tJv8oFq7/h+bjd6O+qQvjyI55oIfKfAZOcohXoxOx1F+3Vny7I9Gnpt3Rp3ELNg==
