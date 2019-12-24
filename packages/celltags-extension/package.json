@@ -47,6 +47,9 @@
     "rimraf": "~3.0.0",
     "typescript": "~3.7.3"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "jupyterlab": {
     "extension": true
   }
