@@ -224,6 +224,7 @@ async function activateFactory(
     options: IFileBrowserFactory.IOptions = {}
   ) => {
     const model = new FileBrowserModel({
+      auto: options.auto ?? true,
       iconRegistry: icoReg,
       manager: docManager,
       driveName: options.driveName || '',
@@ -250,42 +251,14 @@ async function activateFactory(
     return widget;
   };
 
-  // Manually restore the default file browser.
-  const id = 'filebrowser';
-  const defaultBrowser = createFileBrowser(id, { restore: false });
-  const plugin = { createFileBrowser, defaultBrowser, tracker };
-  const restoring = 'jp-mod-restoring';
+  // Manually restore and load the default file browser.
+  const defaultBrowser = createFileBrowser('filebrowser', {
+    auto: false,
+    restore: false
+  });
+  void Private.restoreBrowser(defaultBrowser, commands, router, tree);
 
-  defaultBrowser.addClass(restoring);
-
-  if (!router) {
-    void defaultBrowser.model.restore(id).then(() => {
-      defaultBrowser.removeClass(restoring);
-    });
-    return plugin;
-  }
-
-  const listener = async () => {
-    router.routed.disconnect(listener);
-
-    const paths = await tree?.paths;
-    if (paths) {
-      // Restore the model without populating it.
-      await defaultBrowser.model.restore(id, false);
-      if (paths.file) {
-        await commands.execute(CommandIDs.openPath, { path: paths.file });
-      }
-      if (paths.browser) {
-        await commands.execute(CommandIDs.openPath, { path: paths.browser });
-      }
-    } else {
-      await defaultBrowser.model.restore(id);
-    }
-    defaultBrowser.removeClass(restoring);
-  };
-  router.routed.connect(listener);
-
-  return plugin;
+  return { createFileBrowser, defaultBrowser, tracker };
 }
 
 /**
@@ -1088,5 +1061,47 @@ namespace Private {
       await model.cd(`/${PathExt.dirname(localPath)}`);
     }
     return item;
+  }
+
+  /**
+   * Restores file browser state and overrides state if tree resolver resolves.
+   */
+  export async function restoreBrowser(
+    browser: FileBrowser,
+    commands: CommandRegistry,
+    router: IRouter | null,
+    tree: JupyterFrontEnd.ITreeResolver | null
+  ): Promise<void> {
+    const restoring = 'jp-mod-restoring';
+
+    browser.addClass(restoring);
+
+    if (!router) {
+      await browser.model.restore(browser.id);
+      await browser.model.refresh();
+      browser.removeClass(restoring);
+      return;
+    }
+
+    const listener = async () => {
+      router.routed.disconnect(listener);
+
+      const paths = await tree?.paths;
+      if (paths) {
+        // Restore the model without populating it.
+        await browser.model.restore(browser.id, false);
+        if (paths.file) {
+          await commands.execute(CommandIDs.openPath, { path: paths.file });
+        }
+        if (paths.browser) {
+          await commands.execute(CommandIDs.openPath, { path: paths.browser });
+        }
+      } else {
+        await browser.model.restore(browser.id);
+        await browser.model.refresh();
+      }
+      browser.removeClass(restoring);
+    };
+    router.routed.connect(listener);
   }
 }
