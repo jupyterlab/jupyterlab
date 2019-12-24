@@ -766,8 +766,10 @@ export class SessionContext implements ISessionContext {
     if (this._session) {
       this._session.dispose();
     }
+    const oldValue = this._session;
     this._session = null;
-    this._terminated.emit(undefined);
+    const newValue = this._session;
+    this._sessionChanged.emit({ name: 'session', oldValue, newValue });
   }
 
   /**
@@ -873,7 +875,6 @@ export class SessionContext implements ISessionContext {
   private _initializing = false;
   private _initPromise = new PromiseDelegate<boolean>();
   private _isReady = false;
-  private _terminated = new Signal<this, void>(this);
   private _kernelChanged = new Signal<
     this,
     Session.ISessionConnection.IKernelChangedArgs

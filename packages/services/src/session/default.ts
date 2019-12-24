@@ -206,8 +206,15 @@ export class SessionConnection implements Session.ISessionConnection {
     }
     this._isDisposed = true;
     this._disposed.emit();
-    this._kernel?.dispose();
-    this._kernel = null;
+
+    if (this._kernel) {
+      this._kernel.dispose();
+      let oldValue = this._kernel;
+      this._kernel = null;
+      let newValue = this._kernel;
+      this._kernelChanged.emit({ name: 'kernel', oldValue, newValue });
+    }
+
     Signal.clearData(this);
   }
 
