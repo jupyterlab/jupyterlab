@@ -3,6 +3,15 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-DebuggerCallstack {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-DebuggerCallstack-body {
+  overflow: auto;
+}
+
 .jp-DebuggerCallstack-body ul {
   list-style: none;
   margin: 0;
