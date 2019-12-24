@@ -7,14 +7,58 @@ import { classes } from 'typestyle';
 
 import { iconStyle, IIconStyle } from '../style/icon';
 import { getReactAttrs } from '../utils';
+import { Text } from '@jupyterlab/coreutils';
 
 export class JLIcon {
-  constructor({ name, style = {}, svgstr, _debug = false }: JLIcon.IOptions) {
+  constructor({ name, svgstr, _debug = false }: JLIcon.IOptions) {
     this.name = name;
-    this.style = style;
     this.svgstr = svgstr;
 
+    this._className = 'jp-' + Text.camelCase(name, true) + 'Icon';
     this._debug = _debug;
+
+    this.react = this._initReact();
+  }
+
+  className({
+    className,
+    ...propsStyle
+  }: { className?: string } & IIconStyle = {}): string {
+    if (!className) {
+      className = this._className;
+    }
+
+    return classes(className, iconStyle(propsStyle));
+  }
+
+  element({
+    className,
+    container,
+    title,
+    tag = 'div',
+    ...propsStyle
+  }: JLIcon.IProps = {}): HTMLElement | null {
+    // ensure that svg html is valid
+    const svgElement = this.resolveSvg(title);
+    if (!svgElement) {
+      // bail if failing silently
+      return null;
+    }
+
+    // create a container if needed
+    container = container || document.createElement(tag);
+
+    // set the container class to style class + explicitly passed className
+    container.classList.add(...(classNames ? classNames : []));
+
+    // add the svg node to the container
+    container.appendChild(svgElement);
+
+    return svgElement;
+  }
+
+  render(host: HTMLElement, props: JLIcon.IProps = {}): void {
+    return ReactDOM.render(<this.react {...props} />, host);
   }
 
   resolveSvg(title?: string): HTMLElement | null {
@@ -46,51 +90,19 @@ export class JLIcon {
     }
   }
 
-  element({
-    className,
-    container,
-    title,
-    tag = 'div',
-    ...propsStyle
-  }: JLIcon.IProps = {}): HTMLElement | null {
-    const propsStyleComb = { ...this.style, ...propsStyle };
-    const classNames = classes(
-      className,
-      propsStyleComb ? iconStyle(propsStyleComb) : ''
-    );
-
-    // ensure that svg html is valid
-    const svgElement = this.resolveSvg(title);
-    if (!svgElement) {
-      // bail if failing silently
-      return null;
-    }
-
-    // create a container if needed
-    container = container || document.createElement(tag);
-
-    // set the container class to style class + explicitly passed className
-    container.classList.add(...(classNames ? classNames : []));
-
-    // add the svg node to the container
-    container.appendChild(svgElement);
-
-    return svgElement;
-  }
-
-  render(host: HTMLElement, props: JLIcon.IProps = {}): void {
-    return ReactDOM.render(<this.react {...props} container={host} />, host);
-  }
-
   unrender(host: HTMLElement): void {
     ReactDOM.unmountComponentAtNode(host);
+  }
+
+  style(props: IIconStyle) {
+    return iconStyle(props);
   }
 
   protected _initReact() {
     const component = React.forwardRef(
       (
         {
-          className = '',
+          className,
           container,
           title,
           tag = 'div',
@@ -146,11 +158,14 @@ export class JLIcon {
   }
 
   readonly name: string;
-  readonly react = this._initReact();
-  protected style: IIconStyle;
+  readonly react: React.ForwardRefExoticComponent<
+    JLIcon.IProps & React.RefAttributes<SVGElement>
+  >;
   readonly svgstr: string;
 
+  protected _className: string;
   protected _debug: boolean;
+  protected _svgs: { [key: string]: string } = Object.create(null);
 }
 
 /**
