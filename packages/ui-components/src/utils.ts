@@ -12,8 +12,7 @@ export function combineClasses(
 export function getReactAttrs(elem: Element) {
   return elem.getAttributeNames().reduce((d, name) => {
     if (name !== 'style') {
-      const reactName = Text.camelCase(name);
-      d[reactName] = elem.getAttribute(name);
+      d[Text.camelCase(name)] = elem.getAttribute(name);
     }
     return d;
   }, {} as any);
