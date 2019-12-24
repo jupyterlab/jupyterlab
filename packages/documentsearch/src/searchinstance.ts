@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisplayState, ISearchProvider } from './interfaces';
+import { IDisplayState, ISearchProvider, IFiltersType } from './interfaces';
 import { createSearchOverlay } from './searchoverlay';
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
@@ -31,7 +31,8 @@ export class SearchInstance implements IDisposable {
       onReplaceCurrent: this._replaceCurrent.bind(this),
       onReplaceAll: this._replaceAll.bind(this),
       onEndSearch: this.dispose.bind(this),
-      isReadOnly: this._activeProvider.isReadOnly
+      isReadOnly: this._activeProvider.isReadOnly,
+      hasOutputs: this._activeProvider.hasOutputs || false
     });
 
     this._widget.disposed.connect(() => {
@@ -93,13 +94,14 @@ export class SearchInstance implements IDisposable {
     this._displayUpdateSignal.emit(this._displayState);
   }
 
-  private async _startQuery(query: RegExp) {
+  private async _startQuery(query: RegExp, filters: IFiltersType) {
     // save the last query (or set it to the current query if this is the first)
     if (this._activeProvider && this._displayState.query) {
       await this._activeProvider.endQuery();
     }
     this._displayState.query = query;
-    await this._activeProvider.startQuery(query, this._widget);
+    this._displayState.filters = filters;
+    await this._activeProvider.startQuery(query, this._widget, filters);
     this.updateIndices();
 
     // this signal should get injected when the widget is
@@ -202,8 +204,11 @@ export class SearchInstance implements IDisposable {
     replaceInputFocused: false,
     forceFocus: true,
     replaceText: '',
-    replaceEntryShown: false
+    replaceEntryShown: false,
+    filters: { output: true },
+    filtersOpen: false
   };
+
   private _displayUpdateSignal = new Signal<this, IDisplayState>(this);
   private _activeProvider: ISearchProvider;
   private _searchWidget: Widget;

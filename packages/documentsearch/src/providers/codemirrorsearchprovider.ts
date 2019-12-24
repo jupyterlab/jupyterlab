@@ -69,12 +69,14 @@ export class CodeMirrorSearchProvider
    *
    * @param query A RegExp to be use to perform the search
    * @param searchTarget The widget to be searched
+   * @param [filters={}] Filter parameters to pass to provider
    *
    * @returns A promise that resolves with a list of all matches
    */
   async startQuery(
     query: RegExp,
-    searchTarget: Widget
+    searchTarget: Widget,
+    filters = {}
   ): Promise<ISearchMatch[]> {
     if (!CodeMirrorSearchProvider.canSearchOn(searchTarget)) {
       throw new Error('Cannot find Codemirror instance to search');
@@ -298,6 +300,9 @@ export class CodeMirrorSearchProvider
     return undefined;
   }
 
+  get editor(): CodeMirrorEditor {
+    return this._cm;
+  }
   /**
    * Set whether or not the CodemirrorSearchProvider will wrap to the beginning
    * or end of the document on invocations of highlightNext or highlightPrevious, respectively

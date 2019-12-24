@@ -30,9 +30,15 @@ const CASE_BUTTON_CLASS_ON =
 const INDEX_COUNTER_CLASS = 'jp-DocumentSearch-index-counter';
 const UP_DOWN_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-up-down-wrapper';
 const UP_BUTTON_CLASS = 'jp-DocumentSearch-up-button';
+const ELLIPSES_BUTTON_CLASS = 'jp-DocumentSearch-ellipses-button';
+const ELLIPSES_BUTTON_ENABLED_CLASS =
+  'jp-DocumentSearch-ellipses-button-enabled';
 const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
 const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
+const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
+const SEARCH_OPTIONS_DISABLED_CLASS =
+  'jp-DocumentSearch-search-options-disabled';
 const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
@@ -44,6 +50,7 @@ const TOGGLE_WRAPPER = 'jp-DocumentSearch-toggle-wrapper';
 const TOGGLE_PLACEHOLDER = 'jp-DocumentSearch-toggle-placeholder';
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
+const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
 interface ISearchEntryProps {
   onCaseSensitiveToggled: Function;
@@ -230,6 +237,65 @@ function SearchIndices(props: ISearchIndexProps) {
   );
 }
 
+interface IFilterToggleProps {
+  enabled: boolean;
+  toggleEnabled: () => void;
+}
+
+interface IFilterToggleState {}
+
+class FilterToggle extends React.Component<
+  IFilterToggleProps,
+  IFilterToggleState
+> {
+  render() {
+    let className = `${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`;
+    if (this.props.enabled) {
+      className = `${className} ${ELLIPSES_BUTTON_ENABLED_CLASS}`;
+    }
+    return (
+      <button
+        className={BUTTON_WRAPPER_CLASS}
+        onClick={() => this.props.toggleEnabled()}
+      >
+        <span className={className} tabIndex={-1} />
+      </button>
+    );
+  }
+}
+
+interface IFilterSelectionProps {
+  searchOutput: boolean;
+  canToggleOutput: boolean;
+  toggleOutput: () => void;
+}
+
+interface IFilterSelectionState {}
+
+class FilterSelection extends React.Component<
+  IFilterSelectionProps,
+  IFilterSelectionState
+> {
+  render() {
+    return (
+      <label className={SEARCH_OPTIONS_CLASS}>
+        <span
+          className={
+            this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
+          }
+        >
+          Search Cell Outputs
+        </span>
+        <input
+          type="checkbox"
+          disabled={!this.props.canToggleOutput}
+          checked={this.props.searchOutput}
+          onChange={this.props.toggleOutput}
+        />
+      </label>
+    );
+  }
+}
 interface ISearchOverlayProps {
   overlayState: IDisplayState;
   onCaseSensitiveToggled: Function;
@@ -241,6 +307,7 @@ interface ISearchOverlayProps {
   onReplaceCurrent: Function;
   onReplaceAll: Function;
   isReadOnly: boolean;
+  hasOutputs: boolean;
 }
 
 class SearchOverlay extends React.Component<
@@ -250,6 +317,8 @@ class SearchOverlay extends React.Component<
   constructor(props: ISearchOverlayProps) {
     super(props);
     this.state = props.overlayState;
+
+    this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
   }
 
   componentDidMount() {
@@ -288,7 +357,11 @@ class SearchOverlay extends React.Component<
     }
   }
 
-  private _executeSearch(goForward: boolean, searchText?: string) {
+  private _executeSearch(
+    goForward: boolean,
+    searchText?: string,
+    filterChanged = false
+  ) {
     // execute search!
     let query;
     const input = searchText ? searchText : this.state.searchText;
@@ -304,7 +377,10 @@ class SearchOverlay extends React.Component<
       return;
     }
 
-    if (Private.regexEqual(this.props.overlayState.query, query)) {
+    if (
+      Private.regexEqual(this.props.overlayState.query, query) &&
+      !filterChanged
+    ) {
       if (goForward) {
         this.props.onHightlightNext();
       } else {
@@ -313,7 +389,7 @@ class SearchOverlay extends React.Component<
       return;
     }
 
-    this.props.onStartQuery(query);
+    this.props.onStartQuery(query, this.state.filters);
   }
 
   private _onClose() {
@@ -339,8 +415,41 @@ class SearchOverlay extends React.Component<
       this.setState({ searchInputFocused: false });
     }
   }
+  private _toggleSearchOutput() {
+    this.setState(
+      prevState => ({
+        ...prevState,
+        filters: {
+          ...prevState.filters,
+          output: !prevState.filters.output
+        }
+      }),
+      () => this._executeSearch(true, undefined, true)
+    );
+  }
+  private _toggleFiltersOpen() {
+    this.setState(prevState => ({
+      filtersOpen: !prevState.filtersOpen
+    }));
+  }
 
   render() {
+    const showReplace = !this.props.isReadOnly && this.state.replaceEntryShown;
+    const showFilter = this.props.hasOutputs;
+    const filterToggle = showFilter ? (
+      <FilterToggle
+        enabled={this.state.filtersOpen}
+        toggleEnabled={() => this._toggleFiltersOpen()}
+      />
+    ) : null;
+    const filter = showFilter ? (
+      <FilterSelection
+        key={'filter'}
+        canToggleOutput={!showReplace}
+        searchOutput={this.state.filters.output}
+        toggleOutput={this._toggleSearchOutput}
+      />
+    ) : null;
     return [
       <div className={OVERLAY_ROW_CLASS} key={0}>
         {this.props.isReadOnly ? (
@@ -388,6 +497,7 @@ class SearchOverlay extends React.Component<
           onHighlightPrevious={() => this._executeSearch(false)}
           onHightlightNext={() => this._executeSearch(true)}
         />
+        {showReplace ? null : filterToggle}
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this._onClose()}
@@ -400,19 +510,26 @@ class SearchOverlay extends React.Component<
         </button>
       </div>,
       <div className={OVERLAY_ROW_CLASS} key={1}>
-        {!this.props.isReadOnly && this.state.replaceEntryShown ? (
-          <ReplaceEntry
-            onReplaceKeydown={(e: KeyboardEvent) => this._onReplaceKeydown(e)}
-            onChange={(e: React.ChangeEvent) => this._onReplaceChange(e)}
-            onReplaceCurrent={() =>
-              this.props.onReplaceCurrent(this.state.replaceText)
-            }
-            onReplaceAll={() => this.props.onReplaceAll(this.state.replaceText)}
-            replaceText={this.state.replaceText}
-            ref="replaceEntry"
-          />
+        {showReplace ? (
+          <>
+            <ReplaceEntry
+              onReplaceKeydown={(e: KeyboardEvent) => this._onReplaceKeydown(e)}
+              onChange={(e: React.ChangeEvent) => this._onReplaceChange(e)}
+              onReplaceCurrent={() =>
+                this.props.onReplaceCurrent(this.state.replaceText)
+              }
+              onReplaceAll={() =>
+                this.props.onReplaceAll(this.state.replaceText)
+              }
+              replaceText={this.state.replaceText}
+              ref="replaceEntry"
+            />
+            <div className={SPACER_CLASS}></div>
+            {filterToggle}
+          </>
         ) : null}
       </div>,
+      this.state.filtersOpen ? filter : null,
       <div
         className={REGEX_ERROR_CLASS}
         hidden={
@@ -444,7 +561,8 @@ export function createSearchOverlay(
     onReplaceCurrent,
     onReplaceAll,
     onEndSearch,
-    isReadOnly
+    isReadOnly,
+    hasOutputs
   } = options;
   const widget = ReactWidget.create(
     <UseSignal signal={widgetChanged} initialArgs={overlayState}>
@@ -461,6 +579,7 @@ export function createSearchOverlay(
             onReplaceAll={onReplaceAll}
             overlayState={args!}
             isReadOnly={isReadOnly}
+            hasOutputs={hasOutputs}
           />
         );
       }}
@@ -483,6 +602,7 @@ namespace createSearchOverlay {
     onReplaceCurrent: Function;
     onReplaceAll: Function;
     isReadOnly: boolean;
+    hasOutputs: boolean;
   }
 }
 

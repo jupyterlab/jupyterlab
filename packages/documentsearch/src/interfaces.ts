@@ -4,6 +4,10 @@
 import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
+export interface IFiltersType {
+  output: boolean;
+}
+
 export interface IDisplayState {
   /**
    * The index of the currently selected match
@@ -64,6 +68,16 @@ export interface IDisplayState {
    * Whether or not the replace entry row is visible
    */
   replaceEntryShown: boolean;
+
+  /**
+   * What should we include when we search?
+   */
+  filters: IFiltersType;
+
+  /**
+   * Is the filters view open?
+   */
+  filtersOpen: boolean;
 }
 
 export interface ISearchMatch {
@@ -123,10 +137,15 @@ export interface ISearchProvider<T extends Widget = Widget> {
    *
    * @param query A RegExp to be use to perform the search
    * @param searchTarget The widget to be searched
+   * @param filters Filter parameters to pass to provider
    *
    * @returns A promise that resolves with a list of all matches
    */
-  startQuery(query: RegExp, searchTarget: T): Promise<ISearchMatch[]>;
+  startQuery(
+    query: RegExp,
+    searchTarget: T,
+    filters: IFiltersType
+  ): Promise<ISearchMatch[]>;
 
   /**
    * Clears state of a search provider to prepare for startQuery to be called
@@ -194,4 +213,10 @@ export interface ISearchProvider<T extends Widget = Widget> {
    * the replace option.
    */
   readonly isReadOnly: boolean;
+
+  /**
+   * Set to true if the widget under search has outputs to search.
+   * Defaults to false.
+   */
+  readonly hasOutputs?: boolean;
 }
