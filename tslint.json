@@ -113,10 +113,11 @@
   },
   "linterOptions": {
     "exclude": [
-      "node_modules/**/*.ts",
-      "node_modules/**/*.tsx",
       "**/*.d.ts",
-      "jupyterlab/**/*.ts"
+      "jupyterlab/**/*.ts",
+      "packages/ui-components/src/icon/iconimports.ts",
+      "node_modules/**/*.ts",
+      "node_modules/**/*.tsx"
     ]
   }
 }
