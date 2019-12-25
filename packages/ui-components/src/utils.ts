@@ -3,10 +3,49 @@
 
 import { Text } from '@jupyterlab/coreutils';
 
-export function combineClasses(
-  ...classNames: (string | false | undefined | null)[]
-) {
-  return classNames.filter(c => !!c).join(' ');
+function _classes(
+  classes: (string | false | undefined | null | { [className: string]: any })[]
+): string[] {
+  return classes
+    .map(c =>
+      c && typeof c === 'object'
+        ? Object.keys(c).map(key => !!c[key] && key)
+        : typeof c === 'string'
+        ? c.split(/\s+/)
+        : []
+    )
+    .reduce((flattened, c) => flattened.concat(c), [] as string[])
+    .filter(c => !!c) as string[];
+}
+
+/**
+ * Combines classNames.
+ */
+export function classes(
+  ...classes: (
+    | string
+    | false
+    | undefined
+    | null
+    | { [className: string]: any }
+  )[]
+): string {
+  return _classes(classes).join(' ');
+}
+
+/**
+ * Combines classNames. Removes all duplicates
+ */
+export function classesDedupe(
+  ...classes: (
+    | string
+    | false
+    | undefined
+    | null
+    | { [className: string]: any }
+  )[]
+): string {
+  return [...new Set(_classes(classes))].join(' ');
 }
 
 export function getReactAttrs(elem: Element) {

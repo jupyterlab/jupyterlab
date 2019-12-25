@@ -2,13 +2,13 @@
 // Distributed under the terms of the Modified BSD License.
 
 import React from 'react';
-import { classes } from 'typestyle/lib';
 
 import { Text } from '@jupyterlab/coreutils';
 
 import { IIconRegistry, Icon } from './interfaces';
 import { IconImports } from './iconimports';
 import { iconStyle, iconStyleFlat } from '../style/icon';
+import { classes } from '../utils';
 
 import badSvg from '../../style/debug/bad.svg';
 import blankSvg from '../../style/debug/blank.svg';

@@ -271,8 +271,8 @@ function containerCSS(props: IIconStyle): NestedCSSProperties {
 /**
  * for setting the style on the container of an svg node representing an icon
  */
-export const iconStyle = (props: IIconStyle): string => {
-  if (Object.keys(props).length === 0) {
+export const iconStyle = (props?: IIconStyle): string => {
+  if (!props || Object.keys(props).length === 0) {
     return '';
   }
 
@@ -290,8 +290,10 @@ export const iconStyle = (props: IIconStyle): string => {
 /**
  * for setting the style directly on the svg node representing an icon
  */
-export const iconStyleFlat = (props: IIconStyle): string => {
-  const css = iconCSS(props);
+export const iconStyleFlat = (props?: IIconStyle): string => {
+  if (!props || Object.keys(props).length === 0) {
+    return '';
+  }
 
-  return css && style(css);
+  return style(iconCSS(props));
 };

@@ -66,10 +66,7 @@ export class DocumentRegistry implements IDisposable {
 
     let fts = options.initialFileTypes || DocumentRegistry.defaultFileTypes;
     fts.forEach(ft => {
-      let value: DocumentRegistry.IFileType = {
-        ...DocumentRegistry.fileTypeDefaults,
-        ...ft
-      };
+      let value = new DocumentRegistry.FileType(ft);
       this._fileTypes.push(value);
     });
   }
@@ -1212,6 +1209,34 @@ export namespace DocumentRegistry {
   };
 
   /**
+   * A wrapper for IFileTypes
+   */
+  export class FileType implements IFileType {
+    constructor(options: Partial<IFileType>) {
+      Object.assign(this, fileTypeDefaults, options);
+
+      if (!this.iconClass && this.iconRenderer) {
+        // set a default style class for icons
+        this.iconClass = this.iconRenderer.style({
+          kind: 'mainAreaTab',
+          center: true
+        });
+      }
+    }
+
+    readonly name: string;
+    readonly mimeTypes: ReadonlyArray<string>;
+    readonly extensions: ReadonlyArray<string>;
+    readonly displayName: string;
+    readonly pattern: string;
+    readonly iconClass: string;
+    readonly iconLabel: string;
+    readonly iconRenderer: JLIcon;
+    readonly contentType: Contents.ContentType;
+    readonly fileFormat: Contents.FileFormat;
+  }
+
+  /**
    * An arguments object for the `changed` signal.
    */
   export interface IChangedArgs {
@@ -1243,7 +1268,7 @@ export namespace DocumentRegistry {
     name: 'text',
     mimeTypes: ['text/plain'],
     extensions: ['.txt'],
-    iconRenderer: fileIcon.bindStyle({ kind: 'mainAreaTab', center: true })
+    iconRenderer: fileIcon
   };
 
   /**
@@ -1257,7 +1282,7 @@ export namespace DocumentRegistry {
     extensions: ['.ipynb'],
     contentType: 'notebook',
     fileFormat: 'json',
-    iconRenderer: notebookIcon.bindStyle({ kind: 'mainAreaTab', center: true })
+    iconRenderer: notebookIcon
   };
 
   /**
@@ -1269,7 +1294,7 @@ export namespace DocumentRegistry {
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
-    iconRenderer: folderIcon.bindStyle({ kind: 'mainAreaTab', center: true })
+    iconRenderer: folderIcon
   };
 
   /**
@@ -1284,65 +1309,56 @@ export namespace DocumentRegistry {
       displayName: 'Markdown File',
       extensions: ['.md'],
       mimeTypes: ['text/markdown'],
-      iconRenderer: markdownIcon.bindStyle({
-        kind: 'mainAreaTab',
-        center: true
-      })
+      iconRenderer: markdownIcon
     },
     {
       name: 'python',
       displayName: 'Python File',
       extensions: ['.py'],
       mimeTypes: ['text/x-python'],
-      iconRenderer: pythonIcon.bindStyle({ kind: 'mainAreaTab', center: true })
+      iconRenderer: pythonIcon
     },
     {
       name: 'json',
       displayName: 'JSON File',
       extensions: ['.json'],
       mimeTypes: ['application/json'],
-      iconRenderer: jsonIcon.bindStyle({ kind: 'mainAreaTab', center: true })
+      iconRenderer: jsonIcon
     },
     {
       name: 'csv',
       displayName: 'CSV File',
       extensions: ['.csv'],
       mimeTypes: ['text/csv'],
-      iconRenderer: spreadsheetIcon.bindStyle({
-        kind: 'mainAreaTab',
-        center: true
-      })
+      iconRenderer: spreadsheetIcon
     },
     {
       name: 'tsv',
       displayName: 'TSV File',
       extensions: ['.tsv'],
       mimeTypes: ['text/csv'],
-      iconRenderer: spreadsheetIcon.bindStyle({
-        kind: 'mainAreaTab',
-        center: true
-      })
+      iconRenderer: spreadsheetIcon
     },
     {
       name: 'r',
       displayName: 'R File',
       mimeTypes: ['text/x-rsrc'],
       extensions: ['.r'],
-      iconRenderer: rKernelIcon.bindStyle({ kind: 'mainAreaTab', center: true })
+      iconRenderer: rKernelIcon
     },
     {
       name: 'yaml',
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconRenderer: yamlIcon.bindStyle({ kind: 'mainAreaTab', center: true })
+      iconRenderer: yamlIcon
     },
     {
       name: 'svg',
       displayName: 'Image',
       mimeTypes: ['image/svg+xml'],
       extensions: ['.svg'],
-      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1351,7 +1367,7 @@ export namespace DocumentRegistry {
       mimeTypes: ['image/tiff'],
       extensions: ['.tif', '.tiff'],
       iconClass: 'jp-MaterialIcon jp-ImageIcon',
-      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1359,7 +1375,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/jpeg'],
       extensions: ['.jpg', '.jpeg'],
-      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1367,7 +1383,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/gif'],
       extensions: ['.gif'],
-      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1375,7 +1391,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/png'],
       extensions: ['.png'],
-      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1383,7 +1399,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/bmp'],
       extensions: ['.bmp'],
-      iconRenderer: imageIcon.bindStyle({ kind: 'mainAreaTab', center: true }),
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     }
   ];

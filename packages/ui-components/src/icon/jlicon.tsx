@@ -3,32 +3,25 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { classes } from 'typestyle';
 
 import { iconStyle, IIconStyle } from '../style/icon';
-import { getReactAttrs } from '../utils';
-import { Text } from '@jupyterlab/coreutils';
+import { getReactAttrs, classes } from '../utils';
 
 export class JLIcon {
+  private static _instances: Map<string, JLIcon> = Object.create(null);
+
+  static get(name: string): JLIcon {
+    return JLIcon._instances.get(name) as JLIcon;
+  }
+
   constructor({ name, svgstr, _debug = false }: JLIcon.IOptions) {
     this.name = name;
-    this.svgstr = svgstr;
-
-    this._className = 'jp-' + Text.camelCase(name, true) + 'Icon';
+    this._svgstr = svgstr;
     this._debug = _debug;
 
     this.react = this._initReact();
-  }
 
-  className({
-    className,
-    ...propsStyle
-  }: { className?: string } & IIconStyle = {}): string {
-    if (!className) {
-      className = this._className;
-    }
-
-    return classes(className, iconStyle(propsStyle));
+    JLIcon._instances.set(name, this);
   }
 
   element({
@@ -39,7 +32,7 @@ export class JLIcon {
     ...propsStyle
   }: JLIcon.IProps = {}): HTMLElement | null {
     // ensure that svg html is valid
-    const svgElement = this.resolveSvg(title);
+    const svgElement = this.resolveSvg();
     if (!svgElement) {
       // bail if failing silently
       return null;
@@ -48,8 +41,7 @@ export class JLIcon {
     // create a container if needed
     container = container || document.createElement(tag);
 
-    // set the container class to style class + explicitly passed className
-    container.classList.add(...(classNames ? classNames : []));
+    this._initContainer(container, className, propsStyle, title);
 
     // add the svg node to the container
     container.appendChild(svgElement);
@@ -57,13 +49,17 @@ export class JLIcon {
     return svgElement;
   }
 
+  replaceSvg(svgstr: string) {
+    this._svgstr = svgstr;
+  }
+
   render(host: HTMLElement, props: JLIcon.IProps = {}): void {
-    return ReactDOM.render(<this.react {...props} />, host);
+    return ReactDOM.render(<this.react container={host} {...props} />, host);
   }
 
   resolveSvg(title?: string): HTMLElement | null {
     const svgDoc = new DOMParser().parseFromString(
-      this.svgstr,
+      this._svgstr,
       'image/svg+xml'
     );
     const svgElement = svgDoc.documentElement;
@@ -90,12 +86,37 @@ export class JLIcon {
     }
   }
 
+  string() {
+    return this._svgstr;
+  }
+
+  style(props?: IIconStyle) {
+    return iconStyle(props);
+  }
+
   unrender(host: HTMLElement): void {
     ReactDOM.unmountComponentAtNode(host);
   }
 
-  style(props: IIconStyle) {
-    return iconStyle(props);
+  protected _initContainer(
+    container: HTMLElement,
+    className?: string,
+    propsStyle?: IIconStyle,
+    title?: string
+  ) {
+    const classStyle = this.style(propsStyle);
+
+    if (className || className === '') {
+      // override the container class with explicitly passed-in class + style class
+      container.className = classes(className, classStyle);
+    } else if (classStyle) {
+      // add the style class to the container class
+      container.classList.add(classStyle);
+    }
+
+    if (title) {
+      container.title = title;
+    }
   }
 
   protected _initReact() {
@@ -111,14 +132,9 @@ export class JLIcon {
         ref: React.RefObject<SVGElement>
       ) => {
         const Tag = tag;
-        const propsStyleComb = { ...this.style, ...propsStyle };
-        const classNames = classes(
-          className,
-          propsStyleComb ? iconStyle(propsStyleComb) : ''
-        );
 
         // ensure that svg html is valid
-        const svgElement = this.resolveSvg(title);
+        const svgElement = this.resolveSvg();
         if (!svgElement) {
           // bail if failing silently
           return <></>;
@@ -133,19 +149,12 @@ export class JLIcon {
         );
 
         if (container) {
-          container.classList.add(
-            ...(classNames ? classNames.split(/\s+/) : [])
-          );
+          this._initContainer(container, className, propsStyle, title);
 
           return svgComponent;
         } else {
           return (
-            <Tag
-              className={classes(
-                className,
-                propsStyleComb ? iconStyle(propsStyleComb) : ''
-              )}
-            >
+            <Tag className={classes(className, this.style(propsStyle))}>
               {svgComponent}
             </Tag>
           );
@@ -161,11 +170,10 @@ export class JLIcon {
   readonly react: React.ForwardRefExoticComponent<
     JLIcon.IProps & React.RefAttributes<SVGElement>
   >;
-  readonly svgstr: string;
 
   protected _className: string;
   protected _debug: boolean;
-  protected _svgs: { [key: string]: string } = Object.create(null);
+  protected _svgstr: string;
 }
 
 /**
