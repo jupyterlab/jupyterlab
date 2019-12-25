@@ -58,12 +58,6 @@
   background: var(--jp-brand-color1);
 }
 
-#tab-manager .p-TabBar-tabIcon,
-#tab-manager .p-TabBar-tabLabel,
-#tab-manager .p-TabBar-tabCloseIcon {
-  display: inline-block;
-}
-
 #tab-manager .p-TabBar-tabLabel {
   line-height: var(--jp-private-tab-manager-tab-height);
   padding-left: 4px;

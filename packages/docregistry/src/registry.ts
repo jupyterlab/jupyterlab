@@ -1366,7 +1366,6 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/tiff'],
       extensions: ['.tif', '.tiff'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
       iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
