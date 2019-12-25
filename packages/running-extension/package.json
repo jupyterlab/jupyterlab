@@ -39,6 +39,7 @@
     "@jupyterlab/coreutils": "^4.0.0-alpha.4",
     "@jupyterlab/running": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
+    "@jupyterlab/ui-components": "^2.0.0-alpha.4",
     "@lumino/algorithm": "^1.2.1"
   },
   "devDependencies": {

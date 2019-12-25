@@ -66,7 +66,10 @@ export class DocumentRegistry implements IDisposable {
 
     let fts = options.initialFileTypes || DocumentRegistry.defaultFileTypes;
     fts.forEach(ft => {
-      let value = new DocumentRegistry.FileType(ft);
+      let value: DocumentRegistry.IFileType = {
+        ...DocumentRegistry.fileTypeDefaults,
+        ...ft
+      };
       this._fileTypes.push(value);
     });
   }
@@ -1207,34 +1210,6 @@ export namespace DocumentRegistry {
     contentType: 'file',
     fileFormat: 'text'
   };
-
-  /**
-   * A wrapper for IFileTypes
-   */
-  export class FileType implements IFileType {
-    constructor(options: Partial<IFileType>) {
-      Object.assign(this, fileTypeDefaults, options);
-
-      if (!this.iconClass && this.iconRenderer) {
-        // set a default style class for icons
-        this.iconClass = this.iconRenderer.style({
-          kind: 'mainAreaTab',
-          center: true
-        });
-      }
-    }
-
-    readonly name: string;
-    readonly mimeTypes: ReadonlyArray<string>;
-    readonly extensions: ReadonlyArray<string>;
-    readonly displayName: string;
-    readonly pattern: string;
-    readonly iconClass: string;
-    readonly iconLabel: string;
-    readonly iconRenderer: JLIcon;
-    readonly contentType: Contents.ContentType;
-    readonly fileFormat: Contents.FileFormat;
-  }
 
   /**
    * An arguments object for the `changed` signal.

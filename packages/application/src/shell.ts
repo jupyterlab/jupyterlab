@@ -3,6 +3,8 @@
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
+import { JLIcon } from '@jupyterlab/ui-components';
+
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
 import { PromiseDelegate, Token } from '@lumino/coreutils';
@@ -741,9 +743,19 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       ref = find(dock.widgets(), value => value.id === options!.ref!) || null;
     }
 
+    const { title } = widget;
     // Add widget ID to tab so that we can get a handle on the tab's widget
     // (for context menu support)
-    widget.title.dataset = { ...widget.title.dataset, id: widget.id };
+    title.dataset = { ...title.dataset, id: widget.id };
+
+    // set an appropriate style class for the iconRenderer
+    if (title.iconRenderer instanceof JLIcon) {
+      title.iconClass = title.iconRenderer.class({
+        className: title.iconClass,
+        center: true,
+        kind: 'mainAreaTab'
+      });
+    }
 
     dock.addWidget(widget, { mode, ref });
 
@@ -1147,6 +1159,16 @@ namespace Private {
       // Store the parent id in the title dataset
       // in order to dispatch click events to the right widget.
       title.dataset = { id: widget.id };
+
+      // set an appropriate style class for the iconRenderer
+      if (title.iconRenderer instanceof JLIcon) {
+        title.iconClass = title.iconRenderer.class({
+          className: title.iconClass,
+          center: true,
+          kind: 'sideBar'
+        });
+      }
+
       this._refreshVisibility();
     }
 

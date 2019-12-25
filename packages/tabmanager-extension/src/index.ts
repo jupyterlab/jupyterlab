@@ -1,16 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { each } from '@lumino/algorithm';
+import { TabBar, Widget } from '@lumino/widgets';
+
 import {
   ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
-import { each } from '@lumino/algorithm';
-
-import { TabBar, Widget } from '@lumino/widgets';
+import { tabIcon } from '@jupyterlab/ui-components';
 
 /**
  * The default tab manager extension.
@@ -31,7 +31,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     }
 
     tabs.id = 'tab-manager';
-    tabs.title.iconClass = 'jp-TabIcon jp-SideBar-tabIcon';
+    tabs.title.iconRenderer = tabIcon;
     tabs.title.caption = 'Open Tabs';
     header.textContent = 'Open Tabs';
     tabs.node.insertBefore(header, tabs.contentNode);

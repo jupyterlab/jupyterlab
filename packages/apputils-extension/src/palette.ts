@@ -4,15 +4,13 @@
 |----------------------------------------------------------------------------*/
 
 import { find } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
 import { CommandPalette } from '@lumino/widgets';
 
 import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
-
 import { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
+import { paletteIcon } from '@jupyterlab/ui-components';
 
 /**
  * The command IDs used by the apputils extension.
@@ -31,7 +29,7 @@ export class Palette implements ICommandPalette {
    */
   constructor(palette: CommandPalette) {
     this._palette = palette;
-    this._palette.title.iconClass = 'jp-PaletteIcon jp-SideBar-tabIcon';
+    this._palette.title.iconRenderer = paletteIcon;
     this._palette.title.label = '';
     this._palette.title.caption = 'Command Palette';
   }
@@ -145,6 +143,7 @@ namespace Private {
     if (!palette) {
       palette = new CommandPalette({ commands: app.commands });
       palette.id = 'command-palette';
+      palette.title.iconRenderer = paletteIcon;
       palette.title.label = 'Commands';
     }
 

@@ -11,7 +11,7 @@ import {
 
 import { GroupItem, TextItem, interactiveItem } from '@jupyterlab/statusbar';
 
-import { DefaultIconReact } from '@jupyterlab/ui-components';
+import { listIcon } from '@jupyterlab/ui-components';
 
 import { Signal } from '@lumino/signaling';
 
@@ -32,15 +32,10 @@ function LogConsoleStatusComponent(
     title = `${props.newMessages} new messages, `;
   }
   title += `${props.logEntries} log entries for ${props.source}`;
-  // inline conditional doesn't seem to work with strict TS currently...
-  let cond: JSX.Element = (false as unknown) as JSX.Element;
-  if (props.newMessages > 0) {
-    cond = <TextItem source={props.newMessages} />;
-  }
   return (
     <GroupItem spacing={0} onClick={props.handleClick} title={title}>
-      <DefaultIconReact name={'list'} top={'2px'} kind={'statusBar'} />
-      {cond}
+      <listIcon.react top={'2px'} kind={'statusBar'} />
+      {props.newMessages > 0 ? <TextItem source={props.newMessages} /> : <></>}
     </GroupItem>
   );
 }
