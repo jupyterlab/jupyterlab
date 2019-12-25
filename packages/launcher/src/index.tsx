@@ -8,7 +8,7 @@ import {
 } from '@jupyterlab/apputils';
 
 import {
-  combineClasses,
+  classes,
   DefaultIconReact,
   defaultIconRegistry
 } from '@jupyterlab/ui-components';
@@ -212,7 +212,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
                 />
               ) : (
                 <div
-                  className={combineClasses(
+                  className={classes(
                     iconClass,
                     'jp-Launcher-sectionIcon',
                     'jp-Launcher-icon'
