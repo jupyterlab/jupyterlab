@@ -389,7 +389,7 @@ export async function ensureUiComponents(
       _iconImportStatements.push(`import ${svgname} from '${svgpath}';`);
       _iconModelDeclarations.push(`{ name: '${name}', svg: ${svgname} }`);
       _wrappedIconDefs.push(
-        `export const ${iconname} = new JLIcon('${iconname}', ${svgname});`
+        `export const ${iconname} = new JLIcon({ name: '${iconname}', svgstr: ${svgname} });`
       );
     }
   });
@@ -403,7 +403,7 @@ export async function ensureUiComponents(
     HEADER_TEMPLATE + ICON_IMPORTS_TEMPLATE,
     { funcName, iconImportStatements, iconModelDeclarations, wrappedIconDefs }
   );
-  messages.push(...ensureFile(iconImportsPath, iconImportsContents));
+  messages.push(...ensureFile(iconImportsPath, iconImportsContents, false));
 
   /* support for deprecated icon CSS classes */
   const iconCSSDir = path.join(pkgPath, 'style');

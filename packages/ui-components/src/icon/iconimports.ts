@@ -85,40 +85,37 @@ export namespace IconImports {
 }
 
 // wrapped icon definitions
-export const fileIcon = new JLIcon('fileIcon', fileSvg);
-export const folderIcon = new JLIcon('folderIcon', folderSvg);
-export const html5Icon = new JLIcon('html5Icon', html5Svg);
-export const imageIcon = new JLIcon('imageIcon', imageSvg);
-export const jsonIcon = new JLIcon('jsonIcon', jsonSvg);
-export const markdownIcon = new JLIcon('markdownIcon', markdownSvg);
-export const notebookIcon = new JLIcon('notebookIcon', notebookSvg);
-export const pythonIcon = new JLIcon('pythonIcon', pythonSvg);
-export const rKernelIcon = new JLIcon('rKernelIcon', rKernelSvg);
-export const reactIcon = new JLIcon('reactIcon', reactSvg);
-export const spreadsheetIcon = new JLIcon('spreadsheetIcon', spreadsheetSvg);
-export const textEditorIcon = new JLIcon('textEditorIcon', textEditorSvg);
-export const yamlIcon = new JLIcon('yamlIcon', yamlSvg);
-export const buildIcon = new JLIcon('buildIcon', buildSvg);
-export const extensionIcon = new JLIcon('extensionIcon', extensionSvg);
-export const paletteIcon = new JLIcon('paletteIcon', paletteSvg);
-export const runningIcon = new JLIcon('runningIcon', runningSvg);
-export const tabIcon = new JLIcon('tabIcon', tabSvg);
-export const jupyterFaviconIcon = new JLIcon(
-  'jupyterFaviconIcon',
-  jupyterFaviconSvg
-);
-export const kernelIcon = new JLIcon('kernelIcon', kernelSvg);
-export const lineFormIcon = new JLIcon('lineFormIcon', lineFormSvg);
-export const listIcon = new JLIcon('listIcon', listSvg);
-export const notTrustedIcon = new JLIcon('notTrustedIcon', notTrustedSvg);
-export const terminalIcon = new JLIcon('terminalIcon', terminalSvg);
-export const trustedIcon = new JLIcon('trustedIcon', trustedSvg);
-export const addIcon = new JLIcon('addIcon', addSvg);
-export const checkIcon = new JLIcon('checkIcon', checkSvg);
-export const copyIcon = new JLIcon('copyIcon', copySvg);
-export const cutIcon = new JLIcon('cutIcon', cutSvg);
-export const pasteIcon = new JLIcon('pasteIcon', pasteSvg);
-export const refreshIcon = new JLIcon('refreshIcon', refreshSvg);
-export const runIcon = new JLIcon('runIcon', runSvg);
-export const saveIcon = new JLIcon('saveIcon', saveSvg);
-export const stopIcon = new JLIcon('stopIcon', stopSvg);
+export const fileIcon = new JLIcon({ name: 'fileIcon', svgstr: fileSvg });
+export const folderIcon = new JLIcon({ name: 'folderIcon', svgstr: folderSvg });
+export const html5Icon = new JLIcon({ name: 'html5Icon', svgstr: html5Svg });
+export const imageIcon = new JLIcon({ name: 'imageIcon', svgstr: imageSvg });
+export const jsonIcon = new JLIcon({ name: 'jsonIcon', svgstr: jsonSvg });
+export const markdownIcon = new JLIcon({ name: 'markdownIcon', svgstr: markdownSvg });
+export const notebookIcon = new JLIcon({ name: 'notebookIcon', svgstr: notebookSvg });
+export const pythonIcon = new JLIcon({ name: 'pythonIcon', svgstr: pythonSvg });
+export const rKernelIcon = new JLIcon({ name: 'rKernelIcon', svgstr: rKernelSvg });
+export const reactIcon = new JLIcon({ name: 'reactIcon', svgstr: reactSvg });
+export const spreadsheetIcon = new JLIcon({ name: 'spreadsheetIcon', svgstr: spreadsheetSvg });
+export const textEditorIcon = new JLIcon({ name: 'textEditorIcon', svgstr: textEditorSvg });
+export const yamlIcon = new JLIcon({ name: 'yamlIcon', svgstr: yamlSvg });
+export const buildIcon = new JLIcon({ name: 'buildIcon', svgstr: buildSvg });
+export const extensionIcon = new JLIcon({ name: 'extensionIcon', svgstr: extensionSvg });
+export const paletteIcon = new JLIcon({ name: 'paletteIcon', svgstr: paletteSvg });
+export const runningIcon = new JLIcon({ name: 'runningIcon', svgstr: runningSvg });
+export const tabIcon = new JLIcon({ name: 'tabIcon', svgstr: tabSvg });
+export const jupyterFaviconIcon = new JLIcon({ name: 'jupyterFaviconIcon', svgstr: jupyterFaviconSvg });
+export const kernelIcon = new JLIcon({ name: 'kernelIcon', svgstr: kernelSvg });
+export const lineFormIcon = new JLIcon({ name: 'lineFormIcon', svgstr: lineFormSvg });
+export const listIcon = new JLIcon({ name: 'listIcon', svgstr: listSvg });
+export const notTrustedIcon = new JLIcon({ name: 'notTrustedIcon', svgstr: notTrustedSvg });
+export const terminalIcon = new JLIcon({ name: 'terminalIcon', svgstr: terminalSvg });
+export const trustedIcon = new JLIcon({ name: 'trustedIcon', svgstr: trustedSvg });
+export const addIcon = new JLIcon({ name: 'addIcon', svgstr: addSvg });
+export const checkIcon = new JLIcon({ name: 'checkIcon', svgstr: checkSvg });
+export const copyIcon = new JLIcon({ name: 'copyIcon', svgstr: copySvg });
+export const cutIcon = new JLIcon({ name: 'cutIcon', svgstr: cutSvg });
+export const pasteIcon = new JLIcon({ name: 'pasteIcon', svgstr: pasteSvg });
+export const refreshIcon = new JLIcon({ name: 'refreshIcon', svgstr: refreshSvg });
+export const runIcon = new JLIcon({ name: 'runIcon', svgstr: runSvg });
+export const saveIcon = new JLIcon({ name: 'saveIcon', svgstr: saveSvg });
+export const stopIcon = new JLIcon({ name: 'stopIcon', svgstr: stopSvg });

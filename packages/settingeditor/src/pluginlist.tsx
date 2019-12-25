@@ -6,7 +6,7 @@
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import {
-  combineClasses,
+  classes,
   DefaultIconReact,
   defaultIconRegistry
 } from '@jupyterlab/ui-components';
@@ -262,11 +262,7 @@ namespace Private {
       const { id, schema, version } = plugin;
       const itemTitle = `${schema.description}\n${id}\n${version}`;
       const image = getHint(ICON_CLASS_KEY, registry, plugin);
-      const iconClass = combineClasses(
-        image,
-        'jp-PluginList-icon',
-        'jp-MaterialIcon'
-      );
+      const iconClass = classes(image, 'jp-PluginList-icon', 'jp-MaterialIcon');
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
 
       return (
