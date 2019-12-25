@@ -576,9 +576,12 @@ function activateNotebookHandler(
   factory.widgetCreated.connect((sender, widget) => {
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
-    widget.title.iconClass = ft.iconClass;
-    widget.title.iconLabel = ft.iconLabel;
-    widget.title.iconRenderer = ft.iconRenderer;
+
+    // Set up the title icon
+    widget.title.iconClass = ft?.iconClass ?? '';
+    widget.title.iconLabel = ft?.iconLabel ?? '';
+    widget.title.iconRenderer = ft?.iconRenderer!;
+
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);

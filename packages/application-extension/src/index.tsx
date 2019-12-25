@@ -26,14 +26,16 @@ import {
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
-import { IStateDB } from '@jupyterlab/statedb';
-
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import {
   IPropertyInspectorProvider,
   SideBarPropertyInspectorProvider
 } from '@jupyterlab/property-inspector';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { IStateDB } from '@jupyterlab/statedb';
+
+import { buildIcon } from "@jupyterlab/ui-components";
 
 import { each, iter, toArray } from '@lumino/algorithm';
 
@@ -799,7 +801,7 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   provides: IPropertyInspectorProvider,
   activate: (app: JupyterFrontEnd, labshell: ILabShell) => {
     const widget = new SideBarPropertyInspectorProvider(labshell);
-    widget.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+    widget.title.iconRenderer = buildIcon;
     widget.title.caption = 'Property Inspector';
     widget.id = 'jp-property-inspector';
     labshell.add(widget, 'left');

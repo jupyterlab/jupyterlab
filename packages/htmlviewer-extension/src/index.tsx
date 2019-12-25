@@ -97,7 +97,7 @@ function activateHTMLViewer(
 
     widget.title.iconClass = ft.iconClass ?? '';
     widget.title.iconLabel = ft.iconLabel ?? '';
-    widget.title.iconRenderer = ft.iconRenderer;
+    widget.title.iconRenderer = ft.iconRenderer!;
   });
 
   // Add a command to trust the active HTML document,
