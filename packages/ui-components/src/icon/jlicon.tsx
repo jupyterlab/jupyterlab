@@ -204,10 +204,15 @@ export namespace JLIcon {
      */
     className?: string;
 
-    container?: HTMLElement;
     /**
-     * HTML element tag of the icon's outermost node, which acts as a
-     * container for the actual svg node
+     * The icon's outermost node, which acts as a container for the actual
+     * svg node. If container is not supplied, it will be created
+     */
+    container?: HTMLElement;
+
+    /**
+     * HTML element tag used to create the icon's outermost container node,
+     * if no container is passed in
      */
     tag?: 'div' | 'span';
 
