@@ -41,7 +41,7 @@ export class JLIcon {
     // create a container if needed
     container = container || document.createElement(tag);
 
-    this._initContainer(container, className, propsStyle, title);
+    this._initContainer({ container, className, propsStyle, title });
 
     // add the svg node to the container
     container.appendChild(svgElement);
@@ -98,12 +98,17 @@ export class JLIcon {
     ReactDOM.unmountComponentAtNode(host);
   }
 
-  protected _initContainer(
-    container: HTMLElement,
-    className?: string,
-    propsStyle?: IIconStyle,
-    title?: string
-  ) {
+  protected _initContainer({
+    container,
+    className,
+    propsStyle,
+    title
+  }: {
+    container: HTMLElement;
+    className?: string;
+    propsStyle?: IIconStyle;
+    title?: string;
+  }) {
     const classStyle = this.style(propsStyle);
 
     if (className || className === '') {
@@ -149,7 +154,7 @@ export class JLIcon {
         );
 
         if (container) {
-          this._initContainer(container, className, propsStyle, title);
+          this._initContainer({ container, className, propsStyle, title });
 
           return svgComponent;
         } else {
