@@ -8,7 +8,7 @@ import { iconStyle, IIconStyle } from '../style/icon';
 import { getReactAttrs, classes } from '../utils';
 
 export class JLIcon {
-  private static _instances: Map<string, JLIcon> = Object.create(null);
+  private static _instances = new Map<string, JLIcon>();
 
   static get(name: string): JLIcon {
     return JLIcon._instances.get(name) as JLIcon;
