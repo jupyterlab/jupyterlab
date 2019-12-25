@@ -26,24 +26,6 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import * as nbformat from '@jupyterlab/nbformat';
-
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
-import { IStateDB } from '@jupyterlab/statedb';
-
-import { ArrayExt } from '@lumino/algorithm';
-
-import {
-  UUID,
-  JSONExt,
-  JSONObject,
-  ReadonlyPartialJSONObject,
-  ReadonlyJSONValue
-} from '@lumino/coreutils';
-
-import { DisposableSet } from '@lumino/disposable';
-
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
 import { ILauncher } from '@jupyterlab/launcher';
@@ -57,6 +39,8 @@ import {
   IRunMenu,
   IViewMenu
 } from '@jupyterlab/mainmenu';
+
+import * as nbformat from '@jupyterlab/nbformat';
 
 import {
   NotebookTools,
@@ -78,14 +62,32 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ServiceManager } from '@jupyterlab/services';
 
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { IStateDB } from '@jupyterlab/statedb';
+
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { JSONValue } from '@lumino/coreutils';
+import { buildIcon } from '@jupyterlab/ui-components';
+
+import { ArrayExt } from '@lumino/algorithm';
+
+import { CommandRegistry } from '@lumino/commands';
+
+import {
+  JSONExt,
+  JSONObject,
+  JSONValue,
+  ReadonlyPartialJSONObject,
+  ReadonlyJSONValue,
+  UUID
+} from '@lumino/coreutils';
+
+import { DisposableSet } from '@lumino/disposable';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
 import { Panel, Menu } from '@lumino/widgets';
-import { CommandRegistry } from '@lumino/commands';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -462,7 +464,7 @@ function activateNotebookTools(
       notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
     }
   });
-  notebookTools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+  notebookTools.title.iconRenderer = buildIcon;
   notebookTools.title.caption = 'Notebook Tools';
   notebookTools.id = id;
 

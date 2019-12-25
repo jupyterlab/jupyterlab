@@ -7,14 +7,12 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { Dialog, showDialog, ICommandPalette } from '@jupyterlab/apputils';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { ExtensionView } from '@jupyterlab/extensionmanager';
-
+import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { extensionIcon } from '@jupyterlab/ui-components';
+
 
 /**
  * IDs of the commands added by this extension.
@@ -48,7 +46,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const createView = () => {
       const v = new ExtensionView(serviceManager);
       v.id = 'extensionmanager.main-view';
-      v.title.iconClass = 'jp-ExtensionIcon jp-SideBar-tabIcon';
+      v.title.iconRenderer = extensionIcon;
       v.title.caption = 'Extension Manager';
       if (restorer) {
         restorer.add(v, v.id);

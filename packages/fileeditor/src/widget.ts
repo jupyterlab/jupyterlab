@@ -326,10 +326,6 @@ export class FileEditorFactory extends ABCWidgetFactory<
       mimeTypeService: this._services.mimeTypeService
     });
 
-    content.title.iconClass = textEditorIcon.style({
-      kind: 'mainAreaTab',
-      center: true
-    });
     content.title.iconRenderer = textEditorIcon;
 
     const widget = new DocumentWidget({ content, context });

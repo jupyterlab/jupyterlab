@@ -42,7 +42,7 @@ import { IStateDB } from '@jupyterlab/statedb';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { IIconRegistry } from '@jupyterlab/ui-components';
+import { folderIcon, IIconRegistry } from '@jupyterlab/ui-components';
 
 import { IIterator, map, reduce, toArray } from '@lumino/algorithm';
 
@@ -295,7 +295,7 @@ function activateBrowser(
     mainMenu
   );
 
-  browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
+  browser.title.iconRenderer = folderIcon;
   browser.title.caption = 'File Browser';
   labShell.add(browser, 'left', { rank: 100 });
 

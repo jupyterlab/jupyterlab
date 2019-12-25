@@ -5,7 +5,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import { iconStyle, IIconStyle } from '../style/icon';
-import { getReactAttrs, classes } from '../utils';
+import { getReactAttrs, classes, classesDedupe } from '../utils';
 
 export class JLIcon {
   private static _instances = new Map<string, JLIcon>();
@@ -22,6 +22,10 @@ export class JLIcon {
     this.react = this._initReact();
 
     JLIcon._instances.set(name, this);
+  }
+
+  class({ className, ...propsStyle }: { className?: string } & IIconStyle) {
+    return classesDedupe(className, iconStyle(propsStyle));
   }
 
   element({
@@ -90,10 +94,6 @@ export class JLIcon {
     return this._svgstr;
   }
 
-  style(props?: IIconStyle) {
-    return iconStyle(props);
-  }
-
   unrender(host: HTMLElement): void {
     ReactDOM.unmountComponentAtNode(host);
   }
@@ -109,7 +109,7 @@ export class JLIcon {
     propsStyle?: IIconStyle;
     title?: string;
   }) {
-    const classStyle = this.style(propsStyle);
+    const classStyle = iconStyle(propsStyle);
 
     if (className || className === '') {
       // override the container class with explicitly passed-in class + style class
@@ -159,7 +159,7 @@ export class JLIcon {
           return svgComponent;
         } else {
           return (
-            <Tag className={classes(className, this.style(propsStyle))}>
+            <Tag className={classes(className, iconStyle(propsStyle))}>
               {svgComponent}
             </Tag>
           );
@@ -191,7 +191,6 @@ export namespace JLIcon {
   export interface IOptions {
     name: string;
     svgstr: string;
-    style?: IIconStyle;
     _debug?: boolean;
   }
 

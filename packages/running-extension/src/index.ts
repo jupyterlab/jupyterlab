@@ -12,6 +12,7 @@ import {
   RunningSessionManagers,
   RunningSessions
 } from '@jupyterlab/running';
+import { runningIcon } from '@jupyterlab/ui-components';
 
 import { Session } from '@jupyterlab/services';
 import { PathExt } from '@jupyterlab/coreutils';
@@ -58,7 +59,7 @@ function activate(
   let runningSessionManagers = new RunningSessionManagers();
   let running = new RunningSessions(runningSessionManagers);
   running.id = 'jp-running-sessions';
-  running.title.iconClass = 'jp-RunningIcon jp-SideBar-tabIcon';
+  running.title.iconRenderer = runningIcon;
   running.title.caption = 'Running Terminals and Kernels';
 
   // Let the application restorer track the running panel for restoration of
