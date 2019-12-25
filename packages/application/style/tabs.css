@@ -125,12 +125,6 @@
   transform: translateX(-1px);
 }
 
-.p-DockPanel-tabBar .p-TabBar-tabIcon,
-.p-DockPanel-tabBar .p-TabBar-tabLabel,
-.p-DockPanel-tabBar .p-TabBar-tabCloseIcon {
-  display: inline-block;
-}
-
 .p-DockPanel-tabBar .p-TabBar-tab .p-TabBar-tabIcon,
 .p-TabBar-tab.p-mod-drag-image .p-TabBar-tabIcon {
   width: 14px;
