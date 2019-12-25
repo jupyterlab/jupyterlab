@@ -42,6 +42,7 @@
     "@jupyterlab/property-inspector": "^2.0.0-alpha.4",
     "@jupyterlab/settingregistry": "^2.0.0-alpha.4",
     "@jupyterlab/statedb": "^2.0.0-alpha.4",
+    "@jupyterlab/ui-components": "^2.0.0-alpha.4",
     "@lumino/algorithm": "^1.2.1",
     "@lumino/coreutils": "^1.4.0",
     "@lumino/disposable": "^1.3.2",
