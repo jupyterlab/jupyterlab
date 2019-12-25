@@ -13,7 +13,6 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { extensionIcon } from '@jupyterlab/ui-components';
 
-
 /**
  * IDs of the commands added by this extension.
  */
@@ -130,11 +129,7 @@ namespace Private {
         Dialog.warnButton({ label: 'Enable' })
       ]
     }).then(result => {
-      if (result.button.accept) {
-        return true;
-      } else {
-        return false;
-      }
+      return result.button.accept;
     });
   }
 }
