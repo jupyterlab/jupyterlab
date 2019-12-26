@@ -81,8 +81,15 @@ export class JLIcon {
       return null;
     }
 
-    // create a container if needed
-    container = container || document.createElement(tag);
+    if (container) {
+      // take ownership by removing any existing children
+      while (container.firstChild) {
+        container.firstChild.remove();
+      }
+    } else {
+      // create a container if needed
+      container = document.createElement(tag);
+    }
 
     this._initContainer({ container, className, propsStyle, title });
 

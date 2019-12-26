@@ -20,7 +20,12 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
-import { IIconRegistry } from '@jupyterlab/ui-components';
+import {
+  classes,
+  fileIcon,
+  IIconRegistry,
+  JLIcon
+} from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
@@ -44,8 +49,6 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { Widget } from '@lumino/widgets';
-
-import ReactDOM from 'react-dom';
 
 import { FileBrowserModel } from './model';
 
@@ -736,10 +739,7 @@ export class DirListing extends Widget {
 
     // Remove any excess item nodes.
     while (nodes.length > items.length) {
-      let node = nodes.pop();
-      let icon = DOMUtils.findElement(node!, ITEM_ICON_CLASS);
-      ReactDOM.unmountComponentAtNode(icon);
-      content.removeChild(node!);
+      content.removeChild(nodes.pop()!);
     }
 
     // Add any missing item nodes.
@@ -1808,40 +1808,27 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType
     ): void {
-      let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
-      let text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
-      let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+      const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
+      const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
+      const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      if (fileType) {
-        // TODO: remove workaround if...else/code in else clause in v2.0.0
-        // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of filebrowser
-        if (fileType.iconRenderer) {
-          // add icon as svg node. Can be styled using CSS
-          fileType.iconRenderer.render(icon, {
-            className: ITEM_ICON_CLASS,
-            container: icon,
-            title: fileType.iconLabel,
-            center: true,
-            kind: 'listing'
-          });
-        } else {
-          // cleanup after react
-          ReactDOM.unmountComponentAtNode(icon);
+      let icon: JLIcon;
+      let iconClass: string | undefined;
 
-          // add icon as CSS background image. Can't be styled using CSS
-          icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
-          icon.textContent = fileType.iconLabel || '';
-        }
+      if (fileType?.iconRenderer) {
+        // use the icon and optional iconClass supplied by the ft
+        icon = fileType.iconRenderer;
+        iconClass = classes(ITEM_ICON_CLASS, fileType.iconClass);
+      } else if (fileType?.iconClass) {
+        // try to look up the icon based on the ft iconClass
+        icon = JLIcon.get(fileType.iconClass, fileIcon);
       } else {
-        // cleanup after react
-        ReactDOM.unmountComponentAtNode(icon);
-
-        // use default icon as CSS background image
-        icon.className = ITEM_ICON_CLASS;
-        icon.textContent = '';
-        // clean up the svg icon annotation, if any
-        delete icon.dataset.icon;
+        // fallback to fileIcon
+        icon = fileIcon;
       }
+
+      // render the icon svg node
+      icon.element({className: iconClass, container: iconContainer, center: true, kind: 'listing'});
 
       let hoverText = 'Name: ' + model.name;
       // add file size to pop up if its available
