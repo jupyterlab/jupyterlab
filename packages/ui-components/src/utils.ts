@@ -3,6 +3,9 @@
 
 import { Text } from '@jupyterlab/coreutils';
 
+/**
+ * Inner works of class combining functions
+ */
 function _classes(
   classes: (string | false | undefined | null | { [className: string]: any })[]
 ): string[] {
@@ -20,6 +23,10 @@ function _classes(
 
 /**
  * Combines classNames.
+ *
+ * @param classes - A list of classNames
+ *
+ * @returns A single string with the combined className
  */
 export function classes(
   ...classes: (
@@ -35,6 +42,10 @@ export function classes(
 
 /**
  * Combines classNames. Removes all duplicates
+ *
+ * @param classes - A list of classNames
+ *
+ * @returns A single string with the combined className
  */
 export function classesDedupe(
   ...classes: (
@@ -48,9 +59,23 @@ export function classesDedupe(
   return [...new Set(_classes(classes))].join(' ');
 }
 
+/**
+ * Translates the attributes of a DOM element into attributes that can
+ * be understood by React. Currently not comprehensive, we will add special
+ * cases as they become relevant.
+ *
+ * @param elem - A DOM element
+ *
+ * @returns An object with key:value pairs that are the React-friendly
+ * translation of elem's attributes
+ */
 export function getReactAttrs(elem: Element) {
   return elem.getAttributeNames().reduce((d, name) => {
-    if (name !== 'style') {
+    if (name === 'style') {
+      void 0;
+    } else if (name.startsWith('data')) {
+      d[name] = elem.getAttribute(name);
+    } else {
       d[Text.camelCase(name)] = elem.getAttribute(name);
     }
     return d;

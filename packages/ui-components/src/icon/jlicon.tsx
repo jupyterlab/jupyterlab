@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { UUID } from '@lumino/coreutils';
+
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -55,7 +57,7 @@ export class JLIcon {
   constructor({ name, svgstr }: JLIcon.IOptions) {
     this.name = name;
     this._className = JLIcon.nameToClassName(name);
-    this._svgstr = svgstr;
+    this.svgstr = svgstr;
 
     this.react = this._initReact();
 
@@ -74,6 +76,13 @@ export class JLIcon {
     tag = 'div',
     ...propsStyle
   }: JLIcon.IProps = {}): HTMLElement | null {
+    // check if icon element is already set
+    const maybeSvgElement = container?.firstChild as HTMLElement;
+    if (maybeSvgElement?.dataset?.iconid === this._uuid) {
+      // return the existing icon element
+      return maybeSvgElement;
+    }
+
     // ensure that svg html is valid
     const svgElement = this.resolveSvg();
     if (!svgElement) {
@@ -99,8 +108,11 @@ export class JLIcon {
     return svgElement;
   }
 
-  replaceSvg(svgstr: string) {
+  set svgstr(svgstr: string) {
     this._svgstr = svgstr;
+
+    // associate a unique id with this particular svgstr
+    this._uuid = UUID.uuid4();
   }
 
   render(host: HTMLElement, props: JLIcon.IProps = {}): void {
@@ -128,6 +140,8 @@ export class JLIcon {
       }
     } else {
       // parse succeeded
+      svgElement.dataset.iconid = this._uuid;
+
       if (title) {
         Private.setTitleSvg(svgElement, title);
       }
@@ -224,6 +238,7 @@ export class JLIcon {
 
   protected _className: string;
   protected _svgstr: string;
+  protected _uuid: string;
 }
 
 /**

@@ -1812,20 +1812,8 @@ export namespace DirListing {
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      let icon: JLIcon;
-      let iconClass: string | undefined;
-
-      if (fileType?.iconRenderer) {
-        // use the icon and optional iconClass supplied by the ft
-        icon = fileType.iconRenderer;
-        iconClass = classes(ITEM_ICON_CLASS, fileType.iconClass);
-      } else if (fileType?.iconClass) {
-        // try to look up the icon based on the ft iconClass
-        icon = JLIcon.get(fileType.iconClass, fileIcon);
-      } else {
-        // fallback to fileIcon
-        icon = fileIcon;
-      }
+      let icon = fileType?.iconRenderer ? fileType.iconRenderer : (fileType?.iconClass ? JLIcon.get(fileType.iconClass) : fileIcon);
+      let iconClass = classes(ITEM_ICON_CLASS, fileType?.iconClass);
 
       // render the icon svg node
       icon.element({className: iconClass, container: iconContainer, center: true, kind: 'listing'});
