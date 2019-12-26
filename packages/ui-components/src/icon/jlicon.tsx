@@ -4,24 +4,63 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import { Text } from '@jupyterlab/coreutils';
+
 import { iconStyle, IIconStyle } from '../style/icon';
 import { getReactAttrs, classes, classesDedupe } from '../utils';
 
+import badSvg from '../../style/debug/bad.svg';
+import blankSvg from '../../style/debug/blank.svg';
+
 export class JLIcon {
   private static _instances = new Map<string, JLIcon>();
+  private static _debug: boolean = false;
 
-  static get(name: string): JLIcon {
-    return JLIcon._instances.get(name) as JLIcon;
+  /**
+   * Get any existing JLIcon instance by name
+   *
+   * @param name - Name of the JLIcon instance to fetch
+   *
+   * @param fallback - Optional default JLIcon instance to use if
+   * name is not found
+   *
+   * @returns A JLIcon instance
+   */
+  static get(name: string, fallback?: JLIcon): JLIcon {
+    const icon = JLIcon._instances.get(name);
+
+    if (icon) {
+      return icon;
+    } else {
+      if (JLIcon._debug) {
+        // fail noisily
+        console.error(`Invalid icon name: ${name}`);
+        return badIcon;
+      }
+
+      // fail silently
+      return fallback ?? blankIcon;
+    }
   }
 
-  constructor({ name, svgstr, _debug = false }: JLIcon.IOptions) {
+  /**
+   * Toggle icon debug from off-to-on, or vice-versa
+   *
+   * @param debug - Optional boolean to force debug on or off
+   */
+  static toggleDebug(debug?: boolean) {
+    JLIcon._debug = debug ?? !JLIcon._debug;
+  }
+
+  constructor({ name, svgstr }: JLIcon.IOptions) {
     this.name = name;
+    this._className = JLIcon.nameToClassName(name);
     this._svgstr = svgstr;
-    this._debug = _debug;
 
     this.react = this._initReact();
 
-    JLIcon._instances.set(name, this);
+    JLIcon._instances.set(this.name, this);
+    JLIcon._instances.set(this._className, this);
   }
 
   class({ className, ...propsStyle }: { className?: string } & IIconStyle) {
@@ -71,7 +110,7 @@ export class JLIcon {
     if (svgElement.getElementsByTagName('parsererror').length > 0) {
       const errmsg = `SVG HTML was malformed for icon name: ${name}`;
       // parse failed, svgElement will be an error box
-      if (this._debug) {
+      if (JLIcon._debug) {
         // fail noisily, render the error box
         console.error(errmsg);
         return svgElement;
@@ -177,7 +216,6 @@ export class JLIcon {
   >;
 
   protected _className: string;
-  protected _debug: boolean;
   protected _svgstr: string;
 }
 
@@ -191,7 +229,6 @@ export namespace JLIcon {
   export interface IOptions {
     name: string;
     svgstr: string;
-    _debug?: boolean;
   }
 
   /**
@@ -221,7 +258,14 @@ export namespace JLIcon {
      */
     title?: string;
   }
+
+  export function nameToClassName(name: string): string {
+    return 'jp-' + Text.camelCase(name, true) + 'Icon';
+  }
 }
+
+export const badIcon = new JLIcon({ name: 'bad', svgstr: badSvg });
+export const blankIcon = new JLIcon({ name: 'blank', svgstr: blankSvg });
 
 namespace Private {
   export function setTitleSvg(svgNode: HTMLElement, title: string): void {

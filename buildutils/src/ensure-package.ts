@@ -394,7 +394,7 @@ export async function ensureUiComponents(
       _iconImportStatements.push(`import ${svgname} from '${svgpath}';`);
       _iconModelDeclarations.push(`{ name: '${name}', svg: ${svgname} }`);
       _wrappedIconDefs.push(
-        `export const ${iconname} = new JLIcon({ name: '${iconname}', svgstr: ${svgname} });`
+        `export const ${iconname} = new JLIcon({ name: '${name}', svgstr: ${svgname} });`
       );
     }
   });
