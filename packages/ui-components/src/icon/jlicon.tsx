@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { UUID } from '@lumino/coreutils';
-
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -28,7 +27,7 @@ export class JLIcon {
    *
    * @returns A JLIcon instance
    */
-  static get(name: string, fallback?: JLIcon): JLIcon {
+  private static _get(name: string, fallback?: JLIcon): JLIcon | undefined {
     const icon = JLIcon._instances.get(name);
 
     if (icon) {
@@ -41,8 +40,52 @@ export class JLIcon {
       }
 
       // fail silently
-      return fallback ?? blankIcon;
+      return fallback;
     }
+  }
+
+  /**
+   * Get any existing JLIcon instance by name, construct a DOM element
+   * from it, then return said element.
+   *
+   * @param name - Name of the JLIcon instance to fetch
+   *
+   * @param fallback - If left undefined, use automatic fallback to
+   * icons-as-css-background behavior: elem will be constructed using
+   * a blank icon with `elem.className = classes(name, props.className)`,
+   * where elem is the return value. Otherwise, fallback can be used to
+   * define the default JLIcon instance, returned whenever lookup fails
+   *
+   * @param props = passed directly to JLIcon.element
+   *
+   * @returns An SVGElement
+   */
+  static getElement({
+    name,
+    fallback,
+    ...props
+  }: { name: string; fallback?: JLIcon } & JLIcon.IProps) {
+    let icon = JLIcon._get(name, fallback);
+    if (!icon) {
+      icon = blankIcon;
+      props.className = classesDedupe(name, props.className);
+    }
+
+    return icon.element(props);
+  }
+
+  static getReact({
+    name,
+    fallback,
+    ...props
+  }: { name: string; fallback?: JLIcon } & JLIcon.IReactProps) {
+    let icon = JLIcon._get(name, fallback);
+    if (!icon) {
+      icon = blankIcon;
+      props.className = classesDedupe(name, props.className);
+    }
+
+    return <icon.react {...props} />;
   }
 
   /**
@@ -56,7 +99,7 @@ export class JLIcon {
 
   constructor({ name, svgstr }: JLIcon.IOptions) {
     this.name = name;
-    this._className = JLIcon.nameToClassName(name);
+    this._className = Private.nameToClassName(name);
     this.svgstr = svgstr;
 
     this.react = this._initReact();
@@ -108,13 +151,6 @@ export class JLIcon {
     return svgElement;
   }
 
-  set svgstr(svgstr: string) {
-    this._svgstr = svgstr;
-
-    // associate a unique id with this particular svgstr
-    this._uuid = UUID.uuid4();
-  }
-
   render(host: HTMLElement, props: JLIcon.IProps = {}): void {
     return ReactDOM.render(<this.react container={host} {...props} />, host);
   }
@@ -150,8 +186,15 @@ export class JLIcon {
     }
   }
 
-  string() {
+  get svgstr() {
     return this._svgstr;
+  }
+
+  set svgstr(svgstr: string) {
+    this._svgstr = svgstr;
+
+    // associate a unique id with this particular svgstr
+    this._uuid = UUID.uuid4();
   }
 
   unrender(host: HTMLElement): void {
@@ -232,9 +275,7 @@ export class JLIcon {
   }
 
   readonly name: string;
-  readonly react: React.ForwardRefExoticComponent<
-    JLIcon.IProps & React.RefAttributes<SVGElement>
-  >;
+  readonly react: JLIcon.IReact;
 
   protected _className: string;
   protected _svgstr: string;
@@ -281,15 +322,19 @@ export namespace JLIcon {
     title?: string;
   }
 
-  export function nameToClassName(name: string): string {
-    return 'jp-' + Text.camelCase(name, true) + 'Icon';
-  }
+  export type IReactProps = IProps & React.RefAttributes<SVGElement>;
+
+  export type IReact = React.ForwardRefExoticComponent<IReactProps>;
 }
 
 export const badIcon = new JLIcon({ name: 'bad', svgstr: badSvg });
 export const blankIcon = new JLIcon({ name: 'blank', svgstr: blankSvg });
 
 namespace Private {
+  export function nameToClassName(name: string): string {
+    return 'jp-' + Text.camelCase(name, true) + 'Icon';
+  }
+
   export function setTitleSvg(svgNode: HTMLElement, title: string): void {
     // add a title node to the top level svg node
     let titleNodes = svgNode.getElementsByTagName('title');
