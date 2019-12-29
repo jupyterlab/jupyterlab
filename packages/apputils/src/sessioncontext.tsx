@@ -512,6 +512,8 @@ export class SessionContext implements ISessionContext {
       return;
     }
     this._isDisposed = true;
+    this._disposed.emit();
+
     if (this._session) {
       if (this.kernelPreference.shutdownOnDispose) {
         // Fire and forget the session shutdown request
@@ -531,7 +533,6 @@ export class SessionContext implements ISessionContext {
       this._busyDisposable.dispose();
       this._busyDisposable = null;
     }
-    this._disposed.emit();
     Signal.clearData(this);
   }
 
@@ -765,9 +766,11 @@ export class SessionContext implements ISessionContext {
   private _onSessionDisposed(): void {
     if (this._session) {
       this._session.dispose();
+      const oldValue = this._session;
+      this._session = null;
+      const newValue = this._session;
+      this._sessionChanged.emit({ name: 'session', oldValue, newValue });
     }
-    this._session = null;
-    this._terminated.emit(undefined);
   }
 
   /**
@@ -873,7 +876,6 @@ export class SessionContext implements ISessionContext {
   private _initializing = false;
   private _initPromise = new PromiseDelegate<boolean>();
   private _isReady = false;
-  private _terminated = new Signal<this, void>(this);
   private _kernelChanged = new Signal<
     this,
     Session.ISessionConnection.IKernelChangedArgs

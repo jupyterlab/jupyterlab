@@ -162,17 +162,19 @@ async function activateConsole(
   // Handle state restoration.
   void restorer.restore(tracker, {
     command: CommandIDs.create,
-    args: widget => ({
-      path: widget.content.console.sessionContext.session?.path,
-      name: widget.content.console.sessionContext.session?.name,
-      kernelPreference: {
-        name: widget.content.console.sessionContext.kernelPreference.name,
-        language:
-          widget.content.console.sessionContext.kernelPreference.language
-      }
-    }),
-    name: widget =>
-      widget.content.console.sessionContext.session?.path ?? UUID.uuid4(),
+    args: widget => {
+      const {
+        path,
+        name,
+        kernelPreference
+      } = widget.content.console.sessionContext;
+      return {
+        path,
+        name,
+        kernelPreference: { ...kernelPreference }
+      };
+    },
+    name: widget => widget.content.console.sessionContext.path ?? UUID.uuid4(),
     when: manager.ready
   });
 
