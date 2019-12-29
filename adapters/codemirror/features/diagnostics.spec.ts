@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import { TextMarker } from 'codemirror';
 import { Diagnostics } from './diagnostics';
-import { FeatureTestEnvironment } from '../testutils';
+import { FileEditorFeatureTestEnvironment } from '../testutils';
 
 describe('CodeMirrorAdapterExtension', () => {
-  let env: FeatureTestEnvironment;
+  let env: FileEditorFeatureTestEnvironment;
 
-  beforeEach(() => (env = new FeatureTestEnvironment()));
+  beforeEach(() => (env = new FileEditorFeatureTestEnvironment()));
   afterEach(() => env.dispose());
 
   describe('Works with VirtualFileEditor', () => {

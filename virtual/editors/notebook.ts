@@ -1,4 +1,4 @@
-import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
+import { Notebook } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { IOverridesRegistry } from '../../magics/overrides';
@@ -38,9 +38,9 @@ class DocDispatcher implements CodeMirror.Doc {
       );
   }
 
-  getValue(seperator?: string): string {
-    return this.virtual_editor.getValue();
-  }
+  //getValue(seperator?: string): string {
+  //  return this.virtual_editor.getValue();
+  //}
 
   getCursor(start?: string): CodeMirror.Position {
     let cell = this.virtual_editor.notebook.activeCell;
@@ -51,15 +51,14 @@ class DocDispatcher implements CodeMirror.Doc {
 }
 
 export class VirtualEditorForNotebook extends VirtualEditor {
-  notebook: Notebook;
-  notebook_panel: NotebookPanel;
   has_lsp_supported_file = false;
 
   cell_to_corresponding_source_line: Map<Cell, number>;
   cm_editor_to_cell: Map<CodeMirror.Editor, Cell>;
 
   constructor(
-    notebook_panel: NotebookPanel,
+    public notebook: Notebook,
+    private wrapper: HTMLElement,
     language: () => string,
     file_extension: () => string,
     overrides_registry: IOverridesRegistry,
@@ -73,8 +72,6 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       overrides_registry,
       foreign_code_extractors
     );
-    this.notebook_panel = notebook_panel;
-    this.notebook = notebook_panel.content;
     this.cell_to_corresponding_source_line = new Map();
     this.cm_editor_to_cell = new Map();
     this.overrides_registry = overrides_registry;
@@ -316,7 +313,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
   }
 
   getWrapperElement(): HTMLElement {
-    return this.notebook_panel.node;
+    return this.wrapper;
   }
 
   heightAtLine(

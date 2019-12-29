@@ -8,12 +8,12 @@ import {
 import { IRootPosition } from '../../positioning';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorLSPFeature } from './feature';
-import { FeatureTestEnvironment } from './testutils';
+import { FileEditorFeatureTestEnvironment } from './testutils';
 
 describe('CodeMirrorAdapter', () => {
-  let env: FeatureTestEnvironment;
+  let env: FileEditorFeatureTestEnvironment;
 
-  beforeEach(() => (env = new FeatureTestEnvironment()));
+  beforeEach(() => (env = new FileEditorFeatureTestEnvironment()));
   afterEach(() => env.dispose());
 
   describe('Works with VirtualFileEditor', () => {

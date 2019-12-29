@@ -241,7 +241,6 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
   protected async apply_edit(
     workspaceEdit: lsProtocol.WorkspaceEdit
   ): Promise<number> {
-    console.log(workspaceEdit);
     let current_uri = this.connection.getDocumentUri();
     // Specs: documentChanges are preferred over changes
     let changes = workspaceEdit.documentChanges
@@ -256,7 +255,13 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
         decodeURI(uri) !== decodeURI(current_uri) &&
         decodeURI(uri) !== '/' + decodeURI(current_uri)
       ) {
-        throw new Error('Workspace-wide edits not implemented yet');
+        throw new Error(
+          'Workspace-wide edits not implemented yet (' +
+            decodeURI(uri) +
+            ' != ' +
+            decodeURI(current_uri) +
+            ')'
+        );
       } else {
         for (let edit of change.edits) {
           applied_changes += this.apply_single_edit(edit);
@@ -277,8 +282,11 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
     let newFragmentText = newText
       .split('\n')
       .slice(fragment_start.line - start.line, fragment_end.line - start.line)
-      .join('\n')
-      .slice(0, -1);
+      .join('\n');
+
+    if (newFragmentText.endsWith('\n')) {
+      newFragmentText = newFragmentText.slice(0, -1);
+    }
 
     let doc = editor.getDoc();
 

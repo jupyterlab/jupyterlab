@@ -12,44 +12,41 @@ import {
   IJupyterLabComponentsManager,
   StatusMessage
 } from '../jupyterlab/jl_adapter';
+import { VirtualEditorForNotebook } from '../../virtual/editors/notebook';
+import { Notebook } from '@jupyterlab/notebook';
+import { NBTestUtils } from '@jupyterlab/testutils';
+import { IOverridesRegistry } from '../../magics/overrides';
+import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
+import createNotebook = NBTestUtils.createNotebook;
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
-  ce_editor: CodeMirrorEditor;
   virtual_editor: VirtualEditor;
 
   dispose(): void;
 }
 
-export class FeatureTestEnvironment implements IFeatureTestEnvironment {
-  ce_editor: CodeMirrorEditor;
+export abstract class FeatureTestEnvironment
+  implements IFeatureTestEnvironment {
   host: HTMLElement;
   virtual_editor: VirtualEditor;
   private connections: Map<CodeMirrorLSPFeature, LSPConnection>;
 
-  constructor(
-    protected language = () => 'python',
-    protected path = () => 'dummy.py',
-    protected file_extension = () => 'py'
+  protected constructor(
+    public language: () => string,
+    public path: () => string,
+    public file_extension: () => string
   ) {
-    const factoryService = new CodeMirrorEditorFactory();
     this.connections = new Map();
-
     this.host = document.createElement('div');
     document.body.appendChild(this.host);
-    let model = new CodeEditor.Model();
-
-    this.ce_editor = factoryService.newDocumentEditor({
-      host: this.host,
-      model
-    });
-    this.virtual_editor = new VirtualFileEditor(
-      language,
-      file_extension,
-      path,
-      this.ce_editor.editor
-    );
   }
+
+  init() {
+    this.virtual_editor = this.create_virtual_editor();
+  }
+
+  abstract create_virtual_editor(): VirtualEditor;
 
   public init_feature<T extends CodeMirrorLSPFeature>(
     feature_type: typeof CodeMirrorLSPFeature,
@@ -83,7 +80,7 @@ export class FeatureTestEnvironment implements IFeatureTestEnvironment {
     return new LSPConnection({
       languageId: this.language(),
       serverUri: '',
-      documentUri: '/' + this.path,
+      documentUri: 'file://' + this.path(),
       rootUri: '/',
       documentText: () => {
         this.virtual_editor.update_documents().catch(console.log);
@@ -109,6 +106,69 @@ export class FeatureTestEnvironment implements IFeatureTestEnvironment {
 
   dispose(): void {
     document.body.removeChild(this.host);
+  }
+}
+
+export class FileEditorFeatureTestEnvironment extends FeatureTestEnvironment {
+  ce_editor: CodeMirrorEditor;
+
+  constructor(
+    language = () => 'python',
+    path = () => 'dummy.py',
+    file_extension = () => 'py'
+  ) {
+    super(language, path, file_extension);
+    const factoryService = new CodeMirrorEditorFactory();
+    let model = new CodeEditor.Model();
+
+    this.ce_editor = factoryService.newDocumentEditor({
+      host: this.host,
+      model
+    });
+    this.init();
+  }
+
+  create_virtual_editor(): VirtualFileEditor {
+    return new VirtualFileEditor(
+      this.language,
+      this.file_extension,
+      this.path,
+      this.ce_editor.editor
+    );
+  }
+
+  dispose(): void {
+    super.dispose();
     this.ce_editor.dispose();
+  }
+}
+
+export class NotebookFeatureTestEnvironment extends FeatureTestEnvironment {
+  public notebook: Notebook;
+  public wrapper: HTMLElement;
+
+  constructor(
+    language = () => 'python',
+    path = () => 'notebook.ipynb',
+    file_extension = () => 'py',
+    public overrides_registry: IOverridesRegistry = {},
+    public foreign_code_extractors: IForeignCodeExtractorsRegistry = {}
+  ) {
+    super(language, path, file_extension);
+    this.notebook = createNotebook();
+    this.wrapper = document.createElement('div');
+    this.init();
+  }
+
+  create_virtual_editor(): VirtualEditorForNotebook {
+    return new VirtualEditorForNotebook(
+      this.notebook,
+      this.wrapper,
+      this.language,
+      this.file_extension,
+      this.overrides_registry,
+      this.foreign_code_extractors,
+      this.path
+    );
   }
 }
