@@ -3,8 +3,14 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-DebuggerBreakpoints {
+  display: flex;
+  flex-direction: column;
+}
+
 .jp-DebuggerBreakpoints-body {
   padding: 10px;
+  overflow: auto;
 }
 
 .jp-DebuggerBreakpoint {

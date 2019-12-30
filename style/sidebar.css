@@ -20,6 +20,7 @@
   flex-direction: row;
   align-items: center;
   background-color: var(--jp-layout-color2);
+  min-height: 24px;
   height: 24px;
 }
 
