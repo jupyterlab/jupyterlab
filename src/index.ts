@@ -19,8 +19,6 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
-import { IStateDB } from '@jupyterlab/coreutils';
-
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
@@ -428,15 +426,13 @@ const tracker: JupyterFrontEndPlugin<void> = {
  */
 const main: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:main',
+  requires: [IEditorServices],
   optional: [ILayoutRestorer, ICommandPalette],
-  requires: [IStateDB, IEditorServices, ILabShell],
   provides: IDebugger,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
-    state: IStateDB,
     editorServices: IEditorServices,
-    labShell: ILabShell,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null
   ): IDebugger => {
