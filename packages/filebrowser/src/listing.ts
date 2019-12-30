@@ -20,12 +20,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
-import {
-  classes,
-  fileIcon,
-  IIconRegistry,
-  JLIcon
-} from '@jupyterlab/ui-components';
+import { fileIcon, IIconRegistry, JLIcon } from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
@@ -1812,11 +1807,21 @@ export namespace DirListing {
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      let icon = fileType?.iconRenderer ? fileType.iconRenderer : (fileType?.iconClass ? JLIcon.get(fileType.iconClass) : fileIcon);
-      let iconClass = classes(ITEM_ICON_CLASS, fileType?.iconClass);
+      const iconProps: JLIcon.IProps = {
+        className: ITEM_ICON_CLASS,
+        container: iconContainer,
+        center: true,
+        kind: 'listing'
+      };
 
       // render the icon svg node
-      icon.element({className: iconClass, container: iconContainer, center: true, kind: 'listing'});
+      if (fileType?.iconRenderer) {
+        fileType.iconRenderer.element(iconProps);
+      } else if (fileType?.iconClass) {
+        JLIcon.getElement({ name: fileType.iconClass, ...iconProps });
+      } else {
+        fileIcon.element(iconProps);
+      }
 
       let hoverText = 'Name: ' + model.name;
       // add file size to pop up if its available

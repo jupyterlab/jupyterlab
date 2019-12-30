@@ -261,7 +261,6 @@ namespace Private {
       const itemTitle = `${schema.description}\n${id}\n${version}`;
       const iconClass = getHint(ICON_CLASS_KEY, registry, plugin);
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
-      const icon = JLIcon.get(iconClass, settingsIcon);
 
       return (
         <li
@@ -270,7 +269,13 @@ namespace Private {
           key={id}
           title={itemTitle}
         >
-          <icon.react title={iconTitle} tag={'span'} kind={'settingsEditor'} />
+          <JLIcon.getReact
+            name={iconClass}
+            fallback={settingsIcon}
+            title={iconTitle}
+            tag="span"
+            kind="settingsEditor"
+          />
           <span>{schema.title || id}</span>
         </li>
       );

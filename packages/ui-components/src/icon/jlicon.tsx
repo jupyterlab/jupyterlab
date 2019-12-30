@@ -14,15 +14,15 @@ import badSvg from '../../style/debug/bad.svg';
 import blankSvg from '../../style/debug/blank.svg';
 
 export class JLIcon {
-  private static _instances = new Map<string, JLIcon>();
   private static _debug: boolean = false;
+  private static _instances = new Map<string, JLIcon>();
 
   /**
-   * Get any existing JLIcon instance by name
+   * Get any existing JLIcon instance by name.
    *
-   * @param name - Name of the JLIcon instance to fetch
+   * @param name - name of the JLIcon instance to fetch
    *
-   * @param fallback - Optional default JLIcon instance to use if
+   * @param fallback - optional default JLIcon instance to use if
    * name is not found
    *
    * @returns A JLIcon instance
@@ -48,17 +48,17 @@ export class JLIcon {
    * Get any existing JLIcon instance by name, construct a DOM element
    * from it, then return said element.
    *
-   * @param name - Name of the JLIcon instance to fetch
+   * @param name - name of the JLIcon instance to fetch
    *
-   * @param fallback - If left undefined, use automatic fallback to
+   * @param fallback - if left undefined, use automatic fallback to
    * icons-as-css-background behavior: elem will be constructed using
    * a blank icon with `elem.className = classes(name, props.className)`,
    * where elem is the return value. Otherwise, fallback can be used to
    * define the default JLIcon instance, returned whenever lookup fails
    *
-   * @param props = passed directly to JLIcon.element
+   * @param props - passed directly to JLIcon.element
    *
-   * @returns An SVGElement
+   * @returns an SVGElement
    */
   static getElement({
     name,
@@ -74,6 +74,23 @@ export class JLIcon {
     return icon.element(props);
   }
 
+  /**
+   * Get any existing JLIcon instance by name, construct a React element
+   * from it, then return said element.
+   *
+   * @param name - name of the JLIcon instance to fetch
+   *
+   * @param fallback - if left undefined, use automatic fallback to
+   * icons-as-css-background behavior: elem will be constructed using
+   * a blank icon with `elem.className = classes(name, props.className)`,
+   * where elem is the return value. Otherwise, fallback can be used to
+   * define the default JLIcon instance, used to construct the return
+   * elem whenever lookup fails
+   *
+   * @param props - passed directly to JLIcon.react
+   *
+   * @returns a React element
+   */
   static getReact({
     name,
     fallback,
@@ -89,9 +106,9 @@ export class JLIcon {
   }
 
   /**
-   * Toggle icon debug from off-to-on, or vice-versa
+   * Toggle icon debug from off-to-on, or vice-versa.
    *
-   * @param debug - Optional boolean to force debug on or off
+   * @param debug - optional boolean to force debug on or off
    */
   static toggleDebug(debug?: boolean) {
     JLIcon._debug = debug ?? !JLIcon._debug;
@@ -133,14 +150,19 @@ export class JLIcon {
       return null;
     }
 
+    let ret: HTMLElement;
     if (container) {
       // take ownership by removing any existing children
       while (container.firstChild) {
         container.firstChild.remove();
       }
+
+      ret = svgElement;
     } else {
       // create a container if needed
       container = document.createElement(tag);
+
+      ret = container;
     }
 
     this._initContainer({ container, className, propsStyle, title });
@@ -148,7 +170,7 @@ export class JLIcon {
     // add the svg node to the container
     container.appendChild(svgElement);
 
-    return svgElement;
+    return ret;
   }
 
   render(host: HTMLElement, props: JLIcon.IProps = {}): void {
@@ -327,9 +349,6 @@ export namespace JLIcon {
   export type IReact = React.ForwardRefExoticComponent<IReactProps>;
 }
 
-export const badIcon = new JLIcon({ name: 'bad', svgstr: badSvg });
-export const blankIcon = new JLIcon({ name: 'blank', svgstr: blankSvg });
-
 namespace Private {
   export function nameToClassName(name: string): string {
     return 'jp-' + Text.camelCase(name, true) + 'Icon';
@@ -347,3 +366,7 @@ namespace Private {
     }
   }
 }
+
+// need to be at the bottom since constructor depends on Private
+export const badIcon = new JLIcon({ name: 'bad', svgstr: badSvg });
+export const blankIcon = new JLIcon({ name: 'blank', svgstr: blankSvg });

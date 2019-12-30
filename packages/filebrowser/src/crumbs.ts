@@ -5,19 +5,19 @@ import { ArrayExt } from '@lumino/algorithm';
 
 import { Message } from '@lumino/messaging';
 
-import { IDragEvent } from '@lumino/dragdrop';
-
 import { ElementExt } from '@lumino/domutils';
+
+import { IDragEvent } from '@lumino/dragdrop';
 
 import { Widget } from '@lumino/widgets';
 
 import { DOMUtils, showErrorMessage } from '@jupyterlab/apputils';
 
-import { PathExt, PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 
 import { renameFile } from '@jupyterlab/docmanager';
 
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { folderIcon } from '@jupyterlab/ui-components';
 
 import { FileBrowserModel } from './model';
 
@@ -30,11 +30,6 @@ const MATERIAL_CLASS = 'jp-MaterialIcon';
  * The class name added to the breadcrumb node.
  */
 const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
-
-/**
- * The class name for the folder icon for the breadcrumbs home
- */
-const BREADCRUMB_HOME = 'jp-FolderIcon';
 
 /**
  * The class name for the breadcrumbs home node
@@ -363,8 +358,7 @@ namespace Private {
    */
   export function createCrumbs(): ReadonlyArray<HTMLElement> {
     let home = document.createElement('span');
-    defaultIconRegistry.icon({
-      name: BREADCRUMB_HOME,
+    folderIcon.element({
       className: BREADCRUMB_HOME_CLASS,
       container: home,
       kind: 'breadCrumb'

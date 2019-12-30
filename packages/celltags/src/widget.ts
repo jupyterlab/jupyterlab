@@ -1,6 +1,6 @@
 import { Widget } from '@lumino/widgets';
 
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { checkIcon } from '@jupyterlab/ui-components';
 
 import { TagTool } from './tool';
 
@@ -29,10 +29,8 @@ export class TagWidget extends Widget {
     let tag = document.createElement('div');
     tag.className = 'tag-holder';
     tag.appendChild(text);
-    let img = document.createElement('span');
-    defaultIconRegistry.icon({
-      name: 'check',
-      container: img,
+    let iconContainer = checkIcon.element({
+      tag: 'span',
       center: true,
       height: '18px',
       width: '18px',
@@ -43,9 +41,9 @@ export class TagWidget extends Widget {
       this.addClass('applied-tag');
     } else {
       this.addClass('unapplied-tag');
-      img.style.display = 'none';
+      iconContainer.style.display = 'none';
     }
-    tag.appendChild(img);
+    tag.appendChild(iconContainer);
     this.node.appendChild(tag);
   }
 
