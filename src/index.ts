@@ -134,12 +134,13 @@ class DebuggerHandler<
    * @param widget The widget to update.
    */
   async update<W extends ConsolePanel | NotebookPanel | DocumentWidget>(
+    shell: JupyterFrontEnd.IShell,
     debug: IDebugger,
     widget: W,
     client: IClientSession | Session.ISession
   ): Promise<void> {
     const updateHandler = async () => {
-      return this._update(debug, widget, client);
+      return this._update(shell, debug, widget, client);
     };
 
     // setup handler when the kernel changes
@@ -183,6 +184,7 @@ class DebuggerHandler<
   private async _update<
     W extends ConsolePanel | NotebookPanel | DocumentWidget
   >(
+    shell: JupyterFrontEnd.IShell,
     debug: IDebugger,
     widget: W,
     client: IClientSession | Session.ISession
@@ -190,6 +192,10 @@ class DebuggerHandler<
     if (!debug.model) {
       return;
     }
+
+    const hasFocus = () => {
+      return shell.currentWidget && shell.currentWidget === widget;
+    };
 
     const updateAttribute = () => {
       if (!this._handlers[widget.id]) {
@@ -250,6 +256,11 @@ class DebuggerHandler<
     };
 
     const toggleDebugging = async () => {
+      // bail if the widget doesn't have focus
+      if (!hasFocus()) {
+        return;
+      }
+
       if (debug.isStarted) {
         await debug.stop();
         removeHandlers();
@@ -315,7 +326,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof ConsolePanel)) {
         return;
       }
-      await handler.update(debug, widget, widget.session);
+      await handler.update(app.shell, debug, widget, widget.session);
       app.commands.notifyCommandChanged();
     });
   }
@@ -361,7 +372,7 @@ const files: JupyterFrontEndPlugin<void> = {
           session = sessions.connectTo(model);
           activeSessions[model.id] = session;
         }
-        await handler.update(debug, widget, session);
+        await handler.update(app.shell, debug, widget, session);
         app.commands.notifyCommandChanged();
       } catch {
         return;
@@ -388,7 +399,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       if (!(widget instanceof NotebookPanel)) {
         return;
       }
-      await handler.update(debug, widget, widget.session);
+      await handler.update(app.shell, debug, widget, widget.session);
       app.commands.notifyCommandChanged();
     });
   }
