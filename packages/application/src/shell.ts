@@ -499,6 +499,30 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
+  /*
+   * Activate the next TabBar.
+   */
+  activateNextTabBar(): void {
+    let nextBar = this._adjacentBar('next');
+    if (nextBar) {
+      if (nextBar.currentTitle) {
+        nextBar.currentTitle.owner.activate();
+      }
+    }
+  }
+
+  /*
+   * Activate the next TabBar.
+   */
+  activatePreviousTabBar(): void {
+    let nextBar = this._adjacentBar('previous');
+    if (nextBar) {
+      if (nextBar.currentTitle) {
+        nextBar.currentTitle.owner.activate();
+      }
+    }
+  }
+
   add(
     widget: Widget,
     area: ILabShell.Area = 'main',

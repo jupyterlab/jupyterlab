@@ -54,6 +54,11 @@ namespace CommandIDs {
   export const activatePreviousTab: string =
     'application:activate-previous-tab';
 
+  export const activateNextTabBar: string = 'application:activate-next-tab-bar';
+
+  export const activatePreviousTabBar: string =
+    'application:activate-previous-tab-bar';
+
   export const close = 'application:close';
 
   export const closeOtherTabs = 'application:close-other-tabs';
@@ -574,6 +579,22 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     }
   });
   palette.addItem({ command: CommandIDs.activatePreviousTab, category });
+
+  commands.addCommand(CommandIDs.activateNextTabBar, {
+    label: 'Activate Next Tab Bar',
+    execute: () => {
+      shell.activateNextTabBar();
+    }
+  });
+  palette.addItem({ command: CommandIDs.activateNextTabBar, category });
+
+  commands.addCommand(CommandIDs.activatePreviousTabBar, {
+    label: 'Activate Previous Tab Bar',
+    execute: () => {
+      shell.activatePreviousTabBar();
+    }
+  });
+  palette.addItem({ command: CommandIDs.activatePreviousTabBar, category });
 
   // A CSS selector targeting tabs in the main area. This is a very
   // specific selector since we really only want tabs that are
