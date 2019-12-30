@@ -49,7 +49,6 @@ describe('VirtualEditor', () => {
     language: 'R',
     pattern: '(^|\n)%R (.*)\n?',
     extract_to_foreign: '$2',
-    keep_in_host: true,
     is_standalone: false,
     file_extension: 'R'
   });
