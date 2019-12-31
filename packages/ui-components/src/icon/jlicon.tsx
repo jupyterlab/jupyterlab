@@ -184,7 +184,7 @@ export class JLIcon {
     );
     const svgElement = svgDoc.documentElement;
 
-    if (svgElement.getElementsByTagName('parsererror').length > 0) {
+    if (svgDoc.getElementsByTagName('parsererror').length > 0) {
       const errmsg = `SVG HTML was malformed for icon name: ${name}`;
       // parse failed, svgElement will be an error box
       if (JLIcon._debug) {
