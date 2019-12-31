@@ -290,14 +290,14 @@ export class JLIcon {
           return (
             <React.Fragment>
               {svgComponent}
-              label
+              {label}
             </React.Fragment>
           );
         } else {
           return (
             <Tag className={classes(className, iconStyle(propsStyle))}>
               {svgComponent}
-              label
+              {label}
             </Tag>
           );
         }
