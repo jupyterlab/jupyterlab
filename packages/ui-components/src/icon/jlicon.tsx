@@ -178,6 +178,9 @@ export class JLIcon {
   }
 
   render(host: HTMLElement, props: JLIcon.IProps = {}): void {
+    // TODO: move this title fix to the Lumino side
+    host.removeAttribute('title');
+
     return ReactDOM.render(<this.react container={host} {...props} />, host);
   }
 
