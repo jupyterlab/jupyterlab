@@ -1,13 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
-
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-
 import { Widget } from '@lumino/widgets';
-
-import { NotebookActions } from './actions';
+import * as React from 'react';
 
 import {
   showDialog,
@@ -20,44 +15,21 @@ import {
   ToolbarButton,
   ISessionContextDialogs
 } from '@jupyterlab/apputils';
-
+import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
+import {
+  addIcon,
+  copyIcon,
+  cutIcon,
+  HTMLSelect,
+  pasteIcon,
+  runIcon,
+  saveIcon
+} from '@jupyterlab/ui-components';
 
-import { HTMLSelect } from '@jupyterlab/ui-components';
-
+import { NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
-
 import { Notebook } from './widget';
-
-/**
- * The class name added to toolbar save button.
- */
-const TOOLBAR_SAVE_CLASS = 'jp-SaveIcon';
-
-/**
- * The class name added to toolbar insert button.
- */
-const TOOLBAR_INSERT_CLASS = 'jp-AddIcon';
-
-/**
- * The class name added to toolbar cut button.
- */
-const TOOLBAR_CUT_CLASS = 'jp-CutIcon';
-
-/**
- * The class name added to toolbar copy button.
- */
-const TOOLBAR_COPY_CLASS = 'jp-CopyIcon';
-
-/**
- * The class name added to toolbar paste button.
- */
-const TOOLBAR_PASTE_CLASS = 'jp-PasteIcon';
-
-/**
- * The class name added to toolbar run button.
- */
-const TOOLBAR_RUN_CLASS = 'jp-RunIcon';
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.
@@ -96,7 +68,7 @@ export namespace ToolbarItems {
         <UseSignal signal={panel.context.fileChanged}>
           {() => (
             <ToolbarButtonComponent
-              iconClassName={TOOLBAR_SAVE_CLASS}
+              iconRenderer={saveIcon}
               onClick={onClick}
               tooltip="Save the notebook contents and create checkpoint"
               enabled={
@@ -119,7 +91,7 @@ export namespace ToolbarItems {
    */
   export function createInsertButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_INSERT_CLASS,
+      iconRenderer: addIcon,
       onClick: () => {
         NotebookActions.insertBelow(panel.content);
       },
@@ -132,7 +104,7 @@ export namespace ToolbarItems {
    */
   export function createCutButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_CUT_CLASS,
+      iconRenderer: cutIcon,
       onClick: () => {
         NotebookActions.cut(panel.content);
       },
@@ -145,7 +117,7 @@ export namespace ToolbarItems {
    */
   export function createCopyButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_COPY_CLASS,
+      iconRenderer: copyIcon,
       onClick: () => {
         NotebookActions.copy(panel.content);
       },
@@ -158,7 +130,7 @@ export namespace ToolbarItems {
    */
   export function createPasteButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_PASTE_CLASS,
+      iconRenderer: pasteIcon,
       onClick: () => {
         NotebookActions.paste(panel.content);
       },
@@ -171,7 +143,7 @@ export namespace ToolbarItems {
    */
   export function createRunButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_RUN_CLASS,
+      iconRenderer: runIcon,
       onClick: () => {
         void NotebookActions.runAndAdvance(panel.content, panel.sessionContext);
       },

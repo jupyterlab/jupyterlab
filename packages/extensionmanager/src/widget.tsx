@@ -2,19 +2,19 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
-
 import { ServiceManager } from '@jupyterlab/services';
+import {
+  Button,
+  InputGroup,
+  Collapse,
+  refreshIcon
+} from '@jupyterlab/ui-components';
 
 import { Message } from '@lumino/messaging';
-
-import { Button, InputGroup, Collapse } from '@jupyterlab/ui-components';
-
 import * as React from 'react';
-
 import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
-
 import { isJupyterOrg } from './query';
 
 // TODO: Replace pagination with lazy loading of lower search results
@@ -335,6 +335,7 @@ export class CollapsibleSection extends React.Component<
     };
   }
 
+  // TODO: swtich to iconRenderer
   /**
    * Render the collapsible section using the virtual DOM.
    */
@@ -343,7 +344,7 @@ export class CollapsibleSection extends React.Component<
       <>
         <header>
           <ToolbarButtonComponent
-            iconClassName={
+            iconClass={
               this.state.isOpen
                 ? 'jp-extensionmanager-expandIcon'
                 : 'jp-extensionmanager-collapseIcon'
@@ -536,8 +537,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
           headerElements={
             <ToolbarButtonComponent
               key="refresh-button"
-              className="jp-extensionmanager-refresh"
-              iconClassName="jp-RefreshIcon"
+              iconRenderer={refreshIcon}
               onClick={() => {
                 model.refreshInstalled();
               }}

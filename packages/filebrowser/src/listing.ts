@@ -20,7 +20,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
-import { fileIcon, IIconRegistry, JLIcon } from '@jupyterlab/ui-components';
+import { fileIcon, JLIcon } from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
@@ -193,9 +193,7 @@ export class DirListing extends Widget {
    */
   constructor(options: DirListing.IOptions) {
     super({
-      node: (options.renderer =
-        options.renderer ||
-        new DirListing.Renderer(options.model.iconRegistry)).createNode()
+      node: (options.renderer || DirListing.defaultRenderer).createNode()
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
@@ -205,7 +203,7 @@ export class DirListing extends Widget {
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
-    this._renderer = options.renderer;
+    this._renderer = options.renderer || DirListing.defaultRenderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
@@ -1685,10 +1683,6 @@ export namespace DirListing {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
-    constructor(icoReg: IIconRegistry) {
-      this._iconRegistry = icoReg;
-    }
-
     /**
      * Create the DOM node for a dir listing.
      */
@@ -1928,8 +1922,12 @@ export namespace DirListing {
       node.appendChild(icon);
       return node;
     }
-    _iconRegistry: IIconRegistry;
   }
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export const defaultRenderer = new Renderer();
 }
 
 /**

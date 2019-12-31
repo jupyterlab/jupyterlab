@@ -7,6 +7,8 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { Contents, ServerConnection } from '@jupyterlab/services';
 
+import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
+
 import { IIterator } from '@lumino/algorithm';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
@@ -67,7 +69,7 @@ export class FileBrowser extends Widget {
     this._directoryPending = false;
 
     const newFolder = new ToolbarButton({
-      iconClassName: 'jp-NewFolderIcon',
+      iconRenderer: newFolderIcon,
       onClick: () => {
         this.createNewDirectory();
       },
@@ -75,7 +77,7 @@ export class FileBrowser extends Widget {
     });
     const uploader = new Uploader({ model });
     const refresher = new ToolbarButton({
-      iconClassName: 'jp-RefreshIcon',
+      iconRenderer: refreshIcon,
       onClick: () => {
         void model.refresh();
       },

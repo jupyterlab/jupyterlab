@@ -180,6 +180,8 @@ function Section(props: { manager: IRunningSessions.IManager }) {
       }
     });
   }
+
+  // TODO: replace iconClass below with iconRenderer
   return (
     <div className={SECTION_CLASS}>
       <>
@@ -187,7 +189,7 @@ function Section(props: { manager: IRunningSessions.IManager }) {
           <h2>{props.manager.name} Sessions</h2>
           <ToolbarButtonComponent
             tooltip={`Shut Down All ${props.manager.name} Sessions…`}
-            iconClassName="jp-CloseIcon jp-Icon jp-Icon-16"
+            iconClass="jp-CloseIcon jp-Icon jp-Icon-16"
             onClick={onShutdown}
           />
         </header>
@@ -203,12 +205,13 @@ function Section(props: { manager: IRunningSessions.IManager }) {
 function RunningSessionsComponent(props: {
   managers: IRunningSessionManagers;
 }) {
+  // TODO: replace iconClass below with iconRenderer
   return (
     <>
       <div className={HEADER_CLASS}>
         <ToolbarButtonComponent
           tooltip="Refresh List"
-          iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
+          iconClass="jp-RefreshIcon jp-Icon jp-Icon-16"
           onClick={() =>
             props.managers.items().forEach(manager => manager.refreshRunning())
           }

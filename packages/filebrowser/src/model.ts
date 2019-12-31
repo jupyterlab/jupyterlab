@@ -11,8 +11,6 @@ import { Contents, KernelSpec, Session } from '@jupyterlab/services';
 
 import { IStateDB } from '@jupyterlab/statedb';
 
-import { IIconRegistry } from '@jupyterlab/ui-components';
-
 import {
   ArrayIterator,
   each,
@@ -69,7 +67,6 @@ export class FileBrowserModel implements IDisposable {
    * Construct a new file browser model.
    */
   constructor(options: FileBrowserModel.IOptions) {
-    this.iconRegistry = options.iconRegistry;
     this.manager = options.manager;
     this._driveName = options.driveName || '';
     let rootPath = this._driveName ? this._driveName + ':' : '';
@@ -112,11 +109,6 @@ export class FileBrowserModel implements IDisposable {
       standby: 'when-hidden'
     });
   }
-
-  /**
-   * The icon registry instance used by the file browser model.
-   */
-  readonly iconRegistry: IIconRegistry;
 
   /**
    * The document manager instance used by the file browser model.
@@ -669,11 +661,6 @@ export namespace FileBrowserModel {
      * all paths used in file operations.
      */
     driveName?: string;
-
-    /**
-     * An icon registry instance.
-     */
-    iconRegistry: IIconRegistry;
 
     /**
      * A document manager instance.

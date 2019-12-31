@@ -28,7 +28,8 @@ export class JLIcon {
    * @returns A JLIcon instance
    */
   private static _get(name: string, fallback?: JLIcon): JLIcon | undefined {
-    const icon = JLIcon._instances.get(name);
+    // TODO: correctly handle unordered multiple className case
+    const icon = JLIcon._instances.get(name.split(/\s+/)[0]);
 
     if (icon) {
       return icon;
@@ -132,6 +133,7 @@ export class JLIcon {
   element({
     className,
     container,
+    label,
     title,
     tag = 'div',
     ...propsStyle
@@ -164,7 +166,9 @@ export class JLIcon {
 
       ret = container;
     }
-
+    if (label != null) {
+      container.textContent = label;
+    }
     this._initContainer({ container, className, propsStyle, title });
 
     // add the svg node to the container
@@ -184,6 +188,7 @@ export class JLIcon {
     );
     const svgElement = svgDoc.documentElement;
 
+    // structure of error element varies by browser, search at top level
     if (svgDoc.getElementsByTagName('parsererror').length > 0) {
       const errmsg = `SVG HTML was malformed for icon name: ${name}`;
       // parse failed, svgElement will be an error box
@@ -236,7 +241,7 @@ export class JLIcon {
   }) {
     const classStyle = iconStyle(propsStyle);
 
-    if (className || className === '') {
+    if (className != null) {
       // override the container class with explicitly passed-in class + style class
       container.className = classes(className, classStyle);
     } else if (classStyle) {
@@ -244,7 +249,7 @@ export class JLIcon {
       container.classList.add(classStyle);
     }
 
-    if (title) {
+    if (title != null) {
       container.title = title;
     }
   }
@@ -255,6 +260,7 @@ export class JLIcon {
         {
           className,
           container,
+          label,
           title,
           tag = 'div',
           ...propsStyle
@@ -281,11 +287,17 @@ export class JLIcon {
         if (container) {
           this._initContainer({ container, className, propsStyle, title });
 
-          return svgComponent;
+          return (
+            <React.Fragment>
+              {svgComponent}
+              label
+            </React.Fragment>
+          );
         } else {
           return (
             <Tag className={classes(className, iconStyle(propsStyle))}>
               {svgComponent}
+              label
             </Tag>
           );
         }
@@ -333,13 +345,19 @@ export namespace JLIcon {
     container?: HTMLElement;
 
     /**
+     * Optional text label that will be added as a sibling to the icon's
+     * svg node
+     */
+    label?: string;
+
+    /**
      * HTML element tag used to create the icon's outermost container node,
      * if no container is passed in
      */
     tag?: 'div' | 'span';
 
     /**
-     * Optional title that will be set on the icon's svg node
+     * Optional title that will be set on the icon's outermost container node
      */
     title?: string;
   }

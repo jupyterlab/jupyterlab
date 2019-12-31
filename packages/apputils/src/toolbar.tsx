@@ -1,25 +1,24 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UseSignal, ReactWidget } from './vdom';
-
-import { Button, DefaultIconReact } from '@jupyterlab/ui-components';
+import { Text } from '@jupyterlab/coreutils';
+import {
+  Button,
+  JLIcon,
+  refreshIcon,
+  stopIcon
+} from '@jupyterlab/ui-components';
 
 import { IIterator, find, map, some } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
-
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { PanelLayout, Widget } from '@lumino/widgets';
+import * as React from 'react';
 
 import { ISessionContext, sessionContextDialogs } from './sessioncontext';
-
-import * as React from 'react';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { Text } from '@jupyterlab/coreutils';
+import { UseSignal, ReactWidget } from './vdom';
 
 /**
  * The class name added to toolbars.
@@ -372,7 +371,7 @@ export namespace Toolbar {
     sessionContext: ISessionContext
   ): Widget {
     return new ToolbarButton({
-      iconClassName: 'jp-StopIcon',
+      iconRenderer: stopIcon,
       onClick: () => {
         void sessionContext.session?.kernel?.interrupt();
       },
@@ -388,7 +387,7 @@ export namespace Toolbar {
     dialogs?: ISessionContext.IDialogs
   ): Widget {
     return new ToolbarButton({
-      iconClassName: 'jp-RefreshIcon',
+      iconRenderer: refreshIcon,
       onClick: () => {
         void (dialogs ?? sessionContextDialogs).restart(sessionContext);
       },
@@ -453,8 +452,9 @@ export namespace ToolbarButtonComponent {
   export interface IProps {
     className?: string;
     label?: string;
-    iconClassName?: string;
+    iconClass?: string;
     iconLabel?: string;
+    iconRenderer?: JLIcon;
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
@@ -499,14 +499,20 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       title={props.tooltip || props.iconLabel}
       minimal
     >
-      {props.iconClassName && (
-        <DefaultIconReact
-          name={`${props.iconClassName} jp-Icon jp-Icon-16`}
-          className={'jp-ToolbarButtonComponent-icon'}
-          fallback={true}
+      {props.iconRenderer ? (
+        <props.iconRenderer.react
+          className="jp-ToolbarButtonComponent-icon"
+          tag="span"
           center={true}
-          kind={'toolbarButton'}
-          tag={'span'}
+          kind="toolbarButton"
+        />
+      ) : (
+        <JLIcon.getReact
+          name={`${props.iconClass} jp-Icon jp-Icon-16`}
+          className="jp-ToolbarButtonComponent-icon"
+          tag="span"
+          center={true}
+          kind="toolbarButton"
         />
       )}
       {props.label && (
@@ -612,7 +618,7 @@ namespace Private {
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {
     let { commands, id, args } = options;
-    const iconClassName = commands.iconClass(id, args);
+    const iconClass = commands.iconClass(id, args);
     const iconLabel = commands.iconLabel(id, args);
     const label = commands.label(id, args);
     let className = commands.className(id, args);
@@ -628,7 +634,7 @@ namespace Private {
       void commands.execute(id, args);
     };
     const enabled = commands.isEnabled(id, args);
-    return { className, iconClassName, tooltip, onClick, enabled, label };
+    return { className, iconClass, tooltip, onClick, enabled, label };
   }
 
   /**
@@ -723,6 +729,14 @@ namespace Private {
       }
 
       let status = sessionContext.kernelDisplayStatus;
+
+      // TODO: use the following to set the kernel status icon
+      // // set the icon
+      // if (this._isBusy(status)) {
+      //   circle.element({container: this.node, title: `Kernel ${Text.titleCase(status)}`, center: true, kind: 'toolbarButton'});
+      // } else {
+      //   emptyCircleIcon.element({container: this.node, title: `Kernel ${Text.titleCase(status)}`, center: true, kind: 'toolbarButton'});
+      // }
 
       const busy = this._isBusy(status);
       this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
