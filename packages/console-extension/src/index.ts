@@ -222,6 +222,11 @@ async function activateConsole(
    */
   interface ICreateOptions extends Partial<ConsolePanel.IOptions> {
     /**
+     * Whether to activate the widget.  Defaults to `true`.
+     */
+    activate?: boolean;
+
+    /**
      * The reference widget id for the insert location.
      *
      * The default is `null`.
@@ -235,11 +240,6 @@ async function activateConsole(
      * to the main area relative to a reference widget.
      */
     insertMode?: DockLayout.InsertMode;
-
-    /**
-     * Whether to activate the widget.  Defaults to `true`.
-     */
-    isActivate?: boolean;
   }
 
   /**
@@ -273,7 +273,7 @@ async function activateConsole(
     shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,
-      activate: options.isActivate
+      activate: options.activate !== false
     });
     return panel;
   }
@@ -312,7 +312,7 @@ async function activateConsole(
     /**
      * Whether to activate the console.  Defaults to `true`.
      */
-    isActivate?: boolean;
+    activate?: boolean;
   }
 
   let command = CommandIDs.open;
@@ -323,7 +323,7 @@ async function activateConsole(
         return value.console.sessionContext.session?.path === path;
       });
       if (widget) {
-        if (args['isActivate'] !== false) {
+        if (args.activate !== false) {
           shell.activateById(widget.id);
         }
         return widget;
