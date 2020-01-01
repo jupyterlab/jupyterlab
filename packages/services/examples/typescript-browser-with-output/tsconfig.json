@@ -1,19 +1,13 @@
 {
+  "extends": "../../../../tsconfigbase",
   "compilerOptions": {
-    "declaration": true,
-    "lib": ["es2015", "dom"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noEmitOnError": true,
-    "noUnusedLocals": true,
     "outDir": "build",
     "rootDir": "src",
-    "strict": true,
+    "module": "commonjs",
     "strictNullChecks": false,
-    "target": "es2015",
-    "types": []
+    "types": ["node"]
   },
-  "include": ["src/*"],
+  "include": ["src/**/*"],
   "references": [
     {
       "path": "../../../outputarea"
