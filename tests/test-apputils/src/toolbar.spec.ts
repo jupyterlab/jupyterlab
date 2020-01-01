@@ -380,7 +380,7 @@ describe('@jupyterlab/apputils', () => {
       it('should accept options', async () => {
         const widget = new ToolbarButton({
           className: 'foo',
-          iconClassName: 'iconFoo',
+          iconClass: 'iconFoo',
           onClick: () => {
             return void 0;
           },

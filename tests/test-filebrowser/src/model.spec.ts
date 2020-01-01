@@ -32,8 +32,6 @@ import {
   sleep
 } from '@jupyterlab/testutils';
 
-import { defaultIconRegistry, IIconRegistry } from '@jupyterlab/ui-components';
-
 import { toArray } from '@lumino/algorithm';
 
 /**
@@ -60,7 +58,6 @@ class DelayedContentsManager extends ContentsManager {
 }
 
 describe('filebrowser/model', () => {
-  let iconRegistry: IIconRegistry;
   let manager: IDocumentManager;
   let serviceManager: ServiceManager.IManager;
   let registry: DocumentRegistry;
@@ -79,7 +76,6 @@ describe('filebrowser/model', () => {
       textModelFactory: new TextModelFactory()
     });
     serviceManager = new ServiceManager({ standby: 'never' });
-    iconRegistry = defaultIconRegistry;
     manager = new DocumentManager({
       registry,
       opener,
@@ -90,7 +86,7 @@ describe('filebrowser/model', () => {
 
   beforeEach(async () => {
     await state.clear();
-    model = new FileBrowserModel({ iconRegistry, manager, state });
+    model = new FileBrowserModel({ manager, state });
     const contents = await manager.newUntitled({ type: 'file' });
     name = contents.name;
     return model.cd();
@@ -103,7 +99,7 @@ describe('filebrowser/model', () => {
   describe('FileBrowserModel', () => {
     describe('#constructor()', () => {
       it('should construct a new file browser model', () => {
-        model = new FileBrowserModel({ iconRegistry, manager });
+        model = new FileBrowserModel({ manager });
         expect(model).to.be.an.instanceof(FileBrowserModel);
       });
     });
@@ -269,7 +265,7 @@ describe('filebrowser/model', () => {
           opener,
           manager: delayedServiceManager
         });
-        model = new FileBrowserModel({ iconRegistry, manager, state }); // Should delay 1000ms
+        model = new FileBrowserModel({ manager, state }); // Should delay 1000ms
 
         // An initial refresh is called in the constructor.
         // If it is too slow, it can come in after the directory change,
@@ -289,7 +285,7 @@ describe('filebrowser/model', () => {
     describe('#restore()', () => {
       it('should restore based on ID', async () => {
         const id = 'foo';
-        const model2 = new FileBrowserModel({ iconRegistry, manager, state });
+        const model2 = new FileBrowserModel({ manager, state });
         await model.restore(id);
         await model.cd('src');
         expect(model.path).to.equal('src');
@@ -301,7 +297,7 @@ describe('filebrowser/model', () => {
 
       it('should be safe to call multiple times', async () => {
         const id = 'bar';
-        const model2 = new FileBrowserModel({ iconRegistry, manager, state });
+        const model2 = new FileBrowserModel({ manager, state });
         await model.restore(id);
         await model.cd('src');
         expect(model.path).to.equal('src');
