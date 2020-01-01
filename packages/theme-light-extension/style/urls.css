@@ -3,18 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/* TODO: finish cleaning up these cases of icon-as-css-background-image */
 :root {
-  /*--jp-image-jupyter: url('images/jupyter.svg');*/
-  /*--jp-image-jupyterlab: url('images/jupyterlab.svg');*/
-  /*--jp-image-jupyterlab-workmark: url('images/jupyterlab-wordmark.svg');*/
-  /*--jp-about-header-wordmark: url('images/jupyterlab-wordmark.svg');*/
-
-  /*--jp-image-caretleft: url('images/caretleft.png');*/
-  /*--jp-image-caretright: url('images/caretright.png');*/
-  /*--jp-image-caretup: url('images/caretup.png');*/
-  /*--jp-image-caretdown: url('images/caretdown.png');*/
   /*--jp-icon-caretdown: url('icons/md/caretdown.svg');*/
-  /*--jp-icon-caretleft: url('icons/md/caretleft.svg');*/
   /*--jp-icon-caretright: url('icons/md/caretright.svg');*/
   /*--jp-icon-caretup: url('icons/md/caretup.svg');*/
   /*--jp-ui-select-caret: url('icons/md/down_caret.svg');*/
@@ -45,13 +36,11 @@
   /*--jp-icon-search-case-sensitive: url('icons/jupyter/search_case_sensitive.svg');*/
   /*--jp-icon-search-regex: url('icons/jupyter/search_regex.svg');*/
 
-  /*--jp-about-header-logo: url('icons/jupyter/jupyter.svg');*/
   /*--jp-icon-console-selected: url('icons/jupyter/console_selected.svg');*/
   /*--jp-icon-console: url('icons/jupyter/console.svg');*/
   /*--jp-icon-file-upload: url('icons/md/ic_file_upload_24px.svg');*/
   /*--jp-icon-filter-list: url('icons/md/ic_filter_list_24px.svg');*/
   /*--jp-icon-home: url('icons/md/ic_home_24px.svg');*/
-  /*--jp-icon-jupyter: url('icons/jupyter/jupyter.svg');*/
   /*--jp-icon-keyboard-selected: url('icons/md/ic_keyboard_24px_selected.svg');*/
   /*--jp-icon-keyboard: url('icons/md/ic_keyboard_24px.svg');*/
   /*--jp-icon-launcher-selected: url('icons/md/ic_launch_24px_selected.svg');*/

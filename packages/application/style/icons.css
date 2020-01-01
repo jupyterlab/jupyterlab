@@ -310,15 +310,6 @@
   vertical-align: sub;
 }
 
-.jp-JupyterIcon {
-  background-image: var(--jp-image-jupyter);
-  background-size: 16px;
-  margin: 2px;
-  margin-left: 8px;
-  margin-right: 0px;
-  padding-right: 0px;
-}
-
 .jp-KeyboardIcon {
   background-image: var(--jp-icon-keyboard);
 }
@@ -335,13 +326,6 @@
   background-repeat: no-repeat;
   margin-right: 2px;
   width: 22px;
-}
-
-.jp-MainAreaPortraitIcon {
-  background-position: 0 2px;
-  background-repeat: no-repeat;
-  margin-right: 2px;
-  width: 20px;
 }
 
 .jp-MoreHorizIcon {

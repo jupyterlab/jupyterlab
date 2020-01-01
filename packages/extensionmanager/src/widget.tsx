@@ -7,7 +7,8 @@ import {
   Button,
   InputGroup,
   Collapse,
-  refreshIcon
+  refreshIcon,
+  jupyterIcon
 } from '@jupyterlab/ui-components';
 
 import { Message } from '@lumino/messaging';
@@ -153,7 +154,12 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             {entry.name}
           </a>
         </div>
-        <div className="jp-extensionmanager-entry-jupyter-org" />
+        <jupyterIcon.react
+          className="jp-extensionmanager-entry-jupyter-org"
+          top="1px"
+          height="auto"
+          width="1em"
+        />
       </div>
       <div className="jp-extensionmanager-entry-content">
         <div className="jp-extensionmanager-entry-description">

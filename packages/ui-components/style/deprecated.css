@@ -39,7 +39,6 @@
   --jp-icon-jupyter-favicon: url('icons/jupyter/jupyter-favicon.svg');
   --jp-icon-jupyter: url('icons/jupyter/jupyter.svg');
   --jp-icon-jupyterlab-wordmark: url('icons/jupyter/jupyterlab-wordmark.svg');
-  --jp-icon-jupyterlab: url('icons/jupyter/jupyterlab.svg');
   --jp-icon-search_arrow_down: url('icons/search/search_arrow_down.svg');
   --jp-icon-search_arrow_up: url('icons/search/search_arrow_up.svg');
   --jp-icon-search_case_sensitive: url('icons/search/search_case_sensitive.svg');
@@ -162,9 +161,6 @@
 }
 .jp-JupyterlabWordmarkIcon {
   background-image: var(--jp-icon-jupyterlab-wordmark);
-}
-.jp-JupyterlabIcon {
-  background-image: var(--jp-icon-jupyterlab);
 }
 .jp-Search_arrow_downIcon {
   background-image: var(--jp-icon-search_arrow_down);

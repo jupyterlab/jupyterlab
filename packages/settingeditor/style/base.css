@@ -41,10 +41,9 @@
 
 #setting-editor .jp-SettingEditorInstructions-icon {
   display: inline-block;
-  background-size: 60px;
-  width: 60px;
   height: 78px;
-  margin-right: 5px;
+  margin: 2px 5px 2px 8px;
+  width: 60px;
 }
 
 #setting-editor .jp-SettingEditorInstructions-title {

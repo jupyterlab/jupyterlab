@@ -36,7 +36,6 @@ import yamlSvg from '../../style/icons/filetype/yaml.svg';
 import jupyterFaviconSvg from '../../style/icons/jupyter/jupyter-favicon.svg';
 import jupyterSvg from '../../style/icons/jupyter/jupyter.svg';
 import jupyterlabWordmarkSvg from '../../style/icons/jupyter/jupyterlab-wordmark.svg';
-import jupyterlabSvg from '../../style/icons/jupyter/jupyterlab.svg';
 import search_arrow_downSvg from '../../style/icons/search/search_arrow_down.svg';
 import search_arrow_upSvg from '../../style/icons/search/search_arrow_up.svg';
 import search_case_sensitiveSvg from '../../style/icons/search/search_case_sensitive.svg';
@@ -106,7 +105,6 @@ export namespace IconImports {
     { name: 'jupyter-favicon', svg: jupyterFaviconSvg },
     { name: 'jupyter', svg: jupyterSvg },
     { name: 'jupyterlab-wordmark', svg: jupyterlabWordmarkSvg },
-    { name: 'jupyterlab', svg: jupyterlabSvg },
     { name: 'search_arrow_down', svg: search_arrow_downSvg },
     { name: 'search_arrow_up', svg: search_arrow_upSvg },
     { name: 'search_case_sensitive', svg: search_case_sensitiveSvg },
@@ -176,7 +174,6 @@ export const yamlIcon = new JLIcon({ name: 'yaml', svgstr: yamlSvg });
 export const jupyterFaviconIcon = new JLIcon({ name: 'jupyter-favicon', svgstr: jupyterFaviconSvg });
 export const jupyterIcon = new JLIcon({ name: 'jupyter', svgstr: jupyterSvg });
 export const jupyterlabWordmarkIcon = new JLIcon({ name: 'jupyterlab-wordmark', svgstr: jupyterlabWordmarkSvg });
-export const jupyterlabIcon = new JLIcon({ name: 'jupyterlab', svgstr: jupyterlabSvg });
 export const search_arrow_downIcon = new JLIcon({ name: 'search_arrow_down', svgstr: search_arrow_downSvg });
 export const search_arrow_upIcon = new JLIcon({ name: 'search_arrow_up', svgstr: search_arrow_upSvg });
 export const search_case_sensitiveIcon = new JLIcon({ name: 'search_case_sensitive', svgstr: search_case_sensitiveSvg });
