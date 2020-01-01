@@ -13,6 +13,8 @@ import { getReactAttrs, classes, classesDedupe } from '../utils';
 import badSvg from '../../style/debug/bad.svg';
 import blankSvg from '../../style/debug/blank.svg';
 
+const blankDiv = document.createElement('div');
+
 export class JLIcon {
   private static _debug: boolean = false;
   private static _instances = new Map<string, JLIcon>();
@@ -137,7 +139,7 @@ export class JLIcon {
     title,
     tag = 'div',
     ...propsStyle
-  }: JLIcon.IProps = {}): HTMLElement | null {
+  }: JLIcon.IProps = {}): HTMLElement {
     // check if icon element is already set
     const maybeSvgElement = container?.firstChild as HTMLElement;
     if (maybeSvgElement?.dataset?.iconid === this._uuid) {
@@ -149,7 +151,7 @@ export class JLIcon {
     const svgElement = this.resolveSvg();
     if (!svgElement) {
       // bail if failing silently
-      return null;
+      return blankDiv;
     }
 
     let ret: HTMLElement;

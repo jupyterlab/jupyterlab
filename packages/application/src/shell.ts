@@ -776,7 +776,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     if (title.iconRenderer instanceof JLIcon) {
       title.iconClass = title.iconRenderer.class({
         className: title.iconClass,
-        center: true,
+        justify: 'center',
         kind: 'mainAreaTab'
       });
     }
@@ -1188,7 +1188,7 @@ namespace Private {
       if (title.iconRenderer instanceof JLIcon) {
         title.iconClass = title.iconRenderer.class({
           className: title.iconClass,
-          center: true,
+          justify: 'center',
           kind: 'sideBar'
         });
       }

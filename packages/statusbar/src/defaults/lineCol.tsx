@@ -118,7 +118,7 @@ class LineFormComponent extends React.Component<
             <div className={lineFormButtonDiv}>
               <lineFormIcon.react
                 className={lineFormButtonIcon}
-                center={true}
+                justify="center"
               />
               <input type="submit" className={lineFormButton} value="" />
             </div>

@@ -45,7 +45,7 @@ export class TabBarSvg<T> extends TabBar<T> {
           className: '',
           title: title.iconLabel,
           container: iconNode,
-          center: true,
+          justify: 'center',
           kind: this._kind
         });
       }

@@ -31,7 +31,7 @@ export class TagWidget extends Widget {
     tag.appendChild(text);
     let iconContainer = checkIcon.element({
       tag: 'span',
-      center: true,
+      justify: 'center',
       height: '18px',
       width: '18px',
       marginLeft: '5px',

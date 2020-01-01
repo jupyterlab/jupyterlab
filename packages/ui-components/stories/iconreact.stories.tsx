@@ -25,6 +25,6 @@ export const runningIcon = () => (
 
 export const html5Icon = () => (
   <div className={'foobar'} style={{ height: '500px', width: '500px' }}>
-    <DefaultIconReact name={'html5'} center={true} />
+    <DefaultIconReact name={'html5'} justify="center" />
   </div>
 );

@@ -503,7 +503,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
         <props.iconRenderer.react
           className="jp-ToolbarButtonComponent-icon"
           tag="span"
-          center={true}
+          justify="center"
           kind="toolbarButton"
         />
       ) : (
@@ -511,7 +511,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
           name={`${props.iconClass} jp-Icon jp-Icon-16`}
           className="jp-ToolbarButtonComponent-icon"
           tag="span"
-          center={true}
+          justify="center"
           kind="toolbarButton"
         />
       )}
@@ -733,9 +733,9 @@ namespace Private {
       // TODO: use the following to set the kernel status icon
       // // set the icon
       // if (this._isBusy(status)) {
-      //   circle.element({container: this.node, title: `Kernel ${Text.titleCase(status)}`, center: true, kind: 'toolbarButton'});
+      //   circle.element({container: this.node, title: `Kernel ${Text.titleCase(status)}`, justify: 'center', kind: 'toolbarButton'});
       // } else {
-      //   emptyCircleIcon.element({container: this.node, title: `Kernel ${Text.titleCase(status)}`, center: true, kind: 'toolbarButton'});
+      //   emptyCircleIcon.element({container: this.node, title: `Kernel ${Text.titleCase(status)}`, justify: 'center', kind: 'toolbarButton'});
       // }
 
       const busy = this._isBusy(status);

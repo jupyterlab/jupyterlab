@@ -27,31 +27,19 @@ export type IconKindType =
   | 'statusBar'
   | 'toolbarButton';
 
-export interface IIconStyle extends NestedCSSProperties {
-  /**
-   * center the icon svg in its container
-   */
-  center?: boolean;
+export type IconJustifyType = 'center' | 'left' | 'right';
 
+export interface IIconStyle extends NestedCSSProperties {
   /**
    * the kind of the icon, associated with a default stylesheet
    */
   kind?: IconKindType;
+
+  /**
+   * how to justify the icon
+   */
+  justify?: IconJustifyType;
 }
-
-/**
- * styles for centering node inside of containers
- */
-const containerCSSCenter: NestedCSSProperties = {
-  alignItems: 'center',
-  display: 'flex'
-};
-
-const iconCSSCenter: NestedCSSProperties = {
-  display: 'block',
-  margin: '0 auto',
-  width: '100%'
-};
 
 /**
  * icon kind specific styles
@@ -242,14 +230,60 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
 };
 
 /**
+ * styles for justifying a node inside of a container
+ */
+const iconCSSCenter: NestedCSSProperties = {
+  display: 'block',
+  margin: '0 auto',
+  width: '100%'
+};
+
+const iconCSSLeft: NestedCSSProperties = {
+  display: 'block',
+  margin: '0 auto 0 0'
+};
+
+const iconCSSRight: NestedCSSProperties = {
+  display: 'block',
+  margin: '0 0 0 auto'
+};
+
+const iconCSSJustify: { [k in IconJustifyType]: NestedCSSProperties } = {
+  center: iconCSSCenter,
+  left: iconCSSLeft,
+  right: iconCSSRight
+};
+
+const containerCSSCenter: NestedCSSProperties = {
+  alignItems: 'center',
+  display: 'flex'
+};
+
+const containerCSSLeft: NestedCSSProperties = {
+  alignItems: 'center',
+  display: 'flex'
+};
+
+const containerCSSRight: NestedCSSProperties = {
+  alignItems: 'center',
+  display: 'flex'
+};
+
+const containerCSSJustify: { [k in IconJustifyType]: NestedCSSProperties } = {
+  center: containerCSSCenter,
+  left: containerCSSLeft,
+  right: containerCSSRight
+};
+
+/**
  * for putting together the icon kind style with any user input styling,
  * as well as styling from optional flags like `center`
  */
 function iconCSS(props: IIconStyle): NestedCSSProperties {
-  const { kind, center, ...propsCSS } = props;
+  const { kind, justify, ...propsCSS } = props;
 
   return {
-    ...(center ? iconCSSCenter : {}),
+    ...(justify ? iconCSSJustify[justify] : {}),
     ...(kind ? iconCSSKind[kind] : {}),
     ...propsCSS
   };
@@ -260,10 +294,10 @@ function iconCSS(props: IIconStyle): NestedCSSProperties {
  * styling from optional flags like `center`
  */
 function containerCSS(props: IIconStyle): NestedCSSProperties {
-  const { kind, center } = props;
+  const { kind, justify } = props;
 
   return {
-    ...(center ? containerCSSCenter : {}),
+    ...(justify ? containerCSSJustify[justify] : {}),
     ...(kind ? containerCSSKind[kind] : {})
   };
 }

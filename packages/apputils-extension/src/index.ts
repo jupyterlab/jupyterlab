@@ -151,7 +151,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 
     jupyterFaviconIcon.element({
       container: logo,
-      center: true,
+      justify: 'center',
       kind: 'splash'
     });
 

@@ -206,7 +206,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
                     'jp-Launcher-sectionIcon',
                     'jp-Launcher-icon'
                   )}
-                  center={true}
+                  justify="center"
                   kind="launcherSection"
                 />
               )}
@@ -429,7 +429,7 @@ function Card(
           <JLIcon.getReact
             name={commands.iconClass(command, args)}
             className="jp-Launcher-icon"
-            center={true}
+            justify="center"
             kind="launcherCard"
           />
         )}

@@ -1804,7 +1804,7 @@ export namespace DirListing {
       const iconProps: JLIcon.IProps = {
         className: ITEM_ICON_CLASS,
         container: iconContainer,
-        center: true,
+        justify: 'center',
         kind: 'listing'
       };
 
