@@ -7,7 +7,7 @@ import { ServiceManager } from '@jupyterlab/services';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Widget, Panel } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
 
@@ -46,7 +46,6 @@ describe('console/panel', () => {
 
   beforeEach(() => {
     panel = new TestPanel({
-      content: new Panel(),
       manager,
       contentFactory,
       rendermime,

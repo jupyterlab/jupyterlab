@@ -45,7 +45,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
    * Construct a console panel.
    */
   constructor(options: ConsolePanel.IOptions) {
-    super(options);
+    super({ content: new Panel() });
     this.addClass(PANEL_CLASS);
     let {
       rendermime,
@@ -178,7 +178,6 @@ export namespace ConsolePanel {
    * The initialization options for a console panel.
    */
   export interface IOptions {
-    content: Panel;
     /**
      * The rendermime instance used by the panel.
      */

@@ -53,7 +53,7 @@ import {
 
 import { DisposableSet } from '@lumino/disposable';
 
-import { DockLayout, Menu, Panel } from '@lumino/widgets';
+import { DockLayout, Menu } from '@lumino/widgets';
 
 import foreign from './foreign';
 
@@ -249,7 +249,6 @@ async function activateConsole(
     await manager.ready;
 
     const panel = new ConsolePanel({
-      content: new Panel(),
       manager,
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
