@@ -38,9 +38,9 @@ class DocDispatcher implements CodeMirror.Doc {
       );
   }
 
-  //getValue(seperator?: string): string {
+  // getValue(seperator?: string): string {
   //  return this.virtual_editor.getValue();
-  //}
+  // }
 
   getCursor(start?: string): CodeMirror.Position {
     let cell = this.virtual_editor.notebook.activeCell;
