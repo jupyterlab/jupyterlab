@@ -30,6 +30,10 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
    * Signal emitted by the editor that triggered the update, providing the root document of the updated documents.
    */
   private documents_updated: Signal<VirtualEditor, VirtualDocument>;
+  /**
+   * Whether the editor reflects an interface with multiple cells (such as a notebook)
+   */
+  has_cells: boolean;
 
   public constructor(
     protected language: () => string,

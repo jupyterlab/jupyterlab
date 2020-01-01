@@ -55,6 +55,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
 
   cell_to_corresponding_source_line: Map<Cell, number>;
   cm_editor_to_cell: Map<CodeMirror.Editor, Cell>;
+  has_cells = true;
 
   constructor(
     public notebook: Notebook,

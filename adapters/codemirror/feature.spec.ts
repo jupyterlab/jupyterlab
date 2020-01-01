@@ -69,6 +69,77 @@ function getCellsJSON(notebook: Notebook) {
   return cells.map(cell => cell.toJSON());
 }
 
+const js_fib_code = `function fib(n) {
+  return n<2?n:fib(n-1)+fib(n-2);
+}
+
+fib(5);
+
+window.location /;`;
+
+const js_fib2_code = `function fib2(n) {
+  return n<2?n:fib2(n-1)+fib2(n-2);
+}
+
+fib2(5);
+
+window.location /;`;
+
+const js_partial_edits = [
+  {
+    range: {
+      start: {
+        line: 0,
+        character: 9
+      },
+      end: {
+        line: 0,
+        character: 12
+      }
+    },
+    newText: 'fib2'
+  },
+  {
+    range: {
+      start: {
+        line: 1,
+        character: 15
+      },
+      end: {
+        line: 1,
+        character: 18
+      }
+    },
+    newText: 'fib2'
+  },
+  {
+    range: {
+      start: {
+        line: 1,
+        character: 24
+      },
+      end: {
+        line: 1,
+        character: 27
+      }
+    },
+    newText: 'fib2'
+  },
+  {
+    range: {
+      start: {
+        line: 4,
+        character: 0
+      },
+      end: {
+        line: 4,
+        character: 3
+      }
+    },
+    newText: 'fib2'
+  }
+];
+
 describe('Feature', () => {
   describe('apply_edit()', () => {
     class EditApplyingFeature extends CodeMirrorLSPFeature {
@@ -108,38 +179,70 @@ describe('Feature', () => {
       );
     }
 
-    it('applies simple edit in FileEditor', async () => {
-      let environment = new FileEditorFeatureTestEnvironment();
-      connection = environment.create_dummy_connection();
+    describe('editing in FileEditor', () => {
+      let adapter: CodeMirrorAdapter;
+      let feature: EditApplyingFeature;
+      let environment: FileEditorFeatureTestEnvironment;
 
-      let feature = init_feature(
-        EditApplyingFeature,
-        environment
-      ) as EditApplyingFeature;
-      let adapter = init_adapter(environment, feature);
+      beforeEach(() => {
+        environment = new FileEditorFeatureTestEnvironment();
+        connection = environment.create_dummy_connection();
 
-      environment.ce_editor.model.value.text = 'foo bar';
-      await environment.virtual_editor.update_documents();
-      await adapter.updateAfterChange();
-
-      await feature.do_apply_edit({
-        changes: {
-          ['file://' + environment.path()]: [
-            {
-              range: {
-                start: { line: 0, character: 0 },
-                end: { line: 1, character: 0 }
-              },
-              newText: 'changed bar'
-            } as lsProtocol.TextEdit
-          ]
-        }
+        feature = init_feature(
+          EditApplyingFeature,
+          environment
+        ) as EditApplyingFeature;
+        adapter = init_adapter(environment, feature);
       });
-      let raw_value = environment.ce_editor.doc.getValue();
-      expect(raw_value).to.be.equal('changed bar');
-      expect(environment.ce_editor.model.value.text).to.be.equal('changed bar');
-      connection.close();
-      environment.dispose();
+
+      afterEach(() => {
+        connection.close();
+        environment.dispose();
+      });
+
+      it('applies simple edit in FileEditor', async () => {
+        environment.ce_editor.model.value.text = 'foo bar';
+        await environment.virtual_editor.update_documents();
+        await adapter.updateAfterChange();
+
+        await feature.do_apply_edit({
+          changes: {
+            ['file://' + environment.path()]: [
+              {
+                range: {
+                  start: { line: 0, character: 0 },
+                  end: { line: 1, character: 0 }
+                },
+                newText: 'changed bar'
+              } as lsProtocol.TextEdit
+            ]
+          }
+        });
+        let raw_value = environment.ce_editor.doc.getValue();
+        expect(raw_value).to.be.equal('changed bar');
+        expect(environment.ce_editor.model.value.text).to.be.equal(
+          'changed bar'
+        );
+      });
+
+      it('applies partial edits', async () => {
+        environment.ce_editor.model.value.text = js_fib_code;
+        await environment.virtual_editor.update_documents();
+        await adapter.updateAfterChange();
+
+        let result = await feature.do_apply_edit({
+          changes: { ['file://' + environment.path()]: js_partial_edits }
+        });
+        let raw_value = environment.ce_editor.doc.getValue();
+        expect(raw_value).to.be.equal(js_fib2_code);
+        expect(environment.ce_editor.model.value.text).to.be.equal(
+          js_fib2_code
+        );
+
+        expect(result.appliedChanges).to.be.equal(js_partial_edits.length);
+        expect(result.wasGranular).to.be.equal(true);
+        expect(result.modifiedCells).to.be.equal(1);
+      });
     });
 
     describe('editing in Notebook', () => {
@@ -203,13 +306,13 @@ describe('Feature', () => {
           'def a_function_2():\n    pass\n\n\nx = a_function_2()\n';
         expect(main_document.value).to.be.equal(old_virtual_source);
 
-        await feature.do_apply_edit({
+        let result = await feature.do_apply_edit({
           changes: {
             ['file://' + environment.path()]: [
               {
                 range: {
                   start: { line: 0, character: 0 },
-                  end: { line: 6, character: 10 }
+                  end: { line: 5, character: 0 }
                 },
                 newText: new_virtual_source
               } as lsProtocol.TextEdit
@@ -228,6 +331,10 @@ describe('Feature', () => {
           'def a_function_2():\n    pass'
         );
         expect(code_cells[1]).to.have.property('source', 'x = a_function_2()');
+
+        expect(result.appliedChanges).to.be.equal(null);
+        expect(result.wasGranular).to.be.equal(false);
+        expect(result.modifiedCells).to.be.equal(2);
       });
 
       it('handles IPython magics', async () => {

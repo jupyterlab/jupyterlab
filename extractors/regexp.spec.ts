@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { position_at_offset, RegExpForeignCodeExtractor } from './regexp';
+import { RegExpForeignCodeExtractor } from './regexp';
 
 let R_CELL_MAGIC_EXISTS = `%%R
 some text
@@ -22,42 +22,6 @@ x = """<a href="#">
 <b>important</b> link
 </a>""";
 print(x)`;
-
-describe('positionAtOffset', () => {
-  it('works with single line', () => {
-    let position = position_at_offset(0, ['']);
-    expect(position).deep.equal({ column: 0, line: 0 });
-
-    position = position_at_offset(0, ['abc']);
-    expect(position).deep.equal({ column: 0, line: 0 });
-
-    position = position_at_offset(1, ['abc']);
-    expect(position).deep.equal({ column: 1, line: 0 });
-
-    position = position_at_offset(2, ['abc']);
-    expect(position).deep.equal({ column: 2, line: 0 });
-  });
-
-  it('works two lines', () => {
-    let two_empty_lines = '\n'.split('\n');
-    let two_single_character_lines = 'a\nb'.split('\n');
-
-    let position = position_at_offset(0, two_empty_lines);
-    expect(position).deep.equal({ column: 0, line: 0 });
-
-    position = position_at_offset(1, two_empty_lines);
-    expect(position).deep.equal({ column: 0, line: 1 });
-
-    position = position_at_offset(1, two_single_character_lines);
-    expect(position).deep.equal({ column: 1, line: 0 });
-
-    position = position_at_offset(2, two_single_character_lines);
-    expect(position).deep.equal({ column: 0, line: 1 });
-
-    position = position_at_offset(3, two_single_character_lines);
-    expect(position).deep.equal({ column: 1, line: 1 });
-  });
-});
 
 describe('RegExpForeignCodeExtractor', () => {
   let r_cell_extractor = new RegExpForeignCodeExtractor({

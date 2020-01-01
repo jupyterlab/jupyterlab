@@ -4,7 +4,8 @@ import { LSPConnection } from '../../connection';
 import {
   IEditorPosition,
   IRootPosition,
-  IVirtualPosition
+  IVirtualPosition,
+  offset_at_position
 } from '../../positioning';
 import {
   IJupyterLabComponentsManager,
@@ -17,6 +18,7 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../../converter';
 import * as CodeMirror from 'codemirror';
 import { ICommandContext } from '../../command_manager';
+import { DefaultMap } from '../../utils';
 
 export enum CommandEntryPoint {
   CellContextMenu,
@@ -89,6 +91,16 @@ export interface IEditorRange {
   start: IEditorPosition;
   end: IEditorPosition;
   editor: CodeMirror.Editor;
+}
+
+function offset_from_lsp(position: lsProtocol.Position, lines: string[]) {
+  return offset_at_position(PositionConverter.lsp_to_ce(position), lines);
+}
+
+export interface IEditOutcome {
+  appliedChanges: number | null;
+  modifiedCells: number;
+  wasGranular: boolean;
 }
 
 export class CodeMirrorLSPFeature implements ILSPFeature {
@@ -238,9 +250,23 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
       .markText(range.start, range.end, { className: class_name });
   }
 
+  /**
+   * Does the edit cover the entire document?
+   */
+  protected is_whole_document_edit(edit: lsProtocol.TextEdit) {
+    let value = this.virtual_document.value;
+    let lines = value.split('\n');
+    let range = edit.range;
+    let lsp_to_ce = PositionConverter.lsp_to_ce;
+    return (
+      offset_at_position(lsp_to_ce(range.start), lines) === 0 &&
+      offset_at_position(lsp_to_ce(range.end), lines) === value.length
+    );
+  }
+
   protected async apply_edit(
     workspaceEdit: lsProtocol.WorkspaceEdit
-  ): Promise<number> {
+  ): Promise<IEditOutcome> {
     let current_uri = this.connection.getDocumentUri();
     // Specs: documentChanges are preferred over changes
     let changes = workspaceEdit.documentChanges
@@ -248,7 +274,10 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
           change => change as lsProtocol.TextDocumentEdit
         )
       : toDocumentChanges(workspaceEdit.changes);
-    let applied_changes = 0;
+    let applied_changes = null;
+    let edited_cells: number;
+    let is_whole_document_edit: boolean;
+
     for (let change of changes) {
       let uri = change.textDocument.uri;
       if (
@@ -263,12 +292,86 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
             ')'
         );
       } else {
-        for (let edit of change.edits) {
-          applied_changes += this.apply_single_edit(edit);
+        is_whole_document_edit =
+          change.edits.length === 1 &&
+          this.is_whole_document_edit(change.edits[0]);
+
+        let edit: lsProtocol.TextEdit;
+
+        if (!is_whole_document_edit) {
+          applied_changes = 0;
+          let value = this.virtual_document.value;
+          // TODO: make sure that it was not changed since the request was sent (using the returned document version)
+          let lines = value.split('\n');
+
+          let edits_by_offset = new Map<number, lsProtocol.TextEdit>();
+          for (let e of change.edits) {
+            let offset = offset_from_lsp(e.range.start, lines);
+            if (edits_by_offset.has(offset)) {
+              console.warn(
+                'Edits should not overlap, ignoring an overlapping edit'
+              );
+            } else {
+              edits_by_offset.set(offset, e);
+              applied_changes += 1;
+            }
+          }
+
+          // TODO make use of old_to_new_line for edits which add of remove lines:
+          //  this is crucial to preserve cell boundaries in notebook in such cases
+          let old_to_new_line = new DefaultMap<number, number[]>(() => []);
+          let new_text = '';
+          let last_end = 0;
+          let current_old_line = 0;
+          let current_new_line = 0;
+          // going over the edits in descending order of start points:
+          let start_offsets = [...edits_by_offset.keys()].sort((a, b) => a - b);
+          for (let start of start_offsets) {
+            let edit = edits_by_offset.get(start);
+            let prefix = value.slice(last_end, start);
+            for (let i = 0; i < prefix.split('\n').length; i++) {
+              let new_lines = old_to_new_line.get_or_create(current_old_line);
+              new_lines.push(current_new_line);
+              current_old_line += 1;
+              current_new_line += 1;
+            }
+            new_text += prefix + edit.newText;
+            let end = offset_from_lsp(edit.range.end, lines);
+            let replaced_fragment = value.slice(start, end);
+            for (let i = 0; i < edit.newText.split('\n').length; i++) {
+              if (i < replaced_fragment.length) {
+                current_old_line += 1;
+              }
+              current_new_line += 1;
+              let new_lines = old_to_new_line.get_or_create(current_old_line);
+              new_lines.push(current_new_line);
+            }
+            last_end = end;
+          }
+          new_text += value.slice(last_end, value.length);
+
+          edit = {
+            range: {
+              start: { line: 0, character: 0 },
+              end: {
+                line: lines.length - 1,
+                character: lines[lines.length - 1].length
+              }
+            },
+            newText: new_text
+          };
+          console.assert(this.is_whole_document_edit(edit));
+        } else {
+          edit = change.edits[0];
         }
+        edited_cells = this.apply_single_edit(edit);
       }
     }
-    return applied_changes;
+    return {
+      appliedChanges: applied_changes,
+      modifiedCells: edited_cells,
+      wasGranular: !is_whole_document_edit
+    };
   }
 
   protected replace_fragment(
@@ -276,7 +379,9 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
     editor: CodeMirror.Editor,
     fragment_start: CodeMirror.Position,
     fragment_end: CodeMirror.Position,
-    start: CodeMirror.Position
+    start: CodeMirror.Position,
+    end: CodeMirror.Position,
+    is_whole_document_edit = false
   ): number {
     let document = this.virtual_document;
     let newFragmentText = newText
@@ -295,6 +400,17 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
     // as it was done when the shadow virtual document was being created
     let { lines } = document.prepare_code_block(raw_value, editor);
     let old_value = lines.join('\n');
+
+    if (is_whole_document_edit) {
+      // partial edit
+      let cm_to_ce = PositionConverter.cm_to_ce;
+      let up_to_offset = offset_at_position(cm_to_ce(start), lines);
+      let from_offset = offset_at_position(cm_to_ce(end), lines);
+      newFragmentText =
+        old_value.slice(0, up_to_offset) +
+        newText +
+        old_value.slice(from_offset);
+    }
 
     if (old_value === newFragmentText) {
       return 0;
@@ -363,7 +479,8 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
             last_editor,
             fragment_start,
             fragment_end,
-            start
+            start,
+            end
           );
           recently_replaced = true;
           fragment_start = {
@@ -383,7 +500,8 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
           last_editor,
           fragment_start,
           fragment_end,
-          start
+          start,
+          end
         );
       }
     } else {
@@ -392,7 +510,8 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
         start_editor,
         start,
         end,
-        start
+        start,
+        end
       );
     }
     return applied_changes;

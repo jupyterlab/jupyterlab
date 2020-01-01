@@ -1,25 +1,5 @@
 import { IExtractedCode, IForeignCodeExtractor } from './types';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-
-// TODO: needs heavy unit testing
-export function position_at_offset(
-  offset: number,
-  lines: string[]
-): CodeEditor.IPosition {
-  let line = 0;
-  let column = 0;
-  for (let text_line of lines) {
-    // each line has a new line symbol which is accounted for in offset!
-    if (text_line.length + 1 <= offset) {
-      offset -= text_line.length + 1;
-      line += 1;
-    } else {
-      column = offset;
-      break;
-    }
-  }
-  return { line, column };
-}
+import { position_at_offset } from '../positioning';
 
 export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
   options: RegExpForeignCodeExtractor.IOptions;

@@ -1,5 +1,9 @@
 import * as lsProtocol from 'vscode-languageserver-protocol';
-import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
+import {
+  CodeMirrorLSPFeature,
+  IEditOutcome,
+  IFeatureCommand
+} from '../feature';
 import { InputDialog } from '@jupyterlab/apputils';
 
 export class Rename extends CodeMirrorLSPFeature {
@@ -34,11 +38,16 @@ export class Rename extends CodeMirrorLSPFeature {
         console.log(error);
         this.status_message.set(`Rename failed: ${error}`);
       })
-      .then(applied_changes => {
-        this.status_message.set(
-          `Renamed a variable in ${applied_changes} places`,
-          5 * 1000
-        );
+      .then((outcome: IEditOutcome) => {
+        let status: string;
+        if (outcome.wasGranular) {
+          status = `Renamed a variable in ${outcome.appliedChanges} places`;
+        } else if (this.virtual_editor.has_cells) {
+          status = `Renamed a variable in ${outcome.modifiedCells} cells`;
+        } else {
+          status = `Renamed a variable`;
+        }
+        this.status_message.set(status, 5 * 1000);
       })
       .catch(console.warn);
   }
