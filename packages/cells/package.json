@@ -46,6 +46,7 @@
     "@jupyterlab/outputarea": "^2.0.0-alpha.4",
     "@jupyterlab/rendermime": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
+    "@jupyterlab/ui-components": "^2.0.0-alpha.4",
     "@lumino/algorithm": "^1.2.1",
     "@lumino/coreutils": "^1.4.0",
     "@lumino/dragdrop": "^1.4.2",
