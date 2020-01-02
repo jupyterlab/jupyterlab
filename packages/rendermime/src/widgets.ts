@@ -379,7 +379,7 @@ export class RenderedText extends RenderedCommon {
 }
 
 /**
- * A widget for displaying deprecated JavaScript output.
+ * A widget for displaying JavaScript output.
  */
 export class RenderedJavaScript extends RenderedCommon {
   /**

@@ -161,17 +161,6 @@ export namespace PageConfig {
   }
 
   /**
-   * Get the Notebook version info [major, minor, patch].
-   */
-  export function getNotebookVersion(): [number, number, number] {
-    const notebookVersion = getOption('notebookVersion');
-    if (notebookVersion === '') {
-      return [0, 0, 0];
-    }
-    return JSON.parse(notebookVersion);
-  }
-
-  /**
    * Private page config data for the Jupyter application.
    */
   let configData: { [key: string]: string } | null = null;

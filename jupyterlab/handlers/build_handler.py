@@ -22,10 +22,8 @@ class Builder(object):
     _kill_event = None
     _future = None
 
-    # TODO 2.0: Clean up signature to (self, core_mode, app_options=None)
-    def __init__(self, log, core_mode, app_dir, core_config=None, app_options=None):
-        app_options = _ensure_options(
-            app_options, logger=log, app_dir=app_dir, core_config=core_config)
+    def __init__(self, core_mode, app_options=None):
+        app_options = _ensure_options(app_options)
         self.log = app_options.logger
         self.core_mode = core_mode
         self.app_dir = app_options.app_dir

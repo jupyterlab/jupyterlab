@@ -99,13 +99,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
-   * A signal emitted when the panel has been activated.
-   */
-  get activated(): ISignal<this, void> {
-    return this._activated;
-  }
-
-  /**
    * The session context used by the panel.
    */
   get sessionContext(): ISessionContext {
@@ -155,16 +148,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   dispose(): void {
     this.content.dispose();
     super.dispose();
-  }
-
-  /**
-   * Handle `'activate-request'` messages.
-   */
-  protected onActivateRequest(msg: Message): void {
-    super.onActivateRequest(msg);
-
-    // TODO: do we still need to emit this signal? Who is using it?
-    this._activated.emit(void 0);
   }
 
   /**
@@ -255,8 +238,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       language: spec?.language
     });
   }
-
-  private _activated = new Signal<this, void>(this);
 
   /**
    * Whether we are currently in a series of autorestarts we have already

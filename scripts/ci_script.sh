@@ -193,9 +193,6 @@ if [[ $GROUP == usage ]]; then
     python -m jupyterlab.browser_check
     jupyter labextension list --debug
 
-    # Make sure the deprecated `selenium_check` command still works
-    python -m jupyterlab.selenium_check
-
     # Make sure we can non-dev install.
     virtualenv -p $(which python3) test_install
     ./test_install/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
