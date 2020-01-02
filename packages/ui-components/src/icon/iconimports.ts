@@ -9,17 +9,19 @@ import { JLIcon } from './jlicon';
 import { Icon } from './interfaces';
 
 // icon svg import statements
+import caretDownEmptyThinSvg from '../../style/icons/arrow/caret-down-empty-thin.svg';
 import caretDownEmptySvg from '../../style/icons/arrow/caret-down-empty.svg';
 import caretDownSvg from '../../style/icons/arrow/caret-down.svg';
 import caretLeftSvg from '../../style/icons/arrow/caret-left.svg';
 import caretRightSvg from '../../style/icons/arrow/caret-right.svg';
+import caretUpEmptyThinSvg from '../../style/icons/arrow/caret-up-empty-thin.svg';
 import caretUpSvg from '../../style/icons/arrow/caret-up.svg';
-import baselineWeb24pxSvg from '../../style/icons/filetype/baseline-web-24px.svg';
 import consoleSvg from '../../style/icons/filetype/console.svg';
 import fileSvg from '../../style/icons/filetype/file.svg';
 import folderSvg from '../../style/icons/filetype/folder.svg';
 import html5Svg from '../../style/icons/filetype/html5.svg';
 import imageSvg from '../../style/icons/filetype/image.svg';
+import inspectorSvg from '../../style/icons/filetype/inspector.svg';
 import jsonSvg from '../../style/icons/filetype/json.svg';
 import keyboardSvg from '../../style/icons/filetype/keyboard.svg';
 import launcherSvg from '../../style/icons/filetype/launcher.svg';
@@ -36,10 +38,8 @@ import yamlSvg from '../../style/icons/filetype/yaml.svg';
 import jupyterFaviconSvg from '../../style/icons/jupyter/jupyter-favicon.svg';
 import jupyterSvg from '../../style/icons/jupyter/jupyter.svg';
 import jupyterlabWordmarkSvg from '../../style/icons/jupyter/jupyterlab-wordmark.svg';
-import search_arrow_downSvg from '../../style/icons/search/search_arrow_down.svg';
-import search_arrow_upSvg from '../../style/icons/search/search_arrow_up.svg';
-import search_case_sensitiveSvg from '../../style/icons/search/search_case_sensitive.svg';
-import search_regexSvg from '../../style/icons/search/search_regex.svg';
+import caseSensitiveSvg from '../../style/icons/search/case-sensitive.svg';
+import regexSvg from '../../style/icons/search/regex.svg';
 import buildSvg from '../../style/icons/sidebar/build.svg';
 import extensionSvg from '../../style/icons/sidebar/extension.svg';
 import paletteSvg from '../../style/icons/sidebar/palette.svg';
@@ -54,6 +54,7 @@ import trustedSvg from '../../style/icons/statusbar/trusted.svg';
 import addSvg from '../../style/icons/toolbar/add.svg';
 import bugSvg from '../../style/icons/toolbar/bug.svg';
 import checkSvg from '../../style/icons/toolbar/check.svg';
+import circleEmptySvg from '../../style/icons/toolbar/circle-empty.svg';
 import circleSvg from '../../style/icons/toolbar/circle.svg';
 import closeCircleSvg from '../../style/icons/toolbar/close-circle.svg';
 import closeSvg from '../../style/icons/toolbar/close.svg';
@@ -66,7 +67,6 @@ import fileUploadSvg from '../../style/icons/toolbar/file-upload.svg';
 import filterListSvg from '../../style/icons/toolbar/filter-list.svg';
 import linkSvg from '../../style/icons/toolbar/link.svg';
 import newFolderSvg from '../../style/icons/toolbar/new-folder.svg';
-import panorama_fish_eyeSvg from '../../style/icons/toolbar/panorama_fish_eye.svg';
 import pasteSvg from '../../style/icons/toolbar/paste.svg';
 import refreshSvg from '../../style/icons/toolbar/refresh.svg';
 import runSvg from '../../style/icons/toolbar/run.svg';
@@ -78,17 +78,19 @@ import undoSvg from '../../style/icons/toolbar/undo.svg';
 // defaultIcons definition
 export namespace IconImports {
   export const defaultIcons: ReadonlyArray<Icon.IModel> = [
+    { name: 'caret-down-empty-thin', svg: caretDownEmptyThinSvg },
     { name: 'caret-down-empty', svg: caretDownEmptySvg },
     { name: 'caret-down', svg: caretDownSvg },
     { name: 'caret-left', svg: caretLeftSvg },
     { name: 'caret-right', svg: caretRightSvg },
+    { name: 'caret-up-empty-thin', svg: caretUpEmptyThinSvg },
     { name: 'caret-up', svg: caretUpSvg },
-    { name: 'baseline-web-24px', svg: baselineWeb24pxSvg },
     { name: 'console', svg: consoleSvg },
     { name: 'file', svg: fileSvg },
     { name: 'folder', svg: folderSvg },
     { name: 'html5', svg: html5Svg },
     { name: 'image', svg: imageSvg },
+    { name: 'inspector', svg: inspectorSvg },
     { name: 'json', svg: jsonSvg },
     { name: 'keyboard', svg: keyboardSvg },
     { name: 'launcher', svg: launcherSvg },
@@ -105,10 +107,8 @@ export namespace IconImports {
     { name: 'jupyter-favicon', svg: jupyterFaviconSvg },
     { name: 'jupyter', svg: jupyterSvg },
     { name: 'jupyterlab-wordmark', svg: jupyterlabWordmarkSvg },
-    { name: 'search_arrow_down', svg: search_arrow_downSvg },
-    { name: 'search_arrow_up', svg: search_arrow_upSvg },
-    { name: 'search_case_sensitive', svg: search_case_sensitiveSvg },
-    { name: 'search_regex', svg: search_regexSvg },
+    { name: 'case-sensitive', svg: caseSensitiveSvg },
+    { name: 'regex', svg: regexSvg },
     { name: 'build', svg: buildSvg },
     { name: 'extension', svg: extensionSvg },
     { name: 'palette', svg: paletteSvg },
@@ -123,6 +123,7 @@ export namespace IconImports {
     { name: 'add', svg: addSvg },
     { name: 'bug', svg: bugSvg },
     { name: 'check', svg: checkSvg },
+    { name: 'circle-empty', svg: circleEmptySvg },
     { name: 'circle', svg: circleSvg },
     { name: 'close-circle', svg: closeCircleSvg },
     { name: 'close', svg: closeSvg },
@@ -135,7 +136,6 @@ export namespace IconImports {
     { name: 'filter-list', svg: filterListSvg },
     { name: 'link', svg: linkSvg },
     { name: 'new-folder', svg: newFolderSvg },
-    { name: 'panorama_fish_eye', svg: panorama_fish_eyeSvg },
     { name: 'paste', svg: pasteSvg },
     { name: 'refresh', svg: refreshSvg },
     { name: 'run', svg: runSvg },
@@ -147,17 +147,19 @@ export namespace IconImports {
 }
 
 // wrapped icon definitions
+export const caretDownEmptyThinIcon = new JLIcon({ name: 'caret-down-empty-thin', svgstr: caretDownEmptyThinSvg });
 export const caretDownEmptyIcon = new JLIcon({ name: 'caret-down-empty', svgstr: caretDownEmptySvg });
 export const caretDownIcon = new JLIcon({ name: 'caret-down', svgstr: caretDownSvg });
 export const caretLeftIcon = new JLIcon({ name: 'caret-left', svgstr: caretLeftSvg });
 export const caretRightIcon = new JLIcon({ name: 'caret-right', svgstr: caretRightSvg });
+export const caretUpEmptyThinIcon = new JLIcon({ name: 'caret-up-empty-thin', svgstr: caretUpEmptyThinSvg });
 export const caretUpIcon = new JLIcon({ name: 'caret-up', svgstr: caretUpSvg });
-export const baselineWeb24pxIcon = new JLIcon({ name: 'baseline-web-24px', svgstr: baselineWeb24pxSvg });
 export const consoleIcon = new JLIcon({ name: 'console', svgstr: consoleSvg });
 export const fileIcon = new JLIcon({ name: 'file', svgstr: fileSvg });
 export const folderIcon = new JLIcon({ name: 'folder', svgstr: folderSvg });
 export const html5Icon = new JLIcon({ name: 'html5', svgstr: html5Svg });
 export const imageIcon = new JLIcon({ name: 'image', svgstr: imageSvg });
+export const inspectorIcon = new JLIcon({ name: 'inspector', svgstr: inspectorSvg });
 export const jsonIcon = new JLIcon({ name: 'json', svgstr: jsonSvg });
 export const keyboardIcon = new JLIcon({ name: 'keyboard', svgstr: keyboardSvg });
 export const launcherIcon = new JLIcon({ name: 'launcher', svgstr: launcherSvg });
@@ -174,10 +176,8 @@ export const yamlIcon = new JLIcon({ name: 'yaml', svgstr: yamlSvg });
 export const jupyterFaviconIcon = new JLIcon({ name: 'jupyter-favicon', svgstr: jupyterFaviconSvg });
 export const jupyterIcon = new JLIcon({ name: 'jupyter', svgstr: jupyterSvg });
 export const jupyterlabWordmarkIcon = new JLIcon({ name: 'jupyterlab-wordmark', svgstr: jupyterlabWordmarkSvg });
-export const search_arrow_downIcon = new JLIcon({ name: 'search_arrow_down', svgstr: search_arrow_downSvg });
-export const search_arrow_upIcon = new JLIcon({ name: 'search_arrow_up', svgstr: search_arrow_upSvg });
-export const search_case_sensitiveIcon = new JLIcon({ name: 'search_case_sensitive', svgstr: search_case_sensitiveSvg });
-export const search_regexIcon = new JLIcon({ name: 'search_regex', svgstr: search_regexSvg });
+export const caseSensitiveIcon = new JLIcon({ name: 'case-sensitive', svgstr: caseSensitiveSvg });
+export const regexIcon = new JLIcon({ name: 'regex', svgstr: regexSvg });
 export const buildIcon = new JLIcon({ name: 'build', svgstr: buildSvg });
 export const extensionIcon = new JLIcon({ name: 'extension', svgstr: extensionSvg });
 export const paletteIcon = new JLIcon({ name: 'palette', svgstr: paletteSvg });
@@ -192,6 +192,7 @@ export const trustedIcon = new JLIcon({ name: 'trusted', svgstr: trustedSvg });
 export const addIcon = new JLIcon({ name: 'add', svgstr: addSvg });
 export const bugIcon = new JLIcon({ name: 'bug', svgstr: bugSvg });
 export const checkIcon = new JLIcon({ name: 'check', svgstr: checkSvg });
+export const circleEmptyIcon = new JLIcon({ name: 'circle-empty', svgstr: circleEmptySvg });
 export const circleIcon = new JLIcon({ name: 'circle', svgstr: circleSvg });
 export const closeCircleIcon = new JLIcon({ name: 'close-circle', svgstr: closeCircleSvg });
 export const closeIcon = new JLIcon({ name: 'close', svgstr: closeSvg });
@@ -204,7 +205,6 @@ export const fileUploadIcon = new JLIcon({ name: 'file-upload', svgstr: fileUplo
 export const filterListIcon = new JLIcon({ name: 'filter-list', svgstr: filterListSvg });
 export const linkIcon = new JLIcon({ name: 'link', svgstr: linkSvg });
 export const newFolderIcon = new JLIcon({ name: 'new-folder', svgstr: newFolderSvg });
-export const panorama_fish_eyeIcon = new JLIcon({ name: 'panorama_fish_eye', svgstr: panorama_fish_eyeSvg });
 export const pasteIcon = new JLIcon({ name: 'paste', svgstr: pasteSvg });
 export const refreshIcon = new JLIcon({ name: 'refresh', svgstr: refreshSvg });
 export const runIcon = new JLIcon({ name: 'run', svgstr: runSvg });

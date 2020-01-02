@@ -30,21 +30,21 @@ export class JLIcon {
    * @returns A JLIcon instance
    */
   private static _get(name: string, fallback?: JLIcon): JLIcon | undefined {
-    // TODO: correctly handle unordered multiple className case
-    const icon = JLIcon._instances.get(name.split(/\s+/)[0]);
-
-    if (icon) {
-      return icon;
-    } else {
-      if (JLIcon._debug) {
-        // fail noisily
-        console.error(`Invalid icon name: ${name}`);
-        return badIcon;
+    for (let className of name.split(/\s+/)) {
+      if (JLIcon._instances.has(className)) {
+        return JLIcon._instances.get(className);
       }
-
-      // fail silently
-      return fallback;
     }
+
+    // lookup failed
+    if (JLIcon._debug) {
+      // fail noisily
+      console.error(`Invalid icon name: ${name}`);
+      return badIcon;
+    }
+
+    // fail silently
+    return fallback;
   }
 
   /**
