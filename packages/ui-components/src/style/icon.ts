@@ -126,7 +126,9 @@ const containerCSSBreadCrumb: NestedCSSProperties = {
   // `&` will be substituted for the generated classname (interpolation)
   $nest: {
     '&:first-child svg': {
-      marginLeft: '0px'
+      bottom: '1px',
+      marginLeft: '0px',
+      position: 'relative'
     },
     '&:hover': {
       backgroundColor: 'var(--jp-layout-color2)'
