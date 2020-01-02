@@ -313,8 +313,11 @@ export namespace FileBrowser {
 
     /**
      * Whether a file browser automatically restores state when instantiated.
-     *
      * The default is `true`.
+     *
+     * #### Notes
+     * The file browser model will need to be restored before for the file
+     * browser to start saving its state.
      */
     restore?: boolean;
   }

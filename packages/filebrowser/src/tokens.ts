@@ -72,6 +72,14 @@ export namespace IFileBrowserFactory {
    */
   export interface IOptions {
     /**
+     * Whether a file browser automatically loads its initial path.
+     *
+     * #### Notes
+     * The default is `true`.
+     */
+    auto?: boolean;
+
+    /**
      * An optional `Contents.IDrive` name for the model.
      * If given, the model will prepend `driveName:` to
      * all paths used in file operations.
@@ -84,10 +92,12 @@ export namespace IFileBrowserFactory {
     refreshInterval?: number;
 
     /**
-     * Whether to restore the file browser state after instantiation.
+     * Whether a file browser automatically restores state when instantiated.
+     * The default is `true`.
      *
      * #### Notes
-     * The default value is `true`.
+     * The file browser model will need to be restored before for the file
+     * browser to start saving its state.
      */
     restore?: boolean;
 

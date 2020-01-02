@@ -101,6 +101,8 @@ export class FileBrowserModel implements IDisposable {
     };
     window.addEventListener('beforeunload', this._unloadEventListener);
     this._poll = new Poll({
+      auto: options.auto ?? true,
+      name: '@jupyterlab/filebrowser:Model',
       factory: () => this.cd('.'),
       frequency: {
         interval: refreshInterval,
@@ -656,6 +658,19 @@ export namespace FileBrowserModel {
    */
   export interface IOptions {
     /**
+     * Whether a file browser automatically loads its initial path.
+     * The default is `true`.
+     */
+    auto?: boolean;
+
+    /**
+     * An optional `Contents.IDrive` name for the model.
+     * If given, the model will prepend `driveName:` to
+     * all paths used in file operations.
+     */
+    driveName?: string;
+
+    /**
      * An icon registry instance.
      */
     iconRegistry: IIconRegistry;
@@ -664,13 +679,6 @@ export namespace FileBrowserModel {
      * A document manager instance.
      */
     manager: IDocumentManager;
-
-    /**
-     * An optional `Contents.IDrive` name for the model.
-     * If given, the model will prepend `driveName:` to
-     * all paths used in file operations.
-     */
-    driveName?: string;
 
     /**
      * The time interval for browser refreshing, in ms.
