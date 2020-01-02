@@ -1186,7 +1186,7 @@ class _AppHandler(object):
             json.dump(data, fid, indent=4)
 
         # copy known-good yarn.lock if missing
-        lock_path = pjoin(staging, 'yarn.lock')        
+        lock_path = pjoin(staging, 'yarn.lock')
         lock_template = pjoin(HERE, 'staging', 'yarn.lock')
         if self.registry != YARN_DEFAULT_REGISTRY:  # Replace on the fly the yarn repository see #3658
             with open(lock_template, encoding='utf-8') as f:
@@ -1774,7 +1774,7 @@ def _node_check(logger):
 
 def _yarn_config(logger):
     """Get the yarn configuration.
-    
+
     Returns
     -------
     {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
@@ -1981,6 +1981,15 @@ def _compare_ranges(spec1, spec2):
     x2 = r1.set[0][-1].semver
     y1 = r2.set[0][0].semver
     y2 = r2.set[0][-1].semver
+
+    # Drop prereleases in comparisons (to allow extension authors)
+    # to not have to update their versions for each
+    # Jupyterlab prerelease version.
+    if x1.prerelease:
+        x1 = x1.inc('patch')
+
+    if x2.prelease:
+        x2 = x2.inc('patch')
 
     o1 = r1.set[0][0].operator
     o2 = r2.set[0][0].operator
