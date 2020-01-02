@@ -1982,7 +1982,7 @@ def _compare_ranges(spec1, spec2):
     y1 = r2.set[0][0].semver
     y2 = r2.set[0][-1].semver
 
-    # Drop prereleases in comparisons (to allow extension authors)
+    # Drop prereleases in comparisons to allow extension authors
     # to not have to update their versions for each
     # Jupyterlab prerelease version.
     if x1.prerelease:
