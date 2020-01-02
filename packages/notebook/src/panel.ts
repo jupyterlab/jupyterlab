@@ -9,10 +9,6 @@ import { each } from '@lumino/algorithm';
 
 import { Token } from '@lumino/coreutils';
 
-import { Message } from '@lumino/messaging';
-
-import { ISignal, Signal } from '@lumino/signaling';
-
 import {
   ISessionContext,
   Printing,

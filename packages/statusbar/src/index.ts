@@ -7,5 +7,6 @@ export * from './components';
 export * from './defaults';
 export * from './style/statusbar';
 
+export * from './deprecated';
 export * from './statusbar';
 export * from './tokens';
