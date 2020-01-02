@@ -8,6 +8,11 @@
       "selector": ".jp-mod-searchable"
     },
     {
+      "command": "documentsearch:startWithReplace",
+      "keys": ["Accel H"],
+      "selector": ".jp-mod-searchable"
+    },
+    {
       "command": "documentsearch:highlightNext",
       "keys": ["Accel G"],
       "selector": ".jp-mod-searchable"

@@ -89,42 +89,64 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     const activeSearches = new Map<string, SearchInstance>();
 
     const startCommand: string = 'documentsearch:start';
+    const startReplaceCommand: string = 'documentsearch:startWithReplace';
     const nextCommand: string = 'documentsearch:highlightNext';
     const prevCommand: string = 'documentsearch:highlightPrevious';
-    app.commands.addCommand(startCommand, {
-      label: 'Find…',
-      isEnabled: () => {
-        const currentWidget = app.shell.currentWidget;
-        if (!currentWidget) {
-          return false;
-        }
-        return registry.getProviderForWidget(currentWidget) !== undefined;
-      },
-      execute: () => {
-        const currentWidget = app.shell.currentWidget;
-        if (!currentWidget) {
+
+    const startCommandEnabled = () => {
+      const currentWidget = app.shell.currentWidget;
+      if (!currentWidget) {
+        return false;
+      }
+      return registry.getProviderForWidget(currentWidget) !== undefined;
+    };
+    const executeStartCommand = () => {
+      const currentWidget = app.shell.currentWidget;
+      if (!currentWidget) {
+        return;
+      }
+      const widgetId = currentWidget.id;
+      let searchInstance = activeSearches.get(widgetId);
+      if (!searchInstance) {
+        const searchProvider = registry.getProviderForWidget(currentWidget);
+        if (!searchProvider) {
           return;
         }
-        const widgetId = currentWidget.id;
-        let searchInstance = activeSearches.get(widgetId);
-        if (!searchInstance) {
-          const searchProvider = registry.getProviderForWidget(currentWidget);
-          if (!searchProvider) {
-            return;
-          }
-          searchInstance = new SearchInstance(currentWidget, searchProvider);
+        searchInstance = new SearchInstance(currentWidget, searchProvider);
 
-          activeSearches.set(widgetId, searchInstance);
-          // find next and previous are now enabled
+        activeSearches.set(widgetId, searchInstance);
+        // find next and previous are now enabled
+        app.commands.notifyCommandChanged();
+
+        searchInstance.disposed.connect(() => {
+          activeSearches.delete(widgetId);
+          // find next and previous are now not enabled
           app.commands.notifyCommandChanged();
+        });
+      }
+      return searchInstance;
+    };
 
-          searchInstance.disposed.connect(() => {
-            activeSearches.delete(widgetId);
-            // find next and previous are now not enabled
-            app.commands.notifyCommandChanged();
-          });
+    app.commands.addCommand(startCommand, {
+      label: 'Find…',
+      isEnabled: startCommandEnabled,
+      execute: () => {
+        const searchInstance = executeStartCommand();
+        if (searchInstance) {
+          searchInstance.focusInput();
         }
-        searchInstance.focusInput();
+      }
+    });
+
+    app.commands.addCommand(startReplaceCommand, {
+      label: 'Find and Replace…',
+      isEnabled: startCommandEnabled,
+      execute: () => {
+        const searchInstance = executeStartCommand();
+        if (searchInstance) {
+          searchInstance.showReplace();
+          searchInstance.focusInput();
+        }
       }
     });
 
