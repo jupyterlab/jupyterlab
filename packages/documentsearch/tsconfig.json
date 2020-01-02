@@ -23,6 +23,9 @@
     },
     {
       "path": "../notebook"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

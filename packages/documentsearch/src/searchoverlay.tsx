@@ -2,19 +2,15 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { ellipsesIcon } from '@jupyterlab/ui-components';
 
 import { Debouncer } from '@lumino/polling';
-
 import { Signal } from '@lumino/signaling';
-
 import { Widget } from '@lumino/widgets';
-
 import * as React from 'react';
 
 import { IDisplayState } from './interfaces';
-
 import { SearchInstance } from './searchinstance';
-import { ellipsesIcon } from '@jupyterlab/ui-components';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
