@@ -17,14 +17,9 @@ import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 
 import { renameFile } from '@jupyterlab/docmanager';
 
-import { folderIcon } from '@jupyterlab/ui-components';
+import { ellipsesIcon, folderIcon } from '@jupyterlab/ui-components';
 
 import { FileBrowserModel } from './model';
-
-/**
- * The class name added to material icons
- */
-const MATERIAL_CLASS = 'jp-MaterialIcon';
 
 /**
  * The class name added to the breadcrumb node.
@@ -35,11 +30,6 @@ const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
  * The class name for the breadcrumbs home node
  */
 const BREADCRUMB_HOME_CLASS = 'jp-BreadCrumbs-home';
-
-/**
- * The class named associated to the ellipses icon
- */
-const BREADCRUMB_ELLIPSES = 'jp-EllipsesIcon';
 
 /**
  * The class name added to the breadcrumb node.
@@ -357,16 +347,13 @@ namespace Private {
    * Create the breadcrumb nodes.
    */
   export function createCrumbs(): ReadonlyArray<HTMLElement> {
-    let home = document.createElement('span');
-    folderIcon.element({
+    let home = folderIcon.element({
       className: BREADCRUMB_HOME_CLASS,
-      container: home,
+      tag: 'span',
+      title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
       kind: 'breadCrumb'
     });
-    home.title = PageConfig.getOption('serverRoot') || 'Jupyter Server Root';
-    let ellipsis = document.createElement('span');
-    ellipsis.className =
-      MATERIAL_CLASS + ' ' + BREADCRUMB_ELLIPSES + ' ' + BREADCRUMB_ITEM_CLASS;
+    let ellipsis = ellipsesIcon.element({ tag: 'span', kind: 'breadCrumb' });
     let parent = document.createElement('span');
     parent.className = BREADCRUMB_ITEM_CLASS;
     let current = document.createElement('span');

@@ -51,20 +51,7 @@ const iconCSSBreadCrumb: NestedCSSProperties = {
   padding: '0px 2px',
   height: '16px',
   width: '16px',
-  verticalAlign: 'middle',
-  // `&` will be substituted for the generated classname (interpolation)
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    '&:first-child': {
-      marginLeft: '0px'
-    },
-    ['.jp-mod-dropTarget&']: {
-      backgroundColor: 'var(--jp-brand-color2)',
-      opacity: 0.7
-    }
-  }
+  verticalAlign: 'middle'
 };
 
 const iconCSSLauncherCard: NestedCSSProperties = {
@@ -133,6 +120,22 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   splash: iconCSSSplash,
   statusBar: iconCSSStatusBar,
   toolbarButton: iconCSSToolbarButton
+};
+
+const containerCSSBreadCrumb: NestedCSSProperties = {
+  // `&` will be substituted for the generated classname (interpolation)
+  $nest: {
+    '&:first-child svg': {
+      marginLeft: '0px'
+    },
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2)'
+    },
+    ['.jp-mod-dropTarget&']: {
+      backgroundColor: 'var(--jp-brand-color2)',
+      opacity: 0.7
+    }
+  }
 };
 
 const containerCSSLauncherCard: NestedCSSProperties = {
@@ -217,7 +220,7 @@ const containerCSSToolbarButton: NestedCSSProperties = {
 };
 
 const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
-  breadCrumb: {},
+  breadCrumb: containerCSSBreadCrumb,
   launcherCard: containerCSSLauncherCard,
   launcherSection: {},
   listing: containerCSSListing,

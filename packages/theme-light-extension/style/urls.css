@@ -15,9 +15,7 @@
   /*--jp-icon-circle: url('icons/md/circle.svg');*/
   /*--jp-icon-close-circle: url('icons/md/close-circle.svg');*/
   /*--jp-icon-close: url('icons/md/close.svg');*/
-  /*--jp-icon-download: url('icons/md/download.svg');*/
-  /*--jp-icon-edit: url('icons/md/edit.svg');*/
-  /*--jp-icon-ellipses: url('icons/md/ellipses.svg');*/
+
   /*--jp-icon-kernel-running: url('icons/md/panorama_fish_eye.svg');*/
   /*--jp-icon-link: url('icons/md/link.svg');*/
   /*--jp-icon-more: url('icons/md/ellipses.svg');*/
@@ -27,8 +25,6 @@
   /*--jp-icon-inverse-circle: url('icons/md/circle-inverse.svg');*/
   /*--jp-icon-inverse-close-circle: url('icons/md/close-circle-inverse.svg');*/
   /*--jp-icon-inverse-close: url('icons/md/close-inverse.svg');*/
-
-  /*--jp-icon-stop-circle: url('icons/md/stop-circle.svg');*/
 
   /*--jp-icon-search-arrow-up: url('icons/jupyter/search_arrow_up.svg');*/
   /*--jp-icon-search-arrow-down: url('icons/jupyter/search_arrow_down.svg');*/
@@ -50,4 +46,11 @@
   /*--jp-icon-settings-selected: url('icons/md/ic_settings_24px_selected.svg');*/
   /*--jp-icon-settings: url('icons/md/ic_settings_24px.svg');*/
   /*--jp-icon-vega: url('icons/jupyter/vega.svg');*/
+
+  /* blocked by need for stack/carousel */
+
+  /* blocked by lumino interaction*/
+
+  /*--jp-icon-download: url('icons/md/download.svg');*/
+  /*--jp-icon-edit: url('icons/md/edit.svg');*/
 }

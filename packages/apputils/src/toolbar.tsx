@@ -4,6 +4,8 @@
 import { Text } from '@jupyterlab/coreutils';
 import {
   Button,
+  circleEmptyIcon,
+  circleIcon,
   JLIcon,
   refreshIcon,
   stopIcon
@@ -44,13 +46,6 @@ const TOOLBAR_SPACER_CLASS = 'jp-Toolbar-spacer';
  * The class name added to toolbar kernel status icon.
  */
 const TOOLBAR_KERNEL_STATUS_CLASS = 'jp-Toolbar-kernelStatus';
-
-/**
- * The class name added to a busy kernel indicator.
- */
-const TOOLBAR_BUSY_CLASS = 'jp-FilledCircleIcon';
-
-const TOOLBAR_IDLE_CLASS = 'jp-CircleIcon';
 
 /**
  * A layout for toolbars.
@@ -730,19 +725,22 @@ namespace Private {
 
       let status = sessionContext.kernelDisplayStatus;
 
-      // TODO: use the following to set the kernel status icon
-      // // set the icon
-      // if (this._isBusy(status)) {
-      //   circle.element({container: this.node, title: `Kernel ${Text.titleCase(status)}`, justify: 'center', kind: 'toolbarButton'});
-      // } else {
-      //   emptyCircleIcon.element({container: this.node, title: `Kernel ${Text.titleCase(status)}`, justify: 'center', kind: 'toolbarButton'});
-      // }
-
-      const busy = this._isBusy(status);
-      this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
-      this.toggleClass(TOOLBAR_IDLE_CLASS, !busy);
-      let title = `Kernel ${Text.titleCase(status)}`;
-      this.node.title = title;
+      // set the icon
+      if (this._isBusy(status)) {
+        circleIcon.element({
+          container: this.node,
+          title: `Kernel ${Text.titleCase(status)}`,
+          justify: 'center',
+          kind: 'toolbarButton'
+        });
+      } else {
+        circleEmptyIcon.element({
+          container: this.node,
+          title: `Kernel ${Text.titleCase(status)}`,
+          justify: 'center',
+          kind: 'toolbarButton'
+        });
+      }
     }
 
     /**

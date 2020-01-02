@@ -225,8 +225,7 @@ module.exports = [
     externals: ['node-fetch', 'ws'],
     plugins,
     stats: {
-      chunkModules: false,
-      warningsFilter: ['Multiple versions']
+      chunkModules: true
     }
   }
 ].concat(extraConfig);

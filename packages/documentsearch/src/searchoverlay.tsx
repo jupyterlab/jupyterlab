@@ -14,6 +14,7 @@ import * as React from 'react';
 import { IDisplayState } from './interfaces';
 
 import { SearchInstance } from './searchinstance';
+import { ellipsesIcon } from '@jupyterlab/ui-components';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
@@ -162,7 +163,7 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
         <button
           className={REPLACE_BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onReplaceCurrent()}
-          tabIndex={9}
+          tabIndex={10}
         >
           <span
             className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -173,7 +174,7 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
         </button>
         <button
           className={REPLACE_BUTTON_WRAPPER_CLASS}
-          tabIndex={10}
+          tabIndex={11}
           onClick={() => this.props.onReplaceAll()}
         >
           <span
@@ -257,8 +258,9 @@ class FilterToggle extends React.Component<
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => this.props.toggleEnabled()}
+        tabIndex={8}
       >
-        <span className={className} tabIndex={-1} />
+        <ellipsesIcon.react className={className} height="20px" width="20px" />
       </button>
     );
   }
@@ -501,7 +503,7 @@ class SearchOverlay extends React.Component<
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this._onClose()}
-          tabIndex={8}
+          tabIndex={9}
         >
           <span
             className={`${CLOSE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}

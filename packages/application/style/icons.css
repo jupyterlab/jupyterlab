@@ -286,16 +286,8 @@
   background-image: var(--jp-icon-edit);
 }
 
-.jp-EllipsesIcon {
-  background-image: var(--jp-icon-ellipses);
-}
-
 .jp-FileUploadIcon {
   background-image: var(--jp-icon-file-upload);
-}
-
-.jp-FilledCircleIcon {
-  background-image: var(--jp-icon-circle);
 }
 
 .jp-FilterListIcon {
