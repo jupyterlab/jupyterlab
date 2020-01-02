@@ -1988,7 +1988,7 @@ def _compare_ranges(spec1, spec2):
     if x1.prerelease:
         x1 = x1.inc('patch')
 
-    if x2.prelease:
+    if x2.prerelease:
         x2 = x2.inc('patch')
 
     o1 = r1.set[0][0].operator
