@@ -519,13 +519,12 @@ def link_package(path, app_options=None):
     return handler.link_package(path)
 
 
-def unlink_package(package, app_dir=None, logger=None, core_config=None, app_options=None):
+def unlink_package(package, app_options=None):
     """Unlink a package from JupyterLab by path or name.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    handler = _AppHandler(_ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
+    handler = _AppHandler(app_options)
     return handler.unlink_package(package)
 
 
