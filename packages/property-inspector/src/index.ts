@@ -154,8 +154,12 @@ export class SideBarPropertyInspectorProvider extends PropertyInspectorProvider 
     if (placeholder) {
       this._placeholder = placeholder;
     } else {
-      this._placeholder = new Widget();
-      this._placeholder.node.textContent = 'No properties to inspect.';
+      const node = document.createElement('div');
+      const content = document.createElement('div');
+      content.textContent = 'No properties to inspect.';
+      content.className = 'jp-PropertyInspector-placeholderContent';
+      node.appendChild(content);
+      this._placeholder = new Widget({ node });
       this._placeholder.addClass('jp-PropertyInspector-placeholder');
     }
     layout.widget = this._placeholder;
