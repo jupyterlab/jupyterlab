@@ -326,6 +326,11 @@ export async function ensurePackage(
   // when a package is actually being published.
   delete data.gitHead;
 
+  // Ensure that there is a public access set, if the package is not private.
+  if (data.private !== true) {
+    data['publishConfig'] = { access: 'public' };
+  }
+
   // Ensure there is a minimal prepublishOnly script
   if (!data.private && !data.scripts.prepublishOnly) {
     messages.push(`prepublishOnly script missing in ${pkgPath}`);
