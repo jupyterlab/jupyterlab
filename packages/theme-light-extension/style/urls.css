@@ -16,11 +16,6 @@
   /*--jp-icon-close-circle: url('icons/md/close-circle.svg');*/
   /*--jp-icon-close: url('icons/md/close.svg');*/
 
-  /*--jp-icon-kernel-running: url('icons/md/panorama_fish_eye.svg');*/
-  /*--jp-icon-link: url('icons/md/link.svg');*/
-  /*--jp-icon-more: url('icons/md/ellipses.svg');*/
-  /*--jp-icon-undo: url('icons/md/undo.svg');*/
-
   /*--jp-icon-checkmark-disabled: url('icons/md/checkmark-disabled.svg');*/
   /*--jp-icon-inverse-circle: url('icons/md/circle-inverse.svg');*/
   /*--jp-icon-inverse-close-circle: url('icons/md/close-circle-inverse.svg');*/
@@ -53,4 +48,6 @@
 
   /*--jp-icon-download: url('icons/md/download.svg');*/
   /*--jp-icon-edit: url('icons/md/edit.svg');*/
+  /*--jp-icon-link: url('icons/md/link.svg');*/
+  /*--jp-icon-undo: url('icons/md/undo.svg');*/
 }

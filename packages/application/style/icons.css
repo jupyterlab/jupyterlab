@@ -254,10 +254,6 @@
   background-image: var(--jp-icon-build);
 }
 
-.jp-CircleIcon {
-  background-image: var(--jp-icon-kernel-running);
-}
-
 .jp-CloseIcon {
   background-image: var(--jp-icon-close);
 }
@@ -318,10 +314,6 @@
   background-repeat: no-repeat;
   margin-right: 2px;
   width: 22px;
-}
-
-.jp-MoreHorizIcon {
-  background-image: var(--jp-icon-more);
 }
 
 .jp-NewFolderIcon {
