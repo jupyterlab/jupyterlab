@@ -352,11 +352,11 @@ export class CollapsibleSection extends React.Component<
       <>
         <header>
           <ToolbarButtonComponent
-            iconRenderer={this.state.isOpen ? caretRightIcon : caretDownIcon}
+            iconRenderer={this.state.isOpen ? caretDownIcon : caretRightIcon}
             iconClass={
               this.state.isOpen
-                ? caretRightIcon.class({ height: 'auto', width: '18px' })
-                : caretDownIcon.class({ height: 'auto', width: '18px' })
+                ? caretDownIcon.class({ height: 'auto', width: '20px' })
+                : caretRightIcon.class({ height: 'auto', width: '20px' })
             }
             onClick={() => {
               this.handleCollapse();

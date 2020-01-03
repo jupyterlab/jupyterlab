@@ -24,14 +24,13 @@ const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
 const INPUT_WRAPPER_CLASS = 'jp-DocumentSearch-input-wrapper';
 const INPUT_BUTTON_CLASS_OFF = 'jp-DocumentSearch-input-button-off';
-const INPUT_BUTTON_CLASS_ON = 'jp-DocumentSearch-input-button-off';
+const INPUT_BUTTON_CLASS_ON = 'jp-DocumentSearch-input-button-on';
 const INDEX_COUNTER_CLASS = 'jp-DocumentSearch-index-counter';
 const UP_DOWN_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-up-down-wrapper';
-const UP_BUTTON_CLASS = 'jp-DocumentSearch-up-button';
+const UP_DOWN_BUTTON_CLASS = 'jp-DocumentSearch-up-down-button';
 const ELLIPSES_BUTTON_CLASS = 'jp-DocumentSearch-ellipses-button';
 const ELLIPSES_BUTTON_ENABLED_CLASS =
   'jp-DocumentSearch-ellipses-button-enabled';
-const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
 const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
@@ -196,10 +195,11 @@ function UpDownButtons(props: IUpDownProps) {
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightPrevious()}
+        onKeyPress={}
         tabIndex={6}
       >
         <caretUpEmptyThinIcon.react
-          className={classes(UP_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
+          className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
           tag="span"
         />
       </button>
@@ -209,7 +209,7 @@ function UpDownButtons(props: IUpDownProps) {
         tabIndex={7}
       >
         <caretDownEmptyThinIcon.react
-          className={classes(DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
+          className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
           tag="span"
         />
       </button>

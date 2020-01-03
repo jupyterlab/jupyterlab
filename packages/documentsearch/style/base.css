@@ -144,27 +144,15 @@
   margin: 1px 7px 2px;
 }
 
-.jp-DocumentSearch-up-button {
+.jp-DocumentSearch-up-down-button {
   border-radius: var(--jp-border-radius);
 }
 
-.jp-DocumentSearch-up-button:hover {
+.jp-DocumentSearch-up-down-button:hover {
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DocumentSearch-up-button:active {
-  background-color: var(--jp-layout-color3);
-}
-
-.jp-DocumentSearch-down-button {
-  border-radius: var(--jp-border-radius);
-}
-
-.jp-DocumentSearch-down-button:hover {
-  background-color: var(--jp-layout-color2);
-}
-
-.jp-DocumentSearch-up-down:active {
+.jp-DocumentSearch-up-down-button:active {
   background-color: var(--jp-layout-color3);
 }
 
