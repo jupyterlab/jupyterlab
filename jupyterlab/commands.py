@@ -1186,7 +1186,7 @@ class _AppHandler(object):
             json.dump(data, fid, indent=4)
 
         # copy known-good yarn.lock if missing
-        lock_path = pjoin(staging, 'yarn.lock')        
+        lock_path = pjoin(staging, 'yarn.lock')
         lock_template = pjoin(HERE, 'staging', 'yarn.lock')
         if self.registry != YARN_DEFAULT_REGISTRY:  # Replace on the fly the yarn repository see #3658
             with open(lock_template, encoding='utf-8') as f:
@@ -1219,6 +1219,7 @@ class _AppHandler(object):
         # Handle local extensions.
         for (key, source) in local.items():
             jlab['linkedPackages'][key] = source
+            data['resolutions'][key] = source
 
         # Handle linked packages.
         for (key, item) in linked.items():
@@ -1226,6 +1227,7 @@ class _AppHandler(object):
             path = pjoin(path, item['filename'])
             data['dependencies'][key] = format_path(path)
             jlab['linkedPackages'][key] = item['source']
+            data['resolutions'][key] = format_path(path)
 
         # Handle extensions
         compat_errors = self._get_extension_compat()
@@ -1281,6 +1283,9 @@ class _AppHandler(object):
         """
         # Extract the package in a temporary directory.
         existing = data['filename']
+        if not osp.exists(pjoin(dname, existing)):
+            existing = ''
+
         with TemporaryDirectory() as tempdir:
             info = self._extract_package(source, tempdir)
 
@@ -1290,7 +1295,7 @@ class _AppHandler(object):
 
             shutil.move(info['path'], pjoin(dname, info['filename']))
 
-        # Remove the existing tarball and return the new file name.
+        # Remove the previous tarball and return the new file name.
         if existing:
             os.remove(pjoin(dname, existing))
 
@@ -1774,7 +1779,7 @@ def _node_check(logger):
 
 def _yarn_config(logger):
     """Get the yarn configuration.
-    
+
     Returns
     -------
     {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
