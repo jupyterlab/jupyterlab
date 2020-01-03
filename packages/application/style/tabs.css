@@ -142,31 +142,6 @@
   margin-top: 4px;
 }
 
-.p-DockPanel-tabBar .p-TabBar-tab.p-mod-closable > .p-TabBar-tabCloseIcon {
-  margin-left: 4px;
-  padding-top: 8px;
-  background-size: 16px;
-  height: 16px;
-  width: 16px;
-  background-image: var(--jp-icon-close);
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.p-DockPanel-tabBar
-  .p-TabBar-tab.p-mod-closable.jp-mod-dirty
-  > .p-TabBar-tabCloseIcon {
-  background-size: 10px;
-  background-image: var(--jp-icon-circle);
-}
-
-.p-DockPanel-tabBar
-  .p-TabBar-tab.p-mod-closable
-  > .p-TabBar-tabCloseIcon:hover {
-  background-size: 16px;
-  background-image: var(--jp-icon-close-circle);
-}
-
 .p-TabBar-tab.p-mod-drag-image {
   background: var(--jp-layout-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
@@ -180,7 +155,3 @@
   padding: 0px 10px;
   transform: translateX(-40%) translateY(-58%);
 }
-
-/* .p-TabBar-tab.p-mod-drag-image .p-TabBar-tabLabel {
-  margin-left: 4px;
-} */

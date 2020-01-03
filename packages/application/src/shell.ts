@@ -3,7 +3,7 @@
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { JLIcon } from '@jupyterlab/ui-components';
+import { DockPanelSvg, JLIcon } from '@jupyterlab/ui-components';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
@@ -179,7 +179,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     let topHandler = (this._topHandler = new Private.PanelHandler());
     let bottomPanel = (this._bottomPanel = new BoxPanel());
     let hboxPanel = new BoxPanel();
-    let dockPanel = (this._dockPanel = new DockPanel());
+    let dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     let hsplitPanel = new SplitPanel();

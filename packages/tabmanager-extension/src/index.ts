@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { each } from '@lumino/algorithm';
-import { TabBar, Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import {
   ILabShell,
@@ -10,7 +10,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { tabIcon } from '@jupyterlab/ui-components';
+import { TabBarSvg, tabIcon } from '@jupyterlab/ui-components';
 
 /**
  * The default tab manager extension.
@@ -23,7 +23,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer | null
   ): void => {
     const { shell } = app;
-    const tabs = new TabBar<Widget>({ orientation: 'vertical' });
+    const tabs = new TabBarSvg<Widget>({ orientation: 'vertical' });
     const header = document.createElement('header');
 
     if (restorer) {
