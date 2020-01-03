@@ -32,24 +32,6 @@
   justify-content: flex-end;
 }
 
-.jp-RunningSessions-shutdownAll {
-  flex: 1 1 auto;
-  height: var(--jp-private-running-button-height);
-  width: var(--jp-private-running-button-width);
-  max-width: 100px;
-  min-width: 16px;
-  min-height: 16px;
-  padding: 4px 6px;
-  background: var(--jp-layout-color1);
-  border: none;
-  outline: 0;
-  background-image: var(--jp-icon-close);
-  background-size: 16px;
-  vertical-align: middle;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
 .jp-RunningSessions-section {
   display: flex;
   flex: 0 1 auto;

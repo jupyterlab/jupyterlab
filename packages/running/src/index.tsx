@@ -183,9 +183,9 @@ function Section(props: { manager: IRunningSessions.IManager }) {
         <header className={SECTION_HEADER_CLASS}>
           <h2>{props.manager.name} Sessions</h2>
           <ToolbarButtonComponent
-            tooltip={`Shut Down All ${props.manager.name} Sessions…`}
             iconRenderer={closeIcon}
             onClick={onShutdown}
+            tooltip={`Shut Down All ${props.manager.name} Sessions…`}
           />
         </header>
 

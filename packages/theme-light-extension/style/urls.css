@@ -11,8 +11,6 @@
 
   /*--jp-icon-bug: url('icons/md/bug.svg');*/
   /*--jp-icon-circle: url('icons/md/circle.svg');*/
-  /*--jp-icon-close-circle: url('icons/md/close-circle.svg');*/
-  /*--jp-icon-close: url('icons/md/close.svg');*/
 
   /*--jp-icon-inverse-circle: url('icons/md/circle-inverse.svg');*/
   /*--jp-icon-inverse-close-circle: url('icons/md/close-circle-inverse.svg');*/
@@ -24,6 +22,8 @@
 
   /*--jp-icon-check: url('icons/md/checkmark.svg');*/
   /*--jp-icon-check-disabled: url('icons/md/checkmark-disabled.svg');*/
+  /*--jp-icon-close: url('icons/md/close.svg');*/
+  /*--jp-icon-close-circle: url('icons/md/close-circle.svg');*/
   /*--jp-icon-console: url('icons/jupyter/console.svg');*/
   /*--jp-icon-download: url('icons/md/download.svg');*/
   /*--jp-icon-filter-list: url('icons/md/ic_filter_list_24px.svg');*/

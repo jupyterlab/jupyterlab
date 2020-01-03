@@ -172,20 +172,6 @@
   background-color: var(--jp-layout-color2);
 }
 
-.jp-DocumentSearch-close-button {
-  display: inline-block;
-  background-size: 16px;
-  background-image: var(--jp-icon-close);
-  background-repeat: no-repeat;
-  background-position: center;
-  vertical-align: middle;
-}
-
-.jp-DocumentSearch-close-button:hover {
-  background-size: 16px;
-  background-image: var(--jp-icon-close-circle);
-}
-
 .jp-DocumentSearch-search-options {
   padding: 0 8px;
   margin-left: 3px;

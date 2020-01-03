@@ -508,8 +508,8 @@ class SearchOverlay extends React.Component<
           <closeIcon.react
             className="jp-icon-hover"
             justify="center"
-            height="20px"
-            width="20px"
+            height="16px"
+            width="16px"
           />
         </button>
       </div>,
