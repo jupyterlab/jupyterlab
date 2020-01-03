@@ -388,7 +388,7 @@ def install_extension(extension, app_options=None, pin=None):
     return handler.install_extension(extension, pin=pin)
 
 
-def uninstall_extension(name=None, app_options=None):
+def uninstall_extension(name=None, app_options=None, all_=False):
     """Uninstall an extension by name or path.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
