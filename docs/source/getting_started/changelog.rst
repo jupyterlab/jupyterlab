@@ -3,6 +3,91 @@
 JupyterLab Changelog
 ====================
 
+TODO after release: convert to link:
+`v2.0 https://github.com/jupyterlab/jupyterlab/releases/tag/v2.0`__
+---------------------------------------------------------------------------
+
+2020/01/03
+^^^^^^^^^^
+
+See the `JupyterLab
+2.0 <https://github.com/jupyterlab/jupyterlab/milestone/2.0?closed=1>`__
+milestone on GitHub for the full list of pull requests and issues closed.
+
+User-facing changes
+^^^^^^^^^^^^^^^^^^^
+* New celltags UI (`#7407 <https://github.com/jupyterlab/jupyterlab/pull/7407>`__)
+* Support for output search in notebooks (`#7258 <https://github.com/jupyterlab/jupyterlab/pull/7258>`__)
+* Add commands to move to next/prev tab bar in shell (`#7673 <https://github.com/jupyterlab/jupyterlab/pull/7673>`__)
+* Simplify user experience when selecting 'no kernel' for notebook (`#7647 <https://github.com/jupyterlab/jupyterlab/pull/7647>`__)
+* Drops support for Vega 4 and Vega-lite 2 rendereding (`#7650 <https://github.com/jupyterlab/jupyterlab/pull/7650>`__, `#7523 <https://github.com/jupyterlab/jupyterlab/issues/7523>`__)
+* Extra flags for ``jupyter lab clean``: --extensions, --settings, --static, --all (`#7583 <https://github.com/jupyterlab/jupyterlab/pull/7583>`__)
+* Global track timing setting for notebooks (`#7578 <https://github.com/jupyterlab/jupyterlab/pull/7578>`__)
+* Better command palette icon (`#7577 <https://github.com/jupyterlab/jupyterlab/pull/7577>`__, `#7038 <https://github.com/jupyterlab/jupyterlab/issues/7038>`__)
+* Added a shortcut to go to the last run or current running cell (`#7551 <https://github.com/jupyterlab/jupyterlab/pull/7551>`__)
+* File info on file browser hover (`#7485 <https://github.com/jupyterlab/jupyterlab/pull/7485>`__, `#7352 <https://github.com/jupyterlab/jupyterlab/issues/7352>`__)
+* Add new file and new markdown file to file browser context menu (`#7483 <https://github.com/jupyterlab/jupyterlab/pull/7483>`__, `#4280 <https://github.com/jupyterlab/jupyterlab/issues/4280>`__)
+* In extension manager, show "enable" button only for installed extensions (`#7482 <https://github.com/jupyterlab/jupyterlab/pull/7482>`__)
+* Add download command to file menu (`#7480 <https://github.com/jupyterlab/jupyterlab/pull/7480>`__)
+* Added the selection of cells till top and bottom (`#7177 <https://github.com/jupyterlab/jupyterlab/pull/7177>`__)
+
+For developers
+^^^^^^^^^^^^^^
+* Switch from ``@phosphor` to ``@lumino`` dependencies. (`#7582 <https://github.com/jupyterlab/jupyterlab/pull/7582>`__, `#7534 <https://github.com/jupyterlab/jupyterlab/issues/7534>`__)
+* The ``settingsregistry`` and ``statedb`` packages are broken out from coreutils (`#7681 <https://github.com/jupyterlab/jupyterlab/pull/7681>`__, `#7615 <https://github.com/jupyterlab/jupyterlab/issues/7615>`__)
+* Rework services architecture (`#7252 <https://github.com/jupyterlab/jupyterlab/pull/7252>`__, `#7674 <https://github.com/jupyterlab/jupyterlab/pull/7674>`__)
+* Upgrade to TypeScript 3.7 (`#7522 <https://github.com/jupyterlab/jupyterlab/pull/7522>`__)
+* Removed ``polling`` from coreutils in favor for ``@lumino/polling`` (`#7617 <https://github.com/jupyterlab/jupyterlab/pull/7617>`__)
+* Added TypeScript strict null checking to core packages (`#7657 <https://github.com/jupyterlab/jupyterlab/pull/7657>`__, `#7607 <https://github.com/jupyterlab/jupyterlab/pull/7607>`__)
+* Added a new `property-inspector` which can be used to display the properties of the
+currently selected main area widget (`#7665 <https://github.com/jupyterlab/jupyterlab/pull/7665>`__, `#7664 <https://github.com/jupyterlab/jupyterlab/issues/7664>`__, `#7718 <https://github.com/jupyterlab/jupyterlab/pull/7718>`__, `#7686 <https://github.com/jupyterlab/jupyterlab/issues/7686>`__)
+* Allow metadata for launcher items (`#7654 <https://github.com/jupyterlab/jupyterlab/pull/7654>`__, `#7652 <https://github.com/jupyterlab/jupyterlab/issues/7652>`__)
+* Allow platform aware key shortcuts (`#7589 <https://github.com/jupyterlab/jupyterlab/pull/7589>`__)
+* Restore default file browser manually. (`#7695 <https://github.com/jupyterlab/jupyterlab/pull/7695>`__, `#4009 <https://github.com/jupyterlab/jupyterlab/issues/4009>`__)
+* Upgrade yarn in staging to 1.21.1 (`#7691 <https://github.com/jupyterlab/jupyterlab/pull/7691>`__, `#7692 <https://github.com/jupyterlab/jupyterlab/issues/7692>`__)
+* Make session dialogs configurable (`#7618 <https://github.com/jupyterlab/jupyterlab/pull/7618>`__, `#7616 <https://github.com/jupyterlab/jupyterlab/issues/7616>`__)
+* Switch to using lumino polling package. (`#7617 <https://github.com/jupyterlab/jupyterlab/pull/7617>`__)
+* Support transient editor configs (`#7611 <https://github.com/jupyterlab/jupyterlab/pull/7611>`__, `#7295 <https://github.com/jupyterlab/jupyterlab/issues/7295>`__)
+* Optionnaly force new browser tab (`#7603 <https://github.com/jupyterlab/jupyterlab/pull/7603>`__, `#7602 <https://github.com/jupyterlab/jupyterlab/issues/7602>`__)
+* Update core dependencies (``codemirror``, ``xterm.js``, etc.) (`#7590 <https://github.com/jupyterlab/jupyterlab/pull/7590>`__, `#7194 <https://github.com/jupyterlab/jupyterlab/issues/7194>`__)
+* Add storybook to ``ui-components`` (`#7588 <https://github.com/jupyterlab/jupyterlab/pull/7588>`__, `#6799 <https://github.com/jupyterlab/jupyterlab/issues/6799>`__)
+* Add explicit doc encouraging people to re-use lab components (`#7543 <https://github.com/jupyterlab/jupyterlab/pull/7543>`__)
+* Enable typescript sourcemaps for debugging locally installed labextensions (`#7541 <https://github.com/jupyterlab/jupyterlab/pull/7541>`__)
+* Add usesignal example to the docs (`#7519 <https://github.com/jupyterlab/jupyterlab/pull/7519>`__)
+* Added env prop to kernel options (`#7499 <https://github.com/jupyterlab/jupyterlab/pull/7499>`__)
+* Added hash to the csv delimiter types (`#7367 <https://github.com/jupyterlab/jupyterlab/pull/7367>`__, `#6324 <https://github.com/jupyterlab/jupyterlab/issues/6324>`__)
+* Update marked to 0.7.0 (`#7326 <https://github.com/jupyterlab/jupyterlab/pull/7326>`__, `#6479 <https://github.com/jupyterlab/jupyterlab/issues/6479>`__)
+* Add kernelspec metadata (`#7229 <https://github.com/jupyterlab/jupyterlab/pull/7229>`__, `#7228 <https://github.com/jupyterlab/jupyterlab/issues/7228>`__)
+* Allow different mimetypes for the clipboard data (`#7202 <https://github.com/jupyterlab/jupyterlab/pull/7202>`__)
+
+Bugfixes
+^^^^^^^^
+* Update mathjax cdn in the cell and console examples (`#7680 <https://github.com/jupyterlab/jupyterlab/pull/7680>`__)
+* Revert ensure-max-old-space now that node 12+ has better default memory ceilings (`#7677 <https://github.com/jupyterlab/jupyterlab/pull/7677>`__, `#7675 <https://github.com/jupyterlab/jupyterlab/issues/7675>`__)
+* Resolve race condition between default file browser and tree urls. (`#7676 <https://github.com/jupyterlab/jupyterlab/pull/7676>`__, `#4009 <https://github.com/jupyterlab/jupyterlab/issues/4009>`__)
+* Fix handling of code editor refresh (`#7672 <https://github.com/jupyterlab/jupyterlab/pull/7672>`__, `#7671 <https://github.com/jupyterlab/jupyterlab/issues/7671>`__)
+* Start new notebooks in edit mode (`#7666 <https://github.com/jupyterlab/jupyterlab/pull/7666>`__, `#6731 <https://github.com/jupyterlab/jupyterlab/issues/6731>`__)
+* Use consistent versions of react (`#7661 <https://github.com/jupyterlab/jupyterlab/pull/7661>`__, `#7655 <https://github.com/jupyterlab/jupyterlab/issues/7655>`__)
+* Add scrollbar styles to nbconvert-css (`#7653 <https://github.com/jupyterlab/jupyterlab/pull/7653>`__)
+* Close output views on notebook closed (`#7633 <https://github.com/jupyterlab/jupyterlab/pull/7633>`__, `#7301 <https://github.com/jupyterlab/jupyterlab/issues/7301>`__)
+* Fixed incorrect white background for new command palette icon (`#7609 <https://github.com/jupyterlab/jupyterlab/pull/7609>`__, `#7577 <https://github.com/jupyterlab/jupyterlab/issues/7577>`__)
+* Fix setting connector to re-enable saving user settings (cf. #7147) (`#7601 <https://github.com/jupyterlab/jupyterlab/pull/7601>`__)
+* When timing metadata changes, ensure metadata.changed fires (`#7576 <https://github.com/jupyterlab/jupyterlab/pull/7576>`__)
+* Call result.finalize to prevent memory leaks (`#7564 <https://github.com/jupyterlab/jupyterlab/pull/7564>`__)
+* Handle cell execution cancellation because cell is disposed. (`#7555 <https://github.com/jupyterlab/jupyterlab/pull/7555>`__, `#7554 <https://github.com/jupyterlab/jupyterlab/issues/7554>`__)
+* Fix dropdown option style issue in windows (`#7513 <https://github.com/jupyterlab/jupyterlab/pull/7513>`__)
+* Make sure label is linked to a control when checking for element type (`#7458 <https://github.com/jupyterlab/jupyterlab/pull/7458>`__)
+* Refine log console message ux (`#7448 <https://github.com/jupyterlab/jupyterlab/pull/7448>`__, `#7444 <https://github.com/jupyterlab/jupyterlab/issues/7444>`__, `#7443 <https://github.com/jupyterlab/jupyterlab/issues/7443>`__)
+* Fixed multicursor backspacing (`#7401 <https://github.com/jupyterlab/jupyterlab/pull/7401>`__, `#7205 <https://github.com/jupyterlab/jupyterlab/issues/7205>`__)
+* Reset log display and count when non-notebook tab gets activated (`#7334 <https://github.com/jupyterlab/jupyterlab/pull/7334>`__, `#7325 <https://github.com/jupyterlab/jupyterlab/issues/7325>`__)
+* Fix safari multiple tabs by working around a safari bug. (`#7316 <https://github.com/jupyterlab/jupyterlab/pull/7316>`__, `#6921 <https://github.com/jupyterlab/jupyterlab/issues/6921>`__)
+* Skip custom click behavior on links when the download attribute is set (`#7311 <https://github.com/jupyterlab/jupyterlab/pull/7311>`__, `#5443 <https://github.com/jupyterlab/jupyterlab/issues/5443>`__)
+* Fixes context menu hit test to deal with svg nodes. (`#7242 <https://github.com/jupyterlab/jupyterlab/pull/7242>`__, `#7224 <https://github.com/jupyterlab/jupyterlab/issues/7224>`__)
+* Only display node structure in jsontree for arrays and empty objects (`#7227 <https://github.com/jupyterlab/jupyterlab/pull/7227>`__)
+* Fix overwriting of target attribute of anchors rendered by ipython.display (`#7215 <https://github.com/jupyterlab/jupyterlab/pull/7215>`__, `#6827 <https://github.com/jupyterlab/jupyterlab/issues/6827>`__)
+* Fix file browser location in tree view. (`#7155 <https://github.com/jupyterlab/jupyterlab/pull/7155>`__)
+
+
 `v1.2.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v1.2.0>`__
 ---------------------------------------------------------------------------
 
