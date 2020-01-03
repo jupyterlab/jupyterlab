@@ -56,14 +56,13 @@ const iconCSSBreadCrumb: NestedCSSProperties = {
 };
 
 const iconCSSLauncherCard: NestedCSSProperties = {
-  height: 'var(--jp-private-launcher-large-icon-size)',
-  width: 'var(--jp-private-launcher-large-icon-size)'
+  height: '52px',
+  width: '52px'
 };
 
 const iconCSSLauncherSection: NestedCSSProperties = {
-  marginRight: '12px',
-  height: 'var(--jp-private-launcher-small-icon-size)',
-  width: 'var(--jp-private-launcher-small-icon-size)'
+  height: '32px',
+  width: '32px'
 };
 
 const iconCSSListing: NestedCSSProperties = {
@@ -148,7 +147,12 @@ const containerCSSBreadCrumb: NestedCSSProperties = {
 };
 
 const containerCSSLauncherCard: NestedCSSProperties = {
-  height: 'var(--jp-private-launcher-card-icon-height)'
+  height: '68px'
+};
+
+const containerCSSLauncherSection: NestedCSSProperties = {
+  boxSizing: 'border-box',
+  marginRight: '12px'
 };
 
 const containerCSSListing: NestedCSSProperties = {
@@ -235,7 +239,7 @@ const containerCSSToolbarButton: NestedCSSProperties = {
 const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: containerCSSBreadCrumb,
   launcherCard: containerCSSLauncherCard,
-  launcherSection: {},
+  launcherSection: containerCSSLauncherSection,
   listing: containerCSSListing,
   mainAreaTab: containerCSSMainAreaTab,
   runningItem: containerCSSRunningItem,

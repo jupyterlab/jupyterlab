@@ -282,28 +282,8 @@
   background-image: var(--jp-icon-edit);
 }
 
-.jp-FileUploadIcon {
-  background-image: var(--jp-icon-file-upload);
-}
-
 .jp-FilterListIcon {
   background-image: var(--jp-icon-filter-list);
-}
-
-.jp-HomeIcon {
-  background-image: var(--jp-icon-home);
-  min-width: 16px;
-  min-height: 16px;
-  background-size: 16px;
-  vertical-align: sub;
-}
-
-.jp-KeyboardIcon {
-  background-image: var(--jp-icon-keyboard);
-}
-
-.jp-LauncherIcon {
-  background-image: var(--jp-icon-launcher);
 }
 
 .jp-LinkIcon {
@@ -320,14 +300,6 @@
   background-image: var(--jp-icon-new-folder);
 }
 
-.jp-SettingsIcon {
-  background-image: var(--jp-icon-settings);
-}
-
 .jp-UndoIcon {
   background-image: var(--jp-icon-undo);
-}
-
-.jp-VegaIcon {
-  background-image: var(--jp-icon-vega);
 }

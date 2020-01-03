@@ -5,6 +5,7 @@
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { Widget } from '@lumino/widgets';
+import { JLIcon } from '@jupyterlab/ui-components';
 
 /**
  * A namespace for rendermime associated interfaces.
@@ -155,6 +156,11 @@ export namespace IRenderMime {
      * The icon label for the file type.
      */
     readonly iconLabel?: string;
+
+    /**
+     * The icon (as JLIcon) for the file type.
+     */
+    readonly iconRenderer?: JLIcon;
 
     /**
      * The file format for the file type ('text', 'base64', or 'json').

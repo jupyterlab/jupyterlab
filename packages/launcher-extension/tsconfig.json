@@ -14,6 +14,9 @@
     },
     {
       "path": "../launcher"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

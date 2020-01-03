@@ -21,16 +21,8 @@
   /*--jp-icon-inverse-close-circle: url('icons/md/close-circle-inverse.svg');*/
   /*--jp-icon-inverse-close: url('icons/md/close-inverse.svg');*/
 
-  /*--jp-icon-file-upload: url('icons/md/ic_file_upload_24px.svg');*/
-  /*--jp-icon-filter-list: url('icons/md/ic_filter_list_24px.svg');*/
-  /*--jp-icon-home: url('icons/md/ic_home_24px.svg');*/
-  /*--jp-icon-keyboard: url('icons/md/ic_keyboard_24px.svg');*/
-  /*--jp-icon-launcher: url('icons/md/ic_launch_24px.svg');*/
-  /*--jp-icon-new-folder: url('icons/md/ic_create_new_folder_24px.svg');*/
   /*--jp-icon-search-white: url('icons/md/search-white.svg');*/
   /*--jp-icon-search: url('icons/md/search.svg');*/
-  /*--jp-icon-settings: url('icons/md/ic_settings_24px.svg');*/
-  /*--jp-icon-vega: url('icons/jupyter/vega.svg');*/
 
   /* blocked by need for stack/carousel */
 
@@ -38,7 +30,9 @@
 
   /*--jp-icon-console: url('icons/jupyter/console.svg');*/
   /*--jp-icon-download: url('icons/md/download.svg');*/
+  /*--jp-icon-filter-list: url('icons/md/ic_filter_list_24px.svg');*/
   /*--jp-icon-edit: url('icons/md/edit.svg');*/
   /*--jp-icon-link: url('icons/md/link.svg');*/
+  /*--jp-icon-new-folder: url('icons/md/ic_create_new_folder_24px.svg');*/
   /*--jp-icon-undo: url('icons/md/undo.svg');*/
 }

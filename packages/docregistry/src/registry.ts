@@ -1185,6 +1185,9 @@ export namespace DocumentRegistry {
      */
     readonly iconLabel?: string;
 
+    /**
+     * The icon (as JLIcon) for the file type.
+     */
     readonly iconRenderer?: JLIcon;
 
     /**
