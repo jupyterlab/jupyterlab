@@ -46,7 +46,11 @@ pkg:cells:
   - packages/cells/**/*
   - packages/cells/*
 
-# Missing `celltags`
+pkg:celltags:
+  - packages/celltags/**/*
+  - packages/celltags/*
+  - packages/celltags-extension/**/*
+  - packages/celltags-extension/*
 
 pkg:codeeditor:
   - packages/codeeditor/**/*
@@ -80,8 +84,6 @@ pkg:csvviewer:
   - packages/csvviewer-extension/**/*
   - packages/csvviewer-extension/*
 
-# `dataregistry` is not a package any longer
-
 pkg:docmanager:
   - packages/docmanager/**/*
   - packages/docmanager/*
@@ -103,8 +105,6 @@ pkg:extensionmanager:
   - packages/extensionmanager/*
   - packages/extensionmanager-extension/**/*
   - packages/extensionmanager-extension/*
-
-# `faq` is not a package any longer
 
 pkg:filebrowser:
   - packages/filebrowser/**/*
@@ -131,8 +131,6 @@ pkg:htmlviewer:
 pkg:hub:
   - packages/hub-extension/**/*
   - packages/hub-extension/*
-
-# `iframe` is not a package any longer
 
 pkg:imageviewer:
   - packages/imageviewer/**/*
@@ -202,7 +200,9 @@ pkg:pdf:
   - packages/pdf-extension/**/*
   - packages/pdf-extension/*
 
-# Missing `property-inspector`
+pkg:property-inspector:
+  - packages/property-inspector/**/*
+  - packages/property-inspector/*
 
 pkg:rendermime:
   - packages/rendermime/**/*
@@ -228,13 +228,17 @@ pkg:settingeditor:
   - packages/settingeditor/**/*
   - packages/settingeditor/*
 
-# Missing `settingsregistry`
+pkg:settingregistry:
+  - packages/settingregistry/**/*
+  - packages/settingregistry/*
 
 pkg:shortcuts:
   - packages/shortcuts-extension/**/*
   - packages/shortcuts-extension/*
 
-# Missing `statedb`
+pkg:statedb:
+  - packages/statedb/**/*
+  - packages/statedb/*
 
 pkg:statusbar:
   - packages/statusbar/**/*
