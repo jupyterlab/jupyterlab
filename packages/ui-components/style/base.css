@@ -5,6 +5,7 @@
 
 /* Sibling imports */
 @import './deprecated.css';
+@import './deprecatedExtra.css';
 
 /* Override Blueprint's _reset.scss styles */
 html {

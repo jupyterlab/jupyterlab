@@ -164,7 +164,7 @@
 }
 
 .p-CommandPalette-item.p-mod-toggled .p-CommandPalette-itemIcon {
-  background-image: var(--jp-icon-checkmark);
+  background-image: var(--jp-icon-check);
   background-size: 16px;
   background-repeat: no-repeat;
 }

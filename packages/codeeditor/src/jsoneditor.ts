@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IObservableJSON } from '@jupyterlab/observables';
-import { undoIcon } from '@jupyterlab/ui-components';
+import { checkIcon, undoIcon } from '@jupyterlab/ui-components';
 
 import {
   JSONExt,
@@ -35,11 +35,6 @@ const HOST_CLASS = 'jp-JSONEditor-host';
 const HEADER_CLASS = 'jp-JSONEditor-header';
 
 /**
- * The class name added to the commit button.
- */
-const COMMIT_CLASS = 'jp-JSONEditor-commitButton';
-
-/**
  * A widget for editing observable JSON.
  */
 export class JSONEditor extends Widget {
@@ -59,9 +54,11 @@ export class JSONEditor extends Widget {
       title: 'Revert changes to data'
     });
 
-    this.commitButtonNode = document.createElement('span');
-    this.commitButtonNode.className = COMMIT_CLASS;
-    this.commitButtonNode.title = 'Commit changes to data';
+    this.commitButtonNode = checkIcon.element({
+      tag: 'span',
+      title: 'Commit changes to data',
+      marginLeft: '8px'
+    });
 
     this.editorHostNode = document.createElement('div');
     this.editorHostNode.className = HOST_CLASS;

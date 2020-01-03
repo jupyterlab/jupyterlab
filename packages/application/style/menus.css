@@ -134,11 +134,11 @@
 }
 
 .p-Menu-item.p-mod-toggled > .p-Menu-itemIcon {
-  background-image: var(--jp-icon-checkmark);
+  background-image: var(--jp-icon-check);
 }
 
 .p-Menu-item.p-mod-toggled.p-mod-disabled > .p-Menu-itemIcon {
-  background-image: var(--jp-icon-checkmark-disabled);
+  background-image: var(--jp-icon-check-disabled);
 }
 
 .p-Menu-item[data-type='submenu'] > .p-Menu-itemSubmenuIcon {

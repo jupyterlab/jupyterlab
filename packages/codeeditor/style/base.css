@@ -42,11 +42,6 @@
   background-position: center;
 }
 
-.jp-JSONEditor-commitButton {
-  background-image: var(--jp-icon-checkmark);
-  margin-left: 8px;
-}
-
 .jp-JSONEditor-host.jp-mod-focused {
   background-color: var(--jp-input-active-background);
   border: 1px solid var(--jp-input-active-border-color);
