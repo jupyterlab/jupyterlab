@@ -39,7 +39,7 @@ function activateForeign(
 ) {
   const { shell } = app;
   tracker.widgetAdded.connect((sender, widget) => {
-    const console = widget.content.console;
+    const console = widget.console;
 
     const handler = new ForeignHandler({
       sessionContext: console.sessionContext,
@@ -62,7 +62,7 @@ function activateForeign(
     if (activate && widget) {
       shell.activateById(widget.id);
     }
-    return widget?.content ?? null;
+    return widget;
   }
 
   commands.addCommand(toggleShowAllActivity, {
@@ -79,9 +79,8 @@ function activateForeign(
     },
     isToggled: () =>
       tracker.currentWidget !== null &&
-      !!Private.foreignHandlerProperty.get(
-        tracker.currentWidget.content.console
-      )?.enabled,
+      !!Private.foreignHandlerProperty.get(tracker.currentWidget.console)
+        ?.enabled,
     isEnabled: () =>
       tracker.currentWidget !== null &&
       tracker.currentWidget === shell.currentWidget

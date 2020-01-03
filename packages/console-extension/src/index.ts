@@ -13,7 +13,6 @@ import {
   ISessionContext,
   ISessionContextDialogs,
   ICommandPalette,
-  MainAreaWidget,
   sessionContextDialogs,
   showDialog,
   WidgetTracker
@@ -155,7 +154,7 @@ async function activateConsole(
   sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
   // Create a widget tracker for all console panels.
-  const tracker = new WidgetTracker<MainAreaWidget<ConsolePanel>>({
+  const tracker = new WidgetTracker<ConsolePanel>({
     namespace: 'console'
   });
 
@@ -163,18 +162,14 @@ async function activateConsole(
   void restorer.restore(tracker, {
     command: CommandIDs.create,
     args: widget => {
-      const {
-        path,
-        name,
-        kernelPreference
-      } = widget.content.console.sessionContext;
+      const { path, name, kernelPreference } = widget.console.sessionContext;
       return {
         path,
         name,
         kernelPreference: { ...kernelPreference }
       };
     },
-    name: widget => widget.content.console.sessionContext.path ?? UUID.uuid4(),
+    name: widget => widget.console.sessionContext.path ?? UUID.uuid4(),
     when: manager.ready
   });
 
@@ -227,6 +222,11 @@ async function activateConsole(
    */
   interface ICreateOptions extends Partial<ConsolePanel.IOptions> {
     /**
+     * Whether to activate the widget.  Defaults to `true`.
+     */
+    activate?: boolean;
+
+    /**
      * The reference widget id for the insert location.
      *
      * The default is `null`.
@@ -240,11 +240,6 @@ async function activateConsole(
      * to the main area relative to a reference widget.
      */
     insertMode?: DockLayout.InsertMode;
-
-    /**
-     * Whether to activate the widget.  Defaults to `true`.
-     */
-    activate?: boolean;
   }
 
   /**
@@ -261,7 +256,6 @@ async function activateConsole(
       setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
     });
-    const widget = new MainAreaWidget<ConsolePanel>({ content: panel });
 
     const interactionMode: string = (
       await settingRegistry.get(
@@ -273,13 +267,15 @@ async function activateConsole(
 
     // Add the console panel to the tracker. We want the panel to show up before
     // any kernel selection dialog, so we do not await panel.session.ready;
-    await tracker.add(widget);
-    panel.sessionContext.propertyChanged.connect(() => tracker.save(widget));
+    await tracker.add(panel);
+    panel.sessionContext.propertyChanged.connect(() => {
+      void tracker.save(panel);
+    });
 
     shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,
-      activate: options.activate
+      activate: options.activate !== false
     });
     return panel;
   }
@@ -290,7 +286,7 @@ async function activateConsole(
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
     tracker.forEach(widget => {
-      widget.content.console.node.dataset.jpInteractionMode = interactionMode;
+      widget.console.node.dataset.jpInteractionMode = interactionMode;
     });
   }
   settingRegistry.pluginChanged.connect((sender, plugin) => {
@@ -306,7 +302,7 @@ async function activateConsole(
   function isEnabled(): boolean {
     return (
       tracker.currentWidget !== null &&
-      tracker.currentWidget.content === shell.currentWidget
+      tracker.currentWidget === shell.currentWidget
     );
   }
 
@@ -325,10 +321,10 @@ async function activateConsole(
     execute: (args: IOpenOptions) => {
       let path = args['path'];
       let widget = tracker.find(value => {
-        return value.content.console.sessionContext.session?.path === path;
+        return value.console.sessionContext.session?.path === path;
       });
       if (widget) {
-        if (args['activate'] !== false) {
+        if (args.activate !== false) {
           shell.activateById(widget.id);
         }
         return widget;
@@ -380,7 +376,7 @@ async function activateConsole(
     if (activate && widget) {
       shell.activateById(widget.id);
     }
-    return widget?.content ?? null;
+    return widget ?? null;
   }
 
   commands.addCommand(CommandIDs.clear, {
@@ -487,11 +483,11 @@ async function activateConsole(
     execute: args => {
       let path = args['path'];
       tracker.find(widget => {
-        if (widget.content.console.sessionContext.session?.path === path) {
+        if (widget.console.sessionContext.session?.path === path) {
           if (args['activate'] !== false) {
             shell.activateById(widget.id);
           }
-          void widget.content.console.inject(
+          void widget.console.inject(
             args['code'] as string,
             args['metadata'] as JSONObject
           );
@@ -538,14 +534,14 @@ async function activateConsole(
     tracker,
     action: 'Shutdown',
     name: 'Console',
-    closeAndCleanup: (current: MainAreaWidget<ConsolePanel>) => {
+    closeAndCleanup: (current: ConsolePanel) => {
       return showDialog({
         title: 'Shut down the console?',
         body: `Are you sure you want to close "${current.title.label}"?`,
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.content.console.sessionContext.shutdown().then(() => {
+          return current.console.sessionContext.shutdown().then(() => {
             current.dispose();
           });
         } else {
@@ -553,13 +549,13 @@ async function activateConsole(
         }
       });
     }
-  } as IFileMenu.ICloseAndCleaner<MainAreaWidget<ConsolePanel>>);
+  } as IFileMenu.ICloseAndCleaner<ConsolePanel>);
 
   // Add a kernel user to the Kernel menu
   mainMenu.kernelMenu.kernelUsers.add({
     tracker,
     interruptKernel: current => {
-      let kernel = current.content.console.sessionContext.session?.kernel;
+      let kernel = current.console.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
@@ -567,38 +563,38 @@ async function activateConsole(
     },
     noun: 'Console',
     restartKernel: current =>
-      sessionDialogs!.restart(current.content.console.sessionContext),
+      sessionDialogs!.restart(current.console.sessionContext),
     restartKernelAndClear: current => {
       return sessionDialogs!
-        .restart(current.content.console.sessionContext)
+        .restart(current.console.sessionContext)
         .then(restarted => {
           if (restarted) {
-            current.content.console.clear();
+            current.console.clear();
           }
           return restarted;
         });
     },
     changeKernel: current =>
-      sessionDialogs!.selectKernel(current.content.console.sessionContext),
-    shutdownKernel: current => current.content.console.sessionContext.shutdown()
-  } as IKernelMenu.IKernelUser<MainAreaWidget<ConsolePanel>>);
+      sessionDialogs!.selectKernel(current.console.sessionContext),
+    shutdownKernel: current => current.console.sessionContext.shutdown()
+  } as IKernelMenu.IKernelUser<ConsolePanel>);
 
   // Add a code runner to the Run menu.
   mainMenu.runMenu.codeRunners.add({
     tracker,
     noun: 'Cell',
     pluralNoun: 'Cells',
-    run: current => current.content.console.execute(true)
-  } as IRunMenu.ICodeRunner<MainAreaWidget<ConsolePanel>>);
+    run: current => current.console.execute(true)
+  } as IRunMenu.ICodeRunner<ConsolePanel>);
 
   // Add a clearer to the edit menu
   mainMenu.editMenu.clearers.add({
     tracker,
     noun: 'Console Cells',
-    clearCurrent: (current: MainAreaWidget<ConsolePanel>) => {
-      return current.content.console.clear();
+    clearCurrent: (current: ConsolePanel) => {
+      return current.console.clear();
     }
-  } as IEditMenu.IClearer<MainAreaWidget<ConsolePanel>>);
+  } as IEditMenu.IClearer<ConsolePanel>);
 
   // For backwards compatibility and clarity, we explicitly label the run
   // keystroke with the actual effected change, rather than the generic
@@ -651,8 +647,8 @@ async function activateConsole(
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
     tracker,
-    getKernel: current => current.content.sessionContext.session?.kernel
-  } as IHelpMenu.IKernelUser<MainAreaWidget<ConsolePanel>>);
+    getKernel: current => current.sessionContext.session?.kernel
+  } as IHelpMenu.IKernelUser<ConsolePanel>);
 
   app.contextMenu.addItem({
     command: CommandIDs.clear,
