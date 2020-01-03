@@ -1,37 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { toArray } from '@lumino/algorithm';
+
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { PathExt } from '@jupyterlab/coreutils';
 import {
   IRunningSessions,
   IRunningSessionManagers,
   RunningSessionManagers,
   RunningSessions
 } from '@jupyterlab/running';
-import { runningIcon } from '@jupyterlab/ui-components';
-
 import { Session } from '@jupyterlab/services';
-import { PathExt } from '@jupyterlab/coreutils';
-import { toArray } from '@lumino/algorithm';
-
-/**
- * The class name added to a notebook icon.
- */
-const NOTEBOOK_ICON_CLASS = 'jp-mod-notebook';
-
-/**
- * The class name added to a console icon.
- */
-const CONSOLE_ICON_CLASS = 'jp-mod-console';
-
-/**
- * The class name added to a file icon.
- */
-const FILE_ICON_CLASS = 'jp-mod-file';
+import {
+  consoleIcon,
+  fileIcon,
+  notebookIcon,
+  runningIcon
+} from '@jupyterlab/ui-components';
 
 /**
  * The default running sessions extension.
@@ -118,14 +108,14 @@ function addKernelRunningSessionManager(
     shutdown() {
       return manager.shutdown(this._model.id);
     }
-    iconClass() {
+    iconRenderer() {
       let { name, path, type } = this._model;
       if ((name || PathExt.basename(path)).indexOf('.ipynb') !== -1) {
-        return NOTEBOOK_ICON_CLASS;
+        return notebookIcon;
       } else if (type.toLowerCase() === 'console') {
-        return CONSOLE_ICON_CLASS;
+        return consoleIcon;
       }
-      return FILE_ICON_CLASS;
+      return fileIcon;
     }
     label() {
       return this._model.name || PathExt.basename(this._model.path);

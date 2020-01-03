@@ -21,6 +21,7 @@ export type IconKindType =
   | 'launcherSection'
   | 'listing'
   | 'mainAreaTab'
+  | 'runningItem'
   | 'settingsEditor'
   | 'sideBar'
   | 'splash'
@@ -83,6 +84,11 @@ const iconCSSMainAreaTab: NestedCSSProperties = {
   }
 };
 
+const iconCSSRunningItem: NestedCSSProperties = {
+  height: '16px',
+  width: '16px'
+};
+
 const iconCSSSettingsEditor: NestedCSSProperties = {
   height: '16px',
   width: '16px'
@@ -115,6 +121,7 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   launcherSection: iconCSSLauncherSection,
   listing: iconCSSListing,
   mainAreaTab: iconCSSMainAreaTab,
+  runningItem: iconCSSRunningItem,
   settingsEditor: iconCSSSettingsEditor,
   sideBar: iconCSSSideBar,
   splash: iconCSSSplash,
@@ -163,6 +170,10 @@ const containerCSSMainAreaTab: NestedCSSProperties = {
       position: 'relative'
     }
   }
+};
+
+const containerCSSRunningItem: NestedCSSProperties = {
+  margin: '0px 4px 0px 12px'
 };
 
 const containerCSSSettingsEditor: NestedCSSProperties = {
@@ -227,6 +238,7 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   launcherSection: {},
   listing: containerCSSListing,
   mainAreaTab: containerCSSMainAreaTab,
+  runningItem: containerCSSRunningItem,
   settingsEditor: containerCSSSettingsEditor,
   sideBar: containerCSSSideBar,
   splash: containerCSSSplash,

@@ -359,7 +359,7 @@ async function activateConsole(
       }
       return 'Console';
     },
-    iconClass: args => (args['isPalette'] ? '' : 'jp-CodeConsoleIcon'),
+    iconClass: args => (args['isPalette'] ? '' : 'jp-ConsoleIcon'),
     execute: args => {
       let basePath =
         (args['basePath'] as string) ||

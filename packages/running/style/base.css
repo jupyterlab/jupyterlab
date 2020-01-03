@@ -102,33 +102,6 @@
   line-height: var(--jp-private-running-item-height);
 }
 
-.jp-RunningSessions-itemIcon {
-  flex: 0 0 auto;
-  padding: 0px 8px;
-  margin-right: 4px;
-  margin-left: 12px;
-  vertical-align: baseline;
-  background-size: 16px;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.jp-RunningSessions-itemIcon.jp-mod-notebook {
-  background-image: var(--jp-icon-notebook);
-}
-
-.jp-RunningSessions-itemIcon.jp-mod-console {
-  background-image: var(--jp-icon-console);
-}
-
-.jp-RunningSessions-itemIcon.jp-mod-file:before {
-  background-image: var(--jp-icon-file);
-}
-
-.jp-RunningSessions-itemIcon.jp-mod-terminal {
-  background-image: var(--jp-icon-terminal);
-}
-
 .jp-RunningSessions-itemLabel {
   font-size: var(--jp-ui-font-size1);
   flex: 1 1 auto;

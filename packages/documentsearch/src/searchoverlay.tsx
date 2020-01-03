@@ -195,7 +195,6 @@ function UpDownButtons(props: IUpDownProps) {
       <button
         className={BUTTON_WRAPPER_CLASS}
         onClick={() => props.onHighlightPrevious()}
-        onKeyPress={}
         tabIndex={6}
       >
         <caretUpEmptyThinIcon.react

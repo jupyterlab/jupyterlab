@@ -21,7 +21,6 @@
   /*--jp-icon-inverse-close-circle: url('icons/md/close-circle-inverse.svg');*/
   /*--jp-icon-inverse-close: url('icons/md/close-inverse.svg');*/
 
-  /*--jp-icon-console: url('icons/jupyter/console.svg');*/
   /*--jp-icon-file-upload: url('icons/md/ic_file_upload_24px.svg');*/
   /*--jp-icon-filter-list: url('icons/md/ic_filter_list_24px.svg');*/
   /*--jp-icon-home: url('icons/md/ic_home_24px.svg');*/
@@ -37,6 +36,7 @@
 
   /* blocked by lumino interaction*/
 
+  /*--jp-icon-console: url('icons/jupyter/console.svg');*/
   /*--jp-icon-download: url('icons/md/download.svg');*/
   /*--jp-icon-edit: url('icons/md/edit.svg');*/
   /*--jp-icon-link: url('icons/md/link.svg');*/
