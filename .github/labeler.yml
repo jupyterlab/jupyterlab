@@ -1,0 +1,285 @@
+Design System CSS:
+  - '**/*.css'
+  - '*.css'
+
+tag:CSS:
+  - '**/*.css'
+  - '*.css'
+
+'tag:Design and UX':
+  - design/**/*
+  - design/*
+
+tag:Documentation:
+  - docs/**/*
+  - docs/*
+
+tag:Examples:
+  - examples/**/*
+  - examples/*
+
+tag:Testing:
+  - tests/**/*
+  - tests/*
+
+######################
+#   Package Labels   #
+######################
+
+pkg:application:
+  - packages/application/**/*
+  - packages/application/*
+  - packages/application-extension/**/*
+  - packages/application-extension/*
+
+pkg:apputils:
+  - packages/apputils/**/*
+  - packages/apputils/*
+  - packages/apputils-extension/**/*
+  - packages/apputils-extension/*
+
+pkg:attachments:
+  - packages/attachments/**/*
+  - packages/attachments/*
+
+pkg:cells:
+  - packages/cells/**/*
+  - packages/cells/*
+
+pkg:celltags:
+  - packages/celltags/**/*
+  - packages/celltags/*
+  - packages/celltags-extension/**/*
+  - packages/celltags-extension/*
+
+pkg:codeeditor:
+  - packages/codeeditor/**/*
+  - packages/codeeditor/*
+
+pkg:codemirror:
+  - packages/codemirror/**/*
+  - packages/codemirror/*
+  - packages/codemirror-extension/**/*
+  - packages/codemirror-extension/*
+
+pkg:completer:
+  - packages/completer/**/*
+  - packages/completer/*
+  - packages/completer-extension/**/*
+  - packages/completer-extension/*
+
+pkg:console:
+  - packages/console/**/*
+  - packages/console/*
+  - packages/console-extension/**/*
+  - packages/console-extension/*
+
+pkg:coreutils:
+  - packages/coreutils/**/*
+  - packages/coreutils/*
+
+pkg:csvviewer:
+  - packages/csvviewer/**/*
+  - packages/csvviewer/*
+  - packages/csvviewer-extension/**/*
+  - packages/csvviewer-extension/*
+
+pkg:docmanager:
+  - packages/docmanager/**/*
+  - packages/docmanager/*
+  - packages/docmanager-extension/**/*
+  - packages/docmanager-extension/*
+
+pkg:docregistry:
+  - packages/docregistry/**/*
+  - packages/docregistry/*
+
+pkg:documentsearch:
+  - packages/documentsearch/**/*
+  - packages/documentsearch/*
+  - packages/documentsearch-extension/**/*
+  - packages/documentsearch-extension/*
+
+pkg:extensionmanager:
+  - packages/extensionmanager/**/*
+  - packages/extensionmanager/*
+  - packages/extensionmanager-extension/**/*
+  - packages/extensionmanager-extension/*
+
+pkg:filebrowser:
+  - packages/filebrowser/**/*
+  - packages/filebrowser/*
+  - packages/filebrowser-extension/**/*
+  - packages/filebrowser-extension/*
+
+pkg:fileeditor:
+  - packages/fileeditor/**/*
+  - packages/fileeditor/*
+  - packages/fileeditor-extension/**/*
+  - packages/fileeditor-extension/*
+
+pkg:help:
+  - packages/help-extension/**/*
+  - packages/help-extension/*
+
+pkg:htmlviewer:
+  - packages/htmlviewer/**/*
+  - packages/htmlviewer/*
+  - packages/htmlviewer-extension/**/*
+  - packages/htmlviewer-extension/*
+
+pkg:hub:
+  - packages/hub-extension/**/*
+  - packages/hub-extension/*
+
+pkg:imageviewer:
+  - packages/imageviewer/**/*
+  - packages/imageviewer/*
+  - packages/imageviewer-extension/**/*
+  - packages/imageviewer-extension/*
+
+pkg:inspector:
+  - packages/inspector/**/*
+  - packages/inspector/*
+  - packages/inspector-extension/**/*
+  - packages/inspector-extension/*
+
+pkg:javascript:
+  - packages/javascript-extension/**/*
+  - packages/javascript-extension/*
+
+pkg:json:
+  - packages/json-extension/**/*
+  - packages/json-extension/*
+
+pkg:launcher:
+  - packages/launcher/**/*
+  - packages/launcher/*
+  - packages/launcher-extension/**/*
+  - packages/launcher-extension/*
+
+pkg:logconsole:
+  - packages/logconsole/**/*
+  - packages/logconsole/*
+  - packages/logconsole-extension/**/*
+  - packages/logconsole-extension/*
+
+pkg:mainmenu:
+  - packages/mainmenu/**/*
+  - packages/mainmenu/*
+  - packages/mainmenu-extension/**/*
+  - packages/mainmenu-extension/*
+
+pkg:markdownviewer:
+  - packages/markdownviewer/**/*
+  - packages/markdownviewer/*
+  - packages/markdownviewer-extension/**/*
+  - packages/markdownviewer-extension/*
+
+pkg:mathjax2:
+  - packages/mathjax2/**/*
+  - packages/mathjax2/*
+  - packages/mathjax2-extension/**/*
+  - packages/mathjax2-extension/*
+
+pkg:notebook:
+  - packages/notebook/**/*
+  - packages/notebook/*
+  - packages/notebook-extension/**/*
+  - packages/notebook-extension/*
+
+pkg:observables:
+  - packages/observables/**/*
+  - packages/observables/*
+
+pkg:outputarea:
+  - packages/outputarea/**/*
+  - packages/outputarea/*
+
+pkg:pdf:
+  - packages/pdf-extension/**/*
+  - packages/pdf-extension/*
+
+pkg:property-inspector:
+  - packages/property-inspector/**/*
+  - packages/property-inspector/*
+
+pkg:rendermime:
+  - packages/rendermime/**/*
+  - packages/rendermime/*
+  - packages/rendermime-interfaces/**/*
+  - packages/rendermime-interfaces/*
+  - packages/rendermime-extension/**/*
+  - packages/rendermime-extension/*
+
+pkg:running:
+  - packages/running/**/*
+  - packages/running/*
+  - packages/running-extension/**/*
+  - packages/running-extension/*
+
+pkg:services:
+  - packages/services/**/*
+  - packages/services/*
+
+pkg:settingeditor:
+  - packages/settingeditor/**/*
+  - packages/settingeditor/*
+  - packages/settingeditor/**/*
+  - packages/settingeditor/*
+
+pkg:settingregistry:
+  - packages/settingregistry/**/*
+  - packages/settingregistry/*
+
+pkg:shortcuts:
+  - packages/shortcuts-extension/**/*
+  - packages/shortcuts-extension/*
+
+pkg:statedb:
+  - packages/statedb/**/*
+  - packages/statedb/*
+
+pkg:statusbar:
+  - packages/statusbar/**/*
+  - packages/statusbar/*
+  - packages/statusbar-extension/**/*
+  - packages/statusbar-extension/*
+
+pkg:tabmanager:
+  - packages/tabmanager-extension/**/*
+  - packages/tabmanager-extension/*
+
+pkg:terminal:
+  - packages/terminal/**/*
+  - packages/terminal/*
+  - packages/terminal-extension/**/*
+  - packages/terminal-extension/*
+
+pkg:themes:
+  - packages/theme-dark-extension/**/*
+  - packages/theme-dark-extension/*
+  - packages/theme-light-extension/**/*
+  - packages/theme-light-extension/*
+
+pkg:tooltip:
+  - packages/tooltip/**/*
+  - packages/tooltip/*
+  - packages/tooltip-extension/**/*
+  - packages/tooltip-extension/*
+
+pkg:ui-components:
+  - packages/ui-components/**/*
+  - packages/ui-components/*
+  - packages/ui-components-extension/**/*
+  - packages/ui-components-extension/*
+
+pkg:vdom:
+  - packages/vdom/**/*
+  - packages/vdom/*
+  - packages/vdom-extension/**/*
+  - packages/vdom-extension/*
+
+pkg:vega:
+  - packages/vega5-extension/**/*
+  - packages/vega5-extension/*
