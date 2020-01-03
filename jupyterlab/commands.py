@@ -375,7 +375,7 @@ def watch(app_options=None):
 
 
 
-def install_extension(extension, app_options=None):
+def install_extension(extension, app_options=None, pin=None):
     """Install an extension package into JupyterLab.
 
     The extension is first validated.
