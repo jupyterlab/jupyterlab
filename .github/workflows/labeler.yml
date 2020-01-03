@@ -1,13 +1,18 @@
 name: 'Pull Request Labeler'
 
-# This workflow is triggered whenever a PR is opened, changed, or reopened.
-on: [pull_request]
 
+name: Pull Request Labeler
+# This workflow is supposed to run every 5 minutes
+on:
+  schedule:
+    - cron: '*/5 * * * *'
 jobs:
   triage:
     name: Update PR Labels
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/labeler@v2
-        with:
-          repo-token: '${{ secrets.GITHUB_TOKEN }}'
+      - uses: paulfantom/periodic-labeler@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          LABEL_MAPPINGS_FILE: .github/labeler.yml
