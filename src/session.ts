@@ -70,6 +70,14 @@ export class DebugSession implements IDebugger.ISession {
     } else {
       this._ready = this.client.kernel.ready;
     }
+    this._clientChanged.emit(client);
+  }
+
+  /**
+   * Signal for changed client of session
+   */
+  get clientChanged(): ISignal<this, IClientSession | Session.ISession> {
+    return this._clientChanged;
   }
 
   /**
@@ -206,6 +214,9 @@ export class DebugSession implements IDebugger.ISession {
   private _ready: Promise<void>;
   private _isDisposed = false;
   private _isStarted = false;
+  private _clientChanged = new Signal<this, IClientSession | Session.ISession>(
+    this
+  );
   private _disposed = new Signal<this, void>(this);
   private _eventMessage = new Signal<
     IDebugger.ISession,

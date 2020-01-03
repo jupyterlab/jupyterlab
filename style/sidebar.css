@@ -4,15 +4,26 @@
 |----------------------------------------------------------------------------*/
 
 .jp-DebuggerSidebar {
-  display: flex;
-  flex-direction: column;
   color: var(--jp-ui-font-color1);
   background: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size1);
-  min-width: 350px !important;
 }
 
-.jp-DebuggerSidebar > div > header {
+.jp-DebuggerSidebar .jp-DebuggerSidebar-body {
+  height: 100%;
+}
+
+.jp-DebuggerSidebar > header {
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: var(--jp-layout-color1);
+  min-height: 24px;
+}
+
+.jp-DebuggerSidebar-body > div > header {
   border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
   border-top: solid var(--jp-border-width) var(--jp-border-color1);
   box-shadow: var(--jp-toolbar-box-shadow);
@@ -24,11 +35,12 @@
   height: 24px;
 }
 
-.jp-DebuggerSidebar > div.jp-DebuggerVariables > header {
+.jp-DebuggerSidebar-body > div.jp-DebuggerVariables > header {
   border-top: none;
 }
 
-.jp-DebuggerSidebar > div > header > h2 {
+.jp-DebuggerSidebar-body > div > header > h2,
+.jp-DebuggerSidebar > header > h2 {
   text-transform: uppercase;
   font-weight: 600;
   font-size: var(--jp-ui-font-size0);
@@ -37,7 +49,7 @@
   padding-right: 4px;
 }
 
-.jp-DebuggerSidebar .jp-Toolbar {
+.jp-DebuggerSidebar-body .jp-Toolbar {
   background: var(--jp-layout-color2);
   box-shadow: none;
 }
