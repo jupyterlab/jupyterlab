@@ -378,11 +378,7 @@ export class LogLevelSwitcher extends ReactWidget {
           onChange={this.handleChange}
           onKeyDown={this.handleKeyDown}
           value={logger?.level}
-          iconProps={{
-            icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
-          }}
           aria-label="Log level"
-          minimal
           disabled={logger === null}
           options={
             logger === null

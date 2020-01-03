@@ -71,12 +71,7 @@ select.jp-mod-styled {
   font-size: var(--jp-ui-font-size2);
   background: var(--jp-input-background);
   color: var(--jp-ui-font-color0);
-  padding-left: 8px;
-  padding-right: 8px;
-  background-image: var(--jp-ui-select-caret);
-  background-repeat: no-repeat;
-  background-position: 99% center;
-  background-size: 18px;
+  padding: 0 25px 0 8px;
   border: var(--jp-border-width) solid var(--jp-input-border-color);
   border-radius: 0px;
   outline: none;

@@ -22,6 +22,7 @@ export type IconKindType =
   | 'listing'
   | 'mainAreaTab'
   | 'runningItem'
+  | 'select'
   | 'settingsEditor'
   | 'sideBar'
   | 'splash'
@@ -88,6 +89,12 @@ const iconCSSRunningItem: NestedCSSProperties = {
   width: '16px'
 };
 
+const iconCSSSelect: NestedCSSProperties = {
+  position: 'absolute',
+  height: 'auto',
+  width: '16px'
+};
+
 const iconCSSSettingsEditor: NestedCSSProperties = {
   height: '16px',
   width: '16px'
@@ -121,6 +128,7 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   listing: iconCSSListing,
   mainAreaTab: iconCSSMainAreaTab,
   runningItem: iconCSSRunningItem,
+  select: iconCSSSelect,
   settingsEditor: iconCSSSettingsEditor,
   sideBar: iconCSSSideBar,
   splash: iconCSSSplash,
@@ -178,6 +186,10 @@ const containerCSSMainAreaTab: NestedCSSProperties = {
 
 const containerCSSRunningItem: NestedCSSProperties = {
   margin: '0px 4px 0px 12px'
+};
+
+const containerCSSSelect: NestedCSSProperties = {
+  pointerEvents: 'none'
 };
 
 const containerCSSSettingsEditor: NestedCSSProperties = {
@@ -243,6 +255,7 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   listing: containerCSSListing,
   mainAreaTab: containerCSSMainAreaTab,
   runningItem: containerCSSRunningItem,
+  select: containerCSSSelect,
   settingsEditor: containerCSSSettingsEditor,
   sideBar: containerCSSSideBar,
   splash: containerCSSSplash,

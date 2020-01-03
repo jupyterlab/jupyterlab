@@ -266,10 +266,6 @@
   background-image: var(--jp-icon-directions-run);
 }
 
-.jp-DownCaretIcon {
-  background-image: var(--jp-ui-select-caret);
-}
-
 .jp-DownloadIcon {
   background-image: var(--jp-icon-download);
 }

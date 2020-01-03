@@ -19,10 +19,6 @@ import {
   IInputGroupProps as IBPInputGroupProps
 } from '@blueprintjs/core/lib/cjs/components/forms/inputGroup';
 import {
-  HTMLSelect as BPHTMLSelect,
-  IHTMLSelectProps
-} from '@blueprintjs/core/lib/cjs/components/html-select/htmlSelect';
-import {
   Select as BPSelect,
   ISelectProps
 } from '@blueprintjs/select/lib/cjs/components/select/select';
@@ -76,13 +72,6 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
 
 export const Collapse = (props: ICollapseProps & CommonProps<any>) => (
   <BPCollapse {...props} />
-);
-
-export const HTMLSelect = (props: IHTMLSelectProps & CommonProps<any>) => (
-  <BPHTMLSelect
-    {...props}
-    className={classes(props.className, 'jp-HTMLSelect')}
-  />
 );
 
 export const Select = (props: ISelectProps<any> & CommonProps<any>) => (
