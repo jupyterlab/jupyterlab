@@ -59,7 +59,6 @@
   --jp-icon-check: url('icons/toolbar/check.svg');
   --jp-icon-circle-empty: url('icons/toolbar/circle-empty.svg');
   --jp-icon-circle: url('icons/toolbar/circle.svg');
-  --jp-icon-close-circle: url('icons/toolbar/close-circle.svg');
   --jp-icon-close: url('icons/toolbar/close.svg');
   --jp-icon-copy: url('icons/toolbar/copy.svg');
   --jp-icon-cut: url('icons/toolbar/cut.svg');
@@ -221,9 +220,6 @@
 }
 .jp-CircleIcon {
   background-image: var(--jp-icon-circle);
-}
-.jp-CloseCircleIcon {
-  background-image: var(--jp-icon-close-circle);
 }
 .jp-CloseIcon {
   background-image: var(--jp-icon-close);

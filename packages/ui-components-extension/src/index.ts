@@ -6,15 +6,19 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IIconRegistry, defaultIconRegistry } from '@jupyterlab/ui-components';
+import { IJLIconManager } from '@jupyterlab/ui-components';
 
-const iconRegistry: JupyterFrontEndPlugin<IIconRegistry> = {
-  id: '@jupyterlab/ui-components-extension:default-icon-registry',
-  provides: IIconRegistry,
+/**
+ * Placeholder for future extension that will provide an icon manager class
+ * to assist with overriding/replacing particular sets of icons
+ */
+const jliconManager: JupyterFrontEndPlugin<IJLIconManager> = {
+  id: '@jupyterlab/ui-components-extension:jlicon-manager',
+  provides: IJLIconManager,
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
-    return defaultIconRegistry;
+    return Object.create(null);
   }
 };
 
-export default iconRegistry;
+export default jliconManager;

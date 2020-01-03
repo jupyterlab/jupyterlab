@@ -22,20 +22,12 @@ const HEADER_TEMPLATE = `
 
 const ICON_IMPORTS_TEMPLATE = `
 import { JLIcon } from './jlicon';
-import { Icon } from './interfaces';
 
 // icon svg import statements
 {{iconImportStatements}}
 
-// defaultIcons definition
-export namespace IconImports {
-  export const defaultIcons: ReadonlyArray<Icon.IModel> = [
-    {{iconModelDeclarations}}
-  ];
-}
-
-// wrapped icon definitions
-{{wrappedIconDefs}}
+// JLIcon instance construction
+{{jliconConstruction}}
 `;
 
 const ICON_CSS_CLASSES_TEMPLATE = `
@@ -372,8 +364,7 @@ export async function ensureUiComponents(
 
   // build the per-icon import code
   let _iconImportStatements: string[] = [];
-  let _iconModelDeclarations: string[] = [];
-  let _wrappedIconDefs: string[] = [];
+  let _jliconConstruction: string[] = [];
   svgs.forEach(svg => {
     const name = utils.stem(svg);
     const svgpath = path
@@ -381,32 +372,31 @@ export async function ensureUiComponents(
       .split(path.sep)
       .join('/');
 
+    const svgname = utils.camelCase(name) + 'Svg';
+    const iconname = utils.camelCase(name) + 'Icon';
+
     if (dorequire) {
       // load the icon svg using `require`
-      _iconModelDeclarations.push(
-        `{ name: '${name}', svg: require('${svgpath}').default }`
+      _jliconConstruction.push(
+        `export const ${iconname} = new JLIcon({ name: '${name}', svgstr: require('${svgpath}').default });`
       );
     } else {
       // load the icon svg using `import`
-      const svgname = utils.camelCase(name) + 'Svg';
-      const iconname = utils.camelCase(name) + 'Icon';
-
       _iconImportStatements.push(`import ${svgname} from '${svgpath}';`);
-      _iconModelDeclarations.push(`{ name: '${name}', svg: ${svgname} }`);
-      _wrappedIconDefs.push(
+
+      _jliconConstruction.push(
         `export const ${iconname} = new JLIcon({ name: '${name}', svgstr: ${svgname} });`
       );
     }
   });
   const iconImportStatements = _iconImportStatements.join('\n');
-  const iconModelDeclarations = _iconModelDeclarations.join(',\n');
-  const wrappedIconDefs = _wrappedIconDefs.join('\n');
+  const jliconConstruction = _jliconConstruction.join('\n');
 
   // generate the actual contents of the iconImports file
   const iconImportsPath = path.join(iconSrcDir, 'iconimports.ts');
   const iconImportsContents = utils.fromTemplate(
     HEADER_TEMPLATE + ICON_IMPORTS_TEMPLATE,
-    { funcName, iconImportStatements, iconModelDeclarations, wrappedIconDefs }
+    { funcName, iconImportStatements, jliconConstruction }
   );
   messages.push(...ensureFile(iconImportsPath, iconImportsContents, false));
 
