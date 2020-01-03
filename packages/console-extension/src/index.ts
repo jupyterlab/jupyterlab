@@ -169,7 +169,7 @@ async function activateConsole(
         kernelPreference: { ...kernelPreference }
       };
     },
-    name: widget => widget.console.sessionContext.session?.path ?? UUID.uuid4(),
+    name: widget => widget.console.sessionContext.path ?? UUID.uuid4(),
     when: manager.ready
   });
 
@@ -268,7 +268,9 @@ async function activateConsole(
     // Add the console panel to the tracker. We want the panel to show up before
     // any kernel selection dialog, so we do not await panel.session.ready;
     await tracker.add(panel);
-    panel.sessionContext.propertyChanged.connect(() => tracker.save(panel));
+    panel.sessionContext.propertyChanged.connect(() => {
+      void tracker.save(panel);
+    });
 
     shell.add(panel, 'main', {
       ref: options.ref,
@@ -298,7 +300,6 @@ async function activateConsole(
    * Whether there is an active console.
    */
   function isEnabled(): boolean {
-    console.log({ tracker, shell });
     return (
       tracker.currentWidget !== null &&
       tracker.currentWidget === shell.currentWidget
