@@ -3,6 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/* Sibling imports */
+@import './deprecated.css';
+
 /* Override Blueprint's _reset.scss styles */
 html {
   box-sizing: unset;
@@ -113,7 +116,3 @@ input::placeholder {
 select {
   box-sizing: border-box;
 }
-
-/* Sibling imports */
-@import './deprecated.css';
-@import './deprecatedExtra.css';
