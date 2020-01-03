@@ -76,7 +76,7 @@ Here is an example to request a file.
 
 .. code:: typescript
 
-    const dialog = FileDialog.getExistingDirectory({
+    const dialog = FileDialog.getOpenFiles({
       iconRegistry, // IIconRegistry
       manager, // IDocumentManager
       filter: model => model.type == 'notebook' // optional (model: Contents.IModel) => boolean
