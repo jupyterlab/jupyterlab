@@ -1,8 +1,8 @@
-<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 200 200" style="enable-background:new 0 0 200 200;" xml:space="preserve">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
   <g class="jp-icon-brand1 jp-icon-selectable" fill="#0288D1">
     <rect x="20" y="19.8" width="160" height="159.9"/>
   </g>
-  <g class="jp-icon-selectable-inverse" fill="white">
+  <g class="jp-icon-accent2 jp-icon-selectable-inverse" fill="white">
     <rect x="105" y="127.3" width="40" height="12.8"/>
     <polygon points="51.1,77 74,99.9 50.7,123.2 61.2,133.7 84.5,110.4 95,99.9 84.5,89.4 61.6,66.5 "/>
   </g>

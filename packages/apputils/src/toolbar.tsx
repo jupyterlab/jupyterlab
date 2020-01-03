@@ -6,6 +6,7 @@ import {
   Button,
   circleEmptyIcon,
   circleIcon,
+  classes,
   JLIcon,
   refreshIcon,
   stopIcon
@@ -496,14 +497,14 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     >
       {props.iconRenderer ? (
         <props.iconRenderer.react
-          className="jp-ToolbarButtonComponent-icon"
+          className={classes(props.iconClass, 'jp-ToolbarButtonComponent-icon')}
           tag="span"
           justify="center"
           kind="toolbarButton"
         />
       ) : (
         <JLIcon.getReact
-          name={`${props.iconClass} jp-Icon jp-Icon-16`}
+          name={classes(props.iconClass, 'jp-Icon', 'jp-Icon-16')}
           className="jp-ToolbarButtonComponent-icon"
           tag="span"
           justify="center"

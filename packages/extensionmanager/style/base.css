@@ -305,11 +305,3 @@ input[type='checkbox'] {
   font-weight: 600;
   color: var(--jp-ui-font-color0);
 }
-
-.jp-extensionmanager-collapseIcon {
-  background-image: var(--jp-image-caretright);
-}
-
-.jp-extensionmanager-expandIcon {
-  background-image: var(--jp-image-caretdown);
-}

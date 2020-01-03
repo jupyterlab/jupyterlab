@@ -8,7 +8,9 @@ import {
   InputGroup,
   Collapse,
   refreshIcon,
-  jupyterIcon
+  jupyterIcon,
+  caretRightIcon,
+  caretDownIcon
 } from '@jupyterlab/ui-components';
 
 import { Message } from '@lumino/messaging';
@@ -350,10 +352,11 @@ export class CollapsibleSection extends React.Component<
       <>
         <header>
           <ToolbarButtonComponent
+            iconRenderer={this.state.isOpen ? caretRightIcon : caretDownIcon}
             iconClass={
               this.state.isOpen
-                ? 'jp-extensionmanager-expandIcon'
-                : 'jp-extensionmanager-collapseIcon'
+                ? caretRightIcon.class({ height: 'auto', width: '18px' })
+                : caretDownIcon.class({ height: 'auto', width: '18px' })
             }
             onClick={() => {
               this.handleCollapse();

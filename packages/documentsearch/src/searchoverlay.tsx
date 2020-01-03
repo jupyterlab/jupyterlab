@@ -2,7 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
-import { ellipsesIcon } from '@jupyterlab/ui-components';
+import {
+  caretDownEmptyThinIcon,
+  caretUpEmptyThinIcon,
+  caseSensitiveIcon,
+  classes,
+  ellipsesIcon,
+  regexIcon
+} from '@jupyterlab/ui-components';
 
 import { Debouncer } from '@lumino/polling';
 import { Signal } from '@lumino/signaling';
@@ -16,14 +23,8 @@ const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
 const INPUT_WRAPPER_CLASS = 'jp-DocumentSearch-input-wrapper';
-const REGEX_BUTTON_CLASS_OFF =
-  'jp-DocumentSearch-input-button-off jp-DocumentSearch-regex-button';
-const REGEX_BUTTON_CLASS_ON =
-  'jp-DocumentSearch-input-button-on jp-DocumentSearch-regex-button';
-const CASE_BUTTON_CLASS_OFF =
-  'jp-DocumentSearch-input-button-off jp-DocumentSearch-case-button';
-const CASE_BUTTON_CLASS_ON =
-  'jp-DocumentSearch-input-button-on jp-DocumentSearch-case-button';
+const INPUT_BUTTON_CLASS_OFF = 'jp-DocumentSearch-input-button-off';
+const INPUT_BUTTON_CLASS_ON = 'jp-DocumentSearch-input-button-off';
 const INDEX_COUNTER_CLASS = 'jp-DocumentSearch-index-counter';
 const UP_DOWN_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-up-down-wrapper';
 const UP_BUTTON_CLASS = 'jp-DocumentSearch-up-button';
@@ -90,12 +91,14 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
   }
 
   render() {
-    const caseButtonToggleClass = this.props.caseSensitive
-      ? CASE_BUTTON_CLASS_ON
-      : CASE_BUTTON_CLASS_OFF;
-    const regexButtonToggleClass = this.props.useRegex
-      ? REGEX_BUTTON_CLASS_ON
-      : REGEX_BUTTON_CLASS_OFF;
+    const caseButtonToggleClass = classes(
+      this.props.caseSensitive ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
+      BUTTON_CONTENT_CLASS
+    );
+    const regexButtonToggleClass = classes(
+      this.props.useRegex ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
+      BUTTON_CONTENT_CLASS
+    );
 
     const wrapperClass = `${INPUT_WRAPPER_CLASS} ${
       this.props.inputFocused ? FOCUSED_INPUT : ''
@@ -119,9 +122,9 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           onClick={() => this.props.onCaseSensitiveToggled()}
           tabIndex={4}
         >
-          <span
-            className={`${caseButtonToggleClass} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={-1}
+          <caseSensitiveIcon.react
+            className={caseButtonToggleClass}
+            tag="span"
           />
         </button>
         <button
@@ -129,10 +132,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           onClick={() => this.props.onRegexToggled()}
           tabIndex={5}
         >
-          <span
-            className={`${regexButtonToggleClass} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={-1}
-          />
+          <regexIcon.react className={regexButtonToggleClass} tag="span" />
         </button>
       </div>
     );
@@ -198,9 +198,9 @@ function UpDownButtons(props: IUpDownProps) {
         onClick={() => props.onHighlightPrevious()}
         tabIndex={6}
       >
-        <span
-          className={`${UP_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={-1}
+        <caretUpEmptyThinIcon.react
+          className={classes(UP_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
+          tag="span"
         />
       </button>
       <button
@@ -208,9 +208,9 @@ function UpDownButtons(props: IUpDownProps) {
         onClick={() => props.onHightlightNext()}
         tabIndex={7}
       >
-        <span
-          className={`${DOWN_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={-1}
+        <caretDownEmptyThinIcon.react
+          className={classes(DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
+          tag="span"
         />
       </button>
     </div>
@@ -256,7 +256,12 @@ class FilterToggle extends React.Component<
         onClick={() => this.props.toggleEnabled()}
         tabIndex={8}
       >
-        <ellipsesIcon.react className={className} height="20px" width="20px" />
+        <ellipsesIcon.react
+          className={className}
+          tag="span"
+          height="20px"
+          width="20px"
+        />
       </button>
     );
   }
