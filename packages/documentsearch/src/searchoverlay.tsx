@@ -7,6 +7,7 @@ import {
   caretUpEmptyThinIcon,
   caseSensitiveIcon,
   classes,
+  closeIcon,
   ellipsesIcon,
   regexIcon
 } from '@jupyterlab/ui-components';
@@ -31,7 +32,6 @@ const UP_DOWN_BUTTON_CLASS = 'jp-DocumentSearch-up-down-button';
 const ELLIPSES_BUTTON_CLASS = 'jp-DocumentSearch-ellipses-button';
 const ELLIPSES_BUTTON_ENABLED_CLASS =
   'jp-DocumentSearch-ellipses-button-enabled';
-const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
 const SEARCH_OPTIONS_DISABLED_CLASS =
@@ -505,9 +505,11 @@ class SearchOverlay extends React.Component<
           onClick={() => this._onClose()}
           tabIndex={9}
         >
-          <span
-            className={`${CLOSE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={-1}
+          <closeIcon.react
+            className="jp-icon-hover"
+            justify="center"
+            height="20px"
+            width="20px"
           />
         </button>
       </div>,

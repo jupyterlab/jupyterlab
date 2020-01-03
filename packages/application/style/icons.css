@@ -73,6 +73,15 @@
   stroke: var(--jp-layout-color4);
 }
 
+/* set the color of an icon to transparent */
+.jp-icon-none[fill] {
+  fill: none;
+}
+
+.jp-icon-none[stroke] {
+  stroke: none;
+}
+
 /* brand icon colors. Same for light and dark */
 .jp-icon-brand0[fill] {
   fill: var(--jp-brand-color0);
