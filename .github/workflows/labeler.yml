@@ -11,7 +11,7 @@ jobs:
     name: Update PR Labels
     runs-on: ubuntu-latest
     steps:
-      - uses: paulfantom/periodic-labeler@master
+      - uses: paulfantom/periodic-labeler@8c477b324178bda91aeede9a35ece2b8d8813478
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
