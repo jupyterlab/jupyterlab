@@ -37,9 +37,9 @@
     "@blueprintjs/core": "^3.22.2",
     "@blueprintjs/select": "^3.11.2",
     "@jupyterlab/coreutils": "^4.0.0-alpha.4",
-    "@lumino/coreutils": "^1.4.0",
-    "@lumino/virtualdom": "^1.2.1",
-    "@lumino/widgets": "^1.9.4",
+    "@lumino/coreutils": "^1.4.2",
+    "@lumino/virtualdom": "^1.4.0",
+    "@lumino/widgets": "^1.9.7",
     "react": "~16.9.0",
     "react-dom": "~16.9.0",
     "typestyle": "^2.0.4"

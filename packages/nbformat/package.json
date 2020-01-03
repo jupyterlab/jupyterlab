@@ -33,7 +33,7 @@
     "watch": "tsc -b -w --listEmittedFiles"
   },
   "dependencies": {
-    "@lumino/coreutils": "^1.4.0"
+    "@lumino/coreutils": "^1.4.2"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

@@ -20,9 +20,9 @@
     "@jupyterlab/docregistry": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
     "@jupyterlab/testutils": "^2.0.0-alpha.4",
-    "@lumino/coreutils": "^1.4.0",
-    "@lumino/datagrid": "^0.3.2",
-    "@lumino/widgets": "^1.9.4",
+    "@lumino/coreutils": "^1.4.2",
+    "@lumino/datagrid": "^0.3.5",
+    "@lumino/widgets": "^1.9.7",
     "chai": "^4.2.0",
     "csv-spectrum": "~1.0.0",
     "simulate-event": "~1.4.0"

@@ -37,7 +37,7 @@
     "@jupyterlab/apputils": "^2.0.0-alpha.4",
     "@jupyterlab/documentsearch": "^2.0.0-alpha.4",
     "@jupyterlab/mainmenu": "^2.0.0-alpha.4",
-    "@lumino/widgets": "^1.9.4"
+    "@lumino/widgets": "^1.9.7"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
