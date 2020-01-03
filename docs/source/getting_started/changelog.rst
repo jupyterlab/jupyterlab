@@ -4,7 +4,7 @@ JupyterLab Changelog
 ====================
 
 TODO after release: convert to link:
-`v2.0 https://github.com/jupyterlab/jupyterlab/releases/tag/v2.0`__
+v2.0 https://github.com/jupyterlab/jupyterlab/releases/tag/v2.0__
 ---------------------------------------------------------------------------
 
 2020/01/03
