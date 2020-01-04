@@ -6,6 +6,9 @@
 /* Sibling imports */
 @import './deprecated.css';
 @import './deprecatedExtra.css';
+@import './icons.css';
+@import './iconsalt.css';
+@import './iconshover.css';
 
 /* Override Blueprint's _reset.scss styles */
 html {

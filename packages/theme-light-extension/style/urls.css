@@ -5,6 +5,8 @@
 
 /* TODO: finish cleaning up these cases of icon-as-css-background-image */
 :root {
+  /* may be unused */
+
   /*--jp-icon-bug: url('icons/md/bug.svg');*/
 
   /* blocked by need for stack/carousel */

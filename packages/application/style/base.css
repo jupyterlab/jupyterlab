@@ -46,9 +46,6 @@ body {
 /* Sibling imports */
 @import './datagrid.css';
 @import './dockpanel.css';
-@import './icons.css';
-@import './iconshover.css';
-@import './iconsalt.css';
 @import './menus.css';
 @import './scrollbar.css';
 @import './tabs.css';
