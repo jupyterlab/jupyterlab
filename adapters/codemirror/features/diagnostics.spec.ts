@@ -3,7 +3,7 @@ import { TextMarker } from 'codemirror';
 import { Diagnostics } from './diagnostics';
 import { FileEditorFeatureTestEnvironment } from '../testutils';
 
-describe('CodeMirrorAdapterExtension', () => {
+describe('Diagnostics', () => {
   let env: FileEditorFeatureTestEnvironment;
 
   beforeEach(() => (env = new FileEditorFeatureTestEnvironment()));

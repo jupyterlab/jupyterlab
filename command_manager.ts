@@ -3,7 +3,8 @@ import { IWidgetTracker } from '@jupyterlab/apputils';
 import { JupyterLabWidgetAdapter } from './adapters/jupyterlab/jl_adapter';
 import {
   CommandEntryPoint,
-  IFeatureCommand
+  IFeatureCommand,
+  ILSPFeature
 } from './adapters/codemirror/feature';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { FileEditorAdapter } from './adapters/jupyterlab/file_editor';
@@ -156,4 +157,5 @@ export interface ICommandContext {
   connection: LSPConnection;
   virtual_position: IVirtualPosition;
   root_position: IRootPosition;
+  features: Map<string, ILSPFeature>;
 }

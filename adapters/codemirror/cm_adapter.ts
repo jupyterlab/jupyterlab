@@ -7,7 +7,7 @@ import { ILSPFeature } from './feature';
 import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
 
 export class CodeMirrorAdapter {
-  protected features: Array<ILSPFeature>;
+  features: Map<string, ILSPFeature>;
 
   private last_change: CodeMirror.EditorChange;
   private doc_change_handler: CodeMirrorHandler;
@@ -21,14 +21,14 @@ export class CodeMirrorAdapter {
     this.doc_change_handler = this.saveChange.bind(this);
     this.editor.on('change', this.doc_change_handler);
 
-    this.features = [];
+    this.features = new Map();
 
     for (let feature of features) {
       feature.register();
       if (!feature.is_registered) {
         console.warn('The feature ', feature, 'was not registered properly');
       }
-      this.features.push(feature);
+      this.features.set(feature.name, feature);
     }
   }
 
@@ -58,7 +58,7 @@ export class CodeMirrorAdapter {
         return true;
       }
 
-      for (let feature of this.features) {
+      for (let feature of this.features.values()) {
         feature.afterChange(change, root_position);
       }
       return true;
@@ -78,7 +78,7 @@ export class CodeMirrorAdapter {
   }
 
   public remove() {
-    for (let feature of this.features) {
+    for (let feature of this.features.values()) {
       feature.remove();
     }
     this.editor.off('change', this.doc_change_handler);

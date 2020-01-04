@@ -35,25 +35,34 @@ export class LSPConnection extends LspWsConnection {
     );
   }
 
-  public rename(location: IPosition, newName: string) {
+  async rename(location: IPosition, newName: string): Promise<boolean> {
     if (!this.isConnected || !this.isRenameSupported()) {
       return;
     }
 
-    this.connection
-      .sendRequest('textDocument/rename', {
-        textDocument: {
-          uri: this.documentInfo.documentUri
-        },
-        position: {
-          line: location.line,
-          character: location.ch
-        },
-        newName: newName
-      } as lsProtocol.RenameParams)
-      .then((result: lsProtocol.WorkspaceEdit | null) => {
-        this.emit('renamed', result);
-      });
+    return new Promise((resolve, reject) => {
+      this.connection
+        .sendRequest('textDocument/rename', {
+          textDocument: {
+            uri: this.documentInfo.documentUri
+          },
+          position: {
+            line: location.line,
+            character: location.ch
+          },
+          newName: newName
+        } as lsProtocol.RenameParams)
+        .then(
+          (result: lsProtocol.WorkspaceEdit | null) => {
+            this.emit('renamed', result);
+            resolve(true);
+          },
+          error => {
+            console.warn(error);
+            reject(error);
+          }
+        );
+    });
   }
 
   public connect(socket: WebSocket): this {

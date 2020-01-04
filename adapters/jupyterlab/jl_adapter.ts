@@ -281,6 +281,11 @@ export abstract class JupyterLabWidgetAdapter
     }
   }
 
+  public get_features(virtual_document: VirtualDocument) {
+    let adapter = this.adapters.get(virtual_document.id_path);
+    return adapter.features;
+  }
+
   private async connect(virtual_document: VirtualDocument) {
     let language = virtual_document.language;
     console.log(
@@ -389,7 +394,8 @@ export abstract class JupyterLabWidgetAdapter
     let virtual_position = this.virtual_editor.root_position_to_virtual_position(
       root_position
     );
-    return { document, connection, virtual_position, root_position };
+    let features = this.get_features(document);
+    return { document, connection, virtual_position, root_position, features };
   }
 
   public create_tooltip(

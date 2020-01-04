@@ -63,6 +63,10 @@ export interface IFeatureCommand {
 }
 
 export interface ILSPFeature {
+  /**
+   * The user-readable name of the feature
+   */
+  name: string;
   is_registered: boolean;
 
   virtual_editor: VirtualEditor;
@@ -116,12 +120,16 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
     public virtual_document: VirtualDocument,
     public connection: LSPConnection,
     public jupyterlab_components: IJupyterLabComponentsManager,
-    protected status_message: StatusMessage
+    public status_message: StatusMessage
   ) {
     this.editor_handlers = new Map();
     this.connection_handlers = new Map();
     this.wrapper_handlers = new Map();
     this.is_registered = false;
+  }
+
+  get name(): string {
+    return (this as any).constructor.name;
   }
 
   register(): void {

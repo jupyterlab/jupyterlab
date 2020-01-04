@@ -10,17 +10,24 @@ export class Rename extends CodeMirrorLSPFeature {
   static commands: Array<IFeatureCommand> = [
     {
       id: 'rename-symbol',
-      execute: ({ connection, virtual_position, document }) => {
+      execute: ({ connection, virtual_position, document, features }) => {
         let old_value = document.getTokenAt(virtual_position).string;
+        let handle_failure = (error: any) => {
+          let feature = features.get('Rename') as Rename;
+          feature.status_message.set(`Rename failed: ${error}`, 5 * 1000);
+        };
+
         InputDialog.getText({
           title: 'Rename to',
           text: old_value,
           okLabel: 'Rename'
         })
           .then(value => {
-            connection.rename(virtual_position, value.value);
+            connection
+              .rename(virtual_position, value.value)
+              .catch(handle_failure);
           })
-          .catch(console.warn);
+          .catch(handle_failure);
       },
       is_enabled: ({ connection }) => connection.isRenameSupported(),
       label: 'Rename symbol'
@@ -32,10 +39,9 @@ export class Rename extends CodeMirrorLSPFeature {
     super.register();
   }
 
-  protected handleRename(workspaceEdit: lsProtocol.WorkspaceEdit) {
+  handleRename(workspaceEdit: lsProtocol.WorkspaceEdit) {
     this.apply_edit(workspaceEdit)
       .catch(error => {
-        console.log(error);
         this.status_message.set(`Rename failed: ${error}`);
       })
       .then((outcome: IEditOutcome) => {
