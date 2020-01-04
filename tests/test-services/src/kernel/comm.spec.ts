@@ -188,9 +188,9 @@ describe('jupyter.services - Comm', () => {
         comm.dispose();
       });
 
-      it('should allow an optional target', async () => {
+      it('should allow an optional target name', async () => {
         await kernel.requestExecute({ code: SEND }, true).done;
-        const msg = await kernel.requestCommInfo({ target: 'test' });
+        const msg = await kernel.requestCommInfo({ target_name: 'test' });
         if (msg.content.status !== 'ok') {
           throw new Error('Message error');
         }

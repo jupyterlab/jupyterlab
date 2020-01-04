@@ -71,7 +71,7 @@ export const textRendererFactory: IRenderMime.IRendererFactory = {
 };
 
 /**
- * A placeholder factory for deprecated rendered JavaScript.
+ * A placeholder factory for rendered JavaScript.
  */
 export const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
   safe: false,

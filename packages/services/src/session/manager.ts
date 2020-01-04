@@ -257,8 +257,6 @@ export class SessionManager extends BaseManager implements Session.IManager {
         err.response?.status === 503
       ) {
         this._connectionFailure.emit(err);
-        // TODO: why do we care about resetting models if we are throwing right away?
-        models = [];
       }
       throw err;
     }
