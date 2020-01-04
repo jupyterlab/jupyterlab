@@ -13,6 +13,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
 import { IRootPosition, IVirtualPosition } from './positioning';
+import { VirtualEditor } from './virtual/editor';
 
 export const file_editor_adapters: Map<string, FileEditorAdapter> = new Map();
 export const notebook_adapters: Map<string, NotebookAdapter> = new Map();
@@ -158,4 +159,5 @@ export interface ICommandContext {
   virtual_position: IVirtualPosition;
   root_position: IRootPosition;
   features: Map<string, ILSPFeature>;
+  editor: VirtualEditor;
 }

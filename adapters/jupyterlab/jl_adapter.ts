@@ -390,12 +390,17 @@ export abstract class JupyterLabWidgetAdapter
   get_context_from_context_menu(): ICommandContext {
     let root_position = this.get_position_from_context_menu();
     let document = this.virtual_editor.document_at_root_position(root_position);
-    let connection = this.connection_manager.connections.get(document.id_path);
     let virtual_position = this.virtual_editor.root_position_to_virtual_position(
       root_position
     );
-    let features = this.get_features(document);
-    return { document, connection, virtual_position, root_position, features };
+    return {
+      document,
+      connection: this.connection_manager.connections.get(document.id_path),
+      virtual_position,
+      root_position,
+      features: this.get_features(document),
+      editor: this.virtual_editor
+    };
   }
 
   public create_tooltip(

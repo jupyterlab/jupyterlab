@@ -1,13 +1,26 @@
 import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../../../converter';
-import { IVirtualPosition } from '../../../positioning';
+import { IEditorPosition, IVirtualPosition } from '../../../positioning';
 import { diagnosticSeverityNames } from '../../../lsp';
 import { DefaultMap } from '../../../utils';
 import { CodeMirrorLSPFeature } from '../feature';
 
 // TODO: settings
 const default_severity = 2;
+
+/**
+ * Diagnostic which is localized at a specific editor (cell) within a notebook
+ * (if used in the context of a FileEditor, then there is just a single editor)
+ */
+export interface IEditorDiagnostic {
+  diagnostic: lsProtocol.Diagnostic;
+  editor: CodeMirror.Editor;
+  range: {
+    start: IEditorPosition;
+    end: IEditorPosition;
+  };
+}
 
 export class Diagnostics extends CodeMirrorLSPFeature {
   register(): void {
@@ -21,6 +34,14 @@ export class Diagnostics extends CodeMirrorLSPFeature {
 
   private unique_editor_ids: DefaultMap<CodeMirror.Editor, number>;
   private marked_diagnostics: Map<string, CodeMirror.TextMarker> = new Map();
+  /**
+   * Allows access to the most recent diagnostics in context of the editor.
+   *
+   * One can use VirtualEditorForNotebook.find_cell_by_editor() to find
+   * the corresponding cell in notebook.
+   * Can be used to implement a Panel showing diagnostics list.
+   */
+  public diagnostics_db: IEditorDiagnostic[];
 
   protected collapse_overlapping_diagnostics(
     diagnostics: lsProtocol.Diagnostic[]
@@ -74,6 +95,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
   public handleDiagnostic(response: lsProtocol.PublishDiagnosticsParams) {
     /* TODO: gutters */
     try {
+      let diagnostics_db: IEditorDiagnostic[] = [];
       // Note: no deep equal for Sets or Maps in JS
       const markers_to_retain: Set<string> = new Set();
 
@@ -146,6 +168,10 @@ export class Diagnostics extends CodeMirrorLSPFeature {
 
           let start_in_editor = document.transform_virtual_to_editor(start);
           let end_in_editor = document.transform_virtual_to_editor(end);
+          let range_in_editor = {
+            start: start_in_editor,
+            end: end_in_editor
+          };
           // what a pity there is no hash in the standard library...
           // we could use this: https://stackoverflow.com/a/7616484 though it may not be worth it:
           //   the stringified diagnostic objects are only about 100-200 JS characters anyway,
@@ -166,12 +192,17 @@ export class Diagnostics extends CodeMirrorLSPFeature {
             // after the (inserted/removed) line - but such markers should not be invalidated,
             // i.e. the invalidation should be performed in the cell space, not in the notebook coordinate space,
             // thus we transform the coordinates and keep the cell id in the hash
-            range: {
-              start: start_in_editor,
-              end: end_in_editor
-            },
+            range: range_in_editor,
             editor: this.unique_editor_ids.get(cm_editor)
           });
+          for (let diagnostic of diagnostics) {
+            diagnostics_db.push({
+              diagnostic,
+              editor: cm_editor,
+              range: range_in_editor
+            });
+          }
+
           markers_to_retain.add(diagnostic_hash);
 
           if (!this.marked_diagnostics.has(diagnostic_hash)) {
@@ -201,6 +232,8 @@ export class Diagnostics extends CodeMirrorLSPFeature {
 
       // remove the markers which were not included in the new message
       this.remove_unused_diagnostic_markers(markers_to_retain);
+
+      this.diagnostics_db = diagnostics_db;
     } catch (e) {
       console.warn(e);
     }

@@ -38,10 +38,6 @@ class DocDispatcher implements CodeMirror.Doc {
       );
   }
 
-  // getValue(seperator?: string): string {
-  //  return this.virtual_editor.getValue();
-  // }
-
   getCursor(start?: string): CodeMirror.Position {
     let cell = this.virtual_editor.notebook.activeCell;
     let active_editor = cell.editor as CodeMirrorEditor;
@@ -358,6 +354,26 @@ export class VirtualEditorForNotebook extends VirtualEditor {
           callback(cm_editor);
         }
       });
+    }
+  }
+
+  /**
+   * Find a cell in notebook which uses given CodeMirror editor.
+   * This function is O(n) - when looking up many cells
+   * using a hashmap based approach may be more efficient.
+   * @param cm_editor
+   */
+  find_cell_by_editor(cm_editor: CodeMirror.Editor) {
+    let cells = this.notebook.widgets;
+    for (let i = 0; i < cells.length; i++) {
+      let cell = cells[i];
+      let cell_editor = (cell.editor as CodeMirrorEditor).editor;
+      if (cell_editor === cm_editor) {
+        return {
+          cell_id: i,
+          cell: cell
+        };
+      }
     }
   }
 }
