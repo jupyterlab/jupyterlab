@@ -8,7 +8,6 @@ import {
 
 export class VirtualFileEditor extends VirtualEditor {
   protected cm_editor: CodeMirror.Editor;
-  has_lsp_supported_file = true;
   has_cells = false;
 
   constructor(
@@ -20,7 +19,7 @@ export class VirtualFileEditor extends VirtualEditor {
     // TODO: for now the magics and extractors are not used in FileEditor,
     //  although it would make sense to pass extractors (e.g. for CSS in HTML,
     //  or SQL in Python files) in the future.
-    super(language, file_extension, path, {}, {});
+    super(language, file_extension, path, {}, {}, true);
     this.cm_editor = cm_editor;
     let handler = {
       get: function(

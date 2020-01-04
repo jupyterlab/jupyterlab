@@ -7,11 +7,12 @@ import {
   IVirtualPosition
 } from '../positioning';
 import * as CodeMirror from 'codemirror';
+import { PageConfig } from '@jupyterlab/coreutils';
+import { DocumentConnectionManager } from '../connection_manager';
+import { VirtualDocument } from './document';
 
 class VirtualEditorImplementation extends VirtualEditor {
   private cm_editor: CodeMirror.Editor;
-
-  has_lsp_supported_file = true;
 
   get_cm_editor(position: IRootPosition): CodeMirror.Editor {
     return undefined;
@@ -53,13 +54,53 @@ describe('VirtualEditor', () => {
     file_extension: 'R'
   });
 
+  PageConfig.setOption('rootUri', '/home/username/project');
+  PageConfig.setOption(
+    'virtualDocumentsUri',
+    '/home/username/project/.virtual_documents'
+  );
+
   let editor = new VirtualEditorImplementation(
     () => 'python',
     () => 'py',
     () => 'test.ipynb',
     {},
-    { python: [r_line_extractor] }
+    { python: [r_line_extractor] },
+    false
   );
+
+  describe('#has_lsp_supported', () => {
+    it('gets passed on to the virtual document & used for connection uri base', () => {
+      const rootUri = PageConfig.getOption('rootUri');
+      const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
+      expect(rootUri).to.be.not.equal(virtualDocumentsUri);
+
+      class DummyConnectionManager extends DocumentConnectionManager {
+        public get_solved_uris(document: VirtualDocument, language: string) {
+          return this.solve_uris(document, language);
+        }
+      }
+
+      const manager = new DummyConnectionManager();
+
+      let document = editor.virtual_document;
+      let uris = manager.get_solved_uris(document, 'python');
+      expect(uris.base.startsWith(virtualDocumentsUri)).to.be.equal(true);
+
+      let editor_with_plain_file = new VirtualEditorImplementation(
+        () => 'python',
+        () => 'py',
+        () => 'test.ipynb',
+        {},
+        { python: [r_line_extractor] },
+        true
+      );
+      document = editor_with_plain_file.virtual_document;
+      uris = manager.get_solved_uris(document, 'python');
+      expect(uris.base.startsWith(virtualDocumentsUri)).to.be.equal(false);
+    });
+  });
+
   describe('#document_at_root_position()', () => {
     it('returns correct document', () => {
       let cm_editor_for_cell_1 = {} as CodeMirror.Editor;

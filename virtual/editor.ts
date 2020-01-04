@@ -25,7 +25,6 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
   //  could stop exposing the full implementation of CodeMirror but rather hide it inside.
   virtual_document: VirtualDocument;
   code_extractors: IForeignCodeExtractorsRegistry;
-  abstract get has_lsp_supported_file(): boolean;
   /**
    * Signal emitted by the editor that triggered the update, providing the root document of the updated documents.
    */
@@ -40,7 +39,8 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
     protected file_extension: () => string,
     protected path: () => string,
     protected overrides_registry: IOverridesRegistry,
-    protected foreign_code_extractors: IForeignCodeExtractorsRegistry
+    protected foreign_code_extractors: IForeignCodeExtractorsRegistry,
+    public has_lsp_supported_file: boolean
   ) {
     this.create_virtual_document();
     this.documents_updated = new Signal<VirtualEditor, VirtualDocument>(this);

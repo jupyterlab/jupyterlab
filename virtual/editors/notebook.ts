@@ -51,8 +51,6 @@ class DocDispatcher implements CodeMirror.Doc {
 }
 
 export class VirtualEditorForNotebook extends VirtualEditor {
-  has_lsp_supported_file = false;
-
   cell_to_corresponding_source_line: Map<Cell, number>;
   cm_editor_to_cell: Map<CodeMirror.Editor, Cell>;
   has_cells = true;
@@ -71,7 +69,8 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       file_extension,
       () => path() + '.' + file_extension(),
       overrides_registry,
-      foreign_code_extractors
+      foreign_code_extractors,
+      false
     );
     this.cell_to_corresponding_source_line = new Map();
     this.cm_editor_to_cell = new Map();
