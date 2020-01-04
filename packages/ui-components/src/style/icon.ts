@@ -20,6 +20,7 @@ export type IconKindType =
   | 'launcherCard'
   | 'launcherSection'
   | 'listing'
+  | 'listingHeaderItem'
   | 'mainAreaTab'
   | 'runningItem'
   | 'select'
@@ -69,6 +70,12 @@ const iconCSSLauncherSection: NestedCSSProperties = {
 const iconCSSListing: NestedCSSProperties = {
   height: '16px',
   width: '16px'
+};
+
+const iconCSSlistingHeaderItem: NestedCSSProperties = {
+  height: 'auto',
+  margin: '-2px 0 0 0',
+  width: '20px'
 };
 
 const iconCSSMainAreaTab: NestedCSSProperties = {
@@ -126,6 +133,7 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   launcherCard: iconCSSLauncherCard,
   launcherSection: iconCSSLauncherSection,
   listing: iconCSSListing,
+  listingHeaderItem: iconCSSlistingHeaderItem,
   mainAreaTab: iconCSSMainAreaTab,
   runningItem: iconCSSRunningItem,
   select: iconCSSSelect,
@@ -167,6 +175,12 @@ const containerCSSListing: NestedCSSProperties = {
   flex: '0 0 20px',
   marginRight: '4px',
   position: 'relative'
+};
+
+const containerCSSListingHeaderItem: NestedCSSProperties = {
+  display: 'inline',
+  height: '16px',
+  width: '16px'
 };
 
 /**
@@ -253,6 +267,7 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   launcherCard: containerCSSLauncherCard,
   launcherSection: containerCSSLauncherSection,
   listing: containerCSSListing,
+  listingHeaderItem: containerCSSListingHeaderItem,
   mainAreaTab: containerCSSMainAreaTab,
   runningItem: containerCSSRunningItem,
   select: containerCSSSelect,

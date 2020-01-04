@@ -5,20 +5,24 @@
 
 /* TODO: finish cleaning up these cases of icon-as-css-background-image */
 :root {
-  /*--jp-icon-caretdown: url('icons/md/caretdown.svg');*/
-  /*--jp-icon-caretright: url('icons/md/caretright.svg');*/
-  /*--jp-icon-caretup: url('icons/md/caretup.svg');*/
-
   /*--jp-icon-bug: url('icons/md/bug.svg');*/
 
   /* blocked by need for stack/carousel */
 
+  /*--jp-icon-caret-down: url('icons/md/caretdown.svg');*/
+  /*--jp-icon-caret-right: url('icons/md/caretright.svg');*/
+  /*--jp-icon-caret-up: url('icons/md/caretup.svg');*/
+  /*--jp-icon-caret-left: url('icons/md/caretleft.svg');*/
   /*--jp-icon-check: url('icons/md/checkmark.svg');*/
   /*--jp-icon-check-disabled: url('icons/md/checkmark-disabled.svg');*/
   /*--jp-icon-close: url('icons/md/close.svg');*/
 
   /* blocked by lumino interaction*/
 
+  /*--jp-icon-caret-down: url('icons/md/caretdown.svg');*/
+  /*--jp-icon-caret-right: url('icons/md/caretright.svg');*/
+  /*--jp-icon-caret-up: url('icons/md/caretup.svg');*/
+  /*--jp-icon-caret-left: url('icons/md/caretleft.svg');*/
   /*--jp-icon-check: url('icons/md/checkmark.svg');*/
   /*--jp-icon-check-disabled: url('icons/md/checkmark-disabled.svg');*/
   /*--jp-icon-close: url('icons/md/close.svg');*/

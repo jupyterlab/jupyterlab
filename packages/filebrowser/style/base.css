@@ -102,7 +102,7 @@
 }
 
 .jp-DirListing-headerItem {
-  padding: 4px 12px;
+  padding: 4px 12px 2px 12px;
   font-weight: 500;
 }
 
@@ -127,33 +127,6 @@
 
 .jp-DirListing-headerItem.jp-mod-selected {
   font-weight: 600;
-}
-
-.jp-DirListing-headerItemIcon {
-  height: 16px;
-  width: 16px;
-  background-size: 18px;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.jp-DirListing-headerItem.jp-mod-selected .jp-DirListing-headerItemIcon {
-  background-image: var(--jp-icon-caretup);
-}
-
-.jp-DirListing-headerItem.jp-mod-selected.jp-mod-descending
-  .jp-DirListing-headerItemIcon {
-  background-image: var(--jp-icon-caretdown);
-}
-
-.jp-DirListing-headerItem.jp-mod-selected.jp-id-name
-  .jp-DirListing-headerItemIcon {
-  float: right;
-}
-
-.jp-DirListing-headerItem.jp-mod-selected.jp-id-modified
-  .jp-DirListing-headerItemIcon {
-  float: left;
 }
 
 /* increase specificity to override bundled default */

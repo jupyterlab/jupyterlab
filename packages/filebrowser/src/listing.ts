@@ -20,7 +20,12 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
-import { fileIcon, JLIcon } from '@jupyterlab/ui-components';
+import {
+  caretDownIcon,
+  caretUpIcon,
+  fileIcon,
+  JLIcon
+} from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
@@ -46,6 +51,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 import { FileBrowserModel } from './model';
+import { IIconStyle } from '@jupyterlab/ui-components/lib/style/icon';
 
 /**
  * The class name added to DirListing widget.
@@ -1711,6 +1717,13 @@ export namespace DirListing {
       modified.classList.add(MODIFIED_ID_CLASS);
       node.appendChild(name);
       node.appendChild(modified);
+
+      // set the initial caret icon
+      Private.updateCaret(
+        DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS),
+        'right',
+        'up'
+      );
     }
 
     /**
@@ -1728,36 +1741,56 @@ export namespace DirListing {
       let state: ISortState = { direction: 'ascending', key: 'name' };
       let target = event.target as HTMLElement;
       if (name.contains(target)) {
+        const modifiedIcon = DOMUtils.findElement(
+          modified,
+          HEADER_ITEM_ICON_CLASS
+        );
+        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
         if (name.classList.contains(SELECTED_CLASS)) {
           if (!name.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
             name.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(nameIcon, 'right', 'down');
           } else {
             name.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(nameIcon, 'right', 'up');
           }
         } else {
           name.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(nameIcon, 'right', 'up');
         }
         name.classList.add(SELECTED_CLASS);
         modified.classList.remove(SELECTED_CLASS);
         modified.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(modifiedIcon, 'left');
         return state;
       }
       if (modified.contains(target)) {
+        const modifiedIcon = DOMUtils.findElement(
+          modified,
+          HEADER_ITEM_ICON_CLASS
+        );
+        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
         state.key = 'last_modified';
         if (modified.classList.contains(SELECTED_CLASS)) {
           if (!modified.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
             modified.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(modifiedIcon, 'left', 'down');
           } else {
             modified.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(modifiedIcon, 'left', 'up');
           }
         } else {
           modified.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(modifiedIcon, 'left', 'up');
         }
         modified.classList.add(SELECTED_CLASS);
         name.classList.remove(SELECTED_CLASS);
         name.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(nameIcon, 'right');
         return state;
       }
       return state;
@@ -2056,6 +2089,31 @@ namespace Private {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     } else {
       return String(bytes);
+    }
+  }
+
+  /**
+   * Update an inline svg caret icon in a node.
+   */
+  export function updateCaret(
+    container: HTMLElement,
+    float: 'left' | 'right',
+    state?: 'down' | 'up' | undefined
+  ): void {
+    const propsStyle: IIconStyle = {
+      kind: 'listingHeaderItem',
+      justify: 'center',
+      float
+    };
+
+    if (state) {
+      (state === 'down' ? caretDownIcon : caretUpIcon).element({
+        container,
+        tag: 'span',
+        ...propsStyle
+      });
+    } else {
+      caretDownIcon.recycle({ container, ...propsStyle });
     }
   }
 }

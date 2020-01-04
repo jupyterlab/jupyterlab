@@ -179,6 +179,25 @@ export class JLIcon {
     return ret;
   }
 
+  recycle({
+    className,
+    container,
+    ...propsStyle
+  }: { className?: string; container: HTMLElement } & IIconStyle): HTMLElement {
+    // clean up all children
+    while (container.firstChild) {
+      container.firstChild.remove();
+    }
+
+    // clean up any icon-related class names
+    const cls = this.class({ className, ...propsStyle });
+    if (cls) {
+      container.classList.remove(cls);
+    }
+
+    return container;
+  }
+
   render(host: HTMLElement, props: JLIcon.IProps = {}): void {
     // TODO: move this title fix to the Lumino side
     host.removeAttribute('title');
@@ -195,7 +214,7 @@ export class JLIcon {
 
     // structure of error element varies by browser, search at top level
     if (svgDoc.getElementsByTagName('parsererror').length > 0) {
-      const errmsg = `SVG HTML was malformed for icon name: ${name}`;
+      const errmsg = `SVG HTML was malformed for JLIcon instance.\nname: ${name}, svgstr: ${this._svgstr}`;
       // parse failed, svgElement will be an error box
       if (JLIcon._debug) {
         // fail noisily, render the error box
