@@ -101,6 +101,7 @@ export interface IEditOutcome {
   appliedChanges: number | null;
   modifiedCells: number;
   wasGranular: boolean;
+  errors: string[];
 }
 
 export class CodeMirrorLSPFeature implements ILSPFeature {
@@ -277,6 +278,7 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
     let applied_changes = null;
     let edited_cells: number;
     let is_whole_document_edit: boolean;
+    let errors: string[] = [];
 
     for (let change of changes) {
       let uri = change.textDocument.uri;
@@ -284,8 +286,8 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
         decodeURI(uri) !== decodeURI(current_uri) &&
         decodeURI(uri) !== '/' + decodeURI(current_uri)
       ) {
-        throw new Error(
-          'Workspace-wide edits not implemented yet (' +
+        errors.push(
+          'Workspace-wide edits not implemented (' +
             decodeURI(uri) +
             ' != ' +
             decodeURI(current_uri) +
@@ -370,7 +372,8 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
     return {
       appliedChanges: applied_changes,
       modifiedCells: edited_cells,
-      wasGranular: !is_whole_document_edit
+      wasGranular: !is_whole_document_edit,
+      errors: errors
     };
   }
 

@@ -40,6 +40,7 @@ export class Rename extends CodeMirrorLSPFeature {
       })
       .then((outcome: IEditOutcome) => {
         let status: string;
+
         if (outcome.wasGranular) {
           status = `Renamed a variable in ${outcome.appliedChanges} places`;
         } else if (this.virtual_editor.has_cells) {
@@ -47,6 +48,11 @@ export class Rename extends CodeMirrorLSPFeature {
         } else {
           status = `Renamed a variable`;
         }
+
+        if (outcome.errors.length !== 0) {
+          status += ` with errors: ${outcome.errors}`;
+        }
+
         this.status_message.set(status, 5 * 1000);
       })
       .catch(console.warn);
