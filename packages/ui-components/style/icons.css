@@ -308,52 +308,36 @@
   background-size: 20px;
 }
 
-.jp-BugIcon {
-  background-image: var(--jp-icon-bug);
-}
-
-.jp-BuildIcon {
-  background-image: var(--jp-icon-build);
-}
-
-.jp-CloseIcon {
-  background-image: var(--jp-icon-close);
-}
-
-.jp-ConsoleIcon {
-  background-image: var(--jp-icon-console);
-}
-
-.jp-DownloadIcon {
-  background-image: var(--jp-icon-download);
-}
-
 .jp-DragIcon {
   margin-right: 4px;
 }
 
-.jp-EditIcon {
-  background-image: var(--jp-icon-edit);
-}
+/* These are icons still in need of some cleanup */
 
-.jp-FilterListIcon {
-  background-image: var(--jp-icon-filter-list);
-}
+/*.jp-CloseIcon {*/
+/*  background-image: var(--jp-icon-close);*/
+/*}*/
 
-.jp-LinkIcon {
-  background-image: var(--jp-icon-link);
-}
+/*.jp-ConsoleIcon {*/
+/*  background-image: var(--jp-icon-console);*/
+/*}*/
 
-.jp-MainAreaLandscapeIcon {
-  background-repeat: no-repeat;
-  margin-right: 2px;
-  width: 22px;
-}
+/*.jp-DownloadIcon {*/
+/*  background-image: var(--jp-icon-download);*/
+/*}*/
 
-.jp-NewFolderIcon {
-  background-image: var(--jp-icon-new-folder);
-}
+/*.jp-EditIcon {*/
+/*  background-image: var(--jp-icon-edit);*/
+/*}*/
 
-.jp-UndoIcon {
-  background-image: var(--jp-icon-undo);
-}
+/*.jp-LinkIcon {*/
+/*  background-image: var(--jp-icon-link);*/
+/*}*/
+
+/*.jp-NewFolderIcon {*/
+/*  background-image: var(--jp-icon-new-folder);*/
+/*}*/
+
+/*.jp-UndoIcon {*/
+/*  background-image: var(--jp-icon-undo);*/
+/*}*/
