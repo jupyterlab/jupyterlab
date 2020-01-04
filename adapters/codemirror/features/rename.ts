@@ -34,7 +34,7 @@ export class Rename extends CodeMirrorLSPFeature {
             status = `Rename failed: ${error}`;
           }
 
-          rename_feature.status_message.set(status, 5 * 1000);
+          rename_feature.status_message.set(status, 7.5 * 1000);
         };
 
         InputDialog.getText({
