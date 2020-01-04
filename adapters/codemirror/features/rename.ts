@@ -86,8 +86,8 @@ export class Rename extends CodeMirrorLSPFeature {
 }
 
 /**
- * In #115 a with rename for Python (when using pyls) was identified:
- * it was failing with an obscure message when the source code could
+ * In #115 an issue with rename for Python (when using pyls) was identified:
+ * rename was failing with an obscure message when the source code could
  * not be parsed correctly by rope (due to a user's syntax error).
  *
  * This function detects such a condition using diagnostics feature
