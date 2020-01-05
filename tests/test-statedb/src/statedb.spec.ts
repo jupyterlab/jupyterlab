@@ -120,7 +120,10 @@ describe('StateDB', () => {
         'foo:qux',
         'abc:def',
         'abc:ghi',
-        'abc:jkl'
+        'abc:jkl',
+        'foo-two:bar',
+        'foo-two:baz',
+        'foo-two:qux'
       ];
 
       await Promise.all(keys.map(key => db.save(key, { value: key })));

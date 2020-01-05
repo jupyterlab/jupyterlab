@@ -177,8 +177,8 @@ export class StateDB<
   /**
    * Fetch a list from the database.
    */
-  private async _list(query?: string): Promise<{ ids: string[]; values: T[] }> {
-    const { ids, values } = await this._connector.list(query);
+  private async _list(namespace = ''): Promise<{ ids: string[]; values: T[] }> {
+    const { ids, values } = await this._connector.list(namespace);
 
     return {
       ids,
@@ -300,11 +300,14 @@ export namespace StateDB {
 
     /**
      * Retrieve the list of items available from the data connector.
+     *
+     * @param namespace - If not empty, only keys whose first token before `:`
+     * exactly match `namespace` will be returned, e.g. `foo` in `foo:bar`.
      */
-    async list(query = ''): Promise<{ ids: string[]; values: string[] }> {
+    async list(namespace = ''): Promise<{ ids: string[]; values: string[] }> {
       return Object.keys(this._storage).reduce(
         (acc, val) => {
-          if (val && val.indexOf(query) === 0) {
+          if (namespace === '' ? true : namespace === val.split(':')[0]) {
             acc.ids.push(val);
             acc.values.push(this._storage[val]);
           }
