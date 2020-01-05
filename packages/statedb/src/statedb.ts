@@ -177,7 +177,7 @@ export class StateDB<
   /**
    * Fetch a list from the database.
    */
-  private async _list(query?: string): Promise<{ ids: string[]; values: T[] }> {
+  private async _list(query = ''): Promise<{ ids: string[]; values: T[] }> {
     const { ids, values } = await this._connector.list(query);
 
     return {
@@ -304,7 +304,7 @@ export namespace StateDB {
     async list(query = ''): Promise<{ ids: string[]; values: string[] }> {
       return Object.keys(this._storage).reduce(
         (acc, val) => {
-          if (val && val.indexOf(query) === 0) {
+          if (query === '' ? true : query === val.split(':')[0]) {
             acc.ids.push(val);
             acc.values.push(this._storage[val]);
           }
