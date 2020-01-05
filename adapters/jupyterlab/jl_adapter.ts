@@ -225,7 +225,7 @@ export abstract class JupyterLabWidgetAdapter
     await this.connect(virtual_document).catch(console.warn);
 
     virtual_document.foreign_document_opened.connect((host, context) => {
-      this.connect(context.foreign_document).catch(console.warn);
+      this.connect_document(context.foreign_document).catch(console.warn);
     });
   }
 
