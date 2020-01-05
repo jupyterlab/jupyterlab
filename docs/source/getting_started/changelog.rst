@@ -3,12 +3,11 @@
 JupyterLab Changelog
 ====================
 
-TODO after release: convert to link:
-v2.0 https://github.com/jupyterlab/jupyterlab/releases/tag/v2.0__
----------------------------------------------------------------------------
+`v2.0.0 <https://github.com/jupyterlab/jupyterlab/releases>`__
+--------------------------------------------------------------
 
-2020/01/03
-^^^^^^^^^^
+January 2020
+^^^^^^^^^^^^
 
 See the `JupyterLab
 2.0 <https://github.com/jupyterlab/jupyterlab/milestone/2.0?closed=1>`__
