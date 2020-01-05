@@ -316,8 +316,8 @@ export namespace FileBrowser {
      * The default is `true`.
      *
      * #### Notes
-     * The file browser model will need to be restored before for the file
-     * browser to start saving its state.
+     * The file browser model will need to be restored manually for the file
+     * browser to be able to save its state.
      */
     restore?: boolean;
   }
