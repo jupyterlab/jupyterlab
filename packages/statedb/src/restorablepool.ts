@@ -107,8 +107,8 @@ export class RestorablePool<
    * @param obj - The object object being added.
    *
    * #### Notes
-   * The object passed into the tracker is added synchronously; its existence in
-   * the tracker can be checked with the `has()` method. The promise this method
+   * The object passed into the pool is added synchronously; its existence in
+   * the pool can be checked with the `has()` method. The promise this method
    * returns resolves after the object has been added and saved to an underlying
    * restoration connector, if one is available.
    */
