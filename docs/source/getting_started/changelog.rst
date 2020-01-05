@@ -45,7 +45,7 @@ For developers
 * TypeScript strict null checking in core packages (`#7657 <https://github.com/jupyterlab/jupyterlab/pull/7657>`__, `#7607 <https://github.com/jupyterlab/jupyterlab/pull/7607>`__)
 * New property inspector used to display the properties of the currently selected main area widget (`#7665 <https://github.com/jupyterlab/jupyterlab/pull/7665>`__, `#7664 <https://github.com/jupyterlab/jupyterlab/issues/7664>`__, `#7718 <https://github.com/jupyterlab/jupyterlab/pull/7718>`__, `#7686 <https://github.com/jupyterlab/jupyterlab/issues/7686>`__)
 * Allow metadata for launcher items (`#7654 <https://github.com/jupyterlab/jupyterlab/pull/7654>`__, `#7652 <https://github.com/jupyterlab/jupyterlab/issues/7652>`__)
-* Platform aware key shortcuts (`#7589 <https://github.com/jupyterlab/jupyterlab/pull/7589>`__)
+* Enable platform-aware key shortcuts (`#7589 <https://github.com/jupyterlab/jupyterlab/pull/7589>`__)
 * Allow default file browser to restore manually. (`#7695 <https://github.com/jupyterlab/jupyterlab/pull/7695>`__, `#4009 <https://github.com/jupyterlab/jupyterlab/issues/4009>`__)
 * Upgrade bundled yarn to 1.21.1 (`#7691 <https://github.com/jupyterlab/jupyterlab/pull/7691>`__, `#7692 <https://github.com/jupyterlab/jupyterlab/issues/7692>`__)
 * Make session dialogs configurable (`#7618 <https://github.com/jupyterlab/jupyterlab/pull/7618>`__, `#7616 <https://github.com/jupyterlab/jupyterlab/issues/7616>`__)
