@@ -226,8 +226,8 @@ describe('Feature', () => {
         environment.dispose();
       });
 
-      function synchronizeContent() {
-        synchronize_content(environment, adapter);
+      async function synchronizeContent() {
+        await synchronize_content(environment, adapter);
       }
 
       it('applies edit across cells', async () => {
