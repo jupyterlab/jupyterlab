@@ -7,67 +7,20 @@ import {
 } from '../jupyterlab/jl_adapter';
 import { CodeMirrorLSPFeature } from './feature';
 import {
+  code_cell,
   FeatureTestEnvironment,
   FileEditorFeatureTestEnvironment,
-  NotebookFeatureTestEnvironment
+  getCellsJSON,
+  NotebookFeatureTestEnvironment,
+  python_notebook_metadata,
+  showAllCells,
+  synchronize_content
 } from './testutils';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { nbformat } from '@jupyterlab/coreutils';
 import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
-import { Notebook, NotebookModel } from '@jupyterlab/notebook';
-import { ICellModel } from '@jupyterlab/cells';
-
-function code_cell(
-  source: string[] | string,
-  metadata: object = { trusted: false }
-) {
-  return {
-    cell_type: 'code',
-    source: source,
-    metadata: metadata,
-    execution_count: null,
-    outputs: []
-  } as nbformat.ICodeCell;
-}
-
-const python_notebook_metadata = {
-  kernelspec: {
-    display_name: 'Python [default]',
-    language: 'python',
-    name: 'python3'
-  },
-  language_info: {
-    codemirror_mode: {
-      name: 'ipython',
-      version: 3
-    },
-    file_extension: '.py',
-    mimetype: 'text/x-python',
-    name: 'python',
-    nbconvert_exporter: 'python',
-    pygments_lexer: 'ipython3',
-    version: '3.5.2'
-  },
-  orig_nbformat: 4.1
-} as nbformat.INotebookMetadata;
-
-function showAllCells(notebook: Notebook) {
-  notebook.show();
-  // iterate over every cell to activate the editors
-  for (let i = 0; i < notebook.model.cells.length; i++) {
-    notebook.activeCellIndex = i;
-    notebook.activeCell.show();
-  }
-}
-
-function getCellsJSON(notebook: Notebook) {
-  let cells: Array<ICellModel> = [];
-  for (let i = 0; i < notebook.model.cells.length; i++) {
-    cells.push(notebook.model.cells.get(i));
-  }
-  return cells.map(cell => cell.toJSON());
-}
+import { NotebookModel } from '@jupyterlab/notebook';
 
 const js_fib_code = `function fib(n) {
   return n<2?n:fib(n-1)+fib(n-2);
@@ -273,13 +226,8 @@ describe('Feature', () => {
         environment.dispose();
       });
 
-      async function synchronizeContent() {
-        await environment.virtual_editor.update_documents();
-        try {
-          await adapter.updateAfterChange();
-        } catch (e) {
-          console.warn(e);
-        }
+      function synchronizeContent() {
+        synchronize_content(environment, adapter);
       }
 
       it('applies edit across cells', async () => {

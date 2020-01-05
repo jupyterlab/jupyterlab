@@ -1,34 +1,97 @@
 import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../../../converter';
-import { IEditorPosition, IVirtualPosition } from '../../../positioning';
+import { IVirtualPosition } from '../../../positioning';
 import { diagnosticSeverityNames } from '../../../lsp';
 import { DefaultMap } from '../../../utils';
-import { CodeMirrorLSPFeature } from '../feature';
+import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
+import { MainAreaWidget } from '@jupyterlab/apputils';
+import {
+  DiagnosticsDatabase,
+  DiagnosticsListing,
+  IEditorDiagnostic
+} from './diagnostics_listing';
+import { collect_documents, VirtualDocument } from '../../../virtual/document';
+import { DocumentConnectionManager } from '../../../connection_manager';
+import { VirtualEditor } from '../../../virtual/editor';
 
 // TODO: settings
 const default_severity = 2;
 
-/**
- * Diagnostic which is localized at a specific editor (cell) within a notebook
- * (if used in the context of a FileEditor, then there is just a single editor)
- */
-export interface IEditorDiagnostic {
-  diagnostic: lsProtocol.Diagnostic;
-  editor: CodeMirror.Editor;
-  range: {
-    start: IEditorPosition;
-    end: IEditorPosition;
-  };
+class DiagnosticsPanel {
+  content: DiagnosticsListing;
+  widget: MainAreaWidget<DiagnosticsListing>;
+
+  constructor() {
+    this.widget = this.init_widget();
+    this.widget.content.disposed.connect(() => {
+      // immortal widget (or mild memory leak) TODO: rewrite this
+      this.widget.dispose();
+      this.widget = this.init_widget();
+    });
+  }
+
+  init_widget() {
+    this.content = new DiagnosticsListing(new DiagnosticsListing.Model());
+    this.content.model.diagnostics = new DiagnosticsDatabase();
+    this.content.addClass('lsp-diagnostics-panel-content');
+    const widget = new MainAreaWidget({ content: this.content });
+    widget.id = 'lsp-diagnostics-panel';
+    widget.title.label = 'Diagnostics Panel';
+    widget.title.closable = true;
+    return widget;
+  }
+
+  update() {
+    // if not attached, do not bother to update
+    if (!this.widget.isAttached) {
+      return;
+    }
+    this.widget.content.update();
+  }
 }
 
+export const diagnostics_panel = new DiagnosticsPanel();
+export const diagnostics_databases = new Map<
+  VirtualEditor,
+  DiagnosticsDatabase
+>();
+
 export class Diagnostics extends CodeMirrorLSPFeature {
+  static commands: Array<IFeatureCommand> = [
+    {
+      id: 'show-diagnostics-panel',
+      execute: ({ app, features }) => {
+        let diagnostics_feature = features.get('Diagnostics') as Diagnostics;
+        diagnostics_feature.switchDiagnosticsPanelSource();
+
+        let panel_widget = diagnostics_panel.widget;
+
+        if (!panel_widget.isAttached) {
+          app.shell.add(panel_widget, 'main');
+        }
+        app.shell.activateById(panel_widget.id);
+      },
+      is_enabled: () => true,
+      label: 'Show diagnostics panel',
+      rank: 10
+    }
+  ];
+
   register(): void {
     this.connection_handlers.set(
       'diagnostic',
       this.handleDiagnostic.bind(this)
     );
+    this.wrapper_handlers.set(
+      'focusin',
+      this.switchDiagnosticsPanelSource.bind(this)
+    );
     this.unique_editor_ids = new DefaultMap(() => this.unique_editor_ids.size);
+    if (!diagnostics_databases.has(this.virtual_editor)) {
+      diagnostics_databases.set(this.virtual_editor, new DiagnosticsDatabase());
+    }
+    this.diagnostics_db = diagnostics_databases.get(this.virtual_editor);
     super.register();
   }
 
@@ -40,8 +103,21 @@ export class Diagnostics extends CodeMirrorLSPFeature {
    * One can use VirtualEditorForNotebook.find_cell_by_editor() to find
    * the corresponding cell in notebook.
    * Can be used to implement a Panel showing diagnostics list.
+   *
+   * Maps virtual_document.uri to IEditorDiagnostic[].
    */
-  public diagnostics_db: IEditorDiagnostic[];
+  public diagnostics_db: DiagnosticsDatabase;
+
+  switchDiagnosticsPanelSource() {
+    if (
+      diagnostics_panel.content.model.virtual_editor === this.virtual_editor
+    ) {
+      return;
+    }
+    diagnostics_panel.content.model.diagnostics = this.diagnostics_db;
+    diagnostics_panel.content.model.virtual_editor = this.virtual_editor;
+    diagnostics_panel.update();
+  }
 
   protected collapse_overlapping_diagnostics(
     diagnostics: lsProtocol.Diagnostic[]
@@ -95,7 +171,23 @@ export class Diagnostics extends CodeMirrorLSPFeature {
   public handleDiagnostic(response: lsProtocol.PublishDiagnosticsParams) {
     /* TODO: gutters */
     try {
-      let diagnostics_db: IEditorDiagnostic[] = [];
+      let diagnostics_list: IEditorDiagnostic[] = [];
+
+      let documents = [...collect_documents(this.virtual_document)];
+
+      let documents_by_uri = new Map(
+        documents.map(document => {
+          let key = DocumentConnectionManager.solve_uris(document, '').document;
+          return [key, document];
+        })
+      );
+      let accept_uris = new Set(documents_by_uri.keys());
+      if (!accept_uris.has(response.uri)) {
+        console.log(
+          `Ignoring too broadly propagated response ${response.uri}; accepting: ${accept_uris}`
+        );
+        return;
+      }
       // Note: no deep equal for Sets or Maps in JS
       const markers_to_retain: Set<string> = new Set();
 
@@ -125,17 +217,24 @@ export class Diagnostics extends CodeMirrorLSPFeature {
             );
             return;
           }
-          // assuming that we got a response for this document
-          let start_in_root = this.transform_virtual_position_to_root_position(
-            start
-          );
-          let document = this.virtual_editor.document_at_root_position(
-            start_in_root
-          );
 
-          // TODO why do I get signals from the other connection in the first place?
-          //  A: because each virtual document adds listeners AND if the extracted content
-          //  is kept in the host document, it remains in the same editor.
+          let document: VirtualDocument;
+          try {
+            // assuming that we got a response for this document
+            let start_in_root = this.transform_virtual_position_to_root_position(
+              start
+            );
+            document = this.virtual_editor.document_at_root_position(
+              start_in_root
+            );
+          } catch (e) {
+            console.log(e, diagnostics);
+            return;
+          }
+
+          //  Note: the guard is important because:
+          //   - each virtual document adds listeners
+          //   - if the extracted content is kept in the host document, it remains in the same editor.
           if (this.virtual_document !== document) {
             console.log(
               `Ignoring inspections from ${response.uri}`,
@@ -196,7 +295,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
             editor: this.unique_editor_ids.get(cm_editor)
           });
           for (let diagnostic of diagnostics) {
-            diagnostics_db.push({
+            diagnostics_list.push({
               diagnostic,
               editor: cm_editor,
               range: range_in_editor
@@ -233,7 +332,11 @@ export class Diagnostics extends CodeMirrorLSPFeature {
       // remove the markers which were not included in the new message
       this.remove_unused_diagnostic_markers(markers_to_retain);
 
-      this.diagnostics_db = diagnostics_db;
+      this.diagnostics_db.set(
+        documents_by_uri.get(response.uri),
+        diagnostics_list
+      );
+      diagnostics_panel.update();
     } catch (e) {
       console.warn(e);
     }

@@ -86,27 +86,13 @@ export class DocumentConnectionManager {
     this.documents_changed.emit(this.documents);
   }
 
-  protected solve_uris(virtual_document: VirtualDocument, language: string) {
-    const wsBase = PageConfig.getBaseUrl().replace(/^http/, 'ws');
-    const rootUri = PageConfig.getOption('rootUri');
-    const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
-
-    const baseUri = virtual_document.has_lsp_supported_file
-      ? rootUri
-      : virtualDocumentsUri;
-
-    return {
-      base: baseUri,
-      document: URLExt.join(baseUri, virtual_document.uri),
-      server: URLExt.join('ws://jupyter-lsp', language),
-      socket: URLExt.join(wsBase, 'lsp', language)
-    };
-  }
-
   private connect_socket(options: ISocketConnectionOptions): LSPConnection {
     let { virtual_document, language } = options;
 
-    const uris = this.solve_uris(virtual_document, language);
+    const uris = DocumentConnectionManager.solve_uris(
+      virtual_document,
+      language
+    );
 
     let socket = new WebSocket(uris.socket);
 
@@ -231,5 +217,27 @@ export class DocumentConnectionManager {
       this.closed.emit({ connection, virtual_document });
     }
     this.connections.clear();
+  }
+}
+
+export namespace DocumentConnectionManager {
+  export function solve_uris(
+    virtual_document: VirtualDocument,
+    language: string
+  ) {
+    const wsBase = PageConfig.getBaseUrl().replace(/^http/, 'ws');
+    const rootUri = PageConfig.getOption('rootUri');
+    const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
+
+    const baseUri = virtual_document.has_lsp_supported_file
+      ? rootUri
+      : virtualDocumentsUri;
+
+    return {
+      base: baseUri,
+      document: URLExt.join(baseUri, virtual_document.uri),
+      server: URLExt.join('ws://jupyter-lsp', language),
+      socket: URLExt.join(wsBase, 'lsp', language)
+    };
   }
 }

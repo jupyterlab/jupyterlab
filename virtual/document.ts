@@ -143,9 +143,9 @@ export class VirtualDocument {
     overrides_registry: IOverridesRegistry,
     foreign_code_extractors: IForeignCodeExtractorsRegistry,
     standalone: boolean,
-    protected file_extension: string,
+    public file_extension: string,
     public has_lsp_supported_file: boolean,
-    private readonly parent?: VirtualDocument
+    readonly parent?: VirtualDocument
   ) {
     this.language = language;
     let overrides =
@@ -570,6 +570,13 @@ export class VirtualDocument {
       : this.language;
   }
 
+  get ancestry(): Array<VirtualDocument> {
+    if (!this.parent) {
+      return [this];
+    }
+    return this.parent.ancestry.concat([this]);
+  }
+
   get id_path(): VirtualDocument.id_path {
     if (!this.parent) {
       return this.virtual_id;
@@ -656,4 +663,16 @@ export namespace VirtualDocument {
    * for documents which should be interpreted as one when stretched across cells.
    */
   export type virtual_id = string;
+}
+
+export function collect_documents(
+  virtual_document: VirtualDocument
+): Set<VirtualDocument> {
+  let collected = new Set<VirtualDocument>();
+  collected.add(virtual_document);
+  for (let foreign of virtual_document.foreign_documents.values()) {
+    let foreign_languages = collect_documents(foreign);
+    foreign_languages.forEach(collected.add, collected);
+  }
+  return collected;
 }

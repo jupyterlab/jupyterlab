@@ -107,10 +107,16 @@ export abstract class ContextMenuCommandManager extends LSPCommandManager {
   }
 
   is_visible(command: IFeatureCommand): boolean {
-    let context = this.current_adapter.get_context_from_context_menu();
-    return (
-      this.current_adapter && context.connection && command.is_enabled(context)
-    );
+    try {
+      let context = this.current_adapter.get_context_from_context_menu();
+      return (
+        this.current_adapter &&
+        context.connection &&
+        command.is_enabled(context)
+      );
+    } catch (e) {
+      return false;
+    }
   }
 
   protected get_rank(command: IFeatureCommand): number {
@@ -154,6 +160,7 @@ export class FileEditorCommandManager extends ContextMenuCommandManager {
 }
 
 export interface ICommandContext {
+  app: JupyterFrontEnd;
   document: VirtualDocument;
   connection: LSPConnection;
   virtual_position: IVirtualPosition;

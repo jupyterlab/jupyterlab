@@ -107,7 +107,9 @@ function ux_workaround_for_rope_limitation(
   if (!has_index_error) {
     return null;
   }
-  let dire_python_errors = (diagnostics_feature.diagnostics_db || []).filter(
+  let dire_python_errors = (
+    diagnostics_feature.diagnostics_db.all || []
+  ).filter(
     diagnostic =>
       diagnostic.diagnostic.message.includes('invalid syntax') ||
       diagnostic.diagnostic.message.includes('SyntaxError') ||

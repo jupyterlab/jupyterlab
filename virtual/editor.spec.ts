@@ -9,7 +9,6 @@ import {
 import * as CodeMirror from 'codemirror';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
-import { VirtualDocument } from './document';
 
 class VirtualEditorImplementation extends VirtualEditor {
   private cm_editor: CodeMirror.Editor;
@@ -75,16 +74,8 @@ describe('VirtualEditor', () => {
       const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
       expect(rootUri).to.be.not.equal(virtualDocumentsUri);
 
-      class DummyConnectionManager extends DocumentConnectionManager {
-        public get_solved_uris(document: VirtualDocument, language: string) {
-          return this.solve_uris(document, language);
-        }
-      }
-
-      const manager = new DummyConnectionManager();
-
       let document = editor.virtual_document;
-      let uris = manager.get_solved_uris(document, 'python');
+      let uris = DocumentConnectionManager.solve_uris(document, 'python');
       expect(uris.base.startsWith(virtualDocumentsUri)).to.be.equal(true);
 
       let editor_with_plain_file = new VirtualEditorImplementation(
@@ -96,7 +87,7 @@ describe('VirtualEditor', () => {
         true
       );
       document = editor_with_plain_file.virtual_document;
-      uris = manager.get_solved_uris(document, 'python');
+      uris = DocumentConnectionManager.solve_uris(document, 'python');
       expect(uris.base.startsWith(virtualDocumentsUri)).to.be.equal(false);
     });
   });

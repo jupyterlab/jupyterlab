@@ -399,7 +399,8 @@ export abstract class JupyterLabWidgetAdapter
       virtual_position,
       root_position,
       features: this.get_features(document),
-      editor: this.virtual_editor
+      editor: this.virtual_editor,
+      app: this.app
     };
   }
 

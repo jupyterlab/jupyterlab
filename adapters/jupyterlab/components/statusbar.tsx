@@ -4,22 +4,22 @@
 
 import React from 'react';
 
-import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
+import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import '../../../../style/statusbar.css';
 
 import * as SCHEMA from '../../../_schema';
 
 import {
+  GroupItem,
   interactiveItem,
   Popup,
   showPopup,
-  TextItem,
-  GroupItem
+  TextItem
 } from '@jupyterlab/statusbar';
 
 import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { JupyterLabWidgetAdapter } from '../jl_adapter';
-import { VirtualDocument } from '../../../virtual/document';
+import { collect_documents, VirtualDocument } from '../../../virtual/document';
 import { LSPConnection } from '../../../connection';
 import { PageConfig } from '@jupyterlab/coreutils';
 
@@ -284,18 +284,6 @@ export interface IStatus {
   open_connections: Array<LSPConnection>;
   detected_documents: Set<VirtualDocument>;
   status: StatusCode;
-}
-
-function collect_documents(
-  virtual_document: VirtualDocument
-): Set<VirtualDocument> {
-  let collected = new Set<VirtualDocument>();
-  collected.add(virtual_document);
-  for (let foreign of virtual_document.foreign_documents.values()) {
-    let foreign_languages = collect_documents(foreign);
-    foreign_languages.forEach(collected.add, collected);
-  }
-  return collected;
 }
 
 function collect_languages(virtual_document: VirtualDocument): Set<string> {

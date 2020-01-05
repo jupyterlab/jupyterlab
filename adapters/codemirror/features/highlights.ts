@@ -83,9 +83,13 @@ export class Highlights extends CodeMirrorLSPFeature {
     if (document !== this.virtual_document) {
       return;
     }
-    let virtual_position = this.virtual_editor.root_position_to_virtual_position(
-      root_position
-    );
-    this.connection.getDocumentHighlights(virtual_position);
+    try {
+      let virtual_position = this.virtual_editor.root_position_to_virtual_position(
+        root_position
+      );
+      this.connection.getDocumentHighlights(virtual_position);
+    } catch (e) {
+      console.warn('Could not get highlights:', e);
+    }
   }
 }

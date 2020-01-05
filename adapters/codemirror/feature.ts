@@ -112,7 +112,7 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
   public is_registered: boolean;
   protected readonly editor_handlers: Map<string, CodeMirrorHandler>;
   protected readonly connection_handlers: Map<string, any>;
-  protected readonly wrapper_handlers: Map<string, any>;
+  protected readonly wrapper_handlers: Map<keyof HTMLElementEventMap, any>;
   protected wrapper: HTMLElement;
 
   constructor(
