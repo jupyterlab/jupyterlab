@@ -142,7 +142,7 @@ export class JLIcon {
   }: JLIcon.IProps = {}): HTMLElement {
     // check if icon element is already set
     const maybeSvgElement = container?.firstChild as HTMLElement;
-    if (maybeSvgElement?.dataset?.iconid === this._uuid) {
+    if (maybeSvgElement?.dataset?.iconId === this._uuid) {
       // return the existing icon element
       return maybeSvgElement;
     }
@@ -227,7 +227,8 @@ export class JLIcon {
       }
     } else {
       // parse succeeded
-      svgElement.dataset.iconid = this._uuid;
+      svgElement.dataset.icon = this.name;
+      svgElement.dataset.iconId = this._uuid;
 
       if (title) {
         Private.setTitleSvg(svgElement, title);

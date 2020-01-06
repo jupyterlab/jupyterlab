@@ -326,7 +326,7 @@ describe('@jupyterlab/apputils', () => {
           let called = false;
           sessionContext.statusChanged.connect((_, status) => {
             if (status === 'busy') {
-              expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+              expect(item.node.querySelector("[data-icon='circle']")).to.exist;
               called = true;
             }
           });
@@ -362,7 +362,8 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           const item = Toolbar.createKernelStatusItem(sessionContext);
           expect(item.node.title).to.equal('Kernel Connecting');
-          expect(item.hasClass('jp-FilledCircleIcon')).to.equal(false);
+          expect(item.node.querySelector("[data-icon='circle-empty']")).to
+            .exist;
           await sessionContext.initialize();
           await sessionContext.session?.kernel?.info;
         });
