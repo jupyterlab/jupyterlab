@@ -76,7 +76,6 @@ jobs:
         displayName: 'upgrade pip'
       - script: 'pip install --upgrade -e ".[test]"'
         displayName: 'install pip deps'
-        displayName: 'pin nbformat'
       - script: 'jupyter kernelspec list'
         displayName: 'list kernels'
       - script: 'jlpm versions'
