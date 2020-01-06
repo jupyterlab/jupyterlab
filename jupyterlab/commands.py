@@ -1194,6 +1194,7 @@ class _AppHandler(object):
         # Handle local extensions.
         for (key, source) in local.items():
             jlab['linkedPackages'][key] = source
+            data['resolutions'][key] = source
 
         # Handle linked packages.
         for (key, item) in linked.items():
@@ -1201,6 +1202,7 @@ class _AppHandler(object):
             path = pjoin(path, item['filename'])
             data['dependencies'][key] = format_path(path)
             jlab['linkedPackages'][key] = item['source']
+            data['resolutions'][key] = format_path(path)
 
         # Handle extensions
         compat_errors = self._get_extension_compat()
@@ -1256,6 +1258,9 @@ class _AppHandler(object):
         """
         # Extract the package in a temporary directory.
         existing = data['filename']
+        if not osp.exists(pjoin(dname, existing)):
+            existing = ''
+
         with TemporaryDirectory() as tempdir:
             info = self._extract_package(source, tempdir)
 
@@ -1265,7 +1270,7 @@ class _AppHandler(object):
 
             shutil.move(info['path'], pjoin(dname, info['filename']))
 
-        # Remove the existing tarball and return the new file name.
+        # Remove the previous tarball and return the new file name.
         if existing:
             os.remove(pjoin(dname, existing))
 
