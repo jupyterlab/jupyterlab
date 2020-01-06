@@ -76,6 +76,8 @@ jobs:
         displayName: 'upgrade pip'
       - script: 'pip install --upgrade -e ".[test]"'
         displayName: 'install pip deps'
+      - script: 'pip install "nbformat==4.4.0"' # Remove pending https://github.com/jupyter/nbformat/issues/155
+        displayName: 'pin nbformat'
       - script: 'jupyter kernelspec list'
         displayName: 'list kernels'
       - script: 'jlpm versions'
