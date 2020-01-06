@@ -21,6 +21,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 import { ICellModel } from '@jupyterlab/cells';
 import createNotebook = NBTestUtils.createNotebook;
 import { CodeMirrorAdapter } from './cm_adapter';
+import { VirtualDocument } from '../../virtual/document';
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
@@ -53,13 +54,14 @@ export abstract class FeatureTestEnvironment
 
   public init_feature<T extends CodeMirrorLSPFeature>(
     feature_type: ILSPFeatureConstructor,
-    register = true
+    register = true,
+    document: VirtualDocument = null
   ): T {
     let dummy_components_manager = this.create_dummy_components();
     let connection = this.create_dummy_connection();
     const feature = new feature_type(
       this.virtual_editor,
-      this.virtual_editor.virtual_document,
+      document ? document : this.virtual_editor.virtual_document,
       connection,
       dummy_components_manager,
       new StatusMessage()

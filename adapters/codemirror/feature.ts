@@ -108,6 +108,10 @@ export interface IEditOutcome {
   errors: string[];
 }
 
+/**
+ * One feature of each type exists per VirtualDocument
+ * (the initialization is performed by the adapter).
+ */
 export abstract class CodeMirrorLSPFeature implements ILSPFeature {
   public is_registered: boolean;
   protected readonly editor_handlers: Map<string, CodeMirrorHandler>;

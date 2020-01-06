@@ -11,7 +11,7 @@ import {
   DiagnosticsListing,
   IEditorDiagnostic
 } from './diagnostics_listing';
-import { collect_documents, VirtualDocument } from '../../../virtual/document';
+import { VirtualDocument } from '../../../virtual/document';
 import { DocumentConnectionManager } from '../../../connection_manager';
 import { VirtualEditor } from '../../../virtual/editor';
 
@@ -175,31 +175,20 @@ export class Diagnostics extends CodeMirrorLSPFeature {
     try {
       let diagnostics_list: IEditorDiagnostic[] = [];
 
-      let documents = [...collect_documents(this.virtual_document)];
+      let my_uri = DocumentConnectionManager.solve_uris(
+        this.virtual_document,
+        ''
+      ).document;
 
-      let documents_by_uri = new Map(
-        documents.map(document => {
-          let key = DocumentConnectionManager.solve_uris(document, '').document;
-          return [key, document];
-        })
-      );
-      let accept_uris = new Set(documents_by_uri.keys());
-      if (!accept_uris.has(response.uri)) {
-        console.log(
-          `Ignoring too broadly propagated response ${
-            response.uri
-          }; accepting: ${[...accept_uris].join(', ')}`
-        );
+      if (response.uri !== my_uri) {
         return;
       }
+
       // Note: no deep equal for Sets or Maps in JS
       const markers_to_retain: Set<string> = new Set();
 
       // add new markers, keep track of the added ones
 
-      // TODO: test for diagnostic messages not being over-writen
-      //  test case: from statistics import mean, bisect_left
-      //  and do not use either; expected: title has "mean imported but unused; bisect_left imported and unused'
       // TODO: test case for severity class always being set, even if diagnostic has no severity
 
       let diagnostics_by_range = this.collapse_overlapping_diagnostics(
@@ -236,9 +225,9 @@ export class Diagnostics extends CodeMirrorLSPFeature {
             return;
           }
 
-          //  Note: the guard is important because:
-          //   - each virtual document adds listeners
-          //   - if the extracted content is kept in the host document, it remains in the same editor.
+          // This may happen if the response came delayed
+          // and the user already changed the document so
+          // that now this regions is in another virtual document!
           if (this.virtual_document !== document) {
             console.log(
               `Ignoring inspections from ${response.uri}`,
@@ -336,10 +325,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
       // remove the markers which were not included in the new message
       this.remove_unused_diagnostic_markers(markers_to_retain);
 
-      this.diagnostics_db.set(
-        documents_by_uri.get(response.uri),
-        diagnostics_list
-      );
+      this.diagnostics_db.set(this.virtual_document, diagnostics_list);
       diagnostics_panel.update();
     } catch (e) {
       console.warn(e);

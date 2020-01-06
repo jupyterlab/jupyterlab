@@ -9,6 +9,10 @@ import {
   showAllCells
 } from '../testutils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { is_equal } from '../../../positioning';
+import { language_specific_overrides } from '../../../magics/defaults';
+import { foreign_code_extractors } from '../../../extractors/defaults';
+import * as lsProtocol from 'vscode-languageserver-protocol';
 
 describe('Diagnostics', () => {
   let feature: Diagnostics;
@@ -61,7 +65,13 @@ describe('Diagnostics', () => {
     let env: NotebookFeatureTestEnvironment;
 
     beforeEach(() => {
-      env = new NotebookFeatureTestEnvironment();
+      env = new NotebookFeatureTestEnvironment(
+        () => 'python',
+        () => 'notebook.ipynb',
+        () => 'py',
+        language_specific_overrides,
+        foreign_code_extractors
+      );
       feature = env.init_feature(Diagnostics);
     });
     afterEach(() => {
@@ -161,6 +171,87 @@ describe('Diagnostics', () => {
       let db = diagnostics_panel.content.model.diagnostics;
       expect(db.size).to.equal(1);
       expect(db.get(document).length).to.equal(5);
+    });
+
+    it('Works in foreign documents', async () => {
+      set_notebook_content(env.notebook, [
+        code_cell(['valid = 0\n', 'code = 1', '# here']),
+        code_cell(['%%python\n', 'y = 1\n', 'x'])
+      ]);
+      showAllCells(env.notebook);
+      await env.virtual_editor.update_documents();
+
+      let document = env.virtual_editor.virtual_document;
+      expect(document.foreign_documents.size).to.be.equal(1);
+      let foreign_document = document.foreign_documents.values().next().value;
+
+      let foreign_feature: Diagnostics = env.init_feature(
+        Diagnostics,
+        true,
+        foreign_document
+      );
+
+      let response = {
+        uri: foreign_document.uri,
+        diagnostics: [
+          {
+            source: 'pyflakes',
+            range: {
+              start: { line: 1, character: 0 },
+              end: { line: 1, character: 2 }
+            },
+            message: "undefined name 'x'",
+            severity: 1
+          }
+        ]
+      } as lsProtocol.PublishDiagnosticsParams;
+
+      // test guards against wrongly propagated responses:
+      feature.handleDiagnostic(response);
+      let cm_editors = env.virtual_editor.notebook.widgets.map(
+        cell => (cell.editor as CodeMirrorEditor).editor
+      );
+
+      let marks_cell_1 = cm_editors[0].getDoc().getAllMarks();
+      let marks_cell_2 = cm_editors[1].getDoc().getAllMarks();
+
+      expect(marks_cell_1.length).to.equal(0);
+      expect(marks_cell_2.length).to.equal(0);
+
+      // correct propagation
+      foreign_feature.handleDiagnostic(response);
+
+      marks_cell_1 = cm_editors[0].getDoc().getAllMarks();
+      marks_cell_2 = cm_editors[1].getDoc().getAllMarks();
+
+      expect(marks_cell_1.length).to.equal(0);
+      expect(marks_cell_2.length).to.equal(1);
+
+      let mark = marks_cell_2[0];
+
+      let mark_position = mark.find();
+
+      // second line (0th and 1st virtual lines) + 1 line for '%%python\n' => line: 2
+      expect(is_equal(mark_position.from, { line: 2, ch: 0 })).to.be.true;
+      expect(is_equal(mark_position.to, { line: 2, ch: 1 })).to.be.true;
+
+      // the silenced diagnostic for the %%python magic should be ignored
+      feature.handleDiagnostic({
+        uri: document.uri,
+        diagnostics: [
+          {
+            source: 'pyflakes',
+            range: {
+              start: { line: 5, character: 0 },
+              end: { line: 5, character: 52 }
+            },
+            message: "undefined name 'get_ipython'",
+            severity: 1
+          }
+        ]
+      });
+
+      expect(marks_cell_1.length).to.equal(0);
     });
   });
 });
