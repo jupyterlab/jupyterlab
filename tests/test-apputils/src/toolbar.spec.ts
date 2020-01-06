@@ -269,7 +269,6 @@ describe('@jupyterlab/apputils', () => {
         const wrapperNode = buttonNode.firstChild as HTMLElement;
         const iconNode = wrapperNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
-
         cmd.dispose();
       });
     });
@@ -309,9 +308,10 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           Widget.attach(item, document.body);
           await framePromise();
-          expect(
-            (item.node.firstChild!.lastChild as HTMLElement).textContent
-          ).to.equal(sessionContext.kernelDisplayName);
+          const node = item.node.querySelector(
+            '.jp-ToolbarButtonComponent-label'
+          )!;
+          expect(node.textContent).to.equal(sessionContext.kernelDisplayName);
         });
       });
 

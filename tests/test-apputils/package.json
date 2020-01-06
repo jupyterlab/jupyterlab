@@ -24,7 +24,6 @@
     "chai": "^4.2.0",
     "jest": "^24.9.0",
     "jest-junit": "^10.0.0",
-    "jest-raw-loader": "^1.0.1",
     "react": "~16.9.0",
     "simulate-event": "~1.4.0",
     "ts-jest": "^24.2.0"
