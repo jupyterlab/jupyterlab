@@ -4,6 +4,7 @@ import * as CodeMirror from 'codemirror';
 import { CodeMirrorLSPFeature } from '../feature';
 
 export class Signature extends CodeMirrorLSPFeature {
+  name = 'Signature';
   protected signature_character: IRootPosition;
   protected _signatureCharacters: string[];
 

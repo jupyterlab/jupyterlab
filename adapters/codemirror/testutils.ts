@@ -3,7 +3,7 @@ import {
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
 import { VirtualEditor } from '../../virtual/editor';
-import { CodeMirrorLSPFeature } from './feature';
+import { CodeMirrorLSPFeature, ILSPFeatureConstructor } from './feature';
 import { LSPConnection } from '../../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualFileEditor } from '../../virtual/editors/file_editor';
@@ -52,7 +52,7 @@ export abstract class FeatureTestEnvironment
   abstract create_virtual_editor(): VirtualEditor;
 
   public init_feature<T extends CodeMirrorLSPFeature>(
-    feature_type: typeof CodeMirrorLSPFeature,
+    feature_type: ILSPFeatureConstructor,
     register = true
   ): T {
     let dummy_components_manager = this.create_dummy_components();
@@ -64,7 +64,7 @@ export abstract class FeatureTestEnvironment
       dummy_components_manager,
       new StatusMessage()
     );
-    this.connections.set(feature, connection);
+    this.connections.set(feature as CodeMirrorLSPFeature, connection);
 
     if (register) {
       feature.register();

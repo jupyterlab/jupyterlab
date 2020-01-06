@@ -108,7 +108,7 @@ export interface IEditOutcome {
   errors: string[];
 }
 
-export class CodeMirrorLSPFeature implements ILSPFeature {
+export abstract class CodeMirrorLSPFeature implements ILSPFeature {
   public is_registered: boolean;
   protected readonly editor_handlers: Map<string, CodeMirrorHandler>;
   protected readonly connection_handlers: Map<string, any>;
@@ -128,9 +128,7 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
     this.is_registered = false;
   }
 
-  get name(): string {
-    return (this as any).constructor.name;
-  }
+  abstract get name(): string;
 
   register(): void {
     // register editor handlers
@@ -528,3 +526,10 @@ export class CodeMirrorLSPFeature implements ILSPFeature {
     return applied_changes;
   }
 }
+
+export type ILSPFeatureConstructor = {
+  // TODO: ILSPFeatureOptions
+  new (...args: any[]): CodeMirrorLSPFeature;
+
+  commands: Array<IFeatureCommand>;
+};

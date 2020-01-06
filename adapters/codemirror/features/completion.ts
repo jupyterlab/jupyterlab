@@ -3,6 +3,7 @@ import * as CodeMirror from 'codemirror';
 import { CodeMirrorLSPFeature } from '../feature';
 
 export class Completion extends CodeMirrorLSPFeature {
+  name = 'Completion';
   private _completionCharacters: string[];
 
   get completionCharacters() {

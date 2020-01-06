@@ -10,6 +10,7 @@ import { VirtualEditor } from '../../../virtual/editor';
 import { VirtualEditorForNotebook } from '../../../virtual/editors/notebook';
 
 export class Rename extends CodeMirrorLSPFeature {
+  name = 'Rename';
   static commands: Array<IFeatureCommand> = [
     {
       id: 'rename-symbol',

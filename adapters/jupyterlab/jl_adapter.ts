@@ -23,7 +23,7 @@ import { Diagnostics } from '../codemirror/features/diagnostics';
 import { Highlights } from '../codemirror/features/highlights';
 import { Hover } from '../codemirror/features/hover';
 import { Signature } from '../codemirror/features/signature';
-import { CodeMirrorLSPFeature, ILSPFeature } from '../codemirror/feature';
+import { ILSPFeatureConstructor, ILSPFeature } from '../codemirror/feature';
 import { JumpToDefinition } from '../codemirror/features/jump_to';
 import { ICommandContext } from '../../command_manager';
 import { JSONObject } from '@phosphor/coreutils';
@@ -33,7 +33,7 @@ import {
 } from '../../connection_manager';
 import { Rename } from '../codemirror/features/rename';
 
-export const lsp_features: Array<typeof CodeMirrorLSPFeature> = [
+export const lsp_features: Array<ILSPFeatureConstructor> = [
   Completion,
   Diagnostics,
   Highlights,

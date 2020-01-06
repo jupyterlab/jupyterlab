@@ -22,6 +22,7 @@ describe('CodeMirrorAdapter', () => {
 
     it('updates on change', async () => {
       class UpdateReceivingFeature extends CodeMirrorLSPFeature {
+        name = 'UpdateReceivingFeature';
         public received_update = false;
         public last_change: CodeMirror.EditorChange = null;
         public last_change_position: IRootPosition;

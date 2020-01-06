@@ -96,6 +96,7 @@ const js_partial_edits = [
 describe('Feature', () => {
   describe('apply_edit()', () => {
     class EditApplyingFeature extends CodeMirrorLSPFeature {
+      name = 'EditApplyingFeature';
       do_apply_edit(workspaceEdit: lsProtocol.WorkspaceEdit) {
         return this.apply_edit(workspaceEdit);
       }
@@ -104,14 +105,13 @@ describe('Feature', () => {
 
     let dummy_components_manager: IJupyterLabComponentsManager;
 
-    function init_feature(
-      feature_class: typeof CodeMirrorLSPFeature,
-      environment: FeatureTestEnvironment
-    ) {
+    function init_feature(environment: FeatureTestEnvironment) {
+      // TODO: instead, make feature args an interface and this func
+      //  return the object obeying the interface
       dummy_components_manager = environment.create_dummy_components();
       let virtual_editor = environment.virtual_editor;
 
-      return new feature_class(
+      return new EditApplyingFeature(
         virtual_editor,
         virtual_editor.virtual_document,
         connection,
@@ -141,10 +141,7 @@ describe('Feature', () => {
         environment = new FileEditorFeatureTestEnvironment();
         connection = environment.create_dummy_connection();
 
-        feature = init_feature(
-          EditApplyingFeature,
-          environment
-        ) as EditApplyingFeature;
+        feature = init_feature(environment);
         adapter = init_adapter(environment, feature);
       });
 
@@ -214,10 +211,7 @@ describe('Feature', () => {
 
         connection = environment.create_dummy_connection();
 
-        feature = init_feature(
-          EditApplyingFeature,
-          environment
-        ) as EditApplyingFeature;
+        feature = init_feature(environment);
         adapter = init_adapter(environment, feature);
       });
 

@@ -6,6 +6,7 @@ import { IRootPosition } from '../../../positioning';
 import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
 
 export class Highlights extends CodeMirrorLSPFeature {
+  name = 'Highlights';
   protected highlight_markers: CodeMirror.TextMarker[] = [];
 
   static commands: Array<IFeatureCommand> = [

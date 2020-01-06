@@ -58,6 +58,8 @@ export const diagnostics_databases = new Map<
 >();
 
 export class Diagnostics extends CodeMirrorLSPFeature {
+  name = 'Diagnostics';
+
   static commands: Array<IFeatureCommand> = [
     {
       id: 'show-diagnostics-panel',
@@ -184,7 +186,9 @@ export class Diagnostics extends CodeMirrorLSPFeature {
       let accept_uris = new Set(documents_by_uri.keys());
       if (!accept_uris.has(response.uri)) {
         console.log(
-          `Ignoring too broadly propagated response ${response.uri}; accepting: ${accept_uris}`
+          `Ignoring too broadly propagated response ${
+            response.uri
+          }; accepting: ${[...accept_uris].join(', ')}`
         );
         return;
       }
