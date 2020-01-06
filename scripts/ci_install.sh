@@ -21,6 +21,9 @@ jlpm versions
 jlpm config current
 jupyter serverextension enable --py jupyterlab
 
+# Remove pending https://github.com/jupyter/nbformat/issues/155
+pip install nbformat==4.4.0
+
 if [[ $GROUP == integrity ]]; then
     pip install notebook==4.3.1
 fi
