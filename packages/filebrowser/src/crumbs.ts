@@ -354,6 +354,7 @@ namespace Private {
       kind: 'breadCrumb'
     });
     let ellipsis = ellipsesIcon.element({ tag: 'span', kind: 'breadCrumb' });
+    ellipsis.className = `${ellipsis.className} ${BREADCRUMB_ITEM_CLASS}`;
     let parent = document.createElement('span');
     parent.className = BREADCRUMB_ITEM_CLASS;
     let current = document.createElement('span');
