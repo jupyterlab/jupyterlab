@@ -239,7 +239,9 @@ describe('@jupyterlab/apputils', () => {
           id
         });
         await render(button);
-        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        const buttonNode = button.node.querySelector(
+          '.jp-ToolbarButtonComponent-label'
+        )!;
         expect(buttonNode.textContent).to.equal('Label-only button');
         cmd.dispose();
       });
@@ -259,17 +261,19 @@ describe('@jupyterlab/apputils', () => {
           id
         });
         await render(button);
-        const buttonNode = button.node.firstChild as HTMLButtonElement;
+        const buttonNode = button.node.querySelector(
+          '.jp-ToolbarButtonComponent-label'
+        )!;
         expect(buttonNode.textContent).to.equal('Label-only button');
         expect(buttonNode.classList.contains(iconClassValue)).to.equal(false);
 
         iconClassValue = 'updated-icon-class';
         commands.notifyCommandChanged(id);
         await render(button);
-        const wrapperNode = buttonNode.firstChild as HTMLElement;
-        const iconNode = wrapperNode.firstChild as HTMLElement;
+        const iconNode = button.node.querySelector(
+          '.jp-ToolbarButtonComponent-icon'
+        )!;
         expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
-
         cmd.dispose();
       });
     });
@@ -309,9 +313,10 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           Widget.attach(item, document.body);
           await framePromise();
-          expect(
-            (item.node.firstChild!.lastChild as HTMLElement).textContent
-          ).to.equal(sessionContext.kernelDisplayName);
+          const node = item.node.querySelector(
+            '.jp-ToolbarButtonComponent-label'
+          )!;
+          expect(node.textContent).to.equal(sessionContext.kernelDisplayName);
         });
       });
 
@@ -326,7 +331,7 @@ describe('@jupyterlab/apputils', () => {
           let called = false;
           sessionContext.statusChanged.connect((_, status) => {
             if (status === 'busy') {
-              expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+              expect(item.node.title).to.equal('Kernel Busy');
               called = true;
             }
           });
