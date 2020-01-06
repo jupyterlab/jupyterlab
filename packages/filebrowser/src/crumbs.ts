@@ -353,8 +353,11 @@ namespace Private {
       title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
       kind: 'breadCrumb'
     });
-    let ellipsis = ellipsesIcon.element({ tag: 'span', kind: 'breadCrumb' });
-    ellipsis.className = `${ellipsis.className} ${BREADCRUMB_ITEM_CLASS}`;
+    let ellipsis = ellipsesIcon.element({
+      className: BREADCRUMB_ITEM_CLASS,
+      tag: 'span',
+      kind: 'breadCrumb'
+    });
     let parent = document.createElement('span');
     parent.className = BREADCRUMB_ITEM_CLASS;
     let current = document.createElement('span');
