@@ -304,6 +304,7 @@ export class JLIcon {
           <svg
             {...getReactAttrs(svgElement)}
             dangerouslySetInnerHTML={{ __html: svgElement.innerHTML }}
+            data-icon={this.name}
             ref={ref}
           />
         );
