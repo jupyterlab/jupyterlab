@@ -314,20 +314,37 @@ class DebuggerHandler<
 const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
-  requires: [IDebugger, ILabShell],
-  activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
+  requires: [IDebugger, IConsoleTracker],
+  optional: [ILabShell],
+  activate: (
+    app: JupyterFrontEnd,
+    debug: IDebugger,
+    consoleTracker: IConsoleTracker,
+    labShell: ILabShell
+  ) => {
     const handler = new DebuggerHandler<ConsoleHandler>(ConsoleHandler);
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
     });
 
-    labShell.currentChanged.connect(async (_, update) => {
-      const widget = update.newValue;
-      if (!(widget instanceof ConsolePanel)) {
-        return;
-      }
+    const updateHandlerAndCommands = async (widget: ConsolePanel) => {
       await handler.update(app.shell, debug, widget, widget.session);
       app.commands.notifyCommandChanged();
+    };
+
+    if (labShell) {
+      labShell.currentChanged.connect(async (_, update) => {
+        const widget = update.newValue;
+        if (!(widget instanceof ConsolePanel)) {
+          return;
+        }
+        await updateHandlerAndCommands(widget);
+      });
+      return;
+    }
+
+    consoleTracker.currentChanged.connect(async (_, consolePanel) => {
+      await updateHandlerAndCommands(consolePanel);
     });
   }
 };
@@ -338,8 +355,14 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  requires: [IDebugger, ILabShell],
-  activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
+  requires: [IDebugger, IEditorTracker],
+  optional: [ILabShell],
+  activate: (
+    app: JupyterFrontEnd,
+    debug: IDebugger,
+    editorTracker: IEditorTracker,
+    labShell: ILabShell
+  ) => {
     const handler = new DebuggerHandler<FileHandler>(FileHandler);
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
@@ -349,17 +372,7 @@ const files: JupyterFrontEndPlugin<void> = {
       [id: string]: Session.ISession;
     } = {};
 
-    labShell.currentChanged.connect(async (_, update) => {
-      const widget = update.newValue;
-      if (!(widget instanceof DocumentWidget)) {
-        return;
-      }
-
-      const content = widget.content;
-      if (!(content instanceof FileEditor)) {
-        return;
-      }
-
+    const updateHandlerAndCommands = async (widget: DocumentWidget) => {
       const sessions = app.serviceManager.sessions;
       try {
         const model = await sessions.findByPath(widget.context.path);
@@ -377,6 +390,27 @@ const files: JupyterFrontEndPlugin<void> = {
       } catch {
         return;
       }
+    };
+
+    if (labShell) {
+      labShell.currentChanged.connect(async (_, update) => {
+        const widget = update.newValue;
+        if (!(widget instanceof DocumentWidget)) {
+          return;
+        }
+
+        const content = widget.content;
+        if (!(content instanceof FileEditor)) {
+          return;
+        }
+        await updateHandlerAndCommands(widget);
+      });
+    }
+
+    editorTracker.currentChanged.connect(async (_, documentWidget) => {
+      await updateHandlerAndCommands(
+        (documentWidget as unknown) as DocumentWidget
+      );
     });
   }
 };
@@ -387,21 +421,40 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:notebooks',
   autoStart: true,
-  requires: [IDebugger, ILabShell],
-  activate: (app: JupyterFrontEnd, debug: IDebugger, labShell: ILabShell) => {
+  requires: [IDebugger, INotebookTracker],
+  optional: [ILabShell],
+  activate: (
+    app: JupyterFrontEnd,
+    debug: IDebugger,
+    notebookTracker: INotebookTracker,
+    labShell: ILabShell
+  ) => {
     const handler = new DebuggerHandler<NotebookHandler>(NotebookHandler);
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
     });
 
-    labShell.currentChanged.connect(async (_, update) => {
-      const widget = update.newValue;
-      if (!(widget instanceof NotebookPanel)) {
-        return;
-      }
+    const updateHandlerAndCommands = async (widget: NotebookPanel) => {
       await handler.update(app.shell, debug, widget, widget.session);
       app.commands.notifyCommandChanged();
-    });
+    };
+
+    if (labShell) {
+      labShell.currentChanged.connect(async (_, update) => {
+        const widget = update.newValue;
+        if (!(widget instanceof NotebookPanel)) {
+          return;
+        }
+        await updateHandlerAndCommands(widget);
+      });
+      return;
+    }
+
+    notebookTracker.currentChanged.connect(
+      async (_, notebookPanel: NotebookPanel) => {
+        await updateHandlerAndCommands(notebookPanel);
+      }
+    );
   }
 };
 
