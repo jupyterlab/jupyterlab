@@ -1706,7 +1706,10 @@ class _AppHandler(object):
 
             for (key, value) in latest_deps.items():
                 if key in singletons:
-                    c = _compare_ranges(core_deps[key], value)
+                    # Drop prereleases in comparisons to allow extension authors
+                    # to not have to update their versions for each
+                    # Jupyterlab prerelease version.
+                    c = _compare_ranges(core_deps[key], value, drop_prerelease1=True)
                     lab_newer_than_latest = lab_newer_than_latest or c < 0
                     latest_newer_than_lab = latest_newer_than_lab or c > 0
 
@@ -1922,26 +1925,30 @@ def _validate_compatibility(extension, deps, core_data):
 
     for (key, value) in deps.items():
         if key in singletons:
-            overlap = _test_overlap(core_deps[key], value)
+            # Drop prereleases in comparisons to allow extension authors
+            # to not have to update their versions for each
+            # Jupyterlab prerelease version.
+            overlap = _test_overlap(core_deps[key], value, drop_prerelease1=True)
             if overlap is False:
                 errors.append((key, core_deps[key], value))
 
     return errors
 
 
-def _test_overlap(spec1, spec2):
+def _test_overlap(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False):
     """Test whether two version specs overlap.
 
     Returns `None` if we cannot determine compatibility,
     otherwise whether there is an overlap
     """
-    cmp = _compare_ranges(spec1, spec2)
+    cmp = _compare_ranges(spec1, spec2, drop_prerelease1=drop_prerelease1,
+        drop_prerelease2=drop_prerelease2)
     if cmp is None:
         return
     return cmp == 0
 
 
-def _compare_ranges(spec1, spec2):
+def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False):
     """Test whether two version specs overlap.
 
     Returns `None` if we cannot determine compatibility,
@@ -1961,6 +1968,12 @@ def _compare_ranges(spec1, spec2):
     x2 = r1.set[0][-1].semver
     y1 = r2.set[0][0].semver
     y2 = r2.set[0][-1].semver
+
+    if x1.prerelease and drop_prerelease1:
+        x1 = x1.inc('patch')
+
+    if y1.prerelease and drop_prerelease2:
+        y1 = y1.inc('patch')
 
     o1 = r1.set[0][0].operator
     o2 = r2.set[0][0].operator
@@ -2087,7 +2100,10 @@ def _compat_error_age(errors):
     any_newer = False
 
     for _, jlab, ext in errors:
-        c = _compare_ranges(ext, jlab)
+        # Drop prereleases in comparisons to allow extension authors
+        # to not have to update their versions for each
+        # Jupyterlab prerelease version.
+        c = _compare_ranges(ext, jlab, drop_prerelease1=True)
         any_newer = any_newer or c < 0
         any_older = any_older or c > 0
     if any_older and not any_newer:
