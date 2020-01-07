@@ -102,7 +102,7 @@ This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
-    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v2.0
+    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v2.0beta
 
 When prompted, enter values like the following for all of the cookiecutter
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
