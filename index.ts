@@ -80,7 +80,16 @@ const plugin: JupyterFrontEndPlugin<void> = {
           user_settings.substring(0, user_settings.indexOf('/', 6))
         );
         console.log(
-          'Guessing the server root using user settings path',
+          'Guessing Linux the server root using user settings path',
+          server_root
+        );
+      } else if (user_settings.startsWith('/Users/')) {
+        server_root = server_root.replace(
+          '~',
+          user_settings.substring(0, user_settings.indexOf('/', 7))
+        );
+        console.log(
+          'Guessing Mac the server root using user settings path',
           server_root
         );
       } else {
