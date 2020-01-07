@@ -26,14 +26,16 @@ import {
 
 import { PathExt, URLExt } from '@jupyterlab/coreutils';
 
-import { IStateDB } from '@jupyterlab/statedb';
-
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import {
   IPropertyInspectorProvider,
   SideBarPropertyInspectorProvider
 } from '@jupyterlab/property-inspector';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { IStateDB } from '@jupyterlab/statedb';
+
+import { buildIcon } from '@jupyterlab/ui-components';
 
 import { each, iter, toArray } from '@lumino/algorithm';
 
@@ -605,7 +607,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   commands.addCommand(CommandIDs.close, {
     label: () => 'Close Tab',
     isEnabled: () =>
-      !!shell.currentWidget && !!shell.currentWidget.title.closable,
+      !!shell.currentWidget && shell.currentWidget.title.closable,
     execute: () => {
       if (shell.currentWidget) {
         shell.currentWidget.close();
@@ -673,7 +675,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   });
 
   app.commands.addCommand(CommandIDs.toggleLeftArea, {
-    label: args => 'Show Left Sidebar',
+    label: () => 'Show Left Sidebar',
     execute: () => {
       if (shell.leftCollapsed) {
         shell.expandLeft();
@@ -690,7 +692,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   palette.addItem({ command: CommandIDs.toggleLeftArea, category });
 
   app.commands.addCommand(CommandIDs.toggleRightArea, {
-    label: args => 'Show Right Sidebar',
+    label: () => 'Show Right Sidebar',
     execute: () => {
       if (shell.rightCollapsed) {
         shell.expandRight();
@@ -707,7 +709,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   palette.addItem({ command: CommandIDs.toggleRightArea, category });
 
   app.commands.addCommand(CommandIDs.togglePresentationMode, {
-    label: args => 'Presentation Mode',
+    label: () => 'Presentation Mode',
     execute: () => {
       shell.presentationMode = !shell.presentationMode;
     },
@@ -820,7 +822,7 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   provides: IPropertyInspectorProvider,
   activate: (app: JupyterFrontEnd, labshell: ILabShell) => {
     const widget = new SideBarPropertyInspectorProvider(labshell);
-    widget.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+    widget.title.iconRenderer = buildIcon;
     widget.title.caption = 'Property Inspector';
     widget.id = 'jp-property-inspector';
     labshell.add(widget, 'left');

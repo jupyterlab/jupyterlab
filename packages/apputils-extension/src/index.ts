@@ -25,7 +25,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
@@ -149,10 +149,9 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
     galaxy.id = 'galaxy';
     logo.id = 'main-logo';
 
-    defaultIconRegistry.icon({
-      name: 'jupyter-favicon',
+    jupyterFaviconIcon.element({
       container: logo,
-      center: true,
+      justify: 'center',
       kind: 'splash'
     });
 

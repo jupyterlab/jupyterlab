@@ -28,9 +28,6 @@
     },
     {
       "path": "../../testutils"
-    },
-    {
-      "path": "../../packages/ui-components"
     }
   ]
 }

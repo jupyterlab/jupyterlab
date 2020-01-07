@@ -7,35 +7,26 @@ import {
   sessionContextDialogs,
   MainAreaWidget
 } from '@jupyterlab/apputils';
-
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
-
 import { PathExt, Time } from '@jupyterlab/coreutils';
-
-import { UUID } from '@lumino/coreutils';
-
 import {
   IRenderMimeRegistry,
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
-
 import { ServiceManager } from '@jupyterlab/services';
+import { consoleIcon } from '@jupyterlab/ui-components';
 
-import { Token } from '@lumino/coreutils';
-
+import { Token, UUID } from '@lumino/coreutils';
+import { IDisposable } from '@lumino/disposable';
 import { Message } from '@lumino/messaging';
-
 import { Panel } from '@lumino/widgets';
 
 import { CodeConsole } from './widget';
-import { IDisposable } from '@lumino/disposable';
 
 /**
  * The class name added to console panels.
  */
 const PANEL_CLASS = 'jp-ConsolePanel';
-
-const CONSOLE_ICON_CLASS = 'jp-CodeConsoleIcon';
 
 /**
  * A panel which contains a console and the ability to add other children.
@@ -101,7 +92,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     sessionContext.kernelChanged.connect(this._updateTitlePanel, this);
     sessionContext.propertyChanged.connect(this._updateTitlePanel, this);
 
-    this.title.icon = CONSOLE_ICON_CLASS;
+    this.title.iconRenderer = consoleIcon;
     this.title.closable = true;
     this.id = `console-${count}`;
   }

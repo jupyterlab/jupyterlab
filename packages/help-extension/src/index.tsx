@@ -24,6 +24,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { KernelMessage } from '@jupyterlab/services';
 
+import { jupyterIcon, jupyterlabWordmarkIcon } from '@jupyterlab/ui-components';
+
 import { Menu } from '@lumino/widgets';
 
 import * as React from 'react';
@@ -285,8 +287,6 @@ function activate(
     label: `About ${app.name}`,
     execute: () => {
       // Create the header of the about dialog
-      let headerLogo = <div className="jp-About-header-logo" />;
-      let headerWordmark = <div className="jp-About-header-wordmark" />;
       let versionNumber = `Version ${app.version}`;
       let versionInfo = (
         <span className="jp-About-version-info">
@@ -295,9 +295,9 @@ function activate(
       );
       let title = (
         <span className="jp-About-header">
-          {headerLogo}
+          <jupyterIcon.react margin="7px 9.5px" height="auto" width="58px" />
           <div className="jp-About-header-info">
-            {headerWordmark}
+            <jupyterlabWordmarkIcon.react height="auto" width="196px" />
             {versionInfo}
           </div>
         </span>
@@ -329,7 +329,7 @@ function activate(
       );
       let copyright = (
         <span className="jp-About-copyright">
-          © 2015 Project Jupyter Contributors
+          © 2015-2020 Project Jupyter Contributors
         </span>
       );
       let body = (

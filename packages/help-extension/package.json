@@ -42,7 +42,8 @@
     "@jupyterlab/inspector": "^2.0.0-alpha.4",
     "@jupyterlab/mainmenu": "^2.0.0-alpha.4",
     "@jupyterlab/services": "^5.0.0-alpha.4",
-    "@lumino/widgets": "^1.9.4",
+    "@jupyterlab/ui-components": "^2.0.0-alpha.4",
+    "@lumino/widgets": "^1.9.7",
     "react": "~16.9.0"
   },
   "devDependencies": {

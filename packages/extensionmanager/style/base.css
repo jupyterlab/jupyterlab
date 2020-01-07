@@ -57,7 +57,7 @@
 }
 
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
-  padding: 0px 4px;
+  padding: 0px 2px;
 }
 
 .jp-extensionmanager-view header .jp-extensionmanager-headerText {
@@ -141,13 +141,7 @@
 }
 
 .jp-extensionmanager-entry-jupyter-org {
-  background-image: var(--jp-image-jupyter);
-  background-size: 1em;
-  background-repeat: no-repeat;
-  width: 1em;
   display: none;
-  position: relative;
-  top: 1px;
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-mod-whitelisted
@@ -310,12 +304,4 @@ input[type='checkbox'] {
   font-size: var(--jp-ui-font-size1);
   font-weight: 600;
   color: var(--jp-ui-font-color0);
-}
-
-.jp-extensionmanager-collapseIcon {
-  background-image: var(--jp-image-caretright);
-}
-
-.jp-extensionmanager-expandIcon {
-  background-image: var(--jp-image-caretdown);
 }

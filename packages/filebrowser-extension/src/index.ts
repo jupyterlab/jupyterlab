@@ -42,7 +42,7 @@ import { IStateDB } from '@jupyterlab/statedb';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { IIconRegistry } from '@jupyterlab/ui-components';
+import { addIcon, folderIcon } from '@jupyterlab/ui-components';
 
 import { IIterator, map, reduce, toArray } from '@lumino/algorithm';
 
@@ -133,7 +133,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
-  requires: [IIconRegistry, IDocumentManager],
+  requires: [IDocumentManager],
   optional: [IStateDB, IRouter, JupyterFrontEnd.ITreeResolver]
 };
 
@@ -211,7 +211,6 @@ export default plugins;
  */
 async function activateFactory(
   app: JupyterFrontEnd,
-  icoReg: IIconRegistry,
   docManager: IDocumentManager,
   state: IStateDB | null,
   router: IRouter | null,
@@ -225,7 +224,6 @@ async function activateFactory(
   ) => {
     const model = new FileBrowserModel({
       auto: options.auto ?? true,
-      iconRegistry: icoReg,
       manager: docManager,
       driveName: options.driveName || '',
       refreshInterval: options.refreshInterval,
@@ -237,7 +235,7 @@ async function activateFactory(
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
-      iconClassName: 'jp-AddIcon',
+      iconRenderer: addIcon,
       onClick: () => {
         return Private.createLauncher(commands, widget);
       },
@@ -295,7 +293,7 @@ function activateBrowser(
     mainMenu
   );
 
-  browser.title.iconClass = 'jp-FolderIcon jp-SideBar-tabIcon';
+  browser.title.iconRenderer = folderIcon;
   browser.title.caption = 'File Browser';
   labShell.add(browser, 'left', { rank: 100 });
 

@@ -11,6 +11,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStateDB } from '@jupyterlab/statedb';
 
+import { jupyterIcon } from '@jupyterlab/ui-components';
+
 import { CommandRegistry } from '@lumino/commands';
 
 import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
@@ -427,12 +429,16 @@ namespace Private {
    * Populate the instructions text node.
    */
   export function populateInstructionsNode(node: HTMLElement): void {
-    const iconClass = `jp-SettingEditorInstructions-icon jp-JupyterIcon`;
-
     ReactDOM.render(
       <React.Fragment>
         <h2>
-          <span className={iconClass} />
+          <jupyterIcon.react
+            className="jp-SettingEditorInstructions-icon"
+            tag="span"
+            justify="center"
+            height="auto"
+            width="60px"
+          />
           <span className="jp-SettingEditorInstructions-title">Settings</span>
         </h2>
         <span className="jp-SettingEditorInstructions-text">

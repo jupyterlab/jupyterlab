@@ -130,6 +130,7 @@ function activateCsv(
     if (ft) {
       widget.title.iconClass = ft.iconClass!;
       widget.title.iconLabel = ft.iconLabel!;
+      widget.title.iconRenderer = ft.iconRenderer!;
     }
     // Set the theme for the new widget.
     widget.content.style = style;
@@ -209,6 +210,7 @@ function activateTsv(
     if (ft) {
       widget.title.iconClass = ft.iconClass!;
       widget.title.iconLabel = ft.iconLabel!;
+      widget.title.iconRenderer = ft.iconRenderer!;
     }
     // Set the theme for the new widget.
     widget.content.style = style;

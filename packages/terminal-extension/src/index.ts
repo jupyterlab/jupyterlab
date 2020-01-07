@@ -1,36 +1,30 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { toArray } from '@lumino/algorithm';
+import { Menu } from '@lumino/widgets';
+
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
-import { Terminal } from '@jupyterlab/services';
-
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import { IFileMenu, IMainMenu } from '@jupyterlab/mainmenu';
-
-import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
+import { Terminal } from '@jupyterlab/services';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
+import { terminalIcon } from '@jupyterlab/ui-components';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
-
-import { Menu } from '@lumino/widgets';
-
-import { toArray } from '@lumino/algorithm';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -53,11 +47,6 @@ namespace CommandIDs {
  * The class name for the terminal icon in the default theme.
  */
 const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
-
-/**
- * The class name added to a running session item icon.
- */
-const ITEM_ICON_CLASS = 'jp-RunningSessions-itemIcon';
 
 /**
  * The default terminal extension.
@@ -299,8 +288,8 @@ function addRunningSessionManager(
     open() {
       void app.commands.execute('terminal:open', { name: this._model.name });
     }
-    iconClass() {
-      return `${ITEM_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
+    iconRenderer() {
+      return terminalIcon;
     }
     label() {
       return `terminals/${this._model.name}`;
@@ -347,7 +336,7 @@ export function addCommands(
 
       const term = new Terminal(session, options);
 
-      term.title.icon = TERMINAL_ICON_CLASS;
+      term.title.iconRenderer = terminalIcon;
       term.title.label = '...';
 
       let main = new MainAreaWidget({ content: term });

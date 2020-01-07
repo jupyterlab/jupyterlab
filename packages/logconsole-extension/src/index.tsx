@@ -35,7 +35,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { HTMLSelect } from '@jupyterlab/ui-components';
+import { HTMLSelect, listIcon } from '@jupyterlab/ui-components';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -145,7 +145,7 @@ function activateLogConsole(
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
     logConsoleWidget.title.label = 'Log Console';
-    logConsoleWidget.title.iconClass = 'jp-ListIcon';
+    logConsoleWidget.title.iconRenderer = listIcon;
 
     const addCheckpointButton = new CommandToolbarButton({
       commands: app.commands,
@@ -378,11 +378,7 @@ export class LogLevelSwitcher extends ReactWidget {
           onChange={this.handleChange}
           onKeyDown={this.handleKeyDown}
           value={logger?.level}
-          iconProps={{
-            icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
-          }}
           aria-label="Log level"
-          minimal
           disabled={logger === null}
           options={
             logger === null

@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Contents, Kernel } from '@jupyterlab/services';
-
 import {
   ArrayExt,
   ArrayIterator,
@@ -33,6 +31,22 @@ import {
 import { IModelDB } from '@jupyterlab/observables';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+import { Contents, Kernel } from '@jupyterlab/services';
+
+import {
+  fileIcon,
+  folderIcon,
+  imageIcon,
+  JLIcon,
+  jsonIcon,
+  markdownIcon,
+  notebookIcon,
+  pythonIcon,
+  rKernelIcon,
+  spreadsheetIcon,
+  yamlIcon
+} from '@jupyterlab/ui-components';
 
 import { TextModelFactory } from './default';
 
@@ -1172,6 +1186,11 @@ export namespace DocumentRegistry {
     readonly iconLabel?: string;
 
     /**
+     * The icon (as JLIcon) for the file type.
+     */
+    readonly iconRenderer?: JLIcon;
+
+    /**
      * The content type of the new file.
      */
     readonly contentType: Contents.ContentType;
@@ -1189,7 +1208,7 @@ export namespace DocumentRegistry {
     name: 'default',
     extensions: [],
     mimeTypes: [],
-    iconClass: 'jp-MaterialIcon jp-FileIcon',
+    iconClass: '',
     iconLabel: '',
     contentType: 'file',
     fileFormat: 'text'
@@ -1226,7 +1245,8 @@ export namespace DocumentRegistry {
     ...fileTypeDefaults,
     name: 'text',
     mimeTypes: ['text/plain'],
-    extensions: ['.txt']
+    extensions: ['.txt'],
+    iconRenderer: fileIcon
   };
 
   /**
@@ -1240,7 +1260,7 @@ export namespace DocumentRegistry {
     extensions: ['.ipynb'],
     contentType: 'notebook',
     fileFormat: 'json',
-    iconClass: 'jp-MaterialIcon jp-NotebookIcon'
+    iconRenderer: notebookIcon
   };
 
   /**
@@ -1252,7 +1272,7 @@ export namespace DocumentRegistry {
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
-    iconClass: 'jp-MaterialIcon jp-FolderIcon'
+    iconRenderer: folderIcon
   };
 
   /**
@@ -1267,56 +1287,56 @@ export namespace DocumentRegistry {
       displayName: 'Markdown File',
       extensions: ['.md'],
       mimeTypes: ['text/markdown'],
-      iconClass: 'jp-MaterialIcon jp-MarkdownIcon'
+      iconRenderer: markdownIcon
     },
     {
       name: 'python',
       displayName: 'Python File',
       extensions: ['.py'],
       mimeTypes: ['text/x-python'],
-      iconClass: 'jp-MaterialIcon jp-PythonIcon'
+      iconRenderer: pythonIcon
     },
     {
       name: 'json',
       displayName: 'JSON File',
       extensions: ['.json'],
       mimeTypes: ['application/json'],
-      iconClass: 'jp-MaterialIcon jp-JsonIcon'
+      iconRenderer: jsonIcon
     },
     {
       name: 'csv',
       displayName: 'CSV File',
       extensions: ['.csv'],
       mimeTypes: ['text/csv'],
-      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+      iconRenderer: spreadsheetIcon
     },
     {
       name: 'tsv',
       displayName: 'TSV File',
       extensions: ['.tsv'],
       mimeTypes: ['text/csv'],
-      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+      iconRenderer: spreadsheetIcon
     },
     {
       name: 'r',
       displayName: 'R File',
       mimeTypes: ['text/x-rsrc'],
       extensions: ['.r'],
-      iconClass: 'jp-MaterialIcon jp-RKernelIcon'
+      iconRenderer: rKernelIcon
     },
     {
       name: 'yaml',
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconClass: 'jp-MaterialIcon jp-YamlIcon'
+      iconRenderer: yamlIcon
     },
     {
       name: 'svg',
       displayName: 'Image',
       mimeTypes: ['image/svg+xml'],
       extensions: ['.svg'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1324,7 +1344,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/tiff'],
       extensions: ['.tif', '.tiff'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1332,7 +1352,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/jpeg'],
       extensions: ['.jpg', '.jpeg'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1340,7 +1360,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/gif'],
       extensions: ['.gif'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1348,7 +1368,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/png'],
       extensions: ['.png'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1356,7 +1376,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/bmp'],
       extensions: ['.bmp'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      iconRenderer: imageIcon,
       fileFormat: 'base64'
     }
   ];

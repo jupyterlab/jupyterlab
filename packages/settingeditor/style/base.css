@@ -41,10 +41,9 @@
 
 #setting-editor .jp-SettingEditorInstructions-icon {
   display: inline-block;
-  background-size: 60px;
-  width: 60px;
   height: 78px;
-  margin-right: 5px;
+  margin: 2px 5px 2px 8px;
+  width: 60px;
 }
 
 #setting-editor .jp-SettingEditorInstructions-title {
@@ -241,67 +240,4 @@
 
 #setting-editor .jp-SettingsTableEditor td.jp-SettingsTableEditor-type {
   text-align: right;
-}
-
-#setting-editor
-  .jp-PluginList
-  .jp-mod-selected
-  .jp-PluginList-icon.jp-FileIcon {
-  background-image: var(--jp-icon-file-selected);
-}
-
-#setting-editor
-  .jp-PluginList
-  .jp-mod-selected
-  .jp-PluginList-icon.jp-TextEditorIcon {
-  background-image: var(--jp-icon-text-editor-selected);
-}
-
-#setting-editor
-  .jp-PluginList
-  .jp-mod-selected
-  .jp-PluginList-icon.jp-NotebookIcon {
-  background-image: var(--jp-icon-notebook-selected);
-}
-
-#setting-editor
-  .jp-PluginList
-  .jp-mod-selected
-  .jp-PluginList-icon.jp-FolderIcon {
-  background-image: var(--jp-icon-folder-selected);
-}
-
-#setting-editor
-  .jp-PluginList
-  .jp-mod-selected
-  .jp-PluginList-icon.jp-CodeConsoleIcon {
-  background-image: var(--jp-icon-console-selected);
-}
-
-#setting-editor
-  .jp-PluginList
-  .jp-mod-selected
-  .jp-PluginList-icon.jp-MarkdownIcon {
-  background-image: var(--jp-icon-markdown-selected);
-}
-
-#setting-editor
-  .jp-PluginList
-  .jp-mod-selected
-  .jp-PluginList-icon.jp-LauncherIcon {
-  background-image: var(--jp-icon-launcher-selected);
-}
-
-#setting-editor
-  .jp-PluginList
-  .jp-mod-selected
-  .jp-PluginList-icon.jp-SettingsIcon {
-  background-image: var(--jp-icon-settings-selected);
-}
-
-#setting-editor
-  .jp-PluginList
-  .jp-mod-selected
-  .jp-PluginList-icon.jp-KeyboardIcon {
-  background-image: var(--jp-icon-keyboard-selected);
 }

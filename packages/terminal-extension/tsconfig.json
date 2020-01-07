@@ -30,6 +30,9 @@
     },
     {
       "path": "../terminal"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

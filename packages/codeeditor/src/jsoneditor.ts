@@ -2,15 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IObservableJSON } from '@jupyterlab/observables';
+import { checkIcon, undoIcon } from '@jupyterlab/ui-components';
 
 import {
   JSONExt,
   JSONObject,
   ReadonlyPartialJSONObject
 } from '@lumino/coreutils';
-
 import { Message } from '@lumino/messaging';
-
 import { Widget } from '@lumino/widgets';
 
 import { CodeEditor } from './editor';
@@ -36,16 +35,6 @@ const HOST_CLASS = 'jp-JSONEditor-host';
 const HEADER_CLASS = 'jp-JSONEditor-header';
 
 /**
- * The class name added to the revert button.
- */
-const REVERT_CLASS = 'jp-JSONEditor-revertButton';
-
-/**
- * The class name added to the commit button.
- */
-const COMMIT_CLASS = 'jp-JSONEditor-commitButton';
-
-/**
  * A widget for editing observable JSON.
  */
 export class JSONEditor extends Widget {
@@ -60,13 +49,16 @@ export class JSONEditor extends Widget {
     this.headerNode = document.createElement('div');
     this.headerNode.className = HEADER_CLASS;
 
-    this.revertButtonNode = document.createElement('span');
-    this.revertButtonNode.className = REVERT_CLASS;
-    this.revertButtonNode.title = 'Revert changes to data';
+    this.revertButtonNode = undoIcon.element({
+      tag: 'span',
+      title: 'Revert changes to data'
+    });
 
-    this.commitButtonNode = document.createElement('span');
-    this.commitButtonNode.className = COMMIT_CLASS;
-    this.commitButtonNode.title = 'Commit changes to data';
+    this.commitButtonNode = checkIcon.element({
+      tag: 'span',
+      title: 'Commit changes to data',
+      marginLeft: '8px'
+    });
 
     this.editorHostNode = document.createElement('div');
     this.editorHostNode.className = HOST_CLASS;
@@ -258,23 +250,17 @@ export class JSONEditor extends Widget {
    */
   private _evtClick(event: MouseEvent): void {
     let target = event.target as HTMLElement;
-    switch (target) {
-      case this.revertButtonNode:
+    if (this.revertButtonNode.contains(target)) {
+      this._setValue();
+    } else if (this.commitButtonNode.contains(target)) {
+      if (!this.commitButtonNode.hidden && !this.hasClass(ERROR_CLASS)) {
+        this._changeGuard = true;
+        this._mergeContent();
+        this._changeGuard = false;
         this._setValue();
-        break;
-      case this.commitButtonNode:
-        if (!this.commitButtonNode.hidden && !this.hasClass(ERROR_CLASS)) {
-          this._changeGuard = true;
-          this._mergeContent();
-          this._changeGuard = false;
-          this._setValue();
-        }
-        break;
-      case this.editorHostNode:
-        this.editor.focus();
-        break;
-      default:
-        break;
+      }
+    } else if (this.editorHostNode.contains(target)) {
+      this.editor.focus();
     }
   }
 

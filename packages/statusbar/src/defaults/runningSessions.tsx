@@ -13,7 +13,7 @@ import {
   Session
 } from '@jupyterlab/services';
 
-import { DefaultIconReact } from '@jupyterlab/ui-components';
+import { kernelIcon, terminalIcon } from '@jupyterlab/ui-components';
 
 import { GroupItem, interactiveItem, TextItem } from '..';
 
@@ -36,16 +36,11 @@ function RunningSessionsComponent(
     <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
-        <DefaultIconReact
-          name={'terminal'}
-          left={'1px'}
-          top={'3px'}
-          kind={'statusBar'}
-        />
+        <terminalIcon.react left={'1px'} top={'3px'} kind={'statusBar'} />
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.sessions} />
-        <DefaultIconReact name={'kernel'} top={'2px'} kind={'statusBar'} />
+        <kernelIcon.react top={'2px'} kind={'statusBar'} />
       </GroupItem>
     </GroupItem>
   );

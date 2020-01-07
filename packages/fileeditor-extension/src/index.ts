@@ -40,7 +40,7 @@ import { JSONObject } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
 
-import { Commands, EDITOR_ICON_CLASS, FACTORY } from './commands';
+import { Commands, FACTORY } from './commands';
 
 export { Commands } from './commands';
 
@@ -205,8 +205,6 @@ function activate(
     });
 
   factory.widgetCreated.connect((sender, widget) => {
-    widget.title.icon = EDITOR_ICON_CLASS;
-
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);

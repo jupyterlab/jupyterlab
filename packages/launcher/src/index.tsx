@@ -7,11 +7,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/apputils';
 
-import {
-  combineClasses,
-  DefaultIconReact,
-  defaultIconRegistry
-} from '@jupyterlab/ui-components';
+import { JLIcon } from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
@@ -203,22 +199,11 @@ export class Launcher extends VDomRenderer<LauncherModel> {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              {kernel && defaultIconRegistry.contains(iconClass) ? (
-                <DefaultIconReact
-                  name={iconClass}
-                  className={''}
-                  center={true}
-                  kind={'launcherSection'}
-                />
-              ) : (
-                <div
-                  className={combineClasses(
-                    iconClass,
-                    'jp-Launcher-sectionIcon',
-                    'jp-Launcher-icon'
-                  )}
-                />
-              )}
+              <JLIcon.getReact
+                name={iconClass}
+                justify="center"
+                kind="launcherSection"
+              />
               <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
             <div className="jp-Launcher-cardContainer">
@@ -415,7 +400,6 @@ function Card(
   };
 
   // Return the VDOM element.
-  const iconClass = kernel ? '' : commands.iconClass(command, args);
   return (
     <div
       className="jp-LauncherCard"
@@ -426,27 +410,23 @@ function Card(
       data-category={item.category || 'Other'}
       key={Private.keyProperty.get(item)}
     >
-      {kernel ? (
-        <div className="jp-LauncherCard-icon">
-          {item.kernelIconUrl ? (
+      <div className="jp-LauncherCard-icon">
+        {kernel ? (
+          item.kernelIconUrl ? (
             <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
           ) : (
             <div className="jp-LauncherCard-noKernelIcon">
               {label[0].toUpperCase()}
             </div>
-          )}
-        </div>
-      ) : (
-        <div className="jp-LauncherCard-icon">
-          <DefaultIconReact
-            name={`${iconClass} jp-Launcher-icon`}
-            className={''}
-            fallback={true}
-            center={true}
-            kind={'launcherCard'}
+          )
+        ) : (
+          <JLIcon.getReact
+            name={commands.iconClass(command, args)}
+            justify="center"
+            kind="launcherCard"
           />
-        </div>
-      )}
+        )}
+      </div>
       <div className="jp-LauncherCard-label" title={title}>
         <p>{label}</p>
       </div>

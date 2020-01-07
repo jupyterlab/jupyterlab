@@ -5,7 +5,10 @@ module.exports = function(name: string, baseDir: string) {
     preset: 'ts-jest/presets/js-with-babel',
     moduleNameMapper: {
       '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
-      '\\.(gif|ttf|eot|svg)$': '@jupyterlab/testutils/lib/jest-file-mock.js'
+      '\\.(gif|ttf|eot)$': '@jupyterlab/testutils/lib/jest-file-mock.js'
+    },
+    transform: {
+      '\\.svg$': 'jest-raw-loader'
     },
     setupFilesAfterEnv: ['@jupyterlab/testutils/lib/jest-script.js'],
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],

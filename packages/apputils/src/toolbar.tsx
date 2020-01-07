@@ -1,25 +1,27 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { UseSignal, ReactWidget } from './vdom';
-
-import { Button, DefaultIconReact } from '@jupyterlab/ui-components';
+import { Text } from '@jupyterlab/coreutils';
+import {
+  Button,
+  circleEmptyIcon,
+  circleIcon,
+  classes,
+  JLIcon,
+  refreshIcon,
+  stopIcon
+} from '@jupyterlab/ui-components';
 
 import { IIterator, find, map, some } from '@lumino/algorithm';
-
 import { CommandRegistry } from '@lumino/commands';
-
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { Message, MessageLoop } from '@lumino/messaging';
-
 import { AttachedProperty } from '@lumino/properties';
-
 import { PanelLayout, Widget } from '@lumino/widgets';
+import * as React from 'react';
 
 import { ISessionContext, sessionContextDialogs } from './sessioncontext';
-
-import * as React from 'react';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
-import { Text } from '@jupyterlab/coreutils';
+import { UseSignal, ReactWidget } from './vdom';
 
 /**
  * The class name added to toolbars.
@@ -45,13 +47,6 @@ const TOOLBAR_SPACER_CLASS = 'jp-Toolbar-spacer';
  * The class name added to toolbar kernel status icon.
  */
 const TOOLBAR_KERNEL_STATUS_CLASS = 'jp-Toolbar-kernelStatus';
-
-/**
- * The class name added to a busy kernel indicator.
- */
-const TOOLBAR_BUSY_CLASS = 'jp-FilledCircleIcon';
-
-const TOOLBAR_IDLE_CLASS = 'jp-CircleIcon';
 
 /**
  * A layout for toolbars.
@@ -372,7 +367,7 @@ export namespace Toolbar {
     sessionContext: ISessionContext
   ): Widget {
     return new ToolbarButton({
-      iconClassName: 'jp-StopIcon',
+      iconRenderer: stopIcon,
       onClick: () => {
         void sessionContext.session?.kernel?.interrupt();
       },
@@ -388,7 +383,7 @@ export namespace Toolbar {
     dialogs?: ISessionContext.IDialogs
   ): Widget {
     return new ToolbarButton({
-      iconClassName: 'jp-RefreshIcon',
+      iconRenderer: refreshIcon,
       onClick: () => {
         void (dialogs ?? sessionContextDialogs).restart(sessionContext);
       },
@@ -453,8 +448,9 @@ export namespace ToolbarButtonComponent {
   export interface IProps {
     className?: string;
     label?: string;
-    iconClassName?: string;
+    iconClass?: string;
     iconLabel?: string;
+    iconRenderer?: JLIcon;
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
@@ -486,6 +482,31 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     }
   };
 
+  const Icon = () => {
+    if (props.iconRenderer) {
+      return (
+        <props.iconRenderer.react
+          className={classes(props.iconClass, 'jp-ToolbarButtonComponent-icon')}
+          tag="span"
+          justify="center"
+          kind="toolbarButton"
+        />
+      );
+    } else if (props.iconClass) {
+      return (
+        <JLIcon.getReact
+          name={classes(props.iconClass, 'jp-Icon', 'jp-Icon-16')}
+          className="jp-ToolbarButtonComponent-icon"
+          tag="span"
+          justify="center"
+          kind="toolbarButton"
+        />
+      );
+    } else {
+      return <></>;
+    }
+  };
+
   return (
     <Button
       className={
@@ -499,16 +520,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       title={props.tooltip || props.iconLabel}
       minimal
     >
-      {props.iconClassName && (
-        <DefaultIconReact
-          name={`${props.iconClassName} jp-Icon jp-Icon-16`}
-          className={'jp-ToolbarButtonComponent-icon'}
-          fallback={true}
-          center={true}
-          kind={'toolbarButton'}
-          tag={'span'}
-        />
-      )}
+      <Icon />
       {props.label && (
         <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
       )}
@@ -612,7 +624,7 @@ namespace Private {
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {
     let { commands, id, args } = options;
-    const iconClassName = commands.iconClass(id, args);
+    const iconClass = commands.iconClass(id, args);
     const iconLabel = commands.iconLabel(id, args);
     const label = commands.label(id, args);
     let className = commands.className(id, args);
@@ -628,7 +640,7 @@ namespace Private {
       void commands.execute(id, args);
     };
     const enabled = commands.isEnabled(id, args);
-    return { className, iconClassName, tooltip, onClick, enabled, label };
+    return { className, iconClass, tooltip, onClick, enabled, label };
   }
 
   /**
@@ -724,11 +736,22 @@ namespace Private {
 
       let status = sessionContext.kernelDisplayStatus;
 
-      const busy = this._isBusy(status);
-      this.toggleClass(TOOLBAR_BUSY_CLASS, busy);
-      this.toggleClass(TOOLBAR_IDLE_CLASS, !busy);
-      let title = `Kernel ${Text.titleCase(status)}`;
-      this.node.title = title;
+      // set the icon
+      if (this._isBusy(status)) {
+        circleIcon.element({
+          container: this.node,
+          title: `Kernel ${Text.titleCase(status)}`,
+          justify: 'center',
+          kind: 'toolbarButton'
+        });
+      } else {
+        circleEmptyIcon.element({
+          container: this.node,
+          title: `Kernel ${Text.titleCase(status)}`,
+          justify: 'center',
+          kind: 'toolbarButton'
+        });
+      }
     }
 
     /**

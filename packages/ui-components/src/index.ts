@@ -2,5 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 export * from './blueprint';
+export * from './components';
 export * from './icon';
+export * from './tokens';
 export * from './utils';

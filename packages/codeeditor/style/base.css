@@ -34,22 +34,12 @@
   flex: 0 0 auto;
 }
 
-.jp-JSONEditor-commitButton,
-.jp-JSONEditor-revertButton {
+.jp-JSONEditor-commitButton {
   height: 16px;
   width: 16px;
   background-size: 18px;
   background-repeat: no-repeat;
   background-position: center;
-}
-
-.jp-JSONEditor-commitButton {
-  background-image: var(--jp-icon-checkmark);
-  margin-left: 8px;
-}
-
-.jp-JSONEditor-revertButton {
-  background-image: var(--jp-icon-undo);
 }
 
 .jp-JSONEditor-host.jp-mod-focused {

@@ -6,15 +6,12 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
-
 import { ILauncher, LauncherModel, Launcher } from '@jupyterlab/launcher';
+import { launcherIcon } from '@jupyterlab/ui-components';
 
 import { toArray } from '@lumino/algorithm';
-
 import { JSONObject } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -63,7 +60,7 @@ function activate(
 
       launcher.model = model;
       launcher.title.label = 'Launcher';
-      launcher.title.iconClass = 'jp-LauncherIcon';
+      launcher.title.iconRenderer = launcherIcon;
 
       let main = new MainAreaWidget({ content: launcher });
 

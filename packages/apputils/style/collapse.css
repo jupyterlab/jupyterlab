@@ -12,21 +12,14 @@
 }
 
 .jp-Collapse-header {
-  padding: 4px 12px 4px 12px;
+  padding: 1px 12px;
   color: var(--jp-ui-font-color1);
   background-color: var(--jp-layout-color1);
   font-size: var(--jp-ui-font-size2);
-  background-image: var(--jp-icon-caretdown);
-  background-repeat: no-repeat;
-  background-position: right 12px top 50%;
 }
 
 .jp-Collapse-header:hover {
   background-color: var(--jp-layout-color2);
-}
-
-.jp-Collapse-open > .jp-Collapse-header {
-  background-image: var(--jp-icon-caretup);
 }
 
 .jp-Collapse-contents {

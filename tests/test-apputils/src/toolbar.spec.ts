@@ -269,7 +269,6 @@ describe('@jupyterlab/apputils', () => {
         const wrapperNode = buttonNode.firstChild as HTMLElement;
         const iconNode = wrapperNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
-
         cmd.dispose();
       });
     });
@@ -309,9 +308,10 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           Widget.attach(item, document.body);
           await framePromise();
-          expect(
-            (item.node.firstChild!.lastChild as HTMLElement).textContent
-          ).to.equal(sessionContext.kernelDisplayName);
+          const node = item.node.querySelector(
+            '.jp-ToolbarButtonComponent-label'
+          )!;
+          expect(node.textContent).to.equal(sessionContext.kernelDisplayName);
         });
       });
 
@@ -326,7 +326,7 @@ describe('@jupyterlab/apputils', () => {
           let called = false;
           sessionContext.statusChanged.connect((_, status) => {
             if (status === 'busy') {
-              expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+              expect(item.node.querySelector("[data-icon='circle']")).to.exist;
               called = true;
             }
           });
@@ -362,7 +362,8 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           const item = Toolbar.createKernelStatusItem(sessionContext);
           expect(item.node.title).to.equal('Kernel Connecting');
-          expect(item.hasClass('jp-FilledCircleIcon')).to.equal(false);
+          expect(item.node.querySelector("[data-icon='circle-empty']")).to
+            .exist;
           await sessionContext.initialize();
           await sessionContext.session?.kernel?.info;
         });
@@ -380,7 +381,7 @@ describe('@jupyterlab/apputils', () => {
       it('should accept options', async () => {
         const widget = new ToolbarButton({
           className: 'foo',
-          iconClassName: 'iconFoo',
+          iconClass: 'iconFoo',
           onClick: () => {
             return void 0;
           },

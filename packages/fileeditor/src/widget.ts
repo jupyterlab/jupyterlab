@@ -1,7 +1,12 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { StackedLayout, Widget } from '@lumino/widgets';
+import {
+  CodeEditor,
+  CodeEditorWrapper,
+  IEditorServices,
+  IEditorMimeTypeService
+} from '@jupyterlab/codeeditor';
 
 import {
   ABCWidgetFactory,
@@ -10,16 +15,13 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import {
-  CodeEditor,
-  IEditorServices,
-  IEditorMimeTypeService,
-  CodeEditorWrapper
-} from '@jupyterlab/codeeditor';
+import { textEditorIcon } from '@jupyterlab/ui-components';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
 import { Message } from '@lumino/messaging';
+
+import { StackedLayout, Widget } from '@lumino/widgets';
 
 /**
  * The data attribute added to a widget that can run code.
@@ -323,6 +325,9 @@ export class FileEditorFactory extends ABCWidgetFactory<
       context,
       mimeTypeService: this._services.mimeTypeService
     });
+
+    content.title.iconRenderer = textEditorIcon;
+
     const widget = new DocumentWidget({ content, context });
     return widget;
   }

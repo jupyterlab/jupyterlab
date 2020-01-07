@@ -15,10 +15,16 @@ export default {
   title: 'IconReact'
 };
 
-export const buildIcon = () => <DefaultIconReact name={'build'} />;
+export const buildIcon = () => (
+  <DefaultIconReact name={'build'} kind={'sideBar'} />
+);
+
+export const runningIcon = () => (
+  <DefaultIconReact name={'running'} height={'800px'} width={'800px'} />
+);
 
 export const html5Icon = () => (
-  <div className={'foobar'}>
-    <DefaultIconReact name={'html5'} kind={'launcherSection'} center={true} />
+  <div className={'foobar'} style={{ height: '500px', width: '500px' }}>
+    <DefaultIconReact name={'html5'} justify="center" />
   </div>
 );

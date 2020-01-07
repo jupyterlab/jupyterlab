@@ -34,8 +34,6 @@ import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
 
 import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
-
 function main(): void {
   let manager = new ServiceManager();
   void manager.ready.then(() => {
@@ -88,8 +86,7 @@ function createApp(manager: ServiceManager.IManager): void {
   let commands = new CommandRegistry();
 
   let fbModel = new FileBrowserModel({
-    manager: docManager,
-    iconRegistry: defaultIconRegistry
+    manager: docManager
   });
   let fbWidget = new FileBrowser({
     id: 'filebrowser',
@@ -98,7 +95,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   // Add a creator toolbar item.
   let creator = new ToolbarButton({
-    iconClassName: 'jp-AddIcon jp-Icon jp-Icon-16',
+    iconClass: 'jp-AddIcon jp-Icon jp-Icon-16',
     onClick: () => {
       void docManager
         .newUntitled({

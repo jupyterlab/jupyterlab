@@ -15,46 +15,34 @@ import { NestedCSSProperties } from 'typestyle/lib/types';
  * - splash: The icon used for the splash screen
  * - tabManager: The icons for the tabManager in the sidebar
  */
-export type IconKindTypeStr =
+export type IconKindType =
   | 'breadCrumb'
-  | 'dockPanelBar'
   | 'launcherCard'
   | 'launcherSection'
   | 'listing'
+  | 'listingHeaderItem'
+  | 'mainAreaTab'
+  | 'runningItem'
+  | 'select'
   | 'settingsEditor'
   | 'sideBar'
   | 'splash'
   | 'statusBar'
-  | 'tabManager'
   | 'toolbarButton';
 
-export type IconKindType = IconKindTypeStr | undefined;
+export type IconJustifyType = 'center' | 'left' | 'right';
 
 export interface IIconStyle extends NestedCSSProperties {
-  /**
-   * center the icon svg in its container
-   */
-  center?: boolean;
-
   /**
    * the kind of the icon, associated with a default stylesheet
    */
   kind?: IconKindType;
+
+  /**
+   * how to justify the icon
+   */
+  justify?: IconJustifyType;
 }
-
-/**
- * styles for centering node inside of containers
- */
-const containerCSSCenter: NestedCSSProperties = {
-  alignItems: 'center',
-  display: 'flex'
-};
-
-const iconCSSCenter: NestedCSSProperties = {
-  display: 'block',
-  margin: '0 auto',
-  width: '100%'
-};
 
 /**
  * icon kind specific styles
@@ -66,40 +54,51 @@ const iconCSSBreadCrumb: NestedCSSProperties = {
   padding: '0px 2px',
   height: '16px',
   width: '16px',
-  verticalAlign: 'middle',
-  // `&` will be substituted for the generated classname (interpolation)
-  $nest: {
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    '&:first-child': {
-      marginLeft: '0px'
-    },
-    ['.jp-mod-dropTarget&']: {
-      backgroundColor: 'var(--jp-brand-color2)',
-      opacity: 0.7
-    }
-  }
-};
-
-const iconCSSDockPanelBar: NestedCSSProperties = {
-  height: '14px',
-  width: '14px'
+  verticalAlign: 'middle'
 };
 
 const iconCSSLauncherCard: NestedCSSProperties = {
-  height: 'var(--jp-private-launcher-large-icon-size)',
-  width: 'var(--jp-private-launcher-large-icon-size)'
+  height: '52px',
+  width: '52px'
 };
 
 const iconCSSLauncherSection: NestedCSSProperties = {
-  marginRight: '12px',
-  height: 'var(--jp-private-launcher-small-icon-size)',
-  width: 'var(--jp-private-launcher-small-icon-size)'
+  height: '32px',
+  width: '32px'
 };
 
 const iconCSSListing: NestedCSSProperties = {
   height: '16px',
+  width: '16px'
+};
+
+const iconCSSlistingHeaderItem: NestedCSSProperties = {
+  height: 'auto',
+  margin: '-2px 0 0 0',
+  width: '20px'
+};
+
+const iconCSSMainAreaTab: NestedCSSProperties = {
+  $nest: {
+    '.p-DockPanel-tabBar &': {
+      height: '14px',
+      width: '14px'
+    },
+    '#tab-manager &': {
+      height: '16px',
+      width: '16px'
+    }
+  }
+};
+
+const iconCSSRunningItem: NestedCSSProperties = {
+  height: '16px',
+  width: '16px'
+};
+
+const iconCSSSelect: NestedCSSProperties = {
+  position: 'absolute',
+  height: 'auto',
   width: '16px'
 };
 
@@ -124,45 +123,87 @@ const iconCSSStatusBar: NestedCSSProperties = {
   position: 'relative'
 };
 
-const iconCSSTabManager: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
-
 const iconCSSToolbarButton: NestedCSSProperties = {
   height: '16px',
   width: '16px'
 };
 
-const iconCSSKind: { [k in IconKindTypeStr]: NestedCSSProperties } = {
+const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: iconCSSBreadCrumb,
-  dockPanelBar: iconCSSDockPanelBar,
   launcherCard: iconCSSLauncherCard,
   launcherSection: iconCSSLauncherSection,
   listing: iconCSSListing,
+  listingHeaderItem: iconCSSlistingHeaderItem,
+  mainAreaTab: iconCSSMainAreaTab,
+  runningItem: iconCSSRunningItem,
+  select: iconCSSSelect,
   settingsEditor: iconCSSSettingsEditor,
   sideBar: iconCSSSideBar,
   splash: iconCSSSplash,
   statusBar: iconCSSStatusBar,
-  tabManager: iconCSSTabManager,
   toolbarButton: iconCSSToolbarButton
 };
 
-/**
- * container kind specific styles
- */
-const containerCSSDockPanelBar: NestedCSSProperties = {
-  marginRight: '4px'
+const containerCSSBreadCrumb: NestedCSSProperties = {
+  // `&` will be substituted for the generated classname (interpolation)
+  $nest: {
+    '&:first-child svg': {
+      bottom: '1px',
+      marginLeft: '0px',
+      position: 'relative'
+    },
+    '&:hover': {
+      backgroundColor: 'var(--jp-layout-color2)'
+    },
+    ['.jp-mod-dropTarget&']: {
+      backgroundColor: 'var(--jp-brand-color2)',
+      opacity: 0.7
+    }
+  }
 };
 
 const containerCSSLauncherCard: NestedCSSProperties = {
-  height: 'var(--jp-private-launcher-card-icon-height)'
+  height: '68px'
+};
+
+const containerCSSLauncherSection: NestedCSSProperties = {
+  boxSizing: 'border-box',
+  marginRight: '12px'
 };
 
 const containerCSSListing: NestedCSSProperties = {
   flex: '0 0 20px',
   marginRight: '4px',
   position: 'relative'
+};
+
+const containerCSSListingHeaderItem: NestedCSSProperties = {
+  display: 'inline',
+  height: '16px',
+  width: '16px'
+};
+
+/**
+ * container kind specific styles
+ */
+const containerCSSMainAreaTab: NestedCSSProperties = {
+  $nest: {
+    '.p-DockPanel-tabBar &': {
+      marginRight: '4px'
+    },
+    '#tab-manager &': {
+      marginRight: '2px',
+      position: 'relative'
+    }
+  }
+};
+
+const containerCSSRunningItem: NestedCSSProperties = {
+  margin: '0px 4px 0px 12px'
+};
+
+const containerCSSSelect: NestedCSSProperties = {
+  pointerEvents: 'none'
 };
 
 const containerCSSSettingsEditor: NestedCSSProperties = {
@@ -215,29 +256,72 @@ const containerCSSSplash: NestedCSSProperties = {
   zIndex: 1
 };
 
-const containerCSSTabManager: NestedCSSProperties = {
-  marginRight: '2px',
-  position: 'relative'
-};
-
 const containerCSSToolbarButton: NestedCSSProperties = {
   display: 'inline-block',
   margin: 'auto',
   verticalAlign: 'middle'
 };
 
-const containerCSSKind: { [k in IconKindTypeStr]: NestedCSSProperties } = {
-  breadCrumb: {},
-  dockPanelBar: containerCSSDockPanelBar,
+const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
+  breadCrumb: containerCSSBreadCrumb,
   launcherCard: containerCSSLauncherCard,
-  launcherSection: {},
+  launcherSection: containerCSSLauncherSection,
   listing: containerCSSListing,
+  listingHeaderItem: containerCSSListingHeaderItem,
+  mainAreaTab: containerCSSMainAreaTab,
+  runningItem: containerCSSRunningItem,
+  select: containerCSSSelect,
   settingsEditor: containerCSSSettingsEditor,
   sideBar: containerCSSSideBar,
   splash: containerCSSSplash,
   statusBar: {},
-  tabManager: containerCSSTabManager,
   toolbarButton: containerCSSToolbarButton
+};
+
+/**
+ * styles for justifying a node inside of a container
+ */
+const iconCSSCenter: NestedCSSProperties = {
+  display: 'block',
+  margin: '0 auto',
+  width: '100%'
+};
+
+const iconCSSLeft: NestedCSSProperties = {
+  display: 'block',
+  margin: '0 auto 0 0'
+};
+
+const iconCSSRight: NestedCSSProperties = {
+  display: 'block',
+  margin: '0 0 0 auto'
+};
+
+const iconCSSJustify: { [k in IconJustifyType]: NestedCSSProperties } = {
+  center: iconCSSCenter,
+  left: iconCSSLeft,
+  right: iconCSSRight
+};
+
+const containerCSSCenter: NestedCSSProperties = {
+  alignItems: 'center',
+  display: 'flex'
+};
+
+const containerCSSLeft: NestedCSSProperties = {
+  alignItems: 'center',
+  display: 'flex'
+};
+
+const containerCSSRight: NestedCSSProperties = {
+  alignItems: 'center',
+  display: 'flex'
+};
+
+const containerCSSJustify: { [k in IconJustifyType]: NestedCSSProperties } = {
+  center: containerCSSCenter,
+  left: containerCSSLeft,
+  right: containerCSSRight
 };
 
 /**
@@ -245,10 +329,10 @@ const containerCSSKind: { [k in IconKindTypeStr]: NestedCSSProperties } = {
  * as well as styling from optional flags like `center`
  */
 function iconCSS(props: IIconStyle): NestedCSSProperties {
-  const { kind, center, ...propsCSS } = props;
+  const { kind, justify, ...propsCSS } = props;
 
   return {
-    ...(center ? iconCSSCenter : {}),
+    ...(justify ? iconCSSJustify[justify] : {}),
     ...(kind ? iconCSSKind[kind] : {}),
     ...propsCSS
   };
@@ -259,10 +343,10 @@ function iconCSS(props: IIconStyle): NestedCSSProperties {
  * styling from optional flags like `center`
  */
 function containerCSS(props: IIconStyle): NestedCSSProperties {
-  const { kind, center } = props;
+  const { kind, justify } = props;
 
   return {
-    ...(center ? containerCSSCenter : {}),
+    ...(justify ? containerCSSJustify[justify] : {}),
     ...(kind ? containerCSSKind[kind] : {})
   };
 }
@@ -270,7 +354,11 @@ function containerCSS(props: IIconStyle): NestedCSSProperties {
 /**
  * for setting the style on the container of an svg node representing an icon
  */
-export const iconStyle = (props: IIconStyle): string => {
+export const iconStyle = (props?: IIconStyle): string => {
+  if (!props || Object.keys(props).length === 0) {
+    return '';
+  }
+
   const conCSS = containerCSS(props);
 
   return style({
@@ -285,6 +373,10 @@ export const iconStyle = (props: IIconStyle): string => {
 /**
  * for setting the style directly on the svg node representing an icon
  */
-export const iconStyleFlat = (props: IIconStyle): string => {
+export const iconStyleFlat = (props?: IIconStyle): string => {
+  if (!props || Object.keys(props).length === 0) {
+    return '';
+  }
+
   return style(iconCSS(props));
 };

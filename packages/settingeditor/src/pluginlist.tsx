@@ -5,11 +5,7 @@
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import {
-  combineClasses,
-  DefaultIconReact,
-  defaultIconRegistry
-} from '@jupyterlab/ui-components';
+import { JLIcon, settingsIcon } from '@jupyterlab/ui-components';
 
 import { Message } from '@lumino/messaging';
 
@@ -194,12 +190,14 @@ export namespace PluginList {
  */
 namespace Private {
   /**
-   * The JupyterLab plugin schema key for the setting editor icon of a plugin.
+   * The JupyterLab plugin schema key for the setting editor
+   * icon class of a plugin.
    */
   const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
 
   /**
-   * The JupyterLab plugin schema key for the setting editor label of a plugin.
+   * The JupyterLab plugin schema key for the setting editor
+   * icon label of a plugin.
    */
   const ICON_LABEL_KEY = 'jupyter.lab.setting-icon-label';
 
@@ -261,12 +259,7 @@ namespace Private {
     const items = plugins.map(plugin => {
       const { id, schema, version } = plugin;
       const itemTitle = `${schema.description}\n${id}\n${version}`;
-      const image = getHint(ICON_CLASS_KEY, registry, plugin);
-      const iconClass = combineClasses(
-        image,
-        'jp-PluginList-icon',
-        'jp-MaterialIcon'
-      );
+      const iconClass = getHint(ICON_CLASS_KEY, registry, plugin);
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
 
       return (
@@ -276,17 +269,13 @@ namespace Private {
           key={id}
           title={itemTitle}
         >
-          {defaultIconRegistry.contains(image) ? (
-            <DefaultIconReact
-              name={image}
-              title={iconTitle}
-              className={''}
-              tag={'span'}
-              kind={'settingsEditor'}
-            />
-          ) : (
-            <span className={iconClass} title={iconTitle} />
-          )}
+          <JLIcon.getReact
+            name={iconClass}
+            fallback={settingsIcon}
+            title={iconTitle}
+            tag="span"
+            kind="settingsEditor"
+          />
           <span>{schema.title || id}</span>
         </li>
       );

@@ -87,16 +87,16 @@ describe('codeeditor', () => {
 
     describe('#revertButtonNode', () => {
       it('should be the revert button node used by the editor', () => {
-        expect(Array.from(editor.revertButtonNode.classList)).to.contain(
-          'jp-JSONEditor-revertButton'
+        expect(editor.revertButtonNode.firstElementChild!.localName).to.equal(
+          'svg'
         );
       });
     });
 
     describe('#commitButtonNode', () => {
       it('should be the commit button node used by the editor', () => {
-        expect(Array.from(editor.commitButtonNode.classList)).to.contain(
-          'jp-JSONEditor-commitButton'
+        expect(editor.commitButtonNode.firstElementChild!.localName).to.equal(
+          'svg'
         );
       });
     });

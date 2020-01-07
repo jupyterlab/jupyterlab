@@ -19,16 +19,12 @@ import {
   IInputGroupProps as IBPInputGroupProps
 } from '@blueprintjs/core/lib/cjs/components/forms/inputGroup';
 import {
-  HTMLSelect as BPHTMLSelect,
-  IHTMLSelectProps
-} from '@blueprintjs/core/lib/cjs/components/html-select/htmlSelect';
-import {
   Select as BPSelect,
   ISelectProps
 } from '@blueprintjs/select/lib/cjs/components/select/select';
-import { combineClasses } from './utils';
-
 export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
+
+import { classes } from './utils';
 
 interface IButtonProps extends IBPButtonProps {
   title?: string;
@@ -44,7 +40,7 @@ type CommonProps<T> = React.DOMAttributes<T>;
 export const Button = (props: IButtonProps & CommonProps<any>) => (
   <BPButton
     {...props}
-    className={combineClasses(
+    className={classes(
       props.className,
       props.minimal ? 'minimal' : '',
       'jp-Button'
@@ -57,7 +53,7 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
     return (
       <BPInputGroup
         {...props}
-        className={combineClasses(props.className, 'jp-InputGroup')}
+        className={classes(props.className, 'jp-InputGroup')}
         rightElement={
           <div className="jp-InputGroupAction">
             <BPIcon className={'jp-Icon'} icon={props.rightIcon} />
@@ -69,7 +65,7 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
   return (
     <BPInputGroup
       {...props}
-      className={combineClasses(props.className, 'jp-InputGroup')}
+      className={classes(props.className, 'jp-InputGroup')}
     />
   );
 };
@@ -78,16 +74,6 @@ export const Collapse = (props: ICollapseProps & CommonProps<any>) => (
   <BPCollapse {...props} />
 );
 
-export const HTMLSelect = (props: IHTMLSelectProps & CommonProps<any>) => (
-  <BPHTMLSelect
-    {...props}
-    className={combineClasses(props.className, 'jp-HTMLSelect')}
-  />
-);
-
 export const Select = (props: ISelectProps<any> & CommonProps<any>) => (
-  <BPSelect
-    {...props}
-    className={combineClasses(props.className, 'jp-Select')}
-  />
+  <BPSelect {...props} className={classes(props.className, 'jp-Select')} />
 );

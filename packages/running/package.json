@@ -36,9 +36,10 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^2.0.0-alpha.4",
-    "@lumino/coreutils": "^1.4.0",
-    "@lumino/disposable": "^1.3.2",
-    "@lumino/signaling": "^1.3.2",
+    "@jupyterlab/ui-components": "^2.0.0-alpha.4",
+    "@lumino/coreutils": "^1.4.2",
+    "@lumino/disposable": "^1.3.4",
+    "@lumino/signaling": "^1.3.4",
     "react": "~16.9.0"
   },
   "devDependencies": {

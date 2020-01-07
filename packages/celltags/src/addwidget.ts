@@ -1,6 +1,6 @@
 import { Widget } from '@lumino/widgets';
 
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { addIcon } from '@jupyterlab/ui-components';
 
 import { TagTool } from './tool';
 
@@ -31,18 +31,16 @@ export class AddWidget extends Widget {
     let tag = document.createElement('div');
     tag.className = 'tag-holder';
     tag.appendChild(text);
-    let img = document.createElement('span');
-    defaultIconRegistry.icon({
-      name: 'add',
-      container: img,
-      center: true,
+    let iconContainer = addIcon.element({
+      tag: 'span',
+      justify: 'center',
       height: '18px',
       width: '18px',
       marginLeft: '3px',
       marginRight: '-5px'
     });
     this.addClass('unapplied-tag');
-    tag.appendChild(img);
+    tag.appendChild(iconContainer);
     this.node.appendChild(tag);
   }
 

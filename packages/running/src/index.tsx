@@ -1,20 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import * as React from 'react';
-
+import { Token } from '@lumino/coreutils';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { ISignal } from '@lumino/signaling';
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import * as React from 'react';
 
 import {
   Dialog,
+  ReactWidget,
   showDialog,
-  ToolbarButtonComponent
+  ToolbarButtonComponent,
+  UseSignal
 } from '@jupyterlab/apputils';
-
-import { Token } from '@lumino/coreutils';
-
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+import { closeIcon, JLIcon, refreshIcon } from '@jupyterlab/ui-components';
 
 /**
  * The class name added to a running widget.
@@ -50,11 +49,6 @@ const LIST_CLASS = 'jp-RunningSessions-sectionList';
  * The class name added to the running sessions items.
  */
 const ITEM_CLASS = 'jp-RunningSessions-item';
-
-/**
- * The class name added to a running session item icon.
- */
-const ITEM_ICON_CLASS = 'jp-RunningSessions-itemIcon';
 
 /**
  * The class name added to a running session item label.
@@ -122,9 +116,11 @@ export class RunningSessionManagers implements IRunningSessionManagers {
 
 function Item(props: { runningItem: IRunningSessions.IRunningItem }) {
   const { runningItem } = props;
+  const icon = runningItem.iconRenderer();
+
   return (
     <li className={ITEM_CLASS}>
-      <span className={`${ITEM_ICON_CLASS} ${runningItem.iconClass()}`} />
+      <icon.react tag="span" justify="center" kind="runningItem" />
       <span
         className={ITEM_LABEL_CLASS}
         title={runningItem.labelTitle ? runningItem.labelTitle() : ''}
@@ -180,15 +176,16 @@ function Section(props: { manager: IRunningSessions.IManager }) {
       }
     });
   }
+
   return (
     <div className={SECTION_CLASS}>
       <>
         <header className={SECTION_HEADER_CLASS}>
           <h2>{props.manager.name} Sessions</h2>
           <ToolbarButtonComponent
-            tooltip={`Shut Down All ${props.manager.name} Sessions…`}
-            iconClassName="jp-CloseIcon jp-Icon jp-Icon-16"
+            iconRenderer={closeIcon}
             onClick={onShutdown}
+            tooltip={`Shut Down All ${props.manager.name} Sessions…`}
           />
         </header>
 
@@ -208,7 +205,7 @@ function RunningSessionsComponent(props: {
       <div className={HEADER_CLASS}>
         <ToolbarButtonComponent
           tooltip="Refresh List"
-          iconClassName="jp-RefreshIcon jp-Icon jp-Icon-16"
+          iconRenderer={refreshIcon}
           onClick={() =>
             props.managers.items().forEach(manager => manager.refreshRunning())
           }
@@ -271,8 +268,8 @@ export namespace IRunningSessions {
     open: () => void;
     // called when the shutdown button is pressed on a particular item
     shutdown: () => void;
-    // Class for the icon
-    iconClass: () => string;
+    // JLIcon to use as the icon
+    iconRenderer: () => JLIcon;
     // called to determine the label for each item
     label: () => string;
     // called to determine the `title` attribute for each item, which is revealed on hover

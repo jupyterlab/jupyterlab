@@ -44,8 +44,9 @@
     "@jupyterlab/services": "^5.0.0-alpha.4",
     "@jupyterlab/settingregistry": "^2.0.0-alpha.4",
     "@jupyterlab/terminal": "^2.0.0-alpha.4",
-    "@lumino/algorithm": "^1.2.1",
-    "@lumino/widgets": "^1.9.4"
+    "@jupyterlab/ui-components": "^2.0.0-alpha.4",
+    "@lumino/algorithm": "^1.2.3",
+    "@lumino/widgets": "^1.9.7"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.14.1",

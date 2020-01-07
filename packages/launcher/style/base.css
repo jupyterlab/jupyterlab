@@ -75,15 +75,6 @@
   margin-bottom: 8px;
 }
 
-.jp-Launcher-sectionHeader .jp-Launcher-sectionIcon {
-  box-sizing: border-box;
-  margin-right: 12px;
-  height: var(--jp-private-launcher-small-icon-size);
-  width: var(--jp-private-launcher-small-icon-size);
-  background-size: var(--jp-private-launcher-small-icon-size)
-    var(--jp-private-launcher-small-icon-size);
-}
-
 .jp-Launcher-sectionTitle {
   font-size: var(--jp-ui-font-size2);
   font-weight: normal;
@@ -175,17 +166,7 @@
   overflow: hidden;
 }
 
-/* Icons, kernel icons */
-
-.jp-Launcher-icon {
-  margin: 0px;
-  padding: 0px;
-  height: var(--jp-private-launcher-large-icon-size);
-  width: var(--jp-private-launcher-large-icon-size);
-  background-size: var(--jp-private-launcher-large-icon-size)
-    var(--jp-private-launcher-large-icon-size);
-  background-repeat: no-repeat;
-}
+/* kernel icons */
 
 .jp-Launcher-kernelIcon {
   width: var(--jp-private-launcher-large-icon-size);

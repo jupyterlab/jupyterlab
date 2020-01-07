@@ -152,20 +152,24 @@
 
 .p-ScrollBar[data-orientation='horizontal']
   .p-ScrollBar-button[data-action='decrement'] {
-  background-image: var(--jp-image-caretleft);
+  background-image: var(--jp-icon-caret-left);
+  background-size: 17px;
 }
 
 .p-ScrollBar[data-orientation='horizontal']
   .p-ScrollBar-button[data-action='increment'] {
-  background-image: var(--jp-image-caretright);
+  background-image: var(--jp-icon-caret-right);
+  background-size: 17px;
 }
 
 .p-ScrollBar[data-orientation='vertical']
   .p-ScrollBar-button[data-action='decrement'] {
-  background-image: var(--jp-image-caretup);
+  background-image: var(--jp-icon-caret-up);
+  background-size: 17px;
 }
 
 .p-ScrollBar[data-orientation='vertical']
   .p-ScrollBar-button[data-action='increment'] {
-  background-image: var(--jp-image-caretdown);
+  background-image: var(--jp-icon-caret-down);
+  background-size: 17px;
 }

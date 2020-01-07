@@ -11,7 +11,7 @@
     "@jupyterlab/services": "^5.0.0-alpha.4",
     "@jupyterlab/terminal": "^2.0.0-alpha.4",
     "@jupyterlab/theme-light-extension": "^2.0.0-alpha.4",
-    "@lumino/widgets": "^1.9.4",
+    "@lumino/widgets": "^1.9.7",
     "es6-promise": "~4.2.8"
   },
   "devDependencies": {

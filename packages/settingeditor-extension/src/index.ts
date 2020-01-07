@@ -8,25 +8,20 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
 import { IEditorServices } from '@jupyterlab/codeeditor';
-
 import { IStateDB } from '@jupyterlab/statedb';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-
 import {
   ISettingEditorTracker,
   SettingEditor
 } from '@jupyterlab/settingeditor';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { settingsIcon } from '@jupyterlab/ui-components';
 
 /**
  * The command IDs used by the setting editor.
@@ -120,7 +115,7 @@ function activate(
 
       editor.id = namespace;
       editor.title.label = 'Settings';
-      editor.title.iconClass = 'jp-SettingsIcon';
+      editor.title.iconRenderer = settingsIcon;
 
       let main = new MainAreaWidget({ content: editor });
       void tracker.add(main);

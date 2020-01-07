@@ -20,7 +20,12 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
-import { IIconRegistry } from '@jupyterlab/ui-components';
+import {
+  caretDownIcon,
+  caretUpIcon,
+  fileIcon,
+  JLIcon
+} from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
@@ -46,6 +51,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 import { FileBrowserModel } from './model';
+import { IIconStyle } from '@jupyterlab/ui-components/lib/style/icon';
 
 /**
  * The class name added to DirListing widget.
@@ -193,9 +199,7 @@ export class DirListing extends Widget {
    */
   constructor(options: DirListing.IOptions) {
     super({
-      node: (options.renderer =
-        options.renderer ||
-        new DirListing.Renderer(options.model.iconRegistry)).createNode()
+      node: (options.renderer || DirListing.defaultRenderer).createNode()
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
@@ -205,7 +209,7 @@ export class DirListing extends Widget {
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
-    this._renderer = options.renderer;
+    this._renderer = options.renderer || DirListing.defaultRenderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
@@ -1685,10 +1689,6 @@ export namespace DirListing {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
-    constructor(icoReg: IIconRegistry) {
-      this._iconRegistry = icoReg;
-    }
-
     /**
      * Create the DOM node for a dir listing.
      */
@@ -1717,6 +1717,13 @@ export namespace DirListing {
       modified.classList.add(MODIFIED_ID_CLASS);
       node.appendChild(name);
       node.appendChild(modified);
+
+      // set the initial caret icon
+      Private.updateCaret(
+        DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS),
+        'right',
+        'up'
+      );
     }
 
     /**
@@ -1734,36 +1741,56 @@ export namespace DirListing {
       let state: ISortState = { direction: 'ascending', key: 'name' };
       let target = event.target as HTMLElement;
       if (name.contains(target)) {
+        const modifiedIcon = DOMUtils.findElement(
+          modified,
+          HEADER_ITEM_ICON_CLASS
+        );
+        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
         if (name.classList.contains(SELECTED_CLASS)) {
           if (!name.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
             name.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(nameIcon, 'right', 'down');
           } else {
             name.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(nameIcon, 'right', 'up');
           }
         } else {
           name.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(nameIcon, 'right', 'up');
         }
         name.classList.add(SELECTED_CLASS);
         modified.classList.remove(SELECTED_CLASS);
         modified.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(modifiedIcon, 'left');
         return state;
       }
       if (modified.contains(target)) {
+        const modifiedIcon = DOMUtils.findElement(
+          modified,
+          HEADER_ITEM_ICON_CLASS
+        );
+        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
         state.key = 'last_modified';
         if (modified.classList.contains(SELECTED_CLASS)) {
           if (!modified.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
             modified.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(modifiedIcon, 'left', 'down');
           } else {
             modified.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(modifiedIcon, 'left', 'up');
           }
         } else {
           modified.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(modifiedIcon, 'left', 'up');
         }
         modified.classList.add(SELECTED_CLASS);
         name.classList.remove(SELECTED_CLASS);
         name.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(nameIcon, 'right');
         return state;
       }
       return state;
@@ -1803,35 +1830,24 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType
     ): void {
-      let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
-      let text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
-      let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+      const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
+      const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
+      const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      if (fileType) {
-        // TODO: remove workaround if...else/code in else clause in v2.0.0
-        // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of filebrowser
-        if (this._iconRegistry) {
-          // add icon as svg node. Can be styled using CSS
-          this._iconRegistry.icon({
-            name: fileType.iconClass ?? '',
-            className: ITEM_ICON_CLASS,
-            title: fileType.iconLabel,
-            fallback: true,
-            container: icon,
-            center: true,
-            kind: 'listing'
-          });
-        } else {
-          // add icon as CSS background image. Can't be styled using CSS
-          icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
-          icon.textContent = fileType.iconLabel || '';
-        }
+      const iconProps: JLIcon.IProps = {
+        className: ITEM_ICON_CLASS,
+        container: iconContainer,
+        justify: 'center',
+        kind: 'listing'
+      };
+
+      // render the icon svg node
+      if (fileType?.iconRenderer) {
+        fileType.iconRenderer.element(iconProps);
+      } else if (fileType?.iconClass) {
+        JLIcon.getElement({ name: fileType.iconClass, ...iconProps });
       } else {
-        // use default icon as CSS background image
-        icon.className = ITEM_ICON_CLASS;
-        icon.textContent = '';
-        // clean up the svg icon annotation, if any
-        delete icon.dataset.icon;
+        fileIcon.element(iconProps);
       }
 
       let hoverText = 'Name: ' + model.name;
@@ -1939,8 +1955,12 @@ export namespace DirListing {
       node.appendChild(icon);
       return node;
     }
-    _iconRegistry: IIconRegistry;
   }
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export const defaultRenderer = new Renderer();
 }
 
 /**
@@ -2069,6 +2089,31 @@ namespace Private {
       return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
     } else {
       return String(bytes);
+    }
+  }
+
+  /**
+   * Update an inline svg caret icon in a node.
+   */
+  export function updateCaret(
+    container: HTMLElement,
+    float: 'left' | 'right',
+    state?: 'down' | 'up' | undefined
+  ): void {
+    const propsStyle: IIconStyle = {
+      kind: 'listingHeaderItem',
+      justify: 'center',
+      float
+    };
+
+    if (state) {
+      (state === 'down' ? caretDownIcon : caretUpIcon).element({
+        container,
+        tag: 'span',
+        ...propsStyle
+      });
+    } else {
+      caretDownIcon.recycle({ container, ...propsStyle });
     }
   }
 }

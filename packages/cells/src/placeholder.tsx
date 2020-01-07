@@ -6,6 +6,7 @@
 import * as React from 'react';
 
 import { ReactWidget } from '@jupyterlab/apputils';
+import { ellipsesIcon } from '@jupyterlab/ui-components';
 
 /**
  * The CSS class added to placeholders.
@@ -88,7 +89,12 @@ export class InputPlaceholder extends Placeholder {
         onClick={e => this.handleClick(e)}
         key="content"
       >
-        <div className="jp-MoreHorizIcon" />
+        <ellipsesIcon.react
+          className="jp-MoreHorizIcon"
+          justify="center"
+          height="auto"
+          width="32px"
+        />
       </div>
     ];
   }
@@ -117,7 +123,12 @@ export class OutputPlaceholder extends Placeholder {
         onClick={e => this.handleClick(e)}
         key="content"
       >
-        <div className="jp-MoreHorizIcon" />
+        <ellipsesIcon.react
+          className="jp-MoreHorizIcon"
+          justify="center"
+          height="auto"
+          width="32px"
+        />
       </div>
     ];
   }

@@ -4,12 +4,11 @@
 |----------------------------------------------------------------------------*/
 
 import { JSONObject } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
+import * as VegaModuleType from 'vega-embed';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import * as VegaModuleType from 'vega-embed';
+import { vegaIcon } from '@jupyterlab/ui-components';
 
 /**
  * The CSS class to add to the Vega and Vega-Lite widget.
@@ -176,19 +175,19 @@ const extension: IRenderMime.IExtension = {
       mimeTypes: [VEGA_MIME_TYPE],
       name: 'vega5',
       extensions: ['.vg', '.vg.json', '.vega'],
-      iconClass: 'jp-MaterialIcon jp-VegaIcon'
+      iconRenderer: vegaIcon
     },
     {
       mimeTypes: [VEGALITE4_MIME_TYPE],
       name: 'vega-lite4',
       extensions: ['.vl', '.vl.json', '.vegalite'],
-      iconClass: 'jp-MaterialIcon jp-VegaIcon'
+      iconRenderer: vegaIcon
     },
     {
       mimeTypes: [VEGALITE3_MIME_TYPE],
       name: 'vega-lite3',
       extensions: [],
-      iconClass: 'jp-MaterialIcon jp-VegaIcon'
+      iconRenderer: vegaIcon
     }
   ]
 };

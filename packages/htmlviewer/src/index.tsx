@@ -21,6 +21,8 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
+import { refreshIcon } from '@jupyterlab/ui-components';
+
 import { Token } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
@@ -87,7 +89,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
     this.toolbar.addItem(
       'refresh',
       new ToolbarButton({
-        iconClassName: 'jp-RefreshIcon',
+        iconRenderer: refreshIcon,
         onClick: () => {
           this.content.url = this.content.url;
         },
