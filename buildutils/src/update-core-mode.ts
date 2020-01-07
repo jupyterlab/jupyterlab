@@ -29,6 +29,7 @@ fs.readdirSync(staging).forEach(name => {
   }
 });
 fs.ensureDirSync(staging);
+fs.ensureFileSync(path.join(staging, 'package.json'));
 
 utils.writePackageData(path.join(staging, 'package.json'), data);
 
