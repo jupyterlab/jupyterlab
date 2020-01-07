@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-notebook",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-beta.0",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -18,14 +18,14 @@
     "watch:src": "tsc -p src --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.0.0-alpha.4",
-    "@jupyterlab/cells": "^2.0.0-alpha.4",
-    "@jupyterlab/codemirror": "^2.0.0-alpha.4",
-    "@jupyterlab/docregistry": "^2.0.0-alpha.4",
-    "@jupyterlab/nbformat": "^2.0.0-alpha.4",
-    "@jupyterlab/notebook": "^2.0.0-alpha.4",
-    "@jupyterlab/observables": "^3.0.0-alpha.4",
-    "@jupyterlab/testutils": "^2.0.0-alpha.4",
+    "@jupyterlab/apputils": "^2.0.0-beta.0",
+    "@jupyterlab/cells": "^2.0.0-beta.0",
+    "@jupyterlab/codemirror": "^2.0.0-beta.0",
+    "@jupyterlab/docregistry": "^2.0.0-beta.0",
+    "@jupyterlab/nbformat": "^2.0.0-beta.0",
+    "@jupyterlab/notebook": "^2.0.0-beta.0",
+    "@jupyterlab/observables": "^3.0.0-beta.0",
+    "@jupyterlab/testutils": "^2.0.0-beta.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
     "@lumino/messaging": "^1.3.3",

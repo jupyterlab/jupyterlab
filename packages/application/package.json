@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application",
-  "version": "2.0.0-alpha.4",
+  "version": "2.0.0-beta.0",
   "description": "JupyterLab - Application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,14 +35,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.0.0-alpha.4",
-    "@jupyterlab/coreutils": "^4.0.0-alpha.4",
-    "@jupyterlab/docregistry": "^2.0.0-alpha.4",
-    "@jupyterlab/rendermime": "^2.0.0-alpha.4",
-    "@jupyterlab/rendermime-interfaces": "^2.0.0-alpha.4",
-    "@jupyterlab/services": "^5.0.0-alpha.4",
-    "@jupyterlab/statedb": "^2.0.0-alpha.4",
-    "@jupyterlab/ui-components": "^2.0.0-alpha.4",
+    "@jupyterlab/apputils": "^2.0.0-beta.0",
+    "@jupyterlab/coreutils": "^4.0.0-beta.0",
+    "@jupyterlab/docregistry": "^2.0.0-beta.0",
+    "@jupyterlab/rendermime": "^2.0.0-beta.0",
+    "@jupyterlab/rendermime-interfaces": "^2.0.0-beta.0",
+    "@jupyterlab/services": "^5.0.0-beta.0",
+    "@jupyterlab/statedb": "^2.0.0-beta.0",
+    "@jupyterlab/ui-components": "^2.0.0-beta.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/application": "^1.7.7",
     "@lumino/commands": "^1.9.1",

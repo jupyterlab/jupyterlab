@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "5.0.0-alpha.4",
+  "version": "5.0.0-beta.0",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -41,11 +41,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^4.0.0-alpha.4",
-    "@jupyterlab/nbformat": "^2.0.0-alpha.4",
-    "@jupyterlab/observables": "^3.0.0-alpha.4",
-    "@jupyterlab/settingregistry": "^2.0.0-alpha.4",
-    "@jupyterlab/statedb": "^2.0.0-alpha.4",
+    "@jupyterlab/coreutils": "^4.0.0-beta.0",
+    "@jupyterlab/nbformat": "^2.0.0-beta.0",
+    "@jupyterlab/observables": "^3.0.0-beta.0",
+    "@jupyterlab/settingregistry": "^2.0.0-beta.0",
+    "@jupyterlab/statedb": "^2.0.0-beta.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
     "@lumino/disposable": "^1.3.4",
