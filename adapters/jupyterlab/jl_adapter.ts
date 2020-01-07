@@ -363,6 +363,9 @@ export abstract class JupyterLabWidgetAdapter
   }
 
   get_position_from_context_menu(): IRootPosition {
+    // Note: could also try using this.app.contextMenu.menu.contentNode position.
+    // Note: could add a guard on this.app.contextMenu.menu.isAttached
+
     // get the first node as it gives the most accurate approximation
     let leaf_node = this.app.contextMenuHitTest(() => true);
 
@@ -378,6 +381,7 @@ export abstract class JupyterLabWidgetAdapter
       top = event.clientY;
       event.stopPropagation();
     }
+
     return this.virtual_editor.coordsChar(
       {
         left: left,
@@ -387,8 +391,7 @@ export abstract class JupyterLabWidgetAdapter
     ) as IRootPosition;
   }
 
-  get_context_from_context_menu(): ICommandContext {
-    let root_position = this.get_position_from_context_menu();
+  get_context(root_position: IRootPosition): ICommandContext {
     let document = this.virtual_editor.document_at_root_position(root_position);
     let virtual_position = this.virtual_editor.root_position_to_virtual_position(
       root_position
@@ -402,6 +405,11 @@ export abstract class JupyterLabWidgetAdapter
       editor: this.virtual_editor,
       app: this.app
     };
+  }
+
+  get_context_from_context_menu(): ICommandContext {
+    let root_position = this.get_position_from_context_menu();
+    return this.get_context(root_position);
   }
 
   public create_tooltip(

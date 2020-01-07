@@ -41,7 +41,9 @@ class DocDispatcher implements CodeMirror.Doc {
   getCursor(start?: string): CodeMirror.Position {
     let cell = this.virtual_editor.notebook.activeCell;
     let active_editor = cell.editor as CodeMirrorEditor;
-    let cursor = active_editor.editor.getDoc().getCursor(start);
+    let cursor = active_editor.editor
+      .getDoc()
+      .getCursor(start) as IEditorPosition;
     return this.virtual_editor.transform_from_notebook_to_root(cell, cursor);
   }
 }
@@ -94,7 +96,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
 
   transform_from_notebook_to_root(
     cell: Cell,
-    position: CodeMirror.Position
+    position: IEditorPosition
   ): IRootPosition {
     // TODO: if cell is not known, refresh
     let shift = this.cell_to_corresponding_source_line.get(cell);
@@ -102,7 +104,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       throw Error('Cell not found in cell_line_map');
     }
     return {
-      ...position,
+      ...(position as CodeMirror.Position),
       line: position.line + shift
     } as IRootPosition;
   }
@@ -197,7 +199,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
         continue;
       }
 
-      return this.transform_from_notebook_to_root(cell, pos);
+      return this.transform_from_notebook_to_root(cell, pos as IEditorPosition);
     }
   }
 

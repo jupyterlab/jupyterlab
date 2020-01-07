@@ -109,7 +109,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
       let adapter = null;
       if (notebookTracker.has(current)) {
         let id = (current as NotebookPanel).id;
-        console.warn(id);
         adapter = notebook_adapters.get(id);
       } else if (fileEditorTracker.has(current)) {
         let id = (current as IDocumentWidget<FileEditor>).content.id;
@@ -162,6 +161,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     let command_manager = new FileEditorCommandManager(
       app,
+      palette,
       fileEditorTracker,
       'file_editor'
     );
@@ -189,6 +189,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     // TODO: PR bumping rank of clear all outputs instead?
     let notebook_command_manager = new NotebookCommandManager(
       app,
+      palette,
       notebookTracker,
       'notebook',
       // adding a very small number (epsilon) places the group just after 10th entry
