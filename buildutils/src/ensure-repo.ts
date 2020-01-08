@@ -30,7 +30,7 @@ let MISSING: Dict<string[]> = {
 
 let UNUSED: Dict<string[]> = {
   '@jupyterlab/apputils': ['@types/react'],
-  '@jupyterlab/application': ['font-awesome'],
+  '@jupyterlab/application': [],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/testutils': [
