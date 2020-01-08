@@ -177,14 +177,14 @@ export abstract class JupyterLabWidgetAdapter
   }
 
   // equivalent to triggering didClose and didOpen, as per syncing specification,
-  // but also reloads the connection
+  // but also reloads the connection; used during file rename (or when it was moved)
   protected reload_connection() {
     // ignore premature calls (before the editor was initialized)
     if (typeof this.virtual_editor === 'undefined') {
       return;
     }
 
-    // disconnect all existing connections
+    // disconnect all existing connections (and dispose adapters)
     this.connection_manager.close_all();
     // recreate virtual document using current path and language
     this.virtual_editor.create_virtual_document();

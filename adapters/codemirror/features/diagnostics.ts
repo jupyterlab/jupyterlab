@@ -346,6 +346,8 @@ export class Diagnostics extends CodeMirrorLSPFeature {
   remove(): void {
     // remove all markers
     this.remove_unused_diagnostic_markers(new Set());
+    this.diagnostics_db.clear();
+    diagnostics_panel.update();
     super.remove();
   }
 }
