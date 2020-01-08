@@ -9,14 +9,14 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
     // R magics (non-standalone: the R code will always be in the same, single R-namespace)
     //
     new RegExpForeignCodeExtractor({
-      language: 'R',
+      language: 'r',
       pattern: '^%%R( .*?)?\n([^]*)',
       extract_to_foreign: '$2',
       is_standalone: false,
       file_extension: 'R'
     }),
     new RegExpForeignCodeExtractor({
-      language: 'R',
+      language: 'r',
       pattern: '(^|\n)%R (.*)\n?',
       extract_to_foreign: '$2',
       is_standalone: false,
@@ -49,7 +49,7 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
     }),
     new RegExpForeignCodeExtractor({
       language: 'sh',
-      pattern: '^%%(sh)( .*?)?\n([^]*)',
+      pattern: '^%%(sh|bash)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: true,
       file_extension: 'sh'
