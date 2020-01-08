@@ -212,11 +212,11 @@ Copy the following to ``src/index.ts``:
        */
       createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
         let callback = () => {
-          NotebookActions.runAll(panel.content, context.session);
+          NotebookActions.runAll(panel.content, context.sessionContext);
         };
         let button = new ToolbarButton({
           className: 'myButton',
-          iconClassName: 'fa fa-fast-forward',
+          iconClass: 'fa fa-fast-forward',
           onClick: callback,
           tooltip: 'Run All'
         });
