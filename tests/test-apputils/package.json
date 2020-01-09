@@ -20,7 +20,7 @@
     "@lumino/coreutils": "^1.4.2",
     "@lumino/messaging": "^1.3.3",
     "@lumino/virtualdom": "^1.4.0",
-    "@lumino/widgets": "^1.9.7",
+    "@lumino/widgets": "^1.10.0",
     "chai": "^4.2.0",
     "jest": "^24.9.0",
     "jest-junit": "^10.0.0",

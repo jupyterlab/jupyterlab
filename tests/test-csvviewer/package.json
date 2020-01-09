@@ -21,8 +21,8 @@
     "@jupyterlab/services": "^5.0.0-beta.2",
     "@jupyterlab/testutils": "^2.0.0-beta.2",
     "@lumino/coreutils": "^1.4.2",
-    "@lumino/datagrid": "^0.3.5",
-    "@lumino/widgets": "^1.9.7",
+    "@lumino/datagrid": "^0.4.0",
+    "@lumino/widgets": "^1.10.0",
     "chai": "^4.2.0",
     "csv-spectrum": "~1.0.0",
     "simulate-event": "~1.4.0"
