@@ -1982,18 +1982,6 @@
   dependencies:
     "@lumino/algorithm" "^1.2.3"
 
-"@lumino/commands@^1.9.1":
-  version "1.9.1"
-  resolved "https://registry.yarnpkg.com/@lumino/commands/-/commands-1.9.1.tgz#0d01ccf2b48a7d5a44f0dc272072e4f2be9efb97"
-  integrity sha512-cC8GwzYQ/+Af8D/G37zrYQtv5vp8i/aSoIUAQ47DO6x21uitTedE3R02fpDT51nZx56P5i4VeJOX0+oXrbBlCA==
-  dependencies:
-    "@lumino/algorithm" "^1.2.3"
-    "@lumino/coreutils" "^1.4.2"
-    "@lumino/disposable" "^1.3.4"
-    "@lumino/domutils" "^1.1.7"
-    "@lumino/keyboard" "^1.1.6"
-    "@lumino/signaling" "^1.3.4"
-
 "@lumino/commands@^1.9.2":
   version "1.9.2"
   resolved "https://registry.yarnpkg.com/@lumino/commands/-/commands-1.9.2.tgz#91470db29b93f7b27906bd708f97b4ad6cb5d611"
