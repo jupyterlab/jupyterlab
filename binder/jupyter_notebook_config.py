@@ -5,6 +5,7 @@ lab_command = ' '.join([
     '--debug',
     '--no-browser',
     '--port={port}',
+    '--NotebookApp.ip=127.0.0.1',
     '--NotebookApp.token=""',
     '--NotebookApp.use_redirect_file=False',
     '--NotebookApp.base_url={base_url}lab-dev',
