@@ -2,7 +2,6 @@
 set -euo pipefail
 
 pip install -e .
-pip install -U notebook
 
 jlpm
 
