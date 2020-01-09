@@ -71,18 +71,11 @@ installed from local files, this option will instead default to `True`.
 Explicitly setting `dev-build` to `False` will ensure that the `production`
 build is used in all circumstances.
 
-<<<<<<< HEAD
-- `minimize`: This options controls whether your JS bundle is minified
-during the Webpack build, which helps to improve JupyterLab's overall
-performance. However, the minifier Webpack plugin is very memory
-intensive, so turning it off may help in low-memory environments.
-=======
 - `minimize`: This option controls whether your JS bundle is minified
 during the Webpack build, which helps to improve JupyterLab's overall
 performance. However, the minifier plugin used by Webpack is very memory
 intensive, so turning it off may help the build finish successfully in
 low-memory environments.
->>>>>>> 4335b0558... fixes to `buildFailureMsg`
 """
 
 class LabBuildApp(JupyterApp, DebugLogFileMixin):
