@@ -19,6 +19,7 @@ import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
 import { isJupyterOrg } from './query';
+import { iconStyle } from '@jupyterlab/ui-components/lib/style/icon';
 
 // TODO: Replace pagination with lazy loading of lower search results
 
@@ -343,7 +344,6 @@ export class CollapsibleSection extends React.Component<
     };
   }
 
-  // TODO: swtich to iconRenderer
   /**
    * Render the collapsible section using the virtual DOM.
    */
@@ -353,11 +353,7 @@ export class CollapsibleSection extends React.Component<
         <header>
           <ToolbarButtonComponent
             iconRenderer={this.state.isOpen ? caretDownIcon : caretRightIcon}
-            iconClass={
-              this.state.isOpen
-                ? caretDownIcon.class({ height: 'auto', width: '20px' })
-                : caretRightIcon.class({ height: 'auto', width: '20px' })
-            }
+            iconClass={iconStyle({ height: 'auto', width: '20px' })}
             onClick={() => {
               this.handleCollapse();
             }}

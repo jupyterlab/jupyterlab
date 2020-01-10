@@ -160,11 +160,8 @@ export namespace IRenderMime {
 
     /**
      * Set the icon renderer for the title.
-     *
-     * #### Notes
-     * A renderer is an object that supplies render and unrender functions.
      */
-    readonly iconRenderer?: VirtualElementPass.IRenderer;
+    readonly iconRenderer?: IJLIcon;
 
     /**
      * The file format for the file type ('text', 'base64', or 'json').
@@ -229,6 +226,20 @@ export namespace IRenderMime {
      * The default export.
      */
     readonly default: IExtension | ReadonlyArray<IExtension>;
+  }
+
+  /**
+   * The IJLIcon interface, which supplies element, render,
+   * and unrender functions
+   */
+  export interface IJLIcon extends VirtualElementPass.IRenderer {
+    /**
+     * Create an icon as a DOM element
+     *
+     * @returns A DOM element that contains an (inline) svg element
+     * that displays an icon
+     */
+    element: ({}) => HTMLElement;
   }
 
   /**

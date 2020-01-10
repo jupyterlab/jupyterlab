@@ -2113,7 +2113,7 @@ namespace Private {
         ...propsStyle
       });
     } else {
-      caretDownIcon.recycle({ container, ...propsStyle });
+      JLIcon.remove(container);
     }
   }
 }

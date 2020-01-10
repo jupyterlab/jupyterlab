@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { UUID } from '@lumino/coreutils';
+import { VirtualElementPass } from '@lumino/virtualdom';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -15,7 +16,7 @@ import blankSvg from '../../style/debug/blank.svg';
 
 const blankDiv = document.createElement('div');
 
-export class JLIcon {
+export class JLIcon implements JLIcon.IJLIcon {
   private static _debug: boolean = false;
   private static _instances = new Map<string, JLIcon>();
 
@@ -108,6 +109,20 @@ export class JLIcon {
     return <icon.react {...props} />;
   }
 
+  static remove(container: HTMLElement) {
+    // clean up all children
+    while (container.firstChild) {
+      container.firstChild.remove();
+    }
+
+    if (container.dataset?.iconClass) {
+      container.classList.remove(container.dataset.iconClass);
+    }
+    delete container.dataset?.iconClass;
+
+    return container;
+  }
+
   /**
    * Toggle icon debug from off-to-on, or vice-versa.
    *
@@ -128,10 +143,31 @@ export class JLIcon {
     JLIcon._instances.set(this._className, this);
   }
 
-  class({ className, ...propsStyle }: { className?: string } & IIconStyle) {
-    return classesDedupe(className, iconStyle(propsStyle));
-  }
-
+  /**
+   * Create an icon as a DOM element
+   *
+   * @param className - a string that will be used as the class
+   * of the container element. Overrides any existing class
+   *
+   * @param container - a preexisting DOM element that
+   * will be used as the container for the svg element
+   *
+   * @param label - text that will be displayed adjacent
+   * to the icon
+   *
+   * @param title - a tooltip for the icon
+   *
+   * @param tag - if container is not explicitly
+   * provided, this tag will be used when creating the container
+   *
+   * @propsStyle - style parameters that get passed to TypeStyle in
+   * order to generate a style class. The style class will be added
+   * to the icon container's classes, while the style itself will be
+   * applied to any svg elements within the container.
+   *
+   * @returns A DOM element that contains an (inline) svg element
+   * that displays an icon
+   */
   element({
     className,
     container,
@@ -177,25 +213,6 @@ export class JLIcon {
     container.appendChild(svgElement);
 
     return ret;
-  }
-
-  recycle({
-    className,
-    container,
-    ...propsStyle
-  }: { className?: string; container: HTMLElement } & IIconStyle): HTMLElement {
-    // clean up all children
-    while (container.firstChild) {
-      container.firstChild.remove();
-    }
-
-    // clean up any icon-related class names
-    const cls = this.class({ className, ...propsStyle });
-    if (cls) {
-      container.classList.remove(cls);
-    }
-
-    return container;
   }
 
   render(host: HTMLElement, props: JLIcon.IProps = {}): void {
@@ -268,10 +285,15 @@ export class JLIcon {
 
     if (className != null) {
       // override the container class with explicitly passed-in class + style class
-      container.className = classes(className, classStyle);
+      const classResolved = classes(className, classStyle);
+      container.className = classResolved;
+      container.dataset.iconClass = classResolved;
     } else if (classStyle) {
       // add the style class to the container class
       container.classList.add(classStyle);
+      container.dataset.iconClass = classStyle;
+    } else {
+      container.dataset.iconClass = '';
     }
 
     if (title != null) {
@@ -319,8 +341,9 @@ export class JLIcon {
             </React.Fragment>
           );
         } else {
+          const classResolved = classes(className, iconStyle(propsStyle));
           return (
-            <Tag className={classes(className, iconStyle(propsStyle))}>
+            <Tag className={classResolved} data-icon-class={classResolved}>
               {svgComponent}
               {label}
             </Tag>
@@ -345,6 +368,20 @@ export class JLIcon {
  * A namespace for JLIcon statics.
  */
 export namespace JLIcon {
+  /**
+   * The IJLIcon interface, which supplies element, render,
+   * and unrender functions
+   */
+  export interface IJLIcon extends VirtualElementPass.IRenderer {
+    /**
+     * Create an icon as a DOM element
+     *
+     * @returns A DOM element that contains an (inline) svg element
+     * that displays an icon
+     */
+    element: ({}) => HTMLElement;
+  }
+
   /**
    * The type of the JLIcon contructor params
    */

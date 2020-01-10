@@ -3,7 +3,7 @@
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { DockPanelSvg, JLIcon } from '@jupyterlab/ui-components';
+import { classes, DockPanelSvg } from '@jupyterlab/ui-components';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
@@ -30,6 +30,7 @@ import {
 } from '@lumino/widgets';
 
 import { JupyterFrontEnd } from './frontend';
+import { iconStyle } from '@jupyterlab/ui-components/lib/style/icon';
 
 /**
  * The class name added to AppShell instances.
@@ -773,12 +774,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     title.dataset = { ...title.dataset, id: widget.id };
 
     // set an appropriate style class for the iconRenderer
-    if (title.iconRenderer instanceof JLIcon) {
-      title.iconClass = title.iconRenderer.class({
-        className: title.iconClass,
-        justify: 'center',
-        kind: 'mainAreaTab'
-      });
+    if (title.iconRenderer) {
+      title.iconClass = classes(
+        title.iconClass,
+        iconStyle({ justify: 'center', kind: 'mainAreaTab' })
+      );
     }
 
     dock.addWidget(widget, { mode, ref });
@@ -1185,12 +1185,11 @@ namespace Private {
       title.dataset = { id: widget.id };
 
       // set an appropriate style class for the iconRenderer
-      if (title.iconRenderer instanceof JLIcon) {
-        title.iconClass = title.iconRenderer.class({
-          className: title.iconClass,
-          justify: 'center',
-          kind: 'sideBar'
-        });
+      if (title.iconRenderer) {
+        title.iconClass = classes(
+          title.iconClass,
+          iconStyle({ justify: 'center', kind: 'sideBar' })
+        );
       }
 
       this._refreshVisibility();
