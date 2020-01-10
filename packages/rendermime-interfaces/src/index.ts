@@ -159,9 +159,11 @@ export namespace IRenderMime {
     readonly iconLabel?: string;
 
     /**
-     * Set the icon renderer for the title.
+     * Set the icon renderer for the title. An icon renderer is any object
+     * with appropriate render and unrender methods. See JLIcon in
+     * @jupyterlab/ui-components for a reference implementation.
      */
-    readonly iconRenderer?: IJLIcon;
+    readonly iconRenderer?: VirtualElementPass.IRenderer;
 
     /**
      * The file format for the file type ('text', 'base64', or 'json').
@@ -226,20 +228,6 @@ export namespace IRenderMime {
      * The default export.
      */
     readonly default: IExtension | ReadonlyArray<IExtension>;
-  }
-
-  /**
-   * The IJLIcon interface, which supplies element, render,
-   * and unrender functions
-   */
-  export interface IJLIcon extends VirtualElementPass.IRenderer {
-    /**
-     * Create an icon as a DOM element
-     *
-     * @returns A DOM element that contains an (inline) svg element
-     * that displays an icon
-     */
-    element: ({}) => HTMLElement;
   }
 
   /**

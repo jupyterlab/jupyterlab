@@ -17,6 +17,8 @@ import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { VirtualElementPass } from '@lumino/virtualdom';
+
 import { DockLayout, Widget } from '@lumino/widgets';
 
 import { ISessionContext, Toolbar } from '@jupyterlab/apputils';
@@ -38,7 +40,6 @@ import {
   fileIcon,
   folderIcon,
   imageIcon,
-  JLIcon,
   jsonIcon,
   markdownIcon,
   notebookIcon,
@@ -1186,9 +1187,11 @@ export namespace DocumentRegistry {
     readonly iconLabel?: string;
 
     /**
-     * Set the icon renderer for the title.
+     * Set the icon renderer for the title. An icon renderer is any object
+     * with appropriate render and unrender methods. See JLIcon in
+     * @jupyterlab/ui-components for a reference implementation.
      */
-    readonly iconRenderer?: JLIcon.IJLIcon;
+    readonly iconRenderer?: VirtualElementPass.IRenderer;
 
     /**
      * The content type of the new file.

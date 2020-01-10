@@ -23,6 +23,7 @@ import { Contents } from '@jupyterlab/services';
 import {
   caretDownIcon,
   caretUpIcon,
+  classes,
   fileIcon,
   JLIcon
 } from '@jupyterlab/ui-components';
@@ -51,7 +52,10 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 import { FileBrowserModel } from './model';
-import { IIconStyle } from '@jupyterlab/ui-components/lib/style/icon';
+import {
+  iconStyle,
+  IIconStyle
+} from '@jupyterlab/ui-components/lib/style/icon';
 
 /**
  * The class name added to DirListing widget.
@@ -1834,20 +1838,24 @@ export namespace DirListing {
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      const iconProps: JLIcon.IProps = {
-        className: ITEM_ICON_CLASS,
-        container: iconContainer,
-        justify: 'center',
-        kind: 'listing'
-      };
+      iconContainer.className = classes(
+        ITEM_ICON_CLASS,
+        iconStyle({
+          justify: 'center',
+          kind: 'listing'
+        })
+      );
 
       // render the icon svg node
       if (fileType?.iconRenderer) {
-        fileType.iconRenderer.element(iconProps);
+        fileType.iconRenderer.render(iconContainer);
       } else if (fileType?.iconClass) {
-        JLIcon.getElement({ name: fileType.iconClass, ...iconProps });
+        JLIcon.getElement({
+          name: fileType.iconClass,
+          container: iconContainer
+        });
       } else {
-        fileIcon.element(iconProps);
+        fileIcon.render(iconContainer);
       }
 
       let hoverText = 'Name: ' + model.name;

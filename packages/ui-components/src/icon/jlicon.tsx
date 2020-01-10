@@ -4,7 +4,6 @@
 import { UUID } from '@lumino/coreutils';
 import { VirtualElementPass } from '@lumino/virtualdom';
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 import { Text } from '@jupyterlab/coreutils';
 
@@ -16,7 +15,7 @@ import blankSvg from '../../style/debug/blank.svg';
 
 const blankDiv = document.createElement('div');
 
-export class JLIcon implements JLIcon.IJLIcon {
+export class JLIcon implements VirtualElementPass.IRenderer {
   private static _debug: boolean = false;
   private static _instances = new Map<string, JLIcon>();
 
@@ -109,15 +108,20 @@ export class JLIcon implements JLIcon.IJLIcon {
     return <icon.react {...props} />;
   }
 
+  /**
+   * Remove the svg element from a container element
+   */
   static remove(container: HTMLElement) {
     // clean up all children
     while (container.firstChild) {
       container.firstChild.remove();
     }
 
+    // remove the icon class recorded in the dataset
     if (container.dataset?.iconClass) {
       container.classList.remove(container.dataset.iconClass);
     }
+    // remove icon class from the dataset (even if empty)
     delete container.dataset?.iconClass;
 
     return container;
@@ -215,11 +219,11 @@ export class JLIcon implements JLIcon.IJLIcon {
     return ret;
   }
 
-  render(host: HTMLElement, props: JLIcon.IProps = {}): void {
+  render(container: HTMLElement, props: JLIcon.IProps = {}): void {
     // TODO: move this title fix to the Lumino side
-    host.removeAttribute('title');
+    container.removeAttribute('title');
 
-    return ReactDOM.render(<this.react container={host} {...props} />, host);
+    this.element({ container, ...props });
   }
 
   resolveSvg(title?: string): HTMLElement | null {
@@ -266,12 +270,11 @@ export class JLIcon implements JLIcon.IJLIcon {
     this._uuid = UUID.uuid4();
   }
 
-  unrender(host: HTMLElement): void {
-    ReactDOM.unmountComponentAtNode(host);
-  }
+  unrender(container: HTMLElement): void {}
 
   protected _initContainer({
     container,
+
     className,
     propsStyle,
     title
@@ -280,9 +283,12 @@ export class JLIcon implements JLIcon.IJLIcon {
     className?: string;
     propsStyle?: IIconStyle;
     title?: string;
-  }) {
-    const classStyle = iconStyle(propsStyle);
+  }): string {
+    if (title != null) {
+      container.title = title;
+    }
 
+    const classStyle = iconStyle(propsStyle);
     if (className != null) {
       // override the container class with explicitly passed-in class + style class
       const classResolved = classes(className, classStyle);
@@ -296,9 +302,7 @@ export class JLIcon implements JLIcon.IJLIcon {
       container.dataset.iconClass = '';
     }
 
-    if (title != null) {
-      container.title = title;
-    }
+    return container.dataset.iconClass;
   }
 
   protected _initReact() {
@@ -368,20 +372,6 @@ export class JLIcon implements JLIcon.IJLIcon {
  * A namespace for JLIcon statics.
  */
 export namespace JLIcon {
-  /**
-   * The IJLIcon interface, which supplies element, render,
-   * and unrender functions
-   */
-  export interface IJLIcon extends VirtualElementPass.IRenderer {
-    /**
-     * Create an icon as a DOM element
-     *
-     * @returns A DOM element that contains an (inline) svg element
-     * that displays an icon
-     */
-    element: ({}) => HTMLElement;
-  }
-
   /**
    * The type of the JLIcon contructor params
    */
