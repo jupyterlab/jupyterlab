@@ -6,5 +6,30 @@
 .jp-DebuggerVariables-body {
   min-height: 24px;
   overflow: auto;
-  padding: 5px;
+}
+
+.jp-DebuggerVariables-body table {
+  width: 100%;
+}
+
+.jp-DebuggerVariables-body table thead {
+  background: var(--jp-layout-color4);
+}
+
+.jp-DebuggerVariables-body table tbody {
+  background: var(--jp-layout-color3);
+}
+
+.jp-DebuggerVariables-body table tbody tr td:first-child {
+  background: var(--jp-layout-color2);
+}
+
+.jp-DebuggerVariables-body table tbody td {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.jp-DebuggerVariables-body table tbody td.selected {
+  color: white;
+  background: var(--jp-brand-color1);
 }

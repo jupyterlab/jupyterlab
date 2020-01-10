@@ -475,6 +475,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     const reply = await this.session.sendRequest('variables', {
       variablesReference: scope.variablesReference
     });
+    console.log({ reply });
     return reply.body.variables;
   }
 

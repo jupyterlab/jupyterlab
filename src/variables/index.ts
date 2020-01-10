@@ -3,7 +3,9 @@
 
 import { Panel, Widget } from '@lumino/widgets';
 
-import { VariablesBody } from './body';
+// import { VariablesBody } from './body';
+
+import { VariablesBodyTable } from './table';
 
 import { VariablesHeader } from './header';
 
@@ -20,7 +22,7 @@ export class Variables extends Panel {
   constructor(options: Variables.IOptions) {
     super();
     this._header = new VariablesHeader();
-    this._body = new VariablesBody(options.model);
+    this._body = new VariablesBodyTable(options.model);
 
     this.addWidget(this._header);
     this.addWidget(this._body);
