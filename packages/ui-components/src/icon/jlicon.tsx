@@ -270,7 +270,9 @@ export class JLIcon implements VirtualElementPass.IRenderer {
     this._uuid = UUID.uuid4();
   }
 
-  unrender(container: HTMLElement): void {}
+  unrender(container: HTMLElement): void {
+    return;
+  }
 
   protected _initContainer({
     container,
