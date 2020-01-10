@@ -47,6 +47,10 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       .catch(console.warn);
 
     this.widget.context.session.kernelChanged.connect((_session, change) => {
+      if (!change.newValue) {
+        console.warn('LSP: kernel was shut down');
+        return;
+      }
       change.newValue.ready
         .then(async spec => {
           console.log(
