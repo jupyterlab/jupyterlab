@@ -1,6 +1,10 @@
 import { expect } from 'chai';
 import { TextMarker } from 'codemirror';
-import { Diagnostics, diagnostics_panel } from './diagnostics';
+import {
+  Diagnostics,
+  diagnostics_panel,
+  message_without_code
+} from './diagnostics';
 import {
   code_cell,
   FileEditorFeatureTestEnvironment,
@@ -253,5 +257,37 @@ describe('Diagnostics', () => {
 
       expect(marks_cell_1.length).to.equal(0);
     });
+  });
+});
+
+describe('message_without_code', () => {
+  it('Removes redundant code', () => {
+    let message = message_without_code({
+      source: 'pycodestyle',
+      range: {
+        start: { line: 4, character: 0 },
+        end: { line: 4, character: 5 }
+      },
+      message: 'W293 blank line contains whitespace',
+      code: 'W293',
+      severity: 2
+    });
+    expect(message).to.be.equal('blank line contains whitespace');
+  });
+
+  it('Keeps messages without code intact', () => {
+    let message = message_without_code({
+      source: 'pyflakes',
+      range: {
+        start: { line: 1, character: 0 },
+        end: { line: 1, character: 2 }
+      },
+      // a message starting from "undefined" is particularly tricky as
+      // a lazy implementation can have a coercion of undefined "code"
+      // to a string "undefined" which would wrongly chop off "undefined" from message
+      message: "undefined name 'x'",
+      severity: 1
+    });
+    expect(message).to.be.equal("undefined name 'x'");
   });
 });

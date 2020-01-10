@@ -351,3 +351,16 @@ export class Diagnostics extends CodeMirrorLSPFeature {
     super.remove();
   }
 }
+
+export function message_without_code(diagnostic: lsProtocol.Diagnostic) {
+  let message = diagnostic.message;
+  let code_str = '' + diagnostic.code;
+  if (
+    typeof diagnostic.code !== 'undefined' &&
+    diagnostic.code !== '' &&
+    message.startsWith(code_str + '')
+  ) {
+    return message.slice(code_str.length).trim();
+  }
+  return message;
+}

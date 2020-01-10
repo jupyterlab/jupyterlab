@@ -10,6 +10,7 @@ import { VirtualDocument } from '../../../virtual/document';
 import '../../../../style/diagnostics_listing.css';
 import { Cell } from '@jupyterlab/cells';
 import { diagnosticSeverityNames } from '../../../lsp';
+import { message_without_code } from './diagnostics';
 
 /**
  * Diagnostic which is localized at a specific editor (cell) within a notebook
@@ -199,11 +200,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
 
       let cm_editor = data.editor;
 
-      let message = diagnostic.message;
-      let code = '' + diagnostic.code;
-      if (message.startsWith(code)) {
-        message = message.slice(code.length);
-      }
+      let message = message_without_code(diagnostic);
       let severity = diagnostic.severity || 1;
 
       return (
