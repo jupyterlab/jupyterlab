@@ -3,9 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as webpack from 'webpack';
+import DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
 import * as fs from 'fs-extra';
-var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
+import * as webpack from 'webpack';
 
 export namespace WPPlugin {
   /**
@@ -185,5 +185,7 @@ export namespace WPPlugin {
         }
       );
     }
+
+    options: DuplicatePackageCheckerPlugin.Options;
   }
 }

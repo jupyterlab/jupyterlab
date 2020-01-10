@@ -2719,6 +2719,13 @@
   dependencies:
     "@types/domhandler" "*"
 
+"@types/duplicate-package-checker-webpack-plugin@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@types/duplicate-package-checker-webpack-plugin/-/duplicate-package-checker-webpack-plugin-2.1.0.tgz#02f030a6432274b16529e434d5ea696024f363b2"
+  integrity sha512-lS1AUw32mjdqhObsY2lxzo5qWeFnMZmhAVmh+rHbXdsxIE8cFMIA37NtIDXxkLhFLvF1ua/C5rcMsGumhpGFuA==
+  dependencies:
+    "@types/webpack" "*"
+
 "@types/estree@*":
   version "0.0.41"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.41.tgz#fd90754150b57432b72bf560530500597ff04421"
