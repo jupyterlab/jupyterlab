@@ -102,7 +102,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
    * @param fn - the callback to execute in update lock
    */
   public async with_update_lock(fn: Function) {
-    await until_ready(() => this.can_update(), 10, 10).then(() => {
+    await until_ready(() => this.can_update(), 12, 10).then(() => {
       try {
         this.update_lock = true;
         fn();

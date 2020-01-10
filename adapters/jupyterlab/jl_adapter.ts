@@ -210,7 +210,7 @@ export abstract class JupyterLabWidgetAdapter
 
     await this.virtual_editor.update_documents().then(() => {
       // refresh the document on the LSP server
-      this.document_changed(virtual_document);
+      this.document_changed(virtual_document, true);
       console.log(
         'LSP: virtual document(s) for',
         this.document_path,
@@ -229,7 +229,7 @@ export abstract class JupyterLabWidgetAdapter
     });
   }
 
-  document_changed(virtual_document: VirtualDocument) {
+  document_changed(virtual_document: VirtualDocument, is_init = false) {
     // TODO only send the difference, using connection.sendSelectiveChange()
     let connection = this.connection_manager.connections.get(
       virtual_document.id_path
@@ -251,18 +251,22 @@ export abstract class JupyterLabWidgetAdapter
       'has changed sending update'
     );
     connection.sendFullTextChange(virtual_document.value);
-    // guarantee that the virtual editor won't perform an update of the virtual documents while
-    // the changes are recorded...
-    // TODO this is not ideal - why it solves the problem of some errors,
-    //  it introduces an unnecessary delay. A better way could be to invalidate some of the updates when a new one comes in.
-    //  but maybe not every one (then the outdated state could be kept for too long fo a user who writes very quickly)
-    //  also we would not want to invalidate the updates for the purpose of autocompletion (the trigger characters)
-    this.virtual_editor
-      .with_update_lock(async () => {
-        await adapter.updateAfterChange();
-      })
-      .then()
-      .catch(console.warn);
+    // the first change (initial) is not propagated to features,
+    // as it has no associated CodeMirrorChange object
+    if (!is_init) {
+      // guarantee that the virtual editor won't perform an update of the virtual documents while
+      // the changes are recorded...
+      // TODO this is not ideal - why it solves the problem of some errors,
+      //  it introduces an unnecessary delay. A better way could be to invalidate some of the updates when a new one comes in.
+      //  but maybe not every one (then the outdated state could be kept for too long fo a user who writes very quickly)
+      //  also we would not want to invalidate the updates for the purpose of autocompletion (the trigger characters)
+      this.virtual_editor
+        .with_update_lock(async () => {
+          await adapter.updateAfterChange();
+        })
+        .then()
+        .catch(console.warn);
+    }
   }
 
   private async connect_adapter(
