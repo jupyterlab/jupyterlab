@@ -224,7 +224,7 @@ export abstract class JupyterLabWidgetAdapter
 
     await this.virtual_editor.update_documents().then(() => {
       // refresh the document on the LSP server
-      this.document_changed(virtual_document, true);
+      this.document_changed(virtual_document, virtual_document, true);
       console.log(
         'LSP: virtual document(s) for',
         this.document_path,
@@ -243,7 +243,11 @@ export abstract class JupyterLabWidgetAdapter
     });
   }
 
-  document_changed(virtual_document: VirtualDocument, is_init = false) {
+  document_changed(
+    virtual_document: VirtualDocument,
+    document: VirtualDocument,
+    is_init = false
+  ) {
     // TODO only send the difference, using connection.sendSelectiveChange()
     let connection = this.connection_manager.connections.get(
       virtual_document.id_path
