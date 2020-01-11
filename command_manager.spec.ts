@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { ContextMenuCommandManager } from './command_manager';
+import { ContextCommandManager, ICommandContext } from './command_manager';
 import {
   CommandEntryPoint,
   IFeatureCommand
@@ -7,7 +7,7 @@ import {
 import { JupyterLabWidgetAdapter } from './adapters/jupyterlab/jl_adapter';
 
 describe('ContextMenuCommandManager', () => {
-  class ManagerImplementation extends ContextMenuCommandManager {
+  class ManagerImplementation extends ContextCommandManager {
     public get_rank(command: IFeatureCommand): number {
       return super.get_rank(command);
     }
@@ -16,6 +16,10 @@ describe('ContextMenuCommandManager', () => {
     selector: string;
 
     get current_adapter(): JupyterLabWidgetAdapter {
+      return undefined;
+    }
+
+    context_from_active_document(): ICommandContext {
       return undefined;
     }
   }
@@ -34,14 +38,14 @@ describe('ContextMenuCommandManager', () => {
 
   describe('#get_rank()', () => {
     it('uses in-group (relative) positioning by default', () => {
-      manager = new ManagerImplementation(null, null, null, 0, 5);
+      manager = new ManagerImplementation(null, null, null, null, 0, 5);
       let rank = manager.get_rank(base_command);
       expect(rank).to.equal(0);
 
       rank = manager.get_rank({ ...base_command, rank: 1 });
       expect(rank).to.equal(1 / 5);
 
-      manager = new ManagerImplementation(null, null, null, 1, 5);
+      manager = new ManagerImplementation(null, null, null, null, 1, 5);
 
       rank = manager.get_rank({ ...base_command, rank: 1 });
       expect(rank).to.equal(1 + 1 / 5);
@@ -49,7 +53,7 @@ describe('ContextMenuCommandManager', () => {
   });
 
   it('respects is_rank_relative value', () => {
-    manager = new ManagerImplementation(null, null, null, 0, 5);
+    manager = new ManagerImplementation(null, null, null, null, 0, 5);
 
     let rank = manager.get_rank({
       ...base_command,

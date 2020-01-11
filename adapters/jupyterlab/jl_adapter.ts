@@ -177,14 +177,14 @@ export abstract class JupyterLabWidgetAdapter
   }
 
   // equivalent to triggering didClose and didOpen, as per syncing specification,
-  // but also reloads the connection
+  // but also reloads the connection; used during file rename (or when it was moved)
   protected reload_connection() {
     // ignore premature calls (before the editor was initialized)
     if (typeof this.virtual_editor === 'undefined') {
       return;
     }
 
-    // disconnect all existing connections
+    // disconnect all existing connections (and dispose adapters)
     this.connection_manager.close_all();
     // recreate virtual document using current path and language
     this.virtual_editor.create_virtual_document();
@@ -210,7 +210,7 @@ export abstract class JupyterLabWidgetAdapter
 
     await this.virtual_editor.update_documents().then(() => {
       // refresh the document on the LSP server
-      this.document_changed(virtual_document);
+      this.document_changed(virtual_document, true);
       console.log(
         'LSP: virtual document(s) for',
         this.document_path,
@@ -229,7 +229,7 @@ export abstract class JupyterLabWidgetAdapter
     });
   }
 
-  document_changed(virtual_document: VirtualDocument) {
+  document_changed(virtual_document: VirtualDocument, is_init = false) {
     // TODO only send the difference, using connection.sendSelectiveChange()
     let connection = this.connection_manager.connections.get(
       virtual_document.id_path
@@ -251,18 +251,22 @@ export abstract class JupyterLabWidgetAdapter
       'has changed sending update'
     );
     connection.sendFullTextChange(virtual_document.value);
-    // guarantee that the virtual editor won't perform an update of the virtual documents while
-    // the changes are recorded...
-    // TODO this is not ideal - why it solves the problem of some errors,
-    //  it introduces an unnecessary delay. A better way could be to invalidate some of the updates when a new one comes in.
-    //  but maybe not every one (then the outdated state could be kept for too long fo a user who writes very quickly)
-    //  also we would not want to invalidate the updates for the purpose of autocompletion (the trigger characters)
-    this.virtual_editor
-      .with_update_lock(async () => {
-        await adapter.updateAfterChange();
-      })
-      .then()
-      .catch(console.warn);
+    // the first change (initial) is not propagated to features,
+    // as it has no associated CodeMirrorChange object
+    if (!is_init) {
+      // guarantee that the virtual editor won't perform an update of the virtual documents while
+      // the changes are recorded...
+      // TODO this is not ideal - why it solves the problem of some errors,
+      //  it introduces an unnecessary delay. A better way could be to invalidate some of the updates when a new one comes in.
+      //  but maybe not every one (then the outdated state could be kept for too long fo a user who writes very quickly)
+      //  also we would not want to invalidate the updates for the purpose of autocompletion (the trigger characters)
+      this.virtual_editor
+        .with_update_lock(async () => {
+          await adapter.updateAfterChange();
+        })
+        .then()
+        .catch(console.warn);
+    }
   }
 
   private async connect_adapter(
@@ -363,6 +367,9 @@ export abstract class JupyterLabWidgetAdapter
   }
 
   get_position_from_context_menu(): IRootPosition {
+    // Note: could also try using this.app.contextMenu.menu.contentNode position.
+    // Note: could add a guard on this.app.contextMenu.menu.isAttached
+
     // get the first node as it gives the most accurate approximation
     let leaf_node = this.app.contextMenuHitTest(() => true);
 
@@ -378,6 +385,7 @@ export abstract class JupyterLabWidgetAdapter
       top = event.clientY;
       event.stopPropagation();
     }
+
     return this.virtual_editor.coordsChar(
       {
         left: left,
@@ -387,8 +395,7 @@ export abstract class JupyterLabWidgetAdapter
     ) as IRootPosition;
   }
 
-  get_context_from_context_menu(): ICommandContext {
-    let root_position = this.get_position_from_context_menu();
+  get_context(root_position: IRootPosition): ICommandContext {
     let document = this.virtual_editor.document_at_root_position(root_position);
     let virtual_position = this.virtual_editor.root_position_to_virtual_position(
       root_position
@@ -402,6 +409,11 @@ export abstract class JupyterLabWidgetAdapter
       editor: this.virtual_editor,
       app: this.app
     };
+  }
+
+  get_context_from_context_menu(): ICommandContext {
+    let root_position = this.get_position_from_context_menu();
+    return this.get_context(root_position);
   }
 
   public create_tooltip(

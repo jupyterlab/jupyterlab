@@ -67,6 +67,10 @@ export class LSPConnector extends DataConnector<
     this.options = options;
   }
 
+  protected get _has_kernel(): boolean {
+    return this.options.session.kernel !== null;
+  }
+
   protected get _kernel_language(): string {
     return this.options.session.kernel.info.language_info.name;
   }
@@ -127,6 +131,7 @@ export class LSPConnector extends DataConnector<
 
     try {
       if (
+        this._has_kernel &&
         this._kernel_connector &&
         // TODO: this would be awesome if we could connect to rpy2 for R suggestions in Python,
         //  but this is not the job of this extension; nevertheless its better to keep this in
@@ -157,10 +162,11 @@ export class LSPConnector extends DataConnector<
         virtual_cursor,
         document
       ).catch(e => {
-        console.log(e);
+        console.warn('LSP: hint failed', e);
         return this.fallback_connector.fetch(request);
       });
     } catch (e) {
+      console.warn('LSP: kernel completions failed', e);
       return this.fallback_connector.fetch(request);
     }
   }
