@@ -25,6 +25,10 @@ export class Completion extends CodeMirrorLSPFeature {
     //  requires an up-to-date virtual document on the LSP side, so we need to wait for sync.
     let last_character = this.extract_last_character(change);
     if (this.completionCharacters.indexOf(last_character) > -1) {
+      this.virtual_editor.console.log(
+        'Will invoke completer after',
+        last_character
+      );
       this.jupyterlab_components.invoke_completer(
         CompletionTriggerKind.TriggerCharacter
       );

@@ -76,6 +76,7 @@ export class Signature extends CodeMirrorLSPFeature {
   private handleSignature(response: lsProtocol.SignatureHelp) {
     this.jupyterlab_components.remove_tooltip();
 
+    this.virtual_editor.console.log('Signature received', response);
     if (!this.signature_character || !response || !response.signatures.length) {
       return;
     }
@@ -88,11 +89,19 @@ export class Signature extends CodeMirrorLSPFeature {
     let language = this.get_language_at(editor_position, cm_editor);
     let markup = this.get_markup_for_signature_help(response, language);
 
-    this.jupyterlab_components.create_tooltip(
+    this.virtual_editor.console.log(
+      'Signature will be shown',
+      language,
+      markup,
+      root_position
+    );
+
+    let tooltip = this.jupyterlab_components.create_tooltip(
       markup,
       cm_editor,
       editor_position
     );
+    tooltip.addClass('lsp-signature-help');
   }
 
   get signatureCharacters() {
@@ -114,6 +123,10 @@ export class Signature extends CodeMirrorLSPFeature {
       this.signature_character = root_position;
       let virtual_position = this.virtual_editor.root_position_to_virtual_position(
         root_position
+      );
+      this.virtual_editor.console.log(
+        'Signature will be requested for',
+        virtual_position
       );
       this.connection.getSignatureHelp(virtual_position);
     }

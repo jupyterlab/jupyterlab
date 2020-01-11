@@ -26,7 +26,11 @@ export class CodeMirrorAdapter {
     for (let feature of features) {
       feature.register();
       if (!feature.is_registered) {
-        console.warn('The feature ', feature, 'was not registered properly');
+        this.editor.console.warn(
+          'The feature ',
+          feature,
+          'was not registered properly'
+        );
       }
       this.features.set(feature.name, feature);
     }
@@ -63,8 +67,8 @@ export class CodeMirrorAdapter {
       }
       return true;
     } catch (e) {
-      console.log('updateAfterChange failure');
-      console.error(e);
+      this.editor.console.log('updateAfterChange failure');
+      this.editor.console.error(e);
     }
     this.invalidateLastChange();
   }

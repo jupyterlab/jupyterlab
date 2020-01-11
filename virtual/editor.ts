@@ -10,6 +10,7 @@ import {
 } from '../positioning';
 import { until_ready } from '../utils';
 import { Signal } from '@phosphor/signaling';
+import { EditorLogConsole, create_console } from './console';
 
 export type CodeMirrorHandler = (instance: any, ...args: any[]) => void;
 type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
@@ -33,6 +34,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
    * Whether the editor reflects an interface with multiple cells (such as a notebook)
    */
   has_cells: boolean;
+  console: EditorLogConsole;
 
   public constructor(
     protected language: () => string,
@@ -45,6 +47,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
     this.create_virtual_document();
     this.documents_updated = new Signal<VirtualEditor, VirtualDocument>(this);
     this.documents_updated.connect(this.on_updated.bind(this));
+    this.console = create_console('browser');
   }
 
   create_virtual_document() {
@@ -67,7 +70,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
     try {
       root_document.close_expired_documents();
     } catch (e) {
-      console.warn('LSP: Failed to close expired documents');
+      this.console.warn('LSP: Failed to close expired documents');
     }
   }
 
@@ -102,6 +105,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
    * @param fn - the callback to execute in update lock
    */
   public async with_update_lock(fn: Function) {
+    this.console.log('Will enter update lock with', fn);
     await until_ready(() => this.can_update(), 12, 10).then(() => {
       try {
         this.update_lock = true;
@@ -129,7 +133,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
           this.virtual_document.maybe_emit_changed();
           resolve();
         } catch (e) {
-          console.warn('Documents update failed:', e);
+          this.console.warn('Documents update failed:', e);
           reject(e);
         } finally {
           this.is_update_in_progress = false;
@@ -189,7 +193,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
       try {
         return handler(this, ...args);
       } catch (error) {
-        console.warn(
+        this.console.warn(
           'Wrapped handler (which should accept a CodeMirror Editor instance) failed',
           { error, instance, args, this: this }
         );
