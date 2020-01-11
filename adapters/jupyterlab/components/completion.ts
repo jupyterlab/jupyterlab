@@ -218,7 +218,7 @@ export class LSPConnector extends DataConnector<
       // sortText: "amean"
       let text = match.insertText ? match.insertText : match.label;
 
-      if (text.startsWith(token.value)) {
+      if (text.toLowerCase().startsWith(token.value.toLowerCase())) {
         all_non_prefixed = false;
       }
 
@@ -282,7 +282,7 @@ export class LSPConnector extends DataConnector<
     if (lsp.start > kernel.start) {
       const cursor = editor.getCursorPosition();
       const line = editor.getLine(cursor.line);
-      prefix = line.substring(kernel.start, kernel.end);
+      prefix = line.substring(cursor.column - 1, cursor.column);
       console.log('will remove prefix from kernel response:', prefix);
     }
 
