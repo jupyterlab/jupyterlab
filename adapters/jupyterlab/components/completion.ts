@@ -68,7 +68,10 @@ export class LSPConnector extends DataConnector<
   }
 
   protected get _has_kernel(): boolean {
-    return this.options.session && this.options.session.kernel !== null;
+    return (
+      typeof this.options.session !== 'undefined' &&
+      this.options.session.kernel !== null
+    );
   }
 
   protected get _kernel_language(): string {

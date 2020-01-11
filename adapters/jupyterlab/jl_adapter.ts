@@ -6,7 +6,7 @@ import { CodeJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/
 import { PositionConverter } from '../../converter';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { FreeTooltip } from './components/free_tooltip';
@@ -125,6 +125,7 @@ export abstract class JupyterLabWidgetAdapter
   ) {
     this.status_message = new StatusMessage();
     this.widget.context.pathChanged.connect(this.reload_connection.bind(this));
+    this.widget.context.saveState.connect(this.on_save_state.bind(this));
     this.invoke_command = invoke;
     this.document_connected = new Signal(this);
     this.adapters = new Map();
@@ -192,6 +193,19 @@ export abstract class JupyterLabWidgetAdapter
     this.connect_document(this.virtual_editor.virtual_document).catch(
       console.warn
     );
+  }
+
+  protected on_save_state(context: any, state: DocumentRegistry.SaveState) {
+    // ignore premature calls (before the editor was initialized)
+    if (typeof this.virtual_editor === 'undefined') {
+      return;
+    }
+
+    if (state === 'completed') {
+      for (let connection of this.connection_manager.connections.values()) {
+        connection.sendSaved();
+      }
+    }
   }
 
   abstract find_ce_editor(cm_editor: CodeMirror.Editor): CodeEditor.IEditor;
