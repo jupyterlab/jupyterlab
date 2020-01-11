@@ -68,7 +68,7 @@ export class LSPConnector extends DataConnector<
   }
 
   protected get _has_kernel(): boolean {
-    return this.options.session.kernel !== null;
+    return this.options.session && this.options.session.kernel !== null;
   }
 
   protected get _kernel_language(): string {
@@ -131,8 +131,8 @@ export class LSPConnector extends DataConnector<
 
     try {
       if (
-        this._has_kernel &&
         this._kernel_connector &&
+        this._has_kernel &&
         // TODO: this would be awesome if we could connect to rpy2 for R suggestions in Python,
         //  but this is not the job of this extension; nevertheless its better to keep this in
         //  mind to avoid introducing design decisions which would make this impossible
