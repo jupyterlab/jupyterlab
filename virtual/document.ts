@@ -29,7 +29,7 @@ interface IVirtualLine {
   editor: CodeMirror.Editor;
 }
 
-interface IVirtualDocumentBlock {
+export interface IVirtualDocumentBlock {
   /**
    * Line corresponding to the block in the entire foreign document
    */

@@ -1,5 +1,6 @@
 import { IExtractedCode, IForeignCodeExtractor } from './types';
 import { position_at_offset } from '../positioning';
+import { replacer } from '../magics/overrides';
 
 export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
   options: RegExpForeignCodeExtractor.IOptions;
@@ -39,6 +40,7 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
       let matched_string = match[0];
       let foreign_code_fragment = matched_string.replace(
         this.expression,
+        // @ts-ignore
         this.options.extract_to_foreign
       );
 
@@ -110,7 +112,7 @@ namespace RegExpForeignCodeExtractor {
      * for the use in virtual document of the foreign language.
      * For the R example this should be '$3'
      */
-    extract_to_foreign: string;
+    extract_to_foreign: string | replacer;
     /**
      * String boolean if everything (true, default) or nothing (false) should be kept in the host document.
      *

@@ -1,4 +1,6 @@
-export function parse_r_args(args: string[], content_position: number) {
+export const RPY2_MAX_ARGS = 10;
+
+export function extract_r_args(args: string[], content_position: number) {
   let inputs = [];
   let outputs = [];
   let others = [];
@@ -15,7 +17,19 @@ export function parse_r_args(args: string[], content_position: number) {
       others.push('-' + arg + ' ' + variable);
     }
   }
-  let rest = args.slice(content_position, content_position + 1);
+  return {
+    inputs: inputs,
+    outputs: outputs,
+    rest: args.slice(content_position, content_position + 1),
+    others: others
+  };
+}
+
+export function parse_r_args(args: string[], content_position: number) {
+  let { inputs, outputs, rest, others } = extract_r_args(
+    args,
+    content_position
+  );
   let input_variables = inputs.join(', ');
   if (input_variables) {
     input_variables = ', ' + input_variables;

@@ -1,7 +1,7 @@
 import { IOverridesRegistry } from './overrides';
 import {
   parse_r_args,
-  rpy2_args_pattern,
+  rpy2_args_pattern, RPY2_MAX_ARGS,
   rpy2_reverse_pattern,
   rpy2_reverse_replacement
 } from './rpy2';
@@ -47,7 +47,7 @@ export const language_specific_overrides: IOverridesRegistry = {
       },
       {
         // support up to 10 arguments
-        pattern: '%R' + rpy2_args_pattern(10) + '(.*)(\n)?',
+        pattern: '%R' + rpy2_args_pattern(RPY2_MAX_ARGS) + '(.*)(\n)?',
         replacement: (match, ...args) => {
           let r = parse_r_args(args, -4);
           return `${r.outputs}rpy2.ipython.rmagic.RMagics.R("${r.content}", "${r.others}"${r.inputs})`;
@@ -82,7 +82,7 @@ export const language_specific_overrides: IOverridesRegistry = {
       // rpy2 extension R magic - this should likely go as an example to the user documentation, rather than being a default
       //   only handles simple one input - one output case
       {
-        pattern: '^%%R' + rpy2_args_pattern(10) + '(\n)?([\\s\\S]*)',
+        pattern: '^%%R' + rpy2_args_pattern(RPY2_MAX_ARGS) + '(\n)?([\\s\\S]*)',
         replacement: (match, ...args) => {
           let r = parse_r_args(args, -3);
           return `${r.outputs}rpy2.ipython.rmagic.RMagics.R("""${r.content}""", "${r.others}"${r.inputs})`;

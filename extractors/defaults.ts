@@ -1,5 +1,20 @@
 import { IForeignCodeExtractorsRegistry } from './types';
 import { RegExpForeignCodeExtractor } from './regexp';
+import {
+  extract_r_args,
+  rpy2_args_pattern,
+  RPY2_MAX_ARGS
+} from '../magics/rpy2';
+
+function rpy2_replacer(match: string, ...args: string[]) {
+  let r = extract_r_args(args, -3);
+  // define dummy input variables using empty data frames
+  let inputs = r.inputs.map(i => i + ' <- data.frame()').join('\n');
+  if (inputs !== '') {
+    inputs += '\n';
+  }
+  return `${inputs}${r.rest}`;
+}
 
 // TODO: make the regex code extractors configurable
 export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
@@ -10,15 +25,15 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
     //
     new RegExpForeignCodeExtractor({
       language: 'r',
-      pattern: '^%%R( .*?)?\n([^]*)',
-      extract_to_foreign: '$2',
+      pattern: '^%%R' + rpy2_args_pattern(RPY2_MAX_ARGS) + '\n([^]*)',
+      extract_to_foreign: rpy2_replacer,
       is_standalone: false,
       file_extension: 'R'
     }),
     new RegExpForeignCodeExtractor({
       language: 'r',
-      pattern: '(^|\n)%R (.*)\n?',
-      extract_to_foreign: '$2',
+      pattern: '(?:^|\n)%R' + rpy2_args_pattern(RPY2_MAX_ARGS) + ' (.*)\n?',
+      extract_to_foreign: rpy2_replacer,
       is_standalone: false,
       file_extension: 'R'
     }),
