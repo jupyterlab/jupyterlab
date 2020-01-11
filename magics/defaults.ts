@@ -1,7 +1,8 @@
 import { IOverridesRegistry } from './overrides';
 import {
   parse_r_args,
-  rpy2_args_pattern, RPY2_MAX_ARGS,
+  rpy2_args_pattern,
+  RPY2_MAX_ARGS,
   rpy2_reverse_pattern,
   rpy2_reverse_replacement
 } from './rpy2';
