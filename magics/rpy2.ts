@@ -7,9 +7,9 @@ export function parse_r_args(args: string[], content_position: number) {
     let variable = args[i + 1];
     if (typeof arg === 'undefined') {
       break;
-    } else if (arg === 'i') {
+    } else if (arg === 'i' || arg === '-input') {
       inputs.push(variable);
-    } else if (arg === 'o') {
+    } else if (arg === 'o' || arg === '-output') {
       outputs.push(variable);
     } else {
       others.push('-' + arg + ' ' + variable);
@@ -80,4 +80,8 @@ export function rpy2_reverse_replacement(match: string, ...args: string[]) {
     other: other_args,
     contents: contents
   };
+}
+
+export function rpy2_args_pattern(max_n: number) {
+  return '(?: -(\\S+) (\\S+))?'.repeat(max_n);
 }

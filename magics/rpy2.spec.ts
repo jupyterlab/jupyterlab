@@ -32,7 +32,7 @@ describe('rpy2 IPython overrides', () => {
     let line_magics_map = new LineMagicsMap(
       language_specific_overrides['python'].line_magics
     );
-    it('inputs and outputs', () => {
+    it('works with the short form arguments, inputs and outputs', () => {
       let line = '%R -i x';
       let override = line_magics_map.override_for(line);
       expect(override).to.equal('rpy2.ipython.rmagic.RMagics.R("", "", x)');
@@ -71,6 +71,23 @@ describe('rpy2 IPython overrides', () => {
       override = line_magics_map.override_for(line);
       expect(override).to.equal(
         'y, w = rpy2.ipython.rmagic.RMagics.R(" command()", "", x, z)'
+      );
+      reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal(line);
+    });
+
+    it('works with the long form arguments', () => {
+      let line = '%R --input x';
+      let override = line_magics_map.override_for(line);
+      expect(override).to.equal('rpy2.ipython.rmagic.RMagics.R("", "", x)');
+      let reverse = line_magics_map.reverse.override_for(override);
+      // TODO: make this preserve the long form
+      expect(reverse).to.equal('%R -i x');
+
+      line = '%R --width 800 --height 400 command()';
+      override = line_magics_map.override_for(line);
+      expect(override).to.equal(
+        'rpy2.ipython.rmagic.RMagics.R(" command()", "--width 800 --height 400")'
       );
       reverse = line_magics_map.reverse.override_for(override);
       expect(reverse).to.equal(line);
