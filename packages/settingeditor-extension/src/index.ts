@@ -6,7 +6,8 @@
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  ILabStatus
 } from '@jupyterlab/application';
 import {
   ICommandPalette,
@@ -22,6 +23,7 @@ import {
 } from '@jupyterlab/settingeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { settingsIcon } from '@jupyterlab/ui-components';
+import { IDisposable } from '@lumino/disposable';
 
 /**
  * The command IDs used by the setting editor.
@@ -45,7 +47,8 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     IEditorServices,
     IStateDB,
     IRenderMimeRegistry,
-    ICommandPalette
+    ICommandPalette,
+    ILabStatus
   ],
   autoStart: true,
   provides: ISettingEditorTracker,
@@ -62,7 +65,8 @@ function activate(
   editorServices: IEditorServices,
   state: IStateDB,
   rendermime: IRenderMimeRegistry,
-  palette: ICommandPalette
+  palette: ICommandPalette,
+  status: ILabStatus
 ): ISettingEditorTracker {
   const { commands, shell } = app;
   const namespace = 'setting-editor';
@@ -104,12 +108,26 @@ function activate(
         when
       });
 
+      let disposable: IDisposable | null = null;
       // Notify the command registry when the visibility status of the setting
       // editor's commands change. The setting editor toolbar listens for this
       // signal from the command registry.
       editor.commandsChanged.connect((sender: any, args: string[]) => {
         args.forEach(id => {
           commands.notifyCommandChanged(id);
+        });
+        if (editor.canSaveRaw) {
+          if (!disposable) {
+            disposable = status.setDirty();
+          }
+        } else if (disposable) {
+          disposable.dispose();
+          disposable = null;
+        }
+        editor.disposed.connect(() => {
+          if (disposable) {
+            disposable.dispose();
+          }
         });
       });
 
