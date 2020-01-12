@@ -20,7 +20,7 @@ export function extract_r_args(args: string[], content_position: number) {
   return {
     inputs: inputs,
     outputs: outputs,
-    rest: args.slice(content_position, content_position + 1),
+    rest: args[args.length + content_position],
     others: others
   };
 }

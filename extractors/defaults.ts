@@ -9,11 +9,17 @@ import {
 function rpy2_replacer(match: string, ...args: string[]) {
   let r = extract_r_args(args, -3);
   // define dummy input variables using empty data frames
-  let inputs = r.inputs.map(i => i + ' <- data.frame()').join('\n');
-  if (inputs !== '') {
-    inputs += '\n';
+  let inputs = r.inputs.map(i => i + ' <- data.frame();').join(' ');
+  let code: string;
+  if (typeof r.rest === 'undefined') {
+    code = '';
+  } else {
+    code = r.rest.startsWith(' ') ? r.rest.slice(1) : r.rest;
   }
-  return `${inputs}${r.rest}`;
+  if (inputs !== '' && code) {
+    inputs += ' ';
+  }
+  return `${inputs}${code}`;
 }
 
 // TODO: make the regex code extractors configurable
@@ -32,7 +38,7 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
     }),
     new RegExpForeignCodeExtractor({
       language: 'r',
-      pattern: '(?:^|\n)%R' + rpy2_args_pattern(RPY2_MAX_ARGS) + ' (.*)\n?',
+      pattern: '(?:^|\n)%R' + rpy2_args_pattern(RPY2_MAX_ARGS) + '( .*)?\n?',
       extract_to_foreign: rpy2_replacer,
       is_standalone: false,
       file_extension: 'R'

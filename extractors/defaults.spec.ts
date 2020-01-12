@@ -63,23 +63,29 @@ describe('Default extractors', () => {
 
       let r_document = get_the_only_virtual(foreign_document_map);
       expect(r_document.language).to.equal('r');
-      expect(r_document.value).to.equal('df <- data.frame()\nggplot(df)\n');
+      expect(r_document.value).to.equal('df <- data.frame(); ggplot(df)\n');
+    });
+
+    it('parses input when no code is given', () => {
+      let code = '%R -i df';
+      let { foreign_document_map } = extract(code);
+
+      let r_document = get_the_only_virtual(foreign_document_map);
+      expect(r_document.value).to.equal('df <- data.frame();\n');
     });
 
     it('parses multiple inputs (into dummy data frames)', () => {
       let code = wrap_in_python_lines('%R -i df -i x ggplot(df)');
       let r_document = get_the_only_virtual(extract(code).foreign_document_map);
       expect(r_document.value).to.equal(
-        'df <- data.frame()\n' + 'x <- data.frame()\n' + 'ggplot(df)\n'
+        'df <- data.frame(); x <- data.frame(); ggplot(df)\n'
       );
     });
 
     it('parses inputs ignoring other arguments', () => {
       let code = wrap_in_python_lines('%R -i df --width 300 -o x ggplot(df)');
       let r_document = get_the_only_virtual(extract(code).foreign_document_map);
-      expect(r_document.value).to.equal(
-        'df <- data.frame()\n' + 'ggplot(df)\n'
-      );
+      expect(r_document.value).to.equal('df <- data.frame(); ggplot(df)\n');
     });
   });
 
@@ -101,6 +107,6 @@ describe('Default extractors', () => {
 
     let r_document = get_the_only_virtual(foreign_document_map);
     expect(r_document.language).to.equal('r');
-    expect(r_document.value).to.equal('df <- data.frame()\nggplot(df)\n');
+    expect(r_document.value).to.equal('df <- data.frame(); ggplot(df)\n');
   });
 });
