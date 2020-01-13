@@ -9,6 +9,8 @@ import {
   ServiceManager
 } from '@jupyterlab/services';
 
+import { Debouncer } from '@lumino/polling';
+
 import * as semver from 'semver';
 
 import { doBuild } from './build-helper';
@@ -148,6 +150,7 @@ export class ListModel extends VDomModel {
     this._searchResult = [];
     this.serviceManager = serviceManager;
     this.serverConnectionSettings = ServerConnection.makeSettings();
+    this._debouncedUpdate = new Debouncer(this.update.bind(this), 1000);
   }
 
   /**
@@ -174,7 +177,7 @@ export class ListModel extends VDomModel {
   }
   set query(value: string | null) {
     this._query = value;
-    void this.update();
+    void this._debouncedUpdate.invoke();
   }
 
   /**
@@ -704,6 +707,7 @@ export class ListModel extends VDomModel {
   private _installed: IEntry[];
   private _searchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];
+  private _debouncedUpdate: Debouncer<void, void>;
 }
 
 /**
