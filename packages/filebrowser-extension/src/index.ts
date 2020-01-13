@@ -44,7 +44,7 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 
 import { addIcon, folderIcon } from '@jupyterlab/ui-components';
 
-import { IIterator, map, reduce, toArray } from '@lumino/algorithm';
+import { IIterator, map, reduce, toArray, find } from '@lumino/algorithm';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -294,7 +294,23 @@ function activateBrowser(
   );
 
   browser.title.iconRenderer = folderIcon;
-  browser.title.caption = 'File Browser';
+  // Show the current file browser shortcut in its title.
+  const updatePaletteTitle = () => {
+    const binding = find(
+      app.commands.keyBindings,
+      b => b.command === CommandIDs.toggleBrowser
+    );
+    if (binding) {
+      const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
+      browser.title.caption = `File Browser (${ks})`;
+    } else {
+      browser.title.caption = 'File Browser';
+    }
+  };
+  updatePaletteTitle();
+  app.commands.keyBindingChanged.connect(() => {
+    updatePaletteTitle();
+  });
   labShell.add(browser, 'left', { rank: 100 });
 
   // If the layout is a fresh session without saved data, open file browser.
