@@ -295,7 +295,7 @@ function activateBrowser(
 
   browser.title.iconRenderer = folderIcon;
   // Show the current file browser shortcut in its title.
-  const updatePaletteTitle = () => {
+  const updateBrowserTitle = () => {
     const binding = find(
       app.commands.keyBindings,
       b => b.command === CommandIDs.toggleBrowser
@@ -307,9 +307,9 @@ function activateBrowser(
       browser.title.caption = 'File Browser';
     }
   };
-  updatePaletteTitle();
+  updateBrowserTitle();
   app.commands.keyBindingChanged.connect(() => {
-    updatePaletteTitle();
+    updateBrowserTitle();
   });
   labShell.add(browser, 'left', { rank: 100 });
 
