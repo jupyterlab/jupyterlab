@@ -231,3 +231,14 @@
 .cm-s-jupyter .CodeMirror-gutter {
   background-color: var(--jp-layout-color2);
 }
+
+.cm-s-jupyter .CodeMirror-matchingbracket {
+  color: var(--jp-mirror-editor-matchingbracket);
+}
+.cm-s-jupyter .CodeMirror-nonmatchingbracket {
+  color: var(--jp-mirror-editor-nonmatchingbracket);
+}
+
+.cm-s-jupyter .CodeMirror-matchingtag {
+  background: var(--jp-mirror-editor-matchingtag);
+}

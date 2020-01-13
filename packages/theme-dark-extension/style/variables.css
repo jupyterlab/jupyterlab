@@ -199,11 +199,11 @@ all of MD as it is not optimized for dense, information rich UIs.
    * theme these would go from light to dark.
    */
 
-  --jp-layout-color0: #111111;
-  --jp-layout-color1: var(--md-grey-900);
-  --jp-layout-color2: var(--md-grey-800);
+  --jp-layout-color0: #0a0e14;
+  --jp-layout-color1: #131B26;
+  --jp-layout-color2: #202D40;
   --jp-layout-color3: var(--md-grey-700);
-  --jp-layout-color4: var(--md-grey-600);
+  --jp-layout-color4: #b3b1ad;
 
   /* Inverse Layout
    *
@@ -332,36 +332,38 @@ all of MD as it is not optimized for dense, information rich UIs.
 
   /* General editor styles */
 
-  --jp-editor-selected-background: var(--jp-layout-color2);
+  --jp-editor-selected-background: #273747;
   --jp-editor-selected-focused-background: rgba(33, 150, 243, 0.24);
-  --jp-editor-cursor-color: var(--jp-ui-font-color0);
+  --jp-editor-cursor-color: #e6b450;
 
-  /* Code mirror specific styles */
-
-  --jp-mirror-editor-keyword-color: var(--md-green-500);
-  --jp-mirror-editor-atom-color: var(--md-blue-300);
-  --jp-mirror-editor-number-color: var(--md-green-400);
-  --jp-mirror-editor-def-color: var(--md-blue-600);
-  --jp-mirror-editor-variable-color: var(--md-grey-300);
-  --jp-mirror-editor-variable-2-color: var(--md-blue-400);
-  --jp-mirror-editor-variable-3-color: var(--md-green-600);
-  --jp-mirror-editor-punctuation-color: var(--md-blue-400);
-  --jp-mirror-editor-property-color: var(--md-blue-400);
-  --jp-mirror-editor-operator-color: #aa22ff;
-  --jp-mirror-editor-comment-color: #408080;
-  --jp-mirror-editor-string-color: #ba2121;
-  --jp-mirror-editor-string-2-color: var(--md-purple-300);
-  --jp-mirror-editor-meta-color: #aa22ff;
-  --jp-mirror-editor-qualifier-color: #555;
-  --jp-mirror-editor-builtin-color: var(--md-green-600);
-  --jp-mirror-editor-bracket-color: #997;
-  --jp-mirror-editor-tag-color: var(--md-green-700);
-  --jp-mirror-editor-attribute-color: var(--md-blue-700);
-  --jp-mirror-editor-header-color: var(--md-blue-500);
-  --jp-mirror-editor-quote-color: var(--md-green-300);
-  --jp-mirror-editor-link-color: var(--md-blue-700);
-  --jp-mirror-editor-error-color: #f00;
+  --jp-mirror-editor-keyword-color: #ff8f40;
+  --jp-mirror-editor-atom-color: #ae81ff;
+  --jp-mirror-editor-number-color: #e6b450;
+  --jp-mirror-editor-def-color: #ffee99;
+  --jp-mirror-editor-variable-color: #b3b1ad;
+  --jp-mirror-editor-variable-color-2: #f07178;
+  --jp-mirror-editor-variable-color-3: #39bae6;
+  --jp-mirror-editor-punctuation-color: #ae81ff;
+  --jp-mirror-editor-property-color: #ffb454;
+  --jp-mirror-editor-operator-color: #ff8f40;
+  --jp-mirror-editor-comment-color: #ffb454;
+  --jp-mirror-editor-string-color: #c2d94c;
+  --jp-mirror-editor-string-2-color: #b3b1ad;
+  --jp-mirror-editor-meta-color: #b3b1ad;
+  --jp-mirror-editor-qualifier-color: #b3b1ad;
+  --jp-mirror-editor-builtin-color: #e6b450;
+  --jp-mirror-editor-bracket-color: #f8f8f2;
+  --jp-mirror-editor-tag-color: rgba(57, 186, 230, 80);
+  --jp-mirror-editor-attribute-color: #ffb454;
+  --jp-mirror-editor-header-color: #c2d94c;
+  --jp-mirror-editor-quote-color: #b3b1ad;
+  --jp-mirror-editor-link-color: #39bae6;
+  --jp-mirror-editor-error-color: #ff3333;
   --jp-mirror-editor-hr-color: #999;
+
+  --jp-mirror-editor-matchingbracket: #ff8f40;
+  --jp-mirror-editor-nonmatchingbracket: #ff8f40;
+  --jp-mirror-editor-matchingtag: #ff8f40;
 
   /* Vega extension styles */
 
