@@ -7,11 +7,11 @@ import { Cell, CodeCell } from '@jupyterlab/cells';
 
 import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 
-import { each } from '@phosphor/algorithm';
+import { each } from '@lumino/algorithm';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { EditorHandler } from '../handlers/editor';
 

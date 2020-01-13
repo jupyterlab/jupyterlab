@@ -5,9 +5,9 @@ import { DocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor } from '@jupyterlab/fileeditor';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { EditorHandler } from '../handlers/editor';
 

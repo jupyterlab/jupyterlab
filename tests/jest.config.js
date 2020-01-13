@@ -3,7 +3,6 @@ const upstream = func('@jupyterlab/debugger', __dirname);
 
 let local = {
   preset: 'ts-jest/presets/js-with-babel',
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
   globals: {
     'ts-jest': {
@@ -11,16 +10,17 @@ let local = {
     }
   },
   transform: {
-    '\\.(ts|tsx)?$': 'ts-jest'
+    '\\.(ts|tsx)?$': 'ts-jest',
+    '\\.svg$': 'jest-raw-loader'
   }
 };
 
 [
+  'moduleFileExtensions',
   'moduleNameMapper',
   'reporters',
   'setupFilesAfterEnv',
-  'setupFiles',
-  'moduleFileExtensions'
+  'setupFiles'
 ].forEach(option => {
   local[option] = upstream[option];
 });

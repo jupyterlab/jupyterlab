@@ -3,7 +3,7 @@
 
 import { ToolbarButton } from '@jupyterlab/apputils';
 
-import { Panel } from '@phosphor/widgets';
+import { Panel } from '@lumino/widgets';
 
 import { IDebugger } from '../tokens';
 
@@ -31,7 +31,7 @@ export class Breakpoints extends Panel {
     header.toolbar.addItem(
       'closeAll',
       new ToolbarButton({
-        iconClassName: 'jp-CloseAllIcon',
+        iconClass: 'jp-CloseAllIcon',
         onClick: () => {
           void service.clearBreakpoints();
         },

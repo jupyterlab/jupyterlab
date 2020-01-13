@@ -1,15 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
-
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { IObservableDisposable } from '@phosphor/disposable';
+import { IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
@@ -48,10 +46,10 @@ export interface IDebugger {
   readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
 
   /**
-   * Request whether debugging is available for the given client.
-   * @param client The client session.
+   * Request whether debugging is available for the given session connection.
+   * @param connection The session connection.
    */
-  isAvailable(client: IClientSession | Session.ISession): Promise<boolean>;
+  isAvailable(connection: Session.ISessionConnection): Promise<boolean>;
 
   /**
    * Computes an id based on the given code.
@@ -141,9 +139,9 @@ export namespace IDebugger {
    */
   export interface ISession extends IObservableDisposable {
     /**
-     * The API client session to connect to a debugger.
+     * The API session connection to connect to a debugger.
      */
-    client: IClientSession | Session.ISession;
+    connection: Session.ISessionConnection;
 
     /**
      * Whether the debug session is started
@@ -159,11 +157,11 @@ export namespace IDebugger {
     >;
 
     /**
-     * Signal for changed client of session
+     * Signal emitted when the connection of a debug session changes.
      */
-    readonly clientChanged: ISignal<
+    readonly connectionChanged: ISignal<
       IDebugger.ISession,
-      IClientSession | Session.ISession
+      Session.ISessionConnection
     >;
 
     /**

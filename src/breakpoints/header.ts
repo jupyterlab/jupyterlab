@@ -3,7 +3,7 @@
 
 import { Toolbar } from '@jupyterlab/apputils';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
  * The header for a Breakpoints Panel.

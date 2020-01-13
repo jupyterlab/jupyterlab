@@ -98,7 +98,7 @@
   background-image: var(--jp-icon-bug);
 }
 
-.jp-ToggleSwitch {
+.jp-Toolbar-item .jp-ToggleSwitch {
   display: flex;
   align-items: center;
   cursor: pointer;
@@ -109,8 +109,7 @@
   width: 35px;
 }
 
-.jp-ToggleSwitch::before {
-  content: '';
+.jp-Toolbar-item .jp-ToggleSwitch svg {
   height: 10px;
   width: 10px;
   margin-left: 5px;
@@ -121,11 +120,11 @@
   border-radius: 50%;
 }
 
-[data-jp-debugger='true'] .jp-ToggleSwitch {
+[data-jp-debugger='true'] .jp-Toolbar-item .jp-ToggleSwitch {
   background-color: var(--jp-warn-color0);
 }
 
-[data-jp-debugger='true'] .jp-ToggleSwitch::before {
+[data-jp-debugger='true'] .jp-Toolbar-item .jp-ToggleSwitch svg {
   margin-left: 50%;
   margin-right: 5px;
 }

@@ -26,13 +26,13 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
-import { chain, each } from '@phosphor/algorithm';
+import { chain, each } from '@lumino/algorithm';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { EditorHandler } from './editor';
 
@@ -129,7 +129,7 @@ export class TrackerHandler implements IDisposable {
     _: CallstackModel,
     frame: CallstackModel.IFrame
   ) {
-    const debugSessionPath = this._debuggerService.session?.client?.path;
+    const debugSessionPath = this._debuggerService.session?.connection?.path;
     const source = frame?.source.path ?? null;
     each(this._find(debugSessionPath, source), editor => {
       requestAnimationFrame(() => {
@@ -147,7 +147,7 @@ export class TrackerHandler implements IDisposable {
     if (!source) {
       return;
     }
-    const debugSessionPath = this._debuggerService.session.client.path;
+    const debugSessionPath = this._debuggerService.session.connection.path;
     const { content, mimeType, path } = source;
     const results = this._find(debugSessionPath, path);
     if (results.next()) {
@@ -210,9 +210,9 @@ export class TrackerHandler implements IDisposable {
     }
     const editors: CodeEditor.IEditor[] = [];
     this._notebookTracker.forEach(notebookPanel => {
-      const session = notebookPanel.session;
+      const sessionContext = notebookPanel.sessionContext;
 
-      if (session.path !== debugSessionPath) {
+      if (sessionContext.path !== debugSessionPath) {
         return;
       }
 
@@ -248,9 +248,9 @@ export class TrackerHandler implements IDisposable {
     }
     const editors: CodeEditor.IEditor[] = [];
     this._consoleTracker.forEach(consoleWidget => {
-      const session = consoleWidget.session;
+      const sessionContext = consoleWidget.sessionContext;
 
-      if (session.path !== debugSessionPath) {
+      if (sessionContext.path !== debugSessionPath) {
         return;
       }
 

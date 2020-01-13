@@ -75,7 +75,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
     });
 
     const updateHandlerAndCommands = async (widget: ConsolePanel) => {
-      await handler.update(widget, widget.session);
+      const sessionContext = widget.sessionContext;
+      await sessionContext.ready;
+      await handler.update(widget, sessionContext.session);
       app.commands.notifyCommandChanged();
     };
 
@@ -120,7 +122,7 @@ const files: JupyterFrontEndPlugin<void> = {
     });
 
     const activeSessions: {
-      [id: string]: Session.ISession;
+      [id: string]: Session.ISessionConnection;
     } = {};
 
     const updateHandlerAndCommands = async (widget: DocumentWidget) => {
@@ -133,7 +135,7 @@ const files: JupyterFrontEndPlugin<void> = {
           // `connectTo` sends a kernel_info_request on the shell
           // channel, which blocks the debug session restore when waiting
           // for the kernel to be ready
-          session = sessions.connectTo(model);
+          session = sessions.connectTo({ model });
           activeSessions[model.id] = session;
         }
         await handler.update(widget, session);
@@ -190,7 +192,9 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     });
 
     const updateHandlerAndCommands = async (widget: NotebookPanel) => {
-      await handler.update(widget, widget.session);
+      const sessionContext = widget.sessionContext;
+      await sessionContext.ready;
+      await handler.update(widget, sessionContext.session);
       app.commands.notifyCommandChanged();
     };
 

@@ -3,7 +3,7 @@
 
 import { DebuggerService } from './service';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
  * The header for a Sidebar Debugger Panel.
@@ -22,7 +22,7 @@ export class SidebarHeader extends Widget {
     title.addClass('jp-left-truncated');
 
     service.sessionChanged.connect((_, session) => {
-      session.clientChanged.connect((_, client) => {
+      session.connectionChanged.connect((_, client) => {
         title.node.textContent = client.name;
       });
     });

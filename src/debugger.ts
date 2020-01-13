@@ -3,7 +3,7 @@
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { Panel, SplitPanel } from '@phosphor/widgets';
+import { Panel, SplitPanel } from '@lumino/widgets';
 
 import { Breakpoints } from './breakpoints';
 

@@ -7,9 +7,9 @@ import { IObservableMap, ObservableMap } from '@jupyterlab/observables';
 
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { EditorHandler } from './editor';
 

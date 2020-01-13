@@ -3,7 +3,7 @@
 
 import { IDebugger } from './tokens';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { BreakpointsModel } from './breakpoints/model';
 

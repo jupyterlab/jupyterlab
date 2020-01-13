@@ -1,13 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils';
-
 import { Session } from '@jupyterlab/services';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { murmur2 } from 'murmurhash-js';
 
@@ -126,21 +124,17 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Request whether debugging is available for the given client.
-   * @param client The client session.
+   * Request whether debugging is available for the session connection.
+   * @param connection The session connection.
    */
-  async isAvailable(
-    client: IClientSession | Session.ISession
-  ): Promise<boolean> {
-    if (client instanceof ClientSession) {
-      await client.ready;
-    }
-    const kernel = client.kernel;
+  async isAvailable(connection: Session.ISessionConnection): Promise<boolean> {
+    const kernel = connection.kernel;
     if (!kernel) {
       return false;
     }
-    await kernel.ready;
-    const info = (client.kernel?.info as IDebugger.ISession.IInfoReply) ?? null;
+    const info =
+      (((await kernel.info) as unknown) as IDebugger.ISession.IInfoReply) ??
+      null;
     return !!(info?.debugger ?? false);
   }
 
