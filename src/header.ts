@@ -19,6 +19,7 @@ export class SidebarHeader extends Widget {
     const title = new Widget({ node: document.createElement('h2') });
 
     title.node.textContent = '-';
+    title.addClass('jp-left-truncated');
 
     service.sessionChanged.connect((_, session) => {
       session.clientChanged.connect((_, client) => {

@@ -67,17 +67,19 @@ export namespace Debugger {
        * The header of Widget with current name of session.
        */
       const header = new SidebarHeader(this.service);
+
       this.addWidget(header);
 
-      this.body = new SplitPanel();
-      this.body.orientation = 'vertical';
-      this.body.addWidget(this.variables);
-      this.body.addWidget(this.callstack);
-      this.body.addWidget(this.breakpoints);
-      this.body.addWidget(this.sources);
-      this.body.addClass('jp-DebuggerSidebar-body');
+      const body = new SplitPanel();
 
-      this.addWidget(this.body);
+      body.orientation = 'vertical';
+      body.addWidget(this.variables);
+      body.addWidget(this.callstack);
+      body.addWidget(this.breakpoints);
+      body.addWidget(this.sources);
+      body.addClass('jp-DebuggerSidebar-body');
+
+      this.addWidget(body);
     }
 
     /**
@@ -105,11 +107,6 @@ export namespace Debugger {
      * The debugger service.
      */
     readonly service: DebuggerService;
-
-    /**
-     * The body of widget.
-     */
-    readonly body: SplitPanel;
 
     /**
      * The variables widget.
