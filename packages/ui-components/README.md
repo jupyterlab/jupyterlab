@@ -56,7 +56,7 @@ Design goals for JLIcon (already implemented):
   - this enables compile-time checking; helps to ensure that icons are specified correctly when used (as opposed to the old pattern of specifying icon via a `string` with name or className)
 - every icon is flexible
   - can used in any context in which icons are used in jlab
-    - every icon can be passsed into Lumino
+    - every icon can be passed into Lumino
     - every icon can create a DOM node
     - every icon can create a React component
 - dynamic lookup (for when absolutely needed)
