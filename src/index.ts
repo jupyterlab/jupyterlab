@@ -28,7 +28,7 @@ import { TrackerHandler } from './handlers/tracker';
 
 import { DebuggerService } from './service';
 
-import { DebuggerHandler } from './handlers/handler';
+import { DebuggerHandler } from './handler';
 
 import { IDebugger } from './tokens';
 

@@ -15,17 +15,17 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
 
-import { DebuggerModel } from '../model';
+import { DebuggerModel } from './model';
 
-import { DebugSession } from '../session';
+import { DebugSession } from './session';
 
-import { IDebugger } from '../tokens';
+import { IDebugger } from './tokens';
 
-import { ConsoleHandler } from './console';
+import { ConsoleHandler } from './handlers/console';
 
-import { FileHandler } from './file';
+import { FileHandler } from './handlers/file';
 
-import { NotebookHandler } from './notebook';
+import { NotebookHandler } from './handlers/notebook';
 
 /**
  * Add a button to the widget toolbar to enable and disable debugging.
