@@ -46,7 +46,7 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     ISettingRegistry,
     IEditorServices,
     IStateDB,
-    IRenderMimeRegistry
+    IRenderMimeRegistry,
     ILabStatus
   ],
   optional: [ICommandPalette],
@@ -65,7 +65,7 @@ function activate(
   editorServices: IEditorServices,
   state: IStateDB,
   rendermime: IRenderMimeRegistry,
-  status: ILabStatus
+  status: ILabStatus,
   palette: ICommandPalette | null
 ): ISettingEditorTracker {
   const { commands, shell } = app;

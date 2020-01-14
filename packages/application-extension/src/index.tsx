@@ -592,7 +592,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       shell.activateNextTabBar();
     }
   });
-  palette.addItem({ command: CommandIDs.activateNextTabBar, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.activateNextTabBar, category });
+  }
 
   commands.addCommand(CommandIDs.activatePreviousTabBar, {
     label: 'Activate Previous Tab Bar',
@@ -600,7 +602,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       shell.activatePreviousTabBar();
     }
   });
-  palette.addItem({ command: CommandIDs.activatePreviousTabBar, category });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.activatePreviousTabBar, category });
+  }
 
   // A CSS selector targeting tabs in the main area. This is a very
   // specific selector since we really only want tabs that are
