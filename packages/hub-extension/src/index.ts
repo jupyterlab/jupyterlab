@@ -35,8 +35,8 @@ export namespace CommandIDs {
 function activateHubExtension(
   app: JupyterFrontEnd,
   paths: JupyterFrontEnd.IPaths,
-  palette: ICommandPalette,
-  mainMenu: IMainMenu
+  palette: ICommandPalette | null,
+  mainMenu: IMainMenu | null
 ): void {
   const hubHost = paths.urls.hubHost || '';
   const hubPrefix = paths.urls.hubPrefix || '';
@@ -85,14 +85,18 @@ function activateHubExtension(
     }
   });
 
-  // Add commands and menu itmes.
-  mainMenu.fileMenu.addGroup(
-    [{ command: CommandIDs.controlPanel }, { command: CommandIDs.logout }],
-    100
-  );
-  const category = 'Hub';
-  palette.addItem({ category, command: CommandIDs.controlPanel });
-  palette.addItem({ category, command: CommandIDs.logout });
+  // Add palette and menu itmes.
+  if (mainMenu) {
+    mainMenu.fileMenu.addGroup(
+      [{ command: CommandIDs.controlPanel }, { command: CommandIDs.logout }],
+      100
+    );
+  }
+  if (palette) {
+    const category = 'Hub';
+    palette.addItem({ category, command: CommandIDs.controlPanel });
+    palette.addItem({ category, command: CommandIDs.logout });
+  }
 }
 
 /**
@@ -101,7 +105,8 @@ function activateHubExtension(
 const hubExtension: JupyterFrontEndPlugin<void> = {
   activate: activateHubExtension,
   id: 'jupyter.extensions.hub-extension',
-  requires: [JupyterFrontEnd.IPaths, ICommandPalette, IMainMenu],
+  requires: [JupyterFrontEnd.IPaths],
+  optional: [ICommandPalette, IMainMenu],
   autoStart: true
 };
 

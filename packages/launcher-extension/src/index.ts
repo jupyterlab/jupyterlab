@@ -27,7 +27,8 @@ namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
-  requires: [ICommandPalette, ILabShell],
+  requires: [ILabShell],
+  optional: [ICommandPalette],
   provides: ILauncher,
   autoStart: true
 };
@@ -42,8 +43,8 @@ export default plugin;
  */
 function activate(
   app: JupyterFrontEnd,
-  palette: ICommandPalette,
-  labShell: ILabShell
+  labShell: ILabShell,
+  palette: ICommandPalette | null
 ): ILauncher {
   const { commands } = app;
   const model = new LauncherModel();
@@ -79,7 +80,9 @@ function activate(
     }
   });
 
-  palette.addItem({ command: CommandIDs.create, category: 'Launcher' });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.create, category: 'Launcher' });
+  }
 
   return model;
 }
