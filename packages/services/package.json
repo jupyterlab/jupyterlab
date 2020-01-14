@@ -30,7 +30,7 @@
   "main": "lib/index.js",
   "browser": {
     "node-fetch": false,
-    "ws": false
+    "ws": "./lib/shim/ws.js"
   },
   "typings": "lib/index.d.ts",
   "scripts": {

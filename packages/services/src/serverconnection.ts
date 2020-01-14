@@ -21,7 +21,7 @@ if (typeof window === 'undefined') {
   FETCH = global.fetch ?? fetchMod;
   REQUEST = global.Request ?? fetchMod.Request;
   HEADERS = global.Headers ?? fetchMod.Headers;
-  WEBSOCKET = global.WebSocket ?? require('ws');
+  WEBSOCKET = require('ws');
   /* tslint:enable */
 } else {
   FETCH = fetch;
