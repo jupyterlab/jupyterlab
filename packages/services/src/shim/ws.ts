@@ -1,1 +1,1 @@
-export const ws = WebSocket;
+export default WebSocket;
