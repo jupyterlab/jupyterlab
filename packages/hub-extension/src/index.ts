@@ -36,7 +36,7 @@ function activateHubExtension(
   app: JupyterFrontEnd,
   paths: JupyterFrontEnd.IPaths,
   palette: ICommandPalette | null,
-  mainMenu: IMainMenu | null,
+  mainMenu: IMainMenu | null
 ): void {
   const hubHost = paths.urls.hubHost || '';
   const hubPrefix = paths.urls.hubPrefix || '';

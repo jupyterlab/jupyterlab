@@ -104,7 +104,13 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     IRenderMimeRegistry,
     ISettingRegistry
   ],
-  optional: [IMainMenu, ICommandPalette, ILauncher, ILabStatus, ISessionContextDialogs],
+  optional: [
+    IMainMenu,
+    ICommandPalette,
+    ILauncher,
+    ILabStatus,
+    ISessionContextDialogs
+  ],
   activate: activateConsole,
   autoStart: true
 };
@@ -650,7 +656,7 @@ async function activateConsole(
     // Add kernel information to the application help menu.
     mainMenu.helpMenu.kernelUsers.add({
       tracker,
-    getKernel: current => current.sessionContext.session?.kernel
+      getKernel: current => current.sessionContext.session?.kernel
     } as IHelpMenu.IKernelUser<ConsolePanel>);
   }
 
