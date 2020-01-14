@@ -572,9 +572,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       shell.activateNextTab();
     }
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.activateNextTab, category });
-  }
 
   commands.addCommand(CommandIDs.activatePreviousTab, {
     label: 'Activate Previous Tab',
@@ -582,9 +579,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       shell.activatePreviousTab();
     }
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.activatePreviousTab, category });
-  }
 
   commands.addCommand(CommandIDs.activateNextTabBar, {
     label: 'Activate Next Tab Bar',
@@ -592,9 +586,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       shell.activateNextTabBar();
     }
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.activateNextTabBar, category });
-  }
 
   commands.addCommand(CommandIDs.activatePreviousTabBar, {
     label: 'Activate Previous Tab Bar',
@@ -602,9 +593,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       shell.activatePreviousTabBar();
     }
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.activatePreviousTabBar, category });
-  }
 
   // A CSS selector targeting tabs in the main area. This is a very
   // specific selector since we really only want tabs that are
@@ -622,9 +610,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       }
     }
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.close, category });
-  }
   contextMenu.addItem({
     command: CommandIDs.close,
     selector: tabSelector,
@@ -637,9 +622,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       shell.closeAll();
     }
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.closeAll, category });
-  }
 
   commands.addCommand(CommandIDs.closeOtherTabs, {
     label: () => `Close All Other Tabs`,
@@ -660,9 +642,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       closeWidgets(otherWidgets);
     }
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.closeOtherTabs, category });
-  }
   contextMenu.addItem({
     command: CommandIDs.closeOtherTabs,
     selector: tabSelector,
@@ -681,9 +660,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       closeWidgets(widgetsRightOf(widget));
     }
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.closeRightTabs, category });
-  }
   contextMenu.addItem({
     command: CommandIDs.closeRightTabs,
     selector: tabSelector,
@@ -705,9 +681,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
     isToggled: () => !shell.leftCollapsed,
     isVisible: () => !shell.isEmpty('left')
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.toggleLeftArea, category });
-  }
 
   app.commands.addCommand(CommandIDs.toggleRightArea, {
     label: () => 'Show Right Sidebar',
@@ -724,9 +697,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
     isToggled: () => !shell.rightCollapsed,
     isVisible: () => !shell.isEmpty('right')
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.toggleRightArea, category });
-  }
 
   app.commands.addCommand(CommandIDs.togglePresentationMode, {
     label: () => 'Presentation Mode',
@@ -736,9 +706,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
     isToggled: () => shell.presentationMode,
     isVisible: () => true
   });
-  if (palette) {
-    palette.addItem({ command: CommandIDs.togglePresentationMode, category });
-  }
 
   app.commands.addCommand(CommandIDs.setMode, {
     isVisible: args => {
@@ -766,7 +733,19 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
       return app.commands.execute(CommandIDs.setMode, args);
     }
   });
+
   if (palette) {
+    palette.addItem({ command: CommandIDs.activateNextTab, category });
+    palette.addItem({ command: CommandIDs.activatePreviousTab, category });
+    palette.addItem({ command: CommandIDs.activateNextTabBar, category });
+    palette.addItem({ command: CommandIDs.activatePreviousTabBar, category });
+    palette.addItem({ command: CommandIDs.close, category });
+    palette.addItem({ command: CommandIDs.closeAll, category });
+    palette.addItem({ command: CommandIDs.closeOtherTabs, category });
+    palette.addItem({ command: CommandIDs.closeRightTabs, category });
+    palette.addItem({ command: CommandIDs.toggleLeftArea, category });
+    palette.addItem({ command: CommandIDs.toggleRightArea, category });
+    palette.addItem({ command: CommandIDs.togglePresentationMode, category });
     palette.addItem({ command: CommandIDs.toggleMode, category });
   }
 }
