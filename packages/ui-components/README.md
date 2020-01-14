@@ -59,7 +59,7 @@ Design goals for JLIcon (already implemented):
     - every icon can be passsed into Lumino
     - every icon can create a DOM node
     - every icon can create a React component
-- dyanmic lookup (for when absolutely needed)
+- dynamic lookup (for when absolutely needed)
   - Use dynamic lookup for the few cases in which an icon can only be specified as a string (such as in json schema files)
   - In all other cases, force (or at least strongly encourage) the pattern of import-icon
 - reusable
