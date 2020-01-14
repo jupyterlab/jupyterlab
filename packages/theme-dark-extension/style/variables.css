@@ -200,8 +200,8 @@ all of MD as it is not optimized for dense, information rich UIs.
    */
 
   --jp-layout-color0: #0a0e14;
-  --jp-layout-color1: #131B26;
-  --jp-layout-color2: #202D40;
+  --jp-layout-color1: #131b26;
+  --jp-layout-color2: #202d40;
   --jp-layout-color3: var(--md-grey-700);
   --jp-layout-color4: #b3b1ad;
 
