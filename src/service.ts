@@ -392,6 +392,8 @@ export class DebuggerService implements IDebugger, IDisposable {
       this
     );
 
+    // this._model.variables.variableCliked.connect(this._onVariableClicked, this);
+
     const stackFrames = await this._getFrames(this._currentThread());
     this._model.callstack.frames = stackFrames;
   }
@@ -424,7 +426,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     reply.body.variables.forEach((variable: DebugProtocol.Variable) => {
       newVariable = { [variable.name]: variable, ...newVariable };
     });
-
     const newScopes = this._model.variables.scopes.map(scope => {
       const findIndex = scope.variables.findIndex(
         ele => ele.variablesReference === variable.variablesReference
@@ -434,9 +435,17 @@ export class DebuggerService implements IDebugger, IDisposable {
     });
 
     this._model.variables.scopes = [...newScopes];
-
     return reply.body.variables;
   }
+
+  // private async _onVariableClicked(_: any, variable: DebugProtocol.Variable) {
+  //   console.log('clicked');
+  //   const reply = await this.session.sendRequest('variables', {
+  //     variablesReference: variable.variablesReference
+  //   });
+  //   this._model.variables.details = reply.body.variables;
+  //   return reply.body.variables;
+  // }
 
   /**
    * Get all the frames for the given thread id.

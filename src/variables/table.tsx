@@ -3,14 +3,14 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import { ArrayExt } from '@phosphor/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 
 import React, { useEffect, useState } from 'react';
 
 import { VariablesModel } from './model';
 
-/**
- * The body for a Variables Panel.
+/**VariablesComponent
+ * The body for a Va    console.log({ self });riables Panel.
  */
 export class VariablesBodyTable extends ReactWidget {
   /**
@@ -21,54 +21,61 @@ export class VariablesBodyTable extends ReactWidget {
     super();
     this._model = model;
     this.addClass('jp-DebuggerVariables-body');
+    this._model.changed.connect(this.updateScopes, this);
+  }
+
+  private updateScopes(self: VariablesModel) {
+    if (ArrayExt.shallowEqual(this._scopes, self.scopes)) {
+      return;
+    }
+    this._scopes = self.scopes;
+    this.update();
   }
 
   /**
    * Render the VariablesComponent.
    */
   render() {
-    return <VariablesComponent model={this._model} />;
+    return (
+      <>
+        {this._scopes.map(scope => (
+          <VariablesComponent
+            key={scope.name}
+            data={scope.variables}
+            model={this._model}
+          />
+        ))}
+      </>
+    );
   }
 
   private _model: VariablesModel;
+  private _scopes: VariablesModel.IScope[] = [];
 }
 
-/**
- * A React component to display a list of variables.
- * @param model The model for the variables.
- */
-const VariablesComponent = ({ model }: { model: VariablesModel }) => {
-  const [data, setData] = useState(model.scopes);
+const VariablesComponent = ({
+  data,
+  model
+}: {
+  data: VariablesModel.IVariable[];
+  model: VariablesModel;
+}) => {
+  const [variables, setVariables] = useState(data);
   const [selected, setSelected] = useState('');
 
   useEffect(() => {
-    const updateScopes = (self: VariablesModel) => {
-      if (ArrayExt.shallowEqual(data, self.scopes)) {
-        return;
-      }
-      setData(self.scopes);
-    };
+    setVariables(data);
+  }, [data]);
 
-    model.changed.connect(updateScopes);
-
-    return () => {
-      model.changed.disconnect(updateScopes);
-    };
-  });
-
-  const checkIsSelected = (variable: VariablesModel.IVariable) => {
-    if (selected === variable.evaluateName) {
-      alert(JSON.stringify(variable));
-      return;
-    }
+  const onClickVariable = (variable: VariablesModel.IVariable) => {
     setSelected(variable.evaluateName);
   };
 
   const Tbody = () => (
     <tbody>
-      {data[0]?.variables.map(variable => (
+      {variables?.map(variable => (
         <tr
-          onClick={() => checkIsSelected(variable)}
+          onClick={() => onClickVariable(variable)}
           key={variable.evaluateName}
         >
           <td>{variable.name}</td>

@@ -10,23 +10,28 @@
 
 .jp-DebuggerVariables-body table {
   width: 100%;
+  border-spacing: 0px;
 }
 
+.jp-DebuggerVariables-body table tbody,
 .jp-DebuggerVariables-body table thead {
-  background: var(--jp-layout-color4);
-}
-
-.jp-DebuggerVariables-body table tbody {
-  background: var(--jp-layout-color3);
-}
-
-.jp-DebuggerVariables-body table tbody tr td:first-child {
   background: var(--jp-layout-color2);
+  text-align: left;
 }
 
-.jp-DebuggerVariables-body table tbody td {
-  padding-left: 10px;
-  padding-right: 10px;
+.jp-DebuggerVariables-body table tbody tr:nth-child(2n + 1) {
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-DebuggerVariables-body table tbody td,
+.jp-DebuggerVariables-body table thead th {
+  padding: 5px;
+  border-right: 1px solid var(--jp-layout-color3);
+}
+
+.jp-DebuggerVariables-body table tbody td:last-child,
+.jp-DebuggerVariables-body table thead th:last-child {
+  border-right: none;
 }
 
 .jp-DebuggerVariables-body table tbody td.selected {
