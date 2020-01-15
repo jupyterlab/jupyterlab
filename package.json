@@ -99,6 +99,7 @@
     "lerna": "^3.19.0",
     "lint-staged": "^9.5.0",
     "prettier": "^1.19.1",
+    "shell-quote": "^1.7.2",
     "tslint": "^5.20.1",
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
