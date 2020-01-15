@@ -475,7 +475,7 @@ const sidebar: JupyterFrontEndPlugin<void> = {
     // Add a context menu item to sidebar tabs.
     app.contextMenu.addItem({
       command: CommandIDs.switchSidebar,
-      selector: '.jp-SideBar .p-TabBar-tab',
+      selector: '.jp-SideBar .lm-TabBar-tab',
       rank: 500
     });
   },
@@ -598,7 +598,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   // specific selector since we really only want tabs that are
   // in the main area, as opposed to those in sidebars, ipywidgets, etc.
   const tabSelector =
-    '#jp-main-dock-panel .p-DockPanel-tabBar.jp-Activity .p-TabBar-tab';
+    '#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab';
 
   commands.addCommand(CommandIDs.close, {
     label: () => 'Close Tab',

@@ -23,7 +23,7 @@
   font-size: var(--jp-ui-font-size1);
 }
 
-#setting-editor > .p-Widget {
+#setting-editor > .lm-Widget {
   position: absolute;
   top: 0;
   bottom: 0;
@@ -31,7 +31,7 @@
   right: 0;
 }
 
-#setting-editor .p-SplitPanel-handle {
+#setting-editor .lm-SplitPanel-handle {
   background-color: var(--jp-border-color2);
 }
 

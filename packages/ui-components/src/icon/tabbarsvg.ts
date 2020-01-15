@@ -37,7 +37,7 @@ export namespace TabBarSvg {
      */
     renderCloseIcon(data: TabBar.IRenderData<any>): VirtualElement {
       const className = closeIcon.class({
-        className: 'jp-icon-hover p-TabBar-tabCloseIcon',
+        className: 'jp-icon-hover lm-TabBar-tabCloseIcon',
         justify: 'center',
         height: '16px',
         width: '16px'
@@ -83,7 +83,7 @@ export namespace DockPanelSvg {
      */
     createTabBar(): TabBarSvg<Widget> {
       let bar = new TabBarSvg<Widget>();
-      bar.addClass('p-DockPanel-tabBar');
+      bar.addClass('lm-DockPanel-tabBar');
       return bar;
     }
   }

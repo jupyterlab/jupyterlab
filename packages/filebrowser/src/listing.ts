@@ -645,16 +645,16 @@ export class DirListing extends Widget {
       case 'scroll':
         this._evtScroll(event as MouseEvent);
         break;
-      case 'p-dragenter':
+      case 'lm-dragenter':
         this._evtDragEnter(event as IDragEvent);
         break;
-      case 'p-dragleave':
+      case 'lm-dragleave':
         this._evtDragLeave(event as IDragEvent);
         break;
-      case 'p-dragover':
+      case 'lm-dragover':
         this._evtDragOver(event as IDragEvent);
         break;
-      case 'p-drop':
+      case 'lm-drop':
         this._evtDrop(event as IDragEvent);
         break;
       default:
@@ -679,10 +679,10 @@ export class DirListing extends Widget {
     content.addEventListener('dragend', this);
     content.addEventListener('drop', this);
     content.addEventListener('scroll', this);
-    content.addEventListener('p-dragenter', this);
-    content.addEventListener('p-dragleave', this);
-    content.addEventListener('p-dragover', this);
-    content.addEventListener('p-drop', this);
+    content.addEventListener('lm-dragenter', this);
+    content.addEventListener('lm-dragleave', this);
+    content.addEventListener('lm-dragover', this);
+    content.addEventListener('lm-drop', this);
   }
 
   /**
@@ -702,10 +702,10 @@ export class DirListing extends Widget {
     content.removeEventListener('dragleave', this);
     content.removeEventListener('dragend', this);
     content.removeEventListener('drop', this);
-    content.removeEventListener('p-dragenter', this);
-    content.removeEventListener('p-dragleave', this);
-    content.removeEventListener('p-dragover', this);
-    content.removeEventListener('p-drop', this);
+    content.removeEventListener('lm-dragenter', this);
+    content.removeEventListener('lm-dragleave', this);
+    content.removeEventListener('lm-dragover', this);
+    content.removeEventListener('lm-drop', this);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
   }
@@ -1045,7 +1045,7 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Handle the `'p-dragenter'` event for the widget.
+   * Handle the `'lm-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
@@ -1069,7 +1069,7 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Handle the `'p-dragleave'` event for the widget.
+   * Handle the `'lm-dragleave'` event for the widget.
    */
   private _evtDragLeave(event: IDragEvent): void {
     event.preventDefault();
@@ -1081,7 +1081,7 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Handle the `'p-dragover'` event for the widget.
+   * Handle the `'lm-dragover'` event for the widget.
    */
   private _evtDragOver(event: IDragEvent): void {
     event.preventDefault();
@@ -1096,7 +1096,7 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Handle the `'p-drop'` event for the widget.
+   * Handle the `'lm-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
     event.preventDefault();

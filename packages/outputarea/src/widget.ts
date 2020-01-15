@@ -471,7 +471,7 @@ export class OutputArea extends Widget {
       output.node.appendChild(pre);
 
       // Remove mime-type-specific CSS classes
-      output.node.className = 'p-Widget jp-RenderedText';
+      output.node.className = 'lm-Widget jp-RenderedText';
       output.node.setAttribute(
         'data-mime-type',
         'application/vnd.jupyter.stderr'

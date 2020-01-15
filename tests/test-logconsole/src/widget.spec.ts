@@ -45,7 +45,7 @@ function anyAncestor(el: Element, test: (el: Element) => boolean) {
 }
 
 function isHiddenLumino(el: Element) {
-  return el.classList.contains('p-mod-hidden');
+  return el.classList.contains('lm-mod-hidden');
 }
 
 describe('LogConsolePanel', () => {

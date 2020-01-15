@@ -80,7 +80,7 @@ const iconCSSlistingHeaderItem: NestedCSSProperties = {
 
 const iconCSSMainAreaTab: NestedCSSProperties = {
   $nest: {
-    '.p-DockPanel-tabBar &': {
+    '.lm-DockPanel-tabBar &': {
       height: '14px',
       width: '14px'
     },
@@ -188,7 +188,7 @@ const containerCSSListingHeaderItem: NestedCSSProperties = {
  */
 const containerCSSMainAreaTab: NestedCSSProperties = {
   $nest: {
-    '.p-DockPanel-tabBar &': {
+    '.lm-DockPanel-tabBar &': {
       marginRight: '4px'
     },
     '#tab-manager &': {
@@ -220,11 +220,11 @@ const containerCSSSideBar: NestedCSSProperties = {
   // `&` will be substituted for the generated classname (interpolation)
   $nest: {
     // left sidebar tab divs
-    '.jp-SideBar.jp-mod-left .p-TabBar-tab &': {
+    '.jp-SideBar.jp-mod-left .lm-TabBar-tab &': {
       transform: 'rotate(90deg)'
     },
     // left sidebar currently selected tab div
-    '.jp-SideBar.jp-mod-left .p-TabBar-tab.p-mod-current &': {
+    '.jp-SideBar.jp-mod-left .lm-TabBar-tab.lm-mod-current &': {
       transform:
         'rotate(90deg)\n' +
         '    translate(\n' +
@@ -234,11 +234,11 @@ const containerCSSSideBar: NestedCSSProperties = {
     },
 
     // right sidebar tab divs
-    '.jp-SideBar.jp-mod-right .p-TabBar-tab &': {
+    '.jp-SideBar.jp-mod-right .lm-TabBar-tab &': {
       transform: 'rotate(-90deg)'
     },
     // right sidebar currently selected tab div
-    '.jp-SideBar.jp-mod-right .p-TabBar-tab.p-mod-current &': {
+    '.jp-SideBar.jp-mod-right .lm-TabBar-tab.lm-mod-current &': {
       transform:
         'rotate(-90deg)\n' +
         '    translate(\n' +

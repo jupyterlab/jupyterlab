@@ -184,15 +184,15 @@
 }
 
 /* CSS for icons in selected tabs in the sidebar tab manager */
-#tab-manager .p-TabBar-tab.jp-mod-active .jp-icon-selectable[fill] {
+#tab-manager .lm-TabBar-tab.jp-mod-active .jp-icon-selectable[fill] {
   fill: #fff;
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-active .jp-icon-selectable-inverse[fill] {
+#tab-manager .lm-TabBar-tab.jp-mod-active .jp-icon-selectable-inverse[fill] {
   fill: var(--jp-brand-color1);
 }
 #tab-manager
-  .p-TabBar-tab.jp-mod-active
+  .lm-TabBar-tab.jp-mod-active
   .jp-icon-hover
   :hover
   .jp-icon-selectable[fill] {
@@ -200,7 +200,7 @@
 }
 
 #tab-manager
-  .p-TabBar-tab.jp-mod-active
+  .lm-TabBar-tab.jp-mod-active
   .jp-icon-hover
   :hover
   .jp-icon-selectable-inverse[fill] {
@@ -213,23 +213,23 @@
  * CSS for complex behavior of close icon of tabs in the sidebar tab manager
  */
 #tab-manager
-  .p-TabBar-tab.jp-mod-dirty
-  > .p-TabBar-tabCloseIcon
+  .lm-TabBar-tab.jp-mod-dirty
+  > .lm-TabBar-tabCloseIcon
   > :not(:hover)
   > .jp-icon3[fill] {
   fill: none;
 }
 #tab-manager
-  .p-TabBar-tab.jp-mod-dirty
-  > .p-TabBar-tabCloseIcon
+  .lm-TabBar-tab.jp-mod-dirty
+  > .lm-TabBar-tabCloseIcon
   > :not(:hover)
   > .jp-icon-busy[fill] {
   fill: var(--jp-inverse-layout-color3);
 }
 
 #tab-manager
-  .p-TabBar-tab.jp-mod-dirty.jp-mod-active
-  > .p-TabBar-tabCloseIcon
+  .lm-TabBar-tab.jp-mod-dirty.jp-mod-active
+  > .lm-TabBar-tabCloseIcon
   > :not(:hover)
   > .jp-icon-busy[fill] {
   fill: #fff;
@@ -240,16 +240,16 @@
 *  of the close icon
 * CSS for complex behavior of close icon of tabs in the main area tabbar
 */
-.p-DockPanel-tabBar
-  .p-TabBar-tab.p-mod-closable.jp-mod-dirty
-  > .p-TabBar-tabCloseIcon
+.lm-DockPanel-tabBar
+  .lm-TabBar-tab.lm-mod-closable.jp-mod-dirty
+  > .lm-TabBar-tabCloseIcon
   > :not(:hover)
   > .jp-icon3[fill] {
   fill: none;
 }
-.p-DockPanel-tabBar
-  .p-TabBar-tab.p-mod-closable.jp-mod-dirty
-  > .p-TabBar-tabCloseIcon
+.lm-DockPanel-tabBar
+  .lm-TabBar-tab.lm-mod-closable.jp-mod-dirty
+  > .lm-TabBar-tabCloseIcon
   > :not(:hover)
   > .jp-icon-busy[fill] {
   fill: var(--jp-inverse-layout-color3);

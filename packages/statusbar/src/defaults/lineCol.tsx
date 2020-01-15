@@ -100,7 +100,7 @@ class LineFormComponent extends React.Component<
           <div
             className={classes(
               lineFormWrapper,
-              'p-lineForm-wrapper',
+              'lm-lineForm-wrapper',
               this.state.hasFocus ? lineFormWrapperFocusWithin : undefined
             )}
           >

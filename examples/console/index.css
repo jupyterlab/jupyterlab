@@ -18,7 +18,7 @@ body {
   bottom: 4px;
 }
 
-#main .p-CommandPalette {
+#main .lm-CommandPalette {
   border-top: var(--jp-border-width) solid var(--jp-border-color2);
   min-width: 300px;
 }
