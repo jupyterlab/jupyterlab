@@ -630,10 +630,10 @@ namespace Private {
     let className = commands.className(id, args);
     // Add the boolean state classes.
     if (commands.isToggled(id, args)) {
-      className += ' p-mod-toggled';
+      className += ' lm-mod-toggled';
     }
     if (!commands.isVisible(id, args)) {
-      className += ' p-mod-hidden';
+      className += ' lm-mod-hidden';
     }
     const tooltip = commands.caption(id, args) || label || iconLabel;
     const onClick = () => {

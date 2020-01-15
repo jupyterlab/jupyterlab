@@ -37,7 +37,7 @@
   text-transform: uppercase;
 }
 
-#tab-manager .p-TabBar-tab {
+#tab-manager .lm-TabBar-tab {
   height: var(--jp-private-tab-manager-tab-height);
   padding: 0px 12px;
   border: none;
@@ -45,20 +45,20 @@
   overflow: visible;
 }
 
-#tab-manager .p-TabBar-tab:hover:not(.jp-mod-active) {
+#tab-manager .lm-TabBar-tab:hover:not(.jp-mod-active) {
   background: var(--jp-layout-color2);
 }
 
-#tab-manager .p-TabBar-tab:first-child {
+#tab-manager .lm-TabBar-tab:first-child {
   margin-left: 0;
 }
 
-#tab-manager .p-TabBar-tab.jp-mod-active {
+#tab-manager .lm-TabBar-tab.jp-mod-active {
   color: white;
   background: var(--jp-brand-color1);
 }
 
-#tab-manager .p-TabBar-tabLabel {
+#tab-manager .lm-TabBar-tabLabel {
   line-height: var(--jp-private-tab-manager-tab-height);
   padding-left: 4px;
 }

@@ -857,7 +857,7 @@ export class Notebook extends StaticNotebook {
     super(Private.processNotebookOptions(options));
     this.node.tabIndex = -1; // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
-    this.node.setAttribute('data-p-dragscroll', 'true');
+    this.node.setAttribute('data-lm-dragscroll', 'true');
   }
 
   /**
@@ -1281,16 +1281,16 @@ export class Notebook extends StaticNotebook {
       case 'focusout':
         this._evtFocusOut(event as MouseEvent);
         break;
-      case 'p-dragenter':
+      case 'lm-dragenter':
         this._evtDragEnter(event as IDragEvent);
         break;
-      case 'p-dragleave':
+      case 'lm-dragleave':
         this._evtDragLeave(event as IDragEvent);
         break;
-      case 'p-dragover':
+      case 'lm-dragover':
         this._evtDragOver(event as IDragEvent);
         break;
-      case 'p-drop':
+      case 'lm-drop':
         this._evtDrop(event as IDragEvent);
         break;
       default:
@@ -1315,10 +1315,10 @@ export class Notebook extends StaticNotebook {
     // Capture drag events for the notebook widget
     // in order to preempt the drag/drop handlers in the
     // code editor widgets, which can take text data.
-    node.addEventListener('p-dragenter', this, true);
-    node.addEventListener('p-dragleave', this, true);
-    node.addEventListener('p-dragover', this, true);
-    node.addEventListener('p-drop', this, true);
+    node.addEventListener('lm-dragenter', this, true);
+    node.addEventListener('lm-dragleave', this, true);
+    node.addEventListener('lm-dragover', this, true);
+    node.addEventListener('lm-drop', this, true);
   }
 
   /**
@@ -1333,10 +1333,10 @@ export class Notebook extends StaticNotebook {
     node.removeEventListener('dblclick', this);
     node.removeEventListener('focusin', this);
     node.removeEventListener('focusout', this);
-    node.removeEventListener('p-dragenter', this, true);
-    node.removeEventListener('p-dragleave', this, true);
-    node.removeEventListener('p-dragover', this, true);
-    node.removeEventListener('p-drop', this, true);
+    node.removeEventListener('lm-dragenter', this, true);
+    node.removeEventListener('lm-dragleave', this, true);
+    node.removeEventListener('lm-dragover', this, true);
+    node.removeEventListener('lm-drop', this, true);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
   }
@@ -1825,7 +1825,7 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle the `'p-dragenter'` event for the widget.
+   * Handle the `'lm-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
@@ -1844,7 +1844,7 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle the `'p-dragleave'` event for the widget.
+   * Handle the `'lm-dragleave'` event for the widget.
    */
   private _evtDragLeave(event: IDragEvent): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
@@ -1859,7 +1859,7 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle the `'p-dragover'` event for the widget.
+   * Handle the `'lm-dragover'` event for the widget.
    */
   private _evtDragOver(event: IDragEvent): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
@@ -1882,7 +1882,7 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle the `'p-drop'` event for the widget.
+   * Handle the `'lm-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {

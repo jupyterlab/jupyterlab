@@ -197,8 +197,8 @@ describe('@jupyterlab/apputils', () => {
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.disabled).to.equal(true);
-        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
-        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(true);
+        expect(buttonNode.classList.contains('lm-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('lm-mod-hidden')).to.equal(true);
         button.dispose();
       });
 
@@ -213,14 +213,14 @@ describe('@jupyterlab/apputils', () => {
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.disabled).to.equal(true);
-        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
-        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(true);
+        expect(buttonNode.classList.contains('lm-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('lm-mod-hidden')).to.equal(true);
         enabled = true;
         visible = true;
         commands.notifyCommandChanged(testLogCommandId);
         expect(buttonNode.disabled).to.equal(false);
-        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
-        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(false);
+        expect(buttonNode.classList.contains('lm-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('lm-mod-hidden')).to.equal(false);
         enabled = false;
         visible = false;
         button.dispose();

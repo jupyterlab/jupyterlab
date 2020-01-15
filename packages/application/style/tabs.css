@@ -18,30 +18,30 @@
 | Tabs in the dock panel
 |----------------------------------------------------------------------------*/
 
-.p-DockPanel-tabBar {
+.lm-DockPanel-tabBar {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color1);
   overflow: visible;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
 }
 
-.p-DockPanel-tabBar[data-orientation='horizontal'] {
+.lm-DockPanel-tabBar[data-orientation='horizontal'] {
   min-height: calc(
     var(--jp-private-horizontal-tab-height) + 2 * var(--jp-border-width)
   );
 }
 
-.p-DockPanel-tabBar[data-orientation='vertical'] {
+.lm-DockPanel-tabBar[data-orientation='vertical'] {
   min-width: 80px;
 }
 
-.p-DockPanel-tabBar > .p-TabBar-content {
+.lm-DockPanel-tabBar > .lm-TabBar-content {
   align-items: flex-end;
   min-width: 0;
   min-height: 0;
 }
 
-.p-DockPanel-tabBar .p-TabBar-tab {
+.lm-DockPanel-tabBar .lm-TabBar-tab {
   flex: 0 1 var(--jp-private-horizontal-tab-width);
   min-height: calc(
     var(--jp-private-horizontal-tab-height) + var(--jp-border-width)
@@ -56,16 +56,16 @@
   position: relative;
 }
 
-.p-DockPanel-tabBar .p-TabBar-tab:hover:not(.p-mod-current) {
+.lm-DockPanel-tabBar .lm-TabBar-tab:hover:not(.lm-mod-current) {
   background: var(--jp-layout-color1);
 }
 
-.p-DockPanel-tabBar .p-TabBar-tab:first-child {
+.lm-DockPanel-tabBar .lm-TabBar-tab:first-child {
   margin-left: 0;
 }
 
 /* This is a current tab of a tab bar in the dock panel: each tab bar has 1. */
-.p-DockPanel-tabBar .p-TabBar-tab.p-mod-current {
+.lm-DockPanel-tabBar .lm-TabBar-tab.lm-mod-current {
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color0);
   min-height: calc(
@@ -75,7 +75,7 @@
 }
 
 /* This is the main application level current tab: only 1 exists. */
-.p-DockPanel-tabBar .p-TabBar-tab.jp-mod-current:before {
+.lm-DockPanel-tabBar .lm-TabBar-tab.jp-mod-current:before {
   position: absolute;
   top: calc(-1 * var(--jp-border-width));
   left: calc(-1 * var(--jp-border-width));
@@ -86,47 +86,47 @@
 }
 
 /* This is the left tab bar current tab: only 1 exists. */
-.p-TabBar-tab.p-mod-current {
+.lm-TabBar-tab.lm-mod-current {
   color: var(--jp-ui-font-color0);
   background: var(--jp-layout-color1);
 }
 
-.p-TabBar-tab.p-mod-current:hover {
+.lm-TabBar-tab.lm-mod-current:hover {
   background: var(--jp-layout-color1);
 }
 
-.p-DockPanel-tabBar .p-TabBar.p-mod-left .p-TabBar-tab,
-.p-DockPanel-tabBar .p-TabBar.p-mod-right .p-TabBar-tab {
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab,
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab {
   flex: 0 1 40px;
   margin-top: -1px;
   line-height: 40px;
 }
 
-.p-DockPanel-tabBar .p-TabBar.p-mod-left .p-TabBar-tab {
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab {
   border-right: none;
 }
 
-.p-DockPanel-tabBar .p-TabBar.p-mod-right .p-TabBar-tab {
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab {
   border-left: none;
 }
 
-.p-DockPanel-tabBar .p-TabBar.p-mod-left .p-TabBar-tab:first-child,
-.p-DockPanel-tabBar .p-TabBar.p-mod-right .p-TabBar-tab:first-child {
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab:first-child,
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab:first-child {
   margin-top: 0;
 }
 
-.p-DockPanel-tabBar .p-TabBar.p-mod-left .p-TabBar-tab.p-mod-current,
-.p-DockPanel-tabBar .p-TabBar.p-mod-right .p-TabBar-tab.p-mod-current {
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-left .lm-TabBar-tab.lm-mod-current,
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab.lm-mod-current {
   min-width: 80px;
   max-width: 80px;
 }
 
-.p-DockPanel-tabBar .p-TabBar.p-mod-right .p-TabBar-tab.p-mod-current {
+.lm-DockPanel-tabBar .lm-TabBar.lm-mod-right .lm-TabBar-tab.lm-mod-current {
   transform: translateX(-1px);
 }
 
-.p-DockPanel-tabBar .p-TabBar-tab .p-TabBar-tabIcon,
-.p-TabBar-tab.p-mod-drag-image .p-TabBar-tabIcon {
+.lm-DockPanel-tabBar .lm-TabBar-tab .lm-TabBar-tabIcon,
+.lm-TabBar-tab.lm-mod-drag-image .lm-TabBar-tabIcon {
   width: 14px;
   background-position: left center;
   background-repeat: no-repeat;
@@ -134,15 +134,15 @@
   margin-right: 4px;
 }
 
-.p-DockPanel-tabBar .p-TabBar-tab.p-mod-current .p-TabBar-tabIcon {
+.lm-DockPanel-tabBar .lm-TabBar-tab.lm-mod-current .lm-TabBar-tabIcon {
   margin-bottom: var(--jp-border-width);
 }
 
-.p-TabBar-WindowTabLabel {
+.lm-TabBar-WindowTabLabel {
   margin-top: 4px;
 }
 
-.p-TabBar-tab.p-mod-drag-image {
+.lm-TabBar-tab.lm-mod-drag-image {
   background: var(--jp-layout-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
   border-top: var(--jp-border-width) solid var(--jp-brand-color1);

@@ -3,17 +3,17 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.p-DataGrid {
+.lm-DataGrid {
   min-width: 64px;
   min-height: 64px;
   border: 1px solid #a0a0a0;
 }
 
-.p-DataGrid-scrollCorner {
+.lm-DataGrid-scrollCorner {
   background-color: #f0f0f0;
 }
 
-.p-DataGrid-scrollCorner::after {
+.lm-DataGrid-scrollCorner::after {
   content: '';
   position: absolute;
   top: 0;

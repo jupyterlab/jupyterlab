@@ -31,7 +31,7 @@
     "watch": "tsc -b -w --listEmittedFiles"
   },
   "dependencies": {
-    "@lumino/commands": "^1.9.1",
+    "@lumino/commands": "^1.9.2",
     "@lumino/coreutils": "^1.4.2",
     "@lumino/disposable": "^1.3.4",
     "@lumino/properties": "^1.1.6",

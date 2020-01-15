@@ -705,6 +705,6 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   private _toggleFocused(): void {
     let focused = document.activeElement === this.inputNode;
-    this.toggleClass('p-mod-focused', focused);
+    this.toggleClass('lm-mod-focused', focused);
   }
 }

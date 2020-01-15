@@ -1154,10 +1154,10 @@ export abstract class AttachmentsCell extends Cell {
       case 'drop':
         this._evtNativeDrop(event as DragEvent);
         break;
-      case 'p-dragover':
+      case 'lm-dragover':
         this._evtDragOver(event as IDragEvent);
         break;
-      case 'p-drop':
+      case 'lm-drop':
         this._evtDrop(event as IDragEvent);
         break;
       default:
@@ -1178,8 +1178,8 @@ export abstract class AttachmentsCell extends Cell {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     let node = this.node;
-    node.addEventListener('p-dragover', this);
-    node.addEventListener('p-drop', this);
+    node.addEventListener('lm-dragover', this);
+    node.addEventListener('lm-drop', this);
     node.addEventListener('dragenter', this);
     node.addEventListener('dragover', this);
     node.addEventListener('drop', this);
@@ -1196,8 +1196,8 @@ export abstract class AttachmentsCell extends Cell {
     node.removeEventListener('dragover', this);
     node.removeEventListener('dragenter', this);
     node.removeEventListener('paste', this);
-    node.removeEventListener('p-dragover', this);
-    node.removeEventListener('p-drop', this);
+    node.removeEventListener('lm-dragover', this);
+    node.removeEventListener('lm-drop', this);
   }
 
   private _evtDragOver(event: IDragEvent) {
@@ -1239,7 +1239,7 @@ export abstract class AttachmentsCell extends Cell {
   }
 
   /**
-   * Handle the `'p-drop'` event for the widget.
+   * Handle the `'lm-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
     const supportedMimeTypes = toArray(
