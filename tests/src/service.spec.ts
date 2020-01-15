@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
-import { createClientSession } from '@jupyterlab/testutils';
+import { createSessionContext } from '@jupyterlab/testutils';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 import { DebuggerModel } from '../../lib/model';
 
@@ -16,68 +16,66 @@ import { IDebugger } from '../../lib/tokens';
 
 describe('Debugging support', () => {
   const service = new DebuggerService();
-  let xpythonClient: IClientSession;
-  let ipykernelClient: IClientSession;
+  let xpython: ISessionContext;
+  let ipykernel: ISessionContext;
 
   beforeAll(async () => {
-    xpythonClient = await createClientSession({
+    xpython = await createSessionContext({
       kernelPreference: {
         name: 'xpython'
       }
     });
-    ipykernelClient = await createClientSession({
+    ipykernel = await createSessionContext({
       kernelPreference: {
         name: 'python3'
       }
     });
+    await Promise.all([xpython.initialize(), ipykernel.initialize()]);
     await Promise.all([
-      (xpythonClient as ClientSession).initialize(),
-      (ipykernelClient as ClientSession).initialize()
-    ]);
-    await Promise.all([
-      xpythonClient.kernel.ready,
-      ipykernelClient.kernel.ready
+      xpython.session?.kernel?.info,
+      ipykernel.session?.kernel?.info
     ]);
   });
 
   afterAll(async () => {
-    await Promise.all([xpythonClient.shutdown(), ipykernelClient.shutdown()]);
+    await Promise.all([xpython.shutdown(), ipykernel.shutdown()]);
   });
 
   describe('#isAvailable', () => {
     it('should return true for kernels that have support for debugging', async () => {
-      const enabled = await service.isAvailable(xpythonClient);
+      const enabled = await service.isAvailable(xpython.session);
       expect(enabled).to.be.true;
     });
 
     it('should return false for kernels that do not have support for debugging', async () => {
-      const enabled = await service.isAvailable(ipykernelClient);
+      const enabled = await service.isAvailable(ipykernel.session);
       expect(enabled).to.be.false;
     });
   });
 });
 
 describe('DebuggerService', () => {
-  let client: IClientSession;
+  let sessionContext: ISessionContext;
   let model: DebuggerModel;
   let session: IDebugger.ISession;
   let service: IDebugger;
 
   beforeEach(async () => {
-    client = await createClientSession({
+    sessionContext = await createSessionContext({
       kernelPreference: {
         name: 'xpython'
       }
     });
-    await (client as ClientSession).initialize();
-    await client.kernel.ready;
-    session = new DebugSession({ client });
+    await sessionContext.initialize();
+    await sessionContext.ready;
+    await sessionContext.session.kernel.info;
+    session = new DebugSession({ connection: sessionContext.session });
     model = new DebuggerModel();
     service = new DebuggerService();
   });
 
   afterEach(async () => {
-    await client.shutdown();
+    await sessionContext.shutdown();
     session.dispose();
     (service as DebuggerService).dispose();
   });
@@ -218,7 +216,7 @@ describe('DebuggerService', () => {
         });
 
         // trigger a manual execute request
-        client.kernel.requestExecute({ code });
+        sessionContext.session.kernel.requestExecute({ code });
 
         // wait for the first stopped event and variables changed
         await variablesChanged.promise;

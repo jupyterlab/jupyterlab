@@ -7,9 +7,9 @@ import {
   IEditorServices
 } from '@jupyterlab/codeeditor';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { CallstackModel } from '../callstack/model';
 

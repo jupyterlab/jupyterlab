@@ -5,7 +5,7 @@ import {
   CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
 import { Debugger } from '../../lib/debugger';
 

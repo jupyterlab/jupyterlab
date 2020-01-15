@@ -7,7 +7,7 @@ import { ToolbarButton } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { Panel } from '@phosphor/widgets';
+import { Panel } from '@lumino/widgets';
 
 import { IDebugger } from '../tokens';
 
@@ -38,7 +38,7 @@ export class Sources extends Panel {
     header.toolbar.addItem(
       'open',
       new ToolbarButton({
-        iconClassName: 'jp-ViewBreakpointIcon',
+        iconClass: 'jp-ViewBreakpointIcon',
         onClick: () => model.open(),
         tooltip: 'Open in the Main Area'
       })

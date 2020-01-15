@@ -3,7 +3,7 @@
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
-import { ArrayExt } from '@phosphor/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 
 import { ITheme, ObjectInspector, ObjectRootLabel } from 'react-inspector';
 

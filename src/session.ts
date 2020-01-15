@@ -1,13 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils';
-
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDebugger } from './tokens';
 
@@ -21,7 +19,7 @@ export class DebugSession implements IDebugger.ISession {
    * @param options - The debug session instantiation options.
    */
   constructor(options: DebugSession.IOptions) {
-    this.client = options.client;
+    this.connection = options.connection;
   }
 
   /**
@@ -39,45 +37,39 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
-   * Returns the API client session to connect to a debugger.
+   * Returns the API session connection to connect to a debugger.
    */
-  get client(): IClientSession | Session.ISession {
-    return this._client;
+  get connection(): Session.ISessionConnection {
+    return this._connection;
   }
 
   /**
-   * Sets the API client session to connect to a debugger to
+   * Sets the API session connection to connect to a debugger to
    * the given parameter.
    *
-   * @param client - The new API client session.
+   * @param connection - The new API session connection.
    */
-  set client(client: IClientSession | Session.ISession | null) {
-    if (this._client) {
-      this._client.iopubMessage.disconnect(this._handleEvent, this);
+  set connection(connection: Session.ISessionConnection | null) {
+    if (this._connection) {
+      this._connection.iopubMessage.disconnect(this._handleEvent, this);
     }
 
-    this._client = client;
+    this._connection = connection;
 
-    if (!this._client) {
+    if (!this._connection) {
       this._isStarted = false;
       return;
     }
 
-    this._client.iopubMessage.connect(this._handleEvent, this);
-
-    if (this.client instanceof ClientSession) {
-      this._ready = this.client.ready.then(_ => this.client.kernel.ready);
-    } else {
-      this._ready = this.client.kernel.ready;
-    }
-    this._clientChanged.emit(client);
+    this._connection.iopubMessage.connect(this._handleEvent, this);
+    this._connectionChanged.emit(this._connection);
   }
 
   /**
-   * Signal for changed client of session
+   * Signal emitted when the connection of a debug session changes.
    */
-  get clientChanged(): ISignal<this, IClientSession | Session.ISession> {
-    return this._clientChanged;
+  get connectionChanged(): ISignal<this, Session.ISessionConnection> {
+    return this._connectionChanged;
   }
 
   /**
@@ -110,11 +102,11 @@ export class DebugSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
-    await this._ready;
+    await this._ready();
     await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
-      adapterID: this.client.kernel?.name ?? '',
+      adapterID: this.connection.kernel?.name ?? '',
       pathFormat: 'path',
       linesStartAt1: true,
       columnsStartAt1: true,
@@ -133,7 +125,7 @@ export class DebugSession implements IDebugger.ISession {
    * Stop the running debug session.
    */
   async stop(): Promise<void> {
-    await this._ready;
+    await this._ready();
     await this.sendRequest('disconnect', {
       restart: false,
       terminateDebuggee: true
@@ -145,7 +137,7 @@ export class DebugSession implements IDebugger.ISession {
    * Restore the state of a debug session.
    */
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
-    await this._ready;
+    await this._ready();
     const message = await this.sendRequest('debugInfo', {});
     this._isStarted = message.body.isStarted;
     return message;
@@ -160,7 +152,7 @@ export class DebugSession implements IDebugger.ISession {
     command: K,
     args: IDebugger.ISession.Request[K]
   ): Promise<IDebugger.ISession.Response[K]> {
-    await this._ready;
+    await this._ready();
     const message = await this._sendDebugMessage({
       type: 'request',
       seq: this._seq++,
@@ -176,7 +168,7 @@ export class DebugSession implements IDebugger.ISession {
    * @param message - the event message.
    */
   private _handleEvent(
-    sender: IClientSession | Session.ISession,
+    sender: Session.ISessionConnection,
     message: KernelMessage.IIOPubMessage
   ): void {
     const msgType = message.header.msg_type;
@@ -194,7 +186,7 @@ export class DebugSession implements IDebugger.ISession {
   private async _sendDebugMessage(
     msg: KernelMessage.IDebugRequestMsg['content']
   ): Promise<KernelMessage.IDebugReplyMsg> {
-    const kernel = this.client.kernel;
+    const kernel = this.connection.kernel;
     if (!kernel) {
       return Promise.reject(
         new Error('A kernel is required to send debug messages.')
@@ -209,12 +201,18 @@ export class DebugSession implements IDebugger.ISession {
     return reply.promise;
   }
 
+  /**
+   * A promise that resolves when the kernel is ready.
+   */
+  private _ready() {
+    return this._connection?.kernel?.info;
+  }
+
   private _seq = 0;
-  private _client: IClientSession | Session.ISession;
-  private _ready: Promise<void>;
+  private _connection: Session.ISessionConnection;
   private _isDisposed = false;
   private _isStarted = false;
-  private _clientChanged = new Signal<this, IClientSession | Session.ISession>(
+  private _connectionChanged = new Signal<this, Session.ISessionConnection>(
     this
   );
   private _disposed = new Signal<this, void>(this);
@@ -228,10 +226,13 @@ export class DebugSession implements IDebugger.ISession {
  * A namespace for `DebugSession` statics.
  */
 export namespace DebugSession {
+  /**
+   * Instantiation options for a `DebugSession`.
+   */
   export interface IOptions {
     /**
-     * The client session used by the debug session.
+     * The session connection used by the debug session.
      */
-    client: IClientSession | Session.ISession;
+    connection: Session.ISessionConnection;
   }
 }

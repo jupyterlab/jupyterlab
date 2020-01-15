@@ -3,7 +3,7 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { IClientSession, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
+import { ToolbarButton } from '@jupyterlab/apputils';
 
 import { ConsolePanel } from '@jupyterlab/console';
 
@@ -37,24 +37,12 @@ function updateToolbar(
 ) {
   const button = new ToolbarButton({
     className: 'jp-DebuggerSwitchButton',
-    iconClassName: 'jp-ToggleSwitch',
+    iconClass: 'jp-ToggleSwitch',
     onClick,
     tooltip: 'Enable / Disable Debugger'
   });
 
-  const getToolbar = (): Toolbar => {
-    if (!(widget instanceof ConsolePanel)) {
-      return widget.toolbar;
-    }
-    const toolbar = widget.widgets.find(w => w instanceof Toolbar) as Toolbar;
-    return toolbar ?? new Toolbar();
-  };
-
-  const toolbar = getToolbar();
-  const itemAdded = toolbar.addItem('debugger-button', button);
-  if (itemAdded && widget instanceof ConsolePanel) {
-    widget.insertWidget(0, toolbar);
-  }
+  widget.toolbar.addItem('debugger-button', button);
   return button;
 }
 
@@ -93,44 +81,45 @@ export class DebuggerHandler {
    * Update a debug handler for the given widget, and
    * handle kernel changed events.
    * @param widget The widget to update.
+   * @param connection The session connection.
    */
   async update(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
-    client: IClientSession | Session.ISession
+    connection: Session.ISessionConnection
   ): Promise<void> {
     const updateHandler = async () => {
-      return this._update(widget, client);
+      return this._update(widget, connection);
     };
 
     // setup handler when the kernel changes
-    const kernelChangedHandler = this._kernelChangedHandlers[client.path];
+    const kernelChangedHandler = this._kernelChangedHandlers[connection.path];
     if (kernelChangedHandler) {
-      client.kernelChanged.disconnect(kernelChangedHandler);
+      connection.kernelChanged.disconnect(kernelChangedHandler);
     }
-    client.kernelChanged.connect(updateHandler);
-    this._kernelChangedHandlers[client.path] = updateHandler;
+    connection.kernelChanged.connect(updateHandler);
+    this._kernelChangedHandlers[connection.path] = updateHandler;
 
     // setup handler when the status of the kernel changes (restart)
     // TODO: is there a better way to handle restarts?
     let restarted = false;
     const statusChanged = async () => {
       // wait for the first `idle` status after a restart
-      if (restarted && client.status === 'idle') {
+      if (restarted && connection.kernel?.status === 'idle') {
         restarted = false;
         return updateHandler();
       }
       // handle `starting`, `restarting` and `autorestarting`
-      if (client.status.endsWith('starting')) {
+      if (connection.kernel?.status.endsWith('starting')) {
         restarted = true;
       }
     };
 
-    const statusChangedHandler = this._statusChangedHandlers[client.path];
+    const statusChangedHandler = this._statusChangedHandlers[connection.path];
     if (statusChangedHandler) {
-      client.statusChanged.disconnect(statusChangedHandler);
+      connection.statusChanged.disconnect(statusChangedHandler);
     }
-    client.statusChanged.connect(statusChanged);
-    this._statusChangedHandlers[client.path] = statusChanged;
+    connection.statusChanged.connect(statusChanged);
+    this._statusChangedHandlers[connection.path] = statusChanged;
 
     return updateHandler();
   }
@@ -138,10 +127,11 @@ export class DebuggerHandler {
   /**
    * Update a debug handler for the given widget.
    * @param widget The widget to update.
+   * @param connection The session connection.
    */
   private async _update(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
-    client: IClientSession | Session.ISession
+    connection: Session.ISessionConnection
   ): Promise<void> {
     if (!this._service.model) {
       return;
@@ -201,7 +191,7 @@ export class DebuggerHandler {
 
       // clear the model if the handler being removed corresponds
       // to the current active debug session
-      if (this._service.session?.client?.path === client.path) {
+      if (this._service.session?.connection?.path === connection.path) {
         const model = this._service.model as DebuggerModel;
         model.clear();
       }
@@ -243,7 +233,7 @@ export class DebuggerHandler {
       }
     };
 
-    const debuggingEnabled = await this._service.isAvailable(client);
+    const debuggingEnabled = await this._service.isAvailable(connection);
     if (!debuggingEnabled) {
       removeHandlers();
       removeToolbarButton();
@@ -252,9 +242,9 @@ export class DebuggerHandler {
 
     // update the active debug session
     if (!this._service.session) {
-      this._service.session = new DebugSession({ client: client });
+      this._service.session = new DebugSession({ connection });
     } else {
-      this._service.session.client = client;
+      this._service.session.connection = connection;
     }
 
     await this._service.restoreState(false);

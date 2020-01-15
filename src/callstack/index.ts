@@ -3,9 +3,9 @@
 
 import { CommandToolbarButton } from '@jupyterlab/apputils';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Panel } from '@phosphor/widgets';
+import { Panel } from '@lumino/widgets';
 
 import { CallstackBody } from './body';
 

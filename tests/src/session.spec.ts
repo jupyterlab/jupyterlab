@@ -3,13 +3,13 @@
 
 import { expect } from 'chai';
 
-import { ClientSession, IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
-import { createClientSession } from '@jupyterlab/testutils';
+import { createSessionContext } from '@jupyterlab/testutils';
 
-import { find } from '@phosphor/algorithm';
+import { find } from '@lumino/algorithm';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
@@ -18,25 +18,28 @@ import { IDebugger } from '../../lib/tokens';
 import { DebugSession } from '../../lib/session';
 
 describe('DebugSession', () => {
-  let client: IClientSession;
+  let sessionContext: ISessionContext;
 
   beforeEach(async () => {
-    client = await createClientSession({
+    sessionContext = await createSessionContext({
       kernelPreference: {
         name: 'xpython'
       }
     });
-    await (client as ClientSession).initialize();
-    await client.kernel.ready;
+    await sessionContext.initialize();
+    await sessionContext.ready;
+    await sessionContext.session?.kernel?.info;
   });
 
   afterEach(async () => {
-    await client.shutdown();
+    await sessionContext.shutdown();
   });
 
   describe('#isDisposed', () => {
     it('should return whether the object is disposed', () => {
-      const debugSession = new DebugSession({ client });
+      const debugSession = new DebugSession({
+        connection: sessionContext.session
+      });
       expect(debugSession.isDisposed).to.equal(false);
       debugSession.dispose();
       expect(debugSession.isDisposed).to.equal(true);
@@ -45,7 +48,9 @@ describe('DebugSession', () => {
 
   describe('#eventMessage', () => {
     it('should be emitted when sending debug messages', async () => {
-      const debugSession = new DebugSession({ client });
+      const debugSession = new DebugSession({
+        connection: sessionContext.session
+      });
       let events: string[] = [];
       debugSession.eventMessage.connect((sender, event) => {
         events.push(event.event);
@@ -60,7 +65,9 @@ describe('DebugSession', () => {
     let debugSession: DebugSession;
 
     beforeEach(async () => {
-      debugSession = new DebugSession({ client });
+      debugSession = new DebugSession({
+        connection: sessionContext.session
+      });
       await debugSession.start();
     });
 
@@ -103,19 +110,22 @@ describe('protocol', () => {
     { line: 5 }
   ];
 
-  let client: IClientSession;
+  let sessionContext: ISessionContext;
   let debugSession: DebugSession;
   let threadId: number = 1;
 
   beforeEach(async () => {
-    client = await createClientSession({
+    sessionContext = await createSessionContext({
       kernelPreference: {
         name: 'xpython'
       }
     });
-    await (client as ClientSession).initialize();
-    await client.kernel.ready;
-    debugSession = new DebugSession({ client });
+    await sessionContext.initialize();
+    await sessionContext.ready;
+    await sessionContext.session.kernel.info;
+    debugSession = new DebugSession({
+      connection: sessionContext.session
+    });
     await debugSession.start();
 
     const stoppedFuture = new PromiseDelegate<void>();
@@ -146,7 +156,7 @@ describe('protocol', () => {
     await debugSession.sendRequest('configurationDone', {});
 
     // trigger an execute_request
-    client.kernel.requestExecute({ code });
+    sessionContext.session.kernel.requestExecute({ code });
 
     // wait for the first stopped event
     await stoppedFuture.promise;
@@ -155,8 +165,8 @@ describe('protocol', () => {
   afterEach(async () => {
     await debugSession.stop();
     debugSession.dispose();
-    await client.shutdown();
-    client.dispose();
+    await sessionContext.shutdown();
+    sessionContext.dispose();
   });
 
   describe('#debugInfo', () => {

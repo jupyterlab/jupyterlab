@@ -1,1 +1,6 @@
+# TODO: remove the following and add jupyterlab=2
+# to environment.yml when available
+
+python -m pip install -U --pre jupyterlab
+
 jlpm && jlpm build && jupyter labextension install .

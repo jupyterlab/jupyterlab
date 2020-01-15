@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
  * The header for a Variables Panel.

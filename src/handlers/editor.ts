@@ -9,9 +9,9 @@ import { ActivityMonitor } from '@jupyterlab/coreutils';
 
 import { IObservableString } from '@jupyterlab/observables';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { Editor } from 'codemirror';
 
@@ -40,7 +40,7 @@ export class EditorHandler implements IDisposable {
    * @param options The instantiation options for a EditorHandler.
    */
   constructor(options: EditorHandler.IOptions) {
-    this._id = options.debuggerService.session.client.path;
+    this._id = options.debuggerService.session.connection.path;
     this._path = options.path;
     this._debuggerService = options.debuggerService;
     this._editor = options.editor;
@@ -151,7 +151,7 @@ export class EditorHandler implements IDisposable {
 
     const breakpoints = this._getBreakpointsFromEditor().map(lineInfo => {
       return Private.createBreakpoint(
-        this._debuggerService.session.client.name,
+        this._debuggerService.session.connection.name,
         lineInfo.line + 1
       );
     });
@@ -171,7 +171,7 @@ export class EditorHandler implements IDisposable {
   private _onGutterClick = (editor: Editor, lineNumber: number) => {
     const info = editor.lineInfo(lineNumber);
 
-    if (!info || this._id !== this._debuggerService.session.client.path) {
+    if (!info || this._id !== this._debuggerService.session.connection.path) {
       return;
     }
 
@@ -182,7 +182,7 @@ export class EditorHandler implements IDisposable {
     } else {
       breakpoints.push(
         Private.createBreakpoint(
-          this._path ?? this._debuggerService.session.client.name,
+          this._path ?? this._debuggerService.session.connection.name,
           info.line + 1
         )
       );
@@ -201,7 +201,7 @@ export class EditorHandler implements IDisposable {
   private _addBreakpointsToEditor() {
     const editor = this._editor as CodeMirrorEditor;
     const breakpoints = this._getBreakpoints();
-    if (this._id !== this._debuggerService.session.client.path) {
+    if (this._id !== this._debuggerService.session.connection.path) {
       return;
     }
     EditorHandler.clearGutter(editor);
