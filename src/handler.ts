@@ -92,7 +92,6 @@ export class DebuggerHandler {
   /**
    * Update a debug handler for the given widget, and
    * handle kernel changed events.
-   * @param debug The debug service.
    * @param widget The widget to update.
    */
   async update(
@@ -138,7 +137,6 @@ export class DebuggerHandler {
 
   /**
    * Update a debug handler for the given widget.
-   * @param debug The debug service.
    * @param widget The widget to update.
    */
   private async _update(
