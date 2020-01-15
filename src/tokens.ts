@@ -159,6 +159,14 @@ export namespace IDebugger {
     >;
 
     /**
+     * Signal for changed client of session
+     */
+    readonly clientChanged: ISignal<
+      IDebugger.ISession,
+      IClientSession | Session.ISession
+    >;
+
+    /**
      * Start a new debug session.
      */
     start(): Promise<void>;

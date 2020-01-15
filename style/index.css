@@ -27,3 +27,9 @@
 .jp-Document .jp-Toolbar {
   justify-content: flex-end;
 }
+
+.jp-left-truncated {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+}

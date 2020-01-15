@@ -3,7 +3,7 @@
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { SplitPanel } from '@phosphor/widgets';
+import { Panel, SplitPanel } from '@phosphor/widgets';
 
 import { Breakpoints } from './breakpoints';
 
@@ -14,6 +14,8 @@ import { DebuggerModel } from './model';
 import { DebuggerService } from './service';
 
 import { Sources } from './sources';
+
+import { SidebarHeader } from './header';
 
 import { IDebugger } from './tokens';
 
@@ -26,7 +28,7 @@ export namespace Debugger {
   /**
    * A debugger sidebar.
    */
-  export class Sidebar extends SplitPanel {
+  export class Sidebar extends Panel {
     /**
      * Instantiate a new Debugger.Sidebar
      * @param options The instantiation options for a Debugger.Sidebar
@@ -35,7 +37,7 @@ export namespace Debugger {
       super();
       this.id = 'jp-debugger-sidebar';
       this.title.iconClass = 'jp-BugIcon jp-SideBar-tabIcon';
-      this.orientation = 'vertical';
+      this.addClass('jp-DebuggerSidebar');
 
       const { callstackCommands, editorServices, service } = options;
 
@@ -61,12 +63,23 @@ export namespace Debugger {
         editorServices
       });
 
-      this.addWidget(this.variables);
-      this.addWidget(this.callstack);
-      this.addWidget(this.breakpoints);
-      this.addWidget(this.sources);
+      /**
+       * The header of Widget with current name of session.
+       */
+      const header = new SidebarHeader(this.service);
 
-      this.addClass('jp-DebuggerSidebar');
+      this.addWidget(header);
+
+      const body = new SplitPanel();
+
+      body.orientation = 'vertical';
+      body.addWidget(this.variables);
+      body.addWidget(this.callstack);
+      body.addWidget(this.breakpoints);
+      body.addWidget(this.sources);
+      body.addClass('jp-DebuggerSidebar-body');
+
+      this.addWidget(body);
     }
 
     /**
