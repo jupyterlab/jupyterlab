@@ -246,6 +246,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();
     } else {
+      // this always run even when we start debugging and run, ITS bug!
       this._clearModel();
       this._clearSignals();
     }
