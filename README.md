@@ -35,13 +35,12 @@ The current master branch targets the JupyterLab 2.0 beta release.
 
 ```bash
 # Create a new conda environment
-conda create -n jupyterlab-debugger -c conda-forge nodejs xeus-python=0.6 ptvsd
+conda create -n jupyterlab-debugger -c conda-forge \
+                                    -c conda-forge/label/prerelease-jupyterlab \
+                                    nodejs xeus-python=0.6 ptvsd jupyterlab=2
 
 # Activate the conda environment
 conda activate jupyterlab-debugger
-
-# Install JupyterLab 2.0
-python -m pip install --pre -U jupyterlab
 
 # Install dependencies
 jlpm
