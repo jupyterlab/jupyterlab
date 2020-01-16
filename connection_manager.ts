@@ -1,4 +1,4 @@
-import { VirtualDocument } from './virtual/document';
+import { VirtualDocument, VirtualDocumentInfo } from './virtual/document';
 import { LSPConnection } from './connection';
 import { Signal } from '@phosphor/signaling';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
@@ -94,23 +94,12 @@ export class DocumentConnectionManager {
       language
     );
 
-    let socket = new WebSocket(uris.socket);
+    virtual_document.document_info = new VirtualDocumentInfo(
+      virtual_document,
+      uris.document
+    );
 
-    let connection = new LSPConnection({
-      languageId: language,
-      serverUri: uris.server,
-      rootUri: uris.base,
-      documentUri: uris.document,
-      documentText: () => {
-        // NOTE: Update is async now and this is not really used, as an alternative method
-        // which is compatible with async is used.
-        // This should be only used in the initialization step.
-        // if (main_connection.isConnected) {
-        //  console.warn('documentText is deprecated for use in JupyterLab LSP');
-        // }
-        return virtual_document.value;
-      }
-    }).connect(socket);
+    const connection = Private.connection(language, uris);
 
     connection.on('error', e => {
       console.warn(e);
@@ -137,7 +126,16 @@ export class DocumentConnectionManager {
       }
     });
 
+    if (connection.isReady) {
+      connection.sendOpen(virtual_document.document_info);
+    } else {
+      connection.on('serverInitialized', () => {
+        connection.sendOpen(virtual_document.document_info);
+      });
+    }
+
     this.connections.set(virtual_document.id_path, connection);
+
     return connection;
   }
 
@@ -224,7 +222,7 @@ export namespace DocumentConnectionManager {
   export function solve_uris(
     virtual_document: VirtualDocument,
     language: string
-  ) {
+  ): IURIs {
     const wsBase = PageConfig.getBaseUrl().replace(/^http/, 'ws');
     const rootUri = PageConfig.getOption('rootUri');
     const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
@@ -239,5 +237,36 @@ export namespace DocumentConnectionManager {
       server: URLExt.join('ws://jupyter-lsp', language),
       socket: URLExt.join(wsBase, 'lsp', language)
     };
+  }
+
+  export interface IURIs {
+    base: string;
+    document: string;
+    server: string;
+    socket: string;
+  }
+}
+
+namespace Private {
+  type TConnectionKey = [string, string, string];
+
+  const _connections = new Map<[string, string, string], LSPConnection>();
+
+  export function connection(
+    language: string,
+    uris: DocumentConnectionManager.IURIs
+  ) {
+    const key: TConnectionKey = [language, uris.server, uris.base];
+    if (!_connections.has(key)) {
+      console.log('opening new connection for', ...key);
+      const socket = new WebSocket(uris.socket);
+      const connection = new LSPConnection({
+        languageId: language,
+        serverUri: uris.server,
+        rootUri: uris.base
+      }).connect(socket);
+      _connections.set(key, connection);
+    }
+    return _connections.get(key);
   }
 }

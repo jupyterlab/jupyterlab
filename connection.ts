@@ -7,7 +7,8 @@ import {
   ILspOptions,
   IPosition,
   ITokenInfo,
-  LspWsConnection
+  LspWsConnection,
+  IDocumentInfo
 } from 'lsp-ws-connection';
 import { CompletionTriggerKind } from './lsp';
 import { until_ready } from './utils';
@@ -20,13 +21,14 @@ export class LSPConnection extends LspWsConnection {
   }
 
   public sendSelectiveChange(
-    changeEvent: lsProtocol.TextDocumentContentChangeEvent
+    changeEvent: lsProtocol.TextDocumentContentChangeEvent,
+    documentInfo: IDocumentInfo
   ) {
-    this._sendChange([changeEvent]);
+    this._sendChange([changeEvent], documentInfo);
   }
 
-  public sendFullTextChange(text: string): void {
-    this._sendChange([{ text }]);
+  public sendFullTextChange(text: string, documentInfo: IDocumentInfo): void {
+    this._sendChange([{ text }], documentInfo);
   }
 
   public isRenameSupported() {
@@ -35,7 +37,11 @@ export class LSPConnection extends LspWsConnection {
     );
   }
 
-  async rename(location: IPosition, newName: string): Promise<boolean> {
+  async rename(
+    location: IPosition,
+    documentInfo: IDocumentInfo,
+    newName: string
+  ): Promise<boolean> {
     if (!this.isConnected || !this.isRenameSupported()) {
       return;
     }
@@ -44,7 +50,7 @@ export class LSPConnection extends LspWsConnection {
       this.connection
         .sendRequest('textDocument/rename', {
           textDocument: {
-            uri: this.documentInfo.documentUri
+            uri: documentInfo.uri
           },
           position: {
             line: location.line,
@@ -95,15 +101,16 @@ export class LSPConnection extends LspWsConnection {
   }
 
   private _sendChange(
-    changeEvents: lsProtocol.TextDocumentContentChangeEvent[]
+    changeEvents: lsProtocol.TextDocumentContentChangeEvent[],
+    documentInfo: IDocumentInfo
   ) {
     if (!this.isConnected || !this.isInitialized) {
       return;
     }
     const textDocumentChange: lsProtocol.DidChangeTextDocumentParams = {
       textDocument: {
-        uri: this.documentInfo.documentUri,
-        version: this.documentVersion
+        uri: documentInfo.uri,
+        version: documentInfo.version
       } as lsProtocol.VersionedTextDocumentIdentifier,
       contentChanges: changeEvents
     };
@@ -111,12 +118,13 @@ export class LSPConnection extends LspWsConnection {
       'textDocument/didChange',
       textDocumentChange
     );
-    this.documentVersion++;
+    documentInfo.version++;
   }
 
   public async getCompletion(
     location: IPosition,
     token: ITokenInfo,
+    documentInfo: IDocumentInfo,
     triggerCharacter: string,
     triggerKind: CompletionTriggerKind
   ): Promise<lsProtocol.CompletionItem[]> {
@@ -133,7 +141,7 @@ export class LSPConnection extends LspWsConnection {
       this.connection
         .sendRequest('textDocument/completion', {
           textDocument: {
-            uri: this.documentInfo.documentUri
+            uri: documentInfo.uri
           },
           position: {
             line: location.line,

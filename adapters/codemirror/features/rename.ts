@@ -45,7 +45,7 @@ export class Rename extends CodeMirrorLSPFeature {
         })
           .then(value => {
             connection
-              .rename(virtual_position, value.value)
+              .rename(virtual_position, document.document_info, value.value)
               .catch(handle_failure);
           })
           .catch(handle_failure);

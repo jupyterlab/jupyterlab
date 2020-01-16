@@ -278,7 +278,7 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
   protected async apply_edit(
     workspaceEdit: lsProtocol.WorkspaceEdit
   ): Promise<IEditOutcome> {
-    let current_uri = this.connection.getDocumentUri();
+    let current_uri = this.virtual_document.document_info.uri;
     // Specs: documentChanges are preferred over changes
     let changes = workspaceEdit.documentChanges
       ? workspaceEdit.documentChanges.map(

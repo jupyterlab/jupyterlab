@@ -14,6 +14,7 @@ import {
   IVirtualPosition
 } from '../positioning';
 import IRange = CodeEditor.IRange;
+import { IDocumentInfo } from 'lsp-ws-connection/src';
 
 type language = string;
 
@@ -84,6 +85,32 @@ export function is_within_range(
 }
 
 /**
+ * a virtual implementation of IDocumentInfo
+ */
+export class VirtualDocumentInfo implements IDocumentInfo {
+  private _document: VirtualDocument;
+  private _uri: string;
+  version = 0;
+
+  constructor(document: VirtualDocument, uri: string) {
+    this._document = document;
+    this._uri = uri;
+  }
+
+  get text() {
+    return this._document.value;
+  }
+
+  get uri() {
+    return this._uri;
+  }
+
+  get languageId() {
+    return this._document.language;
+  }
+}
+
+/**
  * A notebook can hold one or more virtual documents; there is always one,
  * "root" document, corresponding to the language of the kernel. All other
  * virtual documents are extracted out of the notebook, based on magics,
@@ -107,6 +134,10 @@ export class VirtualDocument {
   public foreign_document_opened: Signal<VirtualDocument, IForeignContext>;
   public readonly instance_id: number;
   public standalone: boolean;
+  /**
+   * the remote document uri, version and other server-related info
+   */
+  public document_info: IDocumentInfo;
   /**
    * Virtual lines keep all the lines present in the document AND extracted to the foreign document.
    */

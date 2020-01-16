@@ -201,6 +201,7 @@ export class LSPConnector extends DataConnector<
           end,
           text: token.value
         },
+        document.document_info,
         typed_character,
         this.trigger_kind
       )

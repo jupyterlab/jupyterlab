@@ -128,7 +128,10 @@ export class Signature extends CodeMirrorLSPFeature {
         'Signature will be requested for',
         virtual_position
       );
-      this.connection.getSignatureHelp(virtual_position);
+      this.connection.getSignatureHelp(
+        virtual_position,
+        this.virtual_document.document_info
+      );
     }
   }
 }

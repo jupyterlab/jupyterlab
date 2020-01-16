@@ -34,6 +34,7 @@ import IPaths = JupyterFrontEnd.IPaths;
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './adapters/jupyterlab/components/statusbar';
 import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
+import { DocumentConnectionManager } from './connection_manager';
 
 const lsp_commands: Array<IFeatureCommand> = [].concat(
   ...lsp_features.map(feature => feature.commands)
@@ -69,6 +70,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell,
     status_bar: IStatusBar
   ) => {
+    const connection_manager = new DocumentConnectionManager();
     // temporary workaround for getting the absolute path
     let server_root = paths.directories.serverRoot;
     if (server_root.startsWith('~')) {
@@ -153,7 +155,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
           app,
           completion_manager,
           rendermime_registry,
-          server_root
+          server_root,
+          connection_manager
         );
         file_editor_adapters.set(fileEditor.id, adapter);
       }
@@ -176,7 +179,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
         app,
         completion_manager,
         rendermime_registry,
-        server_root
+        server_root,
+        connection_manager
       );
       notebook_adapters.set(widget.id, adapter);
     });

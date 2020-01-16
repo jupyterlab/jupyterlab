@@ -12,15 +12,15 @@ export class Highlights extends CodeMirrorLSPFeature {
   static commands: Array<IFeatureCommand> = [
     {
       id: 'highlight-references',
-      execute: ({ connection, virtual_position }) =>
-        connection.getReferences(virtual_position),
+      execute: ({ connection, virtual_position, document }) =>
+        connection.getReferences(virtual_position, document.document_info),
       is_enabled: ({ connection }) => connection.isReferencesSupported(),
       label: 'Highlight references'
     },
     {
       id: 'highlight-type-definition',
-      execute: ({ connection, virtual_position }) =>
-        connection.getTypeDefinition(virtual_position),
+      execute: ({ connection, virtual_position, document }) =>
+        connection.getTypeDefinition(virtual_position, document.document_info),
       is_enabled: ({ connection }) => connection.isTypeDefinitionSupported(),
       label: 'Highlight type definition'
     }
@@ -88,7 +88,10 @@ export class Highlights extends CodeMirrorLSPFeature {
       let virtual_position = this.virtual_editor.root_position_to_virtual_position(
         root_position
       );
-      this.connection.getDocumentHighlights(virtual_position);
+      this.connection.getDocumentHighlights(
+        virtual_position,
+        this.virtual_document.document_info
+      );
     } catch (e) {
       console.warn('Could not get highlights:', e);
     }

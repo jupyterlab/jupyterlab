@@ -14,6 +14,7 @@ import { foreign_code_extractors } from '../../extractors/defaults';
 import { Cell } from '@jupyterlab/cells';
 import { nbformat } from '@jupyterlab/coreutils';
 import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
+import { DocumentConnectionManager } from '../../connection_manager';
 
 export class NotebookAdapter extends JupyterLabWidgetAdapter {
   editor: Notebook;
@@ -30,14 +31,16 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     app: JupyterFrontEnd,
     completion_manager: ICompletionManager,
     rendermime_registry: IRenderMimeRegistry,
-    server_root: string
+    server_root: string,
+    connection_manager: DocumentConnectionManager
   ) {
     super(
       app,
       editor_widget,
       rendermime_registry,
       'completer:invoke-notebook',
-      server_root
+      server_root,
+      connection_manager
     );
     this.editor = editor_widget.content;
     this.completion_manager = completion_manager;

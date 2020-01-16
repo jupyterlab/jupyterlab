@@ -3,14 +3,15 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../../../converter';
 import { IVirtualPosition } from '../../../positioning';
 import { uri_to_contents_path, uris_equal } from '../../../utils';
+import { IDocumentInfo } from 'lsp-ws-connection/src';
 
 export class JumpToDefinition extends CodeMirrorLSPFeature {
   name = 'JumpToDefinition';
   static commands: Array<IFeatureCommand> = [
     {
       id: 'jump-to-definition',
-      execute: ({ connection, virtual_position }) =>
-        connection.getDefinition(virtual_position),
+      execute: ({ connection, virtual_position, document }) =>
+        connection.getDefinition(virtual_position, document.document_info),
       is_enabled: ({ connection }) => connection.isDefinitionSupported(),
       label: 'Jump to definition'
     }
@@ -26,9 +27,9 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
   }
 
   async handle_jump(
-    location_or_locations: lsProtocol.Location | lsProtocol.Location[]
+    location_or_locations: lsProtocol.Location | lsProtocol.Location[],
+    document_info: IDocumentInfo
   ) {
-    let connection = this.connection;
     // some language servers appear to return a single object
     const locations = Array.isArray(location_or_locations)
       ? location_or_locations
@@ -46,7 +47,7 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
     let location = locations[0];
 
     let uri: string = decodeURI(location.uri);
-    let current_uri = connection.getDocumentUri();
+    let current_uri = document_info.uri;
 
     let virtual_position = PositionConverter.lsp_to_cm(
       location.range.start

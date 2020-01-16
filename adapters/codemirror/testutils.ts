@@ -85,12 +85,7 @@ export abstract class FeatureTestEnvironment
     return new LSPConnection({
       languageId: this.language(),
       serverUri: '',
-      documentUri: 'file://' + this.path(),
-      rootUri: '/',
-      documentText: () => {
-        this.virtual_editor.update_documents().catch(console.log);
-        return this.virtual_editor.virtual_document.value;
-      }
+      rootUri: '/'
     });
   }
 

@@ -121,7 +121,8 @@ export abstract class JupyterLabWidgetAdapter
     protected widget: IDocumentWidget,
     protected rendermime_registry: IRenderMimeRegistry,
     invoke: string,
-    private server_root: string
+    private server_root: string,
+    connection_manager: DocumentConnectionManager
   ) {
     this.status_message = new StatusMessage();
     this.widget.context.pathChanged.connect(this.reload_connection.bind(this));
@@ -129,7 +130,7 @@ export abstract class JupyterLabWidgetAdapter
     this.invoke_command = invoke;
     this.document_connected = new Signal(this);
     this.adapters = new Map();
-    this.connection_manager = new DocumentConnectionManager();
+    this.connection_manager = connection_manager;
     this.connection_manager.closed.connect((manger, { virtual_document }) => {
       console.log(
         'LSP: connection closed, disconnecting adapter',
@@ -203,7 +204,9 @@ export abstract class JupyterLabWidgetAdapter
 
     if (state === 'completed') {
       for (let connection of this.connection_manager.connections.values()) {
-        connection.sendSaved();
+        connection.sendSaved(
+          this.virtual_editor.virtual_document.document_info
+        );
       }
     }
   }
@@ -268,7 +271,10 @@ export abstract class JupyterLabWidgetAdapter
       virtual_document.id_path,
       'has changed sending update'
     );
-    connection.sendFullTextChange(virtual_document.value);
+    connection.sendFullTextChange(
+      virtual_document.value,
+      virtual_document.document_info
+    );
     // the first change (initial) is not propagated to features,
     // as it has no associated CodeMirrorChange object
     if (!is_init) {
