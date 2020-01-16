@@ -47,7 +47,10 @@ export class Highlights extends CodeMirrorLSPFeature {
     this.highlight_markers = [];
   }
 
-  protected handleHighlight(items: lsProtocol.DocumentHighlight[]) {
+  protected handleHighlight(items: lsProtocol.DocumentHighlight[], documentUri: string) {
+    if (documentUri !== this.virtual_document.document_info.uri) {
+      return
+    }
     this.clear_markers();
 
     if (!items) {
