@@ -1231,10 +1231,11 @@ class _AppHandler(object):
         for item in self.info['uninstalled_core']:
             if item in jlab['extensions']:
                 data['jupyterlab']['extensions'].pop(item)
-            else:
+            elif item in jlab['mimeExtensions']:
                 data['jupyterlab']['mimeExtensions'].pop(item)
             # Remove from dependencies as well.
-            data['dependencies'].pop(item)
+            if item in data['dependencies']:
+                data['dependencies'].pop(item)
 
         return data
 
