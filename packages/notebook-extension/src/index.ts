@@ -101,6 +101,8 @@ namespace CommandIDs {
 
   export const restartClear = 'notebook:restart-clear-output';
 
+  export const restartAndRunToSelected = 'notebook:restart-and-run-to-selected';
+
   export const restartRunAll = 'notebook:restart-run-all';
 
   export const reconnectToKernel = 'notebook:reconnect-to-kernel';
@@ -1249,6 +1251,33 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.restartAndRunToSelected, {
+    label: 'Restart Kernel and Run up to Selected Cell…',
+    execute: args => {
+      const current = getCurrent(args);
+      if (current) {
+        const { context, content } = current;
+        return sessionDialogs!
+          .restart(current.sessionContext)
+          .then(restarted => {
+            if (restarted) {
+              void NotebookActions.runAllAbove(
+                content,
+                context.sessionContext
+              ).then(executed => {
+                if (executed || content.activeCellIndex === 0) {
+                  void NotebookActions.run(content, context.sessionContext);
+                }
+              });
+            }
+          });
+      }
+    },
+    isEnabled: () => {
+      // Can't run if there are multiple cells selected
+      return isEnabledAndSingleSelected();
+    }
+  });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: 'Restart Kernel and Run All Cells…',
     execute: args => {
@@ -1918,6 +1947,7 @@ function populatePalette(
     CommandIDs.renderAllMarkdown,
     CommandIDs.runAllAbove,
     CommandIDs.runAllBelow,
+    CommandIDs.restartAndRunToSelected,
     CommandIDs.selectAll,
     CommandIDs.deselectAll,
     CommandIDs.clearAllOutputs,

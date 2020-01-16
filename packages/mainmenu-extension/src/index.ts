@@ -71,6 +71,8 @@ export namespace CommandIDs {
 
   export const restartKernelAndClear = 'kernelmenu:restart-and-clear';
 
+  export const restartAndRunToSelected = 'notebook:restart-and-run-to-selected';
+
   export const changeKernel = 'kernelmenu:change';
 
   export const shutdownKernel = 'kernelmenu:shutdown';
@@ -547,6 +549,7 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
   const restartGroup = [
     CommandIDs.restartKernel,
     CommandIDs.restartKernelAndClear,
+    CommandIDs.restartAndRunToSelected,
     CommandIDs.restartAndRunAll
   ].map(command => {
     return { command };
