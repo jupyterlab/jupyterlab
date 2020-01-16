@@ -86,7 +86,9 @@ export class DocumentConnectionManager {
     this.documents_changed.emit(this.documents);
   }
 
-  private connect_socket(options: ISocketConnectionOptions): LSPConnection {
+  private async connect_socket(
+    options: ISocketConnectionOptions
+  ): Promise<LSPConnection> {
     let { virtual_document, language } = options;
 
     const uris = DocumentConnectionManager.solve_uris(
@@ -99,7 +101,7 @@ export class DocumentConnectionManager {
       uris.document
     );
 
-    const connection = Private.connection(language, uris);
+    const connection = await Private.connection(language, uris);
 
     connection.on('error', e => {
       console.warn(e);
@@ -172,7 +174,7 @@ export class DocumentConnectionManager {
   }
 
   async connect(options: ISocketConnectionOptions) {
-    let connection = this.connect_socket(options);
+    let connection = await this.connect_socket(options);
 
     connection.on('serverInitialized', capabilities => {
       this.initialized.emit({ connection, virtual_document });
@@ -248,25 +250,26 @@ export namespace DocumentConnectionManager {
 }
 
 namespace Private {
-  type TConnectionKey = [string, string, string];
+  const _connections = new Map<string, LSPConnection>();
 
-  const _connections = new Map<[string, string, string], LSPConnection>();
-
-  export function connection(
+  export async function connection(
     language: string,
     uris: DocumentConnectionManager.IURIs
-  ) {
-    const key: TConnectionKey = [language, uris.server, uris.base];
-    if (!_connections.has(key)) {
-      console.log('opening new connection for', ...key);
+  ): Promise<LSPConnection> {
+    const connection_module = await import(
+      /* webpackChunkName: "jupyter-lsp-connection" */ './connection'
+    );
+    if (!_connections.has(language)) {
       const socket = new WebSocket(uris.socket);
-      const connection = new LSPConnection({
+      const connection = new connection_module.LSPConnection({
         languageId: language,
         serverUri: uris.server,
         rootUri: uris.base
-      }).connect(socket);
-      _connections.set(key, connection);
+      });
+      _connections.set(language, connection);
+      connection.connect(socket);
     }
-    return _connections.get(key);
+    const connection = _connections.get(language);
+    return connection;
   }
 }

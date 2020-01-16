@@ -328,11 +328,7 @@ export abstract class JupyterLabWidgetAdapter
       document_path: this.document_path
     };
 
-    let connection = this.connection_manager.connect(options).catch(() => {
-      this.connection_manager
-        .retry_to_connect(options, 0.5)
-        .catch(console.warn);
-    });
+    let connection = await this.connection_manager.connect(options);
 
     return {
       connection,
