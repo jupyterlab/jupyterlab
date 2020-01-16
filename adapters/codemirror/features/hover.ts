@@ -38,7 +38,10 @@ export class Hover extends CodeMirrorLSPFeature {
         this.hover_character === this.last_hover_character
       ) {
         this.show_next_tooltip = true;
-        this.handleHover(this.last_hover_response);
+        this.handleHover(
+          this.last_hover_response,
+          this.virtual_document.document_info.uri
+        );
       }
     });
     this.connection_handlers.set('hover', this.handleHover.bind(this));
@@ -86,7 +89,10 @@ export class Hover extends CodeMirrorLSPFeature {
     }
   }
 
-  public handleHover(response: lsProtocol.Hover) {
+  public handleHover(response: lsProtocol.Hover, documentUri: string) {
+    if (documentUri !== this.virtual_document.document_info.uri) {
+      return;
+    }
     this.hide_hover();
     this.last_hover_character = null;
     this.last_hover_response = null;
