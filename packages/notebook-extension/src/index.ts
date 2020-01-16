@@ -101,6 +101,8 @@ namespace CommandIDs {
 
   export const restartClear = 'notebook:restart-clear-output';
 
+  export const restartAndRunToSelected = 'notebook:restart-and-run-to-selected';
+
   export const restartRunAll = 'notebook:restart-run-all';
 
   export const reconnectToKernel = 'notebook:reconnect-to-kernel';
@@ -132,8 +134,6 @@ namespace CommandIDs {
   export const runAllAbove = 'notebook:run-all-above';
 
   export const runAllBelow = 'notebook:run-all-below';
-
-  export const restartAndRunToSelected = 'notebook:restart-and-run-to-selected';
 
   export const renderAllMarkdown = 'notebook:render-all-markdown';
 
@@ -1255,7 +1255,6 @@ function addCommands(
     label: 'Restart Kernel and Run up to Selected Cell…',
     execute: args => {
       const current = getCurrent(args);
-
       if (current) {
         const { context, content } = current;
         return sessionDialogs!
@@ -1266,7 +1265,7 @@ function addCommands(
                 content,
                 context.sessionContext
               ).then(executed => {
-                if (executed) {
+                if (executed || content.activeCellIndex === 0) {
                   void NotebookActions.run(content, context.sessionContext);
                 }
               });
@@ -2239,11 +2238,6 @@ function populateMenus(
     return { command };
   });
 
-  // Add a restart and run to group to the run menu.
-  const restartRunGroup = [CommandIDs.restartAndRunToSelected].map(command => {
-    return { command };
-  });
-
   // Add commands to the application edit menu.
   const undoCellActionGroup = [
     CommandIDs.undoCellAction,
@@ -2287,7 +2281,6 @@ function populateMenus(
   mainMenu.runMenu.addGroup(runExtras, 10);
   mainMenu.runMenu.addGroup(runAboveBelowGroup, 11);
   mainMenu.runMenu.addGroup(renderAllMarkdown, 12);
-  mainMenu.runMenu.addGroup(restartRunGroup, 13);
 
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
