@@ -72,6 +72,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           view = view || createView();
           shell.add(view, 'left');
         } else if (!enabled && view && view.isAttached) {
+          app.commands.notifyCommandChanged(CommandIDs.toggle);
           view.close();
         }
       });
