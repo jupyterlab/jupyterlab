@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IDebugger } from '../tokens';
+
 import { Panel, Widget } from '@lumino/widgets';
 
 // import { VariablesBody } from './body';
@@ -21,8 +23,11 @@ export class Variables extends Panel {
    */
   constructor(options: Variables.IOptions) {
     super();
+
+    const { model, service } = options;
+
     this._header = new VariablesHeader();
-    this._body = new VariablesBodyTable(options.model);
+    this._body = new VariablesBodyTable({ model, service });
 
     this.addWidget(this._header);
     this.addWidget(this._body);
@@ -63,5 +68,9 @@ export namespace Variables {
      * The variables model.
      */
     model: VariablesModel;
+    /**
+     * The debugger service.
+     */
+    service: IDebugger;
   }
 }

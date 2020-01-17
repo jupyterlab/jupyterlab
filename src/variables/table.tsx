@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ReactWidget } from '@jupyterlab/apputils';
-
 import { ArrayExt } from '@lumino/algorithm';
+
+import { IDebugger } from '../tokens';
+
+import { ReactWidget } from '@jupyterlab/apputils';
 
 import React, { useEffect, useState } from 'react';
 
@@ -17,9 +19,10 @@ export class VariablesBodyTable extends ReactWidget {
    * Instantiate a new Body for the Variables Panel.
    * @param model The model for the variables.
    */
-  constructor(model: VariablesModel) {
+  constructor(options: VariablesBodyTable.IOptions) {
     super();
-    this._model = model;
+    this._model = options.model;
+    this._service = options.service;
     this.addClass('jp-DebuggerVariables-body');
     this._model.changed.connect(this.updateScopes, this);
   }
@@ -43,6 +46,7 @@ export class VariablesBodyTable extends ReactWidget {
             key={scope.name}
             data={scope.variables}
             model={this._model}
+            service={this._service}
           />
         ))}
       </>
@@ -50,15 +54,18 @@ export class VariablesBodyTable extends ReactWidget {
   }
 
   private _model: VariablesModel;
+  private _service: IDebugger;
   private _scopes: VariablesModel.IScope[] = [];
 }
 
 const VariablesComponent = ({
   data,
-  model
+  model,
+  service
 }: {
   data: VariablesModel.IVariable[];
   model: VariablesModel;
+  service: IDebugger;
 }) => {
   const [variables, setVariables] = useState(data);
   const [selected, setSelected] = useState('');
@@ -67,7 +74,9 @@ const VariablesComponent = ({
     setVariables(data);
   }, [data]);
 
-  const onClickVariable = (variable: VariablesModel.IVariable) => {
+  const onClickVariable = async (variable: VariablesModel.IVariable) => {
+    const variableDetials = await service.getVariableDetails(variable);
+    console.log({ variableDetials });
     setSelected(variable.evaluateName);
   };
 
@@ -122,3 +131,10 @@ const convertType = (variable: VariablesModel.IVariable) => {
       return type;
   }
 };
+
+namespace VariablesBodyTable {
+  export interface IOptions {
+    model: VariablesModel;
+    service: IDebugger;
+  }
+}

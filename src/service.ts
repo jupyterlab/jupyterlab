@@ -380,6 +380,19 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Get details of variable
+   * @param variable variable
+   */
+  async getVariableDetails(
+    variable: DebugProtocol.Variable
+  ): Promise<DebugProtocol.Variable[]> {
+    const reply = await this.session.sendRequest('variables', {
+      variablesReference: variable.variablesReference
+    });
+    return reply.body.variables;
+  }
+
+  /**
    * Get all the frames from the kernel.
    */
   private async _getAllFrames() {
@@ -438,15 +451,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     return reply.body.variables;
   }
 
-  // private async _onVariableClicked(_: any, variable: DebugProtocol.Variable) {
-  //   console.log('clicked');
-  //   const reply = await this.session.sendRequest('variables', {
-  //     variablesReference: variable.variablesReference
-  //   });
-  //   this._model.variables.details = reply.body.variables;
-  //   return reply.body.variables;
-  // }
-
   /**
    * Get all the frames for the given thread id.
    * @param threadId The thread id.
@@ -484,7 +488,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     const reply = await this.session.sendRequest('variables', {
       variablesReference: scope.variablesReference
     });
-    console.log({ reply });
     return reply.body.variables;
   }
 

@@ -124,6 +124,14 @@ export interface IDebugger {
   clearBreakpoints(): Promise<void>;
 
   /**
+   * Get details of variable
+   * @param variable variable
+   */
+  getVariableDetails(
+    variable: DebugProtocol.Variable
+  ): Promise<DebugProtocol.Variable[]>;
+
+  /**
    * Retrieve the content of a source file.
    * @param source The source object containing the path to the file.
    */

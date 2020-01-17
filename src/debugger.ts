@@ -45,7 +45,10 @@ export namespace Debugger {
       this.service = service as DebuggerService;
       this.service.model = this.model;
 
-      this.variables = new Variables({ model: this.model.variables });
+      this.variables = new Variables({
+        model: this.model.variables,
+        service
+      });
 
       this.callstack = new Callstack({
         commands: callstackCommands,
