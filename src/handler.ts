@@ -13,7 +13,7 @@ import { FileEditor } from '@jupyterlab/fileeditor';
 
 import { NotebookPanel } from '@jupyterlab/notebook';
 
-import { Session } from '@jupyterlab/services';
+import { Kernel, Session } from '@jupyterlab/services';
 
 import { DebuggerModel } from './model';
 
@@ -100,17 +100,12 @@ export class DebuggerHandler {
     this._kernelChangedHandlers[connection.path] = updateHandler;
 
     // setup handler when the status of the kernel changes (restart)
-    // TODO: is there a better way to handle restarts?
-    let restarted = false;
-    const statusChanged = async () => {
-      // wait for the first `idle` status after a restart
-      if (restarted && connection.kernel?.status === 'idle') {
-        restarted = false;
+    const statusChanged = async (
+      sender: Session.ISessionConnection,
+      status: Kernel.Status
+    ) => {
+      if (status.endsWith('restarting')) {
         return updateHandler();
-      }
-      // handle `starting`, `restarting` and `autorestarting`
-      if (connection.kernel?.status.endsWith('starting')) {
-        restarted = true;
       }
     };
 
@@ -271,7 +266,12 @@ export class DebuggerHandler {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
   } = {};
   private _kernelChangedHandlers: { [id: string]: () => void } = {};
-  private _statusChangedHandlers: { [id: string]: () => void } = {};
+  private _statusChangedHandlers: {
+    [id: string]: (
+      sender: Session.ISessionConnection,
+      status: Kernel.Status
+    ) => void;
+  } = {};
   private _buttons: { [id: string]: ToolbarButton } = {};
 }
 
