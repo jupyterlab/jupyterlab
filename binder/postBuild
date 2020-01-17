@@ -1,1 +1,1 @@
-jlpm && jlpm run build && jupyter labextension link . --debug
+jupyter labextension install @jupyterlab/debugger@0.2.0-alpha.1 --debug
