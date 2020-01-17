@@ -17,13 +17,12 @@ export class SidebarHeader extends Widget {
     super({ node: document.createElement('header') });
 
     const title = new Widget({ node: document.createElement('h2') });
-
     title.node.textContent = '-';
     title.addClass('jp-left-truncated');
 
     service.sessionChanged.connect((_, session) => {
-      session.connectionChanged.connect((_, client) => {
-        title.node.textContent = client.name;
+      session.connectionChanged.connect((_, connection) => {
+        title.node.textContent = connection.name;
       });
     });
 

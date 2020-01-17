@@ -62,7 +62,9 @@ export class DebugSession implements IDebugger.ISession {
     }
 
     this._connection.iopubMessage.connect(this._handleEvent, this);
-    this._connectionChanged.emit(this._connection);
+    this._connectionChanged.emit(connection);
+    // put setTimeout to resolve issue with empty header after refresh page
+    setTimeout(() => this._connectionChanged.emit(connection));
   }
 
   /**
