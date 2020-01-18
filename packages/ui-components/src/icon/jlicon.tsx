@@ -133,7 +133,7 @@ export class JLIcon implements JLIcon.IJLIcon {
     JLIcon._debug = debug ?? !JLIcon._debug;
   }
 
-  constructor({ name, svgstr }: JLIcon.IOptions) {
+  constructor({ name, svgstr }: JLIcon.IJLIcon) {
     this.name = name;
     this._className = Private.nameToClassName(name);
     this.svgstr = svgstr;
