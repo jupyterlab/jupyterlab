@@ -412,8 +412,8 @@
 /* Restrict to direct children as other images could be nested in other content. */
 .jp-RenderedHTMLCommon > img {
   display: block;
-  margin-left: auto;
-  margin-right: auto;
+  margin-left: 0;
+  margin-right: 0;
   margin-bottom: 1em;
 }
 
