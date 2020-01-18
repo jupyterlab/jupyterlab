@@ -103,7 +103,6 @@ export class Diagnostics extends CodeMirrorLSPFeature {
               args: { name: column.name }
             });
           }
-          console.log(columns_menu);
           app.contextMenu.addItem({
             selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' th',
             submenu: columns_menu,
