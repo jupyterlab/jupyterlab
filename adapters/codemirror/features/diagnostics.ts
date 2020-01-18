@@ -1,5 +1,6 @@
 import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
+import { Menu } from '@phosphor/widgets';
 import { PositionConverter } from '../../../converter';
 import { IVirtualPosition } from '../../../positioning';
 import { diagnosticSeverityNames } from '../../../lsp';
@@ -7,6 +8,7 @@ import { DefaultMap } from '../../../utils';
 import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import {
+  DIAGNOSTICS_LISTING_CLASS,
   DiagnosticsDatabase,
   DiagnosticsListing,
   IEditorDiagnostic
@@ -57,6 +59,8 @@ export const diagnostics_databases = new Map<
   DiagnosticsDatabase
 >();
 
+const CMD_COLUMN_VISIBILITY = 'lsp-set-column-visibility';
+
 export class Diagnostics extends CodeMirrorLSPFeature {
   name = 'Diagnostics';
 
@@ -69,8 +73,44 @@ export class Diagnostics extends CodeMirrorLSPFeature {
 
         let panel_widget = diagnostics_panel.widget;
 
+        let get_column = (name: string) => {
+          // TODO: a hashmap in the panel itself?
+          for (let column of panel_widget.content.columns) {
+            if (column.name === name) {
+              return column;
+            }
+          }
+        };
+
         if (!panel_widget.isAttached) {
+          let columns_menu = new Menu({ commands: app.commands });
+          app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
+            execute: args => {
+              let column = get_column(args['name'] as string);
+              column.is_visible = !column.is_visible;
+              panel_widget.update();
+            },
+            label: args => args['name'] as string,
+            isToggled: args => {
+              let column = get_column(args['name'] as string);
+              return column.is_visible;
+            }
+          });
+          columns_menu.title.label = 'Panel columns';
+          for (let column of panel_widget.content.columns) {
+            columns_menu.addItem({
+              command: CMD_COLUMN_VISIBILITY,
+              args: { name: column.name }
+            });
+          }
+          console.log(columns_menu);
+          app.contextMenu.addItem({
+            selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' th',
+            submenu: columns_menu,
+            type: 'submenu'
+          });
           app.shell.add(panel_widget, 'main');
+          //app.commands.addCommand('lsp-panel-columns', {})
         }
         app.shell.activateById(panel_widget.id);
       },
