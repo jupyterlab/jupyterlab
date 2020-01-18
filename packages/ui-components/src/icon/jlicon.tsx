@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { UUID } from '@lumino/coreutils';
-import { VirtualElementPass } from '@lumino/virtualdom';
 import React from 'react';
 
 import { Text } from '@jupyterlab/coreutils';
@@ -13,9 +12,7 @@ import { getReactAttrs, classes, classesDedupe } from '../utils';
 import badSvg from '../../style/debug/bad.svg';
 import blankSvg from '../../style/debug/blank.svg';
 
-const blankDiv = document.createElement('div');
-
-export class JLIcon implements VirtualElementPass.IRenderer {
+export class JLIcon implements JLIcon.IJLIcon {
   private static _debug: boolean = false;
   private static _instances = new Map<string, JLIcon>();
 
@@ -190,8 +187,8 @@ export class JLIcon implements VirtualElementPass.IRenderer {
     // ensure that svg html is valid
     const svgElement = this.resolveSvg();
     if (!svgElement) {
-      // bail if failing silently
-      return blankDiv;
+      // bail if failing silently, return blank element
+      return document.createElement('div');
     }
 
     let ret: HTMLElement;
@@ -375,9 +372,10 @@ export class JLIcon implements VirtualElementPass.IRenderer {
  */
 export namespace JLIcon {
   /**
-   * The type of the JLIcon contructor params
+   * The IJLIcon interface. Outside of this interface the actual
+   * implementation of JLIcon may vary
    */
-  export interface IOptions {
+  export interface IJLIcon {
     name: string;
     svgstr: string;
   }
