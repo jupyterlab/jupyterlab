@@ -32,7 +32,6 @@
   },
   "dependencies": {
     "@lumino/coreutils": "^1.4.2",
-    "@lumino/virtualdom": "^1.4.0",
     "@lumino/widgets": "^1.10.0"
   },
   "devDependencies": {

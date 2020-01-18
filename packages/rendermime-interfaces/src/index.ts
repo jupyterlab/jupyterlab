@@ -4,8 +4,6 @@
 |----------------------------------------------------------------------------*/
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
-import { VirtualElementPass } from '@lumino/virtualdom';
-
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -157,13 +155,6 @@ export namespace IRenderMime {
      * The icon label for the file type.
      */
     readonly iconLabel?: string;
-
-    /**
-     * Set the icon renderer for the title. An icon renderer is any object
-     * with appropriate render and unrender methods. See JLIcon in
-     * @jupyterlab/ui-components for a reference implementation.
-     */
-    readonly iconRenderer?: VirtualElementPass.IRenderer;
 
     /**
      * The file format for the file type ('text', 'base64', or 'json').
