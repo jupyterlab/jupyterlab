@@ -23,6 +23,7 @@ const default_severity = 2;
 class DiagnosticsPanel {
   content: DiagnosticsListing;
   widget: MainAreaWidget<DiagnosticsListing>;
+  is_registered = false;
 
   constructor() {
     this.widget = this.init_widget();
@@ -82,7 +83,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
           }
         };
 
-        if (!panel_widget.isAttached) {
+        if (!diagnostics_panel.is_registered) {
           let columns_menu = new Menu({ commands: app.commands });
           app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
             execute: args => {
@@ -108,6 +109,10 @@ export class Diagnostics extends CodeMirrorLSPFeature {
             submenu: columns_menu,
             type: 'submenu'
           });
+          diagnostics_panel.is_registered = true;
+        }
+
+        if (!panel_widget.isAttached) {
           app.shell.add(panel_widget, 'main');
         }
         app.shell.activateById(panel_widget.id);

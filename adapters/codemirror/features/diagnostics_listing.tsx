@@ -288,7 +288,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
     let sorted_column = this.columns.filter(
       column => column.name === this.sort_key
     )[0];
-    let sorter = sorted_column.sort;
+    let sorter = sorted_column.sort.bind(sorted_column);
     let sorted = flattened.sort((a, b) => sorter(a, b) * this.sort_direction);
 
     let context: IListingContext = {
