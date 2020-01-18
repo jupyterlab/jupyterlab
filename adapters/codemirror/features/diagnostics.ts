@@ -110,7 +110,6 @@ export class Diagnostics extends CodeMirrorLSPFeature {
             type: 'submenu'
           });
           app.shell.add(panel_widget, 'main');
-          //app.commands.addCommand('lsp-panel-columns', {})
         }
         app.shell.activateById(panel_widget.id);
       },
