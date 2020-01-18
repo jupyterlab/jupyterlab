@@ -355,6 +355,7 @@ export async function ensureUiComponents(
   dorequire: boolean = false
 ): Promise<string[]> {
   const funcName = 'ensureUiComponents';
+  const pkgName = utils.stem(pkgPath);
   let messages: string[] = [];
 
   const svgs = glob.sync(path.join(pkgPath, 'style/icons', '**/*.svg'));
@@ -374,18 +375,19 @@ export async function ensureUiComponents(
 
     const svgname = utils.camelCase(name) + 'Svg';
     const iconname = utils.camelCase(name) + 'Icon';
+    const qualname = [pkgName, utils.stem(svg)].join(':');
 
     if (dorequire) {
       // load the icon svg using `require`
       _jliconConstruction.push(
-        `export const ${iconname} = new JLIcon({ name: '${name}', svgstr: require('${svgpath}').default });`
+        `export const ${iconname} = new JLIcon({ name: '${qualname}', svgstr: require('${svgpath}').default });`
       );
     } else {
       // load the icon svg using `import`
       _iconImportStatements.push(`import ${svgname} from '${svgpath}';`);
 
       _jliconConstruction.push(
-        `export const ${iconname} = new JLIcon({ name: '${name}', svgstr: ${svgname} });`
+        `export const ${iconname} = new JLIcon({ name: '${qualname}', svgstr: ${svgname} });`
       );
     }
   });

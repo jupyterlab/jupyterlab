@@ -13,8 +13,9 @@ import badSvg from '../../style/debug/bad.svg';
 import blankSvg from '../../style/debug/blank.svg';
 
 export class JLIcon implements JLIcon.IJLIcon {
-  private static _debug: boolean = false;
-  private static _instances = new Map<string, JLIcon>();
+  /***********
+   * statics *
+   ***********/
 
   /**
    * Get any existing JLIcon instance by name.
@@ -132,6 +133,13 @@ export class JLIcon implements JLIcon.IJLIcon {
   static toggleDebug(debug?: boolean) {
     JLIcon._debug = debug ?? !JLIcon._debug;
   }
+
+  private static _debug: boolean = false;
+  private static _instances = new Map<string, JLIcon>();
+
+  /***********
+   * members *
+   ***********/
 
   constructor({ name, svgstr }: JLIcon.IJLIcon) {
     this.name = name;
@@ -420,8 +428,13 @@ export namespace JLIcon {
 }
 
 namespace Private {
+  /**
+   * @param name - icon name. May be namespaced as per `some-pkg:foo-bar`
+   *
+   * @returns given a name of `some-pkg:foo-bar`, returns `jp-FooBarIcon`
+   */
   export function nameToClassName(name: string): string {
-    return 'jp-' + Text.camelCase(name, true) + 'Icon';
+    return 'jp-' + Text.camelCase(name.split(':').pop()!, true) + 'Icon';
   }
 
   export function setTitleSvg(svgNode: HTMLElement, title: string): void {
