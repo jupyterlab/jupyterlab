@@ -73,7 +73,7 @@ export class Highlights extends CodeMirrorLSPFeature {
     }
   }
 
-  protected onCursorActivity() {
+  protected async onCursorActivity() {
     let root_position = this.virtual_editor
       .getDoc()
       .getCursor('start') as IRootPosition;
@@ -94,10 +94,12 @@ export class Highlights extends CodeMirrorLSPFeature {
       let virtual_position = this.virtual_editor.root_position_to_virtual_position(
         root_position
       );
-      this.connection.getDocumentHighlights(
+      const highlights = await this.connection.getDocumentHighlights(
         virtual_position,
-        this.virtual_document.document_info
+        this.virtual_document.document_info,
+        false
       );
+      this.handleHighlight(highlights, this.virtual_document.document_info.uri);
     } catch (e) {
       console.warn('Could not get highlights:', e);
     }
