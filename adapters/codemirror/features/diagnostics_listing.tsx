@@ -110,7 +110,10 @@ interface IDiagnosticsRow {
   data: IEditorDiagnostic;
   key: string;
   document: VirtualDocument;
-  cell_nr?: number;
+  /**
+   * Cell number is the ordinal, 1-based cell identifier displayed to the user.
+   */
+  cell_number?: number;
 }
 
 interface IListingContext {
@@ -223,8 +226,8 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
     }),
     new Column({
       name: 'Cell',
-      render_cell: row => <td>{row.cell_nr}</td>,
-      sort: (a, b) => (a.cell_nr > b.cell_nr ? 1 : -1),
+      render_cell: row => <td>{row.cell_number}</td>,
+      sort: (a, b) => (a.cell_number > b.cell_number ? 1 : -1),
       is_available: context => context.editor.has_cells
     }),
     new Column({
@@ -265,19 +268,19 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
     let by_document = Array.from(diagnostics_db).map(
       ([virtual_document, diagnostics]) => {
         return diagnostics.map((diagnostic_data, i) => {
-          let cell_nr: number = null;
+          let cell_number: number = null;
           if (editor.has_cells) {
             let notebook_editor = editor as VirtualEditorForNotebook;
             let { cell_id } = notebook_editor.find_cell_by_editor(
               diagnostic_data.editor
             );
-            cell_nr = cell_id + 1;
+            cell_number = cell_id + 1;
           }
           return {
             data: diagnostic_data,
             key: virtual_document.uri + ',' + i,
             document: virtual_document,
-            cell_nr: cell_nr,
+            cell_number: cell_number,
             editor: editor
           } as IDiagnosticsRow;
         });
