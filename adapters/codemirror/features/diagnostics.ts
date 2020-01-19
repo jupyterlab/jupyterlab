@@ -68,7 +68,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
   static commands: Array<IFeatureCommand> = [
     {
       id: 'show-diagnostics-panel',
-      execute: ({ app, features }) => {
+      execute: ({ app, features, adapter }) => {
         let diagnostics_feature = features.get('Diagnostics') as Diagnostics;
         diagnostics_feature.switchDiagnosticsPanelSource();
 
@@ -113,7 +113,11 @@ export class Diagnostics extends CodeMirrorLSPFeature {
         }
 
         if (!panel_widget.isAttached) {
-          app.shell.add(panel_widget, 'main');
+          console.warn(adapter.widget_id);
+          app.shell.add(panel_widget, 'main', {
+            ref: adapter.widget_id,
+            mode: 'split-bottom'
+          });
         }
         app.shell.activateById(panel_widget.id);
       },
