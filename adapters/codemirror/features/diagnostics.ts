@@ -21,24 +21,29 @@ import { VirtualEditor } from '../../../virtual/editor';
 const default_severity = 2;
 
 class DiagnosticsPanel {
-  content: DiagnosticsListing;
-  widget: MainAreaWidget<DiagnosticsListing>;
+  private _content: DiagnosticsListing = null;
+  private _widget: MainAreaWidget<DiagnosticsListing> = null;
   is_registered = false;
 
-  constructor() {
-    this.widget = this.init_widget();
-    this.widget.content.disposed.connect(() => {
-      // immortal widget (or mild memory leak) TODO: rewrite this
-      this.widget.dispose();
-      this.widget = this.init_widget();
-    });
+  get widget() {
+    if (this._widget == null || this._widget.content.model === null) {
+      if (this._widget && !this._widget.isDisposed) {
+        this._widget.dispose();
+      }
+      this._widget = this.init_widget();
+    }
+    return this._widget;
   }
 
-  init_widget() {
-    this.content = new DiagnosticsListing(new DiagnosticsListing.Model());
-    this.content.model.diagnostics = new DiagnosticsDatabase();
-    this.content.addClass('lsp-diagnostics-panel-content');
-    const widget = new MainAreaWidget({ content: this.content });
+  get content() {
+    return this.widget.content;
+  }
+
+  protected init_widget() {
+    this._content = new DiagnosticsListing(new DiagnosticsListing.Model());
+    this._content.model.diagnostics = new DiagnosticsDatabase();
+    this._content.addClass('lsp-diagnostics-panel-content');
+    const widget = new MainAreaWidget({ content: this._content });
     widget.id = 'lsp-diagnostics-panel';
     widget.title.label = 'Diagnostics Panel';
     widget.title.closable = true;
