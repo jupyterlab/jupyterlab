@@ -171,31 +171,18 @@ const plugin: JupyterFrontEndPlugin<void> = {
     command_manager.add(lsp_commands);
 
     notebookTracker.widgetAdded.connect(async (sender, widget) => {
-      // Don't try to do anything until we have a kernel
-      widget.context.session.kernelChanged.connect(async () => {
-        if (notebook_adapters.get(widget.id)) {
-          return;
-        }
-
-        if (!widget.context.session.kernel) {
-          return;
-        }
-
-        await widget.context.session.kernel.ready;
-
-        // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
-        let jumper = new NotebookJumper(widget, documentManager);
-        let adapter = new NotebookAdapter(
-          widget,
-          jumper,
-          app,
-          completion_manager,
-          rendermime_registry,
-          server_root,
-          connection_manager
-        );
-        notebook_adapters.set(widget.id, adapter);
-      });
+      // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
+      let jumper = new NotebookJumper(widget, documentManager);
+      let adapter = new NotebookAdapter(
+        widget,
+        jumper,
+        app,
+        completion_manager,
+        rendermime_registry,
+        server_root,
+        connection_manager
+      );
+      notebook_adapters.set(widget.id, adapter);
     });
 
     // position context menu entries after 10th but before 11th default entry

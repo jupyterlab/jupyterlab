@@ -250,10 +250,11 @@ export class Diagnostics extends CodeMirrorLSPFeature {
             range.end
           ) as IVirtualPosition;
           if (start.line > this.virtual_document.last_virtual_line) {
-            DEBUG && console.log(
-              'Malformed diagnostic was skipped (out of lines) ',
-              diagnostics
-            );
+            DEBUG &&
+              console.log(
+                'Malformed diagnostic was skipped (out of lines) ',
+                diagnostics
+              );
             return;
           }
 
@@ -275,12 +276,13 @@ export class Diagnostics extends CodeMirrorLSPFeature {
           // and the user already changed the document so
           // that now this regions is in another virtual document!
           if (this.virtual_document !== document) {
-            DEBUG && console.log(
-              `Ignoring inspections from ${response.uri}`,
-              ` (this region is covered by a another virtual document: ${document.uri})`,
-              ` inspections: `,
-              diagnostics
-            );
+            DEBUG &&
+              console.log(
+                `Ignoring inspections from ${response.uri}`,
+                ` (this region is covered by a another virtual document: ${document.uri})`,
+                ` inspections: `,
+                diagnostics
+              );
             return;
           }
 
@@ -289,10 +291,11 @@ export class Diagnostics extends CodeMirrorLSPFeature {
               .get(start.line)
               .skip_inspect.indexOf(document.id_path) !== -1
           ) {
-            DEBUG && console.log(
-              'Ignoring inspections silenced for this document:',
-              diagnostics
-            );
+            DEBUG &&
+              console.log(
+                'Ignoring inspections silenced for this document:',
+                diagnostics
+              );
             return;
           }
 

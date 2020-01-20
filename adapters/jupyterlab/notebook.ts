@@ -77,6 +77,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
 
   is_ready() {
     return (
+      !this.widget.isDisposed &&
       this.widget.context.isReady &&
       this.widget.content.isVisible &&
       this.widget.content.widgets.length > 0 &&
@@ -93,7 +94,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     try {
       return this.widget.context.session.kernel.info.language_info;
     } catch (e) {
-      console.warn('Could not get kernel metadata');
+      DEBUG && console.log('LSP: Could not get kernel metadata');
       return null;
     }
   }
