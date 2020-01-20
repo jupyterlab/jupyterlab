@@ -53,11 +53,16 @@ export class CodeMirrorAdapter {
 
     let change: CodeMirror.EditorChange = this.last_change;
 
-    try {
-      const root_position = this.editor
-        .getDoc()
-        .getCursor('end') as IRootPosition;
+    let root_position: IRootPosition;
 
+    try {
+      root_position = this.editor.getDoc().getCursor('end') as IRootPosition;
+    } catch (err) {
+      DEBUG && console.log('LSP: Root positon not found');
+      return;
+    }
+
+    try {
       let document = this.editor.document_at_root_position(root_position);
 
       if (this.virtual_document !== document) {

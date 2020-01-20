@@ -173,11 +173,17 @@ const plugin: JupyterFrontEndPlugin<void> = {
     notebookTracker.widgetAdded.connect(async (sender, widget) => {
       // Don't try to do anything until we have a kernel
       widget.context.session.kernelChanged.connect(async () => {
-        // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
-        await widget.context.session.kernel.ready;
         if (notebook_adapters.get(widget.id)) {
           return;
         }
+
+        if (!widget.context.session.kernel) {
+          return;
+        }
+
+        await widget.context.session.kernel.ready;
+
+        // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
         let jumper = new NotebookJumper(widget, documentManager);
         let adapter = new NotebookAdapter(
           widget,

@@ -539,7 +539,8 @@ export namespace LSPStatus {
 
     set adapter(adapter: JupyterLabWidgetAdapter | null) {
       const oldAdapter = this._adapter;
-      if (oldAdapter !== null) {
+
+      if (oldAdapter != null) {
         oldAdapter.connection_manager.connected.disconnect(this._onChange);
         oldAdapter.connection_manager.initialized.connect(this._onChange);
         oldAdapter.connection_manager.disconnected.disconnect(this._onChange);
@@ -550,19 +551,21 @@ export namespace LSPStatus {
         oldAdapter.status_message.changed.connect(this._onChange);
       }
 
-      let onChange = this._onChange.bind(this);
-      adapter.connection_manager.connected.connect(onChange);
-      adapter.connection_manager.initialized.connect(onChange);
-      adapter.connection_manager.disconnected.connect(onChange);
-      adapter.connection_manager.closed.connect(onChange);
-      adapter.connection_manager.documents_changed.connect(onChange);
-      adapter.status_message.changed.connect(onChange);
+      if (adapter != null) {
+        adapter.connection_manager.connected.connect(this._onChange);
+        adapter.connection_manager.initialized.connect(this._onChange);
+        adapter.connection_manager.disconnected.connect(this._onChange);
+        adapter.connection_manager.closed.connect(this._onChange);
+        adapter.connection_manager.documents_changed.connect(this._onChange);
+        adapter.status_message.changed.connect(this._onChange);
+      }
+
       this._adapter = adapter;
     }
 
-    private _onChange() {
+    private _onChange = () => {
       this.stateChanged.emit(void 0);
-    }
+    };
 
     private _adapter: JupyterLabWidgetAdapter | null = null;
   }

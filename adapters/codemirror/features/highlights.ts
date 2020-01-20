@@ -5,6 +5,8 @@ import { VirtualDocument } from '../../../virtual/document';
 import { IRootPosition } from '../../../positioning';
 import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
 
+const DEBUG = false;
+
 export class Highlights extends CodeMirrorLSPFeature {
   name = 'Highlights';
   protected highlight_markers: CodeMirror.TextMarker[] = [];
@@ -74,9 +76,17 @@ export class Highlights extends CodeMirrorLSPFeature {
   }
 
   protected async onCursorActivity() {
-    let root_position = this.virtual_editor
-      .getDoc()
-      .getCursor('start') as IRootPosition;
+    let root_position: IRootPosition;
+
+    try {
+      root_position = this.virtual_editor
+        .getDoc()
+        .getCursor('start') as IRootPosition;
+    } catch (err) {
+      DEBUG && console.warn('LSP: no root position available');
+      return;
+    }
+
     let document: VirtualDocument;
     try {
       document = this.virtual_editor.document_at_root_position(root_position);

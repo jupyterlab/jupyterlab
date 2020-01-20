@@ -53,7 +53,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
 
     this.widget.context.session.kernelChanged.connect((_session, change) => {
       if (!change.newValue) {
-        console.warn('LSP: kernel was shut down');
+        DEBUG && console.log('LSP: kernel was shut down');
         return;
       }
       change.newValue.ready
@@ -156,6 +156,9 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
   connect_completion() {
     // see https://github.com/jupyterlab/jupyterlab/blob/c0e9eb94668832d1208ad3b00a9791ef181eca4c/packages/completer-extension/src/index.ts#L198-L213
     const cell = this.widget.content.activeCell;
+    if (cell == null) {
+      return;
+    }
     this.set_completion_connector(cell);
     const handler = this.completion_manager.register({
       connector: this.current_completion_connector,
