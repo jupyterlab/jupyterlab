@@ -4,6 +4,8 @@ import { Signal } from '@phosphor/signaling';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { sleep, until_ready } from './utils';
 
+const DEBUG = false;
+
 export interface IDocumentConnectionData {
   virtual_document: VirtualDocument;
   connection: LSPConnection;
@@ -68,10 +70,11 @@ export class DocumentConnectionManager {
 
   connect_document_signals(virtual_document: VirtualDocument) {
     virtual_document.foreign_document_opened.connect((host, context) => {
-      console.log(
-        'LSP: Connecting foreign document: ',
-        context.foreign_document.id_path
-      );
+      DEBUG &&
+        console.log(
+          'LSP: Connecting foreign document: ',
+          context.foreign_document.id_path
+        );
       this.connect_document_signals(context.foreign_document);
     });
     virtual_document.foreign_document_closed.connect(
@@ -110,7 +113,7 @@ export class DocumentConnectionManager {
       // TODO: those codes may be specific to my proxy client, need to investigate
       if (error.message.indexOf('code = 1005') !== -1) {
         console.warn('LSP: Connection failed for ' + virtual_document.id_path);
-        console.log('LSP: disconnecting ' + virtual_document.id_path);
+        console.warn('LSP: disconnecting ' + virtual_document.id_path);
         this.closed.emit({ connection, virtual_document });
         this.ignored_languages.add(virtual_document.language);
         console.warn(
@@ -161,11 +164,12 @@ export class DocumentConnectionManager {
           success = true;
         })
         .catch(e => {
-          console.log(e);
+          DEBUG && console.warn(e);
         });
-      console.log(
-        'LSP: will attempt to re-connect in ' + interval / 1000 + ' seconds'
-      );
+      DEBUG &&
+        console.log(
+          'LSP: will attempt to re-connect in ' + interval / 1000 + ' seconds'
+        );
       await sleep(interval);
 
       // gradually increase the time delay, up to 5 sec
@@ -192,7 +196,13 @@ export class DocumentConnectionManager {
     ).catch(() => {
       throw Error('LSP: Connect timed out for ' + virtual_document.id_path);
     });
-    console.log('LSP:', document_path, virtual_document.id_path, 'connected.');
+    DEBUG &&
+      console.log(
+        'LSP:',
+        document_path,
+        virtual_document.id_path,
+        'connected.'
+      );
 
     connection.on('close', closed_manually => {
       if (!closed_manually) {

@@ -163,6 +163,7 @@ function SortableTH(props: { name: string; listing: DiagnosticsListing }): any {
   const is_sort_key = props.name === props.listing.sort_key;
   return (
     <th
+      key={props.name}
       onClick={() => props.listing.sort(props.name)}
       className={
         is_sort_key

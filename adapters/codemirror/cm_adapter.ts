@@ -6,6 +6,8 @@ import { IRootPosition } from '../../positioning';
 import { ILSPFeature } from './feature';
 import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
 
+const DEBUG = false;
+
 export class CodeMirrorAdapter {
   features: Map<string, ILSPFeature>;
 
@@ -38,12 +40,17 @@ export class CodeMirrorAdapter {
 
   public async updateAfterChange() {
     this.jupyterlab_components.remove_tooltip();
-    await until_ready(() => this.last_change != null, 30, 22).catch(() => {
-      this.invalidateLastChange();
-      throw Error(
-        'No change obtained from CodeMirror editor within the expected time of 0.66s'
-      );
-    });
+
+    try {
+      await until_ready(() => this.last_change != null, 30, 22);
+    } catch (err) {
+      DEBUG &&
+        console.log(
+          'No change obtained from CodeMirror editor within the expected time of 0.66s'
+        );
+      return;
+    }
+
     let change: CodeMirror.EditorChange = this.last_change;
 
     try {

@@ -33,6 +33,8 @@ import {
 } from '../../connection_manager';
 import { Rename } from '../codemirror/features/rename';
 
+const DEBUG = false;
+
 export const lsp_features: Array<ILSPFeatureConstructor> = [
   Completion,
   Diagnostics,
@@ -132,10 +134,11 @@ export abstract class JupyterLabWidgetAdapter
     this.adapters = new Map();
     this.connection_manager = connection_manager;
     this.connection_manager.closed.connect((manger, { virtual_document }) => {
-      console.log(
-        'LSP: connection closed, disconnecting adapter',
-        virtual_document.id_path
-      );
+      DEBUG &&
+        console.log(
+          'LSP: connection closed, disconnecting adapter',
+          virtual_document.id_path
+        );
       this.disconnect_adapter(virtual_document);
     });
     this.connection_manager.connected.connect((manager, data) => {
@@ -232,11 +235,12 @@ export abstract class JupyterLabWidgetAdapter
     await this.virtual_editor.update_documents().then(() => {
       // refresh the document on the LSP server
       this.document_changed(virtual_document, virtual_document, true);
-      console.log(
-        'LSP: virtual document(s) for',
-        this.document_path,
-        'have been initialized'
-      );
+      DEBUG &&
+        console.log(
+          'LSP: virtual document(s) for',
+          this.document_path,
+          'have been initialized'
+        );
     });
   }
 
@@ -262,19 +266,24 @@ export abstract class JupyterLabWidgetAdapter
     let adapter = this.adapters.get(virtual_document.id_path);
 
     if (typeof connection === 'undefined') {
-      console.log('LSP: Skipping document update signal: connection not ready');
+      DEBUG &&
+        console.log(
+          'LSP: Skipping document update signal: connection not ready'
+        );
       return;
     }
     if (typeof adapter === 'undefined') {
-      console.log('LSP: Skipping document update signal: adapter not ready');
+      DEBUG &&
+        console.log('LSP: Skipping document update signal: adapter not ready');
       return;
     }
 
-    console.log(
-      'LSP: virtual document',
-      virtual_document.id_path,
-      'has changed sending update'
-    );
+    DEBUG &&
+      console.log(
+        'LSP: virtual document',
+        virtual_document.id_path,
+        'has changed sending update'
+      );
     connection.sendFullTextChange(
       virtual_document.value,
       virtual_document.document_info
@@ -320,9 +329,10 @@ export abstract class JupyterLabWidgetAdapter
 
   private async connect(virtual_document: VirtualDocument) {
     let language = virtual_document.language;
-    console.log(
-      `LSP: will connect using root path: ${this.root_path} and language: ${language}`
-    );
+    DEBUG &&
+      console.log(
+        `LSP: will connect using root path: ${this.root_path} and language: ${language}`
+      );
 
     let options = {
       virtual_document,
@@ -378,7 +388,7 @@ export abstract class JupyterLabWidgetAdapter
       this,
       adapter_features
     );
-    console.log('LSP: Adapter for', this.document_path, 'is ready.');
+    DEBUG && console.log('LSP: Adapter for', this.document_path, 'is ready.');
     return adapter;
   }
 

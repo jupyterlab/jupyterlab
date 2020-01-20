@@ -11,6 +11,8 @@ import {
   IVirtualPosition
 } from '../../positioning';
 
+const DEBUG = false;
+
 // @ts-ignore
 class DocDispatcher implements CodeMirror.Doc {
   virtual_editor: VirtualEditorForNotebook;
@@ -180,7 +182,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       let editor = this.get_editor_at_root_line(pos);
       return editor.charCoords(pos, mode);
     } catch (e) {
-      console.log(e);
+      DEBUG && console.log(e);
       return { bottom: 0, left: 0, right: 0, top: 0 };
     }
   }

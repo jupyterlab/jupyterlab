@@ -14,8 +14,9 @@ import {
   IEditorDiagnostic
 } from './diagnostics_listing';
 import { VirtualDocument } from '../../../virtual/document';
-import { DocumentConnectionManager } from '../../../connection_manager';
 import { VirtualEditor } from '../../../virtual/editor';
+
+const DEBUG = false;
 
 // TODO: settings
 const default_severity = 2;
@@ -223,18 +224,12 @@ export class Diagnostics extends CodeMirrorLSPFeature {
   }
 
   public handleDiagnostic(response: lsProtocol.PublishDiagnosticsParams) {
+    if (response.uri !== this.virtual_document.document_info.uri) {
+      return;
+    }
     /* TODO: gutters */
     try {
       let diagnostics_list: IEditorDiagnostic[] = [];
-
-      let my_uri = DocumentConnectionManager.solve_uris(
-        this.virtual_document,
-        ''
-      ).document;
-
-      if (response.uri !== my_uri) {
-        return;
-      }
 
       // Note: no deep equal for Sets or Maps in JS
       const markers_to_retain: Set<string> = new Set();
@@ -273,7 +268,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
               start_in_root
             );
           } catch (e) {
-            console.log(e, diagnostics);
+            DEBUG && console.log(e, diagnostics);
             return;
           }
 
