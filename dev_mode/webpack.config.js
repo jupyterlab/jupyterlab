@@ -193,7 +193,7 @@ module.exports = [
         },
         { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
         {
-          // in css files, svg is loaded as a url formatted string
+          // In .css files, svg is loaded as a data URI.
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
           issuer: { test: /\.css$/ },
           use: {
@@ -202,8 +202,8 @@ module.exports = [
           }
         },
         {
-          // in ts and tsx files (both of which compile to js),
-          // svg is loaded as a raw string
+          // In .ts and .tsx files (both of which compile to .js), svg files
+          // must be loaded as a raw string instead of data URIs.
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
           issuer: { test: /\.js$/ },
           use: {
