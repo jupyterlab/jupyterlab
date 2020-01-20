@@ -217,7 +217,11 @@ export class NotebookCommandManager extends ContextCommandManager {
     let ce_cursor = editor.getCursorPosition();
     let cm_cursor = PositionConverter.ce_to_cm(ce_cursor) as IEditorPosition;
 
-    let virtual_editor = this.current_adapter.virtual_editor;
+    let virtual_editor = this.current_adapter?.virtual_editor;
+
+    if (!virtual_editor) {
+      return null;
+    }
 
     let root_position = virtual_editor.transform_from_notebook_to_root(
       cell,

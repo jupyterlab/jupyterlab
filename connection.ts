@@ -42,7 +42,7 @@ export class LSPConnection extends LspWsConnection {
     documentInfo: IDocumentInfo,
     newName: string
   ): Promise<boolean> {
-    if (!this.isConnected || !this.isRenameSupported()) {
+    if (!this.isReady || !this.isRenameSupported()) {
       return;
     }
 
@@ -56,7 +56,7 @@ export class LSPConnection extends LspWsConnection {
             line: location.line,
             character: location.ch
           },
-          newName: newName
+          newName
         } as lsProtocol.RenameParams)
         .then(
           (result: lsProtocol.WorkspaceEdit | null) => {
