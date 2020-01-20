@@ -60,7 +60,7 @@
     "typescript": "~3.7.3"
   },
   "peerDependencies": {
-    "react": "~16.8.4"
+    "react": "~16.9.0"
   },
   "publishConfig": {
     "access": "public"
