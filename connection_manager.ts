@@ -259,14 +259,14 @@ namespace Private {
     language: string,
     uris: DocumentConnectionManager.IURIs
   ): Promise<LSPConnection> {
-    const connection_module = await import(
+    const { LSPConnection } = await import(
       /* webpackChunkName: "jupyter-lsp-connection" */ './connection'
     );
     let connection = _connections.get(language);
 
     if (connection == null) {
       const socket = new WebSocket(uris.socket);
-      const connection = new connection_module.LSPConnection({
+      const connection = new LSPConnection({
         languageId: language,
         serverUri: uris.server,
         rootUri: uris.base
