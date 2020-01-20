@@ -6,7 +6,7 @@ import { IRootPosition } from '../../positioning';
 import { ILSPFeature } from './feature';
 import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
 
-const DEBUG = false;
+const DEBUG = 0;
 
 export class CodeMirrorAdapter {
   features: Map<string, ILSPFeature>;

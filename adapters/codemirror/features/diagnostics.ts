@@ -16,7 +16,7 @@ import {
 import { VirtualDocument } from '../../../virtual/document';
 import { VirtualEditor } from '../../../virtual/editor';
 
-const DEBUG = false;
+const DEBUG = 0;
 
 // TODO: settings
 const default_severity = 2;

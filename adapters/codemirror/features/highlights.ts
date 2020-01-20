@@ -5,7 +5,7 @@ import { VirtualDocument } from '../../../virtual/document';
 import { IRootPosition } from '../../../positioning';
 import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
 
-const DEBUG = false;
+const DEBUG = 0;
 
 export class Highlights extends CodeMirrorLSPFeature {
   name = 'Highlights';

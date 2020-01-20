@@ -4,7 +4,7 @@ import { Signal } from '@phosphor/signaling';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { sleep, until_ready } from './utils';
 
-const DEBUG = false;
+const DEBUG = 0;
 
 export interface IDocumentConnectionData {
   virtual_document: VirtualDocument;
@@ -72,19 +72,25 @@ export class DocumentConnectionManager {
     virtual_document.foreign_document_opened.connect((host, context) => {
       DEBUG &&
         console.log(
-          'LSP: Connecting foreign document: ',
+          'LSP: ConnectionManager received foreign document: ',
           context.foreign_document.id_path
         );
-      this.connect_document_signals(context.foreign_document);
     });
+
     virtual_document.foreign_document_closed.connect(
       (host, { foreign_document }) => {
-        this.connections.get(foreign_document.id_path).close();
-        this.connections.delete(foreign_document.id_path);
+        const connection = this.connections.get(foreign_document.id_path);
+        if (connection) {
+          connection.close();
+          this.connections.delete(foreign_document.id_path);
+        } else {
+          console.warn('LSP: no connection for', foreign_document);
+        }
         this.documents.delete(foreign_document.id_path);
         this.documents_changed.emit(this.documents);
       }
     );
+
     this.documents.set(virtual_document.id_path, virtual_document);
     this.documents_changed.emit(this.documents);
   }
@@ -92,7 +98,10 @@ export class DocumentConnectionManager {
   private async connect_socket(
     options: ISocketConnectionOptions
   ): Promise<LSPConnection> {
+    DEBUG && console.log('LSP: Connection Socket', options);
     let { virtual_document, language } = options;
+
+    this.connect_document_signals(virtual_document);
 
     const uris = DocumentConnectionManager.solve_uris(
       virtual_document,
@@ -175,6 +184,7 @@ export class DocumentConnectionManager {
   }
 
   async connect(options: ISocketConnectionOptions) {
+    DEBUG && console.log('LSP: connection requested', options);
     let connection = await this.connect_socket(options);
 
     connection.on('serverInitialized', capabilities => {
@@ -186,7 +196,7 @@ export class DocumentConnectionManager {
     await until_ready(
       () => {
         // @ts-ignore
-        return connection.isConnected;
+        return connection.isReady;
       },
       50,
       50

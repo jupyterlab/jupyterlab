@@ -123,9 +123,9 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
           );
 
           let status = '';
-          if (connection.isInitialized) {
+          if (connection?.isInitialized) {
             status = 'initialized';
-          } else if (connection.isConnected) {
+          } else if (connection?.isConnected) {
             status = 'connected';
           } else {
             status = 'not connected';
@@ -366,8 +366,8 @@ export namespace LSPStatus {
       Map<string, VirtualDocument[]>
     > {
       let data = new Map();
-      if (!this.adapter) {
-        return new Map();
+      if (!this.adapter?.virtual_editor) {
+        return data;
       }
 
       let main_document = this.adapter.virtual_editor.virtual_document;
@@ -409,7 +409,7 @@ export namespace LSPStatus {
     }
 
     get detected_languages(): Set<string> {
-      if (!this.adapter) {
+      if (!this.adapter?.virtual_editor) {
         return new Set<string>();
       }
 

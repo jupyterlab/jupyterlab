@@ -11,7 +11,7 @@ import {
   IVirtualPosition
 } from '../../positioning';
 
-const DEBUG = false;
+const DEBUG = 0;
 
 // @ts-ignore
 class DocDispatcher implements CodeMirror.Doc {

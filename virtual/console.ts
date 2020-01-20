@@ -1,6 +1,6 @@
 import '../../style/console.css';
 
-const DEBUG = false;
+const DEBUG = 0;
 
 export abstract class EditorLogConsole {
   abstract log(...args: any[]): void;

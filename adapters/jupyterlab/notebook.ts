@@ -16,7 +16,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 import { DocumentConnectionManager } from '../../connection_manager';
 
-const DEBUG = false;
+const DEBUG = 0;
 
 export class NotebookAdapter extends JupyterLabWidgetAdapter {
   editor: Notebook;

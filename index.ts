@@ -136,9 +136,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
       }
     );
 
-    fileEditorTracker.widgetUpdated.connect((sender, widget) => {
-      console.log(sender);
-      console.log(widget);
+    fileEditorTracker.widgetUpdated.connect((_sender, _widget) => {
+      // console.log(sender);
+      // console.log(widget);
       // TODO?
       // adapter.remove();
       // connection.close();

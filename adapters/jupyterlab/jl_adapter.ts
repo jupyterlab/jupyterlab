@@ -33,7 +33,7 @@ import {
 } from '../../connection_manager';
 import { Rename } from '../codemirror/features/rename';
 
-const DEBUG = false;
+const DEBUG = 0;
 
 export const lsp_features: Array<ILSPFeatureConstructor> = [
   Completion,
@@ -77,7 +77,7 @@ export class StatusMessage {
   set(message: string, timeout?: number) {
     this.message = message;
     this.changed.emit('');
-    if (typeof timeout !== 'undefined' && timeout !== -1) {
+    if (timeout == null && timeout !== -1) {
       setTimeout(this.cleanup.bind(this), timeout);
     }
   }
@@ -139,10 +139,10 @@ export abstract class JupyterLabWidgetAdapter
           'LSP: connection closed, disconnecting adapter',
           virtual_document.id_path
         );
+      if (virtual_document !== this.virtual_editor?.virtual_document) {
+        return;
+      }
       this.disconnect_adapter(virtual_document);
-    });
-    this.connection_manager.connected.connect((manager, data) => {
-      this.on_connected(data).catch(console.warn);
     });
 
     // register completion connectors
@@ -189,7 +189,7 @@ export abstract class JupyterLabWidgetAdapter
   // but also reloads the connection; used during file rename (or when it was moved)
   protected reload_connection() {
     // ignore premature calls (before the editor was initialized)
-    if (typeof this.virtual_editor === 'undefined') {
+    if (this.virtual_editor == null) {
       return;
     }
 
@@ -207,7 +207,7 @@ export abstract class JupyterLabWidgetAdapter
 
   protected on_save_state(context: any, state: DocumentRegistry.SaveState) {
     // ignore premature calls (before the editor was initialized)
-    if (typeof this.virtual_editor === 'undefined') {
+    if (this.virtual_editor == null) {
       return;
     }
 
@@ -247,13 +247,13 @@ export abstract class JupyterLabWidgetAdapter
   }
 
   protected async connect_document(virtual_document: VirtualDocument) {
-    this.connection_manager.connect_document_signals(virtual_document);
     virtual_document.changed.connect(this.document_changed.bind(this));
-    await this.connect(virtual_document).catch(console.warn);
 
-    virtual_document.foreign_document_opened.connect((host, context) => {
+    virtual_document.foreign_document_opened.connect(async (host, context) => {
       this.connect_document(context.foreign_document).catch(console.warn);
     });
+
+    await this.connect(virtual_document).catch(console.warn);
   }
 
   document_changed(
@@ -267,14 +267,14 @@ export abstract class JupyterLabWidgetAdapter
     );
     let adapter = this.adapters.get(virtual_document.id_path);
 
-    if (typeof connection === 'undefined') {
+    if (connection == null) {
       DEBUG &&
         console.log(
           'LSP: Skipping document update signal: connection not ready'
         );
       return;
     }
-    if (typeof adapter === 'undefined') {
+    if (adapter == null) {
       DEBUG &&
         console.log('LSP: Skipping document update signal: adapter not ready');
       return;
@@ -319,7 +319,7 @@ export abstract class JupyterLabWidgetAdapter
   private disconnect_adapter(virtual_document: VirtualDocument) {
     let adapter = this.adapters.get(virtual_document.id_path);
     this.adapters.delete(virtual_document.id_path);
-    if (typeof adapter !== 'undefined') {
+    if (adapter != null) {
       adapter.remove();
     }
   }
@@ -345,6 +345,8 @@ export abstract class JupyterLabWidgetAdapter
     };
 
     let connection = await this.connection_manager.connect(options);
+
+    await this.on_connected({ virtual_document, connection });
 
     return {
       connection,
