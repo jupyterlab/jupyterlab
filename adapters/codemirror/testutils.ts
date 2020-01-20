@@ -21,7 +21,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 import { ICellModel } from '@jupyterlab/cells';
 import createNotebook = NBTestUtils.createNotebook;
 import { CodeMirrorAdapter } from './cm_adapter';
-import { VirtualDocument } from '../../virtual/document';
+import { VirtualDocument, VirtualDocumentInfo } from '../../virtual/document';
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
@@ -48,6 +48,9 @@ export abstract class FeatureTestEnvironment
 
   init() {
     this.virtual_editor = this.create_virtual_editor();
+    this.virtual_editor.virtual_document.document_info = new VirtualDocumentInfo(
+      this.virtual_editor.virtual_document
+    );
   }
 
   abstract create_virtual_editor(): VirtualEditor;
