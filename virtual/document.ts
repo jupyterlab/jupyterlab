@@ -16,6 +16,8 @@ import {
 import IRange = CodeEditor.IRange;
 import { IDocumentInfo } from 'lsp-ws-connection/src';
 
+import { DocumentConnectionManager } from '../connection_manager';
+
 type language = string;
 
 interface IVirtualLine {
@@ -102,7 +104,8 @@ export class VirtualDocumentInfo implements IDocumentInfo {
   }
 
   get uri() {
-    return this._uri;
+    const uris = DocumentConnectionManager.solve_uris(this._document, this.languageId);
+    return uris.document;
   }
 
   get languageId() {
