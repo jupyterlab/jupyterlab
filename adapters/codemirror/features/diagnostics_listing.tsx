@@ -155,7 +155,7 @@ class Column {
   }
 
   render_header(listing: DiagnosticsListing): ReactElement {
-    return <SortableTH name={this.name} listing={listing} />;
+    return <SortableTH name={this.name} listing={listing} key={this.name} />;
   }
 }
 
@@ -186,7 +186,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
     new Column({
       name: 'Virtual Document',
       render_cell: (row, context) => (
-        <td>
+        <td key={0}>
           <DocumentLocator document={row.document} editor={context.editor} />
         </td>
       ),
@@ -197,14 +197,14 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       name: 'Message',
       render_cell: row => {
         let message = message_without_code(row.data.diagnostic);
-        return <td>{message}</td>;
+        return <td key={1}>{message}</td>;
       },
       sort: (a, b) =>
         a.data.diagnostic.message.localeCompare(b.data.diagnostic.message)
     }),
     new Column({
       name: 'Code',
-      render_cell: row => <td>{row.data.diagnostic.code}</td>,
+      render_cell: row => <td key={2}>{row.data.diagnostic.code}</td>,
       sort: (a, b) =>
         (a.data.diagnostic.code + '').localeCompare(
           b.data.diagnostic.source + ''
@@ -214,32 +214,34 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       name: 'Severity',
       // TODO: use default diagnostic severity
       render_cell: row => (
-        <td>{diagnosticSeverityNames[row.data.diagnostic.severity || 1]}</td>
+        <td key={3}>
+          {diagnosticSeverityNames[row.data.diagnostic.severity || 1]}
+        </td>
       ),
       sort: (a, b) =>
         a.data.diagnostic.severity > b.data.diagnostic.severity ? 1 : -1
     }),
     new Column({
       name: 'Source',
-      render_cell: row => <td>{row.data.diagnostic.source}</td>,
+      render_cell: row => <td key={4}>{row.data.diagnostic.source}</td>,
       sort: (a, b) =>
         a.data.diagnostic.source.localeCompare(b.data.diagnostic.source)
     }),
     new Column({
       name: 'Cell',
-      render_cell: row => <td>{row.cell_number}</td>,
+      render_cell: row => <td key={5}>{row.cell_number}</td>,
       sort: (a, b) => (a.cell_number > b.cell_number ? 1 : -1),
       is_available: context => context.editor.has_cells
     }),
     new Column({
       name: 'Line',
-      render_cell: row => <td>{row.data.range.start.line}</td>,
+      render_cell: row => <td key={6}>{row.data.range.start.line}</td>,
       sort: (a, b) =>
         a.data.range.start.line > b.data.range.start.line ? 1 : -1
     }),
     new Column({
       name: 'Ch',
-      render_cell: row => <td>{row.data.range.start.line}</td>,
+      render_cell: row => <td key={7}>{row.data.range.start.line}</td>,
       sort: (a, b) => (a.data.range.start.ch > b.data.range.start.ch ? 1 : -1)
     })
   ];
