@@ -1,5 +1,6 @@
 import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
+import { Menu } from '@phosphor/widgets';
 import { PositionConverter } from '../../../converter';
 import { IVirtualPosition } from '../../../positioning';
 import { diagnosticSeverityNames } from '../../../lsp';
@@ -7,6 +8,7 @@ import { DefaultMap } from '../../../utils';
 import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import {
+  DIAGNOSTICS_LISTING_CLASS,
   DiagnosticsDatabase,
   DiagnosticsListing,
   IEditorDiagnostic
@@ -19,23 +21,29 @@ import { VirtualEditor } from '../../../virtual/editor';
 const default_severity = 2;
 
 class DiagnosticsPanel {
-  content: DiagnosticsListing;
-  widget: MainAreaWidget<DiagnosticsListing>;
+  private _content: DiagnosticsListing = null;
+  private _widget: MainAreaWidget<DiagnosticsListing> = null;
+  is_registered = false;
 
-  constructor() {
-    this.widget = this.init_widget();
-    this.widget.content.disposed.connect(() => {
-      // immortal widget (or mild memory leak) TODO: rewrite this
-      this.widget.dispose();
-      this.widget = this.init_widget();
-    });
+  get widget() {
+    if (this._widget == null || this._widget.content.model === null) {
+      if (this._widget && !this._widget.isDisposed) {
+        this._widget.dispose();
+      }
+      this._widget = this.init_widget();
+    }
+    return this._widget;
   }
 
-  init_widget() {
-    this.content = new DiagnosticsListing(new DiagnosticsListing.Model());
-    this.content.model.diagnostics = new DiagnosticsDatabase();
-    this.content.addClass('lsp-diagnostics-panel-content');
-    const widget = new MainAreaWidget({ content: this.content });
+  get content() {
+    return this.widget.content;
+  }
+
+  protected init_widget() {
+    this._content = new DiagnosticsListing(new DiagnosticsListing.Model());
+    this._content.model.diagnostics = new DiagnosticsDatabase();
+    this._content.addClass('lsp-diagnostics-panel-content');
+    const widget = new MainAreaWidget({ content: this._content });
     widget.id = 'lsp-diagnostics-panel';
     widget.title.label = 'Diagnostics Panel';
     widget.title.closable = true;
@@ -57,20 +65,64 @@ export const diagnostics_databases = new Map<
   DiagnosticsDatabase
 >();
 
+const CMD_COLUMN_VISIBILITY = 'lsp-set-column-visibility';
+
 export class Diagnostics extends CodeMirrorLSPFeature {
   name = 'Diagnostics';
 
   static commands: Array<IFeatureCommand> = [
     {
       id: 'show-diagnostics-panel',
-      execute: ({ app, features }) => {
+      execute: ({ app, features, adapter }) => {
         let diagnostics_feature = features.get('Diagnostics') as Diagnostics;
         diagnostics_feature.switchDiagnosticsPanelSource();
 
         let panel_widget = diagnostics_panel.widget;
 
+        let get_column = (name: string) => {
+          // TODO: a hashmap in the panel itself?
+          for (let column of panel_widget.content.columns) {
+            if (column.name === name) {
+              return column;
+            }
+          }
+        };
+
+        if (!diagnostics_panel.is_registered) {
+          let columns_menu = new Menu({ commands: app.commands });
+          app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
+            execute: args => {
+              let column = get_column(args['name'] as string);
+              column.is_visible = !column.is_visible;
+              panel_widget.update();
+            },
+            label: args => args['name'] as string,
+            isToggled: args => {
+              let column = get_column(args['name'] as string);
+              return column.is_visible;
+            }
+          });
+          columns_menu.title.label = 'Panel columns';
+          for (let column of panel_widget.content.columns) {
+            columns_menu.addItem({
+              command: CMD_COLUMN_VISIBILITY,
+              args: { name: column.name }
+            });
+          }
+          app.contextMenu.addItem({
+            selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' th',
+            submenu: columns_menu,
+            type: 'submenu'
+          });
+          diagnostics_panel.is_registered = true;
+        }
+
         if (!panel_widget.isAttached) {
-          app.shell.add(panel_widget, 'main');
+          console.warn(adapter.widget_id);
+          app.shell.add(panel_widget, 'main', {
+            ref: adapter.widget_id,
+            mode: 'split-bottom'
+          });
         }
         app.shell.activateById(panel_widget.id);
       },

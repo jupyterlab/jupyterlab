@@ -257,4 +257,5 @@ export interface ICommandContext {
   root_position: IRootPosition;
   features: Map<string, ILSPFeature>;
   editor: VirtualEditor;
+  adapter: JupyterLabWidgetAdapter;
 }

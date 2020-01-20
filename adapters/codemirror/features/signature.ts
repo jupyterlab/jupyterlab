@@ -42,32 +42,44 @@ export class Signature extends CodeMirrorLSPFeature {
     let markdown = '```' + language + '\n' + item.label + '\n```';
     if (item.documentation) {
       markdown += '\n';
-
-      let in_text_block = false;
-      // TODO: make use of the MarkupContent object instead
-      for (let line of item.documentation.toString().split('\n')) {
-        if (line.trim() === item.label.trim()) {
-          continue;
-        }
-
-        if (line.startsWith('>>>')) {
-          if (in_text_block) {
-            markdown += '```\n\n';
-            in_text_block = false;
+      if (
+        typeof item.documentation === 'string' ||
+        item.documentation.kind === 'plaintext'
+      ) {
+        let in_text_block = false;
+        // TODO: make use of the MarkupContent object instead
+        for (let line of item.documentation.toString().split('\n')) {
+          if (line.trim() === item.label.trim()) {
+            continue;
           }
-          line = '```' + language + '\n' + line.substr(3) + '\n```';
-        } else {
-          // start new text block
-          if (!in_text_block) {
-            markdown += '```\n';
-            in_text_block = true;
+
+          if (line.startsWith('>>>')) {
+            if (in_text_block) {
+              markdown += '```\n\n';
+              in_text_block = false;
+            }
+            line = '```' + language + '\n' + line.substr(3) + '\n```';
+          } else {
+            // start new text block
+            if (!in_text_block) {
+              markdown += '```\n';
+              in_text_block = true;
+            }
           }
+          markdown += line + '\n';
         }
-        markdown += line + '\n';
-      }
-      // close off the text block - if any
-      if (in_text_block) {
-        markdown += '```';
+        // close off the text block - if any
+        if (in_text_block) {
+          markdown += '```';
+        }
+      } else {
+        if (item.documentation.kind !== 'markdown') {
+          this.virtual_editor.console.warn(
+            'Unknown MarkupContent kind:',
+            item.documentation.kind
+          );
+        }
+        markdown += item.documentation.value;
       }
     }
     return markdown;

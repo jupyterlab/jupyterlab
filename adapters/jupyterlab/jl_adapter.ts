@@ -151,6 +151,10 @@ export abstract class JupyterLabWidgetAdapter
   abstract get mime_type(): string;
   protected abstract connect_completion(): void;
 
+  get widget_id(): string {
+    return this.widget.id;
+  }
+
   get language(): string {
     // the values should follow https://microsoft.github.io/language-server-protocol/specification guidelines
     if (mime_type_language_map.hasOwnProperty(this.mime_type)) {
@@ -427,7 +431,8 @@ export abstract class JupyterLabWidgetAdapter
       root_position,
       features: this.get_features(document),
       editor: this.virtual_editor,
-      app: this.app
+      app: this.app,
+      adapter: this
     };
   }
 

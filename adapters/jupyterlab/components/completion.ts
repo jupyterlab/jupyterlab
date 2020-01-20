@@ -111,6 +111,7 @@ export class LSPConnector extends DataConnector<
     const start = editor.getPositionAt(token.offset);
     const end = editor.getPositionAt(token.offset + token.value.length);
 
+    let position_in_token = cursor.column - start.column - 1;
     const typed_character = token.value[cursor.column - start.column - 1];
 
     let start_in_root = this.transform_from_editor_to_root(start);
@@ -150,7 +151,8 @@ export class LSPConnector extends DataConnector<
             virtual_start,
             virtual_end,
             virtual_cursor,
-            document
+            document,
+            position_in_token
           )
         ]).then(([kernel, lsp]) =>
           this.merge_replies(kernel, lsp, this._editor)
@@ -163,7 +165,8 @@ export class LSPConnector extends DataConnector<
         virtual_start,
         virtual_end,
         virtual_cursor,
-        document
+        document,
+        position_in_token
       ).catch(e => {
         console.warn('LSP: hint failed', e);
         return this.fallback_connector.fetch(request);
@@ -180,7 +183,8 @@ export class LSPConnector extends DataConnector<
     start: IVirtualPosition,
     end: IVirtualPosition,
     cursor: IVirtualPosition,
-    document: VirtualDocument
+    document: VirtualDocument,
+    position_in_token: number
   ): Promise<CompletionHandler.IReply> {
     let connection = this._connections.get(document.id_path);
 
@@ -190,7 +194,7 @@ export class LSPConnector extends DataConnector<
     // to the matches...
     // Suggested in https://github.com/jupyterlab/jupyterlab/issues/7044, TODO PR
 
-    console.log(token);
+    console.log('[LSP][Completer] Token:', token);
 
     let completion_items: lsProtocol.CompletionItem[] = [];
     await connection
@@ -209,6 +213,8 @@ export class LSPConnector extends DataConnector<
         completion_items = items || [];
       });
 
+    let prefix = token.value.slice(0, position_in_token + 1);
+
     let matches: Array<string> = [];
     const types: Array<IItemType> = [];
     let all_non_prefixed = true;
@@ -220,10 +226,22 @@ export class LSPConnector extends DataConnector<
       // kind: 3
       // label: "mean(data)"
       // sortText: "amean"
+
+      // TODO: add support for match.textEdit
       let text = match.insertText ? match.insertText : match.label;
 
-      if (text.toLowerCase().startsWith(token.value.toLowerCase())) {
+      if (text.toLowerCase().startsWith(prefix.toLowerCase())) {
         all_non_prefixed = false;
+        if (prefix !== token.value) {
+          if (text.toLowerCase().startsWith(token.value.toLowerCase())) {
+            // given a completion insert text "display_table" and two test cases:
+            // disp<tab>data →  display_table<cursor>data
+            // disp<tab>lay  →  display_table<cursor>
+            // we have to adjust the prefix for the latter (otherwise we would get display_table<cursor>lay),
+            // as we are constrained NOT to replace after the prefix (which would be "disp" otherwise)
+            prefix = token.value;
+          }
+        }
       }
 
       matches.push(text);
@@ -244,7 +262,7 @@ export class LSPConnector extends DataConnector<
       // text = token.value + text;
       // but it did not work for "from statistics <tab>" and lead to "from statisticsimport" (no space)
       start: token.offset + (all_non_prefixed ? 1 : 0),
-      end: token.offset + token.value.length,
+      end: token.offset + prefix.length,
       matches: matches,
       metadata: {
         _jupyter_types_experimental: types
@@ -267,7 +285,7 @@ export class LSPConnector extends DataConnector<
     } else if (lsp.matches.length === 0) {
       return kernel;
     }
-    console.log('merging LSP and kernel completions:', lsp, kernel);
+    console.log('[LSP][Completer] Merging completions:', lsp, kernel);
 
     // Populate the result with a copy of the lsp matches.
     const matches = lsp.matches.slice();
@@ -286,8 +304,10 @@ export class LSPConnector extends DataConnector<
     if (lsp.start > kernel.start) {
       const cursor = editor.getCursorPosition();
       const line = editor.getLine(cursor.line);
-      prefix = line.substring(cursor.column - 1, cursor.column);
-      console.log('will remove prefix from kernel response:', prefix);
+      prefix = line.substring(kernel.start, lsp.start);
+      console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
+    } else if (lsp.start < kernel.start) {
+      console.warn('[LSP][Completer] Kernel start > LSP start');
     }
 
     let remove_prefix = (value: string) => {
