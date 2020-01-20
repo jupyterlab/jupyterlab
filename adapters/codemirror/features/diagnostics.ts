@@ -119,7 +119,6 @@ export class Diagnostics extends CodeMirrorLSPFeature {
         }
 
         if (!panel_widget.isAttached) {
-          console.warn(adapter.widget_id);
           app.shell.add(panel_widget, 'main', {
             ref: adapter.widget_id,
             mode: 'split-bottom'
