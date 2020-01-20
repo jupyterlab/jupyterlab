@@ -91,8 +91,8 @@ export class Highlights extends CodeMirrorLSPFeature {
     try {
       document = this.virtual_editor.document_at_root_position(root_position);
     } catch (e) {
-      console.warn(
-        'Could not obtain virtual document from position',
+      DEBUG && console.warn(
+        'LSP: Could not obtain virtual document from position',
         root_position
       );
       return;
