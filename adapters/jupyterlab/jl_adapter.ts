@@ -194,7 +194,7 @@ export abstract class JupyterLabWidgetAdapter
     }
 
     // disconnect all existing connections (and dispose adapters)
-    this.connection_manager.close_all();
+    this.connection_manager.unregister_document(this.virtual_editor.virtual_document);
     // recreate virtual document using current path and language
     this.virtual_editor.create_virtual_document();
     // reconnect

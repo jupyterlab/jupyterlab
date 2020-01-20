@@ -91,12 +91,10 @@ export function is_within_range(
  */
 export class VirtualDocumentInfo implements IDocumentInfo {
   private _document: VirtualDocument;
-  private _uri: string;
   version = 0;
 
-  constructor(document: VirtualDocument, uri: string) {
+  constructor(document: VirtualDocument) {
     this._document = document;
-    this._uri = uri;
   }
 
   get text() {
@@ -104,7 +102,10 @@ export class VirtualDocumentInfo implements IDocumentInfo {
   }
 
   get uri() {
-    const uris = DocumentConnectionManager.solve_uris(this._document, this.languageId);
+    const uris = DocumentConnectionManager.solve_uris(
+      this._document,
+      this.languageId
+    );
     return uris.document;
   }
 

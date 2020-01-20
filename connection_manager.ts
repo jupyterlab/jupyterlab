@@ -99,10 +99,7 @@ export class DocumentConnectionManager {
       language
     );
 
-    virtual_document.document_info = new VirtualDocumentInfo(
-      virtual_document,
-      uris.document
-    );
+    virtual_document.document_info = new VirtualDocumentInfo(virtual_document);
 
     const connection = await Private.connection(language, uris);
 
@@ -219,14 +216,10 @@ export class DocumentConnectionManager {
     return connection;
   }
 
-  public close_all() {
-    for (let [id_path, connection] of this.connections.entries()) {
-      let virtual_document = this.documents.get(id_path);
-      connection.close();
-      // TODO: close() should trigger the closed event, but it does not seem to work, hence manual trigger below:
-      this.closed.emit({ connection, virtual_document });
-    }
-    this.connections.clear();
+  public unregister_document(virtual_document: VirtualDocument) {
+    const connection = this.connections.get(virtual_document.id_path);
+    this.connections.delete(virtual_document.id_path);
+    this.closed.emit({ connection, virtual_document });
   }
 }
 
@@ -269,7 +262,9 @@ namespace Private {
     const connection_module = await import(
       /* webpackChunkName: "jupyter-lsp-connection" */ './connection'
     );
-    if (!_connections.has(language)) {
+    let connection = _connections.get(language);
+
+    if (connection == null) {
       const socket = new WebSocket(uris.socket);
       const connection = new connection_module.LSPConnection({
         languageId: language,
@@ -279,7 +274,9 @@ namespace Private {
       _connections.set(language, connection);
       connection.connect(socket);
     }
-    const connection = _connections.get(language);
+
+    connection = _connections.get(language);
+
     return connection;
   }
 }
