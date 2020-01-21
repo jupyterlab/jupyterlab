@@ -68,19 +68,25 @@ const VariablesComponent = ({
   service: IDebugger;
 }) => {
   const [variables, setVariables] = useState(data);
-  const [selected, setSelected] = useState('');
+  const [details, setDetials] = useState(null);
+  const [selected, setSelected] = useState(null);
 
   useEffect(() => {
     setVariables(data);
   }, [data]);
 
   const onClickVariable = async (variable: VariablesModel.IVariable) => {
+    if (selected === variable) {
+      setSelected(null);
+      setDetials(null);
+      return;
+    }
     const variableDetials = await service.getVariableDetails(variable);
-    console.log({ variableDetials });
-    setSelected(variable.evaluateName);
+    setSelected(variable);
+    setDetials(variableDetials);
   };
 
-  const Tbody = () => (
+  const Tbody = (variables: VariablesModel.IVariable[]) => (
     <tbody>
       {variables?.map(variable => (
         <tr
@@ -89,7 +95,7 @@ const VariablesComponent = ({
         >
           <td>{variable.name}</td>
           <td>{convertType(variable)}</td>
-          <td className={selected === variable.evaluateName ? 'selected' : ''}>
+          <td className={selected === variable ? 'selected' : ''}>
             {variable.value}
           </td>
         </tr>
@@ -97,19 +103,105 @@ const VariablesComponent = ({
     </tbody>
   );
 
+  const onClose = () => {
+    setDetials(null);
+    setSelected(null);
+  };
+
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Type</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      {Tbody()}
-    </table>
+    <>
+      <table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        {Tbody(variables)}
+      </table>
+      {details && (
+        <VariablesComponentDetails
+          selected={selected}
+          data={details}
+          onClose={onClose}
+          service={service}
+          model={model}
+        />
+      )}
+    </>
   );
 };
+
+const VariablesComponentDetails = (props: any) => {
+  console.log({ props });
+  useEffect(() => {
+    dragElement(document.getElementById(`test-${props.selected.evaluateName}`));
+  }, []);
+
+  return (
+    <div
+      id={`test-${props.selected.evaluateName}`}
+      className={'jp-detailsVariable-box'}
+    >
+      <div id={'header'}>
+        <span>{`${props.selected.evaluateName}-${convertType(
+          props.selected as VariablesModel.IVariable
+        )}`}</span>
+      </div>
+      <div>
+        <VariablesComponent
+          data={props.data}
+          model={props.model}
+          service={props.service}
+        />
+      </div>
+      <button onClick={props.onClose}>Close</button>
+    </div>
+  );
+};
+
+function dragElement(elmnt: HTMLElement) {
+  if (!elmnt) {
+    return;
+  }
+  let pos1 = 0;
+  let pos2 = 0;
+  let pos3 = 0;
+  let pos4 = 0;
+  if (document.getElementById(elmnt.id)) {
+    document.getElementById(elmnt.id).onmousedown = dragMouseDown;
+  } else {
+    elmnt.onmousedown = dragMouseDown;
+  }
+
+  function dragMouseDown(e: MouseEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    document.onmouseup = closeDragElement;
+    document.onmousemove = elementDrag;
+  }
+
+  function elementDrag(e: MouseEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+    pos1 = pos3 - e.clientX;
+    pos2 = pos4 - e.clientY;
+    pos3 = e.clientX;
+    pos4 = e.clientY;
+    // set the element's new position:
+    elmnt.style.top = elmnt.offsetTop - pos2 + 'px';
+    elmnt.style.left = elmnt.offsetLeft - pos1 + 'px';
+  }
+
+  function closeDragElement() {
+    /* stop moving when mouse button is released:*/
+    document.onmouseup = null;
+    document.onmousemove = null;
+  }
+}
 
 /**
  * Convert a variable to a primitive type.

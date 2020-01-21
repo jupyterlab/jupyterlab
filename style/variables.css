@@ -38,3 +38,22 @@
   color: white;
   background: var(--jp-brand-color1);
 }
+
+.jp-detailsVariable-box {
+  position: fixed;
+  top: 30vh;
+  left: 20vw;
+  right: 0vw;
+  width: 500px;
+  z-index: 1253;
+  background-color: white;
+  text-align: center;
+  padding: 15px;
+  border: 1px solid #c1c1c1;
+}
+
+.jp-detailsVariable-box #header {
+  cursor: grab;
+  font-weight: bold;
+  background-color: #c1c1c1;
+}

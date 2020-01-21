@@ -9,6 +9,10 @@
   font-size: var(--jp-ui-font-size1);
 }
 
+.jp-DebuggerSidebar .p-SplitPanel-child {
+  z-index: auto;
+}
+
 .jp-DebuggerSidebar .jp-DebuggerSidebar-body {
   height: 100%;
 }
