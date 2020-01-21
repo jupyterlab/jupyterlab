@@ -289,7 +289,7 @@ describe('@jupyterlab/apputils', () => {
           const button = Toolbar.createInterruptButton(sessionContext);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='stop']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='stop']")).to.exist;
         });
       });
 
@@ -298,7 +298,7 @@ describe('@jupyterlab/apputils', () => {
           const button = Toolbar.createRestartButton(sessionContext);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='refresh']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='refresh']")).to.exist;
         });
       });
 
@@ -326,7 +326,7 @@ describe('@jupyterlab/apputils', () => {
           let called = false;
           sessionContext.statusChanged.connect((_, status) => {
             if (status === 'busy') {
-              expect(item.node.querySelector("[data-icon='circle']")).to.exist;
+              expect(item.node.querySelector("[data-icon$='circle']")).to.exist;
               called = true;
             }
           });
@@ -362,7 +362,7 @@ describe('@jupyterlab/apputils', () => {
           await sessionContext.initialize();
           const item = Toolbar.createKernelStatusItem(sessionContext);
           expect(item.node.title).to.equal('Kernel Connecting');
-          expect(item.node.querySelector("[data-icon='circle-empty']")).to
+          expect(item.node.querySelector("[data-icon$='circle-empty']")).to
             .exist;
           await sessionContext.initialize();
           await sessionContext.session?.kernel?.info;
