@@ -115,12 +115,8 @@ export class JLIcon implements JLIcon.IJLIcon {
       container.firstChild.remove();
     }
 
-    // remove the icon class recorded in the dataset
-    if (container.dataset?.iconClass) {
-      container.classList.remove(container.dataset.iconClass);
-    }
-    // remove icon class from the dataset (even if empty)
-    delete container.dataset?.iconClass;
+    // remove all classes
+    container.className = '';
 
     return container;
   }
@@ -300,16 +296,14 @@ export class JLIcon implements JLIcon.IJLIcon {
       // override the container class with explicitly passed-in class + style class
       const classResolved = classes(className, classStyle);
       container.className = classResolved;
-      container.dataset.iconClass = classResolved;
+      return classResolved;
     } else if (classStyle) {
       // add the style class to the container class
       container.classList.add(classStyle);
-      container.dataset.iconClass = classStyle;
+      return classStyle;
     } else {
-      container.dataset.iconClass = '';
+      return '';
     }
-
-    return container.dataset.iconClass;
   }
 
   protected _initReact() {
@@ -352,9 +346,8 @@ export class JLIcon implements JLIcon.IJLIcon {
             </React.Fragment>
           );
         } else {
-          const classResolved = classes(className, iconStyle(propsStyle));
           return (
-            <Tag className={classResolved} data-icon-class={classResolved}>
+            <Tag className={classes(className, iconStyle(propsStyle))}>
               {svgComponent}
               {label}
             </Tag>

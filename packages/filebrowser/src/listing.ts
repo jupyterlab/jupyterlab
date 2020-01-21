@@ -2122,6 +2122,7 @@ namespace Private {
       });
     } else {
       JLIcon.remove(container);
+      container.className = HEADER_ITEM_ICON_CLASS;
     }
   }
 }
