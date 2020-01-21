@@ -242,11 +242,14 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.start();
     }
 
+    if (this.isStarted || autoStart) {
+      this._changeTitleName();
+    }
+
     this._model.breakpoints.restoreBreakpoints(bpMap);
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();
-    } else {
-      // this always run even when we start debugging and run, ITS bug!
+    } else if (this.isStarted) {
       this._clearModel();
       this._clearSignals();
     }
@@ -378,6 +381,14 @@ export class DebuggerService implements IDebugger, IDisposable {
   async dumpCell(code: string) {
     const reply = await this.session.sendRequest('dumpCell', { code });
     return reply.body;
+  }
+
+  /**
+   * Emit session which have set enabled debugging
+   */
+  private _changeTitleName() {
+    const title = this.isStarted ? this.session?.connection?.name : '-';
+    this._model.header.title = title;
   }
 
   /**

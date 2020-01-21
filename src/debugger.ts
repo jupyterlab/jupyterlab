@@ -66,7 +66,7 @@ export namespace Debugger {
       /**
        * The header of Widget with current name of session.
        */
-      const header = new SidebarHeader(this.service);
+      const header = new SidebarHeader(this.model.header);
 
       this.addWidget(header);
 

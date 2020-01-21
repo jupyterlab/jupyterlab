@@ -13,6 +13,8 @@ import { SourcesModel } from './sources/model';
 
 import { VariablesModel } from './variables/model';
 
+import { SidebarHeaderModel } from './header';
+
 /**
  * A model for a debugger.
  */
@@ -27,6 +29,7 @@ export class DebuggerModel implements IDebugger.IModel {
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged
     });
+    this.header = new SidebarHeaderModel();
   }
 
   /**
@@ -48,6 +51,11 @@ export class DebuggerModel implements IDebugger.IModel {
    * The sources model.
    */
   readonly sources: SourcesModel;
+
+  /**
+   * The Sidebar header  model.
+   */
+  readonly header: SidebarHeaderModel;
 
   /**
    * A signal emitted when the debugger widget is disposed.
@@ -98,6 +106,7 @@ export class DebuggerModel implements IDebugger.IModel {
     this.callstack.frames = [];
     this.variables.scopes = [];
     this.sources.currentSource = null;
+    this.header.title = '-';
   }
 
   private _isDisposed = false;
