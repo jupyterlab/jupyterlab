@@ -16,6 +16,7 @@ import os
 import shutil
 import sys
 import subprocess
+from tempfile import TemporaryDirectory
 
 from tornado.ioloop import IOLoop
 from traitlets import Bool, Unicode
@@ -56,8 +57,14 @@ def run_browser(url):
     target = osp.join(get_app_dir(), 'example_test')
     if not osp.exists(osp.join(target, 'node_modules')):
         os.makedirs(target)
-        subprocess.call(["jlpm"], cwd=target)
-        subprocess.call(["jlpm", "add", "puppeteer"], cwd=target)
+        # Install puppeteer in a temporary directory.
+        # This is to avoid an issue seen in CI where running yarn
+        # In the application directory resulted in the whole Python
+        # install getting removed
+        with TemporaryDirectory() as tdname:
+          subprocess.call(["jlpm"], cwd=tdname)
+          subprocess.call(["jlpm", "add", "puppeteer"], cwd=tdname)
+          shutil.copytree(osp.join(tdname, 'node_modules'), osp.join(target, 'node_modules'))
     shutil.copy(osp.join(here, 'chrome-example-test.js'), osp.join(target, 'chrome-example-test.js'))
     return subprocess.check_call(["node", "chrome-example-test.js", url], cwd=target)
 

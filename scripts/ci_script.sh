@@ -107,9 +107,6 @@ if [[ $GROUP == usage ]]; then
     jlpm run build:examples
 
     # Test the examples
-    pwd
-    ls
-    cat ./setup.sh
     jlpm run test:examples
 
     # Test the cli apps.
