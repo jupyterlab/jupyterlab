@@ -20,16 +20,16 @@ describe('Debugging support', () => {
   let ipykernel: ISessionContext;
 
   beforeAll(async () => {
-    xpython = await createSessionContext({
-      kernelPreference: {
-        name: 'xpython'
-      }
-    });
-    ipykernel = await createSessionContext({
-      kernelPreference: {
-        name: 'python3'
-      }
-    });
+    xpython = await createSessionContext();
+    xpython.kernelPreference = {
+      ...xpython.kernelPreference,
+      name: 'xpython'
+    };
+    ipykernel = await createSessionContext();
+    ipykernel.kernelPreference = {
+      ...ipykernel.kernelPreference,
+      name: 'python3'
+    };
     await Promise.all([xpython.initialize(), ipykernel.initialize()]);
     await Promise.all([
       xpython.session?.kernel?.info,
@@ -61,11 +61,11 @@ describe('DebuggerService', () => {
   let service: IDebugger;
 
   beforeEach(async () => {
-    sessionContext = await createSessionContext({
-      kernelPreference: {
-        name: 'xpython'
-      }
-    });
+    sessionContext = await createSessionContext();
+    sessionContext.kernelPreference = {
+      ...sessionContext.kernelPreference,
+      name: 'xpython'
+    };
     await sessionContext.initialize();
     await sessionContext.session.kernel.info;
     session = new DebugSession({ connection: sessionContext.session });

@@ -102,7 +102,6 @@ export class DebugSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
-    await this._ready();
     await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
@@ -125,7 +124,6 @@ export class DebugSession implements IDebugger.ISession {
    * Stop the running debug session.
    */
   async stop(): Promise<void> {
-    await this._ready();
     await this.sendRequest('disconnect', {
       restart: false,
       terminateDebuggee: true
@@ -137,7 +135,6 @@ export class DebugSession implements IDebugger.ISession {
    * Restore the state of a debug session.
    */
   async restoreState(): Promise<IDebugger.ISession.Response['debugInfo']> {
-    await this._ready();
     const message = await this.sendRequest('debugInfo', {});
     this._isStarted = message.body.isStarted;
     return message;

@@ -21,11 +21,11 @@ describe('DebugSession', () => {
   let sessionContext: ISessionContext;
 
   beforeEach(async () => {
-    sessionContext = await createSessionContext({
-      kernelPreference: {
-        name: 'xpython'
-      }
-    });
+    sessionContext = await createSessionContext();
+    sessionContext.kernelPreference = {
+      ...sessionContext.kernelPreference,
+      name: 'xpython'
+    };
     await sessionContext.initialize();
     await sessionContext.session?.kernel?.info;
   });
@@ -61,33 +61,31 @@ describe('DebugSession', () => {
     });
   });
 
-  describe('#sendRequest', () => {
-    let debugSession: DebugSession;
-
-    beforeEach(async () => {
-      debugSession = new DebugSession({
+  describe('#sendRequest success', () => {
+    it('should send debug messages to the kernel', async () => {
+      const debugSession = new DebugSession({
         connection: sessionContext.session
       });
       await debugSession.start();
-    });
-
-    afterEach(async () => {
-      await debugSession.stop();
-      debugSession.dispose();
-    });
-
-    it('should send debug messages to the kernel', async () => {
       const code = 'i=0\ni+=1\ni+=1';
       const reply = await debugSession.sendRequest('dumpCell', {
         code
       });
+      await debugSession.stop();
       expect(reply.body.sourcePath).to.contain('.py');
     });
+  });
 
+  describe('#sendRequest failure', () => {
     it('should handle replies with success false', async () => {
+      const debugSession = new DebugSession({
+        connection: sessionContext.session
+      });
+      await debugSession.start();
       const reply = await debugSession.sendRequest('evaluate', {
         expression: 'a'
       });
+      await debugSession.stop();
       const { success, message } = reply;
       expect(success).to.be.false;
       expect(message).to.contain('Unable to find thread for evaluation');
@@ -115,11 +113,11 @@ describe('protocol', () => {
   let threadId: number = 1;
 
   beforeEach(async () => {
-    sessionContext = await createSessionContext({
-      kernelPreference: {
-        name: 'xpython'
-      }
-    });
+    sessionContext = await createSessionContext();
+    sessionContext.kernelPreference = {
+      ...sessionContext.kernelPreference,
+      name: 'xpython'
+    };
     await sessionContext.initialize();
     await sessionContext.session?.kernel?.info;
     debugSession = new DebugSession({
