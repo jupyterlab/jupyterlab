@@ -27,12 +27,12 @@ describe('DebugSession', () => {
       }
     });
     await sessionContext.initialize();
-    await sessionContext.ready;
     await sessionContext.session?.kernel?.info;
   });
 
   afterEach(async () => {
     await sessionContext.shutdown();
+    sessionContext.dispose();
   });
 
   describe('#isDisposed', () => {
@@ -121,8 +121,7 @@ describe('protocol', () => {
       }
     });
     await sessionContext.initialize();
-    await sessionContext.ready;
-    await sessionContext.session.kernel.info;
+    await sessionContext.session?.kernel?.info;
     debugSession = new DebugSession({
       connection: sessionContext.session
     });

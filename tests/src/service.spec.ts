@@ -67,7 +67,6 @@ describe('DebuggerService', () => {
       }
     });
     await sessionContext.initialize();
-    await sessionContext.ready;
     await sessionContext.session.kernel.info;
     session = new DebugSession({ connection: sessionContext.session });
     model = new DebuggerModel();
