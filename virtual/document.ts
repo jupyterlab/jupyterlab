@@ -213,6 +213,7 @@ export class VirtualDocument {
     this.foreign_document_opened = new Signal(this);
     this.changed = new Signal(this);
     this.unused_documents = new Set();
+    this.document_info = new VirtualDocumentInfo(this);
     this.clear();
   }
 

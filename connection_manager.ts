@@ -1,4 +1,4 @@
-import { VirtualDocument, VirtualDocumentInfo } from './virtual/document';
+import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
 import { Signal } from '@phosphor/signaling';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
@@ -107,8 +107,6 @@ export class DocumentConnectionManager {
       virtual_document,
       language
     );
-
-    virtual_document.document_info = new VirtualDocumentInfo(virtual_document);
 
     const connection = await Private.connection(language, uris);
 
