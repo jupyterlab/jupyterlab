@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-DebuggerVariables header .jp-Toolbar {
+  margin-left: auto;
+}
+
 .jp-DebuggerVariables-body {
   min-height: 24px;
   overflow: auto;
@@ -48,7 +52,6 @@
   z-index: 1253;
   background-color: white;
   text-align: center;
-  padding: 15px;
   border: 1px solid #c1c1c1;
 }
 
@@ -56,4 +59,9 @@
   cursor: grab;
   font-weight: bold;
   background-color: #c1c1c1;
+}
+
+.jp-detailsVariable-box > button {
+  margin-bottom: 10px;
+  margin-top: 10px;
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Toolbar } from '@jupyterlab/apputils';
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
@@ -17,7 +18,13 @@ export class VariablesHeader extends Widget {
     title.node.textContent = 'Variables';
 
     const layout = new PanelLayout();
-    this.layout = layout;
     layout.addWidget(title);
+    layout.addWidget(this.toolbar);
+    this.layout = layout;
   }
+
+  /**
+   * The toolbar for the callstack header.
+   */
+  readonly toolbar = new Toolbar();
 }

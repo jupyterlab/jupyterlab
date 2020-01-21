@@ -120,11 +120,13 @@
   border-radius: 50%;
 }
 
-[data-jp-debugger='true'] .jp-Toolbar-item .jp-ToggleSwitch {
+[data-jp-debugger='true'] .jp-Toolbar-item .jp-ToggleSwitch,
+[data-jp-table='true'] .jp-Toolbar-item .jp-ToggleSwitch {
   background-color: var(--jp-warn-color0);
 }
 
-[data-jp-debugger='true'] .jp-Toolbar-item .jp-ToggleSwitch svg {
+[data-jp-debugger='true'] .jp-Toolbar-item .jp-ToggleSwitch svg,
+[data-jp-table='true'] .jp-Toolbar-item .jp-ToggleSwitch svg {
   margin-left: 50%;
   margin-right: 5px;
 }
