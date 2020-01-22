@@ -42,6 +42,9 @@ class DocDispatcher implements CodeMirror.Doc {
 
   getCursor(start?: string): CodeMirror.Position {
     let cell = this.virtual_editor.notebook.activeCell;
+    if (cell == null) {
+      return;
+    }
     let active_editor = cell.editor as CodeMirrorEditor;
     let cursor = active_editor.editor
       .getDoc()
@@ -356,6 +359,9 @@ export class VirtualEditorForNotebook extends VirtualEditor {
     }
     if (monitor_for_new_blocks) {
       this.notebook.activeCellChanged.connect((notebook, cell) => {
+        if (cell == null) {
+          return;
+        }
         let cm_editor = (cell.editor as CodeMirrorEditor).editor;
         if (!cells_with_handlers.has(cell) && cell.model.type === 'code') {
           callback(cm_editor);
