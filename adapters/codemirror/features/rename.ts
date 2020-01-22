@@ -51,9 +51,9 @@ export class Rename extends CodeMirrorLSPFeature {
             dialog_value.value,
             false
           );
-          rename_feature.handleRename(edit);
-        } catch (err) {
-          handle_failure(err);
+          await rename_feature.handleRename(edit);
+        } catch (error) {
+          handle_failure(error);
         }
       },
       is_enabled: ({ connection }) => connection.isRenameSupported(),
@@ -61,29 +61,37 @@ export class Rename extends CodeMirrorLSPFeature {
     }
   ];
 
-  handleRename(workspaceEdit: lsProtocol.WorkspaceEdit) {
-    this.apply_edit(workspaceEdit)
-      .catch(error => {
-        this.status_message.set(`Rename failed: ${error}`);
-      })
-      .then((outcome: IEditOutcome) => {
-        let status: string;
+  async handleRename(workspaceEdit: lsProtocol.WorkspaceEdit) {
+    let outcome: IEditOutcome;
 
-        if (outcome.wasGranular) {
-          status = `Renamed a variable in ${outcome.appliedChanges} places`;
-        } else if (this.virtual_editor.has_cells) {
-          status = `Renamed a variable in ${outcome.modifiedCells} cells`;
-        } else {
-          status = `Renamed a variable`;
-        }
+    try {
+      outcome = await this.apply_edit(workspaceEdit);
+    } catch (error) {
+      this.status_message.set(`Rename failed: ${error}`);
+      return outcome;
+    }
 
-        if (outcome.errors.length !== 0) {
-          status += ` with errors: ${outcome.errors}`;
-        }
+    try {
+      let status: string;
 
-        this.status_message.set(status, 5 * 1000);
-      })
-      .catch(console.warn);
+      if (outcome.wasGranular) {
+        status = `Renamed a variable in ${outcome.appliedChanges} places`;
+      } else if (this.virtual_editor.has_cells) {
+        status = `Renamed a variable in ${outcome.modifiedCells} cells`;
+      } else {
+        status = `Renamed a variable`;
+      }
+
+      if (outcome.errors.length !== 0) {
+        status += ` with errors: ${outcome.errors}`;
+      }
+
+      this.status_message.set(status, 5 * 1000);
+    } catch (error) {
+      console.warn(error);
+    }
+
+    return outcome;
   }
 }
 

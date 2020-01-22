@@ -84,8 +84,8 @@ export abstract class FeatureTestEnvironment
   public create_dummy_connection() {
     return new LSPConnection({
       languageId: this.language(),
-      serverUri: '',
-      rootUri: '/'
+      serverUri: 'ws://localhost:8080',
+      rootUri: 'file:///unit-test'
     });
   }
 

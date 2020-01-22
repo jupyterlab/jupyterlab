@@ -279,6 +279,7 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
     workspaceEdit: lsProtocol.WorkspaceEdit
   ): Promise<IEditOutcome> {
     let current_uri = this.virtual_document.document_info.uri;
+
     // Specs: documentChanges are preferred over changes
     let changes = workspaceEdit.documentChanges
       ? workspaceEdit.documentChanges.map(
@@ -292,6 +293,7 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
 
     for (let change of changes) {
       let uri = change.textDocument.uri;
+
       if (
         decodeURI(uri) !== decodeURI(current_uri) &&
         decodeURI(uri) !== '/' + decodeURI(current_uri)

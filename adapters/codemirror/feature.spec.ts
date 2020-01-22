@@ -21,6 +21,7 @@ import { nbformat } from '@jupyterlab/coreutils';
 import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
 import { NotebookModel } from '@jupyterlab/notebook';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 const js_fib_code = `function fib(n) {
   return n<2?n:fib(n-1)+fib(n-2);
@@ -94,6 +95,8 @@ const js_partial_edits = [
 ];
 
 describe('Feature', () => {
+  PageConfig.setOption('rootUri', 'file://');
+
   describe('apply_edit()', () => {
     class EditApplyingFeature extends CodeMirrorLSPFeature {
       name = 'EditApplyingFeature';
@@ -248,9 +251,9 @@ describe('Feature', () => {
           'def a_function_2():\n    pass\n\n\nx = a_function_2()\n';
         expect(main_document.value).to.be.equal(old_virtual_source);
 
-        let result = await feature.do_apply_edit({
+        let outcome = await feature.do_apply_edit({
           changes: {
-            ['file://' + environment.path()]: [
+            [main_document.document_info.uri]: [
               {
                 range: {
                   start: { line: 0, character: 0 },
@@ -261,6 +264,7 @@ describe('Feature', () => {
             ]
           }
         });
+
         await synchronizeContent();
 
         let value = main_document.value;
@@ -274,9 +278,9 @@ describe('Feature', () => {
         );
         expect(code_cells[1]).to.have.property('source', 'x = a_function_2()');
 
-        expect(result.appliedChanges).to.be.equal(null);
-        expect(result.wasGranular).to.be.equal(false);
-        expect(result.modifiedCells).to.be.equal(2);
+        expect(outcome.appliedChanges).to.be.equal(null);
+        expect(outcome.wasGranular).to.be.equal(false);
+        expect(outcome.modifiedCells).to.be.equal(2);
       });
 
       it('handles IPython magics', async () => {
@@ -317,7 +321,7 @@ print(x)""")
 
         await feature.do_apply_edit({
           changes: {
-            ['file://' + environment.path()]: [
+            [main_document.document_info.uri]: [
               {
                 range: {
                   start: { line: 0, character: 0 },
