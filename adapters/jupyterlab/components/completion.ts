@@ -196,19 +196,18 @@ export class LSPConnector extends DataConnector<
 
     console.log('[LSP][Completer] Token:', token);
 
-    let completion_items =
-      ((await connection.getCompletion(
-        cursor,
-        {
-          start,
-          end,
-          text: token.value
-        },
-        document.document_info,
-        false,
-        typed_character,
-        this.trigger_kind
-      )) || []) as lsProtocol.CompletionItem[];
+    let completion_items = ((await connection.getCompletion(
+      cursor,
+      {
+        start,
+        end,
+        text: token.value
+      },
+      document.document_info,
+      false,
+      typed_character,
+      this.trigger_kind
+    )) || []) as lsProtocol.CompletionItem[];
 
     let prefix = token.value.slice(0, position_in_token + 1);
 

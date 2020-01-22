@@ -8,11 +8,6 @@ export class Signature extends CodeMirrorLSPFeature {
   protected signature_character: IRootPosition;
   protected _signatureCharacters: string[];
 
-  register(): void {
-    this.connection_handlers.set('signature', this.handleSignature.bind(this));
-    super.register();
-  }
-
   protected get_markup_for_signature_help(
     response: lsProtocol.SignatureHelp,
     language: string
@@ -117,33 +112,37 @@ export class Signature extends CodeMirrorLSPFeature {
   }
 
   get signatureCharacters() {
-    if (
-      typeof this._signatureCharacters === 'undefined' ||
-      !this._signatureCharacters.length
-    ) {
+    if (!this._signatureCharacters?.length) {
       this._signatureCharacters = this.connection.getLanguageSignatureCharacters();
     }
     return this._signatureCharacters;
   }
 
-  afterChange(
-    change: CodeMirror.EditorChange,
-    root_position: IRootPosition
-  ): void {
+  afterChange(change: CodeMirror.EditorChange, root_position: IRootPosition) {
     let last_character = this.extract_last_character(change);
-    if (this.signatureCharacters.indexOf(last_character) > -1) {
-      this.signature_character = root_position;
-      let virtual_position = this.virtual_editor.root_position_to_virtual_position(
-        root_position
-      );
-      this.virtual_editor.console.log(
-        'Signature will be requested for',
-        virtual_position
-      );
-      this.connection.getSignatureHelp(
-        virtual_position,
-        this.virtual_document.document_info
-      );
+
+    if (this.signatureCharacters.indexOf(last_character) === -1) {
+      return;
     }
+
+    this.signature_character = root_position;
+
+    let virtual_position = this.virtual_editor.root_position_to_virtual_position(
+      root_position
+    );
+
+    this.virtual_editor.console.log(
+      'Signature will be requested for',
+      virtual_position
+    );
+
+    this.connection
+      .getSignatureHelp(
+        virtual_position,
+        this.virtual_document.document_info,
+        false
+      )
+      .then(this.handleSignature)
+      .catch(console.warn);
   }
 }
