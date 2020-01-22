@@ -21,6 +21,8 @@ import {
 } from '../../../positioning';
 import { LSPConnection } from '../../../connection';
 
+const DEBUG = 0;
+
 /*
 Feedback: anchor - not clear from docs
 bundle - very not clear from the docs, interface or better docs would be nice to have
@@ -68,10 +70,7 @@ export class LSPConnector extends DataConnector<
   }
 
   protected get _has_kernel(): boolean {
-    return (
-      typeof this.options.session !== 'undefined' &&
-      this.options.session.kernel !== null
-    );
+    return this.options.session?.kernel != null;
   }
 
   protected get _kernel_language(): string {
@@ -95,7 +94,7 @@ export class LSPConnector extends DataConnector<
    *
    * @param request - The completion request text and details.
    */
-  fetch(
+  async fetch(
     request: CompletionHandler.IRequest
   ): Promise<CompletionHandler.IReply> {
     let editor = this._editor;
@@ -104,7 +103,7 @@ export class LSPConnector extends DataConnector<
     const token = editor.getTokenForPosition(cursor);
 
     if (this.suppress_auto_invoke_in.indexOf(token.type) !== -1) {
-      console.log('Suppressing completer auto-invoke in', token.type);
+      DEBUG && console.log('Suppressing completer auto-invoke in', token.type);
       return;
     }
 
@@ -194,7 +193,7 @@ export class LSPConnector extends DataConnector<
     // to the matches...
     // Suggested in https://github.com/jupyterlab/jupyterlab/issues/7044, TODO PR
 
-    console.log('[LSP][Completer] Token:', token);
+    DEBUG && console.log('[LSP][Completer] Token:', token);
 
     let completion_items = ((await connection.getCompletion(
       cursor,
@@ -281,7 +280,7 @@ export class LSPConnector extends DataConnector<
     } else if (lsp.matches.length === 0) {
       return kernel;
     }
-    console.log('[LSP][Completer] Merging completions:', lsp, kernel);
+    DEBUG && console.log('[LSP][Completer] Merging completions:', lsp, kernel);
 
     // Populate the result with a copy of the lsp matches.
     const matches = lsp.matches.slice();
@@ -301,7 +300,7 @@ export class LSPConnector extends DataConnector<
       const cursor = editor.getCursorPosition();
       const line = editor.getLine(cursor.line);
       prefix = line.substring(kernel.start, lsp.start);
-      console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
+      DEBUG && console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
     } else if (lsp.start < kernel.start) {
       console.warn('[LSP][Completer] Kernel start > LSP start');
     }
@@ -316,7 +315,7 @@ export class LSPConnector extends DataConnector<
     // TODO push the CompletionItem suggestion with proper sorting, this is a mess
     let priority_matches = new Set<string>();
 
-    if (typeof kernel.metadata._jupyter_types_experimental !== 'undefined') {
+    if (kernel.metadata._jupyter_types_experimental == null) {
       let kernel_types = kernel.metadata._jupyter_types_experimental as Array<
         IItemType
       >;

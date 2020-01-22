@@ -53,7 +53,6 @@ export class Hover extends CodeMirrorLSPFeature {
           this.virtual_document.document_info,
           false
         );
-        console.log('NRB: hover', hover);
         return hover;
       },
       50
