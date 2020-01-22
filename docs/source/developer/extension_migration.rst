@@ -97,3 +97,21 @@ the new ``@lumino`` namespaced packages:
     ``data-lm-``, e.g. ``data-lm-dragscroll``
   - ``p-`` DOM events such as ``p-dragenter`` should be updated to ``lm-``,
     e.g. ``lm-dragenter``
+
+Update ``@jupyterlab`` imports if necessary
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+JupyterLab 2.0 introduces several new packages with classes and tokens that
+have been moved.
+
+==================  ===========================  ===========================
+ Export              Old package                  New package
+==================  ===========================  ===========================
+ ``Debouncer``       ``@jupyterlab/coreutils``    ``@lumino/polling``
+ ``IPoll``           ``@jupyterlab/coreutils``    ``@lumino/polling``
+ ``IRateLimiter``    ``@jupyterlab/coreutils``    ``@lumino/polling``
+ ``nbformat``        ``@jupyterlab/coreutils``    ``@jupyterlab/nbformat``
+ ``Poll``            ``@jupyterlab/coreutils``    ``@lumino/polling``
+ ``RateLimiter``     ``@jupyterlab/coreutils``    ``@lumino/polling``
+ ``Throttler``       ``@jupyterlab/coreutils``    ``@lumino/polling``
+==================  ===========================  ===========================
