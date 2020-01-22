@@ -1,34 +1,41 @@
 import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
-import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../../../converter';
 import { IVirtualPosition } from '../../../positioning';
 import { uri_to_contents_path, uris_equal } from '../../../utils';
+import { AnyLocation } from 'lsp-ws-connection/src/types';
+
+const DEBUG = 0;
 
 export class JumpToDefinition extends CodeMirrorLSPFeature {
   name = 'JumpToDefinition';
   static commands: Array<IFeatureCommand> = [
     {
       id: 'jump-to-definition',
-      execute: ({ connection, virtual_position, document }) =>
-        connection.getDefinition(virtual_position, document.document_info),
+      execute: async ({ connection, virtual_position, document, features }) => {
+        const jump_feature = features.get(
+          'JumpToDefinition'
+        ) as JumpToDefinition;
+        const targets = await connection.getDefinition(
+          virtual_position,
+          document.document_info,
+          false
+        );
+        await jump_feature.handle_jump(targets, document.document_info.uri);
+      },
       is_enabled: ({ connection }) => connection.isDefinitionSupported(),
       label: 'Jump to definition'
     }
   ];
 
-  register(): void {
-    this.connection_handlers.set('goTo', this.handle_jump.bind(this));
-    super.register();
-  }
-
   get jumper() {
     return this.jupyterlab_components.jumper;
   }
 
-  async handle_jump(
-    location_or_locations: lsProtocol.Location | lsProtocol.Location[],
-    document_uri: string
-  ) {
+  get_uri_and_range(location_or_locations: AnyLocation) {
+    if (location_or_locations == null) {
+      DEBUG && console.log('No jump targets found');
+      return;
+    }
     // some language servers appear to return a single object
     const locations = Array.isArray(location_or_locations)
       ? location_or_locations
@@ -38,29 +45,49 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
     //  (like when there are multiple definitions or usages)
     //  could use the showHints() or completion frontend as a reference
     if (locations.length === 0) {
-      console.log('No jump targets found');
       return;
     }
-    console.log('Will jump to the first of suggested locations:', locations);
 
-    let location = locations[0];
+    DEBUG &&
+      console.log('Will jump to the first of suggested locations:', locations);
 
-    let uri: string = decodeURI(location.uri);
-    let current_uri = document_uri;
+    const location_or_link = locations[0];
+
+    if ('targetUri' in location_or_link) {
+      return {
+        uri: decodeURI(location_or_link.targetUri),
+        range: location_or_link.targetRange
+      };
+    } else if ('uri' in location_or_link) {
+      return {
+        uri: decodeURI(location_or_link.uri),
+        range: location_or_link.range
+      };
+    }
+  }
+
+  async handle_jump(location_or_locations: AnyLocation, document_uri: string) {
+    const target_info = this.get_uri_and_range(location_or_locations);
+
+    if (target_info == null) {
+      DEBUG && console.log('No jump targets found');
+    }
+
+    let { uri, range } = target_info;
 
     let virtual_position = PositionConverter.lsp_to_cm(
-      location.range.start
+      range.start
     ) as IVirtualPosition;
 
-    if (uris_equal(uri, current_uri)) {
+    if (uris_equal(uri, document_uri)) {
       let editor_index = this.virtual_editor.get_editor_index(virtual_position);
       // if in current file, transform from the position within virtual document to the editor position:
       let editor_position = this.virtual_editor.transform_virtual_to_editor(
         virtual_position
       );
       let editor_position_ce = PositionConverter.cm_to_ce(editor_position);
-      console.log(`Jumping to ${editor_index}th editor of ${uri}`);
-      console.log('Jump target within editor:', editor_position_ce);
+      DEBUG && console.log(`Jumping to ${editor_index}th editor of ${uri}`);
+      DEBUG && console.log('Jump target within editor:', editor_position_ce);
       this.jumper.jump({
         token: {
           offset: this.jumper.getOffset(editor_position_ce, editor_index),
@@ -71,8 +98,9 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
     } else {
       // otherwise there is no virtual document and we expect the returned position to be source position:
       let source_position_ce = PositionConverter.cm_to_ce(virtual_position);
-      console.log(`Jumping to external file: ${uri}`);
-      console.log('Jump target (source location):', source_position_ce);
+      DEBUG && console.log(`Jumping to external file: ${uri}`);
+      DEBUG &&
+        console.log('Jump target (source location):', source_position_ce);
 
       // can it be resolved vs our guessed server root?
       const contents_path = uri_to_contents_path(uri);

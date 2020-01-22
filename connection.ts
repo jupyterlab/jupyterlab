@@ -6,11 +6,9 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import {
   ILspOptions,
   IPosition,
-  ITokenInfo,
   LspWsConnection,
   IDocumentInfo
 } from 'lsp-ws-connection';
-import { CompletionTriggerKind } from './lsp';
 import { until_ready } from './utils';
 
 interface ILSPOptions extends ILspOptions {}
@@ -118,52 +116,5 @@ export class LSPConnection extends LspWsConnection {
       textDocumentChange
     );
     documentInfo.version++;
-  }
-
-  public async getCompletion(
-    location: IPosition,
-    token: ITokenInfo,
-    documentInfo: IDocumentInfo,
-    triggerCharacter: string,
-    triggerKind: CompletionTriggerKind
-  ): Promise<lsProtocol.CompletionItem[]> {
-    if (!this.isConnected) {
-      return;
-    }
-    if (
-      !(this.serverCapabilities && this.serverCapabilities.completionProvider)
-    ) {
-      return;
-    }
-
-    return new Promise<lsProtocol.CompletionItem[]>(resolve => {
-      this.connection
-        .sendRequest('textDocument/completion', {
-          textDocument: {
-            uri: documentInfo.uri
-          },
-          position: {
-            line: location.line,
-            character: location.ch
-          },
-          context: {
-            triggerKind: triggerKind,
-            triggerCharacter
-          }
-        } as lsProtocol.CompletionParams)
-        .then(
-          (
-            params:
-              | lsProtocol.CompletionList
-              | lsProtocol.CompletionItem[]
-              | null
-          ) => {
-            if (params) {
-              params = 'items' in params ? params.items : params;
-            }
-            resolve(params as lsProtocol.CompletionItem[]);
-          }
-        );
-    });
   }
 }
