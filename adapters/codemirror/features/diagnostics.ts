@@ -2,7 +2,7 @@ import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { Menu } from '@phosphor/widgets';
 import { PositionConverter } from '../../../converter';
-import { IVirtualPosition } from '../../../positioning';
+import { IVirtualPosition, IEditorPosition } from '../../../positioning';
 import { diagnosticSeverityNames } from '../../../lsp';
 import { DefaultMap } from '../../../utils';
 import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
@@ -308,7 +308,16 @@ export class Diagnostics extends CodeMirrorLSPFeature {
           let cm_editor = document.get_editor_at_virtual_line(start);
 
           let start_in_editor = document.transform_virtual_to_editor(start);
-          let end_in_editor = document.transform_virtual_to_editor(end);
+          let end_in_editor: IEditorPosition;
+
+          // some servers return strange positions for ends
+          try {
+            end_in_editor = document.transform_virtual_to_editor(end);
+          } catch (err) {
+            DEBUG && console.warn('LSP: Malformed range for diagnostic', end);
+            end_in_editor = { ...start_in_editor, ch: start_in_editor.ch + 1 };
+          }
+
           let range_in_editor = {
             start: start_in_editor,
             end: end_in_editor
