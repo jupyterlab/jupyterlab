@@ -21,7 +21,7 @@ export class Hover extends CodeMirrorLSPFeature {
   protected hover_marker: CodeMirror.TextMarker;
   private virtual_position: IVirtualPosition;
 
-  private debounced_get_hover: Debouncer;
+  private debounced_get_hover: Debouncer<Promise<lsProtocol.Hover>>;
 
   register(): void {
     this.wrapper_handlers.set('mousemove', this.handleMouseOver.bind(this));
@@ -46,12 +46,18 @@ export class Hover extends CodeMirrorLSPFeature {
     });
     this.connection_handlers.set('hover', this.handleHover.bind(this));
     // TODO: make the debounce rate configurable
-    this.debounced_get_hover = new Debouncer(() => {
-      this.connection.getHoverTooltip(
-        this.virtual_position,
-        this.virtual_document.document_info
-      );
-    }, 50);
+    this.debounced_get_hover = new Debouncer<Promise<lsProtocol.Hover>>(
+      async () => {
+        const hover = await this.connection.getHoverTooltip(
+          this.virtual_position,
+          this.virtual_document.document_info,
+          false
+        );
+        console.log('NRB: hover', hover);
+        return hover;
+      },
+      50
+    );
     super.register();
   }
 
@@ -141,7 +147,7 @@ export class Hover extends CodeMirrorLSPFeature {
     return target.closest('.CodeMirror-sizer') !== null;
   }
 
-  public _handleMouseOver(event: MouseEvent) {
+  public async _handleMouseOver(event: MouseEvent) {
     // currently the events are coming from notebook panel; ideally these would be connected to individual cells,
     // (only cells with code) instead, but this is more complex to implement right. In any case filtering
     // is needed to determine in hovered character belongs to this virtual document
@@ -176,7 +182,8 @@ export class Hover extends CodeMirrorLSPFeature {
     if (!is_equal(root_position, this.hover_character)) {
       this.hover_character = root_position;
       this.virtual_position = virtual_position;
-      void this.debounced_get_hover.invoke();
+      const hover = await this.debounced_get_hover.invoke();
+      this.handleHover(hover, this.virtual_document.document_info.uri);
     }
   }
 

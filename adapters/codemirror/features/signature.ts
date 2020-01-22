@@ -142,7 +142,7 @@ export class Signature extends CodeMirrorLSPFeature {
         this.virtual_document.document_info,
         false
       )
-      .then(this.handleSignature)
+      .then(help => this.handleSignature(help))
       .catch(console.warn);
   }
 }
