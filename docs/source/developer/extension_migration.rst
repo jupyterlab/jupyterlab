@@ -43,3 +43,45 @@ In both cases, note that we are using the ``beta`` version of many libraries.
 This is to test the extensions against the JupyterLab 2.0 beta release before
 the final version is published. At the time you are upgrading your extension,
 the final versions of these packages may be published.
+
+Updating ``import`` statements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+All of the ``@phosphor`` namespaced imports need to be updated to the new
+``@lumino`` namespaced packages.
+
++-----------------------------+---------------------------+
+| ``@phosphor`` import        | ``@lumino`` counterpart   |
++=============================+===========================+
+| ``@phosphor/application``   | ``@lumino/application``   |
++-----------------------------+---------------------------+
+| ``@phosphor/collections``   | ``@lumino/collections``   |
++-----------------------------+---------------------------+
+| ``@phosphor/commands``      | ``@lumino/commands``      |
++-----------------------------+---------------------------+
+| ``@phosphor/coreutils``     | ``@lumino/coreutils``     |
++-----------------------------+---------------------------+
+| ``@phosphor/datagrid``      | ``@lumino/datagrid``      |
++-----------------------------+---------------------------+
+| ``@phosphor/datastore``     | ``@lumino/datastore``     |
++-----------------------------+---------------------------+
+| ``@phosphor/default-theme`` | ``@lumino/default-theme`` |
++-----------------------------+---------------------------+
+| ``@phosphor/disposable``    | ``@lumino/disposable``    |
++-----------------------------+---------------------------+
+| ``@phosphor/domutils``      | ``@lumino/domutils``      |
++-----------------------------+---------------------------+
+| ``@phosphor/dragdrop``      | ``@lumino/dragdrop``      |
++-----------------------------+---------------------------+
+| ``@phosphor/keyboard``      | ``@lumino/keyboard``      |
++-----------------------------+---------------------------+
+| ``@phosphor/messaging``     | ``@lumino/messaging``     |
++-----------------------------+---------------------------+
+| ``@phosphor/properties``    | ``@lumino/properties``    |
++-----------------------------+---------------------------+
+| ``@phosphor/signaling``     | ``@lumino/signaling``     |
++-----------------------------+---------------------------+
+| ``@phosphor/virtualdom``    | ``@lumino/virtualdom``    |
++-----------------------------+---------------------------+
+| ``@phosphor/widgets``       | ``@lumino/widgets``       |
++-----------------------------+---------------------------+
