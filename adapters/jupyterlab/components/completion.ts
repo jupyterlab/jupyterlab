@@ -21,8 +21,6 @@ import {
 } from '../../../positioning';
 import { LSPConnection } from '../../../connection';
 
-const DEBUG = 0;
-
 /*
 Feedback: anchor - not clear from docs
 bundle - very not clear from the docs, interface or better docs would be nice to have
@@ -103,7 +101,7 @@ export class LSPConnector extends DataConnector<
     const token = editor.getTokenForPosition(cursor);
 
     if (this.suppress_auto_invoke_in.indexOf(token.type) !== -1) {
-      DEBUG && console.log('Suppressing completer auto-invoke in', token.type);
+      console.log('Suppressing completer auto-invoke in', token.type);
       return;
     }
 
@@ -193,7 +191,7 @@ export class LSPConnector extends DataConnector<
     // to the matches...
     // Suggested in https://github.com/jupyterlab/jupyterlab/issues/7044, TODO PR
 
-    DEBUG && console.log('[LSP][Completer] Token:', token);
+    console.log('[LSP][Completer] Token:', token);
 
     let completion_items = ((await connection.getCompletion(
       cursor,
@@ -280,7 +278,7 @@ export class LSPConnector extends DataConnector<
     } else if (lsp.matches.length === 0) {
       return kernel;
     }
-    DEBUG && console.log('[LSP][Completer] Merging completions:', lsp, kernel);
+    console.log('[LSP][Completer] Merging completions:', lsp, kernel);
 
     // Populate the result with a copy of the lsp matches.
     const matches = lsp.matches.slice();
@@ -300,7 +298,7 @@ export class LSPConnector extends DataConnector<
       const cursor = editor.getCursorPosition();
       const line = editor.getLine(cursor.line);
       prefix = line.substring(kernel.start, lsp.start);
-      DEBUG && console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
+      console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
     } else if (lsp.start < kernel.start) {
       console.warn('[LSP][Completer] Kernel start > LSP start');
     }

@@ -4,8 +4,6 @@ import { Signal } from '@phosphor/signaling';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { sleep, until_ready } from './utils';
 
-const DEBUG = 0;
-
 export interface IDocumentConnectionData {
   virtual_document: VirtualDocument;
   connection: LSPConnection;
@@ -70,11 +68,10 @@ export class DocumentConnectionManager {
 
   connect_document_signals(virtual_document: VirtualDocument) {
     virtual_document.foreign_document_opened.connect((host, context) => {
-      DEBUG &&
-        console.log(
-          'LSP: ConnectionManager received foreign document: ',
-          context.foreign_document.id_path
-        );
+      console.log(
+        'LSP: ConnectionManager received foreign document: ',
+        context.foreign_document.id_path
+      );
     });
 
     virtual_document.foreign_document_closed.connect(
@@ -98,7 +95,7 @@ export class DocumentConnectionManager {
   private async connect_socket(
     options: ISocketConnectionOptions
   ): Promise<LSPConnection> {
-    DEBUG && console.log('LSP: Connection Socket', options);
+    console.log('LSP: Connection Socket', options);
     let { virtual_document, language } = options;
 
     this.connect_document_signals(virtual_document);
@@ -168,12 +165,12 @@ export class DocumentConnectionManager {
           success = true;
         })
         .catch(e => {
-          DEBUG && console.warn(e);
+          console.warn(e);
         });
-      DEBUG &&
-        console.log(
-          'LSP: will attempt to re-connect in ' + interval / 1000 + ' seconds'
-        );
+
+      console.log(
+        'LSP: will attempt to re-connect in ' + interval / 1000 + ' seconds'
+      );
       await sleep(interval);
 
       // gradually increase the time delay, up to 5 sec
@@ -182,7 +179,7 @@ export class DocumentConnectionManager {
   }
 
   async connect(options: ISocketConnectionOptions) {
-    DEBUG && console.log('LSP: connection requested', options);
+    console.log('LSP: connection requested', options);
     let connection = await this.connect_socket(options);
 
     connection.on('serverInitialized', capabilities => {
@@ -190,24 +187,6 @@ export class DocumentConnectionManager {
     });
 
     let { virtual_document, document_path } = options;
-
-    await until_ready(
-      () => {
-        // @ts-ignore
-        return connection.isReady;
-      },
-      50,
-      50
-    ).catch(() => {
-      throw Error('LSP: Connect timed out for ' + virtual_document.id_path);
-    });
-    DEBUG &&
-      console.log(
-        'LSP:',
-        document_path,
-        virtual_document.id_path,
-        'connected.'
-      );
 
     connection.on('close', closed_manually => {
       if (!closed_manually) {
@@ -218,6 +197,15 @@ export class DocumentConnectionManager {
         this.closed.emit({ connection, virtual_document });
       }
     });
+
+    try {
+      await until_ready(() => connection.isReady, 100, 50);
+    } catch {
+      console.warn(`LSP: Connect timed out for ${virtual_document.id_path}`);
+      return;
+    }
+
+    console.log('LSP:', document_path, virtual_document.id_path, 'connected.');
 
     this.connected.emit({ connection, virtual_document });
 

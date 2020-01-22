@@ -6,8 +6,6 @@ import { IRootPosition } from '../../positioning';
 import { ILSPFeature } from './feature';
 import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
 
-const DEBUG = 0;
-
 export class CodeMirrorAdapter {
   features: Map<string, ILSPFeature>;
 
@@ -44,10 +42,9 @@ export class CodeMirrorAdapter {
     try {
       await until_ready(() => this.last_change != null, 30, 22);
     } catch (err) {
-      DEBUG &&
-        console.log(
-          'No change obtained from CodeMirror editor within the expected time of 0.66s'
-        );
+      console.log(
+        'No change obtained from CodeMirror editor within the expected time of 0.66s'
+      );
       return;
     }
 
@@ -58,7 +55,7 @@ export class CodeMirrorAdapter {
     try {
       root_position = this.editor.getDoc().getCursor('end') as IRootPosition;
     } catch (err) {
-      DEBUG && console.log('LSP: Root positon not found');
+      console.log('LSP: Root positon not found');
       return;
     }
 
