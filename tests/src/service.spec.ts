@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import { Session } from '@jupyterlab/services';
 
-import { createSessionContext } from '@jupyterlab/testutils';
+import { createSession } from '@jupyterlab/testutils';
 
-import { PromiseDelegate } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { DebuggerModel } from '../../lib/model';
 
@@ -16,25 +16,22 @@ import { IDebugger } from '../../lib/tokens';
 
 describe('Debugging support', () => {
   const service = new DebuggerService();
-  let xpython: ISessionContext;
-  let ipykernel: ISessionContext;
+  let xpython: Session.ISessionConnection;
+  let ipykernel: Session.ISessionConnection;
 
   beforeAll(async () => {
-    xpython = await createSessionContext();
-    xpython.kernelPreference = {
-      ...xpython.kernelPreference,
-      name: 'xpython'
-    };
-    ipykernel = await createSessionContext();
-    ipykernel.kernelPreference = {
-      ...ipykernel.kernelPreference,
-      name: 'python3'
-    };
-    await Promise.all([xpython.initialize(), ipykernel.initialize()]);
-    await Promise.all([
-      xpython.session?.kernel?.info,
-      ipykernel.session?.kernel?.info
-    ]);
+    xpython = await createSession({
+      name: '',
+      type: 'test',
+      path: UUID.uuid4()
+    });
+    await xpython.changeKernel({ name: 'xpython' });
+    ipykernel = await createSession({
+      name: '',
+      type: 'test',
+      path: UUID.uuid4()
+    });
+    await ipykernel.changeKernel({ name: 'python3' });
   });
 
   afterAll(async () => {
@@ -43,38 +40,38 @@ describe('Debugging support', () => {
 
   describe('#isAvailable', () => {
     it('should return true for kernels that have support for debugging', async () => {
-      const enabled = await service.isAvailable(xpython.session);
+      const enabled = await service.isAvailable(xpython);
       expect(enabled).to.be.true;
     });
 
     it('should return false for kernels that do not have support for debugging', async () => {
-      const enabled = await service.isAvailable(ipykernel.session);
+      const enabled = await service.isAvailable(ipykernel);
       expect(enabled).to.be.false;
     });
   });
 });
 
 describe('DebuggerService', () => {
-  let sessionContext: ISessionContext;
+  let connection: Session.ISessionConnection;
   let model: DebuggerModel;
   let session: IDebugger.ISession;
   let service: IDebugger;
 
   beforeEach(async () => {
-    sessionContext = await createSessionContext();
-    sessionContext.kernelPreference = {
-      ...sessionContext.kernelPreference,
-      name: 'xpython'
-    };
-    await sessionContext.initialize();
-    await sessionContext.session.kernel.info;
-    session = new DebugSession({ connection: sessionContext.session });
+    connection = await createSession({
+      name: '',
+      type: 'test',
+      path: UUID.uuid4()
+    });
+    await connection.changeKernel({ name: 'xpython' });
+    session = new DebugSession({ connection });
     model = new DebuggerModel();
     service = new DebuggerService();
   });
 
   afterEach(async () => {
-    await sessionContext.shutdown();
+    await connection.shutdown();
+    connection.dispose();
     session.dispose();
     (service as DebuggerService).dispose();
   });
@@ -215,7 +212,7 @@ describe('DebuggerService', () => {
         });
 
         // trigger a manual execute request
-        sessionContext.session.kernel.requestExecute({ code });
+        connection.kernel.requestExecute({ code });
 
         // wait for the first stopped event and variables changed
         await variablesChanged.promise;
