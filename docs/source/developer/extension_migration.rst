@@ -7,37 +7,35 @@ This is a migration guide for updating extensions that support JupyterLab 1.x
 to work in JupyterLab 2.x. We will look at two examples of extensions that
 cover most of the APIs that extension authors might be using:
 
-- ``@jupyterlab/shortcutui`` migration pull request:
-  https://github.com/jupyterlab/jupyterlab-shortcutui/pull/53/files
-
 - ``@jupyterlab/debugger`` migration pull request:
   https://github.com/jupyterlab/debugger/pull/337/files
+
+- ``@jupyterlab/shortcutui`` migration pull request:
+  https://github.com/jupyterlab/jupyterlab-shortcutui/pull/53/files
 
 Upgrading library versions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``@phosphor/*`` libraries that JupyterLab 1.x uses have been renamed to
-``@lumino/*`` but their APIs have not changed. Updating your ``package.json``
-is straightforward. The easiest way to do this is to look in the
+``@lumino/*``. Updating your ``package.json`` is straightforward. The easiest
+way to do this is to look in the
 `JupyterLab core packages code base <https://github.com/jupyterlab/jupyterlab/tree/master/packages>`__
 and to simply adopt the versions of the relevant libraries that are used
 there.
 
-.. figure:: extension_migration_dependencies_shortcuts.png
-   :align: center
-   :class: jp-screenshot
-   :alt: Updating the shortcuts UI extensions's package.json
-
-   In the shortcuts UI extension, updating the library versions in
-   ``package.json`` looked like this.
-
 .. figure:: extension_migration_dependencies_debugger.png
    :align: center
    :class: jp-screenshot
-   :alt: Updating the debugger extensions's package.json
+   :alt: Updating the debugger extensions's libraries in package.json
 
-   In the debugger extension, updating the library versions in ``package.json``
-   looked like this.
+   Updating the debugger extensions's libraries in ``package.json``
+
+.. figure:: extension_migration_dependencies_shortcuts.png
+   :align: center
+   :class: jp-screenshot
+   :alt: Updating the shortcuts UI extensions's libraries in package.json
+
+   Updating the shortcuts UI extensions's libraries in ``package.json``
 
 In both cases, note that we are using the ``beta`` version of many libraries.
 This is to test the extensions against the JupyterLab 2.0 beta release before
@@ -48,7 +46,8 @@ Updating ``import`` statements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 All of the ``@phosphor`` namespaced imports need to be updated to the new
-``@lumino`` namespaced packages.
+``@lumino`` namespaced packages. The APIs for these packages have not changed,
+so simply updating the `import` statements is sufficient.
 
 +-----------------------------+---------------------------+
 | ``@phosphor`` import        | ``@lumino`` counterpart   |
@@ -85,3 +84,15 @@ All of the ``@phosphor`` namespaced imports need to be updated to the new
 +-----------------------------+---------------------------+
 | ``@phosphor/widgets``       | ``@lumino/widgets``       |
 +-----------------------------+---------------------------+
+
+.. note::
+  ``p-`` prefixed CSS classes, ``data-p-`` attributes and ``p-`` DOM events
+  are deprecated. They will continue to work until the next major release of
+  Lumino.
+
+  - ``.p-`` CSS classes such as ``.p-Widget`` should be updated to ``.lm-``,
+    e.g. ``.lm-Widget``
+  - ``data-p-`` attributes such as ``data-p-dragscroll`` should be updated to
+    ``data-lm-``, e.g. ``data-lm-dragscroll``
+  - ``p-`` DOM events such as ``p-dragenter`` should be updated to ``lm-``,
+    e.g. ``lm-dragenter``
