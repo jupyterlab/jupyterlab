@@ -148,7 +148,7 @@ class Column {
   }
 
   is_available(context: IListingContext) {
-    if (typeof this.options.is_available !== 'undefined') {
+    if (this.options.is_available != null) {
       return this.options.is_available(context);
     }
     return true;
@@ -264,7 +264,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
   render() {
     let diagnostics_db = this.model.diagnostics;
     const editor = this.model.virtual_editor;
-    if (!diagnostics_db || typeof editor === 'undefined') {
+    if (!diagnostics_db || editor == null) {
       return <div>No issues detected, great job!</div>;
     }
 

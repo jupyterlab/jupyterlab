@@ -656,7 +656,7 @@ export class VirtualDocument {
   }
 
   get root(): VirtualDocument {
-    if (typeof this.parent === 'undefined') {
+    if (this.parent == null) {
       return this;
     }
     return this.parent.root;

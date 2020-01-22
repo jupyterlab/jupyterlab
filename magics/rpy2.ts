@@ -7,7 +7,7 @@ export function extract_r_args(args: string[], content_position: number) {
   for (let i = 0; i < args.length; i = i + 2) {
     let arg = args[i];
     let variable = args[i + 1];
-    if (typeof arg === 'undefined') {
+    if (arg == null) {
       break;
     } else if (arg === 'i' || arg === '-input') {
       inputs.push(variable);
@@ -63,14 +63,14 @@ export function rpy2_reverse_pattern(quote = '"', multi_line = false): string {
 export function rpy2_reverse_replacement(match: string, ...args: string[]) {
   let outputs = [];
   for (let i = 0; i < 10; i++) {
-    if (typeof args[i] === 'undefined') {
+    if (args[i] == null) {
       break;
     }
     outputs.push(args[i]);
   }
   let inputs = [];
   for (let i = 13; i < 23; i++) {
-    if (typeof args[i] === 'undefined') {
+    if (args[i] == null) {
       break;
     }
     inputs.push(args[i]);

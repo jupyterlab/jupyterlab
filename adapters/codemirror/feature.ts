@@ -194,7 +194,7 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
     let start = PositionConverter.lsp_to_cm(range.start) as IVirtualPosition;
     let end = PositionConverter.lsp_to_cm(range.end) as IVirtualPosition;
 
-    if (typeof cm_editor === 'undefined') {
+    if (cm_editor == null) {
       let start_in_root = this.transform_virtual_position_to_root_position(
         start
       );

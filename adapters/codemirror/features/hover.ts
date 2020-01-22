@@ -155,7 +155,7 @@ export class Hover extends CodeMirrorLSPFeature {
 
     // happens because mousemove is attached to panel, not individual code cells,
     // and because some regions of the editor (between lines) have no characters
-    if (typeof root_position === 'undefined') {
+    if (root_position == null) {
       // this.remove_range_highlight();
       this.hover_character = null;
       return;

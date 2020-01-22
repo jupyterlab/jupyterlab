@@ -11,7 +11,7 @@ function rpy2_replacer(match: string, ...args: string[]) {
   // define dummy input variables using empty data frames
   let inputs = r.inputs.map(i => i + ' <- data.frame();').join(' ');
   let code: string;
-  if (typeof r.rest === 'undefined') {
+  if (r.rest == null) {
     code = '';
   } else {
     code = r.rest.startsWith(' ') ? r.rest.slice(1) : r.rest;

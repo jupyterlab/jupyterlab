@@ -49,10 +49,7 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
 
       let end = this.global_expression.lastIndex;
 
-      if (
-        this.options.keep_in_host ||
-        typeof this.options.keep_in_host === 'undefined'
-      ) {
+      if (this.options.keep_in_host || this.options.keep_in_host == null) {
         host_code_fragment = code.substring(started_from, end);
       } else {
         if (started_from === match.index) {
