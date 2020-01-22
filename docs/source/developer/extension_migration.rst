@@ -1,7 +1,7 @@
 .. _extension_migration:
 
-Migrating your JupyterLab extension from 1.x to 2.x
-----------------------------------------------------
+JupyterLab 1.x to 2.x Extension Migration Guide
+------------------------------------------------
 
 This is a migration guide for updating extensions that support JupyterLab 1.x
 to work in JupyterLab 2.x. We will look at two examples of extensions that
@@ -13,8 +13,8 @@ cover most of the APIs that extension authors might be using:
 - ``@jupyterlab/debugger`` migration pull request:
   https://github.com/jupyterlab/debugger/pull/337/files
 
-First step: upgrading libraries
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Upgrading library versions
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``@phosphor/*`` libraries that JupyterLab 1.x uses have been renamed to
 ``@lumino/*`` but their APIs have not changed. Updating your ``package.json``
