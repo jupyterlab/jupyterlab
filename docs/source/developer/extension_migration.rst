@@ -98,20 +98,34 @@ the new ``@lumino`` namespaced packages:
   - ``p-`` DOM events such as ``p-dragenter`` should be updated to ``lm-``,
     e.g. ``lm-dragenter``
 
-Update ``@jupyterlab`` imports if necessary
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Updating former ``@jupyterlab/coreutils`` imports
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 JupyterLab 2.0 introduces several new packages with classes and tokens that
-have been moved.
+have been moved out of ``@jupyterlab/coreutils`` into their own packages. These
+exports have been moved:
 
-==================  ===========================  ===========================
- Export              Old package                  New package
-==================  ===========================  ===========================
- ``Debouncer``       ``@jupyterlab/coreutils``    ``@lumino/polling``
- ``IPoll``           ``@jupyterlab/coreutils``    ``@lumino/polling``
- ``IRateLimiter``    ``@jupyterlab/coreutils``    ``@lumino/polling``
- ``nbformat``        ``@jupyterlab/coreutils``    ``@jupyterlab/nbformat``
- ``Poll``            ``@jupyterlab/coreutils``    ``@lumino/polling``
- ``RateLimiter``     ``@jupyterlab/coreutils``    ``@lumino/polling``
- ``Throttler``       ``@jupyterlab/coreutils``    ``@lumino/polling``
-==================  ===========================  ===========================
+============================  =================================
+ Export                        Package
+============================  =================================
+ ``DataConnector``             ``@jupyterlab/statedb``
+ ``Debouncer``                 ``@lumino/polling``
+ ``DefaultSchemaValidator``    ``@jupyterlab/settingregistry``
+ ``IDataConnector``            ``@jupyterlab/statedb``
+ ``IObjectPool``               ``@jupyterlab/statedb``
+ ``IPoll``                     ``@lumino/polling``
+ ``IRateLimiter``              ``@lumino/polling``
+ ``IRestorable``               ``@jupyterlab/statedb``
+ ``IRestorer``                 ``@jupyterlab/statedb``
+ ``ISchemaValidator``          ``@jupyterlab/settingregistry``
+ ``ISettingRegistry``          ``@jupyterlab/settingregistry``
+ ``IStateDB``                  ``@jupyterlab/statedb``
+ ``nbformat``                  ``@jupyterlab/nbformat``
+ ``Poll``                      ``@lumino/polling``
+ ``RateLimiter``               ``@lumino/polling``
+ ``RestorablePool``            ``@jupyterlab/statedb``
+ ``SettingRegistry``           ``@jupyterlab/settingregistry``
+ ``Settings``                  ``@jupyterlab/settingregistry``
+ ``StateDB``                   ``@jupyterlab/statedb``
+ ``Throttler``                 ``@lumino/polling``
+============================  =================================
