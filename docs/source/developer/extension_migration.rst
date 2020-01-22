@@ -26,16 +26,16 @@ there.
 .. figure:: extension_migration_dependencies_debugger.png
    :align: center
    :class: jp-screenshot
-   :alt: Updating the debugger extensions's libraries in package.json
+   :alt: Updating the debugger extension's libraries in package.json
 
-   Updating the debugger extensions's libraries in ``package.json``
+   Updating the debugger extension's libraries in ``package.json``
 
 .. figure:: extension_migration_dependencies_shortcuts.png
    :align: center
    :class: jp-screenshot
-   :alt: Updating the shortcuts UI extensions's libraries in package.json
+   :alt: Updating the shortcuts UI extension's libraries in package.json
 
-   Updating the shortcuts UI extensions's libraries in ``package.json``
+   Updating the shortcuts UI extension's libraries in ``package.json``
 
 In both cases, note that we are using the ``beta`` version of many libraries.
 This is to test the extensions against the JupyterLab 2.0 beta release before
