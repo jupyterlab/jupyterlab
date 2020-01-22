@@ -37,10 +37,11 @@ there.
 
    Updating the shortcuts UI extension's libraries in ``package.json``
 
-In both cases, note that we are using the ``beta`` version of many libraries.
-This is to test the extensions against the JupyterLab 2.0 beta release before
-the final version is published. At the time you are upgrading your extension,
-the final versions of these packages may be published.
+.. tip::
+  In these examples, note that we are using the ``2.0.0-beta.x`` version of
+  many libraries. This was to test the extensions against the JupyterLab 2.0
+  beta release before the final version. For the final release, your
+  ``package.json`` should depend on version ``^2.0.0`` of these packages.
 
 Migrating from ``@phosphor`` to ``@lumino``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -85,7 +86,7 @@ the new ``@lumino`` namespaced packages:
   * - ``@phosphor/widgets``
     - ``@lumino/widgets``
 
-.. note::
+.. warning::
   ``p-`` prefixed CSS classes, ``data-p-`` attributes and ``p-`` DOM events
   are deprecated. They will continue to work until the next major release of
   Lumino.
