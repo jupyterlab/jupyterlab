@@ -263,7 +263,7 @@ export abstract class JupyterLabWidgetAdapter
     );
     let adapter = this.adapters.get(virtual_document.id_path);
 
-    if (connection == null) {
+    if (!connection?.isReady) {
       console.log('LSP: Skipping document update signal: connection not ready');
       return;
     }
