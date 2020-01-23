@@ -149,4 +149,4 @@ necessary to ``await ready``:
    :class: jp-screenshot
    :alt: Updating the isAvailable method of the debugger service
 
-   Updating the ``isAvailable`` method of the debugger service
+   From the `PR migrating the debugger extension to JupyterLab 2.0 <https://github.com/jupyterlab/debugger/pull/337/files#diff-22ccf3ebb0cb6b300ee90a38b88edff8>`__.
