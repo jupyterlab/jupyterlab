@@ -139,3 +139,14 @@ interact with kernel sessions.
 Any widget that matches the ``interface IDocumentWidget`` has a
 ``context: DocumentRegistry.IContext`` attribute with a
 ``sessionContext: ISessionContext`` attribute.
+
+For example, consider how the ``@jupyterlab/debugger`` extension's
+``DebuggerService`` updated its ``isAvailable()`` method. It is no longer
+necessary to ``await ready``:
+
+.. figure:: extension_migration_session.png
+   :align: center
+   :class: jp-screenshot
+   :alt: Updating the isAvailable method of the debugger service
+
+   Updating the ``isAvailable`` method of the debugger service
