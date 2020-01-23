@@ -129,3 +129,13 @@ exports have been moved:
  ``StateDB``                   ``@jupyterlab/statedb``
  ``Throttler``                 ``@lumino/polling``
 ============================  =================================
+
+Using ``Session`` and ``SessionContext`` to manage kernel sessions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``ConsolePanel`` and ``NotebookPanel`` now expose a
+``sessionContext: ISessionContext`` attribute that allows for a uniform way to
+interact with kernel sessions.
+
+Any widget that matches the ``interface IDocumentWidget`` has a
+``context: DocumentRegistry.IContext`` attribute with a
+``sessionContext: ISessionContext`` attribute.
