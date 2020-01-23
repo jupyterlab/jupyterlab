@@ -195,7 +195,7 @@ export class DocumentConnectionManager {
     });
 
     try {
-      await until_ready(() => connection.isReady, 100, 50);
+      await until_ready(() => connection.isReady, 100, 200);
     } catch {
       console.warn(`LSP: Connect timed out for ${virtual_document.id_path}`);
       return;
