@@ -130,6 +130,10 @@ exports have been moved:
  ``Throttler``                 ``@lumino/polling``
 ============================  =================================
 
+.. tip::
+  It might be helpful to delete ``node_modules`` and ``yarn.lock`` when
+  updating these libraries.
+
 Using ``Session`` and ``SessionContext`` to manage kernel sessions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ``ConsolePanel`` and ``NotebookPanel`` now expose a
@@ -141,12 +145,18 @@ Any widget that matches the ``interface IDocumentWidget`` has a
 ``sessionContext: ISessionContext`` attribute.
 
 For example, consider how the ``@jupyterlab/debugger`` extension's
-``DebuggerService`` updated its ``isAvailable()`` method. It is no longer
-necessary to ``await ready``:
+``DebuggerService`` updated its ``isAvailable()`` method.
 
 .. figure:: extension_migration_session.png
    :align: center
    :class: jp-screenshot
    :alt: Updating the isAvailable method of the debugger service
 
-   From the `PR migrating the debugger extension to JupyterLab 2.0 <https://github.com/jupyterlab/debugger/pull/337/files#diff-22ccf3ebb0cb6b300ee90a38b88edff8>`__.
+   From the `PR migrating the debugger extension to JupyterLab 2.0 <https://github.com/jupyterlab/debugger/pull/337/files#diff-22ccf3ebb0cb6b300ee90a38b88edff8>`__
+
+.. note::
+
+  "One notable change: ``await client.kernel.ready`` becomes
+  ``await sessionContext.session.kernel.info`` to check when a kernel is
+  ready." --
+  `jupyterlab/debugger#337 <https://github.com/jupyterlab/debugger/pull/337>`__
