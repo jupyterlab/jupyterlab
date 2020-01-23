@@ -49,7 +49,6 @@ export class FileEditorAdapter extends JupyterLabWidgetAdapter {
     app: JupyterFrontEnd,
     protected completion_manager: ICompletionManager,
     rendermime_registry: IRenderMimeRegistry,
-    server_root: string,
     connection_manager: DocumentConnectionManager
   ) {
     super(
@@ -57,7 +56,6 @@ export class FileEditorAdapter extends JupyterLabWidgetAdapter {
       editor_widget,
       rendermime_registry,
       'completer:invoke-file',
-      server_root,
       connection_manager
     );
     this.jumper = jumper;

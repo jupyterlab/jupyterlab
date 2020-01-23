@@ -121,7 +121,6 @@ export abstract class JupyterLabWidgetAdapter
     protected widget: IDocumentWidget,
     protected rendermime_registry: IRenderMimeRegistry,
     invoke: string,
-    private server_root: string,
     connection_manager: DocumentConnectionManager
   ) {
     this.status_message = new StatusMessage();
@@ -318,7 +317,7 @@ export abstract class JupyterLabWidgetAdapter
 
   public get_features(virtual_document: VirtualDocument) {
     let adapter = this.adapters.get(virtual_document.id_path);
-    return adapter.features;
+    return adapter?.features;
   }
 
   private async connect(virtual_document: VirtualDocument) {
@@ -332,7 +331,6 @@ export abstract class JupyterLabWidgetAdapter
       virtual_document,
       language,
       root_path: this.root_path,
-      server_root: this.server_root,
       document_path: this.document_path
     };
 

@@ -20,10 +20,6 @@ interface ISocketConnectionOptions {
    */
   root_path: string;
   /**
-   * The real root path (on the server), if exposed by the server. If present, it has to be an absolute path.
-   */
-  server_root: string | null;
-  /**
    * Path to the document in the JupyterLab space
    */
   document_path: string;

@@ -31,7 +31,6 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     app: JupyterFrontEnd,
     completion_manager: ICompletionManager,
     rendermime_registry: IRenderMimeRegistry,
-    server_root: string,
     connection_manager: DocumentConnectionManager
   ) {
     super(
@@ -39,7 +38,6 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       editor_widget,
       rendermime_registry,
       'completer:invoke-notebook',
-      server_root,
       connection_manager
     );
     this.editor = editor_widget.content;

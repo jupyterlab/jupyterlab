@@ -71,35 +71,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
     status_bar: IStatusBar
   ) => {
     const connection_manager = new DocumentConnectionManager();
-    // temporary workaround for getting the absolute path
-    let server_root = paths.directories.serverRoot;
-    if (server_root.startsWith('~')) {
-      // try to guess the home location:
-      let user_settings = paths.directories.userSettings;
-      if (user_settings.startsWith('/home/')) {
-        server_root = server_root.replace(
-          '~',
-          user_settings.substring(0, user_settings.indexOf('/', 6))
-        );
-        console.log(
-          'Guessing Linux the server root using user settings path',
-          server_root
-        );
-      } else if (user_settings.startsWith('/Users/')) {
-        server_root = server_root.replace(
-          '~',
-          user_settings.substring(0, user_settings.indexOf('/', 7))
-        );
-        console.log(
-          'Guessing Mac the server root using user settings path',
-          server_root
-        );
-      } else {
-        console.warn(
-          'Unable to solve the absolute path: some LSP servers may not work correctly'
-        );
-      }
-    }
 
     const status_bar_item = new LSPStatus();
 
@@ -155,7 +126,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
           app,
           completion_manager,
           rendermime_registry,
-          server_root,
           connection_manager
         );
         file_editor_adapters.set(fileEditor.id, adapter);
@@ -179,7 +149,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
         app,
         completion_manager,
         rendermime_registry,
-        server_root,
         connection_manager
       );
       notebook_adapters.set(widget.id, adapter);
