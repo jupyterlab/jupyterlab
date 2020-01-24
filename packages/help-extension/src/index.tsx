@@ -197,11 +197,7 @@ function activate(
       kernelConnectionOptions: { handleComms: false }
     });
 
-    const kernel = session.kernel;
-    if (!kernel) {
-      return;
-    }
-    void kernel.info.then(kernelInfo => {
+    void session.kernel?.info.then(kernelInfo => {
       const name = session.kernel!.name;
 
       // Check the cache second time so that, if two callbacks get scheduled,
