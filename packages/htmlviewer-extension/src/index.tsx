@@ -48,15 +48,15 @@ function activateHTMLViewer(
   restorer: ILayoutRestorer | null
 ): IHTMLViewerTracker {
   // Add an HTML file type to the docregistry.
-  const ft: DocumentRegistry.IFileType = {
+  const ft = new DocumentRegistry.FileType({
     name: 'html',
     contentType: 'file',
     fileFormat: 'text',
     displayName: 'HTML File',
     extensions: ['.html'],
     mimeTypes: ['text/html'],
-    iconRenderer: html5Icon
-  };
+    icon: html5Icon
+  });
   app.docRegistry.addFileType(ft);
 
   // Create a new viewer factory.
@@ -97,7 +97,7 @@ function activateHTMLViewer(
 
     widget.title.iconClass = ft.iconClass ?? '';
     widget.title.iconLabel = ft.iconLabel ?? '';
-    widget.title.iconRenderer = ft.iconRenderer!;
+    widget.title.iconRenderer = ft.icon!;
   });
 
   // Add a command to trust the active HTML document,

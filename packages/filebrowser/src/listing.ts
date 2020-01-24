@@ -1839,7 +1839,7 @@ export namespace DirListing {
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       // render the icon svg node
-      if (fileType?.iconRenderer) {
+      if (fileType?.icon) {
         iconContainer.className = classes(
           ITEM_ICON_CLASS,
           iconStyle({
@@ -1848,7 +1848,7 @@ export namespace DirListing {
           })
         );
 
-        fileType.iconRenderer.render(iconContainer);
+        fileType.icon.render(iconContainer);
       } else if (fileType?.iconClass) {
         iconContainer.className = classes(ITEM_ICON_CLASS, fileType.iconClass);
 
@@ -1864,7 +1864,7 @@ export namespace DirListing {
           })
         );
 
-        fileIcon.renderer.render(iconContainer);
+        fileIcon.render(iconContainer);
       }
 
       let hoverText = 'Name: ' + model.name;

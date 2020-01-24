@@ -64,11 +64,11 @@ export class DocumentRegistry implements IDisposable {
     }
     this._modelFactories['text'] = factory || new TextModelFactory();
 
-    let fts = options.initialFileTypes || DocumentRegistry.defaultFileTypes;
-    fts.forEach(ft => {
-      let value = new DocumentRegistry.FileType(ft);
-      this._fileTypes.push(value);
-    });
+    let fts =
+      options.initialFileTypes?.map(ft =>
+        DocumentRegistry.FileType.resolve(ft)
+      ) || DocumentRegistry.defaultFileTypes;
+    fts.forEach(ft => this._fileTypes.push(ft));
   }
 
   /**
@@ -287,7 +287,7 @@ export class DocumentRegistry implements IDisposable {
       ...DocumentRegistry.fileTypeDefaults,
       ...fileType
     };
-    this._fileTypes.push(new DocumentRegistry.FileType(value));
+    this._fileTypes.push(DocumentRegistry.FileType.resolve(value));
 
     this._changed.emit({
       type: 'fileType',
@@ -1215,6 +1215,14 @@ export namespace DocumentRegistry {
    * A wrapper for IFileTypes
    */
   export class FileType implements IFileType {
+    static resolve(ft: Partial<IFileType>): FileType {
+      if (ft instanceof FileType) {
+        return ft;
+      }
+
+      return new FileType(ft);
+    }
+
     constructor(options: Partial<IFileType>) {
       Object.assign(this, fileTypeDefaults, options);
 
@@ -1222,10 +1230,6 @@ export namespace DocumentRegistry {
         // ensure that the icon is resolved to a JLIcon
         this.icon = JLIcon.resolve(this.icon);
       }
-    }
-
-    get iconRenderer(): JLIcon.IRenderer | null {
-      return this.icon?.renderer ?? null;
     }
 
     readonly name: string;
@@ -1304,107 +1308,109 @@ export namespace DocumentRegistry {
   /**
    * The default file types used by the document registry.
    */
-  export const defaultFileTypes: ReadonlyArray<Partial<IFileType>> = [
+  export const defaultFileTypes: ReadonlyArray<FileType> = [
     defaultTextFileType,
     defaultNotebookFileType,
     defaultDirectoryFileType,
-    {
-      name: 'markdown',
-      displayName: 'Markdown File',
-      extensions: ['.md'],
-      mimeTypes: ['text/markdown'],
-      icon: markdownIcon
-    },
-    {
-      name: 'python',
-      displayName: 'Python File',
-      extensions: ['.py'],
-      mimeTypes: ['text/x-python'],
-      icon: pythonIcon
-    },
-    {
-      name: 'json',
-      displayName: 'JSON File',
-      extensions: ['.json'],
-      mimeTypes: ['application/json'],
-      icon: jsonIcon
-    },
-    {
-      name: 'csv',
-      displayName: 'CSV File',
-      extensions: ['.csv'],
-      mimeTypes: ['text/csv'],
-      icon: spreadsheetIcon
-    },
-    {
-      name: 'tsv',
-      displayName: 'TSV File',
-      extensions: ['.tsv'],
-      mimeTypes: ['text/csv'],
-      icon: spreadsheetIcon
-    },
-    {
-      name: 'r',
-      displayName: 'R File',
-      mimeTypes: ['text/x-rsrc'],
-      extensions: ['.r'],
-      icon: rKernelIcon
-    },
-    {
-      name: 'yaml',
-      displayName: 'YAML File',
-      mimeTypes: ['text/x-yaml', 'text/yaml'],
-      extensions: ['.yaml', '.yml'],
-      icon: yamlIcon
-    },
-    {
-      name: 'svg',
-      displayName: 'Image',
-      mimeTypes: ['image/svg+xml'],
-      extensions: ['.svg'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    },
-    {
-      name: 'tiff',
-      displayName: 'Image',
-      mimeTypes: ['image/tiff'],
-      extensions: ['.tif', '.tiff'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    },
-    {
-      name: 'jpeg',
-      displayName: 'Image',
-      mimeTypes: ['image/jpeg'],
-      extensions: ['.jpg', '.jpeg'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    },
-    {
-      name: 'gif',
-      displayName: 'Image',
-      mimeTypes: ['image/gif'],
-      extensions: ['.gif'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    },
-    {
-      name: 'png',
-      displayName: 'Image',
-      mimeTypes: ['image/png'],
-      extensions: ['.png'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    },
-    {
-      name: 'bmp',
-      displayName: 'Image',
-      mimeTypes: ['image/bmp'],
-      extensions: ['.bmp'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    }
+    ...[
+      {
+        name: 'markdown',
+        displayName: 'Markdown File',
+        extensions: ['.md'],
+        mimeTypes: ['text/markdown'],
+        icon: markdownIcon
+      },
+      {
+        name: 'python',
+        displayName: 'Python File',
+        extensions: ['.py'],
+        mimeTypes: ['text/x-python'],
+        icon: pythonIcon
+      },
+      {
+        name: 'json',
+        displayName: 'JSON File',
+        extensions: ['.json'],
+        mimeTypes: ['application/json'],
+        icon: jsonIcon
+      },
+      {
+        name: 'csv',
+        displayName: 'CSV File',
+        extensions: ['.csv'],
+        mimeTypes: ['text/csv'],
+        icon: spreadsheetIcon
+      },
+      {
+        name: 'tsv',
+        displayName: 'TSV File',
+        extensions: ['.tsv'],
+        mimeTypes: ['text/csv'],
+        icon: spreadsheetIcon
+      },
+      {
+        name: 'r',
+        displayName: 'R File',
+        mimeTypes: ['text/x-rsrc'],
+        extensions: ['.r'],
+        icon: rKernelIcon
+      },
+      {
+        name: 'yaml',
+        displayName: 'YAML File',
+        mimeTypes: ['text/x-yaml', 'text/yaml'],
+        extensions: ['.yaml', '.yml'],
+        icon: yamlIcon
+      },
+      {
+        name: 'svg',
+        displayName: 'Image',
+        mimeTypes: ['image/svg+xml'],
+        extensions: ['.svg'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'tiff',
+        displayName: 'Image',
+        mimeTypes: ['image/tiff'],
+        extensions: ['.tif', '.tiff'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'jpeg',
+        displayName: 'Image',
+        mimeTypes: ['image/jpeg'],
+        extensions: ['.jpg', '.jpeg'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'gif',
+        displayName: 'Image',
+        mimeTypes: ['image/gif'],
+        extensions: ['.gif'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'png',
+        displayName: 'Image',
+        mimeTypes: ['image/png'],
+        extensions: ['.png'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'bmp',
+        displayName: 'Image',
+        mimeTypes: ['image/bmp'],
+        extensions: ['.bmp'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      }
+    ].map(ft => new FileType(ft as Partial<IFileType>))
   ];
 }
 

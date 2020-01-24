@@ -46,7 +46,7 @@ export namespace TabBarSvg {
       return (hpass(
         'div',
         { className },
-        closeIcon.renderer
+        closeIcon
       ) as unknown) as VirtualElement;
     }
   }

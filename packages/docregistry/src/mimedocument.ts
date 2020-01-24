@@ -264,7 +264,10 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
     this._rendermime = options.rendermime;
     this._renderTimeout = options.renderTimeout || 1000;
     this._dataType = options.dataType || 'string';
-    this._fileType = options.primaryFileType;
+
+    // resolve the passed in IFileType to a FileType
+    const ft = options.primaryFileType;
+    this._fileType = ft ? DocumentRegistry.FileType.resolve(ft) : ft;
   }
 
   /**
@@ -289,7 +292,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
 
     content.title.iconClass = ft?.iconClass ?? '';
     content.title.iconLabel = ft?.iconLabel ?? '';
-    content.title.iconRenderer = ft?.iconRenderer!;
+    content.title.iconRenderer = ft?.icon!;
 
     const widget = new MimeDocument({ content, context });
 
@@ -299,7 +302,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
   private _rendermime: IRenderMimeRegistry;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
-  private _fileType: DocumentRegistry.IFileType | undefined;
+  private _fileType: DocumentRegistry.FileType | undefined;
 }
 
 /**

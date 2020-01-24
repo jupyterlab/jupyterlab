@@ -294,8 +294,11 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
    */
   constructor(options: MarkdownViewerFactory.IOptions) {
     super(Private.createRegistryOptions(options));
-    this._fileType = options.primaryFileType;
     this._rendermime = options.rendermime;
+
+    // resolve the passed in IFileType to a FileType
+    const ft = options.primaryFileType;
+    this._fileType = ft ? DocumentRegistry.FileType.resolve(ft) : ft;
   }
 
   /**
@@ -311,13 +314,13 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
     const content = new MarkdownViewer({ context, renderer });
     content.title.iconClass = this._fileType?.iconClass ?? '';
     content.title.iconLabel = this._fileType?.iconLabel ?? '';
-    content.title.iconRenderer = this._fileType?.iconRenderer!;
+    content.title.iconRenderer = this._fileType?.icon!;
     const widget = new MarkdownDocument({ content, context });
 
     return widget;
   }
 
-  private _fileType: DocumentRegistry.IFileType | undefined;
+  private _fileType: DocumentRegistry.FileType | undefined;
   private _rendermime: IRenderMimeRegistry;
 }
 
