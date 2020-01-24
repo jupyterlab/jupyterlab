@@ -59,7 +59,7 @@ class DiagnosticsPanel {
 }
 
 export const diagnostics_panel = new DiagnosticsPanel();
-export const diagnostics_databases = new Map<
+export const diagnostics_databases = new WeakMap<
   VirtualEditor,
   DiagnosticsDatabase
 >();

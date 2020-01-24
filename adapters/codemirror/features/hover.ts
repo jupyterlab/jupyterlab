@@ -47,18 +47,20 @@ export class Hover extends CodeMirrorLSPFeature {
     this.connection_handlers.set('hover', this.handleHover.bind(this));
     // TODO: make the debounce rate configurable
     this.debounced_get_hover = new Debouncer<Promise<lsProtocol.Hover>>(
-      async () => {
-        const hover = await this.connection.getHoverTooltip(
-          this.virtual_position,
-          this.virtual_document.document_info,
-          false
-        );
-        return hover;
-      },
+      this.on_hover,
       50
     );
     super.register();
   }
+
+  on_hover = async () => {
+    const hover = await this.connection.getHoverTooltip(
+      this.virtual_position,
+      this.virtual_document.document_info,
+      false
+    );
+    return hover;
+  };
 
   protected static get_markup_for_hover(
     response: lsProtocol.Hover
@@ -255,6 +257,7 @@ export class Hover extends CodeMirrorLSPFeature {
   remove(): void {
     this.remove_range_highlight();
     this.debounced_get_hover.dispose();
+    this.debounced_get_hover = null;
     super.remove();
   }
 }

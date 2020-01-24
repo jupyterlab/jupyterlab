@@ -170,14 +170,17 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
     for (let [event_name, handler] of this.editor_handlers) {
       this.virtual_editor.off(event_name, handler);
     }
+    this.editor_handlers.clear();
     // unregister connection handlers
     for (let [event_name, handler] of this.connection_handlers) {
       this.connection.off(event_name, handler);
     }
+    this.connection_handlers.clear();
     // unregister editor wrapper handlers
     for (let [event_name, handler] of this.wrapper_handlers) {
       this.wrapper.removeEventListener(event_name, handler);
     }
+    this.wrapper_handlers.clear();
   }
 
   afterChange(

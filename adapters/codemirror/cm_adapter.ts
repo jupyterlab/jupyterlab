@@ -94,6 +94,8 @@ export class CodeMirrorAdapter {
     for (let feature of this.features.values()) {
       feature.remove();
     }
+    this.features.clear();
     this.editor.off('change', this.doc_change_handler);
+    this.doc_change_handler = null;
   }
 }

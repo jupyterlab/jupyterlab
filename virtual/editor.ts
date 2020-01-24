@@ -35,6 +35,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
    */
   has_cells: boolean;
   console: EditorLogConsole;
+  isDisposed = false;
 
   public constructor(
     protected language: () => string,
@@ -46,7 +47,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
   ) {
     this.create_virtual_document();
     this.documents_updated = new Signal<VirtualEditor, VirtualDocument>(this);
-    this.documents_updated.connect(this.on_updated.bind(this));
+    this.documents_updated.connect(this.on_updated, this);
     this.console = create_console('browser');
   }
 
@@ -60,6 +61,23 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
       this.file_extension(),
       this.has_lsp_supported_file
     );
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this.documents_updated.disconnect(this.on_updated, this);
+
+    this._event_wrappers.forEach((wrapped_handler, [eventName]) => {
+      this.forEveryBlockEditor(cm_editor => {
+        cm_editor.off(eventName, wrapped_handler);
+      }, false);
+    });
+
+    this._event_wrappers.clear();
+
+    this.isDisposed = true;
   }
 
   /**
@@ -93,7 +111,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
   private is_update_in_progress: boolean = false;
 
   private can_update() {
-    return !this.is_update_in_progress && !this.update_lock;
+    return !this.isDisposed && !this.is_update_in_progress && !this.update_lock;
   }
 
   private update_lock: boolean = false;
@@ -177,10 +195,14 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
   }
 
   abstract forEveryBlockEditor(
-    callback: (cm_editor: CodeMirror.Editor) => void
+    callback: (cm_editor: CodeMirror.Editor) => void,
+    monitor_for_new_blocks?: boolean
   ): void;
 
-  private _event_wrappers = new Map<CodeMirrorHandler, WrappedHandler>();
+  private _event_wrappers = new Map<
+    [string, CodeMirrorHandler],
+    WrappedHandler
+  >();
 
   /**
    * Proxy the event handler binding to the CodeMirror editors,
@@ -199,7 +221,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
         );
       }
     };
-    this._event_wrappers.set(handler, wrapped_handler);
+    this._event_wrappers.set([eventName, handler], wrapped_handler);
 
     this.forEveryBlockEditor(cm_editor => {
       cm_editor.on(eventName, wrapped_handler);
@@ -207,7 +229,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
   }
 
   off(eventName: string, handler: CodeMirrorHandler, ...args: any[]): void {
-    let wrapped_handler = this._event_wrappers.get(handler);
+    let wrapped_handler = this._event_wrappers.get([eventName, handler]);
 
     this.forEveryBlockEditor(cm_editor => {
       cm_editor.off(eventName, wrapped_handler);

@@ -343,9 +343,6 @@ export class VirtualEditorForNotebook extends VirtualEditor {
     callback: (cm_editor: CodeMirror.Editor) => any,
     monitor_for_new_blocks = true
   ) {
-    if (this.notebook.isDisposed) {
-      return;
-    }
     const cells_with_handlers = new Set<Cell>();
 
     for (let cell of this.notebook.widgets) {
