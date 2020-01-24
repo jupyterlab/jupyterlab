@@ -1,6 +1,1 @@
-# TODO: remove the following and add jupyterlab=2
-# to environment.yml when available
-
-python -m pip install -U --pre jupyterlab
-
-jlpm && jlpm build && jupyter labextension install .
+jupyter labextension install @jupyterlab/debugger@0.2.0-alpha.1 --debug
