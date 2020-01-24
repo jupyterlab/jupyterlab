@@ -66,10 +66,7 @@ export class DocumentRegistry implements IDisposable {
 
     let fts = options.initialFileTypes || DocumentRegistry.defaultFileTypes;
     fts.forEach(ft => {
-      let value: DocumentRegistry.IFileType = {
-        ...DocumentRegistry.fileTypeDefaults,
-        ...ft
-      };
+      let value = new DocumentRegistry.FileType(ft);
       this._fileTypes.push(value);
     });
   }
@@ -290,7 +287,7 @@ export class DocumentRegistry implements IDisposable {
       ...DocumentRegistry.fileTypeDefaults,
       ...fileType
     };
-    this._fileTypes.push(value);
+    this._fileTypes.push(new DocumentRegistry.FileType(value));
 
     this._changed.emit({
       type: 'fileType',
@@ -557,7 +554,7 @@ export class DocumentRegistry implements IDisposable {
   /**
    * Get a file type by name.
    */
-  getFileType(name: string): DocumentRegistry.IFileType | undefined {
+  getFileType(name: string): DocumentRegistry.FileType | undefined {
     name = name.toLowerCase();
     return find(this._fileTypes, fileType => {
       return fileType.name.toLowerCase() === name;
@@ -611,7 +608,7 @@ export class DocumentRegistry implements IDisposable {
    */
   getFileTypeForModel(
     model: Partial<Contents.IModel>
-  ): DocumentRegistry.IFileType {
+  ): DocumentRegistry.FileType {
     switch (model.type) {
       case 'directory':
         return (
@@ -643,8 +640,8 @@ export class DocumentRegistry implements IDisposable {
    *
    * @returns An ordered list of matching file types.
    */
-  getFileTypesForPath(path: string): DocumentRegistry.IFileType[] {
-    let fts: DocumentRegistry.IFileType[] = [];
+  getFileTypesForPath(path: string): DocumentRegistry.FileType[] {
+    let fts: DocumentRegistry.FileType[] = [];
     let name = PathExt.basename(path);
 
     // Look for a pattern match first.
@@ -691,7 +688,7 @@ export class DocumentRegistry implements IDisposable {
   private _widgetFactoriesForFileType: {
     [key: string]: string[];
   } = Object.create(null);
-  private _fileTypes: DocumentRegistry.IFileType[] = [];
+  private _fileTypes: DocumentRegistry.FileType[] = [];
   private _extenders: {
     [key: string]: DocumentRegistry.WidgetExtension[];
   } = Object.create(null);
@@ -1176,6 +1173,13 @@ export namespace DocumentRegistry {
     readonly pattern?: string;
 
     /**
+     * The icon for the file type. Can either be a string containing the name
+     * of an existing icon, or an object with {name, svgstr} fields, where
+     * svgstr is a string containing the raw contents of an svg file.
+     */
+    readonly icon?: string | { name: string; svgstr: string } | null;
+
+    /**
      * The icon class name for the file type.
      */
     readonly iconClass?: string;
@@ -1184,11 +1188,6 @@ export namespace DocumentRegistry {
      * The icon label for the file type.
      */
     readonly iconLabel?: string;
-
-    /**
-     * A JLIcon instance used to set the icon for the file type.
-     */
-    readonly iconRenderer?: JLIcon;
 
     /**
      * The content type of the new file.
@@ -1208,11 +1207,38 @@ export namespace DocumentRegistry {
     name: 'default',
     extensions: [],
     mimeTypes: [],
-    iconClass: '',
-    iconLabel: '',
     contentType: 'file',
     fileFormat: 'text'
   };
+
+  /**
+   * A wrapper for IFileTypes
+   */
+  export class FileType implements IFileType {
+    constructor(options: Partial<IFileType>) {
+      Object.assign(this, fileTypeDefaults, options);
+
+      if (this.icon) {
+        // ensure that the icon is resolved to a JLIcon
+        this.icon = JLIcon.resolve(this.icon);
+      }
+    }
+
+    get iconRenderer(): JLIcon.IRenderer | null {
+      return this.icon?.renderer ?? null;
+    }
+
+    readonly name: string;
+    readonly mimeTypes: ReadonlyArray<string>;
+    readonly extensions: ReadonlyArray<string>;
+    readonly displayName: string;
+    readonly pattern: string;
+    readonly icon: JLIcon | null;
+    readonly iconClass: string;
+    readonly iconLabel: string;
+    readonly contentType: Contents.ContentType;
+    readonly fileFormat: Contents.FileFormat;
+  }
 
   /**
    * An arguments object for the `changed` signal.
@@ -1241,18 +1267,18 @@ export namespace DocumentRegistry {
   /**
    * The default text file type used by the document registry.
    */
-  export const defaultTextFileType: IFileType = {
+  export const defaultTextFileType = new FileType({
     ...fileTypeDefaults,
     name: 'text',
     mimeTypes: ['text/plain'],
     extensions: ['.txt'],
-    iconRenderer: fileIcon
-  };
+    icon: fileIcon
+  });
 
   /**
    * The default notebook file type used by the document registry.
    */
-  export const defaultNotebookFileType: IFileType = {
+  export const defaultNotebookFileType = new FileType({
     ...fileTypeDefaults,
     name: 'notebook',
     displayName: 'Notebook',
@@ -1260,20 +1286,20 @@ export namespace DocumentRegistry {
     extensions: ['.ipynb'],
     contentType: 'notebook',
     fileFormat: 'json',
-    iconRenderer: notebookIcon
-  };
+    icon: notebookIcon
+  });
 
   /**
    * The default directory file type used by the document registry.
    */
-  export const defaultDirectoryFileType: IFileType = {
+  export const defaultDirectoryFileType = new FileType({
     ...fileTypeDefaults,
     name: 'directory',
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
-    iconRenderer: folderIcon
-  };
+    icon: folderIcon
+  });
 
   /**
    * The default file types used by the document registry.
@@ -1287,56 +1313,56 @@ export namespace DocumentRegistry {
       displayName: 'Markdown File',
       extensions: ['.md'],
       mimeTypes: ['text/markdown'],
-      iconRenderer: markdownIcon
+      icon: markdownIcon
     },
     {
       name: 'python',
       displayName: 'Python File',
       extensions: ['.py'],
       mimeTypes: ['text/x-python'],
-      iconRenderer: pythonIcon
+      icon: pythonIcon
     },
     {
       name: 'json',
       displayName: 'JSON File',
       extensions: ['.json'],
       mimeTypes: ['application/json'],
-      iconRenderer: jsonIcon
+      icon: jsonIcon
     },
     {
       name: 'csv',
       displayName: 'CSV File',
       extensions: ['.csv'],
       mimeTypes: ['text/csv'],
-      iconRenderer: spreadsheetIcon
+      icon: spreadsheetIcon
     },
     {
       name: 'tsv',
       displayName: 'TSV File',
       extensions: ['.tsv'],
       mimeTypes: ['text/csv'],
-      iconRenderer: spreadsheetIcon
+      icon: spreadsheetIcon
     },
     {
       name: 'r',
       displayName: 'R File',
       mimeTypes: ['text/x-rsrc'],
       extensions: ['.r'],
-      iconRenderer: rKernelIcon
+      icon: rKernelIcon
     },
     {
       name: 'yaml',
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconRenderer: yamlIcon
+      icon: yamlIcon
     },
     {
       name: 'svg',
       displayName: 'Image',
       mimeTypes: ['image/svg+xml'],
       extensions: ['.svg'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1344,7 +1370,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/tiff'],
       extensions: ['.tif', '.tiff'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1352,7 +1378,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/jpeg'],
       extensions: ['.jpg', '.jpeg'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1360,7 +1386,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/gif'],
       extensions: ['.gif'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1368,7 +1394,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/png'],
       extensions: ['.png'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1376,7 +1402,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/bmp'],
       extensions: ['.bmp'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     }
   ];

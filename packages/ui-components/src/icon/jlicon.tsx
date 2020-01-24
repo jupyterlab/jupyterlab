@@ -145,7 +145,7 @@ export class JLIcon implements JLIcon.IJLIconRenderable {
     }
 
     // icon is a non-JLIcon {name, svgstr} pair
-    return JLIcon._get(icon.name) ?? new JLIcon(icon) ?? null;
+    return JLIcon._get(icon.name) ?? new JLIcon(icon);
   }
 
   /**
@@ -506,15 +506,6 @@ export namespace JLIcon {
   export interface IJLIconRenderable extends IJLIcon {
     readonly renderer: IRenderer;
   }
-
-  // export type IRendererFactory = (icon: JLIcon) => IRenderer;
-
-  // export abstract class Renderer implements IRenderer {
-  //   constructor(protected icon: IJLIcon) {};
-  //
-  //   abstract render(container: HTMLElement): void;
-  //   abstract unrender(container: HTMLElement): void;
-  // }
 
   export class ElementRenderer implements IRenderer {
     render(container: HTMLElement, props: IProps = {}): void {
