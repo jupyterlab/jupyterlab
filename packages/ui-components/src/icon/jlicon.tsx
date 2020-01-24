@@ -122,6 +122,58 @@ export class JLIcon implements JLIcon.IJLIcon {
   }
 
   /**
+   * Resolve an icon name or a {name, svgstr} pair into an
+   * actual JLIcon.
+   *
+   * @param icon - either a string with the name of an existing icon
+   * or an object with {name: string, svgstr: string} fields.
+   *
+   * @returns a JLIcon instance, or null if an icon name was passed in
+   * and lookup fails.
+   */
+  static resolve(icon: JLIcon.IJLIconSpec): JLIcon | null {
+    if (icon instanceof JLIcon) {
+      // icon already is a JLIcon
+      return icon;
+    }
+
+    if (typeof icon === 'string') {
+      // do a dynamic lookup of existing icon by name
+      return JLIcon._get(icon) ?? null;
+    }
+
+    // icon is a non-JLIcon {name, svgstr} pair
+    return JLIcon._get(icon.name) ?? new JLIcon(icon) ?? null;
+  }
+
+  /**
+   * Resolve a {name, svgstr} pair into an actual svg node.
+   */
+  static resolveSvg({ name, svgstr }: JLIcon.IJLIcon): HTMLElement | null {
+    const svgDoc = new DOMParser().parseFromString(svgstr, 'image/svg+xml');
+
+    const svgError = svgDoc.querySelector('parsererror');
+
+    // structure of error element varies by browser, search at top level
+    if (svgError) {
+      // parse failed, svgElement will be an error box
+      const errmsg = `SVG HTML was malformed for JLIcon instance.\nname: ${name}, svgstr: ${svgstr}`;
+      if (JLIcon._debug) {
+        // fail noisily, render the error box
+        console.error(errmsg);
+        return svgError as HTMLElement;
+      } else {
+        // bad svg is always a real error, fail silently but warn
+        console.warn(errmsg);
+        return null;
+      }
+    } else {
+      // parse succeeded
+      return svgDoc.documentElement;
+    }
+  }
+
+  /**
    * Toggle icon debug from off-to-on, or vice-versa.
    *
    * @param debug - optional boolean to force debug on or off
@@ -189,7 +241,7 @@ export class JLIcon implements JLIcon.IJLIcon {
     }
 
     // ensure that svg html is valid
-    const svgElement = this.resolveSvg();
+    const svgElement = this._initSvg();
     if (!svgElement) {
       // bail if failing silently, return blank element
       return document.createElement('div');
@@ -225,39 +277,6 @@ export class JLIcon implements JLIcon.IJLIcon {
     container.removeAttribute('title');
 
     this.element({ container, ...props });
-  }
-
-  resolveSvg(title?: string): HTMLElement | null {
-    const svgDoc = new DOMParser().parseFromString(
-      this._svgstr,
-      'image/svg+xml'
-    );
-    const svgElement = svgDoc.documentElement;
-
-    // structure of error element varies by browser, search at top level
-    if (svgDoc.getElementsByTagName('parsererror').length > 0) {
-      const errmsg = `SVG HTML was malformed for JLIcon instance.\nname: ${name}, svgstr: ${this._svgstr}`;
-      // parse failed, svgElement will be an error box
-      if (JLIcon._debug) {
-        // fail noisily, render the error box
-        console.error(errmsg);
-        return svgElement;
-      } else {
-        // bad svg is always a real error, fail silently but warn
-        console.warn(errmsg);
-        return null;
-      }
-    } else {
-      // parse succeeded
-      svgElement.dataset.icon = this.name;
-      svgElement.dataset.iconId = this._uuid;
-
-      if (title) {
-        Private.setTitleSvg(svgElement, title);
-      }
-
-      return svgElement;
-    }
   }
 
   get svgstr() {
@@ -322,7 +341,7 @@ export class JLIcon implements JLIcon.IJLIcon {
         const Tag = tag;
 
         // ensure that svg html is valid
-        const svgElement = this.resolveSvg();
+        const svgElement = this._initSvg();
         if (!svgElement) {
           // bail if failing silently
           return <></>;
@@ -360,7 +379,51 @@ export class JLIcon implements JLIcon.IJLIcon {
     return component;
   }
 
+  protected _initSvg(title?: string): HTMLElement | null {
+    const svgElement = JLIcon.resolveSvg(this);
+
+    if (!svgElement) {
+      // bail on null svg element
+      return svgElement;
+    }
+
+    if (svgElement.tagName !== 'parsererror') {
+      // svgElement is an actual svg node, augment it
+      svgElement.dataset.icon = this.name;
+      svgElement.dataset.iconId = this._uuid;
+
+      if (title) {
+        Private.setTitleSvg(svgElement, title);
+      }
+    }
+
+    return svgElement;
+  }
+
   readonly name: string;
+
+  /**
+   * A React component that will create the icon.
+   *
+   * @param className - a string that will be used as the class
+   * of the container element. Overrides any existing class
+   *
+   * @param container - a preexisting DOM element that
+   * will be used as the container for the svg element
+   *
+   * @param label - text that will be displayed adjacent
+   * to the icon
+   *
+   * @param title - a tooltip for the icon
+   *
+   * @param tag - if container is not explicitly
+   * provided, this tag will be used when creating the container
+   *
+   * @propsStyle - style parameters that get passed to TypeStyle in
+   * order to generate a style class. The style class will be added
+   * to the icon container's classes, while the style itself will be
+   * applied to any svg elements within the container.
+   */
   readonly react: JLIcon.IReact;
 
   protected _className: string;
@@ -377,9 +440,24 @@ export namespace JLIcon {
    * implementation of JLIcon may vary
    */
   export interface IJLIcon {
-    name: string;
+    /**
+     * The name of the icon. By convention, the icon name will be namespaced
+     * as so:
+     *
+     *     "pkg-name:icon-name"
+     */
+    readonly name: string;
+
+    /**
+     * A string containing the raw contents of an svg file.
+     */
     svgstr: string;
   }
+
+  /**
+   * A type that can be resolved to a JLIcon instance.
+   */
+  export type IJLIconSpec = string | IJLIcon;
 
   /**
    * The input props for creating a new JLIcon
