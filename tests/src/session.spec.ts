@@ -3,13 +3,13 @@
 
 import { expect } from 'chai';
 
-import { ISessionContext } from '@jupyterlab/apputils';
+import { Session } from '@jupyterlab/services';
 
-import { createSessionContext } from '@jupyterlab/testutils';
+import { createSession } from '@jupyterlab/testutils';
 
 import { find } from '@lumino/algorithm';
 
-import { PromiseDelegate } from '@lumino/coreutils';
+import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
@@ -18,27 +18,26 @@ import { IDebugger } from '../../lib/tokens';
 import { DebugSession } from '../../lib/session';
 
 describe('DebugSession', () => {
-  let sessionContext: ISessionContext;
+  let connection: Session.ISessionConnection;
 
   beforeEach(async () => {
-    sessionContext = await createSessionContext({
-      kernelPreference: {
-        name: 'xpython'
-      }
+    const path = UUID.uuid4();
+    connection = await createSession({
+      name: '',
+      type: 'test',
+      path
     });
-    await sessionContext.initialize();
-    await sessionContext.ready;
-    await sessionContext.session?.kernel?.info;
+    await connection.changeKernel({ name: 'xpython' });
   });
 
   afterEach(async () => {
-    await sessionContext.shutdown();
+    await connection.shutdown();
   });
 
   describe('#isDisposed', () => {
     it('should return whether the object is disposed', () => {
       const debugSession = new DebugSession({
-        connection: sessionContext.session
+        connection
       });
       expect(debugSession.isDisposed).to.equal(false);
       debugSession.dispose();
@@ -49,7 +48,7 @@ describe('DebugSession', () => {
   describe('#eventMessage', () => {
     it('should be emitted when sending debug messages', async () => {
       const debugSession = new DebugSession({
-        connection: sessionContext.session
+        connection
       });
       let events: string[] = [];
       debugSession.eventMessage.connect((sender, event) => {
@@ -61,33 +60,31 @@ describe('DebugSession', () => {
     });
   });
 
-  describe('#sendRequest', () => {
-    let debugSession: DebugSession;
-
-    beforeEach(async () => {
-      debugSession = new DebugSession({
-        connection: sessionContext.session
+  describe('#sendRequest success', () => {
+    it('should send debug messages to the kernel', async () => {
+      const debugSession = new DebugSession({
+        connection
       });
       await debugSession.start();
-    });
-
-    afterEach(async () => {
-      await debugSession.stop();
-      debugSession.dispose();
-    });
-
-    it('should send debug messages to the kernel', async () => {
       const code = 'i=0\ni+=1\ni+=1';
       const reply = await debugSession.sendRequest('dumpCell', {
         code
       });
+      await debugSession.stop();
       expect(reply.body.sourcePath).to.contain('.py');
     });
+  });
 
+  describe('#sendRequest failure', () => {
     it('should handle replies with success false', async () => {
+      const debugSession = new DebugSession({
+        connection
+      });
+      await debugSession.start();
       const reply = await debugSession.sendRequest('evaluate', {
         expression: 'a'
       });
+      await debugSession.stop();
       const { success, message } = reply;
       expect(success).to.be.false;
       expect(message).to.contain('Unable to find thread for evaluation');
@@ -110,21 +107,20 @@ describe('protocol', () => {
     { line: 5 }
   ];
 
-  let sessionContext: ISessionContext;
+  let connection: Session.ISessionConnection;
   let debugSession: DebugSession;
   let threadId: number = 1;
 
   beforeEach(async () => {
-    sessionContext = await createSessionContext({
-      kernelPreference: {
-        name: 'xpython'
-      }
+    const path = UUID.uuid4();
+    connection = await createSession({
+      name: '',
+      type: 'test',
+      path
     });
-    await sessionContext.initialize();
-    await sessionContext.ready;
-    await sessionContext.session.kernel.info;
+    await connection.changeKernel({ name: 'xpython' });
     debugSession = new DebugSession({
-      connection: sessionContext.session
+      connection
     });
     await debugSession.start();
 
@@ -156,7 +152,7 @@ describe('protocol', () => {
     await debugSession.sendRequest('configurationDone', {});
 
     // trigger an execute_request
-    sessionContext.session.kernel.requestExecute({ code });
+    connection.kernel.requestExecute({ code });
 
     // wait for the first stopped event
     await stoppedFuture.promise;
@@ -165,8 +161,8 @@ describe('protocol', () => {
   afterEach(async () => {
     await debugSession.stop();
     debugSession.dispose();
-    await sessionContext.shutdown();
-    sessionContext.dispose();
+    await connection.shutdown();
+    connection.dispose();
   });
 
   describe('#debugInfo', () => {
