@@ -103,7 +103,11 @@ Updating former ``@jupyterlab/coreutils`` imports
 
 JupyterLab 2.0 introduces several new packages with classes and tokens that
 have been moved out of ``@jupyterlab/coreutils`` into their own packages. These
-exports have been moved:
+exports have been moved.
+
+.. tip::
+  It might be helpful to delete ``node_modules`` and ``yarn.lock`` when
+  updating these libraries.
 
 ============================  =================================
  Export                        Package
@@ -130,12 +134,14 @@ exports have been moved:
  ``Throttler``                 ``@lumino/polling``
 ============================  =================================
 
-.. tip::
-  It might be helpful to delete ``node_modules`` and ``yarn.lock`` when
-  updating these libraries.
-
 Using ``Session`` and ``SessionContext`` to manage kernel sessions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. note::
+
+  For full API documentation and examples of how to use
+  ``@jupyterlab/services``,
+  `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/master/packages/services#readme>`__.
+
 ``ConsolePanel`` and ``NotebookPanel`` now expose a
 ``sessionContext: ISessionContext`` attribute that allows for a uniform way to
 interact with kernel sessions.
