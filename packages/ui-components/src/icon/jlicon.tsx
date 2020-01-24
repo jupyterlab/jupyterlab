@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { UUID } from '@lumino/coreutils';
+import { Signal } from '@lumino/signaling';
 import React from 'react';
 
 import { Text } from '@jupyterlab/coreutils';
@@ -241,7 +242,7 @@ export class JLIcon implements JLIcon.IJLIcon {
     }
 
     // ensure that svg html is valid
-    const svgElement = this._initSvg();
+    const svgElement = this._initSvg({ uuid: this._uuid });
     if (!svgElement) {
       // bail if failing silently, return blank element
       return document.createElement('div');
@@ -286,8 +287,23 @@ export class JLIcon implements JLIcon.IJLIcon {
   set svgstr(svgstr: string) {
     this._svgstr = svgstr;
 
-    // associate a unique id with this particular svgstr
-    this._uuid = UUID.uuid4();
+    // associate a new unique id with this particular svgstr
+    const uuid = UUID.uuid4();
+    const uuidOld = this._uuid;
+    this._uuid = uuid;
+
+    // update icon elements created using .element method
+    document
+      .querySelectorAll(`[data-icon-id=${uuidOld}]`)
+      .forEach(oldSvgElement => {
+        const svgElement = this._initSvg({ uuid });
+        if (svgElement) {
+          oldSvgElement.replaceWith(svgElement);
+        }
+      });
+
+    // trigger update of icon elements created using other methods
+    this._svgReplaced.emit();
   }
 
   unrender(container: HTMLElement): void {
@@ -338,6 +354,24 @@ export class JLIcon implements JLIcon.IJLIcon {
         }: JLIcon.IProps = {},
         ref: React.RefObject<SVGElement>
       ) => {
+        // set up component state via useState hook
+        const [, setId] = React.useState(this._uuid);
+
+        // subscribe to svg replacement via useEffect hook
+        React.useEffect(() => {
+          const onSvgReplaced = () => {
+            setId(this._uuid);
+          };
+
+          this._svgReplaced.connect(onSvgReplaced);
+
+          // specify cleanup callback as hook return
+          return () => {
+            this._svgReplaced.disconnect(onSvgReplaced);
+          };
+        });
+
+        // make it so that tag can be used as a jsx component
         const Tag = tag;
 
         // ensure that svg html is valid
@@ -379,7 +413,10 @@ export class JLIcon implements JLIcon.IJLIcon {
     return component;
   }
 
-  protected _initSvg(title?: string): HTMLElement | null {
+  protected _initSvg({
+    title,
+    uuid
+  }: { title?: string; uuid?: string } = {}): HTMLElement | null {
     const svgElement = JLIcon.resolveSvg(this);
 
     if (!svgElement) {
@@ -390,7 +427,10 @@ export class JLIcon implements JLIcon.IJLIcon {
     if (svgElement.tagName !== 'parsererror') {
       // svgElement is an actual svg node, augment it
       svgElement.dataset.icon = this.name;
-      svgElement.dataset.iconId = this._uuid;
+
+      if (uuid) {
+        svgElement.dataset.iconId = uuid;
+      }
 
       if (title) {
         Private.setTitleSvg(svgElement, title);
@@ -427,6 +467,7 @@ export class JLIcon implements JLIcon.IJLIcon {
   readonly react: JLIcon.IReact;
 
   protected _className: string;
+  protected _svgReplaced = new Signal<this, void>(this);
   protected _svgstr: string;
   protected _uuid: string;
 }
