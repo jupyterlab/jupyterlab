@@ -156,7 +156,9 @@ For example, consider how the ``@jupyterlab/debugger`` extension's
 
 .. note::
 
-  "One notable change: ``await client.kernel.ready`` becomes
-  ``await sessionContext.session.kernel.info`` to check when a kernel is
-  ready." --
+  One notable change: ``await client.kernel.ready`` is no longer necessary.
+  Using the new API (and
+  `optional chaining in TypeScript 3.7+ <https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-7.html#optional-chaining>`__), you can simply:
+  ``await sessionContext.session?.kernel?.info`` to check when a kernel is
+  ready and retrieve its details. --
   `jupyterlab/debugger#337 <https://github.com/jupyterlab/debugger/pull/337>`__
