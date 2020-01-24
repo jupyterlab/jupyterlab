@@ -1659,7 +1659,7 @@ export namespace DirListing {
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
-      fileType?: DocumentRegistry.IFileType
+      fileType?: DocumentRegistry.FileType
     ): void;
 
     /**
@@ -1685,7 +1685,7 @@ export namespace DirListing {
     createDragImage(
       node: HTMLElement,
       count: number,
-      fileType?: DocumentRegistry.IFileType
+      fileType?: DocumentRegistry.FileType
     ): HTMLElement;
   }
 
@@ -1832,7 +1832,7 @@ export namespace DirListing {
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
-      fileType?: DocumentRegistry.IFileType
+      fileType?: DocumentRegistry.FileType
     ): void {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
@@ -1848,14 +1848,31 @@ export namespace DirListing {
 
       // render the icon svg node
       if (fileType?.iconRenderer) {
+        iconContainer.className = classes(
+          ITEM_ICON_CLASS,
+          iconStyle({
+            justify: 'center',
+            kind: 'listing'
+          })
+        );
+
         fileType.iconRenderer.render(iconContainer);
       } else if (fileType?.iconClass) {
-        JLIcon.getElement({
-          name: fileType.iconClass,
-          container: iconContainer
-        });
+        iconContainer.className = classes(ITEM_ICON_CLASS, fileType.iconClass);
+
+        if (fileType.iconLabel) {
+          iconContainer.textContent = fileType.iconLabel;
+        }
       } else {
-        fileIcon.render(iconContainer);
+        iconContainer.className = classes(
+          ITEM_ICON_CLASS,
+          iconStyle({
+            justify: 'center',
+            kind: 'listing'
+          })
+        );
+
+        fileIcon.renderer.render(iconContainer);
       }
 
       let hoverText = 'Name: ' + model.name;
@@ -1925,7 +1942,7 @@ export namespace DirListing {
     createDragImage(
       node: HTMLElement,
       count: number,
-      fileType?: DocumentRegistry.IFileType
+      fileType?: DocumentRegistry.FileType
     ): HTMLElement {
       let dragImage = node.cloneNode(true) as HTMLElement;
       let modified = DOMUtils.findElement(dragImage, ITEM_MODIFIED_CLASS);
