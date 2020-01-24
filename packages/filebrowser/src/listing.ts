@@ -1838,14 +1838,6 @@ export namespace DirListing {
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      iconContainer.className = classes(
-        ITEM_ICON_CLASS,
-        iconStyle({
-          justify: 'center',
-          kind: 'listing'
-        })
-      );
-
       // render the icon svg node
       if (fileType?.iconRenderer) {
         iconContainer.className = classes(
