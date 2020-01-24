@@ -192,16 +192,20 @@ function activate(
     if (!sessionModel.kernel || kernelInfoCache.has(sessionModel.kernel.name)) {
       return;
     }
-    const session = serviceManager.sessions.connectTo({ model: sessionModel });
-    // Note: .ready implies session.kernel.info is non-null
-    void session.kernel!.info.then(kernelInfo => {
+    const session = serviceManager.sessions.connectTo({
+      model: sessionModel,
+      kernelConnectionOptions: { handleComms: false }
+    });
+
+    void session.kernel?.info.then(kernelInfo => {
+      const name = session.kernel!.name;
+
       // Check the cache second time so that, if two callbacks get scheduled,
       // they don't try to add the same commands.
-      if (kernelInfoCache.has(sessionModel.kernel!.name)) {
+      if (kernelInfoCache.has(name)) {
         return;
       }
       // Set the Kernel Info cache.
-      const name = session.kernel!.name;
       kernelInfoCache.set(name, kernelInfo);
 
       // Utility function to check if the current widget
