@@ -14,7 +14,7 @@ import { getReactAttrs, classes, classesDedupe } from '../utils';
 import badSvg from '../../style/debug/bad.svg';
 import blankSvg from '../../style/debug/blank.svg';
 
-export class JLIcon implements JLIcon.IJLIconRenderable {
+export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
   /***********
    * statics *
    ***********/
@@ -194,19 +194,25 @@ export class JLIcon implements JLIcon.IJLIconRenderable {
   constructor({
     name,
     svgstr,
-    renderer
-  }: JLIcon.IJLIcon & { renderer?: JLIcon.IRenderer }) {
+    render,
+    unrender,
+    rendererClass = JLIcon.ElementRenderer
+  }: JLIcon.IOptions) {
     this.name = name;
     this._className = Private.nameToClassName(name);
     this.svgstr = svgstr;
 
     this.react = this._initReact();
 
-    if (!renderer) {
-      this.renderer = new JLIcon.ElementRenderer();
-      this.renderer.icon = this;
+    if (render && unrender) {
+      this.render = render;
+      this.unrender = unrender;
+    } else {
+      // set render and unrender methods based on the supplied rendererClass
+      const renderer = new rendererClass(this);
+      this.render = renderer.render.bind(this);
+      this.unrender = renderer.unrender.bind(this);
     }
-
     JLIcon._instances.set(this.name, this);
     JLIcon._instances.set(this._className, this);
   }
@@ -228,7 +234,7 @@ export class JLIcon implements JLIcon.IJLIconRenderable {
    * @param tag - if container is not explicitly
    * provided, this tag will be used when creating the container
    *
-   * @propsStyle - style parameters that get passed to TypeStyle in
+   * @param propsStyle - style parameters that get passed to TypeStyle in
    * order to generate a style class. The style class will be added
    * to the icon container's classes, while the style itself will be
    * applied to any svg elements within the container.
@@ -458,16 +464,18 @@ export class JLIcon implements JLIcon.IJLIconRenderable {
    * @param tag - if container is not explicitly
    * provided, this tag will be used when creating the container
    *
-   * @propsStyle - style parameters that get passed to TypeStyle in
+   * @param propsStyle - style parameters that get passed to TypeStyle in
    * order to generate a style class. The style class will be added
    * to the icon container's classes, while the style itself will be
    * applied to any svg elements within the container.
    */
   readonly react: JLIcon.IReact;
 
-  readonly renderer: JLIcon.IRenderer;
+  readonly render: (container: HTMLElement, props?: JLIcon.IProps) => void;
+  readonly unrender: (container: HTMLElement) => void;
 
   protected _className: string;
+  protected _icon = this;
   protected _svgReplaced = new Signal<this, void>(this);
   protected _svgstr: string;
   protected _uuid: string;
@@ -477,18 +485,10 @@ export class JLIcon implements JLIcon.IJLIconRenderable {
  * A namespace for JLIcon statics.
  */
 export namespace JLIcon {
-  export interface IRenderer {
-    render: (container: HTMLElement, props?: IProps) => void;
-    unrender: (container: HTMLElement) => void;
-
-    icon: IJLIcon;
-  }
-
   /**
-   * The IJLIcon interface. Outside of this interface the actual
-   * implementation of JLIcon may vary
+   * The simplest possible interface for defining a generic icon.
    */
-  export interface IJLIcon {
+  export interface IIcon {
     /**
      * The name of the icon. By convention, the icon name will be namespaced
      * as so:
@@ -503,30 +503,62 @@ export namespace JLIcon {
     svgstr: string;
   }
 
-  export interface IJLIconRenderable extends IJLIcon {
-    readonly renderer: IRenderer;
+  /**
+   * Interface for generic renderer. Compatible with interface of
+   * Title.iconRenderer from @lumino/widgets
+   */
+  export interface IRenderer {
+    render: (container: HTMLElement, props?: IProps) => void;
+    unrender: (container: HTMLElement) => void;
   }
 
-  export class ElementRenderer implements IRenderer {
+  /**
+   * The IJLIcon interface. Outside of this interface the actual
+   * implementation of JLIcon may vary
+   */
+  export interface IJLIcon extends IIcon, IRenderer {}
+
+  /**
+   * A type that can be resolved to a JLIcon instance.
+   */
+  export type IResolvable = string | IJLIcon;
+
+  /**
+   * Base implementation of IRenderer.
+   */
+  export class Renderer implements IRenderer {
+    constructor(protected _icon: JLIcon) {}
+
+    render(container: HTMLElement, props: IProps): void {}
+    unrender(container: HTMLElement): void {}
+  }
+
+  /**
+   * Implementation of IRenderer that creates the icon svg node
+   * as a DOM element.
+   */
+  export class ElementRenderer extends Renderer {
     render(container: HTMLElement, props: IProps = {}): void {
       // TODO: move this title fix to the Lumino side
       container.removeAttribute('title');
 
-      this.icon.element({ container, ...props });
+      this._icon.element({ container, ...props });
     }
 
     unrender(container: HTMLElement): void {}
-
-    public icon: JLIcon = blankIcon;
   }
 
-  export class ReactRenderer implements IRenderer {
+  /**
+   * Implementation of IRenderer that creates the icon svg node
+   * as a React component.
+   */
+  export class ReactRenderer extends Renderer {
     render(container: HTMLElement, props: JLIcon.IProps = {}): void {
       // TODO: move this title fix to the Lumino side
       container.removeAttribute('title');
 
       return ReactDOM.render(
-        <this.icon.react container={container} {...props} />,
+        <this._icon.react container={container} {...props} />,
         container
       );
     }
@@ -534,14 +566,15 @@ export namespace JLIcon {
     unrender(container: HTMLElement): void {
       ReactDOM.unmountComponentAtNode(container);
     }
-
-    public icon: JLIcon = blankIcon;
   }
 
   /**
-   * A type that can be resolved to a JLIcon instance.
+   * Interface defining the parameters to be passed to the JLIcon
+   * constructor
    */
-  export type IResolvable = string | IJLIcon;
+  export interface IOptions extends IIcon, Partial<IRenderer> {
+    rendererClass?: typeof Renderer;
+  }
 
   /**
    * The input props for creating a new JLIcon
@@ -577,8 +610,16 @@ export namespace JLIcon {
     title?: string;
   }
 
+  /**
+   * The properties that can be passing into the React component stored in
+   * the .react field of a JLIcon.
+   */
   export type IReactProps = IProps & React.RefAttributes<SVGElement>;
 
+  /**
+   * The complete type of the React component stored in the .react
+   * field of a JLIcon.
+   */
   export type IReact = React.ForwardRefExoticComponent<IReactProps>;
 }
 
