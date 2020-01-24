@@ -42,6 +42,7 @@
     "@lumino/virtualdom": "^1.4.0",
     "@lumino/widgets": "^1.10.0",
     "react": "~16.9.0",
+    "react-dom": "~16.9.0",
     "typestyle": "^2.0.4"
   },
   "devDependencies": {

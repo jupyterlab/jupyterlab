@@ -4,6 +4,7 @@
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 import { Text } from '@jupyterlab/coreutils';
 
@@ -13,7 +14,7 @@ import { getReactAttrs, classes, classesDedupe } from '../utils';
 import badSvg from '../../style/debug/bad.svg';
 import blankSvg from '../../style/debug/blank.svg';
 
-export class JLIcon implements JLIcon.IJLIcon {
+export class JLIcon implements JLIcon.IJLIconRenderable {
   /***********
    * statics *
    ***********/
@@ -132,7 +133,7 @@ export class JLIcon implements JLIcon.IJLIcon {
    * @returns a JLIcon instance, or null if an icon name was passed in
    * and lookup fails.
    */
-  static resolve(icon: JLIcon.IJLIconSpec): JLIcon | null {
+  static resolve(icon: JLIcon.IResolvable): JLIcon | null {
     if (icon instanceof JLIcon) {
       // icon already is a JLIcon
       return icon;
@@ -190,12 +191,21 @@ export class JLIcon implements JLIcon.IJLIcon {
    * members *
    ***********/
 
-  constructor({ name, svgstr }: JLIcon.IJLIcon) {
+  constructor({
+    name,
+    svgstr,
+    renderer
+  }: JLIcon.IJLIcon & { renderer?: JLIcon.IRenderer }) {
     this.name = name;
     this._className = Private.nameToClassName(name);
     this.svgstr = svgstr;
 
     this.react = this._initReact();
+
+    if (!renderer) {
+      this.renderer = new JLIcon.ElementRenderer();
+      this.renderer.icon = this;
+    }
 
     JLIcon._instances.set(this.name, this);
     JLIcon._instances.set(this._className, this);
@@ -273,13 +283,6 @@ export class JLIcon implements JLIcon.IJLIcon {
     return ret;
   }
 
-  render(container: HTMLElement, props: JLIcon.IProps = {}): void {
-    // TODO: move this title fix to the Lumino side
-    container.removeAttribute('title');
-
-    this.element({ container, ...props });
-  }
-
   get svgstr() {
     return this._svgstr;
   }
@@ -304,10 +307,6 @@ export class JLIcon implements JLIcon.IJLIcon {
 
     // trigger update of icon elements created using other methods
     this._svgReplaced.emit();
-  }
-
-  unrender(container: HTMLElement): void {
-    return;
   }
 
   protected _initContainer({
@@ -466,6 +465,8 @@ export class JLIcon implements JLIcon.IJLIcon {
    */
   readonly react: JLIcon.IReact;
 
+  readonly renderer: JLIcon.IRenderer;
+
   protected _className: string;
   protected _svgReplaced = new Signal<this, void>(this);
   protected _svgstr: string;
@@ -476,6 +477,13 @@ export class JLIcon implements JLIcon.IJLIcon {
  * A namespace for JLIcon statics.
  */
 export namespace JLIcon {
+  export interface IRenderer {
+    render: (container: HTMLElement, props?: IProps) => void;
+    unrender: (container: HTMLElement) => void;
+
+    icon: IJLIcon;
+  }
+
   /**
    * The IJLIcon interface. Outside of this interface the actual
    * implementation of JLIcon may vary
@@ -495,10 +503,54 @@ export namespace JLIcon {
     svgstr: string;
   }
 
+  export interface IJLIconRenderable extends IJLIcon {
+    readonly renderer: IRenderer;
+  }
+
+  // export type IRendererFactory = (icon: JLIcon) => IRenderer;
+
+  // export abstract class Renderer implements IRenderer {
+  //   constructor(protected icon: IJLIcon) {};
+  //
+  //   abstract render(container: HTMLElement): void;
+  //   abstract unrender(container: HTMLElement): void;
+  // }
+
+  export class ElementRenderer implements IRenderer {
+    render(container: HTMLElement, props: IProps = {}): void {
+      // TODO: move this title fix to the Lumino side
+      container.removeAttribute('title');
+
+      this.icon.element({ container, ...props });
+    }
+
+    unrender(container: HTMLElement): void {}
+
+    public icon: JLIcon = blankIcon;
+  }
+
+  export class ReactRenderer implements IRenderer {
+    render(container: HTMLElement, props: JLIcon.IProps = {}): void {
+      // TODO: move this title fix to the Lumino side
+      container.removeAttribute('title');
+
+      return ReactDOM.render(
+        <this.icon.react container={container} {...props} />,
+        container
+      );
+    }
+
+    unrender(container: HTMLElement): void {
+      ReactDOM.unmountComponentAtNode(container);
+    }
+
+    public icon: JLIcon = blankIcon;
+  }
+
   /**
    * A type that can be resolved to a JLIcon instance.
    */
-  export type IJLIconSpec = string | IJLIcon;
+  export type IResolvable = string | IJLIcon;
 
   /**
    * The input props for creating a new JLIcon
