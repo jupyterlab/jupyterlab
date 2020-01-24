@@ -2,6 +2,11 @@
   "name": "@jupyterlab/debugger",
   "version": "0.2.0-alpha.1",
   "description": "JupyterLab - Debugger Extension",
+  "keywords": [
+    "jupyter",
+    "jupyterlab",
+    "jupyterlab-extension"
+  ],
   "homepage": "https://github.com/jupyterlab/debugger",
   "bugs": {
     "url": "https://github.com/jupyterlab/debugger/issues"
