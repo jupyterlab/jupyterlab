@@ -187,6 +187,13 @@ export namespace ISessionConnection {
     model: IModel;
 
     /**
+     * Connects to an existing kernel
+     */
+    connectToKernel(
+      options: Kernel.IKernelConnection.IOptions
+    ): Kernel.IKernelConnection;
+
+    /**
      * The server settings.
      */
     serverSettings?: ServerConnection.ISettings;
@@ -202,11 +209,12 @@ export namespace ISessionConnection {
     clientId?: string;
 
     /**
-     * Connects to an existing kernel
+     * Kernel connection options
      */
-    connectToKernel(
-      options: Kernel.IKernelConnection.IOptions
-    ): Kernel.IKernelConnection;
+    kernelConnectionOptions?: Omit<
+      Kernel.IKernelConnection.IOptions,
+      'model' | 'username' | 'clientId' | 'serverSettings'
+    >;
   }
 
   /**
