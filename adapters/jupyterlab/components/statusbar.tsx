@@ -211,7 +211,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
           Documentation:{' '}
           <a
             href={
-              'https://github.com/krassowski/jupyterlab-lsp/blob/master/LANGUAGESERVERS.md'
+              'https://github.com/krassowski/jupyterlab-lsp/blob/master/docs/LANGUAGESERVERS.md'
             }
             target={'_blank'}
           >
