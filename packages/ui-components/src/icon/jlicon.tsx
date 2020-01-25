@@ -529,7 +529,9 @@ export namespace JLIcon {
   export class Renderer implements IRenderer {
     constructor(protected _icon: JLIcon) {}
 
+    // tslint:disable-next-line:no-empty
     render(container: HTMLElement, props: IProps): void {}
+    // tslint:disable-next-line:no-empty
     unrender(container: HTMLElement): void {}
   }
 
@@ -545,6 +547,7 @@ export namespace JLIcon {
       this._icon.element({ container, ...props });
     }
 
+    // tslint:disable-next-line:no-empty
     unrender(container: HTMLElement): void {}
   }
 
