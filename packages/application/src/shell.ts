@@ -3,7 +3,7 @@
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { classes, DockPanelSvg } from '@jupyterlab/ui-components';
+import { classes, DockPanelSvg, iconStyle } from '@jupyterlab/ui-components';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
@@ -30,7 +30,6 @@ import {
 } from '@lumino/widgets';
 
 import { JupyterFrontEnd } from './frontend';
-import { iconStyle } from '@jupyterlab/ui-components/lib/style/icon';
 
 /**
  * The class name added to AppShell instances.

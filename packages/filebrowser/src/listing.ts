@@ -25,6 +25,8 @@ import {
   caretUpIcon,
   classes,
   fileIcon,
+  iconStyle,
+  IIconStyle,
   JLIcon
 } from '@jupyterlab/ui-components';
 
@@ -52,10 +54,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 import { FileBrowserModel } from './model';
-import {
-  iconStyle,
-  IIconStyle
-} from '@jupyterlab/ui-components/lib/style/icon';
 
 /**
  * The class name added to DirListing widget.

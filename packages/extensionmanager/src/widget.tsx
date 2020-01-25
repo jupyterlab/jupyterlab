@@ -7,6 +7,7 @@ import {
   Button,
   InputGroup,
   Collapse,
+  iconStyle,
   refreshIcon,
   jupyterIcon,
   caretRightIcon,
@@ -19,7 +20,6 @@ import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
 import { isJupyterOrg } from './query';
-import { iconStyle } from '@jupyterlab/ui-components/lib/style/icon';
 
 // TODO: Replace pagination with lazy loading of lower search results
 
