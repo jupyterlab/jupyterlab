@@ -174,19 +174,19 @@ const extension: IRenderMime.IExtension = {
       mimeTypes: [VEGA_MIME_TYPE],
       name: 'vega5',
       extensions: ['.vg', '.vg.json', '.vega'],
-      iconClass: 'ui-components:vega'
+      icon: 'ui-components:vega'
     },
     {
       mimeTypes: [VEGALITE4_MIME_TYPE],
       name: 'vega-lite4',
       extensions: ['.vl', '.vl.json', '.vegalite'],
-      iconClass: 'ui-components:vega'
+      icon: 'ui-components:vega'
     },
     {
       mimeTypes: [VEGALITE3_MIME_TYPE],
       name: 'vega-lite3',
       extensions: [],
-      iconClass: 'ui-components:vega'
+      icon: 'ui-components:vega'
     }
   ]
 };
