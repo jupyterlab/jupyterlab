@@ -116,6 +116,39 @@ export namespace IRenderMime {
     readonly toolbarFactory?: (widget?: IRenderer) => IToolbarItem[];
   }
 
+  export namespace LabIcon {
+    /**
+     * The simplest possible interface for defining a generic icon.
+     */
+    export interface IIcon {
+      /**
+       * The name of the icon. By convention, the icon name will be namespaced
+       * as so:
+       *
+       *     "pkg-name:icon-name"
+       */
+      readonly name: string;
+
+      /**
+       * A string containing the raw contents of an svg file.
+       */
+      svgstr: string;
+    }
+
+    /**
+     * Interface for generic renderer.
+     */
+    export interface IRenderer {
+      render: (container: HTMLElement) => void;
+      unrender: (container: HTMLElement) => void;
+    }
+
+    /**
+     * A type that can be resolved to a JLIcon instance.
+     */
+    export type IResolvable = string | (IIcon & Partial<IRenderer>);
+  }
+
   /**
    * A file type to associate with the renderer.
    */
@@ -151,7 +184,7 @@ export namespace IRenderMime {
      * of an existing icon, or an object with {name, svgstr} fields, where
      * svgstr is a string containing the raw contents of an svg file.
      */
-    readonly icon?: string | { name: string; svgstr: string };
+    readonly icon?: LabIcon.IResolvable;
 
     /**
      * The icon class name for the file type.

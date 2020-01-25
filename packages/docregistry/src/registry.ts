@@ -1177,7 +1177,7 @@ export namespace DocumentRegistry {
      * of an existing icon, or an object with {name, svgstr} fields, where
      * svgstr is a string containing the raw contents of an svg file.
      */
-    readonly icon?: string | { name: string; svgstr: string } | null;
+    readonly icon?: JLIcon.IResolvable;
 
     /**
      * The icon class name for the file type.
@@ -1237,7 +1237,7 @@ export namespace DocumentRegistry {
     readonly extensions: ReadonlyArray<string>;
     readonly displayName: string;
     readonly pattern: string;
-    readonly icon: JLIcon | null;
+    readonly icon?: JLIcon;
     readonly iconClass: string;
     readonly iconLabel: string;
     readonly contentType: Contents.ContentType;

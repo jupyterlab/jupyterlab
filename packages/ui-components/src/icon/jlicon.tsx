@@ -133,7 +133,7 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
    * @returns a JLIcon instance, or null if an icon name was passed in
    * and lookup fails.
    */
-  static resolve(icon: JLIcon.IResolvable): JLIcon | null {
+  static resolve(icon: JLIcon.IResolvable): JLIcon | undefined {
     if (icon instanceof JLIcon) {
       // icon already is a JLIcon
       return icon;
@@ -141,7 +141,7 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
 
     if (typeof icon === 'string') {
       // do a dynamic lookup of existing icon by name
-      return JLIcon._get(icon) ?? null;
+      return JLIcon._get(icon);
     }
 
     // icon is a non-JLIcon {name, svgstr} pair
@@ -519,11 +519,6 @@ export namespace JLIcon {
   export interface IJLIcon extends IIcon, IRenderer {}
 
   /**
-   * A type that can be resolved to a JLIcon instance.
-   */
-  export type IResolvable = string | IJLIcon;
-
-  /**
    * Base implementation of IRenderer.
    */
   export class Renderer implements IRenderer {
@@ -578,6 +573,11 @@ export namespace JLIcon {
   export interface IOptions extends IIcon, Partial<IRenderer> {
     rendererClass?: typeof Renderer;
   }
+
+  /**
+   * A type that can be resolved to a JLIcon instance.
+   */
+  export type IResolvable = string | (IIcon & Partial<IRenderer>);
 
   /**
    * The input props for creating a new JLIcon
