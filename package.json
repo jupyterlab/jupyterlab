@@ -48,7 +48,7 @@
     "create:test": "node buildutils/lib/create-test-package.js",
     "create:theme": "node buildutils/lib/create-theme.js",
     "deduplicate": "jlpm yarn-deduplicate -s fewer",
-    "docs": "lerna run docs --ignore \"@jupyterlab/settingregistry\" ",
+    "docs": "lerna run docs",
     "eslint": "eslint --fix .",
     "eslint:check": "eslint .",
     "get:dependency": "node buildutils/lib/get-dependency.js",

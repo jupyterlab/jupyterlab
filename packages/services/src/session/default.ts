@@ -33,6 +33,7 @@ export class SessionConnection implements Session.ISessionConnection {
     this._username = options.username ?? '';
     this._clientId = options.clientId ?? UUID.uuid4();
     this._connectToKernel = options.connectToKernel;
+    this._kernelConnectionOptions = options.kernelConnectionOptions ?? {};
     this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings();
     this.setupKernel(options.model.kernel);
@@ -305,6 +306,7 @@ export class SessionConnection implements Session.ISessionConnection {
       return;
     }
     const kc = this._connectToKernel({
+      ...this._kernelConnectionOptions,
       model,
       username: this._username,
       clientId: this._clientId,
@@ -421,4 +423,8 @@ export class SessionConnection implements Session.ISessionConnection {
   private _connectToKernel: (
     options: Kernel.IKernelConnection.IOptions
   ) => Kernel.IKernelConnection;
+  private _kernelConnectionOptions: Omit<
+    Kernel.IKernelConnection.IOptions,
+    'model' | 'username' | 'clientId' | 'serverSettings'
+  >;
 }

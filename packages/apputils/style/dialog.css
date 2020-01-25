@@ -98,8 +98,6 @@ button.jp-Dialog-button:focus::-moz-focus-inner {
 }
 
 .jp-Dialog-body > label {
-  padding-top: 4px;
-  padding-bottom: 8px;
   line-height: 1.4;
   color: var(--jp-ui-font-color0);
 }
