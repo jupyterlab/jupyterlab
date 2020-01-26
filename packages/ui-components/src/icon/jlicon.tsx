@@ -205,8 +205,8 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
     this.react = this._initReact();
 
     if (render && unrender) {
-      this.render = render;
-      this.unrender = unrender;
+      this.render = render.bind(this);
+      this.unrender = unrender.bind(this);
     } else {
       // set render and unrender methods based on the supplied rendererClass
       const renderer = new rendererClass(this);
