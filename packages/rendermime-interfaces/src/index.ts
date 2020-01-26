@@ -139,8 +139,8 @@ export namespace IRenderMime {
      * Interface for generic renderer.
      */
     export interface IRenderer {
-      render: (container: HTMLElement) => void;
-      unrender: (container: HTMLElement) => void;
+      readonly render: (container: HTMLElement) => void;
+      readonly unrender: (container: HTMLElement) => void;
     }
 
     /**

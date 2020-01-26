@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom';
 
 import { Text } from '@jupyterlab/coreutils';
 
-import { iconStyle, IIconStyle } from '../style/icon';
+import { iconStyle, IIconStyle } from '../style';
 import { getReactAttrs, classes, classesDedupe } from '../utils';
 
 import badSvg from '../../style/debug/bad.svg';
@@ -485,6 +485,10 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
  * A namespace for JLIcon statics.
  */
 export namespace JLIcon {
+  /**************
+   * interfaces *
+   **************/
+
   /**
    * The simplest possible interface for defining a generic icon.
    */
@@ -508,8 +512,8 @@ export namespace JLIcon {
    * Title.iconRenderer from @lumino/widgets
    */
   export interface IRenderer {
-    render: (container: HTMLElement, props?: IProps) => void;
-    unrender: (container: HTMLElement) => void;
+    readonly render: (container: HTMLElement) => void;
+    readonly unrender: (container: HTMLElement) => void;
   }
 
   /**
@@ -519,65 +523,12 @@ export namespace JLIcon {
   export interface IJLIcon extends IIcon, IRenderer {}
 
   /**
-   * Base implementation of IRenderer.
-   */
-  export class Renderer implements IRenderer {
-    constructor(protected _icon: JLIcon) {}
-
-    // tslint:disable-next-line:no-empty
-    render(container: HTMLElement, props: IProps): void {}
-    // tslint:disable-next-line:no-empty
-    unrender(container: HTMLElement): void {}
-  }
-
-  /**
-   * Implementation of IRenderer that creates the icon svg node
-   * as a DOM element.
-   */
-  export class ElementRenderer extends Renderer {
-    render(container: HTMLElement, props: IProps = {}): void {
-      // TODO: move this title fix to the Lumino side
-      container.removeAttribute('title');
-
-      this._icon.element({ container, ...props });
-    }
-
-    // tslint:disable-next-line:no-empty
-    unrender(container: HTMLElement): void {}
-  }
-
-  /**
-   * Implementation of IRenderer that creates the icon svg node
-   * as a React component.
-   */
-  export class ReactRenderer extends Renderer {
-    render(container: HTMLElement, props: JLIcon.IProps = {}): void {
-      // TODO: move this title fix to the Lumino side
-      container.removeAttribute('title');
-
-      return ReactDOM.render(
-        <this._icon.react container={container} {...props} />,
-        container
-      );
-    }
-
-    unrender(container: HTMLElement): void {
-      ReactDOM.unmountComponentAtNode(container);
-    }
-  }
-
-  /**
    * Interface defining the parameters to be passed to the JLIcon
    * constructor
    */
   export interface IOptions extends IIcon, Partial<IRenderer> {
     rendererClass?: typeof Renderer;
   }
-
-  /**
-   * A type that can be resolved to a JLIcon instance.
-   */
-  export type IResolvable = string | (IIcon & Partial<IRenderer>);
 
   /**
    * The input props for creating a new JLIcon
@@ -613,8 +564,17 @@ export namespace JLIcon {
     title?: string;
   }
 
+  /*********
+   * types *
+   *********/
+
   /**
-   * The properties that can be passing into the React component stored in
+   * A type that can be resolved to a JLIcon instance.
+   */
+  export type IResolvable = string | (IIcon & Partial<IRenderer>);
+
+  /**
+   * The properties that can be passed into the React component stored in
    * the .react field of a JLIcon.
    */
   export type IReactProps = IProps & React.RefAttributes<SVGElement>;
@@ -624,6 +584,61 @@ export namespace JLIcon {
    * field of a JLIcon.
    */
   export type IReact = React.ForwardRefExoticComponent<IReactProps>;
+
+  /***********
+   * classes *
+   ***********/
+
+  /**
+   * Base implementation of IRenderer.
+   */
+  export class Renderer implements IRenderer {
+    constructor(protected _icon: JLIcon, protected _props: IProps) {}
+
+    // tslint:disable-next-line:no-empty
+    render(container: HTMLElement): void {}
+    // tslint:disable-next-line:no-empty
+    unrender(container: HTMLElement): void {}
+  }
+
+  /**
+   * Implementation of IRenderer that creates the icon svg node
+   * as a DOM element.
+   */
+  export class ElementRenderer extends Renderer {
+    render(container: HTMLElement, props: JLIcon.IProps = {}): void {
+      // TODO: move this title fix to the Lumino side
+      container.removeAttribute('title');
+
+      this._icon.element({ container, ...this._props, ...props });
+    }
+
+    // tslint:disable-next-line:no-empty
+    unrender(container: HTMLElement): void {}
+  }
+
+  /**
+   * Implementation of IRenderer that creates the icon svg node
+   * as a React component.
+   */
+  export class ReactRenderer extends Renderer {
+    render(container: HTMLElement, props: JLIcon.IProps = {}): void {
+      // TODO: move this title fix to the Lumino side
+      container.removeAttribute('title');
+
+      return ReactDOM.render(
+        <this._icon.react
+          container={container}
+          {...{ ...this._props, ...props }}
+        />,
+        container
+      );
+    }
+
+    unrender(container: HTMLElement): void {
+      ReactDOM.unmountComponentAtNode(container);
+    }
+  }
 }
 
 namespace Private {
