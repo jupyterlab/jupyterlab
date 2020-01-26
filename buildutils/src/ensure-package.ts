@@ -373,7 +373,7 @@ export async function ensureUiComponents(
       .split(path.sep)
       .join('/');
 
-    const svgstrRef = utils.camelCase(svgName) + 'Svg';
+    const svgstrRef = utils.camelCase(svgName) + 'Svgstr';
     const iconRef = utils.camelCase(svgName) + 'Icon';
     const iconName = [pkgName, utils.stem(svgPath)].join(':');
 

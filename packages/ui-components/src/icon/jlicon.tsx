@@ -11,8 +11,9 @@ import { Text } from '@jupyterlab/coreutils';
 import { iconStyle, IIconStyle } from '../style';
 import { getReactAttrs, classes, classesDedupe } from '../utils';
 
-import badSvg from '../../style/debug/bad.svg';
-import blankSvg from '../../style/debug/blank.svg';
+import badSvgstr from '../../style/debug/bad.svg';
+import blankSvgstr from '../../style/debug/blank.svg';
+import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
 
 export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
   /***********
@@ -133,19 +134,27 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
    * @returns a JLIcon instance, or null if an icon name was passed in
    * and lookup fails.
    */
-  static resolve(icon: JLIcon.IResolvable): JLIcon | undefined {
+  static resolve(icon: JLIcon.IResolvable): JLIcon {
     if (icon instanceof JLIcon) {
-      // icon already is a JLIcon
+      // icon already is a JLIcon; nothing to do here
       return icon;
     }
 
     if (typeof icon === 'string') {
       // do a dynamic lookup of existing icon by name
-      return JLIcon._get(icon);
+      const resolved = JLIcon._get(icon);
+      if (resolved) {
+        return resolved;
+      }
+
+      // no matching icon currently registered, create a new loading icon
+      // TODO: find better icon (maybe animate?) for loading icon
+      return new JLIcon({ name: icon, svgstr: refreshSvgstr, _loading: true });
     }
 
-    // icon is a non-JLIcon {name, svgstr} pair
-    return JLIcon._get(icon.name) ?? new JLIcon(icon);
+    // icon was provided as a non-JLIcon {name, svgstr} pair, communicating
+    // an intention to create a new icon
+    return new JLIcon(icon);
   }
 
   /**
@@ -196,8 +205,40 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
     svgstr,
     render,
     unrender,
-    rendererClass = JLIcon.ElementRenderer
-  }: JLIcon.IOptions) {
+    rendererClass = JLIcon.ElementRenderer,
+    _loading = false
+  }: JLIcon.IOptions & { _loading?: boolean }) {
+    if (!(name && svgstr)) {
+      // sanity check failed
+      console.error(
+        `When defining a new JLIcon, name and svgstr must both be non-empty strings. name: ${name}, svgstr: ${svgstr}`
+      );
+      return badIcon;
+    }
+
+    // currently this needs to be set early, before checks for existing icons
+    this._loading = _loading;
+
+    // check to see if this is a redefinition of an existing icon
+    if (JLIcon._instances.has(name)) {
+      // fetch the existing icon, replace its svg, then return it
+      const icon = JLIcon._instances.get(name)!;
+      if (this._loading) {
+        // replace the placeholder svg in icon
+        icon.svgstr = svgstr;
+        this._loading = false;
+        return icon;
+      } else {
+        // already loaded icon svg exists; replace it and warn
+        // TODO: need to see if this warning is useful or just noisy
+        console.warn(
+          `Redefining previously loaded icon svgstr. name: ${name}, svgstrOld: ${icon.svgstr}, svgstr: ${svgstr}`
+        );
+        icon.svgstr = svgstr;
+        return icon;
+      }
+    }
+
     this.name = name;
     this._className = Private.nameToClassName(name);
     this.svgstr = svgstr;
@@ -476,6 +517,7 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
 
   protected _className: string;
   protected _icon = this;
+  protected _loading: boolean;
   protected _svgReplaced = new Signal<this, void>(this);
   protected _svgstr: string;
   protected _uuid: string;
@@ -665,5 +707,11 @@ namespace Private {
 }
 
 // need to be at the bottom since constructor depends on Private
-export const badIcon = new JLIcon({ name: 'bad', svgstr: badSvg });
-export const blankIcon = new JLIcon({ name: 'blank', svgstr: blankSvg });
+export const badIcon = new JLIcon({
+  name: 'ui-components:bad',
+  svgstr: badSvgstr
+});
+export const blankIcon = new JLIcon({
+  name: 'ui-components:blank',
+  svgstr: blankSvgstr
+});
