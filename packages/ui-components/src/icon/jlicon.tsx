@@ -3,6 +3,7 @@
 
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
+import { ElementAttrs, VirtualNode } from '@lumino/virtualdom';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -554,8 +555,14 @@ export namespace JLIcon {
    * Title.iconRenderer from @lumino/widgets
    */
   export interface IRenderer {
-    readonly render: (container: HTMLElement) => void;
+    readonly render: (container: HTMLElement, options: any) => void;
     readonly unrender: (container: HTMLElement) => void;
+  }
+
+  export interface IRendererOptions {
+    attrs?: ElementAttrs;
+    children?: ReadonlyArray<VirtualNode>;
+    props?: IProps;
   }
 
   /**
@@ -635,10 +642,14 @@ export namespace JLIcon {
    * Base implementation of IRenderer.
    */
   export class Renderer implements IRenderer {
-    constructor(protected _icon: JLIcon, protected _props?: IProps) {}
+    constructor(
+      protected _icon: JLIcon,
+      protected _options: IRendererOptions = {}
+    ) {}
 
     // tslint:disable-next-line:no-empty
-    render(container: HTMLElement): void {}
+    render(container: HTMLElement, _options: IRendererOptions = {}): void {}
+    // TODO: make unrenderer optional once @lumino/virtualdom > 1.4.1 is used
     // tslint:disable-next-line:no-empty
     unrender(container: HTMLElement): void {}
   }
@@ -648,11 +659,16 @@ export namespace JLIcon {
    * as a DOM element.
    */
   export class ElementRenderer extends Renderer {
-    render(container: HTMLElement, props: JLIcon.IProps = {}): void {
+    render(container: HTMLElement, _options: IRendererOptions = {}): void {
       // TODO: move this title fix to the Lumino side
       container.removeAttribute('title');
 
-      this._icon.element({ container, ...this._props, ...props });
+      // TODO: decide how to implement rendering of passed in child virtual nodes
+      this._icon.element({
+        container,
+        ...this._options.props,
+        ..._options.props
+      });
     }
 
     // tslint:disable-next-line:no-empty
@@ -664,14 +680,15 @@ export namespace JLIcon {
    * as a React component.
    */
   export class ReactRenderer extends Renderer {
-    render(container: HTMLElement, props: JLIcon.IProps = {}): void {
+    render(container: HTMLElement, _options: IRendererOptions = {}): void {
       // TODO: move this title fix to the Lumino side
       container.removeAttribute('title');
 
+      // TODO: decide how to implement rendering of passed in child virtual nodes
       return ReactDOM.render(
         <this._icon.react
           container={container}
-          {...{ ...this._props, ...props }}
+          {...{ ...this._options.props, ..._options.props }}
         />,
         container
       );

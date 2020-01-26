@@ -139,7 +139,8 @@ export namespace IRenderMime {
      * Interface for generic renderer.
      */
     export interface IRenderer {
-      readonly render: (container: HTMLElement) => void;
+      readonly render: (container: HTMLElement, options?: any) => void;
+      // TODO: make unrenderer optional once @lumino/virtualdom > 1.4.1 is used
       readonly unrender: (container: HTMLElement) => void;
     }
 
