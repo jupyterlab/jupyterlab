@@ -48,7 +48,7 @@ function activateHTMLViewer(
   restorer: ILayoutRestorer | null
 ): IHTMLViewerTracker {
   // Add an HTML file type to the docregistry.
-  const ft = new DocumentRegistry.FileType({
+  const ft: DocumentRegistry.IFileType = {
     name: 'html',
     contentType: 'file',
     fileFormat: 'text',
@@ -56,7 +56,7 @@ function activateHTMLViewer(
     extensions: ['.html'],
     mimeTypes: ['text/html'],
     icon: html5Icon
-  });
+  };
   app.docRegistry.addFileType(ft);
 
   // Create a new viewer factory.

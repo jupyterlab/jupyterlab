@@ -1657,7 +1657,7 @@ export namespace DirListing {
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
-      fileType?: DocumentRegistry.FileType
+      fileType?: DocumentRegistry.IFileType
     ): void;
 
     /**
@@ -1683,7 +1683,7 @@ export namespace DirListing {
     createDragImage(
       node: HTMLElement,
       count: number,
-      fileType?: DocumentRegistry.FileType
+      fileType?: DocumentRegistry.IFileType
     ): HTMLElement;
   }
 
@@ -1830,7 +1830,7 @@ export namespace DirListing {
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
-      fileType?: DocumentRegistry.FileType
+      fileType?: DocumentRegistry.IFileType
     ): void {
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
@@ -1932,7 +1932,7 @@ export namespace DirListing {
     createDragImage(
       node: HTMLElement,
       count: number,
-      fileType?: DocumentRegistry.FileType
+      fileType?: DocumentRegistry.IFileType
     ): HTMLElement {
       let dragImage = node.cloneNode(true) as HTMLElement;
       let modified = DOMUtils.findElement(dragImage, ITEM_MODIFIED_CLASS);

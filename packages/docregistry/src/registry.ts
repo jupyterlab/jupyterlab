@@ -64,11 +64,14 @@ export class DocumentRegistry implements IDisposable {
     }
     this._modelFactories['text'] = factory || new TextModelFactory();
 
-    let fts =
-      options.initialFileTypes?.map(ft =>
-        DocumentRegistry.FileType.resolve(ft)
-      ) || DocumentRegistry.defaultFileTypes;
-    fts.forEach(ft => this._fileTypes.push(ft));
+    let fts = options.initialFileTypes || DocumentRegistry.defaultFileTypes;
+    fts.forEach(ft => {
+      let value: DocumentRegistry.IFileType = {
+        ...DocumentRegistry.fileTypeDefaults,
+        ...ft
+      };
+      this._fileTypes.push(value);
+    });
   }
 
   /**
@@ -287,7 +290,7 @@ export class DocumentRegistry implements IDisposable {
       ...DocumentRegistry.fileTypeDefaults,
       ...fileType
     };
-    this._fileTypes.push(DocumentRegistry.FileType.resolve(value));
+    this._fileTypes.push(value);
 
     this._changed.emit({
       type: 'fileType',
@@ -554,7 +557,7 @@ export class DocumentRegistry implements IDisposable {
   /**
    * Get a file type by name.
    */
-  getFileType(name: string): DocumentRegistry.FileType | undefined {
+  getFileType(name: string): DocumentRegistry.IFileType | undefined {
     name = name.toLowerCase();
     return find(this._fileTypes, fileType => {
       return fileType.name.toLowerCase() === name;
@@ -608,7 +611,7 @@ export class DocumentRegistry implements IDisposable {
    */
   getFileTypeForModel(
     model: Partial<Contents.IModel>
-  ): DocumentRegistry.FileType {
+  ): DocumentRegistry.IFileType {
     switch (model.type) {
       case 'directory':
         return (
@@ -640,8 +643,8 @@ export class DocumentRegistry implements IDisposable {
    *
    * @returns An ordered list of matching file types.
    */
-  getFileTypesForPath(path: string): DocumentRegistry.FileType[] {
-    let fts: DocumentRegistry.FileType[] = [];
+  getFileTypesForPath(path: string): DocumentRegistry.IFileType[] {
+    let fts: DocumentRegistry.IFileType[] = [];
     let name = PathExt.basename(path);
 
     // Look for a pattern match first.
@@ -688,7 +691,7 @@ export class DocumentRegistry implements IDisposable {
   private _widgetFactoriesForFileType: {
     [key: string]: string[];
   } = Object.create(null);
-  private _fileTypes: DocumentRegistry.FileType[] = [];
+  private _fileTypes: DocumentRegistry.IFileType[] = [];
   private _extenders: {
     [key: string]: DocumentRegistry.WidgetExtension[];
   } = Object.create(null);
@@ -1212,39 +1215,6 @@ export namespace DocumentRegistry {
   };
 
   /**
-   * A wrapper for IFileTypes
-   */
-  export class FileType implements IFileType {
-    static resolve(ft: Partial<IFileType>): FileType {
-      if (ft instanceof FileType) {
-        return ft;
-      }
-
-      return new FileType(ft);
-    }
-
-    constructor(options: Partial<IFileType>) {
-      Object.assign(this, fileTypeDefaults, options);
-
-      if (this.icon) {
-        // ensure that the icon is resolved to a JLIcon
-        this.icon = JLIcon.resolve(this.icon);
-      }
-    }
-
-    readonly name: string;
-    readonly mimeTypes: ReadonlyArray<string>;
-    readonly extensions: ReadonlyArray<string>;
-    readonly displayName: string;
-    readonly pattern: string;
-    readonly icon?: JLIcon;
-    readonly iconClass: string;
-    readonly iconLabel: string;
-    readonly contentType: Contents.ContentType;
-    readonly fileFormat: Contents.FileFormat;
-  }
-
-  /**
    * An arguments object for the `changed` signal.
    */
   export interface IChangedArgs {
@@ -1271,18 +1241,18 @@ export namespace DocumentRegistry {
   /**
    * The default text file type used by the document registry.
    */
-  export const defaultTextFileType = new FileType({
+  export const defaultTextFileType: IFileType = {
     ...fileTypeDefaults,
     name: 'text',
     mimeTypes: ['text/plain'],
     extensions: ['.txt'],
     icon: fileIcon
-  });
+  };
 
   /**
    * The default notebook file type used by the document registry.
    */
-  export const defaultNotebookFileType = new FileType({
+  export const defaultNotebookFileType: IFileType = {
     ...fileTypeDefaults,
     name: 'notebook',
     displayName: 'Notebook',
@@ -1291,126 +1261,124 @@ export namespace DocumentRegistry {
     contentType: 'notebook',
     fileFormat: 'json',
     icon: notebookIcon
-  });
+  };
 
   /**
    * The default directory file type used by the document registry.
    */
-  export const defaultDirectoryFileType = new FileType({
+  export const defaultDirectoryFileType: IFileType = {
     ...fileTypeDefaults,
     name: 'directory',
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
     icon: folderIcon
-  });
+  };
 
   /**
    * The default file types used by the document registry.
    */
-  export const defaultFileTypes: ReadonlyArray<FileType> = [
+  export const defaultFileTypes: ReadonlyArray<Partial<IFileType>> = [
     defaultTextFileType,
     defaultNotebookFileType,
     defaultDirectoryFileType,
-    ...[
-      {
-        name: 'markdown',
-        displayName: 'Markdown File',
-        extensions: ['.md'],
-        mimeTypes: ['text/markdown'],
-        icon: markdownIcon
-      },
-      {
-        name: 'python',
-        displayName: 'Python File',
-        extensions: ['.py'],
-        mimeTypes: ['text/x-python'],
-        icon: pythonIcon
-      },
-      {
-        name: 'json',
-        displayName: 'JSON File',
-        extensions: ['.json'],
-        mimeTypes: ['application/json'],
-        icon: jsonIcon
-      },
-      {
-        name: 'csv',
-        displayName: 'CSV File',
-        extensions: ['.csv'],
-        mimeTypes: ['text/csv'],
-        icon: spreadsheetIcon
-      },
-      {
-        name: 'tsv',
-        displayName: 'TSV File',
-        extensions: ['.tsv'],
-        mimeTypes: ['text/csv'],
-        icon: spreadsheetIcon
-      },
-      {
-        name: 'r',
-        displayName: 'R File',
-        mimeTypes: ['text/x-rsrc'],
-        extensions: ['.r'],
-        icon: rKernelIcon
-      },
-      {
-        name: 'yaml',
-        displayName: 'YAML File',
-        mimeTypes: ['text/x-yaml', 'text/yaml'],
-        extensions: ['.yaml', '.yml'],
-        icon: yamlIcon
-      },
-      {
-        name: 'svg',
-        displayName: 'Image',
-        mimeTypes: ['image/svg+xml'],
-        extensions: ['.svg'],
-        icon: imageIcon,
-        fileFormat: 'base64'
-      },
-      {
-        name: 'tiff',
-        displayName: 'Image',
-        mimeTypes: ['image/tiff'],
-        extensions: ['.tif', '.tiff'],
-        icon: imageIcon,
-        fileFormat: 'base64'
-      },
-      {
-        name: 'jpeg',
-        displayName: 'Image',
-        mimeTypes: ['image/jpeg'],
-        extensions: ['.jpg', '.jpeg'],
-        icon: imageIcon,
-        fileFormat: 'base64'
-      },
-      {
-        name: 'gif',
-        displayName: 'Image',
-        mimeTypes: ['image/gif'],
-        extensions: ['.gif'],
-        icon: imageIcon,
-        fileFormat: 'base64'
-      },
-      {
-        name: 'png',
-        displayName: 'Image',
-        mimeTypes: ['image/png'],
-        extensions: ['.png'],
-        icon: imageIcon,
-        fileFormat: 'base64'
-      },
-      {
-        name: 'bmp',
-        displayName: 'Image',
-        mimeTypes: ['image/bmp'],
-        extensions: ['.bmp'],
-        icon: imageIcon,
-        fileFormat: 'base64'
-      }
-    ].map(ft => new FileType(ft as Partial<IFileType>))
+    {
+      name: 'markdown',
+      displayName: 'Markdown File',
+      extensions: ['.md'],
+      mimeTypes: ['text/markdown'],
+      icon: markdownIcon
+    },
+    {
+      name: 'python',
+      displayName: 'Python File',
+      extensions: ['.py'],
+      mimeTypes: ['text/x-python'],
+      icon: pythonIcon
+    },
+    {
+      name: 'json',
+      displayName: 'JSON File',
+      extensions: ['.json'],
+      mimeTypes: ['application/json'],
+      icon: jsonIcon
+    },
+    {
+      name: 'csv',
+      displayName: 'CSV File',
+      extensions: ['.csv'],
+      mimeTypes: ['text/csv'],
+      icon: spreadsheetIcon
+    },
+    {
+      name: 'tsv',
+      displayName: 'TSV File',
+      extensions: ['.tsv'],
+      mimeTypes: ['text/csv'],
+      icon: spreadsheetIcon
+    },
+    {
+      name: 'r',
+      displayName: 'R File',
+      mimeTypes: ['text/x-rsrc'],
+      extensions: ['.r'],
+      icon: rKernelIcon
+    },
+    {
+      name: 'yaml',
+      displayName: 'YAML File',
+      mimeTypes: ['text/x-yaml', 'text/yaml'],
+      extensions: ['.yaml', '.yml'],
+      icon: yamlIcon
+    },
+    {
+      name: 'svg',
+      displayName: 'Image',
+      mimeTypes: ['image/svg+xml'],
+      extensions: ['.svg'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    },
+    {
+      name: 'tiff',
+      displayName: 'Image',
+      mimeTypes: ['image/tiff'],
+      extensions: ['.tif', '.tiff'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    },
+    {
+      name: 'jpeg',
+      displayName: 'Image',
+      mimeTypes: ['image/jpeg'],
+      extensions: ['.jpg', '.jpeg'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    },
+    {
+      name: 'gif',
+      displayName: 'Image',
+      mimeTypes: ['image/gif'],
+      extensions: ['.gif'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    },
+    {
+      name: 'png',
+      displayName: 'Image',
+      mimeTypes: ['image/png'],
+      extensions: ['.png'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    },
+    {
+      name: 'bmp',
+      displayName: 'Image',
+      mimeTypes: ['image/bmp'],
+      extensions: ['.bmp'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    }
   ];
 }
 

@@ -264,10 +264,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
     this._rendermime = options.rendermime;
     this._renderTimeout = options.renderTimeout || 1000;
     this._dataType = options.dataType || 'string';
-
-    // resolve the passed in IFileType to a FileType
-    const ft = options.primaryFileType;
-    this._fileType = ft ? DocumentRegistry.FileType.resolve(ft) : ft;
+    this._fileType = options.primaryFileType;
   }
 
   /**
@@ -302,7 +299,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
   private _rendermime: IRenderMimeRegistry;
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
-  private _fileType: DocumentRegistry.FileType | undefined;
+  private _fileType: DocumentRegistry.IFileType | undefined;
 }
 
 /**

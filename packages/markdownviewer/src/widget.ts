@@ -294,11 +294,8 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
    */
   constructor(options: MarkdownViewerFactory.IOptions) {
     super(Private.createRegistryOptions(options));
+    this._fileType = options.primaryFileType;
     this._rendermime = options.rendermime;
-
-    // resolve the passed in IFileType to a FileType
-    const ft = options.primaryFileType;
-    this._fileType = ft ? DocumentRegistry.FileType.resolve(ft) : ft;
   }
 
   /**
@@ -320,7 +317,7 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
     return widget;
   }
 
-  private _fileType: DocumentRegistry.FileType | undefined;
+  private _fileType: DocumentRegistry.IFileType | undefined;
   private _rendermime: IRenderMimeRegistry;
 }
 
