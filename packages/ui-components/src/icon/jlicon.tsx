@@ -593,7 +593,7 @@ export namespace JLIcon {
    * Base implementation of IRenderer.
    */
   export class Renderer implements IRenderer {
-    constructor(protected _icon: JLIcon, protected _props: IProps) {}
+    constructor(protected _icon: JLIcon, protected _props?: IProps) {}
 
     // tslint:disable-next-line:no-empty
     render(container: HTMLElement): void {}
