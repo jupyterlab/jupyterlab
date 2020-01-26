@@ -12,18 +12,14 @@ import '@jupyterlab/theme-light-extension/style/index.css';
 
 export default {
   // component: JLIcon,
-  title: 'IconReact'
+  title: 'LabIcon'
 };
 
-// a Scene is part of a Story
+export const build = () => <buildIcon.react kind="sideBar" />;
 
-export const buildIconScene = () => <buildIcon.react kind="sideBar" />;
+export const running = () => <runningIcon.react height="800px" width="800px" />;
 
-export const runningIconScene = () => (
-  <runningIcon.react height="800px" width="800px" />
-);
-
-export const html5IconScene = () => (
+export const html5 = () => (
   <div className="foobar" style={{ height: '500px', width: '500px' }}>
     <html5Icon.react justify="center" />
   </div>
