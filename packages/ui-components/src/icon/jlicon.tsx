@@ -517,11 +517,14 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
   readonly unrender: (container: HTMLElement) => void;
 
   protected _className: string;
-  protected _icon = this;
   protected _loading: boolean;
   protected _svgReplaced = new Signal<this, void>(this);
   protected _svgstr: string;
   protected _uuid: string;
+
+  // needed due to the quirks of the current implementation of IRenderer
+  protected _icon = this;
+  protected _rendererOptions = {};
 }
 
 /**
@@ -644,7 +647,7 @@ export namespace JLIcon {
   export class Renderer implements IRenderer {
     constructor(
       protected _icon: JLIcon,
-      protected _options: IRendererOptions = {}
+      protected _rendererOptions: IRendererOptions = {}
     ) {}
 
     // tslint:disable-next-line:no-empty
@@ -666,7 +669,7 @@ export namespace JLIcon {
       // TODO: decide how to implement rendering of passed in child virtual nodes
       this._icon.element({
         container,
-        ...this._options.props,
+        ...this._rendererOptions.props,
         ..._options.props
       });
     }
@@ -688,7 +691,7 @@ export namespace JLIcon {
       return ReactDOM.render(
         <this._icon.react
           container={container}
-          {...{ ...this._options.props, ..._options.props }}
+          {...{ ...this._rendererOptions.props, ..._options.props }}
         />,
         container
       );
