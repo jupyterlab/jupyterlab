@@ -69,7 +69,7 @@ export class FileBrowser extends Widget {
     this._directoryPending = false;
 
     const newFolder = new ToolbarButton({
-      iconRenderer: newFolderIcon,
+      icon: newFolderIcon,
       onClick: () => {
         this.createNewDirectory();
       },
@@ -77,7 +77,7 @@ export class FileBrowser extends Widget {
     });
     const uploader = new Uploader({ model });
     const refresher = new ToolbarButton({
-      iconRenderer: refreshIcon,
+      icon: refreshIcon,
       onClick: () => {
         void model.refresh();
       },

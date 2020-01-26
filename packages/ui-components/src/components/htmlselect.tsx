@@ -38,7 +38,7 @@ export interface IHTMLSelectProps
 
   iconProps?: JLIcon.IProps;
 
-  iconRenderer?: JLIcon;
+  icon?: JLIcon;
 
   options?: Array<string | number | IOptionProps>;
 }
@@ -51,7 +51,7 @@ export class HTMLSelect extends React.Component<IHTMLSelectProps> {
       disabled,
       elementRef,
       iconProps,
-      iconRenderer = caretDownEmptyIcon,
+      icon = caretDownEmptyIcon,
       options = [],
       ...htmlProps
     } = this.props;
@@ -87,7 +87,7 @@ export class HTMLSelect extends React.Component<IHTMLSelectProps> {
           {optionChildren}
           {htmlProps.children}
         </select>
-        <iconRenderer.react
+        <icon.react
           {...{
             tag: 'span',
             kind: 'select',

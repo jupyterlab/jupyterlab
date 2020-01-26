@@ -352,7 +352,7 @@ export class CollapsibleSection extends React.Component<
       <>
         <header>
           <ToolbarButtonComponent
-            iconRenderer={this.state.isOpen ? caretDownIcon : caretRightIcon}
+            icon={this.state.isOpen ? caretDownIcon : caretRightIcon}
             iconClass={iconStyle({ height: 'auto', width: '20px' })}
             onClick={() => {
               this.handleCollapse();
@@ -542,7 +542,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
           headerElements={
             <ToolbarButtonComponent
               key="refresh-button"
-              iconRenderer={refreshIcon}
+              icon={refreshIcon}
               onClick={() => {
                 model.refreshInstalled();
               }}

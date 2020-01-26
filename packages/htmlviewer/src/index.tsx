@@ -89,7 +89,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
     this.toolbar.addItem(
       'refresh',
       new ToolbarButton({
-        iconRenderer: refreshIcon,
+        icon: refreshIcon,
         onClick: () => {
           this.content.url = this.content.url;
         },

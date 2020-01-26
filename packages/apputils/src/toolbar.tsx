@@ -367,7 +367,7 @@ export namespace Toolbar {
     sessionContext: ISessionContext
   ): Widget {
     return new ToolbarButton({
-      iconRenderer: stopIcon,
+      icon: stopIcon,
       onClick: () => {
         void sessionContext.session?.kernel?.interrupt();
       },
@@ -383,7 +383,7 @@ export namespace Toolbar {
     dialogs?: ISessionContext.IDialogs
   ): Widget {
     return new ToolbarButton({
-      iconRenderer: refreshIcon,
+      icon: refreshIcon,
       onClick: () => {
         void (dialogs ?? sessionContextDialogs).restart(sessionContext);
       },
@@ -450,7 +450,7 @@ export namespace ToolbarButtonComponent {
     label?: string;
     iconClass?: string;
     iconLabel?: string;
-    iconRenderer?: JLIcon;
+    icon?: JLIcon;
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
@@ -483,9 +483,9 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
   };
 
   const Icon = () => {
-    if (props.iconRenderer) {
+    if (props.icon) {
       return (
-        <props.iconRenderer.react
+        <props.icon.react
           className={classes(props.iconClass, 'jp-ToolbarButtonComponent-icon')}
           tag="span"
           justify="center"

@@ -235,7 +235,7 @@ async function activateFactory(
 
     // Add a launcher toolbar item.
     let launcher = new ToolbarButton({
-      iconRenderer: addIcon,
+      icon: addIcon,
       onClick: () => {
         return Private.createLauncher(commands, widget);
       },

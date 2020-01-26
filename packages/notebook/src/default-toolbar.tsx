@@ -68,7 +68,7 @@ export namespace ToolbarItems {
         <UseSignal signal={panel.context.fileChanged}>
           {() => (
             <ToolbarButtonComponent
-              iconRenderer={saveIcon}
+              icon={saveIcon}
               onClick={onClick}
               tooltip="Save the notebook contents and create checkpoint"
               enabled={
@@ -91,7 +91,7 @@ export namespace ToolbarItems {
    */
   export function createInsertButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconRenderer: addIcon,
+      icon: addIcon,
       onClick: () => {
         NotebookActions.insertBelow(panel.content);
       },
@@ -104,7 +104,7 @@ export namespace ToolbarItems {
    */
   export function createCutButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconRenderer: cutIcon,
+      icon: cutIcon,
       onClick: () => {
         NotebookActions.cut(panel.content);
       },
@@ -117,7 +117,7 @@ export namespace ToolbarItems {
    */
   export function createCopyButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconRenderer: copyIcon,
+      icon: copyIcon,
       onClick: () => {
         NotebookActions.copy(panel.content);
       },
@@ -130,7 +130,7 @@ export namespace ToolbarItems {
    */
   export function createPasteButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconRenderer: pasteIcon,
+      icon: pasteIcon,
       onClick: () => {
         NotebookActions.paste(panel.content);
       },
@@ -143,7 +143,7 @@ export namespace ToolbarItems {
    */
   export function createRunButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconRenderer: runIcon,
+      icon: runIcon,
       onClick: () => {
         void NotebookActions.runAndAdvance(panel.content, panel.sessionContext);
       },
