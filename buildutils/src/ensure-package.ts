@@ -391,8 +391,10 @@ export async function ensureUiComponents(
       );
     }
   });
-  const svgImportStatements = _svgImportStatements.join('\n');
-  const labiconConstructions = _labiconConstructions.join('\n');
+
+  // sort the statements and then join them
+  const svgImportStatements = _svgImportStatements.sort().join('\n');
+  const labiconConstructions = _labiconConstructions.sort().join('\n');
 
   // generate the actual contents of the iconImports file
   const iconImportsPath = path.join(iconSrcDir, 'iconimports.ts');
@@ -423,8 +425,10 @@ export async function ensureUiComponents(
       `.${className} {background-image: var(--${urlName})}`
     );
   });
-  const iconCSSUrls = _iconCSSUrls.join('\n');
-  const iconCSSDeclarations = _iconCSSDeclarations.join('\n');
+
+  // sort the statements and then join them
+  const iconCSSUrls = _iconCSSUrls.sort().join('\n');
+  const iconCSSDeclarations = _iconCSSDeclarations.sort().join('\n');
 
   // generate the actual contents of the iconCSSClasses file
   const iconCSSClassesPath = path.join(iconCSSDir, 'deprecated.css');
