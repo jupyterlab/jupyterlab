@@ -1844,7 +1844,11 @@ export namespace DirListing {
         // no icon set on fileType, fall back to default file icon
         fileIcon.element(iconProps);
       } else {
-        LabIcon.resolveElement({ ...fileType, ...iconProps });
+        LabIcon.resolveElement({
+          icon: fileType.icon,
+          iconClass: fileType.iconClass,
+          ...iconProps
+        });
       }
 
       let hoverText = 'Name: ' + model.name;

@@ -496,7 +496,8 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       minimal
     >
       <LabIcon.resolveReact
-        {...props}
+        icon={props.icon}
+        iconClass={props.iconClass}
         className={
           // if props.icon is unset, add extra classes for proper support of icon-as-css-background
           props.icon
