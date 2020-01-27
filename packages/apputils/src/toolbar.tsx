@@ -482,31 +482,6 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     }
   };
 
-  const Icon = () => {
-    if (props.icon) {
-      return (
-        <props.icon.react
-          className={classes(props.iconClass, 'jp-ToolbarButtonComponent-icon')}
-          tag="span"
-          justify="center"
-          kind="toolbarButton"
-        />
-      );
-    } else if (props.iconClass) {
-      return (
-        <LabIcon.getReact
-          name={classes(props.iconClass, 'jp-Icon', 'jp-Icon-16')}
-          className="jp-ToolbarButtonComponent-icon"
-          tag="span"
-          justify="center"
-          kind="toolbarButton"
-        />
-      );
-    } else {
-      return <></>;
-    }
-  };
-
   return (
     <Button
       className={
@@ -520,7 +495,18 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       title={props.tooltip || props.iconLabel}
       minimal
     >
-      <Icon />
+      <LabIcon.resolveReact
+        {...props}
+        className={
+          // if props.icon is unset, add extra classes for proper support of icon-as-css-background
+          props.icon
+            ? 'jp-ToolbarButtonComponent-icon'
+            : classes('jp-ToolbarButtonComponent-icon', 'jp-Icon', 'jp-Icon-16')
+        }
+        tag="span"
+        justify="center"
+        kind="toolbarButton"
+      />
       {props.label && (
         <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
       )}

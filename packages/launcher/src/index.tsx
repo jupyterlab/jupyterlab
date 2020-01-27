@@ -199,7 +199,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              <LabIcon.getReact
+              <LabIcon.UNSTABLE_getReact
                 name={iconClass}
                 justify="center"
                 kind="launcherSection"
@@ -420,7 +420,7 @@ function Card(
             </div>
           )
         ) : (
-          <LabIcon.getReact
+          <LabIcon.UNSTABLE_getReact
             name={commands.iconClass(command, args)}
             justify="center"
             kind="launcherCard"

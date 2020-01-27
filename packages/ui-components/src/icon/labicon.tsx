@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { Text } from '@jupyterlab/coreutils';
 
 import { iconStyle, IIconStyle } from '../style';
-import { getReactAttrs, classes, classesDedupe } from '../utils';
+import { getReactAttrs, classes } from '../utils';
 
 import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
@@ -51,68 +51,34 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
   }
 
   /**
-   * Get any existing LabIcon instance by name, construct a DOM element
-   * from it, then return said element.
+   * UNSTABLE - only exists for backwards compatibility in two special cases
    *
-   * @param name - name of the LabIcon instance to fetch
-   *
-   * @param fallback - if left undefined, use automatic fallback to
-   * icons-as-css-background behavior: elem will be constructed using
-   * a blank icon with `elem.className = classes(name, props.className)`,
-   * where elem is the return value. Otherwise, fallback can be used to
-   * define the default LabIcon instance, returned whenever lookup fails
-   *
-   * @param props - passed directly to LabIcon.element
-   *
-   * @returns an SVGElement
+   * TODO: Fix the remaining cases that rely on this and then remove this method:
+   *     - index.tsx in launcher
+   *     - pluginlist.tsx in settingseditor
    */
-  static getElement({
-    name,
-    fallback,
-    ...props
-  }: { name: string; fallback?: LabIcon } & LabIcon.IProps) {
-    let icon = LabIcon._get(name, fallback);
-    if (!icon) {
-      icon = blankIcon;
-      props.className = classesDedupe(name, props.className);
-    }
-
-    return icon.element(props);
-  }
-
-  /**
-   * Get any existing LabIcon instance by name, construct a React element
-   * from it, then return said element.
-   *
-   * @param name - name of the LabIcon instance to fetch
-   *
-   * @param fallback - if left undefined, use automatic fallback to
-   * icons-as-css-background behavior: elem will be constructed using
-   * a blank icon with `elem.className = classes(name, props.className)`,
-   * where elem is the return value. Otherwise, fallback can be used to
-   * define the default LabIcon instance, used to construct the return
-   * elem whenever lookup fails
-   *
-   * @param props - passed directly to LabIcon.react
-   *
-   * @returns a React element
-   */
-  static getReact({
+  static UNSTABLE_getReact({
     name,
     fallback,
     ...props
   }: { name: string; fallback?: LabIcon } & LabIcon.IReactProps) {
-    let icon = LabIcon._get(name, fallback);
+    const icon = LabIcon._get(name, fallback);
     if (!icon) {
-      icon = blankIcon;
-      props.className = classesDedupe(name, props.className);
+      props.className = classes(name, props.className);
+      // try to render the icon as a css background image via iconClass
+      return <Private.iconAsCssBackgroundReact {...props} />;
     }
 
     return <icon.react {...props} />;
   }
 
   /**
-   * Remove the svg element from a container element
+   * Remove any rendered icon from the element that contains it
+   *
+   * @param container - a DOM node into which an icon was
+   * previously rendered
+   *
+   * @returns the cleaned container
    */
   static remove(container: HTMLElement) {
     // clean up all children
@@ -171,12 +137,19 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    * @param iconClass - optional, if the icon arg is not set, the iconClass arg
    * should be a CSS class associated with an existing CSS background-image.
    *
+   * @param props - any additional args are passed though to the element method
+   * of the resolved icon on render
+   *
    * @returns a DOM node with the resolved icon rendered into it
    */
   static resolveElement({
     icon,
+    iconClass,
     ...props
-  }: { icon?: LabIcon.IResolvable } & LabIcon.IProps) {
+  }: { icon?: LabIcon.IResolvable; iconClass?: string } & LabIcon.IProps) {
+    // combine iconClass with any class from the props
+    props.className = classes(iconClass, props.className);
+
     if (!icon) {
       // try to render the icon as a css background image via iconClass
       return Private.iconAsCssBackgroundElement(props);
@@ -198,12 +171,19 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    * @param iconClass - optional, if the icon arg is not set, the iconClass arg
    * should be a CSS class associated with an existing CSS background-image.
    *
+   * @param props - any additional args are passed though to the React component
+   * of the resolved icon on render
+   *
    * @returns a React component that will render the resolved icon
    */
   static resolveReact({
     icon,
+    iconClass,
     ...props
-  }: { icon?: LabIcon.IResolvable } & LabIcon.IReactProps) {
+  }: { icon?: LabIcon.IResolvable; iconClass?: string } & LabIcon.IReactProps) {
+    // combine iconClass with any class from the props
+    props.className = classes(iconClass, props.className);
+
     if (!icon) {
       // try to render the icon as a css background image via iconClass
       return <Private.iconAsCssBackgroundReact {...props} />;

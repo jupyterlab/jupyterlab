@@ -269,7 +269,7 @@ namespace Private {
           key={id}
           title={itemTitle}
         >
-          <LabIcon.getReact
+          <LabIcon.UNSTABLE_getReact
             name={iconClass}
             fallback={settingsIcon}
             title={iconTitle}
