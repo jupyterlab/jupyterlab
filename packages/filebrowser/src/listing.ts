@@ -23,10 +23,7 @@ import { Contents } from '@jupyterlab/services';
 import {
   caretDownIcon,
   caretUpIcon,
-  classes,
   fileIcon,
-  iconStyle,
-  IIconStyle,
   LabIcon
 } from '@jupyterlab/ui-components';
 
@@ -1836,33 +1833,18 @@ export namespace DirListing {
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      // render the icon svg node
-      if (fileType?.icon) {
-        iconContainer.className = classes(
-          ITEM_ICON_CLASS,
-          iconStyle({
-            justify: 'center',
-            kind: 'listing'
-          })
-        );
-
-        fileType.icon.render(iconContainer);
-      } else if (fileType?.iconClass) {
-        iconContainer.className = classes(ITEM_ICON_CLASS, fileType.iconClass);
-
-        if (fileType.iconLabel) {
-          iconContainer.textContent = fileType.iconLabel;
-        }
+      // render the file item's icon
+      const iconProps: LabIcon.IProps = {
+        container: iconContainer,
+        className: ITEM_ICON_CLASS,
+        justify: 'center',
+        kind: 'listing'
+      };
+      if (!(fileType?.icon || fileType?.iconClass)) {
+        // no icon set on fileType, fall back to default file icon
+        fileIcon.element(iconProps);
       } else {
-        iconContainer.className = classes(
-          ITEM_ICON_CLASS,
-          iconStyle({
-            justify: 'center',
-            kind: 'listing'
-          })
-        );
-
-        fileIcon.render(iconContainer);
+        LabIcon.resolveElement({ ...fileType, ...iconProps });
       }
 
       let hoverText = 'Name: ' + model.name;
@@ -2115,17 +2097,13 @@ namespace Private {
     float: 'left' | 'right',
     state?: 'down' | 'up' | undefined
   ): void {
-    const propsStyle: IIconStyle = {
-      kind: 'listingHeaderItem',
-      justify: 'center',
-      float
-    };
-
     if (state) {
       (state === 'down' ? caretDownIcon : caretUpIcon).element({
         container,
         tag: 'span',
-        ...propsStyle
+        kind: 'listingHeaderItem',
+        justify: 'center',
+        float
       });
     } else {
       LabIcon.remove(container);
