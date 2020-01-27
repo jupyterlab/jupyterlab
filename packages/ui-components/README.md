@@ -2,19 +2,23 @@
 
 A JupyterLab package that provides UI elements of various types (React components, DOM elements, etc) to core JupyterLab packages and third-party extensions.
 
-# `LabIcon` docs
+# `LabIcon` user guide
 
 `LabIcon` is the icon class used by JupyterLab, and is part of the new icon system introduced in JupyterLab v2.0.
 
-## `LabIcon` user guide
+## How JupyterLab handles icons
 
-The ui-components package provides icons to the rest of JupyterLab, in the form of a set of `LabIcon` instances (currently about 80). All of the icons in the core JupyterLab packages are rendered using one of these `LabIcon` instances. You can use them in your own code via an `import` statement. For example, to use `jupyterIcon` you would first do:
+The ui-components package provides icons to the rest of JupyterLab, in the form of a set of `LabIcon` instances (currently about 80). All of the icons in the core JupyterLab packages are rendered using one of these `LabIcon` instances.
+
+## Using the icons in your own code
+
+You can use any of JupyterLab icons in your own code via an `import` statement. For example, to use `jupyterIcon` you would first do:
 
 ```
 import { jupyterIcon } from "@jupyterlab/ui-components";
 ```
 
-### How to render an icon into a DOM node
+## How to render an icon into a DOM node
 
 Icons can be added as children to any `div` or `span` nodes using the `icon.element(...)` method (where `icon` is any instance of `LabIcon`). For example, to render the Jupyter icon you could do:
 
@@ -24,7 +28,7 @@ jupyterIcon.element({container: elem, height: '16px', width: '16px', marginLeft:
 
 where `elem` is any `HTMLElement` with a `div` or `span` tag. As shown in the above example, the icon can be styled by passing CSS parameters into `.element(...)`. Any valid CSS parameter can be used (one catch: snake case params do have to be converted to camel case: instead of `foo-bar: '8px'`, you'd need to use `fooBar: '8px'`.
 
-### How to render an icon as a React component
+## How to render an icon as a React component
 
 Icons can also be rendered using React. The `icon.react` parameter holds a standard React component that will display the icon on render. Like any React component, `icon.react` can be used in various ways.
 
@@ -57,13 +61,13 @@ ReactDOM.unmountComponentAtNode(elem);
 
 This cleanup step is not a special property of `LabIcon`, but is instead needed for any React component that is rendered directly at the top level by `ReactDOM`: failure to call `unmountComponentAtNode` can result in a [memory leak](https://stackoverflow.com/a/48198011/425458).
 
-## `LabIcon` reference
+# `LabIcon` reference
 
-### How icon resolution works
+## How icon resolution works
 
 In general, icons in JupyterLab should be consumed either by creating a new instance of `LabIcon`, or by importing an existing one from another file/package. This standard usage pattern does not work with a small set of edge cases. For these cases, it is necessary to dynamically fetch or create an icon. The process by which this occurs is referred to as icon resolution.
 
-For example, in some cases an icon needs to be specified as a string (eg in the `.schema` files used to define the user settings for a JupyterLab extension). So long as the candidate icon meets a certain minimal interface:
+For example, in some cases an icon needs to be specified as a string containing the icon's name (eg in one of an extension's JSON-format `.schema` files). So long as the candidate icon meets a certain minimal interface:
 
 ```
 type IResolvable = string | {name: string, svgstr: string}
@@ -71,7 +75,7 @@ type IResolvable = string | {name: string, svgstr: string}
 
 it can be resolved into an actual `LabIcon` instance by `LabIcon.resolve`. The following is the intended specification for how icon resolution is intended to work:
 
-#### cases when resolving `icon: IResolvable` alone
+### cases when resolving `icon: IResolvable` alone
 
 - **case**: `icon` is an instance of `LabIcon`
   - **do**: nothing needs doing, just return `icon`
@@ -90,7 +94,7 @@ it can be resolved into an actual `LabIcon` instance by `LabIcon.resolve`. The f
     - **case**: both `icon.name` and `icon.svgstr` are non-empty
       - **do**: assume that `icon` is a definition of a new icon, return `new LabIcon(icon)`
 
-#### cases when resolving `icon: IResolvable` and `iconClass: string` together
+### cases when resolving `icon: IResolvable` and `iconClass: string` together
 
 - **case**: `iconClass` is empty, `icon` is any
   - **do**: resolve as you would `icon` alone

@@ -127,7 +127,7 @@ export function createRendermimePlugin(
         item.fileTypes.forEach(ft => {
           if (ft.icon) {
             // upconvert the contents of the icon field to a proper LabIcon
-            ft = { ...ft, icon: LabIcon.resolve(ft.icon) };
+            ft = { ...ft, icon: LabIcon.resolve({ icon: ft.icon }) };
           }
 
           app.docRegistry.addFileType(ft as DocumentRegistry.IFileType);
