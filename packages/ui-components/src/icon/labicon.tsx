@@ -51,11 +51,11 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
   }
 
   /**
-   * UNSTABLE - only exists for backwards compatibility in two special cases
+   * UNSTABLE - only exists for handling a single special case
    *
-   * TODO: Fix the remaining cases that rely on this and then remove this method:
+   * TODO: Fix the remaining case that relies on this and then
+   *   remove this method:
    *     - index.tsx in launcher
-   *     - pluginlist.tsx in settingseditor
    */
   static UNSTABLE_getReact({
     name,
