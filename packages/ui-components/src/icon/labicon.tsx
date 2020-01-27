@@ -32,6 +32,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    * @returns A LabIcon instance
    */
   private static _get(name: string, fallback?: LabIcon): LabIcon | undefined {
+    // TODO: remove name-might-actually-be-className shim here
     for (let className of name.split(/\s+/)) {
       if (LabIcon._instances.has(className)) {
         return LabIcon._instances.get(className);
@@ -135,7 +136,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    * @returns a LabIcon instance, or null if an icon name was passed in
    * and lookup fails.
    */
-  static resolve(icon: LabIcon.IResolvable): LabIcon {
+  static resolve({ icon }: { icon: LabIcon.IResolvable }): LabIcon {
     if (icon instanceof LabIcon) {
       // icon already is a LabIcon; nothing to do here
       return icon;
@@ -323,7 +324,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
     if (label != null) {
       container.textContent = label;
     }
-    this._initContainer({ container, className, propsStyle, title });
+    Private.initContainer({ container, className, propsStyle, title });
 
     // add the svg node to the container
     container.appendChild(svgElement);
@@ -355,37 +356,6 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
 
     // trigger update of icon elements created using other methods
     this._svgReplaced.emit();
-  }
-
-  protected _initContainer({
-    container,
-
-    className,
-    propsStyle,
-    title
-  }: {
-    container: HTMLElement;
-    className?: string;
-    propsStyle?: IIconStyle;
-    title?: string;
-  }): string {
-    if (title != null) {
-      container.title = title;
-    }
-
-    const classStyle = iconStyle(propsStyle);
-    if (className != null) {
-      // override the container class with explicitly passed-in class + style class
-      const classResolved = classes(className, classStyle);
-      container.className = classResolved;
-      return classResolved;
-    } else if (classStyle) {
-      // add the style class to the container class
-      container.classList.add(classStyle);
-      return classStyle;
-    } else {
-      return '';
-    }
   }
 
   protected _initReact() {
@@ -437,7 +407,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
         );
 
         if (container) {
-          this._initContainer({ container, className, propsStyle, title });
+          Private.initContainer({ container, className, propsStyle, title });
 
           return (
             <React.Fragment>
@@ -704,6 +674,101 @@ export namespace LabIcon {
 }
 
 namespace Private {
+  // see https://stackoverflow.com/a/54178819/425458
+  type RequiredBy<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
+  // same as normal IProps, but className is required
+  type IPropsCssBackround = RequiredBy<LabIcon.IProps, 'className'>;
+
+  export function iconAsCssBackgroundElement({
+    className,
+    container,
+    label,
+    title,
+    tag = 'div',
+    ...propsStyle
+  }: IPropsCssBackround): HTMLElement {
+    if (container?.className === className) {
+      // nothing needs doing, return the icon node
+      return container;
+    }
+
+    if (container) {
+      // take ownership by removing any existing children
+      while (container.firstChild) {
+        container.firstChild.remove();
+      }
+    } else {
+      // create a container if needed
+      container = document.createElement(tag);
+    }
+    if (label != null) {
+      container.textContent = label;
+    }
+    Private.initContainer({ container, className, propsStyle, title });
+
+    return container;
+  }
+
+  export const iconAsCssBackgroundReact = React.forwardRef(
+    (
+      {
+        className,
+        container,
+        label,
+        title,
+        tag = 'div',
+        ...propsStyle
+      }: IPropsCssBackround,
+      ref: React.RefObject<HTMLDivElement>
+    ) => {
+      // make it so that tag can be used as a jsx component
+      const Tag = tag;
+
+      if (container) {
+        initContainer({ container, className, propsStyle, title });
+
+        return <></>;
+      } else {
+        return (
+          <Tag className={classes(className, iconStyle(propsStyle))} ref={ref}>
+            {label}
+          </Tag>
+        );
+      }
+    }
+  );
+
+  export function initContainer({
+    container,
+
+    className,
+    propsStyle,
+    title
+  }: {
+    container: HTMLElement;
+    className?: string;
+    propsStyle?: IIconStyle;
+    title?: string;
+  }): string {
+    if (title != null) {
+      container.title = title;
+    }
+
+    const classStyle = iconStyle(propsStyle);
+    if (className != null) {
+      // override the container class with explicitly passed-in class + style class
+      const classResolved = classes(className, classStyle);
+      container.className = classResolved;
+      return classResolved;
+    } else if (classStyle) {
+      // add the style class to the container class
+      container.classList.add(classStyle);
+      return classStyle;
+    } else {
+      return '';
+    }
+  }
+
   /**
    * @param name - icon name. May be namespaced as per `some-pkg:foo-bar`
    *

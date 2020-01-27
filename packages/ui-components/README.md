@@ -2,44 +2,47 @@
 
 A JupyterLab package that provides UI elements of various types (React components, DOM elements, etc) to core JupyterLab packages and third-party extensions.
 
-# Icon notes
+# LabIcon docs
 
-## Icon sourcing notes
+`LabIcon` is the icon class used by JupyterLab, and is part of the new icon system introduced in JupyterLab v2.0.
 
-The following icons were originally taken from a set of material design icons:
+### How icon resolution works
 
-- `filetype/folder.svg`
-  - originally `ic_folder_24px.svg`
-- `sidebar/build.svg`
-  - originally `ic_build_24px.svg`
-- `sidebar/extension.svg`
-  - originally `ic_extension_24px.svg`
-- `sidebar/palette.svg`
-  - originally `ic_palette_24px.svg`
-- `sidebar/tab.svg`
-  - originally `ic_tab_24px.svg`
-- `statusbar/kernel.svg`
-  - originally `ic_memory_24px.svg`
+In general, icons in JupyterLab should be consumed either by creating a new instance of `LabIcon`, or by importing an existing one from another file/package. This standard usage pattern does not work with a small set of edge cases. For these cases, it is necessary to dynamically fetch or create an icon. The process by which this occurs is referred to as icon resolution.
 
-## Icon usage notes
+For example, in some cases an icon needs to be specified as a string (eg in the `.schema` files used to define the user settings for a JupyterLab extension). So long as the candidate icon meets a certain minimal interface:
 
-The icons are organized into various categories in `./style/icons`, based on where/how they are used in Jupyterlab core. Some icons fall into multiple categories, and are noted here:
+```
+type IResolvable = string | {name: string, svgstr: string}
+```
 
-- `filetype/file.svg`
-  - filetype
-  - settingeditor
-- `filetype/folder.svg`
-  - breadcrumb
-  - filetype
-  - sidebar
-- `filetype/markdown.svg`
-  - filetype
-  - settingeditor
-- `filetype/notebook.svg`
-  - filetype
-  - launcher
-  - settingeditor
-- `statusbar/terminal.svg`
-  - launcher
-  - statusbar
-  - settingeditor
+it can be resolved into an actual `LabIcon` instance by `LabIcon.resolve`. The following is the intended specification for how icon resolution is intended to work:
+
+#### cases when resolving `icon: IResolvable` alone
+
+- **case**: `icon` is an instance of `LabIcon`
+  - **do**: nothing needs doing, just return `icon`
+- **case**: `icon` is an empty string
+  - **do**: console error, return `badIcon`
+- **case**: `icon` is a non-empty string
+  - **do**: assume `icon` is an icon name, attempt lookup in `LabIcon._instances`
+    - **case**: lookup succeeds
+      - **do**: return the found icon
+    - **case**: lookup fails
+      - **do**: assume that the icon is correctly specified, but has not yet actually been defined/instantiated anywhere. Create a new icon with params `{name: icon, svgstr: loadingSvgstr}`. Whenever the icon actually does get defined, the loading image will be dynamically replaced with the real one (implemented in `LabIcon.constructor`)
+- **case**: `icon` is an object
+  - **do**: sanity check `icon`'s params
+    - **case**: at least one of `icon.name` or `icon.svgstr` are empty
+      - **do**: console error, return `badIcon`
+    - **case**: both `icon.name` and `icon.svgstr` are non-empty
+      - **do**: assume that `icon` is a definition of a new icon, return `new LabIcon(icon)`
+
+#### cases when resolving `icon: IResolvable` and `iconClass: string` together
+
+- **case**: `iconClass` is empty, `icon` is any
+  - **do**: resolve as you would `icon` alone
+- **case**: `iconClass` is non-empty, `icon` is null
+  - **do** return just the container with `className` set to `iconClass`
+- **case**: `iconClass` is non-empty, `icon` is an object
+  - **do**: resolve as you would `icon` alone, but set things up so that on `icon` render, a `{className: iconClass}` prop gets passed in
+  - **TODO**: figure out best implementation for passing in `iconClass`
