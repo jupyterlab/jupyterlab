@@ -5,7 +5,7 @@
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { JLIcon, settingsIcon } from '@jupyterlab/ui-components';
+import { LabIcon, settingsIcon } from '@jupyterlab/ui-components';
 
 import { Message } from '@lumino/messaging';
 
@@ -269,7 +269,7 @@ namespace Private {
           key={id}
           title={itemTitle}
         >
-          <JLIcon.getReact
+          <LabIcon.getReact
             name={iconClass}
             fallback={settingsIcon}
             title={iconTitle}

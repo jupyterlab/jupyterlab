@@ -7,7 +7,7 @@ import {
   circleEmptyIcon,
   circleIcon,
   classes,
-  JLIcon,
+  LabIcon,
   refreshIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
@@ -450,7 +450,7 @@ export namespace ToolbarButtonComponent {
     label?: string;
     iconClass?: string;
     iconLabel?: string;
-    icon?: JLIcon;
+    icon?: LabIcon;
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
@@ -494,7 +494,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       );
     } else if (props.iconClass) {
       return (
-        <JLIcon.getReact
+        <LabIcon.getReact
           name={classes(props.iconClass, 'jp-Icon', 'jp-Icon-16')}
           className="jp-ToolbarButtonComponent-icon"
           tag="span"

@@ -2,5 +2,5 @@
 // Distributed under the terms of the Modified BSD License.
 
 export * from './iconimports';
-export * from './jlicon';
+export * from './labicon';
 export * from './tabbarsvg';

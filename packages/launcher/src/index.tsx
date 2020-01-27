@@ -7,7 +7,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/apputils';
 
-import { JLIcon } from '@jupyterlab/ui-components';
+import { LabIcon } from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
@@ -199,7 +199,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              <JLIcon.getReact
+              <LabIcon.getReact
                 name={iconClass}
                 justify="center"
                 kind="launcherSection"
@@ -420,7 +420,7 @@ function Card(
             </div>
           )
         ) : (
-          <JLIcon.getReact
+          <LabIcon.getReact
             name={commands.iconClass(command, args)}
             justify="center"
             kind="launcherCard"

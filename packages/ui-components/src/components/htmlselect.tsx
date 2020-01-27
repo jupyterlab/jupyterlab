@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 
-import { caretDownEmptyIcon, JLIcon } from '../icon';
+import { caretDownEmptyIcon, LabIcon } from '../icon';
 import { DEFAULT_STYLE_CLASS, IElementRefProps } from './interface';
 import { classes } from '../utils';
 
@@ -36,9 +36,9 @@ export interface IHTMLSelectProps
     React.SelectHTMLAttributes<HTMLSelectElement> {
   defaultStyle?: boolean;
 
-  iconProps?: JLIcon.IProps;
+  iconProps?: LabIcon.IProps;
 
-  icon?: JLIcon;
+  icon?: LabIcon;
 
   options?: Array<string | number | IOptionProps>;
 }

@@ -145,7 +145,7 @@ export namespace IRenderMime {
     }
 
     /**
-     * A type that can be resolved to a JLIcon instance.
+     * A type that can be resolved to a LabIcon instance.
      */
     export type IResolvable = string | (IIcon & Partial<IRenderer>);
   }

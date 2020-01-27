@@ -16,30 +16,30 @@ import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
 
-export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
+export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
   /***********
    * statics *
    ***********/
 
   /**
-   * Get any existing JLIcon instance by name.
+   * Get any existing LabIcon instance by name.
    *
-   * @param name - name of the JLIcon instance to fetch
+   * @param name - name of the LabIcon instance to fetch
    *
-   * @param fallback - optional default JLIcon instance to use if
+   * @param fallback - optional default LabIcon instance to use if
    * name is not found
    *
-   * @returns A JLIcon instance
+   * @returns A LabIcon instance
    */
-  private static _get(name: string, fallback?: JLIcon): JLIcon | undefined {
+  private static _get(name: string, fallback?: LabIcon): LabIcon | undefined {
     for (let className of name.split(/\s+/)) {
-      if (JLIcon._instances.has(className)) {
-        return JLIcon._instances.get(className);
+      if (LabIcon._instances.has(className)) {
+        return LabIcon._instances.get(className);
       }
     }
 
     // lookup failed
-    if (JLIcon._debug) {
+    if (LabIcon._debug) {
       // fail noisily
       console.error(`Invalid icon name: ${name}`);
       return badIcon;
@@ -50,18 +50,18 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
   }
 
   /**
-   * Get any existing JLIcon instance by name, construct a DOM element
+   * Get any existing LabIcon instance by name, construct a DOM element
    * from it, then return said element.
    *
-   * @param name - name of the JLIcon instance to fetch
+   * @param name - name of the LabIcon instance to fetch
    *
    * @param fallback - if left undefined, use automatic fallback to
    * icons-as-css-background behavior: elem will be constructed using
    * a blank icon with `elem.className = classes(name, props.className)`,
    * where elem is the return value. Otherwise, fallback can be used to
-   * define the default JLIcon instance, returned whenever lookup fails
+   * define the default LabIcon instance, returned whenever lookup fails
    *
-   * @param props - passed directly to JLIcon.element
+   * @param props - passed directly to LabIcon.element
    *
    * @returns an SVGElement
    */
@@ -69,8 +69,8 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
     name,
     fallback,
     ...props
-  }: { name: string; fallback?: JLIcon } & JLIcon.IProps) {
-    let icon = JLIcon._get(name, fallback);
+  }: { name: string; fallback?: LabIcon } & LabIcon.IProps) {
+    let icon = LabIcon._get(name, fallback);
     if (!icon) {
       icon = blankIcon;
       props.className = classesDedupe(name, props.className);
@@ -80,19 +80,19 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
   }
 
   /**
-   * Get any existing JLIcon instance by name, construct a React element
+   * Get any existing LabIcon instance by name, construct a React element
    * from it, then return said element.
    *
-   * @param name - name of the JLIcon instance to fetch
+   * @param name - name of the LabIcon instance to fetch
    *
    * @param fallback - if left undefined, use automatic fallback to
    * icons-as-css-background behavior: elem will be constructed using
    * a blank icon with `elem.className = classes(name, props.className)`,
    * where elem is the return value. Otherwise, fallback can be used to
-   * define the default JLIcon instance, used to construct the return
+   * define the default LabIcon instance, used to construct the return
    * elem whenever lookup fails
    *
-   * @param props - passed directly to JLIcon.react
+   * @param props - passed directly to LabIcon.react
    *
    * @returns a React element
    */
@@ -100,8 +100,8 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
     name,
     fallback,
     ...props
-  }: { name: string; fallback?: JLIcon } & JLIcon.IReactProps) {
-    let icon = JLIcon._get(name, fallback);
+  }: { name: string; fallback?: LabIcon } & LabIcon.IReactProps) {
+    let icon = LabIcon._get(name, fallback);
     if (!icon) {
       icon = blankIcon;
       props.className = classesDedupe(name, props.className);
@@ -127,41 +127,41 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
 
   /**
    * Resolve an icon name or a {name, svgstr} pair into an
-   * actual JLIcon.
+   * actual LabIcon.
    *
    * @param icon - either a string with the name of an existing icon
    * or an object with {name: string, svgstr: string} fields.
    *
-   * @returns a JLIcon instance, or null if an icon name was passed in
+   * @returns a LabIcon instance, or null if an icon name was passed in
    * and lookup fails.
    */
-  static resolve(icon: JLIcon.IResolvable): JLIcon {
-    if (icon instanceof JLIcon) {
-      // icon already is a JLIcon; nothing to do here
+  static resolve(icon: LabIcon.IResolvable): LabIcon {
+    if (icon instanceof LabIcon) {
+      // icon already is a LabIcon; nothing to do here
       return icon;
     }
 
     if (typeof icon === 'string') {
       // do a dynamic lookup of existing icon by name
-      const resolved = JLIcon._get(icon);
+      const resolved = LabIcon._get(icon);
       if (resolved) {
         return resolved;
       }
 
       // no matching icon currently registered, create a new loading icon
       // TODO: find better icon (maybe animate?) for loading icon
-      return new JLIcon({ name: icon, svgstr: refreshSvgstr, _loading: true });
+      return new LabIcon({ name: icon, svgstr: refreshSvgstr, _loading: true });
     }
 
-    // icon was provided as a non-JLIcon {name, svgstr} pair, communicating
+    // icon was provided as a non-LabIcon {name, svgstr} pair, communicating
     // an intention to create a new icon
-    return new JLIcon(icon);
+    return new LabIcon(icon);
   }
 
   /**
    * Resolve a {name, svgstr} pair into an actual svg node.
    */
-  static resolveSvg({ name, svgstr }: JLIcon.IJLIcon): HTMLElement | null {
+  static resolveSvg({ name, svgstr }: LabIcon.ILabIcon): HTMLElement | null {
     const svgDoc = new DOMParser().parseFromString(svgstr, 'image/svg+xml');
 
     const svgError = svgDoc.querySelector('parsererror');
@@ -169,8 +169,8 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
     // structure of error element varies by browser, search at top level
     if (svgError) {
       // parse failed, svgElement will be an error box
-      const errmsg = `SVG HTML was malformed for JLIcon instance.\nname: ${name}, svgstr: ${svgstr}`;
-      if (JLIcon._debug) {
+      const errmsg = `SVG HTML was malformed for LabIcon instance.\nname: ${name}, svgstr: ${svgstr}`;
+      if (LabIcon._debug) {
         // fail noisily, render the error box
         console.error(errmsg);
         return svgError as HTMLElement;
@@ -191,11 +191,11 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
    * @param debug - optional boolean to force debug on or off
    */
   static toggleDebug(debug?: boolean) {
-    JLIcon._debug = debug ?? !JLIcon._debug;
+    LabIcon._debug = debug ?? !LabIcon._debug;
   }
 
   private static _debug: boolean = false;
-  private static _instances = new Map<string, JLIcon>();
+  private static _instances = new Map<string, LabIcon>();
 
   /***********
    * members *
@@ -206,13 +206,13 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
     svgstr,
     render,
     unrender,
-    rendererClass = JLIcon.ElementRenderer,
+    rendererClass = LabIcon.ElementRenderer,
     _loading = false
-  }: JLIcon.IOptions & { _loading?: boolean }) {
+  }: LabIcon.IOptions & { _loading?: boolean }) {
     if (!(name && svgstr)) {
       // sanity check failed
       console.error(
-        `When defining a new JLIcon, name and svgstr must both be non-empty strings. name: ${name}, svgstr: ${svgstr}`
+        `When defining a new LabIcon, name and svgstr must both be non-empty strings. name: ${name}, svgstr: ${svgstr}`
       );
       return badIcon;
     }
@@ -221,9 +221,9 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
     this._loading = _loading;
 
     // check to see if this is a redefinition of an existing icon
-    if (JLIcon._instances.has(name)) {
+    if (LabIcon._instances.has(name)) {
       // fetch the existing icon, replace its svg, then return it
-      const icon = JLIcon._instances.get(name)!;
+      const icon = LabIcon._instances.get(name)!;
       if (this._loading) {
         // replace the placeholder svg in icon
         icon.svgstr = svgstr;
@@ -255,8 +255,8 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
       this.render = renderer.render.bind(this);
       this.unrender = renderer.unrender.bind(this);
     }
-    JLIcon._instances.set(this.name, this);
-    JLIcon._instances.set(this._className, this);
+    LabIcon._instances.set(this.name, this);
+    LabIcon._instances.set(this._className, this);
   }
 
   /**
@@ -291,7 +291,7 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
     title,
     tag = 'div',
     ...propsStyle
-  }: JLIcon.IProps = {}): HTMLElement {
+  }: LabIcon.IProps = {}): HTMLElement {
     // check if icon element is already set
     const maybeSvgElement = container?.firstChild as HTMLElement;
     if (maybeSvgElement?.dataset?.iconId === this._uuid) {
@@ -398,7 +398,7 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
           title,
           tag = 'div',
           ...propsStyle
-        }: JLIcon.IProps = {},
+        }: LabIcon.IProps = {},
         ref: React.RefObject<SVGElement>
       ) => {
         // set up component state via useState hook
@@ -456,7 +456,7 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
       }
     );
 
-    component.displayName = `JLIcon_${this.name}`;
+    component.displayName = `LabIcon_${this.name}`;
     return component;
   }
 
@@ -464,7 +464,7 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
     title,
     uuid
   }: { title?: string; uuid?: string } = {}): HTMLElement | null {
-    const svgElement = JLIcon.resolveSvg(this);
+    const svgElement = LabIcon.resolveSvg(this);
 
     if (!svgElement) {
       // bail on null svg element
@@ -511,9 +511,9 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
    * to the icon container's classes, while the style itself will be
    * applied to any svg elements within the container.
    */
-  readonly react: JLIcon.IReact;
+  readonly react: LabIcon.IReact;
 
-  readonly render: (container: HTMLElement, props?: JLIcon.IProps) => void;
+  readonly render: (container: HTMLElement, props?: LabIcon.IProps) => void;
   readonly unrender: (container: HTMLElement) => void;
 
   protected _className: string;
@@ -528,9 +528,9 @@ export class JLIcon implements JLIcon.IJLIcon, JLIcon.IRenderer {
 }
 
 /**
- * A namespace for JLIcon statics.
+ * A namespace for LabIcon statics.
  */
-export namespace JLIcon {
+export namespace LabIcon {
   /**************
    * interfaces *
    **************/
@@ -569,13 +569,13 @@ export namespace JLIcon {
   }
 
   /**
-   * The IJLIcon interface. Outside of this interface the actual
-   * implementation of JLIcon may vary
+   * The ILabIcon interface. Outside of this interface the actual
+   * implementation of LabIcon may vary
    */
-  export interface IJLIcon extends IIcon, IRenderer {}
+  export interface ILabIcon extends IIcon, IRenderer {}
 
   /**
-   * Interface defining the parameters to be passed to the JLIcon
+   * Interface defining the parameters to be passed to the LabIcon
    * constructor
    */
   export interface IOptions extends IIcon, Partial<IRenderer> {
@@ -583,7 +583,7 @@ export namespace JLIcon {
   }
 
   /**
-   * The input props for creating a new JLIcon
+   * The input props for creating a new LabIcon
    */
   export interface IProps extends IIconStyle {
     /**
@@ -621,19 +621,19 @@ export namespace JLIcon {
    *********/
 
   /**
-   * A type that can be resolved to a JLIcon instance.
+   * A type that can be resolved to a LabIcon instance.
    */
   export type IResolvable = string | (IIcon & Partial<IRenderer>);
 
   /**
    * The properties that can be passed into the React component stored in
-   * the .react field of a JLIcon.
+   * the .react field of a LabIcon.
    */
   export type IReactProps = IProps & React.RefAttributes<SVGElement>;
 
   /**
    * The complete type of the React component stored in the .react
-   * field of a JLIcon.
+   * field of a LabIcon.
    */
   export type IReact = React.ForwardRefExoticComponent<IReactProps>;
 
@@ -646,7 +646,7 @@ export namespace JLIcon {
    */
   export class Renderer implements IRenderer {
     constructor(
-      protected _icon: JLIcon,
+      protected _icon: LabIcon,
       protected _rendererOptions: IRendererOptions = {}
     ) {}
 
@@ -727,11 +727,11 @@ namespace Private {
 }
 
 // need to be at the bottom since constructor depends on Private
-export const badIcon = new JLIcon({
+export const badIcon = new LabIcon({
   name: 'ui-components:bad',
   svgstr: badSvgstr
 });
-export const blankIcon = new JLIcon({
+export const blankIcon = new LabIcon({
   name: 'ui-components:blank',
   svgstr: blankSvgstr
 });

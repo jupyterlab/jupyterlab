@@ -38,7 +38,7 @@ import {
   fileIcon,
   folderIcon,
   imageIcon,
-  JLIcon,
+  LabIcon,
   jsonIcon,
   markdownIcon,
   notebookIcon,
@@ -1180,7 +1180,7 @@ export namespace DocumentRegistry {
      * of an existing icon, or an object with {name, svgstr} fields, where
      * svgstr is a string containing the raw contents of an svg file.
      */
-    readonly icon?: JLIcon;
+    readonly icon?: LabIcon;
 
     /**
      * The icon class name for the file type.

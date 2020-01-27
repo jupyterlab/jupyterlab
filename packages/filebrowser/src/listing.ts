@@ -27,7 +27,7 @@ import {
   fileIcon,
   iconStyle,
   IIconStyle,
-  JLIcon
+  LabIcon
 } from '@jupyterlab/ui-components';
 
 import {
@@ -2128,7 +2128,7 @@ namespace Private {
         ...propsStyle
       });
     } else {
-      JLIcon.remove(container);
+      LabIcon.remove(container);
       container.className = HEADER_ITEM_ICON_CLASS;
     }
   }

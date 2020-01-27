@@ -21,13 +21,13 @@ const HEADER_TEMPLATE = `
 `;
 
 const ICON_IMPORTS_TEMPLATE = `
-import { JLIcon } from './jlicon';
+import { LabIcon } from './labicon';
 
 // icon svg import statements
 {{svgImportStatements}}
 
-// JLIcon instance construction
-{{jliconConstructions}}
+// LabIcon instance construction
+{{labiconConstructions}}
 `;
 
 const ICON_CSS_CLASSES_TEMPLATE = `
@@ -365,7 +365,7 @@ export async function ensureUiComponents(
 
   // build the per-icon import code
   let _svgImportStatements: string[] = [];
-  let _jliconConstructions: string[] = [];
+  let _labiconConstructions: string[] = [];
   svgPaths.forEach(svgPath => {
     const svgName = utils.stem(svgPath);
     const svgImportPath = path
@@ -379,26 +379,26 @@ export async function ensureUiComponents(
 
     if (dorequire) {
       // load the icon svg using `require`
-      _jliconConstructions.push(
-        `export const ${iconRef} = new JLIcon({ name: '${iconName}', svgstr: require('${svgImportPath}').default });`
+      _labiconConstructions.push(
+        `export const ${iconRef} = new LabIcon({ name: '${iconName}', svgstr: require('${svgImportPath}').default });`
       );
     } else {
       // load the icon svg using `import`
       _svgImportStatements.push(`import ${svgstrRef} from '${svgImportPath}';`);
 
-      _jliconConstructions.push(
-        `export const ${iconRef} = new JLIcon({ name: '${iconName}', svgstr: ${svgstrRef} });`
+      _labiconConstructions.push(
+        `export const ${iconRef} = new LabIcon({ name: '${iconName}', svgstr: ${svgstrRef} });`
       );
     }
   });
   const svgImportStatements = _svgImportStatements.join('\n');
-  const jliconConstructions = _jliconConstructions.join('\n');
+  const labiconConstructions = _labiconConstructions.join('\n');
 
   // generate the actual contents of the iconImports file
   const iconImportsPath = path.join(iconSrcDir, 'iconimports.ts');
   const iconImportsContents = utils.fromTemplate(
     HEADER_TEMPLATE + ICON_IMPORTS_TEMPLATE,
-    { funcName, svgImportStatements, jliconConstructions }
+    { funcName, svgImportStatements, labiconConstructions }
   );
   messages.push(...ensureFile(iconImportsPath, iconImportsContents, false));
 
