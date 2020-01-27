@@ -133,8 +133,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    * @param icon - either a string with the name of an existing icon
    * or an object with {name: string, svgstr: string} fields.
    *
-   * @returns a LabIcon instance, or null if an icon name was passed in
-   * and lookup fails.
+   * @returns a LabIcon instance
    */
   static resolve({ icon }: { icon: LabIcon.IResolvable }): LabIcon {
     if (icon instanceof LabIcon) {
@@ -157,6 +156,61 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
     // icon was provided as a non-LabIcon {name, svgstr} pair, communicating
     // an intention to create a new icon
     return new LabIcon(icon);
+  }
+
+  /**
+   * Resolve an icon name or a {name, svgstr} pair into a DOM element.
+   * If icon arg is undefined, the function will fall back to trying to render
+   * the icon as a CSS background image, via the iconClass arg.
+   * If both icon and iconClass are undefined, this function will return
+   * an empty div.
+   *
+   * @param icon - optional, either a string with the name of an existing icon
+   * or an object with {name: string, svgstr: string} fields.
+   *
+   * @param iconClass - optional, if the icon arg is not set, the iconClass arg
+   * should be a CSS class associated with an existing CSS background-image.
+   *
+   * @returns a DOM node with the resolved icon rendered into it
+   */
+  static resolveElement({
+    icon,
+    ...props
+  }: { icon?: LabIcon.IResolvable } & LabIcon.IProps) {
+    if (!icon) {
+      // try to render the icon as a css background image via iconClass
+      return Private.iconAsCssBackgroundElement(props);
+    }
+
+    return LabIcon.resolve({ icon }).element(props);
+  }
+
+  /**
+   * Resolve an icon name or a {name, svgstr} pair into a React component.
+   * If icon arg is undefined, the function will fall back to trying to render
+   * the icon as a CSS background image, via the iconClass arg.
+   * If both icon and iconClass are undefined, the returned component
+   * will simply render an empty div.
+   *
+   * @param icon - optional, either a string with the name of an existing icon
+   * or an object with {name: string, svgstr: string} fields.
+   *
+   * @param iconClass - optional, if the icon arg is not set, the iconClass arg
+   * should be a CSS class associated with an existing CSS background-image.
+   *
+   * @returns a React component that will render the resolved icon
+   */
+  static resolveReact({
+    icon,
+    ...props
+  }: { icon?: LabIcon.IResolvable } & LabIcon.IReactProps) {
+    if (!icon) {
+      // try to render the icon as a css background image via iconClass
+      return <Private.iconAsCssBackgroundReact {...props} />;
+    }
+
+    const resolved = LabIcon.resolve({ icon });
+    return <resolved.react {...props} />;
   }
 
   /**
@@ -369,7 +423,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
           tag = 'div',
           ...propsStyle
         }: LabIcon.IProps = {},
-        ref: React.RefObject<SVGElement>
+        ref: LabIcon.IReactRef
       ) => {
         // set up component state via useState hook
         const [, setId] = React.useState(this._uuid);
@@ -596,6 +650,11 @@ export namespace LabIcon {
   export type IResolvable = string | (IIcon & Partial<IRenderer>);
 
   /**
+   * The type of the svg node ref that can be passed into icon React components
+   */
+  export type IReactRef = React.RefObject<SVGElement>;
+
+  /**
    * The properties that can be passed into the React component stored in
    * the .react field of a LabIcon.
    */
@@ -674,19 +733,14 @@ export namespace LabIcon {
 }
 
 namespace Private {
-  // see https://stackoverflow.com/a/54178819/425458
-  type RequiredBy<T, K extends keyof T> = Omit<T, K> & Required<Pick<T, K>>;
-  // same as normal IProps, but className is required
-  type IPropsCssBackround = RequiredBy<LabIcon.IProps, 'className'>;
-
   export function iconAsCssBackgroundElement({
-    className,
+    className = '',
     container,
     label,
     title,
     tag = 'div',
     ...propsStyle
-  }: IPropsCssBackround): HTMLElement {
+  }: LabIcon.IProps): HTMLElement {
     if (container?.className === className) {
       // nothing needs doing, return the icon node
       return container;
@@ -712,14 +766,14 @@ namespace Private {
   export const iconAsCssBackgroundReact = React.forwardRef(
     (
       {
-        className,
+        className = '',
         container,
         label,
         title,
         tag = 'div',
         ...propsStyle
-      }: IPropsCssBackround,
-      ref: React.RefObject<HTMLDivElement>
+      }: LabIcon.IProps,
+      ref: LabIcon.IReactRef
     ) => {
       // make it so that tag can be used as a jsx component
       const Tag = tag;
@@ -729,8 +783,10 @@ namespace Private {
 
         return <></>;
       } else {
+        // if ref is defined, we create a blank svg node and point ref to it
         return (
-          <Tag className={classes(className, iconStyle(propsStyle))} ref={ref}>
+          <Tag className={classes(className, iconStyle(propsStyle))}>
+            {ref && blankIcon.react({ ref })}
             {label}
           </Tag>
         );
