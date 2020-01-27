@@ -356,6 +356,7 @@ function containerCSS(props: IIconStyle): NestedCSSProperties {
  */
 export const iconStyle = (props?: IIconStyle): string => {
   if (!props || Object.keys(props).length === 0) {
+    // props is empty
     return '';
   }
 

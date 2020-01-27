@@ -1,5 +1,5 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-NotebookIcon",
+  "jupyter.lab.setting-icon": "ui-components:notebook",
   "jupyter.lab.setting-icon-label": "Notebook",
   "jupyter.lab.shortcuts": [
     {

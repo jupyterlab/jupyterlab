@@ -193,6 +193,12 @@ namespace Private {
    * The JupyterLab plugin schema key for the setting editor
    * icon class of a plugin.
    */
+  const ICON_KEY = 'jupyter.lab.setting-icon';
+
+  /**
+   * The JupyterLab plugin schema key for the setting editor
+   * icon class of a plugin.
+   */
   const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
 
   /**
@@ -259,26 +265,29 @@ namespace Private {
     const items = plugins.map(plugin => {
       const { id, schema, version } = plugin;
       const itemTitle = `${schema.description}\n${id}\n${version}`;
+      const icon = getHint(ICON_KEY, registry, plugin);
       const iconClass = getHint(ICON_CLASS_KEY, registry, plugin);
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
 
-      return (
-        <li
-          className={id === selection ? 'jp-mod-selected' : ''}
-          data-id={id}
-          key={id}
-          title={itemTitle}
-        >
-          <LabIcon.UNSTABLE_getReact
-            name={iconClass}
-            fallback={settingsIcon}
-            title={iconTitle}
-            tag="span"
-            kind="settingsEditor"
-          />
-          <span>{schema.title || id}</span>
-        </li>
-      );
+      if (icon)
+        return (
+          <li
+            className={id === selection ? 'jp-mod-selected' : ''}
+            data-id={id}
+            key={id}
+            title={itemTitle}
+          >
+            <LabIcon.UNSTABLE_getReact
+              name={icon}
+              fallback={settingsIcon}
+              className={iconClass}
+              title={iconTitle}
+              tag="span"
+              kind="settingsEditor"
+            />
+            <span>{schema.title || id}</span>
+          </li>
+        );
     });
 
     ReactDOM.unmountComponentAtNode(node);
