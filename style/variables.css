@@ -3,41 +3,69 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-DebuggerVariables header .jp-Toolbar {
-  margin-left: auto;
-}
-
 .jp-DebuggerVariables-body {
   min-height: 24px;
   overflow: auto;
 }
 
+.jp-DebuggerVariables-body ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jp-DebuggerVariables-body ul li {
+  padding: 5px;
+  cursor: pointer;
+  color: var(--jp-content-font-color1);
+}
+
+.jp-DebuggerVariables-body ul li .caret {
+  display: inline-block;
+  color: var(--jp-content-font-color2);
+  font-size: 12px;
+  margin-right: 3px;
+  user-select: none;
+}
+
+.jp-DebuggerVariables header .jp-Toolbar {
+  margin-left: auto;
+}
+
+.jp-debugger-details table,
 .jp-DebuggerVariables-body table {
   width: 100%;
   border-spacing: 0px;
 }
 
+.jp-debugger-details table tbody,
+.jp-debugger-details table thead,
 .jp-DebuggerVariables-body table tbody,
 .jp-DebuggerVariables-body table thead {
   background: var(--jp-layout-color2);
   text-align: left;
 }
 
+.jp-debugger-details table tbody tr:nth-child(2n + 1),
 .jp-DebuggerVariables-body table tbody tr:nth-child(2n + 1) {
   background-color: var(--jp-layout-color1);
 }
 
-.jp-DebuggerVariables-body table tbody td,
+.jp-debugger-details table tbody td,
+.jp-debugger-details table thead th .jp-DebuggerVariables-body table tbody td,
 .jp-DebuggerVariables-body table thead th {
   padding: 5px;
   border-right: 1px solid var(--jp-layout-color3);
 }
 
+.jp-debugger-details table tbody td:last-child,
+.jp-debugger-details table thead th:last-child,
 .jp-DebuggerVariables-body table tbody td:last-child,
 .jp-DebuggerVariables-body table thead th:last-child {
   border-right: none;
 }
 
+.jp-debugger-details table tbody td.selected,
 .jp-DebuggerVariables-body table tbody td.selected {
   color: white;
   background: var(--jp-brand-color1);

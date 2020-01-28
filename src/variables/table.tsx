@@ -11,8 +11,10 @@ import React, { useEffect, useState } from 'react';
 
 import { VariablesModel } from './model';
 
+import { Variables } from '.';
+
 /**VariablesComponent
- * The body for a Va    console.log({ self });riables Panel.
+ * The body for a Variables Panel.
  */
 export class VariablesBodyTable extends ReactWidget {
   /**
@@ -23,6 +25,7 @@ export class VariablesBodyTable extends ReactWidget {
     super();
     this._model = options.model;
     this._service = options.service;
+    this._commands = options.commands;
     this.addClass('jp-DebuggerVariables-body');
     this._model.changed.connect(this.updateScopes, this);
   }
@@ -45,8 +48,8 @@ export class VariablesBodyTable extends ReactWidget {
           <VariablesComponent
             key={scope.name}
             data={scope.variables}
-            model={this._model}
             service={this._service}
+            commands={this._commands}
           />
         ))}
       </>
@@ -56,19 +59,50 @@ export class VariablesBodyTable extends ReactWidget {
   private _model: VariablesModel;
   private _service: IDebugger;
   private _scopes: VariablesModel.IScope[] = [];
+  private _commands: Variables.ICommands;
+}
+
+export class VariableTest extends ReactWidget {
+  constructor(options: VariablesTest.IOptions) {
+    super();
+    const { details, service, commands, model } = options;
+    this._variables = details;
+    this._service = service;
+    this._commands = commands;
+    this._model = model;
+    this._model.changed.connect(this.updateScopes, this);
+  }
+
+  private updateScopes(self: VariablesModel) {
+    this.dispose();
+  }
+
+  render() {
+    return (
+      <VariablesComponent
+        data={this._variables}
+        service={this._service}
+        commands={this._commands}
+      />
+    );
+  }
+
+  private _variables: VariablesModel.IVariable[] = [];
+  private _service: IDebugger;
+  private _commands: Variables.ICommands;
+  private _model: VariablesModel;
 }
 
 const VariablesComponent = ({
   data,
-  model,
-  service
+  service,
+  commands
 }: {
   data: VariablesModel.IVariable[];
-  model: VariablesModel;
   service: IDebugger;
+  commands?: Variables.ICommands;
 }) => {
   const [variables, setVariables] = useState(data);
-  const [details, setDetials] = useState(null);
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
@@ -78,12 +112,13 @@ const VariablesComponent = ({
   const onClickVariable = async (variable: VariablesModel.IVariable) => {
     if (selected === variable) {
       setSelected(null);
-      setDetials(null);
       return;
     }
-    const variableDetials = await service.getVariableDetails(variable);
     setSelected(variable);
-    setDetials(variableDetials);
+    await commands.registry.execute(commands.details, {
+      variableReference: variable.variablesReference,
+      title: variable.evaluateName
+    });
   };
 
   const Tbody = (variables: VariablesModel.IVariable[]) => (
@@ -103,105 +138,19 @@ const VariablesComponent = ({
     </tbody>
   );
 
-  const onClose = () => {
-    setDetials(null);
-    setSelected(null);
-  };
-
   return (
-    <>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        {Tbody(variables)}
-      </table>
-      {details && (
-        <VariablesComponentDetails
-          selected={selected}
-          data={details}
-          onClose={onClose}
-          service={service}
-          model={model}
-        />
-      )}
-    </>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      {Tbody(variables)}
+    </table>
   );
 };
-
-const VariablesComponentDetails = (props: any) => {
-  console.log({ props });
-  useEffect(() => {
-    dragElement(document.getElementById(`test-${props.selected.evaluateName}`));
-  }, []);
-
-  return (
-    <div
-      id={`test-${props.selected.evaluateName}`}
-      className={'jp-detailsVariable-box'}
-    >
-      <div id={'header'}>
-        <span>{`${props.selected.evaluateName}-${convertType(
-          props.selected as VariablesModel.IVariable
-        )}`}</span>
-      </div>
-      <div>
-        <VariablesComponent
-          data={props.data}
-          model={props.model}
-          service={props.service}
-        />
-      </div>
-      <button onClick={props.onClose}>Close</button>
-    </div>
-  );
-};
-
-function dragElement(elmnt: HTMLElement) {
-  if (!elmnt) {
-    return;
-  }
-  let pos1 = 0;
-  let pos2 = 0;
-  let pos3 = 0;
-  let pos4 = 0;
-  if (document.getElementById(elmnt.id)) {
-    document.getElementById(elmnt.id).onmousedown = dragMouseDown;
-  } else {
-    elmnt.onmousedown = dragMouseDown;
-  }
-
-  function dragMouseDown(e: MouseEvent) {
-    e.stopPropagation();
-    e.preventDefault();
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    document.onmouseup = closeDragElement;
-    document.onmousemove = elementDrag;
-  }
-
-  function elementDrag(e: MouseEvent) {
-    e.stopPropagation();
-    e.preventDefault();
-    pos1 = pos3 - e.clientX;
-    pos2 = pos4 - e.clientY;
-    pos3 = e.clientX;
-    pos4 = e.clientY;
-    // set the element's new position:
-    elmnt.style.top = elmnt.offsetTop - pos2 + 'px';
-    elmnt.style.left = elmnt.offsetLeft - pos1 + 'px';
-  }
-
-  function closeDragElement() {
-    /* stop moving when mouse button is released:*/
-    document.onmouseup = null;
-    document.onmousemove = null;
-  }
-}
 
 /**
  * Convert a variable to a primitive type.
@@ -228,5 +177,15 @@ namespace VariablesBodyTable {
   export interface IOptions {
     model: VariablesModel;
     service: IDebugger;
+    commands: Variables.ICommands;
+  }
+}
+
+namespace VariablesTest {
+  export interface IOptions {
+    model?: VariablesModel;
+    service: IDebugger;
+    details: VariablesModel.IVariable[];
+    commands: Variables.ICommands;
   }
 }

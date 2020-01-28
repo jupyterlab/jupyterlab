@@ -384,10 +384,10 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param variable variable
    */
   async getVariableDetails(
-    variable: DebugProtocol.Variable
+    variablesReference: number
   ): Promise<DebugProtocol.Variable[]> {
     const reply = await this.session.sendRequest('variables', {
-      variablesReference: variable.variablesReference
+      variablesReference
     });
     return reply.body.variables;
   }

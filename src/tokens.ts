@@ -128,7 +128,7 @@ export interface IDebugger {
    * @param variable variable
    */
   getVariableDetails(
-    variable: DebugProtocol.Variable
+    variablesReference: number
   ): Promise<DebugProtocol.Variable[]>;
 
   /**

@@ -39,7 +39,12 @@ export namespace Debugger {
       this.title.iconClass = 'jp-BugIcon jp-SideBar-tabIcon';
       this.addClass('jp-DebuggerSidebar');
 
-      const { callstackCommands, editorServices, service } = options;
+      const {
+        variableCommands,
+        callstackCommands,
+        editorServices,
+        service
+      } = options;
 
       this.model = new DebuggerModel();
       this.service = service as DebuggerService;
@@ -47,6 +52,7 @@ export namespace Debugger {
 
       this.variables = new Variables({
         model: this.model.variables,
+        commands: variableCommands,
         service
       });
 
@@ -149,6 +155,11 @@ export namespace Debugger {
        * The callstack toolbar commands.
        */
       callstackCommands: Callstack.ICommands;
+
+      /**
+       * The variable commands.
+       */
+      variableCommands: Variables.ICommands;
 
       /**
        * The editor services.

@@ -1,18 +1,21 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CommandRegistry } from '@lumino/commands';
+
 import { IDebugger } from '../tokens';
 
 import { Panel, Widget } from '@lumino/widgets';
-
-import { VariablesBody } from './body';
 
 import { VariablesBodyTable } from './table';
 
 import { VariablesHeader } from './header';
 
 import { ToolbarButton } from '@jupyterlab/apputils';
+
 import { VariablesModel } from './model';
+
+import { VariablesBodyTree } from './tree';
 
 /**
  * A Panel to show a variable explorer.
@@ -25,12 +28,13 @@ export class Variables extends Panel {
   constructor(options: Variables.IOptions) {
     super();
 
-    const { model, service } = options;
+    const { model, service, commands } = options;
 
     this._header = new VariablesHeader();
-    this._tree = new VariablesBody(model);
-    this._table = new VariablesBodyTable({ model, service });
+    this._tree = new VariablesBodyTree({ model, service });
+    this._table = new VariablesBodyTable({ model, service, commands });
     this._table.hide();
+    // this.node.setAttribute('data-jp-table', 'true');
 
     const onClick = () => {
       if (this._table.isHidden) {
@@ -80,6 +84,7 @@ export class Variables extends Panel {
   private _resizeBody(msg: Widget.ResizeMessage) {
     const height = msg.height - this._header.node.offsetHeight;
     this._table.node.style.height = `${height}px`;
+    this._tree.node.style.height = `${height}px`;
   }
 }
 
@@ -87,6 +92,12 @@ export class Variables extends Panel {
  * A namespace for Variables `statics`.
  */
 export namespace Variables {
+  export interface ICommands {
+    registry: CommandRegistry;
+
+    details: string;
+  }
+
   /**
    * Instantiation options for `Variables`.
    */
@@ -99,5 +110,7 @@ export namespace Variables {
      * The debugger service.
      */
     service: IDebugger;
+
+    commands: ICommands;
   }
 }
