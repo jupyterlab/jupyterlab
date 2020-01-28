@@ -391,6 +391,7 @@
       "@jupyterlab/test-statedb": "../tests/test-statedb",
       "@jupyterlab/test-statusbar": "../tests/test-statusbar",
       "@jupyterlab/test-terminal": "../tests/test-terminal",
+      "@jupyterlab/test-ui-components": "../tests/test-ui-components",
       "@jupyterlab/testutils": "../testutils",
       "@jupyterlab/mock-extension": "../jupyterlab/tests/mock_packages/extension"
     }

@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/ui-components",
+  "name": "@jupyterlab/test-ui-components",
   "version": "2.0.0-beta.3",
   "private": true,
   "scripts": {

@@ -9,7 +9,7 @@
   "include": ["src/*"],
   "references": [
     {
-      "path": "../../packages/test-ui-components"
+      "path": "../../packages/ui-components"
     }
   ]
 }
