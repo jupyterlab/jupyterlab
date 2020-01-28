@@ -486,16 +486,25 @@ function addCommands(
           buttons: [Dialog.okButton()]
         });
       }
-      return showDialog({
-        title: `Reload ${type} from Disk`,
-        body: `Are you sure you want to reload
+      if (context.model.dirty) {
+        return showDialog({
+          title: `Reload ${type} from Disk`,
+          body: `Are you sure you want to reload
           the ${type} from the disk?`,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Reload' })]
-      }).then(result => {
-        if (result.button.accept && !context.isDisposed) {
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.warnButton({ label: 'Reload' })
+          ]
+        }).then(result => {
+          if (result.button.accept && !context.isDisposed) {
+            return context.revert();
+          }
+        });
+      } else {
+        if (!context.isDisposed) {
           return context.revert();
         }
-      });
+      }
     }
   });
 
