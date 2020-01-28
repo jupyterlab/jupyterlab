@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "build",
+    "rootDir": "src",
+    "types": ["jest"],
+    "composite": false
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../../packages/test-ui-components"
+    }
+  ]
+}

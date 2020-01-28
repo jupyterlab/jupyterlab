@@ -40,7 +40,6 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
     if (LabIcon._debug) {
       // fail noisily
       console.error(`Invalid icon name: ${name}`);
-      return badIcon;
     }
 
     // fail silently
