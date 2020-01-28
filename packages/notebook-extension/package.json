@@ -44,6 +44,7 @@
     "@jupyterlab/docmanager": "^3.0.0-alpha.14",
     "@jupyterlab/filebrowser": "^3.0.0-alpha.14",
     "@jupyterlab/launcher": "^3.0.0-alpha.14",
+    "@jupyterlab/logconsole": "^3.0.0-alpha.14",
     "@jupyterlab/mainmenu": "^3.0.0-alpha.14",
     "@jupyterlab/nbformat": "^3.0.0-alpha.14",
     "@jupyterlab/notebook": "^3.0.0-alpha.14",

@@ -22,16 +22,10 @@
       "path": "../mainmenu"
     },
     {
-      "path": "../nbformat"
-    },
-    {
       "path": "../notebook"
     },
     {
       "path": "../rendermime"
-    },
-    {
-      "path": "../services"
     },
     {
       "path": "../settingregistry"

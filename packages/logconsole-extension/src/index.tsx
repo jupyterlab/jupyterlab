@@ -54,8 +54,6 @@ import { DockLayout, Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 
-import { logNotebookOutput } from './nboutput';
-
 import { LogConsoleStatus } from './status';
 
 const LOG_CONSOLE_PLUGIN_ID = '@jupyterlab/logconsole-extension:plugin';
@@ -424,4 +422,4 @@ export class LogLevelSwitcher extends ReactWidget {
   private _id = `level-${UUID.uuid4()}`;
 }
 
-export default [logConsolePlugin, logNotebookOutput];
+export default logConsolePlugin;
