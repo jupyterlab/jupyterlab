@@ -32,11 +32,8 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    * @returns A LabIcon instance
    */
   private static _get(name: string, fallback?: LabIcon): LabIcon | undefined {
-    // TODO: remove name-might-actually-be-className shim here
-    for (let className of name.split(/\s+/)) {
-      if (LabIcon._instances.has(className)) {
-        return LabIcon._instances.get(className);
-      }
+    if (LabIcon._instances.has(name)) {
+      return LabIcon._instances.get(name);
     }
 
     // lookup failed
@@ -62,14 +59,24 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
     fallback,
     ...props
   }: { name: string; fallback?: LabIcon } & LabIcon.IReactProps) {
-    const icon = LabIcon._get(name, fallback);
-    if (!icon) {
-      props.className = classes(name, props.className);
+    for (let className of name.split(/\s+/)) {
+      if (LabIcon._instances.has(className)) {
+        const icon = LabIcon._instances.get(className)!;
+        return <icon.react {...props} />;
+      }
+    }
+
+    // lookup failed if execution reached here
+    if (LabIcon._debug) {
+      // fail noisily
+      console.error(`Invalid icon name: ${name}`);
+      return <badIcon.react {...props} />;
+    } else if (fallback) {
+      return <fallback.react {...props} />;
+    } else {
       // try to render the icon as a css background image via iconClass
       return <Private.iconAsCssBackgroundReact {...props} />;
     }
-
-    return <icon.react {...props} />;
   }
 
   /**

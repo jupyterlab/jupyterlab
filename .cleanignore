@@ -20,4 +20,5 @@
 @.idea/
 
 # ms IDE stuff
+@*.code-workspace
 @.vscode
