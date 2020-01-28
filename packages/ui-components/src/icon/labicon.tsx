@@ -108,7 +108,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    *
    * @returns a LabIcon instance
    */
-  static resolve({ icon }: { icon: LabIcon.IResolvable }): LabIcon {
+  static resolve({ icon }: LabIcon.IResolverProps): LabIcon {
     if (icon instanceof LabIcon) {
       // icon already is a LabIcon; nothing to do here
       return icon;
@@ -152,8 +152,9 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
   static resolveElement({
     icon,
     iconClass,
+    fallback,
     ...props
-  }: { icon?: LabIcon.IResolvable; iconClass?: string } & LabIcon.IProps) {
+  }: Partial<LabIcon.IResolverProps> & LabIcon.IProps) {
     // combine iconClass with any class from the props
     props.className = classes(iconClass, props.className);
 
@@ -186,8 +187,9 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
   static resolveReact({
     icon,
     iconClass,
+    fallback,
     ...props
-  }: { icon?: LabIcon.IResolvable; iconClass?: string } & LabIcon.IReactProps) {
+  }: Partial<LabIcon.IResolverProps> & LabIcon.IReactProps) {
     // combine iconClass with any class from the props
     props.className = classes(iconClass, props.className);
 
@@ -625,6 +627,12 @@ export namespace LabIcon {
      * Optional title that will be set on the icon's outermost container node
      */
     title?: string;
+  }
+
+  export interface IResolverProps {
+    icon: LabIcon.IResolvable;
+    iconClass?: string;
+    fallback?: LabIcon;
   }
 
   /*********
