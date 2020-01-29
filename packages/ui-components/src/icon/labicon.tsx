@@ -215,7 +215,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
     ...props
   }: { name: string; fallback?: LabIcon } & LabIcon.IReactProps) {
     for (let className of name.split(/\s+/)) {
-      if (LabIcon._instances.has(className)) {
+      if (LabIcon._instancesByNameAndClassName.has(className)) {
         const icon = LabIcon._instances.get(className)!;
         return <icon.react {...props} />;
       }
@@ -251,6 +251,9 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
 
   private static _debug: boolean = false;
   private static _instances = new Map<string, LabIcon>();
+
+  // TODO: remove this along with UNSTABLE_getReact
+  private static _instancesByNameAndClassName = new Map<string, LabIcon>();
 
   /***********
    * members *
@@ -311,7 +314,10 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
       this.unrender = renderer.unrender.bind(this);
     }
     LabIcon._instances.set(this.name, this);
-    LabIcon._instances.set(this._className, this);
+
+    // TODO: remove along with UNSTABLE_getReact
+    LabIcon._instancesByNameAndClassName.set(this.name, this);
+    LabIcon._instancesByNameAndClassName.set(this._className, this);
   }
 
   /**
