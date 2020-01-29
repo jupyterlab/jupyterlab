@@ -9,7 +9,6 @@ var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
-var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
 var BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
 
@@ -123,7 +122,7 @@ function ignored(path) {
 }
 
 const plugins = [
-  new DuplicatePackageCheckerPlugin({
+  new WPPlugin.NowatchDuplicatePackageCheckerPlugin({
     verbose: true,
     exclude(instance) {
       // ignore known duplicates
@@ -138,7 +137,6 @@ const plugins = [
     title: jlab.name || 'JupyterLab'
   }),
   new webpack.HashedModuleIdsPlugin(),
-
   // custom plugin for ignoring files during a `--watch` build
   new WPPlugin.FilterWatchIgnorePlugin(ignored),
   // custom plugin that copies the assets to the static directory
@@ -224,9 +222,6 @@ module.exports = [
     bail: true,
     devtool: 'inline-source-map',
     externals: ['node-fetch', 'ws'],
-    plugins,
-    stats: {
-      chunkModules: true
-    }
+    plugins
   }
 ].concat(extraConfig);
