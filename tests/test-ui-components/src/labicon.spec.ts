@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { LabIcon } from '@jupyterlab/ui-components';
 
-import fooSvgstr from '../style/foo.svg';
+import fooSvgstr from '../svg/foo.svg';
 const fooIcon = new LabIcon({
   name: 'test-ui-components:foo',
   svgstr: fooSvgstr
