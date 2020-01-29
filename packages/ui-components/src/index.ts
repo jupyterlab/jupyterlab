@@ -4,6 +4,5 @@
 export * from './blueprint';
 export * from './components';
 export * from './icon';
-export * from './style';
 export * from './tokens';
 export * from './utils';

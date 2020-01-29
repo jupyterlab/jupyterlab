@@ -5,7 +5,7 @@ import { hpass, VirtualElement } from '@lumino/virtualdom';
 import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
 import { closeIcon } from './iconimports';
-import { iconStyle } from '../style/icon';
+import { iconStyle } from '../style';
 import { classes } from '../utils';
 
 /**

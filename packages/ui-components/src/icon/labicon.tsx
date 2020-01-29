@@ -50,7 +50,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    *
    * @returns a LabIcon instance
    */
-  static resolve({ icon }: LabIcon.IResolverProps): LabIcon {
+  static resolve({ icon }: { icon: LabIcon.IResolvable }): LabIcon {
     if (icon instanceof LabIcon) {
       // icon already is a LabIcon; nothing to do here
       return icon;
@@ -232,6 +232,21 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
       // try to render the icon as a css background image via iconClass
       return <Private.blankReact {...props} />;
     }
+  }
+
+  /**
+   * UNSTABLE - only exists for handling 2 special cases
+   *
+   * TODO: Fix the remaining cases that rely on this and then
+   *   remove this method:
+   *     - shell.ts in application
+   *     - widget.tsx in extensionmanager
+   */
+  static UNSTABLE_style({
+    className,
+    ...props
+  }: { className?: string } & IIconStyle) {
+    return classes(className, iconStyle(props));
   }
 
   private static _debug: boolean = false;
@@ -515,6 +530,8 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    * @param tag - if container is not explicitly
    * provided, this tag will be used when creating the container
    *
+   * @param ref - forwarded to the ref prop of the icon's svg element
+   *
    * @param propsStyle - style parameters that get passed to TypeStyle in
    * order to generate a style class. The style class will be added
    * to the icon container's classes, while the style itself will be
@@ -626,7 +643,7 @@ export namespace LabIcon {
   }
 
   export interface IResolverProps {
-    icon: LabIcon.IResolvable;
+    icon?: LabIcon.IResolvable;
     iconClass?: string;
     fallback?: LabIcon;
   }

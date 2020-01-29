@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { LabIcon } from '../..//ui-components/icon';
+import { LabIcon } from '../../ui-components';
 
 describe('@jupyterlab/nbformat', () => {
   describe('validateIcons', () => {
