@@ -243,7 +243,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     if (this.isStarted || autoStart) {
-      this._changeTitleName();
+      this._changeTitle();
     }
 
     this._model.breakpoints.restoreBreakpoints(bpMap);
@@ -386,7 +386,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Emit session which have set enabled debugging
    */
-  private _changeTitleName() {
+  private _changeTitle() {
     const title = this.isStarted ? this.session?.connection?.name : '-';
     this._model.header.title = title;
   }

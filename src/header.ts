@@ -1,6 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { PanelLayout, Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -13,21 +13,11 @@ export class SidebarHeader extends Widget {
    * @param model The SidebarHeaderModel needed to Instantiate a new SidebarHeader.
    */
   constructor(model: SidebarHeaderModel) {
-    super({ node: document.createElement('header') });
-
-    const title = new Widget({
-      node: document.createElement('h2')
-    });
-    title.node.textContent = '-';
-    title.addClass('jp-left-truncated');
+    super({ node: Private.createHeader() });
 
     model.changedTitle.connect((_, currentConnection) => {
-      title.node.textContent = currentConnection;
+      this.node.querySelector('h2').textContent = currentConnection;
     });
-
-    const layout = new PanelLayout();
-    this.layout = layout;
-    layout.addWidget(title);
   }
 }
 
@@ -59,4 +49,20 @@ export class SidebarHeaderModel {
 
   private _title = '-';
   private _changedTitle = new Signal<this, string>(this);
+}
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  export function createHeader(): HTMLElement {
+    const header = document.createElement('header');
+    const title = document.createElement('h2');
+
+    title.textContent = '-';
+    title.classList.add('jp-left-truncated');
+    header.appendChild(title);
+
+    return header;
+  }
 }
