@@ -269,25 +269,24 @@ namespace Private {
       const iconClass = getHint(ICON_CLASS_KEY, registry, plugin);
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
 
-      if (icon)
-        return (
-          <li
-            className={id === selection ? 'jp-mod-selected' : ''}
-            data-id={id}
-            key={id}
-            title={itemTitle}
-          >
-            <LabIcon.resolveReact
-              icon={icon}
-              iconClass={iconClass}
-              fallback={settingsIcon}
-              title={iconTitle}
-              tag="span"
-              kind="settingsEditor"
-            />
-            <span>{schema.title || id}</span>
-          </li>
-        );
+      return (
+        <li
+          className={id === selection ? 'jp-mod-selected' : ''}
+          data-id={id}
+          key={id}
+          title={itemTitle}
+        >
+          <LabIcon.resolveReact
+            icon={icon}
+            iconClass={iconClass}
+            fallback={settingsIcon}
+            title={iconTitle}
+            tag="span"
+            kind="settingsEditor"
+          />
+          <span>{schema.title || id}</span>
+        </li>
+      );
     });
 
     ReactDOM.unmountComponentAtNode(node);
