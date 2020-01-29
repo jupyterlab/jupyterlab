@@ -497,13 +497,11 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     >
       <LabIcon.resolveReact
         icon={props.icon}
-        iconClass={props.iconClass}
-        className={
-          // if props.icon is unset, add extra classes for proper support of icon-as-css-background
-          props.icon
-            ? 'jp-ToolbarButtonComponent-icon'
-            : classes('jp-ToolbarButtonComponent-icon', 'jp-Icon', 'jp-Icon-16')
+        iconClass={
+          // add some extra classes for proper support of icons-as-css-backgorund
+          classes(props.iconClass, 'jp-Icon', 'jp-Icon-16')
         }
+        className="jp-ToolbarButtonComponent-icon"
         tag="span"
         justify="center"
         kind="toolbarButton"

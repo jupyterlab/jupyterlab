@@ -277,21 +277,14 @@ namespace Private {
             key={id}
             title={itemTitle}
           >
-            {!(icon || iconClass) ? (
-              <settingsIcon.react
-                title={iconTitle}
-                tag="span"
-                kind="settingsEditor"
-              />
-            ) : (
-              <LabIcon.resolveReact
-                icon={icon}
-                iconClass={iconClass}
-                title={iconTitle}
-                tag="span"
-                kind="settingsEditor"
-              />
-            )}
+            <LabIcon.resolveReact
+              icon={icon}
+              iconClass={iconClass}
+              fallback={settingsIcon}
+              title={iconTitle}
+              tag="span"
+              kind="settingsEditor"
+            />
             <span>{schema.title || id}</span>
           </li>
         );

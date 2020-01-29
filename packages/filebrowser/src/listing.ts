@@ -1834,22 +1834,15 @@ export namespace DirListing {
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       // render the file item's icon
-      const iconProps: LabIcon.IProps = {
+      LabIcon.resolveElement({
+        icon: fileType?.icon,
+        iconClass: fileType?.iconClass,
+        fallback: fileIcon,
         container: iconContainer,
         className: ITEM_ICON_CLASS,
         justify: 'center',
         kind: 'listing'
-      };
-      if (!(fileType?.icon || fileType?.iconClass)) {
-        // no icon set on fileType, fall back to default file icon
-        fileIcon.element(iconProps);
-      } else {
-        LabIcon.resolveElement({
-          icon: fileType.icon,
-          iconClass: fileType.iconClass,
-          ...iconProps
-        });
-      }
+      });
 
       let hoverText = 'Name: ' + model.name;
       // add file size to pop up if its available

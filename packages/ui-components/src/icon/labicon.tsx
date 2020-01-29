@@ -22,63 +22,6 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    ***********/
 
   /**
-   * Get any existing LabIcon instance by name.
-   *
-   * @param name - name of the LabIcon instance to fetch
-   *
-   * @param fallback - optional default LabIcon instance to use if
-   * name is not found
-   *
-   * @returns A LabIcon instance
-   */
-  private static _get(name: string, fallback?: LabIcon): LabIcon | undefined {
-    if (LabIcon._instances.has(name)) {
-      return LabIcon._instances.get(name);
-    }
-
-    // lookup failed
-    if (LabIcon._debug) {
-      // fail noisily
-      console.error(`Invalid icon name: ${name}`);
-    }
-
-    // fail silently
-    return fallback;
-  }
-
-  /**
-   * UNSTABLE - only exists for handling a single special case
-   *
-   * TODO: Fix the remaining case that relies on this and then
-   *   remove this method:
-   *     - index.tsx in launcher
-   */
-  static UNSTABLE_getReact({
-    name,
-    fallback,
-    ...props
-  }: { name: string; fallback?: LabIcon } & LabIcon.IReactProps) {
-    for (let className of name.split(/\s+/)) {
-      if (LabIcon._instances.has(className)) {
-        const icon = LabIcon._instances.get(className)!;
-        return <icon.react {...props} />;
-      }
-    }
-
-    // lookup failed if execution reached here
-    if (LabIcon._debug) {
-      // fail noisily
-      console.error(`Invalid icon name: ${name}`);
-      return <badIcon.react {...props} />;
-    } else if (fallback) {
-      return <fallback.react {...props} />;
-    } else {
-      // try to render the icon as a css background image via iconClass
-      return <Private.iconAsCssBackgroundReact {...props} />;
-    }
-  }
-
-  /**
    * Remove any rendered icon from the element that contains it
    *
    * @param container - a DOM node into which an icon was
@@ -115,9 +58,17 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
 
     if (typeof icon === 'string') {
       // do a dynamic lookup of existing icon by name
-      const resolved = LabIcon._get(icon);
+      const resolved = LabIcon._instances.get(icon);
       if (resolved) {
         return resolved;
+      }
+
+      // lookup failed
+      if (LabIcon._debug) {
+        // fail noisily
+        console.warn(
+          `Lookup failed for icon, creating loading icon. icon: ${icon}`
+        );
       }
 
       // no matching icon currently registered, create a new loading icon
@@ -138,10 +89,13 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    * an empty div.
    *
    * @param icon - optional, either a string with the name of an existing icon
-   * or an object with {name: string, svgstr: string} fields.
+   * or an object with {name: string, svgstr: string} fields
    *
    * @param iconClass - optional, if the icon arg is not set, the iconClass arg
-   * should be a CSS class associated with an existing CSS background-image.
+   * should be a CSS class associated with an existing CSS background-image
+   *
+   * @param fallback - optional, a LabIcon instance that will be used if
+   * neither icon nor iconClass are defined
    *
    * @param props - any additional args are passed though to the element method
    * of the resolved icon on render
@@ -154,12 +108,16 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
     fallback,
     ...props
   }: Partial<LabIcon.IResolverProps> & LabIcon.IProps) {
-    // combine iconClass with any class from the props
-    props.className = classes(iconClass, props.className);
-
     if (!icon) {
-      // try to render the icon as a css background image via iconClass
-      return Private.iconAsCssBackgroundElement(props);
+      if (!iconClass && fallback) {
+        // if neither icon nor iconClass are defined, use fallback
+        return fallback.element(props);
+      }
+
+      // set the icon's class to iconClass plus props.className
+      props.className = classes(iconClass, props.className);
+      // render icon as css background image, assuming one is set on iconClass
+      return Private.blankElement(props);
     }
 
     return LabIcon.resolve({ icon }).element(props);
@@ -173,10 +131,13 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    * will simply render an empty div.
    *
    * @param icon - optional, either a string with the name of an existing icon
-   * or an object with {name: string, svgstr: string} fields.
+   * or an object with {name: string, svgstr: string} fields
    *
    * @param iconClass - optional, if the icon arg is not set, the iconClass arg
-   * should be a CSS class associated with an existing CSS background-image.
+   * should be a CSS class associated with an existing CSS background-image
+   *
+   * @param fallback - optional, a LabIcon instance that will be used if
+   * neither icon nor iconClass are defined
    *
    * @param props - any additional args are passed though to the React component
    * of the resolved icon on render
@@ -189,12 +150,16 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
     fallback,
     ...props
   }: Partial<LabIcon.IResolverProps> & LabIcon.IReactProps) {
-    // combine iconClass with any class from the props
-    props.className = classes(iconClass, props.className);
-
     if (!icon) {
-      // try to render the icon as a css background image via iconClass
-      return <Private.iconAsCssBackgroundReact {...props} />;
+      if (!iconClass && fallback) {
+        // if neither icon nor iconClass are defined, use fallback
+        return <fallback.react {...props} />;
+      }
+
+      // set the icon's class to iconClass plus props.className
+      props.className = classes(iconClass, props.className);
+      // render icon as css background image, assuming one is set on iconClass
+      return <Private.blankReact {...props} />;
     }
 
     const resolved = LabIcon.resolve({ icon });
@@ -204,7 +169,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
   /**
    * Resolve a {name, svgstr} pair into an actual svg node.
    */
-  static resolveSvg({ name, svgstr }: LabIcon.ILabIcon): HTMLElement | null {
+  static resolveSvg({ name, svgstr }: LabIcon.IIcon): HTMLElement | null {
     const svgDoc = new DOMParser().parseFromString(svgstr, 'image/svg+xml');
 
     const svgError = svgDoc.querySelector('parsererror');
@@ -235,6 +200,38 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    */
   static toggleDebug(debug?: boolean) {
     LabIcon._debug = debug ?? !LabIcon._debug;
+  }
+
+  /**
+   * UNSTABLE - only exists for handling a single special case
+   *
+   * TODO: Fix the remaining case that relies on this and then
+   *   remove this method:
+   *     - index.tsx in launcher
+   */
+  static UNSTABLE_getReact({
+    name,
+    fallback,
+    ...props
+  }: { name: string; fallback?: LabIcon } & LabIcon.IReactProps) {
+    for (let className of name.split(/\s+/)) {
+      if (LabIcon._instances.has(className)) {
+        const icon = LabIcon._instances.get(className)!;
+        return <icon.react {...props} />;
+      }
+    }
+
+    // lookup failed if execution reached here
+    if (LabIcon._debug) {
+      // fail noisily
+      console.error(`Invalid icon name: ${name}`);
+      return <badIcon.react {...props} />;
+    } else if (fallback) {
+      return <fallback.react {...props} />;
+    } else {
+      // try to render the icon as a css background image via iconClass
+      return <Private.blankReact {...props} />;
+    }
   }
 
   private static _debug: boolean = false;
@@ -388,7 +385,7 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
 
     // update icon elements created using .element method
     document
-      .querySelectorAll(`[data-icon-id=${uuidOld}]`)
+      .querySelectorAll(`[data-icon-id="${uuidOld}"]`)
       .forEach(oldSvgElement => {
         const svgElement = this._initSvg({ uuid });
         if (svgElement) {
@@ -727,7 +724,7 @@ export namespace LabIcon {
 }
 
 namespace Private {
-  export function iconAsCssBackgroundElement({
+  export function blankElement({
     className = '',
     container,
     label,
@@ -757,7 +754,7 @@ namespace Private {
     return container;
   }
 
-  export const iconAsCssBackgroundReact = React.forwardRef(
+  export const blankReact = React.forwardRef(
     (
       {
         className = '',
