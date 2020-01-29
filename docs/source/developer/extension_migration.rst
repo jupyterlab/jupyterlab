@@ -168,3 +168,11 @@ For example, consider how the ``@jupyterlab/debugger`` extension's
   ``await sessionContext.session?.kernel?.info`` to check when a kernel is
   ready and retrieve its details. --
   `jupyterlab/debugger#337 <https://github.com/jupyterlab/debugger/pull/337>`__
+
+Using the new icon system and ``LabIcon``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.. note::
+
+  For full API documentation and examples of how to use
+  the new icon support based on ``LabIcon`` from ``@jupyterlab/ui-components``,
+  `consult the repository <https://github.com/jupyterlab/jupyterlab/tree/master/packages/ui-components#readme>`__.
