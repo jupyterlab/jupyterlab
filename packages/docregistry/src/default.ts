@@ -306,7 +306,7 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * Dispose of the resources used by the handler.
+   * Dispose of the resources used by the document manager.
    */
 
   dispose(): void {
