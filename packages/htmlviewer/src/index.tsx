@@ -90,8 +90,11 @@ export class HTMLViewer extends DocumentWidget<IFrame>
       'refresh',
       new ToolbarButton({
         iconRenderer: refreshIcon,
-        onClick: () => {
-          this.content.url = this.content.url;
+        onClick: async () => {
+          if (!this.context.model.dirty) {
+            await this.context.revert();
+            this.update();
+          }
         },
         tooltip: 'Rerender HTML Document'
       })
