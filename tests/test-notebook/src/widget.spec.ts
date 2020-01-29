@@ -1475,6 +1475,20 @@ describe('@jupyter/notebook', () => {
           expect(widget.activeCellIndex).to.equal(1);
         });
       });
+
+      context('`emptyBackspace` signal', () => {
+        it('should delete cell', () => {
+          const widget = createActiveWidget();
+          widget.model!.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+          widget.activeCellIndex = 1;
+          const cell = widget.model!.cells.get(1);
+          const child = widget.widgets[widget.activeCellIndex];
+          (child.editor.emptyBackspace as any).emit();
+          expect(widget.activeCellIndex).to.equal(0);
+          expect(cell.isDisposed).to.equal(false);
+          expect(child.isDisposed).to.equal(true);
+        });
+      });
     });
 
     describe('#onCellMoved()', () => {
