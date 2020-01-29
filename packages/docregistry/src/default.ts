@@ -306,10 +306,15 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * Dispose of the resources held by the document manager.
+   * Dispose of the resources used by the handler.
    */
+
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     this._isDisposed = true;
+    Signal.clearData(this);
   }
 
   /**
