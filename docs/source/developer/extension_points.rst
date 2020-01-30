@@ -241,7 +241,7 @@ component, `icon.react` can be used in various ways.
 For example, here is how you would add the Jupyter icon to the render tree of
 another React component:
 
-.. code:: typescript
+.. code:: jsx
 
   public render() {
     return (
