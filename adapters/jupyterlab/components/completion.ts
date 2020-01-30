@@ -21,6 +21,8 @@ import {
 } from '../../../positioning';
 import { LSPConnection } from '../../../connection';
 
+const DEBUG = 0;
+
 /*
 Feedback: anchor - not clear from docs
 bundle - very not clear from the docs, interface or better docs would be nice to have
@@ -34,8 +36,9 @@ export class LSPConnector extends DataConnector<
   void,
   CompletionHandler.IRequest
 > {
-  private readonly _editor: CodeEditor.IEditor;
-  private readonly _connections: Map<VirtualDocument.id_path, LSPConnection>;
+  isDisposed = false;
+  private _editor: CodeEditor.IEditor;
+  private _connections: Map<VirtualDocument.id_path, LSPConnection>;
   private _context_connector: ContextConnector;
   private _kernel_connector: KernelConnector;
   private _kernel_and_context_connector: CompletionConnector;
@@ -65,6 +68,20 @@ export class LSPConnector extends DataConnector<
       );
     }
     this.options = options;
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+    this._connections = null;
+    this.virtual_editor = null;
+    this._context_connector = null;
+    this._kernel_connector = null;
+    this._kernel_and_context_connector = null;
+    this.options = null;
+    this._editor = null;
+    this.isDisposed = true;
   }
 
   protected get _has_kernel(): boolean {
@@ -101,7 +118,7 @@ export class LSPConnector extends DataConnector<
     const token = editor.getTokenForPosition(cursor);
 
     if (this.suppress_auto_invoke_in.indexOf(token.type) !== -1) {
-      console.log('Suppressing completer auto-invoke in', token.type);
+      DEBUG && console.log('Suppressing completer auto-invoke in', token.type);
       return;
     }
 
@@ -165,11 +182,11 @@ export class LSPConnector extends DataConnector<
         document,
         position_in_token
       ).catch(e => {
-        console.warn('LSP: hint failed', e);
+        DEBUG && console.warn('LSP: hint failed', e);
         return this.fallback_connector.fetch(request);
       });
     } catch (e) {
-      console.warn('LSP: kernel completions failed', e);
+      DEBUG && console.warn('LSP: kernel completions failed', e);
       return this.fallback_connector.fetch(request);
     }
   }
@@ -191,7 +208,7 @@ export class LSPConnector extends DataConnector<
     // to the matches...
     // Suggested in https://github.com/jupyterlab/jupyterlab/issues/7044, TODO PR
 
-    console.log('[LSP][Completer] Token:', token);
+    DEBUG && console.log('[LSP][Completer] Token:', token);
 
     let completion_items = ((await connection.getCompletion(
       cursor,
@@ -278,7 +295,7 @@ export class LSPConnector extends DataConnector<
     } else if (lsp.matches.length === 0) {
       return kernel;
     }
-    console.log('[LSP][Completer] Merging completions:', lsp, kernel);
+    DEBUG && console.log('[LSP][Completer] Merging completions:', lsp, kernel);
 
     // Populate the result with a copy of the lsp matches.
     const matches = lsp.matches.slice();
@@ -298,9 +315,9 @@ export class LSPConnector extends DataConnector<
       const cursor = editor.getCursorPosition();
       const line = editor.getLine(cursor.line);
       prefix = line.substring(kernel.start, lsp.start);
-      console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
+      DEBUG && console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
     } else if (lsp.start < kernel.start) {
-      console.warn('[LSP][Completer] Kernel start > LSP start');
+      DEBUG && console.warn('[LSP][Completer] Kernel start > LSP start');
     }
 
     let remove_prefix = (value: string) => {

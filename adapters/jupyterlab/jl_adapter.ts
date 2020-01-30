@@ -12,7 +12,7 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import { FreeTooltip } from './components/free_tooltip';
 import { Widget } from '@phosphor/widgets';
 import { VirtualEditor } from '../../virtual/editor';
-import { VirtualDocument } from '../../virtual/document';
+import { VirtualDocument, IForeignContext } from '../../virtual/document';
 import { Signal } from '@phosphor/signaling';
 import { IEditorPosition, IRootPosition } from '../../positioning';
 import { LSPConnection } from '../../connection';
@@ -32,6 +32,8 @@ import {
   IDocumentConnectionData
 } from '../../connection_manager';
 import { Rename } from '../codemirror/features/rename';
+
+const DEBUG = 0;
 
 export const lsp_features: Array<ILSPFeatureConstructor> = [
   Completion,
@@ -78,14 +80,14 @@ export class StatusMessage {
     this.message = message;
     this.changed.emit('');
     if (timeout == null && timeout !== -1) {
-      setTimeout(this.cleanup.bind(this), timeout);
+      setTimeout(this.cleanup, timeout);
     }
   }
 
-  cleanup() {
+  cleanup = () => {
     this.message = '';
     this.changed.emit('');
-  }
+  };
 }
 
 /**
@@ -144,10 +146,11 @@ export abstract class JupyterLabWidgetAdapter
     manager: DocumentConnectionManager,
     { virtual_document }: IDocumentConnectionData
   ) {
-    console.log(
-      'LSP: connection closed, disconnecting adapter',
-      virtual_document.id_path
-    );
+    DEBUG &&
+      console.log(
+        'LSP: connection closed, disconnecting adapter',
+        virtual_document.id_path
+      );
     if (virtual_document !== this.virtual_editor?.virtual_document) {
       return;
     }
@@ -171,10 +174,29 @@ export abstract class JupyterLabWidgetAdapter
       this.update_documents,
       this
     );
-    this.adapters.forEach(adapter => adapter.remove());
+    for (let adapter of this.adapters.values()) {
+      adapter.dispose();
+    }
     this.adapters.clear();
+
+    this.connection_manager.disconnect_document_signals(
+      this.virtual_editor.virtual_document
+    );
     this.virtual_editor.dispose();
-    this.virtual_editor = void 0;
+
+    this.current_completion_connector.dispose();
+
+    // just to be sure
+    this.virtual_editor = null;
+    this.app = null;
+    this.widget = null;
+    this._tooltip = null;
+    this.connection_manager = null;
+    this.current_completion_connector = null;
+    this.rendermime_registry = null;
+    this.widget = null;
+
+    // actually disposed
     this.isDisposed = true;
   }
 
@@ -267,22 +289,50 @@ export abstract class JupyterLabWidgetAdapter
       // refresh the document on the LSP server
       this.document_changed(virtual_document, virtual_document, true);
 
-      console.log(
-        'LSP: virtual document(s) for',
-        this.document_path,
-        'have been initialized'
-      );
+      DEBUG &&
+        console.log(
+          'LSP: virtual document(s) for',
+          this.document_path,
+          'have been initialized'
+        );
     });
   }
 
   protected async connect_document(virtual_document: VirtualDocument) {
     virtual_document.changed.connect(this.document_changed, this);
 
-    virtual_document.foreign_document_opened.connect(async (host, context) => {
-      this.connect_document(context.foreign_document).catch(console.warn);
-    });
+    virtual_document.foreign_document_opened.connect(
+      this.on_foreign_document_opened,
+      this
+    );
 
     await this.connect(virtual_document).catch(console.warn);
+  }
+
+  protected async on_foreign_document_opened(
+    host: VirtualDocument,
+    context: IForeignContext
+  ) {
+    const { foreign_document } = context;
+    this.connect_document(foreign_document).catch(console.warn);
+
+    foreign_document.foreign_document_closed.connect(
+      this.on_foreign_document_closed,
+      this
+    );
+  }
+
+  on_foreign_document_closed(host: VirtualDocument, context: IForeignContext) {
+    const { foreign_document } = context;
+    foreign_document.foreign_document_closed.disconnect(
+      this.on_foreign_document_closed,
+      this
+    );
+    foreign_document.foreign_document_opened.disconnect(
+      this.on_foreign_document_opened,
+      this
+    );
+    foreign_document.changed.disconnect(this.document_changed, this);
   }
 
   document_changed(
@@ -297,19 +347,24 @@ export abstract class JupyterLabWidgetAdapter
     let adapter = this.adapters.get(virtual_document.id_path);
 
     if (!connection?.isReady) {
-      console.log('LSP: Skipping document update signal: connection not ready');
+      DEBUG &&
+        console.log(
+          'LSP: Skipping document update signal: connection not ready'
+        );
       return;
     }
     if (adapter == null) {
-      console.log('LSP: Skipping document update signal: adapter not ready');
+      DEBUG &&
+        console.log('LSP: Skipping document update signal: adapter not ready');
       return;
     }
 
-    console.log(
-      'LSP: virtual document',
-      virtual_document.id_path,
-      'has changed sending update'
-    );
+    DEBUG &&
+      console.log(
+        'LSP: virtual document',
+        virtual_document.id_path,
+        'has changed sending update'
+      );
     connection.sendFullTextChange(
       virtual_document.value,
       virtual_document.document_info
@@ -344,7 +399,7 @@ export abstract class JupyterLabWidgetAdapter
     let adapter = this.adapters.get(virtual_document.id_path);
     this.adapters.delete(virtual_document.id_path);
     if (adapter != null) {
-      adapter.remove();
+      adapter.dispose();
     }
   }
 
@@ -356,9 +411,10 @@ export abstract class JupyterLabWidgetAdapter
   private async connect(virtual_document: VirtualDocument) {
     let language = virtual_document.language;
 
-    console.log(
-      `LSP: will connect using root path: ${this.root_path} and language: ${language}`
-    );
+    DEBUG &&
+      console.log(
+        `LSP: will connect using root path: ${this.root_path} and language: ${language}`
+      );
 
     let options = {
       virtual_document,
@@ -416,7 +472,7 @@ export abstract class JupyterLabWidgetAdapter
       this,
       adapter_features
     );
-    console.log('LSP: Adapter for', this.document_path, 'is ready.');
+    DEBUG && console.log('LSP: Adapter for', this.document_path, 'is ready.');
     return adapter;
   }
 

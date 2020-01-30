@@ -36,6 +36,8 @@ import { LSPStatus } from './adapters/jupyterlab/components/statusbar';
 import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
 import { DocumentConnectionManager } from './connection_manager';
 
+const DEBUG = 0;
+
 const lsp_commands: Array<IFeatureCommand> = [].concat(
   ...lsp_features.map(feature => feature.commands)
 );
@@ -73,6 +75,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const connection_manager = new DocumentConnectionManager();
 
     const status_bar_item = new LSPStatus();
+    status_bar_item.model.connection_manager = connection_manager;
 
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
@@ -108,8 +111,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     );
 
     fileEditorTracker.widgetUpdated.connect((_sender, _widget) => {
-      // console.log(sender);
-      // console.log(widget);
+      DEBUG && console.log(_sender);
+      DEBUG && console.log(_widget);
       // TODO?
       // adapter.remove();
       // connection.close();
@@ -129,6 +132,17 @@ const plugin: JupyterFrontEndPlugin<void> = {
           connection_manager
         );
         file_editor_adapters.set(fileEditor.id, adapter);
+
+        file_editor_adapters.set(widget.id, adapter);
+        const disconnect = () => {
+          file_editor_adapters.delete(widget.id);
+          widget.disposed.disconnect(disconnect);
+          adapter.dispose();
+          if (status_bar_item.model.adapter === adapter) {
+            status_bar_item.model.adapter = null;
+          }
+        };
+        widget.disposed.connect(disconnect);
       }
     });
 
@@ -152,6 +166,15 @@ const plugin: JupyterFrontEndPlugin<void> = {
         connection_manager
       );
       notebook_adapters.set(widget.id, adapter);
+      const disconnect = () => {
+        notebook_adapters.delete(widget.id);
+        widget.disposed.disconnect(disconnect);
+        adapter.dispose();
+        if (status_bar_item.model.adapter === adapter) {
+          status_bar_item.model.adapter = null;
+        }
+      };
+      widget.disposed.connect(disconnect);
     });
 
     // position context menu entries after 10th but before 11th default entry
@@ -193,7 +216,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         });
       })
       .catch((reason: Error) => {
-        console.error(reason.message);
+        DEBUG && console.error(reason.message);
       });
   },
   autoStart: true

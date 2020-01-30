@@ -11,6 +11,8 @@ import {
 } from 'lsp-ws-connection';
 import { until_ready } from './utils';
 
+const DEBUG = 0;
+
 interface ILSPOptions extends ILspOptions {}
 
 export class LSPConnection extends LspWsConnection {
@@ -81,7 +83,7 @@ export class LSPConnection extends LspWsConnection {
         });
       })
       .catch(() => {
-        console.error('Could not connect onClose signal');
+        DEBUG && console.error('Could not connect onClose signal');
       });
     return this;
   }

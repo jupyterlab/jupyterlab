@@ -5,6 +5,8 @@ import { VirtualDocument } from '../../../virtual/document';
 import { IRootPosition } from '../../../positioning';
 import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
 
+const DEBUG = 0;
+
 export class Highlights extends CodeMirrorLSPFeature {
   name = 'Highlights';
   protected highlight_markers: CodeMirror.TextMarker[] = [];
@@ -27,17 +29,16 @@ export class Highlights extends CodeMirrorLSPFeature {
   ];
 
   register(): void {
-    this.connection_handlers.set('highlight', this.handleHighlight.bind(this));
-    this.editor_handlers.set(
-      'cursorActivity',
-      this.onCursorActivity.bind(this)
-    );
+    this.connection_handlers.set('highlight', this.handleHighlight);
+    this.editor_handlers.set('cursorActivity', this.onCursorActivity);
     super.register();
   }
 
   remove(): void {
-    super.remove();
+    this.handleHighlight = null;
+    this.onCursorActivity = null;
     this.clear_markers();
+    super.remove();
   }
 
   protected clear_markers() {
@@ -47,10 +48,10 @@ export class Highlights extends CodeMirrorLSPFeature {
     this.highlight_markers = [];
   }
 
-  protected handleHighlight(
+  protected handleHighlight = (
     items: lsProtocol.DocumentHighlight[],
     documentUri: string
-  ) {
+  ) => {
     if (documentUri !== this.virtual_document.document_info.uri) {
       return;
     }
@@ -71,9 +72,9 @@ export class Highlights extends CodeMirrorLSPFeature {
       );
       this.highlight_markers.push(marker);
     }
-  }
+  };
 
-  protected async onCursorActivity() {
+  protected onCursorActivity = async () => {
     let root_position: IRootPosition;
 
     try {
@@ -81,7 +82,7 @@ export class Highlights extends CodeMirrorLSPFeature {
         .getDoc()
         .getCursor('start') as IRootPosition;
     } catch (err) {
-      console.warn('LSP: no root position available');
+      DEBUG && console.warn('LSP: no root position available');
       return;
     }
 
@@ -89,10 +90,11 @@ export class Highlights extends CodeMirrorLSPFeature {
     try {
       document = this.virtual_editor.document_at_root_position(root_position);
     } catch (e) {
-      console.warn(
-        'LSP: Could not obtain virtual document from position',
-        root_position
-      );
+      DEBUG &&
+        console.warn(
+          'LSP: Could not obtain virtual document from position',
+          root_position
+        );
       return;
     }
     if (document !== this.virtual_document) {
@@ -109,7 +111,7 @@ export class Highlights extends CodeMirrorLSPFeature {
       );
       this.handleHighlight(highlights, this.virtual_document.document_info.uri);
     } catch (e) {
-      console.warn('Could not get highlights:', e);
+      DEBUG && console.warn('Could not get highlights:', e);
     }
-  }
+  };
 }

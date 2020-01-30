@@ -57,6 +57,9 @@ export class VirtualFileEditor extends VirtualEditor {
   }
 
   protected perform_documents_update(): void {
+    if (this.isDisposed) {
+      return;
+    }
     // it is sufficient to update the root document, all nested documents will follow (be re-generated)
     this.virtual_document.clear();
     this.virtual_document.append_code_block(

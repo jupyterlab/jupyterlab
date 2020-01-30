@@ -18,6 +18,8 @@ import { IDocumentInfo } from 'lsp-ws-connection/src';
 
 import { DocumentConnectionManager } from '../connection_manager';
 
+const DEBUG = 0;
+
 type language = string;
 
 interface IVirtualLine {
@@ -52,7 +54,7 @@ interface ISourceLine {
   foreign_documents_map: Map<IRange, IVirtualDocumentBlock>;
 }
 
-interface IForeignContext {
+export interface IForeignContext {
   foreign_document: VirtualDocument;
   parent_host: VirtualDocument;
 }
@@ -138,6 +140,7 @@ export class VirtualDocument {
   public foreign_document_opened: Signal<VirtualDocument, IForeignContext>;
   public readonly instance_id: number;
   public standalone: boolean;
+  isDisposed = false;
   /**
    * the remote document uri, version and other server-related info
    */
@@ -180,7 +183,7 @@ export class VirtualDocument {
     standalone: boolean,
     public file_extension: string,
     public has_lsp_supported_file: boolean,
-    readonly parent?: VirtualDocument
+    public parent?: VirtualDocument
   ) {
     this.language = language;
     let overrides =
@@ -213,6 +216,39 @@ export class VirtualDocument {
     this.unused_documents = new Set();
     this.document_info = new VirtualDocumentInfo(this);
     this.clear();
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+
+    this.parent = null;
+
+    for (const doc of this.foreign_documents.values()) {
+      doc.dispose();
+    }
+
+    this.close_all_foreign_documents();
+
+    // clear all the maps
+    this.foreign_documents.clear();
+    this.source_lines.clear();
+    this.unused_documents.clear();
+    this.unused_standalone_documents.clear();
+    this.virtual_lines.clear();
+
+    // just to be sure
+    this.cell_magics_overrides = null;
+    this.document_info = null;
+    this.foreign_extractors = null;
+    this.foreign_extractors_registry = null;
+    this.line_magics_overrides = null;
+    this.lines = null;
+    this.overrides_registry = null;
+
+    // actually disposed now
+    this.isDisposed = true;
   }
 
   /**
@@ -294,8 +330,8 @@ export class VirtualDocument {
     };
     this.foreign_document_opened.emit(context);
     // pass through any future signals
-    document.foreign_document_closed.connect(this.forward_closed_signal);
-    document.foreign_document_opened.connect(this.forward_opened_signal);
+    document.foreign_document_closed.connect(this.forward_closed_signal, this);
+    document.foreign_document_opened.connect(this.forward_opened_signal, this);
 
     this.foreign_documents.set(document.virtual_id, document);
 
@@ -580,7 +616,7 @@ export class VirtualDocument {
   }
 
   close_foreign(document: VirtualDocument) {
-    console.log('LSP: closing document', document);
+    DEBUG && console.log('LSP: closing document', document);
     this.foreign_document_closed.emit({
       foreign_document: document,
       parent_host: this
@@ -590,8 +626,14 @@ export class VirtualDocument {
     // and delete the documents within it
     document.close_all_foreign_documents();
 
-    document.foreign_document_closed.disconnect(this.forward_closed_signal);
-    document.foreign_document_opened.disconnect(this.forward_opened_signal);
+    document.foreign_document_closed.disconnect(
+      this.forward_closed_signal,
+      this
+    );
+    document.foreign_document_opened.disconnect(
+      this.forward_opened_signal,
+      this
+    );
   }
 
   close_all_foreign_documents() {

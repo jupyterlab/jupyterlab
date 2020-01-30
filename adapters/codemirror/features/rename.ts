@@ -9,6 +9,8 @@ import { Diagnostics } from './diagnostics';
 import { VirtualEditor } from '../../../virtual/editor';
 import { VirtualEditorForNotebook } from '../../../virtual/editors/notebook';
 
+const DEBUG = 0;
+
 export class Rename extends CodeMirrorLSPFeature {
   name = 'Rename';
   static commands: Array<IFeatureCommand> = [
@@ -88,7 +90,7 @@ export class Rename extends CodeMirrorLSPFeature {
 
       this.status_message.set(status, 5 * 1000);
     } catch (error) {
-      console.warn(error);
+      DEBUG && console.warn(error);
     }
 
     return outcome;

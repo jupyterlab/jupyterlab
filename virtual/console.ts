@@ -1,5 +1,7 @@
 import '../../style/console.css';
 
+const DEBUG = 0;
+
 export abstract class EditorLogConsole {
   abstract log(...args: any[]): void;
   abstract warn(...args: any[]): void;
@@ -43,13 +45,13 @@ export class FloatingConsole extends EditorLogConsole {
 
 export class BrowserConsole extends EditorLogConsole {
   log(...args: any[]) {
-    console.log('LSP: ', ...args);
+    DEBUG && console.log('LSP: ', ...args);
   }
   warn(...args: any[]) {
-    console.warn('LSP: ', ...args);
+    DEBUG && console.warn('LSP: ', ...args);
   }
   error(...args: any[]) {
-    console.error('LSP: ', ...args);
+    DEBUG && console.error('LSP: ', ...args);
   }
 }
 

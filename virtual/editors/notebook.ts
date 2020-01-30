@@ -11,6 +11,8 @@ import {
   IVirtualPosition
 } from '../../positioning';
 
+const DEBUG = 0;
+
 // @ts-ignore
 class DocDispatcher implements CodeMirror.Doc {
   virtual_editor: VirtualEditorForNotebook;
@@ -56,6 +58,8 @@ export class VirtualEditorForNotebook extends VirtualEditor {
   cm_editor_to_cell: Map<CodeMirror.Editor, Cell>;
   has_cells = true;
 
+  private _proxy: VirtualEditorForNotebook;
+
   constructor(
     public notebook: Notebook,
     private wrapper: HTMLElement,
@@ -78,23 +82,39 @@ export class VirtualEditorForNotebook extends VirtualEditor {
     this.overrides_registry = overrides_registry;
     this.code_extractors = foreign_code_extractors;
     this.language = language;
-    let handler = {
+    this._proxy = new Proxy(this, {
       get: function(
         target: VirtualEditorForNotebook,
         prop: keyof CodeMirror.Editor,
         receiver: any
       ) {
         if (!(prop in target)) {
-          console.warn(
-            `Unimplemented method ${prop} for VirtualEditorForNotebook`
-          );
+          DEBUG &&
+            console.warn(
+              `Unimplemented method ${prop} for VirtualEditorForNotebook`
+            );
           return;
         } else {
           return Reflect.get(target, prop, receiver);
         }
       }
-    };
-    return new Proxy(this, handler);
+    });
+    return this._proxy;
+  }
+
+  dispose() {
+    if (this.isDisposed) {
+      return;
+    }
+
+    this.cm_editor_to_cell.clear();
+    this.cell_to_corresponding_source_line.clear();
+
+    super.dispose();
+
+    // just to be sure
+    this.forEveryBlockEditor = null;
+    this._proxy = null;
   }
 
   transform_from_notebook_to_root(
@@ -183,7 +203,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       let editor = this.get_editor_at_root_line(pos);
       return editor.charCoords(pos, mode);
     } catch (e) {
-      console.log(e);
+      DEBUG && console.log(e);
       return { bottom: 0, left: 0, right: 0, top: 0 };
     }
   }
@@ -286,6 +306,10 @@ export class VirtualEditorForNotebook extends VirtualEditor {
   }
 
   protected perform_documents_update(): void {
+    if (this.isDisposed) {
+      return;
+    }
+
     this.virtual_document.clear();
     this.cell_to_corresponding_source_line.clear();
     this.cm_editor_to_cell.clear();

@@ -1,16 +1,18 @@
 import * as CodeMirror from 'codemirror';
 import { until_ready } from '../../utils';
-import { CodeMirrorHandler, VirtualEditor } from '../../virtual/editor';
+import { VirtualEditor } from '../../virtual/editor';
 import { VirtualDocument } from '../../virtual/document';
 import { IRootPosition } from '../../positioning';
 import { ILSPFeature } from './feature';
 import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
 
+const DEBUG = 0;
+
 export class CodeMirrorAdapter {
   features: Map<string, ILSPFeature>;
+  isDisposed = false;
 
   private last_change: CodeMirror.EditorChange;
-  private doc_change_handler: CodeMirrorHandler;
 
   constructor(
     protected editor: VirtualEditor,
@@ -18,19 +20,19 @@ export class CodeMirrorAdapter {
     protected jupyterlab_components: IJupyterLabComponentsManager,
     features = new Array<ILSPFeature>()
   ) {
-    this.doc_change_handler = this.saveChange.bind(this);
-    this.editor.on('change', this.doc_change_handler);
+    this.editor.on('change', this.saveChange);
 
     this.features = new Map();
 
     for (let feature of features) {
       feature.register();
       if (!feature.is_registered) {
-        this.editor.console.warn(
-          'The feature ',
-          feature,
-          'was not registered properly'
-        );
+        DEBUG &&
+          this.editor.console.warn(
+            'The feature ',
+            feature,
+            'was not registered properly'
+          );
       }
       this.features.set(feature.name, feature);
     }
@@ -42,9 +44,10 @@ export class CodeMirrorAdapter {
     try {
       await until_ready(() => this.last_change != null, 30, 22);
     } catch (err) {
-      console.log(
-        'No change obtained from CodeMirror editor within the expected time of 0.66s'
-      );
+      DEBUG &&
+        console.log(
+          'No change obtained from CodeMirror editor within the expected time of 0.66s'
+        );
       return;
     }
 
@@ -55,7 +58,7 @@ export class CodeMirrorAdapter {
     try {
       root_position = this.editor.getDoc().getCursor('end') as IRootPosition;
     } catch (err) {
-      console.log('LSP: Root positon not found');
+      DEBUG && console.log('LSP: Root positon not found');
       return;
     }
 
@@ -76,8 +79,8 @@ export class CodeMirrorAdapter {
       }
       return true;
     } catch (e) {
-      this.editor.console.log('updateAfterChange failure');
-      this.editor.console.error(e);
+      DEBUG && this.editor.console.log('updateAfterChange failure');
+      DEBUG && this.editor.console.error(e);
     }
     this.invalidateLastChange();
   }
@@ -86,16 +89,27 @@ export class CodeMirrorAdapter {
     this.last_change = null;
   }
 
-  public saveChange(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
+  public saveChange = (
+    doc: CodeMirror.Doc,
+    change: CodeMirror.EditorChange
+  ) => {
     this.last_change = change;
-  }
+  };
 
-  public remove() {
+  public dispose() {
+    if (this.isDisposed) {
+      return;
+    }
     for (let feature of this.features.values()) {
       feature.remove();
     }
     this.features.clear();
-    this.editor.off('change', this.doc_change_handler);
-    this.doc_change_handler = null;
+    this.editor.off('change', this.saveChange);
+
+    // just to be sure
+    this.editor = null;
+
+    // actually disposed
+    this.isDisposed = true;
   }
 }

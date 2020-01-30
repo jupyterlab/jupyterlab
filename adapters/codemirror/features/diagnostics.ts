@@ -16,6 +16,8 @@ import {
 import { VirtualDocument } from '../../../virtual/document';
 import { VirtualEditor } from '../../../virtual/editor';
 
+const DEBUG = 0;
+
 // TODO: settings
 const default_severity = 2;
 
@@ -131,14 +133,8 @@ export class Diagnostics extends CodeMirrorLSPFeature {
   ];
 
   register(): void {
-    this.connection_handlers.set(
-      'diagnostic',
-      this.handleDiagnostic.bind(this)
-    );
-    this.wrapper_handlers.set(
-      'focusin',
-      this.switchDiagnosticsPanelSource.bind(this)
-    );
+    this.connection_handlers.set('diagnostic', this.handleDiagnostic);
+    this.wrapper_handlers.set('focusin', this.switchDiagnosticsPanelSource);
     this.unique_editor_ids = new DefaultMap(() => this.unique_editor_ids.size);
     if (!diagnostics_databases.has(this.virtual_editor)) {
       diagnostics_databases.set(this.virtual_editor, new DiagnosticsDatabase());
@@ -160,7 +156,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
    */
   public diagnostics_db: DiagnosticsDatabase;
 
-  switchDiagnosticsPanelSource() {
+  switchDiagnosticsPanelSource = () => {
     if (
       diagnostics_panel.content.model.virtual_editor === this.virtual_editor
     ) {
@@ -169,7 +165,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
     diagnostics_panel.content.model.diagnostics = this.diagnostics_db;
     diagnostics_panel.content.model.virtual_editor = this.virtual_editor;
     diagnostics_panel.update();
-  }
+  };
 
   protected collapse_overlapping_diagnostics(
     diagnostics: lsProtocol.Diagnostic[]
@@ -220,7 +216,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
     return map;
   }
 
-  public handleDiagnostic(response: lsProtocol.PublishDiagnosticsParams) {
+  public handleDiagnostic = (response: lsProtocol.PublishDiagnosticsParams) => {
     if (response.uri !== this.virtual_document.document_info.uri) {
       return;
     }
@@ -248,10 +244,11 @@ export class Diagnostics extends CodeMirrorLSPFeature {
             range.end
           ) as IVirtualPosition;
           if (start.line > this.virtual_document.last_virtual_line) {
-            console.log(
-              'Malformed diagnostic was skipped (out of lines) ',
-              diagnostics
-            );
+            DEBUG &&
+              console.log(
+                'Malformed diagnostic was skipped (out of lines) ',
+                diagnostics
+              );
             return;
           }
 
@@ -265,7 +262,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
               start_in_root
             );
           } catch (e) {
-            console.log(e, diagnostics);
+            DEBUG && console.log(e, diagnostics);
             return;
           }
 
@@ -273,12 +270,13 @@ export class Diagnostics extends CodeMirrorLSPFeature {
           // and the user already changed the document so
           // that now this regions is in another virtual document!
           if (this.virtual_document !== document) {
-            console.log(
-              `Ignoring inspections from ${response.uri}`,
-              ` (this region is covered by a another virtual document: ${document.uri})`,
-              ` inspections: `,
-              diagnostics
-            );
+            DEBUG &&
+              console.log(
+                `Ignoring inspections from ${response.uri}`,
+                ` (this region is covered by a another virtual document: ${document.uri})`,
+                ` inspections: `,
+                diagnostics
+              );
             return;
           }
 
@@ -287,10 +285,11 @@ export class Diagnostics extends CodeMirrorLSPFeature {
               .get(start.line)
               .skip_inspect.indexOf(document.id_path) !== -1
           ) {
-            console.log(
-              'Ignoring inspections silenced for this document:',
-              diagnostics
-            );
+            DEBUG &&
+              console.log(
+                'Ignoring inspections silenced for this document:',
+                diagnostics
+              );
             return;
           }
 
@@ -309,7 +308,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
           try {
             end_in_editor = document.transform_virtual_to_editor(end);
           } catch (err) {
-            console.warn('LSP: Malformed range for diagnostic', end);
+            DEBUG && console.warn('LSP: Malformed range for diagnostic', end);
             end_in_editor = { ...start_in_editor, ch: start_in_editor.ch + 1 };
           }
 
@@ -363,11 +362,12 @@ export class Diagnostics extends CodeMirrorLSPFeature {
                 .getDoc()
                 .markText(start_in_editor, end_in_editor, options);
             } catch (e) {
-              console.warn(
-                'Marking inspection (diagnostic text) failed, see following logs (2):'
-              );
-              console.log(diagnostics);
-              console.log(e);
+              DEBUG &&
+                console.warn(
+                  'Marking inspection (diagnostic text) failed, see following logs (2):'
+                );
+              DEBUG && console.log(diagnostics);
+              DEBUG && console.log(e);
               return;
             }
             this.marked_diagnostics.set(diagnostic_hash, marker);
@@ -381,9 +381,9 @@ export class Diagnostics extends CodeMirrorLSPFeature {
       this.diagnostics_db.set(this.virtual_document, diagnostics_list);
       diagnostics_panel.update();
     } catch (e) {
-      console.warn(e);
+      DEBUG && console.warn(e);
     }
-  }
+  };
 
   protected remove_unused_diagnostic_markers(to_retain: Set<string>) {
     this.marked_diagnostics.forEach(
@@ -400,6 +400,16 @@ export class Diagnostics extends CodeMirrorLSPFeature {
     // remove all markers
     this.remove_unused_diagnostic_markers(new Set());
     this.diagnostics_db.clear();
+    diagnostics_databases.delete(this.virtual_editor);
+    this.unique_editor_ids.clear();
+
+    if (
+      diagnostics_panel.content.model.virtual_editor === this.virtual_editor
+    ) {
+      diagnostics_panel.content.model.virtual_editor = null;
+      diagnostics_panel.content.model.diagnostics = null;
+    }
+
     diagnostics_panel.update();
     super.remove();
   }

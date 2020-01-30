@@ -4,6 +4,8 @@ import { IVirtualPosition } from '../../../positioning';
 import { uri_to_contents_path, uris_equal } from '../../../utils';
 import { AnyLocation } from 'lsp-ws-connection/src/types';
 
+const DEBUG = 0;
+
 export class JumpToDefinition extends CodeMirrorLSPFeature {
   name = 'JumpToDefinition';
   static commands: Array<IFeatureCommand> = [
@@ -31,7 +33,7 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
 
   get_uri_and_range(location_or_locations: AnyLocation) {
     if (location_or_locations == null) {
-      console.log('No jump targets found');
+      DEBUG && console.log('No jump targets found');
       return;
     }
     // some language servers appear to return a single object
@@ -46,7 +48,8 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
       return;
     }
 
-    console.log('Will jump to the first of suggested locations:', locations);
+    DEBUG &&
+      console.log('Will jump to the first of suggested locations:', locations);
 
     const location_or_link = locations[0];
 
@@ -67,7 +70,7 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
     const target_info = this.get_uri_and_range(location_or_locations);
 
     if (target_info == null) {
-      console.log('No jump targets found');
+      DEBUG && console.log('No jump targets found');
     }
 
     let { uri, range } = target_info;
@@ -83,8 +86,8 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
         virtual_position
       );
       let editor_position_ce = PositionConverter.cm_to_ce(editor_position);
-      console.log(`Jumping to ${editor_index}th editor of ${uri}`);
-      console.log('Jump target within editor:', editor_position_ce);
+      DEBUG && console.log(`Jumping to ${editor_index}th editor of ${uri}`);
+      DEBUG && console.log('Jump target within editor:', editor_position_ce);
       this.jumper.jump({
         token: {
           offset: this.jumper.getOffset(editor_position_ce, editor_index),
@@ -95,9 +98,10 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
     } else {
       // otherwise there is no virtual document and we expect the returned position to be source position:
       let source_position_ce = PositionConverter.cm_to_ce(virtual_position);
-      console.log(`Jumping to external file: ${uri}`);
+      DEBUG && console.log(`Jumping to external file: ${uri}`);
 
-      console.log('Jump target (source location):', source_position_ce);
+      DEBUG &&
+        console.log('Jump target (source location):', source_position_ce);
 
       // can it be resolved vs our guessed server root?
       const contents_path = uri_to_contents_path(uri);
@@ -125,7 +129,7 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
         this.jumper.global_jump({ uri, ...jump_data }, false);
         return;
       } catch (err) {
-        console.warn(err);
+        DEBUG && console.warn(err);
       }
 
       this.jumper.global_jump(
