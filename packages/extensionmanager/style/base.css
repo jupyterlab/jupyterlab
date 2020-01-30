@@ -118,6 +118,21 @@
   display: inline-block;
 }
 
+.jp-extensionmanager-view .pagination li a {
+  padding: 0 5px;
+  margin: 0 5px;
+}
+
+.jp-extensionmanager-view .pagination li.active a {
+  background: var(--jp-brand-color1);
+  color: #fff;
+}
+
+.jp-extensionmanager-view .pagination li a:hover {
+  background-color: var(--jp-layout-color2);
+  color: unset;
+}
+
 .jp-extensionmanager-view .pagination .break a {
   cursor: default;
 }
