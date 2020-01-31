@@ -13,8 +13,6 @@ import { SourcesModel } from './sources/model';
 
 import { VariablesModel } from './variables/model';
 
-import { SidebarHeaderModel } from './header';
-
 /**
  * A model for a debugger.
  */
@@ -29,7 +27,6 @@ export class DebuggerModel implements IDebugger.IModel {
     this.sources = new SourcesModel({
       currentFrameChanged: this.callstack.currentFrameChanged
     });
-    this.header = new SidebarHeaderModel();
   }
 
   /**
@@ -51,11 +48,6 @@ export class DebuggerModel implements IDebugger.IModel {
    * The sources model.
    */
   readonly sources: SourcesModel;
-
-  /**
-   * The Sidebar header  model.
-   */
-  readonly header: SidebarHeaderModel;
 
   /**
    * A signal emitted when the debugger widget is disposed.
@@ -85,6 +77,22 @@ export class DebuggerModel implements IDebugger.IModel {
     this._stoppedThreads = threads;
   }
 
+  get title(): string {
+    return this._title;
+  }
+
+  set title(title: string) {
+    if (title === this._title) {
+      return;
+    }
+    this._title = title || '-';
+    this._titleChanged.emit(title);
+  }
+
+  get titleChanged(): ISignal<this, string> {
+    return this._titleChanged;
+  }
+
   /**
    * Dispose the model.
    */
@@ -106,10 +114,12 @@ export class DebuggerModel implements IDebugger.IModel {
     this.callstack.frames = [];
     this.variables.scopes = [];
     this.sources.currentSource = null;
-    this.header.title = '-';
+    this.title = '-';
   }
 
+  private _disposed = new Signal<this, void>(this);
   private _isDisposed = false;
   private _stoppedThreads = new Set<number>();
-  private _disposed = new Signal<this, void>(this);
+  private _title = '-';
+  private _titleChanged = new Signal<this, string>(this);
 }

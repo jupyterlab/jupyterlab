@@ -388,7 +388,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   private _changeTitle() {
     const title = this.isStarted ? this.session?.connection?.name : '-';
-    this._model.header.title = title;
+    this._model.title = title;
   }
 
   /**
