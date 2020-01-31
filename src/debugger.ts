@@ -94,6 +94,7 @@ export namespace Debugger {
       }
       this.model.dispose();
       this.service.model = null;
+      super.dispose();
     }
 
     /**

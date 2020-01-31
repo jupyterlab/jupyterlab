@@ -65,13 +65,6 @@ export class DebugSession implements IDebugger.ISession {
   }
 
   /**
-   * Signal emitted when the connection of a debug session changes.
-   */
-  get connectionChanged(): ISignal<this, Session.ISessionConnection> {
-    return this._connectionChanged;
-  }
-
-  /**
    * Whether the debug session is started
    */
   get isStarted(): boolean {
@@ -208,9 +201,6 @@ export class DebugSession implements IDebugger.ISession {
   private _connection: Session.ISessionConnection;
   private _isDisposed = false;
   private _isStarted = false;
-  private _connectionChanged = new Signal<this, Session.ISessionConnection>(
-    this
-  );
   private _disposed = new Signal<this, void>(this);
   private _eventMessage = new Signal<
     IDebugger.ISession,

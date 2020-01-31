@@ -91,7 +91,7 @@ export class DebuggerModel implements IDebugger.IModel {
     if (title === this._title) {
       return;
     }
-    this._title = title || '-';
+    this._title = title ?? '-';
     this._titleChanged.emit(title);
   }
 

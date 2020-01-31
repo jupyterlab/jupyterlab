@@ -157,14 +157,6 @@ export namespace IDebugger {
     >;
 
     /**
-     * Signal emitted when the connection of a debug session changes.
-     */
-    readonly connectionChanged: ISignal<
-      IDebugger.ISession,
-      Session.ISessionConnection
-    >;
-
-    /**
      * Start a new debug session.
      */
     start(): Promise<void>;

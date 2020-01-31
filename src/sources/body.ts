@@ -69,8 +69,9 @@ export class SourcesBody extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._editorHandler.dispose();
+    this._editorHandler?.dispose();
     Signal.clearData(this);
+    super.dispose();
   }
 
   /**
