@@ -77,10 +77,16 @@ export class DebuggerModel implements IDebugger.IModel {
     this._stoppedThreads = threads;
   }
 
+  /**
+   * The current debugger title.
+   */
   get title(): string {
     return this._title;
   }
 
+  /**
+   * Set the current debugger title.
+   */
   set title(title: string) {
     if (title === this._title) {
       return;
@@ -89,6 +95,9 @@ export class DebuggerModel implements IDebugger.IModel {
     this._titleChanged.emit(title);
   }
 
+  /**
+   * A signal emitted when the title changes.
+   */
   get titleChanged(): ISignal<this, string> {
     return this._titleChanged;
   }
