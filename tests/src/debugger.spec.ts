@@ -32,10 +32,6 @@ describe('Debugger', () => {
         stepIn: '',
         stepOut: ''
       },
-      variableCommands: {
-        registry,
-        details: ''
-      },
       editorServices: {
         factoryService,
         mimeTypeService

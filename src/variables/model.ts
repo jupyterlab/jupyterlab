@@ -24,15 +24,6 @@ export class VariablesModel {
     this._changed.emit();
   }
 
-  set details(variables: VariablesModel.IVariable[]) {
-    console.log({ variables });
-    this._details = variables;
-  }
-
-  get details(): VariablesModel.IVariable[] {
-    return this._details;
-  }
-
   /**
    * Signal emitted when the current variable has changed.
    */
@@ -47,10 +38,6 @@ export class VariablesModel {
     return this._variableExpanded;
   }
 
-  get variableCliked(): ISignal<this, VariablesModel.IVariable> {
-    return this._variableCliked;
-  }
-
   /**
    * Expand a variable.
    * @param variable The variable to expand.
@@ -59,15 +46,9 @@ export class VariablesModel {
     this._variableExpanded.emit(variable);
   }
 
-  variableGetDetails(variable: VariablesModel.IVariable) {
-    this._variableCliked.emit(variable);
-  }
-
   private _state: VariablesModel.IScope[] = [];
   private _variableExpanded = new Signal<this, VariablesModel.IVariable>(this);
-  private _variableCliked = new Signal<this, VariablesModel.IVariable>(this);
   private _changed = new Signal<this, void>(this);
-  private _details: VariablesModel.IVariable[];
 }
 
 /**

@@ -405,8 +405,6 @@ export class DebuggerService implements IDebugger, IDisposable {
       this
     );
 
-    // this._model.variables.variableCliked.connect(this._onVariableClicked, this);
-
     const stackFrames = await this._getFrames(this._currentThread());
     this._model.callstack.frames = stackFrames;
   }

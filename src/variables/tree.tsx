@@ -3,6 +3,8 @@
 
 import { ArrayExt } from '@lumino/algorithm';
 
+import { convertType } from '.';
+
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import React, { useEffect, useState } from 'react';
@@ -12,11 +14,11 @@ import { IDebugger } from '../tokens';
 import { VariablesModel } from './model';
 
 /**
- * The body for a Variables Panel.
+ * The body for tree of Variables .
  */
 export class VariablesBodyTree extends ReactWidget {
   /**
-   * Instantiate a new Body for the Variables Panel.
+   * Instantiate a new Body for the tree of Variables.
    * @param model The model for the variables.
    */
   constructor(options: VariablesBodyTree.IOptions) {
@@ -27,11 +29,11 @@ export class VariablesBodyTree extends ReactWidget {
     this._model.changed.connect(this.updateScopes, this);
   }
 
-  private updateScopes(self: VariablesModel) {
-    if (ArrayExt.shallowEqual(this._scopes, self.scopes)) {
+  private updateScopes(model: VariablesModel) {
+    if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
       return;
     }
-    this._scopes = self.scopes;
+    this._scopes = model.scopes;
     this.update();
   }
 
@@ -59,7 +61,8 @@ export class VariablesBodyTree extends ReactWidget {
 
 /**
  * A React component to display a list of variables.
- * @param model The model for the variables.
+ * @param data array of variables.
+ * @param service service of Debugger
  */
 const VariablesComponent = ({
   data,
@@ -91,6 +94,11 @@ const VariablesComponent = ({
   );
 };
 
+/**
+ * A React component to display one node variable in tree.
+ * @param data array of variables.
+ * @param service service of Debugger
+ */
 const VariableComponent = ({
   data,
   service
@@ -105,10 +113,6 @@ const VariableComponent = ({
     transform: `rotate(90deg)`
   };
 
-  // const styleValue = {
-  //   color: THEME[variable.type] ?? 'var(--jp-mirror-editor-number-color)'
-  // };
-
   const styleName = {
     color: 'var(--jp-mirror-editor-attribute-color)'
   };
@@ -117,86 +121,57 @@ const VariableComponent = ({
     color: 'var(--jp-mirror-editor-string-color)'
   };
 
-  const nonExpanded = variable.variablesReference === 0;
+  const expandable =
+    variable.variablesReference !== 0 || variable.type === 'function';
 
-  const onClickVariable = async (e: React.MouseEvent) => {
-    if (nonExpanded) {
+  const onVariableClicked = async (e: React.MouseEvent) => {
+    if (!expandable) {
       return;
     }
     e.stopPropagation();
-    const variableDetials = await service.getVariableDetails(
+    const variableDetails = await service.getVariableDetails(
       variable.variablesReference
     );
-    console.log({ variableDetials });
     setExpanded(!expanded);
-    setDetails(variableDetials);
+    setDetails(variableDetails);
   };
 
   return (
-    <li onClick={e => onClickVariable(e)}>
-      {!nonExpanded && (
+    <li onClick={e => onVariableClicked(e)}>
+      {expandable && (
         <span className="caret" style={expanded ? stylesCaret : {}}>
           ▶
         </span>
       )}
-      <span style={styleName}>{variable.evaluateName}</span>
+      <span style={styleName}>{variable.name}</span>
       <span>: </span>
       <span style={styleType}>{convertType(variable)}</span>
-      {expanded && (
-        <ul>
-          {/* <li>
-            value: <span style={styleValue}>{variable.value}</span>
-          </li> */}
-          {details && <VariablesComponent data={details} service={service} />}
-        </ul>
+      {expanded && details && (
+        <VariablesComponent
+          key={variable.name}
+          data={details}
+          service={service}
+        />
       )}
     </li>
   );
 };
 
 /**
- * Convert a variable to a primitive type.
- * @param variable The variable.
+ * A namespace for VariablesBodyTree `statics`.
  */
-const convertType = (variable: VariablesModel.IVariable) => {
-  const { type, value } = variable;
-  switch (type) {
-    case 'int':
-      return parseInt(value, 10);
-    case 'float':
-      return parseFloat(value);
-    case 'bool':
-      return value;
-    case 'str':
-      return value.slice(1, value.length - 1);
-    case 'list':
-      return 'List';
-    case 'dict':
-      return 'Dict';
-    case 'function':
-      return 'Function';
-    default:
-      return value;
-  }
-};
-
 namespace VariablesBodyTree {
+  /**
+   * Instantiation options for `VariablesBodyTree`.
+   */
   export interface IOptions {
+    /**
+     * The model of Variables.
+     */
     model: VariablesModel;
+    /**
+     * The debug service.
+     */
     service: IDebugger;
   }
 }
-
-/**
- * Default theme for the variable tree view.
- */
-// const THEME: { [index: string]: string } = {
-//   dict: 'var(--jp-mirror-editor-attribute-color)',
-//   null: 'var(--jp-mirror-editor-builtin-color)',
-//   regexp: 'var(--jp-mirror-editor-string-color)',
-//   str: 'var(--jp-mirror-editor-string-color)',
-//   symbol: 'var(--jp-mirror-editor-operator-color)',
-//   number: 'var(--jp-mirror-editor-number-color)',
-//   bool: 'var(--jp-mirror-editor-builtin-color))',
-//   function: 'var(--jp-mirror-editor-def-color))'
-// };

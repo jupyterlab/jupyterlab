@@ -3,38 +3,39 @@
 
 import { ArrayExt } from '@lumino/algorithm';
 
-import { IDebugger } from '../tokens';
-
 import { ReactWidget } from '@jupyterlab/apputils';
 
 import React, { useEffect, useState } from 'react';
 
 import { VariablesModel } from './model';
 
-import { Variables } from '.';
+import { IDebugger } from '../tokens';
 
-/**VariablesComponent
- * The body for a Variables Panel.
+import { CommandIDs } from '..';
+
+import { CommandRegistry } from '@lumino/commands';
+
+/**
+ * The body for table of Variables .
  */
 export class VariablesBodyTable extends ReactWidget {
   /**
-   * Instantiate a new Body for the Variables Panel.
-   * @param model The model for the variables.
+   * Instantiate a new Body for the table of Variables .
+   * @param options The instantiation options for a VariablesBodyTable.
    */
   constructor(options: VariablesBodyTable.IOptions) {
     super();
     this._model = options.model;
-    this._service = options.service;
     this._commands = options.commands;
     this.addClass('jp-DebuggerVariables-body');
     this._model.changed.connect(this.updateScopes, this);
   }
 
-  private updateScopes(self: VariablesModel) {
-    if (ArrayExt.shallowEqual(this._scopes, self.scopes)) {
+  private updateScopes(model: VariablesModel) {
+    if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
       return;
     }
-    this._scopes = self.scopes;
+    this._scopes = model.scopes;
     this.update();
   }
 
@@ -48,7 +49,6 @@ export class VariablesBodyTable extends ReactWidget {
           <VariablesComponent
             key={scope.name}
             data={scope.variables}
-            service={this._service}
             commands={this._commands}
           />
         ))}
@@ -57,50 +57,61 @@ export class VariablesBodyTable extends ReactWidget {
   }
 
   private _model: VariablesModel;
-  private _service: IDebugger;
   private _scopes: VariablesModel.IScope[] = [];
-  private _commands: Variables.ICommands;
+  private _commands: CommandRegistry;
 }
 
-export class VariableTest extends ReactWidget {
-  constructor(options: VariablesTest.IOptions) {
+/**
+ * The body for table of detail's selected Variable.
+ */
+export class VariableDetails extends ReactWidget {
+  /**
+   * Instantiate a new Body for the detail's table of selected Variable.
+   * @param options The instantiation options for a VariableDetails.
+   */
+  constructor(options: VariablesDetails.IOptions) {
     super();
-    const { details, service, commands, model } = options;
+    const { details, commands, model, service, title } = options;
+
+    this.title.iconClass = 'jp-VariableIcon';
+    this.addClass('jp-DebuggerVariableDetails');
+    this.title.label = `${service.session?.connection?.name} - details of ${title}`;
+
     this._variables = details;
-    this._service = service;
     this._commands = commands;
     this._model = model;
     this._model.changed.connect(this.updateScopes, this);
   }
 
-  private updateScopes(self: VariablesModel) {
+  private updateScopes() {
     this.dispose();
   }
 
+  /**
+   * Render the VariablesComponent.
+   */
   render() {
     return (
-      <VariablesComponent
-        data={this._variables}
-        service={this._service}
-        commands={this._commands}
-      />
+      <VariablesComponent data={this._variables} commands={this._commands} />
     );
   }
 
   private _variables: VariablesModel.IVariable[] = [];
-  private _service: IDebugger;
-  private _commands: Variables.ICommands;
+  private _commands: CommandRegistry;
   private _model: VariablesModel;
 }
 
+/**
+ * A React component to display table of variables.
+ * @param data array of variables.
+ * @param service service of Debugger
+ */
 const VariablesComponent = ({
   data,
-  service,
   commands
 }: {
   data: VariablesModel.IVariable[];
-  service: IDebugger;
-  commands?: Variables.ICommands;
+  commands: CommandRegistry;
 }) => {
   const [variables, setVariables] = useState(data);
   const [selected, setSelected] = useState(null);
@@ -109,13 +120,18 @@ const VariablesComponent = ({
     setVariables(data);
   }, [data]);
 
-  const onClickVariable = async (variable: VariablesModel.IVariable) => {
+  const onVariableClicked = (variable: VariablesModel.IVariable) => {
     if (selected === variable) {
-      setSelected(null);
       return;
     }
     setSelected(variable);
-    await commands.registry.execute(commands.details, {
+  };
+
+  const onVariableDoubleClicked = async (
+    variable: VariablesModel.IVariable
+  ) => {
+    setSelected(variable);
+    await commands.execute(CommandIDs.addDetails, {
       variableReference: variable.variablesReference,
       title: variable.evaluateName
     });
@@ -125,11 +141,12 @@ const VariablesComponent = ({
     <tbody>
       {variables?.map(variable => (
         <tr
-          onClick={() => onClickVariable(variable)}
+          onDoubleClick={() => onVariableDoubleClicked(variable)}
+          onClick={() => onVariableClicked(variable)}
           key={variable.evaluateName}
         >
           <td>{variable.name}</td>
-          <td>{convertType(variable)}</td>
+          <td>{variable.type}</td>
           <td className={selected === variable ? 'selected' : ''}>
             {variable.value}
           </td>
@@ -153,39 +170,51 @@ const VariablesComponent = ({
 };
 
 /**
- * Convert a variable to a primitive type.
- * @param variable The variable.
+ * A namespace for VariablesBodyTable `statics`.
  */
-
-const convertType = (variable: VariablesModel.IVariable) => {
-  const { type, value } = variable;
-  switch (type) {
-    case 'int':
-      return parseInt(value, 10);
-    case 'float':
-      return parseFloat(value);
-    case 'bool':
-      return value === 'False' ? false : true;
-    case 'str':
-      return value.slice(1, value.length - 1);
-    default:
-      return type;
-  }
-};
-
 namespace VariablesBodyTable {
+  /**
+   * Instantiation options for `VariablesBodyTable`.
+   */
   export interface IOptions {
+    /**
+     * The model of Variables.
+     */
     model: VariablesModel;
-    service: IDebugger;
-    commands: Variables.ICommands;
+    /**
+     * The commands registry.
+     */
+    commands: CommandRegistry;
   }
 }
 
-namespace VariablesTest {
+/**
+ * A namespace for VariablesDetails `statics`.
+ */
+namespace VariablesDetails {
+  /**
+   * Instantiation options for `VariablesDetails`.
+   */
   export interface IOptions {
-    model?: VariablesModel;
-    service: IDebugger;
+    /**
+     * The model of Variables.
+     */
+    model: VariablesModel;
+    /**
+     * The details of selected variable.
+     */
     details: VariablesModel.IVariable[];
-    commands: Variables.ICommands;
+    /**
+     * The service of debugger.
+     */
+    service: IDebugger;
+    /**
+     * The commands registry.
+     */
+    commands: CommandRegistry;
+    /**
+     * The name of selected variable.
+     */
+    title: string;
   }
 }

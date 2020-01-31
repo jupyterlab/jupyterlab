@@ -11,7 +11,7 @@
 .jp-DebuggerVariables-body ul {
   list-style: none;
   margin: 0;
-  padding: 0;
+  padding: 0.5em;
 }
 
 .jp-DebuggerVariables-body ul li {
@@ -32,40 +32,46 @@
   margin-left: auto;
 }
 
-.jp-debugger-details table,
+.jp-DebuggerVariableDetails {
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-DebuggerVariableDetails table,
 .jp-DebuggerVariables-body table {
   width: 100%;
   border-spacing: 0px;
 }
 
-.jp-debugger-details table tbody,
-.jp-debugger-details table thead,
+.jp-DebuggerVariableDetails table tbody,
+.jp-DebuggerVariableDetails table thead,
 .jp-DebuggerVariables-body table tbody,
 .jp-DebuggerVariables-body table thead {
   background: var(--jp-layout-color2);
   text-align: left;
 }
 
-.jp-debugger-details table tbody tr:nth-child(2n + 1),
+.jp-DebuggerVariableDetails table tbody tr:nth-child(2n + 1),
 .jp-DebuggerVariables-body table tbody tr:nth-child(2n + 1) {
   background-color: var(--jp-layout-color1);
 }
 
-.jp-debugger-details table tbody td,
-.jp-debugger-details table thead th .jp-DebuggerVariables-body table tbody td,
+.jp-DebuggerVariableDetails table tbody td,
+.jp-DebuggerVariableDetails table thead th,
+.jp-DebuggerVariables-body table tbody td,
 .jp-DebuggerVariables-body table thead th {
   padding: 5px;
   border-right: 1px solid var(--jp-layout-color3);
 }
 
-.jp-debugger-details table tbody td:last-child,
-.jp-debugger-details table thead th:last-child,
+.jp-DebuggerVariableDetails table tbody td:last-child,
+.jp-DebuggerVariableDetails table thead th:last-child,
 .jp-DebuggerVariables-body table tbody td:last-child,
 .jp-DebuggerVariables-body table thead th:last-child {
   border-right: none;
 }
 
-.jp-debugger-details table tbody td.selected,
+.jp-DebuggerVariableDetails table tbody td.selected,
 .jp-DebuggerVariables-body table tbody td.selected {
   color: white;
   background: var(--jp-brand-color1);

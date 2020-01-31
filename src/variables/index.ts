@@ -32,9 +32,8 @@ export class Variables extends Panel {
 
     this._header = new VariablesHeader();
     this._tree = new VariablesBodyTree({ model, service });
-    this._table = new VariablesBodyTable({ model, service, commands });
+    this._table = new VariablesBodyTable({ model, commands });
     this._table.hide();
-    // this.node.setAttribute('data-jp-table', 'true');
 
     const onClick = () => {
       if (this._table.isHidden) {
@@ -89,15 +88,29 @@ export class Variables extends Panel {
 }
 
 /**
+ * Convert a variable to a primitive type.
+ * @param variable The variable.
+ */
+export const convertType = (variable: VariablesModel.IVariable) => {
+  const { type, value } = variable;
+  switch (type) {
+    case 'int':
+      return parseInt(value, 10);
+    case 'float':
+      return parseFloat(value);
+    case 'bool':
+      return value;
+    case 'str':
+      return value.slice(1, value.length - 1);
+    default:
+      return type;
+  }
+};
+
+/**
  * A namespace for Variables `statics`.
  */
 export namespace Variables {
-  export interface ICommands {
-    registry: CommandRegistry;
-
-    details: string;
-  }
-
   /**
    * Instantiation options for `Variables`.
    */
@@ -110,7 +123,9 @@ export namespace Variables {
      * The debugger service.
      */
     service: IDebugger;
-
-    commands: ICommands;
+    /**
+     * The commands registry.
+     */
+    commands: CommandRegistry;
   }
 }
