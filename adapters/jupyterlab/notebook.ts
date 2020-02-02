@@ -89,11 +89,11 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       this
     );
     this.widget.content.activeCellChanged.disconnect(this.on_completions, this);
-    for (const handler of this.completion_handlers.values()) {
-      handler.connector = null;
-      handler.editor = null;
+    if (this.current_completion_handler) {
+      this.current_completion_handler.connector = null;
+      this.current_completion_handler.editor = null;
+      this.current_completion_handler = null;
     }
-    this.completion_handlers.clear();
     super.dispose();
   }
 
@@ -175,10 +175,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     });
   }
 
-  completion_handlers = new Map<
-    Cell,
-    ICompletionManager.ICompletableAttributes
-  >();
+  current_completion_handler: ICompletionManager.ICompletableAttributes;
 
   connect_completion() {
     // see https://github.com/jupyterlab/jupyterlab/blob/c0e9eb94668832d1208ad3b00a9791ef181eca4c/packages/completer-extension/src/index.ts#L198-L213
@@ -192,19 +189,20 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       editor: cell.editor,
       parent: this.widget
     });
-    this.completion_handlers.set(cell, handler);
+    this.current_completion_handler = handler;
+    this.widget.content.activeCellChanged.connect(this.on_completions, this);
   }
 
   on_completions(notebook: Notebook, cell: Cell) {
     if (cell == null) {
       return;
     }
+    console.error(
+      'NRB: on_completions',
+      (cell.editor as any)._editor.display.lineDiv
+    );
     this.set_completion_connector(cell);
-    const handler = this.completion_handlers.get(cell);
-    if (handler == null) {
-      return;
-    }
-    handler.editor = cell.editor;
-    handler.connector = this.current_completion_connector;
+    this.current_completion_handler.editor = cell.editor;
+    this.current_completion_handler.connector = this.current_completion_connector;
   }
 }

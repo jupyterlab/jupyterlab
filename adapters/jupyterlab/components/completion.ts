@@ -112,6 +112,8 @@ export class LSPConnector extends DataConnector<
   ): Promise<CompletionHandler.IReply> {
     let editor = this._editor;
 
+    console.error('NRB: editor', (editor as any)._editor.display.lineDiv);
+
     const cursor = editor.getCursorPosition();
     const token = editor.getTokenForPosition(cursor);
 
