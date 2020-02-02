@@ -344,11 +344,11 @@ export abstract class JupyterLabWidgetAdapter
       return;
     }
 
-    console.log(
-      'LSP: virtual document',
-      virtual_document.id_path,
-      'has changed sending update'
-    );
+    // console.log(
+    //   'LSP: virtual document',
+    //   virtual_document.id_path,
+    //   'has changed sending update'
+    // );
     connection.sendFullTextChange(
       virtual_document.value,
       virtual_document.document_info

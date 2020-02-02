@@ -311,6 +311,8 @@ namespace Private {
         serverUri: uris.server,
         rootUri: uris.base
       });
+      // TODO: remove remaining unbounded users of connection.on
+      connection.setMaxListeners(999);
       _connections.set(language, connection);
       connection.connect(socket);
       onCreate(connection);
