@@ -153,14 +153,18 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
       // defer the update by up to 50 ms (10 retrials * 5 ms break),
       // awaiting for the previous update to complete.
       await until_ready(() => this.can_update(), 10, 5).then(() => {
-        if (this.isDisposed) {
+        if (this.isDisposed || !this.virtual_document) {
           resolve();
         }
         try {
           this.is_update_in_progress = true;
           this.perform_documents_update();
-          this.documents_updated.emit(this.virtual_document);
-          this.virtual_document.maybe_emit_changed();
+
+          if (this.virtual_document) {
+            this.documents_updated.emit(this.virtual_document);
+            this.virtual_document.maybe_emit_changed();
+          }
+
           resolve();
         } catch (e) {
           this.console.warn('Documents update failed:', e);
