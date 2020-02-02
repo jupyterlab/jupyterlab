@@ -1,4 +1,3 @@
-import { PathExt } from '@jupyterlab/coreutils';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorAdapter } from '../codemirror/cm_adapter';
 import { JupyterFrontEnd } from '@jupyterlab/application';
@@ -29,7 +28,8 @@ import { ICommandContext } from '../../command_manager';
 import { JSONObject } from '@phosphor/coreutils';
 import {
   DocumentConnectionManager,
-  IDocumentConnectionData
+  IDocumentConnectionData,
+  ISocketConnectionOptions
 } from '../../connection_manager';
 import { Rename } from '../codemirror/features/rename';
 
@@ -227,12 +227,6 @@ export abstract class JupyterLabWidgetAdapter
 
   abstract get language_file_extension(): string;
 
-  get root_path() {
-    // TODO: serverRoot may need to be included for Hub or Windows, requires testing.
-    // let root = PageConfig.getOption('serverRoot');
-    return PathExt.dirname(this.document_path);
-  }
-
   // equivalent to triggering didClose and didOpen, as per syncing specification,
   // but also reloads the connection; used during file rename (or when it was moved)
   protected reload_connection() {
@@ -402,14 +396,11 @@ export abstract class JupyterLabWidgetAdapter
   private async connect(virtual_document: VirtualDocument) {
     let language = virtual_document.language;
 
-    console.log(
-      `LSP: will connect using root path: ${this.root_path} and language: ${language}`
-    );
+    console.log(`LSP: will connect using language: ${language}`);
 
-    let options = {
+    let options: ISocketConnectionOptions = {
       virtual_document,
       language,
-      root_path: this.root_path,
       document_path: this.document_path
     };
 

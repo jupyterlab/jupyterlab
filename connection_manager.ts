@@ -13,16 +13,12 @@ export interface IDocumentConnectionData {
   connection: LSPConnection;
 }
 
-interface ISocketConnectionOptions {
+export interface ISocketConnectionOptions {
   virtual_document: VirtualDocument;
   /**
    * The language identifier, corresponding to the API endpoint on the LSP proxy server.
    */
   language: string;
-  /**
-   * The root path in the JupyterLab (virtual) path space
-   */
-  root_path: string;
   /**
    * Path to the document in the JupyterLab space
    */
@@ -257,6 +253,7 @@ export class DocumentConnectionManager {
 
   public unregister_document(virtual_document: VirtualDocument) {
     this.connections.delete(virtual_document.id_path);
+    this.documents_changed.emit(this.documents);
   }
 }
 
