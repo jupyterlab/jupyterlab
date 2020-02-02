@@ -23,8 +23,6 @@ import createNotebook = NBTestUtils.createNotebook;
 import { CodeMirrorAdapter } from './cm_adapter';
 import { VirtualDocument } from '../../virtual/document';
 
-const DEBUG = 0;
-
 interface IFeatureTestEnvironment {
   host: HTMLElement;
   virtual_editor: VirtualEditor;
@@ -253,6 +251,6 @@ export async function synchronize_content(
   try {
     await adapter.updateAfterChange();
   } catch (e) {
-    DEBUG && console.warn(e);
+    console.warn(e);
   }
 }

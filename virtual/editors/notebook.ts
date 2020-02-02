@@ -11,8 +11,6 @@ import {
   IVirtualPosition
 } from '../../positioning';
 
-const DEBUG = 0;
-
 // @ts-ignore
 class DocDispatcher implements CodeMirror.Doc {
   virtual_editor: VirtualEditorForNotebook;
@@ -89,10 +87,9 @@ export class VirtualEditorForNotebook extends VirtualEditor {
         receiver: any
       ) {
         if (!(prop in target)) {
-          DEBUG &&
-            console.warn(
-              `Unimplemented method ${prop} for VirtualEditorForNotebook`
-            );
+          console.warn(
+            `Unimplemented method ${prop} for VirtualEditorForNotebook`
+          );
           return;
         } else {
           return Reflect.get(target, prop, receiver);
@@ -203,7 +200,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       let editor = this.get_editor_at_root_line(pos);
       return editor.charCoords(pos, mode);
     } catch (e) {
-      DEBUG && console.log(e);
+      console.log(e);
       return { bottom: 0, left: 0, right: 0, top: 0 };
     }
   }

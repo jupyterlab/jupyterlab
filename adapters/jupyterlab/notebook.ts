@@ -18,8 +18,6 @@ import { DocumentConnectionManager } from '../../connection_manager';
 import { IClientSession } from '@jupyterlab/apputils';
 import { Session } from '@jupyterlab/services';
 
-const DEBUG = 0;
-
 export class NotebookAdapter extends JupyterLabWidgetAdapter {
   editor: Notebook;
   widget: NotebookPanel;
@@ -62,22 +60,21 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     change: Session.IKernelChangedArgs
   ) {
     if (!change.newValue) {
-      DEBUG && console.log('LSP: kernel was shut down');
+      console.log('LSP: kernel was shut down');
       return;
     }
     change.newValue.ready
       .then(async spec => {
-        DEBUG &&
-          console.log(
-            'LSP: Changed to ' +
-              change.newValue.info.language_info.name +
-              ' kernel, reconnecting'
-          );
+        console.log(
+          'LSP: Changed to ' +
+            change.newValue.info.language_info.name +
+            ' kernel, reconnecting'
+        );
         await until_ready(this.is_ready, -1);
         this.reload_connection();
       })
       .catch(e => {
-        DEBUG && console.warn(e);
+        console.warn(e);
         // try to reconnect anyway
         this.reload_connection();
       });
@@ -119,7 +116,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     try {
       return this.widget.context.session.kernel.info.language_info;
     } catch (e) {
-      DEBUG && console.log('LSP: Could not get kernel metadata');
+      console.log('LSP: Could not get kernel metadata');
       return null;
     }
   }
@@ -146,10 +143,9 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
   }
 
   async init_once_ready() {
-    DEBUG &&
-      console.log('LSP: waiting for', this.document_path, 'to fully load');
+    console.log('LSP: waiting for', this.document_path, 'to fully load');
     await until_ready(this.is_ready, -1);
-    DEBUG && console.log('LSP:', this.document_path, 'ready for connection');
+    console.log('LSP:', this.document_path, 'ready for connection');
 
     this.virtual_editor = new VirtualEditorForNotebook(
       this.widget.content,

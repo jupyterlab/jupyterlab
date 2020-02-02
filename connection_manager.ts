@@ -8,8 +8,6 @@ import { sleep, until_ready } from './utils';
 // Name-only import so as to not trigger inclusion in main bundle
 import * as ConnectionModuleType from './connection';
 
-const DEBUG = 0;
-
 export interface IDocumentConnectionData {
   virtual_document: VirtualDocument;
   connection: LSPConnection;
@@ -105,11 +103,10 @@ export class DocumentConnectionManager {
   }
 
   on_foreign_document_opened(_host: VirtualDocument, context: IForeignContext) {
-    DEBUG &&
-      console.log(
-        'LSP: ConnectionManager received foreign document: ',
-        context.foreign_document.id_path
-      );
+    console.log(
+      'LSP: ConnectionManager received foreign document: ',
+      context.foreign_document.id_path
+    );
   }
 
   on_foreign_document_closed(_host: VirtualDocument, context: IForeignContext) {
@@ -120,7 +117,7 @@ export class DocumentConnectionManager {
   private async connect_socket(
     options: ISocketConnectionOptions
   ): Promise<LSPConnection> {
-    DEBUG && console.log('LSP: Connection Socket', options);
+    console.log('LSP: Connection Socket', options);
     let { virtual_document, language } = options;
 
     this.connect_document_signals(virtual_document);
@@ -147,26 +144,25 @@ export class DocumentConnectionManager {
 
   on_new_connection = (connection: LSPConnection) => {
     connection.on('error', e => {
-      DEBUG && console.warn(e);
+      console.warn(e);
       // TODO invalid now
       let error: Error = e.length && e.length >= 1 ? e[0] : new Error();
       // TODO: those codes may be specific to my proxy client, need to investigate
       if (error.message.indexOf('code = 1005') !== -1) {
-        DEBUG && console.warn(`LSP: Connection failed for ${connection}`);
+        console.warn(`LSP: Connection failed for ${connection}`);
         this.forEachDocumentOfConnection(connection, virtual_document => {
-          DEBUG &&
-            console.warn('LSP: disconnecting ' + virtual_document.id_path);
+          console.warn('LSP: disconnecting ' + virtual_document.id_path);
           this.closed.emit({ connection, virtual_document });
           this.ignored_languages.add(virtual_document.language);
-          DEBUG &&
-            console.warn(
-              `Cancelling further attempts to connect ${virtual_document.id_path} and other documents for this language (no support from the server)`
-            );
+
+          console.warn(
+            `Cancelling further attempts to connect ${virtual_document.id_path} and other documents for this language (no support from the server)`
+          );
         });
       } else if (error.message.indexOf('code = 1006') !== -1) {
-        DEBUG && console.warn('LSP: Connection closed by the server ');
+        console.warn('LSP: Connection closed by the server ');
       } else {
-        DEBUG && console.error('LSP: Connection error:', e);
+        console.error('LSP: Connection error:', e);
       }
     });
 
@@ -179,9 +175,9 @@ export class DocumentConnectionManager {
 
     connection.on('close', closed_manually => {
       if (!closed_manually) {
-        DEBUG && console.warn('LSP: Connection unexpectedly disconnected');
+        console.warn('LSP: Connection unexpectedly disconnected');
       } else {
-        DEBUG && console.warn('LSP: Connection closed');
+        console.warn('LSP: Connection closed');
         this.forEachDocumentOfConnection(connection, virtual_document => {
           this.closed.emit({ connection, virtual_document });
         });
@@ -224,13 +220,12 @@ export class DocumentConnectionManager {
           success = true;
         })
         .catch(e => {
-          DEBUG && console.warn(e);
+          console.warn(e);
         });
 
-      DEBUG &&
-        console.log(
-          'LSP: will attempt to re-connect in ' + interval / 1000 + ' seconds'
-        );
+      console.log(
+        'LSP: will attempt to re-connect in ' + interval / 1000 + ' seconds'
+      );
       await sleep(interval);
 
       // gradually increase the time delay, up to 5 sec
@@ -239,7 +234,7 @@ export class DocumentConnectionManager {
   }
 
   async connect(options: ISocketConnectionOptions) {
-    DEBUG && console.log('LSP: connection requested', options);
+    console.log('LSP: connection requested', options);
     let connection = await this.connect_socket(options);
 
     let { virtual_document, document_path } = options;
@@ -248,21 +243,12 @@ export class DocumentConnectionManager {
       try {
         await until_ready(() => connection.isReady, 200, 200);
       } catch {
-        DEBUG &&
-          console.warn(
-            `LSP: Connect timed out for ${virtual_document.id_path}`
-          );
+        console.warn(`LSP: Connect timed out for ${virtual_document.id_path}`);
         return;
       }
     }
 
-    DEBUG &&
-      console.log(
-        'LSP:',
-        document_path,
-        virtual_document.id_path,
-        'connected.'
-      );
+    console.log('LSP:', document_path, virtual_document.id_path, 'connected.');
 
     this.connected.emit({ connection, virtual_document });
 

@@ -12,8 +12,6 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualFileEditor } from '../../virtual/editors/file_editor';
 import { DocumentConnectionManager } from '../../connection_manager';
 
-const DEBUG = 0;
-
 export class FileEditorAdapter extends JupyterLabWidgetAdapter {
   editor: FileEditor;
   jumper: FileEditorJumper;
@@ -71,7 +69,7 @@ export class FileEditorAdapter extends JupyterLabWidgetAdapter {
     );
     this.connect_contentChanged_signal();
 
-    DEBUG && console.log('LSP: file ready for connection:', this.path);
+    console.log('LSP: file ready for connection:', this.path);
     this.connect_document(this.virtual_editor.virtual_document).catch(
       console.warn
     );

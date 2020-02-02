@@ -16,8 +16,6 @@ import {
 import { VirtualDocument } from '../../../virtual/document';
 import { VirtualEditor } from '../../../virtual/editor';
 
-const DEBUG = 0;
-
 // TODO: settings
 const default_severity = 2;
 
@@ -244,11 +242,10 @@ export class Diagnostics extends CodeMirrorLSPFeature {
             range.end
           ) as IVirtualPosition;
           if (start.line > this.virtual_document.last_virtual_line) {
-            DEBUG &&
-              console.log(
-                'Malformed diagnostic was skipped (out of lines) ',
-                diagnostics
-              );
+            console.log(
+              'Malformed diagnostic was skipped (out of lines) ',
+              diagnostics
+            );
             return;
           }
 
@@ -262,7 +259,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
               start_in_root
             );
           } catch (e) {
-            DEBUG && console.log(e, diagnostics);
+            console.log(e, diagnostics);
             return;
           }
 
@@ -270,13 +267,12 @@ export class Diagnostics extends CodeMirrorLSPFeature {
           // and the user already changed the document so
           // that now this regions is in another virtual document!
           if (this.virtual_document !== document) {
-            DEBUG &&
-              console.log(
-                `Ignoring inspections from ${response.uri}`,
-                ` (this region is covered by a another virtual document: ${document.uri})`,
-                ` inspections: `,
-                diagnostics
-              );
+            console.log(
+              `Ignoring inspections from ${response.uri}`,
+              ` (this region is covered by a another virtual document: ${document.uri})`,
+              ` inspections: `,
+              diagnostics
+            );
             return;
           }
 
@@ -285,11 +281,10 @@ export class Diagnostics extends CodeMirrorLSPFeature {
               .get(start.line)
               .skip_inspect.indexOf(document.id_path) !== -1
           ) {
-            DEBUG &&
-              console.log(
-                'Ignoring inspections silenced for this document:',
-                diagnostics
-              );
+            console.log(
+              'Ignoring inspections silenced for this document:',
+              diagnostics
+            );
             return;
           }
 
@@ -308,7 +303,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
           try {
             end_in_editor = document.transform_virtual_to_editor(end);
           } catch (err) {
-            DEBUG && console.warn('LSP: Malformed range for diagnostic', end);
+            console.warn('LSP: Malformed range for diagnostic', end);
             end_in_editor = { ...start_in_editor, ch: start_in_editor.ch + 1 };
           }
 
@@ -362,12 +357,11 @@ export class Diagnostics extends CodeMirrorLSPFeature {
                 .getDoc()
                 .markText(start_in_editor, end_in_editor, options);
             } catch (e) {
-              DEBUG &&
-                console.warn(
-                  'Marking inspection (diagnostic text) failed, see following logs (2):'
-                );
-              DEBUG && console.log(diagnostics);
-              DEBUG && console.log(e);
+              console.warn(
+                'Marking inspection (diagnostic text) failed, see following logs (2):'
+              );
+              console.log(diagnostics);
+              console.log(e);
               return;
             }
             this.marked_diagnostics.set(diagnostic_hash, marker);
@@ -381,7 +375,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
       this.diagnostics_db.set(this.virtual_document, diagnostics_list);
       diagnostics_panel.update();
     } catch (e) {
-      DEBUG && console.warn(e);
+      console.warn(e);
     }
   };
 

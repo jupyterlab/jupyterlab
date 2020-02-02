@@ -3,8 +3,6 @@ import { IRootPosition } from '../../../positioning';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorLSPFeature } from '../feature';
 
-const DEBUG = 0;
-
 export class Signature extends CodeMirrorLSPFeature {
   name = 'Signature';
   protected signature_character: IRootPosition;
@@ -71,11 +69,10 @@ export class Signature extends CodeMirrorLSPFeature {
         }
       } else {
         if (item.documentation.kind !== 'markdown') {
-          DEBUG &&
-            this.virtual_editor.console.warn(
-              'Unknown MarkupContent kind:',
-              item.documentation.kind
-            );
+          this.virtual_editor.console.warn(
+            'Unknown MarkupContent kind:',
+            item.documentation.kind
+          );
         }
         markdown += item.documentation.value;
       }
@@ -86,7 +83,7 @@ export class Signature extends CodeMirrorLSPFeature {
   private handleSignature(response: lsProtocol.SignatureHelp) {
     this.jupyterlab_components.remove_tooltip();
 
-    DEBUG && this.virtual_editor.console.log('Signature received', response);
+    this.virtual_editor.console.log('Signature received', response);
     if (!this.signature_character || !response || !response.signatures.length) {
       return;
     }
@@ -99,13 +96,12 @@ export class Signature extends CodeMirrorLSPFeature {
     let language = this.get_language_at(editor_position, cm_editor);
     let markup = this.get_markup_for_signature_help(response, language);
 
-    DEBUG &&
-      this.virtual_editor.console.log(
-        'Signature will be shown',
-        language,
-        markup,
-        root_position
-      );
+    this.virtual_editor.console.log(
+      'Signature will be shown',
+      language,
+      markup,
+      root_position
+    );
 
     let tooltip = this.jupyterlab_components.create_tooltip(
       markup,
@@ -135,11 +131,10 @@ export class Signature extends CodeMirrorLSPFeature {
       root_position
     );
 
-    DEBUG &&
-      this.virtual_editor.console.log(
-        'Signature will be requested for',
-        virtual_position
-      );
+    this.virtual_editor.console.log(
+      'Signature will be requested for',
+      virtual_position
+    );
 
     this.connection
       .getSignatureHelp(

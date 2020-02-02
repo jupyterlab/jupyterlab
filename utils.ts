@@ -1,7 +1,5 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 
-const DEBUG = 0;
-
 const RE_PATH_ANCHOR = /^file:\/\/([^\/]+|\/[A-Z]:)/;
 
 export async function sleep(timeout: number) {
@@ -61,10 +59,9 @@ export function getModifierState(
     case 'Meta':
       return event.metaKey;
     default:
-      DEBUG &&
-        console.warn(
-          `State of the modifier key "${modifierKey}" could not be determined.`
-        );
+      console.warn(
+        `State of the modifier key "${modifierKey}" could not be determined.`
+      );
   }
 }
 

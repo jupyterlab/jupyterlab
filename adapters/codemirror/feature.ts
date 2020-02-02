@@ -20,8 +20,6 @@ import * as CodeMirror from 'codemirror';
 import { ICommandContext } from '../../command_manager';
 import { DefaultMap } from '../../utils';
 
-const DEBUG = 0;
-
 export enum CommandEntryPoint {
   CellContextMenu,
   FileEditorContextMenu
@@ -327,10 +325,9 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
           for (let e of change.edits) {
             let offset = offset_from_lsp(e.range.start, lines);
             if (edits_by_offset.has(offset)) {
-              DEBUG &&
-                console.warn(
-                  'Edits should not overlap, ignoring an overlapping edit'
-                );
+              console.warn(
+                'Edits should not overlap, ignoring an overlapping edit'
+              );
             } else {
               edits_by_offset.set(offset, e);
               applied_changes += 1;
@@ -458,7 +455,7 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
       // note: this does not matter for actions invoke from context menu
       // as those loose focus anyways (this might be addressed elsewhere)
     } catch (e) {
-      DEBUG && console.log('Could not place the cursor back', e);
+      console.log('Could not place the cursor back', e);
     }
 
     return 1;

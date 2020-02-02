@@ -6,8 +6,6 @@ import { IRootPosition } from '../../positioning';
 import { ILSPFeature } from './feature';
 import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
 
-const DEBUG = 0;
-
 export class CodeMirrorAdapter {
   features: Map<string, ILSPFeature>;
   isDisposed = false;
@@ -27,12 +25,11 @@ export class CodeMirrorAdapter {
     for (let feature of features) {
       feature.register();
       if (!feature.is_registered) {
-        DEBUG &&
-          this.editor.console.warn(
-            'The feature ',
-            feature,
-            'was not registered properly'
-          );
+        this.editor.console.warn(
+          'The feature ',
+          feature,
+          'was not registered properly'
+        );
       }
       this.features.set(feature.name, feature);
     }
@@ -44,10 +41,9 @@ export class CodeMirrorAdapter {
     try {
       await until_ready(() => this.last_change != null, 30, 22);
     } catch (err) {
-      DEBUG &&
-        console.log(
-          'No change obtained from CodeMirror editor within the expected time of 0.66s'
-        );
+      console.log(
+        'No change obtained from CodeMirror editor within the expected time of 0.66s'
+      );
       return;
     }
 
@@ -58,7 +54,7 @@ export class CodeMirrorAdapter {
     try {
       root_position = this.editor.getDoc().getCursor('end') as IRootPosition;
     } catch (err) {
-      DEBUG && console.log('LSP: Root positon not found');
+      console.log('LSP: Root positon not found');
       return;
     }
 
@@ -79,8 +75,8 @@ export class CodeMirrorAdapter {
       }
       return true;
     } catch (e) {
-      DEBUG && this.editor.console.log('updateAfterChange failure');
-      DEBUG && this.editor.console.error(e);
+      this.editor.console.log('updateAfterChange failure');
+      this.editor.console.error(e);
     }
     this.invalidateLastChange();
   }

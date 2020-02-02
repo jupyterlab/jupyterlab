@@ -23,8 +23,6 @@ import { PositionConverter } from './converter';
 export const file_editor_adapters: Map<string, FileEditorAdapter> = new Map();
 export const notebook_adapters: Map<string, NotebookAdapter> = new Map();
 
-const DEBUG = 0;
-
 function is_context_menu_over_token(adapter: JupyterLabWidgetAdapter) {
   let position = adapter.get_position_from_context_menu();
   if (!position) {
@@ -151,11 +149,10 @@ export abstract class ContextCommandManager extends LSPCommandManager {
       try {
         context = this.current_adapter.get_context_from_context_menu();
       } catch (e) {
-        DEBUG &&
-          console.warn(
-            'contextMenu is attached, but could not get the context',
-            e
-          );
+        console.warn(
+          'contextMenu is attached, but could not get the context',
+          e
+        );
         context = null;
       }
     }
@@ -175,7 +172,7 @@ export abstract class ContextCommandManager extends LSPCommandManager {
         command.is_enabled(context)
       );
     } catch (e) {
-      DEBUG && console.warn('is_visible failed', e);
+      console.warn('is_visible failed', e);
       return false;
     }
   }

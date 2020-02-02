@@ -18,8 +18,6 @@ import { IDocumentInfo } from 'lsp-ws-connection/src';
 
 import { DocumentConnectionManager } from '../connection_manager';
 
-const DEBUG = 0;
-
 type language = string;
 
 interface IVirtualLine {
@@ -616,7 +614,7 @@ export class VirtualDocument {
   }
 
   close_foreign(document: VirtualDocument) {
-    DEBUG && console.log('LSP: closing document', document);
+    console.log('LSP: closing document', document);
     this.foreign_document_closed.emit({
       foreign_document: document,
       parent_host: this

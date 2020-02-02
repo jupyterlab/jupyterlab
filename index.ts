@@ -36,8 +36,6 @@ import { LSPStatus } from './adapters/jupyterlab/components/statusbar';
 import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
 import { DocumentConnectionManager } from './connection_manager';
 
-const DEBUG = 0;
-
 const lsp_commands: Array<IFeatureCommand> = [].concat(
   ...lsp_features.map(feature => feature.commands)
 );
@@ -111,8 +109,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     );
 
     fileEditorTracker.widgetUpdated.connect((_sender, _widget) => {
-      DEBUG && console.log(_sender);
-      DEBUG && console.log(_widget);
+      console.log(_sender);
+      console.log(_widget);
       // TODO?
       // adapter.remove();
       // connection.close();
@@ -216,7 +214,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         });
       })
       .catch((reason: Error) => {
-        DEBUG && console.error(reason.message);
+        console.error(reason.message);
       });
   },
   autoStart: true
