@@ -257,7 +257,12 @@ export class Hover extends CodeMirrorLSPFeature {
   remove(): void {
     this.remove_range_highlight();
     this.debounced_get_hover.dispose();
-    this.debounced_get_hover = null;
     super.remove();
+
+    // just to be sure
+    this.debounced_get_hover = null;
+    this.remove_range_highlight = null;
+    this.handleHover = null;
+    this.on_hover = null;
   }
 }

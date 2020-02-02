@@ -136,11 +136,11 @@ export class DocumentConnectionManager {
       this.on_new_connection
     );
 
+    this.connections.set(virtual_document.id_path, connection);
+
     if (connection.isReady) {
       connection.sendOpen(virtual_document.document_info);
     }
-
-    this.connections.set(virtual_document.id_path, connection);
 
     return connection;
   }
@@ -172,6 +172,7 @@ export class DocumentConnectionManager {
 
     connection.on('serverInitialized', capabilities => {
       this.forEachDocumentOfConnection(connection, virtual_document => {
+        connection.sendOpen(virtual_document.document_info);
         this.initialized.emit({ connection, virtual_document });
       });
     });
@@ -245,7 +246,7 @@ export class DocumentConnectionManager {
 
     if (!connection.isReady) {
       try {
-        await until_ready(() => connection.isReady, 100, 200);
+        await until_ready(() => connection.isReady, 200, 200);
       } catch {
         DEBUG &&
           console.warn(
