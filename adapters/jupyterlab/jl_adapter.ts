@@ -133,7 +133,6 @@ export abstract class JupyterLabWidgetAdapter
     this.connection_manager = connection_manager;
 
     // set up signal connections
-    this.widget.context.pathChanged.connect(this.reload_connection, this);
     this.widget.context.saveState.connect(this.on_save_state, this);
     this.connection_manager.closed.connect(this.on_connection_closed, this);
     this.document_connected.connect(this.connect_completion, this);
@@ -162,7 +161,6 @@ export abstract class JupyterLabWidgetAdapter
       this.disconnect_adapter(this.virtual_editor?.virtual_document);
     }
 
-    this.widget.context.pathChanged.disconnect(this.reload_connection, this);
     this.widget.context.saveState.disconnect(this.on_save_state, this);
     this.connection_manager.closed.disconnect(this.on_connection_closed, this);
     this.document_connected.disconnect(this.connect_completion, this);
@@ -181,7 +179,7 @@ export abstract class JupyterLabWidgetAdapter
     );
     this.virtual_editor.dispose();
 
-    this.current_completion_connector.dispose();
+    this.current_completion_connector?.dispose();
 
     // just to be sure
     this.virtual_editor = null;
@@ -239,6 +237,7 @@ export abstract class JupyterLabWidgetAdapter
     this.connection_manager.unregister_document(
       this.virtual_editor.virtual_document
     );
+
     // recreate virtual document using current path and language
     this.virtual_editor.create_virtual_document();
     // reconnect

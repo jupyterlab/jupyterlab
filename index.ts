@@ -33,7 +33,10 @@ import {
 import IPaths = JupyterFrontEnd.IPaths;
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './adapters/jupyterlab/components/statusbar';
-import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
+import {
+  IDocumentWidget,
+  DocumentRegistry
+} from '@jupyterlab/docregistry/lib/registry';
 import { DocumentConnectionManager } from './connection_manager';
 
 const lsp_commands: Array<IFeatureCommand> = [].concat(
@@ -116,7 +119,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
       // connection.close();
     });
 
-    fileEditorTracker.widgetAdded.connect((sender, widget) => {
+    const connect_file_editor = (
+      widget: IDocumentWidget<FileEditor, DocumentRegistry.IModel>
+    ) => {
       let fileEditor = widget.content;
 
       if (fileEditor.editor instanceof CodeMirrorEditor) {
@@ -131,17 +136,30 @@ const plugin: JupyterFrontEndPlugin<void> = {
         );
         file_editor_adapters.set(fileEditor.id, adapter);
 
-        file_editor_adapters.set(widget.id, adapter);
         const disconnect = () => {
-          file_editor_adapters.delete(widget.id);
+          file_editor_adapters.delete(fileEditor.id);
           widget.disposed.disconnect(disconnect);
+          widget.context.pathChanged.disconnect(reconnect);
           adapter.dispose();
           if (status_bar_item.model.adapter === adapter) {
             status_bar_item.model.adapter = null;
           }
         };
+
+        const reconnect = () => {
+          disconnect();
+          connect_file_editor(widget);
+        };
+
         widget.disposed.connect(disconnect);
+        widget.context.pathChanged.connect(reconnect);
+
+        status_bar_item.model.adapter = adapter;
       }
+    };
+
+    fileEditorTracker.widgetAdded.connect((sender, widget) => {
+      connect_file_editor(widget);
     });
 
     let command_manager = new FileEditorCommandManager(
@@ -152,7 +170,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     );
     command_manager.add(lsp_commands);
 
-    notebookTracker.widgetAdded.connect(async (sender, widget) => {
+    const connect_notebook = (widget: NotebookPanel) => {
       // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
       let jumper = new NotebookJumper(widget, documentManager);
       let adapter = new NotebookAdapter(
@@ -164,15 +182,30 @@ const plugin: JupyterFrontEndPlugin<void> = {
         connection_manager
       );
       notebook_adapters.set(widget.id, adapter);
+
       const disconnect = () => {
         notebook_adapters.delete(widget.id);
         widget.disposed.disconnect(disconnect);
+        widget.context.pathChanged.disconnect(reconnect);
         adapter.dispose();
         if (status_bar_item.model.adapter === adapter) {
           status_bar_item.model.adapter = null;
         }
       };
+
+      const reconnect = () => {
+        disconnect();
+        connect_notebook(widget);
+      };
+
+      widget.context.pathChanged.connect(reconnect);
       widget.disposed.connect(disconnect);
+
+      status_bar_item.model.adapter = adapter;
+    };
+
+    notebookTracker.widgetAdded.connect(async (sender, widget) => {
+      connect_notebook(widget);
     });
 
     // position context menu entries after 10th but before 11th default entry

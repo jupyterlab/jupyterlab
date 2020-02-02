@@ -222,7 +222,7 @@ export class NotebookCommandManager extends ContextCommandManager {
       cm_cursor
     );
 
-    return this.current_adapter.get_context(root_position);
+    return this.current_adapter?.get_context(root_position);
   }
 }
 
@@ -243,7 +243,7 @@ export class FileEditorCommandManager extends ContextCommandManager {
     let editor = this.tracker.currentWidget.content.editor;
     let ce_cursor = editor.getCursorPosition();
     let root_position = PositionConverter.ce_to_cm(ce_cursor) as IRootPosition;
-    return this.current_adapter.get_context(root_position);
+    return this.current_adapter?.get_context(root_position);
   }
 }
 

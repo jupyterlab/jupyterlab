@@ -148,6 +148,7 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
     for (let [event_name, handler] of this.wrapper_handlers) {
       this.wrapper.addEventListener(event_name, handler);
     }
+
     this.is_registered = true;
   }
 

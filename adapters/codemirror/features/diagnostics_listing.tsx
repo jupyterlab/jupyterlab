@@ -270,6 +270,9 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
 
     let by_document = Array.from(diagnostics_db).map(
       ([virtual_document, diagnostics]) => {
+        if (virtual_document.isDisposed) {
+          return [];
+        }
         return diagnostics.map((diagnostic_data, i) => {
           let cell_number: number = null;
           if (editor.has_cells) {
