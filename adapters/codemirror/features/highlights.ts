@@ -27,7 +27,6 @@ export class Highlights extends CodeMirrorLSPFeature {
   ];
 
   register(): void {
-    this.connection_handlers.set('highlight', this.handleHighlight);
     this.editor_handlers.set('cursorActivity', this.onCursorActivity);
     super.register();
   }

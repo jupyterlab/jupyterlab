@@ -44,7 +44,6 @@ export class Hover extends CodeMirrorLSPFeature {
         );
       }
     });
-    this.connection_handlers.set('hover', this.handleHover);
     // TODO: make the debounce rate configurable
     this.debounced_get_hover = new Debouncer<Promise<lsProtocol.Hover>>(
       this.on_hover,
