@@ -256,9 +256,7 @@ export class DocumentConnectionManager {
   }
 
   public unregister_document(virtual_document: VirtualDocument) {
-    const connection = this.connections.get(virtual_document.id_path);
     this.connections.delete(virtual_document.id_path);
-    this.closed.emit({ connection, virtual_document });
   }
 }
 

@@ -73,6 +73,9 @@ export class Highlights extends CodeMirrorLSPFeature {
   };
 
   protected onCursorActivity = async () => {
+    if (!this.virtual_editor?.virtual_document?.document_info) {
+      return;
+    }
     let root_position: IRootPosition;
 
     try {
