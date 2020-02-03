@@ -16,7 +16,7 @@ describe('@jupyterlab/ui-components', () => {
     it('should hold a string with the raw contents of an svg', () => {
       expect(fooSvgstr).to.be.string;
       expect(
-        fooSvgstr.startsWith(`<svg width="24" height="24" viewBox="0 0 24 24">`)
+        fooSvgstr.startsWith(`<svg width="24" height="24" viewBox="0 0 24 24"`)
       ).to.be.true;
     });
   });
@@ -27,7 +27,7 @@ describe('@jupyterlab/ui-components', () => {
         expect(fooIcon.svgstr).to.be.string;
         expect(
           fooIcon.svgstr.startsWith(
-            `<svg width="24" height="24" viewBox="0 0 24 24">`
+            `<svg width="24" height="24" viewBox="0 0 24 24"`
           )
         ).to.be.true;
       });
