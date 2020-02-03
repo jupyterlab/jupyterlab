@@ -265,6 +265,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     render,
     unrender,
     rendererClass = LabIcon.ElementRenderer,
+    className = '',
     _loading = false
   }: LabIcon.IOptions & { _loading?: boolean }) {
     if (!(name && svgstr)) {
@@ -299,7 +300,8 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     }
 
     this.name = name;
-    this._className = Private.nameToClassName(name);
+    this._className =
+      className != undefined ? className : Private.nameToClassName(name);
     this.svgstr = svgstr;
 
     this.react = this._initReact();
@@ -606,6 +608,7 @@ export namespace LabIcon {
    */
   export interface IOptions extends IIcon, Partial<VirtualElement.IRenderer> {
     rendererClass?: typeof Renderer;
+    className?: string;
   }
 
   /**
