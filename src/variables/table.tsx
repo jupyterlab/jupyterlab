@@ -131,7 +131,7 @@ const VariablesComponent = ({
     variable: VariablesModel.IVariable
   ) => {
     setSelected(variable);
-    await commands.execute(CommandIDs.addDetails, {
+    await commands.execute(CommandIDs.variableDetails, {
       variableReference: variable.variablesReference,
       title: variable.evaluateName
     });

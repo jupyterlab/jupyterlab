@@ -18,7 +18,7 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
-import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
+import { DocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 
@@ -58,7 +58,7 @@ export namespace CommandIDs {
 
   export const stepOut = 'debugger:stepOut';
 
-  export const addDetails = 'debugger:variableDetails';
+  export const variableDetails = 'debugger:variable-details';
 }
 
 /**
@@ -257,8 +257,8 @@ const tracker: JupyterFrontEndPlugin<void> = {
 /*
  * A plugin to open detailed views for variables.
  */
-const details: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger:details',
+const variables: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger:variables',
   autoStart: true,
   requires: [IDebugger],
   activate: (app: JupyterFrontEnd, service: IDebugger) => {
@@ -267,12 +267,11 @@ const details: JupyterFrontEndPlugin<void> = {
       namespace: 'variableDetails'
     });
 
-    commands.addCommand(CommandIDs.addDetails, {
-      label: 'Continue',
-      caption: 'Continue',
+    commands.addCommand(CommandIDs.variableDetails, {
+      label: 'Variable Details',
+      caption: 'Variable Details',
       execute: async args => {
         const { variableReference } = args;
-        const title = args.title as string;
         if (!variableReference || variableReference === 0) {
           return;
         }
@@ -280,18 +279,17 @@ const details: JupyterFrontEndPlugin<void> = {
           variableReference as number
         );
 
+        const title = args.title as string;
+        const id = `jp-debugger-details-${title}`;
         if (
           !details ||
           details.length === 0 ||
-          tracker.find(widget => widget.id === `jp-debugger-details-${title}`)
+          tracker.find(widget => widget.id === id)
         ) {
           return;
         }
 
         const model = (service.model as DebuggerModel).variables;
-        const openOption: DocumentRegistry.IOpenOptions = {
-          mode: tracker.currentWidget ? 'split-right' : 'split-bottom'
-        };
         const widget = new MainAreaWidget<VariableDetails>({
           content: new VariableDetails({
             commands,
@@ -301,9 +299,11 @@ const details: JupyterFrontEndPlugin<void> = {
             title
           })
         });
-        widget.id = `jp-debugger-details-${title}`;
+        widget.id = id;
         void tracker.add(widget);
-        shell.add(widget, 'main', openOption);
+        shell.add(widget, 'main', {
+          mode: tracker.currentWidget ? 'split-right' : 'split-bottom'
+        });
       }
     });
   }
@@ -445,7 +445,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   files,
   notebooks,
   tracker,
-  details,
+  variables,
   main
 ];
 
