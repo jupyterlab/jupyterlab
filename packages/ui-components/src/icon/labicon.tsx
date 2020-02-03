@@ -3,7 +3,7 @@
 
 import { UUID } from '@lumino/coreutils';
 import { Signal } from '@lumino/signaling';
-import { ElementAttrs, VirtualNode } from '@lumino/virtualdom';
+import { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
@@ -16,7 +16,7 @@ import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
 
-export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
+export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   /***********
    * statics *
    ***********/
@@ -545,7 +545,10 @@ export class LabIcon implements LabIcon.ILabIcon, LabIcon.IRenderer {
    */
   readonly react: LabIcon.IReact;
 
-  readonly render: (container: HTMLElement, props?: LabIcon.IProps) => void;
+  readonly render: (
+    container: HTMLElement,
+    options?: LabIcon.IRendererOptions
+  ) => void;
   readonly unrender: (container: HTMLElement) => void;
 
   protected _className: string;
@@ -585,15 +588,6 @@ export namespace LabIcon {
     svgstr: string;
   }
 
-  /**
-   * Interface for generic renderer. Compatible with interface of
-   * Title.iconRenderer from @lumino/widgets
-   */
-  export interface IRenderer {
-    readonly render: (container: HTMLElement, options: any) => void;
-    readonly unrender: (container: HTMLElement) => void;
-  }
-
   export interface IRendererOptions {
     attrs?: ElementAttrs;
     children?: ReadonlyArray<VirtualNode>;
@@ -604,13 +598,13 @@ export namespace LabIcon {
    * The ILabIcon interface. Outside of this interface the actual
    * implementation of LabIcon may vary
    */
-  export interface ILabIcon extends IIcon, IRenderer {}
+  export interface ILabIcon extends IIcon, VirtualElement.IRenderer {}
 
   /**
    * Interface defining the parameters to be passed to the LabIcon
    * constructor
    */
-  export interface IOptions extends IIcon, Partial<IRenderer> {
+  export interface IOptions extends IIcon, Partial<VirtualElement.IRenderer> {
     rendererClass?: typeof Renderer;
   }
 
@@ -661,7 +655,9 @@ export namespace LabIcon {
   /**
    * A type that can be resolved to a LabIcon instance.
    */
-  export type IResolvable = string | (IIcon & Partial<IRenderer>);
+  export type IResolvable =
+    | string
+    | (IIcon & Partial<VirtualElement.IRenderer>);
 
   /**
    * The type of the svg node ref that can be passed into icon React components
@@ -687,7 +683,7 @@ export namespace LabIcon {
   /**
    * Base implementation of IRenderer.
    */
-  export class Renderer implements IRenderer {
+  export class Renderer implements VirtualElement.IRenderer {
     constructor(
       protected _icon: LabIcon,
       protected _rendererOptions: IRendererOptions = {}

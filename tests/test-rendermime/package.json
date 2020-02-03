@@ -25,7 +25,7 @@
     "@jupyterlab/testutils": "^2.0.0-beta.3",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
-    "@lumino/widgets": "^1.10.0",
+    "@lumino/widgets": "^1.10.2",
     "chai": "^4.2.0"
   },
   "devDependencies": {
