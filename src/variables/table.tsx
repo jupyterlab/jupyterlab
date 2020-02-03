@@ -25,9 +25,11 @@ export class VariablesBodyTable extends ReactWidget {
    */
   constructor(options: VariablesBodyTable.IOptions) {
     super();
-    this._model = options.model;
     this._commands = options.commands;
-    this._model.changed.connect(this._updateScopes, this);
+
+    const model = options.model;
+    model.changed.connect(this._updateScopes, this);
+
     this.addClass('jp-DebuggerVariables-body');
   }
 
@@ -60,7 +62,6 @@ export class VariablesBodyTable extends ReactWidget {
     this.update();
   }
 
-  private _model: VariablesModel;
   private _scopes: VariablesModel.IScope[] = [];
   private _commands: CommandRegistry;
 }
@@ -82,8 +83,8 @@ export class VariableDetails extends ReactWidget {
 
     this._variables = details;
     this._commands = commands;
-    this._model = model;
-    this._model.changed.connect(this._onModelChanged, this);
+
+    model.changed.connect(this._onModelChanged, this);
 
     this.addClass('jp-DebuggerVariableDetails');
   }
@@ -106,7 +107,6 @@ export class VariableDetails extends ReactWidget {
 
   private _variables: VariablesModel.IVariable[] = [];
   private _commands: CommandRegistry;
-  private _model: VariablesModel;
 }
 
 /**

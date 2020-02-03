@@ -23,9 +23,11 @@ export class VariablesBodyTree extends ReactWidget {
    */
   constructor(options: VariablesBodyTree.IOptions) {
     super();
-    this._model = options.model;
     this._service = options.service;
-    this._model.changed.connect(this._updateScopes, this);
+
+    const model = options.model;
+    model.changed.connect(this._updateScopes, this);
+
     this.addClass('jp-DebuggerVariables-body');
   }
 
@@ -58,7 +60,6 @@ export class VariablesBodyTree extends ReactWidget {
     this.update();
   }
 
-  private _model: VariablesModel;
   private _scopes: VariablesModel.IScope[] = [];
   private _service: IDebugger;
 }
