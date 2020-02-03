@@ -24,7 +24,7 @@ import {
   caretDownIcon,
   caretUpIcon,
   fileIcon,
-  JLIcon
+  LabIcon
 } from '@jupyterlab/ui-components';
 
 import {
@@ -51,7 +51,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 import { FileBrowserModel } from './model';
-import { IIconStyle } from '@jupyterlab/ui-components/lib/style/icon';
 
 /**
  * The class name added to DirListing widget.
@@ -1834,21 +1833,16 @@ export namespace DirListing {
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      const iconProps: JLIcon.IProps = {
-        className: ITEM_ICON_CLASS,
+      // render the file item's icon
+      LabIcon.resolveElement({
+        icon: fileType?.icon,
+        iconClass: fileType?.iconClass,
+        fallback: fileIcon,
         container: iconContainer,
+        className: ITEM_ICON_CLASS,
         justify: 'center',
         kind: 'listing'
-      };
-
-      // render the icon svg node
-      if (fileType?.iconRenderer) {
-        fileType.iconRenderer.element(iconProps);
-      } else if (fileType?.iconClass) {
-        JLIcon.getElement({ name: fileType.iconClass, ...iconProps });
-      } else {
-        fileIcon.element(iconProps);
-      }
+      });
 
       let hoverText = 'Name: ' + model.name;
       // add file size to pop up if its available
@@ -2100,20 +2094,17 @@ namespace Private {
     float: 'left' | 'right',
     state?: 'down' | 'up' | undefined
   ): void {
-    const propsStyle: IIconStyle = {
-      kind: 'listingHeaderItem',
-      justify: 'center',
-      float
-    };
-
     if (state) {
       (state === 'down' ? caretDownIcon : caretUpIcon).element({
         container,
         tag: 'span',
-        ...propsStyle
+        kind: 'listingHeaderItem',
+        justify: 'center',
+        float
       });
     } else {
-      caretDownIcon.recycle({ container, ...propsStyle });
+      LabIcon.remove(container);
+      container.className = HEADER_ITEM_ICON_CLASS;
     }
   }
 }

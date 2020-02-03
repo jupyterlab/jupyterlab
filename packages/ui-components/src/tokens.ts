@@ -7,11 +7,11 @@ import { Token } from '@lumino/coreutils';
  * Placeholder for future icon manager class to assist with
  * overriding/replacing particular sets of icons
  */
-export interface IJLIconManager {}
+export interface ILabIconManager {}
 
 /**
- * The IJLIconManager token.
+ * The ILabIconManager token.
  */
-export const IJLIconManager = new Token<IJLIconManager>(
-  '@jupyterlab/ui-components:IJLIconManager'
+export const ILabIconManager = new Token<ILabIconManager>(
+  '@jupyterlab/ui-components:ILabIconManager'
 );

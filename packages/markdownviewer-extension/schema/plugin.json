@@ -1,5 +1,5 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-MarkdownIcon",
+  "jupyter.lab.setting-icon": "ui-components:markdown",
   "jupyter.lab.setting-icon-label": "Markdown Viewer",
   "title": "Markdown Viewer",
   "description": "Markdown viewer settings.",

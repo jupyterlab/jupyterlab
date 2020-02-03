@@ -7,9 +7,13 @@
   "additionalProperties": true,
   "properties": {
     "jupyter.lab.setting-deprecated": { "type": "boolean", "default": false },
+    "jupyter.lab.setting-icon": {
+      "type": "string",
+      "default": "ui-components:settings"
+    },
     "jupyter.lab.setting-icon-class": {
       "type": "string",
-      "default": "jp-SettingsIcon"
+      "default": ""
     },
     "jupyter.lab.setting-icon-label": { "type": "string", "default": "Plugin" },
     "jupyter.lab.shortcuts": {

@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 
-import { caretDownEmptyIcon, JLIcon } from '../icon';
+import { caretDownEmptyIcon, LabIcon } from '../icon';
 import { DEFAULT_STYLE_CLASS, IElementRefProps } from './interface';
 import { classes } from '../utils';
 
@@ -36,9 +36,9 @@ export interface IHTMLSelectProps
     React.SelectHTMLAttributes<HTMLSelectElement> {
   defaultStyle?: boolean;
 
-  iconProps?: JLIcon.IProps;
+  iconProps?: LabIcon.IProps;
 
-  iconRenderer?: JLIcon;
+  icon?: LabIcon;
 
   options?: Array<string | number | IOptionProps>;
 }
@@ -51,7 +51,7 @@ export class HTMLSelect extends React.Component<IHTMLSelectProps> {
       disabled,
       elementRef,
       iconProps,
-      iconRenderer = caretDownEmptyIcon,
+      icon = caretDownEmptyIcon,
       options = [],
       ...htmlProps
     } = this.props;
@@ -87,7 +87,7 @@ export class HTMLSelect extends React.Component<IHTMLSelectProps> {
           {optionChildren}
           {htmlProps.children}
         </select>
-        <iconRenderer.react
+        <icon.react
           {...{
             tag: 'span',
             kind: 'select',

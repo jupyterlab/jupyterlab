@@ -7,7 +7,7 @@ import {
   circleEmptyIcon,
   circleIcon,
   classes,
-  JLIcon,
+  LabIcon,
   refreshIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
@@ -367,7 +367,7 @@ export namespace Toolbar {
     sessionContext: ISessionContext
   ): Widget {
     return new ToolbarButton({
-      iconRenderer: stopIcon,
+      icon: stopIcon,
       onClick: () => {
         void sessionContext.session?.kernel?.interrupt();
       },
@@ -383,7 +383,7 @@ export namespace Toolbar {
     dialogs?: ISessionContext.IDialogs
   ): Widget {
     return new ToolbarButton({
-      iconRenderer: refreshIcon,
+      icon: refreshIcon,
       onClick: () => {
         void (dialogs ?? sessionContextDialogs).restart(sessionContext);
       },
@@ -450,7 +450,7 @@ export namespace ToolbarButtonComponent {
     label?: string;
     iconClass?: string;
     iconLabel?: string;
-    iconRenderer?: JLIcon;
+    icon?: LabIcon;
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
@@ -482,31 +482,6 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     }
   };
 
-  const Icon = () => {
-    if (props.iconRenderer) {
-      return (
-        <props.iconRenderer.react
-          className={classes(props.iconClass, 'jp-ToolbarButtonComponent-icon')}
-          tag="span"
-          justify="center"
-          kind="toolbarButton"
-        />
-      );
-    } else if (props.iconClass) {
-      return (
-        <JLIcon.getReact
-          name={classes(props.iconClass, 'jp-Icon', 'jp-Icon-16')}
-          className="jp-ToolbarButtonComponent-icon"
-          tag="span"
-          justify="center"
-          kind="toolbarButton"
-        />
-      );
-    } else {
-      return <></>;
-    }
-  };
-
   return (
     <Button
       className={
@@ -520,7 +495,17 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       title={props.tooltip || props.iconLabel}
       minimal
     >
-      <Icon />
+      <LabIcon.resolveReact
+        icon={props.icon}
+        iconClass={
+          // add some extra classes for proper support of icons-as-css-backgorund
+          classes(props.iconClass, 'jp-Icon', 'jp-Icon-16')
+        }
+        className="jp-ToolbarButtonComponent-icon"
+        tag="span"
+        justify="center"
+        kind="toolbarButton"
+      />
       {props.label && (
         <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
       )}

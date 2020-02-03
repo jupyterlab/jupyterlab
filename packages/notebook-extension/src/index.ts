@@ -582,7 +582,7 @@ function activateNotebookHandler(
     // Set up the title icon
     widget.title.iconClass = ft?.iconClass ?? '';
     widget.title.iconLabel = ft?.iconLabel ?? '';
-    widget.title.iconRenderer = ft?.iconRenderer!;
+    widget.title.iconRenderer = ft?.icon!;
 
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {

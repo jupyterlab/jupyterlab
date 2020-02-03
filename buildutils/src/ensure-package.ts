@@ -21,13 +21,13 @@ const HEADER_TEMPLATE = `
 `;
 
 const ICON_IMPORTS_TEMPLATE = `
-import { JLIcon } from './jlicon';
+import { LabIcon } from './labicon';
 
 // icon svg import statements
-{{iconImportStatements}}
+{{svgImportStatements}}
 
-// JLIcon instance construction
-{{jliconConstruction}}
+// LabIcon instance construction
+{{labiconConstructions}}
 `;
 
 const ICON_CSS_CLASSES_TEMPLATE = `
@@ -355,48 +355,52 @@ export async function ensureUiComponents(
   dorequire: boolean = false
 ): Promise<string[]> {
   const funcName = 'ensureUiComponents';
+  const pkgName = utils.stem(pkgPath);
   let messages: string[] = [];
 
-  const svgs = glob.sync(path.join(pkgPath, 'style/icons', '**/*.svg'));
+  const svgPaths = glob.sync(path.join(pkgPath, 'style/icons', '**/*.svg'));
 
   /* support for glob import of icon svgs */
   const iconSrcDir = path.join(pkgPath, 'src/icon');
 
   // build the per-icon import code
-  let _iconImportStatements: string[] = [];
-  let _jliconConstruction: string[] = [];
-  svgs.forEach(svg => {
-    const name = utils.stem(svg);
-    const svgpath = path
-      .relative(iconSrcDir, svg)
+  let _svgImportStatements: string[] = [];
+  let _labiconConstructions: string[] = [];
+  svgPaths.forEach(svgPath => {
+    const svgName = utils.stem(svgPath);
+    const svgImportPath = path
+      .relative(iconSrcDir, svgPath)
       .split(path.sep)
       .join('/');
 
-    const svgname = utils.camelCase(name) + 'Svg';
-    const iconname = utils.camelCase(name) + 'Icon';
+    const svgstrRef = utils.camelCase(svgName) + 'Svgstr';
+    const iconRef = utils.camelCase(svgName) + 'Icon';
+    const iconName = [pkgName, utils.stem(svgPath)].join(':');
 
     if (dorequire) {
       // load the icon svg using `require`
-      _jliconConstruction.push(
-        `export const ${iconname} = new JLIcon({ name: '${name}', svgstr: require('${svgpath}').default });`
+      _labiconConstructions.push(
+        `export const ${iconRef} = new LabIcon({ name: '${iconName}', svgstr: require('${svgImportPath}').default });`
       );
     } else {
       // load the icon svg using `import`
-      _iconImportStatements.push(`import ${svgname} from '${svgpath}';`);
+      _svgImportStatements.push(`import ${svgstrRef} from '${svgImportPath}';`);
 
-      _jliconConstruction.push(
-        `export const ${iconname} = new JLIcon({ name: '${name}', svgstr: ${svgname} });`
+      _labiconConstructions.push(
+        `export const ${iconRef} = new LabIcon({ name: '${iconName}', svgstr: ${svgstrRef} });`
       );
     }
   });
-  const iconImportStatements = _iconImportStatements.join('\n');
-  const jliconConstruction = _jliconConstruction.join('\n');
+
+  // sort the statements and then join them
+  const svgImportStatements = _svgImportStatements.sort().join('\n');
+  const labiconConstructions = _labiconConstructions.sort().join('\n');
 
   // generate the actual contents of the iconImports file
   const iconImportsPath = path.join(iconSrcDir, 'iconimports.ts');
   const iconImportsContents = utils.fromTemplate(
     HEADER_TEMPLATE + ICON_IMPORTS_TEMPLATE,
-    { funcName, iconImportStatements, jliconConstruction }
+    { funcName, svgImportStatements, labiconConstructions }
   );
   messages.push(...ensureFile(iconImportsPath, iconImportsContents, false));
 
@@ -406,14 +410,14 @@ export async function ensureUiComponents(
   // build the per-icon import code
   let _iconCSSUrls: string[] = [];
   let _iconCSSDeclarations: string[] = [];
-  svgs.forEach(svg => {
-    const name = utils.stem(svg);
-    const urlName = 'jp-icon-' + name;
-    const className = 'jp-' + utils.camelCase(name, true) + 'Icon';
+  svgPaths.forEach(svgPath => {
+    const svgName = utils.stem(svgPath);
+    const urlName = 'jp-icon-' + svgName;
+    const className = 'jp-' + utils.camelCase(svgName, true) + 'Icon';
 
     _iconCSSUrls.push(
       `--${urlName}: url('${path
-        .relative(iconCSSDir, svg)
+        .relative(iconCSSDir, svgPath)
         .split(path.sep)
         .join('/')}');`
     );
@@ -421,8 +425,10 @@ export async function ensureUiComponents(
       `.${className} {background-image: var(--${urlName})}`
     );
   });
-  const iconCSSUrls = _iconCSSUrls.join('\n');
-  const iconCSSDeclarations = _iconCSSDeclarations.join('\n');
+
+  // sort the statements and then join them
+  const iconCSSUrls = _iconCSSUrls.sort().join('\n');
+  const iconCSSDeclarations = _iconCSSDeclarations.sort().join('\n');
 
   // generate the actual contents of the iconCSSClasses file
   const iconCSSClassesPath = path.join(iconCSSDir, 'deprecated.css');

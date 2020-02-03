@@ -62,7 +62,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createSaveButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='save']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='save']")).to.exist;
         });
       });
 
@@ -81,7 +81,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createInsertButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='add']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='add']")).to.exist;
           button.dispose();
         });
       });
@@ -104,7 +104,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createCutButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='cut']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='cut']")).to.exist;
           button.dispose();
         });
       });
@@ -127,7 +127,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createCopyButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='copy']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='copy']")).to.exist;
           button.dispose();
         });
       });
@@ -149,7 +149,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createPasteButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='paste']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='paste']")).to.exist;
           button.dispose();
         });
       });
@@ -276,7 +276,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createRunButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='run']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='run']")).to.exist;
         });
       });
     });

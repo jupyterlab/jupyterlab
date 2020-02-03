@@ -1,5 +1,5 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-TerminalIcon",
+  "jupyter.lab.setting-icon": "ui-components:terminal",
   "jupyter.lab.setting-icon-label": "Terminal",
   "title": "Terminal",
   "description": "Terminal settings.",

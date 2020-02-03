@@ -5,12 +5,13 @@ import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import {
   Button,
-  InputGroup,
-  Collapse,
-  refreshIcon,
-  jupyterIcon,
+  caretDownIcon,
   caretRightIcon,
-  caretDownIcon
+  Collapse,
+  InputGroup,
+  jupyterIcon,
+  LabIcon,
+  refreshIcon
 } from '@jupyterlab/ui-components';
 
 import { Message } from '@lumino/messaging';
@@ -343,7 +344,6 @@ export class CollapsibleSection extends React.Component<
     };
   }
 
-  // TODO: swtich to iconRenderer
   /**
    * Render the collapsible section using the virtual DOM.
    */
@@ -352,12 +352,11 @@ export class CollapsibleSection extends React.Component<
       <>
         <header>
           <ToolbarButtonComponent
-            iconRenderer={this.state.isOpen ? caretDownIcon : caretRightIcon}
-            iconClass={
-              this.state.isOpen
-                ? caretDownIcon.class({ height: 'auto', width: '20px' })
-                : caretRightIcon.class({ height: 'auto', width: '20px' })
-            }
+            icon={this.state.isOpen ? caretDownIcon : caretRightIcon}
+            iconClass={LabIcon.UNSTABLE_style({
+              height: 'auto',
+              width: '20px'
+            })}
             onClick={() => {
               this.handleCollapse();
             }}
@@ -546,7 +545,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
           headerElements={
             <ToolbarButtonComponent
               key="refresh-button"
-              iconRenderer={refreshIcon}
+              icon={refreshIcon}
               onClick={() => {
                 model.refreshInstalled();
               }}
