@@ -255,7 +255,7 @@ const tracker: JupyterFrontEndPlugin<void> = {
 };
 
 /*
- * A plugin for add widget with detials of veriable.
+ * A plugin to open detailed views for variables.
  */
 const details: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:details',

@@ -16,11 +16,11 @@ import { CommandIDs } from '..';
 import { CommandRegistry } from '@lumino/commands';
 
 /**
- * The body for table of Variables .
+ * The body for a table of variables.
  */
 export class VariablesBodyTable extends ReactWidget {
   /**
-   * Instantiate a new Body for the table of Variables .
+   * Instantiate a new Body for the table of variables.
    * @param options The instantiation options for a VariablesBodyTable.
    */
   constructor(options: VariablesBodyTable.IOptions) {

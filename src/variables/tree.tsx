@@ -14,12 +14,12 @@ import { IDebugger } from '../tokens';
 import { VariablesModel } from './model';
 
 /**
- * The body for tree of Variables .
+ * The body for tree of variables.
  */
 export class VariablesBodyTree extends ReactWidget {
   /**
-   * Instantiate a new Body for the tree of Variables.
-   * @param model The model for the variables.
+   * Instantiate a new Body for the tree of variables.
+   * @param options The instantiation options for a VariablesBodyTree.
    */
   constructor(options: VariablesBodyTree.IOptions) {
     super();
@@ -38,7 +38,7 @@ export class VariablesBodyTree extends ReactWidget {
   }
 
   /**
-   * Render the VariablesComponent.
+   * Render the VariablesBodyTree.
    */
   render() {
     return (

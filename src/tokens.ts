@@ -125,7 +125,7 @@ export interface IDebugger {
 
   /**
    * Get details of variable
-   * @param variable variable
+   * @param variable The variable for which to request details.
    */
   getVariableDetails(
     variablesReference: number

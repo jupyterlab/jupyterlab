@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Toolbar } from '@jupyterlab/apputils';
+
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
