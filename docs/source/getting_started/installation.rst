@@ -85,6 +85,17 @@ the version of the ``notebook`` package that you have installed:
 
     jupyter notebook --version
 
+
+Usage with JupyterHub
+~~~~~~~~~~~~~~~~~~~~~
+
+Install JupyterLab and JupyterHub.
+
+In ``jupyterhub_config.py``, configure the ``Spawner`` to tell the single-user notebook servers to default to JupyterLab:
+
+``c.Spawner.default_url = '/lab'``
+
+
 Supported browsers
 ~~~~~~~~~~~~~~~~~~
 
@@ -101,3 +112,6 @@ minimum versions listed above.  IE 11+ or Edge 14 do not support
 CSS Variables, and are not directly supported at this time.
 A tool like `postcss <https://postcss.org/>`__ can be used to convert the CSS files in the
 ``jupyterlab/build`` directory manually if desired.
+
+
+
