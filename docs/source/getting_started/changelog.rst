@@ -24,6 +24,7 @@ User-facing changes
 * Support for output search in notebooks (`#7258 <https://github.com/jupyterlab/jupyterlab/pull/7258>`__)
 * Add commands to move to next/prev tab bar in shell (`#7673 <https://github.com/jupyterlab/jupyterlab/pull/7673>`__)
 * Simplify user experience when selecting "No Kernel" for notebook (`#7647 <https://github.com/jupyterlab/jupyterlab/pull/7647>`__)
+* JupyterHub users should use ``c.Spawner.default_url = '/lab'`` instead of deprecated ``labhubapp`` (`#7724 <https://github.com/jupyterlab/jupyterlab/pull/7724>`__)
 * Drop support for Vega 4 and Vega-lite 2 rendering (`#7650 <https://github.com/jupyterlab/jupyterlab/pull/7650>`__, `#7523 <https://github.com/jupyterlab/jupyterlab/issues/7523>`__)
 * Extra flags options for ``jupyter lab clean`` (`#7583 <https://github.com/jupyterlab/jupyterlab/pull/7583>`__)
 * Global track timing setting for notebooks (`#7578 <https://github.com/jupyterlab/jupyterlab/pull/7578>`__)
@@ -37,12 +38,15 @@ User-facing changes
 
 For developers
 ^^^^^^^^^^^^^^
+Backward incompatible changes:
 * Switch from ``@phosphor`` to ``@lumino`` dependencies. (`#7582 <https://github.com/jupyterlab/jupyterlab/pull/7582>`__, `#7534 <https://github.com/jupyterlab/jupyterlab/issues/7534>`__)
 * Factor out the ``settingsregistry`` and ``statedb`` packages from coreutils (`#7681 <https://github.com/jupyterlab/jupyterlab/pull/7681>`__, `#7615 <https://github.com/jupyterlab/jupyterlab/issues/7615>`__)
 * Rework services architecture (sessions, kernels, terminals).  Rename ``ClientSession`` to ``SessionContext`` (`#7252 <https://github.com/jupyterlab/jupyterlab/pull/7252>`__, `#7674 <https://github.com/jupyterlab/jupyterlab/pull/7674>`__)
 * Upgrade to TypeScript 3.7 (`#7522 <https://github.com/jupyterlab/jupyterlab/pull/7522>`__)
 * Remove ``polling`` from coreutils in favor for ``@lumino/polling`` (`#7617 <https://github.com/jupyterlab/jupyterlab/pull/7617>`__)
 * TypeScript strict null checking in core packages (`#7657 <https://github.com/jupyterlab/jupyterlab/pull/7657>`__, `#7607 <https://github.com/jupyterlab/jupyterlab/pull/7607>`__)
+
+Other changes:
 * New property inspector used to display the properties of the currently selected main area widget (`#7665 <https://github.com/jupyterlab/jupyterlab/pull/7665>`__, `#7664 <https://github.com/jupyterlab/jupyterlab/issues/7664>`__, `#7718 <https://github.com/jupyterlab/jupyterlab/pull/7718>`__, `#7686 <https://github.com/jupyterlab/jupyterlab/issues/7686>`__)
 * Allow metadata for launcher items (`#7654 <https://github.com/jupyterlab/jupyterlab/pull/7654>`__, `#7652 <https://github.com/jupyterlab/jupyterlab/issues/7652>`__)
 * Enable platform-aware key shortcuts (`#7589 <https://github.com/jupyterlab/jupyterlab/pull/7589>`__)
