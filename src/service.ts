@@ -242,6 +242,10 @@ export class DebuggerService implements IDebugger, IDisposable {
       await this.start();
     }
 
+    if (this.isStarted || autoStart) {
+      this._model.title = this.isStarted ? this.session?.connection?.name : '-';
+    }
+
     this._model.breakpoints.restoreBreakpoints(bpMap);
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();
@@ -520,6 +524,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Clear the current model.
    */
   private _clearModel() {
+    this._model.title = this.isStarted ? this.session?.connection?.name : '-';
     this._model.callstack.frames = [];
     this._model.variables.scopes = [];
   }

@@ -44,7 +44,7 @@ export class FileHandler implements IDisposable {
       return;
     }
     this.isDisposed = true;
-    this._editorHandler.dispose();
+    this._editorHandler?.dispose();
     Signal.clearData(this);
   }
 

@@ -78,6 +78,31 @@ export class DebuggerModel implements IDebugger.IModel {
   }
 
   /**
+   * The current debugger title.
+   */
+  get title(): string {
+    return this._title;
+  }
+
+  /**
+   * Set the current debugger title.
+   */
+  set title(title: string) {
+    if (title === this._title) {
+      return;
+    }
+    this._title = title ?? '-';
+    this._titleChanged.emit(title);
+  }
+
+  /**
+   * A signal emitted when the title changes.
+   */
+  get titleChanged(): ISignal<this, string> {
+    return this._titleChanged;
+  }
+
+  /**
    * Dispose the model.
    */
   dispose(): void {
@@ -98,9 +123,12 @@ export class DebuggerModel implements IDebugger.IModel {
     this.callstack.frames = [];
     this.variables.scopes = [];
     this.sources.currentSource = null;
+    this.title = '-';
   }
 
+  private _disposed = new Signal<this, void>(this);
   private _isDisposed = false;
   private _stoppedThreads = new Set<number>();
-  private _disposed = new Signal<this, void>(this);
+  private _title = '-';
+  private _titleChanged = new Signal<this, string>(this);
 }

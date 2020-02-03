@@ -3,7 +3,7 @@
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import { Panel, SplitPanel } from '@lumino/widgets';
+import { Panel, SplitPanel, Widget } from '@lumino/widgets';
 
 import { Breakpoints } from './breakpoints';
 
@@ -14,8 +14,6 @@ import { DebuggerModel } from './model';
 import { DebuggerService } from './service';
 
 import { Sources } from './sources';
-
-import { SidebarHeader } from './header';
 
 import { IDebugger } from './tokens';
 
@@ -63,12 +61,12 @@ export namespace Debugger {
         editorServices
       });
 
-      /**
-       * The header of Widget with current name of session.
-       */
-      const header = new SidebarHeader(this.service);
+      const header = new Sidebar.Header();
 
       this.addWidget(header);
+      this.model.titleChanged.connect((_, title) => {
+        header.title.label = title;
+      });
 
       const body = new SplitPanel();
 
@@ -96,6 +94,7 @@ export namespace Debugger {
       }
       this.model.dispose();
       this.service.model = null;
+      super.dispose();
     }
 
     /**
@@ -152,5 +151,39 @@ export namespace Debugger {
        */
       editorServices: IEditorServices;
     }
+
+    /**
+     * The header for a debugger sidebar.
+     */
+    export class Header extends Widget {
+      /**
+       * Instantiate a new sidebar header.
+       */
+      constructor() {
+        super({ node: Private.createHeader() });
+        this.title.changed.connect(_ => {
+          this.node.querySelector('h2').textContent = this.title.label;
+        });
+      }
+    }
+  }
+}
+
+/**
+ * A namespace for private module data.
+ */
+namespace Private {
+  /**
+   * Create a sidebar header node.
+   */
+  export function createHeader(): HTMLElement {
+    const header = document.createElement('header');
+    const title = document.createElement('h2');
+
+    title.textContent = '-';
+    title.classList.add('jp-left-truncated');
+    header.appendChild(title);
+
+    return header;
   }
 }
