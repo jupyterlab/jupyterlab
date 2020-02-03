@@ -380,7 +380,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Get details of variable
+   * Request details for a variable.
    * @param variable The variable for which to request details.
    */
   async getVariableDetails(

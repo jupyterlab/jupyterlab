@@ -25,16 +25,8 @@ export class VariablesBodyTree extends ReactWidget {
     super();
     this._model = options.model;
     this._service = options.service;
+    this._model.changed.connect(this._updateScopes, this);
     this.addClass('jp-DebuggerVariables-body');
-    this._model.changed.connect(this.updateScopes, this);
-  }
-
-  private updateScopes(model: VariablesModel) {
-    if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
-      return;
-    }
-    this._scopes = model.scopes;
-    this.update();
   }
 
   /**
@@ -54,6 +46,18 @@ export class VariablesBodyTree extends ReactWidget {
     );
   }
 
+  /**
+   * Update the scopes and the tree of variables.
+   * @param model The variables model.
+   */
+  private _updateScopes(model: VariablesModel) {
+    if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
+      return;
+    }
+    this._scopes = model.scopes;
+    this.update();
+  }
+
   private _model: VariablesModel;
   private _scopes: VariablesModel.IScope[] = [];
   private _service: IDebugger;
@@ -61,8 +65,8 @@ export class VariablesBodyTree extends ReactWidget {
 
 /**
  * A React component to display a list of variables.
- * @param data array of variables.
- * @param service service of Debugger
+ * @param data An array of variables.
+ * @param service The debugger service.
  */
 const VariablesComponent = ({
   data,
@@ -96,8 +100,8 @@ const VariablesComponent = ({
 
 /**
  * A React component to display one node variable in tree.
- * @param data array of variables.
- * @param service service of Debugger
+ * @param data An array of variables.
+ * @param service The debugger service.
  */
 const VariableComponent = ({
   data,
@@ -166,11 +170,11 @@ namespace VariablesBodyTree {
    */
   export interface IOptions {
     /**
-     * The model of Variables.
+     * The variables model.
      */
     model: VariablesModel;
     /**
-     * The debug service.
+     * The debugger service.
      */
     service: IDebugger;
   }

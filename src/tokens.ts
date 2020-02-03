@@ -124,7 +124,7 @@ export interface IDebugger {
   clearBreakpoints(): Promise<void>;
 
   /**
-   * Get details of variable
+   * Request details for a variable.
    * @param variable The variable for which to request details.
    */
   getVariableDetails(

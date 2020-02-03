@@ -27,16 +27,8 @@ export class VariablesBodyTable extends ReactWidget {
     super();
     this._model = options.model;
     this._commands = options.commands;
+    this._model.changed.connect(this._updateScopes, this);
     this.addClass('jp-DebuggerVariables-body');
-    this._model.changed.connect(this.updateScopes, this);
-  }
-
-  private updateScopes(model: VariablesModel) {
-    if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
-      return;
-    }
-    this._scopes = model.scopes;
-    this.update();
   }
 
   /**
@@ -56,35 +48,44 @@ export class VariablesBodyTable extends ReactWidget {
     );
   }
 
+  /**
+   * Update the scopes and the table of variables.
+   * @param model The variables model.
+   */
+  private _updateScopes(model: VariablesModel) {
+    if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
+      return;
+    }
+    this._scopes = model.scopes;
+    this.update();
+  }
+
   private _model: VariablesModel;
   private _scopes: VariablesModel.IScope[] = [];
   private _commands: CommandRegistry;
 }
 
 /**
- * The body for table of detail's selected Variable.
+ * A widget to display details for a variable.
  */
 export class VariableDetails extends ReactWidget {
   /**
-   * Instantiate a new Body for the detail's table of selected Variable.
-   * @param options The instantiation options for a VariableDetails.
+   * Instantiate a new Body for the detail table of the selected variable.
+   * @param options The instantiation options for VariableDetails.
    */
   constructor(options: VariablesDetails.IOptions) {
     super();
     const { details, commands, model, service, title } = options;
 
     this.title.iconClass = 'jp-VariableIcon';
-    this.addClass('jp-DebuggerVariableDetails');
     this.title.label = `${service.session?.connection?.name} - details of ${title}`;
 
     this._variables = details;
     this._commands = commands;
     this._model = model;
-    this._model.changed.connect(this.updateScopes, this);
-  }
+    this._model.changed.connect(this._onModelChanged, this);
 
-  private updateScopes() {
-    this.dispose();
+    this.addClass('jp-DebuggerVariableDetails');
   }
 
   /**
@@ -96,15 +97,22 @@ export class VariableDetails extends ReactWidget {
     );
   }
 
+  /**
+   * Handle when the debug model changes.
+   */
+  private _onModelChanged() {
+    this.dispose();
+  }
+
   private _variables: VariablesModel.IVariable[] = [];
   private _commands: CommandRegistry;
   private _model: VariablesModel;
 }
 
 /**
- * A React component to display table of variables.
- * @param data array of variables.
- * @param service service of Debugger
+ * A React component to display a table of variables.
+ * @param data An array of variables.
+ * @param service The debugger service.
  */
 const VariablesComponent = ({
   data,
@@ -178,7 +186,7 @@ namespace VariablesBodyTable {
    */
   export interface IOptions {
     /**
-     * The model of Variables.
+     * The variables model.
      */
     model: VariablesModel;
     /**
@@ -197,15 +205,15 @@ namespace VariablesDetails {
    */
   export interface IOptions {
     /**
-     * The model of Variables.
+     * The variables model.
      */
     model: VariablesModel;
     /**
-     * The details of selected variable.
+     * The details of the selected variable.
      */
     details: VariablesModel.IVariable[];
     /**
-     * The service of debugger.
+     * The debugger service.
      */
     service: IDebugger;
     /**
@@ -213,7 +221,7 @@ namespace VariablesDetails {
      */
     commands: CommandRegistry;
     /**
-     * The name of selected variable.
+     * The name of the selected variable.
      */
     title: string;
   }
