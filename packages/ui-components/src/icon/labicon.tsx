@@ -216,7 +216,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   }: { name: string; fallback?: LabIcon } & LabIcon.IReactProps) {
     for (let className of name.split(/\s+/)) {
       if (LabIcon._instancesByNameAndClassName.has(className)) {
-        const icon = LabIcon._instances.get(className)!;
+        const icon = LabIcon._instancesByNameAndClassName.get(className)!;
         return <icon.react {...props} />;
       }
     }
