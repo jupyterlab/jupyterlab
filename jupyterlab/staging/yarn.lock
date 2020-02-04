@@ -1349,10 +1349,10 @@
     "@jupyterlab/application" "^2.0.0-rc.0"
     "@jupyterlab/ui-components" "^2.0.0-rc.0"
 
-"@jupyterlab/ui-components@^2.0.0-rc.0", "@jupyterlab/ui-components@~2.0.0-rc.0":
-  version "2.0.0-rc.0"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/ui-components/-/ui-components-2.0.0-rc.0.tgz#b0eba31b522b5f47549363163e5a393096918e17"
-  integrity sha512-lp+elMTis7AHWM/FGUOPAjGPs1kaywr1uIug7zS9usHnOxiU70QvMal4HSDyExaOog4+LSpD+HVg1txg3kB+rw==
+"@jupyterlab/ui-components@^2.0.0-rc.0", "@jupyterlab/ui-components@~2.0.0-rc.1":
+  version "2.0.0-rc.1"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/ui-components/-/ui-components-2.0.0-rc.1.tgz#4ae690d307a93485a571acd50eaee09f5ed77264"
+  integrity sha512-OH3vHWjRg6GzvFwMiX0ZZdKwCqWuet9w4NIO8Bx7hhSF5s8DZuHzikD/6gO/PaKLl/e99zTKGqrWLhBViFa5QQ==
   dependencies:
     "@blueprintjs/core" "^3.22.2"
     "@blueprintjs/select" "^3.11.2"

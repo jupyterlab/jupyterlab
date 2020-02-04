@@ -163,7 +163,7 @@
     "@jupyterlab/theme-light-extension": "~2.0.0-rc.0",
     "@jupyterlab/tooltip": "~2.0.0-rc.0",
     "@jupyterlab/tooltip-extension": "~2.0.0-rc.0",
-    "@jupyterlab/ui-components": "~2.0.0-rc.0",
+    "@jupyterlab/ui-components": "~2.0.0-rc.1",
     "@jupyterlab/ui-components-extension": "~2.0.0-rc.0",
     "@jupyterlab/vdom": "~2.0.0-rc.0",
     "@jupyterlab/vdom-extension": "~2.0.0-rc.0",
