@@ -5,7 +5,6 @@
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { Widget } from '@lumino/widgets';
-import { JLIcon } from '@jupyterlab/ui-components';
 
 /**
  * A namespace for rendermime associated interfaces.
@@ -117,6 +116,40 @@ export namespace IRenderMime {
     readonly toolbarFactory?: (widget?: IRenderer) => IToolbarItem[];
   }
 
+  export namespace LabIcon {
+    /**
+     * The simplest possible interface for defining a generic icon.
+     */
+    export interface IIcon {
+      /**
+       * The name of the icon. By convention, the icon name will be namespaced
+       * as so:
+       *
+       *     "pkg-name:icon-name"
+       */
+      readonly name: string;
+
+      /**
+       * A string containing the raw contents of an svg file.
+       */
+      svgstr: string;
+    }
+
+    /**
+     * Interface for generic renderer.
+     */
+    export interface IRenderer {
+      readonly render: (container: HTMLElement, options?: any) => void;
+      // TODO: make unrenderer optional once @lumino/virtualdom > 1.4.1 is used
+      readonly unrender: (container: HTMLElement) => void;
+    }
+
+    /**
+     * A type that can be resolved to a LabIcon instance.
+     */
+    export type IResolvable = string | (IIcon & Partial<IRenderer>);
+  }
+
   /**
    * A file type to associate with the renderer.
    */
@@ -148,6 +181,13 @@ export namespace IRenderMime {
     readonly pattern?: string;
 
     /**
+     * The icon for the file type. Can either be a string containing the name
+     * of an existing icon, or an object with {name, svgstr} fields, where
+     * svgstr is a string containing the raw contents of an svg file.
+     */
+    readonly icon?: LabIcon.IResolvable;
+
+    /**
      * The icon class name for the file type.
      */
     readonly iconClass?: string;
@@ -156,11 +196,6 @@ export namespace IRenderMime {
      * The icon label for the file type.
      */
     readonly iconLabel?: string;
-
-    /**
-     * The icon (as JLIcon) for the file type.
-     */
-    readonly iconRenderer?: JLIcon;
 
     /**
      * The file format for the file type ('text', 'base64', or 'json').

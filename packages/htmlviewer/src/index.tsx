@@ -89,7 +89,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
     this.toolbar.addItem(
       'refresh',
       new ToolbarButton({
-        iconRenderer: refreshIcon,
+        icon: refreshIcon,
         onClick: async () => {
           if (!this.context.model.dirty) {
             await this.context.revert();

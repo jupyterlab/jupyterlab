@@ -15,7 +15,7 @@ export class Uploader extends ToolbarButton {
    */
   constructor(options: Uploader.IOptions) {
     super({
-      iconRenderer: fileUploadIcon,
+      icon: fileUploadIcon,
       onClick: () => {
         this._input.click();
       },

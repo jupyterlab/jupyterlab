@@ -5,6 +5,8 @@ import { hpass, VirtualElement } from '@lumino/virtualdom';
 import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
 import { closeIcon } from './iconimports';
+import { iconStyle } from '../style';
+import { classes } from '../utils';
 
 /**
  * a widget which displays titles as a single row or column of tabs.
@@ -36,12 +38,10 @@ export namespace TabBarSvg {
      * @returns A virtual element representing the tab close icon.
      */
     renderCloseIcon(data: TabBar.IRenderData<any>): VirtualElement {
-      const className = closeIcon.class({
-        className: 'jp-icon-hover lm-TabBar-tabCloseIcon',
-        justify: 'center',
-        height: '16px',
-        width: '16px'
-      });
+      const className = classes(
+        'jp-icon-hover lm-TabBar-tabCloseIcon',
+        iconStyle({ justify: 'center', height: '16px', width: '16px' })
+      );
 
       return (hpass(
         'div',

@@ -3,7 +3,7 @@
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { DockPanelSvg, JLIcon } from '@jupyterlab/ui-components';
+import { DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
@@ -773,8 +773,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     title.dataset = { ...title.dataset, id: widget.id };
 
     // set an appropriate style class for the iconRenderer
-    if (title.iconRenderer instanceof JLIcon) {
-      title.iconClass = title.iconRenderer.class({
+    if (title.iconRenderer) {
+      title.iconClass = LabIcon.UNSTABLE_style({
         className: title.iconClass,
         justify: 'center',
         kind: 'mainAreaTab'
@@ -1185,8 +1185,8 @@ namespace Private {
       title.dataset = { id: widget.id };
 
       // set an appropriate style class for the iconRenderer
-      if (title.iconRenderer instanceof JLIcon) {
-        title.iconClass = title.iconRenderer.class({
+      if (title.iconRenderer) {
+        title.iconClass = LabIcon.UNSTABLE_style({
           className: title.iconClass,
           justify: 'center',
           kind: 'sideBar'

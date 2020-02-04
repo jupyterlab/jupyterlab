@@ -87,17 +87,15 @@ describe('codeeditor', () => {
 
     describe('#revertButtonNode', () => {
       it('should be the revert button node used by the editor', () => {
-        expect(editor.revertButtonNode.firstElementChild!.localName).to.equal(
-          'svg'
-        );
+        expect(editor.revertButtonNode.querySelector("[data-icon$='undo']")).to
+          .exist;
       });
     });
 
     describe('#commitButtonNode', () => {
       it('should be the commit button node used by the editor', () => {
-        expect(editor.commitButtonNode.firstElementChild!.localName).to.equal(
-          'svg'
-        );
+        expect(editor.commitButtonNode.querySelector("[data-icon$='check']")).to
+          .exist;
       });
     });
 

@@ -60,15 +60,10 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     this._searchTarget = searchTarget;
     const cells = this._searchTarget.content.widgets;
 
-    this._query = query;
     this._filters =
       !filters || Object.entries(filters).length === 0
         ? { output: true }
         : filters;
-    // Listen for cell model change to redo the search in case of
-    // new/pasted/deleted cells
-    const cellList = this._searchTarget.model!.cells;
-    cellList.changed.connect(this._restartQuery.bind(this), this);
 
     // hide the current notebook widget to prevent expensive layout re-calculation operations
     this._searchTarget.hide();
@@ -461,12 +456,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
     return match;
   }
 
-  private async _restartQuery() {
-    await this.endQuery();
-    await this.startQuery(this._query, this._searchTarget!, this._filters);
-    this._changed.emit(undefined);
-  }
-
   private _getMatchesFromCells(): ISearchMatch[][] {
     let indexTotal = 0;
     const result: ISearchMatch[][] = [];
@@ -503,7 +492,6 @@ export class NotebookSearchProvider implements ISearchProvider<NotebookPanel> {
   }
 
   private _searchTarget: NotebookPanel | undefined | null;
-  private _query: RegExp;
   private _filters: INotebookFilters;
   private _searchProviders: ICellSearchPair[] = [];
   private _currentProvider: ICellSearchPair | null | undefined;

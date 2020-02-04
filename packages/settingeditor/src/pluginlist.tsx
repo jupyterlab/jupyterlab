@@ -5,7 +5,7 @@
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { JLIcon, settingsIcon } from '@jupyterlab/ui-components';
+import { LabIcon, settingsIcon } from '@jupyterlab/ui-components';
 
 import { Message } from '@lumino/messaging';
 
@@ -193,6 +193,12 @@ namespace Private {
    * The JupyterLab plugin schema key for the setting editor
    * icon class of a plugin.
    */
+  const ICON_KEY = 'jupyter.lab.setting-icon';
+
+  /**
+   * The JupyterLab plugin schema key for the setting editor
+   * icon class of a plugin.
+   */
   const ICON_CLASS_KEY = 'jupyter.lab.setting-icon-class';
 
   /**
@@ -259,6 +265,7 @@ namespace Private {
     const items = plugins.map(plugin => {
       const { id, schema, version } = plugin;
       const itemTitle = `${schema.description}\n${id}\n${version}`;
+      const icon = getHint(ICON_KEY, registry, plugin);
       const iconClass = getHint(ICON_CLASS_KEY, registry, plugin);
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
 
@@ -269,8 +276,9 @@ namespace Private {
           key={id}
           title={itemTitle}
         >
-          <JLIcon.getReact
-            name={iconClass}
+          <LabIcon.resolveReact
+            icon={icon}
+            iconClass={iconClass}
             fallback={settingsIcon}
             title={iconTitle}
             tag="span"

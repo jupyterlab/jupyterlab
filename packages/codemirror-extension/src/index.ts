@@ -148,7 +148,8 @@ function activateEditorCommands(
     scrollPastEnd,
     styleActiveLine,
     styleSelectedText,
-    selectionPointer
+    selectionPointer,
+    lineWiseCopyCut
   } = CodeMirrorEditor.defaultConfig;
 
   /**
@@ -172,13 +173,15 @@ function activateEditorCommands(
     styleActiveLine =
       (settings.get('styleActiveLine').composite as
         | boolean
-        | CodeMirror.StyleActiveLine) || styleActiveLine;
+        | CodeMirror.StyleActiveLine) ?? styleActiveLine;
     styleSelectedText =
-      (settings.get('styleSelectedText').composite as boolean) ||
+      (settings.get('styleSelectedText').composite as boolean) ??
       styleSelectedText;
     selectionPointer =
-      (settings.get('selectionPointer').composite as boolean | string) ||
+      (settings.get('selectionPointer').composite as boolean | string) ??
       selectionPointer;
+    lineWiseCopyCut =
+      (settings.get('lineWiseCopyCut').composite as boolean) ?? lineWiseCopyCut;
   }
 
   /**
@@ -194,6 +197,7 @@ function activateEditorCommands(
         cm.setOption('styleActiveLine', styleActiveLine);
         cm.setOption('styleSelectedText', styleSelectedText);
         cm.setOption('selectionPointer', selectionPointer);
+        cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
       }
     });
   }
@@ -225,6 +229,7 @@ function activateEditorCommands(
       cm.setOption('styleActiveLine', styleActiveLine);
       cm.setOption('styleSelectedText', styleSelectedText);
       cm.setOption('selectionPointer', selectionPointer);
+      cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
     }
   });
 

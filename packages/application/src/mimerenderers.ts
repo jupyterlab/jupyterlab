@@ -13,6 +13,8 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
+import { LabIcon } from '@jupyterlab/ui-components';
+
 import { Token } from '@lumino/coreutils';
 
 import { AttachedProperty } from '@lumino/properties';
@@ -123,6 +125,11 @@ export function createRendermimePlugin(
 
       if (item.fileTypes) {
         item.fileTypes.forEach(ft => {
+          if (ft.icon) {
+            // upconvert the contents of the icon field to a proper LabIcon
+            ft = { ...ft, icon: LabIcon.resolve({ icon: ft.icon }) };
+          }
+
           app.docRegistry.addFileType(ft as DocumentRegistry.IFileType);
         });
       }

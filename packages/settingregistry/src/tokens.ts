@@ -265,6 +265,11 @@ export namespace ISettingRegistry {
     'jupyter.lab.setting-deprecated'?: boolean;
 
     /**
+     * The JupyterLab icon hint.
+     */
+    'jupyter.lab.setting-icon'?: string;
+
+    /**
      * The JupyterLab icon class hint.
      */
     'jupyter.lab.setting-icon-class'?: string;

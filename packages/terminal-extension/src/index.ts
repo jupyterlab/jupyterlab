@@ -288,7 +288,7 @@ function addRunningSessionManager(
     open() {
       void app.commands.execute('terminal:open', { name: this._model.name });
     }
-    iconRenderer() {
+    icon() {
       return terminalIcon;
     }
     label() {
