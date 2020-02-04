@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^2.0.0-rc.0",
-    "@jupyterlab/ui-components": "^2.0.0-rc.0"
+    "@jupyterlab/ui-components": "^2.0.0-rc.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

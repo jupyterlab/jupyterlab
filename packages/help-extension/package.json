@@ -42,7 +42,7 @@
     "@jupyterlab/inspector": "^2.0.0-rc.0",
     "@jupyterlab/mainmenu": "^2.0.0-rc.0",
     "@jupyterlab/services": "^5.0.0-rc.0",
-    "@jupyterlab/ui-components": "^2.0.0-rc.0",
+    "@jupyterlab/ui-components": "^2.0.0-rc.1",
     "@lumino/widgets": "^1.10.2",
     "react": "~16.9.0"
   },

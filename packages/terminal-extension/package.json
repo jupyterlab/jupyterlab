@@ -44,7 +44,7 @@
     "@jupyterlab/services": "^5.0.0-rc.0",
     "@jupyterlab/settingregistry": "^2.0.0-rc.0",
     "@jupyterlab/terminal": "^2.0.0-rc.0",
-    "@jupyterlab/ui-components": "^2.0.0-rc.0",
+    "@jupyterlab/ui-components": "^2.0.0-rc.1",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/widgets": "^1.10.2"
   },

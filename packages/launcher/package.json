@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^2.0.0-rc.0",
-    "@jupyterlab/ui-components": "^2.0.0-rc.0",
+    "@jupyterlab/ui-components": "^2.0.0-rc.1",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.9.2",
     "@lumino/coreutils": "^1.4.2",
