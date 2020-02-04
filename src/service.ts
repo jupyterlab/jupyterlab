@@ -128,7 +128,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param connection The session connection.
    */
   async isAvailable(connection: Session.ISessionConnection): Promise<boolean> {
-    const kernel = connection.kernel;
+    const kernel = connection?.kernel;
     if (!kernel) {
       return false;
     }

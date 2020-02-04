@@ -3,7 +3,7 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { ToolbarButton } from '@jupyterlab/apputils';
+import { ISessionContext, ToolbarButton } from '@jupyterlab/apputils';
 
 import { ConsolePanel } from '@jupyterlab/console';
 
@@ -85,11 +85,20 @@ export class DebuggerHandler {
    */
   async update(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
-    connection: Session.ISessionConnection
+    connection: Session.ISessionConnection,
+    sessionContext?: ISessionContext
   ): Promise<void> {
     const updateHandler = async () => {
       return this._update(widget, connection);
     };
+
+    sessionContext.kernelChanged.connect(async (slot, kernel) => {
+      if (!this._service.session) {
+        return;
+      }
+      connection = slot.session;
+      await updateHandler();
+    });
 
     // setup handler when the kernel changes
     const kernelChangedHandler = this._kernelChangedHandlers[connection.path];
@@ -223,6 +232,7 @@ export class DebuggerHandler {
         await this._service.stop();
         removeHandlers();
       } else {
+        this._service.session.connection = connection;
         await this._service.restoreState(true);
         await createHandler();
       }
@@ -239,6 +249,7 @@ export class DebuggerHandler {
     if (!this._service.session) {
       this._service.session = new DebugSession({ connection });
     } else {
+      this._oldConnection = this._service.session.connection;
       this._service.session.connection = connection;
     }
 
@@ -248,6 +259,8 @@ export class DebuggerHandler {
     // check the state of the debug session
     if (!this._service.isStarted) {
       removeHandlers();
+      this._service.session.connection = this._oldConnection;
+      await this._service.restoreState(false);
       return;
     }
 
@@ -262,6 +275,7 @@ export class DebuggerHandler {
   private _type: DebuggerHandler.SessionType;
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
+  private _oldConnection: Session.ISessionConnection;
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
   } = {};

@@ -87,7 +87,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
     const updateHandlerAndCommands = async (widget: ConsolePanel) => {
       const sessionContext = widget.sessionContext;
       await sessionContext.ready;
-      await handler.update(widget, sessionContext.session);
+      await handler.update(widget, sessionContext.session, sessionContext);
       app.commands.notifyCommandChanged();
     };
 
@@ -204,7 +204,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     const updateHandlerAndCommands = async (widget: NotebookPanel) => {
       const sessionContext = widget.sessionContext;
       await sessionContext.ready;
-      await handler.update(widget, sessionContext.session);
+      await handler.update(widget, sessionContext.session, sessionContext);
       app.commands.notifyCommandChanged();
     };
 
