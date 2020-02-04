@@ -123,12 +123,17 @@ export class DocumentConnectionManager {
       language
     );
 
+    // lazily load 1) the underlying library (1.5mb) and/or 2) a live WebSocket-
+    // like connection: either already connected or potentiailly in the process
+    // of connecting.
     const connection = await Private.connection(
       language,
       uris,
       this.on_new_connection
     );
 
+    // if connecting for the first time, all documents subsequent documents will
+    // be re-opened and synced
     this.connections.set(virtual_document.id_path, connection);
 
     if (connection.isReady) {
@@ -138,6 +143,11 @@ export class DocumentConnectionManager {
     return connection;
   }
 
+  /**
+   * Fired the first time a connection is opened. These _should_ be the only
+   * invocation of `.on` (once remaining LSPFeature.connection_handlers are made
+   * singletons).
+   */
   on_new_connection = (connection: LSPConnection) => {
     connection.on('error', e => {
       console.warn(e);
@@ -165,6 +175,7 @@ export class DocumentConnectionManager {
     connection.on('serverInitialized', capabilities => {
       this.forEachDocumentOfConnection(connection, virtual_document => {
         connection.sendOpen(virtual_document.document_info);
+        // TODO: is this still neccessary, e.g. for status bar to update responsively?
         this.initialized.emit({ connection, virtual_document });
       });
     });
@@ -196,6 +207,10 @@ export class DocumentConnectionManager {
     }
   }
 
+  /**
+   * TODO: presently no longer referenced. A failing connection would close
+   * the socket, triggering the language server on the other end to exit
+   */
   public async retry_to_connect(
     options: ISocketConnectionOptions,
     reconnect_delay: number,
@@ -286,16 +301,24 @@ export namespace DocumentConnectionManager {
   }
 }
 
+/**
+ * Namespace primarily for language-keyed cache of LSPConnections
+ */
 namespace Private {
   const _connections = new Map<string, LSPConnection>();
   let _promise: Promise<typeof ConnectionModuleType>;
 
+  /**
+   * Return (or create and initialize) the WebSocket associated with the language
+   */
   export async function connection(
     language: string,
     uris: DocumentConnectionManager.IURIs,
     onCreate: (connection: LSPConnection) => void
   ): Promise<LSPConnection> {
     if (_promise == null) {
+      // TODO: consider lazy-loading _only_ the modules that _must_ be webpacked
+      // with custom shims, e.g. `fs`
       _promise = import(
         /* webpackChunkName: "jupyter-lsp-connection" */ './connection'
       );
