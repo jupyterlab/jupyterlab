@@ -64,7 +64,6 @@
     "@lumino/disposable": "^1.2.0",
     "@lumino/widgets": "^1.8.0",
     "murmurhash-js": "^1.0.0",
-    "react-inspector": "^2.0.0",
     "vscode-debugprotocol": "^1.37.0"
   },
   "devDependencies": {

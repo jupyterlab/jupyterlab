@@ -384,6 +384,19 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Request details for a variable.
+   * @param variable The variable for which to request details.
+   */
+  async getVariableDetails(
+    variablesReference: number
+  ): Promise<DebugProtocol.Variable[]> {
+    const reply = await this.session.sendRequest('variables', {
+      variablesReference
+    });
+    return reply.body.variables;
+  }
+
+  /**
    * Get all the frames from the kernel.
    */
   private async _getAllFrames() {
@@ -428,7 +441,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     reply.body.variables.forEach((variable: DebugProtocol.Variable) => {
       newVariable = { [variable.name]: variable, ...newVariable };
     });
-
     const newScopes = this._model.variables.scopes.map(scope => {
       const findIndex = scope.variables.findIndex(
         ele => ele.variablesReference === variable.variablesReference
@@ -438,7 +450,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     });
 
     this._model.variables.scopes = [...newScopes];
-
     return reply.body.variables;
   }
 

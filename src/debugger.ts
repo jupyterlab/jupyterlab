@@ -43,7 +43,11 @@ export namespace Debugger {
       this.service = service as DebuggerService;
       this.service.model = this.model;
 
-      this.variables = new Variables({ model: this.model.variables });
+      this.variables = new Variables({
+        model: this.model.variables,
+        commands: callstackCommands.registry,
+        service
+      });
 
       this.callstack = new Callstack({
         commands: callstackCommands,
@@ -145,7 +149,6 @@ export namespace Debugger {
        * The callstack toolbar commands.
        */
       callstackCommands: Callstack.ICommands;
-
       /**
        * The editor services.
        */

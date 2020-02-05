@@ -8,7 +8,11 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { ICommandPalette } from '@jupyterlab/apputils';
+import {
+  ICommandPalette,
+  MainAreaWidget,
+  WidgetTracker
+} from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -32,6 +36,10 @@ import { DebuggerHandler } from './handler';
 
 import { IDebugger } from './tokens';
 
+import { VariableDetails } from './variables/table';
+
+import { DebuggerModel } from './model';
+
 /**
  * The command IDs used by the debugger plugin.
  */
@@ -49,6 +57,8 @@ export namespace CommandIDs {
   export const stepIn = 'debugger:stepIn';
 
   export const stepOut = 'debugger:stepOut';
+
+  export const variableDetails = 'debugger:variable-details';
 }
 
 /**
@@ -244,6 +254,61 @@ const tracker: JupyterFrontEndPlugin<void> = {
   }
 };
 
+/*
+ * A plugin to open detailed views for variables.
+ */
+const variables: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger:variables',
+  autoStart: true,
+  requires: [IDebugger],
+  activate: (app: JupyterFrontEnd, service: IDebugger) => {
+    const { commands, shell } = app;
+    const tracker = new WidgetTracker<MainAreaWidget<VariableDetails>>({
+      namespace: 'variableDetails'
+    });
+
+    commands.addCommand(CommandIDs.variableDetails, {
+      label: 'Variable Details',
+      caption: 'Variable Details',
+      execute: async args => {
+        const { variableReference } = args;
+        if (!variableReference || variableReference === 0) {
+          return;
+        }
+        const details = await service.getVariableDetails(
+          variableReference as number
+        );
+
+        const title = args.title as string;
+        const id = `jp-debugger-details-${title}`;
+        if (
+          !details ||
+          details.length === 0 ||
+          tracker.find(widget => widget.id === id)
+        ) {
+          return;
+        }
+
+        const model = (service.model as DebuggerModel).variables;
+        const widget = new MainAreaWidget<VariableDetails>({
+          content: new VariableDetails({
+            commands,
+            service,
+            details,
+            model,
+            title
+          })
+        });
+        widget.id = id;
+        void tracker.add(widget);
+        shell.add(widget, 'main', {
+          mode: tracker.currentWidget ? 'split-right' : 'split-bottom'
+        });
+      }
+    });
+  }
+};
+
 /**
  * A plugin providing a tracker code debuggers.
  */
@@ -380,6 +445,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   files,
   notebooks,
   tracker,
+  variables,
   main
 ];
 
