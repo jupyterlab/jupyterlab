@@ -1966,14 +1966,14 @@
   resolved "https://registry.yarnpkg.com/@lumino/algorithm/-/algorithm-1.2.3.tgz#4ab9883d7e9a5b1845372a752dcaee2a35a770c6"
   integrity sha512-XBJ/homcm7o8Y9G6MzYvf0FF7SVqUCzvkIO01G2mZhCOnkZZhZ9c4uNOcE2VjSHNxHv2WU0l7d8rdhyKhmet+A==
 
-"@lumino/application@^1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@lumino/application/-/application-1.8.0.tgz#f2f3789e49cba941ba50a81557caaddbdd739b78"
-  integrity sha512-GVjnvZSjXp7QioNNXKmWijyxLOD1nbYgTQkrskDkxaieJWFOPGbuy+4wGPZbZkj7NHkpGNnF713m/jFENHjpEQ==
+"@lumino/application@^1.8.2":
+  version "1.8.2"
+  resolved "https://registry.yarnpkg.com/@lumino/application/-/application-1.8.2.tgz#6b9d2418e27e733ca54be1bc47a406a15d3ba47f"
+  integrity sha512-67JQBJc9gGBo9vzQiXvPGXPoTnyE/CUQ45A/E8wqLEKA+i55Q7k0ogDcDZ4O1JdGVXSUa3mVlZbS5UWLOMy06Q==
   dependencies:
     "@lumino/commands" "^1.9.2"
     "@lumino/coreutils" "^1.4.2"
-    "@lumino/widgets" "^1.10.0"
+    "@lumino/widgets" "^1.10.2"
 
 "@lumino/collections@^1.2.3":
   version "1.2.3"
@@ -2069,17 +2069,17 @@
   dependencies:
     "@lumino/algorithm" "^1.2.3"
 
-"@lumino/virtualdom@^1.4.0":
-  version "1.4.0"
-  resolved "https://registry.yarnpkg.com/@lumino/virtualdom/-/virtualdom-1.4.0.tgz#6083a72279d6d02ab2c3589593513f055815c18e"
-  integrity sha512-BItNqb/XGTHEWg7DSktyJqnFXYPs2rNYxvOCr5We5MDVHtc7OdM3Q5nnYfCzE704By5aSGgBEkyFvguun3u1Ug==
+"@lumino/virtualdom@^1.5.0":
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/@lumino/virtualdom/-/virtualdom-1.5.0.tgz#e6875ebe17b4ab650e57d6d0e72eaa4c9434ac78"
+  integrity sha512-PmDaAn86IKYOPKXi/n8UqUxAW6WNETLmhPJNaADnYVDBedM2xBJE2haA7COCpGRDQAy5mFRv7LIIyT9erHLCyw==
   dependencies:
     "@lumino/algorithm" "^1.2.3"
 
-"@lumino/widgets@^1.10.0":
-  version "1.10.0"
-  resolved "https://registry.yarnpkg.com/@lumino/widgets/-/widgets-1.10.0.tgz#2907d64c4c55acb0059bf32efefb80b181c80cde"
-  integrity sha512-MQzqF5qkLZ3a334yA2j9g5/PYoIqY3z8XqxlxLPIwxNEqWIE5mZMOcZLANruMk4UinYQP5ZQVTRcuU/TuwnOvw==
+"@lumino/widgets@^1.10.0", "@lumino/widgets@^1.10.2":
+  version "1.10.2"
+  resolved "https://registry.yarnpkg.com/@lumino/widgets/-/widgets-1.10.2.tgz#e25bad3274d91b6ae633e7213cc6c8d89201197a"
+  integrity sha512-2P4gOcFa8IlnAoaCFoH0i8egsYsOfzXQYECDQbr864+pfI2O71M/gjGN0mzVLRsipLGpU7i6EhGzE2KyCAyJQQ==
   dependencies:
     "@lumino/algorithm" "^1.2.3"
     "@lumino/commands" "^1.9.2"
@@ -2091,7 +2091,7 @@
     "@lumino/messaging" "^1.3.3"
     "@lumino/properties" "^1.1.6"
     "@lumino/signaling" "^1.3.4"
-    "@lumino/virtualdom" "^1.4.0"
+    "@lumino/virtualdom" "^1.5.0"
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
@@ -8539,20 +8539,15 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@^2.0.1, inherits@^2.0.3, inherits@~2.0.1, inherits@~2.0.3:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
-  integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
+inherits@2, inherits@2.0.3, inherits@^2.0.1, inherits@^2.0.3, inherits@~2.0.1, inherits@~2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
+  integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
 
 inherits@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.1.tgz#b17d08d326b4423e568eff719f91b0b1cbdf69f1"
   integrity sha1-sX0I0ya0Qj5Wjv9xn5GwscvfafE=
-
-inherits@2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.3.tgz#633c2c83e3da42a502f52466022480f4208261de"
-  integrity sha1-Yzwsg+PaQqUC9SRmAiSA9CCCYd4=
 
 ini@^1.3.2, ini@^1.3.4, ini@^1.3.5, ini@~1.3.0:
   version "1.3.5"
@@ -13734,7 +13729,7 @@ shebang-regex@^3.0.0:
   resolved "https://registry.yarnpkg.com/shebang-regex/-/shebang-regex-3.0.0.tgz#ae16f1644d873ecad843b0307b143362d4c42172"
   integrity sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==
 
-shell-quote@1.7.2:
+shell-quote@1.7.2, shell-quote@^1.7.2:
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/shell-quote/-/shell-quote-1.7.2.tgz#67a7d02c76c9da24f99d20808fcaded0e0e04be2"
   integrity sha512-mRz/m/JVscCrkMyPqHc/bczi3OQHkLTqXHEFu0zDhK/qfv3UcOA4SVmRCLmos4bhjr9ekVQubj/R7waKapmiQg==

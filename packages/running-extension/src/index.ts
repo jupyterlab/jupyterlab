@@ -108,7 +108,7 @@ function addKernelRunningSessionManager(
     shutdown() {
       return manager.shutdown(this._model.id);
     }
-    iconRenderer() {
+    icon() {
       let { name, path, type } = this._model;
       if ((name || PathExt.basename(path)).indexOf('.ipynb') !== -1) {
         return notebookIcon;

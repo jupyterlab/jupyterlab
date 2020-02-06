@@ -55,7 +55,7 @@ function activateHTMLViewer(
     displayName: 'HTML File',
     extensions: ['.html'],
     mimeTypes: ['text/html'],
-    iconRenderer: html5Icon
+    icon: html5Icon
   };
   app.docRegistry.addFileType(ft);
 
@@ -97,7 +97,7 @@ function activateHTMLViewer(
 
     widget.title.iconClass = ft.iconClass ?? '';
     widget.title.iconLabel = ft.iconLabel ?? '';
-    widget.title.iconRenderer = ft.iconRenderer!;
+    widget.title.iconRenderer = ft.icon!;
   });
 
   // Add a command to trust the active HTML document,

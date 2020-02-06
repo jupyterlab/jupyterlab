@@ -38,7 +38,7 @@ if [[ $GROUP == docs ]]; then
 
     # Verify tutorial docs build
     pushd docs
-    pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark
+    pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
     make linkcheck
     make html
     popd

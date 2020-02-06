@@ -38,7 +38,7 @@ import {
   fileIcon,
   folderIcon,
   imageIcon,
-  JLIcon,
+  LabIcon,
   jsonIcon,
   markdownIcon,
   notebookIcon,
@@ -1176,6 +1176,13 @@ export namespace DocumentRegistry {
     readonly pattern?: string;
 
     /**
+     * The icon for the file type. Can either be a string containing the name
+     * of an existing icon, or an object with {name, svgstr} fields, where
+     * svgstr is a string containing the raw contents of an svg file.
+     */
+    readonly icon?: LabIcon;
+
+    /**
      * The icon class name for the file type.
      */
     readonly iconClass?: string;
@@ -1184,11 +1191,6 @@ export namespace DocumentRegistry {
      * The icon label for the file type.
      */
     readonly iconLabel?: string;
-
-    /**
-     * The icon (as JLIcon) for the file type.
-     */
-    readonly iconRenderer?: JLIcon;
 
     /**
      * The content type of the new file.
@@ -1208,8 +1210,6 @@ export namespace DocumentRegistry {
     name: 'default',
     extensions: [],
     mimeTypes: [],
-    iconClass: '',
-    iconLabel: '',
     contentType: 'file',
     fileFormat: 'text'
   };
@@ -1246,7 +1246,7 @@ export namespace DocumentRegistry {
     name: 'text',
     mimeTypes: ['text/plain'],
     extensions: ['.txt'],
-    iconRenderer: fileIcon
+    icon: fileIcon
   };
 
   /**
@@ -1260,7 +1260,7 @@ export namespace DocumentRegistry {
     extensions: ['.ipynb'],
     contentType: 'notebook',
     fileFormat: 'json',
-    iconRenderer: notebookIcon
+    icon: notebookIcon
   };
 
   /**
@@ -1272,7 +1272,7 @@ export namespace DocumentRegistry {
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
-    iconRenderer: folderIcon
+    icon: folderIcon
   };
 
   /**
@@ -1287,56 +1287,56 @@ export namespace DocumentRegistry {
       displayName: 'Markdown File',
       extensions: ['.md'],
       mimeTypes: ['text/markdown'],
-      iconRenderer: markdownIcon
+      icon: markdownIcon
     },
     {
       name: 'python',
       displayName: 'Python File',
       extensions: ['.py'],
       mimeTypes: ['text/x-python'],
-      iconRenderer: pythonIcon
+      icon: pythonIcon
     },
     {
       name: 'json',
       displayName: 'JSON File',
       extensions: ['.json'],
       mimeTypes: ['application/json'],
-      iconRenderer: jsonIcon
+      icon: jsonIcon
     },
     {
       name: 'csv',
       displayName: 'CSV File',
       extensions: ['.csv'],
       mimeTypes: ['text/csv'],
-      iconRenderer: spreadsheetIcon
+      icon: spreadsheetIcon
     },
     {
       name: 'tsv',
       displayName: 'TSV File',
       extensions: ['.tsv'],
       mimeTypes: ['text/csv'],
-      iconRenderer: spreadsheetIcon
+      icon: spreadsheetIcon
     },
     {
       name: 'r',
       displayName: 'R File',
       mimeTypes: ['text/x-rsrc'],
       extensions: ['.r'],
-      iconRenderer: rKernelIcon
+      icon: rKernelIcon
     },
     {
       name: 'yaml',
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconRenderer: yamlIcon
+      icon: yamlIcon
     },
     {
       name: 'svg',
       displayName: 'Image',
       mimeTypes: ['image/svg+xml'],
       extensions: ['.svg'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1344,7 +1344,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/tiff'],
       extensions: ['.tif', '.tiff'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1352,7 +1352,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/jpeg'],
       extensions: ['.jpg', '.jpeg'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1360,7 +1360,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/gif'],
       extensions: ['.gif'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1368,7 +1368,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/png'],
       extensions: ['.png'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1376,7 +1376,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/bmp'],
       extensions: ['.bmp'],
-      iconRenderer: imageIcon,
+      icon: imageIcon,
       fileFormat: 'base64'
     }
   ];

@@ -1,5 +1,5 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-TextEditorIcon",
+  "jupyter.lab.setting-icon": "ui-components:text-editor",
   "jupyter.lab.setting-icon-label": "CodeMirror",
   "title": "CodeMirror",
   "description": "Text editor settings for all CodeMirror editors.",
@@ -39,6 +39,12 @@
       "title": "Selection Pointer",
       "description": "Value is boolean or string, e.g. 'pointer'",
       "default": false
+    },
+    "lineWiseCopyCut": {
+      "type": ["boolean"],
+      "title": "Ctrl-C",
+      "description": "When enabled, which is the default, doing copy or cut when there is no selection will copy or cut the whole lines that have cursors on them.",
+      "default": true
     }
   },
   "type": "object"

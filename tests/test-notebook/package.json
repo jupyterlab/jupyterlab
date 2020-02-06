@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-notebook",
-  "version": "2.0.0-beta.3",
+  "version": "2.0.0-rc.0",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -18,18 +18,18 @@
     "watch:src": "tsc -p src --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.0.0-beta.3",
-    "@jupyterlab/cells": "^2.0.0-beta.3",
-    "@jupyterlab/codemirror": "^2.0.0-beta.3",
-    "@jupyterlab/docregistry": "^2.0.0-beta.3",
-    "@jupyterlab/nbformat": "^2.0.0-beta.3",
-    "@jupyterlab/notebook": "^2.0.0-beta.3",
-    "@jupyterlab/observables": "^3.0.0-beta.3",
-    "@jupyterlab/testutils": "^2.0.0-beta.3",
+    "@jupyterlab/apputils": "^2.0.0-rc.0",
+    "@jupyterlab/cells": "^2.0.0-rc.0",
+    "@jupyterlab/codemirror": "^2.0.0-rc.0",
+    "@jupyterlab/docregistry": "^2.0.0-rc.0",
+    "@jupyterlab/nbformat": "^2.0.0-rc.0",
+    "@jupyterlab/notebook": "^2.0.0-rc.0",
+    "@jupyterlab/observables": "^3.0.0-rc.0",
+    "@jupyterlab/testutils": "^2.0.0-rc.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
     "@lumino/messaging": "^1.3.3",
-    "@lumino/widgets": "^1.10.0",
+    "@lumino/widgets": "^1.10.2",
     "chai": "^4.2.0",
     "simulate-event": "~1.4.0"
   },

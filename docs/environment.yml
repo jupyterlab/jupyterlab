@@ -8,5 +8,7 @@ dependencies:
 - sphinx_rtd_theme
 - recommonmark
 - pytest
+- pip
 - pip:
   - pytest-check-links
+  - jsx-lexer

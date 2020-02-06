@@ -1,5 +1,5 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-ListIcon",
+  "jupyter.lab.setting-icon": "ui-components:list",
   "jupyter.lab.setting-icon-label": "Log Console",
   "title": "Log Console",
   "description": "Log Console settings.",
