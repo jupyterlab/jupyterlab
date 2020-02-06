@@ -73,11 +73,14 @@ commander
     } else if (spec === 'release' && prev.indexOf('rc') !== -1) {
       lernaVersion = 'patch';
     }
+    if (lernaVersion === 'preminor') {
+      lernaVersion += ' --preid=a';
+    }
+
     let cmd = `lerna version -m \"New version\" --force-publish=* --no-push ${lernaVersion}`;
     if (opts.force) {
       cmd += ' --yes';
     }
-
     let oldVersion = utils.run(
       'git rev-parse HEAD',
       {
