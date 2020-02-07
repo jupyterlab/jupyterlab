@@ -569,7 +569,10 @@ class Sanitizer implements ISanitizer {
       'ul',
       'var',
       'video',
-      'wbr'
+      'wbr',
+      'svg',
+      'line',
+      'path'
     ],
     // Attributes that HTML tags are allowed to have, extracted from Google Caja.
     // See https://github.com/jupyterlab/jupyterlab/issues/1812#issuecomment-285848435
@@ -627,6 +630,9 @@ class Sanitizer implements ISanitizer {
       br: ['clear'],
       button: ['accesskey', 'disabled', 'name', 'tabindex', 'type', 'value'],
       canvas: ['height', 'width'],
+      svg: ['height', 'width', 'viewBox', 'preserveAspectRatio', 'style'],
+      line: ['x1', 'y1', 'x2', 'y2', 'stroke', 'stroke-width'],
+      path: ['d'],
       caption: ['align'],
       col: ['align', 'char', 'charoff', 'span', 'valign', 'width'],
       colgroup: ['align', 'char', 'charoff', 'span', 'valign', 'width'],
