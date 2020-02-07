@@ -25,6 +25,8 @@ import { ConsoleHandler } from './handlers/console';
 
 import { FileHandler } from './handlers/file';
 
+import { IChangedArgs } from '@jupyterlab/coreutils';
+import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 import { NotebookHandler } from './handlers/notebook';
 
 /**
@@ -86,27 +88,32 @@ export class DebuggerHandler {
   async update(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     connection: Session.ISessionConnection,
-    sessionContext?: ISessionContext
+    sessionContext: ISessionContext
   ): Promise<void> {
     const updateHandler = async () => {
       return this._update(widget, connection);
     };
 
-    sessionContext.kernelChanged.connect(async (slot, kernel) => {
+    const restartKernal = async (
+      slot: ISessionContext,
+      kernel: IChangedArgs<IKernelConnection, IKernelConnection, 'kernel'>
+    ) => {
       if (!this._service.session) {
         return;
       }
-      connection = slot.session;
+      await slot.ready.then(() => {
+        connection = slot.session;
+      });
       await updateHandler();
-    });
+    };
 
     // setup handler when the kernel changes
     const kernelChangedHandler = this._kernelChangedHandlers[connection.path];
     if (kernelChangedHandler) {
-      connection.kernelChanged.disconnect(kernelChangedHandler);
+      sessionContext?.kernelChanged.disconnect(kernelChangedHandler);
     }
-    connection.kernelChanged.connect(updateHandler);
-    this._kernelChangedHandlers[connection.path] = updateHandler;
+    sessionContext?.kernelChanged.connect(restartKernal);
+    this._kernelChangedHandlers[connection.path] = restartKernal;
 
     // setup handler when the status of the kernel changes (restart)
     const statusChanged = async (
@@ -195,7 +202,7 @@ export class DebuggerHandler {
 
       // clear the model if the handler being removed corresponds
       // to the current active debug session
-      if (this._service.session?.connection?.path === connection.path) {
+      if (this._service.session?.connection?.path === connection?.path) {
         const model = this._service.model as DebuggerModel;
         model.clear();
       }
@@ -228,11 +235,13 @@ export class DebuggerHandler {
         return;
       }
 
-      if (this._service.isStarted) {
+      if (this._service.isStarted && this._oldConnection.id === connection.id) {
+        this._service.session.connection = connection;
         await this._service.stop();
         removeHandlers();
       } else {
         this._service.session.connection = connection;
+        this._oldConnection = connection;
         await this._service.restoreState(true);
         await createHandler();
       }
@@ -249,7 +258,9 @@ export class DebuggerHandler {
     if (!this._service.session) {
       this._service.session = new DebugSession({ connection });
     } else {
-      this._oldConnection = this._service.session.connection;
+      this._oldConnection = this._service.session.connection.kernel
+        ? this._service.session.connection
+        : null;
       this._service.session.connection = connection;
     }
 
@@ -259,13 +270,14 @@ export class DebuggerHandler {
     // check the state of the debug session
     if (!this._service.isStarted) {
       removeHandlers();
-      this._service.session.connection = this._oldConnection;
+      this._service.session.connection = this._oldConnection ?? connection;
       await this._service.restoreState(false);
       return;
     }
 
     // if the debugger is started but there is no handler, create a new one
     await createHandler();
+    this._oldConnection = connection;
 
     // listen to the disposed signals
     widget.disposed.connect(removeHandlers);
@@ -279,7 +291,12 @@ export class DebuggerHandler {
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
   } = {};
-  private _kernelChangedHandlers: { [id: string]: () => void } = {};
+  private _kernelChangedHandlers: {
+    [id: string]: (
+      slot: ISessionContext,
+      kernel: IChangedArgs<IKernelConnection, IKernelConnection, 'kernel'>
+    ) => Promise<void>;
+  } = {};
   private _statusChangedHandlers: {
     [id: string]: (
       sender: Session.ISessionConnection,

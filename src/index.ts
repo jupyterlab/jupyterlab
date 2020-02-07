@@ -148,7 +148,7 @@ const files: JupyterFrontEndPlugin<void> = {
           session = sessions.connectTo({ model });
           activeSessions[model.id] = session;
         }
-        await handler.update(widget, session);
+        await handler.update(widget, session, widget.context.sessionContext);
         app.commands.notifyCommandChanged();
       } catch {
         return;
