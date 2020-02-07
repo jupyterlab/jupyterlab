@@ -52,7 +52,6 @@ export class Context<T extends DocumentRegistry.IModel>
     this._path = this._manager.contents.normalize(options.path);
     const localPath = this._manager.contents.localPath(this._path);
     let lang = this._factory.preferredLanguage(PathExt.basename(localPath));
-
     let dbFactory = options.modelDBFactory;
     if (dbFactory) {
       const localPath = manager.contents.localPath(this._path);
@@ -641,10 +640,26 @@ export class Context<T extends DocumentRegistry.IModel>
         let modified = this.contentsModel?.last_modified;
         let tClient = modified ? new Date(modified) : new Date();
         let tDisk = new Date(model.last_modified);
-        if (modified && tDisk.getTime() - tClient.getTime() > 500) {
-          // 500 ms
-          return this._timeConflict(tClient, model, options);
-        }
+        let settingsPromise = this._manager.settings.fetch(
+          '@jupyterlab/notebook-extension:tracker'
+        );
+        settingsPromise.then(
+          list => {
+            let settings = list?.settings as any;
+            let margin = settings?.lastModifiedCheckMargin
+              ? settings.lastModifiedCheckMargin
+              : list.schema?.properties?.lastModifiedCheckMargin.default;
+            if (modified && tDisk.getTime() - tClient.getTime() > margin) {
+              // 500 ms
+              return this._timeConflict(tClient, model, options);
+            }
+          },
+          err => {
+            return this._manager.contents.save(path, options);
+            throw err;
+          }
+        );
+
         return this._manager.contents.save(path, options);
       },
       err => {
