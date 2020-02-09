@@ -408,7 +408,7 @@ function activateShareFile(
     isVisible: () =>
       !!tracker.currentWidget &&
       toArray(tracker.currentWidget.selectedItems()).length === 1,
-    iconRenderer: linkIcon,
+    icon: linkIcon,
     label: 'Copy Shareable Link'
   });
 }
@@ -436,7 +436,7 @@ function addCommands(
         return widget.delete();
       }
     },
-    iconRenderer: closeIcon,
+    icon: closeIcon,
     label: 'Delete',
     mnemonic: 0
   });
@@ -449,7 +449,7 @@ function addCommands(
         return widget.copy();
       }
     },
-    iconRenderer: copyIcon,
+    icon: copyIcon,
     label: 'Copy',
     mnemonic: 0
   });
@@ -462,7 +462,7 @@ function addCommands(
         return widget.cut();
       }
     },
-    iconRenderer: cutIcon,
+    icon: cutIcon,
     label: 'Cut'
   });
 
@@ -474,7 +474,7 @@ function addCommands(
         return widget.download();
       }
     },
-    iconRenderer: downloadIcon,
+    icon: downloadIcon,
     label: 'Download'
   });
 
@@ -486,7 +486,7 @@ function addCommands(
         return widget.duplicate();
       }
     },
-    iconRenderer: copyIcon,
+    icon: copyIcon,
     label: 'Duplicate'
   });
 
@@ -601,16 +601,16 @@ function addCommands(
         )
       );
     },
-    iconClass: args => {
+    icon: args => {
       const factory = (args['factory'] as string) || void 0;
       if (factory) {
         // if an explicit factory is passed...
         const ft = registry.getFileType(factory);
         // ...set an icon if the factory name corresponds to a file type name...
         // ...or leave the icon blank
-        return ft?.iconClass ?? '';
+        return ft?.icon;
       } else {
-        return 'jp-MaterialIcon jp-FolderIcon';
+        return folderIcon;
       }
     },
     label: args => (args['label'] || args['factory'] || 'Open') as string,
@@ -635,7 +635,7 @@ function addCommands(
         )
       );
     },
-    iconRenderer: addIcon,
+    icon: addIcon,
     label: 'Open in New Browser Tab',
     mnemonic: 0
   });
@@ -653,7 +653,7 @@ function addCommands(
           Clipboard.copyToSystem(url);
         });
     },
-    iconRenderer: copyIcon,
+    icon: copyIcon,
     label: 'Copy Download Link',
     mnemonic: 0
   });
@@ -666,7 +666,7 @@ function addCommands(
         return widget.paste();
       }
     },
-    iconRenderer: pasteIcon,
+    icon: pasteIcon,
     label: 'Paste',
     mnemonic: 0
   });
@@ -679,7 +679,7 @@ function addCommands(
         return widget.createNewDirectory();
       }
     },
-    iconRenderer: newFolderIcon,
+    icon: newFolderIcon,
     label: 'New Folder'
   });
 
@@ -694,7 +694,7 @@ function addCommands(
         ext: 'txt'
       });
     },
-    iconRenderer: textEditorIcon,
+    icon: textEditorIcon,
     label: 'New File'
   });
 
@@ -709,7 +709,7 @@ function addCommands(
         ext: 'md'
       });
     },
-    iconRenderer: markdownIcon,
+    icon: markdownIcon,
     label: 'New Markdown File'
   });
 
@@ -721,7 +721,7 @@ function addCommands(
         return widget.rename();
       }
     },
-    iconRenderer: editIcon,
+    icon: editIcon,
     label: 'Rename',
     mnemonic: 0
   });
@@ -742,7 +742,7 @@ function addCommands(
     isVisible: () =>
       !!tracker.currentWidget &&
       tracker.currentWidget.selectedItems().next !== undefined,
-    iconRenderer: fileIcon,
+    icon: fileIcon,
     label: 'Copy Path'
   });
 
@@ -784,7 +784,7 @@ function addCommands(
         return widget.shutdownKernels();
       }
     },
-    iconRenderer: stopIcon,
+    icon: stopIcon,
     label: 'Shut Down Kernel'
   });
 
