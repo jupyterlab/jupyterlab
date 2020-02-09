@@ -68,7 +68,7 @@ import { IStateDB } from '@jupyterlab/statedb';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { buildIcon } from '@jupyterlab/ui-components';
+import { buildIcon, notebookIcon } from '@jupyterlab/ui-components';
 
 import { ArrayExt } from '@lumino/algorithm';
 
@@ -229,11 +229,6 @@ namespace CommandIDs {
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
 }
-
-/**
- * The class name for the notebook icon from the default theme.
- */
-const NOTEBOOK_ICON_CLASS = 'jp-NotebookIcon';
 
 /**
  * The name of the factory that creates notebooks.
@@ -466,7 +461,7 @@ function activateNotebookTools(
       notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
     }
   });
-  notebookTools.title.iconRenderer = buildIcon;
+  notebookTools.title.icon = buildIcon;
   notebookTools.title.caption = 'Notebook Tools';
   notebookTools.id = id;
 
@@ -580,9 +575,9 @@ function activateNotebookHandler(
     widget.id = widget.id || `notebook-${++id}`;
 
     // Set up the title icon
+    widget.title.icon = ft?.icon;
     widget.title.iconClass = ft?.iconClass ?? '';
     widget.title.iconLabel = ft?.iconLabel ?? '';
-    widget.title.iconRenderer = ft?.icon!;
 
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
@@ -691,7 +686,7 @@ function activateNotebookHandler(
       return 'Notebook';
     },
     caption: 'Create a new notebook',
-    iconClass: args => (args['isPalette'] ? '' : 'jp-NotebookIcon'),
+    icon: args => (args['isPalette'] ? undefined : notebookIcon),
     execute: args => {
       const cwd =
         (args['cwd'] as string) ||
@@ -2327,7 +2322,7 @@ namespace Private {
       this._cell = options.cell || null;
       this.id = `LinkedOutputView-${UUID.uuid4()}`;
       this.title.label = 'Output View';
-      this.title.icon = NOTEBOOK_ICON_CLASS;
+      this.title.icon = notebookIcon;
       this.title.caption = this._notebook.title.label
         ? `For Notebook: ${this._notebook.title.label}`
         : 'For Notebook:';
