@@ -42,7 +42,22 @@ import { IStateDB } from '@jupyterlab/statedb';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { addIcon, folderIcon } from '@jupyterlab/ui-components';
+import {
+  addIcon,
+  closeIcon,
+  copyIcon,
+  cutIcon,
+  downloadIcon,
+  editIcon,
+  fileIcon,
+  folderIcon,
+  linkIcon,
+  markdownIcon,
+  newFolderIcon,
+  pasteIcon,
+  stopIcon,
+  textEditorIcon
+} from '@jupyterlab/ui-components';
 
 import { IIterator, map, reduce, toArray, find } from '@lumino/algorithm';
 
@@ -393,7 +408,7 @@ function activateShareFile(
     isVisible: () =>
       !!tracker.currentWidget &&
       toArray(tracker.currentWidget.selectedItems()).length === 1,
-    iconClass: 'jp-MaterialIcon jp-LinkIcon',
+    iconRenderer: linkIcon,
     label: 'Copy Shareable Link'
   });
 }
@@ -421,7 +436,7 @@ function addCommands(
         return widget.delete();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-CloseIcon',
+    iconRenderer: closeIcon,
     label: 'Delete',
     mnemonic: 0
   });
@@ -434,7 +449,7 @@ function addCommands(
         return widget.copy();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-CopyIcon',
+    iconRenderer: copyIcon,
     label: 'Copy',
     mnemonic: 0
   });
@@ -447,7 +462,7 @@ function addCommands(
         return widget.cut();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-CutIcon',
+    iconRenderer: cutIcon,
     label: 'Cut'
   });
 
@@ -459,7 +474,7 @@ function addCommands(
         return widget.download();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-DownloadIcon',
+    iconRenderer: downloadIcon,
     label: 'Download'
   });
 
@@ -471,7 +486,7 @@ function addCommands(
         return widget.duplicate();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-CopyIcon',
+    iconRenderer: copyIcon,
     label: 'Duplicate'
   });
 
@@ -620,7 +635,7 @@ function addCommands(
         )
       );
     },
-    iconClass: 'jp-MaterialIcon jp-AddIcon',
+    iconRenderer: addIcon,
     label: 'Open in New Browser Tab',
     mnemonic: 0
   });
@@ -638,7 +653,7 @@ function addCommands(
           Clipboard.copyToSystem(url);
         });
     },
-    iconClass: 'jp-MaterialIcon jp-CopyIcon',
+    iconRenderer: copyIcon,
     label: 'Copy Download Link',
     mnemonic: 0
   });
@@ -651,7 +666,7 @@ function addCommands(
         return widget.paste();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-PasteIcon',
+    iconRenderer: pasteIcon,
     label: 'Paste',
     mnemonic: 0
   });
@@ -664,7 +679,7 @@ function addCommands(
         return widget.createNewDirectory();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-NewFolderIcon',
+    iconRenderer: newFolderIcon,
     label: 'New Folder'
   });
 
@@ -679,7 +694,7 @@ function addCommands(
         ext: 'txt'
       });
     },
-    iconClass: 'jp-MaterialIcon jp-TextEditorIcon',
+    iconRenderer: textEditorIcon,
     label: 'New File'
   });
 
@@ -694,7 +709,7 @@ function addCommands(
         ext: 'md'
       });
     },
-    iconClass: 'jp-MaterialIcon jp-MarkdownIcon',
+    iconRenderer: markdownIcon,
     label: 'New Markdown File'
   });
 
@@ -706,7 +721,7 @@ function addCommands(
         return widget.rename();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-EditIcon',
+    iconRenderer: editIcon,
     label: 'Rename',
     mnemonic: 0
   });
@@ -727,7 +742,7 @@ function addCommands(
     isVisible: () =>
       !!tracker.currentWidget &&
       tracker.currentWidget.selectedItems().next !== undefined,
-    iconClass: 'jp-MaterialIcon jp-FileIcon',
+    iconRenderer: fileIcon,
     label: 'Copy Path'
   });
 
@@ -769,7 +784,7 @@ function addCommands(
         return widget.shutdownKernels();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-StopIcon',
+    iconRenderer: stopIcon,
     label: 'Shut Down Kernel'
   });
 
