@@ -543,7 +543,7 @@ State Database
 ``````````````
 
 The state database can be accessed by importing ``IStateDB`` from
-``@jupyterlab/coreutils`` and adding it to the list of ``requires`` for
+``@jupyterlab/statedb`` and adding it to the list of ``requires`` for
 a plugin:
 
 .. code:: typescript
