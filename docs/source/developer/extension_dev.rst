@@ -419,12 +419,6 @@ might want to use them in your extensions.
   created by the application.
 - ``@jupyterlab/console:IContentFactory``: A factory object that creates new code
   consoles. Use this if you want to create and host code consoles in your own UI elements.
-- ``@jupyterlab/coreutils:ISettingRegistry``: An interface to the JupyterLab settings system.
-  Use this if you want to store settings for your application.
-  See `extension settings <#extension-settings>`__ for more information.
-- ``@jupyterlab/coreutils:IStateDB``: An interface to the JupyterLab state database.
-  Use this if you want to store data that will persist across page loads.
-  See `state database <#state-database>`__ for more information.
 - ``@jupyterlab/docmanager:IDocumentManager``: An interface to the manager for all
   documents used by the application. Use this if you want to open and close documents,
   create and delete files, and otherwise interact with the file system.
@@ -467,6 +461,12 @@ might want to use them in your extensions.
 - ``@jupyterlab/settingeditor:ISettingEditorTracker``: A widget tracker for setting editors.
   Use this if you want to be able to iterate over and interact with setting editors
   created by the application.
+- ``@jupyterlab/settingregistry:ISettingRegistry``: An interface to the JupyterLab settings system.
+  Use this if you want to store settings for your application.
+  See `extension settings <#extension-settings>`__ for more information.
+- ``@jupyterlab/statedb:IStateDB``: An interface to the JupyterLab state database.
+  Use this if you want to store data that will persist across page loads.
+  See `state database <#state-database>`__ for more information.
 - ``@jupyterlab/statusbar:IStatusBar``: An interface to the status bar on the application.
   Use this if you want to add new status bar items.
 - ``@jupyterlab/terminal:ITerminalTracker``: A widget tracker for terminals.
