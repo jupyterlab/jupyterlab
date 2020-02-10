@@ -299,20 +299,16 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     }
 
     this.name = name;
-    this._className = Private.nameToClassName(name);
+    this.react = this._initReact(name);
     this.svgstr = svgstr;
 
-    this.react = this._initReact();
+    this._className = Private.nameToClassName(name);
+    this._renderer = new rendererClass(this);
+    this._rendererClass = rendererClass;
 
-    if (render && unrender) {
-      this.render = render.bind(this);
-      this.unrender = unrender.bind(this);
-    } else {
-      // set render and unrender methods based on the supplied rendererClass
-      const renderer = new rendererClass(this);
-      this.render = renderer.render.bind(this);
-      this.unrender = renderer.unrender.bind(this);
-    }
+    // setup custom render/unrender methods, if passed in
+    this._initRender({ render, unrender });
+
     LabIcon._instances.set(this.name, this);
 
     // TODO: remove along with UNSTABLE_getReact
@@ -392,6 +388,22 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     return ret;
   }
 
+  render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
+    this._renderer.render(container, options);
+  }
+
+  /**
+   * Get an instance of this icon's Renderer with optional bound props
+   *
+   * @param optional icon/style props (same as args for .element
+   * and .react methods). These will be bound to the resulting Renderer
+   *
+   * @returns a Renderer that wraps this LabIcon instance
+   */
+  renderer(props?: LabIcon.IProps) {
+    return new this._rendererClass(this, { props });
+  }
+
   get svgstr() {
     return this._svgstr;
   }
@@ -418,7 +430,13 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     this._svgReplaced.emit();
   }
 
-  protected _initReact() {
+  unrender(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
+    if (this._renderer.unrender) {
+      this._renderer.unrender(container, options);
+    }
+  }
+
+  protected _initReact(displayName: string) {
     const component = React.forwardRef(
       (
         {
@@ -486,8 +504,24 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       }
     );
 
-    component.displayName = `LabIcon_${this.name}`;
+    component.displayName = `LabIcon_${displayName}`;
     return component;
+  }
+
+  protected _initRender({
+    render,
+    unrender
+  }: Partial<VirtualElement.IRenderer>) {
+    if (render) {
+      this.render = render;
+      if (unrender) {
+        this.unrender = unrender;
+      }
+    } else if (unrender) {
+      console.warn(
+        'In _initRender, ignoring unrender arg since render is undefined'
+      );
+    }
   }
 
   protected _initSvg({
@@ -545,21 +579,13 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    */
   readonly react: LabIcon.IReact;
 
-  readonly render: (
-    container: HTMLElement,
-    options?: LabIcon.IRendererOptions
-  ) => void;
-  readonly unrender: (container: HTMLElement) => void;
-
   protected _className: string;
   protected _loading: boolean;
+  protected _renderer: LabIcon.Renderer;
+  protected _rendererClass: typeof LabIcon.Renderer;
   protected _svgReplaced = new Signal<this, void>(this);
   protected _svgstr: string;
   protected _uuid: string;
-
-  // needed due to the quirks of the current implementation of IRenderer
-  protected _icon = this;
-  protected _rendererOptions = {};
 }
 
 /**
@@ -605,6 +631,9 @@ export namespace LabIcon {
    * constructor
    */
   export interface IOptions extends IIcon, Partial<VirtualElement.IRenderer> {
+    /**
+     * @deprecated does nothing
+     */
     rendererClass?: typeof Renderer;
   }
 
@@ -686,14 +715,12 @@ export namespace LabIcon {
   export class Renderer implements VirtualElement.IRenderer {
     constructor(
       protected _icon: LabIcon,
-      protected _rendererOptions: IRendererOptions = {}
+      protected _rendererOptions?: IRendererOptions
     ) {}
 
     // tslint:disable-next-line:no-empty
-    render(container: HTMLElement, _options: IRendererOptions = {}): void {}
-    // TODO: make unrenderer optional once @lumino/virtualdom > 1.4.1 is used
-    // tslint:disable-next-line:no-empty
-    unrender(container: HTMLElement): void {}
+    render(container: HTMLElement, options?: IRendererOptions): void {}
+    unrender?(container: HTMLElement, options?: IRendererOptions): void;
   }
 
   /**
@@ -701,20 +728,20 @@ export namespace LabIcon {
    * as a DOM element.
    */
   export class ElementRenderer extends Renderer {
-    render(container: HTMLElement, _options: IRendererOptions = {}): void {
-      // TODO: move this title fix to the Lumino side
-      container.removeAttribute('title');
+    render(container: HTMLElement, options?: IRendererOptions): void {
+      let label = options?.children?.[0];
+      // narrow type of label
+      if (typeof label !== 'string') {
+        label = undefined;
+      }
 
-      // TODO: decide how to implement rendering of passed in child virtual nodes
       this._icon.element({
         container,
-        ...this._rendererOptions.props,
-        ..._options.props
+        label,
+        ...this._rendererOptions?.props,
+        ...options?.props
       });
     }
-
-    // tslint:disable-next-line:no-empty
-    unrender(container: HTMLElement): void {}
   }
 
   /**
@@ -722,15 +749,18 @@ export namespace LabIcon {
    * as a React component.
    */
   export class ReactRenderer extends Renderer {
-    render(container: HTMLElement, _options: IRendererOptions = {}): void {
-      // TODO: move this title fix to the Lumino side
-      container.removeAttribute('title');
+    render(container: HTMLElement, options?: IRendererOptions): void {
+      let label = options?.children?.[0];
+      // narrow type of label
+      if (typeof label !== 'string') {
+        label = undefined;
+      }
 
-      // TODO: decide how to implement rendering of passed in child virtual nodes
       return ReactDOM.render(
         <this._icon.react
           container={container}
-          {...{ ...this._rendererOptions.props, ..._options.props }}
+          label={label}
+          {...{ ...this._rendererOptions?.props, ...options?.props }}
         />,
         container
       );
