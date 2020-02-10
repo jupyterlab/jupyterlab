@@ -92,7 +92,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
     sessionContext.kernelChanged.connect(this._updateTitlePanel, this);
     sessionContext.propertyChanged.connect(this._updateTitlePanel, this);
 
-    this.title.iconRenderer = consoleIcon;
+    this.title.icon = consoleIcon;
     this.title.closable = true;
     this.id = `console-${count}`;
   }

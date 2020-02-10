@@ -308,7 +308,7 @@ function activateBrowser(
     mainMenu
   );
 
-  browser.title.iconRenderer = folderIcon;
+  browser.title.icon = folderIcon;
   // Show the current file browser shortcut in its title.
   const updateBrowserTitle = () => {
     const binding = find(

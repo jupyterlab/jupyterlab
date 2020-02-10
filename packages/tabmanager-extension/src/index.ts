@@ -31,8 +31,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     }
 
     tabs.id = 'tab-manager';
-    tabs.title.iconRenderer = tabIcon;
     tabs.title.caption = 'Open Tabs';
+    tabs.title.icon = tabIcon;
     header.textContent = 'Open Tabs';
     tabs.node.insertBefore(header, tabs.contentNode);
     shell.add(tabs, 'left', { rank: 600 });

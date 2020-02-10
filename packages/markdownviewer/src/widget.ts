@@ -309,9 +309,9 @@ export class MarkdownViewerFactory extends ABCWidgetFactory<MarkdownDocument> {
     });
     const renderer = rendermime.createRenderer(MIMETYPE);
     const content = new MarkdownViewer({ context, renderer });
+    content.title.icon = this._fileType?.icon!;
     content.title.iconClass = this._fileType?.iconClass ?? '';
     content.title.iconLabel = this._fileType?.iconLabel ?? '';
-    content.title.iconRenderer = this._fileType?.icon!;
     const widget = new MarkdownDocument({ content, context });
 
     return widget;

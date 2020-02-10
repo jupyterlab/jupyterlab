@@ -132,8 +132,8 @@ function activate(
       });
 
       editor.id = namespace;
+      editor.title.icon = settingsIcon;
       editor.title.label = 'Settings';
-      editor.title.iconRenderer = settingsIcon;
 
       let main = new MainAreaWidget({ content: editor });
       void tracker.add(main);
