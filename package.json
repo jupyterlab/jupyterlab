@@ -59,6 +59,7 @@
     "@jupyterlab/observables": "^3.0.0",
     "@jupyterlab/notebook": "^2.0.0",
     "@jupyterlab/services": "^5.0.0",
+    "@jupyterlab/settingregistry": "^2.0.0",
     "@jupyterlab/ui-components": "^2.0.0",
     "@lumino/algorithm": "^1.2.0",
     "@lumino/coreutils": "^1.3.1",
