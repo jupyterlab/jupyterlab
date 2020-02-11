@@ -3,6 +3,8 @@
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
+import { bugIcon } from '@jupyterlab/ui-components';
+
 import { Panel, SplitPanel, Widget } from '@lumino/widgets';
 
 import { Breakpoints } from './breakpoints';
@@ -34,7 +36,7 @@ export namespace Debugger {
     constructor(options: Sidebar.IOptions) {
       super();
       this.id = 'jp-debugger-sidebar';
-      this.title.iconClass = 'jp-BugIcon jp-SideBar-tabIcon';
+      this.title.iconRenderer = bugIcon;
       this.addClass('jp-DebuggerSidebar');
 
       const { callstackCommands, editorServices, service } = options;
