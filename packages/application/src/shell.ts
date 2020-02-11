@@ -772,10 +772,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // (for context menu support)
     title.dataset = { ...title.dataset, id: widget.id };
 
-    // set an appropriate style class for the icon
-    if (title.icon && typeof title.icon !== 'string') {
-      title.iconClass = LabIcon.UNSTABLE_style({
-        className: title.iconClass,
+    // bind an appropriate style to the icon
+    if (title.icon instanceof LabIcon) {
+      title.icon = title.icon.renderer({
         justify: 'center',
         kind: 'mainAreaTab'
       });
@@ -1184,10 +1183,9 @@ namespace Private {
       // in order to dispatch click events to the right widget.
       title.dataset = { id: widget.id };
 
-      // set an appropriate style class for the icon
-      if (title.icon && typeof title.icon !== 'string') {
-        title.iconClass = LabIcon.UNSTABLE_style({
-          className: title.iconClass,
+      // bind an appropriate style to the icon
+      if (title.icon instanceof LabIcon) {
+        title.icon = title.icon.renderer({
           justify: 'center',
           kind: 'sideBar'
         });

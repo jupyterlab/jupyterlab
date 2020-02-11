@@ -239,7 +239,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *
    * TODO: Fix the remaining cases that rely on this and then
    *   remove this method:
-   *     - shell.ts in application
    *     - widget.tsx in extensionmanager
    */
   static UNSTABLE_style({
