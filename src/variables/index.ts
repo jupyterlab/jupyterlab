@@ -64,9 +64,13 @@ export class Variables extends Panel {
     this.addClass('jp-DebuggerVariables');
   }
 
-  private _header: VariablesHeader;
-  private _tree: Widget;
-  private _table: Widget;
+  /**
+   * Set the variable filter for both the tree and table views.
+   */
+  set filter(filter: Set<string>) {
+    this._tree.filter = filter;
+    this._table.filter = filter;
+  }
 
   /**
    * A message handler invoked on a `'resize'` message.
@@ -85,6 +89,10 @@ export class Variables extends Panel {
     this._table.node.style.height = `${height}px`;
     this._tree.node.style.height = `${height}px`;
   }
+
+  private _header: VariablesHeader;
+  private _tree: VariablesBodyTree;
+  private _table: VariablesBodyTable;
 }
 
 /**

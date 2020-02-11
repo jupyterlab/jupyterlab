@@ -320,13 +320,13 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
   optional: [ILayoutRestorer, ICommandPalette, ISettingRegistry],
   provides: IDebugger,
   autoStart: true,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     editorServices: IEditorServices,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null,
-    settings: ISettingRegistry | null
-  ): IDebugger => {
+    settingRegistry: ISettingRegistry | null
+  ): Promise<IDebugger> => {
     const { commands, shell } = app;
 
     const service = new DebuggerService();
@@ -407,6 +407,18 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       callstackCommands,
       editorServices
     });
+
+    if (settingRegistry) {
+      const setting = await settingRegistry.load(main.id);
+      const updateVariableSettings = () => {
+        const list = setting.get('variableFilter').composite as string[];
+        const variableFilter = new Set<string>(list);
+        sidebar.variables.filter = variableFilter;
+      };
+
+      updateVariableSettings();
+      setting.changed.connect(updateVariableSettings);
+    }
 
     sidebar.service.eventMessage.connect(_ => {
       commands.notifyCommandChanged();

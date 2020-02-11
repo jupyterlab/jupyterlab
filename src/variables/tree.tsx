@@ -42,10 +42,19 @@ export class VariablesBodyTree extends ReactWidget {
             key={scope.name}
             service={this._service}
             data={scope.variables}
+            filter={this._filter}
           />
         ))}
       </>
     );
+  }
+
+  /**
+   * Set the variable filter list.
+   */
+  set filter(filter: Set<string>) {
+    this._filter = filter;
+    this.update();
   }
 
   /**
@@ -61,6 +70,7 @@ export class VariablesBodyTree extends ReactWidget {
   }
 
   private _scopes: VariablesModel.IScope[] = [];
+  private _filter = new Set<string>();
   private _service: IDebugger;
 }
 
@@ -68,13 +78,16 @@ export class VariablesBodyTree extends ReactWidget {
  * A React component to display a list of variables.
  * @param data An array of variables.
  * @param service The debugger service.
+ * @param filter Optional variable filter list.
  */
 const VariablesComponent = ({
   data,
-  service
+  service,
+  filter
 }: {
   data: VariablesModel.IVariable[];
   service: IDebugger;
+  filter?: Set<string>;
 }) => {
   const [variables, setVariables] = useState(data);
 
@@ -85,12 +98,19 @@ const VariablesComponent = ({
   return (
     <>
       <ul>
-        {variables.map(variable => {
-          const key = `${variable.evaluateName}-${variable.type}-${variable.value}`;
-          return (
-            <VariableComponent key={key} data={variable} service={service} />
-          );
-        })}
+        {variables
+          ?.filter(variable => !filter.has(variable.evaluateName))
+          .map(variable => {
+            const key = `${variable.evaluateName}-${variable.type}-${variable.value}`;
+            return (
+              <VariableComponent
+                key={key}
+                data={variable}
+                service={service}
+                filter={filter}
+              />
+            );
+          })}
       </ul>
     </>
   );
@@ -103,10 +123,12 @@ const VariablesComponent = ({
  */
 const VariableComponent = ({
   data,
-  service
+  service,
+  filter
 }: {
   data: VariablesModel.IVariable;
   service: IDebugger;
+  filter?: Set<string>;
 }) => {
   const [variable] = useState(data);
   const [expanded, setExpanded] = useState(null);
@@ -153,6 +175,7 @@ const VariableComponent = ({
           key={variable.name}
           data={details}
           service={service}
+          filter={filter}
         />
       )}
     </li>
