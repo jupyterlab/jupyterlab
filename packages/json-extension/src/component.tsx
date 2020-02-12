@@ -51,14 +51,7 @@ export class Component extends React.Component<IProps, IState> {
       ? filterPaths(data, this.state.filter, [root])
       : [root];
     return (
-      <div className="container" data-native-context-menu>
-        <div
-          onContextMenu={() => {
-            console.log('right clicked');
-          }}
-        >
-          <p>HI!!!</p>
-        </div>
+      <div className="container">
         <InputGroup
           className="filter"
           type="text"
