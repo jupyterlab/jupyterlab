@@ -152,7 +152,7 @@ export abstract class JupyterFrontEnd<
     this._contextMenuEvent = event;
     if (
       event.shiftKey ||
-      Private.elementChildOfNativeContextMenu(event.target as HTMLElement)
+      Private.suppressContextMenu(event.target as HTMLElement)
     ) {
       return;
     }
@@ -354,18 +354,18 @@ namespace Private {
   export const CONTEXT_MENU_INFO = '__internal:context-menu-info';
 
   /**
-   * Returns whether the element is itself, or a child of, an element with the `native-context-menu` data attribute.
+   * Returns whether the element is itself, or a child of, an element with the `jp-suppress-context-menu` data attribute.
    */
-  export function elementChildOfNativeContextMenu({
+  export function suppressContextMenu({
     dataset,
     parentElement
   }: HTMLElement): boolean {
-    // Any value of `native-context-menu` data property means its active.
-    if (typeof dataset.nativeContextMenu === 'string') {
+    // Any value of data property means its active.
+    if (typeof dataset.jpSuppressContextMenu === 'string') {
       return true;
     }
     if (parentElement) {
-      return elementChildOfNativeContextMenu(parentElement);
+      return suppressContextMenu(parentElement);
     }
     return false;
   }

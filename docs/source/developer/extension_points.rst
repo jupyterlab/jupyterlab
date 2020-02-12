@@ -126,7 +126,7 @@ The selector can be any valid CSS selector, and may target your own UI elements,
 A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
 
 If you don't want JupyterLab's custom context menu to appear for your element, because you have
-your own right click behavior that you want to trigger, you can add the `native-context-menu` data attribute
+your own right click behavior that you want to trigger, you can add the `jp-suppress-context-menu` data attribute
 to any node to have it and it's children not trigger it.
 
 For example, if you are building a custom React element, it would like this:
@@ -135,7 +135,7 @@ For example, if you are building a custom React element, it would like this:
 
     function MyElement(props: {}) {
       return (
-        <div data-native-context-menu>
+        <div data-jl-suppress-context-menu>
           <p>Hi</p>
           <p onContextMenu={() => {console.log("right clicked")}}>There</p>
         </div>
