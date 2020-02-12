@@ -93,14 +93,14 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     const nextCommand: string = 'documentsearch:highlightNext';
     const prevCommand: string = 'documentsearch:highlightPrevious';
 
-    const startCommandEnabled = () => {
+    const currentWidgetHasSearchProvider = () => {
       const currentWidget = app.shell.currentWidget;
       if (!currentWidget) {
         return false;
       }
       return registry.getProviderForWidget(currentWidget) !== undefined;
     };
-    const executeStartCommand = () => {
+    const getCurrentWidgetSearchInstance = () => {
       const currentWidget = app.shell.currentWidget;
       if (!currentWidget) {
         return;
@@ -129,9 +129,9 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
 
     app.commands.addCommand(startCommand, {
       label: 'Find…',
-      isEnabled: startCommandEnabled,
+      isEnabled: currentWidgetHasSearchProvider,
       execute: () => {
-        const searchInstance = executeStartCommand();
+        const searchInstance = getCurrentWidgetSearchInstance();
         if (searchInstance) {
           searchInstance.focusInput();
         }
@@ -140,9 +140,9 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
 
     app.commands.addCommand(startReplaceCommand, {
       label: 'Find and Replace…',
-      isEnabled: startCommandEnabled,
+      isEnabled: currentWidgetHasSearchProvider,
       execute: () => {
-        const searchInstance = executeStartCommand();
+        const searchInstance = getCurrentWidgetSearchInstance();
         if (searchInstance) {
           searchInstance.showReplace();
           searchInstance.focusInput();
