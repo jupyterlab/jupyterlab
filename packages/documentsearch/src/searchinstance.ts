@@ -82,7 +82,6 @@ export class SearchInstance implements IDisposable {
    */
   showReplace(): void {
     this._displayState.replaceEntryShown = true;
-    this._updateDisplay();
   }
   /**
    * Updates the match index and total display in the search widget.
