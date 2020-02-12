@@ -150,7 +150,10 @@ export abstract class JupyterFrontEnd<
    */
   protected evtContextMenu(event: MouseEvent): void {
     this._contextMenuEvent = event;
-    if (event.shiftKey) {
+    if (
+      event.shiftKey ||
+      Private.elementChildOfNativeContextMenu(event.target as HTMLElement)
+    ) {
       return;
     }
     const opened = this.contextMenu.open(event);
@@ -349,4 +352,21 @@ namespace Private {
    * ersatz command.
    */
   export const CONTEXT_MENU_INFO = '__internal:context-menu-info';
+
+  /**
+   * Returns whether the element is itself, or a child of, an element with the `native-context-menu` data attribute.
+   */
+  export function elementChildOfNativeContextMenu({
+    dataset,
+    parentElement
+  }: HTMLElement): boolean {
+    // Any value of `native-context-menu` data property means its active.
+    if (typeof dataset.nativeContextMenu === 'string') {
+      return true;
+    }
+    if (parentElement) {
+      return elementChildOfNativeContextMenu(parentElement);
+    }
+    return false;
+  }
 }
