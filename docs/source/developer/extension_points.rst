@@ -127,7 +127,7 @@ A list of CSS selectors currently used by context menu commands is given in :ref
 
 If you don't want JupyterLab's custom context menu to appear for your element, because you have
 your own right click behavior that you want to trigger, you can add the `data-jp-suppress-context-menu` data attribute
-to any node to have it and it's children not trigger it.
+to any node to have it and its children not trigger it.
 
 For example, if you are building a custom React element, it would like this:
 
