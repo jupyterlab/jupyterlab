@@ -364,12 +364,6 @@
       "description": "Should timing data be recorded in cell metadata",
       "type": "boolean",
       "default": false
-    },
-    "lastModifiedCheckMargin": {
-      "title": "Set time difference",
-      "description": "Difference between disk time and client time",
-      "type": "number",
-      "default": 500
     }
   },
   "additionalProperties": false,
