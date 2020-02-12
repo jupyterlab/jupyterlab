@@ -40,7 +40,7 @@ export class EditorHandler implements IDisposable {
    * @param options The instantiation options for a EditorHandler.
    */
   constructor(options: EditorHandler.IOptions) {
-    this._id = options.debuggerService.session.connection.path;
+    this._id = options.debuggerService.session.connection.id;
     this._path = options.path;
     this._debuggerService = options.debuggerService;
     this._editor = options.editor;
@@ -170,8 +170,7 @@ export class EditorHandler implements IDisposable {
    */
   private _onGutterClick = (editor: Editor, lineNumber: number) => {
     const info = editor.lineInfo(lineNumber);
-
-    if (!info || this._id !== this._debuggerService.session.connection.path) {
+    if (!info || this._id !== this._debuggerService.session.connection.id) {
       return;
     }
 
@@ -201,7 +200,7 @@ export class EditorHandler implements IDisposable {
   private _addBreakpointsToEditor() {
     const editor = this._editor as CodeMirrorEditor;
     const breakpoints = this._getBreakpoints();
-    if (this._id !== this._debuggerService.session.connection.path) {
+    if (this._id !== this._debuggerService.session.connection.id) {
       return;
     }
     EditorHandler.clearGutter(editor);
