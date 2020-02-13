@@ -242,16 +242,16 @@ ${fileTypes}`;
       }
     });
 
-    //callback to registry change that ensures not to invoke reload method when there is already a promise that is pending
+    // callback to registry change that ensures not to invoke reload method when there is already a promise that is pending
     let reloadSettingsRegistry = () => {
       let promisePending = false;
 
       return async () => {
-          if(!promisePending) {
-            promisePending = true;
-            await settingRegistry.reload(pluginId);
-            promisePending = false;
-          }
+        if (!promisePending) {
+          promisePending = true;
+          await settingRegistry.reload(pluginId);
+          promisePending = false;
+        }
       };
     };
 
