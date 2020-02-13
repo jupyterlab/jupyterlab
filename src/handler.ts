@@ -3,9 +3,11 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { ISessionContext, ToolbarButton } from '@jupyterlab/apputils';
+import { ToolbarButton } from '@jupyterlab/apputils';
 
 import { ConsolePanel } from '@jupyterlab/console';
+
+import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
@@ -25,8 +27,6 @@ import { ConsoleHandler } from './handlers/console';
 
 import { FileHandler } from './handlers/file';
 
-import { IChangedArgs } from '@jupyterlab/coreutils';
-import { IKernelConnection } from '@jupyterlab/services/lib/kernel/kernel';
 import { NotebookHandler } from './handlers/notebook';
 
 /**
@@ -87,52 +87,41 @@ export class DebuggerHandler {
    */
   async update(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
-    connection: Session.ISessionConnection,
-    sessionContext: ISessionContext
+    connection: Session.ISessionConnection
   ): Promise<void> {
-    const updateHandler = async () => {
+    if (!connection) {
+      delete this._kernelChangedHandlers[widget.id];
+      delete this._statusChangedHandlers[widget.id];
       return this._update(widget, connection);
-    };
-
-    const restartKernal = async (
-      slot: ISessionContext,
-      kernel: IChangedArgs<IKernelConnection, IKernelConnection, 'kernel'>
-    ) => {
-      if (!this._service.session) {
-        return;
-      }
-      await slot.ready.then(() => {
-        connection = slot.session;
-      });
-      await updateHandler();
-    };
-
-    // setup handler when the kernel changes
-    const kernelChangedHandler = this._kernelChangedHandlers[connection.path];
-    if (kernelChangedHandler) {
-      sessionContext?.kernelChanged.disconnect(kernelChangedHandler);
     }
-    sessionContext?.kernelChanged.connect(restartKernal);
-    this._kernelChangedHandlers[connection.path] = restartKernal;
 
-    // setup handler when the status of the kernel changes (restart)
-    const statusChanged = async (
-      sender: Session.ISessionConnection,
+    const kernelChanged = () => {
+      void this._update(widget, connection);
+    };
+    const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
+
+    if (kernelChangedHandler) {
+      connection.kernelChanged.disconnect(kernelChangedHandler);
+    }
+    this._kernelChangedHandlers[widget.id] = kernelChanged;
+    connection.kernelChanged.connect(kernelChanged);
+
+    const statusChanged = (
+      _: Session.ISessionConnection,
       status: Kernel.Status
     ) => {
       if (status.endsWith('restarting')) {
-        return updateHandler();
+        void this._update(widget, connection);
       }
     };
-
-    const statusChangedHandler = this._statusChangedHandlers[connection.path];
+    const statusChangedHandler = this._statusChangedHandlers[widget.id];
     if (statusChangedHandler) {
       connection.statusChanged.disconnect(statusChangedHandler);
     }
     connection.statusChanged.connect(statusChanged);
-    this._statusChangedHandlers[connection.path] = statusChanged;
+    this._statusChangedHandlers[widget.id] = statusChanged;
 
-    return updateHandler();
+    return this._update(widget, connection);
   }
 
   /**
@@ -293,9 +282,13 @@ export class DebuggerHandler {
   } = {};
   private _kernelChangedHandlers: {
     [id: string]: (
-      slot: ISessionContext,
-      kernel: IChangedArgs<IKernelConnection, IKernelConnection, 'kernel'>
-    ) => Promise<void>;
+      sender: Session.ISessionConnection,
+      args: IChangedArgs<
+        Kernel.IKernelConnection,
+        Kernel.IKernelConnection,
+        'kernel'
+      >
+    ) => void;
   } = {};
   private _statusChangedHandlers: {
     [id: string]: (

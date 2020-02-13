@@ -87,7 +87,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
     const updateHandlerAndCommands = async (widget: ConsolePanel) => {
       const sessionContext = widget.sessionContext;
       await sessionContext.ready;
-      await handler.update(widget, sessionContext.session, sessionContext);
+      await handler.update(widget, sessionContext.session);
       app.commands.notifyCommandChanged();
     };
 
@@ -148,7 +148,7 @@ const files: JupyterFrontEndPlugin<void> = {
           session = sessions.connectTo({ model });
           activeSessions[model.id] = session;
         }
-        await handler.update(widget, session, widget.context.sessionContext);
+        await handler.update(widget, session);
         app.commands.notifyCommandChanged();
       } catch {
         return;
@@ -204,7 +204,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     const updateHandlerAndCommands = async (widget: NotebookPanel) => {
       const sessionContext = widget.sessionContext;
       await sessionContext.ready;
-      await handler.update(widget, sessionContext.session, sessionContext);
+      await handler.update(widget, sessionContext.session);
       app.commands.notifyCommandChanged();
     };
 
