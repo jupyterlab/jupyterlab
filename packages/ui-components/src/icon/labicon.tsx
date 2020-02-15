@@ -392,15 +392,17 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   }
 
   /**
-   * Get an instance of this icon's Renderer with optional bound props
+   * Get a view of this icon that is bound to the specified icon/style props
    *
    * @param optional icon/style props (same as args for .element
-   * and .react methods). These will be bound to the resulting Renderer
+   * and .react methods). These will be bound to the resulting view
    *
-   * @returns a Renderer that wraps this LabIcon instance
+   * @returns a view of this LabIcon instance
    */
-  renderer(props?: LabIcon.IProps) {
-    return new this._rendererClass(this, { props });
+  bindprops(props?: LabIcon.IProps) {
+    const view = Object.create(this);
+    view._props = props;
+    return view;
   }
 
   get svgstr() {
@@ -580,6 +582,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
 
   protected _className: string;
   protected _loading: boolean;
+  protected _props: LabIcon.IProps;
   protected _renderer: LabIcon.Renderer;
   protected _rendererClass: typeof LabIcon.Renderer;
   protected _svgReplaced = new Signal<this, void>(this);
