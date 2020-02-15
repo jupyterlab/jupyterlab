@@ -271,6 +271,7 @@ export class Dialog<T> extends Widget {
     if (!content.contains(event.target as HTMLElement)) {
       event.stopPropagation();
       event.preventDefault();
+      this.reject();
       return;
     }
     for (let buttonNode of this._buttonNodes) {
