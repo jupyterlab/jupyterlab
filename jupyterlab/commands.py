@@ -893,7 +893,7 @@ class _AppHandler(object):
         """
         path = _normalize_path(path)
         if not osp.exists(path) or not osp.isdir(path):
-            msg = 'Can install "%s" only link local directories'
+            msg = 'Cannot install "%s" only link local directories'
             raise ValueError(msg % path)
 
         with TemporaryDirectory() as tempdir:

@@ -48,7 +48,7 @@ may be able to fix it by disabling the `dev_build` and/or `minimize` options.
 If you are building via the `jupyter lab build` command, you can disable
 these options like so:
 
-jupyter lab build --dev-mode=False --minimize=False
+jupyter lab build --dev-build=False --minimize=False
 
 You can also disable these options for all JupyterLab builds by adding these
 lines to a Jupyter config file named `jupyter_config.py`:
