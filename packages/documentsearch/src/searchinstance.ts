@@ -78,6 +78,12 @@ export class SearchInstance implements IDisposable {
   }
 
   /**
+   * If there is a replace box, show it.
+   */
+  showReplace(): void {
+    this._displayState.replaceEntryShown = true;
+  }
+  /**
    * Updates the match index and total display in the search widget.
    */
   updateIndices(): void {
