@@ -7,11 +7,11 @@ import { ILanguageServerManager, TSessionMap } from './tokens';
 import * as SCHEMA from './_schema';
 
 export class LanguageServerManager implements ILanguageServerManager {
-  private _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal<
+  protected _sessionsChanged: Signal<ILanguageServerManager, void> = new Signal<
     ILanguageServerManager,
     void
   >(this);
-  private _sessions: TSessionMap = new Map();
+  protected _sessions: TSessionMap = new Map();
   private _settings: ServerConnection.ISettings;
   private _baseUrl: string;
 

@@ -22,12 +22,26 @@ import { ICellModel } from '@jupyterlab/cells';
 import createNotebook = NBTestUtils.createNotebook;
 import { CodeMirrorAdapter } from './cm_adapter';
 import { VirtualDocument } from '../../virtual/document';
+import { LanguageServerManager } from '../../manager';
+import { DocumentConnectionManager } from '../../connection_manager';
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
   virtual_editor: VirtualEditor;
 
   dispose(): void;
+}
+
+export class MockLanguageServerManager extends LanguageServerManager {
+  async fetchSessions() {
+    this._sessions = new Map();
+    this._sessions.set('pyls', {
+      spec: {
+        languages: ['python']
+      }
+    } as any);
+    this._sessionsChanged.emit(void 0);
+  }
 }
 
 export abstract class FeatureTestEnvironment
@@ -129,6 +143,18 @@ export class FileEditorFeatureTestEnvironment extends FeatureTestEnvironment {
       host: this.host,
       model
     });
+
+    const LANGSERVER_MANAGER = new MockLanguageServerManager({});
+    const CONNECTION_MANAGER = new DocumentConnectionManager({
+      language_server_manager: LANGSERVER_MANAGER
+    });
+
+    const DEBUG = false;
+
+    if (DEBUG) {
+      console.log(CONNECTION_MANAGER);
+    }
+
     this.init();
   }
 

@@ -337,9 +337,6 @@ namespace Private {
   export function setLanguageServerManager(
     language_server_manager: ILanguageServerManager
   ) {
-    if (_language_server_manager) {
-      return;
-    }
     _language_server_manager = language_server_manager;
   }
 
