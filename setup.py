@@ -153,8 +153,7 @@ setup_args['extras_require'] = {
         'sphinx',
         'recommonmark',
         'sphinx_rtd_theme',
-        'sphinx-copybutton',
-        'jsx-lexer'
+        'sphinx-copybutton'
     ],
 }
 
