@@ -131,7 +131,7 @@ to any node to have it and its children not trigger it.
 
 For example, if you are building a custom React element, it would look like this:
 
-.. code:: jsx
+.. code::
 
     function MyElement(props: {}) {
       return (
