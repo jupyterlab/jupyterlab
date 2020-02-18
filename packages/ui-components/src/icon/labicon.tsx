@@ -234,20 +234,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     }
   }
 
-  /**
-   * UNSTABLE - only exists for handling 2 special cases
-   *
-   * TODO: Fix the remaining cases that rely on this and then
-   *   remove this method:
-   *     - widget.tsx in extensionmanager
-   */
-  static UNSTABLE_style({
-    className,
-    ...props
-  }: { className?: string } & IIconStyle) {
-    return classes(className, iconStyle(props));
-  }
-
   private static _debug: boolean = false;
   private static _instances = new Map<string, LabIcon>();
 
@@ -313,6 +299,20 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     // TODO: remove along with UNSTABLE_getReact
     LabIcon._instancesByNameAndClassName.set(this.name, this);
     LabIcon._instancesByNameAndClassName.set(this._className, this);
+  }
+
+  /**
+   * Get a view of this icon that is bound to the specified icon/style props
+   *
+   * @param optional icon/style props (same as args for .element
+   * and .react methods). These will be bound to the resulting view
+   *
+   * @returns a view of this LabIcon instance
+   */
+  bindprops(props?: LabIcon.IProps) {
+    const view = Object.create(this);
+    view._props = props;
+    return view;
   }
 
   /**
@@ -391,20 +391,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     this._renderer.render(container, options);
   }
 
-  /**
-   * Get a view of this icon that is bound to the specified icon/style props
-   *
-   * @param optional icon/style props (same as args for .element
-   * and .react methods). These will be bound to the resulting view
-   *
-   * @returns a view of this LabIcon instance
-   */
-  bindprops(props?: LabIcon.IProps) {
-    const view = Object.create(this);
-    view._props = props;
-    return view;
-  }
-
   get svgstr() {
     return this._svgstr;
   }
@@ -447,7 +433,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           title,
           tag = 'div',
           ...propsStyle
-        }: LabIcon.IProps = {},
+        }: LabIcon.IProps = this._props,
         ref: LabIcon.IReactRef
       ) => {
         // set up component state via useState hook
@@ -582,7 +568,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
 
   protected _className: string;
   protected _loading: boolean;
-  protected _props: LabIcon.IProps;
+  protected _props: LabIcon.IProps = {};
   protected _renderer: LabIcon.Renderer;
   protected _rendererClass: typeof LabIcon.Renderer;
   protected _svgReplaced = new Signal<this, void>(this);
