@@ -22,6 +22,7 @@ export type IconKindType =
   | 'listing'
   | 'listingHeaderItem'
   | 'mainAreaTab'
+  | 'menuItem'
   | 'runningItem'
   | 'select'
   | 'settingsEditor'
@@ -91,6 +92,11 @@ const iconCSSMainAreaTab: NestedCSSProperties = {
   }
 };
 
+const iconCSSMenuItem: NestedCSSProperties = {
+  height: '16px',
+  width: '16px'
+};
+
 const iconCSSRunningItem: NestedCSSProperties = {
   height: '16px',
   width: '16px'
@@ -135,6 +141,7 @@ const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   listing: iconCSSListing,
   listingHeaderItem: iconCSSlistingHeaderItem,
   mainAreaTab: iconCSSMainAreaTab,
+  menuItem: iconCSSMenuItem,
   runningItem: iconCSSRunningItem,
   select: iconCSSSelect,
   settingsEditor: iconCSSSettingsEditor,
@@ -196,6 +203,11 @@ const containerCSSMainAreaTab: NestedCSSProperties = {
       position: 'relative'
     }
   }
+};
+
+const containerCSSMenuItem: NestedCSSProperties = {
+  display: 'inline-block',
+  verticalAlign: 'middle'
 };
 
 const containerCSSRunningItem: NestedCSSProperties = {
@@ -269,6 +281,7 @@ const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   listing: containerCSSListing,
   listingHeaderItem: containerCSSListingHeaderItem,
   mainAreaTab: containerCSSMainAreaTab,
+  menuItem: containerCSSMenuItem,
   runningItem: containerCSSRunningItem,
   select: containerCSSSelect,
   settingsEditor: containerCSSSettingsEditor,
