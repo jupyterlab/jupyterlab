@@ -249,7 +249,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     svgstr,
     render,
     unrender,
-    rendererClass = LabIcon.ElementRenderer,
     _loading = false
   }: LabIcon.IOptions & { _loading?: boolean }) {
     if (!(name && svgstr)) {
@@ -288,8 +287,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     this.svgstr = svgstr;
 
     this._className = Private.nameToClassName(name);
-    this._renderer = new rendererClass(this);
-    this._rendererClass = rendererClass;
 
     // setup custom render/unrender methods, if passed in
     this._initRender({ render, unrender });
@@ -312,6 +309,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   bindprops(props?: LabIcon.IProps) {
     const view = Object.create(this);
     view._props = props;
+    view.react = view._initReact(view.name + '_bind');
     return view;
   }
 
@@ -340,14 +338,16 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * @returns A DOM element that contains an (inline) svg element
    * that displays an icon
    */
-  element({
-    className,
-    container,
-    label,
-    title,
-    tag = 'div',
-    ...propsStyle
-  }: LabIcon.IProps = {}): HTMLElement {
+  element(props: LabIcon.IProps = {}): HTMLElement {
+    let {
+      className,
+      container,
+      label,
+      title,
+      tag = 'div',
+      ...propsStyle
+    }: LabIcon.IProps = { ...this._props, ...props };
+
     // check if icon element is already set
     const maybeSvgElement = container?.firstChild as HTMLElement;
     if (maybeSvgElement?.dataset?.iconId === this._uuid) {
@@ -388,7 +388,17 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   }
 
   render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
-    this._renderer.render(container, options);
+    let label = options?.children?.[0];
+    // narrow type of label
+    if (typeof label !== 'string') {
+      label = undefined;
+    }
+
+    this.element({
+      container,
+      label,
+      ...options?.props
+    });
   }
 
   get svgstr() {
@@ -417,25 +427,20 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     this._svgReplaced.emit();
   }
 
-  unrender(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
-    if (this._renderer.unrender) {
-      this._renderer.unrender(container, options);
-    }
-  }
+  unrender?(container: HTMLElement, options?: LabIcon.IRendererOptions): void;
 
   protected _initReact(displayName: string) {
     const component = React.forwardRef(
-      (
-        {
+      (props: LabIcon.IProps = {}, ref: LabIcon.IReactRef) => {
+        let {
           className,
           container,
           label,
           title,
           tag = 'div',
           ...propsStyle
-        }: LabIcon.IProps = this._props,
-        ref: LabIcon.IReactRef
-      ) => {
+        }: LabIcon.IProps = { ...this._props, ...props };
+
         // set up component state via useState hook
         const [, setId] = React.useState(this._uuid);
 
