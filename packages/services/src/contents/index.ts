@@ -28,6 +28,14 @@ const SERVICE_DRIVE_URL = 'api/contents';
 const FILES_URL = 'files';
 
 /**
+ * The object to reference listCheckpoints promises
+ * used as a flag to check and return the existing promise if it's pending
+ */
+let checkpointPromiseQueue: {
+  [key: string]: Promise<Contents.ICheckpointModel[]>;
+} = {};
+
+/**
  * A namespace for contents interfaces.
  */
 export namespace Contents {
@@ -1309,22 +1317,34 @@ export class Drive implements Contents.IDrive {
    */
   listCheckpoints(localPath: string): Promise<Contents.ICheckpointModel[]> {
     let url = this._getUrl(localPath, 'checkpoints');
-    return ServerConnection.makeRequest(url, {}, this.serverSettings)
-      .then(response => {
-        if (response.status !== 200) {
-          throw new ServerConnection.ResponseError(response);
-        }
-        return response.json();
-      })
-      .then(data => {
-        if (!Array.isArray(data)) {
-          throw new Error('Invalid Checkpoint list');
-        }
-        for (let i = 0; i < data.length; i++) {
-          validate.validateCheckpointModel(data[i]);
-        }
-        return data;
-      });
+
+    if (!checkpointPromiseQueue[localPath]) {
+      checkpointPromiseQueue[localPath] = ServerConnection.makeRequest(
+        url,
+        {},
+        this.serverSettings
+      )
+        .then(response => {
+          if (response.status !== 200) {
+            throw new ServerConnection.ResponseError(response);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (!Array.isArray(data)) {
+            throw new Error('Invalid Checkpoint list');
+          }
+          for (let i = 0; i < data.length; i++) {
+            validate.validateCheckpointModel(data[i]);
+          }
+          return data;
+        })
+        .finally(() => {
+          delete checkpointPromiseQueue[localPath];
+        });
+    }
+
+    return checkpointPromiseQueue[localPath];
   }
 
   /**

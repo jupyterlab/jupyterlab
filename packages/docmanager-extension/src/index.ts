@@ -44,6 +44,8 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Widget } from '@lumino/widgets';
 
+import { Debouncer } from '@lumino/polling';
+
 /**
  * The command IDs used by the document manager plugin.
  */
@@ -244,15 +246,11 @@ ${fileTypes}`;
 
     // callback to registry change that ensures not to invoke reload method when there is already a promise that is pending
     let reloadSettingsRegistry = () => {
-      let promisePending = false;
+      let reloadDebounce = new Debouncer(() =>
+        settingRegistry.reload(pluginId)
+      );
 
-      return async () => {
-        if (!promisePending) {
-          promisePending = true;
-          await settingRegistry.reload(pluginId);
-          promisePending = false;
-        }
-      };
+      return reloadDebounce.invoke.bind(reloadDebounce);
     };
 
     // If the document registry gains or loses a factory or file type,
