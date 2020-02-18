@@ -1,0 +1,4 @@
+tasks:
+  - init: yarn install && yarn run build && pip install .
+    command: yarn run watch
+image: gitpod/workspace-full
