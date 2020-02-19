@@ -28,6 +28,7 @@ package within the ``InputDialog`` namespace. There are four helpers:
 * ``getItem`` : request a item from a list; the list may be editable.
 * ``getNumber`` : request a number; if the user input is not a valid number, NaN is returned.
 * ``getText`` : request a short text.
+* ``getPassword`` : request a short password.
 
 All dialogs are built on the standard ``Dialog``. Therefore the helper functions each return
 a ``Promise`` resolving in a ``Dialog.IResult`` object.
@@ -65,6 +66,12 @@ a ``Promise`` resolving in a ``Dialog.IResult`` object.
     InputDialog.getText({ title: 'Provide a text' }).then(value => {
       console.log('text ' + value.value);
     });
+
+    // Request a text
+    InputDialog.getPassword({ title: 'Input password' }).then(value => {
+      console.log('A password was input');
+    });
+
 
 File Dialogs
 ''''''''''''
