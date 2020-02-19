@@ -3,7 +3,9 @@
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 import {
+  caretDownIcon,
   caretDownEmptyThinIcon,
+  caretRightIcon,
   caretUpEmptyThinIcon,
   caseSensitiveIcon,
   classes,
@@ -40,8 +42,7 @@ const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
 const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
-const REPLACE_TOGGLE_COLLAPSED = 'jp-DocumentSearch-replace-toggle-collapsed';
-const REPLACE_TOGGLE_EXPANDED = 'jp-DocumentSearch-replace-toggle-expanded';
+const REPLACE_TOGGLE_CLASS = 'jp-DocumentSearch-replace-toggle';
 const FOCUSED_INPUT = 'jp-DocumentSearch-focused-input';
 const TOGGLE_WRAPPER = 'jp-DocumentSearch-toggle-wrapper';
 const TOGGLE_PLACEHOLDER = 'jp-DocumentSearch-toggle-placeholder';
@@ -452,6 +453,8 @@ class SearchOverlay extends React.Component<
         toggleOutput={this._toggleSearchOutput}
       />
     ) : null;
+    const icon = this.state.replaceEntryShown ? caretDownIcon : caretRightIcon;
+
     return [
       <div className={OVERLAY_ROW_CLASS} key={0}>
         {this.props.isReadOnly ? (
@@ -462,13 +465,12 @@ class SearchOverlay extends React.Component<
             onClick={() => this._onReplaceToggled()}
             tabIndex={1}
           >
-            <span
-              className={`${
-                this.state.replaceEntryShown
-                  ? REPLACE_TOGGLE_EXPANDED
-                  : REPLACE_TOGGLE_COLLAPSED
-              } ${BUTTON_CONTENT_CLASS}`}
-              tabIndex={-1}
+            <icon.react
+              className={`${REPLACE_TOGGLE_CLASS} ${BUTTON_CONTENT_CLASS}`}
+              tag="span"
+              justify="center"
+              height="20px"
+              width="20px"
             />
           </button>
         )}

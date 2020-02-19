@@ -232,24 +232,12 @@
   display: flex;
 }
 
-.jp-DocumentSearch-replace-toggle-collapsed,
-.jp-DocumentSearch-replace-toggle-expanded {
+.jp-DocumentSearch-replace-toggle {
   border: none;
   background-color: var(--jp-toolbar-background);
-}
-
-.jp-DocumentSearch-replace-toggle-collapsed {
   border-radius: var(--jp-border-radius);
 }
 
-.jp-DocumentSearch-replace-toggle-collapsed:hover {
-  background-color: var(--jp-layout-color2);
-}
-
-.jp-DocumentSearch-replace-toggle-expanded {
-  border-radius: var(--jp-border-radius);
-}
-
-.jp-DocumentSearch-replace-toggle-expanded:hover {
+.jp-DocumentSearch-replace-toggle:hover {
   background-color: var(--jp-layout-color2);
 }
