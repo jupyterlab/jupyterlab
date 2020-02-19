@@ -608,9 +608,9 @@ function addCommands(
         const ft = registry.getFileType(factory);
         // ...set an icon if the factory name corresponds to a file type name...
         // ...or leave the icon blank
-        return ft?.icon;
+        return ft?.icon?.bindprops({ justify: 'center', kind: 'menuItem' });
       } else {
-        return folderIcon;
+        return folderIcon.bindprops({ justify: 'center', kind: 'menuItem' });
       }
     },
     label: args => (args['label'] || args['factory'] || 'Open') as string,
