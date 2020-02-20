@@ -73,8 +73,8 @@ export namespace Styling {
       caretDownEmptyIcon.element({
         tag: 'span',
         kind: 'select',
-        right: '15px',
-        top: '23px',
+        right: '8px',
+        top: '5px',
         width: '18px'
       })
     );
