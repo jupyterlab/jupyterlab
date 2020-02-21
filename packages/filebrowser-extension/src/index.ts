@@ -388,7 +388,7 @@ function activateShareFile(
         return;
       }
       const path = encodeURI(model.path);
-      Clipboard.copyToSystem(URLExt.join(PageConfig.getTreeUrl(), path));
+      Clipboard.copyToSystem(URLExt.join(PageConfig.getTreeShareUrl(), path));
     },
     isVisible: () =>
       !!tracker.currentWidget &&

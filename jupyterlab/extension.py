@@ -209,6 +209,7 @@ def load_jupyter_server_extension(nbapp):
         page_config['hubPrefix'] = nbapp.hub_prefix
         page_config['hubHost'] = nbapp.hub_host
         page_config['hubUser'] = nbapp.user
+        page_config['shareUrl'] = ujoin(nbapp.hub_prefix, 'user-redirect')
         # Assume the server_name property indicates running JupyterHub 1.0.
         if hasattr(nbapp, 'server_name'):
             page_config['hubServerName'] = nbapp.server_name
