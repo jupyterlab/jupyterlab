@@ -7,8 +7,6 @@ import { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { Text } from '@jupyterlab/coreutils';
-
 import { iconStyle, IIconStyle } from '../style';
 import { getReactAttrs, classes } from '../utils';
 
@@ -839,15 +837,6 @@ namespace Private {
       (typeof icon === 'string' ||
         ((icon as LabIcon.IIcon).name && (icon as LabIcon.IIcon).svgstr))
     );
-  }
-
-  /**
-   * @param name - icon name. May be namespaced as per `some-pkg:foo-bar`
-   *
-   * @returns given a name of `some-pkg:foo-bar`, returns `jp-FooBarIcon`
-   */
-  export function nameToClassName(name: string): string {
-    return 'jp-' + Text.camelCase(name.split(':').pop()!, true) + 'Icon';
   }
 
   export function setTitleSvg(svgNode: HTMLElement, title: string): void {
