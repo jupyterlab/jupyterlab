@@ -127,7 +127,7 @@
 }
 
 /* gray out icon/caret for disable menu items */
-.lm-Menu-item.lm-mod-toggled.lm-mod-disabled > .lm-Menu-itemIcon,
-.lm-Menu-item[data-type='submenu'] > .lm-Menu-itemSubmenuIcon {
+.lm-Menu-item.lm-mod-disabled > .lm-Menu-itemIcon,
+.lm-Menu-item[data-type='submenu'].lm-mod-disabled > .lm-Menu-itemSubmenuIcon {
   opacity: 0.4;
 }
