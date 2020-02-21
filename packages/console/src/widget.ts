@@ -363,6 +363,18 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Inserts text into the prompt cell.
+   * @param text - The text to be inserted.
+   */
+  insertText(text: string): void {
+    let promptCell = this.promptCell;
+    if (!promptCell) {
+      return;
+    }
+    promptCell.editor.insertText(text);
+  }
+
+  /**
    * Serialize the output.
    *
    * #### Notes

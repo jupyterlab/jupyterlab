@@ -660,6 +660,17 @@ export namespace NotebookActions {
   }
 
   /**
+   * Inserts text into the active cell of the notebook.
+   * @param notebook - The target notebook widget.
+   * @param text - The text to be inserted.
+   */
+  export function insertText(notebook: Notebook, text: string): void {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+    notebook.activeCell.editor.insertText(text);
+  }
+  /**
    * Select the above the active cell.
    *
    * @param notebook - The target notebook widget.

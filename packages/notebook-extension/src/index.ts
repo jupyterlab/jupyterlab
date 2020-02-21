@@ -226,6 +226,8 @@ namespace CommandIDs {
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
+
+  export const insertText = 'notebook:insert-text';
 }
 
 /**
@@ -1895,6 +1897,17 @@ function addCommands(
 
       if (current) {
         return NotebookActions.selectLastRunCell(current.content);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.insertText, {
+    label: 'Insert text into cell',
+    execute: args => {
+      const current = getCurrent(args);
+      const text: string = (args['text'] as string) || '';
+      if (current) {
+        return NotebookActions.insertText(current.content, text);
       }
     },
     isEnabled

@@ -88,6 +88,8 @@ namespace CommandIDs {
   export const shiftEnterToExecute = 'console:shift-enter-to-execute';
 
   export const interactionMode = 'console:interaction-mode';
+
+  export const insertText = 'console:insert-text';
 }
 
 /**
@@ -429,6 +431,18 @@ async function activateConsole(
       current.console.insertLinebreak();
     },
     isEnabled
+  });
+
+  commands.addCommand(CommandIDs.insertText, {
+    label: 'Insert Text',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      const text: string = (args['text'] as string) || '';
+      current.console.insertText(text);
+    }
   });
 
   commands.addCommand(CommandIDs.interrupt, {
