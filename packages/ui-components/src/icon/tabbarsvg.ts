@@ -14,8 +14,7 @@ import { classes } from '../utils';
  */
 export class TabBarSvg<T> extends TabBar<T> {
   /**
-   * Construct a new tab bar. Sets the (icon) kind and overrides
-   * the default renderer.
+   * Construct a new tab bar. Overrides the default renderer.
    *
    * @param options - The options for initializing the tab bar.
    */

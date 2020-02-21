@@ -125,25 +125,3 @@
   top: 4px;
   border-top: var(--jp-border-width) solid var(--jp-layout-color2);
 }
-
-.lm-Menu-itemIcon,
-.lm-Menu-itemSubmenuIcon {
-  background-size: 16px;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.lm-Menu-item.lm-mod-toggled > .lm-Menu-itemIcon {
-  background-image: var(--jp-icon-check);
-}
-
-.lm-Menu-item.lm-mod-toggled.lm-mod-disabled > .lm-Menu-itemIcon {
-  background-image: var(--jp-icon-check-disabled);
-}
-
-.lm-Menu-item[data-type='submenu'] > .lm-Menu-itemSubmenuIcon {
-  background-image: var(--jp-icon-caret-right);
-  background-size: 18px;
-  background-repeat: no-repeat;
-  background-position: left;
-}

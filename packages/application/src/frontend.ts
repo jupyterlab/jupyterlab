@@ -7,6 +7,8 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { ServiceManager } from '@jupyterlab/services';
 
+import { MenuSvg } from '@jupyterlab/ui-components';
+
 import { IIterator } from '@lumino/algorithm';
 
 import { Application, IPlugin } from '@lumino/application';
@@ -38,6 +40,10 @@ export abstract class JupyterFrontEnd<
    * Construct a new JupyterFrontEnd object.
    */
   constructor(options: JupyterFrontEnd.IOptions<T>) {
+    // render context menu with svg icon tweaks
+    options.contextMenuRenderer =
+      options.contextMenuRenderer || MenuSvg.defaultRenderer;
+
     super(options);
 
     // The default restored promise if one does not exist in the options.

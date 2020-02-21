@@ -3,4 +3,5 @@
 
 export * from './iconimports';
 export * from './labicon';
+export * from './menusvg';
 export * from './tabbarsvg';

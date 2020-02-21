@@ -3,6 +3,8 @@
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
 
+import { MenuSvg } from '@jupyterlab/ui-components';
+
 import { ArrayExt } from '@lumino/algorithm';
 
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
@@ -61,6 +63,9 @@ export class JupyterLabMenu implements IJupyterLabMenu {
    *   groups that are added to the menu.
    */
   constructor(options: Menu.IOptions, includeSeparators: boolean = true) {
+    // render menu with svg icon tweaks
+    options.renderer = options.renderer || MenuSvg.defaultRenderer;
+
     this.menu = new Menu(options);
     this._includeSeparators = includeSeparators;
   }
