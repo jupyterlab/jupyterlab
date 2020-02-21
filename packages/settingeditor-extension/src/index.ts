@@ -22,7 +22,7 @@ import {
   SettingEditor
 } from '@jupyterlab/settingeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { settingsIcon } from '@jupyterlab/ui-components';
+import { saveIcon, settingsIcon, undoIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 
 /**
@@ -149,14 +149,14 @@ function activate(
     execute: () => {
       tracker.currentWidget?.content.revert();
     },
-    iconClass: 'jp-MaterialIcon jp-UndoIcon',
+    icon: undoIcon,
     label: 'Revert User Settings',
     isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
   });
 
   commands.addCommand(CommandIDs.save, {
     execute: () => tracker.currentWidget?.content.save(),
-    iconClass: 'jp-MaterialIcon jp-SaveIcon',
+    icon: saveIcon,
     label: 'Save User Settings',
     isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
   });

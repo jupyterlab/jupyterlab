@@ -35,7 +35,12 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { HTMLSelect, listIcon } from '@jupyterlab/ui-components';
+import {
+  addIcon,
+  closeIcon,
+  HTMLSelect,
+  listIcon
+} from '@jupyterlab/ui-components';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -208,22 +213,21 @@ function activateLogConsole(
   });
 
   app.commands.addCommand(CommandIDs.addCheckpoint, {
-    label: 'Add Checkpoint',
     execute: () => {
       logConsolePanel?.logger?.checkpoint();
     },
+    icon: addIcon,
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
-    iconClass: 'jp-AddIcon'
+    label: 'Add Checkpoint'
   });
 
   app.commands.addCommand(CommandIDs.clear, {
-    label: 'Clear Log',
     execute: () => {
       logConsolePanel?.logger?.clear();
     },
+    icon: closeIcon,
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
-    // TODO: figure out how this jp-clearIcon class should work, analagous to jp-AddIcon
-    iconClass: 'fa fa-ban jp-ClearIcon'
+    label: 'Clear Log'
   });
 
   function toTitleCase(value: string) {
