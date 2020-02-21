@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { h, VirtualElement } from '@lumino/virtualdom';
-import { ContextMenu, Menu } from '@lumino/widgets';
+import { Menu } from '@lumino/widgets';
 
 import { caretRightIcon, checkIcon } from './iconimports';
 import { iconStyle } from '../style';
@@ -12,22 +12,6 @@ const submenuIcon = caretRightIcon.bindprops({
   justify: 'center',
   kind: 'menuItem'
 });
-
-/**
- * a widget which displays items as a canonical menu.
- * Tweaked to use inline svg icons
- */
-export class MenuSvg extends Menu {
-  /**
-   * construct a new menu. Overrides the default renderer
-   *
-   * @param options - The options for initializing the tab bar.
-   */
-  constructor(options: Menu.IOptions) {
-    options.renderer = options.renderer || MenuSvg.defaultRenderer;
-    super(options);
-  }
-}
 
 export namespace MenuSvg {
   /**
@@ -44,22 +28,19 @@ export namespace MenuSvg {
     renderIcon(data: Menu.IRenderData): VirtualElement {
       let className = this.createIconClass(data);
 
+      if (data.item.isToggled) {
+        // check mark icon takes precedence
+        return h.div({ className }, checkIcon, data.item.iconLabel);
+      }
+
       /* <DEPRECATED> */
       if (typeof data.item.icon === 'string') {
         return h.div({ className }, data.item.iconLabel);
       }
       /* </DEPRECATED> */
 
-      // if (!(data.item.icon || data.item.iconClass)) {
-
-      // }
-
-      if (data.item.isToggled) {
-        return h.div({ className }, checkIcon, data.item.iconLabel);
-      } else {
-        // if data.item.icon is undefined, it will be ignored
-        return h.div({ className }, data.item.icon!, data.item.iconLabel);
-      }
+      // if data.item.icon is undefined, it will be ignored
+      return h.div({ className }, data.item.icon!, data.item.iconLabel);
     }
 
     /**
@@ -75,11 +56,15 @@ export namespace MenuSvg {
       name += ' p-Menu-itemIcon';
       /* </DEPRECATED> */
 
-      return classes(
-        iconStyle({ justify: 'center', kind: 'menuItem' }),
-        data.item.iconClass,
-        name
-      );
+      if (data.item.type === 'separator') {
+        return classes(data.item.iconClass, name);
+      } else {
+        return classes(
+          iconStyle({ justify: 'center', kind: 'menuItem' }),
+          data.item.iconClass,
+          name
+        );
+      }
     }
 
     /**
@@ -105,20 +90,4 @@ export namespace MenuSvg {
   }
 
   export const defaultRenderer = new Renderer();
-}
-
-/**
- * an object which implements a universal context menu.
- * Tweaked to use inline svg icons
- */
-export class ContextMenuSvg extends ContextMenu {
-  /**
-   * Construct a new dock panel.
-   *
-   * @param options - The options for initializing the panel.
-   */
-  constructor(options: ContextMenu.IOptions) {
-    options.renderer = options.renderer || MenuSvg.defaultRenderer;
-    super(options);
-  }
 }

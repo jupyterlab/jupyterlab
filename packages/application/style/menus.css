@@ -125,3 +125,9 @@
   top: 4px;
   border-top: var(--jp-border-width) solid var(--jp-layout-color2);
 }
+
+/* gray out icon/caret for disable menu items */
+.lm-Menu-item.lm-mod-toggled.lm-mod-disabled > .lm-Menu-itemIcon,
+.lm-Menu-item[data-type='submenu'] > .lm-Menu-itemSubmenuIcon {
+  opacity: 0.4;
+}
