@@ -609,9 +609,14 @@ namespace Private {
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {
     let { commands, id, args } = options;
-    const icon = commands.icon(id, args);
+
     const iconClass = commands.iconClass(id, args);
     const iconLabel = commands.iconLabel(id, args);
+    // DEPRECATED: remove _icon when lumino 2.0 is adopted
+    // if icon is aliasing iconClass, don't use it
+    const _icon = commands.icon(id, args);
+    const icon = _icon === iconClass ? undefined : _icon;
+
     const label = commands.label(id, args);
     let className = commands.className(id, args);
     // Add the boolean state classes.
@@ -626,6 +631,7 @@ namespace Private {
       void commands.execute(id, args);
     };
     const enabled = commands.isEnabled(id, args);
+
     return { className, icon, iconClass, tooltip, onClick, enabled, label };
   }
 

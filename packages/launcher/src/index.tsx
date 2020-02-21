@@ -193,13 +193,19 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       const args = { ...item.args, cwd: this.cwd };
       const kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
 
+      // DEPRECATED: remove _icon when lumino 2.0 is adopted
+      // if icon is aliasing iconClass, don't use it
+      const iconClass = this._commands.iconClass(item.command, args);
+      const _icon = this._commands.icon(item.command, args);
+      const icon = _icon === iconClass ? undefined : _icon;
+
       if (cat in categories) {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
               <LabIcon.resolveReact
-                icon={this._commands.icon(item.command, args)}
-                iconClass={this._commands.iconClass(item.command, args)}
+                icon={icon}
+                iconClass={iconClass}
                 justify="center"
                 kind="launcherSection"
               />
@@ -398,6 +404,12 @@ function Card(
     }
   };
 
+  // DEPRECATED: remove _icon when lumino 2.0 is adopted
+  // if icon is aliasing iconClass, don't use it
+  const iconClass = commands.iconClass(command, args);
+  const _icon = commands.icon(command, args);
+  const icon = _icon === iconClass ? undefined : _icon;
+
   // Return the VDOM element.
   return (
     <div
@@ -420,8 +432,8 @@ function Card(
           )
         ) : (
           <LabIcon.resolveReact
-            icon={commands.icon(command, args)}
-            iconClass={commands.iconClass(command, args)}
+            icon={icon}
+            iconClass={iconClass}
             justify="center"
             kind="launcherCard"
           />
