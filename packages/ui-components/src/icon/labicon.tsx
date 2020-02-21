@@ -106,12 +106,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     fallback,
     ...props
   }: Partial<LabIcon.IResolverProps> & LabIcon.IProps) {
-    // make sure that the icon is either resolvable or undefined
-    icon = Private.isResolvable(icon) ? icon : undefined;
-
-    if (!icon) {
+    if (!Private.isResolvable(icon)) {
       if (!iconClass && fallback) {
-        // if neither icon nor iconClass are defined, use fallback
+        // if neither icon nor iconClass are defined/resolvable, use fallback
         return fallback.element(props);
       }
 
@@ -151,12 +148,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     fallback,
     ...props
   }: Partial<LabIcon.IResolverProps> & LabIcon.IReactProps) {
-    // make sure that the icon is either resolvable or undefined
-    icon = Private.isResolvable(icon) ? icon : undefined;
-
-    if (!icon) {
+    if (!Private.isResolvable(icon)) {
       if (!iconClass && fallback) {
-        // if neither icon nor iconClass are defined, use fallback
+        // if neither icon nor iconClass are defined/resolvable, use fallback
         return <fallback.react {...props} />;
       }
 
