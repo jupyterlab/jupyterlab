@@ -41,7 +41,8 @@
     "@jupyterlab/console": "^2.0.0-rc.1",
     "@jupyterlab/inspector": "^2.0.0-rc.1",
     "@jupyterlab/launcher": "^2.0.0-rc.1",
-    "@jupyterlab/notebook": "^2.0.0-rc.1"
+    "@jupyterlab/notebook": "^2.0.0-rc.1",
+    "@jupyterlab/ui-components": "^2.0.0-rc.1"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

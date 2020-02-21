@@ -448,9 +448,9 @@ export namespace ToolbarButtonComponent {
   export interface IProps {
     className?: string;
     label?: string;
+    icon?: LabIcon.IMaybeResolvable;
     iconClass?: string;
     iconLabel?: string;
-    icon?: LabIcon;
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
@@ -609,6 +609,7 @@ namespace Private {
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {
     let { commands, id, args } = options;
+    const icon = commands.icon(id, args);
     const iconClass = commands.iconClass(id, args);
     const iconLabel = commands.iconLabel(id, args);
     const label = commands.label(id, args);
@@ -625,7 +626,7 @@ namespace Private {
       void commands.execute(id, args);
     };
     const enabled = commands.isEnabled(id, args);
-    return { className, iconClass, tooltip, onClick, enabled, label };
+    return { className, icon, iconClass, tooltip, onClick, enabled, label };
   }
 
   /**

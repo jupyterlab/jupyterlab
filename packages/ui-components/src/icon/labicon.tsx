@@ -108,6 +108,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     fallback,
     ...props
   }: Partial<LabIcon.IResolverProps> & LabIcon.IProps) {
+    // make sure that the icon is either resolvable or undefined
+    icon = Private.isResolvable(icon) ? icon : undefined;
+
     if (!icon) {
       if (!iconClass && fallback) {
         // if neither icon nor iconClass are defined, use fallback
@@ -150,6 +153,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     fallback,
     ...props
   }: Partial<LabIcon.IResolverProps> & LabIcon.IReactProps) {
+    // make sure that the icon is either resolvable or undefined
+    icon = Private.isResolvable(icon) ? icon : undefined;
+
     if (!icon) {
       if (!iconClass && fallback) {
         // if neither icon nor iconClass are defined, use fallback
@@ -202,43 +208,8 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     LabIcon._debug = debug ?? !LabIcon._debug;
   }
 
-  /**
-   * UNSTABLE - only exists for handling a single special case
-   *
-   * TODO: Fix the remaining case that relies on this and then
-   *   remove this method:
-   *     - index.tsx in launcher
-   */
-  static UNSTABLE_getReact({
-    name,
-    fallback,
-    ...props
-  }: { name: string; fallback?: LabIcon } & LabIcon.IReactProps) {
-    for (let className of name.split(/\s+/)) {
-      if (LabIcon._instancesByNameAndClassName.has(className)) {
-        const icon = LabIcon._instancesByNameAndClassName.get(className)!;
-        return <icon.react {...props} />;
-      }
-    }
-
-    // lookup failed if execution reached here
-    if (LabIcon._debug) {
-      // fail noisily
-      console.error(`Invalid icon name: ${name}`);
-      return <badIcon.react {...props} />;
-    } else if (fallback) {
-      return <fallback.react {...props} />;
-    } else {
-      // try to render the icon as a css background image via iconClass
-      return <Private.blankReact {...props} />;
-    }
-  }
-
   private static _debug: boolean = false;
   private static _instances = new Map<string, LabIcon>();
-
-  // TODO: remove this along with UNSTABLE_getReact
-  private static _instancesByNameAndClassName = new Map<string, LabIcon>();
 
   /***********
    * members *
@@ -286,16 +257,10 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     this.react = this._initReact(name);
     this.svgstr = svgstr;
 
-    this._className = Private.nameToClassName(name);
-
     // setup custom render/unrender methods, if passed in
     this._initRender({ render, unrender });
 
     LabIcon._instances.set(this.name, this);
-
-    // TODO: remove along with UNSTABLE_getReact
-    LabIcon._instancesByNameAndClassName.set(this.name, this);
-    LabIcon._instancesByNameAndClassName.set(this._className, this);
   }
 
   /**
@@ -665,7 +630,7 @@ export namespace LabIcon {
   }
 
   export interface IResolverProps {
-    icon?: LabIcon.IResolvable;
+    icon?: IMaybeResolvable;
     iconClass?: string;
     fallback?: LabIcon;
   }
@@ -680,6 +645,14 @@ export namespace LabIcon {
   export type IResolvable =
     | string
     | (IIcon & Partial<VirtualElement.IRenderer>);
+
+  /**
+   * A type that maybe can be resolved to a LabIcon instance.
+   */
+  export type IMaybeResolvable =
+    | IResolvable
+    | VirtualElement.IRenderer
+    | undefined;
 
   /**
    * The type of the svg node ref that can be passed into icon React components
@@ -856,6 +829,16 @@ namespace Private {
     } else {
       return '';
     }
+  }
+
+  export function isResolvable(
+    icon: LabIcon.IMaybeResolvable
+  ): icon is LabIcon.IResolvable {
+    return !!(
+      icon &&
+      (typeof icon === 'string' ||
+        ((icon as LabIcon.IIcon).name && (icon as LabIcon.IIcon).svgstr))
+    );
   }
 
   /**

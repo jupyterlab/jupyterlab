@@ -190,17 +190,16 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     // Now create the sections for each category
     orderedCategories.forEach(cat => {
       const item = categories[cat][0] as ILauncher.IItemOptions;
-      let iconClass = this._commands.iconClass(item.command, {
-        ...item.args,
-        cwd: this.cwd
-      });
-      let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
+      const args = { ...item.args, cwd: this.cwd };
+      const kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
+
       if (cat in categories) {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              <LabIcon.UNSTABLE_getReact
-                name={iconClass}
+              <LabIcon.resolveReact
+                icon={this._commands.icon(item.command, args)}
+                iconClass={this._commands.iconClass(item.command, args)}
                 justify="center"
                 kind="launcherSection"
               />
@@ -420,8 +419,9 @@ function Card(
             </div>
           )
         ) : (
-          <LabIcon.UNSTABLE_getReact
-            name={commands.iconClass(command, args)}
+          <LabIcon.resolveReact
+            icon={commands.icon(command, args)}
+            iconClass={commands.iconClass(command, args)}
             justify="center"
             kind="launcherCard"
           />
