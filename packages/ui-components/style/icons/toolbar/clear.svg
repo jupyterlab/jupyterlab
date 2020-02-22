@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <mask id="donutHole">
+    <rect height="24" width="24" fill="white" />
+    <circle cx="12" cy="12" r="8" fill="black"/>
+  </mask>
+
+  <g class="jp-icon3" fill="#616161">
+    <rect height="18" width="2" x="11" y="3" transform="rotate(315, 12, 12)"/>
+    <circle cx="12" cy="12" r="10" mask="url(#donutHole)"/>
+  </g>
+</svg>

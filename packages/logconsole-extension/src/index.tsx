@@ -37,7 +37,7 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 
 import {
   addIcon,
-  closeIcon,
+  clearIcon,
   HTMLSelect,
   listIcon
 } from '@jupyterlab/ui-components';
@@ -225,7 +225,7 @@ function activateLogConsole(
     execute: () => {
       logConsolePanel?.logger?.clear();
     },
-    icon: closeIcon,
+    icon: clearIcon,
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
     label: 'Clear Log'
   });
@@ -235,14 +235,14 @@ function activateLogConsole(
   }
 
   app.commands.addCommand(CommandIDs.setLevel, {
-    label: args => `Set Log Level to ${toTitleCase(args.level as string)}`,
+    // TODO: find good icon class
     execute: (args: { level: LogLevel }) => {
       if (logConsolePanel?.logger) {
         logConsolePanel.logger.level = args.level;
       }
     },
-    isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null
-    // TODO: find good icon class
+    isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
+    label: args => `Set Log Level to ${toTitleCase(args.level as string)}`
   });
 
   app.contextMenu.addItem({
