@@ -184,6 +184,7 @@ const containerCSSBreadCrumb: NestedCSSProperties = {
 };
 
 const containerCSSCommandPaletteHeader: NestedCSSProperties = {
+  height: '14px',
   margin: '0 14px 0 auto'
 };
 
