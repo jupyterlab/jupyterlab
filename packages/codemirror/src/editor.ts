@@ -1479,7 +1479,7 @@ namespace Private {
         el.style.fontFamily = value;
         break;
       case 'fontSize':
-        el.style.setProperty('fontSize', value ? value + 'px' : null);
+        el.style.setProperty('font-size', value ? value + 'px' : null);
         break;
       case 'lineHeight':
         el.style.lineHeight = value ? value.toString() : null;
