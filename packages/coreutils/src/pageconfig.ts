@@ -118,6 +118,22 @@ export namespace PageConfig {
   }
 
   /**
+   * Get the base url for sharing links (usually baseUrl)
+   */
+  export function getShareUrl(): string {
+    return URLExt.normalize(getOption('shareUrl') || getBaseUrl());
+  }
+
+  /**
+   * Get the tree url for shareable links.
+   * Usually the same as treeUrl,
+   * but overrideable e.g. when sharing with JupyterHub.
+   */
+  export function getTreeShareUrl(): string {
+    return URLExt.normalize(URLExt.join(getShareUrl(), getOption('treeUrl')));
+  }
+
+  /**
    * Get the base websocket url for a Jupyter application, or an empty string.
    */
   export function getWsUrl(baseUrl?: string): string {
