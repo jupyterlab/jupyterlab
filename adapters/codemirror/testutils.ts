@@ -129,6 +129,8 @@ export abstract class FeatureTestEnvironment
 
 export class FileEditorFeatureTestEnvironment extends FeatureTestEnvironment {
   ce_editor: CodeMirrorEditor;
+  connection_manager: DocumentConnectionManager;
+  language_server_manager: LanguageServerManager;
 
   constructor(
     language = () => 'python',
@@ -144,16 +146,10 @@ export class FileEditorFeatureTestEnvironment extends FeatureTestEnvironment {
       model
     });
 
-    const LANGSERVER_MANAGER = new MockLanguageServerManager({});
-    const CONNECTION_MANAGER = new DocumentConnectionManager({
-      language_server_manager: LANGSERVER_MANAGER
+    this.language_server_manager = new MockLanguageServerManager({});
+    this.connection_manager = new DocumentConnectionManager({
+      language_server_manager: this.language_server_manager
     });
-
-    const DEBUG = false;
-
-    if (DEBUG) {
-      console.log(CONNECTION_MANAGER);
-    }
 
     this.init();
   }
