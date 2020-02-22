@@ -63,7 +63,7 @@ export class JupyterLabMenu implements IJupyterLabMenu {
    *   groups that are added to the menu.
    */
   constructor(options: Menu.IOptions, includeSeparators: boolean = true) {
-    // render menu with svg icon tweaks
+    // render menu with inline svg icon tweaks
     this.menu = new MenuSvg(options);
     this._includeSeparators = includeSeparators;
   }
@@ -129,7 +129,7 @@ export class JupyterLabMenu implements IJupyterLabMenu {
   /**
    * The underlying Phosphor menu.
    */
-  readonly menu: MenuSvg;
+  readonly menu: Menu;
 
   /**
    * Whether the menu has been disposed.

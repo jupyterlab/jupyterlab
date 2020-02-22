@@ -40,7 +40,7 @@ export abstract class JupyterFrontEnd<
    * Construct a new JupyterFrontEnd object.
    */
   constructor(options: JupyterFrontEnd.IOptions<T>) {
-    // render context menu with svg icon tweaks
+    // render context menu with inline svg icon tweaks
     options.contextMenuRenderer =
       options.contextMenuRenderer || MenuSvg.defaultRenderer;
 

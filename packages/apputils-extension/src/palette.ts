@@ -10,7 +10,7 @@ import { CommandPalette } from '@lumino/widgets';
 
 import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
 import { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
-import { paletteIcon } from '@jupyterlab/ui-components';
+import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 
 /**
  * The command IDs used by the apputils extension.
@@ -141,7 +141,11 @@ namespace Private {
    */
   export function createPalette(app: JupyterFrontEnd): CommandPalette {
     if (!palette) {
-      palette = new CommandPalette({ commands: app.commands });
+      // use a renderer tweaked to use inline svg icons
+      palette = new CommandPalette({
+        commands: app.commands,
+        renderer: CommandPaletteSvg.defaultRenderer
+      });
       palette.id = 'command-palette';
       palette.title.icon = paletteIcon;
       palette.title.label = 'Commands';

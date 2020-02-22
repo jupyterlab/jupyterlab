@@ -43,7 +43,7 @@ export class MenuSvg extends Menu {
    */
   insertItem(index: number, options: Menu.IItemOptions): Menu.IItem {
     if (options.submenu?.renderer === Menu.defaultRenderer) {
-      //
+      // create a "view" of the submenu with a different default renderer
       const submenu = Object.create(options.submenu, {
         renderer: {
           configurable: true,

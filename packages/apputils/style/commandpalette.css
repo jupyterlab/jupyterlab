@@ -163,14 +163,8 @@
   color: var(--jp-ui-font-color3);
 }
 
-.lm-CommandPalette-item.lm-mod-toggled .lm-CommandPalette-itemIcon {
-  background-image: var(--jp-icon-check);
-  background-size: 16px;
-  background-repeat: no-repeat;
-}
-
 .lm-CommandPalette-item .lm-CommandPalette-itemIcon {
-  padding: 0px 0px 0px 4px;
+  margin: 0 4px 0 0;
   position: relative;
   width: 16px;
   top: 2px;
