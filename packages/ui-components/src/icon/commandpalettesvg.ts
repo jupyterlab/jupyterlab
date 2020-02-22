@@ -4,20 +4,44 @@
 import { h, VirtualElement } from '@lumino/virtualdom';
 import { CommandPalette } from '@lumino/widgets';
 
-import { checkIcon } from './iconimports';
+import { checkIcon, filterListIcon } from './iconimports';
 import { iconStyle } from '../style';
 import { classes } from '../utils';
 
-// const submenuIcon = caretRightIcon.bindprops({
-//   justify: 'center',
-//   kind: 'menuItem'
-// });
+const searchHeaderIcon = filterListIcon.bindprops({
+  justify: 'center',
+  kind: 'commandPaletteHeader'
+});
 
 export namespace CommandPaletteSvg {
   /**
    * a modified implementation of the CommandPalette Renderer
    */
   export class Renderer extends CommandPalette.Renderer {
+    /**
+     * Render the virtual element for a command palette header.
+     *
+     * @param data - The data to use for rendering the header.
+     *
+     * @returns A virtual element representing the header.
+     */
+    renderHeader(data: CommandPalette.IHeaderRenderData): VirtualElement {
+      const content = this.formatHeader(data);
+      return h.li(
+        {
+          className: classes(
+            'lm-CommandPalette-header',
+            'jp-icon-hoverShow',
+            /* <DEPRECATED> */
+            'p-CommandPalette-header'
+            /* </DEPRECATED> */
+          )
+        },
+        content,
+        h.span(searchHeaderIcon)
+      );
+    }
+
     /**
      * Render the icon for a command palette item.
      *
@@ -26,7 +50,7 @@ export namespace CommandPaletteSvg {
      * @returns A virtual element representing the icon.
      */
     renderItemIcon(data: CommandPalette.IItemRenderData): VirtualElement {
-      let className = this.createIconClass(data);
+      const className = this.createIconClass(data);
 
       if (data.item.isToggled) {
         // check mark icon takes precedence

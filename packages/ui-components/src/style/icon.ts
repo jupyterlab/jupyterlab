@@ -17,6 +17,7 @@ import { NestedCSSProperties } from 'typestyle/lib/types';
  */
 export type IconKindType =
   | 'breadCrumb'
+  | 'commandPaletteHeader'
   | 'commandPaletteItem'
   | 'launcherCard'
   | 'launcherSection'
@@ -57,6 +58,11 @@ const iconCSSBreadCrumb: NestedCSSProperties = {
   height: '16px',
   width: '16px',
   verticalAlign: 'middle'
+};
+
+const iconCSSCommandPaletteHeader: NestedCSSProperties = {
+  height: '14px',
+  width: '14px'
 };
 
 const iconCSSCommandPaletteItem: NestedCSSProperties = {
@@ -142,6 +148,7 @@ const iconCSSToolbarButton: NestedCSSProperties = {
 
 const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: iconCSSBreadCrumb,
+  commandPaletteHeader: iconCSSCommandPaletteHeader,
   commandPaletteItem: iconCSSCommandPaletteItem,
   launcherCard: iconCSSLauncherCard,
   launcherSection: iconCSSLauncherSection,
@@ -174,6 +181,10 @@ const containerCSSBreadCrumb: NestedCSSProperties = {
       opacity: 0.7
     }
   }
+};
+
+const containerCSSCommandPaletteHeader: NestedCSSProperties = {
+  margin: '0 14px 0 auto'
 };
 
 const containerCSSLauncherCard: NestedCSSProperties = {
@@ -283,6 +294,7 @@ const containerCSSToolbarButton: NestedCSSProperties = {
 
 const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
   breadCrumb: containerCSSBreadCrumb,
+  commandPaletteHeader: containerCSSCommandPaletteHeader,
   commandPaletteItem: {},
   launcherCard: containerCSSLauncherCard,
   launcherSection: containerCSSLauncherSection,

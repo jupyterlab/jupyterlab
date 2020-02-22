@@ -82,7 +82,7 @@ export namespace MenuSvg {
      * @returns A virtual element representing the item icon.
      */
     renderIcon(data: Menu.IRenderData): VirtualElement {
-      let className = this.createIconClass(data);
+      const className = this.createIconClass(data);
 
       if (data.item.isToggled) {
         // check mark icon takes precedence
