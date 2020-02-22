@@ -13,6 +13,62 @@ const submenuIcon = caretRightIcon.bindprops({
   kind: 'menuItem'
 });
 
+/**
+ * a widget which displays items as a canonical menu.
+ * Tweaked to use inline svg icons
+ */
+export class MenuSvg extends Menu {
+  /**
+   * construct a new menu. Overrides the default renderer
+   *
+   * @param options - The options for initializing the tab bar.
+   */
+  constructor(options: Menu.IOptions) {
+    options.renderer = options.renderer || MenuSvg.defaultRenderer;
+    super(options);
+  }
+
+  /**
+   * insert a menu item into the menu at the specified index. Replaces the
+   * default renderer for submenus
+   *
+   * @param index - The index at which to insert the item.
+   *
+   * @param options - The options for creating the menu item.
+   *
+   * @returns The menu item added to the menu.
+   *
+   * #### Notes
+   * The index will be clamped to the bounds of the items.
+   */
+  insertItem(index: number, options: Menu.IItemOptions): Menu.IItem {
+    if (options.submenu?.renderer === Menu.defaultRenderer) {
+      //
+      const submenu = Object.create(options.submenu, {
+        renderer: {
+          configurable: true,
+          enumerable: true,
+          value: MenuSvg.defaultRenderer
+        }
+      });
+
+      // Widget.title is an AttachedProperty, and needs special handling
+      submenu.title.label = options.submenu.title.label;
+      submenu.title.mnemonic = options.submenu.title.mnemonic;
+      submenu.title.icon = options.submenu.title.icon;
+      submenu.title.iconClass = options.submenu.title.iconClass;
+      submenu.title.iconLabel = options.submenu.title.iconLabel;
+      submenu.title.caption = options.submenu.title.caption;
+      submenu.title.className = options.submenu.title.className;
+      submenu.title.dataset = options.submenu.title.dataset;
+
+      options.submenu = submenu;
+    }
+
+    return super.insertItem(index, options);
+  }
+}
+
 export namespace MenuSvg {
   /**
    * a modified implementation of the Menu Renderer
