@@ -4,9 +4,9 @@
 import { h, VirtualElement } from '@lumino/virtualdom';
 import { Menu } from '@lumino/widgets';
 
-import { caretRightIcon, checkIcon } from './iconimports';
-import { iconStyle } from '../style';
-import { classes } from '../utils';
+import { caretRightIcon, checkIcon } from '../iconimports';
+import { iconStyle } from '../../style';
+import { classes } from '../../utils';
 
 const submenuIcon = caretRightIcon.bindprops({
   justify: 'center',

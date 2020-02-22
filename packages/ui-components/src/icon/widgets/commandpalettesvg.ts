@@ -4,9 +4,9 @@
 import { h, VirtualElement } from '@lumino/virtualdom';
 import { CommandPalette } from '@lumino/widgets';
 
-import { checkIcon, filterListIcon } from './iconimports';
-import { iconStyle } from '../style';
-import { classes } from '../utils';
+import { checkIcon, filterListIcon } from '../iconimports';
+import { iconStyle } from '../../style';
+import { classes } from '../../utils';
 
 const searchHeaderIcon = filterListIcon.bindprops({
   justify: 'center',

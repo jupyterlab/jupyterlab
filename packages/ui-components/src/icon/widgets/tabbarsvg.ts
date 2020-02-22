@@ -4,9 +4,9 @@
 import { hpass, VirtualElement } from '@lumino/virtualdom';
 import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
-import { closeIcon } from './iconimports';
-import { iconStyle } from '../style';
-import { classes } from '../utils';
+import { closeIcon } from '../iconimports';
+import { iconStyle } from '../../style';
+import { classes } from '../../utils';
 
 /**
  * a widget which displays titles as a single row or column of tabs.
