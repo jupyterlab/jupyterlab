@@ -44,7 +44,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Widget } from '@lumino/widgets';
 
-import { Debouncer } from '@lumino/polling';
+import { Throttler } from '@lumino/polling';
 
 /**
  * The command IDs used by the document manager plugin.
@@ -246,11 +246,11 @@ ${fileTypes}`;
 
     // callback to registry change that ensures not to invoke reload method when there is already a promise that is pending
     let reloadSettingsRegistry = () => {
-      let reloadDebounce = new Debouncer(() =>
+      let reloadThrottle = new Throttler(() =>
         settingRegistry.reload(pluginId)
       );
 
-      return reloadDebounce.invoke.bind(reloadDebounce);
+      return reloadThrottle.invoke.bind(reloadThrottle);
     };
 
     // If the document registry gains or loses a factory or file type,
