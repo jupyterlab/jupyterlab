@@ -70,6 +70,9 @@ export class FileEditorAdapter extends JupyterLabWidgetAdapter {
     this.connect_contentChanged_signal();
 
     console.log('LSP: file ready for connection:', this.path);
+
+    // connect the document, but do not open it as the adapter will handle this
+    // after registering all features
     this.connect_document(this.virtual_editor.virtual_document).catch(
       console.warn
     );
