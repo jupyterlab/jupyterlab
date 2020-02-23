@@ -1,424 +1,519 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { style } from 'typestyle/lib';
+import { style as typestyleClass } from 'typestyle/lib';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
-/**
- * - breadCrumb: The path icons above the filebrowser
- * - commandPaletteHeader: The icon to the right of palette section headers
- * - commandPaletteItem: The icon next to a palette item
- * - launcherCard: The icons for the cards at the bottom of the launcher
- * - launcherSection: The icons to left of the Launcher section headers
- * - listing: The icons to the left of the filebrowser listing items
- * - listingHeaderItem: Caret icons used to show sort order in listing column headers
- * - mainAreaTab: The icons in the tabs above the main area/the tabManager in the sidebar
- * - menuItem: The icon next to a menu item
- * - runningItem: The icon next to an item in the Running sidebar
- * - select: The caret icon on the left side of a dropdown select element
- * - settingsEditor: The icons to the left of each section of the settings editor
- * - sideBar: The icons for the sidebar (default to the left of the main window)
- * - splash: The icon used for the splash screen
- * - statusBar: The icons in the status bar
- * - toolbarButton: The icon shown on a toolbar button
- */
-export type IconKindType =
-  | 'breadCrumb'
-  | 'commandPaletteHeader'
-  | 'commandPaletteItem'
-  | 'launcherCard'
-  | 'launcherSection'
-  | 'listing'
-  | 'listingHeaderItem'
-  | 'mainAreaTab'
-  | 'menuItem'
-  | 'runningItem'
-  | 'select'
-  | 'settingsEditor'
-  | 'sideBar'
-  | 'splash'
-  | 'statusBar'
-  | 'toolbarButton';
-
-export type IconJustifyType = 'center' | 'left' | 'right';
-
-export interface IIconStyle extends NestedCSSProperties {
+export namespace LabIcon {
   /**
-   * the kind of the icon, associated with a default stylesheet
+   * - breadCrumb: The path icons above the filebrowser
+   * - commandPaletteHeader: The icon to the right of palette section headers
+   * - commandPaletteItem: The icon next to a palette item
+   * - launcherCard: The icons for the cards at the bottom of the launcher
+   * - launcherSection: The icons to left of the Launcher section headers
+   * - listing: The icons to the left of the filebrowser listing items
+   * - listingHeaderItem: Caret icons used to show sort order in listing column headers
+   * - mainAreaTab: The icons in the tabs above the main area/the tabManager in the sidebar
+   * - menuItem: The icon next to a menu item
+   * - runningItem: The icon next to an item in the Running sidebar
+   * - select: The caret icon on the left side of a dropdown select element
+   * - settingsEditor: The icons to the left of each section of the settings editor
+   * - sideBar: The icons for the sidebar (default to the left of the main window)
+   * - splash: The icon used for the splash screen
+   * - statusBar: The icons in the status bar
+   * - toolbarButton: The icon shown on a toolbar button
    */
-  kind?: IconKindType;
+  type IStyleBuiltin =
+    | 'breadCrumb'
+    | 'commandPaletteHeader'
+    | 'commandPaletteItem'
+    | 'launcherCard'
+    | 'launcherSection'
+    | 'listing'
+    | 'listingHeaderItem'
+    | 'mainAreaTab'
+    | 'menuItem'
+    | 'runningItem'
+    | 'select'
+    | 'settingsEditor'
+    | 'sideBar'
+    | 'splash'
+    | 'statusBar'
+    | 'toolbarButton';
+
+  type IPosition =
+    | 'center'
+    | 'top'
+    | 'right'
+    | 'bottom'
+    | 'left'
+    | 'top right'
+    | 'bottom right'
+    | 'bottom left'
+    | 'top left';
+
+  // type ISize =
+  //   | 'small'
+  //   | 'normal'
+  //   | 'large'
+  //   | 'xlarge';
 
   /**
-   * how to justify the icon
+   * Collections of CSS props that can be fed directly to
+   * typestyle's style() function
    */
-  justify?: IconJustifyType;
-}
+  interface IStyleLiteralPure {
+    /**
+     * CSS properties that will be applied to the outer container
+     * element via a typestyle class
+     */
+    containerStyle?: NestedCSSProperties;
 
-/**
- * icon kind specific styles
- */
-const iconCSSBreadCrumb: NestedCSSProperties = {
-  borderRadius: 'var(--jp-border-radius)',
-  cursor: 'pointer',
-  margin: '0px 2px',
-  padding: '0px 2px',
-  height: '16px',
-  width: '16px',
-  verticalAlign: 'middle'
-};
+    /**
+     * CSS properties that will be applied to the inner svg
+     * element via a typestyle class
+     */
+    elementStyle?: NestedCSSProperties;
 
-const iconCSSCommandPaletteHeader: NestedCSSProperties = {
-  height: '14px',
-  width: '14px'
-};
-
-const iconCSSCommandPaletteItem: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
-
-const iconCSSLauncherCard: NestedCSSProperties = {
-  height: '52px',
-  width: '52px'
-};
-
-const iconCSSLauncherSection: NestedCSSProperties = {
-  height: '32px',
-  width: '32px'
-};
-
-const iconCSSListing: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
-
-const iconCSSlistingHeaderItem: NestedCSSProperties = {
-  height: 'auto',
-  margin: '-2px 0 0 0',
-  width: '20px'
-};
-
-const iconCSSMainAreaTab: NestedCSSProperties = {
-  $nest: {
-    '.lm-DockPanel-tabBar &': {
-      height: '14px',
-      width: '14px'
-    },
-    '#tab-manager &': {
-      height: '16px',
-      width: '16px'
-    }
+    /**
+     * FUTURE: CSS properties that will be applied to the label
+     * element, if any, via a typestyle class
+     */
+    // labelStyle?: NestedCSSProperties;
   }
-};
 
-const iconCSSMenuItem: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
+  /**
+   * Collections of CSS props plus some custom options
+   */
+  interface IStyleLiteral extends IStyleLiteralPure {
+    /**
+     * How to position the inner svg element,
+     * relative to the outer container
+     */
+    elementPosition?: IPosition;
 
-const iconCSSRunningItem: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
+    /**
+     * FUTURE: how to position the outer container
+     */
+    // containerPosition?: IPosition;
 
-const iconCSSSelect: NestedCSSProperties = {
-  position: 'absolute',
-  height: 'auto',
-  width: '16px'
-};
+    /**
+     * FUTURE: the size of the inner svg element
+     */
+    // elementSize?: ISize
 
-const iconCSSSettingsEditor: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
-
-const iconCSSSideBar: NestedCSSProperties = {
-  width: '20px'
-};
-
-const iconCSSSplash: NestedCSSProperties = {
-  width: '100px'
-};
-
-const iconCSSStatusBar: NestedCSSProperties = {
-  left: '0px',
-  top: '0px',
-  height: '18px',
-  width: '20px',
-  position: 'relative'
-};
-
-const iconCSSToolbarButton: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
-
-const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
-  breadCrumb: iconCSSBreadCrumb,
-  commandPaletteHeader: iconCSSCommandPaletteHeader,
-  commandPaletteItem: iconCSSCommandPaletteItem,
-  launcherCard: iconCSSLauncherCard,
-  launcherSection: iconCSSLauncherSection,
-  listing: iconCSSListing,
-  listingHeaderItem: iconCSSlistingHeaderItem,
-  mainAreaTab: iconCSSMainAreaTab,
-  menuItem: iconCSSMenuItem,
-  runningItem: iconCSSRunningItem,
-  select: iconCSSSelect,
-  settingsEditor: iconCSSSettingsEditor,
-  sideBar: iconCSSSideBar,
-  splash: iconCSSSplash,
-  statusBar: iconCSSStatusBar,
-  toolbarButton: iconCSSToolbarButton
-};
-
-const containerCSSBreadCrumb: NestedCSSProperties = {
-  // `&` will be substituted for the generated classname (interpolation)
-  $nest: {
-    '&:first-child svg': {
-      bottom: '1px',
-      marginLeft: '0px',
-      position: 'relative'
-    },
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    ['.jp-mod-dropTarget&']: {
-      backgroundColor: 'var(--jp-brand-color2)',
-      opacity: 0.7
-    }
+    /**
+     * FUTURE: how to position the label element (if any),
+     * relative to the outer container
+     */
+    // labelPosition?: IPosition;
   }
-};
 
-const containerCSSCommandPaletteHeader: NestedCSSProperties = {
-  height: '14px',
-  margin: '0 14px 0 auto'
-};
+  /**
+   * The actual type of the iconStyleClass arg
+   */
+  type IStyle = IStyleBuiltin | IStyleLiteral;
 
-const containerCSSLauncherCard: NestedCSSProperties = {
-  height: '68px'
-};
+  export interface IStyleProps extends NestedCSSProperties, IStyleLiteral {
+    /**
+     * the kind of the icon, associated with a builtin stylesheet
+     */
+    kind?: IStyleBuiltin;
 
-const containerCSSLauncherSection: NestedCSSProperties = {
-  boxSizing: 'border-box',
-  marginRight: '12px'
-};
-
-const containerCSSListing: NestedCSSProperties = {
-  flex: '0 0 20px',
-  marginRight: '4px',
-  position: 'relative'
-};
-
-const containerCSSListingHeaderItem: NestedCSSProperties = {
-  display: 'inline',
-  height: '16px',
-  width: '16px'
-};
-
-/**
- * container kind specific styles
- */
-const containerCSSMainAreaTab: NestedCSSProperties = {
-  $nest: {
-    '.lm-DockPanel-tabBar &': {
-      marginRight: '4px'
-    },
-    '#tab-manager &': {
-      marginRight: '2px',
-      position: 'relative'
-    }
+    /**
+     * @deprecated use elementPosition instead
+     */
+    justify?: IPosition;
   }
-};
 
-const containerCSSMenuItem: NestedCSSProperties = {
-  display: 'inline-block',
-  verticalAlign: 'middle'
-};
-
-const containerCSSRunningItem: NestedCSSProperties = {
-  margin: '0px 4px 0px 12px'
-};
-
-const containerCSSSelect: NestedCSSProperties = {
-  pointerEvents: 'none'
-};
-
-const containerCSSSettingsEditor: NestedCSSProperties = {
-  display: 'inline-block',
-  flex: '0 0 20px',
-  marginLeft: '2px',
-  marginRight: '1px',
-  position: 'relative',
-  height: '20px',
-  width: '20px'
-};
-
-const containerCSSSideBar: NestedCSSProperties = {
-  // `&` will be substituted for the generated classname (interpolation)
-  $nest: {
-    // left sidebar tab divs
-    '.jp-SideBar.jp-mod-left .lm-TabBar-tab &': {
-      transform: 'rotate(90deg)'
-    },
-    // left sidebar currently selected tab div
-    '.jp-SideBar.jp-mod-left .lm-TabBar-tab.lm-mod-current &': {
-      transform:
-        'rotate(90deg)\n' +
-        '    translate(\n' +
-        '      calc(-0.5 * var(--jp-border-width)),\n' +
-        '      calc(-0.5 * var(--jp-border-width))\n' +
-        '    )'
+  /**
+   * The builtin styles
+   */
+  export const builtinStyles: { [k in IStyleBuiltin]: IStyleLiteral } = {
+    breadCrumb: {
+      containerStyle: {
+        $nest: {
+          // `&` will be substituted for the generated classname (interpolation)
+          '&:first-child svg': {
+            bottom: '1px',
+            marginLeft: '0px',
+            position: 'relative'
+          },
+          '&:hover': {
+            backgroundColor: 'var(--jp-layout-color2)'
+          },
+          ['.jp-mod-dropTarget&']: {
+            backgroundColor: 'var(--jp-brand-color2)',
+            opacity: 0.7
+          }
+        }
+      },
+      elementStyle: {
+        borderRadius: 'var(--jp-border-radius)',
+        cursor: 'pointer',
+        margin: '0px 2px',
+        padding: '0px 2px',
+        height: '16px',
+        width: '16px',
+        verticalAlign: 'middle'
+      }
     },
 
-    // right sidebar tab divs
-    '.jp-SideBar.jp-mod-right .lm-TabBar-tab &': {
-      transform: 'rotate(-90deg)'
+    commandPaletteHeader: {
+      containerStyle: {
+        height: '14px',
+        margin: '0 14px 0 auto'
+      },
+      elementStyle: {
+        height: '14px',
+        width: '14px'
+      },
+      elementPosition: 'center'
     },
-    // right sidebar currently selected tab div
-    '.jp-SideBar.jp-mod-right .lm-TabBar-tab.lm-mod-current &': {
-      transform:
-        'rotate(-90deg)\n' +
-        '    translate(\n' +
-        '      calc(0.5 * var(--jp-border-width)),\n' +
-        '      calc(-0.5 * var(--jp-border-width))\n' +
-        '    )'
+
+    commandPaletteItem: {
+      elementStyle: {
+        height: '16px',
+        width: '16px'
+      },
+      elementPosition: 'center'
+    },
+
+    launcherCard: {
+      containerStyle: {
+        height: '68px'
+      },
+      elementStyle: {
+        height: '52px',
+        width: '52px'
+      },
+      elementPosition: 'center'
+    },
+
+    launcherSection: {
+      containerStyle: {
+        boxSizing: 'border-box',
+        marginRight: '12px'
+      },
+      elementStyle: {
+        height: '32px',
+        width: '32px'
+      },
+      elementPosition: 'center'
+    },
+
+    listing: {
+      containerStyle: {
+        flex: '0 0 20px',
+        marginRight: '4px',
+        position: 'relative'
+      },
+      elementStyle: {
+        height: '16px',
+        width: '16px'
+      },
+      elementPosition: 'center'
+    },
+
+    listingHeaderItem: {
+      containerStyle: {
+        display: 'inline',
+        height: '16px',
+        width: '16px'
+      },
+      elementStyle: {
+        height: 'auto',
+        margin: '-2px 0 0 0',
+        width: '20px'
+      },
+      elementPosition: 'center'
+    },
+
+    mainAreaTab: {
+      containerStyle: {
+        $nest: {
+          '.lm-DockPanel-tabBar &': {
+            marginRight: '4px'
+          },
+          '#tab-manager &': {
+            marginRight: '2px',
+            position: 'relative'
+          }
+        }
+      },
+      elementStyle: {
+        $nest: {
+          '.lm-DockPanel-tabBar &': {
+            height: '14px',
+            width: '14px'
+          },
+          '#tab-manager &': {
+            height: '16px',
+            width: '16px'
+          }
+        }
+      },
+      elementPosition: 'center'
+    },
+
+    menuItem: {
+      containerStyle: {
+        display: 'inline-block',
+        verticalAlign: 'middle'
+      },
+      elementStyle: {
+        height: '16px',
+        width: '16px'
+      },
+      elementPosition: 'center'
+    },
+
+    runningItem: {
+      containerStyle: {
+        margin: '0px 4px 0px 12px'
+      },
+      elementStyle: {
+        height: '16px',
+        width: '16px'
+      },
+      elementPosition: 'center'
+    },
+
+    select: {
+      containerStyle: {
+        pointerEvents: 'none'
+      },
+      elementStyle: {
+        position: 'absolute',
+        height: 'auto',
+        width: '16px'
+      },
+      elementPosition: 'center'
+    },
+
+    settingsEditor: {
+      containerStyle: {
+        display: 'inline-block',
+        flex: '0 0 20px',
+        marginLeft: '2px',
+        marginRight: '1px',
+        position: 'relative',
+        height: '20px',
+        width: '20px'
+      },
+      elementStyle: {
+        height: '16px',
+        width: '16px'
+      },
+      elementPosition: 'center'
+    },
+
+    sideBar: {
+      containerStyle: {
+        // `&` will be substituted for the generated classname (interpolation)
+        $nest: {
+          // left sidebar tab divs
+          '.jp-SideBar.jp-mod-left .lm-TabBar-tab &': {
+            transform: 'rotate(90deg)'
+          },
+          // left sidebar currently selected tab div
+          '.jp-SideBar.jp-mod-left .lm-TabBar-tab.lm-mod-current &': {
+            transform:
+              'rotate(90deg)\n' +
+              '    translate(\n' +
+              '      calc(-0.5 * var(--jp-border-width)),\n' +
+              '      calc(-0.5 * var(--jp-border-width))\n' +
+              '    )'
+          },
+
+          // right sidebar tab divs
+          '.jp-SideBar.jp-mod-right .lm-TabBar-tab &': {
+            transform: 'rotate(-90deg)'
+          },
+          // right sidebar currently selected tab div
+          '.jp-SideBar.jp-mod-right .lm-TabBar-tab.lm-mod-current &': {
+            transform:
+              'rotate(-90deg)\n' +
+              '    translate(\n' +
+              '      calc(0.5 * var(--jp-border-width)),\n' +
+              '      calc(-0.5 * var(--jp-border-width))\n' +
+              '    )'
+          }
+        }
+      },
+      elementStyle: {
+        width: '20px'
+      },
+      elementPosition: 'center'
+    },
+
+    splash: {
+      containerStyle: {
+        animation: '0.3s fade-in linear forwards',
+        height: '100%',
+        width: '100%',
+        zIndex: 1
+      },
+      elementStyle: {
+        width: '100px'
+      },
+      elementPosition: 'center'
+    },
+
+    statusBar: {
+      elementStyle: {
+        left: '0px',
+        top: '0px',
+        height: '18px',
+        width: '20px',
+        position: 'relative'
+      },
+      elementPosition: 'center'
+    },
+
+    toolbarButton: {
+      containerStyle: {
+        display: 'inline-block',
+        margin: 'auto',
+        verticalAlign: 'middle'
+      },
+      elementStyle: {
+        height: '16px',
+        width: '16px'
+      },
+      elementPosition: 'center'
     }
-  }
-};
-
-const containerCSSSplash: NestedCSSProperties = {
-  animation: '0.3s fade-in linear forwards',
-  height: '100%',
-  width: '100%',
-  zIndex: 1
-};
-
-const containerCSSToolbarButton: NestedCSSProperties = {
-  display: 'inline-block',
-  margin: 'auto',
-  verticalAlign: 'middle'
-};
-
-const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
-  breadCrumb: containerCSSBreadCrumb,
-  commandPaletteHeader: containerCSSCommandPaletteHeader,
-  commandPaletteItem: {},
-  launcherCard: containerCSSLauncherCard,
-  launcherSection: containerCSSLauncherSection,
-  listing: containerCSSListing,
-  listingHeaderItem: containerCSSListingHeaderItem,
-  mainAreaTab: containerCSSMainAreaTab,
-  menuItem: containerCSSMenuItem,
-  runningItem: containerCSSRunningItem,
-  select: containerCSSSelect,
-  settingsEditor: containerCSSSettingsEditor,
-  sideBar: containerCSSSideBar,
-  splash: containerCSSSplash,
-  statusBar: {},
-  toolbarButton: containerCSSToolbarButton
-};
-
-/**
- * styles for justifying a node inside of a container
- */
-const iconCSSCenter: NestedCSSProperties = {
-  display: 'block',
-  margin: '0 auto',
-  width: '100%'
-};
-
-const iconCSSLeft: NestedCSSProperties = {
-  display: 'block',
-  margin: '0 auto 0 0'
-};
-
-const iconCSSRight: NestedCSSProperties = {
-  display: 'block',
-  margin: '0 0 0 auto'
-};
-
-const iconCSSJustify: { [k in IconJustifyType]: NestedCSSProperties } = {
-  center: iconCSSCenter,
-  left: iconCSSLeft,
-  right: iconCSSRight
-};
-
-const containerCSSCenter: NestedCSSProperties = {
-  alignItems: 'center',
-  display: 'flex'
-};
-
-const containerCSSLeft: NestedCSSProperties = {
-  alignItems: 'center',
-  display: 'flex'
-};
-
-const containerCSSRight: NestedCSSProperties = {
-  alignItems: 'center',
-  display: 'flex'
-};
-
-const containerCSSJustify: { [k in IconJustifyType]: NestedCSSProperties } = {
-  center: containerCSSCenter,
-  left: containerCSSLeft,
-  right: containerCSSRight
-};
-
-/**
- * for putting together the icon kind style with any user input styling,
- * as well as styling from optional flags like `center`
- */
-function iconCSS(props: IIconStyle): NestedCSSProperties {
-  const { kind, justify, ...propsCSS } = props;
-
-  return {
-    ...(justify ? iconCSSJustify[justify] : {}),
-    ...(kind ? iconCSSKind[kind] : {}),
-    ...propsCSS
   };
-}
 
-/**
- * for putting together the container kind style with any
- * styling from optional flags like `center`
- */
-function containerCSS(props: IIconStyle): NestedCSSProperties {
-  const { kind, justify } = props;
+  function _elementPositionFactory(extra: NestedCSSProperties) {
+    return {
+      containerStyle: {
+        alignItems: 'center',
+        display: 'flex'
+      },
+      elementStyle: {
+        display: 'block',
+        ...extra
+      }
+    };
+  }
 
-  return {
-    ...(justify ? containerCSSJustify[justify] : {}),
-    ...(kind ? containerCSSKind[kind] : {})
+  /**
+   * Styles to help with positioning
+   */
+  export const positionStyles: { [k in IPosition]: IStyleLiteralPure } = {
+    center: _elementPositionFactory({ margin: '0 auto', width: '100%' }),
+
+    top: _elementPositionFactory({ margin: '0 0 auto 0' }),
+    right: _elementPositionFactory({ margin: '0 0 0 auto' }),
+    bottom: _elementPositionFactory({ margin: 'auto 0 0 0' }),
+    left: _elementPositionFactory({ margin: '0 auto 0 0' }),
+
+    'top right': _elementPositionFactory({ margin: '0 0 auto auto' }),
+    'bottom right': _elementPositionFactory({ margin: 'auto 0 0 auto' }),
+    'bottom left': _elementPositionFactory({ margin: 'auto auto 0 0' }),
+    'top left': _elementPositionFactory({ margin: '0 auto 0 auto' })
   };
-}
 
-/**
- * for setting the style on the container of an svg node representing an icon
- */
-export const iconStyle = (props?: IIconStyle): string => {
-  if (!props || Object.keys(props).length === 0) {
-    // props is empty
-    return '';
+  // function _elementSizeFactory(size: string) {
+  //   return {
+  //     elementStyle: {
+  //       height: size,
+  //       width: size
+  //     }
+  //   }
+  // }
+
+  // /**
+  //  * styles that establish some default sizes
+  //  */
+  // export const styleSizes: { [k in ISize]: IStyleLiteralPure } = {
+  //   small: _elementSizeFactory('14px'),
+  //   normal: _elementSizeFactory('16px'),
+  //   large: _elementSizeFactory('20px'),
+  //   xlarge: _elementSizeFactory('24px')
+  // }
+
+  const _builtinStylesCache = Object.keys(builtinStyles).reduce(
+    (c: any, k: IStyleBuiltin) => {
+      c[k] = resolveStyle(builtinStyles[k]);
+      return c;
+    },
+    {}
+  );
+
+  /**
+   * Merge two or more pure (CSS props only) icon styles
+   */
+  function mergeStyles(styles: IStyleLiteralPure[]): IStyleLiteralPure {
+    return {
+      containerStyle: Object.assign({}, ...styles.map(s => s.containerStyle)),
+      elementStyle: Object.assign({}, ...styles.map(s => s.elementStyle))
+    };
   }
 
-  const conCSS = containerCSS(props);
-
-  return style({
-    ...conCSS,
-    $nest: {
-      ...conCSS.$nest,
-      ['svg']: iconCSS(props)
+  /**
+   * Resolve an icon style into a "pure" style that contains only
+   * collections of CSS props that can be passed directly into typestyle
+   */
+  function resolveStyle(style: IStyle): IStyleLiteralPure {
+    if (typeof style === 'string') {
+      // return pre-resolved style
+      return _builtinStylesCache[style];
     }
-  });
-};
 
-/**
- * for setting the style directly on the svg node representing an icon
- */
-export const iconStyleFlat = (props?: IIconStyle): string => {
-  if (!props || Object.keys(props).length === 0) {
-    return '';
+    let styles = [style];
+    if (style.elementPosition) {
+      styles.unshift(positionStyles[style.elementPosition]);
+    }
+
+    return mergeStyles(styles);
   }
 
-  return style(iconCSS(props));
-};
+  /**
+   * Resolve and merge multiple icon styles
+   */
+  function resolveStyles(styles: (IStyle | undefined)[]) {
+    return mergeStyles(styles.filter(Boolean).map(s => resolveStyle(s!)));
+  }
+
+  /**
+   * Resolve a pure icon style into a typestyle class
+   */
+  function resolveStyleClass(style: IStyleLiteralPure): string {
+    return typestyleClass({
+      ...style.containerStyle,
+      $nest: {
+        ...style.containerStyle?.$nest,
+        ['svg']: style.elementStyle
+      }
+    });
+  }
+
+  /**
+   * Get a typestyle class, given a given set of icon styling props
+   */
+  export function styleClass(props?: IStyleProps): string {
+    if (!props || Object.keys(props).length === 0) {
+      // props is empty
+      return '';
+    }
+
+    const {
+      containerStyle,
+      elementStyle,
+      elementPosition,
+      kind,
+      justify,
+      ...elementStyleExtra
+    } = props;
+    // DEPRECATED: alias justify => elementPosition
+    if (!elementPosition) {
+      props.elementPosition = justify;
+    }
+    // merge any extra element style props
+    props.elementStyle = { ...props.elementStyle, ...elementStyleExtra };
+
+    return resolveStyleClass(resolveStyles([kind, props]));
+  }
+}
