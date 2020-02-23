@@ -14,8 +14,26 @@ import { until_ready } from './utils';
 interface ILSPOptions extends ILspOptions {}
 
 export class LSPConnection extends LspWsConnection {
+  protected documentsToOpen: IDocumentInfo[];
+
   constructor(options: ILSPOptions) {
     super(options);
+    this.documentsToOpen = [];
+  }
+
+  sendOpenWhenReady(documentInfo: IDocumentInfo) {
+    if (this.isReady) {
+      this.sendOpen(documentInfo);
+    } else {
+      this.documentsToOpen.push(documentInfo);
+    }
+  }
+
+  protected onServerInitialized(params: lsProtocol.InitializeResult) {
+    super.onServerInitialized(params);
+    while (this.documentsToOpen.length) {
+      this.sendOpen(this.documentsToOpen.pop());
+    }
   }
 
   public sendSelectiveChange(

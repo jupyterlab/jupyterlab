@@ -145,10 +145,6 @@ export class DocumentConnectionManager {
     // be re-opened and synced
     this.connections.set(virtual_document.id_path, connection);
 
-    if (connection.isReady) {
-      connection.sendOpen(virtual_document.document_info);
-    }
-
     return connection;
   }
 
@@ -183,7 +179,6 @@ export class DocumentConnectionManager {
 
     connection.on('serverInitialized', capabilities => {
       this.forEachDocumentOfConnection(connection, virtual_document => {
-        connection.sendOpen(virtual_document.document_info);
         // TODO: is this still neccessary, e.g. for status bar to update responsively?
         this.initialized.emit({ connection, virtual_document });
       });

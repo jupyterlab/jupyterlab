@@ -294,8 +294,7 @@ export abstract class JupyterLabWidgetAdapter
       this.on_foreign_document_opened,
       this
     );
-
-    await this.connect(virtual_document).catch(console.warn);
+    return await this.connect(virtual_document).catch(console.warn);
   }
 
   protected async on_foreign_document_opened(
@@ -303,12 +302,21 @@ export abstract class JupyterLabWidgetAdapter
     context: IForeignContext
   ) {
     const { foreign_document } = context;
-    this.connect_document(foreign_document).catch(console.warn);
+
+    const connection_context = await this.connect_document(foreign_document);
 
     foreign_document.foreign_document_closed.connect(
       this.on_foreign_document_closed,
       this
     );
+
+    if (connection_context) {
+      connection_context.connection.sendOpenWhenReady(
+        foreign_document.document_info
+      );
+    } else {
+      console.warn(`Connection for ${foreign_document.path} was not be opened`);
+    }
   }
 
   on_foreign_document_closed(host: VirtualDocument, context: IForeignContext) {
@@ -453,6 +461,8 @@ export abstract class JupyterLabWidgetAdapter
       adapter_features
     );
     console.log('LSP: Adapter for', this.document_path, 'is ready.');
+    // the client is now fully ready: signal to the server that the document is "open"
+    connection.sendOpenWhenReady(virtual_document.document_info);
     return adapter;
   }
 
