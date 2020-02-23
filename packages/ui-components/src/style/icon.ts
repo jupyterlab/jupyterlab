@@ -6,14 +6,21 @@ import { NestedCSSProperties } from 'typestyle/lib/types';
 
 /**
  * - breadCrumb: The path icons above the filebrowser
- * - dockPanelBar: The tab icons above the main area
+ * - commandPaletteHeader: The icon to the right of palette section headers
+ * - commandPaletteItem: The icon next to a palette item
  * - launcherCard: The icons for the cards at the bottom of the launcher
  * - launcherSection: The icons to left of the Launcher section headers
  * - listing: The icons to the left of the filebrowser listing items
+ * - listingHeaderItem: Caret icons used to show sort order in listing column headers
+ * - mainAreaTab: The icons in the tabs above the main area/the tabManager in the sidebar
+ * - menuItem: The icon next to a menu item
+ * - runningItem: The icon next to an item in the Running sidebar
+ * - select: The caret icon on the left side of a dropdown select element
  * - settingsEditor: The icons to the left of each section of the settings editor
  * - sideBar: The icons for the sidebar (default to the left of the main window)
  * - splash: The icon used for the splash screen
- * - tabManager: The icons for the tabManager in the sidebar
+ * - statusBar: The icons in the status bar
+ * - toolbarButton: The icon shown on a toolbar button
  */
 export type IconKindType =
   | 'breadCrumb'
