@@ -5,7 +5,7 @@ import { h, VirtualElement } from '@lumino/virtualdom';
 import { Menu } from '@lumino/widgets';
 
 import { caretRightIcon, checkIcon } from '../iconimports';
-import { iconStyle } from '../../style';
+import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
 
 const submenuIcon = caretRightIcon.bindprops({
@@ -116,7 +116,7 @@ export namespace MenuSvg {
         return classes(data.item.iconClass, name);
       } else {
         return classes(
-          iconStyle({ justify: 'center', kind: 'menuItem' }),
+          LabIconStyle.styleClass({ justify: 'center', kind: 'menuItem' }),
           data.item.iconClass,
           name
         );

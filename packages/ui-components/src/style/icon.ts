@@ -4,7 +4,7 @@
 import { style as typestyleClass } from 'typestyle/lib';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
-export namespace LabIcon {
+export namespace LabIconStyle {
   /**
    * - breadCrumb: The path icons above the filebrowser
    * - commandPaletteHeader: The icon to the right of palette section headers
@@ -23,7 +23,7 @@ export namespace LabIcon {
    * - statusBar: The icons in the status bar
    * - toolbarButton: The icon shown on a toolbar button
    */
-  type IStyleBuiltin =
+  type IBuiltin =
     | 'breadCrumb'
     | 'commandPaletteHeader'
     | 'commandPaletteItem'
@@ -62,7 +62,7 @@ export namespace LabIcon {
    * Collections of CSS props that can be fed directly to
    * typestyle's style() function
    */
-  interface IStyleLiteralPure {
+  interface IStylePure {
     /**
      * CSS properties that will be applied to the outer container
      * element via a typestyle class
@@ -85,7 +85,7 @@ export namespace LabIcon {
   /**
    * Collections of CSS props plus some custom options
    */
-  interface IStyleLiteral extends IStyleLiteralPure {
+  export interface IStyle extends IStylePure {
     /**
      * How to position the inner svg element,
      * relative to the outer container
@@ -110,15 +110,15 @@ export namespace LabIcon {
   }
 
   /**
-   * The actual type of the iconStyleClass arg
+   * Type to help with resolving a style that might be a string
    */
-  type IStyle = IStyleBuiltin | IStyleLiteral;
+  type IStyleResolvable = IStyle | IBuiltin;
 
-  export interface IStyleProps extends NestedCSSProperties, IStyleLiteral {
+  export interface IProps extends NestedCSSProperties, IStyle {
     /**
      * the kind of the icon, associated with a builtin stylesheet
      */
-    kind?: IStyleBuiltin;
+    kind?: IBuiltin;
 
     /**
      * @deprecated use elementPosition instead
@@ -127,9 +127,9 @@ export namespace LabIcon {
   }
 
   /**
-   * The builtin styles
+   * The kind (ie builtin) styles
    */
-  export const builtinStyles: { [k in IStyleBuiltin]: IStyleLiteral } = {
+  export const kindStyles: { [k in IBuiltin]: IStyle } = {
     breadCrumb: {
       containerStyle: {
         $nest: {
@@ -401,7 +401,7 @@ export namespace LabIcon {
   /**
    * Styles to help with positioning
    */
-  export const positionStyles: { [k in IPosition]: IStyleLiteralPure } = {
+  export const positionStyles: { [k in IPosition]: IStyle } = {
     center: _elementPositionFactory({ margin: '0 auto', width: '100%' }),
 
     top: _elementPositionFactory({ margin: '0 0 auto 0' }),
@@ -427,16 +427,16 @@ export namespace LabIcon {
   // /**
   //  * styles that establish some default sizes
   //  */
-  // export const styleSizes: { [k in ISize]: IStyleLiteralPure } = {
+  // export const styleSizes: { [k in ISize]: IStylePure } = {
   //   small: _elementSizeFactory('14px'),
   //   normal: _elementSizeFactory('16px'),
   //   large: _elementSizeFactory('20px'),
   //   xlarge: _elementSizeFactory('24px')
   // }
 
-  const _builtinStylesCache = Object.keys(builtinStyles).reduce(
-    (c: any, k: IStyleBuiltin) => {
-      c[k] = resolveStyle(builtinStyles[k]);
+  const _kindStylesCache = Object.keys(kindStyles).reduce(
+    (c: any, k: IBuiltin) => {
+      c[k] = resolveStyle(kindStyles[k]);
       return c;
     },
     {}
@@ -445,7 +445,7 @@ export namespace LabIcon {
   /**
    * Merge two or more pure (CSS props only) icon styles
    */
-  function mergeStyles(styles: IStyleLiteralPure[]): IStyleLiteralPure {
+  function mergeStyles(styles: IStylePure[]): IStylePure {
     return {
       containerStyle: Object.assign({}, ...styles.map(s => s.containerStyle)),
       elementStyle: Object.assign({}, ...styles.map(s => s.elementStyle))
@@ -456,10 +456,10 @@ export namespace LabIcon {
    * Resolve an icon style into a "pure" style that contains only
    * collections of CSS props that can be passed directly into typestyle
    */
-  function resolveStyle(style: IStyle): IStyleLiteralPure {
+  function resolveStyle(style: IStyleResolvable): IStylePure {
     if (typeof style === 'string') {
       // return pre-resolved style
-      return _builtinStylesCache[style];
+      return _kindStylesCache[style];
     }
 
     let styles = [style];
@@ -473,14 +473,14 @@ export namespace LabIcon {
   /**
    * Resolve and merge multiple icon styles
    */
-  function resolveStyles(styles: (IStyle | undefined)[]) {
+  function resolveStyles(styles: (IStyleResolvable | undefined)[]) {
     return mergeStyles(styles.filter(Boolean).map(s => resolveStyle(s!)));
   }
 
   /**
    * Resolve a pure icon style into a typestyle class
    */
-  function resolveStyleClass(style: IStyleLiteralPure): string {
+  function resolveStyleClass(style: IStylePure): string {
     return typestyleClass({
       ...style.containerStyle,
       $nest: {
@@ -493,7 +493,7 @@ export namespace LabIcon {
   /**
    * Get a typestyle class, given a given set of icon styling props
    */
-  export function styleClass(props?: IStyleProps): string {
+  export function styleClass(props?: IProps): string {
     if (!props || Object.keys(props).length === 0) {
       // props is empty
       return '';

@@ -7,7 +7,7 @@ import { ElementAttrs, VirtualElement, VirtualNode } from '@lumino/virtualdom';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import { iconStyle, IIconStyle } from '../style';
+import { LabIconStyle } from '../style';
 import { getReactAttrs, classes } from '../utils';
 
 import badSvgstr from '../../style/debug/bad.svg';
@@ -287,7 +287,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * @param tag - if container is not explicitly
    * provided, this tag will be used when creating the container
    *
-   * @param propsStyle - style parameters that get passed to TypeStyle in
+   * @param styleProps - style parameters that get passed to TypeStyle in
    * order to generate a style class. The style class will be added
    * to the icon container's classes, while the style itself will be
    * applied to any svg elements within the container.
@@ -302,7 +302,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       label,
       title,
       tag = 'div',
-      ...propsStyle
+      ...styleProps
     }: LabIcon.IProps = { ...this._props, ...props };
 
     // check if icon element is already set
@@ -336,7 +336,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     if (label != null) {
       container.textContent = label;
     }
-    Private.initContainer({ container, className, propsStyle, title });
+    Private.initContainer({ container, className, styleProps, title });
 
     // add the svg node to the container
     container.appendChild(svgElement);
@@ -395,7 +395,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           label,
           title,
           tag = 'div',
-          ...propsStyle
+          ...styleProps
         }: LabIcon.IProps = { ...this._props, ...props };
 
         // set up component state via useState hook
@@ -434,7 +434,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         );
 
         if (container) {
-          Private.initContainer({ container, className, propsStyle, title });
+          Private.initContainer({ container, className, styleProps, title });
 
           return (
             <React.Fragment>
@@ -444,7 +444,12 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           );
         } else {
           return (
-            <Tag className={classes(className, iconStyle(propsStyle))}>
+            <Tag
+              className={classes(
+                className,
+                LabIconStyle.styleClass(styleProps)
+              )}
+            >
               {svgComponent}
               {label}
             </Tag>
@@ -521,7 +526,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *
    * @param ref - forwarded to the ref prop of the icon's svg element
    *
-   * @param propsStyle - style parameters that get passed to TypeStyle in
+   * @param styleProps - style parameters that get passed to TypeStyle in
    * order to generate a style class. The style class will be added
    * to the icon container's classes, while the style itself will be
    * applied to any svg elements within the container.
@@ -590,7 +595,7 @@ export namespace LabIcon {
   /**
    * The input props for creating a new LabIcon
    */
-  export interface IProps extends IIconStyle {
+  export interface IProps extends LabIconStyle.IProps {
     /**
      * Extra classNames. Used in addition to the typestyle className to
      * set the className of the icon's outermost container node
@@ -728,6 +733,13 @@ export namespace LabIcon {
       ReactDOM.unmountComponentAtNode(container);
     }
   }
+
+  /**************
+   * re-exports *
+   **************/
+
+  export const kindStyles = LabIconStyle.kindStyles;
+  export const positionStyles = LabIconStyle.positionStyles;
 }
 
 namespace Private {
@@ -737,7 +749,7 @@ namespace Private {
     label,
     title,
     tag = 'div',
-    ...propsStyle
+    ...styleProps
   }: LabIcon.IProps): HTMLElement {
     if (container?.className === className) {
       // nothing needs doing, return the icon node
@@ -756,7 +768,7 @@ namespace Private {
     if (label != null) {
       container.textContent = label;
     }
-    Private.initContainer({ container, className, propsStyle, title });
+    Private.initContainer({ container, className, styleProps, title });
 
     return container;
   }
@@ -769,7 +781,7 @@ namespace Private {
         label,
         title,
         tag = 'div',
-        ...propsStyle
+        ...styleProps
       }: LabIcon.IProps,
       ref: LabIcon.IReactRef
     ) => {
@@ -777,13 +789,15 @@ namespace Private {
       const Tag = tag;
 
       if (container) {
-        initContainer({ container, className, propsStyle, title });
+        initContainer({ container, className, styleProps, title });
 
         return <></>;
       } else {
         // if ref is defined, we create a blank svg node and point ref to it
         return (
-          <Tag className={classes(className, iconStyle(propsStyle))}>
+          <Tag
+            className={classes(className, LabIconStyle.styleClass(styleProps))}
+          >
             {ref && blankIcon.react({ ref })}
             {label}
           </Tag>
@@ -796,28 +810,28 @@ namespace Private {
     container,
 
     className,
-    propsStyle,
+    styleProps,
     title
   }: {
     container: HTMLElement;
     className?: string;
-    propsStyle?: IIconStyle;
+    styleProps?: LabIconStyle.IProps;
     title?: string;
   }): string {
     if (title != null) {
       container.title = title;
     }
+    const styleClass = LabIconStyle.styleClass(styleProps);
 
-    const classStyle = iconStyle(propsStyle);
     if (className != null) {
       // override the container class with explicitly passed-in class + style class
-      const classResolved = classes(className, classStyle);
+      const classResolved = classes(className, styleClass);
       container.className = classResolved;
       return classResolved;
-    } else if (classStyle) {
+    } else if (styleClass) {
       // add the style class to the container class
-      container.classList.add(classStyle);
-      return classStyle;
+      container.classList.add(styleClass);
+      return styleClass;
     } else {
       return '';
     }

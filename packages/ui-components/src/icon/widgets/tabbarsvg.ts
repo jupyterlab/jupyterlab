@@ -5,7 +5,7 @@ import { hpass, VirtualElement } from '@lumino/virtualdom';
 import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
 import { closeIcon } from '../iconimports';
-import { iconStyle } from '../../style';
+import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
 
 /**
@@ -39,7 +39,11 @@ export namespace TabBarSvg {
     renderCloseIcon(data: TabBar.IRenderData<any>): VirtualElement {
       const className = classes(
         'jp-icon-hover lm-TabBar-tabCloseIcon',
-        iconStyle({ justify: 'center', height: '16px', width: '16px' })
+        LabIconStyle.styleClass({
+          justify: 'center',
+          height: '16px',
+          width: '16px'
+        })
       );
 
       return (hpass(

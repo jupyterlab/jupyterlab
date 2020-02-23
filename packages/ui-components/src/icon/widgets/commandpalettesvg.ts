@@ -5,7 +5,7 @@ import { h, VirtualElement } from '@lumino/virtualdom';
 import { CommandPalette } from '@lumino/widgets';
 
 import { checkIcon, filterListIcon } from '../iconimports';
-import { iconStyle } from '../../style';
+import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
 
 const searchHeaderIcon = filterListIcon.bindprops({
@@ -81,7 +81,10 @@ export namespace CommandPaletteSvg {
       /* </DEPRECATED> */
 
       return classes(
-        iconStyle({ justify: 'center', kind: 'commandPaletteItem' }),
+        LabIconStyle.styleClass({
+          justify: 'center',
+          kind: 'commandPaletteItem'
+        }),
         data.item.iconClass,
         name
       );
