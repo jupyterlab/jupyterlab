@@ -605,12 +605,7 @@ export namespace LabIcon {
    * Interface defining the parameters to be passed to the LabIcon
    * constructor
    */
-  export interface IOptions extends IIcon, Partial<VirtualElement.IRenderer> {
-    /**
-     * @deprecated does nothing
-     */
-    rendererClass?: typeof Private.Renderer;
-  }
+  export interface IOptions extends IIcon, Partial<VirtualElement.IRenderer> {}
 
   /**
    * The input props for creating a new LabIcon
