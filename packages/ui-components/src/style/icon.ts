@@ -337,8 +337,7 @@ export namespace LabIconStyle {
       container: {
         display: 'inline-block',
         flex: '0 0 20px',
-        marginLeft: '2px',
-        marginRight: '1px',
+        margin: '0 3px 0 0',
         position: 'relative',
         height: '20px',
         width: '20px'
