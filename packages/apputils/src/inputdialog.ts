@@ -190,6 +190,27 @@ export namespace InputDialog {
       focusNodeSelector: 'input'
     });
   }
+
+  /**
+   * Create and show a input dialog for a password.
+   *
+   * @param options - The dialog setup options.
+   *
+   * @returns A promise that resolves with whether the dialog was accepted
+   */
+  export function getPassword(
+    options: ITextOptions
+  ): Promise<Dialog.IResult<string>> {
+    return showDialog({
+      ...options,
+      body: new InputPasswordDialog(options),
+      buttons: [
+        Dialog.cancelButton({ label: options.cancelLabel }),
+        Dialog.okButton({ label: options.okLabel })
+      ],
+      focusNodeSelector: 'input'
+    });
+  }
 }
 
 /**
@@ -295,6 +316,38 @@ class InputTextDialog extends InputDialogBase<string> {
     this._input = document.createElement('input', {});
     this._input.classList.add('jp-mod-styled');
     this._input.type = 'text';
+    this._input.value = options.text ? options.text : '';
+    if (options.placeholder) {
+      this._input.placeholder = options.placeholder;
+    }
+
+    // Initialize the node
+    this.node.appendChild(this._input);
+  }
+
+  /**
+   * Get the text specified by the user
+   */
+  getValue(): string {
+    return this._input.value;
+  }
+}
+
+/**
+ * Widget body for input password dialog
+ */
+class InputPasswordDialog extends InputDialogBase<string> {
+  /**
+   * InputPasswordDialog constructor
+   *
+   * @param options Constructor options
+   */
+  constructor(options: InputDialog.ITextOptions) {
+    super(options.label);
+
+    this._input = document.createElement('input', {});
+    this._input.classList.add('jp-mod-styled');
+    this._input.type = 'password';
     this._input.value = options.text ? options.text : '';
     if (options.placeholder) {
       this._input.placeholder = options.placeholder;
