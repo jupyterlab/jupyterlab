@@ -26,7 +26,7 @@ If you use ``pip``, you can install it with:
 
 If installing using ``pip install --user``, you must add the user-level
 ``bin`` directory to your ``PATH`` environment variable in order to launch
-``jupyter lab``.
+``jupyter-lab``.
 
 pipenv
 ~~~~~~
