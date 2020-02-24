@@ -9,32 +9,12 @@
 
   /*--jp-icon-bug: url('icons/md/bug.svg');*/
 
-  /* blocked by need for stack/carousel */
+  /* blocked by lumino interaction */
 
   /*--jp-icon-caret-down: url('icons/md/caretdown.svg');*/
   /*--jp-icon-caret-right: url('icons/md/caretright.svg');*/
   /*--jp-icon-caret-up: url('icons/md/caretup.svg');*/
   /*--jp-icon-caret-left: url('icons/md/caretleft.svg');*/
-  /*--jp-icon-check: url('icons/md/checkmark.svg');*/
-  /*--jp-icon-check-disabled: url('icons/md/checkmark-disabled.svg');*/
-  /*--jp-icon-close: url('icons/md/close.svg');*/
-
-  /* blocked by lumino interaction*/
-
-  /*--jp-icon-caret-down: url('icons/md/caretdown.svg');*/
-  /*--jp-icon-caret-right: url('icons/md/caretright.svg');*/
-  /*--jp-icon-caret-up: url('icons/md/caretup.svg');*/
-  /*--jp-icon-caret-left: url('icons/md/caretleft.svg');*/
-  /*--jp-icon-check: url('icons/md/checkmark.svg');*/
-  /*--jp-icon-check-disabled: url('icons/md/checkmark-disabled.svg');*/
-  /*--jp-icon-close: url('icons/md/close.svg');*/
-  /*--jp-icon-console: url('icons/jupyter/console.svg');*/
-  /*--jp-icon-download: url('icons/md/download.svg');*/
-  /*--jp-icon-filter-list: url('icons/md/ic_filter_list_24px.svg');*/
-  /*--jp-icon-edit: url('icons/md/edit.svg');*/
-  /*--jp-icon-link: url('icons/md/link.svg');*/
-  /*--jp-icon-new-folder: url('icons/md/ic_create_new_folder_24px.svg');*/
   /*--jp-icon-search: url('icons/md/search.svg');*/
   /*--jp-icon-search-white: url('icons/md/search-white.svg');*/
-  /*--jp-icon-undo: url('icons/md/undo.svg');*/
 }

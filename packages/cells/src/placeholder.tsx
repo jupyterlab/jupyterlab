@@ -91,7 +91,7 @@ export class InputPlaceholder extends Placeholder {
       >
         <ellipsesIcon.react
           className="jp-MoreHorizIcon"
-          justify="center"
+          elementPosition="center"
           height="auto"
           width="32px"
         />
@@ -125,7 +125,7 @@ export class OutputPlaceholder extends Placeholder {
       >
         <ellipsesIcon.react
           className="jp-MoreHorizIcon"
-          justify="center"
+          elementPosition="center"
           height="auto"
           width="32px"
         />

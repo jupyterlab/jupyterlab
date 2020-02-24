@@ -41,6 +41,8 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { consoleIcon } from '@jupyterlab/ui-components';
+
 import { find } from '@lumino/algorithm';
 
 import {
@@ -363,7 +365,7 @@ async function activateConsole(
       }
       return 'Console';
     },
-    iconClass: args => (args['isPalette'] ? '' : 'jp-ConsoleIcon'),
+    icon: args => (args['isPalette'] ? undefined : consoleIcon),
     execute: args => {
       let basePath =
         (args['basePath'] as string) ||

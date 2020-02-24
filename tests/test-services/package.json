@@ -17,7 +17,7 @@
     "@jupyterlab/testutils": "^2.0.0-rc.1",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
-    "@lumino/signaling": "^1.3.4",
+    "@lumino/signaling": "^1.3.5",
     "chai": "^4.2.0",
     "jest": "^24.9.0",
     "jest-junit": "^10.0.0",

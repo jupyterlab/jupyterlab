@@ -114,7 +114,6 @@ input::placeholder {
   line-height: 14px;
   padding: 0 25px 0 10px;
   text-align: left;
-  vertical-align: middle;
   -moz-appearance: none;
   -webkit-appearance: none;
 }

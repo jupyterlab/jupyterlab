@@ -35,7 +35,12 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { HTMLSelect, listIcon } from '@jupyterlab/ui-components';
+import {
+  addIcon,
+  clearIcon,
+  HTMLSelect,
+  listIcon
+} from '@jupyterlab/ui-components';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -144,8 +149,8 @@ function activateLogConsole(
     logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
     logConsoleWidget.addClass('jp-LogConsole');
     logConsoleWidget.title.closable = true;
+    logConsoleWidget.title.icon = listIcon;
     logConsoleWidget.title.label = 'Log Console';
-    logConsoleWidget.title.iconRenderer = listIcon;
 
     const addCheckpointButton = new CommandToolbarButton({
       commands: app.commands,
@@ -208,22 +213,21 @@ function activateLogConsole(
   });
 
   app.commands.addCommand(CommandIDs.addCheckpoint, {
-    label: 'Add Checkpoint',
     execute: () => {
       logConsolePanel?.logger?.checkpoint();
     },
+    icon: addIcon,
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
-    iconClass: 'jp-AddIcon'
+    label: 'Add Checkpoint'
   });
 
   app.commands.addCommand(CommandIDs.clear, {
-    label: 'Clear Log',
     execute: () => {
       logConsolePanel?.logger?.clear();
     },
+    icon: clearIcon,
     isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
-    // TODO: figure out how this jp-clearIcon class should work, analagous to jp-AddIcon
-    iconClass: 'fa fa-ban jp-ClearIcon'
+    label: 'Clear Log'
   });
 
   function toTitleCase(value: string) {
@@ -231,14 +235,14 @@ function activateLogConsole(
   }
 
   app.commands.addCommand(CommandIDs.setLevel, {
-    label: args => `Set Log Level to ${toTitleCase(args.level as string)}`,
+    // TODO: find good icon class
     execute: (args: { level: LogLevel }) => {
       if (logConsolePanel?.logger) {
         logConsolePanel.logger.level = args.level;
       }
     },
-    isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null
-    // TODO: find good icon class
+    isEnabled: () => !!logConsolePanel && logConsolePanel.source !== null,
+    label: args => `Set Log Level to ${toTitleCase(args.level as string)}`
   });
 
   app.contextMenu.addItem({

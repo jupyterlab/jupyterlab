@@ -190,19 +190,23 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     // Now create the sections for each category
     orderedCategories.forEach(cat => {
       const item = categories[cat][0] as ILauncher.IItemOptions;
-      let iconClass = this._commands.iconClass(item.command, {
-        ...item.args,
-        cwd: this.cwd
-      });
-      let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
+      const args = { ...item.args, cwd: this.cwd };
+      const kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
+
+      // DEPRECATED: remove _icon when lumino 2.0 is adopted
+      // if icon is aliasing iconClass, don't use it
+      const iconClass = this._commands.iconClass(item.command, args);
+      const _icon = this._commands.icon(item.command, args);
+      const icon = _icon === iconClass ? undefined : _icon;
+
       if (cat in categories) {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              <LabIcon.UNSTABLE_getReact
-                name={iconClass}
-                justify="center"
-                kind="launcherSection"
+              <LabIcon.resolveReact
+                icon={icon}
+                iconClass={iconClass}
+                stylesheet="launcherSection"
               />
               <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
@@ -399,6 +403,12 @@ function Card(
     }
   };
 
+  // DEPRECATED: remove _icon when lumino 2.0 is adopted
+  // if icon is aliasing iconClass, don't use it
+  const iconClass = commands.iconClass(command, args);
+  const _icon = commands.icon(command, args);
+  const icon = _icon === iconClass ? undefined : _icon;
+
   // Return the VDOM element.
   return (
     <div
@@ -420,10 +430,10 @@ function Card(
             </div>
           )
         ) : (
-          <LabIcon.UNSTABLE_getReact
-            name={commands.iconClass(command, args)}
-            justify="center"
-            kind="launcherCard"
+          <LabIcon.resolveReact
+            icon={icon}
+            iconClass={iconClass}
+            stylesheet="launcherCard"
           />
         )}
       </div>

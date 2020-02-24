@@ -1176,9 +1176,7 @@ export namespace DocumentRegistry {
     readonly pattern?: string;
 
     /**
-     * The icon for the file type. Can either be a string containing the name
-     * of an existing icon, or an object with {name, svgstr} fields, where
-     * svgstr is a string containing the raw contents of an svg file.
+     * The icon for the file type.
      */
     readonly icon?: LabIcon;
 

@@ -41,7 +41,7 @@
     "@jupyterlab/rendermime": "^2.0.0-rc.1",
     "@jupyterlab/services": "^5.0.0-rc.1",
     "@lumino/coreutils": "^1.4.2",
-    "@lumino/signaling": "^1.3.4",
+    "@lumino/signaling": "^1.3.5",
     "fs-extra": "^8.1.0",
     "identity-obj-proxy": "^3.0.0",
     "jest-raw-loader": "^1.0.1",

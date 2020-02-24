@@ -135,7 +135,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     let logo = new Widget();
     jupyterIcon.element({
       container: logo.node,
-      justify: 'center',
+      elementPosition: 'center',
       margin: '2px 2px 2px 8px',
       height: 'auto',
       width: '16px'

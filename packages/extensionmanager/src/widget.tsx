@@ -10,7 +10,6 @@ import {
   Collapse,
   InputGroup,
   jupyterIcon,
-  LabIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
 
@@ -22,6 +21,18 @@ import { ListModel, IEntry, Action } from './model';
 import { isJupyterOrg } from './query';
 
 // TODO: Replace pagination with lazy loading of lower search results
+
+/**
+ * Icons with custom styling bound.
+ */
+const caretDownIconStyled = caretDownIcon.bindprops({
+  height: 'auto',
+  width: '20px'
+});
+const caretRightIconStyled = caretRightIcon.bindprops({
+  height: 'auto',
+  width: '20px'
+});
 
 /**
  * Search bar VDOM component.
@@ -352,11 +363,9 @@ export class CollapsibleSection extends React.Component<
       <>
         <header>
           <ToolbarButtonComponent
-            icon={this.state.isOpen ? caretDownIcon : caretRightIcon}
-            iconClass={LabIcon.UNSTABLE_style({
-              height: 'auto',
-              width: '20px'
-            })}
+            icon={
+              this.state.isOpen ? caretDownIconStyled : caretRightIconStyled
+            }
             onClick={() => {
               this.handleCollapse();
             }}

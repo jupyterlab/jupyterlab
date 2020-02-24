@@ -95,9 +95,9 @@ function activateHTMLViewer(
       app.commands.notifyCommandChanged(CommandIDs.trustHTML);
     });
 
+    widget.title.icon = ft.icon!;
     widget.title.iconClass = ft.iconClass ?? '';
     widget.title.iconLabel = ft.iconLabel ?? '';
-    widget.title.iconRenderer = ft.icon!;
   });
 
   // Add a command to trust the active HTML document,

@@ -282,7 +282,7 @@ namespace Private {
             fallback={settingsIcon}
             title={iconTitle}
             tag="span"
-            kind="settingsEditor"
+            stylesheet="settingsEditor"
           />
           <span>{schema.title || id}</span>
         </li>

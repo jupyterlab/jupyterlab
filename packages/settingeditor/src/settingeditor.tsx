@@ -435,7 +435,7 @@ namespace Private {
           <jupyterIcon.react
             className="jp-SettingEditorInstructions-icon"
             tag="span"
-            justify="center"
+            elementPosition="center"
             height="auto"
             width="60px"
           />

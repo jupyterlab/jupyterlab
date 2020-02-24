@@ -1840,8 +1840,8 @@ export namespace DirListing {
         fallback: fileIcon,
         container: iconContainer,
         className: ITEM_ICON_CLASS,
-        justify: 'center',
-        kind: 'listing'
+
+        stylesheet: 'listing'
       });
 
       let hoverText = 'Name: ' + model.name;
@@ -2098,8 +2098,8 @@ namespace Private {
       (state === 'down' ? caretDownIcon : caretUpIcon).element({
         container,
         tag: 'span',
-        kind: 'listingHeaderItem',
-        justify: 'center',
+        stylesheet: 'listingHeaderItem',
+
         float
       });
     } else {

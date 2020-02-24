@@ -49,8 +49,8 @@ function activate(
   let runningSessionManagers = new RunningSessionManagers();
   let running = new RunningSessions(runningSessionManagers);
   running.id = 'jp-running-sessions';
-  running.title.iconRenderer = runningIcon;
   running.title.caption = 'Running Terminals and Kernels';
+  running.title.icon = runningIcon;
 
   // Let the application restorer track the running panel for restoration of
   // application state (e.g. setting the running panel as the current side bar

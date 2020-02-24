@@ -27,6 +27,8 @@ import { ILauncher } from '@jupyterlab/launcher';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
+import { inspectorIcon } from '@jupyterlab/ui-components';
+
 /**
  * The command IDs used by the inspector plugin.
  */
@@ -83,8 +85,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         !inspector.isAttached ||
         !inspector.isVisible,
       label,
-      iconClass: args =>
-        args.isLauncher ? 'jp-MaterialIcon jp-InspectorIcon' : '',
+      icon: args => (args.isLauncher ? inspectorIcon : undefined),
       execute: () => openInspector()
     });
 

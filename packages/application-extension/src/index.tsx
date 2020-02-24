@@ -825,7 +825,7 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   provides: IPropertyInspectorProvider,
   activate: (app: JupyterFrontEnd, labshell: ILabShell) => {
     const widget = new SideBarPropertyInspectorProvider(labshell);
-    widget.title.iconRenderer = buildIcon;
+    widget.title.icon = buildIcon;
     widget.title.caption = 'Property Inspector';
     widget.id = 'jp-property-inspector';
     labshell.add(widget, 'left');

@@ -46,7 +46,7 @@
     "@jupyterlab/terminal": "^2.0.0-rc.1",
     "@jupyterlab/ui-components": "^2.0.0-rc.2",
     "@lumino/algorithm": "^1.2.3",
-    "@lumino/widgets": "^1.10.2"
+    "@lumino/widgets": "^1.11.1"
   },
   "devDependencies": {
     "@types/webpack-env": "^1.14.1",

@@ -151,8 +151,8 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 
     jupyterFaviconIcon.element({
       container: logo,
-      justify: 'center',
-      kind: 'splash'
+
+      stylesheet: 'splash'
     });
 
     galaxy.appendChild(logo);
