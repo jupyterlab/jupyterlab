@@ -52,11 +52,7 @@ export namespace LabIconStyle {
     | 'bottom left'
     | 'top left';
 
-  // type ISize =
-  //   | 'small'
-  //   | 'normal'
-  //   | 'large'
-  //   | 'xlarge';
+  type ISize = 'small' | 'normal' | 'large' | 'xlarge';
 
   /**
    * Collections of CSS props that can be fed directly to
@@ -90,14 +86,13 @@ export namespace LabIconStyle {
     elementPosition?: IPosition;
 
     /**
-     * FUTURE: how to position the outer container
+     * the size of the inner svg element. Can be any of:
+     *   - 'small': 14px x 14px
+     *   - 'normal': 16px x 16px
+     *   - 'large': 20px x 20px
+     *   - 'xlarge': 24px x 24px
      */
-    // containerPosition?: IPosition;
-
-    /**
-     * FUTURE: the size of the inner svg element
-     */
-    // elementSize?: ISize
+    elementSize?: ISize;
 
     /**
      * FUTURE: how to position the label element (if any),
@@ -443,24 +438,24 @@ export namespace LabIconStyle {
     'top left': _elementPositionFactory({ margin: '0 auto 0 auto' })
   };
 
-  // function _elementSizeFactory(size: string) {
-  //   return {
-  //     elementStyle: {
-  //       height: size,
-  //       width: size
-  //     }
-  //   }
-  // }
+  function _elementSizeFactory(size: string) {
+    return {
+      elementStyle: {
+        height: size,
+        width: size
+      }
+    };
+  }
 
-  // /**
-  //  * styles that establish some default sizes
-  //  */
-  // export const styleSizes: { [k in ISize]: IStylePure } = {
-  //   small: _elementSizeFactory('14px'),
-  //   normal: _elementSizeFactory('16px'),
-  //   large: _elementSizeFactory('20px'),
-  //   xlarge: _elementSizeFactory('24px')
-  // }
+  /**
+   * styles that establish some default sizes
+   */
+  export const sizeStyles: { [k in ISize]: IStylePure } = {
+    small: _elementSizeFactory('14px'),
+    normal: _elementSizeFactory('16px'),
+    large: _elementSizeFactory('20px'),
+    xlarge: _elementSizeFactory('24px')
+  };
 
   /**
    * Merge two or more pure (CSS props only) icon styles
@@ -500,6 +495,10 @@ export namespace LabIconStyle {
       styles.unshift(positionStyles[options.elementPosition]);
     }
 
+    if (options.elementSize) {
+      styles.unshift(sizeStyles[options.elementSize]);
+    }
+
     return mergeStyles(styles);
   }
 
@@ -528,7 +527,13 @@ export namespace LabIconStyle {
       return '';
     }
 
-    let { elementPosition, kind, justify, ...elementStyle } = props;
+    let {
+      elementPosition,
+      elementSize,
+      kind,
+      justify,
+      ...elementStyle
+    } = props;
 
     // DEPRECATED: alias justify => elementPosition
     if (!elementPosition) {
@@ -537,7 +542,8 @@ export namespace LabIconStyle {
 
     // add option args with defined values to overrides
     const options = {
-      ...(elementPosition && { elementPosition })
+      ...(elementPosition && { elementPosition }),
+      ...(elementSize && { elementSize })
     };
 
     // try to look up the style class in the cache
