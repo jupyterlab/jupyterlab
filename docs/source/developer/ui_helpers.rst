@@ -69,7 +69,7 @@ a ``Promise`` resolving in a ``Dialog.IResult`` object.
 File Dialogs
 ''''''''''''
 
-Two helper functions to ask a user to open a file or a directory are 
+Two helper functions to ask a user to open a file or a directory are
 available in the ``filebrowser`` package under the namespace ``FileDialog``.
 
 Here is an example to request a file.
@@ -77,7 +77,6 @@ Here is an example to request a file.
 .. code:: typescript
 
     const dialog = FileDialog.getOpenFiles({
-      iconRegistry, // IIconRegistry
       manager, // IDocumentManager
       filter: model => model.type == 'notebook' // optional (model: Contents.IModel) => boolean
     });
@@ -93,7 +92,6 @@ And for a folder.
 .. code:: typescript
 
     const dialog = FileDialog.getExistingDirectory({
-      iconRegistry, // IIconRegistry
       manager // IDocumentManager
     });
 
@@ -103,7 +101,6 @@ And for a folder.
       let folders = result.value;
     }
 
-.. note:: The document manager and the icon registry can be obtained in a plugin by
-    requesting ``IFileBrowserFactory`` token. The ``manager`` will be accessed through 
-    ``factory.defaultBrowser.model.manager`` and the ``iconRegistry`` through
-    ``factory.defaultBrowser.model.iconRegistry``.
+.. note:: The document manager can be obtained in a plugin by
+    requesting ``IFileBrowserFactory`` token. The ``manager`` will be accessed through
+    ``factory.defaultBrowser.model.manager``.
