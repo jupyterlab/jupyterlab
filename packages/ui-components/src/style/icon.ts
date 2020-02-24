@@ -143,12 +143,12 @@ export namespace LabIconStyle {
     /**
      * @depreacted use stylesheet instead
      */
-    kind?: ISheetResolvable | ISheetResolvable[];
+    kind?: IBuiltin;
 
     /**
      * @deprecated use elementPosition instead
      */
-    justify?: IPosition;
+    justify?: 'center' | 'right' | 'left';
   }
 
   /**
@@ -494,8 +494,8 @@ export namespace LabIconStyle {
   }
 
   /**
-   * Resolve a string naming a builtin style/an actual ISheet obj,
-   * or an array of such, into an array of actual ISheet objs
+   * Resolve one or more stylesheets that may just be a string naming
+   * one of the builtin stylesheets to an array of proper ISheet objects
    */
   function resolveSheet(
     stylesheet: ISheetResolvable | ISheetResolvable[] | undefined
@@ -513,9 +513,9 @@ export namespace LabIconStyle {
   }
 
   /**
-   * Resolve and merge multiple icon sheets
+   * Resolve and merge multiple icon stylesheets
    */
-  function resolveSheets(sheets: ISheet[]) {
+  function applySheetOptions(sheets: ISheet[]) {
     const options: ISheetOptions = Object.assign(
       {},
       ...sheets.map(s => s.options)
@@ -533,7 +533,7 @@ export namespace LabIconStyle {
   }
 
   /**
-   * Resolve a pure icon style into a typestyle class
+   * Resolve a pure icon styleheet into a typestyle class
    */
   function resolveStyleClass(stylesheet: ISheetPure): string {
     return typestyleClass({
@@ -549,7 +549,7 @@ export namespace LabIconStyle {
   let _styleClassCache = new Map<string, string>();
 
   /**
-   * Get a typestyle class, given a given set of icon styling props
+   * Get a typestyle class, given a set of icon styling props
    */
   export function styleClass(props?: IProps): string {
     if (!props || Object.keys(props).length === 0) {
@@ -585,7 +585,9 @@ export namespace LabIconStyle {
     // try to look up the style class in the cache
     const cacheable =
       typeof stylesheet === 'string' && Object.keys(elementCSS).length === 0;
-    const cacheKey = cacheable ? [stylesheet, elementPosition].join(',') : '';
+    const cacheKey = cacheable
+      ? [stylesheet, elementPosition, elementSize].join(',')
+      : '';
     if (cacheable && _styleClassCache.has(cacheKey)) {
       return _styleClassCache.get(cacheKey)!;
     }
@@ -595,7 +597,7 @@ export namespace LabIconStyle {
     sheets.push({ element: elementCSS, options });
 
     // apply style options/merge sheets, then convert to typestyle class
-    const cls = resolveStyleClass(resolveSheets(sheets));
+    const cls = resolveStyleClass(applySheetOptions(sheets));
 
     if (cacheable) {
       // store in cache for later reuse
