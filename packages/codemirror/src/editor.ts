@@ -1438,7 +1438,7 @@ namespace Private {
           value === 'bounded' ? `${config.wordWrapColumn}ch` : null;
         const width =
           value === 'wordWrapColumn' ? `${config.wordWrapColumn}ch` : null;
-        lines.style.setProperty('maxWidth', maxWidth);
+        lines.style.setProperty('max-width', maxWidth);
         lines.style.setProperty('width', width);
         editor.setOption('lineWrapping', lineWrapping);
         break;
