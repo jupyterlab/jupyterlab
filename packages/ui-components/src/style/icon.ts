@@ -55,29 +55,10 @@ export namespace LabIconStyle {
   type ISize = 'small' | 'normal' | 'large' | 'xlarge';
 
   /**
-   * Collections of CSS props that can be fed directly to
-   * typestyle's style() function
+   * Options that function as a shorthand for compound CSS properties,
+   * such as the set of props required to center an svg inside
+   * of a parent node
    */
-  interface IStylePure {
-    /**
-     * CSS properties that will be applied to the outer container
-     * element via a typestyle class
-     */
-    containerStyle?: NestedCSSProperties;
-
-    /**
-     * CSS properties that will be applied to the inner svg
-     * element via a typestyle class
-     */
-    elementStyle?: NestedCSSProperties;
-
-    /**
-     * FUTURE: CSS properties that will be applied to the label
-     * element, if any, via a typestyle class
-     */
-    // labelStyle?: NestedCSSProperties;
-  }
-
   interface IStyleOptions {
     /**
      * How to position the inner svg element,
@@ -104,8 +85,43 @@ export namespace LabIconStyle {
   /**
    * Collections of CSS props plus some custom options
    */
-  export interface IStyle extends IStylePure {
+  interface IStyle {
+    /**
+     * CSS properties that will be applied to the outer container
+     * element via a typestyle class
+     */
+    containerStyle?: NestedCSSProperties;
+
+    /**
+     * CSS properties that will be applied to the inner svg
+     * element via a typestyle class
+     */
+    elementStyle?: NestedCSSProperties;
+
+    /**
+     * Options that function as modifiers for this style's
+     * CSS properties
+     */
     options?: IStyleOptions;
+
+    /**
+     * FUTURE: CSS properties that will be applied to the label
+     * element, if any, via a typestyle class
+     */
+    // labelStyle?: NestedCSSProperties;
+  }
+
+  /**
+   * Collections of CSS style props that can be fed directly to
+   * typestyle's style() function. A standard IStyle can be resolved
+   * to a "pure" style by processing and removing any options
+   */
+  interface IStylePure extends IStyle {
+    /**
+     * Options are disallowed for "pure" styles, which may contain
+     * only collections of valid (as per typestyle) CSS props
+     */
+    options?: undefined;
   }
 
   /**
@@ -128,7 +144,7 @@ export namespace LabIconStyle {
   /**
    * The kind (ie builtin) styles
    */
-  export const kindStyles: { [k in IBuiltin]: IStyle } = {
+  const kindStyles: { [k in IBuiltin]: IStyle } = {
     breadCrumb: {
       containerStyle: {
         $nest: {
@@ -424,7 +440,7 @@ export namespace LabIconStyle {
   /**
    * Styles to help with positioning
    */
-  export const positionStyles: { [k in IPosition]: IStyle } = {
+  const positionStyles: { [k in IPosition]: IStyle } = {
     center: _elementPositionFactory({ margin: '0 auto', width: '100%' }),
 
     top: _elementPositionFactory({ margin: '0 0 auto 0' }),
@@ -450,7 +466,7 @@ export namespace LabIconStyle {
   /**
    * styles that establish some default sizes
    */
-  export const sizeStyles: { [k in ISize]: IStylePure } = {
+  const sizeStyles: { [k in ISize]: IStyle } = {
     small: _elementSizeFactory('14px'),
     normal: _elementSizeFactory('16px'),
     large: _elementSizeFactory('20px'),
@@ -458,7 +474,8 @@ export namespace LabIconStyle {
   };
 
   /**
-   * Merge two or more pure (CSS props only) icon styles
+   * Merge two or more icon styles into a single "pure"
+   * icon style (ie collections of CSS props only)
    */
   function mergeStyles(styles: IStyle[]): IStylePure {
     return {
@@ -467,6 +484,10 @@ export namespace LabIconStyle {
     };
   }
 
+  /**
+   * Resolve a string naming a builtin style/an actual IStyle obj,
+   * or an array of such, into an array of actual IStyle objs
+   */
   function resolveKind(
     kind: IStyleResolvable | IStyleResolvable[] | undefined
   ): IStyle[] {

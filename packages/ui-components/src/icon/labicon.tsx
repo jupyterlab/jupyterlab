@@ -287,10 +287,19 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * @param tag - if container is not explicitly
    * provided, this tag will be used when creating the container
    *
-   * @param styleProps - style parameters that get passed to TypeStyle in
-   * order to generate a style class. The style class will be added
-   * to the icon container's classes, while the style itself will be
-   * applied to any svg elements within the container.
+   * @param kind - optional string naming a builtin icon style to
+   * use, for example 'menuItem' or `statusBar`. Can also be an
+   * object defining a custom icon style, or a list of builtin style
+   * names and/or custom style objects (these will be merged)
+   *
+   * @param elementPosition - optional position for the
+   * inner svg element
+   *
+   * @param elementSize - optional size for the inner svg element.
+   * Set to 'normal' to get a standard 16px x 16px icon
+   *
+   * @param ...elementStyle - all additional args are treated as
+   * overrides for the CSS props applied to the inner svg element
    *
    * @returns A DOM element that contains an (inline) svg element
    * that displays an icon
@@ -524,12 +533,21 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * @param tag - if container is not explicitly
    * provided, this tag will be used when creating the container
    *
-   * @param ref - forwarded to the ref prop of the icon's svg element
+   * @param kind - optional string naming a builtin icon style to
+   * use, for example 'menuItem' or `statusBar`. Can also be an
+   * object defining a custom icon style, or a list of builtin style
+   * names and/or custom style objects (these will be merged)
    *
-   * @param styleProps - style parameters that get passed to TypeStyle in
-   * order to generate a style class. The style class will be added
-   * to the icon container's classes, while the style itself will be
-   * applied to any svg elements within the container.
+   * @param elementPosition - optional position for the
+   * inner svg element
+   *
+   * @param elementSize - optional size for the inner svg element.
+   * Set to 'normal' to get a standard 16px x 16px icon
+   *
+   * @param ...elementStyle - all additional args are treated as
+   * overrides for the CSS props applied to the inner svg element
+   *
+   * @param ref - forwarded to the ref prop of the icon's svg element
    */
   readonly react: LabIcon.IReact;
 
@@ -547,9 +565,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
  * A namespace for LabIcon statics.
  */
 export namespace LabIcon {
-  /**************
+  /*************
    * interfaces *
-   **************/
+   *************/
 
   /**
    * The simplest possible interface for defining a generic icon.
@@ -632,7 +650,7 @@ export namespace LabIcon {
     fallback?: LabIcon;
   }
 
-  /*********
+  /********
    * types *
    *********/
 
@@ -668,9 +686,9 @@ export namespace LabIcon {
    */
   export type IReact = React.ForwardRefExoticComponent<IReactProps>;
 
-  /***********
+  /**********
    * classes *
-   ***********/
+   **********/
 
   /**
    * Base implementation of IRenderer.
@@ -733,13 +751,6 @@ export namespace LabIcon {
       ReactDOM.unmountComponentAtNode(container);
     }
   }
-
-  /**************
-   * re-exports *
-   **************/
-
-  export const kindStyles = LabIconStyle.kindStyles;
-  export const positionStyles = LabIconStyle.positionStyles;
 }
 
 namespace Private {
