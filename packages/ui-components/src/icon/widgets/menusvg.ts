@@ -9,7 +9,7 @@ import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
 
 const submenuIcon = caretRightIcon.bindprops({
-  kind: 'menuItem'
+  stylesheet: 'menuItem'
 });
 
 /**
@@ -115,7 +115,7 @@ export namespace MenuSvg {
         return classes(data.item.iconClass, name);
       } else {
         return classes(
-          LabIconStyle.styleClass({ kind: 'menuItem' }),
+          LabIconStyle.styleClass({ stylesheet: 'menuItem' }),
           data.item.iconClass,
           name
         );

@@ -408,7 +408,7 @@ function activateShareFile(
     isVisible: () =>
       !!tracker.currentWidget &&
       toArray(tracker.currentWidget.selectedItems()).length === 1,
-    icon: linkIcon.bindprops({ kind: 'menuItem' }),
+    icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Copy Shareable Link'
   });
 }
@@ -436,7 +436,7 @@ function addCommands(
         return widget.delete();
       }
     },
-    icon: closeIcon.bindprops({ kind: 'menuItem' }),
+    icon: closeIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Delete',
     mnemonic: 0
   });
@@ -449,7 +449,7 @@ function addCommands(
         return widget.copy();
       }
     },
-    icon: copyIcon.bindprops({ kind: 'menuItem' }),
+    icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Copy',
     mnemonic: 0
   });
@@ -462,7 +462,7 @@ function addCommands(
         return widget.cut();
       }
     },
-    icon: cutIcon.bindprops({ kind: 'menuItem' }),
+    icon: cutIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Cut'
   });
 
@@ -474,7 +474,7 @@ function addCommands(
         return widget.download();
       }
     },
-    icon: downloadIcon.bindprops({ kind: 'menuItem' }),
+    icon: downloadIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Download'
   });
 
@@ -486,7 +486,7 @@ function addCommands(
         return widget.duplicate();
       }
     },
-    icon: copyIcon.bindprops({ kind: 'menuItem' }),
+    icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Duplicate'
   });
 
@@ -608,9 +608,9 @@ function addCommands(
         const ft = registry.getFileType(factory);
         // ...set an icon if the factory name corresponds to a file type name...
         // ...or leave the icon blank
-        return ft?.icon?.bindprops({ kind: 'menuItem' });
+        return ft?.icon?.bindprops({ stylesheet: 'menuItem' });
       } else {
-        return folderIcon.bindprops({ kind: 'menuItem' });
+        return folderIcon.bindprops({ stylesheet: 'menuItem' });
       }
     },
     label: args => (args['label'] || args['factory'] || 'Open') as string,
@@ -635,7 +635,7 @@ function addCommands(
         )
       );
     },
-    icon: addIcon.bindprops({ kind: 'menuItem' }),
+    icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Open in New Browser Tab',
     mnemonic: 0
   });
@@ -653,7 +653,7 @@ function addCommands(
           Clipboard.copyToSystem(url);
         });
     },
-    icon: copyIcon.bindprops({ kind: 'menuItem' }),
+    icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Copy Download Link',
     mnemonic: 0
   });
@@ -666,7 +666,7 @@ function addCommands(
         return widget.paste();
       }
     },
-    icon: pasteIcon.bindprops({ kind: 'menuItem' }),
+    icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Paste',
     mnemonic: 0
   });
@@ -679,7 +679,7 @@ function addCommands(
         return widget.createNewDirectory();
       }
     },
-    icon: newFolderIcon.bindprops({ kind: 'menuItem' }),
+    icon: newFolderIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'New Folder'
   });
 
@@ -694,7 +694,7 @@ function addCommands(
         ext: 'txt'
       });
     },
-    icon: textEditorIcon.bindprops({ kind: 'menuItem' }),
+    icon: textEditorIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'New File'
   });
 
@@ -709,7 +709,7 @@ function addCommands(
         ext: 'md'
       });
     },
-    icon: markdownIcon.bindprops({ kind: 'menuItem' }),
+    icon: markdownIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'New Markdown File'
   });
 
@@ -721,7 +721,7 @@ function addCommands(
         return widget.rename();
       }
     },
-    icon: editIcon.bindprops({ kind: 'menuItem' }),
+    icon: editIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Rename',
     mnemonic: 0
   });
@@ -742,7 +742,7 @@ function addCommands(
     isVisible: () =>
       !!tracker.currentWidget &&
       tracker.currentWidget.selectedItems().next !== undefined,
-    icon: fileIcon.bindprops({ kind: 'menuItem' }),
+    icon: fileIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Copy Path'
   });
 
@@ -784,7 +784,7 @@ function addCommands(
         return widget.shutdownKernels();
       }
     },
-    icon: stopIcon.bindprops({ kind: 'menuItem' }),
+    icon: stopIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Shut Down Kernel'
   });
 

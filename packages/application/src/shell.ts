@@ -775,7 +775,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // bind an appropriate style to the icon
     if (title.icon instanceof LabIcon) {
       title.icon = title.icon.bindprops({
-        kind: 'mainAreaTab'
+        stylesheet: 'mainAreaTab'
       });
     }
 
@@ -1185,7 +1185,7 @@ namespace Private {
       // bind an appropriate style to the icon
       if (title.icon instanceof LabIcon) {
         title.icon = title.icon.bindprops({
-          kind: 'sideBar'
+          stylesheet: 'sideBar'
         });
       }
 

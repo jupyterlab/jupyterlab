@@ -9,7 +9,7 @@ import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
 
 const searchHeaderIcon = filterListIcon.bindprops({
-  kind: 'commandPaletteHeader'
+  stylesheet: 'commandPaletteHeader'
 });
 
 export namespace CommandPaletteSvg {
@@ -81,7 +81,7 @@ export namespace CommandPaletteSvg {
 
       return classes(
         LabIconStyle.styleClass({
-          kind: 'commandPaletteItem'
+          stylesheet: 'commandPaletteItem'
         }),
         data.item.iconClass,
         name

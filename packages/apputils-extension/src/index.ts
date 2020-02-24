@@ -152,7 +152,7 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
     jupyterFaviconIcon.element({
       container: logo,
 
-      kind: 'splash'
+      stylesheet: 'splash'
     });
 
     galaxy.appendChild(logo);

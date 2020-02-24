@@ -45,9 +45,9 @@ function NotebookTrustComponent(
   props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> {
   if (props.allCellsTrusted) {
-    return <trustedIcon.react top={'2px'} kind={'statusBar'} />;
+    return <trustedIcon.react top={'2px'} stylesheet={'statusBar'} />;
   } else {
-    return <notTrustedIcon.react top={'2px'} kind={'statusBar'} />;
+    return <notTrustedIcon.react top={'2px'} stylesheet={'statusBar'} />;
   }
 }
 

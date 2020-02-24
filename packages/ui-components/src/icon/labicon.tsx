@@ -287,18 +287,20 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * @param tag - if container is not explicitly
    * provided, this tag will be used when creating the container
    *
-   * @param kind - optional string naming a builtin icon style to
-   * use, for example 'menuItem' or `statusBar`. Can also be an
-   * object defining a custom icon style, or a list of builtin style
-   * names and/or custom style objects (these will be merged)
+   * @param stylesheet - optional string naming a builtin icon
+   * stylesheet, for example 'menuItem' or `statusBar`. Can also be an
+   * object defining a custom icon stylesheet, or a list of builtin
+   * stylesheet names and/or custom stylesheet objects. If array,
+   * the given stylesheets will be merged.
    *
-   * @param elementPosition - optional position for the
-   * inner svg element
+   *   See @jupyterlab/ui-components/src/style/icon.ts for details
+   *
+   * @param elementPosition - optional position for the inner svg element
    *
    * @param elementSize - optional size for the inner svg element.
    * Set to 'normal' to get a standard 16px x 16px icon
    *
-   * @param ...elementStyle - all additional args are treated as
+   * @param ...elementCSS - all additional args are treated as
    * overrides for the CSS props applied to the inner svg element
    *
    * @returns A DOM element that contains an (inline) svg element
@@ -533,18 +535,20 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * @param tag - if container is not explicitly
    * provided, this tag will be used when creating the container
    *
-   * @param kind - optional string naming a builtin icon style to
-   * use, for example 'menuItem' or `statusBar`. Can also be an
-   * object defining a custom icon style, or a list of builtin style
-   * names and/or custom style objects (these will be merged)
+   * @param stylesheet - optional string naming a builtin icon
+   * stylesheet, for example 'menuItem' or `statusBar`. Can also be an
+   * object defining a custom icon stylesheet, or a list of builtin
+   * stylesheet names and/or custom stylesheet objects. If array,
+   * the given stylesheets will be merged.
    *
-   * @param elementPosition - optional position for the
-   * inner svg element
+   *   See @jupyterlab/ui-components/src/style/icon.ts for details
+   *
+   * @param elementPosition - optional position for the inner svg element
    *
    * @param elementSize - optional size for the inner svg element.
    * Set to 'normal' to get a standard 16px x 16px icon
    *
-   * @param ...elementStyle - all additional args are treated as
+   * @param ...elementCSS - all additional args are treated as
    * overrides for the CSS props applied to the inner svg element
    *
    * @param ref - forwarded to the ref prop of the icon's svg element

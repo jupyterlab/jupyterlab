@@ -59,7 +59,7 @@ export namespace LabIconStyle {
    * such as the set of props required to center an svg inside
    * of a parent node
    */
-  interface IStyleOptions {
+  interface ISheetOptions {
     /**
      * How to position the inner svg element,
      * relative to the outer container
@@ -83,57 +83,67 @@ export namespace LabIconStyle {
   }
 
   /**
-   * Collections of CSS props plus some custom options
+   * Stylesheet with a collection of CSS props for each node
+   * in an icon, plus some custom options
    */
-  interface IStyle {
+  interface ISheet {
     /**
      * CSS properties that will be applied to the outer container
      * element via a typestyle class
      */
-    containerStyle?: NestedCSSProperties;
+    container?: NestedCSSProperties;
 
     /**
      * CSS properties that will be applied to the inner svg
      * element via a typestyle class
      */
-    elementStyle?: NestedCSSProperties;
+    element?: NestedCSSProperties;
 
     /**
      * Options that function as modifiers for this style's
      * CSS properties
      */
-    options?: IStyleOptions;
+    options?: ISheetOptions;
 
     /**
      * FUTURE: CSS properties that will be applied to the label
      * element, if any, via a typestyle class
      */
-    // labelStyle?: NestedCSSProperties;
+    // labelCSS?: NestedCSSProperties;
   }
 
   /**
-   * Collections of CSS style props that can be fed directly to
-   * typestyle's style() function. A standard IStyle can be resolved
-   * to a "pure" style by processing and removing any options
+   * A stylesheet containing only collections of CSS style props that
+   * can be fed directly to typestyle's style() function. A standard
+   * ISheet can be resolved to a "pure" stylesheet by processing and
+   * removing any options
    */
-  interface IStylePure extends IStyle {
+  interface ISheetPure extends ISheet {
     /**
-     * Options are disallowed for "pure" styles, which may contain
-     * only collections of valid (as per typestyle) CSS props
+     * Options are disallowed
      */
     options?: undefined;
   }
 
   /**
-   * Type to help with resolving a style that might be a string
+   * Type to help with resolving a stylesheet that might be a string
    */
-  type IStyleResolvable = IStyle | IBuiltin;
+  type ISheetResolvable = ISheet | IBuiltin;
 
-  export interface IProps extends NestedCSSProperties, IStyleOptions {
+  export interface IProps extends NestedCSSProperties, ISheetOptions {
     /**
-     * the kind of the icon, associated with a builtin stylesheet
+     * Specify the icon styling. Can be either a string naming one of
+     * the builtin icon stylesheets, a LabIconStyle.ISheet object, or an
+     * array containing any mixture of the two. If an array is provided,
+     * the actual style will be determined by merging the stylesheets in
+     * the array, giving precedence to the rightmost values.
      */
-    kind?: IStyleResolvable | IStyleResolvable[];
+    stylesheet?: ISheetResolvable | ISheetResolvable[];
+
+    /**
+     * @depreacted use stylesheet instead
+     */
+    kind?: ISheetResolvable | ISheetResolvable[];
 
     /**
      * @deprecated use elementPosition instead
@@ -142,11 +152,11 @@ export namespace LabIconStyle {
   }
 
   /**
-   * The kind (ie builtin) styles
+   * The builtin stylesheets
    */
-  const kindStyles: { [k in IBuiltin]: IStyle } = {
+  const builtinSheets: { [k in IBuiltin]: ISheet } = {
     breadCrumb: {
-      containerStyle: {
+      container: {
         $nest: {
           // `&` will be substituted for the generated classname (interpolation)
           '&:first-child svg': {
@@ -163,7 +173,7 @@ export namespace LabIconStyle {
           }
         }
       },
-      elementStyle: {
+      element: {
         borderRadius: 'var(--jp-border-radius)',
         cursor: 'pointer',
         margin: '0px 2px',
@@ -175,11 +185,11 @@ export namespace LabIconStyle {
     },
 
     commandPaletteHeader: {
-      containerStyle: {
+      container: {
         height: '14px',
         margin: '0 14px 0 auto'
       },
-      elementStyle: {
+      element: {
         height: '14px',
         width: '14px'
       },
@@ -189,7 +199,7 @@ export namespace LabIconStyle {
     },
 
     commandPaletteItem: {
-      elementStyle: {
+      element: {
         height: '16px',
         width: '16px'
       },
@@ -199,10 +209,10 @@ export namespace LabIconStyle {
     },
 
     launcherCard: {
-      containerStyle: {
+      container: {
         height: '68px'
       },
-      elementStyle: {
+      element: {
         height: '52px',
         width: '52px'
       },
@@ -212,11 +222,11 @@ export namespace LabIconStyle {
     },
 
     launcherSection: {
-      containerStyle: {
+      container: {
         boxSizing: 'border-box',
         marginRight: '12px'
       },
-      elementStyle: {
+      element: {
         height: '32px',
         width: '32px'
       },
@@ -226,12 +236,12 @@ export namespace LabIconStyle {
     },
 
     listing: {
-      containerStyle: {
+      container: {
         flex: '0 0 20px',
         marginRight: '4px',
         position: 'relative'
       },
-      elementStyle: {
+      element: {
         height: '16px',
         width: '16px'
       },
@@ -241,12 +251,12 @@ export namespace LabIconStyle {
     },
 
     listingHeaderItem: {
-      containerStyle: {
+      container: {
         display: 'inline',
         height: '16px',
         width: '16px'
       },
-      elementStyle: {
+      element: {
         height: 'auto',
         margin: '-2px 0 0 0',
         width: '20px'
@@ -257,7 +267,7 @@ export namespace LabIconStyle {
     },
 
     mainAreaTab: {
-      containerStyle: {
+      container: {
         $nest: {
           '.lm-DockPanel-tabBar &': {
             marginRight: '4px'
@@ -268,7 +278,7 @@ export namespace LabIconStyle {
           }
         }
       },
-      elementStyle: {
+      element: {
         $nest: {
           '.lm-DockPanel-tabBar &': {
             height: '14px',
@@ -286,11 +296,11 @@ export namespace LabIconStyle {
     },
 
     menuItem: {
-      containerStyle: {
+      container: {
         display: 'inline-block',
         verticalAlign: 'middle'
       },
-      elementStyle: {
+      element: {
         height: '16px',
         width: '16px'
       },
@@ -300,10 +310,10 @@ export namespace LabIconStyle {
     },
 
     runningItem: {
-      containerStyle: {
+      container: {
         margin: '0px 4px 0px 12px'
       },
-      elementStyle: {
+      element: {
         height: '16px',
         width: '16px'
       },
@@ -313,10 +323,10 @@ export namespace LabIconStyle {
     },
 
     select: {
-      containerStyle: {
+      container: {
         pointerEvents: 'none'
       },
-      elementStyle: {
+      element: {
         position: 'absolute',
         height: 'auto',
         width: '16px'
@@ -324,7 +334,7 @@ export namespace LabIconStyle {
     },
 
     settingsEditor: {
-      containerStyle: {
+      container: {
         display: 'inline-block',
         flex: '0 0 20px',
         marginLeft: '2px',
@@ -333,7 +343,7 @@ export namespace LabIconStyle {
         height: '20px',
         width: '20px'
       },
-      elementStyle: {
+      element: {
         height: '16px',
         width: '16px'
       },
@@ -343,7 +353,7 @@ export namespace LabIconStyle {
     },
 
     sideBar: {
-      containerStyle: {
+      container: {
         // `&` will be substituted for the generated classname (interpolation)
         $nest: {
           // left sidebar tab divs
@@ -375,7 +385,7 @@ export namespace LabIconStyle {
           }
         }
       },
-      elementStyle: {
+      element: {
         width: '20px'
       },
       options: {
@@ -384,13 +394,13 @@ export namespace LabIconStyle {
     },
 
     splash: {
-      containerStyle: {
+      container: {
         animation: '0.3s fade-in linear forwards',
         height: '100%',
         width: '100%',
         zIndex: 1
       },
-      elementStyle: {
+      element: {
         width: '100px'
       },
       options: {
@@ -399,7 +409,7 @@ export namespace LabIconStyle {
     },
 
     statusBar: {
-      elementStyle: {
+      element: {
         left: '0px',
         top: '0px',
         height: '18px',
@@ -409,12 +419,12 @@ export namespace LabIconStyle {
     },
 
     toolbarButton: {
-      containerStyle: {
+      container: {
         display: 'inline-block',
         margin: 'auto',
         verticalAlign: 'middle'
       },
-      elementStyle: {
+      element: {
         height: '16px',
         width: '16px'
       },
@@ -424,13 +434,13 @@ export namespace LabIconStyle {
     }
   };
 
-  function _elementPositionFactory(extra: NestedCSSProperties) {
+  function _elementPositionFactory(extra: NestedCSSProperties): ISheet {
     return {
-      containerStyle: {
+      container: {
         alignItems: 'center',
         display: 'flex'
       },
-      elementStyle: {
+      element: {
         display: 'block',
         ...extra
       }
@@ -440,7 +450,7 @@ export namespace LabIconStyle {
   /**
    * Styles to help with positioning
    */
-  const positionStyles: { [k in IPosition]: IStyle } = {
+  const positionSheets: { [k in IPosition]: ISheet } = {
     center: _elementPositionFactory({ margin: '0 auto', width: '100%' }),
 
     top: _elementPositionFactory({ margin: '0 0 auto 0' }),
@@ -454,9 +464,9 @@ export namespace LabIconStyle {
     'top left': _elementPositionFactory({ margin: '0 auto 0 auto' })
   };
 
-  function _elementSizeFactory(size: string) {
+  function _elementSizeFactory(size: string): ISheet {
     return {
-      elementStyle: {
+      element: {
         height: size,
         width: size
       }
@@ -464,9 +474,9 @@ export namespace LabIconStyle {
   }
 
   /**
-   * styles that establish some default sizes
+   * sheets that establish some default sizes
    */
-  const sizeStyles: { [k in ISize]: IStyle } = {
+  const sizeSheets: { [k in ISize]: ISheet } = {
     small: _elementSizeFactory('14px'),
     normal: _elementSizeFactory('16px'),
     large: _elementSizeFactory('20px'),
@@ -474,70 +484,70 @@ export namespace LabIconStyle {
   };
 
   /**
-   * Merge two or more icon styles into a single "pure"
+   * Merge two or more icon sheets into a single "pure"
    * icon style (ie collections of CSS props only)
    */
-  function mergeStyles(styles: IStyle[]): IStylePure {
+  function mergeSheets(sheets: ISheet[]): ISheetPure {
     return {
-      containerStyle: Object.assign({}, ...styles.map(s => s.containerStyle)),
-      elementStyle: Object.assign({}, ...styles.map(s => s.elementStyle))
+      container: Object.assign({}, ...sheets.map(s => s.container)),
+      element: Object.assign({}, ...sheets.map(s => s.element))
     };
   }
 
   /**
-   * Resolve a string naming a builtin style/an actual IStyle obj,
-   * or an array of such, into an array of actual IStyle objs
+   * Resolve a string naming a builtin style/an actual ISheet obj,
+   * or an array of such, into an array of actual ISheet objs
    */
-  function resolveKind(
-    kind: IStyleResolvable | IStyleResolvable[] | undefined
-  ): IStyle[] {
-    if (!kind) {
+  function resolveSheet(
+    stylesheet: ISheetResolvable | ISheetResolvable[] | undefined
+  ): ISheet[] {
+    if (!stylesheet) {
       return [];
     }
 
-    if (!Array.isArray(kind)) {
+    if (!Array.isArray(stylesheet)) {
       // wrap in array
-      kind = [kind];
+      stylesheet = [stylesheet];
     }
 
-    return kind.map(k => (typeof k === 'string' ? kindStyles[k] : k));
+    return stylesheet.map(k => (typeof k === 'string' ? builtinSheets[k] : k));
   }
 
   /**
-   * Resolve and merge multiple icon styles
+   * Resolve and merge multiple icon sheets
    */
-  function resolveStyles(styles: IStyle[]) {
-    const options: IStyleOptions = Object.assign(
+  function resolveSheets(sheets: ISheet[]) {
+    const options: ISheetOptions = Object.assign(
       {},
-      ...styles.map(s => s.options)
+      ...sheets.map(s => s.options)
     );
 
     if (options.elementPosition) {
-      styles.unshift(positionStyles[options.elementPosition]);
+      sheets.unshift(positionSheets[options.elementPosition]);
     }
 
     if (options.elementSize) {
-      styles.unshift(sizeStyles[options.elementSize]);
+      sheets.unshift(sizeSheets[options.elementSize]);
     }
 
-    return mergeStyles(styles);
+    return mergeSheets(sheets);
   }
 
   /**
    * Resolve a pure icon style into a typestyle class
    */
-  function resolveStyleClass(style: IStylePure): string {
+  function resolveStyleClass(stylesheet: ISheetPure): string {
     return typestyleClass({
-      ...style.containerStyle,
+      ...stylesheet.container,
       $nest: {
-        ...style.containerStyle?.$nest,
-        ['svg']: style.elementStyle
+        ...stylesheet.container?.$nest,
+        ['svg']: stylesheet.element
       }
     });
   }
 
-  // cache style classes for builtin kinds with simple options
-  let _styleCache = new Map<string, string>();
+  // cache style classes for builtin stylesheets
+  let _styleClassCache = new Map<string, string>();
 
   /**
    * Get a typestyle class, given a given set of icon styling props
@@ -551,10 +561,16 @@ export namespace LabIconStyle {
     let {
       elementPosition,
       elementSize,
+      stylesheet,
       kind,
       justify,
-      ...elementStyle
+      ...elementCSS
     } = props;
+
+    // DEPRECATED: alias kind => stylesheet
+    if (!stylesheet) {
+      stylesheet = kind;
+    }
 
     // DEPRECATED: alias justify => elementPosition
     if (!elementPosition) {
@@ -569,22 +585,22 @@ export namespace LabIconStyle {
 
     // try to look up the style class in the cache
     const cacheable =
-      typeof kind === 'string' && Object.keys(elementStyle).length === 0;
-    const cacheKey = cacheable ? [kind, elementPosition].join(',') : '';
-    if (cacheable && _styleCache.has(cacheKey)) {
-      return _styleCache.get(cacheKey)!;
+      typeof stylesheet === 'string' && Object.keys(elementCSS).length === 0;
+    const cacheKey = cacheable ? [stylesheet, elementPosition].join(',') : '';
+    if (cacheable && _styleClassCache.has(cacheKey)) {
+      return _styleClassCache.get(cacheKey)!;
     }
 
-    // resolve kind to an array of styles, then stick overrides on the end
-    const styles = resolveKind(kind);
-    styles.push({ elementStyle, options });
+    // resolve kind to an array of sheets, then stick overrides on the end
+    const sheets = resolveSheet(stylesheet);
+    sheets.push({ element: elementCSS, options });
 
-    // apply style options/merge styles, then convert to typestyle class
-    const cls = resolveStyleClass(resolveStyles(styles));
+    // apply style options/merge sheets, then convert to typestyle class
+    const cls = resolveStyleClass(resolveSheets(sheets));
 
     if (cacheable) {
       // store in cache for later reuse
-      _styleCache.set(cacheKey, cls);
+      _styleClassCache.set(cacheKey, cls);
     }
 
     return cls;

@@ -1841,7 +1841,7 @@ export namespace DirListing {
         container: iconContainer,
         className: ITEM_ICON_CLASS,
 
-        kind: 'listing'
+        stylesheet: 'listing'
       });
 
       let hoverText = 'Name: ' + model.name;
@@ -2098,7 +2098,7 @@ namespace Private {
       (state === 'down' ? caretDownIcon : caretUpIcon).element({
         container,
         tag: 'span',
-        kind: 'listingHeaderItem',
+        stylesheet: 'listingHeaderItem',
 
         float
       });

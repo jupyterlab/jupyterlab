@@ -15,7 +15,7 @@ export default {
   title: 'LabIcon'
 };
 
-export const build = () => <buildIcon.react kind="sideBar" />;
+export const build = () => <buildIcon.react stylesheet="sideBar" />;
 
 export const running = () => <runningIcon.react height="800px" width="800px" />;
 

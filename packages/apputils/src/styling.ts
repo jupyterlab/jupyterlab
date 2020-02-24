@@ -72,7 +72,7 @@ export namespace Styling {
     wrapper.appendChild(
       caretDownEmptyIcon.element({
         tag: 'span',
-        kind: 'select',
+        stylesheet: 'select',
         right: '8px',
         top: '5px',
         width: '18px'
