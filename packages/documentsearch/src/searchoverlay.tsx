@@ -468,7 +468,7 @@ class SearchOverlay extends React.Component<
             <icon.react
               className={`${REPLACE_TOGGLE_CLASS} ${BUTTON_CONTENT_CLASS}`}
               tag="span"
-              justify="center"
+              elementPosition="center"
               height="20px"
               width="20px"
             />
@@ -509,7 +509,7 @@ class SearchOverlay extends React.Component<
         >
           <closeIcon.react
             className="jp-icon-hover"
-            justify="center"
+            elementPosition="center"
             height="16px"
             width="16px"
           />

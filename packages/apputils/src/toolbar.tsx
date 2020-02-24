@@ -503,7 +503,6 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
         }
         className="jp-ToolbarButtonComponent-icon"
         tag="span"
-        justify="center"
         kind="toolbarButton"
       />
       {props.label && (
@@ -733,14 +732,14 @@ namespace Private {
         circleIcon.element({
           container: this.node,
           title: `Kernel ${Text.titleCase(status)}`,
-          justify: 'center',
+
           kind: 'toolbarButton'
         });
       } else {
         circleEmptyIcon.element({
           container: this.node,
           title: `Kernel ${Text.titleCase(status)}`,
-          justify: 'center',
+
           kind: 'toolbarButton'
         });
       }

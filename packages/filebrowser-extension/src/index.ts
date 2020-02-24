@@ -408,7 +408,7 @@ function activateShareFile(
     isVisible: () =>
       !!tracker.currentWidget &&
       toArray(tracker.currentWidget.selectedItems()).length === 1,
-    icon: linkIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: linkIcon.bindprops({ kind: 'menuItem' }),
     label: 'Copy Shareable Link'
   });
 }
@@ -436,7 +436,7 @@ function addCommands(
         return widget.delete();
       }
     },
-    icon: closeIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: closeIcon.bindprops({ kind: 'menuItem' }),
     label: 'Delete',
     mnemonic: 0
   });
@@ -449,7 +449,7 @@ function addCommands(
         return widget.copy();
       }
     },
-    icon: copyIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: copyIcon.bindprops({ kind: 'menuItem' }),
     label: 'Copy',
     mnemonic: 0
   });
@@ -462,7 +462,7 @@ function addCommands(
         return widget.cut();
       }
     },
-    icon: cutIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: cutIcon.bindprops({ kind: 'menuItem' }),
     label: 'Cut'
   });
 
@@ -474,7 +474,7 @@ function addCommands(
         return widget.download();
       }
     },
-    icon: downloadIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: downloadIcon.bindprops({ kind: 'menuItem' }),
     label: 'Download'
   });
 
@@ -486,7 +486,7 @@ function addCommands(
         return widget.duplicate();
       }
     },
-    icon: copyIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: copyIcon.bindprops({ kind: 'menuItem' }),
     label: 'Duplicate'
   });
 
@@ -608,9 +608,9 @@ function addCommands(
         const ft = registry.getFileType(factory);
         // ...set an icon if the factory name corresponds to a file type name...
         // ...or leave the icon blank
-        return ft?.icon?.bindprops({ justify: 'center', kind: 'menuItem' });
+        return ft?.icon?.bindprops({ kind: 'menuItem' });
       } else {
-        return folderIcon.bindprops({ justify: 'center', kind: 'menuItem' });
+        return folderIcon.bindprops({ kind: 'menuItem' });
       }
     },
     label: args => (args['label'] || args['factory'] || 'Open') as string,
@@ -635,7 +635,7 @@ function addCommands(
         )
       );
     },
-    icon: addIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: addIcon.bindprops({ kind: 'menuItem' }),
     label: 'Open in New Browser Tab',
     mnemonic: 0
   });
@@ -653,7 +653,7 @@ function addCommands(
           Clipboard.copyToSystem(url);
         });
     },
-    icon: copyIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: copyIcon.bindprops({ kind: 'menuItem' }),
     label: 'Copy Download Link',
     mnemonic: 0
   });
@@ -666,7 +666,7 @@ function addCommands(
         return widget.paste();
       }
     },
-    icon: pasteIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: pasteIcon.bindprops({ kind: 'menuItem' }),
     label: 'Paste',
     mnemonic: 0
   });
@@ -679,7 +679,7 @@ function addCommands(
         return widget.createNewDirectory();
       }
     },
-    icon: newFolderIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: newFolderIcon.bindprops({ kind: 'menuItem' }),
     label: 'New Folder'
   });
 
@@ -694,7 +694,7 @@ function addCommands(
         ext: 'txt'
       });
     },
-    icon: textEditorIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: textEditorIcon.bindprops({ kind: 'menuItem' }),
     label: 'New File'
   });
 
@@ -709,7 +709,7 @@ function addCommands(
         ext: 'md'
       });
     },
-    icon: markdownIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: markdownIcon.bindprops({ kind: 'menuItem' }),
     label: 'New Markdown File'
   });
 
@@ -721,7 +721,7 @@ function addCommands(
         return widget.rename();
       }
     },
-    icon: editIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: editIcon.bindprops({ kind: 'menuItem' }),
     label: 'Rename',
     mnemonic: 0
   });
@@ -742,7 +742,7 @@ function addCommands(
     isVisible: () =>
       !!tracker.currentWidget &&
       tracker.currentWidget.selectedItems().next !== undefined,
-    icon: fileIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: fileIcon.bindprops({ kind: 'menuItem' }),
     label: 'Copy Path'
   });
 
@@ -784,7 +784,7 @@ function addCommands(
         return widget.shutdownKernels();
       }
     },
-    icon: stopIcon.bindprops({ justify: 'center', kind: 'menuItem' }),
+    icon: stopIcon.bindprops({ kind: 'menuItem' }),
     label: 'Shut Down Kernel'
   });
 

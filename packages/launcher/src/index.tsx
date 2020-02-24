@@ -206,7 +206,6 @@ export class Launcher extends VDomRenderer<LauncherModel> {
               <LabIcon.resolveReact
                 icon={icon}
                 iconClass={iconClass}
-                justify="center"
                 kind="launcherSection"
               />
               <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
@@ -434,7 +433,6 @@ function Card(
           <LabIcon.resolveReact
             icon={icon}
             iconClass={iconClass}
-            justify="center"
             kind="launcherCard"
           />
         )}

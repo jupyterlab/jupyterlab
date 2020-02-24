@@ -9,7 +9,6 @@ import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
 
 const submenuIcon = caretRightIcon.bindprops({
-  justify: 'center',
   kind: 'menuItem'
 });
 
@@ -116,7 +115,7 @@ export namespace MenuSvg {
         return classes(data.item.iconClass, name);
       } else {
         return classes(
-          LabIconStyle.styleClass({ justify: 'center', kind: 'menuItem' }),
+          LabIconStyle.styleClass({ kind: 'menuItem' }),
           data.item.iconClass,
           name
         );

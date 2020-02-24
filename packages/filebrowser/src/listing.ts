@@ -1840,7 +1840,7 @@ export namespace DirListing {
         fallback: fileIcon,
         container: iconContainer,
         className: ITEM_ICON_CLASS,
-        justify: 'center',
+
         kind: 'listing'
       });
 
@@ -2099,7 +2099,7 @@ namespace Private {
         container,
         tag: 'span',
         kind: 'listingHeaderItem',
-        justify: 'center',
+
         float
       });
     } else {

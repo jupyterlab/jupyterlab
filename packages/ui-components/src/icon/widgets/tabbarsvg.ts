@@ -40,7 +40,7 @@ export namespace TabBarSvg {
       const className = classes(
         'jp-icon-hover lm-TabBar-tabCloseIcon',
         LabIconStyle.styleClass({
-          justify: 'center',
+          elementPosition: 'center',
           height: '16px',
           width: '16px'
         })

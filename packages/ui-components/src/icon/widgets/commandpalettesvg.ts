@@ -9,7 +9,6 @@ import { LabIconStyle } from '../../style';
 import { classes } from '../../utils';
 
 const searchHeaderIcon = filterListIcon.bindprops({
-  justify: 'center',
   kind: 'commandPaletteHeader'
 });
 
@@ -82,7 +81,6 @@ export namespace CommandPaletteSvg {
 
       return classes(
         LabIconStyle.styleClass({
-          justify: 'center',
           kind: 'commandPaletteItem'
         }),
         data.item.iconClass,

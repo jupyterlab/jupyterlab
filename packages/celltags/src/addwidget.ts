@@ -33,7 +33,7 @@ export class AddWidget extends Widget {
     tag.appendChild(text);
     let iconContainer = addIcon.element({
       tag: 'span',
-      justify: 'center',
+      elementPosition: 'center',
       height: '18px',
       width: '18px',
       marginLeft: '3px',
