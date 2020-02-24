@@ -554,8 +554,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   protected _className: string;
   protected _loading: boolean;
   protected _props: LabIcon.IProps = {};
-  protected _renderer: LabIcon.Renderer;
-  protected _rendererClass: typeof LabIcon.Renderer;
   protected _svgReplaced = new Signal<this, void>(this);
   protected _svgstr: string;
   protected _uuid: string;
@@ -607,7 +605,7 @@ export namespace LabIcon {
     /**
      * @deprecated does nothing
      */
-    rendererClass?: typeof Renderer;
+    rendererClass?: typeof Private.Renderer;
   }
 
   /**
@@ -685,72 +683,6 @@ export namespace LabIcon {
    * field of a LabIcon.
    */
   export type IReact = React.ForwardRefExoticComponent<IReactProps>;
-
-  /**********
-   * classes *
-   **********/
-
-  /**
-   * Base implementation of IRenderer.
-   */
-  export class Renderer implements VirtualElement.IRenderer {
-    constructor(
-      protected _icon: LabIcon,
-      protected _rendererOptions?: IRendererOptions
-    ) {}
-
-    // tslint:disable-next-line:no-empty
-    render(container: HTMLElement, options?: IRendererOptions): void {}
-    unrender?(container: HTMLElement, options?: IRendererOptions): void;
-  }
-
-  /**
-   * Implementation of IRenderer that creates the icon svg node
-   * as a DOM element.
-   */
-  export class ElementRenderer extends Renderer {
-    render(container: HTMLElement, options?: IRendererOptions): void {
-      let label = options?.children?.[0];
-      // narrow type of label
-      if (typeof label !== 'string') {
-        label = undefined;
-      }
-
-      this._icon.element({
-        container,
-        label,
-        ...this._rendererOptions?.props,
-        ...options?.props
-      });
-    }
-  }
-
-  /**
-   * Implementation of IRenderer that creates the icon svg node
-   * as a React component.
-   */
-  export class ReactRenderer extends Renderer {
-    render(container: HTMLElement, options?: IRendererOptions): void {
-      let label = options?.children?.[0];
-      // narrow type of label
-      if (typeof label !== 'string') {
-        label = undefined;
-      }
-
-      return ReactDOM.render(
-        <this._icon.react
-          container={container}
-          label={label}
-          {...{ ...this._rendererOptions?.props, ...options?.props }}
-        />,
-        container
-      );
-    }
-
-    unrender(container: HTMLElement): void {
-      ReactDOM.unmountComponentAtNode(container);
-    }
-  }
 }
 
 namespace Private {
@@ -867,6 +799,71 @@ namespace Private {
       let titleNode = document.createElement('title');
       titleNode.textContent = title;
       svgNode.appendChild(titleNode);
+    }
+  }
+
+  /**
+   * TODO: figure out story for independent Renderers.
+   * Base implementation of IRenderer.
+   */
+  export class Renderer implements VirtualElement.IRenderer {
+    constructor(
+      protected _icon: LabIcon,
+      protected _rendererOptions?: LabIcon.IRendererOptions
+    ) {}
+
+    // tslint:disable-next-line:no-empty
+    render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {}
+    unrender?(container: HTMLElement, options?: LabIcon.IRendererOptions): void;
+  }
+
+  /**
+   * TODO: figure out story for independent Renderers.
+   * Implementation of IRenderer that creates the icon svg node
+   * as a DOM element.
+   */
+  export class ElementRenderer extends Renderer {
+    render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
+      let label = options?.children?.[0];
+      // narrow type of label
+      if (typeof label !== 'string') {
+        label = undefined;
+      }
+
+      this._icon.element({
+        container,
+        label,
+        ...this._rendererOptions?.props,
+        ...options?.props
+      });
+    }
+  }
+
+  /**
+   * TODO: figure out story for independent Renderers.
+   * Implementation of IRenderer that creates the icon svg node
+   * as a React component.
+   */
+  export class ReactRenderer extends Renderer {
+    render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
+      let label = options?.children?.[0];
+      // narrow type of label
+      if (typeof label !== 'string') {
+        label = undefined;
+      }
+
+      return ReactDOM.render(
+        <this._icon.react
+          container={container}
+          label={label}
+          {...{ ...this._rendererOptions?.props, ...options?.props }}
+        />,
+        container
+      );
+    }
+
+    unrender(container: HTMLElement): void {
+      ReactDOM.unmountComponentAtNode(container);
     }
   }
 }
