@@ -394,9 +394,6 @@ export namespace LabIconStyle {
         height: '18px',
         width: '20px',
         position: 'relative'
-      },
-      options: {
-        elementPosition: 'center'
       }
     },
 
@@ -519,7 +516,7 @@ export namespace LabIconStyle {
     });
   }
 
-  // cache style classes for builtin kinds
+  // cache style classes for builtin kinds with simple options
   let _styleCache = new Map<string, string>();
 
   /**
