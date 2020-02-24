@@ -82,10 +82,7 @@ export namespace LabIconStyle {
     // labelStyle?: NestedCSSProperties;
   }
 
-  /**
-   * Collections of CSS props plus some custom options
-   */
-  export interface IStyle extends IStylePure {
+  interface IStyleOptions {
     /**
      * How to position the inner svg element,
      * relative to the outer container
@@ -110,15 +107,22 @@ export namespace LabIconStyle {
   }
 
   /**
+   * Collections of CSS props plus some custom options
+   */
+  export interface IStyle extends IStylePure {
+    options?: IStyleOptions;
+  }
+
+  /**
    * Type to help with resolving a style that might be a string
    */
   type IStyleResolvable = IStyle | IBuiltin;
 
-  export interface IProps extends NestedCSSProperties, IStyle {
+  export interface IProps extends NestedCSSProperties, IStyleOptions {
     /**
      * the kind of the icon, associated with a builtin stylesheet
      */
-    kind?: IBuiltin;
+    kind?: IStyleResolvable | IStyleResolvable[];
 
     /**
      * @deprecated use elementPosition instead
@@ -168,7 +172,9 @@ export namespace LabIconStyle {
         height: '14px',
         width: '14px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     commandPaletteItem: {
@@ -176,7 +182,9 @@ export namespace LabIconStyle {
         height: '16px',
         width: '16px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     launcherCard: {
@@ -187,7 +195,9 @@ export namespace LabIconStyle {
         height: '52px',
         width: '52px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     launcherSection: {
@@ -199,7 +209,9 @@ export namespace LabIconStyle {
         height: '32px',
         width: '32px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     listing: {
@@ -212,7 +224,9 @@ export namespace LabIconStyle {
         height: '16px',
         width: '16px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     listingHeaderItem: {
@@ -226,7 +240,9 @@ export namespace LabIconStyle {
         margin: '-2px 0 0 0',
         width: '20px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     mainAreaTab: {
@@ -253,7 +269,9 @@ export namespace LabIconStyle {
           }
         }
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     menuItem: {
@@ -265,7 +283,9 @@ export namespace LabIconStyle {
         height: '16px',
         width: '16px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     runningItem: {
@@ -276,7 +296,9 @@ export namespace LabIconStyle {
         height: '16px',
         width: '16px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     select: {
@@ -287,8 +309,7 @@ export namespace LabIconStyle {
         position: 'absolute',
         height: 'auto',
         width: '16px'
-      },
-      elementPosition: 'center'
+      }
     },
 
     settingsEditor: {
@@ -305,7 +326,9 @@ export namespace LabIconStyle {
         height: '16px',
         width: '16px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     sideBar: {
@@ -344,7 +367,9 @@ export namespace LabIconStyle {
       elementStyle: {
         width: '20px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     splash: {
@@ -357,7 +382,9 @@ export namespace LabIconStyle {
       elementStyle: {
         width: '100px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     statusBar: {
@@ -368,7 +395,9 @@ export namespace LabIconStyle {
         width: '20px',
         position: 'relative'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     },
 
     toolbarButton: {
@@ -381,7 +410,9 @@ export namespace LabIconStyle {
         height: '16px',
         width: '16px'
       },
-      elementPosition: 'center'
+      options: {
+        elementPosition: 'center'
+      }
     }
   };
 
@@ -434,47 +465,45 @@ export namespace LabIconStyle {
   //   xlarge: _elementSizeFactory('24px')
   // }
 
-  const _kindStylesCache = Object.keys(kindStyles).reduce(
-    (c: any, k: IBuiltin) => {
-      c[k] = resolveStyle(kindStyles[k]);
-      return c;
-    },
-    {}
-  );
-
   /**
    * Merge two or more pure (CSS props only) icon styles
    */
-  function mergeStyles(styles: IStylePure[]): IStylePure {
+  function mergeStyles(styles: IStyle[]): IStylePure {
     return {
       containerStyle: Object.assign({}, ...styles.map(s => s.containerStyle)),
       elementStyle: Object.assign({}, ...styles.map(s => s.elementStyle))
     };
   }
 
-  /**
-   * Resolve an icon style into a "pure" style that contains only
-   * collections of CSS props that can be passed directly into typestyle
-   */
-  function resolveStyle(style: IStyleResolvable): IStylePure {
-    if (typeof style === 'string') {
-      // return pre-resolved style
-      return _kindStylesCache[style];
+  function resolveKind(
+    kind: IStyleResolvable | IStyleResolvable[] | undefined
+  ): IStyle[] {
+    if (!kind) {
+      return [];
     }
 
-    let styles = [style];
-    if (style.elementPosition) {
-      styles.unshift(positionStyles[style.elementPosition]);
+    if (!Array.isArray(kind)) {
+      // wrap in array
+      kind = [kind];
     }
 
-    return mergeStyles(styles);
+    return kind.map(k => (typeof k === 'string' ? kindStyles[k] : k));
   }
 
   /**
    * Resolve and merge multiple icon styles
    */
-  function resolveStyles(styles: (IStyleResolvable | undefined)[]) {
-    return mergeStyles(styles.filter(Boolean).map(s => resolveStyle(s!)));
+  function resolveStyles(styles: IStyle[]) {
+    const options: IStyleOptions = Object.assign(
+      {},
+      ...styles.map(s => s.options)
+    );
+
+    if (options.elementPosition) {
+      styles.unshift(positionStyles[options.elementPosition]);
+    }
+
+    return mergeStyles(styles);
   }
 
   /**
@@ -490,6 +519,9 @@ export namespace LabIconStyle {
     });
   }
 
+  // cache style classes for builtin kinds
+  let _styleCache = new Map<string, string>();
+
   /**
    * Get a typestyle class, given a given set of icon styling props
    */
@@ -499,21 +531,38 @@ export namespace LabIconStyle {
       return '';
     }
 
-    const {
-      containerStyle,
-      elementStyle,
-      elementPosition,
-      kind,
-      justify,
-      ...elementStyleExtra
-    } = props;
+    let { elementPosition, kind, justify, ...elementStyle } = props;
+
     // DEPRECATED: alias justify => elementPosition
     if (!elementPosition) {
-      props.elementPosition = justify;
+      elementPosition = justify;
     }
-    // merge any extra element style props
-    props.elementStyle = { ...props.elementStyle, ...elementStyleExtra };
 
-    return resolveStyleClass(resolveStyles([kind, props]));
+    // add option args with defined values to overrides
+    const options = {
+      ...(elementPosition && { elementPosition })
+    };
+
+    // try to look up the style class in the cache
+    const cacheable =
+      typeof kind === 'string' && Object.keys(elementStyle).length === 0;
+    const cacheKey = cacheable ? [kind, elementPosition].join(',') : '';
+    if (cacheable && _styleCache.has(cacheKey)) {
+      return _styleCache.get(cacheKey)!;
+    }
+
+    // resolve kind to an array of styles, then stick overrides on the end
+    const styles = resolveKind(kind);
+    styles.push({ elementStyle, options });
+
+    // apply style options/merge styles, then convert to typestyle class
+    const cls = resolveStyleClass(resolveStyles(styles));
+
+    if (cacheable) {
+      // store in cache for later reuse
+      _styleCache.set(cacheKey, cls);
+    }
+
+    return cls;
   }
 }
