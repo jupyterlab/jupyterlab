@@ -2011,6 +2011,7 @@ def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False
         ):
             # if we ever find an overlap, we can return immediately
             return 0
+
         if gte(y1, x2, True):
             if return_value is False:
                 # We can possibly return 1
@@ -2018,14 +2019,20 @@ def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False
             elif return_value == -1:
                 # conflicting information, so we must return None
                 return_value = None
+            continue
+
         if gte(x1, y2, True):
             if return_value is False:
                 return_value = -1
             elif return_value == 1:
                 # conflicting information, so we must return None
                 return_value = None
-    if return_value is False:
+            continue
+
         raise AssertionError('Unexpected case comparing version ranges')
+
+    if return_value is False:
+        return_value = None
     return return_value
 
 
