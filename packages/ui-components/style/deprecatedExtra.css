@@ -8,6 +8,5 @@
  */
 
 :root {
-  --jp-icon-check-disabled: url('deprecated/check-disabled.svg');
   --jp-icon-search-white: url('deprecated/search-white.svg');
 }
