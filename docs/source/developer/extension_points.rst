@@ -135,7 +135,7 @@ For example, if you are building a custom React element, it would look like this
 
     function MyElement(props: {}) {
       return (
-        <div data-jl-suppress-context-menu>
+        <div data-jp-suppress-context-menu>
           <p>Hi</p>
           <p onContextMenu={() => {console.log("right clicked")}}>There</p>
         </div>
