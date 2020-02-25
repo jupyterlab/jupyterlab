@@ -3,7 +3,11 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { ToolbarButton } from '@jupyterlab/apputils';
+import {
+  ISessionContext,
+  SessionContext,
+  ToolbarButton
+} from '@jupyterlab/apputils';
 
 import { ConsolePanel } from '@jupyterlab/console';
 
@@ -125,6 +129,34 @@ export class DebuggerHandler {
   }
 
   /**
+   * Update a debug handler for the given widget, and
+   * handle connection kernel changed events.
+   * @param widget The widget to update.
+   * @param sessionContext The session context.
+   */
+  async updateContext(
+    widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
+    sessionContext: ISessionContext
+  ): Promise<void> {
+    const connectionChanged = () => {
+      const { session: connection } = sessionContext;
+      void this.update(widget, connection);
+    };
+
+    const contextKernelChangedHandlers = this._contextKernelChangedHandlers[
+      widget.id
+    ];
+
+    if (contextKernelChangedHandlers) {
+      sessionContext.kernelChanged.disconnect(contextKernelChangedHandlers);
+    }
+    this._contextKernelChangedHandlers[widget.id] = connectionChanged;
+    sessionContext.kernelChanged.connect(connectionChanged);
+
+    return this.update(widget, sessionContext.session);
+  }
+
+  /**
    * Update a debug handler for the given widget.
    * @param widget The widget to update.
    * @param connection The session connection.
@@ -188,6 +220,7 @@ export class DebuggerHandler {
       delete this._handlers[widget.id];
       delete this._kernelChangedHandlers[widget.id];
       delete this._statusChangedHandlers[widget.id];
+      delete this._contextKernelChangedHandlers[widget.id];
 
       // clear the model if the handler being removed corresponds
       // to the current active debug session
@@ -279,6 +312,17 @@ export class DebuggerHandler {
   private _oldConnection: Session.ISessionConnection;
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
+  } = {};
+
+  private _contextKernelChangedHandlers: {
+    [id: string]: (
+      sender: SessionContext,
+      args: IChangedArgs<
+        Kernel.IKernelConnection,
+        Kernel.IKernelConnection,
+        'kernel'
+      >
+    ) => void;
   } = {};
   private _kernelChangedHandlers: {
     [id: string]: (
