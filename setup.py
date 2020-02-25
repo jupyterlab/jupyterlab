@@ -158,6 +158,7 @@ setup_args['extras_require'] = {
 }
 
 
+setup_args['package_data'] = package_data_spec
 setup_args['include_package_data'] = True
 setup_args['python_requires'] = '>=3.5'
 
