@@ -13,9 +13,11 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { Token } from '@phosphor/coreutils';
+import { LabIcon } from '@jupyterlab/ui-components';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { Token } from '@lumino/coreutils';
+
+import { AttachedProperty } from '@lumino/properties';
 
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from './index';
 
@@ -123,13 +125,18 @@ export function createRendermimePlugin(
 
       if (item.fileTypes) {
         item.fileTypes.forEach(ft => {
+          if (ft.icon) {
+            // upconvert the contents of the icon field to a proper LabIcon
+            ft = { ...ft, icon: LabIcon.resolve({ icon: ft.icon }) };
+          }
+
           app.docRegistry.addFileType(ft as DocumentRegistry.IFileType);
         });
       }
 
       options.forEach(option => {
         const toolbarFactory = option.toolbarFactory
-          ? (w: MimeDocument) => option.toolbarFactory(w.content.renderer)
+          ? (w: MimeDocument) => option.toolbarFactory!(w.content.renderer)
           : undefined;
         let factory = new MimeDocumentFactory({
           renderTimeout: item.renderTimeout,
@@ -166,10 +173,11 @@ namespace Private {
    * An attached property for keeping the factory name
    * that was used to create a mimedocument.
    */
-  export const factoryNameProperty = new AttachedProperty<MimeDocument, string>(
-    {
-      name: 'factoryName',
-      create: () => undefined
-    }
-  );
+  export const factoryNameProperty = new AttachedProperty<
+    MimeDocument,
+    string | undefined
+  >({
+    name: 'factoryName',
+    create: () => undefined
+  });
 }

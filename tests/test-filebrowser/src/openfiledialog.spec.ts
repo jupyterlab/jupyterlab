@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
@@ -11,8 +11,6 @@ import {
   FileBrowserModel
 } from '@jupyterlab/filebrowser';
 import { ServiceManager, Contents } from '@jupyterlab/services';
-
-import { defaultIconRegistry, IIconRegistry } from '@jupyterlab/ui-components';
 
 import { expect } from 'chai';
 import {
@@ -25,7 +23,6 @@ import {
 import { simulate } from 'simulate-event';
 
 describe('@jupyterlab/filebrowser', () => {
-  let iconRegistry: IIconRegistry;
   let manager: IDocumentManager;
   let serviceManager: ServiceManager.IManager;
   let registry: DocumentRegistry;
@@ -41,7 +38,6 @@ describe('@jupyterlab/filebrowser', () => {
       textModelFactory: new TextModelFactory()
     });
     serviceManager = new ServiceManager({ standby: 'never' });
-    iconRegistry = defaultIconRegistry;
     manager = new DocumentManager({
       registry,
       opener,
@@ -57,13 +53,12 @@ describe('@jupyterlab/filebrowser', () => {
   describe('FilterFileBrowserModel', () => {
     describe('#constructor()', () => {
       it('should construct a new filtered file browser model', () => {
-        let model = new FilterFileBrowserModel({ iconRegistry, manager });
+        let model = new FilterFileBrowserModel({ manager });
         expect(model).to.be.an.instanceof(FilterFileBrowserModel);
       });
 
       it('should accept filter option', () => {
         let model = new FilterFileBrowserModel({
-          iconRegistry,
           manager,
           filter: (model: Contents.IModel) => false
         });
@@ -74,11 +69,10 @@ describe('@jupyterlab/filebrowser', () => {
     describe('#items()', () => {
       it('should list all elements if no filter is defined', async () => {
         let filteredModel = new FilterFileBrowserModel({
-          iconRegistry,
           manager
         });
         await filteredModel.cd();
-        let model = new FileBrowserModel({ iconRegistry, manager });
+        let model = new FileBrowserModel({ manager });
         await model.cd();
 
         const filteredItems = toArray(filteredModel.items());
@@ -88,12 +82,11 @@ describe('@jupyterlab/filebrowser', () => {
 
       it('should list all directories whatever the filter', async () => {
         let filteredModel = new FilterFileBrowserModel({
-          iconRegistry,
           manager,
           filter: (model: Contents.IModel) => false
         });
         await filteredModel.cd();
-        let model = new FileBrowserModel({ iconRegistry, manager });
+        let model = new FileBrowserModel({ manager });
         await model.cd();
 
         const filteredItems = toArray(filteredModel.items());
@@ -104,12 +97,11 @@ describe('@jupyterlab/filebrowser', () => {
 
       it('should respect the filter', async () => {
         let filteredModel = new FilterFileBrowserModel({
-          iconRegistry,
           manager,
           filter: (model: Contents.IModel) => model.type === 'notebook'
         });
         await filteredModel.cd();
-        let model = new FileBrowserModel({ iconRegistry, manager });
+        let model = new FileBrowserModel({ manager });
         await model.cd();
 
         const filteredItems = toArray(
@@ -131,7 +123,6 @@ describe('@jupyterlab/filebrowser', () => {
   describe('FileDialog.getOpenFiles()', () => {
     it('should create a dialog', async () => {
       let dialog = FileDialog.getOpenFiles({
-        iconRegistry,
         manager
       });
 
@@ -149,7 +140,6 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.appendChild(node);
 
       let dialog = FileDialog.getOpenFiles({
-        iconRegistry,
         manager,
         title: 'Select a notebook',
         host: node,
@@ -161,7 +151,7 @@ describe('@jupyterlab/filebrowser', () => {
       const result = await dialog;
 
       expect(result.button.accept).true;
-      let items = result.value;
+      let items = result.value!;
       expect(items.length).equal(1);
 
       document.body.removeChild(node);
@@ -173,7 +163,6 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.appendChild(node);
 
       let dialog = FileDialog.getOpenFiles({
-        iconRegistry,
         manager,
         title: 'Select a notebook',
         host: node,
@@ -201,16 +190,16 @@ describe('@jupyterlab/filebrowser', () => {
 
       // Emulate notebook file selection
       // Get node coordinates we need to be precised as code test for hit position
-      const rect = items.item(items.length - 1).getBoundingClientRect();
+      const rect = items.item(items.length - 1)!.getBoundingClientRect();
 
-      simulate(items.item(items.length - 1), 'mousedown', {
+      simulate(items.item(items.length - 1)!, 'mousedown', {
         clientX: 0.5 * (rect.left + rect.right),
         clientY: 0.5 * (rect.bottom + rect.top)
       });
 
       await acceptDialog();
       let result = await dialog;
-      let files = result.value;
+      let files = result.value!;
       expect(files.length).equal(1);
       expect(files[0].type).equal('notebook');
       expect(files[0].name).matches(/Untitled\d*.ipynb/);
@@ -220,14 +209,13 @@ describe('@jupyterlab/filebrowser', () => {
 
     it('should return current path if nothing is selected', async () => {
       let dialog = FileDialog.getOpenFiles({
-        iconRegistry,
         manager
       });
 
       await acceptDialog();
 
       const result = await dialog;
-      const items = result.value;
+      const items = result.value!;
 
       expect(items.length).equal(1);
       expect(items[0].type).equal('directory');
@@ -238,7 +226,6 @@ describe('@jupyterlab/filebrowser', () => {
   describe('FileDialog.getExistingDirectory()', () => {
     it('should create a dialog', async () => {
       let dialog = FileDialog.getExistingDirectory({
-        iconRegistry,
         manager
       });
 
@@ -256,7 +243,6 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.appendChild(node);
 
       let dialog = FileDialog.getExistingDirectory({
-        iconRegistry,
         manager,
         title: 'Select a folder',
         host: node
@@ -267,7 +253,7 @@ describe('@jupyterlab/filebrowser', () => {
       const result = await dialog;
 
       expect(result.button.accept).true;
-      expect(result.value.length).equal(1);
+      expect(result.value!.length).equal(1);
 
       document.body.removeChild(node);
     });
@@ -278,7 +264,6 @@ describe('@jupyterlab/filebrowser', () => {
       document.body.appendChild(node);
 
       let dialog = FileDialog.getExistingDirectory({
-        iconRegistry,
         manager,
         title: 'Select a folder',
         host: node
@@ -304,16 +289,16 @@ describe('@jupyterlab/filebrowser', () => {
 
       // Emulate notebook file selection
       // Get node coordinates we need to be precised as code test for hit position
-      const rect = items.item(items.length - 1).getBoundingClientRect();
+      const rect = items.item(items.length - 1)!.getBoundingClientRect();
 
-      simulate(items.item(items.length - 1), 'mousedown', {
+      simulate(items.item(items.length - 1)!, 'mousedown', {
         clientX: 0.5 * (rect.left + rect.right),
         clientY: 0.5 * (rect.bottom + rect.top)
       });
 
       await acceptDialog();
       let result = await dialog;
-      let files = result.value;
+      let files = result.value!;
       expect(files.length).equal(1);
       expect(files[0].type).equal('directory');
       expect(files[0].name).matches(/Untitled Folder( \d+)?/);
@@ -323,14 +308,13 @@ describe('@jupyterlab/filebrowser', () => {
 
     it('should return current path if nothing is selected', async () => {
       let dialog = FileDialog.getExistingDirectory({
-        iconRegistry,
         manager
       });
 
       await acceptDialog();
 
       const result = await dialog;
-      const items = result.value;
+      const items = result.value!;
 
       expect(items.length).equal(1);
       expect(items[0].type).equal('directory');

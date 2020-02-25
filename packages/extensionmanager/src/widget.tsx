@@ -2,22 +2,37 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
-
 import { ServiceManager } from '@jupyterlab/services';
+import {
+  Button,
+  caretDownIcon,
+  caretRightIcon,
+  Collapse,
+  InputGroup,
+  jupyterIcon,
+  refreshIcon
+} from '@jupyterlab/ui-components';
 
-import { Message } from '@phosphor/messaging';
-
-import { Button, InputGroup, Collapse } from '@jupyterlab/ui-components';
-
+import { Message } from '@lumino/messaging';
 import * as React from 'react';
-
 import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
-
 import { isJupyterOrg } from './query';
 
 // TODO: Replace pagination with lazy loading of lower search results
+
+/**
+ * Icons with custom styling bound.
+ */
+const caretDownIconStyled = caretDownIcon.bindprops({
+  height: 'auto',
+  width: '20px'
+});
+const caretRightIconStyled = caretRightIcon.bindprops({
+  height: 'auto',
+  width: '20px'
+});
 
 /**
  * Search bar VDOM component.
@@ -153,7 +168,12 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             {entry.name}
           </a>
         </div>
-        <div className="jp-extensionmanager-entry-jupyter-org" />
+        <jupyterIcon.react
+          className="jp-extensionmanager-entry-jupyter-org"
+          top="1px"
+          height="auto"
+          width="1em"
+        />
       </div>
       <div className="jp-extensionmanager-entry-content">
         <div className="jp-extensionmanager-entry-description">
@@ -343,10 +363,8 @@ export class CollapsibleSection extends React.Component<
       <>
         <header>
           <ToolbarButtonComponent
-            iconClassName={
-              this.state.isOpen
-                ? 'jp-extensionmanager-expandIcon'
-                : 'jp-extensionmanager-collapseIcon'
+            icon={
+              this.state.isOpen ? caretDownIconStyled : caretRightIconStyled
             }
             onClick={() => {
               this.handleCollapse();
@@ -429,8 +447,7 @@ export namespace CollapsibleSection {
  */
 export class ExtensionView extends VDomRenderer<ListModel> {
   constructor(serviceManager: ServiceManager) {
-    super();
-    this.model = new ListModel(serviceManager);
+    super(new ListModel(serviceManager));
     this.addClass('jp-extensionmanager-view');
   }
 
@@ -537,8 +554,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
           headerElements={
             <ToolbarButtonComponent
               key="refresh-button"
-              className="jp-extensionmanager-refresh"
-              iconClassName="jp-RefreshIcon"
+              icon={refreshIcon}
               onClick={() => {
                 model.refreshInstalled();
               }}
@@ -697,6 +713,6 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   private _toggleFocused(): void {
     let focused = document.activeElement === this.inputNode;
-    this.toggleClass('p-mod-focused', focused);
+    this.toggleClass('lm-mod-focused', focused);
   }
 }

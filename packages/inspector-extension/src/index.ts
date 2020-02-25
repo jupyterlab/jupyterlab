@@ -27,6 +27,8 @@ import { ILauncher } from '@jupyterlab/launcher';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
+import { inspectorIcon } from '@jupyterlab/ui-components';
+
 /**
  * The command IDs used by the inspector plugin.
  */
@@ -83,8 +85,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         !inspector.isAttached ||
         !inspector.isVisible,
       label,
-      iconClass: args =>
-        args.isLauncher ? 'jp-MaterialIcon jp-InspectorIcon' : '',
+      icon: args => (args.isLauncher ? inspectorIcon : undefined),
       execute: () => openInspector()
     });
 
@@ -135,9 +136,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
 
     // Create a handler for each console that is created.
     consoles.widgetAdded.connect((sender, parent) => {
-      const session = parent.console.session;
+      const sessionContext = parent.console.sessionContext;
       const rendermime = parent.console.rendermime;
-      const connector = new KernelConnector({ session });
+      const connector = new KernelConnector({ sessionContext });
       const handler = new InspectionHandler({ connector, rendermime });
 
       // Associate the handler to the widget.
@@ -196,9 +197,9 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 
     // Create a handler for each notebook that is created.
     notebooks.widgetAdded.connect((sender, parent) => {
-      const session = parent.session;
+      const sessionContext = parent.sessionContext;
       const rendermime = parent.content.rendermime;
-      const connector = new KernelConnector({ session });
+      const connector = new KernelConnector({ sessionContext });
       const handler = new InspectionHandler({ connector, rendermime });
 
       // Associate the handler to the widget.

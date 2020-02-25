@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Message } from '@phosphor/messaging';
-import { ISignal, Signal } from '@phosphor/signaling';
-import { Widget, Panel, PanelLayout, Title } from '@phosphor/widgets';
+import { Message } from '@lumino/messaging';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget, Panel, PanelLayout, Title } from '@lumino/widgets';
+import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
 
 /**
  * A panel that supports a collapsible header made from the widget's title.
@@ -87,9 +88,9 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     }
 
     // Delete references we explicitly hold to other widgets.
-    delete this._header;
-    delete this._widget;
-    delete this._content;
+    this._header = null!;
+    this._widget = null!;
+    this._content = null!;
 
     super.dispose();
   }
@@ -127,7 +128,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     if (this._content) {
       this._content.hide();
     }
-    this.removeClass('jp-Collapse-open');
+    this._setHeader();
     this._collapseChanged.emit(void 0);
   }
 
@@ -136,7 +137,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     if (this._content) {
       this._content.show();
     }
-    this.addClass('jp-Collapse-open');
+    this._setHeader();
     this._collapseChanged.emit(void 0);
   }
 
@@ -148,7 +149,16 @@ export class Collapse<T extends Widget = Widget> extends Widget {
    * Handle the `changed` signal of a title object.
    */
   private _onTitleChanged(sender: Title<Widget>): void {
-    this._header.node.textContent = this._widget.title.label;
+    this._setHeader();
+  }
+
+  private _setHeader(): void {
+    (this._collapsed ? caretUpIcon : caretDownIcon).element({
+      container: this._header.node,
+      label: this._widget.title.label,
+      elementPosition: 'right',
+      height: '28px'
+    });
   }
 
   private _collapseChanged = new Signal<this, void>(this);

@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ToolbarButton, showErrorMessage } from '@jupyterlab/apputils';
+import { fileUploadIcon } from '@jupyterlab/ui-components';
 
 import { FileBrowserModel } from './model';
 
@@ -14,7 +15,7 @@ export class Uploader extends ToolbarButton {
    */
   constructor(options: Uploader.IOptions) {
     super({
-      iconClassName: 'jp-FileUploadIcon',
+      icon: fileUploadIcon,
       onClick: () => {
         this._input.click();
       },

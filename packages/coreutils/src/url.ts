@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONObject } from '@phosphor/coreutils';
+import { PartialJSONObject } from '@lumino/coreutils';
 
 import urlparse from 'url-parse';
 
@@ -28,7 +28,10 @@ export namespace URLExt {
   /**
    * Normalize a url.
    */
-  export function normalize(url: string): string {
+  export function normalize(url: string): string;
+  export function normalize(url: undefined): undefined;
+  export function normalize(url: string | undefined): string | undefined;
+  export function normalize(url: string | undefined): string | undefined {
     return url && parse(url).toString();
   }
 
@@ -51,8 +54,8 @@ export namespace URLExt {
     // Parse the top element into a header collection.
     const header = top.match(/(\w+)(:)(\/\/)?/);
     const protocol = header && header[1];
-    const colon = protocol && header[2];
-    const slashes = colon && header[3];
+    const colon = protocol && header![2];
+    const slashes = colon && header![3];
 
     // Construct the URL prefix.
     const prefix = shorthand
@@ -97,7 +100,7 @@ export namespace URLExt {
    * #### Notes
    * Modified version of [stackoverflow](http://stackoverflow.com/a/30707423).
    */
-  export function objectToQueryString(value: JSONObject): string {
+  export function objectToQueryString(value: PartialJSONObject): string {
     const keys = Object.keys(value).filter(key => key.length > 0);
 
     if (!keys.length) {
@@ -121,22 +124,19 @@ export namespace URLExt {
    */
   export function queryStringToObject(
     value: string
-  ): { [key: string]: string } {
+  ): { [key: string]: string | undefined } {
     return value
       .replace(/^\?/, '')
       .split('&')
-      .reduce(
-        (acc, val) => {
-          const [key, value] = val.split('=');
+      .reduce((acc, val) => {
+        const [key, value] = val.split('=');
 
-          if (key.length > 0) {
-            acc[key] = decodeURIComponent(value || '');
-          }
+        if (key.length > 0) {
+          acc[key] = decodeURIComponent(value || '');
+        }
 
-          return acc;
-        },
-        {} as { [key: string]: string }
-      );
+        return acc;
+      }, {} as { [key: string]: string });
   }
 
   /**
@@ -149,7 +149,10 @@ export namespace URLExt {
   export function isLocal(url: string): boolean {
     const { protocol } = parse(url);
 
-    return url.toLowerCase().indexOf(protocol) !== 0 && url.indexOf('/') !== 0;
+    return (
+      (!protocol || url.toLowerCase().indexOf(protocol) !== 0) &&
+      url.indexOf('/') !== 0
+    );
   }
 
   /**
@@ -160,40 +163,40 @@ export namespace URLExt {
      * The full URL string that was parsed with both the protocol and host
      * components converted to lower-case.
      */
-    href?: string;
+    href: string;
 
     /**
      * Identifies the URL's lower-cased protocol scheme.
      */
-    protocol?: string;
+    protocol: string;
 
     /**
      * The full lower-cased host portion of the URL, including the port if
      * specified.
      */
-    host?: string;
+    host: string;
 
     /**
      * The lower-cased host name portion of the host component without the
      * port included.
      */
-    hostname?: string;
+    hostname: string;
 
     /**
      * The numeric port portion of the host component.
      */
-    port?: string;
+    port: string;
 
     /**
      * The entire path section of the URL.
      */
-    pathname?: string;
+    pathname: string;
 
     /**
      * The "fragment" portion of the URL including the leading ASCII hash
      * `(#)` character
      */
-    hash?: string;
+    hash: string;
 
     /**
      * The search element, including leading question mark (`'?'`), if any,

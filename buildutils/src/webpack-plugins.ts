@@ -3,8 +3,9 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import * as webpack from 'webpack';
+import DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
 import * as fs from 'fs-extra';
+import * as webpack from 'webpack';
 
 export namespace WPPlugin {
   /**
@@ -170,5 +171,21 @@ export namespace WPPlugin {
     }
 
     ignored: (path: string) => boolean;
+  }
+
+  export class NowatchDuplicatePackageCheckerPlugin extends DuplicatePackageCheckerPlugin {
+    apply(compiler: any) {
+      const options = this.options;
+
+      compiler.hooks.run.tap(
+        'NowatchDuplicatePackageCheckerPlugin',
+        (compiler: any) => {
+          const p = new DuplicatePackageCheckerPlugin(options);
+          p.apply(compiler);
+        }
+      );
+    }
+
+    options: DuplicatePackageCheckerPlugin.Options;
   }
 }

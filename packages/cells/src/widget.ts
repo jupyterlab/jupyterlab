@@ -5,20 +5,17 @@
 
 import { AttachmentsResolver } from '@jupyterlab/attachments';
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext } from '@jupyterlab/apputils';
 
-import {
-  IChangedArgs,
-  ActivityMonitor,
-  nbformat,
-  URLExt
-} from '@jupyterlab/coreutils';
+import { IChangedArgs, ActivityMonitor, URLExt } from '@jupyterlab/coreutils';
 
 import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { DirListing } from '@jupyterlab/filebrowser';
 
-import { IObservableMap } from '@jupyterlab/observables';
+import * as nbformat from '@jupyterlab/nbformat';
+
+import { IObservableMap, IObservableJSON } from '@jupyterlab/observables';
 
 import {
   OutputArea,
@@ -42,16 +39,17 @@ import {
   JSONValue,
   PromiseDelegate,
   JSONObject,
-  UUID
-} from '@phosphor/coreutils';
+  UUID,
+  PartialJSONValue
+} from '@lumino/coreutils';
 
-import { some, filter, toArray } from '@phosphor/algorithm';
+import { some, filter, toArray } from '@lumino/algorithm';
 
-import { IDragEvent } from '@phosphor/dragdrop';
+import { IDragEvent } from '@lumino/dragdrop';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
+import { PanelLayout, Panel, Widget } from '@lumino/widgets';
 
 import { InputCollapser, OutputCollapser } from './collapser';
 
@@ -218,7 +216,7 @@ export class Cell extends Widget {
     if (options.editorConfig) {
       Object.keys(options.editorConfig).forEach(
         (key: keyof CodeEditor.IConfig) => {
-          this.editor.setOption(key, options.editorConfig[key]);
+          this.editor.setOption(key, options.editorConfig?.[key] ?? null);
         }
       );
     }
@@ -251,7 +249,7 @@ export class Cell extends Widget {
     if (!this._inputHidden) {
       return this._input.promptNode;
     } else {
-      return (this._inputPlaceholder.node as HTMLElement)
+      return (this._inputPlaceholder!.node as HTMLElement)
         .firstElementChild as HTMLElement;
     }
   }
@@ -464,10 +462,10 @@ export class Cell extends Widget {
     if (this.isDisposed) {
       return;
     }
-    this._input = null;
-    this._model = null;
-    this._inputWrapper = null;
-    this._inputPlaceholder = null;
+    this._input = null!;
+    this._model = null!;
+    this._inputWrapper = null!;
+    this._inputPlaceholder = null!;
     super.dispose();
   }
 
@@ -511,8 +509,8 @@ export class Cell extends Widget {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
-    model: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    model: IObservableJSON,
+    args: IObservableMap.IChangedArgs<PartialJSONValue | undefined>
   ): void {
     switch (args.key) {
       case 'jupyter':
@@ -531,11 +529,11 @@ export class Cell extends Widget {
   }
 
   private _readOnly = false;
-  private _model: ICellModel = null;
+  private _model: ICellModel;
   private _inputHidden = false;
-  private _input: InputArea = null;
-  private _inputWrapper: Widget = null;
-  private _inputPlaceholder: InputPlaceholder = null;
+  private _input: InputArea;
+  private _inputWrapper: Widget;
+  private _inputPlaceholder: InputPlaceholder;
   private _syncCollapse = false;
   private _syncEditable = false;
 }
@@ -648,7 +646,7 @@ export namespace Cell {
       return new Stdin(options);
     }
 
-    private _editorFactory: CodeEditor.Factory = null;
+    private _editorFactory: CodeEditor.Factory;
   }
 
   /**
@@ -924,7 +922,7 @@ export class CodeCell extends Cell {
    */
   cloneOutputArea(): OutputArea {
     return new SimplifiedOutputArea({
-      model: this.model.outputs,
+      model: this.model.outputs!,
       contentFactory: this.contentFactory,
       rendermime: this._rendermime
     });
@@ -941,10 +939,10 @@ export class CodeCell extends Cell {
       this._outputLengthHandler,
       this
     );
-    this._rendermime = null;
-    this._output = null;
-    this._outputWrapper = null;
-    this._outputPlaceholder = null;
+    this._rendermime = null!;
+    this._output = null!;
+    this._outputWrapper = null!;
+    this._outputPlaceholder = null!;
     super.dispose();
   }
 
@@ -965,7 +963,7 @@ export class CodeCell extends Cell {
    * Handle changes in the metadata.
    */
   protected onMetadataChanged(
-    model: IObservableMap<JSONValue>,
+    model: IObservableJSON,
     args: IObservableMap.IChangedArgs<JSONValue>
   ): void {
     if (this._savingMetadata) {
@@ -997,12 +995,12 @@ export class CodeCell extends Cell {
     this.toggleClass(NO_OUTPUTS_CLASS, force);
   }
 
-  private _rendermime: IRenderMimeRegistry = null;
+  private _rendermime: IRenderMimeRegistry;
   private _outputHidden = false;
   private _outputsScrolled: boolean;
-  private _outputWrapper: Widget = null;
-  private _outputPlaceholder: OutputPlaceholder = null;
-  private _output: OutputArea = null;
+  private _outputWrapper: Widget;
+  private _outputPlaceholder: OutputPlaceholder;
+  private _output: OutputArea;
   private _syncScrolled = false;
   private _savingMetadata = false;
 }
@@ -1031,14 +1029,13 @@ export namespace CodeCell {
    */
   export async function execute(
     cell: CodeCell,
-    session: IClientSession,
+    sessionContext: ISessionContext,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
     let model = cell.model;
     let code = model.value.text;
-    if (!code.trim() || !session.kernel) {
-      model.executionCount = null;
-      model.outputs.clear();
+    if (!code.trim() || !sessionContext.session?.kernel) {
+      model.clearExecution();
       return;
     }
     let cellId = { cellId: model.id };
@@ -1048,19 +1045,21 @@ export namespace CodeCell {
       ...cellId
     };
     const { recordTiming } = metadata;
-    model.executionCount = null;
+    model.clearExecution();
     cell.outputHidden = false;
     cell.setPrompt('*');
     model.trusted = true;
-    let future: Kernel.IFuture<
-      KernelMessage.IExecuteRequestMsg,
-      KernelMessage.IExecuteReplyMsg
-    >;
+    let future:
+      | Kernel.IFuture<
+          KernelMessage.IExecuteRequestMsg,
+          KernelMessage.IExecuteReplyMsg
+        >
+      | undefined;
     try {
       const msgPromise = OutputArea.execute(
         code,
         cell.outputArea,
-        session,
+        sessionContext,
         metadata
       );
       // cell.outputArea.future assigned synchronously in `execute`
@@ -1077,26 +1076,34 @@ export namespace CodeCell {
               label = 'execute_input';
               break;
             default:
-              return;
+              return false;
           }
           const value = msg.header.date;
           if (!value) {
-            return;
+            return false;
           }
-          const timingInfo: any = model.metadata.get('execution') || {};
+          const timingInfo: any = Object.assign(
+            {},
+            model.metadata.get('execution')
+          );
           timingInfo[`iopub.${label}`] = value;
           model.metadata.set('execution', timingInfo);
           return true;
         };
         cell.outputArea.future.registerMessageHook(recordTimingHook);
+      } else {
+        model.metadata.delete('execution');
       }
       // Save this execution's future so we can compare in the catch below.
       future = cell.outputArea.future;
-      const msg = await msgPromise;
+      const msg = (await msgPromise)!;
       model.executionCount = msg.content.execution_count;
       const started = msg.metadata.started as string;
       if (recordTiming && started) {
-        const timingInfo = (model.metadata.get('execution') as any) || {};
+        const timingInfo = Object.assign(
+          {},
+          model.metadata.get('execution') as any
+        );
         if (started) {
           timingInfo['shell.execute_reply.started'] = started;
         }
@@ -1108,8 +1115,9 @@ export namespace CodeCell {
       }
       return msg;
     } catch (e) {
-      // If this is still the current execution, clear the prompt.
-      if (e.message === 'Canceled' && cell.outputArea.future === future) {
+      // If we started executing, and the cell is still indicating this
+      // execution, clear the prompt.
+      if (future && !cell.isDisposed && cell.outputArea.future === future) {
         cell.setPrompt('');
       }
       throw e;
@@ -1146,10 +1154,10 @@ export abstract class AttachmentsCell extends Cell {
       case 'drop':
         this._evtNativeDrop(event as DragEvent);
         break;
-      case 'p-dragover':
+      case 'lm-dragover':
         this._evtDragOver(event as IDragEvent);
         break;
-      case 'p-drop':
+      case 'lm-drop':
         this._evtDrop(event as IDragEvent);
         break;
       default:
@@ -1170,8 +1178,8 @@ export abstract class AttachmentsCell extends Cell {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     let node = this.node;
-    node.addEventListener('p-dragover', this);
-    node.addEventListener('p-drop', this);
+    node.addEventListener('lm-dragover', this);
+    node.addEventListener('lm-drop', this);
     node.addEventListener('dragenter', this);
     node.addEventListener('dragover', this);
     node.addEventListener('drop', this);
@@ -1188,8 +1196,8 @@ export abstract class AttachmentsCell extends Cell {
     node.removeEventListener('dragover', this);
     node.removeEventListener('dragenter', this);
     node.removeEventListener('paste', this);
-    node.removeEventListener('p-dragover', this);
-    node.removeEventListener('p-drop', this);
+    node.removeEventListener('lm-dragover', this);
+    node.removeEventListener('lm-drop', this);
   }
 
   private _evtDragOver(event: IDragEvent) {
@@ -1214,7 +1222,9 @@ export abstract class AttachmentsCell extends Cell {
    * Handle the `paste` event for the widget
    */
   private _evtPaste(event: ClipboardEvent): void {
-    this._attachFiles(event.clipboardData.items);
+    if (event.clipboardData) {
+      this._attachFiles(event.clipboardData.items);
+    }
     event.preventDefault();
   }
 
@@ -1222,12 +1232,14 @@ export abstract class AttachmentsCell extends Cell {
    * Handle the `drop` event for the widget
    */
   private _evtNativeDrop(event: DragEvent): void {
-    this._attachFiles(event.dataTransfer.items);
+    if (event.dataTransfer) {
+      this._attachFiles(event.dataTransfer.items);
+    }
     event.preventDefault();
   }
 
   /**
-   * Handle the `'p-drop'` event for the widget.
+   * Handle the `'lm-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
     const supportedMimeTypes = toArray(
@@ -1287,7 +1299,9 @@ export abstract class AttachmentsCell extends Cell {
       const item = items[i];
       if (item.kind === 'file') {
         const blob = item.getAsFile();
-        this._attachFile(blob);
+        if (blob) {
+          this._attachFile(blob);
+        }
       }
     }
   }
@@ -1305,7 +1319,7 @@ export abstract class AttachmentsCell extends Cell {
       }
       const dataURIRegex = /([\w+\/\+]+)?(?:;(charset=[\w\d-]*|base64))?,(.*)/;
       const matches = dataURIRegex.exec(href);
-      if (matches.length !== 4) {
+      if (!matches || matches.length !== 4) {
         return;
       }
       const mimeType = matches[1];
@@ -1349,7 +1363,7 @@ export class MarkdownCell extends AttachmentsCell {
     // Ensure we can resolve attachments:
     this._rendermime = options.rendermime.clone({
       resolver: new AttachmentsResolver({
-        parent: options.rendermime.resolver,
+        parent: options.rendermime.resolver ?? undefined,
         model: this.model.attachments
       })
     });
@@ -1368,7 +1382,7 @@ export class MarkdownCell extends AttachmentsCell {
     void this._updateRenderedInput().then(() => {
       this._ready.resolve(void 0);
     });
-    this.renderInput(this._renderer);
+    this.renderInput(this._renderer!);
   }
 
   /**
@@ -1446,7 +1460,7 @@ export class MarkdownCell extends AttachmentsCell {
       // TODO: It would be nice for the cell to provide a way for
       // its consumers to hook into when the rendering is done.
       void this._updateRenderedInput();
-      this.renderInput(this._renderer);
+      this.renderInput(this._renderer!);
     }
   }
 
@@ -1481,8 +1495,8 @@ export class MarkdownCell extends AttachmentsCell {
     });
   }
 
-  private _monitor: ActivityMonitor<ICellModel, void> = null;
-  private _renderer: IRenderMime.IRenderer = null;
+  private _monitor: ActivityMonitor<ICellModel, void>;
+  private _renderer: IRenderMime.IRenderer | null = null;
   private _rendermime: IRenderMimeRegistry;
   private _rendered = true;
   private _prevText = '';

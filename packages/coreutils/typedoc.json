@@ -1,0 +1,6 @@
+{
+  "excludeNotExported": true,
+  "mode": "file",
+  "out": "../../docs/api/coreutils",
+  "theme": "../../typedoc-theme"
+}

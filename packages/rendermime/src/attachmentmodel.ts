@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
 
@@ -12,11 +12,12 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 import {
   JSONExt,
   JSONObject,
-  JSONValue,
-  ReadonlyJSONObject
-} from '@phosphor/coreutils';
+  PartialJSONObject,
+  PartialJSONValue,
+  ReadonlyPartialJSONObject
+} from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { MimeModel } from './mimemodel';
 
@@ -63,7 +64,7 @@ export class AttachmentModel implements IAttachmentModel {
    * Construct a new attachment model.
    */
   constructor(options: IAttachmentModel.IOptions) {
-    let { data } = Private.getBundleOptions(options);
+    let data = Private.getData(options.value);
     this._data = new ObservableJSON({ values: data as JSONObject });
     this._rawData = data;
     // Make a copy of the data.
@@ -97,15 +98,15 @@ export class AttachmentModel implements IAttachmentModel {
   /**
    * The data associated with the model.
    */
-  get data(): ReadonlyJSONObject {
+  get data(): ReadonlyPartialJSONObject {
     return this._rawData;
   }
 
   /**
    * The metadata associated with the model.
    */
-  get metadata(): ReadonlyJSONObject {
-    return undefined;
+  get metadata(): ReadonlyPartialJSONObject {
+    return {};
   }
 
   /**
@@ -127,7 +128,7 @@ export class AttachmentModel implements IAttachmentModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IMimeBundle {
-    let attachment: JSONValue = {};
+    let attachment: PartialJSONObject = {};
     for (let key in this._raw) {
       attachment[key] = Private.extract(this._raw, key);
     }
@@ -142,7 +143,7 @@ export class AttachmentModel implements IAttachmentModel {
    */
   private _updateObservable(
     observable: IObservableJSON,
-    data: ReadonlyJSONObject
+    data: ReadonlyPartialJSONObject
   ) {
     let oldKeys = observable.keys();
     let newKeys = Object.keys(data);
@@ -159,14 +160,14 @@ export class AttachmentModel implements IAttachmentModel {
       let oldValue = observable.get(key);
       let newValue = data[key];
       if (oldValue !== newValue) {
-        observable.set(key, newValue as JSONValue);
+        observable.set(key, newValue);
       }
     }
   }
 
   private _changed = new Signal<this, void>(this);
-  private _raw: JSONObject = {};
-  private _rawData: ReadonlyJSONObject;
+  private _raw: PartialJSONObject = {};
+  private _rawData: ReadonlyPartialJSONObject;
   private _data: IObservableJSON;
 }
 
@@ -181,7 +182,7 @@ export namespace AttachmentModel {
    *
    * @returns - The data for the payload.
    */
-  export function getData(bundle: nbformat.IMimeBundle): JSONObject {
+  export function getData(bundle: nbformat.IMimeBundle): PartialJSONObject {
     return Private.getData(bundle);
   }
 }
@@ -193,7 +194,7 @@ namespace Private {
   /**
    * Get the data from a notebook attachment.
    */
-  export function getData(bundle: nbformat.IMimeBundle): JSONObject {
+  export function getData(bundle: nbformat.IMimeBundle): PartialJSONObject {
     return convertBundle(bundle);
   }
 
@@ -210,9 +211,12 @@ namespace Private {
   /**
    * Extract a value from a JSONObject.
    */
-  export function extract(value: JSONObject, key: string): JSONValue {
+  export function extract(
+    value: PartialJSONObject,
+    key: string
+  ): PartialJSONValue | undefined {
     let item = value[key];
-    if (JSONExt.isPrimitive(item)) {
+    if (item === undefined || JSONExt.isPrimitive(item)) {
       return item;
     }
     return JSONExt.deepCopy(item);
@@ -221,8 +225,8 @@ namespace Private {
   /**
    * Convert a mime bundle to mime data.
    */
-  function convertBundle(bundle: nbformat.IMimeBundle): JSONObject {
-    let map: JSONObject = Object.create(null);
+  function convertBundle(bundle: nbformat.IMimeBundle): PartialJSONObject {
+    let map: PartialJSONObject = Object.create(null);
     for (let mimeType in bundle) {
       map[mimeType] = extract(bundle, mimeType);
     }

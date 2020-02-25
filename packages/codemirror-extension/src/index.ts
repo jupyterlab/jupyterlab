@@ -3,7 +3,7 @@
 
 import CodeMirror from 'codemirror';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 import {
   ILabShell,
@@ -22,11 +22,11 @@ import {
   Mode
 } from '@jupyterlab/codemirror';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
@@ -86,7 +86,7 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
     let item = new EditorSyntaxStatus({ commands: app.commands });
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
-      if (current && tracker.has(current)) {
+      if (current && tracker.has(current) && item.model) {
         item.model.editor = (current as IDocumentWidget<
           FileEditor
         >).content.editor;
@@ -99,8 +99,8 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
         align: 'left',
         rank: 0,
         isActive: () =>
-          labShell.currentWidget &&
-          tracker.currentWidget &&
+          !!labShell.currentWidget &&
+          !!tracker.currentWidget &&
           labShell.currentWidget === tracker.currentWidget
       }
     );
@@ -148,7 +148,8 @@ function activateEditorCommands(
     scrollPastEnd,
     styleActiveLine,
     styleSelectedText,
-    selectionPointer
+    selectionPointer,
+    lineWiseCopyCut
   } = CodeMirrorEditor.defaultConfig;
 
   /**
@@ -166,17 +167,21 @@ function activateEditorCommands(
     }
 
     theme = (settings.get('theme').composite as string | null) || theme;
-    scrollPastEnd = settings.get('scrollPastEnd').composite as boolean | null;
+    scrollPastEnd =
+      (settings.get('scrollPastEnd').composite as boolean | null) ??
+      scrollPastEnd;
     styleActiveLine =
       (settings.get('styleActiveLine').composite as
         | boolean
-        | CodeMirror.StyleActiveLine) || styleActiveLine;
+        | CodeMirror.StyleActiveLine) ?? styleActiveLine;
     styleSelectedText =
-      (settings.get('styleSelectedText').composite as boolean) ||
+      (settings.get('styleSelectedText').composite as boolean) ??
       styleSelectedText;
     selectionPointer =
-      (settings.get('selectionPointer').composite as boolean | string) ||
+      (settings.get('selectionPointer').composite as boolean | string) ??
       selectionPointer;
+    lineWiseCopyCut =
+      (settings.get('lineWiseCopyCut').composite as boolean) ?? lineWiseCopyCut;
   }
 
   /**
@@ -192,6 +197,7 @@ function activateEditorCommands(
         cm.setOption('styleActiveLine', styleActiveLine);
         cm.setOption('styleSelectedText', styleSelectedText);
         cm.setOption('selectionPointer', selectionPointer);
+        cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
       }
     });
   }
@@ -223,6 +229,7 @@ function activateEditorCommands(
       cm.setOption('styleActiveLine', styleActiveLine);
       cm.setOption('styleSelectedText', styleSelectedText);
       cm.setOption('selectionPointer', selectionPointer);
+      cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
     }
   });
 
@@ -346,7 +353,7 @@ function activateEditorCommands(
       }
       modeMenu.addItem({
         command: CommandIDs.changeMode,
-        args: { ...spec }
+        args: { ...spec } as any // TODO: Casting to `any` until lumino typings are fixed
       });
     });
 

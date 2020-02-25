@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IOutputAreaModel, OutputAreaModel } from '@jupyterlab/outputarea';
 
@@ -11,7 +11,7 @@ import {
   OutputModel
 } from '@jupyterlab/rendermime';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import {
   ILogger,
@@ -74,7 +74,7 @@ export class LogOutputModel extends OutputModel implements ILogOutputModel {
   /**
    * Date & time when output is logged.
    */
-  readonly timestamp: Date = null;
+  readonly timestamp: Date;
 
   /**
    * Log level
@@ -312,7 +312,7 @@ export class Logger implements ILogger {
     ) {
       return;
     }
-    let output: nbformat.IOutput = null;
+    let output: nbformat.IOutput | null = null;
     switch (log.type) {
       case 'text':
         output = {
@@ -384,7 +384,7 @@ export class Logger implements ILogger {
     }
     this._isDisposed = true;
     this.clear();
-    this._rendermime = null;
+    this._rendermime = null!;
     Signal.clearData(this);
   }
 

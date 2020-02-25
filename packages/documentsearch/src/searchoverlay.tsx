@@ -1,43 +1,54 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-import { IDisplayState } from './interfaces';
-import { SearchInstance } from './searchinstance';
 
 import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
-import { Debouncer } from '@jupyterlab/coreutils';
-import { Signal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import {
+  caretDownIcon,
+  caretDownEmptyThinIcon,
+  caretRightIcon,
+  caretUpEmptyThinIcon,
+  caseSensitiveIcon,
+  classes,
+  closeIcon,
+  ellipsesIcon,
+  regexIcon
+} from '@jupyterlab/ui-components';
+
+import { Debouncer } from '@lumino/polling';
+import { Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
+
+import { IDisplayState } from './interfaces';
+import { SearchInstance } from './searchinstance';
 
 const OVERLAY_CLASS = 'jp-DocumentSearch-overlay';
 const OVERLAY_ROW_CLASS = 'jp-DocumentSearch-overlay-row';
 const INPUT_CLASS = 'jp-DocumentSearch-input';
 const INPUT_WRAPPER_CLASS = 'jp-DocumentSearch-input-wrapper';
-const REGEX_BUTTON_CLASS_OFF =
-  'jp-DocumentSearch-input-button-off jp-DocumentSearch-regex-button';
-const REGEX_BUTTON_CLASS_ON =
-  'jp-DocumentSearch-input-button-on jp-DocumentSearch-regex-button';
-const CASE_BUTTON_CLASS_OFF =
-  'jp-DocumentSearch-input-button-off jp-DocumentSearch-case-button';
-const CASE_BUTTON_CLASS_ON =
-  'jp-DocumentSearch-input-button-on jp-DocumentSearch-case-button';
+const INPUT_BUTTON_CLASS_OFF = 'jp-DocumentSearch-input-button-off';
+const INPUT_BUTTON_CLASS_ON = 'jp-DocumentSearch-input-button-on';
 const INDEX_COUNTER_CLASS = 'jp-DocumentSearch-index-counter';
 const UP_DOWN_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-up-down-wrapper';
-const UP_BUTTON_CLASS = 'jp-DocumentSearch-up-button';
-const DOWN_BUTTON_CLASS = 'jp-DocumentSearch-down-button';
-const CLOSE_BUTTON_CLASS = 'jp-DocumentSearch-close-button';
+const UP_DOWN_BUTTON_CLASS = 'jp-DocumentSearch-up-down-button';
+const ELLIPSES_BUTTON_CLASS = 'jp-DocumentSearch-ellipses-button';
+const ELLIPSES_BUTTON_ENABLED_CLASS =
+  'jp-DocumentSearch-ellipses-button-enabled';
 const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
+const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
+const SEARCH_OPTIONS_DISABLED_CLASS =
+  'jp-DocumentSearch-search-options-disabled';
 const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
 const REPLACE_WRAPPER_CLASS = 'jp-DocumentSearch-replace-wrapper-class';
-const REPLACE_TOGGLE_COLLAPSED = 'jp-DocumentSearch-replace-toggle-collapsed';
-const REPLACE_TOGGLE_EXPANDED = 'jp-DocumentSearch-replace-toggle-expanded';
+const REPLACE_TOGGLE_CLASS = 'jp-DocumentSearch-replace-toggle';
 const FOCUSED_INPUT = 'jp-DocumentSearch-focused-input';
 const TOGGLE_WRAPPER = 'jp-DocumentSearch-toggle-wrapper';
 const TOGGLE_PLACEHOLDER = 'jp-DocumentSearch-toggle-placeholder';
 const BUTTON_CONTENT_CLASS = 'jp-DocumentSearch-button-content';
 const BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-button-wrapper';
+const SPACER_CLASS = 'jp-DocumentSearch-spacer';
 
 interface ISearchEntryProps {
   onCaseSensitiveToggled: Function;
@@ -80,12 +91,14 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
   }
 
   render() {
-    const caseButtonToggleClass = this.props.caseSensitive
-      ? CASE_BUTTON_CLASS_ON
-      : CASE_BUTTON_CLASS_OFF;
-    const regexButtonToggleClass = this.props.useRegex
-      ? REGEX_BUTTON_CLASS_ON
-      : REGEX_BUTTON_CLASS_OFF;
+    const caseButtonToggleClass = classes(
+      this.props.caseSensitive ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
+      BUTTON_CONTENT_CLASS
+    );
+    const regexButtonToggleClass = classes(
+      this.props.useRegex ? INPUT_BUTTON_CLASS_ON : INPUT_BUTTON_CLASS_OFF,
+      BUTTON_CONTENT_CLASS
+    );
 
     const wrapperClass = `${INPUT_WRAPPER_CLASS} ${
       this.props.inputFocused ? FOCUSED_INPUT : ''
@@ -94,7 +107,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
     return (
       <div className={wrapperClass}>
         <input
-          placeholder={this.props.searchText ? null : 'Find'}
+          placeholder={this.props.searchText ? undefined : 'Find'}
           className={INPUT_CLASS}
           value={this.props.searchText}
           onChange={e => this.props.onChange(e)}
@@ -109,9 +122,9 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           onClick={() => this.props.onCaseSensitiveToggled()}
           tabIndex={4}
         >
-          <span
-            className={`${caseButtonToggleClass} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={-1}
+          <caseSensitiveIcon.react
+            className={caseButtonToggleClass}
+            tag="span"
           />
         </button>
         <button
@@ -119,10 +132,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           onClick={() => this.props.onRegexToggled()}
           tabIndex={5}
         >
-          <span
-            className={`${regexButtonToggleClass} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={-1}
-          />
+          <regexIcon.react className={regexButtonToggleClass} tag="span" />
         </button>
       </div>
     );
@@ -138,7 +148,7 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
     return (
       <div className={REPLACE_WRAPPER_CLASS}>
         <input
-          placeholder={this.props.replaceText ? null : 'Replace'}
+          placeholder={this.props.replaceText ? undefined : 'Replace'}
           className={REPLACE_ENTRY_CLASS}
           value={this.props.replaceText}
           onKeyDown={e => this.props.onReplaceKeydown(e)}
@@ -149,7 +159,7 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
         <button
           className={REPLACE_BUTTON_WRAPPER_CLASS}
           onClick={() => this.props.onReplaceCurrent()}
-          tabIndex={9}
+          tabIndex={10}
         >
           <span
             className={`${REPLACE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
@@ -160,7 +170,7 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
         </button>
         <button
           className={REPLACE_BUTTON_WRAPPER_CLASS}
-          tabIndex={10}
+          tabIndex={11}
           onClick={() => this.props.onReplaceAll()}
         >
           <span
@@ -188,9 +198,9 @@ function UpDownButtons(props: IUpDownProps) {
         onClick={() => props.onHighlightPrevious()}
         tabIndex={6}
       >
-        <span
-          className={`${UP_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={-1}
+        <caretUpEmptyThinIcon.react
+          className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
+          tag="span"
         />
       </button>
       <button
@@ -198,9 +208,9 @@ function UpDownButtons(props: IUpDownProps) {
         onClick={() => props.onHightlightNext()}
         tabIndex={7}
       >
-        <span
-          className={`${DOWN_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-          tabIndex={-1}
+        <caretDownEmptyThinIcon.react
+          className={classes(UP_DOWN_BUTTON_CLASS, BUTTON_CONTENT_CLASS)}
+          tag="span"
         />
       </button>
     </div>
@@ -208,7 +218,7 @@ function UpDownButtons(props: IUpDownProps) {
 }
 
 interface ISearchIndexProps {
-  currentIndex: number;
+  currentIndex: number | null;
   totalMatches: number;
 }
 
@@ -217,11 +227,78 @@ function SearchIndices(props: ISearchIndexProps) {
     <div className={INDEX_COUNTER_CLASS}>
       {props.totalMatches === 0
         ? '-/-'
-        : `${props.currentIndex + 1}/${props.totalMatches}`}
+        : `${props.currentIndex === null ? '-' : props.currentIndex + 1}/${
+            props.totalMatches
+          }`}
     </div>
   );
 }
 
+interface IFilterToggleProps {
+  enabled: boolean;
+  toggleEnabled: () => void;
+}
+
+interface IFilterToggleState {}
+
+class FilterToggle extends React.Component<
+  IFilterToggleProps,
+  IFilterToggleState
+> {
+  render() {
+    let className = `${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`;
+    if (this.props.enabled) {
+      className = `${className} ${ELLIPSES_BUTTON_ENABLED_CLASS}`;
+    }
+    return (
+      <button
+        className={BUTTON_WRAPPER_CLASS}
+        onClick={() => this.props.toggleEnabled()}
+        tabIndex={8}
+      >
+        <ellipsesIcon.react
+          className={className}
+          tag="span"
+          height="20px"
+          width="20px"
+        />
+      </button>
+    );
+  }
+}
+
+interface IFilterSelectionProps {
+  searchOutput: boolean;
+  canToggleOutput: boolean;
+  toggleOutput: () => void;
+}
+
+interface IFilterSelectionState {}
+
+class FilterSelection extends React.Component<
+  IFilterSelectionProps,
+  IFilterSelectionState
+> {
+  render() {
+    return (
+      <label className={SEARCH_OPTIONS_CLASS}>
+        <span
+          className={
+            this.props.canToggleOutput ? '' : SEARCH_OPTIONS_DISABLED_CLASS
+          }
+        >
+          Search Cell Outputs
+        </span>
+        <input
+          type="checkbox"
+          disabled={!this.props.canToggleOutput}
+          checked={this.props.searchOutput}
+          onChange={this.props.toggleOutput}
+        />
+      </label>
+    );
+  }
+}
 interface ISearchOverlayProps {
   overlayState: IDisplayState;
   onCaseSensitiveToggled: Function;
@@ -233,6 +310,7 @@ interface ISearchOverlayProps {
   onReplaceCurrent: Function;
   onReplaceAll: Function;
   isReadOnly: boolean;
+  hasOutputs: boolean;
 }
 
 class SearchOverlay extends React.Component<
@@ -242,6 +320,8 @@ class SearchOverlay extends React.Component<
   constructor(props: ISearchOverlayProps) {
     super(props);
     this.state = props.overlayState;
+
+    this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
   }
 
   componentDidMount() {
@@ -280,7 +360,11 @@ class SearchOverlay extends React.Component<
     }
   }
 
-  private _executeSearch(goForward: boolean, searchText?: string) {
+  private _executeSearch(
+    goForward: boolean,
+    searchText?: string,
+    filterChanged = false
+  ) {
     // execute search!
     let query;
     const input = searchText ? searchText : this.state.searchText;
@@ -296,7 +380,10 @@ class SearchOverlay extends React.Component<
       return;
     }
 
-    if (Private.regexEqual(this.props.overlayState.query, query)) {
+    if (
+      Private.regexEqual(this.props.overlayState.query, query) &&
+      !filterChanged
+    ) {
       if (goForward) {
         this.props.onHightlightNext();
       } else {
@@ -305,7 +392,7 @@ class SearchOverlay extends React.Component<
       return;
     }
 
-    this.props.onStartQuery(query);
+    this.props.onStartQuery(query, this.state.filters);
   }
 
   private _onClose() {
@@ -331,8 +418,43 @@ class SearchOverlay extends React.Component<
       this.setState({ searchInputFocused: false });
     }
   }
+  private _toggleSearchOutput() {
+    this.setState(
+      prevState => ({
+        ...prevState,
+        filters: {
+          ...prevState.filters,
+          output: !prevState.filters.output
+        }
+      }),
+      () => this._executeSearch(true, undefined, true)
+    );
+  }
+  private _toggleFiltersOpen() {
+    this.setState(prevState => ({
+      filtersOpen: !prevState.filtersOpen
+    }));
+  }
 
   render() {
+    const showReplace = !this.props.isReadOnly && this.state.replaceEntryShown;
+    const showFilter = this.props.hasOutputs;
+    const filterToggle = showFilter ? (
+      <FilterToggle
+        enabled={this.state.filtersOpen}
+        toggleEnabled={() => this._toggleFiltersOpen()}
+      />
+    ) : null;
+    const filter = showFilter ? (
+      <FilterSelection
+        key={'filter'}
+        canToggleOutput={!showReplace}
+        searchOutput={this.state.filters.output}
+        toggleOutput={this._toggleSearchOutput}
+      />
+    ) : null;
+    const icon = this.state.replaceEntryShown ? caretDownIcon : caretRightIcon;
+
     return [
       <div className={OVERLAY_ROW_CLASS} key={0}>
         {this.props.isReadOnly ? (
@@ -343,13 +465,12 @@ class SearchOverlay extends React.Component<
             onClick={() => this._onReplaceToggled()}
             tabIndex={1}
           >
-            <span
-              className={`${
-                this.state.replaceEntryShown
-                  ? REPLACE_TOGGLE_EXPANDED
-                  : REPLACE_TOGGLE_COLLAPSED
-              } ${BUTTON_CONTENT_CLASS}`}
-              tabIndex={-1}
+            <icon.react
+              className={`${REPLACE_TOGGLE_CLASS} ${BUTTON_CONTENT_CLASS}`}
+              tag="span"
+              elementPosition="center"
+              height="20px"
+              width="20px"
             />
           </button>
         )}
@@ -380,34 +501,46 @@ class SearchOverlay extends React.Component<
           onHighlightPrevious={() => this._executeSearch(false)}
           onHightlightNext={() => this._executeSearch(true)}
         />
+        {showReplace ? null : filterToggle}
         <button
           className={BUTTON_WRAPPER_CLASS}
           onClick={() => this._onClose()}
-          tabIndex={8}
+          tabIndex={9}
         >
-          <span
-            className={`${CLOSE_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`}
-            tabIndex={-1}
+          <closeIcon.react
+            className="jp-icon-hover"
+            elementPosition="center"
+            height="16px"
+            width="16px"
           />
         </button>
       </div>,
       <div className={OVERLAY_ROW_CLASS} key={1}>
-        {!this.props.isReadOnly && this.state.replaceEntryShown ? (
-          <ReplaceEntry
-            onReplaceKeydown={(e: KeyboardEvent) => this._onReplaceKeydown(e)}
-            onChange={(e: React.ChangeEvent) => this._onReplaceChange(e)}
-            onReplaceCurrent={() =>
-              this.props.onReplaceCurrent(this.state.replaceText)
-            }
-            onReplaceAll={() => this.props.onReplaceAll(this.state.replaceText)}
-            replaceText={this.state.replaceText}
-            ref="replaceEntry"
-          />
+        {showReplace ? (
+          <>
+            <ReplaceEntry
+              onReplaceKeydown={(e: KeyboardEvent) => this._onReplaceKeydown(e)}
+              onChange={(e: React.ChangeEvent) => this._onReplaceChange(e)}
+              onReplaceCurrent={() =>
+                this.props.onReplaceCurrent(this.state.replaceText)
+              }
+              onReplaceAll={() =>
+                this.props.onReplaceAll(this.state.replaceText)
+              }
+              replaceText={this.state.replaceText}
+              ref="replaceEntry"
+            />
+            <div className={SPACER_CLASS}></div>
+            {filterToggle}
+          </>
         ) : null}
       </div>,
+      this.state.filtersOpen ? filter : null,
       <div
         className={REGEX_ERROR_CLASS}
-        hidden={this.state.errorMessage && this.state.errorMessage.length === 0}
+        hidden={
+          !!this.state.errorMessage && this.state.errorMessage.length === 0
+        }
         key={3}
       >
         {this.state.errorMessage}
@@ -434,7 +567,8 @@ export function createSearchOverlay(
     onReplaceCurrent,
     onReplaceAll,
     onEndSearch,
-    isReadOnly
+    isReadOnly,
+    hasOutputs
   } = options;
   const widget = ReactWidget.create(
     <UseSignal signal={widgetChanged} initialArgs={overlayState}>
@@ -449,8 +583,9 @@ export function createSearchOverlay(
             onEndSearch={onEndSearch}
             onReplaceCurrent={onReplaceCurrent}
             onReplaceAll={onReplaceAll}
-            overlayState={args}
+            overlayState={args!}
             isReadOnly={isReadOnly}
+            hasOutputs={hasOutputs}
           />
         );
       }}
@@ -473,6 +608,7 @@ namespace createSearchOverlay {
     onReplaceCurrent: Function;
     onReplaceAll: Function;
     isReadOnly: boolean;
+    hasOutputs: boolean;
   }
 }
 
@@ -495,7 +631,7 @@ namespace Private {
     return ret;
   }
 
-  export function regexEqual(a: RegExp, b: RegExp) {
+  export function regexEqual(a: RegExp | null, b: RegExp | null) {
     if (!a || !b) {
       return false;
     }

@@ -3,17 +3,19 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IAttachmentsModel, AttachmentsModel } from '@jupyterlab/attachments';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
+
+import { UUID } from '@lumino/coreutils';
 
 import {
   IObservableJSON,
@@ -101,6 +103,11 @@ export interface ICodeCellModel extends ICellModel {
    * The cell outputs.
    */
   readonly outputs: IOutputAreaModel;
+
+  /**
+   * Clear execution, outputs, and related metadata
+   */
+  clearExecution(): void;
 }
 
 /**
@@ -349,7 +356,7 @@ export class AttachmentsCellModel extends CellModel {
     return cell;
   }
 
-  private _attachments: IAttachmentsModel | null = null;
+  private _attachments: IAttachmentsModel;
 }
 
 /**
@@ -480,7 +487,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
     // preference to `collapsed`.
     if (this.metadata.has('collapsed')) {
-      let collapsed = this.metadata.get('collapsed');
+      let collapsed = this.metadata.get('collapsed') as boolean | undefined;
       Private.collapseChanged(this.metadata, {
         type: 'change',
         key: 'collapsed',
@@ -521,6 +528,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     this.modelDB.setValue('executionCount', newValue || null);
   }
 
+  clearExecution() {
+    this.outputs.clear();
+    this.executionCount = null;
+    this.metadata.delete('execution');
+  }
+
   /**
    * The cell outputs.
    */
@@ -536,7 +549,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
       return;
     }
     this._outputs.dispose();
-    this._outputs = null;
+    this._outputs = null!;
     super.dispose();
   }
 
@@ -582,7 +595,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     });
   }
 
-  private _outputs: IOutputAreaModel = null;
+  private _outputs: IOutputAreaModel;
 }
 
 /**

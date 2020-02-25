@@ -19,9 +19,6 @@
       "path": "../console"
     },
     {
-      "path": "../coreutils"
-    },
-    {
       "path": "../docregistry"
     },
     {
@@ -32,6 +29,9 @@
     },
     {
       "path": "../notebook"
+    },
+    {
+      "path": "../settingregistry"
     },
     {
       "path": "../statusbar"

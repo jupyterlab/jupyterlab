@@ -24,10 +24,10 @@
       "path": "../../packages/services"
     },
     {
-      "path": "../../testutils"
+      "path": "../../packages/statedb"
     },
     {
-      "path": "../../packages/ui-components"
+      "path": "../../testutils"
     }
   ]
 }

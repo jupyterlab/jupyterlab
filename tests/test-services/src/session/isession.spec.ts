@@ -5,11 +5,16 @@ import { expect } from 'chai';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Kernel, KernelMessage } from '@jupyterlab/services';
+import {
+  KernelMessage,
+  SessionManager,
+  KernelManager,
+  KernelAPI
+} from '@jupyterlab/services';
 
 import { Session } from '@jupyterlab/services';
 
@@ -19,41 +24,46 @@ import { handleRequest, SessionTester, init } from '../utils';
 
 init();
 
+let kernelManager = new KernelManager();
+let sessionManager = new SessionManager({ kernelManager });
+
 /**
  * Start a new session with a unique name.
  */
-function startNew(): Promise<Session.ISession> {
-  return Session.startNew({ path: UUID.uuid4() });
+async function startNew(): Promise<Session.ISessionConnection> {
+  const session = await sessionManager.startNew({
+    path: UUID.uuid4(),
+    name: UUID.uuid4(),
+    type: 'test'
+  });
+  return session;
 }
 
 describe('session', () => {
-  let session: Session.ISession;
-  let defaultSession: Session.ISession;
+  let session: Session.ISessionConnection;
+  let defaultSession: Session.ISessionConnection;
 
   beforeAll(async () => {
+    jest.setTimeout(120000);
     defaultSession = await startNew();
-    await defaultSession.kernel.ready;
   });
 
   afterEach(async () => {
     if (session && !session.isDisposed) {
-      await session.kernel.ready;
       await session.shutdown();
     }
   });
 
   afterAll(async () => {
-    await defaultSession.kernel.ready;
     await defaultSession.shutdown();
   });
 
-  describe('Session.ISession', () => {
-    describe('#terminated', () => {
-      it('should emit when the session is shut down', async () => {
+  describe('Session.DefaultSession', () => {
+    describe('#disposed', () => {
+      it('should emit when the session is disposed', async () => {
         let called = false;
         session = await startNew();
-        await session.kernel.ready;
-        session.terminated.connect(() => {
+        session.disposed.connect(() => {
           called = true;
         });
         await session.shutdown();
@@ -64,21 +74,23 @@ describe('session', () => {
 
     describe('#kernelChanged', () => {
       it('should emit when the kernel changes', async () => {
-        let called: Session.IKernelChangedArgs | null = null;
+        let called: Session.ISessionConnection.IKernelChangedArgs | null = null;
         const object = {};
+        await defaultSession.kernel?.requestKernelInfo();
         defaultSession.kernelChanged.connect((s, args) => {
           called = args;
           Signal.disconnectReceiver(object);
         }, object);
-        const previous = defaultSession.kernel;
-        await defaultSession.changeKernel({ name: previous.name });
-        await defaultSession.kernel.ready;
-        expect(previous).to.not.equal(defaultSession.kernel);
+        const original = defaultSession.kernel!;
+        // Create a new kernel with the same kernel name (same type)
+        await defaultSession.changeKernel({ name: original.name });
+        expect(original).to.not.equal(defaultSession.kernel);
         expect(called).to.deep.equal({
-          oldValue: previous,
+          name: 'kernel',
+          oldValue: original,
           newValue: defaultSession.kernel
         });
-        previous.dispose();
+        original.dispose();
       });
     });
 
@@ -90,7 +102,7 @@ describe('session', () => {
             called = true;
           }
         });
-        await defaultSession.kernel.requestKernelInfo();
+        await defaultSession.kernel!.requestKernelInfo();
         expect(called).to.equal(true);
       });
     });
@@ -103,7 +115,7 @@ describe('session', () => {
             called = true;
           }
         });
-        await defaultSession.kernel.requestExecute({ code: 'a=1' }, true).done;
+        await defaultSession.kernel!.requestExecute({ code: 'a=1' }, true).done;
         expect(called).to.equal(true);
       });
     });
@@ -112,7 +124,6 @@ describe('session', () => {
       it('should be emitted for an unhandled message', async () => {
         const tester = new SessionTester();
         const session = await tester.startSession();
-        await session.kernel.ready;
         const msgId = UUID.uuid4();
         const emission = testEmission(session.unhandledMessage, {
           find: (k, msg) => msg.header.msg_id === msgId
@@ -124,7 +135,7 @@ describe('session', () => {
           msgId,
           content: {}
         });
-        msg.parent_header = { session: session.kernel.clientId };
+        msg.parent_header = { session: session.kernel!.clientId };
         tester.send(msg);
         await emission;
         await tester.shutdown();
@@ -177,20 +188,14 @@ describe('session', () => {
         const model = defaultSession.model;
         expect(typeof model.id).to.equal('string');
         expect(typeof model.path).to.equal('string');
-        expect(typeof model.kernel.name).to.equal('string');
-        expect(typeof model.kernel.id).to.equal('string');
+        expect(typeof model.kernel!.name).to.equal('string');
+        expect(typeof model.kernel!.id).to.equal('string');
       });
     });
 
     describe('#kernel', () => {
       it('should be an IKernel object', () => {
-        expect(typeof defaultSession.kernel.id).to.equal('string');
-      });
-    });
-
-    describe('#kernel', () => {
-      it('should be a delegate to the kernel status', () => {
-        expect(defaultSession.status).to.equal(defaultSession.kernel.status);
+        expect(typeof defaultSession.kernel!.id).to.equal('string');
       });
     });
 
@@ -203,15 +208,15 @@ describe('session', () => {
     });
 
     describe('#isDisposed', () => {
-      it('should be true after we dispose of the session', () => {
-        const session = Session.connectTo(defaultSession.model);
+      it('should be true after we dispose of the session', async () => {
+        const session = await startNew();
         expect(session.isDisposed).to.equal(false);
         session.dispose();
         expect(session.isDisposed).to.equal(true);
       });
 
-      it('should be safe to call multiple times', () => {
-        const session = Session.connectTo(defaultSession.model);
+      it('should be safe to call multiple times', async () => {
+        const session = await startNew();
         expect(session.isDisposed).to.equal(false);
         expect(session.isDisposed).to.equal(false);
         session.dispose();
@@ -221,23 +226,23 @@ describe('session', () => {
     });
 
     describe('#dispose()', () => {
-      it('should dispose of the resources held by the session', () => {
-        const session = Session.connectTo(defaultSession.model);
+      it('should dispose of the resources held by the session', async () => {
+        const session = await startNew();
         session.dispose();
         expect(session.isDisposed).to.equal(true);
       });
 
-      it('should be safe to call twice', () => {
-        const session = Session.connectTo(defaultSession.model);
+      it('should be safe to call twice', async () => {
+        const session = await startNew();
         session.dispose();
         expect(session.isDisposed).to.equal(true);
         session.dispose();
         expect(session.isDisposed).to.equal(true);
       });
 
-      it('should be safe to call if the kernel is disposed', () => {
-        const session = Session.connectTo(defaultSession.model);
-        session.kernel.dispose();
+      it('should be safe to call if the kernel is disposed', async () => {
+        const session = await startNew();
+        session.kernel!.dispose();
         session.dispose();
         expect(session.isDisposed).to.equal(true);
       });
@@ -266,7 +271,9 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = Session.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo({
+          model: defaultSession.model
+        });
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, 'Session is disposed');
@@ -275,9 +282,11 @@ describe('session', () => {
 
     describe('#setType()', () => {
       it('should set the type of the session', async () => {
+        const session = await startNew();
         const type = UUID.uuid4();
-        await defaultSession.setType(type);
-        expect(defaultSession.type).to.equal(type);
+        await session.setType(type);
+        expect(session.type).to.equal(type);
+        await session.shutdown();
       });
 
       it('should fail for improper response status', async () => {
@@ -296,7 +305,9 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = Session.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo({
+          model: defaultSession.model
+        });
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, 'Session is disposed');
@@ -326,7 +337,9 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = Session.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo({
+          model: defaultSession.model
+        });
         session.dispose();
         const promise = session.setPath(UUID.uuid4());
         await expectFailure(promise, 'Session is disposed');
@@ -336,40 +349,36 @@ describe('session', () => {
     describe('#changeKernel()', () => {
       it('should create a new kernel with the new name', async () => {
         session = await startNew();
-        const previous = session.kernel;
-        await previous.ready;
+        const previous = session.kernel!;
+        await previous.info;
         await session.changeKernel({ name: previous.name });
-        await session.kernel.ready;
-        expect(session.kernel.name).to.equal(previous.name);
-        expect(session.kernel.id).to.not.equal(previous.id);
+        expect(session.kernel!.name).to.equal(previous.name);
+        expect(session.kernel!.id).to.not.equal(previous.id);
         expect(session.kernel).to.not.equal(previous);
         previous.dispose();
       });
 
       it('should accept the id of the new kernel', async () => {
         session = await startNew();
-        const previous = session.kernel;
-        await previous.ready;
-        const kernel = await Kernel.startNew();
-        await kernel.ready;
+        const previous = session.kernel!;
+        await previous.info;
+        const kernel = await KernelAPI.startNew();
         await session.changeKernel({ id: kernel.id });
-        await session.kernel.ready;
-        expect(session.kernel.id).to.equal(kernel.id);
+        expect(session.kernel!.id).to.equal(kernel.id);
         expect(session.kernel).to.not.equal(previous);
         expect(session.kernel).to.not.equal(kernel);
         previous.dispose();
-        kernel.dispose();
+        await KernelAPI.shutdownKernel(kernel.id);
       });
 
       it('should update the session path if it has changed', async () => {
         session = await startNew();
-        const previous = session.kernel;
-        await previous.ready;
+        const previous = session.kernel!;
+        await previous.info;
         const model = { ...session.model, path: 'foo.ipynb' };
         handleRequest(session, 200, model);
         await session.changeKernel({ name: previous.name });
-        await session.kernel.ready;
-        expect(session.kernel.name).to.equal(previous.name);
+        expect(session.kernel!.name).to.equal(previous.name);
         expect(session.path).to.equal(model.path);
         previous.dispose();
       });
@@ -381,10 +390,10 @@ describe('session', () => {
         await session.shutdown();
       });
 
-      it('should emit a terminated signal', async () => {
+      it('should emit a disposed signal', async () => {
         let called = false;
         session = await startNew();
-        session.terminated.connect(() => {
+        session.disposed.connect(() => {
           called = true;
         });
         await session.shutdown();
@@ -420,16 +429,11 @@ describe('session', () => {
       });
 
       it('should fail if the session is disposed', async () => {
-        const session = Session.connectTo(defaultSession.model);
+        const session = sessionManager.connectTo({
+          model: defaultSession.model
+        });
         session.dispose();
         await expectFailure(session.shutdown(), 'Session is disposed');
-      });
-
-      it('should dispose of all session instances', async () => {
-        const session0 = await startNew();
-        const session1 = Session.connectTo(session0.model);
-        await session0.shutdown();
-        expect(session1.isDisposed).to.equal(true);
       });
     });
   });

@@ -7,19 +7,19 @@ import { Dialog, showDialog } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { JSONExt } from '@phosphor/coreutils';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Message } from '@phosphor/messaging';
+import { JSONExt } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { Message } from '@lumino/messaging';
 
-import { Widget, StackedLayout } from '@phosphor/widgets';
+import { ISignal, Signal } from '@lumino/signaling';
+
+import { Widget, StackedLayout } from '@lumino/widgets';
 
 import { RawEditor } from './raweditor';
 

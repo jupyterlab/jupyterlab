@@ -3,11 +3,11 @@
 
 import { Kernel, KernelMessage, Session } from '@jupyterlab/services';
 
-import { find } from '@phosphor/algorithm';
+import { find, toArray } from '@lumino/algorithm';
 
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { Text } from '@jupyterlab/coreutils';
 
@@ -106,8 +106,8 @@ const consoles: JupyterFrontEndPlugin<void> = {
         }
 
         const anchor = parent.console;
-        const editor = anchor.promptCell.editor;
-        const kernel = anchor.session.kernel;
+        const editor = anchor.promptCell?.editor;
+        const kernel = anchor.sessionContext.session?.kernel;
         const rendermime = anchor.rendermime;
 
         // If all components necessary for rendering exist, create a tooltip.
@@ -141,8 +141,8 @@ const notebooks: JupyterFrontEndPlugin<void> = {
         }
 
         const anchor = parent.content;
-        const editor = anchor.activeCell.editor;
-        const kernel = parent.session.kernel;
+        const editor = anchor.activeCell?.editor;
+        const kernel = parent.sessionContext.session?.kernel;
         const rendermime = anchor.rendermime;
 
         // If all components necessary for rendering exist, create a tooltip.
@@ -170,7 +170,7 @@ const files: JupyterFrontEndPlugin<void> = {
     // Keep a list of active ISessions so that we can
     // clean them up when they are no longer needed.
     const activeSessions: {
-      [id: string]: Session.ISession;
+      [id: string]: Session.ISessionConnection;
     } = {};
 
     const sessions = app.serviceManager.sessions;
@@ -196,7 +196,7 @@ const files: JupyterFrontEndPlugin<void> = {
             delete activeSessions[file.id];
             oldSession.dispose();
           }
-          const session = sessions.connectTo(model);
+          const session = sessions.connectTo({ model });
           activeSessions[file.id] = session;
         } else {
           const session = activeSessions[file.id];
@@ -207,9 +207,7 @@ const files: JupyterFrontEndPlugin<void> = {
         }
       });
     };
-    void Session.listRunning().then(models => {
-      onRunningChanged(sessions, models);
-    });
+    onRunningChanged(sessions, toArray(sessions.running()));
     sessions.runningChanged.connect(onRunningChanged);
 
     // Clean up after a widget when it is disposed
@@ -234,8 +232,8 @@ const files: JupyterFrontEndPlugin<void> = {
         if (!kernel) {
           return;
         }
-        const anchor = parent.content;
-        const editor = anchor.editor;
+        const anchor = parent!.content;
+        const editor = anchor?.editor;
 
         // If all components necessary for rendering exist, create a tooltip.
         if (!!editor && !!kernel && !!rendermime) {

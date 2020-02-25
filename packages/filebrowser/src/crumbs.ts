@@ -1,30 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt } from '@phosphor/algorithm';
+import { ArrayExt } from '@lumino/algorithm';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { IDragEvent } from '@phosphor/dragdrop';
+import { ElementExt } from '@lumino/domutils';
 
-import { ElementExt } from '@phosphor/domutils';
+import { IDragEvent } from '@lumino/dragdrop';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { DOMUtils, showErrorMessage } from '@jupyterlab/apputils';
 
-import { PathExt, PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 
 import { renameFile } from '@jupyterlab/docmanager';
 
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { ellipsesIcon, folderIcon } from '@jupyterlab/ui-components';
 
 import { FileBrowserModel } from './model';
-
-/**
- * The class name added to material icons
- */
-const MATERIAL_CLASS = 'jp-MaterialIcon';
 
 /**
  * The class name added to the breadcrumb node.
@@ -32,19 +27,9 @@ const MATERIAL_CLASS = 'jp-MaterialIcon';
 const BREADCRUMB_CLASS = 'jp-BreadCrumbs';
 
 /**
- * The class name for the folder icon for the breadcrumbs home
- */
-const BREADCRUMB_HOME = 'jp-FolderIcon';
-
-/**
  * The class name for the breadcrumbs home node
  */
 const BREADCRUMB_HOME_CLASS = 'jp-BreadCrumbs-home';
-
-/**
- * The class named associated to the ellipses icon
- */
-const BREADCRUMB_ELLIPSES = 'jp-EllipsesIcon';
 
 /**
  * The class name added to the breadcrumb node.
@@ -100,16 +85,16 @@ export class BreadCrumbs extends Widget {
       case 'click':
         this._evtClick(event as MouseEvent);
         break;
-      case 'p-dragenter':
+      case 'lm-dragenter':
         this._evtDragEnter(event as IDragEvent);
         break;
-      case 'p-dragleave':
+      case 'lm-dragleave':
         this._evtDragLeave(event as IDragEvent);
         break;
-      case 'p-dragover':
+      case 'lm-dragover':
         this._evtDragOver(event as IDragEvent);
         break;
-      case 'p-drop':
+      case 'lm-drop':
         this._evtDrop(event as IDragEvent);
         break;
       default:
@@ -125,10 +110,10 @@ export class BreadCrumbs extends Widget {
     this.update();
     let node = this.node;
     node.addEventListener('click', this);
-    node.addEventListener('p-dragenter', this);
-    node.addEventListener('p-dragleave', this);
-    node.addEventListener('p-dragover', this);
-    node.addEventListener('p-drop', this);
+    node.addEventListener('lm-dragenter', this);
+    node.addEventListener('lm-dragleave', this);
+    node.addEventListener('lm-dragover', this);
+    node.addEventListener('lm-drop', this);
   }
 
   /**
@@ -138,10 +123,10 @@ export class BreadCrumbs extends Widget {
     super.onBeforeDetach(msg);
     let node = this.node;
     node.removeEventListener('click', this);
-    node.removeEventListener('p-dragenter', this);
-    node.removeEventListener('p-dragleave', this);
-    node.removeEventListener('p-dragover', this);
-    node.removeEventListener('p-drop', this);
+    node.removeEventListener('lm-dragenter', this);
+    node.removeEventListener('lm-dragleave', this);
+    node.removeEventListener('lm-dragover', this);
+    node.removeEventListener('lm-drop', this);
   }
 
   /**
@@ -188,7 +173,7 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
-   * Handle the `'p-dragenter'` event for the widget.
+   * Handle the `'lm-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
@@ -206,7 +191,7 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
-   * Handle the `'p-dragleave'` event for the widget.
+   * Handle the `'lm-dragleave'` event for the widget.
    */
   private _evtDragLeave(event: IDragEvent): void {
     event.preventDefault();
@@ -218,7 +203,7 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
-   * Handle the `'p-dragover'` event for the widget.
+   * Handle the `'lm-dragover'` event for the widget.
    */
   private _evtDragOver(event: IDragEvent): void {
     event.preventDefault();
@@ -237,7 +222,7 @@ export class BreadCrumbs extends Widget {
   }
 
   /**
-   * Handle the `'p-drop'` event for the widget.
+   * Handle the `'lm-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
     event.preventDefault();
@@ -362,17 +347,17 @@ namespace Private {
    * Create the breadcrumb nodes.
    */
   export function createCrumbs(): ReadonlyArray<HTMLElement> {
-    let home = document.createElement('span');
-    defaultIconRegistry.icon({
-      name: BREADCRUMB_HOME,
+    let home = folderIcon.element({
       className: BREADCRUMB_HOME_CLASS,
-      container: home,
-      kind: 'breadCrumb'
+      tag: 'span',
+      title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
+      stylesheet: 'breadCrumb'
     });
-    home.title = PageConfig.getOption('serverRoot') || 'Jupyter Server Root';
-    let ellipsis = document.createElement('span');
-    ellipsis.className =
-      MATERIAL_CLASS + ' ' + BREADCRUMB_ELLIPSES + ' ' + BREADCRUMB_ITEM_CLASS;
+    let ellipsis = ellipsesIcon.element({
+      className: BREADCRUMB_ITEM_CLASS,
+      tag: 'span',
+      stylesheet: 'breadCrumb'
+    });
     let parent = document.createElement('span');
     parent.className = BREADCRUMB_ITEM_CLASS;
     let current = document.createElement('span');

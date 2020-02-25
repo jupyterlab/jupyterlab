@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DataConnector } from '@jupyterlab/coreutils';
+import { DataConnector } from '@jupyterlab/statedb';
 
 import { KernelConnector } from './kernelconnector';
 
@@ -90,13 +90,10 @@ namespace Private {
     const matches = kernel.matches.slice();
 
     // Cache all the kernel matches in a memo.
-    const memo = matches.reduce(
-      (acc, val) => {
-        acc[val] = null;
-        return acc;
-      },
-      {} as { [key: string]: string }
-    );
+    const memo = matches.reduce((acc, val) => {
+      acc[val] = null;
+      return acc;
+    }, {} as { [key: string]: string | null });
 
     // Add each context match that is not in the memo to the result.
     context.matches.forEach(match => {

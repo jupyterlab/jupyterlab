@@ -5,11 +5,13 @@ import React from 'react';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
-import { URLExt, Poll } from '@jupyterlab/coreutils';
-
-import { TextItem } from '..';
+import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
+
+import { Poll } from '@lumino/polling';
+
+import { TextItem } from '..';
 
 /**
  * A VDomRenderer for showing memory usage by a kernel.
@@ -19,8 +21,7 @@ export class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
    * Construct a new memory usage status item.
    */
   constructor() {
-    super();
-    this.model = new MemoryUsage.Model({ refreshRate: 5000 });
+    super(new MemoryUsage.Model({ refreshRate: 5000 }));
   }
 
   /**
@@ -170,7 +171,7 @@ export namespace MemoryUsage {
     private _currentMemory: number = 0;
     private _memoryLimit: number | null = null;
     private _metricsAvailable: boolean = false;
-    private _poll: Poll<Private.IMetricRequestResult>;
+    private _poll: Poll<Private.IMetricRequestResult | null>;
     private _units: MemoryUnit = 'B';
   }
 

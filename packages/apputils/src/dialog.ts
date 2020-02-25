@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each, map, toArray } from '@phosphor/algorithm';
+import { ArrayExt, each, map, toArray } from '@lumino/algorithm';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { PanelLayout, Panel, Widget } from '@phosphor/widgets';
+import { PanelLayout, Panel, Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -228,7 +228,7 @@ export class Dialog<T> extends Widget {
     this._original = document.activeElement as HTMLElement;
     if (this._focusNodeSelector) {
       let body = this.node.querySelector('.jp-Dialog-body');
-      let el = body.querySelector(this._focusNodeSelector);
+      let el = body?.querySelector(this._focusNodeSelector);
 
       if (el) {
         this._primary = el as HTMLElement;
@@ -271,6 +271,7 @@ export class Dialog<T> extends Widget {
     if (!content.contains(event.target as HTMLElement)) {
       event.stopPropagation();
       event.preventDefault();
+      this.reject();
       return;
     }
     for (let buttonNode of this._buttonNodes) {
@@ -360,7 +361,7 @@ export class Dialog<T> extends Widget {
   private _defaultButton: number;
   private _host: HTMLElement;
   private _body: Dialog.Body<T>;
-  private _focusNodeSelector = '';
+  private _focusNodeSelector: string | undefined = '';
 }
 
 /**

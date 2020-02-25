@@ -13,13 +13,16 @@
       "path": "../codeeditor"
     },
     {
-      "path": "../coreutils"
-    },
-    {
       "path": "../inspector"
     },
     {
       "path": "../rendermime"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
     },
     {
       "path": "../ui-components"

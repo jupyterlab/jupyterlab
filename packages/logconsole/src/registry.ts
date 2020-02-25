@@ -3,7 +3,7 @@
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Logger } from './logger';
 
@@ -95,7 +95,7 @@ export class LoggerRegistry implements ILoggerRegistry {
     Signal.clearData(this);
   }
 
-  private _defaultRendermime: IRenderMimeRegistry = null;
+  private _defaultRendermime: IRenderMimeRegistry;
   private _loggers = new Map<string, ILogger>();
   private _maxLength: number;
   private _registryChanged = new Signal<this, ILoggerRegistryChange>(this);

@@ -7,13 +7,13 @@ import { ILabShell, LayoutRestorer } from '@jupyterlab/application';
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { StateDB } from '@jupyterlab/coreutils';
+import { StateDB } from '@jupyterlab/statedb';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { DockPanel, Widget } from '@phosphor/widgets';
+import { DockPanel, Widget } from '@lumino/widgets';
 
 describe('apputils', () => {
   describe('LayoutRestorer', () => {
@@ -71,8 +71,8 @@ describe('apputils', () => {
         await restorer.restored;
         await restorer.save(dehydrated);
         const layout = await restorer.fetch();
-        expect(layout.mainArea.currentWidget).to.equal(currentWidget);
-        expect(layout.mainArea.mode).to.equal(mode);
+        expect(layout.mainArea?.currentWidget).to.equal(currentWidget);
+        expect(layout.mainArea?.mode).to.equal(mode);
       });
     });
 

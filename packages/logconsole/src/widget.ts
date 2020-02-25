@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { nbformat, IChangedArgs } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
+
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { OutputArea, IOutputPrompt } from '@jupyterlab/outputarea';
 
@@ -9,11 +11,11 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget, Panel, PanelLayout, StackedPanel } from '@phosphor/widgets';
+import { Widget, Panel, PanelLayout, StackedPanel } from '@lumino/widgets';
 
 import { LogOutputModel, LoggerOutputAreaModel } from './logger';
 
@@ -89,7 +91,7 @@ class LogConsoleOutputArea extends OutputArea {
   /**
    * The rendermime instance used by the widget.
    */
-  rendermime: IRenderMimeRegistry;
+  rendermime: IRenderMimeRegistry | null;
   /**
    * Output area model used by the widget.
    */
@@ -215,7 +217,7 @@ export class ScrollingWidget<T extends Widget> extends Widget {
   }
 
   private _content: T;
-  private _observer: IntersectionObserver = null;
+  private _observer: IntersectionObserver | null = null;
   private _scrollHeight: number;
   private _sentinel: HTMLDivElement;
   private _tracking: boolean;
@@ -297,13 +299,18 @@ export class LogConsolePanel extends StackedPanel {
    */
   get sourceVersion(): number | null {
     const source = this.source;
-    return source && this._loggerRegistry.getLogger(source).version;
+    return source !== null
+      ? this._loggerRegistry.getLogger(source).version
+      : null;
   }
 
   /**
    * Signal for source changes
    */
-  get sourceChanged(): ISignal<this, IChangedArgs<string | null, 'source'>> {
+  get sourceChanged(): ISignal<
+    this,
+    IChangedArgs<string | null, string | null, 'source'>
+  > {
     return this._sourceChanged;
   }
 
@@ -350,7 +357,11 @@ export class LogConsolePanel extends StackedPanel {
         const viewId = `source:${sender.source}`;
         const outputArea = this._outputAreas.get(viewId);
         if (outputArea) {
-          outputArea.rendermime = change.newValue;
+          if (change.newValue) {
+            outputArea.rendermime = change.newValue;
+          } else {
+            outputArea.dispose();
+          }
         }
       }, this);
 
@@ -366,7 +377,7 @@ export class LogConsolePanel extends StackedPanel {
       (outputArea: LogConsoleOutputArea, name: string) => {
         // Show/hide the output area parents, the scrolling windows.
         if (outputArea.id === viewId) {
-          outputArea.parent.show();
+          outputArea.parent?.show();
           if (outputArea.isVisible) {
             this._sourceDisplayed.emit({
               source: this.source,
@@ -374,7 +385,7 @@ export class LogConsolePanel extends StackedPanel {
             });
           }
         } else {
-          outputArea.parent.hide();
+          outputArea.parent?.hide();
         }
       }
     );
@@ -453,7 +464,7 @@ export class LogConsolePanel extends StackedPanel {
     for (let viewId of viewIds) {
       if (!loggerIds.has(viewId)) {
         const outputArea = this._outputAreas.get(viewId);
-        outputArea.dispose();
+        outputArea?.dispose();
         this._outputAreas.delete(viewId);
       }
     }
@@ -464,7 +475,7 @@ export class LogConsolePanel extends StackedPanel {
   private _source: string | null = null;
   private _sourceChanged = new Signal<
     this,
-    IChangedArgs<string | null, 'source'>
+    IChangedArgs<string | null, string | null, 'source'>
   >(this);
   private _sourceDisplayed = new Signal<this, ISourceDisplayed>(this);
   private _placeholder: Widget;
@@ -472,6 +483,6 @@ export class LogConsolePanel extends StackedPanel {
 }
 
 export interface ISourceDisplayed {
-  source: string;
-  version: number;
+  source: string | null;
+  version: number | null;
 }

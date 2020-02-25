@@ -19,6 +19,12 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
       "path": "../ui-components"
     }
   ]

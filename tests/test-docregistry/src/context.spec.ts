@@ -3,11 +3,11 @@
 
 import { expect } from 'chai';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import { Contents, ServiceManager } from '@jupyterlab/services';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import {
   Context,
@@ -24,6 +24,7 @@ import {
   initNotebookContext,
   NBTestUtils
 } from '@jupyterlab/testutils';
+import { SessionContext } from '@jupyterlab/apputils';
 
 describe('docregistry/context', () => {
   let manager: ServiceManager.IManager;
@@ -46,7 +47,7 @@ describe('docregistry/context', () => {
     });
 
     afterEach(async () => {
-      await context.session.shutdown();
+      await context.sessionContext.shutdown();
       context.dispose();
     });
 
@@ -231,9 +232,9 @@ describe('docregistry/context', () => {
       });
     });
 
-    describe('#session', () => {
-      it('should be a client session object', () => {
-        expect(context.session.path).to.equal(context.path);
+    describe('#sessionContext', () => {
+      it('should be a ISessionContext object', () => {
+        expect(context.sessionContext).to.be.instanceOf(SessionContext);
       });
     });
 
@@ -253,7 +254,7 @@ describe('docregistry/context', () => {
 
         void context.initialize(true);
         await context.ready;
-        expect(context.contentsModel.path).to.equal(path);
+        expect(context.contentsModel!.path).to.equal(path);
       });
     });
 

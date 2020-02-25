@@ -7,7 +7,12 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
-import { IClientSession, ICommandPalette } from '@jupyterlab/apputils';
+import {
+  ISessionContext,
+  ICommandPalette,
+  ISessionContextDialogs,
+  sessionContextDialogs
+} from '@jupyterlab/apputils';
 
 import { Cell, CodeCell } from '@jupyterlab/cells';
 
@@ -36,11 +41,11 @@ import {
   StatusBar
 } from '@jupyterlab/statusbar';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Title, Widget } from '@phosphor/widgets';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { Title, Widget } from '@lumino/widgets';
 
 export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
 
@@ -124,21 +129,25 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:kernel-status',
   autoStart: true,
   requires: [IStatusBar, INotebookTracker, IConsoleTracker, ILabShell],
+  optional: [ISessionContextDialogs],
   activate: (
     app: JupyterFrontEnd,
     statusBar: IStatusBar,
     notebookTracker: INotebookTracker,
     consoleTracker: IConsoleTracker,
-    labShell: ILabShell
+    labShell: ILabShell,
+    sessionDialogs: ISessionContextDialogs | null
   ) => {
     // When the status item is clicked, launch the kernel
     // selection dialog for the current session.
-    let currentSession: IClientSession | null = null;
+    let currentSession: ISessionContext | null = null;
     const changeKernel = async () => {
       if (!currentSession) {
         return;
       }
-      await currentSession.selectKernel();
+      await (sessionDialogs || sessionContextDialogs).selectKernel(
+        currentSession
+      );
     };
 
     // Create the status item.
@@ -167,13 +176,13 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
 
       // Grab the session off of the current widget, if it exists.
       if (newValue && consoleTracker.has(newValue)) {
-        currentSession = (newValue as ConsolePanel).session;
+        currentSession = (newValue as ConsolePanel).sessionContext;
       } else if (newValue && notebookTracker.has(newValue)) {
-        currentSession = (newValue as NotebookPanel).session;
+        currentSession = (newValue as NotebookPanel).sessionContext;
       } else {
         currentSession = null;
       }
-      item.model!.session = currentSession;
+      item.model!.sessionContext = currentSession;
     });
 
     statusBar.registerStatusItem(
@@ -185,7 +194,7 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
         isActive: () => {
           const current = labShell.currentWidget;
           return (
-            current &&
+            !!current &&
             (notebookTracker.has(current) || consoleTracker.has(current))
           );
         }
@@ -272,7 +281,7 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
         isActive: () => {
           const current = labShell.currentWidget;
           return (
-            current &&
+            !!current &&
             (notebookTracker.has(current) ||
               editorTracker.has(current) ||
               consoleTracker.has(current))

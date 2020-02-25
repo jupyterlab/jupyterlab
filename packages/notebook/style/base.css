@@ -204,6 +204,10 @@
   overflow: auto;
 }
 
+.jp-NotebookTools-tool {
+  padding: 0px 12px 0 12px;
+}
+
 .jp-ActiveCellTool {
   padding: 12px;
   background-color: var(--jp-layout-color1);
@@ -232,10 +236,6 @@
 
 .jp-RankedPanel > :not(:first-child) {
   margin-top: 12px;
-}
-
-.jp-KeySelector {
-  padding: 0px 12px 0 12px;
 }
 
 .jp-KeySelector select.jp-mod-styled {

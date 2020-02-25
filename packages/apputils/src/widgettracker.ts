@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IRestorable, RestorablePool } from '@jupyterlab/coreutils';
+import { IRestorable, RestorablePool } from '@jupyterlab/statedb';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { FocusTracker, Widget } from '@phosphor/widgets';
+import { FocusTracker, Widget } from '@lumino/widgets';
 
 /**
  * A tracker that tracks widgets.
@@ -336,7 +336,7 @@ export class WidgetTracker<T extends Widget = Widget>
     /* no-op */
   }
 
-  private _currentChanged = new Signal<this, T>(this);
+  private _currentChanged = new Signal<this, T | null>(this);
   private _focusTracker: FocusTracker<T>;
   private _pool: RestorablePool<T>;
   private _isDisposed = false;

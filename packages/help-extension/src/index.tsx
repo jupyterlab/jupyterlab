@@ -24,7 +24,9 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { KernelMessage } from '@jupyterlab/services';
 
-import { Menu } from '@phosphor/widgets';
+import { jupyterIcon, jupyterlabWordmarkIcon } from '@jupyterlab/ui-components';
+
+import { Menu } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -156,15 +158,16 @@ function activate(
 
   // Populate the Help menu.
   const helpMenu = mainMenu.helpMenu;
-  const labGroup = [CommandIDs.about, CommandIDs.launchClassic].map(
-    command => ({ command })
-  );
+  const labGroup = [
+    CommandIDs.about,
+    CommandIDs.launchClassic
+  ].map(command => ({ command }));
   helpMenu.addGroup(labGroup, 0);
 
   // Contextual help in its own group
-  const contextualHelpGroup = [inspector ? 'inspector:open' : null].map(
-    command => ({ command })
-  );
+  const contextualHelpGroup = [
+    inspector ? 'inspector:open' : undefined
+  ].map(command => ({ command }));
   helpMenu.addGroup(contextualHelpGroup, 0);
 
   const resourcesGroup = RESOURCES.map(args => ({
@@ -186,19 +189,23 @@ function activate(
       return;
     }
     const sessionModel = sessions[sessions.length - 1];
-    if (kernelInfoCache.has(sessionModel.kernel.name)) {
+    if (!sessionModel.kernel || kernelInfoCache.has(sessionModel.kernel.name)) {
       return;
     }
-    const session = serviceManager.sessions.connectTo(sessionModel);
-    void session.kernel.ready.then(() => {
+    const session = serviceManager.sessions.connectTo({
+      model: sessionModel,
+      kernelConnectionOptions: { handleComms: false }
+    });
+
+    void session.kernel?.info.then(kernelInfo => {
+      const name = session.kernel!.name;
+
       // Check the cache second time so that, if two callbacks get scheduled,
       // they don't try to add the same commands.
-      if (kernelInfoCache.has(sessionModel.kernel.name)) {
+      if (kernelInfoCache.has(name)) {
         return;
       }
       // Set the Kernel Info cache.
-      const name = session.kernel.name;
-      const kernelInfo = session.kernel.info;
       kernelInfoCache.set(name, kernelInfo);
 
       // Utility function to check if the current widget
@@ -210,11 +217,7 @@ function activate(
           return result;
         }
         helpMenu.kernelUsers.forEach(u => {
-          if (
-            u.tracker.has(widget) &&
-            u.getKernel(widget) &&
-            u.getKernel(widget).name === name
-          ) {
+          if (u.tracker.has(widget) && u.getKernel(widget)?.name === name) {
             result = true;
           }
         });
@@ -223,7 +226,7 @@ function activate(
 
       // Add the kernel banner to the Help Menu.
       const bannerCommand = `help-menu-${name}:banner`;
-      const spec = serviceManager.specs.kernelspecs[name];
+      const spec = serviceManager.kernelspecs?.specs?.kernelspecs[name];
       if (!spec) {
         return;
       }
@@ -265,7 +268,7 @@ function activate(
 
       // Add the kernel info help_links to the Help menu.
       const kernelGroup: Menu.IItemOptions[] = [];
-      (session.kernel.info.help_links || []).forEach(link => {
+      (kernelInfo.help_links || []).forEach(link => {
         const commandId = `help-menu-${name}:${link.text}`;
         commands.addCommand(commandId, {
           label: link.text,
@@ -288,8 +291,6 @@ function activate(
     label: `About ${app.name}`,
     execute: () => {
       // Create the header of the about dialog
-      let headerLogo = <div className="jp-About-header-logo" />;
-      let headerWordmark = <div className="jp-About-header-wordmark" />;
       let versionNumber = `Version ${app.version}`;
       let versionInfo = (
         <span className="jp-About-version-info">
@@ -298,9 +299,9 @@ function activate(
       );
       let title = (
         <span className="jp-About-header">
-          {headerLogo}
+          <jupyterIcon.react margin="7px 9.5px" height="auto" width="58px" />
           <div className="jp-About-header-info">
-            {headerWordmark}
+            <jupyterlabWordmarkIcon.react height="auto" width="196px" />
             {versionInfo}
           </div>
         </span>
@@ -332,7 +333,7 @@ function activate(
       );
       let copyright = (
         <span className="jp-About-copyright">
-          © 2015 Project Jupyter Contributors
+          © 2015-2020 Project Jupyter Contributors
         </span>
       );
       let body = (
@@ -360,9 +361,13 @@ function activate(
     execute: args => {
       const url = args['url'] as string;
       const text = args['text'] as string;
+      const newBrowserTab = (args['newBrowserTab'] as boolean) || false;
 
       // If help resource will generate a mixed content error, load externally.
-      if (LAB_IS_SECURE && URLExt.parse(url).protocol !== 'https:') {
+      if (
+        newBrowserTab ||
+        (LAB_IS_SECURE && URLExt.parse(url).protocol !== 'https:')
+      ) {
         window.open(url);
         return;
       }

@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { ActivityMonitor } from '@jupyterlab/coreutils';
 

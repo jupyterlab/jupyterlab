@@ -57,7 +57,7 @@ def check_assets():
     # Representative files that should exist after a successful build
     targets = [
         'static/package.json',
-        'schemas/@jupyterlab/shortcuts-extension/plugin.json',
+        'schemas/@jupyterlab/shortcuts-extension/shortcuts.json',
         'themes/@jupyterlab/theme-light-extension/index.css'
     ]
 

@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
@@ -83,7 +83,7 @@ describe('@jupyterlab/cells', () => {
     describe('#setPrompt()', () => {
       it('should change the value of the input prompt', () => {
         const widget = new InputArea({ model });
-        const prompt = widget.node.querySelector(`.${PROMPT_CLASS}`);
+        const prompt = widget.node.querySelector(`.${PROMPT_CLASS}`)!;
         expect(prompt.textContent).to.be.empty;
         widget.setPrompt('foo');
         expect(prompt.textContent).to.contain('foo');

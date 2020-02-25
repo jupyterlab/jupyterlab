@@ -12,11 +12,11 @@ import {
   DocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The class name added to a imageviewer.
@@ -46,7 +46,7 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
       if (this.isDisposed) {
         return;
       }
-      const contents = context.contentsModel;
+      const contents = context.contentsModel!;
       this._format = contents.format === 'base64' ? ';base64' : '';
       this._mimeType = contents.mimetype;
       this._render();

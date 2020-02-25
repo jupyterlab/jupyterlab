@@ -5,11 +5,11 @@ import { expect } from 'chai';
 
 import { framePromise } from '@jupyterlab/testutils';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { simulate } from 'simulate-event';
 
@@ -393,8 +393,8 @@ describe('LabShell', () => {
       shell.add(foo, 'main');
       const state = shell.saveLayout();
       shell.activateById('foo');
-      expect(state.mainArea.mode).to.equal('multiple-document');
-      expect(state.mainArea.currentWidget).to.equal(null);
+      expect(state.mainArea?.mode).to.equal('multiple-document');
+      expect(state.mainArea?.currentWidget).to.equal(null);
     });
   });
 
@@ -403,7 +403,7 @@ describe('LabShell', () => {
       const state = shell.saveLayout();
       shell.mode = 'single-document';
       shell.restoreLayout(state);
-      expect(state.mainArea.mode).to.equal('multiple-document');
+      expect(state.mainArea?.mode).to.equal('multiple-document');
     });
   });
 });

@@ -5,13 +5,13 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { PromiseDelegate, Token } from '@phosphor/coreutils';
+import { PromiseDelegate, Token } from '@lumino/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IRouter } from './tokens';
 
@@ -44,7 +44,7 @@ export class Router implements IRouter {
     const { base } = this;
     const parsed = URLExt.parse(window.location.href);
     const { search, hash } = parsed;
-    const path = parsed.pathname.replace(base, '/');
+    const path = parsed.pathname?.replace(base, '/') ?? '';
     const request = path + search + hash;
 
     return { hash, path, request, search };
@@ -104,7 +104,7 @@ export class Router implements IRouter {
    */
   register(options: IRouter.IRegisterOptions): IDisposable {
     const { command, pattern } = options;
-    const rank = 'rank' in options ? options.rank : 100;
+    const rank = options.rank ?? 100;
     const rules = this._rules;
 
     rules.set(pattern, { command, rank });
@@ -137,7 +137,7 @@ export class Router implements IRouter {
 
     // Collect all rules that match the URL.
     rules.forEach((rule, pattern) => {
-      if (request.match(pattern)) {
+      if (request?.match(pattern)) {
         matches.push(rule);
       }
     });
@@ -155,7 +155,7 @@ export class Router implements IRouter {
         return;
       }
 
-      const { command } = queue.pop();
+      const { command } = queue.pop()!;
 
       try {
         const request = this.current.request;

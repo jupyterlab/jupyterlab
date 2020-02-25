@@ -10,9 +10,9 @@ import '@jupyterlab/console/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { CommandPalette, SplitPanel, Widget } from '@phosphor/widgets';
+import { CommandPalette, SplitPanel, Widget } from '@lumino/widgets';
 
 import { ServiceManager } from '@jupyterlab/services';
 

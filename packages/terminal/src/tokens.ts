@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
 import { IWidgetTracker, MainAreaWidget } from '@jupyterlab/apputils';
 
-import { TerminalSession } from '@jupyterlab/services';
+import { Terminal } from '@jupyterlab/services';
 
 /**
  * A class that tracks editor widgets.
@@ -33,7 +33,7 @@ export namespace ITerminal {
     /**
      * The terminal session associated with the widget.
      */
-    session: TerminalSession.ISession;
+    session: Terminal.ITerminalConnection;
 
     /**
      * Get a config option for the terminal.
@@ -57,7 +57,7 @@ export namespace ITerminal {
     /**
      * The font family used to render text.
      */
-    fontFamily: string | null;
+    fontFamily?: string;
 
     /**
      * The font size of the terminal in pixels.
@@ -67,7 +67,7 @@ export namespace ITerminal {
     /**
      * The line height used to render text.
      */
-    lineHeight: number | null;
+    lineHeight?: number;
 
     /**
      * The theme of the terminal.
@@ -78,7 +78,7 @@ export namespace ITerminal {
      * The amount of buffer scrollback to be used
      * with the terminal
      */
-    scrollback: number | null;
+    scrollback?: number;
 
     /**
      * Whether to shut down the session when closing a terminal or not.

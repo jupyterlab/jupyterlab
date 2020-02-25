@@ -6,9 +6,9 @@ import { INotebookModel, Notebook } from '.';
 
 import { Cell } from '@jupyterlab/cells';
 
-import { DefaultIconReact } from '@jupyterlab/ui-components';
+import { notTrustedIcon, trustedIcon } from '@jupyterlab/ui-components';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * Determine the notebook trust status message.
@@ -45,11 +45,9 @@ function NotebookTrustComponent(
   props: NotebookTrustComponent.IProps
 ): React.ReactElement<NotebookTrustComponent.IProps> {
   if (props.allCellsTrusted) {
-    return <DefaultIconReact name="trusted" top={'2px'} kind={'statusBar'} />;
+    return <trustedIcon.react top={'2px'} stylesheet={'statusBar'} />;
   } else {
-    return (
-      <DefaultIconReact name="not-trusted" top={'2px'} kind={'statusBar'} />
-    );
+    return <notTrustedIcon.react top={'2px'} stylesheet={'statusBar'} />;
   }
 }
 
@@ -93,8 +91,7 @@ export class NotebookTrustStatus extends VDomRenderer<
    * Construct a new status item.
    */
   constructor() {
-    super();
-    this.model = new NotebookTrustStatus.Model();
+    super(new NotebookTrustStatus.Model());
   }
 
   /**
@@ -225,8 +222,11 @@ export namespace NotebookTrustStatus {
      * Given a notebook model, figure out how many of the cells are trusted.
      */
     private _deriveCellTrustState(
-      model: INotebookModel
+      model: INotebookModel | null
     ): { total: number; trusted: number } {
+      if (model === null) {
+        return { total: 0, trusted: 0 };
+      }
       let cells = toArray(model.cells);
 
       let trusted = cells.reduce((accum, current) => {

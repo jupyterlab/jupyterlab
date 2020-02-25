@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { JSONExt } from '@phosphor/coreutils';
+import { JSONExt } from '@lumino/coreutils';
 
 import minimist from 'minimist';
 
@@ -115,6 +115,22 @@ export namespace PageConfig {
    */
   export function getTreeUrl(): string {
     return URLExt.join(getBaseUrl(), getOption('treeUrl'));
+  }
+
+  /**
+   * Get the base url for sharing links (usually baseUrl)
+   */
+  export function getShareUrl(): string {
+    return URLExt.normalize(getOption('shareUrl') || getBaseUrl());
+  }
+
+  /**
+   * Get the tree url for shareable links.
+   * Usually the same as treeUrl,
+   * but overrideable e.g. when sharing with JupyterHub.
+   */
+  export function getTreeShareUrl(): string {
+    return URLExt.normalize(URLExt.join(getShareUrl(), getOption('treeUrl')));
   }
 
   /**

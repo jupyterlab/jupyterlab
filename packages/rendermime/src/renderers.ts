@@ -13,7 +13,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 import escape from 'lodash.escape';
 
@@ -73,7 +73,9 @@ export function renderHTML(options: renderHTML.IOptions): Promise<void> {
       runButton.onclick = event => {
         host.innerHTML = originalSource;
         Private.evalInnerHTMLScriptTags(host);
-        host.removeChild(host.firstChild);
+        if (host.firstChild) {
+          host.removeChild(host.firstChild);
+        }
       };
       container.appendChild(warning);
       container.appendChild(runButton);
@@ -581,7 +583,7 @@ namespace Private {
    */
   export function handleDefaults(
     node: HTMLElement,
-    resolver?: IRenderMime.IResolver
+    resolver?: IRenderMime.IResolver | null
   ): void {
     // Handle anchor elements.
     let anchors = node.getElementsByTagName('a');
@@ -666,7 +668,7 @@ namespace Private {
       let headers = node.getElementsByTagName(headerType);
       for (let i = 0; i < headers.length; i++) {
         let header = headers[i];
-        header.id = header.textContent.replace(/ /g, '-');
+        header.id = (header.textContent ?? '').replace(/ /g, '-');
         let anchor = document.createElement('a');
         anchor.target = '_self';
         anchor.textContent = '¶';
@@ -780,7 +782,6 @@ namespace Private {
     marked.setOptions({
       gfm: true,
       sanitize: false,
-      tables: true,
       // breaks: true; We can't use GFM breaks as it causes problems with tables
       langPrefix: `cm-s-${CodeMirrorEditor.defaultConfig.theme} language-`,
       highlight: (code, lang, callback) => {
@@ -913,15 +914,15 @@ namespace Private {
     let n = numbers.shift();
     if (n === 2 && numbers.length >= 3) {
       // 24-bit RGB
-      r = numbers.shift();
-      g = numbers.shift();
-      b = numbers.shift();
+      r = numbers.shift()!;
+      g = numbers.shift()!;
+      b = numbers.shift()!;
       if ([r, g, b].some(c => c < 0 || 255 < c)) {
         throw new RangeError('Invalid range for RGB colors');
       }
     } else if (n === 5 && numbers.length >= 1) {
       // 256 colors
-      let idx = numbers.shift();
+      let idx = numbers.shift()!;
       if (idx < 0) {
         throw new RangeError('Color index must be >= 0');
       } else if (idx < 16) {

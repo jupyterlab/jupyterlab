@@ -3,7 +3,7 @@
 
 import { expect } from 'chai';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -14,7 +14,7 @@ import {
   DocumentRegistry,
   TextModelFactory
 } from '@jupyterlab/docregistry';
-import { JSONModel, DataGrid, CellRenderer } from '@phosphor/datagrid';
+import { JSONModel, DataGrid, CellRenderer } from '@lumino/datagrid';
 
 function createContext(): Context<DocumentRegistry.IModel> {
   const factory = new TextModelFactory();
@@ -80,7 +80,7 @@ describe('csvviewer/widget', () => {
     }
     function createGridSearchService(model: JSONModel): GridSearchService {
       const grid = new DataGrid();
-      grid.model = model;
+      grid.dataModel = model;
       return new GridSearchService(grid);
     }
 
@@ -103,7 +103,7 @@ describe('csvviewer/widget', () => {
           value: model.data('body', row, column),
           row,
           column
-        } as CellRenderer.ICellConfig;
+        } as CellRenderer.CellConfig;
         return cellRenderer(cellConfig);
       }
 
@@ -113,7 +113,7 @@ describe('csvviewer/widget', () => {
       searchService.find(query);
       expect(fakeRenderCell(0, 1)).to.equal('currentMatch');
       expect(fakeRenderCell(1, 1)).to.equal('anotherMatch');
-      expect(fakeRenderCell(0, 0)).to.equal(undefined);
+      expect(fakeRenderCell(0, 0)).to.equal('');
 
       // search again, the current match "moves" to be (1,1)
       searchService.find(query);

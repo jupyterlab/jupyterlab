@@ -10,7 +10,13 @@
       "path": "../coreutils"
     },
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../observables"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

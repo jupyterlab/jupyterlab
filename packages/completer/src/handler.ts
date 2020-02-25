@@ -3,15 +3,17 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDataConnector, Text } from '@jupyterlab/coreutils';
+import { Text } from '@jupyterlab/coreutils';
 
-import { ReadonlyJSONObject, JSONObject, JSONArray } from '@phosphor/coreutils';
+import { IDataConnector } from '@jupyterlab/statedb';
 
-import { IDisposable } from '@phosphor/disposable';
+import { ReadonlyJSONObject, JSONObject, JSONArray } from '@lumino/coreutils';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { IDisposable } from '@lumino/disposable';
 
-import { Signal } from '@phosphor/signaling';
+import { Message, MessageLoop } from '@lumino/messaging';
+
+import { Signal } from '@lumino/signaling';
 
 import { Completer } from './widget';
 
@@ -357,6 +359,10 @@ export class CompletionHandler implements IDisposable {
         // If a newer completion request has created a pending request, bail.
         if (pending !== this._pending) {
           throw new Error('A newer completion request is pending');
+        }
+
+        if (!reply) {
+          throw new Error(`Invalid request: ${request}`);
         }
 
         this._onReply(state, reply);

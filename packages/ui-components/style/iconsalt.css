@@ -1,0 +1,74 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/**
+ * Support for alt colors for icons as inline SVG HTMLElements
+ */
+
+/* alt recolor the primary elements of an icon */
+.jp-icon-alt .jp-icon0[fill] {
+  fill: var(--jp-layout-color0);
+}
+.jp-icon-alt .jp-icon1[fill] {
+  fill: var(--jp-layout-color1);
+}
+.jp-icon-alt .jp-icon2[fill] {
+  fill: var(--jp-layout-color2);
+}
+.jp-icon-alt .jp-icon3[fill] {
+  fill: var(--jp-layout-color3);
+}
+.jp-icon-alt .jp-icon4[fill] {
+  fill: var(--jp-layout-color4);
+}
+
+.jp-icon-alt .jp-icon0[stroke] {
+  stroke: var(--jp-layout-color0);
+}
+.jp-icon-alt .jp-icon1[stroke] {
+  stroke: var(--jp-layout-color1);
+}
+.jp-icon-alt .jp-icon2[stroke] {
+  stroke: var(--jp-layout-color2);
+}
+.jp-icon-alt .jp-icon3[stroke] {
+  stroke: var(--jp-layout-color3);
+}
+.jp-icon-alt .jp-icon4[stroke] {
+  stroke: var(--jp-layout-color4);
+}
+
+/* alt recolor the accent elements of an icon */
+.jp-icon-alt .jp-icon-accent0[fill] {
+  fill: var(--jp-inverse-layout-color0);
+}
+.jp-icon-alt .jp-icon-accent1[fill] {
+  fill: var(--jp-inverse-layout-color1);
+}
+.jp-icon-alt .jp-icon-accent2[fill] {
+  fill: var(--jp-inverse-layout-color2);
+}
+.jp-icon-alt .jp-icon-accent3[fill] {
+  fill: var(--jp-inverse-layout-color3);
+}
+.jp-icon-alt .jp-icon-accent4[fill] {
+  fill: var(--jp-inverse-layout-color4);
+}
+
+.jp-icon-alt .jp-icon-accent0[stroke] {
+  stroke: var(--jp-inverse-layout-color0);
+}
+.jp-icon-alt .jp-icon-accent1[stroke] {
+  stroke: var(--jp-inverse-layout-color1);
+}
+.jp-icon-alt .jp-icon-accent2[stroke] {
+  stroke: var(--jp-inverse-layout-color2);
+}
+.jp-icon-alt .jp-icon-accent3[stroke] {
+  stroke: var(--jp-inverse-layout-color3);
+}
+.jp-icon-alt .jp-icon-accent4[stroke] {
+  stroke: var(--jp-inverse-layout-color4);
+}

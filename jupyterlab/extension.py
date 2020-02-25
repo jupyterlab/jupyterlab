@@ -139,13 +139,12 @@ def load_jupyter_server_extension(nbapp):
         core_mode = False
 
     page_config = web_app.settings.setdefault('page_config_data', dict())
-    page_config['buildAvailable'] = not core_mode and not dev_mode
-    page_config['buildCheck'] = not core_mode and not dev_mode
+    page_config.setdefault('buildAvailable', not core_mode and not dev_mode)
+    page_config.setdefault('buildCheck', not core_mode and not dev_mode)
     page_config['devMode'] = dev_mode
     page_config['token'] = nbapp.serverapp.token
 
     # Client-side code assumes notebookVersion is a JSON-encoded string
-    # TODO: fix this when we can make such a change
     page_config['notebookVersion'] = dumps(version_info)
 
     if nbapp.serverapp.file_to_run and type(nbapp).__name__ == "LabApp":
@@ -159,7 +158,7 @@ def load_jupyter_server_extension(nbapp):
     logger.info('JupyterLab application directory is %s' % app_dir)
 
     build_url = ujoin(base_url, build_path)
-    builder = Builder(None, core_mode, None, app_options=build_handler_options)
+    builder = Builder(core_mode, app_options=build_handler_options)
     build_handler = (build_url, BuildHandler, {'builder': builder})
     handlers = [build_handler]
 
@@ -210,6 +209,7 @@ def load_jupyter_server_extension(nbapp):
         page_config['hubPrefix'] = nbapp.hub_prefix
         page_config['hubHost'] = nbapp.hub_host
         page_config['hubUser'] = nbapp.user
+        page_config['shareUrl'] = ujoin(nbapp.hub_prefix, 'user-redirect')
         # Assume the server_name property indicates running JupyterHub 1.0.
         if hasattr(nbapp, 'server_name'):
             page_config['hubServerName'] = nbapp.server_name

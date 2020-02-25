@@ -10,7 +10,7 @@
       "path": "../apputils"
     },
     {
-      "path": "../coreutils"
+      "path": "../nbformat"
     },
     {
       "path": "../observables"

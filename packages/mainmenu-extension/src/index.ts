@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { each, find } from '@phosphor/algorithm';
+import { each, find } from '@lumino/algorithm';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { Menu, Widget } from '@phosphor/widgets';
+import { Menu, Widget } from '@lumino/widgets';
 
 import {
   ILabShell,
@@ -32,6 +32,8 @@ import {
 } from '@jupyterlab/mainmenu';
 
 import { ServerConnection } from '@jupyterlab/services';
+
+import { jupyterIcon } from '@jupyterlab/ui-components';
 
 /**
  * A namespace for command IDs of semantic extension points.
@@ -68,6 +70,8 @@ export namespace CommandIDs {
   export const restartKernel = 'kernelmenu:restart';
 
   export const restartKernelAndClear = 'kernelmenu:restart-and-clear';
+
+  export const restartAndRunToSelected = 'notebook:restart-and-run-to-selected';
 
   export const changeKernel = 'kernelmenu:change';
 
@@ -114,13 +118,13 @@ export namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
-  requires: [ICommandPalette, IRouter],
-  optional: [ILabShell],
+  requires: [IRouter],
+  optional: [ICommandPalette, ILabShell],
   provides: IMainMenu,
   activate: (
     app: JupyterFrontEnd,
-    palette: ICommandPalette,
     router: IRouter,
+    palette: ICommandPalette | null,
     labShell: ILabShell | null
   ): IMainMenu => {
     const { commands } = app;
@@ -129,8 +133,13 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     menu.id = 'jp-MainMenu';
 
     let logo = new Widget();
-    logo.addClass('jp-MainAreaPortraitIcon');
-    logo.addClass('jp-JupyterIcon');
+    jupyterIcon.element({
+      container: logo.node,
+      elementPosition: 'center',
+      margin: '2px 2px 2px 8px',
+      height: 'auto',
+      width: '16px'
+    });
     logo.id = 'jp-MainLogo';
 
     // Only add quit button if the back-end supports it by checking page config.
@@ -196,27 +205,29 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       }
     });
 
-    // Add some of the commands defined here to the command palette.
-    if (menu.fileMenu.quitEntry) {
+    if (palette) {
+      // Add some of the commands defined here to the command palette.
+      if (menu.fileMenu.quitEntry) {
+        palette.addItem({
+          command: CommandIDs.shutdown,
+          category: 'Main Area'
+        });
+        palette.addItem({
+          command: CommandIDs.logout,
+          category: 'Main Area'
+        });
+      }
+
       palette.addItem({
-        command: CommandIDs.shutdown,
-        category: 'Main Area'
+        command: CommandIDs.shutdownAllKernels,
+        category: 'Kernel Operations'
       });
+
       palette.addItem({
-        command: CommandIDs.logout,
+        command: CommandIDs.activatePreviouslyUsedTab,
         category: 'Main Area'
       });
     }
-
-    palette.addItem({
-      command: CommandIDs.shutdownAllKernels,
-      category: 'Kernel Operations'
-    });
-
-    palette.addItem({
-      command: CommandIDs.activatePreviouslyUsedTab,
-      category: 'Main Area'
-    });
 
     app.shell.add(logo, 'top');
     app.shell.add(menu, 'top');
@@ -538,6 +549,7 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
   const restartGroup = [
     CommandIDs.restartKernel,
     CommandIDs.restartKernelAndClear,
+    CommandIDs.restartAndRunToSelected,
     CommandIDs.restartAndRunAll
   ].map(command => {
     return { command };
@@ -723,6 +735,8 @@ export function createTabsMenu(
     [
       { command: 'application:activate-next-tab' },
       { command: 'application:activate-previous-tab' },
+      { command: 'application:activate-next-tab-bar' },
+      { command: 'application:activate-previous-tab-bar' },
       { command: CommandIDs.activatePreviouslyUsedTab }
     ],
     0
@@ -742,7 +756,7 @@ export function createTabsMenu(
     },
     isToggled: args => {
       const id = args['id'] || '';
-      return app.shell.currentWidget && app.shell.currentWidget.id === id;
+      return !!app.shell.currentWidget && app.shell.currentWidget.id === id;
     },
     execute: args => app.shell.activateById((args['id'] as string) || '')
   });
@@ -828,7 +842,9 @@ namespace Private {
     label: keyof E
   ): string {
     let widget = app.shell.currentWidget;
-    const extender = find(s, value => value.tracker.has(widget));
+    const extender = widget
+      ? find(s, value => value.tracker.has(widget!))
+      : undefined;
     if (!extender) {
       return '';
     }
@@ -849,7 +865,9 @@ namespace Private {
   ): () => Promise<any> {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = find(s, value => value.tracker.has(widget));
+      const extender = widget
+        ? find(s, value => value.tracker.has(widget!))
+        : undefined;
       if (!extender) {
         return Promise.resolve(void 0);
       }
@@ -857,7 +875,7 @@ namespace Private {
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a function.
       let f = (extender[executor] as any) as (w: Widget) => Promise<any>;
-      return f(widget);
+      return f(widget!);
     };
   }
 
@@ -872,11 +890,13 @@ namespace Private {
   ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = find(s, value => value.tracker.has(widget));
+      const extender = widget
+        ? find(s, value => value.tracker.has(widget!))
+        : undefined;
       return (
         !!extender &&
         !!extender[executor] &&
-        (extender.isEnabled ? extender.isEnabled(widget) : true)
+        (extender.isEnabled && widget ? extender.isEnabled(widget) : true)
       );
     };
   }
@@ -892,13 +912,16 @@ namespace Private {
   ): () => boolean {
     return () => {
       let widget = app.shell.currentWidget;
-      const extender = find(s, value => value.tracker.has(widget));
+      const extender = widget
+        ? find(s, value => value.tracker.has(widget!))
+        : undefined;
       // Coerce extender[toggled] to be a function. When Typedoc is updated to use
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a function.
       return (
         !!extender &&
         !!extender[toggled] &&
+        !!widget &&
         !!((extender[toggled] as any) as (w: Widget) => () => boolean)(widget)
       );
     };

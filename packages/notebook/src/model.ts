@@ -14,9 +14,9 @@ import {
   CellModel
 } from '@jupyterlab/cells';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import {
   IObservableJSON,
@@ -151,11 +151,11 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    */
   dispose(): void {
     // Do nothing if already disposed.
-    if (this.cells === null) {
+    if (this.isDisposed) {
       return;
     }
     let cells = this.cells;
-    this._cells = null;
+    this._cells = null!;
     cells.dispose();
     super.dispose();
   }
@@ -182,7 +182,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    */
   toJSON(): nbformat.INotebookContent {
     let cells: nbformat.ICell[] = [];
-    for (let i = 0; i < this.cells.length; i++) {
+    for (let i = 0; i < (this.cells?.length || 0); i++) {
       let cell = this.cells.get(i);
       cells.push(cell.toJSON());
     }
@@ -282,9 +282,17 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
 
   /**
    * Initialize the model with its current state.
+   *
+   * # Notes
+   * Adds an empty code cell if the model is empty
+   * and clears undo state.
    */
   initialize(): void {
     super.initialize();
+    if (!this.cells.length) {
+      let factory = this.contentFactory;
+      this.cells.push(factory.createCodeCell({}));
+    }
     this.cells.clearUndo();
   }
 
@@ -371,7 +379,7 @@ export namespace NotebookModel {
     /**
      * The IModelDB in which to put data for the notebook model.
      */
-    modelDB: IModelDB;
+    modelDB: IModelDB | undefined;
 
     /**
      * Create a new cell by cell type.

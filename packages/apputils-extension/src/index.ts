@@ -13,30 +13,29 @@ import {
 import {
   Dialog,
   ICommandPalette,
+  ISessionContextDialogs,
   ISplashScreen,
   IWindowResolver,
   WindowResolver,
-  Printing
+  Printing,
+  sessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import {
-  Debouncer,
-  IRateLimiter,
-  ISettingRegistry,
-  IStateDB,
-  SettingRegistry,
-  StateDB,
-  Throttler,
-  URLExt
-} from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { IStateDB, StateDB } from '@jupyterlab/statedb';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { jupyterFaviconIcon } from '@jupyterlab/ui-components';
 
-import { DisposableDelegate } from '@phosphor/disposable';
+import { PromiseDelegate } from '@lumino/coreutils';
+
+import { DisposableDelegate } from '@lumino/disposable';
+
+import { Debouncer, Throttler } from '@lumino/polling';
 
 import { Palette } from './palette';
+
+import { settingsPlugin } from './settingsplugin';
 
 import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
 
@@ -82,21 +81,6 @@ const paletteRestorer: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:palette-restorer',
   requires: [ILayoutRestorer],
   autoStart: true
-};
-
-/**
- * The default setting registry provider.
- */
-const settings: JupyterFrontEndPlugin<ISettingRegistry> = {
-  id: '@jupyterlab/apputils-extension:settings',
-  activate: async (app: JupyterFrontEnd): Promise<ISettingRegistry> => {
-    const connector = app.serviceManager.settings;
-    const plugins = (await connector.list()).values;
-
-    return new SettingRegistry({ connector, plugins });
-  },
-  autoStart: true,
-  provides: ISettingRegistry
 };
 
 /**
@@ -165,11 +149,10 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
     galaxy.id = 'galaxy';
     logo.id = 'main-logo';
 
-    defaultIconRegistry.icon({
-      name: 'jupyter-favicon',
+    jupyterFaviconIcon.element({
       container: logo,
-      center: true,
-      kind: 'splash'
+
+      stylesheet: 'splash'
     });
 
     galaxy.appendChild(logo);
@@ -189,8 +172,8 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
     splash.appendChild(galaxy);
 
     // Create debounced recovery dialog function.
-    let dialog: Dialog<any>;
-    const recovery: IRateLimiter = new Throttler(async () => {
+    let dialog: Dialog<unknown> | null;
+    const recovery = new Throttler(async () => {
       if (dialog) {
         return;
       }
@@ -460,18 +443,31 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 };
 
 /**
+ * The default session context dialogs extension.
+ */
+const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
+  id: '@jupyterlab/apputils-extension:sessionDialogs',
+  provides: ISessionContextDialogs,
+  autoStart: true,
+  activate: () => {
+    return sessionContextDialogs;
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   palette,
   paletteRestorer,
+  print,
   resolver,
-  settings,
+  settingsPlugin,
   state,
   splash,
+  sessionDialogs,
   themesPlugin,
-  themesPaletteMenuPlugin,
-  print
+  themesPaletteMenuPlugin
 ];
 export default plugins;
 

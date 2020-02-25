@@ -7,11 +7,7 @@ import {
   VDomRenderer
 } from '@jupyterlab/apputils';
 
-import {
-  combineClasses,
-  DefaultIconReact,
-  defaultIconRegistry
-} from '@jupyterlab/ui-components';
+import { LabIcon } from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
@@ -20,17 +16,17 @@ import {
   map,
   each,
   toArray
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Token, ReadonlyJSONObject } from '@phosphor/coreutils';
+import { Token, ReadonlyJSONObject } from '@lumino/coreutils';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -120,7 +116,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
    * Construct a new launcher widget.
    */
   constructor(options: ILauncher.IOptions) {
-    super();
+    super(options.model);
     this._cwd = options.cwd;
     this._callback = options.callback;
     this._commands = options.commands;
@@ -151,7 +147,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
   /**
    * Render the launcher to virtual DOM nodes.
    */
-  protected render(): React.ReactElement<any> {
+  protected render(): React.ReactElement<any> | null {
     // Bail if there is no model.
     if (!this.model) {
       return null;
@@ -194,31 +190,24 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     // Now create the sections for each category
     orderedCategories.forEach(cat => {
       const item = categories[cat][0] as ILauncher.IItemOptions;
-      let iconClass = this._commands.iconClass(item.command, {
-        ...item.args,
-        cwd: this.cwd
-      });
-      let kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
+      const args = { ...item.args, cwd: this.cwd };
+      const kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
+
+      // DEPRECATED: remove _icon when lumino 2.0 is adopted
+      // if icon is aliasing iconClass, don't use it
+      const iconClass = this._commands.iconClass(item.command, args);
+      const _icon = this._commands.icon(item.command, args);
+      const icon = _icon === iconClass ? undefined : _icon;
+
       if (cat in categories) {
         section = (
           <div className="jp-Launcher-section" key={cat}>
             <div className="jp-Launcher-sectionHeader">
-              {kernel && defaultIconRegistry.contains(iconClass) ? (
-                <DefaultIconReact
-                  name={iconClass}
-                  className={''}
-                  center={true}
-                  kind={'launcherSection'}
-                />
-              ) : (
-                <div
-                  className={combineClasses(
-                    iconClass,
-                    'jp-Launcher-sectionIcon',
-                    'jp-Launcher-icon'
-                  )}
-                />
-              )}
+              <LabIcon.resolveReact
+                icon={icon}
+                iconClass={iconClass}
+                stylesheet="launcherSection"
+              />
               <h2 className="jp-Launcher-sectionTitle">{cat}</h2>
             </div>
             <div className="jp-Launcher-cardContainer">
@@ -267,6 +256,11 @@ export namespace ILauncher {
    * The options used to create a Launcher.
    */
   export interface IOptions {
+    /**
+     * The model of the launcher.
+     */
+    model: LauncherModel;
+
     /**
      * The cwd of the launcher.
      */
@@ -339,6 +333,12 @@ export namespace ILauncher {
      * spec.
      */
     kernelIconUrl?: string;
+
+    /**
+     * Metadata about the item.  This can be used by the launcher to
+     * affect how the item is displayed.
+     */
+    metadata?: ReadonlyJSONObject;
   }
 }
 
@@ -403,8 +403,13 @@ function Card(
     }
   };
 
+  // DEPRECATED: remove _icon when lumino 2.0 is adopted
+  // if icon is aliasing iconClass, don't use it
+  const iconClass = commands.iconClass(command, args);
+  const _icon = commands.icon(command, args);
+  const icon = _icon === iconClass ? undefined : _icon;
+
   // Return the VDOM element.
-  const iconClass = kernel ? '' : commands.iconClass(command, args);
   return (
     <div
       className="jp-LauncherCard"
@@ -415,27 +420,23 @@ function Card(
       data-category={item.category || 'Other'}
       key={Private.keyProperty.get(item)}
     >
-      {kernel ? (
-        <div className="jp-LauncherCard-icon">
-          {item.kernelIconUrl ? (
+      <div className="jp-LauncherCard-icon">
+        {kernel ? (
+          item.kernelIconUrl ? (
             <img src={item.kernelIconUrl} className="jp-Launcher-kernelIcon" />
           ) : (
             <div className="jp-LauncherCard-noKernelIcon">
               {label[0].toUpperCase()}
             </div>
-          )}
-        </div>
-      ) : (
-        <div className="jp-LauncherCard-icon">
-          <DefaultIconReact
-            name={`${iconClass} jp-Launcher-icon`}
-            className={''}
-            fallback={true}
-            center={true}
-            kind={'launcherCard'}
+          )
+        ) : (
+          <LabIcon.resolveReact
+            icon={icon}
+            iconClass={iconClass}
+            stylesheet="launcherCard"
           />
-        </div>
-      )}
+        )}
+      </div>
       <div className="jp-LauncherCard-label" title={title}>
         <p>{label}</p>
       </div>

@@ -1,36 +1,30 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { toArray } from '@lumino/algorithm';
+import { Menu } from '@lumino/widgets';
 
 import {
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import {
   ICommandPalette,
   IThemeManager,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
-
-import { TerminalSession } from '@jupyterlab/services';
-
 import { ILauncher } from '@jupyterlab/launcher';
-
 import { IFileMenu, IMainMenu } from '@jupyterlab/mainmenu';
-
-import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
 import { IRunningSessionManagers, IRunningSessions } from '@jupyterlab/running';
+import { Terminal } from '@jupyterlab/services';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ITerminalTracker, ITerminal } from '@jupyterlab/terminal';
+import { terminalIcon } from '@jupyterlab/ui-components';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as WidgetModuleType from '@jupyterlab/terminal/lib/widget';
-
-import { Menu } from '@phosphor/widgets';
-
-import { toArray } from '@phosphor/algorithm';
 
 /**
  * The command IDs used by the terminal plugin.
@@ -48,16 +42,6 @@ namespace CommandIDs {
 
   export const setTheme = 'terminal:set-theme';
 }
-
-/**
- * The class name for the terminal icon in the default theme.
- */
-const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
-
-/**
- * The class name added to a running session item icon.
- */
-const ITEM_ICON_CLASS = 'jp-RunningSessions-itemIcon';
 
 /**
  * The default terminal extension.
@@ -171,7 +155,7 @@ function activate(
   // Subscribe to changes in theme. This is needed as the theme
   // is computed dynamically based on the string value and DOM
   // properties.
-  themeManager.themeChanged.connect((sender, args) => {
+  themeManager?.themeChanged.connect((sender, args) => {
     tracker.forEach(widget => {
       const terminal = widget.content;
       if (terminal.getOption('theme') === 'inherit') {
@@ -293,14 +277,14 @@ function addRunningSessionManager(
   });
 
   class RunningTerminal implements IRunningSessions.IRunningItem {
-    constructor(model: TerminalSession.IModel) {
+    constructor(model: Terminal.IModel) {
       this._model = model;
     }
     open() {
       void app.commands.execute('terminal:open', { name: this._model.name });
     }
-    iconClass() {
-      return `${ITEM_ICON_CLASS} ${TERMINAL_ICON_CLASS}`;
+    icon() {
+      return terminalIcon;
     }
     label() {
       return `terminals/${this._model.name}`;
@@ -309,7 +293,7 @@ function addRunningSessionManager(
       return manager.shutdown(this._model.name);
     }
 
-    private _model: TerminalSession.IModel;
+    private _model: Terminal.IModel;
   }
 }
 
@@ -328,7 +312,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.createNew, {
     label: args => (args['isPalette'] ? 'New Terminal' : 'Terminal'),
     caption: 'Start a new terminal session',
-    iconClass: args => (args['isPalette'] ? '' : TERMINAL_ICON_CLASS),
+    icon: args => (args['isPalette'] ? undefined : terminalIcon),
     execute: async args => {
       // wait for the widget to lazy load
       let Terminal: typeof WidgetModuleType.Terminal;
@@ -336,19 +320,18 @@ export function addCommands(
         Terminal = (await Private.ensureWidget()).Terminal;
       } catch (err) {
         Private.showErrorMessage(err);
+        return;
       }
 
       const name = args['name'] as string;
 
       const session = await (name
-        ? serviceManager.terminals
-            .connectTo(name)
-            .catch(() => serviceManager.terminals.startNew())
+        ? serviceManager.terminals.connectTo({ model: { name } })
         : serviceManager.terminals.startNew());
 
       const term = new Terminal(session, options);
 
-      term.title.icon = TERMINAL_ICON_CLASS;
+      term.title.icon = terminalIcon;
       term.title.label = '...';
 
       let main = new MainAreaWidget({ content: term });
@@ -401,7 +384,7 @@ export function addCommands(
     label: 'Increase Terminal Font Size',
     execute: async () => {
       let { fontSize } = options;
-      if (fontSize < 72) {
+      if (fontSize && fontSize < 72) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
         } catch (err) {
@@ -415,7 +398,7 @@ export function addCommands(
     label: 'Decrease Terminal Font Size',
     execute: async () => {
       let { fontSize } = options;
-      if (fontSize > 9) {
+      if (fontSize && fontSize > 9) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);
         } catch (err) {

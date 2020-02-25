@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Contents, Kernel } from '@jupyterlab/services';
-
 import {
   ArrayExt,
   ArrayIterator,
@@ -11,17 +9,17 @@ import {
   empty,
   find,
   map
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { JSONValue } from '@phosphor/coreutils';
+import { PartialJSONValue, ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
-import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { DockLayout, Widget } from '@phosphor/widgets';
+import { DockLayout, Widget } from '@lumino/widgets';
 
-import { IClientSession, Toolbar } from '@jupyterlab/apputils';
+import { ISessionContext, Toolbar } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -33,6 +31,22 @@ import {
 import { IModelDB } from '@jupyterlab/observables';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
+
+import { Contents, Kernel } from '@jupyterlab/services';
+
+import {
+  fileIcon,
+  folderIcon,
+  imageIcon,
+  LabIcon,
+  jsonIcon,
+  markdownIcon,
+  notebookIcon,
+  pythonIcon,
+  rKernelIcon,
+  spreadsheetIcon,
+  yamlIcon
+} from '@jupyterlab/ui-components';
 
 import { TextModelFactory } from './default';
 
@@ -393,7 +407,7 @@ export class DocumentRegistry implements IDisposable {
     // Get the matching file types.
     let fts = this.getFileTypesForPath(PathExt.basename(path));
 
-    let factory: DocumentRegistry.WidgetFactory = undefined;
+    let factory: DocumentRegistry.WidgetFactory | undefined = undefined;
     // Find if a there is a default rendered factory for this type.
     for (let ft of fts) {
       if (ft.name in this._defaultRenderedWidgetFactories) {
@@ -565,7 +579,7 @@ export class DocumentRegistry implements IDisposable {
     path: string,
     widgetName: string,
     kernel?: Partial<Kernel.IModel>
-  ): IClientSession.IKernelPreference | undefined {
+  ): ISessionContext.IKernelPreference | undefined {
     widgetName = widgetName.toLowerCase();
     let widgetFactory = this._widgetFactories[widgetName];
     if (!widgetFactory) {
@@ -584,7 +598,7 @@ export class DocumentRegistry implements IDisposable {
       language,
       shouldStart: widgetFactory.preferKernel,
       canStart: widgetFactory.canStartKernel,
-      shutdownOnClose: widgetFactory.shutdownOnClose
+      shutdownOnDispose: widgetFactory.shutdownOnClose
     };
   }
 
@@ -612,7 +626,7 @@ export class DocumentRegistry implements IDisposable {
       default:
         // Find the best matching extension.
         if (model.name || model.path) {
-          let name = model.name || PathExt.basename(model.path);
+          let name = model.name || PathExt.basename(model.path!);
           let fts = this.getFileTypesForPath(name);
           if (fts.length > 0) {
             return fts[0];
@@ -635,7 +649,7 @@ export class DocumentRegistry implements IDisposable {
 
     // Look for a pattern match first.
     let ft = find(this._fileTypes, ft => {
-      return ft.pattern && ft.pattern.match(name) !== null;
+      return !!(ft.pattern && ft.pattern.match(name) !== null);
     });
     if (ft) {
       fts.push(ft);
@@ -777,7 +791,7 @@ export namespace DocumentRegistry {
     /**
      * Serialize the model to JSON.
      */
-    toJSON(): JSONValue;
+    toJSON(): PartialJSONValue;
 
     /**
      * Deserialize the model from JSON.
@@ -785,7 +799,7 @@ export namespace DocumentRegistry {
      * #### Notes
      * Should emit a [contentChanged] signal.
      */
-    fromJSON(value: any): void;
+    fromJSON(value: ReadonlyPartialJSONValue): void;
 
     /**
      * Initialize model state after initial data load.
@@ -832,9 +846,9 @@ export namespace DocumentRegistry {
     readonly model: T;
 
     /**
-     * The client session object associated with the context.
+     * The session context object associated with the context.
      */
-    readonly session: IClientSession;
+    readonly sessionContext: ISessionContext;
 
     /**
      * The current path associated with the document.
@@ -1162,6 +1176,11 @@ export namespace DocumentRegistry {
     readonly pattern?: string;
 
     /**
+     * The icon for the file type.
+     */
+    readonly icon?: LabIcon;
+
+    /**
      * The icon class name for the file type.
      */
     readonly iconClass?: string;
@@ -1189,8 +1208,6 @@ export namespace DocumentRegistry {
     name: 'default',
     extensions: [],
     mimeTypes: [],
-    iconClass: 'jp-MaterialIcon jp-FileIcon',
-    iconLabel: '',
     contentType: 'file',
     fileFormat: 'text'
   };
@@ -1211,7 +1228,7 @@ export namespace DocumentRegistry {
     /**
      * The name of the item or the widget factory being extended.
      */
-    readonly name: string;
+    readonly name?: string;
 
     /**
      * Whether the item was added or removed.
@@ -1226,7 +1243,8 @@ export namespace DocumentRegistry {
     ...fileTypeDefaults,
     name: 'text',
     mimeTypes: ['text/plain'],
-    extensions: ['.txt']
+    extensions: ['.txt'],
+    icon: fileIcon
   };
 
   /**
@@ -1240,7 +1258,7 @@ export namespace DocumentRegistry {
     extensions: ['.ipynb'],
     contentType: 'notebook',
     fileFormat: 'json',
-    iconClass: 'jp-MaterialIcon jp-NotebookIcon'
+    icon: notebookIcon
   };
 
   /**
@@ -1252,7 +1270,7 @@ export namespace DocumentRegistry {
     extensions: [],
     mimeTypes: ['text/directory'],
     contentType: 'directory',
-    iconClass: 'jp-MaterialIcon jp-FolderIcon'
+    icon: folderIcon
   };
 
   /**
@@ -1267,56 +1285,56 @@ export namespace DocumentRegistry {
       displayName: 'Markdown File',
       extensions: ['.md'],
       mimeTypes: ['text/markdown'],
-      iconClass: 'jp-MaterialIcon jp-MarkdownIcon'
+      icon: markdownIcon
     },
     {
       name: 'python',
       displayName: 'Python File',
       extensions: ['.py'],
       mimeTypes: ['text/x-python'],
-      iconClass: 'jp-MaterialIcon jp-PythonIcon'
+      icon: pythonIcon
     },
     {
       name: 'json',
       displayName: 'JSON File',
       extensions: ['.json'],
       mimeTypes: ['application/json'],
-      iconClass: 'jp-MaterialIcon jp-JsonIcon'
+      icon: jsonIcon
     },
     {
       name: 'csv',
       displayName: 'CSV File',
       extensions: ['.csv'],
       mimeTypes: ['text/csv'],
-      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+      icon: spreadsheetIcon
     },
     {
       name: 'tsv',
       displayName: 'TSV File',
       extensions: ['.tsv'],
       mimeTypes: ['text/csv'],
-      iconClass: 'jp-MaterialIcon jp-SpreadsheetIcon'
+      icon: spreadsheetIcon
     },
     {
       name: 'r',
       displayName: 'R File',
       mimeTypes: ['text/x-rsrc'],
       extensions: ['.r'],
-      iconClass: 'jp-MaterialIcon jp-RKernelIcon'
+      icon: rKernelIcon
     },
     {
       name: 'yaml',
       displayName: 'YAML File',
       mimeTypes: ['text/x-yaml', 'text/yaml'],
       extensions: ['.yaml', '.yml'],
-      iconClass: 'jp-MaterialIcon jp-YamlIcon'
+      icon: yamlIcon
     },
     {
       name: 'svg',
       displayName: 'Image',
       mimeTypes: ['image/svg+xml'],
       extensions: ['.svg'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1324,7 +1342,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/tiff'],
       extensions: ['.tif', '.tiff'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1332,7 +1350,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/jpeg'],
       extensions: ['.jpg', '.jpeg'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1340,7 +1358,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/gif'],
       extensions: ['.gif'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1348,7 +1366,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/png'],
       extensions: ['.png'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      icon: imageIcon,
       fileFormat: 'base64'
     },
     {
@@ -1356,7 +1374,7 @@ export namespace DocumentRegistry {
       displayName: 'Image',
       mimeTypes: ['image/bmp'],
       extensions: ['.bmp'],
-      iconClass: 'jp-MaterialIcon jp-ImageIcon',
+      icon: imageIcon,
       fileFormat: 'base64'
     }
   ];

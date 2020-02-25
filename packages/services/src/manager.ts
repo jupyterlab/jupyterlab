@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Poll } from '@jupyterlab/coreutils';
+import { IDisposable } from '@lumino/disposable';
 
-import { IDisposable } from '@phosphor/disposable';
+import { Poll } from '@lumino/polling';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Builder, BuildManager } from './builder';
 
@@ -13,17 +13,18 @@ import { NbConvert, NbConvertManager } from './nbconvert';
 
 import { Contents, ContentsManager } from './contents';
 
-import { Kernel } from './kernel';
+import { KernelSpec, KernelSpecManager } from './kernelspec';
 
 import { Session, SessionManager } from './session';
 
 import { Setting, SettingManager } from './setting';
 
-import { TerminalSession, TerminalManager } from './terminal';
+import { Terminal, TerminalManager } from './terminal';
 
 import { ServerConnection } from './serverconnection';
 
 import { Workspace, WorkspaceManager } from './workspace';
+import { KernelManager } from './kernel';
 
 /**
  * A Jupyter services manager.
@@ -35,44 +36,37 @@ export class ServiceManager implements ServiceManager.IManager {
   constructor(options: ServiceManager.IOptions = {}) {
     const defaultDrive = options.defaultDrive;
     const serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
-    const standby = options.standby || 'when-hidden';
+      options.serverSettings ?? ServerConnection.makeSettings();
+    const standby = options.standby ?? 'when-hidden';
     const normalized = { defaultDrive, serverSettings, standby };
 
+    const kernelManager = new KernelManager(normalized);
     this.serverSettings = serverSettings;
     this.contents = new ContentsManager(normalized);
-    this.sessions = new SessionManager(normalized);
+    this.sessions = new SessionManager({
+      ...normalized,
+      kernelManager: kernelManager
+    });
     this.settings = new SettingManager(normalized);
     this.terminals = new TerminalManager(normalized);
     this.builder = new BuildManager(normalized);
     this.workspaces = new WorkspaceManager(normalized);
     this.nbconvert = new NbConvertManager(normalized);
-
-    this.sessions.specsChanged.connect((_, specs) => {
-      this._specsChanged.emit(specs);
-    });
+    this.kernelspecs = new KernelSpecManager(normalized);
 
     // Relay connection failures from the service managers that poll
-    // the server for running sessions.
-    // TODO: should we also relay connection failures from other managers?
+    // the server for current information.
+    this.kernelspecs.connectionFailure.connect(this._onConnectionFailure, this);
     this.sessions.connectionFailure.connect(this._onConnectionFailure, this);
     this.terminals.connectionFailure.connect(this._onConnectionFailure, this);
 
-    this._readyPromise = this.sessions.ready.then(() => {
-      if (this.terminals.isAvailable()) {
-        return this.terminals.ready;
-      }
-    });
-    void this._readyPromise.then(() => {
+    let readyList = [this.sessions.ready, this.kernelspecs.ready];
+    if (this.terminals.isAvailable()) {
+      readyList.push(this.terminals.ready);
+    }
+    this._readyPromise = Promise.all(readyList).then(() => {
       this._isReady = true;
     });
-  }
-
-  /**
-   * A signal emitted when the kernel specs change.
-   */
-  get specsChanged(): ISignal<this, Kernel.ISpecModels> {
-    return this._specsChanged;
   }
 
   /**
@@ -106,13 +100,6 @@ export class ServiceManager implements ServiceManager.IManager {
   }
 
   /**
-   * The kernel spec models.
-   */
-  get specs(): Kernel.ISpecModels | null {
-    return this.sessions.specs;
-  }
-
-  /**
    * The server settings of the manager.
    */
   readonly serverSettings: ServerConnection.ISettings;
@@ -121,6 +108,11 @@ export class ServiceManager implements ServiceManager.IManager {
    * Get the session manager instance.
    */
   readonly sessions: SessionManager;
+
+  /**
+   * Get the session manager instance.
+   */
+  readonly kernelspecs: KernelSpecManager;
 
   /**
    * Get the setting manager instance.
@@ -172,7 +164,6 @@ export class ServiceManager implements ServiceManager.IManager {
 
   private _isDisposed = false;
   private _readyPromise: Promise<void>;
-  private _specsChanged = new Signal<this, Kernel.ISpecModels>(this);
   private _connectionFailure = new Signal<this, Error>(this);
   private _isReady = false;
 }
@@ -216,24 +207,19 @@ export namespace ServiceManager {
     readonly sessions: Session.IManager;
 
     /**
+     * The session manager for the manager.
+     */
+    readonly kernelspecs: KernelSpec.IManager;
+
+    /**
      * The setting manager for the manager.
      */
     readonly settings: Setting.IManager;
 
     /**
-     * The kernel spec models.
-     */
-    readonly specs: Kernel.ISpecModels | null;
-
-    /**
-     * A signal emitted when the kernel specs change.
-     */
-    readonly specsChanged: ISignal<IManager, Kernel.ISpecModels>;
-
-    /**
      * The terminals manager for the manager.
      */
-    readonly terminals: TerminalSession.IManager;
+    readonly terminals: Terminal.IManager;
 
     /**
      * The workspace manager for the manager.

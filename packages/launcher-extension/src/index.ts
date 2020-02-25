@@ -6,16 +6,13 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
-
 import { ILauncher, LauncherModel, Launcher } from '@jupyterlab/launcher';
+import { launcherIcon } from '@jupyterlab/ui-components';
 
-import { toArray } from '@phosphor/algorithm';
-
-import { JSONObject } from '@phosphor/coreutils';
-
-import { Widget } from '@phosphor/widgets';
+import { toArray } from '@lumino/algorithm';
+import { JSONObject } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The command IDs used by the launcher plugin.
@@ -30,7 +27,8 @@ namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
-  requires: [ICommandPalette, ILabShell],
+  requires: [ILabShell],
+  optional: [ICommandPalette],
   provides: ILauncher,
   autoStart: true
 };
@@ -45,8 +43,8 @@ export default plugin;
  */
 function activate(
   app: JupyterFrontEnd,
-  palette: ICommandPalette,
-  labShell: ILabShell
+  labShell: ILabShell,
+  palette: ICommandPalette | null
 ): ILauncher {
   const { commands } = app;
   const model = new LauncherModel();
@@ -59,11 +57,11 @@ function activate(
       const callback = (item: Widget) => {
         labShell.add(item, 'main', { ref: id });
       };
-      const launcher = new Launcher({ cwd, callback, commands });
+      const launcher = new Launcher({ model, cwd, callback, commands });
 
       launcher.model = model;
+      launcher.title.icon = launcherIcon;
       launcher.title.label = 'Launcher';
-      launcher.title.iconClass = 'jp-LauncherIcon';
 
       let main = new MainAreaWidget({ content: launcher });
 
@@ -82,7 +80,9 @@ function activate(
     }
   });
 
-  palette.addItem({ command: CommandIDs.create, category: 'Launcher' });
+  if (palette) {
+    palette.addItem({ command: CommandIDs.create, category: 'Launcher' });
+  }
 
   return model;
 }

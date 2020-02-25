@@ -3,11 +3,13 @@
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
 
-import { ArrayExt } from '@phosphor/algorithm';
+import { MenuSvg } from '@jupyterlab/ui-components';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { ArrayExt } from '@lumino/algorithm';
 
-import { Menu, Widget } from '@phosphor/widgets';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+
+import { Menu, Widget } from '@lumino/widgets';
 
 /**
  * A common interface for extensible JupyterLab application menus.
@@ -61,7 +63,8 @@ export class JupyterLabMenu implements IJupyterLabMenu {
    *   groups that are added to the menu.
    */
   constructor(options: Menu.IOptions, includeSeparators: boolean = true) {
-    this.menu = new Menu(options);
+    // render menu with inline svg icon tweaks
+    this.menu = new MenuSvg(options);
     this._includeSeparators = includeSeparators;
   }
 

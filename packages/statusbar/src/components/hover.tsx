@@ -3,9 +3,9 @@
 
 import { HoverBox } from '@jupyterlab/apputils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget, PanelLayout } from '@phosphor/widgets';
+import { Widget, PanelLayout } from '@lumino/widgets';
 
 import { style } from 'typestyle/lib';
 

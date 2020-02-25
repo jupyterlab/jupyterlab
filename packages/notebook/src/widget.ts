@@ -1,23 +1,23 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt, each } from '@phosphor/algorithm';
+import { ArrayExt, each } from '@lumino/algorithm';
 
-import { JSONValue } from '@phosphor/coreutils';
+import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { MimeData } from '@phosphor/coreutils';
+import { MimeData } from '@lumino/coreutils';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Drag, IDragEvent } from '@phosphor/dragdrop';
+import { Drag, IDragEvent } from '@lumino/dragdrop';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { PanelLayout, Widget } from '@lumino/widgets';
 
-import { h, VirtualDOM } from '@phosphor/virtualdom';
+import { h, VirtualDOM } from '@lumino/virtualdom';
 
 import {
   ICellModel,
@@ -32,7 +32,9 @@ import {
 
 import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
+
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { IObservableMap, IObservableList } from '@jupyterlab/observables';
 
@@ -204,10 +206,10 @@ export class StaticNotebook extends Widget {
   /**
    * The model for the widget.
    */
-  get model(): INotebookModel {
+  get model(): INotebookModel | null {
     return this._model;
   }
-  set model(newValue: INotebookModel) {
+  set model(newValue: INotebookModel | null) {
     newValue = newValue || null;
     if (this._model === newValue) {
       return;
@@ -217,7 +219,7 @@ export class StaticNotebook extends Widget {
 
     if (oldValue && oldValue.modelDB.isCollaborative) {
       void oldValue.modelDB.connected.then(() => {
-        oldValue.modelDB.collaborators.changed.disconnect(
+        oldValue!.modelDB.collaborators!.changed.disconnect(
           this._onCollaboratorsChanged,
           this
         );
@@ -225,7 +227,7 @@ export class StaticNotebook extends Widget {
     }
     if (newValue && newValue.modelDB.isCollaborative) {
       void newValue.modelDB.connected.then(() => {
-        newValue.modelDB.collaborators.changed.connect(
+        newValue!.modelDB.collaborators!.changed.connect(
           this._onCollaboratorsChanged,
           this
         );
@@ -295,8 +297,8 @@ export class StaticNotebook extends Widget {
    * The default implementation is a no-op.
    */
   protected onModelChanged(
-    oldValue: INotebookModel,
-    newValue: INotebookModel
+    oldValue: INotebookModel | null,
+    newValue: INotebookModel | null
   ): void {
     // No-op.
   }
@@ -319,8 +321,8 @@ export class StaticNotebook extends Widget {
    * when the `language_info` metadata changes.
    */
   protected onMetadataChanged(
-    sender: IObservableMap<JSONValue>,
-    args: IObservableMap.IChangedArgs<JSONValue>
+    sender: IObservableMap<ReadonlyPartialJSONValue | undefined>,
+    args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
   ): void {
     switch (args.key) {
       case 'language_info':
@@ -362,8 +364,8 @@ export class StaticNotebook extends Widget {
    * Handle a new model on the widget.
    */
   private _onModelChanged(
-    oldValue: INotebookModel,
-    newValue: INotebookModel
+    oldValue: INotebookModel | null,
+    newValue: INotebookModel | null
   ): void {
     let layout = this.layout as PanelLayout;
     if (oldValue) {
@@ -423,7 +425,7 @@ export class StaticNotebook extends Widget {
           // Add the cell in a new context to avoid triggering another
           // cell changed event during the handling of this signal.
           requestAnimationFrame(() => {
-            if (!model.isDisposed && !model.cells.length) {
+            if (model && !model.isDisposed && !model.cells.length) {
               model.cells.push(
                 model.contentFactory.createCell(
                   this.notebookConfig.defaultCell,
@@ -559,7 +561,7 @@ export class StaticNotebook extends Widget {
    * Update the mimetype of the notebook.
    */
   private _updateMimetype(): void {
-    let info = this._model.metadata.get(
+    let info = this._model?.metadata.get(
       'language_info'
     ) as nbformat.ILanguageInfoMetadata;
     if (!info) {
@@ -582,7 +584,7 @@ export class StaticNotebook extends Widget {
     for (let i = 0; i < this.widgets.length; i++) {
       let cell = this.widgets[i];
       for (let key of cell.model.selections.keys()) {
-        if (!this._model.modelDB.collaborators.has(key)) {
+        if (false === this._model?.modelDB?.collaborators?.has(key)) {
           cell.model.selections.delete(key);
         }
       }
@@ -608,7 +610,7 @@ export class StaticNotebook extends Widget {
           break;
       }
       Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-        cell.editor.setOption(key, config[key]);
+        cell.editor.setOption(key, config[key] ?? null);
       });
       cell.editor.refresh();
     }
@@ -628,7 +630,7 @@ export class StaticNotebook extends Widget {
   private _editorConfig = StaticNotebook.defaultEditorConfig;
   private _notebookConfig = StaticNotebook.defaultNotebookConfig;
   private _mimetype = 'text/plain';
-  private _model: INotebookModel = null;
+  private _model: INotebookModel | null = null;
   private _mimetypeService: IEditorMimeTypeService;
   private _modelChanged = new Signal<this, void>(this);
   private _modelContentChanged = new Signal<this, void>(this);
@@ -759,13 +761,19 @@ export namespace StaticNotebook {
      * The default type for new notebook cells.
      */
     defaultCell: nbformat.CellType;
+
+    /**
+     * Should timing be recorded in metadata
+     */
+    recordTiming: boolean;
   }
   /**
    * Default configuration options for notebooks.
    */
   export const defaultNotebookConfig: INotebookConfig = {
     scrollPastEnd: true,
-    defaultCell: 'code'
+    defaultCell: 'code',
+    recordTiming: false
   };
 
   /**
@@ -849,7 +857,7 @@ export class Notebook extends StaticNotebook {
     super(Private.processNotebookOptions(options));
     this.node.tabIndex = -1; // Allow the widget to take focus.
     // Allow the node to scroll while dragging items.
-    this.node.setAttribute('data-p-dragscroll', 'true');
+    this.node.setAttribute('data-lm-dragscroll', 'true');
   }
 
   /**
@@ -906,7 +914,7 @@ export class Notebook extends StaticNotebook {
       if (activeCell instanceof MarkdownCell) {
         activeCell.rendered = false;
       }
-      activeCell.inputHidden = false;
+      activeCell!.inputHidden = false;
     } else {
       // Focus on the notebook document, which blurs the active cell.
       this.node.focus();
@@ -1063,7 +1071,7 @@ export class Notebook extends StaticNotebook {
     let i: number;
 
     // Handle the case of no current selection.
-    if (anchor === null) {
+    if (anchor === null || head === null) {
       if (index === this.activeCellIndex) {
         // Already collapsed selection, nothing more to do.
         return;
@@ -1149,7 +1157,9 @@ export class Notebook extends StaticNotebook {
    * Throws an error if the currently selected cells do not form a contiguous
    * selection.
    */
-  getContiguousSelection(): { head: number | null; anchor: number | null } {
+  getContiguousSelection():
+    | { head: number; anchor: number }
+    | { head: null; anchor: null } {
     let cells = this.widgets;
     let first = ArrayExt.findFirstIndex(cells, c => this.isSelected(c));
 
@@ -1271,16 +1281,16 @@ export class Notebook extends StaticNotebook {
       case 'focusout':
         this._evtFocusOut(event as MouseEvent);
         break;
-      case 'p-dragenter':
+      case 'lm-dragenter':
         this._evtDragEnter(event as IDragEvent);
         break;
-      case 'p-dragleave':
+      case 'lm-dragleave':
         this._evtDragLeave(event as IDragEvent);
         break;
-      case 'p-dragover':
+      case 'lm-dragover':
         this._evtDragOver(event as IDragEvent);
         break;
-      case 'p-drop':
+      case 'lm-drop':
         this._evtDrop(event as IDragEvent);
         break;
       default:
@@ -1305,10 +1315,10 @@ export class Notebook extends StaticNotebook {
     // Capture drag events for the notebook widget
     // in order to preempt the drag/drop handlers in the
     // code editor widgets, which can take text data.
-    node.addEventListener('p-dragenter', this, true);
-    node.addEventListener('p-dragleave', this, true);
-    node.addEventListener('p-dragover', this, true);
-    node.addEventListener('p-drop', this, true);
+    node.addEventListener('lm-dragenter', this, true);
+    node.addEventListener('lm-dragleave', this, true);
+    node.addEventListener('lm-dragover', this, true);
+    node.addEventListener('lm-drop', this, true);
   }
 
   /**
@@ -1323,10 +1333,10 @@ export class Notebook extends StaticNotebook {
     node.removeEventListener('dblclick', this);
     node.removeEventListener('focusin', this);
     node.removeEventListener('focusout', this);
-    node.removeEventListener('p-dragenter', this, true);
-    node.removeEventListener('p-dragleave', this, true);
-    node.removeEventListener('p-dragover', this, true);
-    node.removeEventListener('p-drop', this, true);
+    node.removeEventListener('lm-dragenter', this, true);
+    node.removeEventListener('lm-dragleave', this, true);
+    node.removeEventListener('lm-dragover', this, true);
+    node.removeEventListener('lm-drop', this, true);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
   }
@@ -1413,7 +1423,7 @@ export class Notebook extends StaticNotebook {
       }
     });
     if (count > 1) {
-      activeCell.addClass(OTHER_SELECTED_CLASS);
+      activeCell?.addClass(OTHER_SELECTED_CLASS);
     }
     if (this._fragment) {
       let el;
@@ -1438,7 +1448,7 @@ export class Notebook extends StaticNotebook {
       void modelDB.connected.then(() => {
         if (!cell.isDisposed) {
           // Setup the selection style for collaborators.
-          let localCollaborator = modelDB.collaborators.localCollaborator;
+          let localCollaborator = modelDB.collaborators!.localCollaborator;
           cell.editor.uuid = localCollaborator.sessionId;
           cell.editor.selectionStyle = {
             ...CodeEditor.defaultSelectionStyle,
@@ -1511,7 +1521,7 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex--;
       // Move the cursor to the first position on the last line.
       if (this.activeCellIndex < prev) {
-        let editor = this.activeCell.editor;
+        let editor = this.activeCell!.editor;
         let lastLine = editor.lineCount - 1;
         editor.setCursorPosition({ line: lastLine, column: 0 });
       }
@@ -1519,7 +1529,7 @@ export class Notebook extends StaticNotebook {
       this.activeCellIndex++;
       // Move the cursor to the first character.
       if (this.activeCellIndex > prev) {
-        let editor = this.activeCell.editor;
+        let editor = this.activeCell!.editor;
         editor.setCursorPosition({ line: 0, column: 0 });
       }
     }
@@ -1550,18 +1560,19 @@ export class Notebook extends StaticNotebook {
   private _findCell(node: HTMLElement): number {
     // Trace up the DOM hierarchy to find the root cell node.
     // Then find the corresponding child and select it.
-    while (node && node !== this.node) {
-      if (node.classList.contains(NB_CELL_CLASS)) {
+    let n: HTMLElement | null = node;
+    while (n && n !== this.node) {
+      if (n.classList.contains(NB_CELL_CLASS)) {
         let i = ArrayExt.findFirstIndex(
           this.widgets,
-          widget => widget.node === node
+          widget => widget.node === n
         );
         if (i !== -1) {
           return i;
         }
         break;
       }
-      node = node.parentElement;
+      n = n.parentElement;
     }
     return -1;
   }
@@ -1693,7 +1704,7 @@ export class Notebook extends StaticNotebook {
     } else if (targetArea === 'prompt' || targetArea === 'cell') {
       // We don't want to prevent the default selection behavior
       // if there is currently text selected in an output.
-      const hasSelection = window.getSelection().toString() !== '';
+      const hasSelection = (window.getSelection() ?? '').toString() !== '';
       if (button === 0 && shiftKey && !hasSelection) {
         // Prevent browser selecting text in prompt or output
         event.preventDefault();
@@ -1800,7 +1811,7 @@ export class Notebook extends StaticNotebook {
         break;
       case 'couldDrag':
         // Check for a drag initialization.
-        let data = this._dragData;
+        let data = this._dragData!;
         let dx = Math.abs(event.clientX - data.pressX);
         let dy = Math.abs(event.clientY - data.pressY);
         if (dx >= DRAG_THRESHOLD || dy >= DRAG_THRESHOLD) {
@@ -1814,7 +1825,7 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle the `'p-dragenter'` event for the widget.
+   * Handle the `'lm-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
@@ -1833,7 +1844,7 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle the `'p-dragleave'` event for the widget.
+   * Handle the `'lm-dragleave'` event for the widget.
    */
   private _evtDragLeave(event: IDragEvent): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
@@ -1848,7 +1859,7 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle the `'p-dragover'` event for the widget.
+   * Handle the `'lm-dragover'` event for the widget.
    */
   private _evtDragOver(event: IDragEvent): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
@@ -1871,7 +1882,7 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle the `'p-drop'` event for the widget.
+   * Handle the `'lm-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
     if (!event.mimeData.hasData(JUPYTER_CELL_MIME)) {
@@ -1892,6 +1903,9 @@ export class Notebook extends StaticNotebook {
       }
       target = target.parentElement;
     }
+
+    // Model presence should be checked before calling event handlers
+    let model = this.model!;
 
     let source: Notebook = event.source;
     if (source === this) {
@@ -1918,17 +1932,17 @@ export class Notebook extends StaticNotebook {
       }
 
       // Move the cells one by one
-      this.model.cells.beginCompoundOperation();
+      model.cells.beginCompoundOperation();
       if (fromIndex < toIndex) {
         each(toMove, cellWidget => {
-          this.model.cells.move(fromIndex, toIndex);
+          model.cells.move(fromIndex, toIndex);
         });
       } else if (fromIndex > toIndex) {
         each(toMove, cellWidget => {
-          this.model.cells.move(fromIndex++, toIndex++);
+          model.cells.move(fromIndex++, toIndex++);
         });
       }
-      this.model.cells.endCompoundOperation();
+      model.cells.endCompoundOperation();
     } else {
       // Handle the case where we are copying cells between
       // notebooks.
@@ -1939,7 +1953,6 @@ export class Notebook extends StaticNotebook {
         index = this.widgets.length;
       }
       let start = index;
-      let model = this.model;
       let values = event.mimeData.getData(JUPYTER_CELL_MIME);
       let factory = model.contentFactory;
 
@@ -1972,7 +1985,7 @@ export class Notebook extends StaticNotebook {
    * Start a drag event.
    */
   private _startDrag(index: number, clientX: number, clientY: number): void {
-    let cells = this.model.cells;
+    let cells = this.model!.cells;
     let selected: nbformat.ICell[] = [];
     let toMove: Cell[] = [];
 
@@ -1985,9 +1998,9 @@ export class Notebook extends StaticNotebook {
       }
     });
     let activeCell = this.activeCell;
-    let dragImage: HTMLElement = null;
+    let dragImage: HTMLElement | null = null;
     let countString: string;
-    if (activeCell.model.type === 'code') {
+    if (activeCell?.model.type === 'code') {
       let executionCount = (activeCell.model as ICodeCellModel).executionCount;
       countString = ' ';
       if (executionCount) {
@@ -2001,7 +2014,7 @@ export class Notebook extends StaticNotebook {
     dragImage = Private.createDragImage(
       selected.length,
       countString,
-      activeCell.model.value.text.split('\n')[0].slice(0, 26)
+      activeCell?.model.value.text.split('\n')[0].slice(0, 26) ?? ''
     );
 
     // Set up the drag event.
@@ -2153,9 +2166,13 @@ export class Notebook extends StaticNotebook {
   private _activeCellIndex = -1;
   private _activeCell: Cell | null = null;
   private _mode: NotebookMode = 'command';
-  private _drag: Drag = null;
+  private _drag: Drag | null = null;
   private _fragment = '';
-  private _dragData: { pressX: number; pressY: number; index: number } = null;
+  private _dragData: {
+    pressX: number;
+    pressY: number;
+    index: number;
+  } | null = null;
   private _mouseMode: 'select' | 'couldDrag' | null = null;
   private _activeCellChanged = new Signal<this, Cell>(this);
   private _stateChanged = new Signal<this, IChangedArgs<any>>(this);

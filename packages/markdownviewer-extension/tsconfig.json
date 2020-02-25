@@ -13,13 +13,13 @@
       "path": "../apputils"
     },
     {
-      "path": "../coreutils"
-    },
-    {
       "path": "../markdownviewer"
     },
     {
       "path": "../rendermime"
+    },
+    {
+      "path": "../settingregistry"
     }
   ]
 }

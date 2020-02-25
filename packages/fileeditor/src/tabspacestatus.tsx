@@ -15,7 +15,7 @@ import {
   TextItem
 } from '@jupyterlab/statusbar';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 /**
  * A namespace for TabSpaceComponent statics.
@@ -67,9 +67,8 @@ export class TabSpaceStatus extends VDomRenderer<TabSpaceStatus.Model> {
    * Create a new tab/space status item.
    */
   constructor(options: TabSpaceStatus.IOptions) {
-    super();
+    super(new TabSpaceStatus.Model());
     this._menu = options.menu;
-    this.model = new TabSpaceStatus.Model();
     this.addClass(interactiveItem);
   }
 

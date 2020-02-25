@@ -1,19 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Debouncer } from '@jupyterlab/coreutils';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { DockPanelSvg, TabBarSvg } from '@jupyterlab/ui-components';
+import { DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
 
-import { ArrayExt, find, IIterator, iter, toArray } from '@phosphor/algorithm';
+import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
-import { PromiseDelegate, Token } from '@phosphor/coreutils';
+import { PromiseDelegate, Token } from '@lumino/coreutils';
 
-import { Message, MessageLoop, IMessageHandler } from '@phosphor/messaging';
+import { Message, MessageLoop, IMessageHandler } from '@lumino/messaging';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { Debouncer } from '@lumino/polling';
+
+import { ISignal, Signal } from '@lumino/signaling';
 
 import {
   BoxLayout,
@@ -27,7 +27,7 @@ import {
   TabBar,
   Title,
   Widget
-} from '@phosphor/widgets';
+} from '@lumino/widgets';
 
 import { JupyterFrontEnd } from './frontend';
 
@@ -179,9 +179,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     let topHandler = (this._topHandler = new Private.PanelHandler());
     let bottomPanel = (this._bottomPanel = new BoxPanel());
     let hboxPanel = new BoxPanel();
-    let dockPanel = (this._dockPanel = new DockPanelSvg({
-      kind: 'dockPanelBar'
-    }));
+    let dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
     let hsplitPanel = new SplitPanel();
@@ -499,6 +497,30 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
   }
 
+  /*
+   * Activate the next TabBar.
+   */
+  activateNextTabBar(): void {
+    let nextBar = this._adjacentBar('next');
+    if (nextBar) {
+      if (nextBar.currentTitle) {
+        nextBar.currentTitle.owner.activate();
+      }
+    }
+  }
+
+  /*
+   * Activate the next TabBar.
+   */
+  activatePreviousTabBar(): void {
+    let nextBar = this._adjacentBar('previous');
+    if (nextBar) {
+      if (nextBar.currentTitle) {
+        nextBar.currentTitle.owner.activate();
+      }
+    }
+  }
+
   add(
     widget: Widget,
     area: ILabShell.Area = 'main',
@@ -742,12 +764,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     let ref: Widget | null = this.currentWidget;
 
     if (options.ref) {
-      ref = find(dock.widgets(), value => value.id === options.ref!) || null;
+      ref = find(dock.widgets(), value => value.id === options!.ref!) || null;
     }
 
+    const { title } = widget;
     // Add widget ID to tab so that we can get a handle on the tab's widget
     // (for context menu support)
-    widget.title.dataset = { ...widget.title.dataset, id: widget.id };
+    title.dataset = { ...title.dataset, id: widget.id };
+
+    // bind an appropriate style to the icon
+    if (title.icon instanceof LabIcon) {
+      title.icon = title.icon.bindprops({
+        stylesheet: 'mainAreaTab'
+      });
+    }
 
     dock.addWidget(widget, { mode, ref });
 
@@ -802,7 +832,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
     options = options || {};
-    const rank = 'rank' in options ? options.rank : DEFAULT_RANK;
+    const rank = options.rank ?? DEFAULT_RANK;
     this._topHandler.addWidget(widget, rank);
     this._onLayoutModified();
     if (this._topHandler.panel.isHidden) {
@@ -1062,8 +1092,7 @@ namespace Private {
      * Construct a new side bar handler.
      */
     constructor() {
-      this._sideBar = new TabBarSvg<Widget>({
-        kind: 'sideBar',
+      this._sideBar = new TabBar<Widget>({
         insertBehavior: 'none',
         removeBehavior: 'none',
         allowDeselect: true
@@ -1152,6 +1181,14 @@ namespace Private {
       // Store the parent id in the title dataset
       // in order to dispatch click events to the right widget.
       title.dataset = { id: widget.id };
+
+      // bind an appropriate style to the icon
+      if (title.icon instanceof LabIcon) {
+        title.icon = title.icon.bindprops({
+          stylesheet: 'sideBar'
+        });
+      }
+
       this._refreshVisibility();
     }
 

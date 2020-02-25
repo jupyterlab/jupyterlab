@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { TerminalSession } from '@jupyterlab/services';
+import { Terminal as TerminalNS } from '@jupyterlab/services';
 
-import { Platform } from '@phosphor/domutils';
+import { Platform } from '@lumino/domutils';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { Terminal as Xterm } from 'xterm';
 
-import { fit } from 'xterm/lib/addons/fit/fit';
+import { FitAddon } from 'xterm-addon-fit';
 
 import { ITerminal } from '.';
 
@@ -37,7 +37,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * @param options - The terminal configuration options.
    */
   constructor(
-    session: TerminalSession.ISession,
+    session: TerminalNS.ITerminalConnection,
     options: Partial<ITerminal.IOptions> = {}
   ) {
     super();
@@ -57,34 +57,53 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
     // Create the xterm.
     this._term = new Xterm(xtermOptions);
+    this._fitAddon = new FitAddon();
+    this._term.loadAddon(this._fitAddon);
+
     this._initializeTerm();
 
     this.id = `jp-Terminal-${Private.id++}`;
     this.title.label = 'Terminal';
 
     session.messageReceived.connect(this._onMessage, this);
-    session.terminated.connect(this.dispose, this);
+    session.disposed.connect(this.dispose, this);
 
-    void session.ready.then(() => {
-      if (this.isDisposed) {
-        return;
-      }
+    if (session.connectionStatus === 'connected') {
+      this._initialConnection();
+    } else {
+      session.connectionStatusChanged.connect(this._initialConnection, this);
+    }
+  }
 
-      this.title.label = `Terminal ${session.name}`;
-      this._setSessionSize();
-      if (this._options.initialCommand) {
-        this.session.send({
-          type: 'stdin',
-          content: [this._options.initialCommand + '\r']
-        });
-      }
-    });
+  private _initialConnection() {
+    if (this.isDisposed) {
+      return;
+    }
+
+    if (this.session.connectionStatus !== 'connected') {
+      return;
+    }
+
+    this.title.label = `Terminal ${this.session.name}`;
+    this._setSessionSize();
+    if (this._options.initialCommand) {
+      this.session.send({
+        type: 'stdin',
+        content: [this._options.initialCommand + '\r']
+      });
+    }
+
+    // Only run this initial connection logic once.
+    this.session.connectionStatusChanged.disconnect(
+      this._initialConnection,
+      this
+    );
   }
 
   /**
    * The terminal session associated with the widget.
    */
-  readonly session: TerminalSession.ISession;
+  readonly session: TerminalNS.ITerminalConnection;
 
   /**
    * Get a config option for the terminal.
@@ -211,7 +230,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     // Open the terminal if necessary.
     if (!this._termOpened) {
       this._term.open(this.node);
-      this._term.element.classList.add(TERMINAL_BODY_CLASS);
+      this._term.element?.classList.add(TERMINAL_BODY_CLASS);
       this._termOpened = true;
     }
 
@@ -240,7 +259,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    */
   private _initializeTerm(): void {
     const term = this._term;
-    term.on('data', (data: string) => {
+    term.onData((data: string) => {
       if (this.isDisposed) {
         return;
       }
@@ -250,7 +269,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       });
     });
 
-    term.on('title', (title: string) => {
+    term.onTitleChange((title: string) => {
       this.title.label = title;
     });
 
@@ -280,8 +299,8 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Handle a message from the terminal session.
    */
   private _onMessage(
-    sender: TerminalSession.ISession,
-    msg: TerminalSession.IMessage
+    sender: TerminalNS.ITerminalConnection,
+    msg: TerminalNS.IMessage
   ): void {
     switch (msg.type) {
       case 'stdout':
@@ -301,7 +320,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Resize the terminal based on computed geometry.
    */
   private _resizeTerminal() {
-    fit(this._term);
+    this._fitAddon.fit();
     if (this._offsetWidth === -1) {
       this._offsetWidth = this.node.offsetWidth;
     }
@@ -328,6 +347,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   }
 
   private readonly _term: Xterm;
+  private readonly _fitAddon: FitAddon;
   private _needsResize = true;
   private _termOpened = false;
   private _offsetWidth = -1;

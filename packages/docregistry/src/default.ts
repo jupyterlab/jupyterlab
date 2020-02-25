@@ -5,11 +5,11 @@ import { Mode } from '@jupyterlab/codemirror';
 
 import { Contents } from '@jupyterlab/services';
 
-import { JSONValue } from '@phosphor/coreutils';
+import { PartialJSONValue } from '@lumino/coreutils';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 
@@ -119,7 +119,7 @@ export class DocumentModel extends CodeEditor.Model
   /**
    * Serialize the model to JSON.
    */
-  toJSON(): JSONValue {
+  toJSON(): PartialJSONValue {
     return JSON.parse(this.value.text || 'null');
   }
 
@@ -129,7 +129,7 @@ export class DocumentModel extends CodeEditor.Model
    * #### Notes
    * Should emit a [contentChanged] signal.
    */
-  fromJSON(value: JSONValue): void {
+  fromJSON(value: PartialJSONValue): void {
     this.fromString(JSON.stringify(value));
   }
 
@@ -306,10 +306,15 @@ export abstract class ABCWidgetFactory<
   }
 
   /**
-   * Dispose of the resources held by the document manager.
+   * Dispose of the resources used by the document manager.
    */
+
   dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
     this._isDisposed = true;
+    Signal.clearData(this);
   }
 
   /**
@@ -421,9 +426,9 @@ export abstract class ABCWidgetFactory<
     return [];
   }
 
-  private _toolbarFactory: (
-    widget: T
-  ) => DocumentRegistry.IToolbarItem[] | undefined;
+  private _toolbarFactory:
+    | ((widget: T) => DocumentRegistry.IToolbarItem[])
+    | undefined;
   private _isDisposed = false;
   private _name: string;
   private _readOnly: boolean;

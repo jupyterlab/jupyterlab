@@ -1,13 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { Widget } from '@lumino/widgets';
 import * as React from 'react';
-
-import { DocumentRegistry } from '@jupyterlab/docregistry';
-
-import { Widget } from '@phosphor/widgets';
-
-import { NotebookActions } from './actions';
 
 import {
   showDialog,
@@ -17,46 +12,24 @@ import {
   UseSignal,
   addToolbarButtonClass,
   ReactWidget,
-  ToolbarButton
+  ToolbarButton,
+  ISessionContextDialogs
 } from '@jupyterlab/apputils';
+import { DocumentRegistry } from '@jupyterlab/docregistry';
+import * as nbformat from '@jupyterlab/nbformat';
+import {
+  addIcon,
+  copyIcon,
+  cutIcon,
+  HTMLSelect,
+  pasteIcon,
+  runIcon,
+  saveIcon
+} from '@jupyterlab/ui-components';
 
-import { nbformat } from '@jupyterlab/coreutils';
-
-import { HTMLSelect } from '@jupyterlab/ui-components';
-
+import { NotebookActions } from './actions';
 import { NotebookPanel } from './panel';
-
 import { Notebook } from './widget';
-
-/**
- * The class name added to toolbar save button.
- */
-const TOOLBAR_SAVE_CLASS = 'jp-SaveIcon';
-
-/**
- * The class name added to toolbar insert button.
- */
-const TOOLBAR_INSERT_CLASS = 'jp-AddIcon';
-
-/**
- * The class name added to toolbar cut button.
- */
-const TOOLBAR_CUT_CLASS = 'jp-CutIcon';
-
-/**
- * The class name added to toolbar copy button.
- */
-const TOOLBAR_COPY_CLASS = 'jp-CopyIcon';
-
-/**
- * The class name added to toolbar paste button.
- */
-const TOOLBAR_PASTE_CLASS = 'jp-PasteIcon';
-
-/**
- * The class name added to toolbar run button.
- */
-const TOOLBAR_RUN_CLASS = 'jp-RunIcon';
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.
@@ -95,7 +68,7 @@ export namespace ToolbarItems {
         <UseSignal signal={panel.context.fileChanged}>
           {() => (
             <ToolbarButtonComponent
-              iconClassName={TOOLBAR_SAVE_CLASS}
+              icon={saveIcon}
               onClick={onClick}
               tooltip="Save the notebook contents and create checkpoint"
               enabled={
@@ -118,7 +91,7 @@ export namespace ToolbarItems {
    */
   export function createInsertButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_INSERT_CLASS,
+      icon: addIcon,
       onClick: () => {
         NotebookActions.insertBelow(panel.content);
       },
@@ -131,7 +104,7 @@ export namespace ToolbarItems {
    */
   export function createCutButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_CUT_CLASS,
+      icon: cutIcon,
       onClick: () => {
         NotebookActions.cut(panel.content);
       },
@@ -144,7 +117,7 @@ export namespace ToolbarItems {
    */
   export function createCopyButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_COPY_CLASS,
+      icon: copyIcon,
       onClick: () => {
         NotebookActions.copy(panel.content);
       },
@@ -157,7 +130,7 @@ export namespace ToolbarItems {
    */
   export function createPasteButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_PASTE_CLASS,
+      icon: pasteIcon,
       onClick: () => {
         NotebookActions.paste(panel.content);
       },
@@ -170,9 +143,9 @@ export namespace ToolbarItems {
    */
   export function createRunButton(panel: NotebookPanel): Widget {
     return new ToolbarButton({
-      iconClassName: TOOLBAR_RUN_CLASS,
+      icon: runIcon,
       onClick: () => {
-        void NotebookActions.runAndAdvance(panel.content, panel.session);
+        void NotebookActions.runAndAdvance(panel.content, panel.sessionContext);
       },
       tooltip: 'Run the selected cells and advance'
     });
@@ -197,7 +170,8 @@ export namespace ToolbarItems {
    * Get the default toolbar items for panel
    */
   export function getDefaultItems(
-    panel: NotebookPanel
+    panel: NotebookPanel,
+    sessionDialogs?: ISessionContextDialogs
   ): DocumentRegistry.IToolbarItem[] {
     return [
       { name: 'save', widget: createSaveButton(panel) },
@@ -208,21 +182,27 @@ export namespace ToolbarItems {
       { name: 'run', widget: createRunButton(panel) },
       {
         name: 'interrupt',
-        widget: Toolbar.createInterruptButton(panel.session)
+        widget: Toolbar.createInterruptButton(panel.sessionContext)
       },
       {
         name: 'restart',
-        widget: Toolbar.createRestartButton(panel.session)
+        widget: Toolbar.createRestartButton(
+          panel.sessionContext,
+          sessionDialogs
+        )
       },
       { name: 'cellType', widget: createCellTypeItem(panel) },
       { name: 'spacer', widget: Toolbar.createSpacerItem() },
       {
         name: 'kernelName',
-        widget: Toolbar.createKernelNameItem(panel.session)
+        widget: Toolbar.createKernelNameItem(
+          panel.sessionContext,
+          sessionDialogs
+        )
       },
       {
         name: 'kernelStatus',
-        widget: Toolbar.createKernelStatusItem(panel.session)
+        widget: Toolbar.createKernelStatusItem(panel.sessionContext)
       }
     ];
   }
@@ -252,8 +232,10 @@ export class CellTypeSwitcher extends ReactWidget {
    */
   handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
     if (event.target.value !== '-') {
-      NotebookActions.changeCellType(this._notebook, event.target
-        .value as nbformat.CellType);
+      NotebookActions.changeCellType(
+        this._notebook,
+        event.target.value as nbformat.CellType
+      );
       this._notebook.activate();
     }
   };
@@ -286,11 +268,7 @@ export class CellTypeSwitcher extends ReactWidget {
         onChange={this.handleChange}
         onKeyDown={this.handleKeyDown}
         value={value}
-        iconProps={{
-          icon: <span className="jp-MaterialIcon jp-DownCaretIcon bp3-icon" />
-        }}
         aria-label="Cell type"
-        minimal
       >
         <option value="-">-</option>
         <option value="code">Code</option>
@@ -300,5 +278,5 @@ export class CellTypeSwitcher extends ReactWidget {
     );
   }
 
-  private _notebook: Notebook = null;
+  private _notebook: Notebook;
 }

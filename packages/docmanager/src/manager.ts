@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IClientSession } from '@jupyterlab/apputils';
+import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import {
   DocumentRegistry,
@@ -15,15 +15,15 @@ import {
 
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 
-import { ArrayExt, find } from '@phosphor/algorithm';
+import { ArrayExt, find } from '@lumino/algorithm';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { SaveHandler } from './savehandler';
 
@@ -48,6 +48,7 @@ export class DocumentManager implements IDocumentManager {
   constructor(options: DocumentManager.IOptions) {
     this.registry = options.registry;
     this.services = options.manager;
+    this._dialogs = options.sessionDialogs || sessionContextDialogs;
 
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
@@ -88,6 +89,9 @@ export class DocumentManager implements IDocumentManager {
     // For each existing context, start/stop the autosave handler as needed.
     this._contexts.forEach(context => {
       const handler = Private.saveHandlerProperty.get(context);
+      if (!handler) {
+        return;
+      }
       if (value === true && !handler.isActive) {
         handler.start();
       } else if (value === false && handler.isActive) {
@@ -109,6 +113,9 @@ export class DocumentManager implements IDocumentManager {
     // For each existing context, set the save interval as needed.
     this._contexts.forEach(context => {
       const handler = Private.saveHandlerProperty.get(context);
+      if (!handler) {
+        return;
+      }
       handler.saveInterval = value || 120;
     });
   }
@@ -226,7 +233,7 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName = 'default',
     kernel?: Partial<Kernel.IModel>
-  ): Widget {
+  ): Widget | undefined {
     return this._createOrOpenDocument('create', path, widgetName, kernel);
   }
 
@@ -288,9 +295,11 @@ export class DocumentManager implements IDocumentManager {
 
     for (let context of this._contextsForPath(newPath)) {
       for (const widgetName of widgetNames) {
-        let widget = this._widgetManager.findWidget(context, widgetName);
-        if (widget) {
-          return widget;
+        if (widgetName !== null) {
+          let widget = this._widgetManager.findWidget(context, widgetName);
+          if (widget) {
+            return widget;
+          }
         }
       }
     }
@@ -439,7 +448,7 @@ export class DocumentManager implements IDocumentManager {
   private _createContext(
     path: string,
     factory: DocumentRegistry.ModelFactory,
-    kernelPreference: IClientSession.IKernelPreference
+    kernelPreference?: ISessionContext.IKernelPreference
   ): Private.IContext {
     // TODO: Make it impossible to open two different contexts for the same
     // path. Or at least prompt the closing of all widgets associated with the
@@ -465,7 +474,8 @@ export class DocumentManager implements IDocumentManager {
       path,
       kernelPreference,
       modelDBFactory,
-      setBusy: this._setBusy
+      setBusy: this._setBusy,
+      sessionDialogs: this._dialogs
     });
     let handler = new SaveHandler({
       context,
@@ -539,7 +549,7 @@ export class DocumentManager implements IDocumentManager {
       kernel
     );
 
-    let context: Private.IContext | null = null;
+    let context: Private.IContext | null;
     let ready: Promise<void> = Promise.resolve(undefined);
 
     // Handle the load-from-disk case
@@ -550,15 +560,17 @@ export class DocumentManager implements IDocumentManager {
         context = this._createContext(path, factory, preference);
         // Populate the model, either from disk or a
         // model backend.
-        ready = this._when.then(() => context.initialize(false));
+        ready = this._when.then(() => context!.initialize(false));
       }
     } else if (which === 'create') {
       context = this._createContext(path, factory, preference);
       // Immediately save the contents to disk.
-      ready = this._when.then(() => context.initialize(true));
+      ready = this._when.then(() => context!.initialize(true));
+    } else {
+      throw new Error(`Invalid argument 'which': ${which}`);
     }
 
-    let widget = this._widgetManager.createWidget(widgetFactory, context!);
+    let widget = this._widgetManager.createWidget(widgetFactory, context);
     this._opener.open(widget, options || {});
 
     // If the initial opening of the context fails, dispose of the widget.
@@ -587,7 +599,8 @@ export class DocumentManager implements IDocumentManager {
   private _autosave = true;
   private _autosaveInterval = 120;
   private _when: Promise<void>;
-  private _setBusy: () => IDisposable;
+  private _setBusy: (() => IDisposable) | undefined;
+  private _dialogs: ISessionContext.IDialogs;
 }
 
 /**
@@ -622,6 +635,11 @@ export namespace DocumentManager {
      * A function called when a kernel is busy.
      */
     setBusy?: () => IDisposable;
+
+    /**
+     * The provider for session dialogs.
+     */
+    sessionDialogs?: ISessionContext.IDialogs;
   }
 
   /**

@@ -14,6 +14,16 @@
       "selector": "body"
     },
     {
+      "command": "application:activate-next-tab-bar",
+      "keys": ["Ctrl Shift ."],
+      "selector": "body"
+    },
+    {
+      "command": "application:activate-previous-tab-bar",
+      "keys": ["Ctrl Shift ,"],
+      "selector": "body"
+    },
+    {
       "command": "application:close",
       "keys": ["Alt W"],
       "selector": ".jp-Activity"

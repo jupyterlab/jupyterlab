@@ -1,0 +1,63 @@
+.tag {
+  height: 32px;
+  width: fit-content;
+  border-radius: 35px;
+  margin-right: 5px;
+  margin-bottom: 10px;
+  padding: 12px;
+  font-size: var(--jp-ui-font-size-1);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  max-width: calc(100% - 25px);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.unapplied-tag {
+  background-color: var(--jp-layout-color1);
+  border: 1px solid var(--jp-ui-font-color2);
+  color: var(--jp-ui-font-color2);
+}
+
+.applied-tag {
+  background-color: var(--jp-layout-color2);
+  border: 1px solid var(--jp-ui-font-color1);
+  color: var(--jp-ui-font-color1);
+}
+
+.add-tag {
+  white-space: nowrap;
+  overflow: hidden;
+  border: none;
+  outline: none;
+  resize: horizontal;
+  font-size: var(--jp-ui-font-size-1);
+  color: var(--jp-ui-font-color2);
+  background-color: var(--jp-layout-color1);
+}
+
+.tag-holder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.tag-hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.tag-header {
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+  flex: 0 0 auto;
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
+  letter-spacing: 1px;
+  margin: 0px;
+  padding: 8px 12px;
+  text-transform: uppercase;
+}

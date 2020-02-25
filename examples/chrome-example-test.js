@@ -20,9 +20,11 @@ async function main() {
 
   const handleMessage = async msg => {
     const text = msg.text();
-    console.log(`>> ${text}`);
     if (msg.type() === 'error') {
+      console.log(`ERROR>> ${text}`);
       errored = true;
+    } else {
+      console.log(`>> ${text}`);
     }
     const lower = text.toLowerCase();
     if (lower === 'example started!' || lower === 'test complete!') {

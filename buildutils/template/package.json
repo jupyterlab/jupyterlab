@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/template",
-  "version": "1.2.0-alpha.1",
+  "version": "2.0.0-rc.2",
   "description": "JupyterLab - Package Template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,8 +32,8 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "devDependencies": {
-    "rimraf": "~2.6.2",
-    "typescript": "~3.5.1"
+    "rimraf": "~3.0.0",
+    "typescript": "~3.7.3"
   },
   "publishConfig": {
     "access": "public"

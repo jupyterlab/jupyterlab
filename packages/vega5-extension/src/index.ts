@@ -3,13 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONObject } from '@phosphor/coreutils';
-
-import { Widget } from '@phosphor/widgets';
+import { JSONObject } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
+import * as VegaModuleType from 'vega-embed';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import * as VegaModuleType from 'vega-embed';
 
 /**
  * The CSS class to add to the Vega and Vega-Lite widget.
@@ -24,7 +22,7 @@ const VEGA_CLASS = 'jp-RenderedVega5';
 /**
  * The CSS class to add to the Vega-Lite.
  */
-const VEGALITE_CLASS = 'jp-RenderedVegaLite3';
+const VEGALITE_CLASS = 'jp-RenderedVegaLite';
 
 /**
  * The MIME type for Vega.
@@ -40,7 +38,15 @@ export const VEGA_MIME_TYPE = 'application/vnd.vega.v5+json';
  * #### Notes
  * The version of this follows the major version of Vega-Lite.
  */
-export const VEGALITE_MIME_TYPE = 'application/vnd.vegalite.v3+json';
+export const VEGALITE3_MIME_TYPE = 'application/vnd.vegalite.v3+json';
+
+/**
+ * The MIME type for Vega-Lite.
+ *
+ * #### Notes
+ * The version of this follows the major version of Vega-Lite.
+ */
+export const VEGALITE4_MIME_TYPE = 'application/vnd.vegalite.v4+json';
 
 /**
  * A widget for rendering Vega or Vega-Lite data, for usage with rendermime.
@@ -65,10 +71,15 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
    * Render Vega/Vega-Lite into this widget's node.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    const spec = model.data[this._mimeType] as JSONObject;
-    const metadata = model.metadata[this._mimeType] as {
-      embed_options?: VegaModuleType.EmbedOptions;
-    };
+    const spec = model.data[this._mimeType] as JSONObject | undefined;
+    if (spec === undefined) {
+      return;
+    }
+    const metadata = model.metadata[this._mimeType] as
+      | {
+          embed_options?: VegaModuleType.EmbedOptions;
+        }
+      | undefined;
     const embedOptions =
       metadata && metadata.embed_options ? metadata.embed_options : {};
     const mode: VegaModuleType.Mode =
@@ -84,7 +95,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     this.node.appendChild(el);
 
     if (this._result) {
-      this._result.view.finalize();
+      this._result.finalize();
     }
 
     const loader = vega.vega.loader({
@@ -93,7 +104,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     const sanitize = async (uri: string, options: any) => {
       // Use the resolver for any URIs it wants to handle
       const resolver = this._resolver;
-      if (resolver.isLocal(uri)) {
+      if (resolver?.isLocal && resolver.isLocal(uri)) {
         const absPath = await resolver.resolveUrl(uri);
         uri = await resolver.getDownloadUrl(absPath);
       }
@@ -121,13 +132,13 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
 
   dispose(): void {
     if (this._result) {
-      this._result.view.finalize();
+      this._result.finalize();
     }
     super.dispose();
   }
 
   private _mimeType: string;
-  private _resolver: IRenderMime.IResolver;
+  private _resolver: IRenderMime.IResolver | null;
 }
 
 /**
@@ -135,7 +146,7 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
  */
 export const rendererFactory: IRenderMime.IRendererFactory = {
   safe: true,
-  mimeTypes: [VEGA_MIME_TYPE, VEGALITE_MIME_TYPE],
+  mimeTypes: [VEGA_MIME_TYPE, VEGALITE3_MIME_TYPE, VEGALITE4_MIME_TYPE],
   createRenderer: options => new RenderedVega(options)
 };
 
@@ -152,10 +163,10 @@ const extension: IRenderMime.IExtension = {
       defaultFor: ['vega5']
     },
     {
-      name: 'Vega-Lite3',
-      primaryFileType: 'vega-lite3',
-      fileTypes: ['vega-lite3', 'json'],
-      defaultFor: ['vega-lite3']
+      name: 'Vega-Lite4',
+      primaryFileType: 'vega-lite4',
+      fileTypes: ['vega-lite3', 'vega-lite4', 'json'],
+      defaultFor: ['vega-lite3', 'vega-lite4']
     }
   ],
   fileTypes: [
@@ -163,13 +174,19 @@ const extension: IRenderMime.IExtension = {
       mimeTypes: [VEGA_MIME_TYPE],
       name: 'vega5',
       extensions: ['.vg', '.vg.json', '.vega'],
-      iconClass: 'jp-MaterialIcon jp-VegaIcon'
+      icon: 'ui-components:vega'
     },
     {
-      mimeTypes: [VEGALITE_MIME_TYPE],
-      name: 'vega-lite3',
+      mimeTypes: [VEGALITE4_MIME_TYPE],
+      name: 'vega-lite4',
       extensions: ['.vl', '.vl.json', '.vegalite'],
-      iconClass: 'jp-MaterialIcon jp-VegaIcon'
+      icon: 'ui-components:vega'
+    },
+    {
+      mimeTypes: [VEGALITE3_MIME_TYPE],
+      name: 'vega-lite3',
+      extensions: [],
+      icon: 'ui-components:vega'
     }
   ]
 };
@@ -198,7 +215,7 @@ namespace Private {
       return vegaReady;
     }
 
-    vegaReady = import('./built-vega-embed') as any;
+    vegaReady = import('vega-embed');
 
     return vegaReady;
   }

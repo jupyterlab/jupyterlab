@@ -10,14 +10,14 @@
  * Another way to print is to use the `printURL` function, which takes a URL and prints that page.
  */
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 import { ServerConnection } from '@jupyterlab/services';
 
 export namespace Printing {
   /**
    * Function that takes no arguments and when invoked prints out some object or null if printing is not defined.
    */
-  export type OptionalAsyncThunk = () => Promise<void> | null;
+  export type OptionalAsyncThunk = (() => Promise<void>) | null;
 
   /**
    * Symbol to use for a method that returns a function to print an object.
@@ -70,11 +70,9 @@ export namespace Printing {
    * @param url URL to load into an iframe.
    */
   export async function printURL(url: string): Promise<void> {
-    const text = await (await ServerConnection.makeRequest(
-      url,
-      {},
-      settings
-    )).text();
+    const text = await (
+      await ServerConnection.makeRequest(url, {}, settings)
+    ).text();
     return printContent(text);
   }
 
@@ -92,10 +90,11 @@ export namespace Printing {
       await resolveWhenLoaded(iframe);
     } else {
       iframe.src = 'about:blank';
+      await resolveWhenLoaded(iframe);
       setIFrameNode(iframe, textOrEl as HTMLElement);
     }
     const printed = resolveAfterEvent();
-    launchPrint(iframe.contentWindow);
+    launchPrint(iframe.contentWindow!);
     // Once the print dialog has been dismissed, we regain event handling,
     // and it should be safe to discard the hidden iframe.
     await printed;
@@ -129,8 +128,8 @@ export namespace Printing {
    * Copies a node from the base document to the iframe.
    */
   function setIFrameNode(iframe: HTMLIFrameElement, node: HTMLElement) {
-    iframe.contentDocument.body.appendChild(node.cloneNode(true));
-    iframe.contentDocument.close();
+    iframe.contentDocument!.body.appendChild(node.cloneNode(true));
+    iframe.contentDocument!.close();
   }
 
   /**
@@ -168,7 +167,7 @@ export namespace Printing {
    * Prints a content window.
    */
   function launchPrint(contentWindow: Window) {
-    const result = contentWindow.document.execCommand('print', false, null);
+    const result = contentWindow.document.execCommand('print', false);
     // execCommand won't work in firefox so we call the `print` method instead if it fails
     // https://github.com/joseluisq/printd/blob/eb7948d602583c055ab6dee3ee294b6a421da4b6/src/index.ts#L148
     if (!result) {

@@ -5,15 +5,16 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Printing } from '@jupyterlab/apputils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
 import { Component } from './component';
+import { JSONValue, JSONObject } from '@lumino/coreutils';
 
 /**
  * The CSS class to add to the JSON Widget.
@@ -49,8 +50,8 @@ export class RenderedJSON extends Widget
    * Render JSON into this widget's node.
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-    const data = model.data[this._mimeType] as any;
-    const metadata = (model.metadata[this._mimeType] as any) || {};
+    const data = (model.data[this._mimeType] || {}) as NonNullable<JSONValue>;
+    const metadata = (model.metadata[this._mimeType] || {}) as JSONObject;
     return new Promise<void>((resolve, reject) => {
       ReactDOM.render(
         <Component data={data} metadata={metadata} />,

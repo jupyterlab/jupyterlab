@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { caretDownEmptyIcon } from '@jupyterlab/ui-components';
+
 /**
  * A namespace for node styling.
  */
@@ -65,6 +67,18 @@ export namespace Styling {
       node.parentElement.replaceChild(wrapper, node);
     }
     wrapper.appendChild(node);
+
+    // add the icon node
+    wrapper.appendChild(
+      caretDownEmptyIcon.element({
+        tag: 'span',
+        stylesheet: 'select',
+        right: '8px',
+        top: '5px',
+        width: '18px'
+      })
+    );
+
     return wrapper;
   }
 }

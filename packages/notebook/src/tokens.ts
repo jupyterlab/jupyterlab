@@ -3,9 +3,9 @@
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
 import { Cell } from '@jupyterlab/cells';
-import { Token } from '@phosphor/coreutils';
-import { ISignal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { Token } from '@lumino/coreutils';
+import { ISignal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from './panel';
 import { NotebookTools } from './notebooktools';
 
@@ -79,7 +79,7 @@ export interface INotebookTracker extends IWidgetTracker<NotebookPanel> {
    * #### Notes
    * If there is no cell with the focus, then this value is `null`.
    */
-  readonly activeCell: Cell;
+  readonly activeCell: Cell | null;
 
   /**
    * A signal emitted when the current active cell changes.
@@ -87,7 +87,7 @@ export interface INotebookTracker extends IWidgetTracker<NotebookPanel> {
    * #### Notes
    * If there is no cell with the focus, then `null` will be emitted.
    */
-  readonly activeCellChanged: ISignal<this, Cell>;
+  readonly activeCellChanged: ISignal<this, Cell | null>;
 
   /**
    * A signal emitted when the selection state changes.

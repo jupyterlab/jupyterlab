@@ -3,13 +3,15 @@
 
 import { expect } from 'chai';
 
-import { StateDB, PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
+
+import { StateDB } from '@jupyterlab/statedb';
 
 import {
   FileBrowserModel,
@@ -30,9 +32,7 @@ import {
   sleep
 } from '@jupyterlab/testutils';
 
-import { defaultIconRegistry, IIconRegistry } from '@jupyterlab/ui-components';
-
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * A contents manager that delays requests by less each time it is called
@@ -58,7 +58,6 @@ class DelayedContentsManager extends ContentsManager {
 }
 
 describe('filebrowser/model', () => {
-  let iconRegistry: IIconRegistry;
   let manager: IDocumentManager;
   let serviceManager: ServiceManager.IManager;
   let registry: DocumentRegistry;
@@ -77,7 +76,6 @@ describe('filebrowser/model', () => {
       textModelFactory: new TextModelFactory()
     });
     serviceManager = new ServiceManager({ standby: 'never' });
-    iconRegistry = defaultIconRegistry;
     manager = new DocumentManager({
       registry,
       opener,
@@ -88,7 +86,7 @@ describe('filebrowser/model', () => {
 
   beforeEach(async () => {
     await state.clear();
-    model = new FileBrowserModel({ iconRegistry, manager, state });
+    model = new FileBrowserModel({ manager, state });
     const contents = await manager.newUntitled({ type: 'file' });
     name = contents.name;
     return model.cd();
@@ -101,7 +99,7 @@ describe('filebrowser/model', () => {
   describe('FileBrowserModel', () => {
     describe('#constructor()', () => {
       it('should construct a new file browser model', () => {
-        model = new FileBrowserModel({ iconRegistry, manager });
+        model = new FileBrowserModel({ manager });
         expect(model).to.be.an.instanceof(FileBrowserModel);
       });
     });
@@ -152,7 +150,7 @@ describe('filebrowser/model', () => {
           expect(sender).to.equal(model);
           expect(args.type).to.equal('new');
           expect(args.oldValue).to.be.null;
-          expect(args.newValue.type).to.equal('file');
+          expect(args.newValue!.type).to.equal('file');
           called = true;
         });
         await manager.newUntitled({ type: 'file' });
@@ -164,8 +162,8 @@ describe('filebrowser/model', () => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.equal(model);
           expect(args.type).to.equal('rename');
-          expect(args.oldValue.path).to.equal(name);
-          expect(args.newValue.path).to.equal(name + '.bak');
+          expect(args.oldValue!.path).to.equal(name);
+          expect(args.newValue!.path).to.equal(name + '.bak');
           called = true;
         });
         await manager.rename(name, name + '.bak');
@@ -177,7 +175,7 @@ describe('filebrowser/model', () => {
         model.fileChanged.connect((sender, args) => {
           expect(sender).to.equal(model);
           expect(args.type).to.equal('delete');
-          expect(args.oldValue.path).to.equal(name);
+          expect(args.oldValue!.path).to.equal(name);
           expect(args.newValue).to.be.null;
           called = true;
         });
@@ -213,7 +211,9 @@ describe('filebrowser/model', () => {
       it('should be the session models for the active notebooks', async () => {
         const contents = await manager.newUntitled({ type: 'notebook' });
         const session = await serviceManager.sessions.startNew({
-          path: contents.path
+          name: '',
+          path: contents.path,
+          type: 'test'
         });
         await model.cd();
         expect(model.sessions().next()).to.be.ok;
@@ -265,7 +265,7 @@ describe('filebrowser/model', () => {
           opener,
           manager: delayedServiceManager
         });
-        model = new FileBrowserModel({ iconRegistry, manager, state }); // Should delay 1000ms
+        model = new FileBrowserModel({ manager, state }); // Should delay 1000ms
 
         // An initial refresh is called in the constructor.
         // If it is too slow, it can come in after the directory change,
@@ -285,7 +285,7 @@ describe('filebrowser/model', () => {
     describe('#restore()', () => {
       it('should restore based on ID', async () => {
         const id = 'foo';
-        const model2 = new FileBrowserModel({ iconRegistry, manager, state });
+        const model2 = new FileBrowserModel({ manager, state });
         await model.restore(id);
         await model.cd('src');
         expect(model.path).to.equal('src');
@@ -297,7 +297,7 @@ describe('filebrowser/model', () => {
 
       it('should be safe to call multiple times', async () => {
         const id = 'bar';
-        const model2 = new FileBrowserModel({ iconRegistry, manager, state });
+        const model2 = new FileBrowserModel({ manager, state });
         await model.restore(id);
         await model.cd('src');
         expect(model.path).to.equal('src');
@@ -361,7 +361,7 @@ describe('filebrowser/model', () => {
           expect(sender).to.equal(model);
           expect(args.type).to.equal('save');
           expect(args.oldValue).to.be.null;
-          expect(args.newValue.path).to.equal(fname);
+          expect(args.newValue!.path).to.equal(fname);
           called = true;
         });
         const file = new File(['<p>Hello world!</p>'], fname, {

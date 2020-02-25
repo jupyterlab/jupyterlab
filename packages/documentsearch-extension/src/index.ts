@@ -18,7 +18,7 @@ import {
 } from '@jupyterlab/documentsearch';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 const SEARCHABLE_CLASS = 'jp-mod-searchable';
 
@@ -33,7 +33,7 @@ const labShellWidgetListener: JupyterFrontEndPlugin<void> = {
   ) => {
     // If a given widget is searchable, apply the searchable class.
     // If it's not searchable, remove the class.
-    const transformWidgetSearchability = (widget: Widget) => {
+    const transformWidgetSearchability = (widget: Widget | null) => {
       if (!widget) {
         return;
       }
@@ -89,42 +89,64 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
     const activeSearches = new Map<string, SearchInstance>();
 
     const startCommand: string = 'documentsearch:start';
+    const startReplaceCommand: string = 'documentsearch:startWithReplace';
     const nextCommand: string = 'documentsearch:highlightNext';
     const prevCommand: string = 'documentsearch:highlightPrevious';
+
+    const currentWidgetHasSearchProvider = () => {
+      const currentWidget = app.shell.currentWidget;
+      if (!currentWidget) {
+        return false;
+      }
+      return registry.getProviderForWidget(currentWidget) !== undefined;
+    };
+    const getCurrentWidgetSearchInstance = () => {
+      const currentWidget = app.shell.currentWidget;
+      if (!currentWidget) {
+        return;
+      }
+      const widgetId = currentWidget.id;
+      let searchInstance = activeSearches.get(widgetId);
+      if (!searchInstance) {
+        const searchProvider = registry.getProviderForWidget(currentWidget);
+        if (!searchProvider) {
+          return;
+        }
+        searchInstance = new SearchInstance(currentWidget, searchProvider);
+
+        activeSearches.set(widgetId, searchInstance);
+        // find next and previous are now enabled
+        app.commands.notifyCommandChanged();
+
+        searchInstance.disposed.connect(() => {
+          activeSearches.delete(widgetId);
+          // find next and previous are now not enabled
+          app.commands.notifyCommandChanged();
+        });
+      }
+      return searchInstance;
+    };
+
     app.commands.addCommand(startCommand, {
       label: 'Find…',
-      isEnabled: () => {
-        const currentWidget = app.shell.currentWidget;
-        if (!currentWidget) {
-          return;
-        }
-        return registry.getProviderForWidget(currentWidget) !== undefined;
-      },
+      isEnabled: currentWidgetHasSearchProvider,
       execute: () => {
-        const currentWidget = app.shell.currentWidget;
-        if (!currentWidget) {
-          return;
+        const searchInstance = getCurrentWidgetSearchInstance();
+        if (searchInstance) {
+          searchInstance.focusInput();
         }
-        const widgetId = currentWidget.id;
-        let searchInstance = activeSearches.get(widgetId);
-        if (!searchInstance) {
-          const searchProvider = registry.getProviderForWidget(currentWidget);
-          if (!searchProvider) {
-            return;
-          }
-          searchInstance = new SearchInstance(currentWidget, searchProvider);
+      }
+    });
 
-          activeSearches.set(widgetId, searchInstance);
-          // find next and previous are now enabled
-          app.commands.notifyCommandChanged();
-
-          searchInstance.disposed.connect(() => {
-            activeSearches.delete(widgetId);
-            // find next and previous are now not enabled
-            app.commands.notifyCommandChanged();
-          });
+    app.commands.addCommand(startReplaceCommand, {
+      label: 'Find and Replace…',
+      isEnabled: currentWidgetHasSearchProvider,
+      execute: () => {
+        const searchInstance = getCurrentWidgetSearchInstance();
+        if (searchInstance) {
+          searchInstance.showReplace();
+          searchInstance.focusInput();
         }
-        searchInstance.focusInput();
       }
     });
 
@@ -133,7 +155,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       isEnabled: () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {
-          return;
+          return false;
         }
         return activeSearches.has(currentWidget.id);
       },
@@ -157,7 +179,7 @@ const extension: JupyterFrontEndPlugin<ISearchProviderRegistry> = {
       isEnabled: () => {
         const currentWidget = app.shell.currentWidget;
         if (!currentWidget) {
-          return;
+          return false;
         }
         return activeSearches.has(currentWidget.id);
       },

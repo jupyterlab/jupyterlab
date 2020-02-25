@@ -11,14 +11,18 @@ This is intended to be a guide for some of JupyterLab's most commonly-used exten
 However, it is not an exhaustive account of how to extend the application components,
 and more detailed descriptions of their public APIs may be found in the
 `JupyterLab <http://jupyterlab.github.io/jupyterlab/index.html>`__ and
-`Phosphor <http://phosphorjs.github.io/docs.html>`__ API documentation.
+`Lumino <http://jupyterlab.github.io/lumino/index.html>`__ API documentation.
 
 .. contents:: Table of contents
     :local:
     :depth: 1
 
+
 Commands
 ~~~~~~~~
+
+Add a Command to the Command Registry
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Perhaps the most common way to add functionality to JupyterLab is via commands.
 These are lightweight objects that include a function to execute combined with
@@ -57,21 +61,21 @@ Each of ``isEnabled``, ``isToggled``, and ``isVisible`` can be either
 a boolean value or a function that returns a boolean value, in case you want
 to do some logic in order to determine those conditions.
 
-Likewise, each of ``label`` and ``iconClass`` can be either 
+Likewise, each of ``label`` and ``iconClass`` can be either
 a string value or a function that returns a string value.
 
 There are several more options which can be passed into the command registry when
-adding new commands. These are documented 
-`here <http://phosphorjs.github.io/phosphor/api/commands/interfaces/commandregistry.icommandoptions.html>`__.
+adding new commands. These are documented
+`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.icommandoptions.html>`__.
 
 After a command has been added to the application command registry
 you can add them to various places in the application user interface,
 where they will be rendered using the metadata you provided.
 
-Command Palette
-~~~~~~~~~~~~~~~
+Add a Command to the Command Palette
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-In order to add a command to the command palette, you need to request the
+In order to add an existing, registered command to the command palette, you need to request the
 ``ICommandPalette`` token in your extension.
 Here is an example showing how to add a command to the command palette (given by ``palette``):
 
@@ -95,6 +99,268 @@ Your command ``label`` function can then check the ``args`` it is provided for `
 and return a different label in that case.
 This can be useful to make a single command flexible enough to work in multiple contexts.
 
+
+Context Menu
+~~~~~~~~~~~~
+
+The application context menu is shown when the user right-clicks,
+and is populated with menu items that are most relevant to the thing that the user clicked.
+
+The context menu system determines which items to show based on
+`CSS selectors <https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Selectors>`__.
+It propagates up the DOM tree and tests whether a given HTML element
+matches the CSS selector provided by a given command.
+
+Here is an example showing how to add a command to the application context menu:
+
+.. code:: typescript
+
+    app.contextMenu.addItem({
+      command: commandID,
+      selector: '.jp-Notebook'
+    })
+
+In this example, the command indicated by ``commandID`` is shown whenever the user
+right-clicks on a DOM element matching ``.jp-Notebook`` (that is to say, a notebook).
+The selector can be any valid CSS selector, and may target your own UI elements, or existing ones.
+A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
+
+
+.. _copy_shareable_link:
+
+Copy Shareable Link
+~~~~~~~~~~~~~~~~~~~
+
+The file browser provides a context menu item "Copy Shareable Link". The
+desired behavior will vary by deployment and the users it serves. The file
+browser supports overriding the behavior of this item.
+
+.. code:: typescript
+
+   import {
+     IFileBrowserFactory
+   } from '@jupyterlab/filebrowser';
+
+   import {
+     JupyterFrontEnd, JupyterFrontEndPlugin
+   } from '@jupyterlab/application';
+
+
+   const shareFile: JupyterFrontEndPlugin<void> = {
+     activate: activateShareFile,
+     id: commandID,
+     requires: [IFileBrowserFactory],
+     autoStart: true
+   };
+
+   function activateShareFile(
+     app: JupyterFrontEnd,
+     factory: IFileBrowserFactory
+   ): void {
+     const { commands } = app;
+     const { tracker } = factory;
+
+     commands.addCommand('filebrowser:share-main', {
+       execute: () => {
+         const widget = tracker.currentWidget;
+         if (!widget) {
+           return;
+         }
+         const path = encodeURI(widget.selectedItems().next().path);
+         // Do something with path.
+       },
+       isVisible: () =>
+         tracker.currentWidget &&
+         toArray(tracker.currentWidget.selectedItems()).length === 1,
+       iconClass: 'jp-MaterialIcon jp-LinkIcon',
+       label: 'Copy Shareable Link'
+     });
+   }
+
+Note that before enabling this plugin in the usual way, you must *disable* the
+default plugin provided by the built-in file browser.
+
+.. code:: bash
+
+   jupyter labextension disable @jupyterlab/filebrowser-extension:share-file
+
+
+Icons
+~~~~~
+
+``LabIcon`` is the icon class used by JupyterLab, and is part of the new icon
+system introduced in JupyterLab v2.0.
+
+How JupyterLab handles icons
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The ui-components package provides icons to the rest of JupyterLab, in the
+form of a set of ``LabIcon`` instances (currently about 80). All of the icons
+in the core JupyterLab packages are rendered using one of these ``LabIcon``
+instances.
+
+Using the icons in your own code
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can use any of JupyterLab icons in your own code via an ``import``
+statement. For example, to use ``jupyterIcon`` you would first do:
+
+.. code:: typescript
+
+  import { jupyterIcon } from "@jupyterlab/ui-components";
+
+How to render an icon into a DOM node
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Icons can be added as children to any ``div`` or ``span`` nodes using the
+`icon.element(...)` method (where ``icon`` is any instance of ``LabIcon``).
+For example, to render the Jupyter icon you could do:
+
+.. code:: typescript
+
+  jupyterIcon.element({
+    container: elem,
+    height: '16px',
+    width: '16px',
+    marginLeft: '2px'
+  });
+
+where ``elem`` is any ``HTMLElement`` with a ``div`` or ``span`` tag. As shown in
+the above example, the icon can be styled by passing CSS parameters into
+`.element(...)`. Any valid CSS parameter can be used, with one caveat:
+snake case params have to be converted to camel case. For example, instead
+of `foo-bar: '8px'`, you'd need to use `fooBar: '8px'`.
+
+How to render an icon as a React component
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Icons can also be rendered using React. The `icon.react` parameter holds a
+standard React component that will display the icon on render. Like any React
+component, `icon.react` can be used in various ways.
+
+For example, here is how you would add the Jupyter icon to the render tree of
+another React component:
+
+.. code:: jsx
+
+  public render() {
+    return (
+      <div className="outer">
+        <div className="inner">
+          <jupyterIcon.react
+            tag="span"
+            right="7px"
+            top="5px"
+          />
+          "and here's a text node"
+        </div>
+      </div>
+    );
+  }
+
+Alternatively, you can just render the icon directly into any existing DOM
+node ``elem`` by using the ``ReactDOM`` module:
+
+.. code:: typescript
+
+  ReactDOM.render(jupyterIcon.react, elem);
+
+If do you use ``ReactDOM`` to render, and if the ``elem`` node is ever removed
+from the DOM, you'll first need to clean it up:
+
+.. code:: typescript
+
+  ReactDOM.unmountComponentAtNode(elem);
+
+This cleanup step is not a special property of ``LabIcon``, but is instead
+needed for any React component that is rendered directly at the top level
+by ``ReactDOM``: failure to call `unmountComponentAtNode` can result in a
+`memory leak <https://stackoverflow.com/a/48198011/425458>`__.
+
+
+Keyboard Shortcuts
+~~~~~~~~~~~~~~~~~~
+
+There are two ways of adding keyboard shortcuts in JupyterLab.
+If you don't want the shortcuts to be user-configurable,
+you can add them directly to the application command registry:
+
+.. code:: typescript
+
+    app.commands.addKeyBinding({
+      command: commandID,
+      args: {},
+      keys: ['Accel T'],
+      selector: '.jp-Notebook'
+    });
+
+In this example ``my-command`` command is mapped to ``Accel T``,
+where ``Accel`` corresponds to ``Cmd`` on a Mac and ``Ctrl`` on Windows and Linux computers.
+
+The behavior for keyboard shortcuts is very similar to that of the context menu:
+the shortcut handler propagates up the DOM tree from the focused element
+and tests each element against the registered selectors. If a match is found,
+then that command is executed with the provided ``args``.
+Full documentation for the options for ``addKeyBinding`` can be found
+`here <http://jupyterlab.github.io/lumino/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
+
+JupyterLab also provides integration with its settings system for keyboard shortcuts.
+Your extension can provide a settings schema with a ``jupyter.lab.shortcuts`` key,
+declaring default keyboard shortcuts for a command:
+
+.. code:: json
+
+    {
+      "jupyter.lab.shortcuts": [
+        {
+          "command": "my-command",
+          "keys": ["Accel T"],
+          "selector": ".jp-mod-searchable"
+        }
+      ]
+    }
+
+Shortcuts added to the settings system will be editable by users.
+
+
+Launcher
+~~~~~~~~
+
+As with menus, keyboard shortcuts, and the command palette, new items can be added
+to the application launcher via commands.
+You can do this by requesting the ``ILauncher`` token in your extension:
+
+.. code:: typescript
+
+    launcher.add({
+      command: commandID,
+      category: 'Other',
+      rank: 0
+    });
+
+In addition to providing a command ID, you also provide a category in which to put your item,
+(e.g. 'Notebook', or 'Other'), as well as a rank to determine its position among other items.
+
+Left/Right Areas
+~~~~~~~~~~~~~~~~
+
+The left and right areas of JupyterLab are intended to host more persistent user interface
+elements than the main area. That being said, extension authors are free to add whatever
+components they like to these areas. The outermost-level of the object that you add is expected
+to be a Lumino ``Widget``, but that can host any content you like (such as React components).
+
+As an example, the following code executes an application command to a terminal widget
+and then adds the terminal to the right area:
+
+.. code:: typescript
+
+  app.commands
+    .execute('terminal:create-new')
+    .then((terminal: WidgetModuleType.Terminal) => {
+      app.shell.add(terminal, 'right');
+    });
+
+
 Main Menu
 ~~~~~~~~~
 
@@ -110,7 +376,7 @@ Adding a New Menu
 ^^^^^^^^^^^^^^^^^
 
 To add a new menu to the menu bar, you need to create a new
-`Phosphor menu <https://phosphorjs.github.io/phosphor/api/widgets/classes/menu.html>`__.
+`Lumino menu <https://jupyterlab.github.io/lumino/widgets/classes/menu.html>`__.
 
 You can then add commands to the menu in a similar way to the command palette,
 and add that menu to the main menu bar:
@@ -204,120 +470,11 @@ The available semantic menu items are:
 - ``IViewMenu.IEditorViewer``: an activity that knows how to set various view-related options on a text editor that it owns.
 
 
-Context Menu
-~~~~~~~~~~~~
-
-The application context menu is shown when the user right-clicks,
-and is populated with menu items that are most relevant to the thing that the user clicked.
-
-The context menu system determines which items to show based on
-`CSS selectors <https://developer.mozilla.org/en-US/docs/Learn/CSS/Introduction_to_CSS/Selectors>`__.
-It propagates up the DOM tree and tests whether a given HTML element
-matches the CSS selector provided by a given command.
-
-Here is an example showing how to add a command to the application context menu:
-
-.. code:: typescript
-
-    app.contextMenu.addItem({
-      command: commandID,
-      selector: '.jp-Notebook'
-    })
-
-In this example, the command indicated by ``commandID`` is shown whenever the user
-right-clicks on a DOM element matching ``.jp-Notebook`` (that is to say, a notebook).
-The selector can be any valid CSS selector, and may target your own UI elements, or existing ones.
-A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
-
-
-Keyboard Shortcuts
-~~~~~~~~~~~~~~~~~~
-
-There are two ways of adding keyboard shortcuts in JupyterLab.
-If you don't want the shortcuts to be user-configurable,
-you can add them directly to the application command registry:
-
-.. code:: typescript
-    
-    app.commands.addKeyBinding({
-      command: commandID,
-      args: {},
-      keys: ['Accel T'],
-      selector: '.jp-Notebook'
-    });
-
-In this example ``my-command`` command is mapped to ``Accel T``,
-where ``Accel`` corresponds to ``Cmd`` on a Mac and ``Ctrl`` on Windows and Linux computers.
-
-The behavior for keyboard shortcuts is very similar to that of the context menu:
-the shortcut handler propagates up the DOM tree from the focused element
-and tests each element against the registered selectors. If a match is found,
-then that command is executed with the provided ``args``.
-Full documentation for the options for ``addKeyBinding`` can be found
-`here <http://phosphorjs.github.io/phosphor/api/commands/interfaces/commandregistry.ikeybindingoptions.html>`__.
-
-JupyterLab also provides integration with its settings system for keyboard shortcuts.
-Your extension can provide a settings schema with a ``jupyter.lab.shortcuts`` key,
-declaring default keyboard shortcuts for a command:
-
-.. code:: json
-
-    {
-      "jupyter.lab.shortcuts": [
-        {
-          "command": "my-command",
-          "keys": ["Accel T"],
-          "selector": ".jp-mod-searchable"
-        }
-      ]
-    }
-
-Shortcuts added to the settings system will be editable by users.
-
-
-Launcher
-~~~~~~~~
-
-As with menus, keyboard shortcuts, and the command palette, new items can be added
-to the application launcher via commands.
-You can do this by requesting the ``ILauncher`` token in your extension:
-
-.. code:: typescript
-
-    launcher.add({
-      command: commandID,
-      category: 'Other',
-      rank: 0
-    });
-
-In addition to providing a command ID, you also provide a category in which to put your item,
-(e.g. 'Notebook', or 'Other'), as well as a rank to determine its position among other items.
-
-Left/Right Areas
-~~~~~~~~~~~~~~~~
-
-The left and right areas of JupyterLab are intended to host more persistent user interface
-elements than the main area. That being said, extension authors are free to add whatever
-components they like to these areas. The outermost-level of the object that you add is expected
-to be a Phosphor ``Widget``, but that can host any content you like (such as React components).
-
-As an example, the following code executes an application command to a terminal widget
-and then adds the terminal to the right area:
-
-.. code:: typescript
-
-  app.commands
-    .execute('terminal:create-new')
-    .then((terminal: WidgetModuleType.Terminal) => {
-      app.shell.add(terminal, 'right');
-    });
-
-
 Status Bar
 ~~~~~~~~~~
 
 JupyterLab's status bar is intended to show small pieces of contextual information.
-Like the left and right areas, it only expects a Phosphor ``Widget``,
+Like the left and right areas, it only expects a Lumino ``Widget``,
 which might contain any kind of content. Since the status bar has limited space,
 you should endeavor to only add small widgets to it.
 
@@ -359,61 +516,3 @@ Widget tracker tokens are provided for many activities in JupyterLab, including
 notebooks, consoles, text files, mime documents, and terminals.
 If you are adding your own activities to JupyterLab, you might consider providing
 a ``WidgetTracker`` token of your own, so that other extensions can make use of it.
-
-.. _copy_shareable_link:
-
-Copy Shareable Link
-~~~~~~~~~~~~~~~~~~~
-
-The file browser provides a context menu item "Copy Shareable Link". The
-desired behavior will vary by deployment and the users it serves. The file
-browser supports overriding the behavior of this item.
-
-.. code:: typescript
-
-   import {
-     IFileBrowserFactory
-   } from '@jupyterlab/filebrowser';
-
-   import {
-     JupyterFrontEnd, JupyterFrontEndPlugin
-   } from '@jupyterlab/application';
-
-
-   const shareFile: JupyterFrontEndPlugin<void> = {
-     activate: activateShareFile,
-     id: commandID,
-     requires: [IFileBrowserFactory],
-     autoStart: true
-   };
-
-   function activateShareFile(
-     app: JupyterFrontEnd,
-     factory: IFileBrowserFactory
-   ): void {
-     const { commands } = app;
-     const { tracker } = factory;
-
-     commands.addCommand('filebrowser:share-main', {
-       execute: () => {
-         const widget = tracker.currentWidget;
-         if (!widget) {
-           return;
-         }
-         const path = encodeURI(widget.selectedItems().next().path);
-         // Do something with path.
-       },
-       isVisible: () =>
-         tracker.currentWidget &&
-         toArray(tracker.currentWidget.selectedItems()).length === 1,
-       iconClass: 'jp-MaterialIcon jp-LinkIcon',
-       label: 'Copy Shareable Link'
-     });
-   }
-
-Note that before enabling this plugin in the usual way, you must *disable* the
-default plugin provided by the built-in file browser.
-
-.. code:: bash
-
-   jupyter labextension disable @jupyterlab/filebrowser-extension:share-file

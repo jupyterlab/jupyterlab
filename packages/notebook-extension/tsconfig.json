@@ -34,7 +34,13 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../notebook"
+    },
+    {
+      "path": "../property-inspector"
     },
     {
       "path": "../rendermime"
@@ -43,7 +49,16 @@
       "path": "../services"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
       "path": "../statusbar"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

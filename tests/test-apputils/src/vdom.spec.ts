@@ -7,7 +7,7 @@ import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
 import { framePromise } from '@jupyterlab/testutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -30,7 +30,7 @@ class TestWidget extends VDomRenderer<TestModel> {
   }
 }
 
-class TestWidgetNoModel extends VDomRenderer<null> {
+class TestWidgetNoModel extends VDomRenderer {
   protected render(): React.ReactElement<any> {
     return React.createElement('span', null, 'No model!');
   }
@@ -72,12 +72,12 @@ describe('@jupyterlab/apputils', () => {
   describe('VDomRenderer', () => {
     describe('#constructor()', () => {
       it('should create a TestWidget', () => {
-        const widget = new TestWidget();
+        const widget = new TestWidget(new TestModel());
         expect(widget).to.be.an.instanceof(TestWidget);
       });
 
       it('should be properly disposed', () => {
-        const widget = new TestWidget();
+        const widget = new TestWidget(new TestModel());
         widget.dispose();
         expect(widget.isDisposed).to.equal(true);
       });
@@ -85,8 +85,8 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#modelChanged()', () => {
       it('should fire the stateChanged signal on a change', () => {
-        const widget = new TestWidget();
         const model = new TestModel();
+        const widget = new TestWidget(new TestModel());
         let changed = false;
         widget.modelChanged.connect(() => {
           changed = true;
@@ -98,7 +98,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#render()', () => {
       it('should render the contents after a model change', async () => {
-        const widget = new TestWidget();
+        const widget = new TestWidget(new TestModel());
         const model = new TestModel();
         widget.model = model;
         model.value = 'foo';

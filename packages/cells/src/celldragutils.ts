@@ -9,11 +9,11 @@
  * Notebook widgets.
  */
 
-import { each, IterableOrArrayLike } from '@phosphor/algorithm';
+import { each, IterableOrArrayLike } from '@lumino/algorithm';
 import { ICodeCellModel } from './model';
 import { Cell } from './widget';
-import { h, VirtualDOM } from '@phosphor/virtualdom';
-import { nbformat } from '@jupyterlab/coreutils';
+import { h, VirtualDOM } from '@lumino/virtualdom';
+import * as nbformat from '@jupyterlab/nbformat';
 
 /**
  * Constants for drag
@@ -95,7 +95,7 @@ export namespace CellDragUtils {
     cell: Cell,
     target: HTMLElement
   ): ICellTargetArea {
-    let targetArea: ICellTargetArea = null;
+    let targetArea: ICellTargetArea;
     if (cell) {
       if (cell.editorWidget.node.contains(target)) {
         targetArea = 'input';

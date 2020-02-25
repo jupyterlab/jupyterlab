@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { IInspector, InspectorPanel } from '@jupyterlab/inspector';
 

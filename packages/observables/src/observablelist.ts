@@ -8,11 +8,11 @@ import {
   IterableOrArrayLike,
   each,
   toArray
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * A list which can be observed for changes.
@@ -70,7 +70,7 @@ export interface IObservableList<T> extends IDisposable {
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
    */
-  get(index: number): T | undefined;
+  get(index: number): T;
 
   /**
    * Insert a value into the list at a specific index.
@@ -383,7 +383,7 @@ export class ObservableList<T> implements IObservableList<T> {
    * #### Undefined Behavior
    * An `index` which is non-integral or out of range.
    */
-  get(index: number): T | undefined {
+  get(index: number): T {
     return this._array[index];
   }
 

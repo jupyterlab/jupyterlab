@@ -1,15 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IChangedArgs, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
+import { IChangedArgs, URLExt } from '@jupyterlab/coreutils';
 
-import { each } from '@phosphor/algorithm';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { DisposableDelegate, IDisposable } from '@phosphor/disposable';
+import { each } from '@lumino/algorithm';
 
-import { Widget } from '@phosphor/widgets';
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { Widget } from '@lumino/widgets';
+
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Dialog, showDialog } from './dialog';
 
@@ -69,7 +71,7 @@ export class ThemeManager implements IThemeManager {
   /**
    * A signal fired when the application theme changes.
    */
-  get themeChanged(): ISignal<this, IChangedArgs<string>> {
+  get themeChanged(): ISignal<this, IChangedArgs<string, string | null>> {
     return this._themeChanged;
   }
 
@@ -435,7 +437,9 @@ export class ThemeManager implements IThemeManager {
   private _settings: ISettingRegistry.ISettings;
   private _splash: ISplashScreen | null;
   private _themes: { [key: string]: IThemeManager.ITheme } = {};
-  private _themeChanged = new Signal<this, IChangedArgs<string>>(this);
+  private _themeChanged = new Signal<this, IChangedArgs<string, string | null>>(
+    this
+  );
 }
 
 export namespace ThemeManager {

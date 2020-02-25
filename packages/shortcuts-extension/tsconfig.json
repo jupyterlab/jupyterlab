@@ -10,7 +10,7 @@
       "path": "../application"
     },
     {
-      "path": "../coreutils"
+      "path": "../settingregistry"
     }
   ]
 }

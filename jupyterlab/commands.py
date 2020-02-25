@@ -8,6 +8,7 @@ from distutils.version import LooseVersion
 import errno
 import glob
 import hashlib
+import itertools
 import json
 import logging
 import os
@@ -94,7 +95,6 @@ class ProgressProcess(Process):
         cache = []
         proc = self.proc
         kill_event = self._kill_event
-        import itertools
         spinner = itertools.cycle(['-', '\\', '|', '/'])
         while proc.poll() is None:
             sys.stdout.write(next(spinner))   # write the next character
@@ -344,25 +344,17 @@ class AppOptions(HasTraits):
         return config.get("registry", YARN_DEFAULT_REGISTRY)
 
 
-def _ensure_options(options, **kwargs):
+def _ensure_options(options):
     """Helper to use deprecated kwargs for AppOption"""
-    # Filter out default-value kwargs
-    kwargs = dict(filter(lambda item: item[1] is not None, kwargs.items()))
-    # Warn for deprecated kwargs usage
-    if kwargs:
-        warnings.warn(
-            "Direct keyword args to jupyterlab.commands functions are "
-            "deprecated, use the options argument instead: %r" % (kwargs,),
-            DeprecationWarning)
     if options is None:
-        return AppOptions(**kwargs)
-    # Also support mixed use of options and kwargs:
-    opt_args = {name: getattr(options, name) for name in options.trait_names()}
-    kwargs.update(**opt_args)
-    return AppOptions(**kwargs)
+        return AppOptions()
+    elif issubclass(options.__class__, AppOptions):
+        return options
+    else:
+        return AppOptions(**options)
 
 
-def watch(app_dir=None, logger=None, core_config=None, app_options=None):
+def watch(app_options=None):
     """Watch the application.
 
     Parameters
@@ -376,35 +368,32 @@ def watch(app_dir=None, logger=None, core_config=None, app_options=None):
     -------
     A list of processes to run asynchronously.
     """
-    app_options = _ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    app_options = _ensure_options(app_options)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     return handler.watch()
 
 
 
-def install_extension(extension, app_dir=None, logger=None, core_config=None, pin=None, app_options=None):
+def install_extension(extension, app_options=None, pin=None):
     """Install an extension package into JupyterLab.
 
     The extension is first validated.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    app_options = _ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    app_options = _ensure_options(app_options)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     return handler.install_extension(extension, pin=pin)
 
 
-def uninstall_extension(name=None, app_dir=None, logger=None, all_=False, core_config=None, app_options=None):
+def uninstall_extension(name=None, app_options=None, all_=False):
     """Uninstall an extension by name or path.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    app_options = _ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    app_options = _ensure_options(app_options)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     if all_ is True:
@@ -412,14 +401,13 @@ def uninstall_extension(name=None, app_dir=None, logger=None, all_=False, core_c
     return handler.uninstall_extension(name)
 
 
-def update_extension(name=None, all_=False, app_dir=None, logger=None, core_config=None, app_options=None):
+def update_extension(name=None, all_=False, app_dir=None, app_options=None):
     """Update an extension by name, or all extensions.
     Either `name` must be given as a string, or `all_` must be `True`.
     If `all_` is `True`, the value of `name` is ignored.
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    app_options = _ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    app_options = _ensure_options(app_options)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     if all_ is True:
@@ -427,126 +415,129 @@ def update_extension(name=None, all_=False, app_dir=None, logger=None, core_conf
     return handler.update_extension(name)
 
 
-def clean(app_dir=None, logger=None, app_options=None):
+def clean(app_options=None):
     """Clean the JupyterLab application directory."""
-    app_options = _ensure_options(
-        app_options, app_dir=app_dir, logger=logger)
+    app_options = _ensure_options(app_options)
     handler = _AppHandler(app_options)
     logger = app_options.logger
     app_dir = app_options.app_dir
+
     logger.info('Cleaning %s...', app_dir)
     if app_dir == pjoin(HERE, 'dev'):
         raise ValueError('Cannot clean the dev app')
     if app_dir == pjoin(HERE, 'core'):
         raise ValueError('Cannot clean the core app')
-    for name in ['staging']:
-        target = pjoin(app_dir, name)
-        if osp.exists(target):
-            _rmtree(target, logger)
+
+    if app_options.all:
+        logger.info('Removing everything in %s...', app_dir)
+        _rmtree_star(app_dir, logger)
+    else:
+        possibleTargets = ['extensions', 'settings', 'staging', 'static']
+        targets = [t for t in possibleTargets if getattr(app_options, t)]
+
+        for name in targets:
+            target = pjoin(app_dir, name)
+            if osp.exists(target):
+                logger.info('Removing %s...', name)
+                _rmtree(target, logger)
+            else:
+                logger.info('%s not present, skipping...', name)
+
     logger.info('Success!')
+    if app_options.all or app_options.extensions:
+        logger.info('All of your extensions have been removed, and will need to be reinstalled')
 
 
-def build(app_dir=None, name=None, version=None, static_url=None,
-          logger=None, command='build:prod', kill_event=None,
-          clean_staging=False, core_config=None, app_options=None):
+def build(name=None, version=None, static_url=None,
+          command='build:prod', kill_event=None,
+          clean_staging=False, app_options=None):
     """Build the JupyterLab application.
     """
-    app_options = _ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    app_options = _ensure_options(app_options)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     return handler.build(name=name, version=version, static_url=static_url,
                          command=command, clean_staging=clean_staging)
 
 
-def get_app_info(app_dir=None, logger=None, core_config=None, app_options=None):
+def get_app_info(app_options=None):
     """Get a dictionary of information about the app.
     """
-    handler = _AppHandler(_ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
+    handler = _AppHandler(app_options)
     return handler.info
 
 
-def enable_extension(extension, app_dir=None, logger=None, core_config=None, app_options=None):
+def enable_extension(extension, app_options=None):
     """Enable a JupyterLab extension.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    handler = _AppHandler(_ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
+    handler = _AppHandler(app_options)
     return handler.toggle_extension(extension, False)
 
 
-def disable_extension(extension, app_dir=None, logger=None, core_config=None, app_options=None):
+def disable_extension(extension, app_options=None):
     """Disable a JupyterLab package.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    handler = _AppHandler(_ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
+    handler = _AppHandler(app_options)
     return handler.toggle_extension(extension, True)
 
 
-def check_extension(extension, app_dir=None, installed=False, logger=None, core_config=None, app_options=None):
+def check_extension(extension, installed=False, app_options=None):
     """Check if a JupyterLab extension is enabled or disabled.
     """
-    handler = _AppHandler(_ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
+    handler = _AppHandler(app_options)
     return handler.check_extension(extension, installed)
 
 
-def build_check(app_dir=None, logger=None, core_config=None, app_options=None):
+def build_check(app_options=None):
     """Determine whether JupyterLab should be built.
 
     Returns a list of messages.
     """
-    app_options = _ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config)
+    app_options = _ensure_options(app_options)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     return handler.build_check()
 
 
-def list_extensions(app_dir=None, logger=None, core_config=None, app_options=None):
+def list_extensions(app_options=None):
     """List the extensions.
     """
-    handler = _AppHandler(_ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
+    handler = _AppHandler(app_options)
     return handler.list_extensions()
 
 
-def link_package(path, app_dir=None, logger=None, core_config=None, app_options=None):
+def link_package(path, app_options=None):
     """Link a package against the JupyterLab build.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    handler = _AppHandler(_ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
+    handler = _AppHandler(app_options)
     return handler.link_package(path)
 
 
-def unlink_package(package, app_dir=None, logger=None, core_config=None, app_options=None):
+def unlink_package(package, app_options=None):
     """Unlink a package from JupyterLab by path or name.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
-    handler = _AppHandler(_ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
+    handler = _AppHandler(app_options)
     return handler.unlink_package(package)
 
 
-def get_app_version(app_dir=None, core_config=None, app_options=None):
+def get_app_version(app_options=None):
     """Get the application version."""
-    handler = _AppHandler(_ensure_options(
-        app_options, app_dir=app_dir, core_config=core_config))
+    handler = _AppHandler(app_options)
     return handler.info['version']
 
 
-def get_latest_compatible_package_versions(names, app_dir=None, logger=None, core_config=None, app_options=None):
+def get_latest_compatible_package_versions(names, app_options=None):
     """Get the latest compatible version of a list of packages.
     """
-    handler = _AppHandler(_ensure_options(
-        app_options, app_dir=app_dir, logger=logger, core_config=core_config))
+    handler = _AppHandler(app_options)
     return handler.latest_compatible_package_versions(names)
 
 
@@ -573,6 +564,7 @@ class _AppHandler(object):
     def __init__(self, options):
         """Create a new _AppHandler object
         """
+        options = _ensure_options(options)
         self.app_dir = options.app_dir
         self.sys_dir = get_app_dir() if options.use_sys_dir else self.app_dir
         self.logger = options.logger
@@ -901,7 +893,7 @@ class _AppHandler(object):
         """
         path = _normalize_path(path)
         if not osp.exists(path) or not osp.isdir(path):
-            msg = 'Can install "%s" only link local directories'
+            msg = 'Cannot install "%s" only link local directories'
             raise ValueError(msg % path)
 
         with TemporaryDirectory() as tempdir:
@@ -1169,7 +1161,7 @@ class _AppHandler(object):
             json.dump(data, fid, indent=4)
 
         # copy known-good yarn.lock if missing
-        lock_path = pjoin(staging, 'yarn.lock')        
+        lock_path = pjoin(staging, 'yarn.lock')
         lock_template = pjoin(HERE, 'staging', 'yarn.lock')
         if self.registry != YARN_DEFAULT_REGISTRY:  # Replace on the fly the yarn repository see #3658
             with open(lock_template, encoding='utf-8') as f:
@@ -1202,6 +1194,7 @@ class _AppHandler(object):
         # Handle local extensions.
         for (key, source) in local.items():
             jlab['linkedPackages'][key] = source
+            data['resolutions'][key] = source
 
         # Handle linked packages.
         for (key, item) in linked.items():
@@ -1209,6 +1202,7 @@ class _AppHandler(object):
             path = pjoin(path, item['filename'])
             data['dependencies'][key] = format_path(path)
             jlab['linkedPackages'][key] = item['source']
+            data['resolutions'][key] = format_path(path)
 
         # Handle extensions
         compat_errors = self._get_extension_compat()
@@ -1237,10 +1231,11 @@ class _AppHandler(object):
         for item in self.info['uninstalled_core']:
             if item in jlab['extensions']:
                 data['jupyterlab']['extensions'].pop(item)
-            else:
+            elif item in jlab['mimeExtensions']:
                 data['jupyterlab']['mimeExtensions'].pop(item)
             # Remove from dependencies as well.
-            data['dependencies'].pop(item)
+            if item in data['dependencies']:
+                data['dependencies'].pop(item)
 
         return data
 
@@ -1264,6 +1259,9 @@ class _AppHandler(object):
         """
         # Extract the package in a temporary directory.
         existing = data['filename']
+        if not osp.exists(pjoin(dname, existing)):
+            existing = ''
+
         with TemporaryDirectory() as tempdir:
             info = self._extract_package(source, tempdir)
 
@@ -1273,7 +1271,7 @@ class _AppHandler(object):
 
             shutil.move(info['path'], pjoin(dname, info['filename']))
 
-        # Remove the existing tarball and return the new file name.
+        # Remove the previous tarball and return the new file name.
         if existing:
             os.remove(pjoin(dname, existing))
 
@@ -1709,7 +1707,10 @@ class _AppHandler(object):
 
             for (key, value) in latest_deps.items():
                 if key in singletons:
-                    c = _compare_ranges(core_deps[key], value)
+                    # Drop prereleases in comparisons to allow extension authors
+                    # to not have to update their versions for each
+                    # Jupyterlab prerelease version.
+                    c = _compare_ranges(core_deps[key], value, drop_prerelease1=True)
                     lab_newer_than_latest = lab_newer_than_latest or c < 0
                     latest_newer_than_lab = latest_newer_than_lab or c > 0
 
@@ -1757,7 +1758,7 @@ def _node_check(logger):
 
 def _yarn_config(logger):
     """Get the yarn configuration.
-    
+
     Returns
     -------
     {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
@@ -1809,9 +1810,27 @@ def _normalize_path(extension):
 def _rmtree(path, logger):
     """Remove a tree, logging errors"""
     def onerror(*exc_info):
-        logger.debug('Error in rmtree', exc_info=exc_info)
+        logger.debug('Error in shutil.rmtree', exc_info=exc_info)
 
     shutil.rmtree(path, onerror=onerror)
+
+
+def _unlink(path, logger):
+    """Remove a file, logging errors"""
+    try:
+        os.unlink(path)
+    except Exception:
+        logger.debug('Error in os.unlink', exc_info=sys.exc_info())
+
+
+def _rmtree_star(path, logger):
+    """Remove all files/trees within a dir, logging errors"""
+    for filename in os.listdir(path):
+        file_path = os.path.join(path, filename)
+        if os.path.isfile(file_path) or os.path.islink(file_path):
+            _unlink(file_path, logger)
+        elif os.path.isdir(file_path):
+            _rmtree(file_path, logger)
 
 
 def _validate_extension(data):
@@ -1907,26 +1926,30 @@ def _validate_compatibility(extension, deps, core_data):
 
     for (key, value) in deps.items():
         if key in singletons:
-            overlap = _test_overlap(core_deps[key], value)
+            # Drop prereleases in comparisons to allow extension authors
+            # to not have to update their versions for each
+            # Jupyterlab prerelease version.
+            overlap = _test_overlap(core_deps[key], value, drop_prerelease1=True)
             if overlap is False:
                 errors.append((key, core_deps[key], value))
 
     return errors
 
 
-def _test_overlap(spec1, spec2):
+def _test_overlap(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False):
     """Test whether two version specs overlap.
 
     Returns `None` if we cannot determine compatibility,
     otherwise whether there is an overlap
     """
-    cmp = _compare_ranges(spec1, spec2)
+    cmp = _compare_ranges(spec1, spec2, drop_prerelease1=drop_prerelease1,
+        drop_prerelease2=drop_prerelease2)
     if cmp is None:
         return
     return cmp == 0
 
 
-def _compare_ranges(spec1, spec2):
+def _compare_ranges(spec1, spec2, drop_prerelease1=False, drop_prerelease2=False):
     """Test whether two version specs overlap.
 
     Returns `None` if we cannot determine compatibility,
@@ -1942,45 +1965,75 @@ def _compare_ranges(spec1, spec2):
     if not r1.range or not r2.range:
         return
 
-    x1 = r1.set[0][0].semver
-    x2 = r1.set[0][-1].semver
-    y1 = r2.set[0][0].semver
-    y2 = r2.set[0][-1].semver
+    # Set return_value to a sentinel value
+    return_value = False
 
-    o1 = r1.set[0][0].operator
-    o2 = r2.set[0][0].operator
+    # r1.set may be a list of ranges if the range involved an ||, so we need to test for overlaps between each pair.
+    for r1set, r2set in itertools.product(r1.set, r2.set):
+        x1 = r1set[0].semver
+        x2 = r1set[-1].semver
+        y1 = r2set[0].semver
+        y2 = r2set[-1].semver
 
-    # We do not handle (<) specifiers.
-    if (o1.startswith('<') or o2.startswith('<')):
-        return
+        if x1.prerelease and drop_prerelease1:
+            x1 = x1.inc('patch')
 
-    # Handle single value specifiers.
-    lx = lte if x1 == x2 else lt
-    ly = lte if y1 == y2 else lt
-    gx = gte if x1 == x2 else gt
-    gy = gte if x1 == x2 else gt
+        if y1.prerelease and drop_prerelease2:
+            y1 = y1.inc('patch')
 
-    # Handle unbounded (>) specifiers.
-    def noop(x, y, z):
-        return True
+        o1 = r1set[0].operator
+        o2 = r2set[0].operator
 
-    if x1 == x2 and o1.startswith('>'):
-        lx = noop
-    if y1 == y2 and o2.startswith('>'):
-        ly = noop
+        # We do not handle (<) specifiers.
+        if (o1.startswith('<') or o2.startswith('<')):
+            continue
 
-    # Check for overlap.
-    if (gte(x1, y1, True) and ly(x1, y2, True) or
-        gy(x2, y1, True) and ly(x2, y2, True) or
-        gte(y1, x1, True) and lx(y1, x2, True) or
-        gx(y2, x1, True) and lx(y2, x2, True)
-       ):
-       return 0
-    if gte(y1, x2, True):
-        return 1
-    if gte(x1, y2, True):
-        return -1
-    raise AssertionError('Unexpected case comparing version ranges')
+        # Handle single value specifiers.
+        lx = lte if x1 == x2 else lt
+        ly = lte if y1 == y2 else lt
+        gx = gte if x1 == x2 else gt
+        gy = gte if x1 == x2 else gt
+
+        # Handle unbounded (>) specifiers.
+        def noop(x, y, z):
+            return True
+
+        if x1 == x2 and o1.startswith('>'):
+            lx = noop
+        if y1 == y2 and o2.startswith('>'):
+            ly = noop
+
+        # Check for overlap.
+        if (gte(x1, y1, True) and ly(x1, y2, True) or
+            gy(x2, y1, True) and ly(x2, y2, True) or
+            gte(y1, x1, True) and lx(y1, x2, True) or
+            gx(y2, x1, True) and lx(y2, x2, True)
+        ):
+            # if we ever find an overlap, we can return immediately
+            return 0
+
+        if gte(y1, x2, True):
+            if return_value is False:
+                # We can possibly return 1
+                return_value = 1
+            elif return_value == -1:
+                # conflicting information, so we must return None
+                return_value = None
+            continue
+
+        if gte(x1, y2, True):
+            if return_value is False:
+                return_value = -1
+            elif return_value == 1:
+                # conflicting information, so we must return None
+                return_value = None
+            continue
+
+        raise AssertionError('Unexpected case comparing version ranges')
+
+    if return_value is False:
+        return_value = None
+    return return_value
 
 
 def _is_disabled(name, disabled=[]):
@@ -2022,7 +2075,7 @@ def _format_compatibility_errors(name, version, errors):
 
 
 def _log_multiple_compat_errors(logger, errors_map):
-    """Log compatability errors for multiple extensions at once"""
+    """Log compatibility errors for multiple extensions at once"""
 
     outdated = []
     others = []
@@ -2072,7 +2125,10 @@ def _compat_error_age(errors):
     any_newer = False
 
     for _, jlab, ext in errors:
-        c = _compare_ranges(ext, jlab)
+        # Drop prereleases in comparisons to allow extension authors
+        # to not have to update their versions for each
+        # Jupyterlab prerelease version.
+        c = _compare_ranges(ext, jlab, drop_prerelease1=True)
         any_newer = any_newer or c < 0
         any_older = any_older or c > 0
     if any_older and not any_newer:

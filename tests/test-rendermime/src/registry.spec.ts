@@ -3,15 +3,15 @@
 
 import { expect } from 'chai';
 
-import { UUID, JSONObject } from '@phosphor/coreutils';
+import { UUID, JSONObject } from '@lumino/coreutils';
 
 import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 
@@ -22,9 +22,10 @@ import {
   RenderMimeRegistry
 } from '@jupyterlab/rendermime';
 
-import { defaultRenderMime, createFileContext } from '@jupyterlab/testutils';
-
-const RESOLVER: IRenderMime.IResolver = createFileContext().urlResolver;
+import {
+  defaultRenderMime,
+  createFileContextWithKernel
+} from '@jupyterlab/testutils';
 
 function createModel(data: JSONObject): IRenderMime.IMimeModel {
   return new MimeModel({ data });
@@ -39,6 +40,18 @@ const fooFactory: IRenderMime.IRendererFactory = {
 
 describe('rendermime/registry', () => {
   let r: RenderMimeRegistry;
+  let RESOLVER: IRenderMime.IResolver;
+
+  before(async () => {
+    let fileContext = await createFileContextWithKernel();
+    await fileContext.initialize(true);
+
+    // The context initialization kicks off a sessionContext initialization,
+    // but does not wait for it. We need to wait for it so our url resolver
+    // has access to the session.
+    await fileContext.sessionContext.initialize();
+    RESOLVER = fileContext.urlResolver;
+  });
 
   beforeEach(() => {
     r = defaultRenderMime();
@@ -281,7 +294,7 @@ describe('rendermime/registry', () => {
 
     describe('#getFactory()', () => {
       it('should get a factory by mimeType', () => {
-        const f = r.getFactory('text/plain');
+        const f = r.getFactory('text/plain')!;
         expect(f.mimeTypes).to.contain('text/plain');
       });
 
@@ -299,7 +312,7 @@ describe('rendermime/registry', () => {
     describe('.UrlResolver', () => {
       let resolver: RenderMimeRegistry.UrlResolver;
       let contents: Contents.IManager;
-      let session: Session.ISession;
+      let session: Session.ISessionConnection;
       const pathParent = 'has%20üni';
       const urlParent = encodeURI(pathParent);
 
@@ -310,7 +323,11 @@ describe('rendermime/registry', () => {
         contents = manager.contents;
         contents.addDrive(drive);
         await manager.ready;
-        session = await manager.sessions.startNew({ path: path });
+        session = await manager.sessions.startNew({
+          name: '',
+          path: path,
+          type: 'test'
+        });
         resolver = new RenderMimeRegistry.UrlResolver({
           session,
           contents: manager.contents

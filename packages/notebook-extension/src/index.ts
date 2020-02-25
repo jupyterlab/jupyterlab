@@ -11,30 +11,20 @@ import {
 import {
   Dialog,
   ICommandPalette,
+  ISessionContextDialogs,
   MainAreaWidget,
   showDialog,
-  WidgetTracker
+  WidgetTracker,
+  sessionContextDialogs
 } from '@jupyterlab/apputils';
 
 import { CodeCell } from '@jupyterlab/cells';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
-import {
-  ISettingRegistry,
-  IStateDB,
-  nbformat,
-  PageConfig,
-  URLExt
-} from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
-
-import { ArrayExt } from '@phosphor/algorithm';
-
-import { UUID, JSONObject } from '@phosphor/coreutils';
-
-import { DisposableSet } from '@phosphor/disposable';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -50,6 +40,8 @@ import {
   IViewMenu
 } from '@jupyterlab/mainmenu';
 
+import * as nbformat from '@jupyterlab/nbformat';
+
 import {
   NotebookTools,
   INotebookTools,
@@ -64,18 +56,38 @@ import {
   NotebookTrustStatus
 } from '@jupyterlab/notebook';
 
+import { IPropertyInspectorProvider } from '@jupyterlab/property-inspector';
+
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ServiceManager } from '@jupyterlab/services';
 
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { IStateDB } from '@jupyterlab/statedb';
+
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { ReadonlyJSONObject, JSONValue } from '@phosphor/coreutils';
+import { buildIcon, notebookIcon } from '@jupyterlab/ui-components';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { ArrayExt } from '@lumino/algorithm';
 
-import { Panel, Menu } from '@phosphor/widgets';
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
+
+import {
+  JSONExt,
+  JSONObject,
+  JSONValue,
+  ReadonlyPartialJSONObject,
+  ReadonlyJSONValue,
+  UUID
+} from '@lumino/coreutils';
+
+import { DisposableSet } from '@lumino/disposable';
+
+import { Message, MessageLoop } from '@lumino/messaging';
+
+import { Panel, Menu } from '@lumino/widgets';
 
 /**
  * The command IDs used by the notebook plugin.
@@ -88,6 +100,8 @@ namespace CommandIDs {
   export const restart = 'notebook:restart-kernel';
 
   export const restartClear = 'notebook:restart-clear-output';
+
+  export const restartAndRunToSelected = 'notebook:restart-and-run-to-selected';
 
   export const restartRunAll = 'notebook:restart-run-all';
 
@@ -177,8 +191,6 @@ namespace CommandIDs {
 
   export const toggleAllLines = 'notebook:toggle-all-cell-line-numbers';
 
-  export const toggleRecordTiming = 'notebook:toggle-record-timing';
-
   export const undoCellAction = 'notebook:undo-cell-action';
 
   export const redoCellAction = 'notebook:redo-cell-action';
@@ -214,22 +226,14 @@ namespace CommandIDs {
   export const enableOutputScrolling = 'notebook:enable-output-scrolling';
 
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
-}
 
-/**
- * The class name for the notebook icon from the default theme.
- */
-const NOTEBOOK_ICON_CLASS = 'jp-NotebookIcon';
+  export const selectLastRunCell = 'notebook:select-last-run-cell';
+}
 
 /**
  * The name of the factory that creates notebooks.
  */
 const FACTORY = 'Notebook';
-
-/**
- * The rank of the notebook tools tab in the sidebar
- */
-const NOTEBOOK_TOOLS_RANK = 400;
 
 /**
  * The exluded Export To ...
@@ -274,7 +278,8 @@ const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
     ILauncher,
     ILayoutRestorer,
     IMainMenu,
-    ISettingRegistry
+    ISettingRegistry,
+    ISessionContextDialogs
   ],
   activate: activateNotebookHandler,
   autoStart: true
@@ -303,7 +308,7 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
   requires: [INotebookTracker, IEditorServices, IStateDB],
-  optional: [ILabShell]
+  optional: [ILabShell, IPropertyInspectorProvider]
 };
 
 /**
@@ -337,8 +342,8 @@ export const commandEditItem: JupyterFrontEndPlugin<void> = {
       align: 'right',
       rank: 4,
       isActive: () =>
-        shell.currentWidget &&
-        tracker.currentWidget &&
+        !!shell.currentWidget &&
+        !!tracker.currentWidget &&
         shell.currentWidget === tracker.currentWidget
     });
   }
@@ -377,8 +382,8 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
         align: 'right',
         rank: 3,
         isActive: () =>
-          shell.currentWidget &&
-          tracker.currentWidget &&
+          !!shell.currentWidget &&
+          !!tracker.currentWidget &&
           shell.currentWidget === tracker.currentWidget
       }
     );
@@ -405,7 +410,8 @@ function activateNotebookTools(
   tracker: INotebookTracker,
   editorServices: IEditorServices,
   state: IStateDB,
-  labShell: ILabShell | null
+  labShell: ILabShell | null,
+  inspectorProvider: IPropertyInspectorProvider | null
 ): INotebookTools {
   const id = 'notebook-tools';
   const notebookTools = new NotebookTools({ tracker });
@@ -455,7 +461,7 @@ function activateNotebookTools(
       notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
     }
   });
-  notebookTools.title.iconClass = 'jp-BuildIcon jp-SideBar-tabIcon';
+  notebookTools.title.icon = buildIcon;
   notebookTools.title.caption = 'Notebook Tools';
   notebookTools.id = id;
 
@@ -475,44 +481,12 @@ function activateNotebookTools(
 
   MessageLoop.installMessageHook(notebookTools, hook);
 
-  // Wait until the application has finished restoring before rendering.
-  void Promise.all([state.fetch(id), app.restored]).then(([value]) => {
-    const open = !!(
-      value && ((value as ReadonlyJSONObject)['open'] as boolean)
-    );
-
-    // After initial restoration, check if the notebook tools should render.
-    if (tracker.size) {
-      app.shell.add(notebookTools, 'left', { rank: NOTEBOOK_TOOLS_RANK });
-      if (open) {
-        app.shell.activateById(notebookTools.id);
-      }
-    }
-
-    const updateTools = () => {
-      // If there are any open notebooks, add notebook tools to the side panel if
-      // it is not already there.
-      if (tracker.size) {
-        if (!notebookTools.isAttached) {
-          labShell.add(notebookTools, 'left', { rank: NOTEBOOK_TOOLS_RANK });
-        }
-        return;
-      }
-      // If there are no notebooks, close notebook tools.
-      notebookTools.close();
-    };
-
-    // For all subsequent widget changes, check if the notebook tools should render.
-    if (labShell) {
-      labShell.currentChanged.connect((sender, args) => {
-        updateTools();
-      });
-    } else {
-      tracker.currentChanged.connect((sender, args) => {
-        updateTools();
-      });
-    }
-  });
+  if (inspectorProvider) {
+    tracker.widgetAdded.connect((sender, panel) => {
+      const inspector = inspectorProvider.register(panel);
+      inspector.render(notebookTools);
+    });
+  }
 
   return notebookTools;
 }
@@ -531,7 +505,8 @@ function activateNotebookHandler(
   launcher: ILauncher | null,
   restorer: ILayoutRestorer | null,
   mainMenu: IMainMenu | null,
-  settingRegistry: ISettingRegistry | null
+  settingRegistry: ISettingRegistry | null,
+  sessionDialogs: ISessionContextDialogs | null
 ): INotebookTracker {
   const services = app.serviceManager;
 
@@ -579,17 +554,31 @@ function activateNotebookHandler(
   registry.addModelFactory(new NotebookModelFactory({}));
   registry.addWidgetFactory(factory);
 
-  addCommands(app, docManager, services, tracker, clonedOutputs);
+  addCommands(
+    app,
+    docManager,
+    services,
+    tracker,
+    clonedOutputs,
+    sessionDialogs
+  );
   if (palette) {
     populatePalette(palette, services);
   }
 
   let id = 0; // The ID counter for notebook panels.
 
+  let ft = app.docRegistry.getFileType('notebook');
+
   factory.widgetCreated.connect((sender, widget) => {
     // If the notebook panel does not have an ID, assign it one.
     widget.id = widget.id || `notebook-${++id}`;
-    widget.title.icon = NOTEBOOK_ICON_CLASS;
+
+    // Set up the title icon
+    widget.title.icon = ft?.icon;
+    widget.title.iconClass = ft?.iconClass ?? '';
+    widget.title.iconLabel = ft?.iconLabel ?? '';
+
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
@@ -629,7 +618,8 @@ function activateNotebookHandler(
     factory.editorConfig = { code, markdown, raw };
     factory.notebookConfig = {
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
-      defaultCell: settings.get('defaultCell').composite as nbformat.CellType
+      defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
+      recordTiming: settings.get('recordTiming').composite as boolean
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
@@ -664,7 +654,7 @@ function activateNotebookHandler(
 
   // Add main menu notebook menu.
   if (mainMenu) {
-    populateMenus(app, mainMenu, tracker, services, palette);
+    populateMenus(app, mainMenu, tracker, services, palette, sessionDialogs);
   }
 
   // Utility function to create a new notebook.
@@ -684,8 +674,11 @@ function activateNotebookHandler(
   commands.addCommand(CommandIDs.createNew, {
     label: args => {
       const kernelName = (args['kernelName'] as string) || '';
-      if (args['isLauncher'] && args['kernelName']) {
-        return services.specs.kernelspecs[kernelName].display_name;
+      if (args['isLauncher'] && args['kernelName'] && services.kernelspecs) {
+        return (
+          services.kernelspecs.specs?.kernelspecs[kernelName]?.display_name ??
+          ''
+        );
       }
       if (args['isPalette']) {
         return 'New Notebook';
@@ -693,7 +686,7 @@ function activateNotebookHandler(
       return 'Notebook';
     },
     caption: 'Create a new notebook',
-    iconClass: args => (args['isPalette'] ? '' : 'jp-NotebookIcon'),
+    icon: args => (args['isPalette'] ? undefined : notebookIcon),
     execute: args => {
       const cwd =
         (args['cwd'] as string) ||
@@ -712,7 +705,7 @@ function activateNotebookHandler(
           disposables.dispose();
           disposables = null;
         }
-        const specs = services.specs;
+        const specs = services.kernelspecs.specs;
         if (!specs) {
           return;
         }
@@ -721,7 +714,8 @@ function activateNotebookHandler(
 
         for (let name in specs.kernelspecs) {
           let rank = name === specs.default ? 0 : Infinity;
-          let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+          const spec = specs.kernelspecs[name]!;
+          let kernelIconUrl = spec.resources['logo-64x64'];
           if (kernelIconUrl) {
             let index = kernelIconUrl.indexOf('kernelspecs');
             kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
@@ -732,13 +726,18 @@ function activateNotebookHandler(
               args: { isLauncher: true, kernelName: name },
               category: 'Notebook',
               rank,
-              kernelIconUrl
+              kernelIconUrl,
+              metadata: {
+                kernel: JSONExt.deepCopy(
+                  spec.metadata || {}
+                ) as ReadonlyJSONValue
+              }
             })
           );
         }
       };
       onSpecsChanged();
-      services.specsChanged.connect(onSpecsChanged);
+      services.kernelspecs.specsChanged.connect(onSpecsChanged);
     });
   }
 
@@ -874,12 +873,15 @@ function addCommands(
   docManager: IDocumentManager,
   services: ServiceManager,
   tracker: NotebookTracker,
-  clonedOutputs: WidgetTracker<MainAreaWidget>
+  clonedOutputs: WidgetTracker<MainAreaWidget>,
+  sessionDialogs: ISessionContextDialogs | null
 ): void {
   const { commands, shell } = app;
 
+  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
+
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: ReadonlyJSONObject): NotebookPanel | null {
+  function getCurrent(args: ReadonlyPartialJSONObject): NotebookPanel | null {
     const widget = tracker.currentWidget;
     const activate = args['activate'] !== false;
 
@@ -907,7 +909,7 @@ function addCommands(
     if (!isEnabled()) {
       return false;
     }
-    const { content } = tracker.currentWidget;
+    const { content } = tracker.currentWidget!;
     const index = content.activeCellIndex;
     // If there are selections that are not the active cell,
     // this command is confusing, so disable it.
@@ -927,7 +929,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndAdvance(content, context.session);
+        return NotebookActions.runAndAdvance(content, context.sessionContext);
       }
     },
     isEnabled
@@ -940,7 +942,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.run(content, context.session);
+        return NotebookActions.run(content, context.sessionContext);
       }
     },
     isEnabled
@@ -953,7 +955,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAndInsert(content, context.session);
+        return NotebookActions.runAndInsert(content, context.sessionContext);
       }
     },
     isEnabled
@@ -972,7 +974,7 @@ function addCommands(
       const { context, content } = current;
 
       let cell = content.activeCell;
-      let metadata = cell.model.metadata.toJSON();
+      let metadata = cell?.model.metadata.toJSON();
       let path = context.path;
       // ignore action in non-code cell
       if (!cell || cell.model.type !== 'code') {
@@ -1007,11 +1009,13 @@ function addCommands(
         let lastLine = firstLine + 1;
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
-          let reply = await current.context.session.kernel.requestIsComplete({
-            // ipython needs an empty line at the end to correctly identify completeness of indented code
-            code: code + '\n\n'
-          });
-          if (reply.content.status === 'complete') {
+          let reply = await current.context.sessionContext.session?.kernel?.requestIsComplete(
+            {
+              // ipython needs an empty line at the end to correctly identify completeness of indented code
+              code: code + '\n\n'
+            }
+          );
+          if (reply?.content.status === 'complete') {
             if (curLine < lastLine) {
               // we find a block of complete statement containing the current line, great!
               while (
@@ -1083,7 +1087,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAll(content, context.session);
+        return NotebookActions.runAll(content, context.sessionContext);
       }
     },
     isEnabled
@@ -1096,7 +1100,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllAbove(content, context.session);
+        return NotebookActions.runAllAbove(content, context.sessionContext);
       }
     },
     isEnabled: () => {
@@ -1104,7 +1108,7 @@ function addCommands(
       // or if we are at the top of the notebook.
       return (
         isEnabledAndSingleSelected() &&
-        tracker.currentWidget.content.activeCellIndex !== 0
+        tracker.currentWidget!.content.activeCellIndex !== 0
       );
     }
   });
@@ -1116,7 +1120,7 @@ function addCommands(
       if (current) {
         const { context, content } = current;
 
-        return NotebookActions.runAllBelow(content, context.session);
+        return NotebookActions.runAllBelow(content, context.sessionContext);
       }
     },
     isEnabled: () => {
@@ -1124,8 +1128,8 @@ function addCommands(
       // or if we are at the bottom of the notebook.
       return (
         isEnabledAndSingleSelected() &&
-        tracker.currentWidget.content.activeCellIndex !==
-          tracker.currentWidget.content.widgets.length - 1
+        tracker.currentWidget!.content.activeCellIndex !==
+          tracker.currentWidget!.content.widgets.length - 1
       );
     }
   });
@@ -1135,7 +1139,10 @@ function addCommands(
       const current = getCurrent(args);
       if (current) {
         const { context, content } = current;
-        return NotebookActions.renderAllMarkdown(content, context.session);
+        return NotebookActions.renderAllMarkdown(
+          content,
+          context.sessionContext
+        );
       }
     },
     isEnabled
@@ -1146,7 +1153,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return current.session.restart();
+        return sessionDialogs!.restart(current.sessionContext);
       }
     },
     isEnabled
@@ -1168,7 +1175,7 @@ function addCommands(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.context.session.shutdown().then(() => {
+          return current.context.sessionContext.shutdown().then(() => {
             current.dispose();
           });
         }
@@ -1208,15 +1215,17 @@ function addCommands(
       const child = window.open('', '_blank');
       const { context } = current;
 
-      child.opener = null;
+      if (child) {
+        child.opener = null;
+      }
       if (context.model.dirty && !context.model.readOnly) {
         return context.save().then(() => {
-          child.location.assign(url);
+          child?.location.assign(url);
         });
       }
 
       return new Promise<void>(resolve => {
-        child.location.assign(url);
+        child?.location.assign(url);
         resolve(undefined);
       });
     },
@@ -1228,14 +1237,41 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        const { content, session } = current;
+        const { content, sessionContext } = current;
 
-        return session.restart().then(() => {
+        return sessionDialogs!.restart(sessionContext).then(() => {
           NotebookActions.clearAllOutputs(content);
         });
       }
     },
     isEnabled
+  });
+  commands.addCommand(CommandIDs.restartAndRunToSelected, {
+    label: 'Restart Kernel and Run up to Selected Cell…',
+    execute: args => {
+      const current = getCurrent(args);
+      if (current) {
+        const { context, content } = current;
+        return sessionDialogs!
+          .restart(current.sessionContext)
+          .then(restarted => {
+            if (restarted) {
+              void NotebookActions.runAllAbove(
+                content,
+                context.sessionContext
+              ).then(executed => {
+                if (executed || content.activeCellIndex === 0) {
+                  void NotebookActions.run(content, context.sessionContext);
+                }
+              });
+            }
+          });
+      }
+    },
+    isEnabled: () => {
+      // Can't run if there are multiple cells selected
+      return isEnabledAndSingleSelected();
+    }
   });
   commands.addCommand(CommandIDs.restartRunAll, {
     label: 'Restart Kernel and Run All Cells…',
@@ -1243,11 +1279,11 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        const { context, content, session } = current;
+        const { context, content, sessionContext } = current;
 
-        return session.restart().then(restarted => {
+        return sessionDialogs!.restart(sessionContext).then(restarted => {
           if (restarted) {
-            void NotebookActions.runAll(content, context.session);
+            void NotebookActions.runAll(content, context.sessionContext);
           }
           return restarted;
         });
@@ -1286,7 +1322,7 @@ function addCommands(
         return;
       }
 
-      const kernel = current.context.session.kernel;
+      const kernel = current.context.sessionContext.session?.kernel;
 
       if (kernel) {
         return kernel.interrupt();
@@ -1558,17 +1594,6 @@ function addCommands(
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.toggleRecordTiming, {
-    label: 'Toggle Recording Cell Timing',
-    execute: args => {
-      const current = getCurrent(args);
-
-      if (current) {
-        return NotebookActions.toggleRecordTiming(current.content);
-      }
-    },
-    isEnabled
-  });
   commands.addCommand(CommandIDs.commandMode, {
     label: 'Enter Command Mode',
     execute: args => {
@@ -1619,7 +1644,7 @@ function addCommands(
       const current = getCurrent(args);
 
       if (current) {
-        return current.context.session.selectKernel();
+        return sessionDialogs!.selectKernel(current.context.sessionContext);
       }
     },
     isEnabled
@@ -1633,7 +1658,7 @@ function addCommands(
         return;
       }
 
-      const kernel = current.context.session.kernel;
+      const kernel = current.context.sessionContext.session?.kernel;
 
       if (kernel) {
         return kernel.reconnect();
@@ -1645,7 +1670,7 @@ function addCommands(
     label: 'Create New View for Output',
     execute: async args => {
       let cell: CodeCell | undefined;
-      let current: NotebookPanel | undefined;
+      let current: NotebookPanel | undefined | null;
       // If we are given a notebook path and cell index, then
       // use that, otherwise use the current active cell.
       let path = args.path as string | undefined | null;
@@ -1678,16 +1703,17 @@ function addCommands(
       const updateCloned = () => {
         void clonedOutputs.save(widget);
       };
+
       current.context.pathChanged.connect(updateCloned);
-      current.content.model.cells.changed.connect(updateCloned);
+      current.context.model?.cells.changed.connect(updateCloned);
 
       // Add the cloned output to the output widget tracker.
       void clonedOutputs.add(widget);
 
       // Remove the output view if the parent notebook is closed.
       current.content.disposed.connect(() => {
-        current.context.pathChanged.disconnect(updateCloned);
-        current.content.model.cells.changed.disconnect(updateCloned);
+        current!.context.pathChanged.disconnect(updateCloned);
+        current!.context.model?.cells.changed.disconnect(updateCloned);
         widget.dispose();
       });
     },
@@ -1702,9 +1728,11 @@ function addCommands(
         return;
       }
 
-      return Private.createConsole(commands, current, args[
-        'activate'
-      ] as boolean);
+      return Private.createConsole(
+        commands,
+        current,
+        args['activate'] as boolean
+      );
     },
     isEnabled
   });
@@ -1884,6 +1912,17 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.selectLastRunCell, {
+    label: 'Select current running or last run cell',
+    execute: args => {
+      const current = getCurrent(args);
+
+      if (current) {
+        return NotebookActions.selectLastRunCell(current.content);
+      }
+    },
+    isEnabled
+  });
 }
 
 /**
@@ -1903,11 +1942,11 @@ function populatePalette(
     CommandIDs.renderAllMarkdown,
     CommandIDs.runAllAbove,
     CommandIDs.runAllBelow,
+    CommandIDs.restartAndRunToSelected,
     CommandIDs.selectAll,
     CommandIDs.deselectAll,
     CommandIDs.clearAllOutputs,
     CommandIDs.toggleAllLines,
-    CommandIDs.toggleRecordTiming,
     CommandIDs.editMode,
     CommandIDs.commandMode,
     CommandIDs.changeKernel,
@@ -1984,18 +2023,21 @@ function populateMenus(
   mainMenu: IMainMenu,
   tracker: INotebookTracker,
   services: ServiceManager,
-  palette: ICommandPalette | null
+  palette: ICommandPalette | null,
+  sessionDialogs: ISessionContextDialogs | null
 ): void {
   let { commands } = app;
+
+  sessionDialogs = sessionDialogs || sessionContextDialogs;
 
   // Add undo/redo hooks to the edit menu.
   mainMenu.editMenu.undoers.add({
     tracker,
     undo: widget => {
-      widget.content.activeCell.editor.undo();
+      widget.content.activeCell?.editor.undo();
     },
     redo: widget => {
-      widget.content.activeCell.editor.redo();
+      widget.content.activeCell?.editor.redo();
     }
   } as IEditMenu.IUndoer<NotebookPanel>);
 
@@ -2028,7 +2070,7 @@ function populateMenus(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.context.session.shutdown().then(() => {
+          return current.context.sessionContext.shutdown().then(() => {
             current.dispose();
           });
         }
@@ -2077,24 +2119,25 @@ function populateMenus(
   mainMenu.kernelMenu.kernelUsers.add({
     tracker,
     interruptKernel: current => {
-      let kernel = current.session.kernel;
+      let kernel = current.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
       return Promise.resolve(void 0);
     },
     noun: 'All Outputs',
-    restartKernel: current => current.session.restart(),
+    restartKernel: current => sessionDialogs!.restart(current.sessionContext),
     restartKernelAndClear: current => {
-      return current.session.restart().then(restarted => {
+      return sessionDialogs!.restart(current.sessionContext).then(restarted => {
         if (restarted) {
           NotebookActions.clearAllOutputs(current.content);
         }
         return restarted;
       });
     },
-    changeKernel: current => current.session.selectKernel(),
-    shutdownKernel: current => current.session.shutdown()
+    changeKernel: current =>
+      sessionDialogs!.selectKernel(current.sessionContext),
+    shutdownKernel: current => current.sessionContext.shutdown()
   } as IKernelMenu.IKernelUser<NotebookPanel>);
 
   // Add a console creator the the Kernel menu
@@ -2147,21 +2190,22 @@ function populateMenus(
     noun: 'Cells',
     run: current => {
       const { context, content } = current;
-      return NotebookActions.runAndAdvance(content, context.session).then(
-        () => void 0
-      );
+      return NotebookActions.runAndAdvance(
+        content,
+        context.sessionContext
+      ).then(() => void 0);
     },
     runAll: current => {
       const { context, content } = current;
-      return NotebookActions.runAll(content, context.session).then(
+      return NotebookActions.runAll(content, context.sessionContext).then(
         () => void 0
       );
     },
     restartAndRunAll: current => {
       const { context, content } = current;
-      return context.session.restart().then(restarted => {
+      return sessionDialogs!.restart(context.sessionContext).then(restarted => {
         if (restarted) {
-          void NotebookActions.runAll(content, context.session);
+          void NotebookActions.runAll(content, context.sessionContext);
         }
         return restarted;
       });
@@ -2236,7 +2280,7 @@ function populateMenus(
   // Add kernel information to the application help menu.
   mainMenu.helpMenu.kernelUsers.add({
     tracker,
-    getKernel: current => current.session.kernel
+    getKernel: current => current.sessionContext.session?.kernel
   } as IHelpMenu.IKernelUser<NotebookPanel>);
 }
 
@@ -2278,7 +2322,7 @@ namespace Private {
       this._cell = options.cell || null;
       this.id = `LinkedOutputView-${UUID.uuid4()}`;
       this.title.label = 'Output View';
-      this.title.icon = NOTEBOOK_ICON_CLASS;
+      this.title.icon = notebookIcon;
       this.title.caption = this._notebook.title.label
         ? `For Notebook: ${this._notebook.title.label}`
         : 'For Notebook:';

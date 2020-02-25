@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
@@ -63,7 +63,7 @@ describe('@jupyterlab/mainmenu', () => {
           },
           restartAndRunAll: widget => {
             widget.state = 'restartAndRunAll';
-            return Promise.resolve(void 0);
+            return Promise.resolve(false);
           }
         };
         menu.codeRunners.add(runner);

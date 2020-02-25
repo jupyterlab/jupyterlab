@@ -3,13 +3,13 @@
 
 import { expect } from 'chai';
 
-import { UUID } from '@phosphor/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import { Contents, ServiceManager } from '@jupyterlab/services';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import {
   Base64ModelFactory,
@@ -64,11 +64,11 @@ describe('ImageViewer', () => {
   beforeAll(async () => {
     manager = new ServiceManager({ standby: 'never' });
     await manager.ready;
-    return manager.contents.save(IMAGE.path, IMAGE);
+    return manager.contents.save(IMAGE.path!, IMAGE);
   });
 
   beforeEach(() => {
-    context = new Context({ manager, factory, path: IMAGE.path });
+    context = new Context({ manager, factory, path: IMAGE.path! });
     widget = new LogImage(context);
     return context.initialize(false);
   });
@@ -139,7 +139,7 @@ describe('ImageViewer', () => {
 
   describe('#onUpdateRequest()', () => {
     it('should render the image', async () => {
-      const img: HTMLImageElement = widget.node.querySelector('img');
+      const img: HTMLImageElement = widget.node.querySelector('img')!;
       await widget.ready;
       MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
       expect(widget.methods).to.contain('onUpdateRequest');

@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
-import { IChangedArgs, nbformat } from '@jupyterlab/coreutils';
+import { IChangedArgs } from '@jupyterlab/coreutils';
 
 import {
   CellModel,
@@ -14,10 +14,12 @@ import {
   CodeCellModel
 } from '@jupyterlab/cells';
 
+import * as nbformat from '@jupyterlab/nbformat';
+
 import { OutputAreaModel } from '@jupyterlab/outputarea';
 
 import { NBTestUtils } from '@jupyterlab/testutils';
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 
 class TestModel extends CellModel {
   get type(): 'raw' {

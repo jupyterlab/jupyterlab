@@ -15,9 +15,9 @@ import {
   ForeignHandler
 } from '@jupyterlab/console';
 
-import { AttachedProperty } from '@phosphor/properties';
+import { AttachedProperty } from '@lumino/properties';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 /**
  * The console widget tracker provider.
@@ -38,11 +38,11 @@ function activateForeign(
   palette: ICommandPalette | null
 ) {
   const { shell } = app;
-  tracker.widgetAdded.connect((sender, panel) => {
-    const console = panel.console;
+  tracker.widgetAdded.connect((sender, widget) => {
+    const console = widget.console;
 
     const handler = new ForeignHandler({
-      session: console.session,
+      sessionContext: console.sessionContext,
       parent: console
     });
     Private.foreignHandlerProperty.set(console, handler);
@@ -56,7 +56,7 @@ function activateForeign(
   const toggleShowAllActivity = 'console:toggle-show-all-kernel-activity';
 
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: ReadonlyJSONObject): ConsolePanel | null {
+  function getCurrent(args: ReadonlyPartialJSONObject): ConsolePanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
@@ -73,11 +73,14 @@ function activateForeign(
         return;
       }
       const handler = Private.foreignHandlerProperty.get(current.console);
-      handler.enabled = !handler.enabled;
+      if (handler) {
+        handler.enabled = !handler.enabled;
+      }
     },
     isToggled: () =>
       tracker.currentWidget !== null &&
-      Private.foreignHandlerProperty.get(tracker.currentWidget.console).enabled,
+      !!Private.foreignHandlerProperty.get(tracker.currentWidget.console)
+        ?.enabled,
     isEnabled: () =>
       tracker.currentWidget !== null &&
       tracker.currentWidget === shell.currentWidget

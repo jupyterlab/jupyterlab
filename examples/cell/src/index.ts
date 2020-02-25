@@ -10,7 +10,7 @@ import '@jupyterlab/cells/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
-import { ClientSession, Toolbar } from '@jupyterlab/apputils';
+import { SessionContext, Toolbar } from '@jupyterlab/apputils';
 
 import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
 
@@ -28,15 +28,25 @@ import {
   standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
 
-import { SessionManager } from '@jupyterlab/services';
+import {
+  SessionManager,
+  KernelManager,
+  KernelSpecManager
+} from '@jupyterlab/services';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { BoxPanel, Widget } from '@phosphor/widgets';
+import { BoxPanel, Widget } from '@lumino/widgets';
 
 function main(): void {
-  const manager = new SessionManager();
-  const session = new ClientSession({ manager, name: 'Example' });
+  const kernelManager = new KernelManager();
+  const specsManager = new KernelSpecManager();
+  const sessionManager = new SessionManager({ kernelManager });
+  const sessionContext = new SessionContext({
+    sessionManager,
+    specsManager,
+    name: 'Example'
+  });
   const mimeService = new CodeMirrorMimeTypeService();
 
   // Initialize the command registry with the bindings.
@@ -60,23 +70,23 @@ function main(): void {
     model: new CodeCellModel({})
   }).initializeState();
 
-  // Handle the mimeType for the current kernel.
-  session.kernelChanged.connect(() => {
-    void session.kernel.ready.then(() => {
-      const lang = session.kernel.info.language_info;
+  // Handle the mimeType for the current kernel asynchronously.
+  sessionContext.kernelChanged.connect(() => {
+    void sessionContext.session?.kernel?.info.then(info => {
+      const lang = info.language_info;
       const mimeType = mimeService.getMimeTypeByLanguage(lang);
       cellWidget.model.mimeType = mimeType;
     });
   });
 
   // Use the default kernel.
-  session.kernelPreference = { autoStartDefault: true };
+  sessionContext.kernelPreference = { autoStartDefault: true };
 
   // Set up a completer.
   const editor = cellWidget.editor;
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
-  const connector = new KernelConnector({ session });
+  const connector = new KernelConnector({ session: sessionContext.session });
   const handler = new CompletionHandler({ completer, connector });
 
   // Set the handler's editor.
@@ -88,10 +98,10 @@ function main(): void {
   // Create a toolbar for the cell.
   const toolbar = new Toolbar();
   toolbar.addItem('spacer', Toolbar.createSpacerItem());
-  toolbar.addItem('interrupt', Toolbar.createInterruptButton(session));
-  toolbar.addItem('restart', Toolbar.createRestartButton(session));
-  toolbar.addItem('name', Toolbar.createKernelNameItem(session));
-  toolbar.addItem('status', Toolbar.createKernelStatusItem(session));
+  toolbar.addItem('interrupt', Toolbar.createInterruptButton(sessionContext));
+  toolbar.addItem('restart', Toolbar.createRestartButton(sessionContext));
+  toolbar.addItem('name', Toolbar.createKernelNameItem(sessionContext));
+  toolbar.addItem('status', Toolbar.createKernelStatusItem(sessionContext));
 
   // Lay out the widgets.
   const panel = new BoxPanel();
@@ -120,7 +130,7 @@ function main(): void {
     }
   });
   commands.addCommand('run:cell', {
-    execute: () => CodeCell.execute(cellWidget, session)
+    execute: () => CodeCell.execute(cellWidget, sessionContext)
   });
 
   commands.addKeyBinding({
@@ -135,7 +145,7 @@ function main(): void {
   });
 
   // Start up the kernel.
-  void session.initialize().then(() => {
+  void sessionContext.initialize().then(() => {
     console.log('Example started!');
   });
 }

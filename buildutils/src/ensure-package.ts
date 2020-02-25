@@ -21,17 +21,13 @@ const HEADER_TEMPLATE = `
 `;
 
 const ICON_IMPORTS_TEMPLATE = `
-import { Icon } from './interfaces';
+import { LabIcon } from './labicon';
 
 // icon svg import statements
-{{iconImportStatements}}
+{{svgImportStatements}}
 
-// defaultIcons definition
-export namespace IconImports {
-  export const defaultIcons: ReadonlyArray<Icon.IModel> = [
-    {{iconModelDeclarations}}
-  ];
-}
+// LabIcon instance construction
+{{labiconConstructions}}
 `;
 
 const ICON_CSS_CLASSES_TEMPLATE = `
@@ -117,6 +113,17 @@ export async function ensurePackage(
     return messages;
   }
 
+  // Make sure typedoc config files are consistent
+  if (fs.existsSync(path.join(pkgPath, 'typedoc.json'))) {
+    let name = data.name.split('/');
+    utils.writeJSONFile(path.join(pkgPath, 'typedoc.json'), {
+      excludeNotExported: true,
+      mode: 'file',
+      out: `../../docs/api/${name[name.length - 1]}`,
+      theme: '../../typedoc-theme'
+    });
+  }
+
   let imports: string[] = [];
 
   // Extract all of the imports from the TypeScript files.
@@ -182,6 +189,9 @@ export async function ensurePackage(
 
     // write out cssIndexContents, if needed
     const cssIndexPath = path.join(pkgPath, 'style/index.css');
+    if (!fs.existsSync(cssIndexPath)) {
+      fs.ensureFileSync(cssIndexPath);
+    }
     messages.push(...ensureFile(cssIndexPath, cssIndexContents, false));
   }
 
@@ -312,6 +322,11 @@ export async function ensurePackage(
   // when a package is actually being published.
   delete data.gitHead;
 
+  // Ensure that there is a public access set, if the package is not private.
+  if (data.private !== true) {
+    data['publishConfig'] = { access: 'public' };
+  }
+
   // Ensure there is a minimal prepublishOnly script
   if (!data.private && !data.scripts.prepublishOnly) {
     messages.push(`prepublishOnly script missing in ${pkgPath}`);
@@ -340,46 +355,54 @@ export async function ensureUiComponents(
   dorequire: boolean = false
 ): Promise<string[]> {
   const funcName = 'ensureUiComponents';
+  const pkgName = utils.stem(pkgPath);
   let messages: string[] = [];
 
-  const svgs = glob.sync(path.join(pkgPath, 'style/icons', '**/*.svg'));
+  const svgPaths = glob.sync(path.join(pkgPath, 'style/icons', '**/*.svg'));
 
   /* support for glob import of icon svgs */
   const iconSrcDir = path.join(pkgPath, 'src/icon');
 
   // build the per-icon import code
-  let _iconImportStatements: string[] = [];
-  let _iconModelDeclarations: string[] = [];
-  svgs.forEach(svg => {
-    const name = utils.stem(svg);
-    const svgpath = path
-      .relative(iconSrcDir, svg)
+  let _svgImportStatements: string[] = [];
+  let _labiconConstructions: string[] = [];
+  svgPaths.forEach(svgPath => {
+    const svgName = utils.stem(svgPath);
+    const svgImportPath = path
+      .relative(iconSrcDir, svgPath)
       .split(path.sep)
       .join('/');
 
+    const svgstrRef = utils.camelCase(svgName) + 'Svgstr';
+    const iconRef = utils.camelCase(svgName) + 'Icon';
+    const iconName = [pkgName, utils.stem(svgPath)].join(':');
+
     if (dorequire) {
       // load the icon svg using `require`
-      _iconModelDeclarations.push(
-        `{ name: '${name}', svg: require('${svgpath}').default }`
+      _labiconConstructions.push(
+        `export const ${iconRef} = new LabIcon({ name: '${iconName}', svgstr: require('${svgImportPath}').default });`
       );
     } else {
       // load the icon svg using `import`
-      const nameCamel = utils.camelCase(name) + 'Svg';
+      _svgImportStatements.push(`import ${svgstrRef} from '${svgImportPath}';`);
 
-      _iconImportStatements.push(`import ${nameCamel} from '${svgpath}';`);
-      _iconModelDeclarations.push(`{ name: '${name}', svg: ${nameCamel} }`);
+      _labiconConstructions.push(
+        `export const ${iconRef} = new LabIcon({ name: '${iconName}', svgstr: ${svgstrRef} });`
+      );
     }
   });
-  const iconImportStatements = _iconImportStatements.join('\n');
-  const iconModelDeclarations = _iconModelDeclarations.join(',\n');
+
+  // sort the statements and then join them
+  const svgImportStatements = _svgImportStatements.sort().join('\n');
+  const labiconConstructions = _labiconConstructions.sort().join('\n');
 
   // generate the actual contents of the iconImports file
   const iconImportsPath = path.join(iconSrcDir, 'iconimports.ts');
   const iconImportsContents = utils.fromTemplate(
     HEADER_TEMPLATE + ICON_IMPORTS_TEMPLATE,
-    { funcName, iconImportStatements, iconModelDeclarations }
+    { funcName, svgImportStatements, labiconConstructions }
   );
-  messages.push(...ensureFile(iconImportsPath, iconImportsContents));
+  messages.push(...ensureFile(iconImportsPath, iconImportsContents, false));
 
   /* support for deprecated icon CSS classes */
   const iconCSSDir = path.join(pkgPath, 'style');
@@ -387,14 +410,14 @@ export async function ensureUiComponents(
   // build the per-icon import code
   let _iconCSSUrls: string[] = [];
   let _iconCSSDeclarations: string[] = [];
-  svgs.forEach(svg => {
-    const name = utils.stem(svg);
-    const urlName = 'jp-icon-' + name;
-    const className = 'jp-' + utils.camelCase(name, true) + 'Icon';
+  svgPaths.forEach(svgPath => {
+    const svgName = utils.stem(svgPath);
+    const urlName = 'jp-icon-' + svgName;
+    const className = 'jp-' + utils.camelCase(svgName, true) + 'Icon';
 
     _iconCSSUrls.push(
       `--${urlName}: url('${path
-        .relative(iconCSSDir, svg)
+        .relative(iconCSSDir, svgPath)
         .split(path.sep)
         .join('/')}');`
     );
@@ -402,8 +425,10 @@ export async function ensureUiComponents(
       `.${className} {background-image: var(--${urlName})}`
     );
   });
-  const iconCSSUrls = _iconCSSUrls.join('\n');
-  const iconCSSDeclarations = _iconCSSDeclarations.join('\n');
+
+  // sort the statements and then join them
+  const iconCSSUrls = _iconCSSUrls.sort().join('\n');
+  const iconCSSDeclarations = _iconCSSDeclarations.sort().join('\n');
 
   // generate the actual contents of the iconCSSClasses file
   const iconCSSClassesPath = path.join(iconCSSDir, 'deprecated.css');

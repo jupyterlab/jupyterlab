@@ -9,19 +9,19 @@ import {
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
-import {
-  IRenderMimeRegistry,
-  markdownRendererFactory
-} from '@jupyterlab/rendermime';
-
 import {
   MarkdownViewer,
   MarkdownViewerFactory,
   MarkdownDocument,
   IMarkdownViewerTracker
 } from '@jupyterlab/markdownviewer';
+
+import {
+  IRenderMimeRegistry,
+  markdownRendererFactory
+} from '@jupyterlab/rendermime';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 /**
  * The command IDs used by the markdownviewer plugin.
@@ -74,7 +74,7 @@ function activate(
    */
   function updateWidget(widget: MarkdownViewer): void {
     Object.keys(config).forEach((k: keyof MarkdownViewer.IConfig) => {
-      widget.setOption(k, config[k]);
+      widget.setOption(k, config[k] ?? null);
     });
   }
 

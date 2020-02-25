@@ -16,29 +16,29 @@
 | MenuBar
 |----------------------------------------------------------------------------*/
 
-.p-MenuBar {
+.lm-MenuBar {
   padding-left: 5px;
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
 }
 
-.p-MenuBar-menu {
+.lm-MenuBar-menu {
   transform: translateY(calc(-2 * var(--jp-border-width)));
 }
 
-.p-MenuBar-item {
+.lm-MenuBar-item {
   padding: 0px 8px;
   border-left: var(--jp-border-width) solid transparent;
   border-right: var(--jp-border-width) solid transparent;
   line-height: var(--jp-private-menubar-height);
 }
 
-.p-MenuBar-item.p-mod-active {
+.lm-MenuBar-item.lm-mod-active {
   background: var(--jp-layout-color2);
 }
 
-.p-MenuBar.p-mod-active .p-MenuBar-item.p-mod-active {
+.lm-MenuBar.lm-mod-active .lm-MenuBar-item.lm-mod-active {
   z-index: 10001;
   background: var(--jp-layout-color0);
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
@@ -46,18 +46,18 @@
   box-shadow: var(--jp-elevation-z6);
 }
 
-.p-MenuBar-item.p-mod-disabled {
+.lm-MenuBar-item.lm-mod-disabled {
   color: var(--jp-ui-font-color3);
 }
 
-.p-MenuBar-item.p-type-separator {
+.lm-MenuBar-item.lm-type-separator {
   margin: 2px;
   padding: 0;
   border: none;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
 }
 
-.p-MenuBar-itemMnemonic {
+.lm-MenuBar-itemMnemonic {
   text-decoration: underline;
 }
 
@@ -65,7 +65,7 @@
 | Menu
 |----------------------------------------------------------------------------*/
 
-.p-Menu {
+.lm-Menu {
   z-index: 10000;
   padding: 4px 0px;
   background: var(--jp-layout-color0);
@@ -75,50 +75,50 @@
   box-shadow: var(--jp-elevation-z6);
 }
 
-.p-Menu-item {
+.lm-Menu-item {
   min-height: var(--jp-private-menu-item-height);
   max-height: var(--jp-private-menu-item-height);
   padding: 0px;
   line-height: var(--jp-private-menu-item-height);
 }
 
-.p-Menu-item.p-mod-active {
+.lm-Menu-item.lm-mod-active {
   background: var(--jp-layout-color2);
 }
 
-.p-Menu-item.p-mod-disabled {
+.lm-Menu-item.lm-mod-disabled {
   color: var(--jp-ui-font-color3);
 }
 
-.p-Menu-itemIcon {
+.lm-Menu-itemIcon {
   width: 21px;
   padding: 0px 2px 0px 4px;
   margin-top: -2px;
 }
 
-.p-Menu-itemLabel {
+.lm-Menu-itemLabel {
   padding: 0px 32px 0px 2px;
 }
 
-.p-Menu-itemMnemonic {
+.lm-Menu-itemMnemonic {
   text-decoration: underline;
 }
 
-.p-Menu-itemShortcut {
+.lm-Menu-itemShortcut {
   padding: 0px;
 }
 
-.p-Menu-itemSubmenuIcon {
+.lm-Menu-itemSubmenuIcon {
   width: 18px;
   padding: 0px 4px 0px 0px;
 }
 
-.p-Menu-item[data-type='separator'] > div {
+.lm-Menu-item[data-type='separator'] > div {
   padding: 0;
   height: 9px;
 }
 
-.p-Menu-item[data-type='separator'] > div::after {
+.lm-Menu-item[data-type='separator'] > div::after {
   content: '';
   display: block;
   position: relative;
@@ -126,24 +126,8 @@
   border-top: var(--jp-border-width) solid var(--jp-layout-color2);
 }
 
-.p-Menu-itemIcon,
-.p-Menu-itemSubmenuIcon {
-  background-size: 16px;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.p-Menu-item.p-mod-toggled > .p-Menu-itemIcon {
-  background-image: var(--jp-icon-checkmark);
-}
-
-.p-Menu-item.p-mod-toggled.p-mod-disabled > .p-Menu-itemIcon {
-  background-image: var(--jp-icon-checkmark-disabled);
-}
-
-.p-Menu-item[data-type='submenu'] > .p-Menu-itemSubmenuIcon {
-  background-image: var(--jp-icon-caretright);
-  background-size: 18px;
-  background-repeat: no-repeat;
-  background-position: left;
+/* gray out icon/caret for disable menu items */
+.lm-Menu-item.lm-mod-disabled > .lm-Menu-itemIcon,
+.lm-Menu-item[data-type='submenu'].lm-mod-disabled > .lm-Menu-itemSubmenuIcon {
+  opacity: 0.4;
 }

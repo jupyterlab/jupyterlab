@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MimeData } from '@phosphor/coreutils';
+import { MimeData } from '@lumino/coreutils';
 
 // 'string' is allowed so as to make it non-breaking for any 1.x releases
 export type ClipboardData = string | MimeData;
@@ -70,24 +70,28 @@ export namespace Clipboard {
 
     // Save the current selection.
     let savedRanges: any[] = [];
-    for (let i = 0, len = sel.rangeCount; i < len; ++i) {
-      savedRanges[i] = sel.getRangeAt(i).cloneRange();
+    for (let i = 0, len = sel?.rangeCount || 0; i < len; ++i) {
+      savedRanges[i] = sel!.getRangeAt(i).cloneRange();
     }
 
     // Select the node content.
     let range = document.createRange();
     range.selectNodeContents(node);
-    sel.removeAllRanges();
-    sel.addRange(range);
+    if (sel) {
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
 
     // Execute the command.
     document.execCommand(type);
 
     // Restore the previous selection.
     sel = window.getSelection();
-    sel.removeAllRanges();
-    for (let i = 0, len = savedRanges.length; i < len; ++i) {
-      sel.addRange(savedRanges[i]);
+    if (sel) {
+      sel.removeAllRanges();
+      for (let i = 0, len = savedRanges.length; i < len; ++i) {
+        sel.addRange(savedRanges[i]);
+      }
     }
   }
 }

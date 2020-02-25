@@ -3,9 +3,9 @@
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
-import { IStateDB } from '@jupyterlab/coreutils';
+import { IStateDB } from '@jupyterlab/statedb';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
 import { FileBrowser } from './browser';
 
@@ -72,11 +72,34 @@ export namespace IFileBrowserFactory {
    */
   export interface IOptions {
     /**
+     * Whether a file browser automatically loads its initial path.
+     *
+     * #### Notes
+     * The default is `true`.
+     */
+    auto?: boolean;
+
+    /**
      * An optional `Contents.IDrive` name for the model.
      * If given, the model will prepend `driveName:` to
      * all paths used in file operations.
      */
     driveName?: string;
+
+    /**
+     * The time interval for browser refreshing, in ms.
+     */
+    refreshInterval?: number;
+
+    /**
+     * Whether a file browser automatically restores state when instantiated.
+     * The default is `true`.
+     *
+     * #### Notes
+     * The file browser model will need to be restored before for the file
+     * browser to start saving its state.
+     */
+    restore?: boolean;
 
     /**
      * The state database to use for saving file browser state and restoring it.
@@ -86,10 +109,5 @@ export namespace IFileBrowserFactory {
      * database will be automatically passed in and used for state restoration.
      */
     state?: IStateDB | null;
-
-    /**
-     * The time interval for browser refreshing, in ms.
-     */
-    refreshInterval?: number;
   }
 }

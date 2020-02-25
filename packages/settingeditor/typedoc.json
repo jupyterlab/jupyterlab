@@ -1,0 +1,6 @@
+{
+  "excludeNotExported": true,
+  "mode": "file",
+  "out": "../../docs/api/settingeditor",
+  "theme": "../../typedoc-theme"
+}

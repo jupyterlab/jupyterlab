@@ -18,6 +18,9 @@
       "path": "../../packages/mathjax2"
     },
     {
+      "path": "../../packages/nbformat"
+    },
+    {
       "path": "../../packages/rendermime"
     },
     {

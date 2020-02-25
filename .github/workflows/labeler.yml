@@ -1,0 +1,15 @@
+name: Pull Request Labeler
+# This workflow is supposed to run every 5 minutes
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+jobs:
+  triage:
+    name: Update PR Labels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: paulfantom/periodic-labeler@dffbc90404f371f76444a69221c2f7ad079e2319
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          LABEL_MAPPINGS_FILE: .github/labeler.yml

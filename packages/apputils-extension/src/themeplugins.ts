@@ -15,11 +15,13 @@ import {
   ThemeManager
 } from '@jupyterlab/apputils';
 
-import { ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Menu } from '@phosphor/widgets';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { Menu } from '@lumino/widgets';
 
 namespace CommandIDs {
   export const changeTheme = 'apputils:change-theme';
@@ -48,7 +50,13 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
     const commands = app.commands;
     const url = URLExt.join(paths.urls.base, paths.urls.themes);
     const key = themesPlugin.id;
-    const manager = new ThemeManager({ key, host, settings, splash, url });
+    const manager = new ThemeManager({
+      key,
+      host,
+      settings,
+      splash: splash ?? undefined,
+      url
+    });
 
     // Keep a synchronously set reference to the current theme,
     // since the asynchronous setting of the theme in `changeTheme`

@@ -7,14 +7,11 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
 import { Dialog, showDialog, ICommandPalette } from '@jupyterlab/apputils';
-
-import { ISettingRegistry } from '@jupyterlab/coreutils';
-
-import { IMainMenu } from '@jupyterlab/mainmenu';
-
 import { ExtensionView } from '@jupyterlab/extensionmanager';
+import { IMainMenu } from '@jupyterlab/mainmenu';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { extensionIcon } from '@jupyterlab/ui-components';
 
 /**
  * IDs of the commands added by this extension.
@@ -48,7 +45,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const createView = () => {
       const v = new ExtensionView(serviceManager);
       v.id = 'extensionmanager.main-view';
-      v.title.iconClass = 'jp-ExtensionIcon jp-SideBar-tabIcon';
+      v.title.icon = extensionIcon;
       v.title.caption = 'Extension Manager';
       if (restorer) {
         restorer.add(v, v.id);
@@ -75,6 +72,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           view = view || createView();
           shell.add(view, 'left');
         } else if (!enabled && view && view.isAttached) {
+          app.commands.notifyCommandChanged(CommandIDs.toggle);
           view.close();
         }
       });
@@ -132,11 +130,7 @@ namespace Private {
         Dialog.warnButton({ label: 'Enable' })
       ]
     }).then(result => {
-      if (result.button.accept) {
-        return true;
-      } else {
-        return false;
-      }
+      return result.button.accept;
     });
   }
 }

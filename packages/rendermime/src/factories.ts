@@ -71,7 +71,7 @@ export const textRendererFactory: IRenderMime.IRendererFactory = {
 };
 
 /**
- * A placeholder factory for deprecated rendered JavaScript.
+ * A placeholder factory for rendered JavaScript.
  */
 export const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
   safe: false,
@@ -83,9 +83,7 @@ export const javaScriptRendererFactory: IRenderMime.IRendererFactory = {
 /**
  * The standard factories provided by the rendermime package.
  */
-export const standardRendererFactories: ReadonlyArray<
-  IRenderMime.IRendererFactory
-> = [
+export const standardRendererFactories: ReadonlyArray<IRenderMime.IRendererFactory> = [
   htmlRendererFactory,
   markdownRendererFactory,
   latexRendererFactory,

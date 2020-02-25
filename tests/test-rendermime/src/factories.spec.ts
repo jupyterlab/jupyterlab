@@ -3,9 +3,9 @@
 
 import { expect } from 'chai';
 
-import { JSONObject, JSONValue } from '@phosphor/coreutils';
+import { JSONObject, JSONValue } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { defaultSanitizer } from '@jupyterlab/apputils';
 
@@ -215,9 +215,9 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         Widget.attach(w, document.body);
-        const node = document.getElementById('Title-third-level');
+        const node = document.getElementById('Title-third-level')!;
         expect(node.localName).to.equal('h3');
-        const anchor = node.firstChild.nextSibling as HTMLAnchorElement;
+        const anchor = node.firstChild!.nextSibling as HTMLAnchorElement;
         expect(anchor.href).to.contain('#Title-third-level');
         expect(anchor.target).to.equal('_self');
         expect(anchor.className).to.contain('jp-InternalAnchorLink');

@@ -103,6 +103,18 @@ def run_test(app, func):
     IOLoop.current().add_future(future, finished)
 
 
+def run_browser(url):
+    """Run the browser test and return an exit code.
+    """
+    target = osp.join(get_app_dir(), 'browser_test')
+    if not osp.exists(osp.join(target, 'node_modules')):
+        os.makedirs(target)
+        subprocess.call(["jlpm", "init", "-y"], cwd=target)
+        subprocess.call(["jlpm", "add", "puppeteer"], cwd=target)
+    shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
+    return subprocess.check_call(["node", "chrome-test.js", url], cwd=target)
+
+
 class BrowserApp(LabApp):
     """An app the launches JupyterLab and waits for it to start up, checking for
     JS console errors, JS errors, and Python logged errors.
@@ -112,27 +124,20 @@ class BrowserApp(LabApp):
     ip = '127.0.0.1'
     flags = test_flags
     aliases = test_aliases
+    test_browser = True
 
     def start(self):
         web_app = self.web_app
         web_app.settings.setdefault('page_config_data', dict())
         web_app.settings['page_config_data']['browserTest'] = True
         web_app.settings['page_config_data']['buildAvailable'] = False
-        run_test(self, run_browser)
+        run_test(self, run_browser if self.test_browser else lambda url: 0)
         super().start()
 
 
-def run_browser(url):
-    """Run the browser test and return an exit code.
-    """
-    target = osp.join(get_app_dir(), 'browser_test')
-    if not osp.exists(osp.join(target, 'node_modules')):
-        os.makedirs(target)
-        subprocess.call(["jlpm"], cwd=target)
-        subprocess.call(["jlpm", "add", "puppeteer"], cwd=target)
-    shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
-    return subprocess.check_call(["node", "chrome-test.js", url], cwd=target)
-
-
 if __name__ == '__main__':
+    skip_option = "--no-chrome-test"
+    if skip_option in sys.argv:
+        BrowserApp.test_browser = False
+        sys.argv.remove(skip_option)
     BrowserApp.launch_instance()

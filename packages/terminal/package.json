@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/terminal",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-rc.2",
   "description": "JupyterLab - Terminal Emulator Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -30,23 +30,24 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib",
-    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "docs": "typedoc src",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.0.0-alpha.1",
-    "@jupyterlab/services": "^5.0.0-alpha.1",
-    "@phosphor/coreutils": "^1.3.1",
-    "@phosphor/domutils": "^1.1.3",
-    "@phosphor/messaging": "^1.3.0",
-    "@phosphor/widgets": "^1.9.0",
-    "xterm": "~3.13.2"
+    "@jupyterlab/apputils": "^2.0.0-rc.2",
+    "@jupyterlab/services": "^5.0.0-rc.2",
+    "@lumino/coreutils": "^1.4.2",
+    "@lumino/domutils": "^1.1.7",
+    "@lumino/messaging": "^1.3.3",
+    "@lumino/widgets": "^1.11.1",
+    "xterm": "~4.2.0",
+    "xterm-addon-fit": "~0.3.0"
   },
   "devDependencies": {
-    "rimraf": "~2.6.2",
-    "typedoc": "^0.14.2",
-    "typescript": "~3.5.1"
+    "rimraf": "~3.0.0",
+    "typedoc": "^0.15.4",
+    "typescript": "~3.7.3"
   },
   "publishConfig": {
     "access": "public"
@@ -54,7 +55,7 @@
   "jupyterlab": {
     "extraStyles": {
       "xterm": [
-        "src/xterm.css"
+        "css/xterm.css"
       ]
     }
   }

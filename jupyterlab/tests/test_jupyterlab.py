@@ -28,7 +28,7 @@ from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, build_check,
     disable_extension, enable_extension, get_app_info,
-    check_extension, _test_overlap, update_extension,
+    check_extension, _test_overlap, _compare_ranges, update_extension,
     AppOptions
 )
 from jupyterlab.coreconfig import CoreConfig, _get_default_core_data
@@ -612,6 +612,22 @@ class TestExtension(AppHandlerTest):
 
         assert _test_overlap('*', '0.6') is None
         assert _test_overlap('<0.6', '0.1') is None
+
+        assert _test_overlap('^1 || ^2', '^1')
+        assert _test_overlap('^1 || ^2', '^2')
+        assert _test_overlap('^1', '^1 || ^2')
+        assert _test_overlap('^2', '^1 || ^2')
+        assert _test_overlap('^1 || ^2', '^2 || ^3')
+        assert not _test_overlap('^1 || ^2', '^3 || ^4')
+        assert not _test_overlap('^2', '^1 || ^3')
+
+    def test_compare_ranges(self):
+        assert _compare_ranges('^1 || ^2', '^1') == 0
+        assert _compare_ranges('^1 || ^2', '^2 || ^3') == 0
+        assert _compare_ranges('^1 || ^2', '^3 || ^4') == 1
+        assert _compare_ranges('^3 || ^4', '^1 || ^2') == -1
+        assert _compare_ranges('^2 || ^3', '^1 || ^4') is None
+
 
     def test_install_compatible(self):
         core_data = _get_default_core_data()

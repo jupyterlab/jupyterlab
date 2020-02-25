@@ -20,7 +20,12 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
-import { IIconRegistry } from '@jupyterlab/ui-components';
+import {
+  caretDownIcon,
+  caretUpIcon,
+  fileIcon,
+  LabIcon
+} from '@jupyterlab/ui-components';
 
 import {
   ArrayExt,
@@ -31,19 +36,19 @@ import {
   IIterator,
   map,
   toArray
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { MimeData, PromiseDelegate } from '@phosphor/coreutils';
+import { MimeData, PromiseDelegate } from '@lumino/coreutils';
 
-import { ElementExt } from '@phosphor/domutils';
+import { ElementExt } from '@lumino/domutils';
 
-import { Drag, IDragEvent } from '@phosphor/dragdrop';
+import { Drag, IDragEvent } from '@lumino/dragdrop';
 
-import { Message, MessageLoop } from '@phosphor/messaging';
+import { Message, MessageLoop } from '@lumino/messaging';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { FileBrowserModel } from './model';
 
@@ -193,9 +198,7 @@ export class DirListing extends Widget {
    */
   constructor(options: DirListing.IOptions) {
     super({
-      node: (options.renderer =
-        options.renderer ||
-        new DirListing.Renderer(options.model.iconRegistry)).createNode()
+      node: (options.renderer || DirListing.defaultRenderer).createNode()
     });
     this.addClass(DIR_LISTING_CLASS);
     this._model = options.model;
@@ -205,7 +208,7 @@ export class DirListing extends Widget {
     this._editNode = document.createElement('input');
     this._editNode.className = EDITOR_CLASS;
     this._manager = this._model.manager;
-    this._renderer = options.renderer;
+    this._renderer = options.renderer || DirListing.defaultRenderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
     this._renderer.populateHeaderNode(headerNode);
@@ -641,16 +644,16 @@ export class DirListing extends Widget {
       case 'scroll':
         this._evtScroll(event as MouseEvent);
         break;
-      case 'p-dragenter':
+      case 'lm-dragenter':
         this._evtDragEnter(event as IDragEvent);
         break;
-      case 'p-dragleave':
+      case 'lm-dragleave':
         this._evtDragLeave(event as IDragEvent);
         break;
-      case 'p-dragover':
+      case 'lm-dragover':
         this._evtDragOver(event as IDragEvent);
         break;
-      case 'p-drop':
+      case 'lm-drop':
         this._evtDrop(event as IDragEvent);
         break;
       default:
@@ -675,10 +678,10 @@ export class DirListing extends Widget {
     content.addEventListener('dragend', this);
     content.addEventListener('drop', this);
     content.addEventListener('scroll', this);
-    content.addEventListener('p-dragenter', this);
-    content.addEventListener('p-dragleave', this);
-    content.addEventListener('p-dragover', this);
-    content.addEventListener('p-drop', this);
+    content.addEventListener('lm-dragenter', this);
+    content.addEventListener('lm-dragleave', this);
+    content.addEventListener('lm-dragover', this);
+    content.addEventListener('lm-drop', this);
   }
 
   /**
@@ -698,10 +701,10 @@ export class DirListing extends Widget {
     content.removeEventListener('dragleave', this);
     content.removeEventListener('dragend', this);
     content.removeEventListener('drop', this);
-    content.removeEventListener('p-dragenter', this);
-    content.removeEventListener('p-dragleave', this);
-    content.removeEventListener('p-dragover', this);
-    content.removeEventListener('p-drop', this);
+    content.removeEventListener('lm-dragenter', this);
+    content.removeEventListener('lm-dragleave', this);
+    content.removeEventListener('lm-dragover', this);
+    content.removeEventListener('lm-drop', this);
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
   }
@@ -734,7 +737,7 @@ export class DirListing extends Widget {
 
     // Remove any excess item nodes.
     while (nodes.length > items.length) {
-      content.removeChild(nodes.pop());
+      content.removeChild(nodes.pop()!);
     }
 
     // Add any missing item nodes.
@@ -785,11 +788,11 @@ export class DirListing extends Widget {
     each(this._model.sessions(), session => {
       let index = ArrayExt.firstIndexOf(paths, session.path);
       let node = nodes[index];
-      let name = session.kernel.name;
+      let name = session.kernel?.name;
       let specs = this._model.specs;
 
       node.classList.add(RUNNING_CLASS);
-      if (specs) {
+      if (specs && name) {
         const spec = specs.kernelspecs[name];
         name = spec ? spec.display_name : 'unknown';
       }
@@ -1030,8 +1033,8 @@ export class DirListing extends Widget {
    * Handle the `drop` event for the widget.
    */
   private _evtNativeDrop(event: DragEvent): void {
-    let files = event.dataTransfer.files;
-    if (files.length === 0) {
+    let files = event.dataTransfer?.files;
+    if (!files || files.length === 0) {
       return;
     }
     event.preventDefault();
@@ -1041,7 +1044,7 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Handle the `'p-dragenter'` event for the widget.
+   * Handle the `'lm-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
@@ -1065,7 +1068,7 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Handle the `'p-dragleave'` event for the widget.
+   * Handle the `'lm-dragleave'` event for the widget.
    */
   private _evtDragLeave(event: IDragEvent): void {
     event.preventDefault();
@@ -1077,7 +1080,7 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Handle the `'p-dragover'` event for the widget.
+   * Handle the `'lm-dragover'` event for the widget.
    */
   private _evtDragOver(event: IDragEvent): void {
     event.preventDefault();
@@ -1092,7 +1095,7 @@ export class DirListing extends Widget {
   }
 
   /**
-   * Handle the `'p-drop'` event for the widget.
+   * Handle the `'lm-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
     event.preventDefault();
@@ -1233,7 +1236,7 @@ export class DirListing extends Widget {
             let prevWidget = widget;
             otherPaths.forEach(path => {
               const options: DocumentRegistry.IOpenOptions = {
-                ref: prevWidget.id,
+                ref: prevWidget?.id,
                 mode: 'tab-after'
               };
               prevWidget = this._manager.openOrReveal(
@@ -1242,7 +1245,7 @@ export class DirListing extends Widget {
                 void 0,
                 options
               );
-              this._manager.openOrReveal(item.path);
+              this._manager.openOrReveal(item!.path);
             });
           });
           firstWidgetPlaced.resolve(void 0);
@@ -1498,7 +1501,7 @@ export class DirListing extends Widget {
 
     void this.selectItemByName(name)
       .then(() => {
-        if (!this.isDisposed && newValue.type === 'directory') {
+        if (!this.isDisposed && newValue!.type === 'directory') {
           return this._doRename();
         }
       })
@@ -1685,10 +1688,6 @@ export namespace DirListing {
    * The default implementation of an `IRenderer`.
    */
   export class Renderer implements IRenderer {
-    constructor(icoReg: IIconRegistry) {
-      this._iconRegistry = icoReg;
-    }
-
     /**
      * Create the DOM node for a dir listing.
      */
@@ -1717,6 +1716,13 @@ export namespace DirListing {
       modified.classList.add(MODIFIED_ID_CLASS);
       node.appendChild(name);
       node.appendChild(modified);
+
+      // set the initial caret icon
+      Private.updateCaret(
+        DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS),
+        'right',
+        'up'
+      );
     }
 
     /**
@@ -1734,36 +1740,56 @@ export namespace DirListing {
       let state: ISortState = { direction: 'ascending', key: 'name' };
       let target = event.target as HTMLElement;
       if (name.contains(target)) {
+        const modifiedIcon = DOMUtils.findElement(
+          modified,
+          HEADER_ITEM_ICON_CLASS
+        );
+        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
         if (name.classList.contains(SELECTED_CLASS)) {
           if (!name.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
             name.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(nameIcon, 'right', 'down');
           } else {
             name.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(nameIcon, 'right', 'up');
           }
         } else {
           name.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(nameIcon, 'right', 'up');
         }
         name.classList.add(SELECTED_CLASS);
         modified.classList.remove(SELECTED_CLASS);
         modified.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(modifiedIcon, 'left');
         return state;
       }
       if (modified.contains(target)) {
+        const modifiedIcon = DOMUtils.findElement(
+          modified,
+          HEADER_ITEM_ICON_CLASS
+        );
+        const nameIcon = DOMUtils.findElement(name, HEADER_ITEM_ICON_CLASS);
+
         state.key = 'last_modified';
         if (modified.classList.contains(SELECTED_CLASS)) {
           if (!modified.classList.contains(DESCENDING_CLASS)) {
             state.direction = 'descending';
             modified.classList.add(DESCENDING_CLASS);
+            Private.updateCaret(modifiedIcon, 'left', 'down');
           } else {
             modified.classList.remove(DESCENDING_CLASS);
+            Private.updateCaret(modifiedIcon, 'left', 'up');
           }
         } else {
           modified.classList.remove(DESCENDING_CLASS);
+          Private.updateCaret(modifiedIcon, 'left', 'up');
         }
         modified.classList.add(SELECTED_CLASS);
         name.classList.remove(SELECTED_CLASS);
         name.classList.remove(DESCENDING_CLASS);
+        Private.updateCaret(nameIcon, 'right');
         return state;
       }
       return state;
@@ -1803,38 +1829,48 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType?: DocumentRegistry.IFileType
     ): void {
-      let icon = DOMUtils.findElement(node, ITEM_ICON_CLASS);
-      let text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
-      let modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
+      const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
+      const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
+      const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
-      if (fileType) {
-        // TODO: remove workaround if...else/code in else clause in v2.0.0
-        // workaround for 1.0.x versions of Jlab pulling in 1.1.x versions of filebrowser
-        if (this._iconRegistry) {
-          // add icon as svg node. Can be styled using CSS
-          this._iconRegistry.icon({
-            name: fileType.iconClass,
-            className: ITEM_ICON_CLASS,
-            title: fileType.iconLabel,
-            fallback: true,
-            container: icon,
-            center: true,
-            kind: 'listing'
-          });
-        } else {
-          // add icon as CSS background image. Can't be styled using CSS
-          icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
-          icon.textContent = fileType.iconLabel || '';
+      // render the file item's icon
+      LabIcon.resolveElement({
+        icon: fileType?.icon,
+        iconClass: fileType?.iconClass,
+        fallback: fileIcon,
+        container: iconContainer,
+        className: ITEM_ICON_CLASS,
+
+        stylesheet: 'listing'
+      });
+
+      let hoverText = 'Name: ' + model.name;
+      // add file size to pop up if its available
+      if (model.size !== null && model.size !== undefined) {
+        hoverText += '\nSize: ' + Private.formatFileSize(model.size, 1, 1024);
+      }
+      if (model.path) {
+        let dirname = PathExt.dirname(model.path);
+        if (dirname) {
+          hoverText += '\nPath: ' + dirname.substr(0, 50);
+          if (dirname.length > 50) {
+            hoverText += '...';
+          }
         }
-      } else {
-        // use default icon as CSS background image
-        icon.className = ITEM_ICON_CLASS;
-        icon.textContent = '';
-        // clean up the svg icon annotation, if any
-        delete icon.dataset.icon;
+      }
+      if (model.created) {
+        hoverText +=
+          '\nCreated: ' +
+          Time.format(new Date(model.created), 'YYYY-MM-DD HH:mm:ss');
+      }
+      if (model.last_modified) {
+        hoverText +=
+          '\nModified: ' +
+          Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss');
       }
 
-      node.title = model.name;
+      node.title = hoverText;
+
       // If an item is being edited currently, its text node is unavailable.
       if (text && text.textContent !== model.name) {
         text.textContent = model.name;
@@ -1913,8 +1949,12 @@ export namespace DirListing {
       node.appendChild(icon);
       return node;
     }
-    _iconRegistry: IIconRegistry;
   }
+
+  /**
+   * The default `IRenderer` instance.
+   */
+  export const defaultRenderer = new Renderer();
 }
 
 /**
@@ -2022,5 +2062,49 @@ namespace Private {
     return ArrayExt.findFirstIndex(nodes, node =>
       ElementExt.hitTest(node, x, y)
     );
+  }
+
+  /**
+   * Format bytes to human readable string.
+   */
+  export function formatFileSize(
+    bytes: number,
+    decimalPoint: number,
+    k: number
+  ): string {
+    // https://www.codexworld.com/how-to/convert-file-size-bytes-kb-mb-gb-javascript/
+    if (bytes === 0) {
+      return '0 Bytes';
+    }
+    const dm = decimalPoint || 2;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    if (i >= 0 && i < sizes.length) {
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    } else {
+      return String(bytes);
+    }
+  }
+
+  /**
+   * Update an inline svg caret icon in a node.
+   */
+  export function updateCaret(
+    container: HTMLElement,
+    float: 'left' | 'right',
+    state?: 'down' | 'up' | undefined
+  ): void {
+    if (state) {
+      (state === 'down' ? caretDownIcon : caretUpIcon).element({
+        container,
+        tag: 'span',
+        stylesheet: 'listingHeaderItem',
+
+        float
+      });
+    } else {
+      LabIcon.remove(container);
+      container.className = HEADER_ITEM_ICON_CLASS;
+    }
   }
 }

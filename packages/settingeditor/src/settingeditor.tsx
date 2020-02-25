@@ -5,19 +5,23 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { ISettingRegistry, IStateDB } from '@jupyterlab/coreutils';
-
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { JSONExt, JSONObject, JSONValue } from '@phosphor/coreutils';
+import { IStateDB } from '@jupyterlab/statedb';
 
-import { Message } from '@phosphor/messaging';
+import { jupyterIcon } from '@jupyterlab/ui-components';
 
-import { ISignal } from '@phosphor/signaling';
+import { CommandRegistry } from '@lumino/commands';
 
-import { PanelLayout, Widget } from '@phosphor/widgets';
+import { JSONExt, JSONObject, JSONValue } from '@lumino/coreutils';
+
+import { Message } from '@lumino/messaging';
+
+import { ISignal } from '@lumino/signaling';
+
+import { PanelLayout, Widget } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -133,7 +137,7 @@ export class SettingEditor extends Widget {
   /**
    * The currently loaded settings.
    */
-  get settings(): ISettingRegistry.ISettings {
+  get settings(): ISettingRegistry.ISettings | null {
     return this._editor.settings;
   }
 
@@ -425,12 +429,16 @@ namespace Private {
    * Populate the instructions text node.
    */
   export function populateInstructionsNode(node: HTMLElement): void {
-    const iconClass = `jp-SettingEditorInstructions-icon jp-JupyterIcon`;
-
     ReactDOM.render(
       <React.Fragment>
         <h2>
-          <span className={iconClass} />
+          <jupyterIcon.react
+            className="jp-SettingEditorInstructions-icon"
+            tag="span"
+            elementPosition="center"
+            height="auto"
+            width="60px"
+          />
           <span className="jp-SettingEditorInstructions-title">Settings</span>
         </h2>
         <span className="jp-SettingEditorInstructions-text">

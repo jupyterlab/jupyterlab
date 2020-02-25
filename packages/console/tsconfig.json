@@ -19,6 +19,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../nbformat"
+    },
+    {
       "path": "../observables"
     },
     {
@@ -26,6 +29,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

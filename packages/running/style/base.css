@@ -29,30 +29,7 @@
   flex: 0 0 auto;
   display: flex;
   flex-direction: row;
-  margin: var(--jp-toolbar-header-margin);
   justify-content: flex-end;
-}
-
-.jp-RunningSessions-header .jp-ToolbarButtonComponent {
-  padding: 0px 16px;
-}
-
-.jp-RunningSessions-shutdownAll {
-  flex: 1 1 auto;
-  height: var(--jp-private-running-button-height);
-  width: var(--jp-private-running-button-width);
-  max-width: 100px;
-  min-width: 16px;
-  min-height: 16px;
-  padding: 4px 6px;
-  background: var(--jp-layout-color1);
-  border: none;
-  outline: 0;
-  background-image: var(--jp-icon-close);
-  background-size: 16px;
-  vertical-align: middle;
-  background-repeat: no-repeat;
-  background-position: center;
 }
 
 .jp-RunningSessions-section {
@@ -65,6 +42,7 @@
 .jp-RunningSessions-sectionHeader {
   flex: 0 0 auto;
   align-items: center;
+  justify-content: space-between;
   height: 28px;
   display: flex;
   border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
@@ -104,33 +82,6 @@
   color: var(--jp-ui-font-color1);
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
-}
-
-.jp-RunningSessions-itemIcon {
-  flex: 0 0 auto;
-  padding: 0px 8px;
-  margin-right: 4px;
-  margin-left: 12px;
-  vertical-align: baseline;
-  background-size: 16px;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
-.jp-RunningSessions-itemIcon.jp-mod-notebook {
-  background-image: var(--jp-icon-notebook);
-}
-
-.jp-RunningSessions-itemIcon.jp-mod-console {
-  background-image: var(--jp-icon-console);
-}
-
-.jp-RunningSessions-itemIcon.jp-mod-file:before {
-  background-image: var(--jp-icon-file);
-}
-
-.jp-RunningSessions-itemIcon.jp-mod-terminal {
-  background-image: var(--jp-icon-terminal);
 }
 
 .jp-RunningSessions-itemLabel {

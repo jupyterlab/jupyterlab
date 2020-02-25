@@ -3,7 +3,7 @@
 
 import { IMenuExtender } from '@jupyterlab/mainmenu';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * Given a widget and a set containing IMenuExtenders,
@@ -13,8 +13,8 @@ import { Widget } from '@phosphor/widgets';
 function findExtender<E extends IMenuExtender<Widget>>(
   widget: Widget,
   s: Set<E>
-): E {
-  let extender: E;
+): E | undefined {
+  let extender: E | undefined;
   s.forEach(value => {
     if (value.tracker.has(widget)) {
       extender = value;

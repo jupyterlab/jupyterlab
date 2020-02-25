@@ -1,18 +1,16 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { each } from '@lumino/algorithm';
+import { Widget } from '@lumino/widgets';
+
 import {
   ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-
-import { TabBarSvg } from '@jupyterlab/ui-components';
-
-import { each } from '@phosphor/algorithm';
-
-import { Widget } from '@phosphor/widgets';
+import { TabBarSvg, tabIcon } from '@jupyterlab/ui-components';
 
 /**
  * The default tab manager extension.
@@ -25,10 +23,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer | null
   ): void => {
     const { shell } = app;
-    const tabs = new TabBarSvg<Widget>({
-      kind: 'tabManager',
-      orientation: 'vertical'
-    });
+    const tabs = new TabBarSvg<Widget>({ orientation: 'vertical' });
     const header = document.createElement('header');
 
     if (restorer) {
@@ -36,8 +31,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
     }
 
     tabs.id = 'tab-manager';
-    tabs.title.iconClass = 'jp-TabIcon jp-SideBar-tabIcon';
     tabs.title.caption = 'Open Tabs';
+    tabs.title.icon = tabIcon;
     header.textContent = 'Open Tabs';
     tabs.node.insertBefore(header, tabs.contentNode);
     shell.add(tabs, 'left', { rank: 600 });

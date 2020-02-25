@@ -1,5 +1,5 @@
 {
-  "jupyter.lab.setting-icon-class": "jp-NotebookIcon",
+  "jupyter.lab.setting-icon": "ui-components:notebook",
   "jupyter.lab.setting-icon-label": "Notebook",
   "jupyter.lab.shortcuts": [
     {
@@ -267,6 +267,9 @@
         },
         "codeFolding": {
           "type": "boolean"
+        },
+        "lineWiseCopyCut": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -291,7 +294,8 @@
         "tabSize": 4,
         "wordWrapColumn": 80,
         "rulers": [],
-        "codeFolding": false
+        "codeFolding": false,
+        "lineWiseCopyCut": true
       }
     },
     "defaultCell": {
@@ -324,7 +328,8 @@
         "tabSize": 4,
         "wordWrapColumn": 80,
         "rulers": [],
-        "codeFolding": false
+        "codeFolding": false,
+        "lineWiseCopyCut": true
       }
     },
     "rawCellConfig": {
@@ -344,7 +349,8 @@
         "tabSize": 4,
         "wordWrapColumn": 80,
         "rulers": [],
-        "codeFolding": false
+        "codeFolding": false,
+        "lineWiseCopyCut": true
       }
     },
     "scrollPastEnd": {
@@ -352,6 +358,12 @@
       "description": "Whether to be able to scroll so the last cell is at the top of the panel",
       "type": "boolean",
       "default": true
+    },
+    "recordTiming": {
+      "title": "Recording timing",
+      "description": "Should timing data be recorded in cell metadata",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

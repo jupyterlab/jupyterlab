@@ -20,7 +20,7 @@ import {
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
-import { DataGrid } from '@phosphor/datagrid';
+import { DataGrid } from '@lumino/datagrid';
 import { CSVSearchProvider } from './searchprovider';
 
 /**
@@ -105,7 +105,7 @@ function activateCsv(
   });
 
   // The current styles for the data grids.
-  let style: DataGrid.IStyle = Private.LIGHT_STYLE;
+  let style: DataGrid.Style = Private.LIGHT_STYLE;
   let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
   if (restorer) {
@@ -128,6 +128,7 @@ function activateCsv(
     });
 
     if (ft) {
+      widget.title.icon = ft.icon!;
       widget.title.iconClass = ft.iconClass!;
       widget.title.iconLabel = ft.iconLabel!;
     }
@@ -184,7 +185,7 @@ function activateTsv(
   });
 
   // The current styles for the data grids.
-  let style: DataGrid.IStyle = Private.LIGHT_STYLE;
+  let style: DataGrid.Style = Private.LIGHT_STYLE;
   let rendererConfig: TextRenderConfig = Private.LIGHT_TEXT_CONFIG;
 
   if (restorer) {
@@ -207,6 +208,7 @@ function activateTsv(
     });
 
     if (ft) {
+      widget.title.icon = ft.icon!;
       widget.title.iconClass = ft.iconClass!;
       widget.title.iconLabel = ft.iconLabel!;
     }
@@ -255,7 +257,7 @@ namespace Private {
   /**
    * The light theme for the data grid.
    */
-  export const LIGHT_STYLE: DataGrid.IStyle = {
+  export const LIGHT_STYLE: DataGrid.Style = {
     ...DataGrid.defaultStyle,
     voidColor: '#F3F3F3',
     backgroundColor: 'white',
@@ -268,7 +270,7 @@ namespace Private {
   /**
    * The dark theme for the data grid.
    */
-  export const DARK_STYLE: DataGrid.IStyle = {
+  export const DARK_STYLE: DataGrid.Style = {
     voidColor: 'black',
     backgroundColor: '#111111',
     headerBackgroundColor: '#424242',

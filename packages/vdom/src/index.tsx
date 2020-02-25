@@ -5,7 +5,7 @@ import * as React from 'react';
 
 import * as ReactDOM from 'react-dom';
 
-import { IClientSession, IWidgetTracker } from '@jupyterlab/apputils';
+import { ISessionContext, IWidgetTracker } from '@jupyterlab/apputils';
 
 import { DocumentRegistry, MimeDocument } from '@jupyterlab/docregistry';
 
@@ -15,11 +15,11 @@ import { Kernel } from '@jupyterlab/services';
 
 import VDOM, { SerializedEvent } from '@nteract/transform-vdom';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 /**
  * The CSS class to add to the VDOM Widget.
@@ -55,7 +55,7 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
     this.addClass('jp-RenderedHTMLCommon');
     this._mimeType = options.mimeType;
     if (context) {
-      this._session = context.session;
+      this._sessionContext = context.sessionContext;
     }
   }
 
@@ -104,12 +104,11 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
     if (this._timer) {
       window.clearTimeout(this._timer);
     }
-    if (this._session) {
+    const kernel = this._sessionContext?.session?.kernel;
+    if (kernel) {
       this._timer = window.setTimeout(() => {
         if (!this._comms[targetName]) {
-          this._comms[targetName] = this._session.kernel.connectToComm(
-            targetName
-          );
+          this._comms[targetName] = kernel.createComm(targetName);
           this._comms[targetName].open();
         }
         this._comms[targetName].send(JSON.stringify(event));
@@ -118,7 +117,7 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
   };
 
   private _mimeType: string;
-  private _session?: IClientSession;
+  private _sessionContext?: ISessionContext;
   private _comms: { [targetName: string]: Kernel.IComm } = {};
   private _timer: number;
 }

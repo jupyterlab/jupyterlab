@@ -3,13 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JSONExt, JSONObject } from '@phosphor/coreutils';
+import { JSONExt, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { ElementDataset } from '@phosphor/virtualdom';
+import { ElementDataset } from '@lumino/virtualdom';
 
 /**
  * The command data attribute added to nodes that are connected.
@@ -73,7 +73,7 @@ export class CommandLinker implements IDisposable {
   connectNode(
     node: HTMLElement,
     command: string,
-    args?: JSONObject
+    args?: ReadonlyPartialJSONObject
   ): HTMLElement {
     node.setAttribute(`data-${COMMAND_ATTR}`, command);
     if (args !== void 0) {
@@ -154,7 +154,10 @@ export class CommandLinker implements IDisposable {
    * }, 'some text');
    * ```
    */
-  populateVNodeDataset(command: string, args?: JSONObject): ElementDataset {
+  populateVNodeDataset(
+    command: string,
+    args?: ReadonlyPartialJSONObject
+  ): ElementDataset {
     let dataset: ElementDataset;
     if (args !== void 0) {
       dataset = { [ARGS_ATTR]: JSON.stringify(args), [COMMAND_ATTR]: command };

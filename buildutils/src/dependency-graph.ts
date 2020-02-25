@@ -60,13 +60,13 @@ type Graph = { [key: string]: string[] };
 /**
  * Build a dependency graph based on the yarn data.
  */
-function buildYarnGraph(yarnData: any): Graph | undefined {
+function buildYarnGraph(yarnData: any): Graph {
   // 'a': ['b', 'c'] means 'a' depends on 'b' and 'c'
   const dependsOn: Graph = Object.create(null);
 
   Object.keys(yarnData).forEach(pkgName => {
     let pkg = yarnData[pkgName];
-    let pkgNode = getNode(yarnData, pkgName);
+    let pkgNode = getNode(yarnData, pkgName)!;
 
     // If multiple version specs resolve to the same actual package version, we
     // only want to record the dependency once.
@@ -78,7 +78,7 @@ function buildYarnGraph(yarnData: any): Graph | undefined {
     let deps = pkg.dependencies;
     if (deps) {
       Object.keys(deps).forEach(depName => {
-        let depNode = getNode(yarnData, `${depName}@${deps[depName]}`);
+        let depNode = getNode(yarnData, `${depName}@${deps[depName]}`)!;
         dependsOn[pkgNode].push(depNode);
       });
     }
@@ -151,7 +151,7 @@ interface IMainOptions {
   lernaExclude: string;
   lernaInclude: string;
   path: string;
-  phosphor: boolean;
+  lumino: boolean;
   topLevel: boolean;
 }
 
@@ -163,7 +163,7 @@ function main({
   lernaExclude,
   lernaInclude,
   path,
-  phosphor,
+  lumino,
   topLevel
 }: IMainOptions) {
   let yarnData = readYarn(path);
@@ -215,7 +215,7 @@ function main({
             return getNode(yarnData, `${i}@${deps[i]}`);
           }
         })
-        .filter(i => i !== undefined);
+        .filter(i => i !== undefined) as string[];
       roots.push(...nodes);
     }
     return roots;
@@ -231,13 +231,13 @@ function main({
     });
   }
 
-  // Filter out *all* phosphor nodes
-  if (!phosphor) {
+  // Filter out *all* lumino nodes
+  if (!lumino) {
     Object.keys(sub).forEach(v => {
-      sub[v] = sub[v].filter(w => !w.startsWith('@phosphor/'));
+      sub[v] = sub[v].filter(w => !w.startsWith('@lumino/'));
     });
     Object.keys(sub).forEach(v => {
-      if (v.startsWith('@phosphor/')) {
+      if (v.startsWith('@lumino/')) {
         delete sub[v];
       }
     });
@@ -277,7 +277,7 @@ commander
     '--no-jupyterlab',
     'Do not include dependency connections TO @jupyterlab org packages nor isolated @jupyterlab org packages'
   )
-  .option('--no-phosphor', 'Do not include @phosphor org packages')
+  .option('--no-lumino', 'Do not include @lumino org packages')
   .option('--no-devDependencies', 'Do not include dev dependencies')
   .option('--no-dependencies', 'Do not include normal dependencies')
   .option('--no-top-level', 'Do not include the top-level packages')

@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.p-Widget.p-mod-hidden {
+.lm-Widget.lm-mod-hidden {
   display: none !important;
 }
 
@@ -46,8 +46,6 @@ body {
 /* Sibling imports */
 @import './datagrid.css';
 @import './dockpanel.css';
-@import './images.css';
-@import './icons.css';
 @import './menus.css';
 @import './scrollbar.css';
 @import './tabs.css';

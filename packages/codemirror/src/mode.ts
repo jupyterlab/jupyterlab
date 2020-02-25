@@ -1,8 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt } from '@phosphor/algorithm';
-import { JSONValue } from '@phosphor/coreutils';
+import { ArrayExt } from '@lumino/algorithm';
+import { JSONValue } from '@lumino/coreutils';
 
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor';
 
@@ -108,7 +108,7 @@ export namespace Mode {
    *
    * @returns A promise that resolves when the mode is available.
    */
-  export async function ensure(mode: string | ISpec): Promise<ISpec> {
+  export async function ensure(mode: string | ISpec): Promise<ISpec | null> {
     let spec = findBest(mode);
 
     for (let specLoader of specLoaders) {
@@ -132,7 +132,7 @@ export namespace Mode {
   export function findBest(mode: string | ISpec): ISpec {
     let modename = typeof mode === 'string' ? mode : mode.mode || mode.name;
     let mimetype = typeof mode !== 'string' ? mode.mime : modename;
-    let ext = typeof mode !== 'string' ? mode.ext : [];
+    let ext = typeof mode !== 'string' ? mode.ext ?? [] : [];
 
     return (
       CodeMirror.findModeByName(modename || '') ||
@@ -168,7 +168,7 @@ export namespace Mode {
   /**
    * Find a codemirror mode by extension.
    */
-  export function findByExtension(ext: string | string[]): ISpec {
+  export function findByExtension(ext: string | string[]): ISpec | null {
     if (typeof ext === 'string') {
       return CodeMirror.findModeByExtension(name);
     }
@@ -178,6 +178,7 @@ export namespace Mode {
         return mode;
       }
     }
+    return null;
   }
 }
 

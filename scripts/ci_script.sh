@@ -6,7 +6,9 @@
 set -ex
 set -o pipefail
 
-python -c "from jupyterlab.commands import build_check; build_check()"
+if [[ $GROUP != nonode ]]; then
+    python -c "from jupyterlab.commands import build_check; build_check()"
+fi
 
 
 if [[ $GROUP == python ]]; then
@@ -36,7 +38,7 @@ if [[ $GROUP == docs ]]; then
 
     # Verify tutorial docs build
     pushd docs
-    pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark
+    pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
     make linkcheck
     make html
     popd
@@ -52,10 +54,6 @@ if [[ $GROUP == integrity ]]; then
 
     # Lint our files.
     jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
-
-
-    # Build the vega bundles
-    jlpm run build:vega
 
     # Build the packages individually.
     jlpm run build:src
@@ -82,25 +80,16 @@ if [[ $GROUP == integrity ]]; then
     git checkout -b commit_${BUILD_SOURCEVERSION}
     git clean -df
     jlpm bumpversion minor --force
-    git commit -a -m "minor"
     jlpm bumpversion major --force
-    git commit -a -m "major"
+    jlpm bumpversion release --force # switch to beta
     jlpm bumpversion release --force # switch to rc
-    git commit -a -m "release"
     jlpm bumpversion build --force
-    git commit -a -m "build"
     VERSION=$(python setup.py --version)
     if [[ $VERSION != *rc1 ]]; then exit 1; fi
 
     # make sure we can patch release
     jlpm bumpversion release --force  # switch to final
-    git commit -a -m "release"
     jlpm patch:release --force
-    git commit -a -m "patched"
-    jlpm patch:release console --force
-    git commit -a -m "patched single"
-    jlpm patch:release filebrowser notebook --force
-    git commit -a -m "patched multiple"
 
     # make sure we can bump major JS releases
     jlpm bumpversion minor --force
@@ -191,12 +180,6 @@ if [[ $GROUP == usage ]]; then
     env JUPYTERLAB_DIR=./link_app_dir jupyter lab path | grep link_app_dir
     popd
 
-    # Build the examples.
-    jlpm run build:examples
-
-    # Test the examples
-    jlpm run test:examples
-
     # Make sure we can successfully load the dev app.
     python -m jupyterlab.browser_check --dev-mode
 
@@ -210,15 +193,36 @@ if [[ $GROUP == usage ]]; then
     python -m jupyterlab.browser_check
     jupyter labextension list --debug
 
-    # Make sure the deprecated `selenium_check` command still works
-    python -m jupyterlab.selenium_check
-
     # Make sure we can non-dev install.
     virtualenv -p $(which python3) test_install
     ./test_install/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
     ./test_install/bin/python -m jupyterlab.browser_check
     # Make sure we can run the build
     ./test_install/bin/jupyter lab build
+
+    # Make sure we can start and kill the lab server
+    ./test_install/bin/jupyter lab --no-browser &
+    TASK_PID=$!
+    # Make sure the task is running
+    ps -p $TASK_PID || exit 1
+    sleep 5
+    kill $TASK_PID
+    wait $TASK_PID
+
+    # Make sure we can clean various bits of the app dir
+    jupyter lab clean
+    jupyter lab clean --extensions
+    jupyter lab clean --settings
+    jupyter lab clean --static
+    jupyter lab clean --all
+fi
+
+if [[ $GROUP == nonode ]]; then
+    # Make sure we can install the wheel
+    virtualenv -p $(which python3) test_install
+    ./test_install/bin/pip install -v --pre --no-cache-dir --no-deps jupyterlab --no-index --find-links=dist  # Install latest jupyterlab
+    ./test_install/bin/pip install jupyterlab  # Install jupyterlab dependencies
+    ./test_install/bin/python -m jupyterlab.browser_check --no-chrome-test
 
     # Make sure we can start and kill the lab server
     ./test_install/bin/jupyter lab --no-browser &

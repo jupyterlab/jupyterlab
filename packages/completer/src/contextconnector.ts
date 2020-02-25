@@ -3,7 +3,7 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { DataConnector } from '@jupyterlab/coreutils';
+import { DataConnector } from '@jupyterlab/statedb';
 
 import { CompletionHandler } from './handler';
 
@@ -33,12 +33,15 @@ export class ContextConnector extends DataConnector<
   fetch(
     request: CompletionHandler.IRequest
   ): Promise<CompletionHandler.IReply> {
+    if (!this._editor) {
+      return Promise.reject('No editor');
+    }
     return new Promise<CompletionHandler.IReply>(resolve => {
-      resolve(Private.contextHint(this._editor));
+      resolve(Private.contextHint(this._editor!));
     });
   }
 
-  private _editor: CodeEditor.IEditor;
+  private _editor: CodeEditor.IEditor | null;
 }
 
 /**
@@ -52,7 +55,7 @@ export namespace ContextConnector {
     /**
      * The session used by the context connector.
      */
-    editor: CodeEditor.IEditor;
+    editor: CodeEditor.IEditor | null;
   }
 }
 

@@ -4,23 +4,23 @@
 import { expect } from 'chai';
 
 import {
-  ClientSession,
   Toolbar,
   ToolbarButton,
-  CommandToolbarButton
+  CommandToolbarButton,
+  SessionContext
 } from '@jupyterlab/apputils';
 
-import { toArray } from '@phosphor/algorithm';
+import { toArray } from '@lumino/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { createClientSession, framePromise } from '@jupyterlab/testutils';
+import { createSessionContext, framePromise } from '@jupyterlab/testutils';
 
 describe('@jupyterlab/apputils', () => {
   let widget: Toolbar<Widget>;
@@ -127,7 +127,7 @@ describe('@jupyterlab/apputils', () => {
     describe('.createFromCommand', () => {
       const commands = new CommandRegistry();
       const testLogCommandId = 'test:toolbar-log';
-      const logArgs: ReadonlyJSONObject[] = [];
+      const logArgs: ReadonlyPartialJSONObject[] = [];
       let enabled = false;
       let toggled = true;
       let visible = false;
@@ -197,8 +197,8 @@ describe('@jupyterlab/apputils', () => {
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.disabled).to.equal(true);
-        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
-        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(true);
+        expect(buttonNode.classList.contains('lm-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('lm-mod-hidden')).to.equal(true);
         button.dispose();
       });
 
@@ -213,14 +213,14 @@ describe('@jupyterlab/apputils', () => {
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
         expect(buttonNode.disabled).to.equal(true);
-        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
-        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(true);
+        expect(buttonNode.classList.contains('lm-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('lm-mod-hidden')).to.equal(true);
         enabled = true;
         visible = true;
         commands.notifyCommandChanged(testLogCommandId);
         expect(buttonNode.disabled).to.equal(false);
-        expect(buttonNode.classList.contains('p-mod-toggled')).to.equal(true);
-        expect(buttonNode.classList.contains('p-mod-hidden')).to.equal(false);
+        expect(buttonNode.classList.contains('lm-mod-toggled')).to.equal(true);
+        expect(buttonNode.classList.contains('lm-mod-hidden')).to.equal(false);
         enabled = false;
         visible = false;
         button.dispose();
@@ -246,13 +246,13 @@ describe('@jupyterlab/apputils', () => {
 
       it('should update the node content on command change event', async () => {
         const id = 'to-be-removed';
-        let iconClassValue: string | null = null;
+        let iconClassValue: string = '';
         const cmd = commands.addCommand(id, {
           execute: () => {
             /* no op */
           },
           label: 'Label-only button',
-          iconClass: () => iconClassValue
+          iconClass: () => iconClassValue ?? ''
         });
         const button = new CommandToolbarButton({
           commands,
@@ -269,89 +269,84 @@ describe('@jupyterlab/apputils', () => {
         const wrapperNode = buttonNode.firstChild as HTMLElement;
         const iconNode = wrapperNode.firstChild as HTMLElement;
         expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
-
         cmd.dispose();
       });
     });
 
     describe('Kernel buttons', () => {
-      let session: ClientSession;
+      let sessionContext: SessionContext;
       beforeEach(async () => {
-        session = await createClientSession();
+        sessionContext = await createSessionContext();
       });
 
       afterEach(async () => {
-        await session.shutdown();
-        session.dispose();
+        await sessionContext.shutdown();
+        sessionContext.dispose();
       });
 
       describe('.createInterruptButton()', () => {
         it("should add an inline svg node with the 'stop' icon", async () => {
-          const button = Toolbar.createInterruptButton(session);
+          const button = Toolbar.createInterruptButton(sessionContext);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='stop']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='stop']")).to.exist;
         });
       });
 
       describe('.createRestartButton()', () => {
         it("should add an inline svg node with the 'refresh' icon", async () => {
-          const button = Toolbar.createRestartButton(session);
+          const button = Toolbar.createRestartButton(sessionContext);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='refresh']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='refresh']")).to.exist;
         });
       });
 
       describe('.createKernelNameItem()', () => {
         it("should display the `'display_name'` of the kernel", async () => {
-          const item = Toolbar.createKernelNameItem(session);
-          await session.initialize();
+          const item = Toolbar.createKernelNameItem(sessionContext);
+          await sessionContext.initialize();
           Widget.attach(item, document.body);
           await framePromise();
-          expect(
-            (item.node.firstChild.lastChild as HTMLElement).textContent
-          ).to.equal(session.kernelDisplayName);
-        });
-
-        it("should display `'No Kernel!'` if there is no kernel", async () => {
-          const item = Toolbar.createKernelNameItem(session);
-          Widget.attach(item, document.body);
-          await framePromise();
-          expect(
-            (item.node.firstChild.lastChild as HTMLElement).textContent
-          ).to.equal('No Kernel!');
+          const node = item.node.querySelector(
+            '.jp-ToolbarButtonComponent-label'
+          )!;
+          expect(node.textContent).to.equal(sessionContext.kernelDisplayName);
         });
       });
 
       describe('.createKernelStatusItem()', () => {
         beforeEach(async () => {
-          await session.initialize();
-          await session.kernel.ready;
+          await sessionContext.initialize();
+          await sessionContext.session?.kernel?.info;
         });
 
         it('should display a busy status if the kernel status is busy', async () => {
-          const item = Toolbar.createKernelStatusItem(session);
+          const item = Toolbar.createKernelStatusItem(sessionContext);
           let called = false;
-          session.statusChanged.connect((_, status) => {
+          sessionContext.statusChanged.connect((_, status) => {
             if (status === 'busy') {
-              expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
+              expect(item.node.querySelector("[data-icon$='circle']")).to.exist;
               called = true;
             }
           });
-          const future = session.kernel.requestExecute({ code: 'a = 109\na' });
+          const future = sessionContext.session?.kernel?.requestExecute({
+            code: 'a = 109\na'
+          })!;
           await future.done;
           expect(called).to.equal(true);
         });
 
         it('should show the current status in the node title', async () => {
-          const item = Toolbar.createKernelStatusItem(session);
-          const status = session.status;
+          const item = Toolbar.createKernelStatusItem(sessionContext);
+          const status = sessionContext.session?.kernel?.status;
           expect(item.node.title.toLowerCase()).to.contain(status);
           let called = false;
-          const future = session.kernel.requestExecute({ code: 'a = 1' });
+          const future = sessionContext.session?.kernel?.requestExecute({
+            code: 'a = 1'
+          })!;
           future.onIOPub = msg => {
-            if (session.status === 'busy') {
+            if (sessionContext.session?.kernel?.status === 'busy') {
               expect(item.node.title.toLowerCase()).to.contain('busy');
               called = true;
             }
@@ -361,14 +356,16 @@ describe('@jupyterlab/apputils', () => {
         });
 
         it('should handle a starting session', async () => {
-          await session.kernel.ready;
-          await session.shutdown();
-          session = await createClientSession();
-          const item = Toolbar.createKernelStatusItem(session);
-          expect(item.node.title).to.equal('Kernel Starting');
-          expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);
-          await session.initialize();
-          await session.kernel.ready;
+          await sessionContext.session?.kernel?.info;
+          await sessionContext.shutdown();
+          sessionContext = await createSessionContext();
+          await sessionContext.initialize();
+          const item = Toolbar.createKernelStatusItem(sessionContext);
+          expect(item.node.title).to.equal('Kernel Connecting');
+          expect(item.node.querySelector("[data-icon$='circle-empty']")).to
+            .exist;
+          await sessionContext.initialize();
+          await sessionContext.session?.kernel?.info;
         });
       });
     });
@@ -384,7 +381,7 @@ describe('@jupyterlab/apputils', () => {
       it('should accept options', async () => {
         const widget = new ToolbarButton({
           className: 'foo',
-          iconClassName: 'iconFoo',
+          iconClass: 'iconFoo',
           onClick: () => {
             return void 0;
           },

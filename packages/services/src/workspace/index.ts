@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DataConnector, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { DataConnector } from '@jupyterlab/statedb';
+
+import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { ServerConnection } from '../serverconnection';
 
@@ -22,7 +24,7 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
   constructor(options: WorkspaceManager.IOptions = {}) {
     super();
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
   }
 
   /**
@@ -150,7 +152,7 @@ export namespace Workspace {
     /**
      * The workspace data.
      */
-    data: ReadonlyJSONObject;
+    data: ReadonlyPartialJSONObject;
 
     /**
      * The metadata for a workspace.

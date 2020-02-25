@@ -3,11 +3,11 @@
 
 import { expect } from 'chai';
 
-import { MessageLoop, Message } from '@phosphor/messaging';
+import { MessageLoop, Message } from '@lumino/messaging';
 
-import { Panel } from '@phosphor/widgets';
+import { Panel } from '@lumino/widgets';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { simulate } from 'simulate-event';
 
@@ -91,7 +91,7 @@ describe('completer/widget', () => {
           model: new CompleterModel(),
           renderer: new CustomRenderer()
         };
-        options.model.setOptions(['foo', 'bar']);
+        options.model!.setOptions(['foo', 'bar']);
 
         let widget = new Completer(options);
         expect(widget).to.be.an.instanceof(Completer);
@@ -114,7 +114,7 @@ describe('completer/widget', () => {
         let listener = (sender: any, selected: string) => {
           value = selected;
         };
-        options.model.setOptions(['foo', 'bar']);
+        options.model!.setOptions(['foo', 'bar']);
         Widget.attach(anchor, document.body);
 
         let widget = new Completer(options);
@@ -149,7 +149,7 @@ describe('completer/widget', () => {
         panel.node.scrollTop = 0;
         document.body.scrollTop = 0;
 
-        let position = code.editor.getPositionAt(1);
+        let position = code.editor.getPositionAt(1)!;
 
         editor.setCursorPosition(position);
 
@@ -580,7 +580,7 @@ describe('completer/widget', () => {
           Widget.attach(panel, document.body);
           editor.refresh();
 
-          let position = code.editor.getPositionAt(text.length);
+          let position = code.editor.getPositionAt(text.length)!;
           let coords = code.editor.getCoordinateForPosition(position);
 
           editor.setCursorPosition(position);

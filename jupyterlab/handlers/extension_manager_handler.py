@@ -67,9 +67,8 @@ def _build_check_info(app_options):
 class ExtensionManager(object):
     executor = ThreadPoolExecutor(max_workers=1)
 
-    # TODO 2.0: Clean up signature to (self, app_options=None)
-    def __init__(self, log=None, app_dir=None, core_config=None, app_options=None):
-        app_options = _ensure_options(app_options, logger=log, app_dir=app_dir, core_config=core_config)
+    def __init__(self, app_options=None):
+        app_options = _ensure_options(app_options)
         self.log = app_options.logger
         self.app_dir = app_options.app_dir
         self.core_config = app_options.core_config

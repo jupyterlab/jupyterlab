@@ -3,19 +3,13 @@
 
 import { showDialog, Dialog } from '@jupyterlab/apputils';
 
-import {
-  IChangedArgs,
-  IStateDB,
-  PathExt,
-  PageConfig,
-  Poll
-} from '@jupyterlab/coreutils';
+import { IChangedArgs, PathExt, PageConfig } from '@jupyterlab/coreutils';
 
 import { IDocumentManager, shouldOverwrite } from '@jupyterlab/docmanager';
 
-import { Contents, Kernel, Session } from '@jupyterlab/services';
+import { Contents, KernelSpec, Session } from '@jupyterlab/services';
 
-import { IIconRegistry } from '@jupyterlab/ui-components';
+import { IStateDB } from '@jupyterlab/statedb';
 
 import {
   ArrayIterator,
@@ -25,13 +19,15 @@ import {
   IterableOrArrayLike,
   ArrayExt,
   filter
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { PromiseDelegate, ReadonlyJSONObject } from '@phosphor/coreutils';
+import { PromiseDelegate, ReadonlyJSONObject } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { Poll } from '@lumino/polling';
+
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -71,7 +67,6 @@ export class FileBrowserModel implements IDisposable {
    * Construct a new file browser model.
    */
   constructor(options: FileBrowserModel.IOptions) {
-    this.iconRegistry = options.iconRegistry;
     this.manager = options.manager;
     this._driveName = options.driveName || '';
     let rootPath = this._driveName ? this._driveName + ':' : '';
@@ -103,6 +98,8 @@ export class FileBrowserModel implements IDisposable {
     };
     window.addEventListener('beforeunload', this._unloadEventListener);
     this._poll = new Poll({
+      auto: options.auto ?? true,
+      name: '@jupyterlab/filebrowser:Model',
       factory: () => this.cd('.'),
       frequency: {
         interval: refreshInterval,
@@ -112,11 +109,6 @@ export class FileBrowserModel implements IDisposable {
       standby: 'when-hidden'
     });
   }
-
-  /**
-   * The icon registry instance used by the file browser model.
-   */
-  readonly iconRegistry: IIconRegistry;
 
   /**
    * The document manager instance used by the file browser model.
@@ -175,8 +167,8 @@ export class FileBrowserModel implements IDisposable {
   /**
    * Get the kernel spec models.
    */
-  get specs(): Kernel.ISpecModels | null {
-    return this.manager.services.sessions.specs;
+  get specs(): KernelSpec.ISpecModels | null {
+    return this.manager.services.kernelspecs.specs;
   }
 
   /**
@@ -189,7 +181,7 @@ export class FileBrowserModel implements IDisposable {
   /**
    * A signal emitted when an upload progresses.
    */
-  get uploadChanged(): ISignal<this, IChangedArgs<IUploadModel>> {
+  get uploadChanged(): ISignal<this, IChangedArgs<IUploadModel | null>> {
     return this._uploadChanged;
   }
 
@@ -337,41 +329,53 @@ export class FileBrowserModel implements IDisposable {
    *
    * @param id - The unique ID that is used to construct a state database key.
    *
+   * @param populate - If `false`, the restoration ID will be set but the file
+   * browser state will not be fetched from the state database.
+   *
    * @returns A promise when restoration is complete.
    *
    * #### Notes
    * This function will only restore the model *once*. If it is called multiple
    * times, all subsequent invocations are no-ops.
    */
-  restore(id: string): Promise<void> {
+  async restore(id: string, populate = true): Promise<void> {
+    const { manager } = this;
+    const key = `file-browser-${id}:cwd`;
     const state = this._state;
     const restored = !!this._key;
-    if (!state || restored) {
-      return Promise.resolve(void 0);
+
+    if (restored) {
+      return;
     }
 
-    const manager = this.manager;
-    const key = `file-browser-${id}:cwd`;
-    const ready = manager.services.ready;
-    return Promise.all([state.fetch(key), ready])
-      .then(([value]) => {
-        if (!value) {
-          this._restored.resolve(undefined);
-          return;
-        }
+    // Set the file browser key for state database fetch/save.
+    this._key = key;
 
-        const path = (value as ReadonlyJSONObject)['path'] as string;
-        const localPath = manager.services.contents.localPath(path);
-        return manager.services.contents
-          .get(path)
-          .then(() => this.cd(localPath))
-          .catch(() => state.remove(key));
-      })
-      .catch(() => state.remove(key))
-      .then(() => {
-        this._key = key;
+    if (!populate || !state) {
+      this._restored.resolve(undefined);
+      return;
+    }
+
+    await manager.services.ready;
+
+    try {
+      const value = await state.fetch(key);
+
+      if (!value) {
         this._restored.resolve(undefined);
-      }); // Set key after restoration is done.
+        return;
+      }
+
+      const path = (value as ReadonlyJSONObject)['path'] as string;
+      const localPath = manager.services.contents.localPath(path);
+
+      await manager.services.contents.get(path);
+      await this.cd(localPath);
+    } catch (error) {
+      await state.remove(key);
+    }
+
+    this._restored.resolve(undefined);
   }
 
   /**
@@ -479,7 +483,7 @@ export class FileBrowserModel implements IDisposable {
       }
     }
 
-    let finalModel: Contents.IModel;
+    let finalModel: Contents.IModel | undefined;
 
     let upload = { path, progress: 0 };
     this._uploadChanged.emit({
@@ -630,8 +634,10 @@ export class FileBrowserModel implements IDisposable {
   private _isDisposed = false;
   private _restored = new PromiseDelegate<void>();
   private _uploads: IUploadModel[] = [];
-  private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel>>(this);
-  private _unloadEventListener: (e: Event) => string;
+  private _uploadChanged = new Signal<this, IChangedArgs<IUploadModel | null>>(
+    this
+  );
+  private _unloadEventListener: (e: Event) => string | undefined;
   private _poll: Poll;
 }
 
@@ -644,14 +650,10 @@ export namespace FileBrowserModel {
    */
   export interface IOptions {
     /**
-     * An icon registry instance.
+     * Whether a file browser automatically loads its initial path.
+     * The default is `true`.
      */
-    iconRegistry: IIconRegistry;
-
-    /**
-     * A document manager instance.
-     */
-    manager: IDocumentManager;
+    auto?: boolean;
 
     /**
      * An optional `Contents.IDrive` name for the model.
@@ -659,6 +661,11 @@ export namespace FileBrowserModel {
      * all paths used in file operations.
      */
     driveName?: string;
+
+    /**
+     * A document manager instance.
+     */
+    manager: IDocumentManager;
 
     /**
      * The time interval for browser refreshing, in ms.

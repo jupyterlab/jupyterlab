@@ -10,7 +10,8 @@ import os.path as osp
 from os.path import join as pjoin
 import sys
 
-from jupyter_core.application import JupyterApp, base_aliases
+from jupyter_core.application import JupyterApp, base_aliases, base_flags
+from jupyterlab_server import slugify, WORKSPACE_EXTENSION
 from jupyter_server.serverapp import aliases, flags
 from jupyter_server.utils import url_path_join as ujoin
 from traitlets import Bool, Instance, Unicode
@@ -42,6 +43,42 @@ app_version = get_app_version()
 if version != app_version:
     version = '%s (dev), %s (app)' % (__version__, app_version)
 
+buildFailureMsg = """Build failed.
+Troubleshooting: If the build failed due to an out-of-memory error, you
+may be able to fix it by disabling the `dev_build` and/or `minimize` options.
+
+If you are building via the `jupyter lab build` command, you can disable
+these options like so:
+
+jupyter lab build --dev-build=False --minimize=False
+
+You can also disable these options for all JupyterLab builds by adding these
+lines to a Jupyter config file named `jupyter_config.py`:
+
+c.LabBuildApp.minimize = False
+c.LabBuildApp.dev_build = False
+
+If you don't already have a `jupyter_config.py` file, you can create one by
+adding a blank file of that name to any of the Jupyter config directories.
+The config directories can be listed by running:
+
+jupyter --paths
+
+Explanation:
+
+- `dev-build`: This option controls whether a `dev` or a more streamlined
+`production` build is used. This option will default to `False` (ie the
+`production` build) for most users. However, if you have any labextensions
+installed from local files, this option will instead default to `True`.
+Explicitly setting `dev-build` to `False` will ensure that the `production`
+build is used in all circumstances.
+
+- `minimize`: This option controls whether your JS bundle is minified
+during the Webpack build, which helps to improve JupyterLab's overall
+performance. However, the minifier plugin used by Webpack is very memory
+intensive, so turning it off may help the build finish successfully in
+low-memory environments.
+"""
 
 class LabBuildApp(JupyterApp, DebugLogFileMixin):
     version = version
@@ -95,12 +132,34 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
                 self.log.info('Cleaning %s' % app_dir)
                 clean(app_options=app_options)
             self.log.info('Building in %s', app_dir)
-            build(name=self.name, version=self.version,
+            try:
+                build(name=self.name, version=self.version,
                   command=command, app_options=app_options)
+            except Exception as e:
+                print(buildFailureMsg)
+                raise e
 
 
 clean_aliases = dict(base_aliases)
 clean_aliases['app-dir'] = 'LabCleanApp.app_dir'
+
+ext_warn_msg = "WARNING: this will delete all of your extensions, which will need to be reinstalled"
+
+clean_flags = dict(base_flags)
+clean_flags['extensions'] = ({'LabCleanApp': {'extensions': True}},
+    'Also delete <app-dir>/extensions.\n%s' % ext_warn_msg)
+clean_flags['settings'] = ({'LabCleanApp': {'settings': True}}, 'Also delete <app-dir>/settings')
+clean_flags['static'] = ({'LabCleanApp': {'static': True}}, 'Also delete <app-dir>/static')
+clean_flags['all'] = ({'LabCleanApp': {'all': True}},
+    'Delete the entire contents of the app directory.\n%s' % ext_warn_msg)
+
+
+class LabCleanAppOptions(AppOptions):
+    extensions = Bool(False)
+    settings = Bool(False)
+    staging = Bool(True)
+    static = Bool(False)
+    all = Bool(False)
 
 
 class LabCleanApp(JupyterApp):
@@ -108,20 +167,39 @@ class LabCleanApp(JupyterApp):
     description = """
     Clean the JupyterLab application
 
-    This will clean the app directory by removing the `staging` and `static`
-    directories.
+    This will clean the app directory by removing the `staging` directories.
+    Optionally, the `extensions`, `settings`, and/or `static` directories,
+    or the entire contents of the app directory, can also be removed.
     """
     aliases = clean_aliases
+    flags = clean_flags
 
     # Not configurable!
     core_config = Instance(CoreConfig, allow_none=True)
 
     app_dir = Unicode('', config=True, help='The app directory to clean')
 
+    extensions = Bool(False, config=True,
+        help="Also delete <app-dir>/extensions.\n%s" % ext_warn_msg)
+
+    settings = Bool(False, config=True, help="Also delete <app-dir>/settings")
+
+    static = Bool(False, config=True, help="Also delete <app-dir>/static")
+
+    all = Bool(False, config=True,
+        help="Delete the entire contents of the app directory.\n%s" % ext_warn_msg)
+
     def start(self):
-        clean(app_options=AppOptions(
-            app_dir=self.app_dir, logger=self.log,
-            core_config=self.core_config))
+        app_options = LabCleanAppOptions(
+            logger=self.log,
+            core_config=self.core_config,
+            app_dir=self.app_dir,
+            extensions=self.extensions,
+            settings=self.settings,
+            static=self.static,
+            all=self.all
+        )
+        clean(app_options=app_options)
 
 
 class LabPathApp(JupyterApp):
@@ -138,7 +216,6 @@ class LabPathApp(JupyterApp):
         environment variable or it will fall back to
         '/lab/workspaces' in the default Jupyter configuration directory.
     """
-
     def start(self):
         print('Application directory:   %s' % get_app_dir())
         print('User Settings directory: %s' % get_user_settings_dir())

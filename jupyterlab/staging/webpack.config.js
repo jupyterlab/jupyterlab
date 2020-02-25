@@ -1,3 +1,4 @@
+// This file is auto-generated from the corresponding file in /dev_mode
 /*-----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
@@ -8,7 +9,6 @@ var fs = require('fs-extra');
 var Handlebars = require('handlebars');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var webpack = require('webpack');
-var DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
 var BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
 
@@ -59,6 +59,12 @@ Object.keys(jlab.linkedPackages).forEach(function(name) {
   const localPkgPath = require.resolve(plib.join(name, 'package.json'));
   watched[name] = plib.dirname(localPkgPath);
 });
+
+// Set up source-map-loader to look in watched lib dirs
+let sourceMapRes = Object.values(watched).reduce((res, name) => {
+  res.push(new RegExp(name + '/lib'));
+  return res;
+}, []);
 
 /**
  * Sync a local path to a linked package path if they are files and differ.
@@ -116,7 +122,7 @@ function ignored(path) {
 }
 
 const plugins = [
-  new DuplicatePackageCheckerPlugin({
+  new WPPlugin.NowatchDuplicatePackageCheckerPlugin({
     verbose: true,
     exclude(instance) {
       // ignore known duplicates
@@ -131,7 +137,6 @@ const plugins = [
     title: jlab.name || 'JupyterLab'
   }),
   new webpack.HashedModuleIdsPlugin(),
-
   // custom plugin for ignoring files during a `--watch` build
   new WPPlugin.FilterWatchIgnorePlugin(ignored),
   // custom plugin that copies the assets to the static directory
@@ -147,6 +152,67 @@ module.exports = [
     mode: 'development',
     entry: {
       main: ['whatwg-fetch', plib.resolve(buildDir, 'index.out.js')]
+    },
+    // Map Phosphor files to Lumino files.
+    resolve: {
+      alias: {
+        '@phosphor/algorithm$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/algorithm/lib/index.js'
+        ),
+        '@phosphor/application$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/application/lib/index.js'
+        ),
+        '@phosphor/commands$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/commands/lib/index.js'
+        ),
+        '@phosphor/coreutils$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/coreutils/lib/index.js'
+        ),
+        '@phosphor/disposable$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/disposable/lib/index.js'
+        ),
+        '@phosphor/domutils$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/domutils/lib/index.js'
+        ),
+        '@phosphor/dragdrop$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/dragdrop/lib/index.js'
+        ),
+        '@phosphor/dragdrop/style': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/widgets/style'
+        ),
+        '@phosphor/messaging$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/messaging/lib/index.js'
+        ),
+        '@phosphor/properties$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/properties/lib'
+        ),
+        '@phosphor/signaling': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/signaling/lib/index.js'
+        ),
+        '@phosphor/widgets/style': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/widgets/style'
+        ),
+        '@phosphor/virtualdom$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/virtualdom/lib/index.js'
+        ),
+        '@phosphor/widgets$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/widgets/lib/index.js'
+        )
+      }
     },
     output: {
       path: plib.resolve(buildDir),
@@ -165,10 +231,9 @@ module.exports = [
         { test: /\.txt$/, use: 'raw-loader' },
         {
           test: /\.js$/,
+          include: sourceMapRes,
           use: ['source-map-loader'],
-          enforce: 'pre',
-          // eslint-disable-next-line no-undef
-          exclude: /node_modules/
+          enforce: 'pre'
         },
         { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
         { test: /\.js.map$/, use: 'file-loader' },
@@ -190,7 +255,7 @@ module.exports = [
         },
         { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
         {
-          // in css files, svg is loaded as a url formatted string
+          // In .css files, svg is loaded as a data URI.
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
           issuer: { test: /\.css$/ },
           use: {
@@ -199,8 +264,8 @@ module.exports = [
           }
         },
         {
-          // in ts and tsx files (both of which compile to js),
-          // svg is loaded as a raw string
+          // In .ts and .tsx files (both of which compile to .js), svg files
+          // must be loaded as a raw string instead of data URIs.
           test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
           issuer: { test: /\.js$/ },
           use: {
@@ -218,9 +283,6 @@ module.exports = [
     bail: true,
     devtool: 'inline-source-map',
     externals: ['node-fetch', 'ws'],
-    plugins,
-    stats: {
-      chunkModules: true
-    }
+    plugins
   }
 ].concat(extraConfig);

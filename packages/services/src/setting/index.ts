@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { DataConnector, ISettingRegistry, URLExt } from '@jupyterlab/coreutils';
+import { URLExt } from '@jupyterlab/coreutils';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { DataConnector } from '@jupyterlab/statedb';
 
 import { ServerConnection } from '../serverconnection';
 
@@ -23,7 +27,7 @@ export class SettingManager extends DataConnector<
   constructor(options: SettingManager.IOptions = {}) {
     super();
     this.serverSettings =
-      options.serverSettings || ServerConnection.makeSettings();
+      options.serverSettings ?? ServerConnection.makeSettings();
   }
 
   /**
@@ -39,16 +43,16 @@ export class SettingManager extends DataConnector<
    * @returns A promise that resolves if successful.
    */
   async fetch(id: string): Promise<ISettingRegistry.IPlugin> {
+    if (!id) {
+      throw new Error('Plugin `id` parameter is required for settings fetch.');
+    }
+
     const { serverSettings } = this;
     const { baseUrl, appUrl } = serverSettings;
     const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + appUrl;
     const url = Private.url(base, id);
     const response = await makeRequest(url, {}, serverSettings);
-
-    if (!id) {
-      throw new Error('Plugin `id` parameter is required for settings fetch.');
-    }
 
     if (response.status !== 200) {
       throw new ResponseError(response);
@@ -76,12 +80,11 @@ export class SettingManager extends DataConnector<
     }
 
     const json = await response.json();
-    const values = ((json || {})['settings'] || []).map(
-      (plugin: ISettingRegistry.IPlugin) => {
+    const values: ISettingRegistry.IPlugin[] =
+      json?.['settings']?.map((plugin: ISettingRegistry.IPlugin) => {
         plugin.data = { composite: {}, user: {} };
         return plugin;
-      }
-    ) as ISettingRegistry.IPlugin[];
+      }) ?? [];
     const ids = values.map(plugin => plugin.id);
 
     return { ids, values };

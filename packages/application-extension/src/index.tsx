@@ -24,16 +24,26 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
+import { PathExt, URLExt } from '@jupyterlab/coreutils';
+
 import {
-  PathExt,
-  IStateDB,
-  ISettingRegistry,
-  URLExt
-} from '@jupyterlab/coreutils';
+  IPropertyInspectorProvider,
+  SideBarPropertyInspectorProvider
+} from '@jupyterlab/property-inspector';
 
-import { each, iter, toArray } from '@phosphor/algorithm';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { Widget, DockLayout } from '@phosphor/widgets';
+import { IStateDB } from '@jupyterlab/statedb';
+
+import { buildIcon } from '@jupyterlab/ui-components';
+
+import { each, iter, toArray } from '@lumino/algorithm';
+
+import { PromiseDelegate } from '@lumino/coreutils';
+
+import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
+
+import { Widget, DockLayout } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -45,6 +55,11 @@ namespace CommandIDs {
 
   export const activatePreviousTab: string =
     'application:activate-previous-tab';
+
+  export const activateNextTabBar: string = 'application:activate-next-tab-bar';
+
+  export const activatePreviousTabBar: string =
+    'application:activate-previous-tab-bar';
 
   export const close = 'application:close';
 
@@ -75,14 +90,14 @@ namespace CommandIDs {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [ICommandPalette, IRouter, IWindowResolver],
-  optional: [IConnectionLost],
+  requires: [IRouter, IWindowResolver],
+  optional: [ICommandPalette, IConnectionLost],
   activate: (
     app: JupyterFrontEnd,
-    palette: ICommandPalette,
     router: IRouter,
     resolver: IWindowResolver,
-    connectionLost: IConnectionLost | undefined
+    palette: ICommandPalette | null,
+    connectionLost: IConnectionLost | null
   ) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${main.id} must be activated in JupyterLab.`);
@@ -239,63 +254,87 @@ const router: JupyterFrontEndPlugin<IRouter> = {
 };
 
 /**
- * The tree route handler provider.
+ * The default tree route resolver plugin.
  */
-const tree: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/application-extension:tree',
+const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
+  id: '@jupyterlab/application-extension:tree-resolver',
   autoStart: true,
   requires: [JupyterFrontEnd.IPaths, IRouter, IWindowResolver],
+  provides: JupyterFrontEnd.ITreeResolver,
   activate: (
     app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
     router: IRouter,
     resolver: IWindowResolver
-  ) => {
+  ): JupyterFrontEnd.ITreeResolver => {
     const { commands } = app;
     const treePattern = new RegExp(`^${paths.urls.tree}([^?]+)`);
     const workspacePattern = new RegExp(
       `^${paths.urls.workspaces}/[^?/]+/tree/([^?]+)`
     );
+    const set = new DisposableSet();
+    const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
 
-    commands.addCommand(CommandIDs.tree, {
-      execute: async (args: IRouter.ILocation) => {
-        const treeMatch = args.path.match(treePattern);
-        const workspaceMatch = args.path.match(workspacePattern);
-        const match = treeMatch || workspaceMatch;
-        const path = decodeURI(match[1]);
-        const workspace = PathExt.basename(resolver.name);
-        const query = URLExt.queryStringToObject(args.search);
-        const fileBrowserPath = query['file-browser-path'];
-
-        // Remove the file browser path from the query string.
-        delete query['file-browser-path'];
-
-        // Remove the tree portion of the URL.
-        const url =
-          (workspaceMatch
-            ? URLExt.join(paths.urls.workspaces, workspace)
-            : paths.urls.app) +
-          URLExt.objectToQueryString(query) +
-          args.hash;
-
-        router.navigate(url);
-
-        try {
-          await commands.execute('filebrowser:open-path', { path });
-
-          if (fileBrowserPath) {
-            await commands.execute('filebrowser:open-path', {
-              path: fileBrowserPath
-            });
+    set.add(
+      commands.addCommand(CommandIDs.tree, {
+        execute: async (args: IRouter.ILocation) => {
+          if (set.isDisposed) {
+            return;
           }
-        } catch (error) {
-          console.warn('Tree routing failed.', error);
-        }
-      }
-    });
 
-    router.register({ command: CommandIDs.tree, pattern: treePattern });
-    router.register({ command: CommandIDs.tree, pattern: workspacePattern });
+          const treeMatch = args.path.match(treePattern);
+          const workspaceMatch = args.path.match(workspacePattern);
+          const match = treeMatch || workspaceMatch;
+          const file = match ? decodeURI(match[1]) : '';
+          const workspace = PathExt.basename(resolver.name);
+          const query = URLExt.queryStringToObject(args.search ?? '');
+          const browser = query['file-browser-path'] || '';
+
+          // Remove the file browser path from the query string.
+          delete query['file-browser-path'];
+
+          // Remove the tree portion of the URL.
+          const url =
+            (workspaceMatch
+              ? URLExt.join(paths.urls.workspaces, workspace)
+              : paths.urls.app) +
+            URLExt.objectToQueryString(query) +
+            args.hash;
+
+          // Route to the cleaned URL.
+          router.navigate(url);
+
+          // Clean up artifacts immediately upon routing.
+          set.dispose();
+
+          delegate.resolve({ browser, file });
+        }
+      })
+    );
+    set.add(
+      router.register({ command: CommandIDs.tree, pattern: treePattern })
+    );
+    set.add(
+      router.register({ command: CommandIDs.tree, pattern: workspacePattern })
+    );
+
+    // If a route is handled by the router without the tree command being
+    // invoked, resolve to `null` and clean up artifacts.
+    const listener = () => {
+      if (set.isDisposed) {
+        return;
+      }
+      set.dispose();
+      delegate.resolve(null);
+    };
+    router.routed.connect(listener);
+    set.add(
+      new DisposableDelegate(() => {
+        router.routed.disconnect(listener);
+      })
+    );
+
+    return { paths: delegate.promise };
   }
 };
 
@@ -356,7 +395,7 @@ const busy: JupyterFrontEndPlugin<void> = {
 
         // Firefox doesn't seem to recognize just changing rel, so we also
         // reinsert the link into the DOM.
-        newFavicon.parentNode.replaceChild(newFavicon, newFavicon);
+        newFavicon.parentNode!.replaceChild(newFavicon, newFavicon);
       }
     });
   },
@@ -408,13 +447,13 @@ const sidebar: JupyterFrontEndPlugin<void> = {
       execute: () => {
         // First, try to find the correct panel based on the
         // application context menu click.
-        const contextNode: HTMLElement = app.contextMenuHitTest(
+        const contextNode: HTMLElement | undefined = app.contextMenuHitTest(
           node => !!node.dataset.id
         );
         let id: string;
         let side: 'left' | 'right';
         if (contextNode) {
-          id = contextNode.dataset['id'];
+          id = contextNode.dataset['id']!;
           const leftPanel = document.getElementById('jp-left-stack');
           const node = document.getElementById(id);
           if (leftPanel && node && leftPanel.contains(node)) {
@@ -436,7 +475,7 @@ const sidebar: JupyterFrontEndPlugin<void> = {
     // Add a context menu item to sidebar tabs.
     app.contextMenu.addItem({
       command: CommandIDs.switchSidebar,
-      selector: '.jp-SideBar .p-TabBar-tab',
+      selector: '.jp-SideBar .lm-TabBar-tab',
       rank: 500
     });
   },
@@ -447,12 +486,12 @@ const sidebar: JupyterFrontEndPlugin<void> = {
 /**
  * Add the main application commands.
  */
-function addCommands(app: JupyterLab, palette: ICommandPalette): void {
+function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   const { commands, contextMenu, shell } = app;
   const category = 'Main Area';
 
   // Returns the widget associated with the most recent contextmenu event.
-  const contextMenuWidget = (): Widget => {
+  const contextMenuWidget = (): Widget | null => {
     const test = (node: HTMLElement) => !!node.dataset.id;
     const node = app.contextMenuHitTest(test);
 
@@ -486,7 +525,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       case 'split-area':
         const iterator = iter(area.children);
         let tab: DockLayout.ITabAreaConfig | null = null;
-        let value: DockLayout.AreaConfig | null = null;
+        let value: DockLayout.AreaConfig | undefined;
         do {
           value = iterator.next();
           if (value) {
@@ -505,10 +544,10 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   // Find the tab area for a widget within the main dock area.
   const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
     const { mainArea } = shell.saveLayout();
-    if (mainArea.mode !== 'multiple-document') {
+    if (!mainArea || mainArea.mode !== 'multiple-document') {
       return null;
     }
-    let area = mainArea.dock.main;
+    let area = mainArea.dock?.main;
     if (!area) {
       return null;
     }
@@ -533,7 +572,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       shell.activateNextTab();
     }
   });
-  palette.addItem({ command: CommandIDs.activateNextTab, category });
 
   commands.addCommand(CommandIDs.activatePreviousTab, {
     label: 'Activate Previous Tab',
@@ -541,25 +579,37 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       shell.activatePreviousTab();
     }
   });
-  palette.addItem({ command: CommandIDs.activatePreviousTab, category });
+
+  commands.addCommand(CommandIDs.activateNextTabBar, {
+    label: 'Activate Next Tab Bar',
+    execute: () => {
+      shell.activateNextTabBar();
+    }
+  });
+
+  commands.addCommand(CommandIDs.activatePreviousTabBar, {
+    label: 'Activate Previous Tab Bar',
+    execute: () => {
+      shell.activatePreviousTabBar();
+    }
+  });
 
   // A CSS selector targeting tabs in the main area. This is a very
   // specific selector since we really only want tabs that are
   // in the main area, as opposed to those in sidebars, ipywidgets, etc.
   const tabSelector =
-    '#jp-main-dock-panel .p-DockPanel-tabBar.jp-Activity .p-TabBar-tab';
+    '#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab';
 
   commands.addCommand(CommandIDs.close, {
     label: () => 'Close Tab',
     isEnabled: () =>
-      !!shell.currentWidget && !!shell.currentWidget.title.closable,
+      !!shell.currentWidget && shell.currentWidget.title.closable,
     execute: () => {
       if (shell.currentWidget) {
         shell.currentWidget.close();
       }
     }
   });
-  palette.addItem({ command: CommandIDs.close, category });
   contextMenu.addItem({
     command: CommandIDs.close,
     selector: tabSelector,
@@ -572,7 +622,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       shell.closeAll();
     }
   });
-  palette.addItem({ command: CommandIDs.closeAll, category });
 
   commands.addCommand(CommandIDs.closeOtherTabs, {
     label: () => `Close All Other Tabs`,
@@ -593,7 +642,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       closeWidgets(otherWidgets);
     }
   });
-  palette.addItem({ command: CommandIDs.closeOtherTabs, category });
   contextMenu.addItem({
     command: CommandIDs.closeOtherTabs,
     selector: tabSelector,
@@ -603,7 +651,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   commands.addCommand(CommandIDs.closeRightTabs, {
     label: () => `Close Tabs to Right`,
     isEnabled: () =>
-      contextMenuWidget() && widgetsRightOf(contextMenuWidget()).length > 0,
+      !!contextMenuWidget() && widgetsRightOf(contextMenuWidget()!).length > 0,
     execute: () => {
       const widget = contextMenuWidget();
       if (!widget) {
@@ -612,7 +660,6 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       closeWidgets(widgetsRightOf(widget));
     }
   });
-  palette.addItem({ command: CommandIDs.closeRightTabs, category });
   contextMenu.addItem({
     command: CommandIDs.closeRightTabs,
     selector: tabSelector,
@@ -620,7 +667,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
   });
 
   app.commands.addCommand(CommandIDs.toggleLeftArea, {
-    label: args => 'Show Left Sidebar',
+    label: () => 'Show Left Sidebar',
     execute: () => {
       if (shell.leftCollapsed) {
         shell.expandLeft();
@@ -634,10 +681,9 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     isToggled: () => !shell.leftCollapsed,
     isVisible: () => !shell.isEmpty('left')
   });
-  palette.addItem({ command: CommandIDs.toggleLeftArea, category });
 
   app.commands.addCommand(CommandIDs.toggleRightArea, {
-    label: args => 'Show Right Sidebar',
+    label: () => 'Show Right Sidebar',
     execute: () => {
       if (shell.rightCollapsed) {
         shell.expandRight();
@@ -651,17 +697,15 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
     isToggled: () => !shell.rightCollapsed,
     isVisible: () => !shell.isEmpty('right')
   });
-  palette.addItem({ command: CommandIDs.toggleRightArea, category });
 
   app.commands.addCommand(CommandIDs.togglePresentationMode, {
-    label: args => 'Presentation Mode',
+    label: () => 'Presentation Mode',
     execute: () => {
       shell.presentationMode = !shell.presentationMode;
     },
     isToggled: () => shell.presentationMode,
     isVisible: () => true
   });
-  palette.addItem({ command: CommandIDs.togglePresentationMode, category });
 
   app.commands.addCommand(CommandIDs.setMode, {
     isVisible: args => {
@@ -689,7 +733,21 @@ function addCommands(app: JupyterLab, palette: ICommandPalette): void {
       return app.commands.execute(CommandIDs.setMode, args);
     }
   });
-  palette.addItem({ command: CommandIDs.toggleMode, category });
+
+  if (palette) {
+    palette.addItem({ command: CommandIDs.activateNextTab, category });
+    palette.addItem({ command: CommandIDs.activatePreviousTab, category });
+    palette.addItem({ command: CommandIDs.activateNextTabBar, category });
+    palette.addItem({ command: CommandIDs.activatePreviousTabBar, category });
+    palette.addItem({ command: CommandIDs.close, category });
+    palette.addItem({ command: CommandIDs.closeAll, category });
+    palette.addItem({ command: CommandIDs.closeOtherTabs, category });
+    palette.addItem({ command: CommandIDs.closeRightTabs, category });
+    palette.addItem({ command: CommandIDs.toggleLeftArea, category });
+    palette.addItem({ command: CommandIDs.toggleRightArea, category });
+    palette.addItem({ command: CommandIDs.togglePresentationMode, category });
+    palette.addItem({ command: CommandIDs.toggleMode, category });
+  }
 }
 
 /**
@@ -758,6 +816,24 @@ const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
 };
 
 /**
+ * The default property inspector provider.
+ */
+const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
+  id: '@jupyterlab/application-extension:property-inspector',
+  autoStart: true,
+  requires: [ILabShell],
+  provides: IPropertyInspectorProvider,
+  activate: (app: JupyterFrontEnd, labshell: ILabShell) => {
+    const widget = new SideBarPropertyInspectorProvider(labshell);
+    widget.title.icon = buildIcon;
+    widget.title.caption = 'Property Inspector';
+    widget.id = 'jp-property-inspector';
+    labshell.add(widget, 'left');
+    return widget;
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -771,7 +847,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   shell,
   status,
   info,
-  paths
+  paths,
+  propertyInspector
 ];
 
 export default plugins;

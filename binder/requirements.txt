@@ -1,1 +1,3 @@
-jupyter-server-proxy==1.0beta9
+jupyter-server-proxy
+matplotlib
+vega-datasets

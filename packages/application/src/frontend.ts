@@ -7,13 +7,15 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { IIterator } from '@phosphor/algorithm';
+import { MenuSvg } from '@jupyterlab/ui-components';
 
-import { Application, IPlugin } from '@phosphor/application';
+import { IIterator } from '@lumino/algorithm';
 
-import { Token } from '@phosphor/coreutils';
+import { Application, IPlugin } from '@lumino/application';
 
-import { Widget } from '@phosphor/widgets';
+import { Token } from '@lumino/coreutils';
+
+import { Widget } from '@lumino/widgets';
 
 /**
  * The type for all JupyterFrontEnd application plugins.
@@ -38,6 +40,10 @@ export abstract class JupyterFrontEnd<
    * Construct a new JupyterFrontEnd object.
    */
   constructor(options: JupyterFrontEnd.IOptions<T>) {
+    // render context menu with inline svg icon tweaks
+    options.contextMenuRenderer =
+      options.contextMenuRenderer || MenuSvg.defaultRenderer;
+
     super(options);
 
     // The default restored promise if one does not exist in the options.
@@ -122,7 +128,7 @@ export abstract class JupyterFrontEnd<
     ) {
       return undefined;
     }
-    let node = this._contextMenuEvent.target;
+    let node: Node | null = this._contextMenuEvent.target;
     do {
       if (node instanceof HTMLElement && test(node)) {
         return node;
@@ -241,7 +247,7 @@ export namespace JupyterFrontEnd {
      * Different shell implementations have latitude to decide what "current"
      * or "focused" mean, depending on their user interface characteristics.
      */
-    readonly currentWidget: Widget;
+    readonly currentWidget: Widget | null;
 
     /**
      * Returns an iterator for the widgets inside the application shell.
@@ -304,6 +310,39 @@ export namespace JupyterFrontEnd {
       readonly serverRoot: string;
       readonly workspaces: string;
     };
+  }
+
+  /**
+   * The application tree resolver token.
+   *
+   * #### Notes
+   * Not all Jupyter front-end applications will have a tree resolver
+   * implemented on the client-side. This token should not be required as a
+   * dependency if it is possible to make it an optional dependency.
+   */
+  export const ITreeResolver = new Token<ITreeResolver>(
+    '@jupyterlab/application:ITreeResolver'
+  );
+
+  /**
+   * An interface for a front-end tree route resolver.
+   */
+  export interface ITreeResolver {
+    /**
+     * A promise that resolves to the routed tree paths or null.
+     */
+    readonly paths: Promise<ITreeResolver.Paths>;
+  }
+
+  /**
+   * A namespace for tree resolver types.
+   */
+  export namespace ITreeResolver {
+    /**
+     * The browser and file paths if the tree resolver encountered and handled
+     * a tree URL or `null` if not. Empty string paths should be ignored.
+     */
+    export type Paths = { browser: string; file: string } | null;
   }
 }
 

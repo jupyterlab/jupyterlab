@@ -13,13 +13,16 @@
       "path": "../apputils"
     },
     {
-      "path": "../coreutils"
-    },
-    {
       "path": "../extensionmanager"
     },
     {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

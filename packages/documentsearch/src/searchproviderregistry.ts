@@ -4,9 +4,9 @@
 import { ISearchProvider, ISearchProviderConstructor } from './interfaces';
 import { ISearchProviderRegistry } from './tokens';
 
-import { IDisposable, DisposableDelegate } from '@phosphor/disposable';
-import { ISignal, Signal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { IDisposable, DisposableDelegate } from '@lumino/disposable';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 export class SearchProviderRegistry implements ISearchProviderRegistry {
   /**

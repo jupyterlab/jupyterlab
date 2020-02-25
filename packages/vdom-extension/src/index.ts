@@ -15,12 +15,9 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { RenderedVDOM, IVDOMTracker } from '@jupyterlab/vdom';
+import { reactIcon } from '@jupyterlab/ui-components';
 
-/**
- * The name for a VDOM icon.
- */
-const ICON_NAME = 'react';
+import { RenderedVDOM, IVDOMTracker } from '@jupyterlab/vdom';
 
 /**
  * The MIME type for VDOM.
@@ -82,7 +79,7 @@ const plugin: JupyterFrontEndPlugin<IVDOMTracker> = {
       name: 'vdom',
       mimeTypes: [MIME_TYPE],
       extensions: ['.vdom', '.vdom.json'],
-      iconClass: ICON_NAME
+      icon: reactIcon
     });
 
     const factory = new MimeDocumentFactory({

@@ -8,9 +8,9 @@ import {
   each,
   toArray,
   ArrayIterator
-} from '@phosphor/algorithm';
+} from '@lumino/algorithm';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { ICellModel } from '@jupyterlab/cells';
 
@@ -105,7 +105,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   iter(): IIterator<ICellModel> {
     let arr: ICellModel[] = [];
     for (let id of toArray(this._cellOrder)) {
-      arr.push(this._cellMap.get(id));
+      arr.push(this._cellMap.get(id)!);
     }
     return new ArrayIterator<ICellModel>(arr);
   }
@@ -144,7 +144,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * An `index` which is non-integral or out of range.
    */
   get(index: number): ICellModel {
-    return this._cellMap.get(this._cellOrder.get(index)) as ICellModel;
+    return this._cellMap.get(this._cellOrder.get(index))!;
   }
 
   /**
@@ -274,7 +274,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   remove(index: number): ICellModel {
     let id = this._cellOrder.get(index);
     this._cellOrder.remove(index);
-    let cell = this._cellMap.get(id);
+    let cell = this._cellMap.get(id)!;
     return cell;
   }
 
@@ -471,7 +471,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     if (change.type === 'add' || change.type === 'set') {
       each(change.newValues, id => {
         if (!this._cellMap.has(id)) {
-          let cellDB = this._factory.modelDB;
+          let cellDB = this._factory.modelDB!;
           let cellType = cellDB.createValue(id + '.type');
           let cell: ICellModel;
           switch (cellType.get()) {
@@ -492,10 +492,10 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     let newValues: ICellModel[] = [];
     let oldValues: ICellModel[] = [];
     each(change.newValues, id => {
-      newValues.push(this._cellMap.get(id));
+      newValues.push(this._cellMap.get(id)!);
     });
     each(change.oldValues, id => {
-      oldValues.push(this._cellMap.get(id));
+      oldValues.push(this._cellMap.get(id)!);
     });
     this._changed.emit({
       type: change.type,
@@ -507,10 +507,10 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   }
 
   private _isDisposed: boolean = false;
-  private _cellOrder: IObservableUndoableList<string> = null;
-  private _cellMap: IObservableMap<ICellModel> = null;
+  private _cellOrder: IObservableUndoableList<string>;
+  private _cellMap: IObservableMap<ICellModel>;
   private _changed = new Signal<this, IObservableList.IChangedArgs<ICellModel>>(
     this
   );
-  private _factory: NotebookModel.IContentFactory = null;
+  private _factory: NotebookModel.IContentFactory;
 }

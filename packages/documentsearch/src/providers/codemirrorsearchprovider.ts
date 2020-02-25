@@ -39,8 +39,8 @@ import { FileEditor } from '@jupyterlab/fileeditor';
 
 import * as CodeMirror from 'codemirror';
 
-import { ISignal, Signal } from '@phosphor/signaling';
-import { Widget } from '@phosphor/widgets';
+import { ISignal, Signal } from '@lumino/signaling';
+import { Widget } from '@lumino/widgets';
 
 // The type for which canSearchFor returns true
 export type CMMainAreaWidget = MainAreaWidget<FileEditor> & {
@@ -69,12 +69,14 @@ export class CodeMirrorSearchProvider
    *
    * @param query A RegExp to be use to perform the search
    * @param searchTarget The widget to be searched
+   * @param [filters={}] Filter parameters to pass to provider
    *
    * @returns A promise that resolves with a list of all matches
    */
   async startQuery(
     query: RegExp,
-    searchTarget: Widget
+    searchTarget: Widget,
+    filters = {}
   ): Promise<ISearchMatch[]> {
     if (!CodeMirrorSearchProvider.canSearchOn(searchTarget)) {
       throw new Error('Cannot find Codemirror instance to search');
@@ -83,8 +85,6 @@ export class CodeMirrorSearchProvider
     // canSearchOn is a type guard that guarantees the type of .editor
     this._cm = searchTarget.content.editor;
     return this._startQuery(query);
-
-    throw new Error('Cannot find Codemirror instance to search');
   }
 
   /**
@@ -123,9 +123,9 @@ export class CodeMirrorSearchProvider
     }
     if (!this.isSubProvider) {
       const cursorMatch = this._findNext(false);
-      const match = this._matchState[cursorMatch.from.line][
-        cursorMatch.from.ch
-      ];
+      const match =
+        cursorMatch &&
+        this._matchState[cursorMatch.from.line][cursorMatch.from.ch];
       this._currentMatch = match;
     }
     return matches;
@@ -236,7 +236,7 @@ export class CodeMirrorSearchProvider
       this._cm.operation(() => {
         const cursor = this._cm.getSearchCursor(
           this._query,
-          null,
+          undefined,
           !this._query.ignoreCase
         );
         while (cursor.findNext()) {
@@ -282,7 +282,7 @@ export class CodeMirrorSearchProvider
   /**
    * The current index of the selected match.
    */
-  get currentMatchIndex(): number {
+  get currentMatchIndex(): number | null {
     if (!this._currentMatch) {
       return null;
     }
@@ -297,9 +297,12 @@ export class CodeMirrorSearchProvider
   readonly isReadOnly = false;
 
   clearSelection(): void {
-    return null;
+    return undefined;
   }
 
+  get editor(): CodeMirrorEditor {
+    return this._cm;
+  }
   /**
    * Set whether or not the CodemirrorSearchProvider will wrap to the beginning
    * or end of the document on invocations of highlightNext or highlightPrevious, respectively
@@ -309,7 +312,7 @@ export class CodeMirrorSearchProvider
   private _onDocChanged(_: any, changeObj: CodeMirror.EditorChange) {
     // If we get newlines added/removed, the line numbers across the
     // match state are all shifted, so here we need to recalculate it
-    if (changeObj.text.length > 1 || changeObj.removed.length > 1) {
+    if (changeObj.text.length > 1 || (changeObj.removed?.length ?? 0) > 1) {
       this._setInitialMatches(this._query);
       this._changed.emit(undefined);
     }
@@ -321,7 +324,7 @@ export class CodeMirrorSearchProvider
       this._cm.removeOverlay(this._overlay);
       this._overlay = this._getSearchOverlay();
       this._cm.addOverlay(this._overlay);
-      this._changed.emit(null);
+      this._changed.emit(undefined);
     });
   }
 
@@ -414,7 +417,7 @@ export class CodeMirrorSearchProvider
 
           // if the last thing on the line was a match, make sure we still
           // emit the changed signal so the display can pick up the updates
-          if (stream.eol) {
+          if (stream.eol()) {
             this._changed.emit(undefined);
           }
           return 'searching';
@@ -430,7 +433,7 @@ export class CodeMirrorSearchProvider
     };
   }
 
-  private _findNext(reverse: boolean): Private.ICodeMirrorMatch {
+  private _findNext(reverse: boolean): Private.ICodeMirrorMatch | null {
     return this._cm.operation(() => {
       const caseSensitive = this._query.ignoreCase;
 
@@ -552,7 +555,7 @@ export class CodeMirrorSearchProvider
 
   private _query: RegExp;
   private _cm: CodeMirrorEditor;
-  private _currentMatch: ISearchMatch;
+  private _currentMatch: ISearchMatch | null;
   private _matchState: MatchMap = {};
   private _changed = new Signal<this, void>(this);
   private _overlay: any;

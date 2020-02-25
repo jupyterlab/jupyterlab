@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { DisposableDelegate } from '@phosphor/disposable';
+import { DisposableDelegate } from '@lumino/disposable';
 
-import { Kernel } from './kernel';
+import * as Kernel from './kernel';
 
-import { KernelMessage } from './messages';
+import * as KernelMessage from './messages';
 
 declare var setImmediate: any;
 
@@ -31,7 +31,7 @@ export abstract class KernelFutureHandler<
     msg: REQUEST,
     expectReply: boolean,
     disposeOnDone: boolean,
-    kernel: Kernel.IKernel
+    kernel: Kernel.IKernelConnection
   ) {
     super(cb);
     this._msg = msg;
@@ -165,17 +165,8 @@ export abstract class KernelFutureHandler<
     this._stdin = Private.noOp;
     this._iopub = Private.noOp;
     this._reply = Private.noOp;
-    this._hooks = null;
+    this._hooks = null!;
     if (!this._testFlag(Private.KernelFutureFlag.IsDone)) {
-      // Reject the `done` promise, but catch its error here in case no one else
-      // is waiting for the promise to resolve. This prevents the error from
-      // being displayed in the console, but does not prevent it from being
-      // caught by a client who is waiting for it.
-      this._done.reject(new Error('Canceled'));
-      this._done.promise.catch(() => {
-        /* no-op */
-      });
-
       // TODO: Uncomment the following logging code, and check for any tests that trigger it.
       // let status = [];
       // if (!this._testFlag(Private.KernelFutureFlag.GotIdle)) {
@@ -184,7 +175,25 @@ export abstract class KernelFutureHandler<
       // if (!this._testFlag(Private.KernelFutureFlag.GotReply)) {
       //   status.push('reply');
       // }
-      // console.warn(`*************** DISPOSED BEFORE DONE: K${this._kernel.id.slice(0, 6)} M${this._msg.header.msg_id.slice(0, 6)} missing ${status.join(' ')}`);
+      // console.warn(
+      //   `*************** DISPOSED BEFORE DONE: K${this._kernel.id.slice(
+      //     0,
+      //     6
+      //   )} M${this._msg.header.msg_id.slice(0, 6)} missing ${status.join(' ')}`
+      // );
+
+      // Reject the `done` promise, but catch its error here in case no one else
+      // is waiting for the promise to resolve. This prevents the error from
+      // being displayed in the console, but does not prevent it from being
+      // caught by a client who is waiting for it.
+      this._done.promise.catch(() => {
+        /* no-op */
+      });
+      this._done.reject(
+        new Error(
+          `Canceled future for ${this.msg.header.msg_type} message before replies were done`
+        )
+      );
     }
     super.dispose();
   }
@@ -295,7 +304,7 @@ export abstract class KernelFutureHandler<
   private _replyMsg: REPLY;
   private _hooks = new Private.HookList<KernelMessage.IIOPubMessage>();
   private _disposeOnDone = true;
-  private _kernel: Kernel.IKernel;
+  private _kernel: Kernel.IKernelConnection;
 }
 
 export class KernelControlFutureHandler<
@@ -451,7 +460,8 @@ namespace Private {
 
     private _hooks: (
       | ((msg: T) => boolean | PromiseLike<boolean>)
-      | null)[] = [];
+      | null
+    )[] = [];
     private _compactScheduled: boolean;
     private _processing: Promise<void>;
   }

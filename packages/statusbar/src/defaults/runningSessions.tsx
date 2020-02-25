@@ -7,13 +7,13 @@ import { VDomRenderer, VDomModel } from '@jupyterlab/apputils';
 
 import {
   ServiceManager,
-  Kernel,
-  TerminalSession,
+  Terminal,
   TerminalManager,
-  SessionManager
+  SessionManager,
+  Session
 } from '@jupyterlab/services';
 
-import { DefaultIconReact } from '@jupyterlab/ui-components';
+import { kernelIcon, terminalIcon } from '@jupyterlab/ui-components';
 
 import { GroupItem, interactiveItem, TextItem } from '..';
 
@@ -36,16 +36,11 @@ function RunningSessionsComponent(
     <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
-        <DefaultIconReact
-          name={'terminal'}
-          left={'1px'}
-          top={'3px'}
-          kind={'statusBar'}
-        />
+        <terminalIcon.react left={'1px'} top={'3px'} stylesheet={'statusBar'} />
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
-        <TextItem source={props.kernels} />
-        <DefaultIconReact name={'kernel'} top={'2px'} kind={'statusBar'} />
+        <TextItem source={props.sessions} />
+        <kernelIcon.react top={'2px'} stylesheet={'statusBar'} />
       </GroupItem>
     </GroupItem>
   );
@@ -66,9 +61,9 @@ namespace RunningSessionsComponent {
     handleClick: () => void;
 
     /**
-     * The number of running kernels.
+     * The number of running kernel sessions.
      */
-    kernels: number;
+    sessions: number;
 
     /**
      * The number of active terminal sessions.
@@ -85,12 +80,12 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
    * Create a new RunningSessions widget.
    */
   constructor(opts: RunningSessions.IOptions) {
-    super();
+    super(new RunningSessions.Model());
     this._serviceManager = opts.serviceManager;
     this._handleClick = opts.onClick;
 
     this._serviceManager.sessions.runningChanged.connect(
-      this._onKernelsRunningChanged,
+      this._onSessionsRunningChanged,
       this
     );
     this._serviceManager.terminals.runningChanged.connect(
@@ -98,7 +93,6 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
       this
     );
 
-    this.model = new RunningSessions.Model();
     this.addClass(interactiveItem);
   }
 
@@ -110,11 +104,11 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
       return null;
     }
     this.title.caption = `${this.model.terminals} Terminals, ${
-      this.model!.kernels
-    } Kernels`;
+      this.model!.sessions
+    } Kernel sessions`;
     return (
       <RunningSessionsComponent
-        kernels={this.model.kernels}
+        sessions={this.model.sessions}
         terminals={this.model.terminals}
         handleClick={this._handleClick}
       />
@@ -128,7 +122,7 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
     super.dispose();
 
     this._serviceManager.sessions.runningChanged.disconnect(
-      this._onKernelsRunningChanged,
+      this._onSessionsRunningChanged,
       this
     );
     this._serviceManager.terminals.runningChanged.disconnect(
@@ -138,21 +132,21 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
   }
 
   /**
-   * Set the number of model kernels when the list changes.
+   * Set the number of kernel sessions when the list changes.
    */
-  private _onKernelsRunningChanged(
+  private _onSessionsRunningChanged(
     manager: SessionManager,
-    kernels: Kernel.IModel[]
+    sessions: Session.IModel[]
   ): void {
-    this.model!.kernels = kernels.length;
+    this.model!.sessions = sessions.length;
   }
 
   /**
-   * Set the number of model terminal sessions when the list changes.
+   * Set the number of terminal sessions when the list changes.
    */
   private _onTerminalsRunningChanged(
     manager: TerminalManager,
-    terminals: TerminalSession.IModel[]
+    terminals: Terminal.IModel[]
   ): void {
     this.model!.terminals = terminals.length;
   }
@@ -170,16 +164,16 @@ export namespace RunningSessions {
    */
   export class Model extends VDomModel {
     /**
-     * The number of active kernels.
+     * The number of active kernel sessions.
      */
-    get kernels(): number {
-      return this._kernels;
+    get sessions(): number {
+      return this._sessions;
     }
-    set kernels(kernels: number) {
-      const oldKernels = this._kernels;
-      this._kernels = kernels;
+    set sessions(sessions: number) {
+      const oldSessions = this._sessions;
+      this._sessions = sessions;
 
-      if (oldKernels !== this._kernels) {
+      if (oldSessions !== this._sessions) {
         this.stateChanged.emit(void 0);
       }
     }
@@ -200,7 +194,7 @@ export namespace RunningSessions {
     }
 
     private _terminals: number = 0;
-    private _kernels: number = 0;
+    private _sessions: number = 0;
   }
 
   /**

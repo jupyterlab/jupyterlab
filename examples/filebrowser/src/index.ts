@@ -11,11 +11,11 @@ import '@jupyterlab/filebrowser/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
 
-import { each } from '@phosphor/algorithm';
+import { each } from '@lumino/algorithm';
 
-import { CommandRegistry } from '@phosphor/commands';
+import { CommandRegistry } from '@lumino/commands';
 
-import { DockPanel, Menu, SplitPanel, Widget } from '@phosphor/widgets';
+import { DockPanel, Menu, SplitPanel, Widget } from '@lumino/widgets';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -34,7 +34,7 @@ import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
 
 import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
-import { defaultIconRegistry } from '@jupyterlab/ui-components';
+import { addIcon } from '@jupyterlab/ui-components';
 
 function main(): void {
   let manager = new ServiceManager();
@@ -88,8 +88,7 @@ function createApp(manager: ServiceManager.IManager): void {
   let commands = new CommandRegistry();
 
   let fbModel = new FileBrowserModel({
-    manager: docManager,
-    iconRegistry: defaultIconRegistry
+    manager: docManager
   });
   let fbWidget = new FileBrowser({
     id: 'filebrowser',
@@ -98,7 +97,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   // Add a creator toolbar item.
   let creator = new ToolbarButton({
-    iconClassName: 'jp-AddIcon jp-Icon jp-Icon-16',
+    icon: addIcon,
     onClick: () => {
       void docManager
         .newUntitled({
@@ -153,7 +152,7 @@ function createApp(manager: ServiceManager.IManager): void {
   commands.addCommand('file-save', {
     execute: () => {
       let context = docManager.contextForWidget(activeWidget);
-      return context.save();
+      return context?.save();
     }
   });
   commands.addCommand('file-cut', {

@@ -1,9 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Kernel } from './kernel';
+import * as KernelMessage from './messages';
 
-import { KernelMessage } from './messages';
+import { IModel } from './restapi';
+
+import { validateProperty } from '../validate';
 
 /**
  * Required fields for `IKernelHeader`.
@@ -24,7 +26,12 @@ const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
     metadata: 'object'
   },
   error: { ename: 'string', evalue: 'string', traceback: 'object' },
-  status: { execution_state: 'string' },
+  status: {
+    execution_state: [
+      'string',
+      ['starting', 'idle', 'busy', 'restarting', 'dead']
+    ]
+  },
   clear_output: { wait: 'boolean' },
   comm_open: { comm_id: 'string', target_name: 'string', data: 'object' },
   comm_msg: { comm_id: 'string', data: 'object' },
@@ -33,36 +40,11 @@ const IOPUB_CONTENT_FIELDS: { [key: string]: any } = {
 };
 
 /**
- * Validate a property as being on an object, and optionally
- * of a given type.
- */
-function validateProperty(object: any, name: string, typeName?: string): void {
-  if (!object.hasOwnProperty(name)) {
-    throw Error(`Missing property '${name}'`);
-  }
-  if (typeName !== void 0) {
-    let valid = true;
-    let value = object[name];
-    switch (typeName) {
-      case 'array':
-        valid = Array.isArray(value);
-        break;
-      case 'object':
-        valid = typeof value !== 'undefined';
-        break;
-      default:
-        valid = typeof value === typeName;
-    }
-    if (!valid) {
-      throw new Error(`Property '${name}' is not of type '${typeName}`);
-    }
-  }
-}
-
-/**
  * Validate the header of a kernel message.
  */
-function validateHeader(header: KernelMessage.IHeader): void {
+function validateHeader(
+  header: KernelMessage.IHeader
+): asserts header is KernelMessage.IHeader {
   for (let i = 0; i < HEADER_FIELDS.length; i++) {
     validateProperty(header, HEADER_FIELDS[i], 'string');
   }
@@ -71,7 +53,9 @@ function validateHeader(header: KernelMessage.IHeader): void {
 /**
  * Validate a kernel message object.
  */
-export function validateMessage(msg: KernelMessage.IMessage): void {
+export function validateMessage(
+  msg: KernelMessage.IMessage
+): asserts msg is KernelMessage.IMessage {
   validateProperty(msg, 'metadata', 'object');
   validateProperty(msg, 'content', 'object');
   validateProperty(msg, 'channel', 'string');
@@ -84,17 +68,23 @@ export function validateMessage(msg: KernelMessage.IMessage): void {
 /**
  * Validate content an kernel message on the iopub channel.
  */
-function validateIOPubContent(msg: KernelMessage.IIOPubMessage): void {
+function validateIOPubContent(
+  msg: KernelMessage.IIOPubMessage
+): asserts msg is KernelMessage.IIOPubMessage {
   if (msg.channel === 'iopub') {
     let fields = IOPUB_CONTENT_FIELDS[msg.header.msg_type];
     // Check for unknown message type.
-    if (fields === void 0) {
+    if (fields === undefined) {
       return;
     }
     let names = Object.keys(fields);
     let content = msg.content;
     for (let i = 0; i < names.length; i++) {
-      validateProperty(content, names[i], fields[names[i]]);
+      let args = fields[names[i]];
+      if (!Array.isArray(args)) {
+        args = [args];
+      }
+      validateProperty(content, names[i], ...args);
     }
   }
 }
@@ -102,81 +92,17 @@ function validateIOPubContent(msg: KernelMessage.IIOPubMessage): void {
 /**
  * Validate a `Kernel.IModel` object.
  */
-export function validateModel(model: Kernel.IModel): void {
+export function validateModel(model: IModel): asserts model is IModel {
   validateProperty(model, 'name', 'string');
   validateProperty(model, 'id', 'string');
 }
 
 /**
- * Validate a server kernelspec model to a client side model.
+ * Validate an array of `IModel` objects.
  */
-export function validateSpecModel(data: any): Kernel.ISpecModel {
-  let spec = data.spec;
-  if (!spec) {
-    throw new Error('Invalid kernel spec');
+export function validateModels(models: IModel[]): asserts models is IModel[] {
+  if (!Array.isArray(models)) {
+    throw new Error('Invalid kernel list');
   }
-  validateProperty(data, 'name', 'string');
-  validateProperty(data, 'resources', 'object');
-  validateProperty(spec, 'language', 'string');
-  validateProperty(spec, 'display_name', 'string');
-  validateProperty(spec, 'argv', 'array');
-
-  let metadata: any = null;
-  if (spec.hasOwnProperty('metadata')) {
-    validateProperty(spec, 'metadata', 'object');
-    metadata = spec.metadata;
-  }
-
-  let env: any = null;
-  if (spec.hasOwnProperty('env')) {
-    validateProperty(spec, 'env', 'object');
-    env = spec.env;
-  }
-  return {
-    name: data.name,
-    resources: data.resources,
-    language: spec.language,
-    display_name: spec.display_name,
-    argv: spec.argv,
-    metadata,
-    env
-  };
-}
-
-/**
- * Validate a `Kernel.ISpecModels` object.
- */
-export function validateSpecModels(data: any): Kernel.ISpecModels {
-  if (!data.hasOwnProperty('kernelspecs')) {
-    throw new Error('No kernelspecs found');
-  }
-  let keys = Object.keys(data.kernelspecs);
-  let kernelspecs: { [key: string]: Kernel.ISpecModel } = Object.create(null);
-  let defaultSpec = data.default;
-
-  for (let i = 0; i < keys.length; i++) {
-    let ks = data.kernelspecs[keys[i]];
-    try {
-      kernelspecs[keys[i]] = validateSpecModel(ks);
-    } catch (err) {
-      // Remove the errant kernel spec.
-      console.warn(`Removing errant kernel spec: ${keys[i]}`);
-    }
-  }
-  keys = Object.keys(kernelspecs);
-  if (!keys.length) {
-    throw new Error('No valid kernelspecs found');
-  }
-  if (
-    !defaultSpec ||
-    typeof defaultSpec !== 'string' ||
-    !(defaultSpec in kernelspecs)
-  ) {
-    defaultSpec = keys[0];
-    console.warn(`Default kernel not found, using '${keys[0]}'`);
-  }
-  return {
-    default: defaultSpec,
-    kernelspecs
-  };
+  models.forEach(d => validateModel(d));
 }

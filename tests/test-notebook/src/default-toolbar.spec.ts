@@ -5,9 +5,9 @@ import { expect } from 'chai';
 
 import { simulate } from 'simulate-event';
 
-import { PromiseDelegate } from '@phosphor/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { Context } from '@jupyterlab/docregistry';
 
@@ -62,7 +62,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createSaveButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='save']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='save']")).to.exist;
         });
       });
 
@@ -81,7 +81,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createInsertButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='add']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='add']")).to.exist;
           button.dispose();
         });
       });
@@ -104,7 +104,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createCutButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='cut']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='cut']")).to.exist;
           button.dispose();
         });
       });
@@ -127,7 +127,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createCopyButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='copy']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='copy']")).to.exist;
           button.dispose();
         });
       });
@@ -149,7 +149,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createPasteButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='paste']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='paste']")).to.exist;
           button.dispose();
         });
       });
@@ -191,8 +191,8 @@ describe('@jupyterlab/notebook', () => {
             'select'
           )[0] as HTMLSelectElement;
           expect(node.value).to.equal('code');
-          const cell = panel.model.contentFactory.createCodeCell({});
-          panel.model.cells.insert(1, cell);
+          const cell = panel.model!.contentFactory.createCodeCell({});
+          panel.model!.cells.insert(1, cell);
           panel.content.select(panel.content.widgets[1]);
           await framePromise();
           expect(node.value).to.equal('code');
@@ -231,14 +231,14 @@ describe('@jupyterlab/notebook', () => {
 
       beforeEach(async function() {
         // tslint:disable-next-line:no-invalid-this
-        this.timeout(60000);
+        this.timeout(120000);
         context = await initNotebookContext({ startKernel: true });
         panel = NBTestUtils.createNotebookPanel(context);
         context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
       });
 
       afterEach(async () => {
-        await context.session.shutdown();
+        await context.sessionContext.shutdown();
         panel.dispose();
         context.dispose();
       });
@@ -258,7 +258,7 @@ describe('@jupyterlab/notebook', () => {
 
           Widget.attach(button, document.body);
           const p = new PromiseDelegate();
-          context.session.statusChanged.connect((sender, status) => {
+          context.sessionContext.statusChanged.connect((sender, status) => {
             // Find the right status idle message
             if (status === 'idle' && codeCell.model.outputs.length > 0) {
               expect(mdCell.rendered).to.equal(true);
@@ -276,7 +276,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createRunButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon='run']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='run']")).to.exist;
         });
       });
     });

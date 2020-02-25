@@ -57,7 +57,7 @@
 }
 
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
-  padding: 0px 4px;
+  padding: 0px 2px;
 }
 
 .jp-extensionmanager-view header .jp-extensionmanager-headerText {
@@ -118,6 +118,21 @@
   display: inline-block;
 }
 
+.jp-extensionmanager-view .pagination li a {
+  padding: 0 5px;
+  margin: 0 5px;
+}
+
+.jp-extensionmanager-view .pagination li.active a {
+  background: var(--jp-brand-color1);
+  color: #fff;
+}
+
+.jp-extensionmanager-view .pagination li a:hover {
+  background-color: var(--jp-layout-color2);
+  color: unset;
+}
+
 .jp-extensionmanager-view .pagination .break a {
   cursor: default;
 }
@@ -141,13 +156,7 @@
 }
 
 .jp-extensionmanager-entry-jupyter-org {
-  background-image: var(--jp-image-jupyter);
-  background-size: 1em;
-  background-repeat: no-repeat;
-  width: 1em;
   display: none;
-  position: relative;
-  top: 1px;
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-mod-whitelisted
@@ -310,12 +319,4 @@ input[type='checkbox'] {
   font-size: var(--jp-ui-font-size1);
   font-weight: 600;
   color: var(--jp-ui-font-color0);
-}
-
-.jp-extensionmanager-collapseIcon {
-  background-image: var(--jp-image-caretright);
-}
-
-.jp-extensionmanager-expandIcon {
-  background-image: var(--jp-image-caretdown);
 }

@@ -3,15 +3,19 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDataConnector, Text, Debouncer } from '@jupyterlab/coreutils';
+import { Text } from '@jupyterlab/coreutils';
+
+import { IDataConnector } from '@jupyterlab/statedb';
 
 import { MimeModel, IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 
-import { IDisposable } from '@phosphor/disposable';
+import { IDisposable } from '@lumino/disposable';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { Debouncer } from '@lumino/polling';
+
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { IInspector } from './tokens';
 
@@ -139,7 +143,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
       .fetch({ offset, text })
       .then(reply => {
         // If handler has been disposed or a newer request is pending, bail.
-        if (this.isDisposed || pending !== this._pending) {
+        if (!reply || this.isDisposed || pending !== this._pending) {
           this._inspected.emit(update);
           return;
         }

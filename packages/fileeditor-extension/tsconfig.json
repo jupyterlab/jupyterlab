@@ -37,7 +37,13 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../settingregistry"
+    },
+    {
       "path": "../statusbar"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

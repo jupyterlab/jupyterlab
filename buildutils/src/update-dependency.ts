@@ -12,7 +12,56 @@ import commander from 'commander';
 import semver from 'semver';
 
 let versionCache = new Map();
-const tags = /^([~^]?)([\w.]*)$/;
+
+/**
+ * Matches a simple semver range, where the version number could be an npm tag.
+ */
+const SEMVER_RANGE = /^(~|\^|=|<|>|<=|>=)?([\w\-.]*)$/;
+
+/**
+ * Get the specifier we should use
+ *
+ * @param currentSpecifier - The current package version.
+ * @param suggestedSpecifier - The package version we would like to use.
+ *
+ * #### Notes
+ * If the suggested specifier is not a valid range, we assume it is of the
+ * form ${RANGE}${TAG}, where TAG is an npm tag (such as 'latest') and RANGE
+ * is either a semver range indicator (one of `~, ^, >, <, =, >=, <=`), or is
+ * not given (in which case the current specifier range prefix is used).
+ */
+async function getSpecifier(
+  currentSpecifier: string,
+  suggestedSpecifier: string
+) {
+  if (semver.validRange(suggestedSpecifier)) {
+    return suggestedSpecifier;
+  }
+
+  // The suggested specifier is not a valid range, so we assume it
+  // references a tag
+  let [, suggestedSigil, suggestedTag] =
+    suggestedSpecifier.match(SEMVER_RANGE) ?? [];
+
+  if (!suggestedTag) {
+    throw Error(`Invalid version specifier: ${suggestedSpecifier}`);
+  }
+
+  // A tag with no sigil adopts the sigil from the current specification
+  if (!suggestedSigil) {
+    let match = currentSpecifier.match(SEMVER_RANGE);
+    if (match === null) {
+      throw Error(
+        `Current version range is not recognized: ${currentSpecifier}`
+      );
+    }
+    let [, currentSigil] = match;
+    if (currentSigil) {
+      suggestedSigil = currentSigil;
+    }
+  }
+  return `${suggestedSigil}${suggestedTag}`;
+}
 
 async function getVersion(pkg: string, specifier: string) {
   let key = JSON.stringify([pkg, specifier]);
@@ -21,7 +70,7 @@ async function getVersion(pkg: string, specifier: string) {
   }
   if (semver.validRange(specifier) === null) {
     // We have a tag, with possibly a range specifier, such as ^latest
-    let match = specifier.match(tags);
+    let match = specifier.match(SEMVER_RANGE);
     if (match === null) {
       throw Error(`Invalid version specifier: ${specifier}`);
     }
@@ -44,12 +93,12 @@ async function getVersion(pkg: string, specifier: string) {
  */
 function subset(range1: string, range2: string): boolean {
   try {
-    const [, r1, version1] = range1.match(tags);
-    const [, r2] = range2.match(tags);
+    const [, r1, version1] = range1.match(SEMVER_RANGE) ?? [];
+    const [, r2] = range2.match(SEMVER_RANGE) ?? [];
     return (
-      ['', '~', '^'].indexOf(r1) >= 0 &&
+      ['', '>=', '=', '~', '^'].includes(r1) &&
       r1 === r2 &&
-      semver.valid(version1) &&
+      !!semver.valid(version1) &&
       semver.satisfies(version1, range2)
     );
   } catch (e) {
@@ -60,13 +109,15 @@ function subset(range1: string, range2: string): boolean {
 async function handleDependency(
   dependencies: { [key: string]: string },
   dep: string,
-  specifier: string,
+  suggestedSpecifier: string,
   minimal: boolean
 ): Promise<{ updated: boolean; log: string[] }> {
   let log = [];
   let updated = false;
-  let newRange = await getVersion(dep, specifier);
   let oldRange = dependencies[dep];
+  let specifier = await getSpecifier(oldRange, suggestedSpecifier);
+  let newRange = await getVersion(dep, specifier);
+
   if (minimal && subset(newRange, oldRange)) {
     log.push(`SKIPPING ${dep} ${oldRange} -> ${newRange}`);
   } else {
@@ -189,6 +240,12 @@ Examples
   Only update if the update is substantial:
 
       update-dependency --minimal --regex '.*' ^latest
+
+  Update all packages, that does not start with '@jupyterlab',
+  to the latest version and use the same version specifier currently
+  being used
+
+      update:dependency --regex '^(?!@jupyterlab).*' latest --dry-run
 
   Print the log of the above without actually making any changes.
 

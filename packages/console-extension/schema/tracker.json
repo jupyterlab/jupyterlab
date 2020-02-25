@@ -1,7 +1,7 @@
 {
   "title": "Code Console",
   "description": "Code Console settings.",
-  "jupyter.lab.setting-icon-class": "jp-CodeConsoleIcon",
+  "jupyter.lab.setting-icon": "ui-components:console",
   "jupyter.lab.setting-icon-label": "Code Console Settings",
   "jupyter.lab.shortcuts": [
     {

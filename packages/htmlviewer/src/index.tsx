@@ -21,9 +21,11 @@ import {
   IDocumentWidget
 } from '@jupyterlab/docregistry';
 
-import { Token } from '@phosphor/coreutils';
+import { refreshIcon } from '@jupyterlab/ui-components';
 
-import { ISignal, Signal } from '@phosphor/signaling';
+import { Token } from '@lumino/coreutils';
+
+import { ISignal, Signal } from '@lumino/signaling';
 
 import * as React from 'react';
 
@@ -87,9 +89,12 @@ export class HTMLViewer extends DocumentWidget<IFrame>
     this.toolbar.addItem(
       'refresh',
       new ToolbarButton({
-        iconClassName: 'jp-RefreshIcon',
-        onClick: () => {
-          this.content.url = this.content.url;
+        icon: refreshIcon,
+        onClick: async () => {
+          if (!this.context.model.dirty) {
+            await this.context.revert();
+            this.update();
+          }
         },
         tooltip: 'Rerender HTML Document'
       })
@@ -183,8 +188,7 @@ export class HTMLViewer extends DocumentWidget<IFrame>
    */
   private async _setBase(data: string): Promise<string> {
     const doc = this._parser.parseFromString(data, 'text/html');
-    let base: HTMLBaseElement;
-    base = doc.querySelector('base');
+    let base = doc.querySelector('base');
     if (!base) {
       base = doc.createElement('base');
       doc.head.insertBefore(base, doc.head.firstChild);

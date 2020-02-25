@@ -3,11 +3,11 @@
 
 import { expect } from 'chai';
 
-import { ArrayExt, toArray } from '@phosphor/algorithm';
+import { ArrayExt, toArray } from '@lumino/algorithm';
 
 import { CodeCellModel } from '@jupyterlab/cells';
 
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 
 import { NotebookModel } from '@jupyterlab/notebook';
 
@@ -342,6 +342,26 @@ describe('@jupyterlab/notebook', () => {
         });
         model.metadata.set('foo', 'bar');
         expect(called).to.equal(true);
+      });
+    });
+
+    describe('#initialize()', () => {
+      it('should add one code cell if the model is empty', () => {
+        const model = new NotebookModel();
+        expect(model.cells.length).to.equal(0);
+        model.initialize();
+        expect(model.cells.length).to.equal(1);
+        expect(model.cells.get(0).type).to.equal('code');
+      });
+
+      it('should clear undo state', () => {
+        const model = new NotebookModel();
+        const cell = model.contentFactory.createCodeCell({});
+        cell.value.text = 'foo';
+        model.cells.push(cell);
+        expect(model.cells.canUndo).to.equal(true);
+        model.initialize();
+        expect(model.cells.canUndo).to.equal(false);
       });
     });
 

@@ -3,11 +3,11 @@
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { IDataConnector } from '@jupyterlab/coreutils';
+import { IDataConnector } from '@jupyterlab/statedb';
 
-import { Token } from '@phosphor/coreutils';
+import { Token } from '@lumino/coreutils';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { CompletionHandler } from './handler';
 

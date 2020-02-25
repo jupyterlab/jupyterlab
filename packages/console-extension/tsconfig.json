@@ -32,6 +32,12 @@
     },
     {
       "path": "../rendermime"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

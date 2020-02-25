@@ -165,7 +165,7 @@ released npm packages, not the development versions.
 
 ::
 
-    npm install --save @jupyterlab/notebook @jupyterlab/application @jupyterlab/apputils @jupyterlab/docregistry @phosphor/disposable
+    npm install --save @jupyterlab/notebook @jupyterlab/application @jupyterlab/apputils @jupyterlab/docregistry @lumino/disposable
 
 Copy the following to ``src/index.ts``:
 
@@ -173,7 +173,7 @@ Copy the following to ``src/index.ts``:
 
     import {
       IDisposable, DisposableDelegate
-    } from '@phosphor/disposable';
+    } from '@lumino/disposable';
 
     import {
       JupyterFrontEnd, JupyterFrontEndPlugin
@@ -212,11 +212,11 @@ Copy the following to ``src/index.ts``:
        */
       createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
         let callback = () => {
-          NotebookActions.runAll(panel.content, context.session);
+          NotebookActions.runAll(panel.content, context.sessionContext);
         };
         let button = new ToolbarButton({
           className: 'myButton',
-          iconClassName: 'fa fa-fast-forward',
+          iconClass: 'fa fa-fast-forward',
           onClick: callback,
           tooltip: 'Run All'
         });
@@ -256,9 +256,9 @@ The *ipywidgets* third party extension
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This discussion will be a bit confusing since we've been using the term
-*widget* to refer to *phosphor widgets*. In the discussion below,
+*widget* to refer to *lumino widgets*. In the discussion below,
 *ipython widgets* will be referred to as *ipywidgets*. There is no
-intrinsic relation between *phosphor widgets* and *ipython widgets*.
+intrinsic relation between *lumino widgets* and *ipython widgets*.
 
 The *ipywidgets* extension registers a factory for a notebook *widget*
 extension using the `Document
@@ -277,7 +277,7 @@ a ``display_data`` output is sent to the browser with the ipywidget
 model id. The renderer registered in that notebook's rendermime is asked
 to render the output. The renderer asks the ipywidget manager instance
 to render the corresponding model, which returns a JavaScript promise.
-The renderer creates a container *phosphor widget* which it hands back
+The renderer creates a container *lumino widget* which it hands back
 synchronously to the OutputArea, and then fills the container with the
 rendered *ipywidget* when the promise resolves.
 

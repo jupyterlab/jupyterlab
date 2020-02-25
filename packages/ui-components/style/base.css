@@ -3,6 +3,13 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+/* Sibling imports */
+@import './deprecated.css';
+@import './deprecatedExtra.css';
+@import './icons.css';
+@import './iconsalt.css';
+@import './iconshover.css';
+
 /* Override Blueprint's _reset.scss styles */
 html {
   box-sizing: unset;
@@ -95,24 +102,28 @@ input::placeholder {
   padding: 6px;
 }
 
-.jp-HTMLSelect.bp3-html-select.bp3-minimal select {
-  height: 24;
-  font-size: var(--jp-ui-font-size1);
-  line-height: 14px;
+.jp-HTMLSelect.jp-DefaultStyle select {
+  background-color: initial;
+  border: none;
   border-radius: 0;
-  display: block;
+  box-shadow: none;
   color: var(--jp-ui-font-color0);
+  display: block;
+  font-size: var(--jp-ui-font-size1);
+  height: 24px;
+  line-height: 14px;
+  padding: 0 25px 0 10px;
+  text-align: left;
+  -moz-appearance: none;
+  -webkit-appearance: none;
 }
 
-/* Use our own theme for hover styles */
-.jp-HTMLSelect.bp3-html-select.bp3-minimal select:hover {
-  color: var(--jp-ui-font-color0);
+/* Use our own theme for hover and option styles */
+.jp-HTMLSelect.jp-DefaultStyle select:hover,
+.jp-HTMLSelect.jp-DefaultStyle select > option {
   background-color: var(--jp-layout-color2);
+  color: var(--jp-ui-font-color0);
 }
 select {
   box-sizing: border-box;
 }
-
-/* Sibling imports */
-@import './deprecated.css';
-@import './deprecatedExtra.css';

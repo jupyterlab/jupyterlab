@@ -15,7 +15,7 @@
       "path": "../../packages/apputils"
     },
     {
-      "path": "../../packages/coreutils"
+      "path": "../../packages/statedb"
     },
     {
       "path": "../../testutils"

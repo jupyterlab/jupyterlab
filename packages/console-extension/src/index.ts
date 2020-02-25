@@ -10,8 +10,10 @@ import {
 
 import {
   Dialog,
-  IClientSession,
+  ISessionContext,
+  ISessionContextDialogs,
   ICommandPalette,
+  sessionContextDialogs,
   showDialog,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -20,7 +22,7 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
-import { ISettingRegistry, PageConfig, URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 
@@ -37,13 +39,23 @@ import {
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
-import { find } from '@phosphor/algorithm';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { ReadonlyJSONObject, JSONObject } from '@phosphor/coreutils';
+import { consoleIcon } from '@jupyterlab/ui-components';
 
-import { DisposableSet } from '@phosphor/disposable';
+import { find } from '@lumino/algorithm';
 
-import { DockLayout, Menu } from '@phosphor/widgets';
+import {
+  JSONExt,
+  JSONObject,
+  ReadonlyPartialJSONObject,
+  UUID,
+  ReadonlyJSONValue
+} from '@lumino/coreutils';
+
+import { DisposableSet } from '@lumino/disposable';
+
+import { DockLayout, Menu } from '@lumino/widgets';
 
 import foreign from './foreign';
 
@@ -87,8 +99,6 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
   id: '@jupyterlab/console-extension:tracker',
   provides: IConsoleTracker,
   requires: [
-    IMainMenu,
-    ICommandPalette,
     ConsolePanel.IContentFactory,
     IEditorServices,
     ILayoutRestorer,
@@ -96,7 +106,13 @@ const tracker: JupyterFrontEndPlugin<IConsoleTracker> = {
     IRenderMimeRegistry,
     ISettingRegistry
   ],
-  optional: [ILauncher, ILabStatus],
+  optional: [
+    IMainMenu,
+    ICommandPalette,
+    ILauncher,
+    ILabStatus,
+    ISessionContextDialogs
+  ],
   activate: activateConsole,
   autoStart: true
 };
@@ -126,36 +142,40 @@ export default plugins;
  */
 async function activateConsole(
   app: JupyterFrontEnd,
-  mainMenu: IMainMenu,
-  palette: ICommandPalette,
   contentFactory: ConsolePanel.IContentFactory,
   editorServices: IEditorServices,
   restorer: ILayoutRestorer,
   browserFactory: IFileBrowserFactory,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry,
+  mainMenu: IMainMenu | null,
+  palette: ICommandPalette | null,
   launcher: ILauncher | null,
-  status: ILabStatus | null
+  status: ILabStatus | null,
+  sessionDialogs: ISessionContextDialogs | null
 ): Promise<IConsoleTracker> {
   const manager = app.serviceManager;
   const { commands, shell } = app;
   const category = 'Console';
+  sessionDialogs = sessionDialogs ?? sessionContextDialogs;
 
   // Create a widget tracker for all console panels.
-  const tracker = new WidgetTracker<ConsolePanel>({ namespace: 'console' });
+  const tracker = new WidgetTracker<ConsolePanel>({
+    namespace: 'console'
+  });
 
   // Handle state restoration.
   void restorer.restore(tracker, {
     command: CommandIDs.create,
-    args: panel => ({
-      path: panel.console.session.path,
-      name: panel.console.session.name,
-      kernelPreference: {
-        name: panel.console.session.kernelPreference.name,
-        language: panel.console.session.kernelPreference.language
-      }
-    }),
-    name: panel => panel.console.session.path,
+    args: widget => {
+      const { path, name, kernelPreference } = widget.console.sessionContext;
+      return {
+        path,
+        name,
+        kernelPreference: { ...kernelPreference }
+      };
+    },
+    name: widget => widget.console.sessionContext.path ?? UUID.uuid4(),
     when: manager.ready
   });
 
@@ -168,7 +188,7 @@ async function activateConsole(
           disposables.dispose();
           disposables = null;
         }
-        const specs = manager.specs;
+        const specs = manager.kernelspecs.specs;
         if (!specs) {
           return;
         }
@@ -176,7 +196,8 @@ async function activateConsole(
         let baseUrl = PageConfig.getBaseUrl();
         for (let name in specs.kernelspecs) {
           let rank = name === specs.default ? 0 : Infinity;
-          let kernelIconUrl = specs.kernelspecs[name].resources['logo-64x64'];
+          const spec = specs.kernelspecs[name]!;
+          let kernelIconUrl = spec.resources['logo-64x64'];
           if (kernelIconUrl) {
             let index = kernelIconUrl.indexOf('kernelspecs');
             kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
@@ -187,13 +208,18 @@ async function activateConsole(
               args: { isLauncher: true, kernelPreference: { name } },
               category: 'Console',
               rank,
-              kernelIconUrl
+              kernelIconUrl,
+              metadata: {
+                kernel: JSONExt.deepCopy(
+                  spec.metadata || {}
+                ) as ReadonlyJSONValue
+              }
             })
           );
         }
       };
       onSpecsChanged();
-      manager.specsChanged.connect(onSpecsChanged);
+      manager.kernelspecs.specsChanged.connect(onSpecsChanged);
     });
   }
 
@@ -201,6 +227,11 @@ async function activateConsole(
    * The options used to create a widget.
    */
   interface ICreateOptions extends Partial<ConsolePanel.IOptions> {
+    /**
+     * Whether to activate the widget.  Defaults to `true`.
+     */
+    activate?: boolean;
+
     /**
      * The reference widget id for the insert location.
      *
@@ -215,11 +246,6 @@ async function activateConsole(
      * to the main area relative to a reference widget.
      */
     insertMode?: DockLayout.InsertMode;
-
-    /**
-     * Whether to activate the widget.  Defaults to `true`.
-     */
-    activate?: boolean;
   }
 
   /**
@@ -233,25 +259,29 @@ async function activateConsole(
       contentFactory,
       mimeTypeService: editorServices.mimeTypeService,
       rendermime,
-      setBusy: status && (() => status.setBusy()),
+      setBusy: (status && (() => status.setBusy())) ?? undefined,
       ...(options as Partial<ConsolePanel.IOptions>)
     });
 
-    const interactionMode: string = (await settingRegistry.get(
-      '@jupyterlab/console-extension:tracker',
-      'interactionMode'
-    )).composite as string;
+    const interactionMode: string = (
+      await settingRegistry.get(
+        '@jupyterlab/console-extension:tracker',
+        'interactionMode'
+      )
+    ).composite as string;
     panel.console.node.dataset.jpInteractionMode = interactionMode;
 
     // Add the console panel to the tracker. We want the panel to show up before
     // any kernel selection dialog, so we do not await panel.session.ready;
     await tracker.add(panel);
-    panel.session.propertyChanged.connect(() => tracker.save(panel));
+    panel.sessionContext.propertyChanged.connect(() => {
+      void tracker.save(panel);
+    });
 
     shell.add(panel, 'main', {
       ref: options.ref,
       mode: options.insertMode,
-      activate: options.activate
+      activate: options.activate !== false
     });
     return panel;
   }
@@ -261,8 +291,8 @@ async function activateConsole(
   async function updateSettings() {
     interactionMode = (await settingRegistry.get(pluginId, 'interactionMode'))
       .composite as string;
-    tracker.forEach(panel => {
-      panel.console.node.dataset.jpInteractionMode = interactionMode;
+    tracker.forEach(widget => {
+      widget.console.node.dataset.jpInteractionMode = interactionMode;
     });
   }
   settingRegistry.pluginChanged.connect((sender, plugin) => {
@@ -297,10 +327,10 @@ async function activateConsole(
     execute: (args: IOpenOptions) => {
       let path = args['path'];
       let widget = tracker.find(value => {
-        return value.console.session.path === path;
+        return value.console.sessionContext.session?.path === path;
       });
       if (widget) {
-        if (args['activate'] !== false) {
+        if (args.activate !== false) {
           shell.activateById(widget.id);
         }
         return widget;
@@ -326,12 +356,16 @@ async function activateConsole(
       } else if (args['isLauncher'] && args['kernelPreference']) {
         const kernelPreference = args[
           'kernelPreference'
-        ] as IClientSession.IKernelPreference;
-        return manager.specs.kernelspecs[kernelPreference.name].display_name;
+        ] as ISessionContext.IKernelPreference;
+        // TODO: Lumino command functions should probably be allowed to return undefined?
+        return (
+          manager.kernelspecs?.specs?.kernelspecs[kernelPreference.name || '']
+            ?.display_name ?? ''
+        );
       }
       return 'Console';
     },
-    iconClass: args => (args['isPalette'] ? '' : 'jp-CodeConsoleIcon'),
+    icon: args => (args['isPalette'] ? undefined : consoleIcon),
     execute: args => {
       let basePath =
         (args['basePath'] as string) ||
@@ -342,13 +376,13 @@ async function activateConsole(
   });
 
   // Get the current widget and activate unless the args specify otherwise.
-  function getCurrent(args: ReadonlyJSONObject): ConsolePanel | null {
+  function getCurrent(args: ReadonlyPartialJSONObject): ConsolePanel | null {
     let widget = tracker.currentWidget;
     let activate = args['activate'] !== false;
     if (activate && widget) {
       shell.activateById(widget.id);
     }
-    return widget;
+    return widget ?? null;
   }
 
   commands.addCommand(CommandIDs.clear, {
@@ -406,7 +440,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      let kernel = current.console.session.kernel;
+      let kernel = current.console.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
@@ -421,7 +455,7 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return current.console.session.restart();
+      return sessionDialogs!.restart(current.console.sessionContext);
     },
     isEnabled
   });
@@ -439,7 +473,7 @@ async function activateConsole(
         buttons: [Dialog.cancelButton(), Dialog.warnButton()]
       }).then(result => {
         if (result.button.accept) {
-          return current.console.session.shutdown().then(() => {
+          return current.console.sessionContext.shutdown().then(() => {
             current.dispose();
             return true;
           });
@@ -455,7 +489,7 @@ async function activateConsole(
     execute: args => {
       let path = args['path'];
       tracker.find(widget => {
-        if (widget.console.session.path === path) {
+        if (widget.console.sessionContext.session?.path === path) {
           if (args['activate'] !== false) {
             shell.activateById(widget.id);
           }
@@ -478,91 +512,99 @@ async function activateConsole(
       if (!current) {
         return;
       }
-      return current.console.session.selectKernel();
+      return sessionDialogs!.selectKernel(current.console.sessionContext);
     },
     isEnabled
   });
 
-  // Add command palette items
-  [
-    CommandIDs.create,
-    CommandIDs.linebreak,
-    CommandIDs.clear,
-    CommandIDs.runUnforced,
-    CommandIDs.runForced,
-    CommandIDs.restart,
-    CommandIDs.interrupt,
-    CommandIDs.changeKernel,
-    CommandIDs.closeAndShutdown
-  ].forEach(command => {
-    palette.addItem({ command, category, args: { isPalette: true } });
-  });
+  if (palette) {
+    // Add command palette items
+    [
+      CommandIDs.create,
+      CommandIDs.linebreak,
+      CommandIDs.clear,
+      CommandIDs.runUnforced,
+      CommandIDs.runForced,
+      CommandIDs.restart,
+      CommandIDs.interrupt,
+      CommandIDs.changeKernel,
+      CommandIDs.closeAndShutdown
+    ].forEach(command => {
+      palette.addItem({ command, category, args: { isPalette: true } });
+    });
+  }
 
-  // Add a console creator to the File menu
-  mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.create }], 0);
+  if (mainMenu) {
+    // Add a console creator to the File menu
+    mainMenu.fileMenu.newMenu.addGroup([{ command: CommandIDs.create }], 0);
 
-  // Add a close and shutdown command to the file menu.
-  mainMenu.fileMenu.closeAndCleaners.add({
-    tracker,
-    action: 'Shutdown',
-    name: 'Console',
-    closeAndCleanup: (current: ConsolePanel) => {
-      return showDialog({
-        title: 'Shut down the console?',
-        body: `Are you sure you want to close "${current.title.label}"?`,
-        buttons: [Dialog.cancelButton(), Dialog.warnButton()]
-      }).then(result => {
-        if (result.button.accept) {
-          return current.console.session.shutdown().then(() => {
-            current.dispose();
-          });
-        } else {
-          return void 0;
-        }
-      });
-    }
-  } as IFileMenu.ICloseAndCleaner<ConsolePanel>);
-
-  // Add a kernel user to the Kernel menu
-  mainMenu.kernelMenu.kernelUsers.add({
-    tracker,
-    interruptKernel: current => {
-      let kernel = current.console.session.kernel;
-      if (kernel) {
-        return kernel.interrupt();
+    // Add a close and shutdown command to the file menu.
+    mainMenu.fileMenu.closeAndCleaners.add({
+      tracker,
+      action: 'Shutdown',
+      name: 'Console',
+      closeAndCleanup: (current: ConsolePanel) => {
+        return showDialog({
+          title: 'Shut down the console?',
+          body: `Are you sure you want to close "${current.title.label}"?`,
+          buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+        }).then(result => {
+          if (result.button.accept) {
+            return current.console.sessionContext.shutdown().then(() => {
+              current.dispose();
+            });
+          } else {
+            return void 0;
+          }
+        });
       }
-      return Promise.resolve(void 0);
-    },
-    noun: 'Console',
-    restartKernel: current => current.console.session.restart(),
-    restartKernelAndClear: current => {
-      return current.console.session.restart().then(restarted => {
-        if (restarted) {
-          current.console.clear();
+    } as IFileMenu.ICloseAndCleaner<ConsolePanel>);
+
+    // Add a kernel user to the Kernel menu
+    mainMenu.kernelMenu.kernelUsers.add({
+      tracker,
+      interruptKernel: current => {
+        let kernel = current.console.sessionContext.session?.kernel;
+        if (kernel) {
+          return kernel.interrupt();
         }
-        return restarted;
-      });
-    },
-    changeKernel: current => current.console.session.selectKernel(),
-    shutdownKernel: current => current.console.session.shutdown()
-  } as IKernelMenu.IKernelUser<ConsolePanel>);
+        return Promise.resolve(void 0);
+      },
+      noun: 'Console',
+      restartKernel: current =>
+        sessionDialogs!.restart(current.console.sessionContext),
+      restartKernelAndClear: current => {
+        return sessionDialogs!
+          .restart(current.console.sessionContext)
+          .then(restarted => {
+            if (restarted) {
+              current.console.clear();
+            }
+            return restarted;
+          });
+      },
+      changeKernel: current =>
+        sessionDialogs!.selectKernel(current.console.sessionContext),
+      shutdownKernel: current => current.console.sessionContext.shutdown()
+    } as IKernelMenu.IKernelUser<ConsolePanel>);
 
-  // Add a code runner to the Run menu.
-  mainMenu.runMenu.codeRunners.add({
-    tracker,
-    noun: 'Cell',
-    pluralNoun: 'Cells',
-    run: current => current.console.execute(true)
-  } as IRunMenu.ICodeRunner<ConsolePanel>);
+    // Add a code runner to the Run menu.
+    mainMenu.runMenu.codeRunners.add({
+      tracker,
+      noun: 'Cell',
+      pluralNoun: 'Cells',
+      run: current => current.console.execute(true)
+    } as IRunMenu.ICodeRunner<ConsolePanel>);
 
-  // Add a clearer to the edit menu
-  mainMenu.editMenu.clearers.add({
-    tracker,
-    noun: 'Console Cells',
-    clearCurrent: (current: ConsolePanel) => {
-      return current.console.clear();
-    }
-  } as IEditMenu.IClearer<ConsolePanel>);
+    // Add a clearer to the edit menu
+    mainMenu.editMenu.clearers.add({
+      tracker,
+      noun: 'Console Cells',
+      clearCurrent: (current: ConsolePanel) => {
+        return current.console.clear();
+      }
+    } as IEditMenu.IClearer<ConsolePanel>);
+  }
 
   // For backwards compatibility and clarity, we explicitly label the run
   // keystroke with the actual effected change, rather than the generic
@@ -580,9 +622,11 @@ async function activateConsole(
     execute: async args => {
       const key = 'keyMap';
       try {
-        await settingRegistry.set(pluginId, 'interactionMode', args[
-          'interactionMode'
-        ] as string);
+        await settingRegistry.set(
+          pluginId,
+          'interactionMode',
+          args['interactionMode'] as string
+        );
       } catch (reason) {
         console.error(`Failed to set ${pluginId}:${key} - ${reason.message}`);
       }
@@ -600,21 +644,23 @@ async function activateConsole(
     })
   );
 
-  mainMenu.settingsMenu.addGroup(
-    [
-      {
-        type: 'submenu' as Menu.ItemType,
-        submenu: executeMenu
-      }
-    ],
-    10
-  );
+  if (mainMenu) {
+    mainMenu.settingsMenu.addGroup(
+      [
+        {
+          type: 'submenu' as Menu.ItemType,
+          submenu: executeMenu
+        }
+      ],
+      10
+    );
 
-  // Add kernel information to the application help menu.
-  mainMenu.helpMenu.kernelUsers.add({
-    tracker,
-    getKernel: current => current.session.kernel
-  } as IHelpMenu.IKernelUser<ConsolePanel>);
+    // Add kernel information to the application help menu.
+    mainMenu.helpMenu.kernelUsers.add({
+      tracker,
+      getKernel: current => current.sessionContext.session?.kernel
+    } as IHelpMenu.IKernelUser<ConsolePanel>);
+  }
 
   app.contextMenu.addItem({
     command: CommandIDs.clear,

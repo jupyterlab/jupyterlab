@@ -41,11 +41,6 @@
   white-space: pre-wrap;
 }
 
-.jp-InspectorIcon {
-  background-image: var(--jp-icon-inspector);
-  transform: scaleX(-1);
-}
-
 .jp-Inspector-default-content {
   display: flex;
   align-items: center;

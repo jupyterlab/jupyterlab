@@ -1,0 +1,6 @@
+{
+  "excludeNotExported": true,
+  "mode": "file",
+  "out": "../../docs/api/inspector-extension",
+  "theme": "../../typedoc-theme"
+}

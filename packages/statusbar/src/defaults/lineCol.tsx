@@ -7,7 +7,7 @@ import { VDomRenderer, VDomModel, ReactWidget } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { DefaultIconReact } from '@jupyterlab/ui-components';
+import { lineFormIcon } from '@jupyterlab/ui-components';
 
 import { classes } from 'typestyle/lib';
 
@@ -100,7 +100,7 @@ class LineFormComponent extends React.Component<
           <div
             className={classes(
               lineFormWrapper,
-              'p-lineForm-wrapper',
+              'lm-lineForm-wrapper',
               this.state.hasFocus ? lineFormWrapperFocusWithin : undefined
             )}
           >
@@ -116,10 +116,9 @@ class LineFormComponent extends React.Component<
               }}
             />
             <div className={lineFormButtonDiv}>
-              <DefaultIconReact
-                name="line-form"
+              <lineFormIcon.react
                 className={lineFormButtonIcon}
-                center={true}
+                elementPosition="center"
               />
               <input type="submit" className={lineFormButton} value="" />
             </div>
@@ -225,8 +224,7 @@ export class LineCol extends VDomRenderer<LineCol.Model> {
    * Construct a new LineCol status item.
    */
   constructor() {
-    super();
-    this.model = new LineCol.Model();
+    super(new LineCol.Model());
     this.addClass(interactiveItem);
   }
 

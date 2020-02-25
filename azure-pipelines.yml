@@ -17,6 +17,8 @@ jobs:
           testResultsFiles: 'junit.xml'
         Usage:
           group: 'usage'
+        UsageNoNodeJS:
+          group: 'nonode'
         Docs:
           group: 'docs'
 

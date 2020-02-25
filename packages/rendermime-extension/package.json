@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime-extension",
-  "version": "2.0.0-alpha.1",
+  "version": "2.0.0-rc.2",
   "description": "A rendermime extension for JupyterLab",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -28,19 +28,19 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib",
-    "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
+    "docs": "typedoc src",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.0.0-alpha.1",
-    "@jupyterlab/docmanager": "^2.0.0-alpha.1",
-    "@jupyterlab/rendermime": "^2.0.0-alpha.1"
+    "@jupyterlab/application": "^2.0.0-rc.2",
+    "@jupyterlab/docmanager": "^2.0.0-rc.2",
+    "@jupyterlab/rendermime": "^2.0.0-rc.2"
   },
   "devDependencies": {
-    "rimraf": "~2.6.2",
-    "typedoc": "^0.14.2",
-    "typescript": "~3.5.1"
+    "rimraf": "~3.0.0",
+    "typedoc": "^0.15.4",
+    "typescript": "~3.7.3"
   },
   "publishConfig": {
     "access": "public"

@@ -22,6 +22,9 @@
       "path": "../rendermime"
     },
     {
+      "path": "../ui-components"
+    },
+    {
       "path": "../vdom"
     }
   ]

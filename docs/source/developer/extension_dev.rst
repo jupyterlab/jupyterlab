@@ -39,7 +39,7 @@ A plugin adds a core functionality to the application:
    the default export.
 
    We provide two cookiecutters to create JupyterLab plugin extensions in
-   `CommonJS <https://github.com/jupyterlab/extension-cookiecutter-js>`__ and
+   `JavaScript <https://github.com/jupyterlab/extension-cookiecutter-js>`__ and
    `TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`__.
 
 The default plugins in the JupyterLab application include:
@@ -101,19 +101,19 @@ In JupyterLab, the application shell consists of:
 -  A ``bottom`` area for things like status bars.
 -  A ``header`` area for custom elements.
 
-Phosphor
+Lumino
 ~~~~~~~~
 
-The Phosphor library is used as the underlying architecture of
+The Lumino library is used as the underlying architecture of
 JupyterLab and provides many of the low level primitives and widget
-structure used in the application. Phosphor provides a rich set of
+structure used in the application. Lumino provides a rich set of
 widgets for developing desktop-like applications in the browser, as well
 as patterns and objects for writing clean, well-abstracted code. The
-widgets in the application are primarily **Phosphor widgets**, and
-Phosphor concepts, like message passing and signals, are used
-throughout. **Phosphor messages** are a *many-to-one* interaction that
+widgets in the application are primarily **Lumino widgets**, and
+Lumino concepts, like message passing and signals, are used
+throughout. **Lumino messages** are a *many-to-one* interaction that
 enables information like resize events to flow through the widget
-hierarchy in the application. **Phosphor signals** are a *one-to-many*
+hierarchy in the application. **Lumino signals** are a *one-to-many*
 interaction that enable listeners to react to changes in an observed
 object.
 
@@ -419,12 +419,6 @@ might want to use them in your extensions.
   created by the application.
 - ``@jupyterlab/console:IContentFactory``: A factory object that creates new code
   consoles. Use this if you want to create and host code consoles in your own UI elements.
-- ``@jupyterlab/coreutils:ISettingRegistry``: An interface to the JupyterLab settings system.
-  Use this if you want to store settings for your application.
-  See `extension settings <#extension-settings>`__ for more information.
-- ``@jupyterlab/coreutils:IStateDB``: An interface to the JupyterLab state database.
-  Use this if you want to store data that will persist across page loads.
-  See `state database <#state-database>`__ for more information.
 - ``@jupyterlab/docmanager:IDocumentManager``: An interface to the manager for all
   documents used by the application. Use this if you want to open and close documents,
   create and delete files, and otherwise interact with the file system.
@@ -467,6 +461,12 @@ might want to use them in your extensions.
 - ``@jupyterlab/settingeditor:ISettingEditorTracker``: A widget tracker for setting editors.
   Use this if you want to be able to iterate over and interact with setting editors
   created by the application.
+- ``@jupyterlab/settingregistry:ISettingRegistry``: An interface to the JupyterLab settings system.
+  Use this if you want to store settings for your application.
+  See `extension settings <#extension-settings>`__ for more information.
+- ``@jupyterlab/statedb:IStateDB``: An interface to the JupyterLab state database.
+  Use this if you want to store data that will persist across page loads.
+  See `state database <#state-database>`__ for more information.
 - ``@jupyterlab/statusbar:IStatusBar``: An interface to the status bar on the application.
   Use this if you want to add new status bar items.
 - ``@jupyterlab/terminal:ITerminalTracker``: A widget tracker for terminals.
@@ -543,7 +543,7 @@ State Database
 ``````````````
 
 The state database can be accessed by importing ``IStateDB`` from
-``@jupyterlab/coreutils`` and adding it to the list of ``requires`` for
+``@jupyterlab/statedb`` and adding it to the list of ``requires`` for
 a plugin:
 
 .. code:: typescript
@@ -579,14 +579,14 @@ Context Menus
 ^^^^^^^^^^^^^
 
 JupyterLab has an application-wide context menu available as
-``app.contextMenu``. See the Phosphor
-`docs <https://phosphorjs.github.io/phosphor/api/widgets/interfaces/contextmenu.iitemoptions.html>`__
+``app.contextMenu``. See the Lumino
+`docs <https://jupyterlab.github.io/lumino/widgets/interfaces/contextmenu.iitemoptions.html>`__
 for the item creation options. If you wish to preempt the
 application context menu, you can use a 'contextmenu' event listener and
 call ``event.stopPropagation`` to prevent the application context menu
 handler from being called (it is listening in the bubble phase on the
-``document``). At this point you could show your own Phosphor
-`contextMenu <https://phosphorjs.github.io/phosphor/api/widgets/classes/contextmenu.html>`__,
+``document``). At this point you could show your own Lumino
+`contextMenu <https://jupyterlab.github.io/lumino/widgets/classes/contextmenu.html>`__,
 or simply stop propagation and let the system context menu be shown.
 This would look something like the following in a ``Widget`` subclass:
 

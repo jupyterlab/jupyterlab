@@ -102,7 +102,7 @@ This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
-    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v1.0
+    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v2.0beta
 
 When prompted, enter values like the following for all of the cookiecutter
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
@@ -216,15 +216,15 @@ you in JupyterLab. For your first addition, you're going to add a
 tab panel when invoked.
 
 Fire up your favorite text editor and open the ``src/index.ts`` file in
-your extension project. Change the import at the top of the file to get 
+your extension project. Change the import at the top of the file to get
 a reference to the command palette interface and the Jupyter front end.
 
 .. code:: typescript
-    
+
     import {
       JupyterFrontEnd, JupyterFrontEndPlugin
     } from '@jupyterlab/application';
-    
+
     import {
       ICommandPalette
     } from '@jupyterlab/apputils';
@@ -300,13 +300,13 @@ Now return to your editor. Modify the imports at the top of the file to add a fe
 
     import {
       Widget
-    } from '@phosphor/widgets';
+    } from '@lumino/widgets';
 
 Install this new dependency as well:
 
 .. code:: bash
 
-    jlpm add @phosphor/widgets
+    jlpm add @lumino/widgets
 
 
 Then modify the ``activate`` function again so that it has the following
@@ -346,7 +346,7 @@ The first new block of code creates a ``MainAreaWidget`` instance with an empty
 content ``Widget`` as its child. It also assigns the main area widget a unique
 ID, gives it a label that will appear as its tab title, and makes the tab
 closable by the user.
-The second block of code adds a new command with id ``apod:open`` and label *Random Astronomy Picture* 
+The second block of code adds a new command with id ``apod:open`` and label *Random Astronomy Picture*
 to JupyterLab. When the command executes,
 it attaches the widget to the main display area if it is not already
 present and then makes it the active tab. The last new line of code uses the command id to add
@@ -373,7 +373,7 @@ single *Astronomy Picture* tab should come to the foreground.
 
 If your widget is not behaving, compare your code with the reference
 project state at the `01-show-a-panel
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-01-show-a-panel>`__.
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-01-show-a-panel>`__.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
@@ -460,7 +460,7 @@ panel. You'll address both of these problems in the upcoming sections.
 
 If you don't see a image at all, compare your code with the
 `02-show-an-image
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-02-show-an-image>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-02-show-an-image>`__
 in the reference project. When it's working, make another git commit.
 
 .. code:: bash
@@ -552,7 +552,7 @@ The beginning of the function should read like the following:
           }
         }
 
-      // Keep all the remaining fetch and command lines the same
+      // Keep all the remaining command lines the same
       // as before from here down ...
 
 Build your extension if necessary (``jlpm run build``) and refresh your
@@ -564,7 +564,7 @@ of the image.
 
 If anything is not working correctly, compare your code with the reference project
 `03-style-and-attribute
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-03-style-and-attribute>`__.
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-03-style-and-attribute>`__.
 When everything is working as expected, make another commit.
 
 .. code:: bash
@@ -591,13 +591,13 @@ Add the following additional import to the top of the file.
 
     import {
       Message
-    } from '@phosphor/messaging';
+    } from '@lumino/messaging';
 
 Install this dependency:
 
 .. code:: bash
 
-    jlpm add @phosphor/messaging
+    jlpm add @lumino/messaging
 
 
 Then add the class just below the import statements in the ``index.ts``
@@ -744,7 +744,7 @@ image.
 
 If anything is not working correctly, compare your code with the
 `04-refactor-and-refresh
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-04-refactor-and-refresh>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-04-refactor-and-refresh>`__
 to debug. Once it is working properly, commit it.
 
 .. code:: bash
@@ -777,17 +777,11 @@ entire list of import statements looks like the following:
 
     import {
       Message
-    } from '@phosphor/messaging';
+    } from '@lumino/messaging';
 
     import {
       Widget
-    } from '@phosphor/widgets';
-
-Install this dependency:
-
-.. code:: bash
-
-    jlpm add @phosphor/coreutils
+    } from '@lumino/widgets';
 
 Then add the ``ILayoutRestorer`` interface to the ``JupyterFrontEndPlugin``
 definition. This addition passes the global ``LayoutRestorer`` as the
@@ -875,7 +869,7 @@ after the refresh.
    The completed extension, showing the `Astronomy Picture of the Day for 24 Jul 2015 <https://apod.nasa.gov/apod/ap150724.html>`__.
 
 Refer to the `05-restore-panel-state
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-05-restore-panel-state>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-05-restore-panel-state>`__
 if your extension is not working correctly. Make a commit when the state of your
 extension persists properly.
 
@@ -935,7 +929,7 @@ directly. If it doesn't appear, make sure you've updated the package
 name properly in the ``package.json`` and run the npm command correctly.
 Compare your work with the state of the reference project at the
 `06-prepare-to-publish
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/1.0-06-prepare-to-publish>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-06-prepare-to-publish>`__
 for further debugging.
 
 You can now try installing your extension as a user would. Open a new
@@ -965,6 +959,6 @@ learning, here are some suggestions about what to try next:
 -  Make the image a link to the picture on the NASA website (URLs are of the form ``https://apod.nasa.gov/apod/apYYMMDD.html``).
 -  Make the image title and description update after the image loads so that the picture and description are always synced.
 -  Give users the ability to pin pictures in separate, permanent panels.
--  Add a setting for the user to put in their `API key <https://api.nasa.gov/>`__ so they can make many more requests per hour than the demo key allows.
+-  Add a setting for the user to put in their `API key <https://api.nasa.gov/#authentication>`__ so they can make many more requests per hour than the demo key allows.
 -  Push your extension git repository to GitHub.
 -  Learn how to write :ref:`other kinds of extensions <developer_extensions>`.

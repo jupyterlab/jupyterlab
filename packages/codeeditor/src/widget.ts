@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MimeData } from '@phosphor/coreutils';
+import { MimeData } from '@lumino/coreutils';
 
-import { IDragEvent } from '@phosphor/dragdrop';
+import { IDragEvent } from '@lumino/dragdrop';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { CodeEditor } from './';
 
@@ -87,16 +87,16 @@ export class CodeEditorWrapper extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'p-dragenter':
+      case 'lm-dragenter':
         this._evtDragEnter(event as IDragEvent);
         break;
-      case 'p-dragleave':
+      case 'lm-dragleave':
         this._evtDragLeave(event as IDragEvent);
         break;
-      case 'p-dragover':
+      case 'lm-dragover':
         this._evtDragOver(event as IDragEvent);
         break;
-      case 'p-drop':
+      case 'lm-drop':
         this._evtDrop(event as IDragEvent);
         break;
       default:
@@ -117,10 +117,13 @@ export class CodeEditorWrapper extends Widget {
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
     let node = this.node;
-    node.addEventListener('p-dragenter', this);
-    node.addEventListener('p-dragleave', this);
-    node.addEventListener('p-dragover', this);
-    node.addEventListener('p-drop', this);
+    node.addEventListener('lm-dragenter', this);
+    node.addEventListener('lm-dragleave', this);
+    node.addEventListener('lm-dragover', this);
+    node.addEventListener('lm-drop', this);
+    // We have to refresh at least once after attaching,
+    // while visible.
+    this._hasRefreshedSinceAttach = false;
     if (this.isVisible) {
       this.update();
     }
@@ -131,17 +134,17 @@ export class CodeEditorWrapper extends Widget {
    */
   protected onBeforeDetach(msg: Message): void {
     let node = this.node;
-    node.removeEventListener('p-dragenter', this);
-    node.removeEventListener('p-dragleave', this);
-    node.removeEventListener('p-dragover', this);
-    node.removeEventListener('p-drop', this);
+    node.removeEventListener('lm-dragenter', this);
+    node.removeEventListener('lm-dragleave', this);
+    node.removeEventListener('lm-dragover', this);
+    node.removeEventListener('lm-drop', this);
   }
 
   /**
    * A message handler invoked on an `'after-show'` message.
    */
   protected onAfterShow(msg: Message): void {
-    if (this._updateOnShow) {
+    if (this._updateOnShow || !this._hasRefreshedSinceAttach) {
       this.update();
     }
   }
@@ -161,7 +164,10 @@ export class CodeEditorWrapper extends Widget {
    * A message handler invoked on an `'update-request'` message.
    */
   protected onUpdateRequest(msg: Message): void {
-    this.editor.refresh();
+    if (this.isVisible) {
+      this._hasRefreshedSinceAttach = true;
+      this.editor.refresh();
+    }
   }
 
   /**
@@ -180,7 +186,7 @@ export class CodeEditorWrapper extends Widget {
 
       if (
         this.editor
-          .getLine(end.line)
+          .getLine(end.line)!
           .slice(0, end.column)
           .match(leadingWhitespaceRe)
       ) {
@@ -192,7 +198,7 @@ export class CodeEditorWrapper extends Widget {
   }
 
   /**
-   * Handle the `'p-dragenter'` event for the widget.
+   * Handle the `'lm-dragenter'` event for the widget.
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (this.editor.getOption('readOnly') === true) {
@@ -208,7 +214,7 @@ export class CodeEditorWrapper extends Widget {
   }
 
   /**
-   * Handle the `'p-dragleave'` event for the widget.
+   * Handle the `'lm-dragleave'` event for the widget.
    */
   private _evtDragLeave(event: IDragEvent): void {
     this.removeClass(DROP_TARGET_CLASS);
@@ -224,7 +230,7 @@ export class CodeEditorWrapper extends Widget {
   }
 
   /**
-   * Handle the `'p-dragover'` event for the widget.
+   * Handle the `'lm-dragover'` event for the widget.
    */
   private _evtDragOver(event: IDragEvent): void {
     this.removeClass(DROP_TARGET_CLASS);
@@ -242,7 +248,7 @@ export class CodeEditorWrapper extends Widget {
   }
 
   /**
-   * Handle the `'p-drop'` event for the widget.
+   * Handle the `'lm-drop'` event for the widget.
    */
   private _evtDrop(event: IDragEvent): void {
     if (this.editor.getOption('readOnly') === true) {
@@ -250,13 +256,6 @@ export class CodeEditorWrapper extends Widget {
     }
     const data = Private.findTextData(event.mimeData);
     if (data === undefined) {
-      return;
-    }
-    this.removeClass(DROP_TARGET_CLASS);
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.proposedAction === 'none') {
-      event.dropAction = 'none';
       return;
     }
     const coordinate = {
@@ -270,11 +269,22 @@ export class CodeEditorWrapper extends Widget {
       height: 0
     };
     const position = this.editor.getPositionForCoordinate(coordinate);
+    if (position === null) {
+      return;
+    }
+    this.removeClass(DROP_TARGET_CLASS);
+    event.preventDefault();
+    event.stopPropagation();
+    if (event.proposedAction === 'none') {
+      event.dropAction = 'none';
+      return;
+    }
     const offset = this.editor.getOffsetAt(position);
     this.model.value.insert(offset, data);
   }
 
   private _updateOnShow: boolean;
+  private _hasRefreshedSinceAttach = false;
 }
 
 /**

@@ -3,9 +3,7 @@
   "compilerOptions": {
     "outDir": "lib",
     "rootDir": "src",
-    "module": "commonjs",
-    "types": ["node"]
+    "module": "commonjs"
   },
-  "files": ["src/plugin-schema.json"],
   "include": ["src/*"]
 }
