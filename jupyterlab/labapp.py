@@ -9,6 +9,7 @@ import os
 import os.path as osp
 from os.path import join as pjoin
 import sys
+from jinja2 import Environment, FileSystemLoader
 
 from jupyter_core.application import JupyterApp, base_aliases, base_flags
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
@@ -25,7 +26,7 @@ from .commands import (
 )
 from .coreconfig import CoreConfig
 
-from jupyter_server.extension.application import ExtensionApp
+from jupyter_server.extension.application import ExtensionApp, ExtensionAppJinjaMixin
 from nbclassic.shimconfig import merge_notebook_configs
 
 build_aliases = dict(base_aliases)
@@ -383,7 +384,7 @@ class LabWorkspaceApp(JupyterApp):
 
 
 
-class LabApp(ExtensionApp):
+class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
     version = version
 
     description = """
@@ -493,11 +494,31 @@ class LabApp(ExtensionApp):
     # Local path to templates directory.
     template_paths = []
 
+    def initialize_templates(self):
+        c = load_config(self)
+        self.static_paths = [c.static_dir]
+        self.template_paths = [c.templates_dir]
+        if len(self.template_paths) > 0:
+            self.settings.update({
+                "{}_template_paths".format(self.extension_name): self.template_paths
+            })
+        self.jinja2_env = Environment(
+            loader=FileSystemLoader(self.template_paths), 
+            extensions=['jinja2.ext.i18n'],
+            autoescape=True,
+            **self.jinja2_options
+        )
+        self.settings.update(
+            {
+                "{}_jinja2_env".format(self.extension_name): self.jinja2_env 
+            }
+        )
+
     def initialize_settings(self):
         merged_config = merge_notebook_configs(
             notebook_config_name = 'jupyter_notebook',
             server_config_name = 'jupyter_server',
-            extension_config_name = 'jupyter_lab',
+            other_config_name = 'jupyter_lab',
             argv = sys.argv
             )
         self.settings['ServerApp'] = merged_config['ServerApp']

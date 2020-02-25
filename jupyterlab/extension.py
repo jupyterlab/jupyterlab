@@ -218,4 +218,4 @@ def load_jupyter_server_extension(nbapp):
 
     # Add the root handlers if we have not errored.
     if not errored:
-        add_handlers(web_app, config)
+        add_handlers(nbapp, web_app, config)
