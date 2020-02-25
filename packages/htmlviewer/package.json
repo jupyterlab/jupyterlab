@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/htmlviewer",
-  "version": "2.0.0-rc.0",
+  "version": "2.0.0-rc.2",
   "description": "A viewer for HTML documents.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,12 +32,12 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.0.0-rc.0",
-    "@jupyterlab/coreutils": "^4.0.0-rc.0",
-    "@jupyterlab/docregistry": "^2.0.0-rc.0",
-    "@jupyterlab/ui-components": "^2.0.0-rc.1",
+    "@jupyterlab/apputils": "^2.0.0-rc.2",
+    "@jupyterlab/coreutils": "^4.0.0-rc.2",
+    "@jupyterlab/docregistry": "^2.0.0-rc.2",
+    "@jupyterlab/ui-components": "^2.0.0-rc.3",
     "@lumino/coreutils": "^1.4.2",
-    "@lumino/signaling": "^1.3.4",
+    "@lumino/signaling": "^1.3.5",
     "react": "~16.9.0"
   },
   "devDependencies": {

@@ -41,6 +41,9 @@
     },
     {
       "path": "../statusbar"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

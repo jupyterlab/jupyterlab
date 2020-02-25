@@ -42,6 +42,7 @@ input.jp-mod-styled:focus {
 
 .jp-select-wrapper {
   display: flex;
+  position: relative;
   flex-direction: column;
   padding: 1px;
   background-color: var(--jp-layout-color1);

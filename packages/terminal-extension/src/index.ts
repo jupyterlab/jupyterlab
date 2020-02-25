@@ -44,11 +44,6 @@ namespace CommandIDs {
 }
 
 /**
- * The class name for the terminal icon in the default theme.
- */
-const TERMINAL_ICON_CLASS = 'jp-TerminalIcon';
-
-/**
  * The default terminal extension.
  */
 const plugin: JupyterFrontEndPlugin<ITerminalTracker> = {
@@ -317,7 +312,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.createNew, {
     label: args => (args['isPalette'] ? 'New Terminal' : 'Terminal'),
     caption: 'Start a new terminal session',
-    iconClass: args => (args['isPalette'] ? '' : TERMINAL_ICON_CLASS),
+    icon: args => (args['isPalette'] ? undefined : terminalIcon),
     execute: async args => {
       // wait for the widget to lazy load
       let Terminal: typeof WidgetModuleType.Terminal;
@@ -336,7 +331,7 @@ export function addCommands(
 
       const term = new Terminal(session, options);
 
-      term.title.iconRenderer = terminalIcon;
+      term.title.icon = terminalIcon;
       term.title.label = '...';
 
       let main = new MainAreaWidget({ content: term });

@@ -15,12 +15,12 @@ export default {
   title: 'LabIcon'
 };
 
-export const build = () => <buildIcon.react kind="sideBar" />;
+export const build = () => <buildIcon.react stylesheet="sideBar" />;
 
 export const running = () => <runningIcon.react height="800px" width="800px" />;
 
 export const html5 = () => (
   <div className="foobar" style={{ height: '500px', width: '500px' }}>
-    <html5Icon.react justify="center" />
+    <html5Icon.react elementPosition="center" />
   </div>
 );

@@ -34,6 +34,8 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { markdownIcon, textEditorIcon } from '@jupyterlab/ui-components';
+
 import { CommandRegistry } from '@lumino/commands';
 
 import { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
@@ -68,16 +70,6 @@ export namespace CommandIDs {
 
   export const markdownPreview = 'fileeditor:markdown-preview';
 }
-
-/**
- * The class name for the text editor icon from the default theme.
- */
-export const EDITOR_ICON_CLASS = 'jp-MaterialIcon jp-TextEditorIcon';
-
-/**
- * The class name for the text editor icon from the default theme.
- */
-export const MARKDOWN_ICON_CLASS = 'jp-MarkdownIcon';
 
 /**
  * The name of the factory that creates editor widgets.
@@ -561,7 +553,7 @@ export namespace Commands {
     commands.addCommand(CommandIDs.createNew, {
       label: args => (args['isPalette'] ? 'New Text File' : 'Text File'),
       caption: 'Create a new text file',
-      iconClass: args => (args['isPalette'] ? '' : EDITOR_ICON_CLASS),
+      icon: args => (args['isPalette'] ? undefined : textEditorIcon),
       execute: args => {
         let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
         return createNew(commands, cwd as string);
@@ -580,7 +572,7 @@ export namespace Commands {
       label: args =>
         args['isPalette'] ? 'New Markdown File' : 'Markdown File',
       caption: 'Create a new markdown file',
-      iconClass: args => (args['isPalette'] ? '' : MARKDOWN_ICON_CLASS),
+      icon: args => (args['isPalette'] ? undefined : markdownIcon),
       execute: args => {
         let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
         return createNew(commands, cwd as string, 'md');

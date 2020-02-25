@@ -34,6 +34,8 @@ import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
 
 import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
+import { addIcon } from '@jupyterlab/ui-components';
+
 function main(): void {
   let manager = new ServiceManager();
   void manager.ready.then(() => {
@@ -95,7 +97,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   // Add a creator toolbar item.
   let creator = new ToolbarButton({
-    iconClass: 'jp-AddIcon jp-Icon jp-Icon-16',
+    icon: addIcon,
     onClick: () => {
       void docManager
         .newUntitled({

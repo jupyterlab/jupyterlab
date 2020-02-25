@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-icon-hoverShow:not(:hover) svg {
+  display: none !important;
+}
+
 /**
  * Support for hover colors for icons as inline SVG HTMLElements
  */

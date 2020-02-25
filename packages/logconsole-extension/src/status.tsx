@@ -34,7 +34,7 @@ function LogConsoleStatusComponent(
   title += `${props.logEntries} log entries for ${props.source}`;
   return (
     <GroupItem spacing={0} onClick={props.handleClick} title={title}>
-      <listIcon.react top={'2px'} kind={'statusBar'} />
+      <listIcon.react top={'2px'} stylesheet={'statusBar'} />
       {props.newMessages > 0 ? <TextItem source={props.newMessages} /> : <></>}
     </GroupItem>
   );

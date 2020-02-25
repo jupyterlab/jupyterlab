@@ -120,7 +120,7 @@ function Item(props: { runningItem: IRunningSessions.IRunningItem }) {
 
   return (
     <li className={ITEM_CLASS}>
-      <icon.react tag="span" justify="center" kind="runningItem" />
+      <icon.react tag="span" stylesheet="runningItem" />
       <span
         className={ITEM_LABEL_CLASS}
         title={runningItem.labelTitle ? runningItem.labelTitle() : ''}

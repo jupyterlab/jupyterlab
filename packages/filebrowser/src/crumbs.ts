@@ -351,12 +351,12 @@ namespace Private {
       className: BREADCRUMB_HOME_CLASS,
       tag: 'span',
       title: PageConfig.getOption('serverRoot') || 'Jupyter Server Root',
-      kind: 'breadCrumb'
+      stylesheet: 'breadCrumb'
     });
     let ellipsis = ellipsesIcon.element({
       className: BREADCRUMB_ITEM_CLASS,
       tag: 'span',
-      kind: 'breadCrumb'
+      stylesheet: 'breadCrumb'
     });
     let parent = document.createElement('span');
     parent.className = BREADCRUMB_ITEM_CLASS;

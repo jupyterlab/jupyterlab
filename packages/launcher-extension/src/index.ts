@@ -60,8 +60,8 @@ function activate(
       const launcher = new Launcher({ model, cwd, callback, commands });
 
       launcher.model = model;
+      launcher.title.icon = launcherIcon;
       launcher.title.label = 'Launcher';
-      launcher.title.iconRenderer = launcherIcon;
 
       let main = new MainAreaWidget({ content: launcher });
 

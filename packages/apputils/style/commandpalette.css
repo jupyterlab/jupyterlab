@@ -90,33 +90,20 @@
 }
 
 .lm-CommandPalette-header {
-  margin-top: 8px;
-  padding: 8px 0 8px 12px;
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
   color: var(--jp-ui-font-color1);
+  cursor: pointer;
+  display: flex;
   font-size: var(--jp-ui-font-size0);
   font-weight: 600;
-  cursor: pointer;
-  text-transform: uppercase;
-  border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
   letter-spacing: 1px;
+  margin-top: 8px;
+  padding: 8px 0 8px 12px;
+  text-transform: uppercase;
 }
 
 .lm-CommandPalette-header.lm-mod-active {
   background: var(--jp-layout-color2);
-}
-
-.lm-CommandPalette-header:hover::after {
-  content: '';
-  min-width: 12px;
-  min-height: 12px;
-  background-size: 14px;
-  margin-right: 16px;
-  float: right;
-  display: inline-block;
-  vertical-align: middle;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-image: var(--jp-icon-filter-list);
 }
 
 .lm-CommandPalette-header > mark {
@@ -163,14 +150,8 @@
   color: var(--jp-ui-font-color3);
 }
 
-.lm-CommandPalette-item.lm-mod-toggled .lm-CommandPalette-itemIcon {
-  background-image: var(--jp-icon-check);
-  background-size: 16px;
-  background-repeat: no-repeat;
-}
-
 .lm-CommandPalette-item .lm-CommandPalette-itemIcon {
-  padding: 0px 0px 0px 4px;
+  margin: 0 4px 0 0;
   position: relative;
   width: 16px;
   top: 2px;

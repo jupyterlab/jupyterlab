@@ -36,11 +36,11 @@ function RunningSessionsComponent(
     <GroupItem spacing={HALF_SPACING} onClick={props.handleClick}>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.terminals} />
-        <terminalIcon.react left={'1px'} top={'3px'} kind={'statusBar'} />
+        <terminalIcon.react left={'1px'} top={'3px'} stylesheet={'statusBar'} />
       </GroupItem>
       <GroupItem spacing={HALF_SPACING}>
         <TextItem source={props.sessions} />
-        <kernelIcon.react top={'2px'} kind={'statusBar'} />
+        <kernelIcon.react top={'2px'} stylesheet={'statusBar'} />
       </GroupItem>
     </GroupItem>
   );

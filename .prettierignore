@@ -22,3 +22,10 @@ jupyterlab/geckodriver
 jupyterlab/staging/yarn.js
 jupyterlab/staging/index.js
 packages/ui-components/src/icon/iconimports.ts
+
+# jetbrains IDE stuff
+.idea/
+
+# ms IDE stuff
+.history/
+.vscode/

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/coreutils",
-  "version": "4.0.0-rc.0",
+  "version": "4.0.0-rc.2",
   "description": "JupyterLab - Core Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,8 +33,8 @@
   },
   "dependencies": {
     "@lumino/coreutils": "^1.4.2",
-    "@lumino/disposable": "^1.3.4",
-    "@lumino/signaling": "^1.3.4",
+    "@lumino/disposable": "^1.3.5",
+    "@lumino/signaling": "^1.3.5",
     "minimist": "~1.2.0",
     "moment": "^2.24.0",
     "path-posix": "~1.0.0",

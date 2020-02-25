@@ -1,383 +1,609 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { style } from 'typestyle/lib';
+import { style as typestyleClass } from 'typestyle/lib';
 import { NestedCSSProperties } from 'typestyle/lib/types';
 
-/**
- * - breadCrumb: The path icons above the filebrowser
- * - dockPanelBar: The tab icons above the main area
- * - launcherCard: The icons for the cards at the bottom of the launcher
- * - launcherSection: The icons to left of the Launcher section headers
- * - listing: The icons to the left of the filebrowser listing items
- * - settingsEditor: The icons to the left of each section of the settings editor
- * - sideBar: The icons for the sidebar (default to the left of the main window)
- * - splash: The icon used for the splash screen
- * - tabManager: The icons for the tabManager in the sidebar
- */
-export type IconKindType =
-  | 'breadCrumb'
-  | 'launcherCard'
-  | 'launcherSection'
-  | 'listing'
-  | 'listingHeaderItem'
-  | 'mainAreaTab'
-  | 'runningItem'
-  | 'select'
-  | 'settingsEditor'
-  | 'sideBar'
-  | 'splash'
-  | 'statusBar'
-  | 'toolbarButton';
-
-export type IconJustifyType = 'center' | 'left' | 'right';
-
-export interface IIconStyle extends NestedCSSProperties {
+export namespace LabIconStyle {
   /**
-   * the kind of the icon, associated with a default stylesheet
+   * - breadCrumb: The path icons above the filebrowser
+   * - commandPaletteHeader: The icon to the right of palette section headers
+   * - commandPaletteItem: The icon next to a palette item
+   * - launcherCard: The icons for the cards at the bottom of the launcher
+   * - launcherSection: The icons to left of the Launcher section headers
+   * - listing: The icons to the left of the filebrowser listing items
+   * - listingHeaderItem: Caret icons used to show sort order in listing column headers
+   * - mainAreaTab: The icons in the tabs above the main area/the tabManager in the sidebar
+   * - menuItem: The icon next to a menu item
+   * - runningItem: The icon next to an item in the Running sidebar
+   * - select: The caret icon on the left side of a dropdown select element
+   * - settingsEditor: The icons to the left of each section of the settings editor
+   * - sideBar: The icons for the sidebar (default to the left of the main window)
+   * - splash: The icon used for the splash screen
+   * - statusBar: The icons in the status bar
+   * - toolbarButton: The icon shown on a toolbar button
    */
-  kind?: IconKindType;
+  type IBuiltin =
+    | 'breadCrumb'
+    | 'commandPaletteHeader'
+    | 'commandPaletteItem'
+    | 'launcherCard'
+    | 'launcherSection'
+    | 'listing'
+    | 'listingHeaderItem'
+    | 'mainAreaTab'
+    | 'menuItem'
+    | 'runningItem'
+    | 'select'
+    | 'settingsEditor'
+    | 'sideBar'
+    | 'splash'
+    | 'statusBar'
+    | 'toolbarButton';
+
+  type IPosition =
+    | 'center'
+    | 'top'
+    | 'right'
+    | 'bottom'
+    | 'left'
+    | 'top right'
+    | 'bottom right'
+    | 'bottom left'
+    | 'top left';
+
+  type ISize = 'small' | 'normal' | 'large' | 'xlarge';
 
   /**
-   * how to justify the icon
+   * Options that function as a shorthand for compound CSS properties,
+   * such as the set of props required to center an svg inside
+   * of a parent node
    */
-  justify?: IconJustifyType;
-}
+  interface ISheetOptions {
+    /**
+     * How to position the inner svg element,
+     * relative to the outer container
+     */
+    elementPosition?: IPosition;
 
-/**
- * icon kind specific styles
- */
-const iconCSSBreadCrumb: NestedCSSProperties = {
-  borderRadius: 'var(--jp-border-radius)',
-  cursor: 'pointer',
-  margin: '0px 2px',
-  padding: '0px 2px',
-  height: '16px',
-  width: '16px',
-  verticalAlign: 'middle'
-};
+    /**
+     * the size of the inner svg element. Can be any of:
+     *   - 'small': 14px x 14px
+     *   - 'normal': 16px x 16px
+     *   - 'large': 20px x 20px
+     *   - 'xlarge': 24px x 24px
+     */
+    elementSize?: ISize;
 
-const iconCSSLauncherCard: NestedCSSProperties = {
-  height: '52px',
-  width: '52px'
-};
-
-const iconCSSLauncherSection: NestedCSSProperties = {
-  height: '32px',
-  width: '32px'
-};
-
-const iconCSSListing: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
-
-const iconCSSlistingHeaderItem: NestedCSSProperties = {
-  height: 'auto',
-  margin: '-2px 0 0 0',
-  width: '20px'
-};
-
-const iconCSSMainAreaTab: NestedCSSProperties = {
-  $nest: {
-    '.lm-DockPanel-tabBar &': {
-      height: '14px',
-      width: '14px'
-    },
-    '#tab-manager &': {
-      height: '16px',
-      width: '16px'
-    }
+    /**
+     * FUTURE: how to position the label element (if any),
+     * relative to the outer container
+     */
+    // labelPosition?: IPosition;
   }
-};
 
-const iconCSSRunningItem: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
+  /**
+   * Stylesheet with a collection of CSS props for each node
+   * in an icon, plus some custom options
+   */
+  interface ISheet {
+    /**
+     * CSS properties that will be applied to the outer container
+     * element via a typestyle class
+     */
+    container?: NestedCSSProperties;
 
-const iconCSSSelect: NestedCSSProperties = {
-  position: 'absolute',
-  height: 'auto',
-  width: '16px'
-};
+    /**
+     * CSS properties that will be applied to the inner svg
+     * element via a typestyle class
+     */
+    element?: NestedCSSProperties;
 
-const iconCSSSettingsEditor: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
+    /**
+     * Options that function as modifiers for this style's
+     * CSS properties
+     */
+    options?: ISheetOptions;
 
-const iconCSSSideBar: NestedCSSProperties = {
-  width: '20px'
-};
-
-const iconCSSSplash: NestedCSSProperties = {
-  width: '100px'
-};
-
-const iconCSSStatusBar: NestedCSSProperties = {
-  left: '0px',
-  top: '0px',
-  height: '18px',
-  width: '20px',
-  position: 'relative'
-};
-
-const iconCSSToolbarButton: NestedCSSProperties = {
-  height: '16px',
-  width: '16px'
-};
-
-const iconCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
-  breadCrumb: iconCSSBreadCrumb,
-  launcherCard: iconCSSLauncherCard,
-  launcherSection: iconCSSLauncherSection,
-  listing: iconCSSListing,
-  listingHeaderItem: iconCSSlistingHeaderItem,
-  mainAreaTab: iconCSSMainAreaTab,
-  runningItem: iconCSSRunningItem,
-  select: iconCSSSelect,
-  settingsEditor: iconCSSSettingsEditor,
-  sideBar: iconCSSSideBar,
-  splash: iconCSSSplash,
-  statusBar: iconCSSStatusBar,
-  toolbarButton: iconCSSToolbarButton
-};
-
-const containerCSSBreadCrumb: NestedCSSProperties = {
-  // `&` will be substituted for the generated classname (interpolation)
-  $nest: {
-    '&:first-child svg': {
-      bottom: '1px',
-      marginLeft: '0px',
-      position: 'relative'
-    },
-    '&:hover': {
-      backgroundColor: 'var(--jp-layout-color2)'
-    },
-    ['.jp-mod-dropTarget&']: {
-      backgroundColor: 'var(--jp-brand-color2)',
-      opacity: 0.7
-    }
+    /**
+     * FUTURE: CSS properties that will be applied to the label
+     * element, if any, via a typestyle class
+     */
+    // labelCSS?: NestedCSSProperties;
   }
-};
 
-const containerCSSLauncherCard: NestedCSSProperties = {
-  height: '68px'
-};
-
-const containerCSSLauncherSection: NestedCSSProperties = {
-  boxSizing: 'border-box',
-  marginRight: '12px'
-};
-
-const containerCSSListing: NestedCSSProperties = {
-  flex: '0 0 20px',
-  marginRight: '4px',
-  position: 'relative'
-};
-
-const containerCSSListingHeaderItem: NestedCSSProperties = {
-  display: 'inline',
-  height: '16px',
-  width: '16px'
-};
-
-/**
- * container kind specific styles
- */
-const containerCSSMainAreaTab: NestedCSSProperties = {
-  $nest: {
-    '.lm-DockPanel-tabBar &': {
-      marginRight: '4px'
-    },
-    '#tab-manager &': {
-      marginRight: '2px',
-      position: 'relative'
-    }
+  /**
+   * A stylesheet containing only collections of CSS style props that
+   * can be fed directly to typestyle's style() function. A standard
+   * ISheet can be resolved to a "pure" stylesheet by processing and
+   * removing any options
+   */
+  interface ISheetPure extends ISheet {
+    /**
+     * Options are disallowed
+     */
+    options?: undefined;
   }
-};
 
-const containerCSSRunningItem: NestedCSSProperties = {
-  margin: '0px 4px 0px 12px'
-};
+  /**
+   * Type to help with resolving a stylesheet that might be a string
+   */
+  type ISheetResolvable = ISheet | IBuiltin;
 
-const containerCSSSelect: NestedCSSProperties = {
-  pointerEvents: 'none'
-};
+  export interface IProps extends NestedCSSProperties, ISheetOptions {
+    /**
+     * Specify the icon styling. Can be either a string naming one of
+     * the builtin icon stylesheets, a LabIconStyle.ISheet object, or an
+     * array containing any mixture of the two. If an array is provided,
+     * the actual style will be determined by merging the stylesheets in
+     * the array, giving precedence to the rightmost values.
+     */
+    stylesheet?: ISheetResolvable | ISheetResolvable[];
 
-const containerCSSSettingsEditor: NestedCSSProperties = {
-  display: 'inline-block',
-  flex: '0 0 20px',
-  marginLeft: '2px',
-  marginRight: '1px',
-  position: 'relative',
-  height: '20px',
-  width: '20px'
-};
+    /**
+     * @depreacted use stylesheet instead
+     */
+    kind?: IBuiltin;
 
-const containerCSSSideBar: NestedCSSProperties = {
-  // `&` will be substituted for the generated classname (interpolation)
-  $nest: {
-    // left sidebar tab divs
-    '.jp-SideBar.jp-mod-left .lm-TabBar-tab &': {
-      transform: 'rotate(90deg)'
-    },
-    // left sidebar currently selected tab div
-    '.jp-SideBar.jp-mod-left .lm-TabBar-tab.lm-mod-current &': {
-      transform:
-        'rotate(90deg)\n' +
-        '    translate(\n' +
-        '      calc(-0.5 * var(--jp-border-width)),\n' +
-        '      calc(-0.5 * var(--jp-border-width))\n' +
-        '    )'
-    },
-
-    // right sidebar tab divs
-    '.jp-SideBar.jp-mod-right .lm-TabBar-tab &': {
-      transform: 'rotate(-90deg)'
-    },
-    // right sidebar currently selected tab div
-    '.jp-SideBar.jp-mod-right .lm-TabBar-tab.lm-mod-current &': {
-      transform:
-        'rotate(-90deg)\n' +
-        '    translate(\n' +
-        '      calc(0.5 * var(--jp-border-width)),\n' +
-        '      calc(-0.5 * var(--jp-border-width))\n' +
-        '    )'
-    }
+    /**
+     * @deprecated use elementPosition instead
+     */
+    justify?: 'center' | 'right' | 'left';
   }
-};
 
-const containerCSSSplash: NestedCSSProperties = {
-  animation: '0.3s fade-in linear forwards',
-  height: '100%',
-  width: '100%',
-  zIndex: 1
-};
+  /**
+   * The builtin stylesheets
+   */
+  const builtinSheets: { [k in IBuiltin]: ISheet } = {
+    breadCrumb: {
+      container: {
+        $nest: {
+          // `&` will be substituted for the generated classname (interpolation)
+          '&:first-child svg': {
+            bottom: '1px',
+            marginLeft: '0px',
+            position: 'relative'
+          },
+          '&:hover': {
+            backgroundColor: 'var(--jp-layout-color2)'
+          },
+          ['.jp-mod-dropTarget&']: {
+            backgroundColor: 'var(--jp-brand-color2)',
+            opacity: 0.7
+          }
+        }
+      },
+      element: {
+        borderRadius: 'var(--jp-border-radius)',
+        cursor: 'pointer',
+        margin: '0px 2px',
+        padding: '0px 2px',
+        height: '16px',
+        width: '16px',
+        verticalAlign: 'middle'
+      }
+    },
 
-const containerCSSToolbarButton: NestedCSSProperties = {
-  display: 'inline-block',
-  margin: 'auto',
-  verticalAlign: 'middle'
-};
+    commandPaletteHeader: {
+      container: {
+        height: '14px',
+        margin: '0 14px 0 auto'
+      },
+      element: {
+        height: '14px',
+        width: '14px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
 
-const containerCSSKind: { [k in IconKindType]: NestedCSSProperties } = {
-  breadCrumb: containerCSSBreadCrumb,
-  launcherCard: containerCSSLauncherCard,
-  launcherSection: containerCSSLauncherSection,
-  listing: containerCSSListing,
-  listingHeaderItem: containerCSSListingHeaderItem,
-  mainAreaTab: containerCSSMainAreaTab,
-  runningItem: containerCSSRunningItem,
-  select: containerCSSSelect,
-  settingsEditor: containerCSSSettingsEditor,
-  sideBar: containerCSSSideBar,
-  splash: containerCSSSplash,
-  statusBar: {},
-  toolbarButton: containerCSSToolbarButton
-};
+    commandPaletteItem: {
+      element: {
+        height: '16px',
+        width: '16px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
 
-/**
- * styles for justifying a node inside of a container
- */
-const iconCSSCenter: NestedCSSProperties = {
-  display: 'block',
-  margin: '0 auto',
-  width: '100%'
-};
+    launcherCard: {
+      container: {
+        height: '68px'
+      },
+      element: {
+        height: '52px',
+        width: '52px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
 
-const iconCSSLeft: NestedCSSProperties = {
-  display: 'block',
-  margin: '0 auto 0 0'
-};
+    launcherSection: {
+      container: {
+        boxSizing: 'border-box',
+        marginRight: '12px'
+      },
+      element: {
+        height: '32px',
+        width: '32px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
 
-const iconCSSRight: NestedCSSProperties = {
-  display: 'block',
-  margin: '0 0 0 auto'
-};
+    listing: {
+      container: {
+        flex: '0 0 20px',
+        marginRight: '4px',
+        position: 'relative'
+      },
+      element: {
+        height: '16px',
+        width: '16px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
 
-const iconCSSJustify: { [k in IconJustifyType]: NestedCSSProperties } = {
-  center: iconCSSCenter,
-  left: iconCSSLeft,
-  right: iconCSSRight
-};
+    listingHeaderItem: {
+      container: {
+        display: 'inline',
+        height: '16px',
+        width: '16px'
+      },
+      element: {
+        height: 'auto',
+        margin: '-2px 0 0 0',
+        width: '20px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
 
-const containerCSSCenter: NestedCSSProperties = {
-  alignItems: 'center',
-  display: 'flex'
-};
+    mainAreaTab: {
+      container: {
+        $nest: {
+          '.lm-DockPanel-tabBar &': {
+            marginRight: '4px'
+          },
+          '#tab-manager &': {
+            marginRight: '2px',
+            position: 'relative'
+          }
+        }
+      },
+      element: {
+        $nest: {
+          '.lm-DockPanel-tabBar &': {
+            height: '14px',
+            width: '14px'
+          },
+          '#tab-manager &': {
+            height: '16px',
+            width: '16px'
+          }
+        }
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
 
-const containerCSSLeft: NestedCSSProperties = {
-  alignItems: 'center',
-  display: 'flex'
-};
+    menuItem: {
+      container: {
+        display: 'inline-block',
+        verticalAlign: 'middle'
+      },
+      element: {
+        height: '16px',
+        width: '16px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
 
-const containerCSSRight: NestedCSSProperties = {
-  alignItems: 'center',
-  display: 'flex'
-};
+    runningItem: {
+      container: {
+        margin: '0px 4px 0px 12px'
+      },
+      element: {
+        height: '16px',
+        width: '16px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
 
-const containerCSSJustify: { [k in IconJustifyType]: NestedCSSProperties } = {
-  center: containerCSSCenter,
-  left: containerCSSLeft,
-  right: containerCSSRight
-};
+    select: {
+      container: {
+        pointerEvents: 'none'
+      },
+      element: {
+        position: 'absolute',
+        height: 'auto',
+        width: '16px'
+      }
+    },
 
-/**
- * for putting together the icon kind style with any user input styling,
- * as well as styling from optional flags like `center`
- */
-function iconCSS(props: IIconStyle): NestedCSSProperties {
-  const { kind, justify, ...propsCSS } = props;
+    settingsEditor: {
+      container: {
+        display: 'inline-block',
+        flex: '0 0 20px',
+        margin: '0 3px 0 0',
+        position: 'relative',
+        height: '20px',
+        width: '20px'
+      },
+      element: {
+        height: '16px',
+        width: '16px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
 
-  return {
-    ...(justify ? iconCSSJustify[justify] : {}),
-    ...(kind ? iconCSSKind[kind] : {}),
-    ...propsCSS
+    sideBar: {
+      container: {
+        // `&` will be substituted for the generated classname (interpolation)
+        $nest: {
+          // left sidebar tab divs
+          '.jp-SideBar.jp-mod-left .lm-TabBar-tab &': {
+            transform: 'rotate(90deg)'
+          },
+          // left sidebar currently selected tab div
+          '.jp-SideBar.jp-mod-left .lm-TabBar-tab.lm-mod-current &': {
+            transform:
+              'rotate(90deg)\n' +
+              '    translate(\n' +
+              '      calc(-0.5 * var(--jp-border-width)),\n' +
+              '      calc(-0.5 * var(--jp-border-width))\n' +
+              '    )'
+          },
+
+          // right sidebar tab divs
+          '.jp-SideBar.jp-mod-right .lm-TabBar-tab &': {
+            transform: 'rotate(-90deg)'
+          },
+          // right sidebar currently selected tab div
+          '.jp-SideBar.jp-mod-right .lm-TabBar-tab.lm-mod-current &': {
+            transform:
+              'rotate(-90deg)\n' +
+              '    translate(\n' +
+              '      calc(0.5 * var(--jp-border-width)),\n' +
+              '      calc(-0.5 * var(--jp-border-width))\n' +
+              '    )'
+          }
+        }
+      },
+      element: {
+        width: '20px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
+
+    splash: {
+      container: {
+        animation: '0.3s fade-in linear forwards',
+        height: '100%',
+        width: '100%',
+        zIndex: 1
+      },
+      element: {
+        width: '100px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    },
+
+    statusBar: {
+      element: {
+        left: '0px',
+        top: '0px',
+        height: '18px',
+        width: '20px',
+        position: 'relative'
+      }
+    },
+
+    toolbarButton: {
+      container: {
+        display: 'inline-block',
+        margin: 'auto',
+        verticalAlign: 'middle'
+      },
+      element: {
+        height: '16px',
+        width: '16px'
+      },
+      options: {
+        elementPosition: 'center'
+      }
+    }
   };
-}
 
-/**
- * for putting together the container kind style with any
- * styling from optional flags like `center`
- */
-function containerCSS(props: IIconStyle): NestedCSSProperties {
-  const { kind, justify } = props;
+  function _elementPositionFactory(extra: NestedCSSProperties): ISheet {
+    return {
+      container: {
+        alignItems: 'center',
+        display: 'flex'
+      },
+      element: {
+        display: 'block',
+        ...extra
+      }
+    };
+  }
 
-  return {
-    ...(justify ? containerCSSJustify[justify] : {}),
-    ...(kind ? containerCSSKind[kind] : {})
+  /**
+   * Styles to help with positioning
+   */
+  const positionSheets: { [k in IPosition]: ISheet } = {
+    center: _elementPositionFactory({ margin: '0 auto', width: '100%' }),
+
+    top: _elementPositionFactory({ margin: '0 0 auto 0' }),
+    right: _elementPositionFactory({ margin: '0 0 0 auto' }),
+    bottom: _elementPositionFactory({ margin: 'auto 0 0 0' }),
+    left: _elementPositionFactory({ margin: '0 auto 0 0' }),
+
+    'top right': _elementPositionFactory({ margin: '0 0 auto auto' }),
+    'bottom right': _elementPositionFactory({ margin: 'auto 0 0 auto' }),
+    'bottom left': _elementPositionFactory({ margin: 'auto auto 0 0' }),
+    'top left': _elementPositionFactory({ margin: '0 auto 0 auto' })
   };
-}
 
-/**
- * for setting the style on the container of an svg node representing an icon
- */
-export const iconStyle = (props?: IIconStyle): string => {
-  if (!props || Object.keys(props).length === 0) {
-    // props is empty
-    return '';
+  function _elementSizeFactory(size: string): ISheet {
+    return {
+      element: {
+        height: size,
+        width: size
+      }
+    };
   }
 
-  const conCSS = containerCSS(props);
+  /**
+   * sheets that establish some default sizes
+   */
+  const sizeSheets: { [k in ISize]: ISheet } = {
+    small: _elementSizeFactory('14px'),
+    normal: _elementSizeFactory('16px'),
+    large: _elementSizeFactory('20px'),
+    xlarge: _elementSizeFactory('24px')
+  };
 
-  return style({
-    ...conCSS,
-    $nest: {
-      ...conCSS.$nest,
-      ['svg']: iconCSS(props)
+  /**
+   * Merge two or more icon sheets into a single "pure"
+   * icon style (ie collections of CSS props only)
+   */
+  function mergeSheets(sheets: ISheet[]): ISheetPure {
+    return {
+      container: Object.assign({}, ...sheets.map(s => s.container)),
+      element: Object.assign({}, ...sheets.map(s => s.element))
+    };
+  }
+
+  /**
+   * Resolve one or more stylesheets that may just be a string naming
+   * one of the builtin stylesheets to an array of proper ISheet objects
+   */
+  function resolveSheet(
+    stylesheet: ISheetResolvable | ISheetResolvable[] | undefined
+  ): ISheet[] {
+    if (!stylesheet) {
+      return [];
     }
-  });
-};
 
-/**
- * for setting the style directly on the svg node representing an icon
- */
-export const iconStyleFlat = (props?: IIconStyle): string => {
-  if (!props || Object.keys(props).length === 0) {
-    return '';
+    if (!Array.isArray(stylesheet)) {
+      // wrap in array
+      stylesheet = [stylesheet];
+    }
+
+    return stylesheet.map(k => (typeof k === 'string' ? builtinSheets[k] : k));
   }
 
-  return style(iconCSS(props));
-};
+  /**
+   * Resolve and merge multiple icon stylesheets
+   */
+  function applySheetOptions(sheets: ISheet[]) {
+    const options: ISheetOptions = Object.assign(
+      {},
+      ...sheets.map(s => s.options)
+    );
+
+    if (options.elementPosition) {
+      sheets.unshift(positionSheets[options.elementPosition]);
+    }
+
+    if (options.elementSize) {
+      sheets.unshift(sizeSheets[options.elementSize]);
+    }
+
+    return mergeSheets(sheets);
+  }
+
+  /**
+   * Resolve a pure icon styleheet into a typestyle class
+   */
+  function resolveStyleClass(stylesheet: ISheetPure): string {
+    return typestyleClass({
+      ...stylesheet.container,
+      $nest: {
+        ...stylesheet.container?.$nest,
+        ['svg']: stylesheet.element
+      }
+    });
+  }
+
+  // cache style classes for builtin stylesheets
+  let _styleClassCache = new Map<string, string>();
+
+  /**
+   * Get a typestyle class, given a set of icon styling props
+   */
+  export function styleClass(props?: IProps): string {
+    if (!props || Object.keys(props).length === 0) {
+      // props is empty
+      return '';
+    }
+
+    let {
+      elementPosition,
+      elementSize,
+      stylesheet,
+      kind,
+      justify,
+      ...elementCSS
+    } = props;
+
+    // DEPRECATED: alias kind => stylesheet
+    if (!stylesheet) {
+      stylesheet = kind;
+    }
+
+    // DEPRECATED: alias justify => elementPosition
+    if (!elementPosition) {
+      elementPosition = justify;
+    }
+
+    // add option args with defined values to overrides
+    const options = {
+      ...(elementPosition && { elementPosition }),
+      ...(elementSize && { elementSize })
+    };
+
+    // try to look up the style class in the cache
+    const cacheable =
+      typeof stylesheet === 'string' && Object.keys(elementCSS).length === 0;
+    const cacheKey = cacheable
+      ? [stylesheet, elementPosition, elementSize].join(',')
+      : '';
+    if (cacheable && _styleClassCache.has(cacheKey)) {
+      return _styleClassCache.get(cacheKey)!;
+    }
+
+    // resolve kind to an array of sheets, then stick overrides on the end
+    const sheets = resolveSheet(stylesheet);
+    sheets.push({ element: elementCSS, options });
+
+    // apply style options/merge sheets, then convert to typestyle class
+    const cls = resolveStyleClass(applySheetOptions(sheets));
+
+    if (cacheable) {
+      // store in cache for later reuse
+      _styleClassCache.set(cacheKey, cls);
+    }
+
+    return cls;
+  }
+}

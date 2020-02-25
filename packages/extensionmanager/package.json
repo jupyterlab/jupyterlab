@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/extensionmanager",
-  "version": "2.0.0-rc.0",
+  "version": "2.0.0-rc.2",
   "description": "JupyterLab - Extension Manager",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,11 +35,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.0.0-rc.0",
-    "@jupyterlab/services": "^5.0.0-rc.0",
-    "@jupyterlab/ui-components": "^2.0.0-rc.1",
+    "@jupyterlab/apputils": "^2.0.0-rc.2",
+    "@jupyterlab/services": "^5.0.0-rc.2",
+    "@jupyterlab/ui-components": "^2.0.0-rc.3",
     "@lumino/messaging": "^1.3.3",
-    "@lumino/polling": "^1.0.3",
+    "@lumino/polling": "^1.0.4",
     "react": "~16.9.0",
     "react-paginate": "^6.3.2",
     "semver": "^6.3.0"

@@ -311,33 +311,3 @@
 .jp-DragIcon {
   margin-right: 4px;
 }
-
-/* These are icons still in need of some cleanup */
-
-/*.jp-CloseIcon {*/
-/*  background-image: var(--jp-icon-close);*/
-/*}*/
-
-/*.jp-ConsoleIcon {*/
-/*  background-image: var(--jp-icon-console);*/
-/*}*/
-
-/*.jp-DownloadIcon {*/
-/*  background-image: var(--jp-icon-download);*/
-/*}*/
-
-/*.jp-EditIcon {*/
-/*  background-image: var(--jp-icon-edit);*/
-/*}*/
-
-/*.jp-LinkIcon {*/
-/*  background-image: var(--jp-icon-link);*/
-/*}*/
-
-/*.jp-NewFolderIcon {*/
-/*  background-image: var(--jp-icon-new-folder);*/
-/*}*/
-
-/*.jp-UndoIcon {*/
-/*  background-image: var(--jp-icon-undo);*/
-/*}*/

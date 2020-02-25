@@ -4,9 +4,9 @@
 import { hpass, VirtualElement } from '@lumino/virtualdom';
 import { DockPanel, TabBar, Widget } from '@lumino/widgets';
 
-import { closeIcon } from './iconimports';
-import { iconStyle } from '../style';
-import { classes } from '../utils';
+import { closeIcon } from '../iconimports';
+import { LabIconStyle } from '../../style';
+import { classes } from '../../utils';
 
 /**
  * a widget which displays titles as a single row or column of tabs.
@@ -14,8 +14,7 @@ import { classes } from '../utils';
  */
 export class TabBarSvg<T> extends TabBar<T> {
   /**
-   * Construct a new tab bar. Sets the (icon) kind and overrides
-   * the default renderer.
+   * Construct a new tab bar. Overrides the default renderer.
    *
    * @param options - The options for initializing the tab bar.
    */
@@ -40,7 +39,11 @@ export namespace TabBarSvg {
     renderCloseIcon(data: TabBar.IRenderData<any>): VirtualElement {
       const className = classes(
         'jp-icon-hover lm-TabBar-tabCloseIcon',
-        iconStyle({ justify: 'center', height: '16px', width: '16px' })
+        LabIconStyle.styleClass({
+          elementPosition: 'center',
+          height: '16px',
+          width: '16px'
+        })
       );
 
       return (hpass(

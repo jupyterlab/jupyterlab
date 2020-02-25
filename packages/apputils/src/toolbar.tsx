@@ -448,9 +448,9 @@ export namespace ToolbarButtonComponent {
   export interface IProps {
     className?: string;
     label?: string;
+    icon?: LabIcon.IMaybeResolvable;
     iconClass?: string;
     iconLabel?: string;
-    icon?: LabIcon;
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
@@ -503,8 +503,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
         }
         className="jp-ToolbarButtonComponent-icon"
         tag="span"
-        justify="center"
-        kind="toolbarButton"
+        stylesheet="toolbarButton"
       />
       {props.label && (
         <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
@@ -609,8 +608,14 @@ namespace Private {
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {
     let { commands, id, args } = options;
+
     const iconClass = commands.iconClass(id, args);
     const iconLabel = commands.iconLabel(id, args);
+    // DEPRECATED: remove _icon when lumino 2.0 is adopted
+    // if icon is aliasing iconClass, don't use it
+    const _icon = commands.icon(id, args);
+    const icon = _icon === iconClass ? undefined : _icon;
+
     const label = commands.label(id, args);
     let className = commands.className(id, args);
     // Add the boolean state classes.
@@ -625,7 +630,8 @@ namespace Private {
       void commands.execute(id, args);
     };
     const enabled = commands.isEnabled(id, args);
-    return { className, iconClass, tooltip, onClick, enabled, label };
+
+    return { className, icon, iconClass, tooltip, onClick, enabled, label };
   }
 
   /**
@@ -726,15 +732,15 @@ namespace Private {
         circleIcon.element({
           container: this.node,
           title: `Kernel ${Text.titleCase(status)}`,
-          justify: 'center',
-          kind: 'toolbarButton'
+
+          stylesheet: 'toolbarButton'
         });
       } else {
         circleEmptyIcon.element({
           container: this.node,
           title: `Kernel ${Text.titleCase(status)}`,
-          justify: 'center',
-          kind: 'toolbarButton'
+
+          stylesheet: 'toolbarButton'
         });
       }
     }

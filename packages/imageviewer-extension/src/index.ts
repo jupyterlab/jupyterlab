@@ -105,9 +105,9 @@ function activate(
     const types = app.docRegistry.getFileTypesForPath(widget.context.path);
 
     if (types.length > 0) {
+      widget.title.icon = types[0].icon!;
       widget.title.iconClass = types[0].iconClass ?? '';
       widget.title.iconLabel = types[0].iconLabel ?? '';
-      widget.title.iconRenderer = types[0].icon!;
     }
   });
 

@@ -23,3 +23,10 @@ jupyterlab/staging/index.js
 jupyterlab/staging/yarn.js
 jupyterlab/themes
 packages/ui-components/src/icon/iconimports.ts
+
+# jetbrains IDE stuff
+.idea/
+
+# ms IDE stuff
+.history/
+.vscode/

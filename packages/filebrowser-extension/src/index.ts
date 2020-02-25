@@ -42,7 +42,22 @@ import { IStateDB } from '@jupyterlab/statedb';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
-import { addIcon, folderIcon } from '@jupyterlab/ui-components';
+import {
+  addIcon,
+  closeIcon,
+  copyIcon,
+  cutIcon,
+  downloadIcon,
+  editIcon,
+  fileIcon,
+  folderIcon,
+  linkIcon,
+  markdownIcon,
+  newFolderIcon,
+  pasteIcon,
+  stopIcon,
+  textEditorIcon
+} from '@jupyterlab/ui-components';
 
 import { IIterator, map, reduce, toArray, find } from '@lumino/algorithm';
 
@@ -293,7 +308,7 @@ function activateBrowser(
     mainMenu
   );
 
-  browser.title.iconRenderer = folderIcon;
+  browser.title.icon = folderIcon;
   // Show the current file browser shortcut in its title.
   const updateBrowserTitle = () => {
     const binding = find(
@@ -388,12 +403,12 @@ function activateShareFile(
         return;
       }
       const path = encodeURI(model.path);
-      Clipboard.copyToSystem(URLExt.join(PageConfig.getTreeUrl(), path));
+      Clipboard.copyToSystem(URLExt.join(PageConfig.getTreeShareUrl(), path));
     },
     isVisible: () =>
       !!tracker.currentWidget &&
       toArray(tracker.currentWidget.selectedItems()).length === 1,
-    iconClass: 'jp-MaterialIcon jp-LinkIcon',
+    icon: linkIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Copy Shareable Link'
   });
 }
@@ -421,7 +436,7 @@ function addCommands(
         return widget.delete();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-CloseIcon',
+    icon: closeIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Delete',
     mnemonic: 0
   });
@@ -434,7 +449,7 @@ function addCommands(
         return widget.copy();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-CopyIcon',
+    icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Copy',
     mnemonic: 0
   });
@@ -447,7 +462,7 @@ function addCommands(
         return widget.cut();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-CutIcon',
+    icon: cutIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Cut'
   });
 
@@ -459,7 +474,7 @@ function addCommands(
         return widget.download();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-DownloadIcon',
+    icon: downloadIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Download'
   });
 
@@ -471,7 +486,7 @@ function addCommands(
         return widget.duplicate();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-CopyIcon',
+    icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Duplicate'
   });
 
@@ -586,16 +601,16 @@ function addCommands(
         )
       );
     },
-    iconClass: args => {
+    icon: args => {
       const factory = (args['factory'] as string) || void 0;
       if (factory) {
         // if an explicit factory is passed...
         const ft = registry.getFileType(factory);
         // ...set an icon if the factory name corresponds to a file type name...
         // ...or leave the icon blank
-        return ft?.iconClass ?? '';
+        return ft?.icon?.bindprops({ stylesheet: 'menuItem' });
       } else {
-        return 'jp-MaterialIcon jp-FolderIcon';
+        return folderIcon.bindprops({ stylesheet: 'menuItem' });
       }
     },
     label: args => (args['label'] || args['factory'] || 'Open') as string,
@@ -620,7 +635,7 @@ function addCommands(
         )
       );
     },
-    iconClass: 'jp-MaterialIcon jp-AddIcon',
+    icon: addIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Open in New Browser Tab',
     mnemonic: 0
   });
@@ -638,7 +653,7 @@ function addCommands(
           Clipboard.copyToSystem(url);
         });
     },
-    iconClass: 'jp-MaterialIcon jp-CopyIcon',
+    icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Copy Download Link',
     mnemonic: 0
   });
@@ -651,7 +666,7 @@ function addCommands(
         return widget.paste();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-PasteIcon',
+    icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Paste',
     mnemonic: 0
   });
@@ -664,7 +679,7 @@ function addCommands(
         return widget.createNewDirectory();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-NewFolderIcon',
+    icon: newFolderIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'New Folder'
   });
 
@@ -679,7 +694,7 @@ function addCommands(
         ext: 'txt'
       });
     },
-    iconClass: 'jp-MaterialIcon jp-TextEditorIcon',
+    icon: textEditorIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'New File'
   });
 
@@ -694,7 +709,7 @@ function addCommands(
         ext: 'md'
       });
     },
-    iconClass: 'jp-MaterialIcon jp-MarkdownIcon',
+    icon: markdownIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'New Markdown File'
   });
 
@@ -706,7 +721,7 @@ function addCommands(
         return widget.rename();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-EditIcon',
+    icon: editIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Rename',
     mnemonic: 0
   });
@@ -727,7 +742,7 @@ function addCommands(
     isVisible: () =>
       !!tracker.currentWidget &&
       tracker.currentWidget.selectedItems().next !== undefined,
-    iconClass: 'jp-MaterialIcon jp-FileIcon',
+    icon: fileIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Copy Path'
   });
 
@@ -769,7 +784,7 @@ function addCommands(
         return widget.shutdownKernels();
       }
     },
-    iconClass: 'jp-MaterialIcon jp-StopIcon',
+    icon: stopIcon.bindprops({ stylesheet: 'menuItem' }),
     label: 'Shut Down Kernel'
   });
 

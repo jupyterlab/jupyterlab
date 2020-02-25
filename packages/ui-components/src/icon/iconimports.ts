@@ -22,6 +22,7 @@ import caseSensitiveSvgstr from '../../style/icons/search/case-sensitive.svg';
 import checkSvgstr from '../../style/icons/toolbar/check.svg';
 import circleEmptySvgstr from '../../style/icons/toolbar/circle-empty.svg';
 import circleSvgstr from '../../style/icons/toolbar/circle.svg';
+import clearSvgstr from '../../style/icons/toolbar/clear.svg';
 import closeSvgstr from '../../style/icons/toolbar/close.svg';
 import consoleSvgstr from '../../style/icons/filetype/console.svg';
 import copySvgstr from '../../style/icons/toolbar/copy.svg';
@@ -88,6 +89,7 @@ export const caseSensitiveIcon = new LabIcon({ name: 'ui-components:case-sensiti
 export const checkIcon = new LabIcon({ name: 'ui-components:check', svgstr: checkSvgstr });
 export const circleEmptyIcon = new LabIcon({ name: 'ui-components:circle-empty', svgstr: circleEmptySvgstr });
 export const circleIcon = new LabIcon({ name: 'ui-components:circle', svgstr: circleSvgstr });
+export const clearIcon = new LabIcon({ name: 'ui-components:clear', svgstr: clearSvgstr });
 export const closeIcon = new LabIcon({ name: 'ui-components:close', svgstr: closeSvgstr });
 export const consoleIcon = new LabIcon({ name: 'ui-components:console', svgstr: consoleSvgstr });
 export const copyIcon = new LabIcon({ name: 'ui-components:copy', svgstr: copySvgstr });

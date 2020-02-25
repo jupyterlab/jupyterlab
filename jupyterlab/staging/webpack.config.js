@@ -153,6 +153,67 @@ module.exports = [
     entry: {
       main: ['whatwg-fetch', plib.resolve(buildDir, 'index.out.js')]
     },
+    // Map Phosphor files to Lumino files.
+    resolve: {
+      alias: {
+        '@phosphor/algorithm$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/algorithm/lib/index.js'
+        ),
+        '@phosphor/application$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/application/lib/index.js'
+        ),
+        '@phosphor/commands$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/commands/lib/index.js'
+        ),
+        '@phosphor/coreutils$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/coreutils/lib/index.js'
+        ),
+        '@phosphor/disposable$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/disposable/lib/index.js'
+        ),
+        '@phosphor/domutils$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/domutils/lib/index.js'
+        ),
+        '@phosphor/dragdrop$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/dragdrop/lib/index.js'
+        ),
+        '@phosphor/dragdrop/style': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/widgets/style'
+        ),
+        '@phosphor/messaging$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/messaging/lib/index.js'
+        ),
+        '@phosphor/properties$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/properties/lib'
+        ),
+        '@phosphor/signaling': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/signaling/lib/index.js'
+        ),
+        '@phosphor/widgets/style': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/widgets/style'
+        ),
+        '@phosphor/virtualdom$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/virtualdom/lib/index.js'
+        ),
+        '@phosphor/widgets$': plib.resolve(
+          __dirname,
+          'node_modules/@lumino/widgets/lib/index.js'
+        )
+      }
+    },
     output: {
       path: plib.resolve(buildDir),
       publicPath: '{{page_config.fullStaticUrl}}/',
