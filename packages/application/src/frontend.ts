@@ -356,13 +356,7 @@ namespace Private {
   /**
    * Returns whether the element is itself, or a child of, an element with the `jp-suppress-context-menu` data attribute.
    */
-  export function suppressContextMenu(element: HTMLElement | null): boolean {
-    while (element) {
-      if (typeof element.dataset.jpSuppressContextMenu === 'string') {
-        return true;
-      }
-      element = element.parentElement;
-    }
-    return false;
+  export function suppressContextMenu(element: HTMLElement): boolean {
+    return element.closest('[data-jp-suppress-context-menu]') !== null;
   }
 }
