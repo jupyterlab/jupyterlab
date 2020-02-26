@@ -3,30 +3,73 @@ from tempfile import TemporaryDirectory
 import threading
 
 import pytest
+import json
+import tornado
+
+import urllib.parse
+
+from tornado.escape import url_escape
 
 from jupyterlab.labapp import LabApp
-from jupyterlab_server.tests.utils import APITester, LabTestBase
-from jupyter_server.tests.launchnotebook import assert_http_error
+from jupyterlab_server.tests.utils import expected_http_error
+from jupyter_server.utils import url_path_join
 
 
-class BuildAPITester(APITester):
+class BuildAPITester():
     """Wrapper for build REST API requests"""
     url = 'lab/api/build'
 
-    def getStatus(self):
-        return self._req('GET', '')
+    def __init__(self, labapp, fetch):
+        self.fetch = fetch
+        self.labapp = labapp
 
-    def build(self):
-        return self._req('POST', '')
+    async def _req(self, verb, path, body=None):
+        return await self.fetch(self.url + path,
+            method=verb,
+            body=body
+            )
 
-    def clear(self):
-        return self._req('DELETE', '')
+    async def getStatus(self):
+        return await self._req('GET', '')
+
+    async def build(self):
+        return await self._req('POST', '', json.dumps({}))
+
+    async def clear(self):
+        return await self._req('DELETE', '')
+
+
+@pytest.fixture
+def labapp(serverapp, make_lab_extension_app):
+    app = make_lab_extension_app()
+    app.initialize(serverapp)
+    return app
+
+
+@pytest.fixture
+def build_api_tester(serverapp, labapp, fetch_long):
+    return BuildAPITester(labapp, fetch_long)
+
+
+@pytest.fixture
+def fetch_long(http_server_client, auth_header, base_url):
+    """fetch fixture that handles auth, base_url, and path"""
+    def client_fetch(*parts, headers={}, params={}, **kwargs):
+        # Handle URL strings
+        path_url = url_escape(url_path_join(base_url, *parts), plus=False)
+        params_url = urllib.parse.urlencode(params)
+        url = path_url + "?" + params_url
+        # Add auth keys to header
+        headers.update(auth_header)
+        # Make request.
+        return http_server_client.fetch(
+            url, headers=headers, request_timeout=300, **kwargs
+        )
+    return client_fetch
 
 
 @pytest.mark.slow
-class BuildAPITest(LabTestBase):
-    """Test the build web service API"""
-    Application = LabApp
+class TestBuildAPI:
 
     def tempdir(self):
         td = TemporaryDirectory()
@@ -38,39 +81,51 @@ class BuildAPITest(LabTestBase):
         # up at the end of the test run.
         self.tempdirs = []
 
+        # TODO(@echarles) Move the cleanup in the fixture.
         @self.addCleanup
         def cleanup_tempdirs():
             for d in self.tempdirs:
                 d.cleanup()
 
-        self.build_api = BuildAPITester(self.request)
-
-    @pytest.mark.timeout(timeout=30)
-    def test_get_status(self):
+#    @pytest.mark.timeout(timeout=30)
+#    @pytest.mark.gen_test(timeout=30)
+    async def test_get_status(self, build_api_tester):
         """Make sure there are no kernels running at the start"""
-        resp = self.build_api.getStatus().json()
+        r = await build_api_tester.getStatus()
+        res = r.body.decode()
+        resp = json.loads(res)
         assert 'status' in resp
         assert 'message' in resp
 
-    def test_build(self):
-        resp = self.build_api.build()
-        assert resp.status_code == 200
+#    @pytest.mark.gen_test(timeout=30)
+    async def test_build(self, build_api_tester):
+        r = await build_api_tester.build()
+        assert r.code == 200
 
-    def test_clear(self):
-        with assert_http_error(500):
-            self.build_api.clear()
+#    @pytest.mark.gen_test(timeout=30)
+    async def test_clear(self, build_api_tester):
+        with pytest.raises(tornado.httpclient.HTTPClientError) as e:
+            r = await build_api_tester.clear()
+            res = r.body.decode()
+        assert expected_http_error(e, 500)
 
-        def build_thread():
-            with assert_http_error(500):
-                self.build_api.build()
+        async def build_thread():
+            with pytest.raises(tornado.httpclient.HTTPClientError) as e:
+                r = await build_api_tester.build()
+                res = r.body.decode()
+            assert expected_http_error(e, 500)
 
         t1 = threading.Thread(target=build_thread)
         t1.start()
 
         while 1:
-            resp = self.build_api.getStatus().json()
+            r = await build_api_tester.getStatus()
+            res = r.body.decode()
+            resp = json.loads(res)
             if resp['status'] == 'building':
                 break
 
-        resp = self.build_api.clear()
-        assert resp.status_code == 204
+        r = await build_api_tester.clear()
+        res = r.body.decode()
+        resp = json.loads(res)
+        assert resp.code == 204

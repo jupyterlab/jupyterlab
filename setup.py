@@ -136,22 +136,26 @@ setup_args = dict(
 )
 
 
-# TODO Pin to a released jupyterlab_server and jupyter_server once available.
+# TODO(@echarles) Pin to a released jupyterlab_server and jupyter_server once available.
 setup_args['install_requires'] = [
     'notebook>=4.3.1',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
     'jinja2>=2.10',
     'nbclassic@ git+https://github.com/datalayer-contrib/jupyter-notebook-classic@master',
     'jupyterlab_server@ https://github.com/datalayer-contrib/jupyterlab-server@jupyter_server',
-    'jupyter_server@ git+https://github.com/jupyter/jupyter_server.git@master',
+    'jupyter_server@ git+https://github.com/datalayer-contrib/jupyter-server.git@extension_handlers',
 ]
 
 setup_args['extras_require'] = {
     'test': [
-        'pytest',
+        'pytest==5.3.2', 
+        'pytest-cov', 
+        'pytest-tornasync', 
+        'pytest-console-scripts',
         'pytest-check-links',
         'requests'
     ],
+    'test:sys_platform == "win32"': ['nose-exclude'],
     'docs': [
         'sphinx',
         'recommonmark',
@@ -172,6 +176,9 @@ setup_args['entry_points'] = {
         'jupyter-labextension = jupyterlab.labextensions:main',
         'jupyter-labhub = jupyterlab.labhubapp:main',
         'jlpm = jupyterlab.jlpmapp:main',
+    ],
+    'pytest11': [
+        'pytest_jupyterlab = jupyterlab.pytest_plugin'
     ],
 }
 
