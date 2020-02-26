@@ -480,7 +480,7 @@ class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
         help="Whether to serve the app in watch mode")
 
     # The name of the extension
-    extension_name = "jupyterlab"
+    extension_name = "lab"
 
     # The url that your extension will serve its homepage.
     default_url = '/lab'
