@@ -1,5 +1,4 @@
 version: 2
-name: jupyterlab
 sphinx:
   configuration: docs/source/conf.py
 python:
