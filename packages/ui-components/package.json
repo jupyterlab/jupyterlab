@@ -28,7 +28,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib",
-    "cleansvg": "svgo --pretty --indent=2 --disable=collapseGroups,moveGroupAttrsToElems,removeUnknownsAndDefaults,removeViewBox",
+    "cleansvg": "svgo --config svgo.yaml",
     "docs": "typedoc src",
     "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 9001 -c .storybook",
