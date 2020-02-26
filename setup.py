@@ -141,9 +141,9 @@ setup_args['install_requires'] = [
     'notebook>=4.3.1',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
     'jinja2>=2.10',
-    'nbclassic@ git+https://github.com/datalayer-contrib/jupyter-notebook-classic/tree/master',
-    'jupyterlab_server@ https://github.com/datalayer-contrib/jupyterlab-server/tree/jupyter_server',
-    'jupyter_server@ git+https://github.com/datalayer-contrib/jupyter-server.git/tree/extension_handlers',
+    'nbclassic@ git+https://github.com/datalayer-contrib/jupyter-notebook-classic@master',
+    'jupyterlab_server@ git+https://github.com/datalayer-contrib/jupyterlab-server@jupyter_server',
+    'jupyter_server@ git+https://github.com/datalayer-contrib/jupyter-server.git@extension_handlers',
 ]
 
 setup_args['extras_require'] = {
