@@ -1,6 +1,12 @@
-conda:
-    file: docs/environment.yml
+version: 2
+name: jupyterlab
+sphinx:
+  configuration: docs/conf.py
 python:
-    version: 3
-    pip_install: false
-    setup_py_install: false
+  version: 3.7
+  install:
+    # install docs requirements
+    - requirements: docs/requirements.txt
+    # install jupyterlab itself
+    - method: pip
+      path: .
