@@ -28,6 +28,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib",
+    "cleansvg": "svgo --config svgo.yaml",
     "docs": "typedoc src",
     "prepublishOnly": "npm run build",
     "storybook": "start-storybook -p 9001 -c .storybook",
@@ -56,6 +57,7 @@
     "babel-loader": "^8.0.6",
     "react-docgen-typescript-loader": "^3.3.0",
     "rimraf": "~3.0.0",
+    "svgo": "^1.3.2",
     "typedoc": "^0.15.4",
     "typescript": "~3.7.3"
   },

@@ -385,6 +385,7 @@ export namespace LabIconStyle {
         }
       },
       element: {
+        // width no height
         width: '20px'
       },
       options: {
@@ -400,6 +401,7 @@ export namespace LabIconStyle {
         zIndex: 1
       },
       element: {
+        // width no height
         width: '100px'
       },
       options: {
