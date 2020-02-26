@@ -1,9 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
   <g class="jp-icon-brand1 jp-icon-selectable" fill="#0288D1">
-    <rect x="20" y="19.8" width="160" height="159.9"/>
+    <path d="M20 19.8h160v159.9H20z"/>
   </g>
-  <g class="jp-icon-selectable-inverse" fill="white">
-    <rect x="105" y="127.3" width="40" height="12.8"/>
-    <polygon points="51.1,77 74,99.9 50.7,123.2 61.2,133.7 84.5,110.4 95,99.9 84.5,89.4 61.6,66.5 "/>
+  <g class="jp-icon-selectable-inverse" fill="#fff">
+    <path d="M105 127.3h40v12.8h-40zM51.1 77L74 99.9l-23.3 23.3 10.5 10.5 23.3-23.3L95 99.9 84.5 89.4 61.6 66.5z"/>
   </g>
 </svg>
