@@ -1,7 +1,7 @@
 version: 2
 name: jupyterlab
 sphinx:
-  configuration: docs/conf.py
+  configuration: docs/source/conf.py
 python:
   version: 3.7
   install:
