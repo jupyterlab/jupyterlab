@@ -39,4 +39,4 @@ Tips and Tricks
 
 - How do I start JupyterLab with a clean workspace every time?
 
-Add `'c.NotebookApp.default_url = '/lab?reset'` to your `jupyter_notebook_config.py`. See [How to create a jupyter_notebook_config.py](https://jupyter-notebook.readthedocs.io/en/stable/config.html) for more information.
+Add ``'c.NotebookApp.default_url = '/lab?reset'`` to your ``jupyter_notebook_config.py``. See `How to create a jupyter_notebook_config.py <https://jupyter-notebook.readthedocs.io/en/stable/config.html>`__ for more information.
