@@ -494,10 +494,14 @@ class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
     # Local path to templates directory.
     template_paths = []
 
+    # The config.
+    c = None
+
     def initialize_templates(self):
-        c = load_config(self)
-        self.static_paths = [c.static_dir]
-        self.template_paths = [c.templates_dir]
+        if self.c == None:
+            self.c = load_config(self)
+            self.static_paths = [self.c.static_dir]
+            self.template_paths = [self.c.templates_dir]
         if len(self.template_paths) > 0:
             self.settings.update({
                 "{}_template_paths".format(self.extension_name): self.template_paths
@@ -534,9 +538,10 @@ class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
 
         The extension API is experimental, and may change in future releases.
         """
-        c = load_config(self)
-        self.static_paths = [c.static_dir]
-        self.template_paths = [c.templates_dir]
+        if self.c == None:
+            self.c = load_config(self)
+            self.static_paths = [self.c.static_dir]
+            self.template_paths = [self.c.templates_dir]
         if not self.serverapp.jpserver_extensions.get('jupyterlab', False):
             msg = 'JupyterLab server extension not enabled, manually loading...'
             self.log.warning(msg)
