@@ -23,6 +23,7 @@ from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
 from jupyter_core.application import base_aliases, base_flags
 
+from jupyterlab_server import LabConfig
 from jupyterlab_server.process_app import ProcessApp
 import jupyterlab_server
 
@@ -121,7 +122,7 @@ class ProcessTestApp(ProcessApp):
     """A process app for running tests, includes a mock contents directory.
     """
     allow_origin = Unicode('*')
-    notebook_dir = Unicode(_create_notebook_dir())
+    root_dir = Unicode(_create_notebook_dir())
     schemas_dir = Unicode(_create_schemas_dir())
     user_settings_dir = Unicode(_create_user_settings_dir())
     workspaces_dir = Unicode(_create_workspaces_dir())
@@ -138,6 +139,8 @@ class ProcessTestApp(ProcessApp):
     def start(self):
         self._install_default_kernels()
         self.kernel_manager.default_kernel_name = 'echo'
+        self.lab_config.static_dir = self.root_dir
+        self.lab_config.templates_dir = self.root_dir
         self.lab_config.schemas_dir = self.schemas_dir
         self.lab_config.user_settings_dir = self.user_settings_dir
         self.lab_config.workspaces_dir = self.workspaces_dir
