@@ -16,6 +16,7 @@ module.exports = function(name: string, baseDir: string) {
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
     rootDir: path.resolve(path.join(baseDir, '..', '..')),
     reporters: ['default', 'jest-junit'],
+    maxConcurrency: 1,
     collectCoverageFrom: [
       `packages/${name}/src/**.{ts,tsx}`,
       `!packages/${name}/src/*.d.ts`

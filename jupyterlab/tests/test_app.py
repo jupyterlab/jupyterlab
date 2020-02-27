@@ -265,10 +265,11 @@ class JestApp(ProcessTestApp):
         if self.testNamePattern:
             cmd += ['--testNamePattern', self.testNamePattern]
 
-        cmd += ['--runInBand']
+        # may work more consistently than --runInBand
+        cmd += ['--maxWorkers=1']
 
-        if self.log_level > logging.INFO:
-            cmd += ['--silent']
+        # --silent supresses js console output, --verbose makes jest print test names
+        cmd += ['--silent', '--verbose']
 
         config = dict(baseUrl=self.connection_url,
                       terminalsAvailable=str(terminalsAvailable),
@@ -356,6 +357,7 @@ class KarmaTestApp(ProcessTestApp):
 def run_jest(jest_dir):
     """Run a jest test in the given base directory.
     """
+    logging.disable(logging.WARNING)
     app = JestApp.instance()
     app.jest_dir = jest_dir
     app.initialize()
