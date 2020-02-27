@@ -23,11 +23,14 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { PathExt } from '@jupyterlab/coreutils';
+
 /**
  * The command IDs used by the markdownviewer plugin.
  */
 namespace CommandIDs {
   export const markdownPreview = 'markdownviewer:open';
+  export const markdownEditor = 'markdownviewer:edit';
 }
 
 /**
@@ -140,6 +143,35 @@ function activate(
         options: args['options']
       });
     }
+  });
+
+  commands.addCommand(CommandIDs.markdownEditor, {
+    execute: () => {
+      let widget = tracker.currentWidget;
+      if (!widget) {
+        return;
+      }
+      let path = widget.context.path;
+      return commands.execute('docmanager:open', {
+        path,
+        factory: 'Editor',
+        options: {
+          mode: 'split-right'
+        }
+      });
+    },
+    isVisible: () => {
+      let widget = tracker.currentWidget;
+      return (
+        (widget && PathExt.extname(widget.context.path) === '.md') || false
+      );
+    },
+    label: 'Show Markdown Editor'
+  });
+
+  app.contextMenu.addItem({
+    command: CommandIDs.markdownEditor,
+    selector: '.jp-RenderedMarkdown'
   });
 
   return tracker;
