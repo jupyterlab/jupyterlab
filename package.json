@@ -45,7 +45,7 @@
     "clean:utils": "cd buildutils && jlpm run clean",
     "covcmd": "lerna run coverage --stream --concurrency 1",
     "coverage": "jlpm run covcmd --scope \"@jupyterlab/test-*\" --ignore \"@jupyterlab/test-services\"",
-    "coverage:services": "jlpm run covcmd --scope \"@jupyterlab/test-services\"",
+    "coverage:services": "cd tests/test-services && jlpm run coverage",
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",
     "create:theme": "node buildutils/lib/create-theme.js",
