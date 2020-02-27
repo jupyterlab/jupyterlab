@@ -1,6 +1,8 @@
-conda:
-    file: docs/environment.yml
+version: 2
+sphinx:
+  configuration: docs/source/conf.py
 python:
-    version: 3
-    pip_install: false
-    setup_py_install: false
+  version: 3.7
+  install:
+    # install docs requirements
+    - requirements: docs/requirements.txt
