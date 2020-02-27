@@ -19,8 +19,8 @@ class BuildAPITester():
     """Wrapper for build REST API requests"""
     url = 'lab/api/build'
 
-    def __init__(self, labapp, fetch):
-        self.fetch = fetch
+    def __init__(self, labapp, fetch_long):
+        self.fetch = fetch_long
         self.labapp = labapp
 
     async def _req(self, verb, path, body=None):
