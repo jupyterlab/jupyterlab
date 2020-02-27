@@ -199,6 +199,11 @@ jest_aliases.update({
 
 
 jest_flags = dict(base_flags)
+jest_flags['detectOpenHandles'] = (
+    {'JestApp': {'detectOpenHandles': True}},
+    ('Attempt to collect and print open handles preventing Jest from exiting cleanly.\n'
+     'Expensive, use only for debug when jest is hanging and not exiting properly.')
+)
 jest_flags['coverage'] = (
     {'JestApp': {'coverage': True}},
     'Run coverage'
@@ -213,6 +218,8 @@ class JestApp(ProcessTestApp):
     """A notebook app that runs a jest test."""
 
     coverage = Bool(False, help='Whether to run coverage').tag(config=True)
+
+    detectOpenHandles = Bool(False).tag(config=True)
 
     testPathPattern = Unicode('').tag(config=True)
 
@@ -258,6 +265,9 @@ class JestApp(ProcessTestApp):
                 cmd += ['--watch']
         else:
             cmd += [jest]
+
+        if self.detectOpenHandles:
+            cmd += ['--detectOpenHandles']
 
         if self.testPathPattern:
             cmd += ['--testPathPattern', self.testPathPattern]
