@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf build && rimraf coverage",
-    "coverage": "python run.py --coverage || python run.py --coverage",
+    "coverage": "python run.py --coverage --detectOpenHandles || python run.py --coverage --detectOpenHandles",
     "test": "python run.py",
     "watch": "python run.py --debug",
     "watch:all": "python run.py --debug --watchAll",
