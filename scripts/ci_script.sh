@@ -21,8 +21,8 @@ if [[ $GROUP == js ]]; then
 
     jlpm build:packages
     jlpm build:test
-    jlpm coverage:services --loglevel success
-    jlpm coverage --loglevel success
+    FORCE_COLOR=1 jlpm coverage:services
+    FORCE_COLOR=1 jlpm coverage --loglevel success
 
     jlpm run clean
 fi
