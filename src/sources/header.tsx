@@ -43,15 +43,15 @@ export class SourcesHeader extends Widget {
   readonly toolbar = new Toolbar();
 }
 
+/**
+ * A React component to display the path to a source.
+ * @param model The model for the sources.
+ */
 const SourcePathComponent = ({ model }: { model: SourcesModel }) => {
   return (
     <UseSignal signal={model.currentSourceChanged} initialSender={model}>
       {model => (
-        <span
-          onClick={() => {
-            model.open();
-          }}
-        >
+        <span onClick={() => model.open()}>
           {model.currentSource?.path ?? ''}
         </span>
       )}
