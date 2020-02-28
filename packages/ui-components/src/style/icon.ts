@@ -210,7 +210,8 @@ export namespace LabIconStyle {
 
     launcherCard: {
       container: {
-        height: '68px'
+        height: '52px',
+        width: '52px'
       },
       element: {
         height: '52px',
