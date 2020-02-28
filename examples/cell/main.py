@@ -12,42 +12,69 @@ run ``python main.py``.
 
 """
 import os
-from jinja2 import FileSystemLoader
-from notebook.base.handlers import IPythonHandler, FileFindHandler
-from notebook.notebookapp import NotebookApp
-from notebook.utils import url_path_join as ujoin
+import json
+from jupyter_server.base.handlers import JupyterHandler, FileFindHandler
+from jupyter_server.extension.handler import ExtensionHandlerMixin, ExtensionHandlerJinjaMixin
+from jupyterlab_server import LabServerApp, LabConfig
+from jupyter_server.utils import url_path_join as ujoin
 from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
 
-class ExampleHandler(IPythonHandler):
+with open(os.path.join(HERE, 'package.json')) as fid:
+    version = json.load(fid)['version']
+
+class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterHandler):
     """Handle requests between the main app page and notebook server."""
+
+    def initialize(self):
+        super().initialize('lab')
 
     def get(self):
         """Get the main page for the application's interface."""
-        return self.write(self.render_template('index.html',
-                                               static=self.static_url,
-                                               base_url=self.base_url,
-                                               token=self.settings['token']))
+        config_data = {
+            # Use camelCase here, since that's what the lab components expect
+            "appVersion": version,
+            'baseUrl': self.base_url,
+            'token': self.settings['token'],
+            'frontendUrl': ujoin(self.base_url, 'example/'),
+        }
+        return self.write(
+            self.render_template(
+                'index.html',
+                static=self.static_url,
+                base_url=self.base_url,
+                token=self.settings['token'],
+                page_config=config_data
+                )
+            )
 
-    def get_template(self, name):
-        loader = FileSystemLoader(HERE)
-        return loader.load(self.settings['jinja2_env'], name)
 
-
-class ExampleApp(NotebookApp):
+class ExampleApp(LabServerApp):
 
     default_url = Unicode('/example')
 
-    def init_webapp(self):
+    lab_config = LabConfig(
+        app_name = 'JupyterLab Example Cell',
+        app_url = '/example',
+        static_dir = os.path.join(HERE, 'build'),
+        templates_dir = os.path.join(HERE, 'templates'),
+        app_version = version,
+        app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
+        schemas_dir = os.path.join(HERE, 'build', 'schemas'),
+        themes_dir = os.path.join(HERE, 'build', 'themes'),
+        user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
+        workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
+    )
+
+    def initialize_handlers(self):
         """initialize tornado webapp and httpserver.
         """
-        super().init_webapp()
         default_handlers = [
-            (ujoin(self.base_url, r'/example/?'), ExampleHandler),
-            (ujoin(self.base_url, r"/example/(.*)"), FileFindHandler,
-        {'path': os.path.join(HERE, 'build')})        ]
-        self.web_app.add_handlers('.*$', default_handlers)
+            (ujoin(self.serverapp.base_url, 'example'), ExampleHandler),
+        ]
+        self.serverapp.web_app.add_handlers('.*$', default_handlers)
+        super().initialize_handlers()
 
 
 if __name__ == '__main__':

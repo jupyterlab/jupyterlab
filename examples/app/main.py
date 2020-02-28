@@ -17,7 +17,6 @@ with open(os.path.join(HERE, 'package.json')) as fid:
     version = json.load(fid)['version']
 
 class ExampleApp(LabServerApp):
-    base_url = '/foo'
     default_url = Unicode('/example',
                           help='The default URL to redirect to from `/`')
 
