@@ -94,8 +94,15 @@ input::placeholder {
   color: var(--jp-ui-font-color3);
 }
 
-.jp-Icon {
-  color: var(--jp-layout-color4);
+.jp-BPIcon {
+  display: inline-block;
+  vertical-align: middle;
+  margin: auto;
+}
+
+/* Stop blueprint futzing with our icon fills */
+.bp3-icon.jp-BPIcon > svg:not([fill]) {
+  fill: var(--jp-inverse-layout-color3);
 }
 
 .jp-InputGroupAction {

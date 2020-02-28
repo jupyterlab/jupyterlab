@@ -499,7 +499,7 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
         icon={props.icon}
         iconClass={
           // add some extra classes for proper support of icons-as-css-backgorund
-          classes(props.iconClass, 'jp-Icon', 'jp-Icon-16')
+          classes(props.iconClass, 'jp-Icon')
         }
         className="jp-ToolbarButtonComponent-icon"
         tag="span"

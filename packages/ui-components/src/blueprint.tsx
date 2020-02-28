@@ -56,7 +56,7 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
         className={classes(props.className, 'jp-InputGroup')}
         rightElement={
           <div className="jp-InputGroupAction">
-            <BPIcon className={'jp-Icon'} icon={props.rightIcon} />
+            <BPIcon className={'jp-BPIcon'} icon={props.rightIcon} />
           </div>
         }
       />
