@@ -100,6 +100,6 @@ def fetch_long(http_server_client, auth_header, base_url):
         headers.update(auth_header)
         # Make request.
         return http_server_client.fetch(
-            url, headers=headers, request_timeout=50, **kwargs
+            url, headers=headers, request_timeout=150, **kwargs
         )
     return client_fetch

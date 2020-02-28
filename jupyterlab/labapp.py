@@ -389,7 +389,7 @@ class LabWorkspaceApp(JupyterApp):
             # TODO(@echarles) Discuss with @Zsailer on this...
             pass
         print('Either `export` or `import` must be specified.')
-        self.exit(1)
+        self.exit(0)
 
 
 
