@@ -101,7 +101,8 @@ input::placeholder {
 }
 
 /* Stop blueprint futzing with our icon fills */
-.bp3-icon > svg:not([fill]) {
+.bp3-icon.jp-BPIcon > svg:not([fill]) {
+  fill: var(--jp-inverse-layout-color3);
 }
 
 .jp-InputGroupAction {
