@@ -37,6 +37,7 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
             "appVersion": version,
             'baseUrl': self.base_url,
             'token': self.settings['token'],
+            'fullStaticUrl': ujoin(self.base_url, 'static', 'example'), 
             'frontendUrl': ujoin(self.base_url, 'example/'),
         }
         return self.write(

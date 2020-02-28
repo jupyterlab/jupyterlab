@@ -12,18 +12,26 @@ run ``python main.py``.
 
 """
 import os
+import json
 from jinja2 import FileSystemLoader
-from notebook.base.handlers import IPythonHandler, FileFindHandler
-from notebook.notebookapp import NotebookApp
-from notebook.utils import url_path_join as ujoin
+from jupyter_server.base.handlers import JupyterHandler, FileFindHandler
+from jupyter_server.extension.handler import ExtensionHandlerMixin, ExtensionHandlerJinjaMixin
+from jupyterlab_server import LabServerApp, LabConfig
+from jupyter_server.utils import url_path_join as ujoin
 from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
 
-class ExampleHandler(IPythonHandler):
+with open(os.path.join(HERE, 'package.json')) as fid:
+    version = json.load(fid)['version']
+
+class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterHandler):
     """
     Serve a notebook file from the filesystem in the notebook interface
     """
+
+    def initialize(self):
+        super().initialize('lab')
 
     def get(self):
         """Get the main page for the application's interface."""
@@ -33,6 +41,7 @@ class ExampleHandler(IPythonHandler):
             'baseUrl': self.base_url,
             'token': self.settings['token'],
             'notebookPath': 'test.ipynb',
+            'fullStaticUrl': ujoin(self.base_url, 'static', 'example'), 
             'frontendUrl': ujoin(self.base_url, 'example/'),
             # FIXME: Don't use a CDN here
             'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
@@ -43,30 +52,36 @@ class ExampleHandler(IPythonHandler):
                 'index.html',
                 static=self.static_url,
                 base_url=self.base_url,
-                config_data=config_data
+                token=self.settings['token'],
+                page_config=config_data
+                )
             )
-        )
-
-    def get_template(self, name):
-        loader = FileSystemLoader(HERE)
-        return loader.load(self.settings['jinja2_env'], name)
 
 
-class ExampleApp(NotebookApp):
+class ExampleApp(LabServerApp):
 
     default_url = Unicode('/example')
 
-    def init_webapp(self):
+    lab_config = LabConfig(
+        app_name = 'JupyterLab Example Notebook',
+        app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
+        app_url = '/example',
+        schemas_dir = os.path.join(HERE, 'build', 'schemas'),
+        static_dir = os.path.join(HERE, 'build'),
+        templates_dir = os.path.join(HERE, 'templates'),
+        themes_dir = os.path.join(HERE, 'build', 'themes'),
+        user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
+        workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
+    )
+
+    def initialize_handlers(self):
         """initialize tornado webapp and httpserver.
         """
-        super(ExampleApp, self).init_webapp()
-
         default_handlers = [
-            (ujoin(self.base_url, r'/example/?'), ExampleHandler),
-            (ujoin(self.base_url, r"/example/(.*)"), FileFindHandler,
-                {'path': os.path.join(HERE, 'build')})
+            (ujoin(self.serverapp.base_url, 'example'), ExampleHandler),
         ]
-        self.web_app.add_handlers('.*$', default_handlers)
+        self.serverapp.web_app.add_handlers('.*$', default_handlers)
+        super().initialize_handlers()
 
 
 if __name__ == '__main__':

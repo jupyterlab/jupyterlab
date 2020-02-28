@@ -10,10 +10,10 @@
     {# Set a dummy variable - we just want the side effect of the update. #}
     {% set _ = page_config_full.update(baseUrl=base_url, wsUrl=ws_url) %}
     
-      <script id="jupyter-config-data" type="application/json">
-        {{ page_config_full | tojson }}
-      </script>
-  <script src="{{page_config['fullStaticUrl'] | e}}/bundle.js" main="index"></script>
+    <script id="jupyter-config-data" type="application/json">
+      {{ page_config_full | tojson }}
+    </script>
+    <script src="{{page_config['fullStaticUrl'] | e}}/bundle.js" main="index"></script>
 
   <script type="text/javascript">
     /* Remove token from URL. */
