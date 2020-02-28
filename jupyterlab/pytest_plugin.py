@@ -1,12 +1,17 @@
 import pytest, shutil, os
 
-from jupyterlab import LabApp
-from jupyterlab_server import LabConfig
+import urllib.parse
+
+from tornado.escape import url_escape
 
 from traitlets import Unicode
 
+from jupyterlab import LabApp
+from jupyterlab_server import LabConfig
 from jupyterlab_server.tests.utils import here
 from jupyterlab_server.app import LabServerApp
+from jupyter_server.utils import url_path_join
+
 
 def mkdir(tmp_path, *parts):
     path = tmp_path.joinpath(*parts)
@@ -20,9 +25,9 @@ schemas_dir = pytest.fixture(lambda tmp_path: mkdir(tmp_path, 'schemas'))
 workspaces_dir = pytest.fixture(lambda tmp_path: mkdir(tmp_path, 'workspaces'))
 
 @pytest.fixture
-def make_lab_extension_app(root_dir, template_dir, app_settings_dir, user_settings_dir, schemas_dir, workspaces_dir):
-    def _make_lab_extension_app(**kwargs):
-        class TestLabServerApp(LabApp):
+def make_lab_app(root_dir, template_dir, app_settings_dir, user_settings_dir, schemas_dir, workspaces_dir):
+    def _make_lab_app(**kwargs):
+        class TestLabApp(LabApp):
             base_url = '/lab'
             default_url = Unicode('/',
                                 help='The default URL to redirect to from `/`')
@@ -36,7 +41,7 @@ def make_lab_extension_app(root_dir, template_dir, app_settings_dir, user_settin
                 schemas_dir = str(schemas_dir),
                 workspaces_dir = str(workspaces_dir),
             )
-        app = TestLabServerApp()
+        app = TestLabApp()
         return app
 
     # Create the index files.
@@ -73,11 +78,28 @@ def make_lab_extension_app(root_dir, template_dir, app_settings_dir, user_settin
 </html>
 """)
 
-    return _make_lab_extension_app
+    return _make_lab_app
 
 
 @pytest.fixture
-def labserverapp(serverapp, make_lab_extension_app):
-    app = make_lab_extension_app()
+def labapp(serverapp, make_lab_app):
+    app = make_lab_app()
     app.initialize(serverapp)
     return app
+
+
+@pytest.fixture
+def fetch_long(http_server_client, auth_header, base_url):
+    """fetch fixture that handles auth, base_url, and path"""
+    def client_fetch(*parts, headers={}, params={}, **kwargs):
+        # Handle URL strings
+        path_url = url_escape(url_path_join(base_url, *parts), plus=False)
+        params_url = urllib.parse.urlencode(params)
+        url = path_url + "?" + params_url
+        # Add auth keys to header
+        headers.update(auth_header)
+        # Make request.
+        return http_server_client.fetch(
+            url, headers=headers, request_timeout=50, **kwargs
+        )
+    return client_fetch

@@ -2,17 +2,18 @@
 from tempfile import TemporaryDirectory
 import threading
 
+import asyncio
 import pytest
 import json
 import tornado
 
-import urllib.parse
-
-from tornado.escape import url_escape
-
 from jupyterlab.labapp import LabApp
 from jupyterlab_server.tests.utils import expected_http_error
-from jupyter_server.utils import url_path_join
+
+
+@pytest.fixture
+def build_api_tester(serverapp, labapp, fetch_long):
+    return BuildAPITester(labapp, fetch_long)
 
 
 class BuildAPITester():
@@ -37,35 +38,6 @@ class BuildAPITester():
 
     async def clear(self):
         return await self._req('DELETE', '')
-
-
-@pytest.fixture
-def labapp(serverapp, make_lab_extension_app):
-    app = make_lab_extension_app()
-    app.initialize(serverapp)
-    return app
-
-
-@pytest.fixture
-def build_api_tester(serverapp, labapp, fetch_long):
-    return BuildAPITester(labapp, fetch_long)
-
-
-@pytest.fixture
-def fetch_long(http_server_client, auth_header, base_url):
-    """fetch fixture that handles auth, base_url, and path"""
-    def client_fetch(*parts, headers={}, params={}, **kwargs):
-        # Handle URL strings
-        path_url = url_escape(url_path_join(base_url, *parts), plus=False)
-        params_url = urllib.parse.urlencode(params)
-        url = path_url + "?" + params_url
-        # Add auth keys to header
-        headers.update(auth_header)
-        # Make request.
-        return http_server_client.fetch(
-            url, headers=headers, request_timeout=30, **kwargs
-        )
-    return client_fetch
 
 
 @pytest.mark.slow
@@ -109,16 +81,9 @@ class TestBuildAPI:
             res = r.body.decode()
         assert expected_http_error(e, 500)
 
-        async def build_thread():
-            with pytest.raises(tornado.httpclient.HTTPClientError) as e:
-                r = await build_api_tester.build()
-                res = r.body.decode()
-            assert expected_http_error(e, 500)
+        loop = asyncio.get_running_loop()
+        asyncio.ensure_future(build_api_tester.build(), loop=loop)
 
-        t1 = threading.Thread(target=build_thread)
-        t1.start()
-        """
-        TODO(@echarles) FIX ME
         while 1:
             r = await build_api_tester.getStatus()
             res = r.body.decode()
@@ -127,8 +92,4 @@ class TestBuildAPI:
                 break
 
         r = await build_api_tester.clear()
-        res = r.body.decode()
-        resp = json.loads(res)
-        assert resp.code == 204
-        """
-    
+        assert r.code == 204

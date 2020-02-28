@@ -13,7 +13,9 @@ fi
 
 if [[ $GROUP == python ]]; then
     # Run the python tests
-    py.test -v --junitxml=junit.xml
+#    py.test -v --junitxml=junit.xml
+#    Move the flags to setup.cfg
+    py.test
 fi
 
 

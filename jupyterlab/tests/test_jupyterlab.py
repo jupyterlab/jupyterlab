@@ -520,16 +520,6 @@ class TestExtension(AppHandlerTest):
         for pkg in data['jupyterlab']['singletonPackages']:
             if pkg.startswith('@jupyterlab/'):
                 assert pkg in singletons
-    """
-    # TODO(@echarles) Fix and reenable this test.
-    def test_load_extension(self):
-        app = NotebookApp()
-        stderr = sys.stderr
-        sys.stderr = self.devnull
-        app.initialize(argv=[])
-        sys.stderr = stderr
-        load_jupyter_server_extension(app)
-    """
 
     def test_disable_extension(self):
         options = AppOptions(app_dir=self.tempdir())
@@ -788,3 +778,12 @@ class TestExtension(AppHandlerTest):
         with p1, p2:
             assert update_extension(None, all_=True) is True
         assert sorted(updated) == [self.pkg_names['extension'], self.pkg_names['mimeextension']]
+
+
+def test_load_extension(serverapp, make_lab_app):
+    app = make_lab_app()
+    stderr = sys.stderr
+#    sys.stderr = self.devnull
+    app.initialize(serverapp)
+    sys.stderr = stderr
+    load_jupyter_server_extension(app)
