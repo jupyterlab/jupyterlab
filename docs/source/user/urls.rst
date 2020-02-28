@@ -168,3 +168,52 @@ validates the ``id`` field in the workspace ``metadata`` to make sure its URL is
 compatible with either the ``workspaces_url`` configuration or the ``page_url``
 configuration to verify that it is a correctly named workspace or it is the
 default workspace.
+
+
+Workspace File Format
+~~~~~~~~~~~~~~~~~~~~~
+
+A workspace file in a JSON file with a specific spec.
+
+
+There are two top level keys requires, `data`, and `metadata`.
+
+The `metadata` must be a mapping with an `id`
+key that has the same value as the ID of the workspace. This should also be the relative URL path to access the workspace,
+like `/lab/workspaces/foo`.
+
+The `data` key maps to the initial state of the `IStateDB`. Many plugins look in the State DB for the configuration. 
+Also any plugins that register with the `ILayoutRestorer` will look up all keys in the State DB
+that start with the `namespace` of their tracker before the first `:`. The values of these keys should have a `data`
+attribute that maps.
+
+For example, if your workspace looks like this:
+
+.. code-block:: bash
+
+  {
+    "data": {
+      "application-mimedocuments:package.json:JSON": {
+        "data": { "path": "package.json", "factory": "JSON" }
+      }
+    }
+  }
+
+It will run the `docmanager:open` with the `{ "path": "package.json", "factory": "JSON" }` args, because the `application-mimedocuments` tracker is registerd with the `docmanager:open` command, like this:
+
+
+.. code-block:: typescript
+
+  const namespace = 'application-mimedocuments';
+  const tracker = new WidgetTracker<MimeDocument>({ namespace });
+  void restorer.restore(tracker, {
+    command: 'docmanager:open',
+    args: widget => ({
+      path: widget.context.path,
+      factory: Private.factoryNameProperty.get(widget)
+    }),
+    name: widget =>
+      `${widget.context.path}:${Private.factoryNameProperty.get(widget)}`
+  });
+
+Not that the part of the data key after the first `:`, `package.json:JSON` is dropped and is irrelevent.
