@@ -17,6 +17,7 @@ import {
   createLatexGenerator,
   createNotebookGenerator,
   createMarkdownGenerator,
+  createPythonGenerator,
   createRenderedMarkdownGenerator
 } from './generators';
 import {
@@ -91,6 +92,10 @@ function activateTOC(
   // Create a LaTeX generator:
   const latexGenerator = createLatexGenerator(editorTracker);
   registry.add(latexGenerator);
+
+  // Create a Python generator:
+  const pythonGenerator = createPythonGenerator(editorTracker);
+  registry.add(pythonGenerator);
 
   // Update the ToC when the active widget changes:
   labShell.currentChanged.connect(onConnect);
