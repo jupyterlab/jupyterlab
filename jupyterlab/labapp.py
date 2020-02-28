@@ -235,7 +235,9 @@ class LabWorkspaceExportApp(JupyterApp):
     """
     def start(self):
         app = LabApp(config=self.config)
-        base_url = app.serverapp.base_url
+#        base_url = app.serverapp.base_url
+        # TODO(@echarles) Fix this.
+        base_url = '/'
         config = load_config(app)
         directory = config.workspaces_dir
         app_url = config.app_url
@@ -284,7 +286,9 @@ class LabWorkspaceImportApp(JupyterApp):
 
     def start(self):
         app = LabApp(config=self.config)
-        base_url = app.serverapp.base_url
+#        base_url = app.serverapp.base_url
+        # TODO(@echarles) Fix this.
+        base_url = '/'
         config = load_config(app)
         directory = config.workspaces_dir
         app_url = config.app_url
@@ -519,13 +523,16 @@ class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
         )
 
     def initialize_settings(self):
+        """
         merged_config = merge_notebook_configs(
             notebook_config_name = 'jupyter_notebook',
             server_config_name = 'jupyter_server',
             other_config_name = 'jupyter_lab',
             argv = sys.argv
-            )
+            )        
         self.settings['ServerApp'] = merged_config['ServerApp']
+        """
+        pass
         
     def initialize_handlers(self):
         """Load any extensions specified by config.
