@@ -11,17 +11,8 @@
   --jp-icon-search-white: url('deprecated/search-white.svg');
 }
 
-/* .jp-Launcher-icon {
-  margin: 0px;
-  padding: 0px;
-  height: var(--jp-private-launcher-large-icon-size);
-  width: var(--jp-private-launcher-large-icon-size);
-  background-size: var(--jp-private-launcher-large-icon-size)
-    var(--jp-private-launcher-large-icon-size);
-  background-repeat: no-repeat;
-} */
-
-.jp-Icon .jp-MaterialIcon {
+.jp-Icon,
+.jp-MaterialIcon {
   background-position: center;
   background-repeat: no-repeat;
   background-size: 16px;
@@ -33,10 +24,6 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-}
-
-.jp-DragIcon {
-  margin-right: 4px;
 }
 
 /**

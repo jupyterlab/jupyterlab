@@ -269,3 +269,8 @@
 :root {
   --jp-warn-color0: var(--md-orange-700);
 }
+
+/* not sure what to do with this one, used in filebrowser listing */
+.jp-DragIcon {
+  margin-right: 4px;
+}
