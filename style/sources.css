@@ -11,8 +11,9 @@
   height: 100%;
 }
 
-.jp-DebuggerSources-header > span {
+.jp-DebuggerSources-header > div > span {
   overflow: hidden;
+  cursor: pointer;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: var(--jp-ui-font-size0);

@@ -1,11 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Toolbar } from '@jupyterlab/apputils';
+import { ReactWidget, Toolbar, UseSignal } from '@jupyterlab/apputils';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { SourcesModel } from './model';
+
+import React from 'react';
 
 /**
  * The header for a Source Panel.
@@ -24,12 +26,9 @@ export class SourcesHeader extends Widget {
     const title = new Widget({ node: document.createElement('h2') });
     title.node.textContent = 'Source';
 
-    const sourcePath = new Widget({ node: document.createElement('span') });
-    model.currentSourceChanged.connect((_, source) => {
-      const path = source?.path ?? '';
-      sourcePath.node.textContent = path;
-      sourcePath.node.title = path;
-    });
+    const sourcePath = ReactWidget.create(
+      <SourcePathComponent model={model} />
+    );
 
     layout.addWidget(title);
     layout.addWidget(this.toolbar);
@@ -43,3 +42,19 @@ export class SourcesHeader extends Widget {
    */
   readonly toolbar = new Toolbar();
 }
+
+/**
+ * A React component to display the path to a source.
+ * @param model The model for the sources.
+ */
+const SourcePathComponent = ({ model }: { model: SourcesModel }) => {
+  return (
+    <UseSignal signal={model.currentSourceChanged} initialSender={model}>
+      {model => (
+        <span onClick={() => model.open()}>
+          {model.currentSource?.path ?? ''}
+        </span>
+      )}
+    </UseSignal>
+  );
+};
