@@ -12,6 +12,7 @@ import sys
 from jinja2 import Environment, FileSystemLoader
 
 from jupyter_core.application import JupyterApp, base_aliases, base_flags
+from jupyter_core.application import NoStart
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
 from jupyter_server.serverapp import aliases, flags
 from jupyter_server.utils import url_path_join as ujoin
@@ -382,7 +383,11 @@ class LabWorkspaceApp(JupyterApp):
     )
 
     def start(self):
-        super().start()
+        try:
+            super().start()
+        except NoStart:
+            # TODO(@echarles) Discuss with @Zsailer on this...
+            pass
         print('Either `export` or `import` must be specified.')
         self.exit(1)
 
