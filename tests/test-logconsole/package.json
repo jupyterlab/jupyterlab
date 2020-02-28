@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-logconsole",
-  "version": "2.0.0-rc.2",
+  "version": "2.1.0-rc.2",
   "private": true,
   "scripts": {
     "build": "tsc -b",
