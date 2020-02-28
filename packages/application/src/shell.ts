@@ -3,7 +3,7 @@
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
+import { classes, DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
@@ -772,11 +772,14 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // (for context menu support)
     title.dataset = { ...title.dataset, id: widget.id };
 
-    // bind an appropriate style to the icon
     if (title.icon instanceof LabIcon) {
+      // bind an appropriate style to the icon
       title.icon = title.icon.bindprops({
         stylesheet: 'mainAreaTab'
       });
+    } else if (typeof title.icon === 'string' || !title.icon) {
+      // add some classes to help with displaying css background imgs
+      title.iconClass = classes(title.iconClass, 'jp-Icon');
     }
 
     dock.addWidget(widget, { mode, ref });
@@ -1182,11 +1185,14 @@ namespace Private {
       // in order to dispatch click events to the right widget.
       title.dataset = { id: widget.id };
 
-      // bind an appropriate style to the icon
       if (title.icon instanceof LabIcon) {
+        // bind an appropriate style to the icon
         title.icon = title.icon.bindprops({
           stylesheet: 'sideBar'
         });
+      } else if (typeof title.icon === 'string' || !title.icon) {
+        // add some classes to help with displaying css background imgs
+        title.iconClass = classes(title.iconClass, 'jp-Icon', 'jp-Icon-20');
       }
 
       this._refreshVisibility();

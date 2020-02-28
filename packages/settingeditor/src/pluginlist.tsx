@@ -278,7 +278,7 @@ namespace Private {
         >
           <LabIcon.resolveReact
             icon={icon}
-            iconClass={classes(iconClass, 'jp-Icon')}
+            iconClass={iconClass && classes(iconClass, 'jp-Icon')}
             fallback={settingsIcon}
             title={iconTitle}
             tag="span"
