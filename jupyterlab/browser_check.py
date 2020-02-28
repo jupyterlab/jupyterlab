@@ -127,7 +127,7 @@ class BrowserApp(LabApp):
     test_browser = True
 
     def start(self):
-        web_app = self.web_app
+        web_app = self.serverapp.web_app
         web_app.settings.setdefault('page_config_data', dict())
         web_app.settings['page_config_data']['browserTest'] = True
         web_app.settings['page_config_data']['buildAvailable'] = False

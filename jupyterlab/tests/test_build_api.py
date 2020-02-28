@@ -81,7 +81,7 @@ class TestBuildAPI:
             res = r.body.decode()
         assert expected_http_error(e, 500)
 
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_event_loop()
         asyncio.ensure_future(build_api_tester.build(), loop=loop)
 
         while 1:
