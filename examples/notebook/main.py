@@ -44,8 +44,8 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
             'fullStaticUrl': ujoin(self.base_url, 'static', 'example'), 
             'frontendUrl': ujoin(self.base_url, 'example/'),
             # FIXME: Don't use a CDN here
-#            'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
-#            'mathjaxConfig': "TeX-AMS_CHTML-full,Safe"
+            'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
+            'mathjaxConfig': "TeX-AMS_CHTML-full,Safeee"
         }
         return self.write(
             self.render_template(
@@ -62,18 +62,6 @@ class ExampleApp(LabServerApp):
 
     default_url = Unicode('/example')
 
-    LabServerApp.lab_config = LabConfig(
-        app_name = 'JupyterLab Example Notebook',
-        app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
-        app_url = '/example',
-        schemas_dir = os.path.join(HERE, 'build', 'schemas'),
-        static_dir = os.path.join(HERE, 'build'),
-        templates_dir = os.path.join(HERE, 'templates'),
-        themes_dir = os.path.join(HERE, 'build', 'themes'),
-        user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
-        workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
-    )
-
     def initialize_handlers(self):
         """initialize tornado webapp and httpserver.
         """
@@ -81,6 +69,17 @@ class ExampleApp(LabServerApp):
             (ujoin(self.serverapp.base_url, 'example'), ExampleHandler),
         ]
         self.serverapp.web_app.add_handlers('.*$', default_handlers)
+        LabServerApp.lab_config = LabConfig(
+            app_name = 'JupyterLab Example Notebook',
+            app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
+            app_url = '/example',
+            schemas_dir = os.path.join(HERE, 'build', 'schemas'),
+            static_dir = os.path.join(HERE, 'build'),
+            templates_dir = os.path.join(HERE, 'templates'),
+            themes_dir = os.path.join(HERE, 'build', 'themes'),
+            user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
+            workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
+        )
         super().initialize_handlers()
 
 

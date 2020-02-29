@@ -42,13 +42,6 @@ class ExampleApp(LabServerApp):
 
     default_url = Unicode('/example')
 
-    LabServerApp.lab_config = LabConfig(
-        app_name = 'JupyterLab Example Service Browser Require',
-        app_url = '/example',
-        static_dir = os.path.join(HERE, 'static'),
-        templates_dir = os.path.join(HERE),
-    )
-
     def initialize_handlers(self):
         """initialize tornado webapp and httpserver.
         """
@@ -56,6 +49,12 @@ class ExampleApp(LabServerApp):
             (ujoin(self.serverapp.base_url, 'example'), ExampleHandler),
         ]
         self.serverapp.web_app.add_handlers('.*$', default_handlers)
+        LabServerApp.lab_config = LabConfig(
+            app_name = 'JupyterLab Example Service Browser Require',
+            app_url = '/example',
+            static_dir = os.path.join(HERE, 'static'),
+            templates_dir = os.path.join(HERE),
+        )
         super().initialize_handlers()
 
 

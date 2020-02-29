@@ -47,19 +47,6 @@ class ExampleApp(LabServerApp):
 
     default_url = Unicode('/example')
 
-    LabServerApp.lab_config = LabConfig(
-        app_name = 'JupyterLab Example Cell',
-        app_url = '/example',
-        static_dir = os.path.join(HERE, 'build'),
-        templates_dir = os.path.join(HERE, 'templates'),
-        app_version = version,
-        app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
-        schemas_dir = os.path.join(HERE, 'build', 'schemas'),
-        themes_dir = os.path.join(HERE, 'build', 'themes'),
-        user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
-        workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
-    )
-
     def initialize_handlers(self):
         """initialize tornado webapp and httpserver.
         """
@@ -67,6 +54,18 @@ class ExampleApp(LabServerApp):
             (ujoin(self.serverapp.base_url, 'example'), ExampleHandler),
         ]
         self.serverapp.web_app.add_handlers('.*$', default_handlers)
+        LabServerApp.lab_config = LabConfig(
+            app_name = 'JupyterLab Example Cell',
+            app_url = '/example',
+            static_dir = os.path.join(HERE, 'build'),
+            templates_dir = os.path.join(HERE, 'templates'),
+            app_version = version,
+            app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
+            schemas_dir = os.path.join(HERE, 'build', 'schemas'),
+            themes_dir = os.path.join(HERE, 'build', 'themes'),
+            user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
+            workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
+        )
         super().initialize_handlers()
 
 
