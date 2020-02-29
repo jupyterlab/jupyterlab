@@ -17,7 +17,6 @@ import tempfile
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-
 from traitlets import Bool, Dict, Unicode
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
