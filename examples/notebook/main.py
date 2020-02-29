@@ -44,8 +44,8 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
             'fullStaticUrl': ujoin(self.base_url, 'static', 'example'), 
             'frontendUrl': ujoin(self.base_url, 'example/'),
             # FIXME: Don't use a CDN here
-            'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
-            'mathjaxConfig': "TeX-AMS_CHTML-full,Safe"
+#            'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
+#            'mathjaxConfig': "TeX-AMS_CHTML-full,Safe"
         }
         return self.write(
             self.render_template(
