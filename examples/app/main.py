@@ -20,7 +20,7 @@ class ExampleApp(LabServerApp):
     default_url = Unicode('/example',
                           help='The default URL to redirect to from `/`')
 
-    lab_config = LabConfig(
+    LabServerApp.lab_config = LabConfig(
         app_name = 'JupyterLab Example App',
         app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
         app_version = version,

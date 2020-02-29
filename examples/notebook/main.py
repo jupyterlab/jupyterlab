@@ -62,7 +62,7 @@ class ExampleApp(LabServerApp):
 
     default_url = Unicode('/example')
 
-    lab_config = LabConfig(
+    LabServerApp.lab_config = LabConfig(
         app_name = 'JupyterLab Example Notebook',
         app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
         app_url = '/example',

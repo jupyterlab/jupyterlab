@@ -56,7 +56,7 @@ class ExampleApp(LabServerApp):
 
     default_url = Unicode('/example')
 
-    lab_config = LabConfig(
+    LabServerApp.lab_config = LabConfig(
         app_name = 'JupyterLab Example File Browser',
         app_url = '/example',
         static_dir = os.path.join(HERE, 'build'),
