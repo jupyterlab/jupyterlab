@@ -506,6 +506,12 @@ class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
     # The config.
     c = None
 
+    @staticmethod
+    def _jupyter_server_extension_paths():
+        return [{
+            'module': 'jupyterlab'
+        }]
+
     def initialize_templates(self):
         if self.c == None:
             self.c = load_config(self)
@@ -554,10 +560,10 @@ class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
             self.c = load_config(self)
             self.static_paths = [self.c.static_dir]
             self.template_paths = [self.c.templates_dir]
-        if not self.serverapp.jpserver_extensions.get('jupyterlab', False):
-            msg = 'JupyterLab server extension not enabled, manually loading...'
-            self.log.warning(msg)
-            load_jupyter_server_extension(self)
+        # TODO(@echarles) Discuss with @Zsailer https://github.com/jupyter/jupyter_server/pull/180
+#        if not self.serverapp.jpserver_extensions.get('jupyterlab', False):
+        self.log.warning('JupyterLab server extension not enabled, manually loading...')
+        load_jupyter_server_extension(self)
 
 #-----------------------------------------------------------------------------
 # Main entry point
