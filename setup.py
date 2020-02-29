@@ -143,7 +143,7 @@ setup_args['install_requires'] = [
     'jinja2>=2.10',
     'nbclassic@ git+https://github.com/datalayer-contrib/jupyter-notebook-classic@jupyterlab',
     'jupyterlab_server@ git+https://github.com/datalayer-contrib/jupyterlab-server@jupyter_server',
-    'jupyter_server@ git+https://github.com/datalayer-contrib/jupyter-server.git@discover-extensionapp-config',
+    'jupyter_server@ git+https://github.com/zsailer/jupyter-server.git@discover-extensionapp-config',
 ]
 
 setup_args['extras_require'] = {
