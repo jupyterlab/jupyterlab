@@ -160,7 +160,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
 
     // connect the document, but do not open it as the adapter will handle this
     // after registering all features
-    this.connect_document(this.virtual_editor.virtual_document).catch(
+    this.connect_document(this.virtual_editor.virtual_document, false).catch(
       console.warn
     );
   }

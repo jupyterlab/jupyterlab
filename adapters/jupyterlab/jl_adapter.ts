@@ -290,7 +290,7 @@ export abstract class JupyterLabWidgetAdapter
   /**
    * Opens a connection for the document. The connection may or may
    * not be initialized, yet, and depending on when this is called, the client
-   * may not be fully connected. In
+   * may not be fully connected.
    *
    * @param virtual_document a VirtualDocument
    * @param send_open whether to open the document immediately
@@ -324,8 +324,8 @@ export abstract class JupyterLabWidgetAdapter
   }
 
   /**
-   * Handler for opening a document contained in a larger document. The assumption
-   * is that the editor already exists for this this, and as such the document
+   * Handler for opening a document contained in a parent document. The assumption
+   * is that the editor already exists for this, and as such the document
    * should be queued for immediate opening.
    *
    * @param host the VirtualDocument that contains the VirtualDocument in another language
