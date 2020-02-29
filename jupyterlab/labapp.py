@@ -385,10 +385,10 @@ class LabWorkspaceApp(JupyterApp):
     def start(self):
         try:
             super().start()
+            print('Either `export` or `import` must be specified.')
+            self.exit(1)
         except NoStart:
-            # TODO(@echarles) Discuss with @Zsailer on this...
             pass
-        print('Either `export` or `import` must be specified.')
         self.exit(0)
 
 
