@@ -17,7 +17,12 @@ import {
   TextItem
 } from '@jupyterlab/statusbar';
 
-import { DefaultIconReact } from '@jupyterlab/ui-components';
+import {
+  LabIcon,
+  refreshIcon,
+  runningIcon,
+  stopIcon
+} from '@jupyterlab/ui-components';
 import { JupyterLabWidgetAdapter } from '../jl_adapter';
 import { collect_documents, VirtualDocument } from '../../../virtual/document';
 import { LSPConnection } from '../../../connection';
@@ -91,8 +96,7 @@ class CollapsibleList extends React.Component<
 
 class LSPPopup extends VDomRenderer<LSPStatus.Model> {
   constructor(model: LSPStatus.Model) {
-    super();
-    this.model = model;
+    super(model);
     this.addClass('lsp-popover');
   }
   render() {
@@ -230,8 +234,7 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
    * Construct a new VDomRenderer for the status item.
    */
   constructor() {
-    super();
-    this.model = new LSPStatus.Model();
+    super(new LSPStatus.Model());
     this.addClass(interactiveItem);
     this.addClass('lsp-statusbar-item');
     this.title.caption = 'LSP status';
@@ -250,8 +253,7 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
         title={this.model.long_message}
         onClick={this.handleClick}
       >
-        <DefaultIconReact
-          name={this.model.status_icon}
+        <this.model.status_icon.react
           top={'2px'}
           kind={'statusBar'}
           title={'LSP Code Intelligence'}
@@ -292,12 +294,13 @@ function collect_languages(virtual_document: VirtualDocument): Set<string> {
 }
 
 type StatusMap = Record<StatusCode, string>;
+type StatusIcon = Record<StatusCode, LabIcon>;
 
-const iconByStatus: StatusMap = {
-  waiting: 'refresh',
-  initialized: 'running',
-  initializing: 'refresh',
-  connecting: 'refresh'
+const iconByStatus: StatusIcon = {
+  waiting: refreshIcon,
+  initialized: runningIcon,
+  initializing: refreshIcon,
+  connecting: refreshIcon
 };
 
 const shortMessageByStatus: StatusMap = {
@@ -451,9 +454,9 @@ export namespace LSPStatus {
       };
     }
 
-    get status_icon(): string {
+    get status_icon(): LabIcon {
       if (!this.adapter) {
-        return 'stop';
+        return stopIcon;
       }
       return iconByStatus[this.status.status];
     }
