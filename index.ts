@@ -7,7 +7,7 @@ import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
-import { ISettingRegistry } from '@jupyterlab/coreutils';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { LanguageServerManager } from './manager';
