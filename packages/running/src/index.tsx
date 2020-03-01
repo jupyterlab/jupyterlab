@@ -13,7 +13,7 @@ import {
   ToolbarButtonComponent,
   UseSignal
 } from '@jupyterlab/apputils';
-import { closeIcon, LabIcon, refreshIcon } from '@jupyterlab/ui-components';
+import { closeIcon, ILabIcon, refreshIcon } from '@jupyterlab/ui-components';
 
 /**
  * The class name added to a running widget.
@@ -269,7 +269,7 @@ export namespace IRunningSessions {
     // called when the shutdown button is pressed on a particular item
     shutdown: () => void;
     // LabIcon to use as the icon
-    icon: () => LabIcon;
+    icon: () => ILabIcon;
     // called to determine the label for each item
     label: () => string;
     // called to determine the `title` attribute for each item, which is revealed on hover
