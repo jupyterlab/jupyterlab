@@ -22,13 +22,14 @@ from ._version import __version__
 from .debuglog import DebugLogFileMixin
 from .extension import load_config, load_jupyter_server_extension
 from .commands import (
+    DEV_DIR, HERE, 
     build, clean, get_app_dir, get_app_version, get_user_settings_dir,
     get_workspaces_dir, AppOptions,
 )
 from .coreconfig import CoreConfig
 
 from jupyter_server.extension.application import ExtensionApp, ExtensionAppJinjaMixin
-from nbclassic.shimconfig import merge_notebook_configs
+# from nbclassic.shimconfig import merge_notebook_configs
 
 build_aliases = dict(base_aliases)
 build_aliases['app-dir'] = 'LabBuildApp.app_dir'
@@ -515,8 +516,18 @@ class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
     def initialize_templates(self):
         if self.c == None:
             self.c = load_config(self)
-            self.static_paths = [self.c.static_dir]
-            self.template_paths = [self.c.templates_dir]
+            app_dir = getattr(self, 'app_dir', get_app_dir())
+            if getattr(self, 'dev_mode', False) or app_dir.startswith(DEV_DIR):
+                dev_static_dir = ujoin(DEV_DIR, 'static')
+                self.static_paths = [dev_static_dir]
+                self.template_paths = [dev_static_dir]
+            elif getattr(self, 'core_mode', False) or app_dir.startswith(HERE):
+                dev_static_dir = ujoin(HERE, 'static')
+                self.static_paths = [dev_static_dir]
+                self.template_paths = [dev_static_dir]
+            else:
+                self.static_paths = [self.c.static_dir]
+                self.template_paths = [self.c.templates_dir]
         if len(self.template_paths) > 0:
             self.settings.update({
                 "{}_template_paths".format(self.extension_name): self.template_paths
@@ -556,10 +567,6 @@ class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
 
         The extension API is experimental, and may change in future releases.
         """
-        if self.c == None:
-            self.c = load_config(self)
-            self.static_paths = [self.c.static_dir]
-            self.template_paths = [self.c.templates_dir]
         # TODO(@echarles) Discuss with @Zsailer https://github.com/jupyter/jupyter_server/pull/180
 #        if not self.serverapp.jpserver_extensions.get('jupyterlab', False):
         self.log.warning('JupyterLab server extension not enabled, manually loading...')

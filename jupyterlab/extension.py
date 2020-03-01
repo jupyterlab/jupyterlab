@@ -25,7 +25,7 @@ Running the core application with no additional extensions or settings
 """
 
 
-def load_config(nbapp):
+def load_config(labapp):
     """Load the JupyterLab configuration and defaults for a given application.
     """
     from jupyterlab_server import LabConfig
@@ -38,13 +38,13 @@ def load_config(nbapp):
         AppOptions,
     )
 
-    app_dir = getattr(nbapp, 'app_dir', get_app_dir())
+    app_dir = getattr(labapp, 'app_dir', get_app_dir())
     info = get_app_info(app_options=AppOptions(app_dir=app_dir))
     static_url = info['staticUrl']
     user_settings_dir = getattr(
-        nbapp, 'user_settings_dir', get_user_settings_dir()
+        labapp, 'user_settings_dir', get_user_settings_dir()
     )
-    workspaces_dir = getattr(nbapp, 'workspaces_dir', get_workspaces_dir())
+    workspaces_dir = getattr(labapp, 'workspaces_dir', get_workspaces_dir())
 
     config = LabConfig()
     config.app_dir = app_dir
@@ -59,10 +59,10 @@ def load_config(nbapp):
     config.user_settings_dir = user_settings_dir
     config.workspaces_dir = workspaces_dir
 
-    if getattr(nbapp, 'override_static_url', ''):
-        static_url = nbapp.override_static_url
-    if getattr(nbapp, 'override_theme_url', ''):
-        config.themes_url = nbapp.override_theme_url
+    if getattr(labapp, 'override_static_url', ''):
+        static_url = labapp.override_static_url
+    if getattr(labapp, 'override_theme_url', ''):
+        config.themes_url = labapp.override_theme_url
         config.themes_dir = ''
 
     if static_url:
@@ -73,7 +73,7 @@ def load_config(nbapp):
     return config
 
 
-def load_jupyter_server_extension(nbapp):
+def load_jupyter_server_extension(labapp):
     """Load the JupyterLab server extension.
     """
     # Delay imports to speed up jlpmapp
@@ -93,33 +93,33 @@ def load_jupyter_server_extension(nbapp):
         watch_dev, get_app_dir, AppOptions
     )
 
-    web_app = nbapp.serverapp.web_app
-    logger = nbapp.log
-    base_url = nbapp.serverapp.base_url
+    web_app = labapp.serverapp.web_app
+    logger = labapp.log
+    base_url = labapp.serverapp.base_url
 
     # Handle the app_dir
-    app_dir = getattr(nbapp, 'app_dir', get_app_dir())
+    app_dir = getattr(labapp, 'app_dir', get_app_dir())
 
     build_handler_options = AppOptions(logger=logger, app_dir=app_dir)
 
     # Check for core mode.
     core_mode = False
-    if getattr(nbapp, 'core_mode', False) or app_dir.startswith(HERE):
+    if getattr(labapp, 'core_mode', False) or app_dir.startswith(HERE):
         app_dir = HERE
         core_mode = True
         logger.info('Running JupyterLab in core mode')
 
     # Check for dev mode.
     dev_mode = False
-    if getattr(nbapp, 'dev_mode', False) or app_dir.startswith(DEV_DIR):
+    if getattr(labapp, 'dev_mode', False) or app_dir.startswith(DEV_DIR):
         app_dir = DEV_DIR
         dev_mode = True
         logger.info('Running JupyterLab in dev mode')
 
-    # Set the value on nbapp so it will get picked up in load_config
-    nbapp.app_dir = app_dir
+    # Set the value on labapp so it will get picked up in load_config
+    labapp.app_dir = app_dir
 
-    config = load_config(nbapp)
+    config = load_config(labapp)
     config.app_name = 'JupyterLab'
     config.app_namespace = 'jupyterlab'
 
@@ -128,7 +128,7 @@ def load_jupyter_server_extension(nbapp):
     config.cache_files = True
 
     # Check for watch.
-    watch_mode = getattr(nbapp, 'watch', False)
+    watch_mode = getattr(labapp, 'watch', False)
 
     if watch_mode and core_mode:
         logger.warn('Cannot watch in core mode, did you mean --dev-mode?')
@@ -142,16 +142,16 @@ def load_jupyter_server_extension(nbapp):
     page_config.setdefault('buildAvailable', not core_mode and not dev_mode)
     page_config.setdefault('buildCheck', not core_mode and not dev_mode)
     page_config['devMode'] = dev_mode
-    page_config['token'] = nbapp.serverapp.token
+    page_config['token'] = labapp.serverapp.token
 
     # Client-side code assumes notebookVersion is a JSON-encoded string
     page_config['notebookVersion'] = dumps(version_info)
 
-    if nbapp.serverapp.file_to_run and type(nbapp).__name__ == "LabApp":
-        relpath = os.path.relpath(nbapp.file_to_run, nbapp.notebook_dir)
+    if labapp.serverapp.file_to_run and type(labapp).__name__ == "LabApp":
+        relpath = os.path.relpath(labapp.file_to_run, labapp.notebook_dir)
         uri = url_escape(ujoin('/lab/tree', *relpath.split(os.sep)))
-        nbapp.default_url = uri
-        nbapp.serverapp.file_to_run = ''
+        labapp.default_url = uri
+        labapp.serverapp.file_to_run = ''
 
     # Print messages.
     logger.info('JupyterLab extension loaded from %s' % HERE)
@@ -186,7 +186,7 @@ def load_jupyter_server_extension(nbapp):
         logger.info('Starting JupyterLab watch mode...')
 
         # Set the ioloop in case the watch fails.
-        nbapp.ioloop = IOLoop.current()
+        labapp.ioloop = IOLoop.current()
         if dev_mode:
             watch_dev(logger)
         else:
@@ -205,14 +205,14 @@ def load_jupyter_server_extension(nbapp):
     web_app.add_handlers('.*$', handlers)
 
     # If running under JupyterHub, add more metadata.
-    if hasattr(nbapp, 'hub_prefix'):
-        page_config['hubPrefix'] = nbapp.hub_prefix
-        page_config['hubHost'] = nbapp.hub_host
-        page_config['hubUser'] = nbapp.user
-        page_config['shareUrl'] = ujoin(nbapp.hub_prefix, 'user-redirect')
+    if hasattr(labapp, 'hub_prefix'):
+        page_config['hubPrefix'] = labapp.hub_prefix
+        page_config['hubHost'] = labapp.hub_host
+        page_config['hubUser'] = labapp.user
+        page_config['shareUrl'] = ujoin(labapp.hub_prefix, 'user-redirect')
         # Assume the server_name property indicates running JupyterHub 1.0.
-        if hasattr(nbapp, 'server_name'):
-            page_config['hubServerName'] = nbapp.server_name
+        if hasattr(labapp, 'server_name'):
+            page_config['hubServerName'] = labapp.server_name
         api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
         page_config['token'] = api_token
 

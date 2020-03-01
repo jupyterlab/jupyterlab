@@ -13,7 +13,7 @@ import sys
 import subprocess
 
 from tornado.ioloop import IOLoop
-from nbclassic.notebookapp import flags, aliases
+from jupyter_server.serverapp import flags, aliases
 from jupyter_server.utils import urljoin, pathname2url
 from traitlets import Bool
 
