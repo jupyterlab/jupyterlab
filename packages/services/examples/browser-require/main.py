@@ -24,7 +24,7 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
             # Use camelCase here, since that's what the lab components expect
             'baseUrl': self.base_url,
             'token': self.settings['token'],
-            'fullStaticUrl': ujoin(self.base_url, 'static', 'example'), 
+            'fullStaticUrl': ujoin(self.base_url, 'static', 'example_app'), 
             'frontendUrl': ujoin(self.base_url, 'example/'),
         }
         return self.write(
@@ -42,20 +42,21 @@ class ExampleApp(LabServerApp):
 
     default_url = Unicode('/example')
 
+    LabServerApp.lab_config = LabConfig(
+        app_name = 'JupyterLab Example Service Browser Require',
+        app_url = '/example_app',
+        static_dir = os.path.join(HERE, 'static'),
+        templates_dir = os.path.join(HERE),
+    )
+
     def initialize_handlers(self):
         """initialize tornado webapp and httpserver.
         """
+        super().initialize_handlers()
         default_handlers = [
             (ujoin(self.serverapp.base_url, 'example'), ExampleHandler),
         ]
         self.serverapp.web_app.add_handlers('.*$', default_handlers)
-        LabServerApp.lab_config = LabConfig(
-            app_name = 'JupyterLab Example Service Browser Require',
-            app_url = '/example',
-            static_dir = os.path.join(HERE, 'static'),
-            templates_dir = os.path.join(HERE),
-        )
-        super().initialize_handlers()
 
 
 if __name__ == '__main__':

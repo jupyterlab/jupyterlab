@@ -39,41 +39,44 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
             "appVersion": version,
             'baseUrl': self.base_url,
             'token': self.settings['token'],
-            'fullStaticUrl': ujoin(self.base_url, 'static', 'example'), 
+            'fullStaticUrl': ujoin(self.base_url, 'static', 'example_app'), 
             'frontendUrl': ujoin(self.base_url, 'example/'),
             'terminalsAvailable': available
         }
-        return self.write(self.render_template('index.html',
-                                               static=self.static_url,
-                                               base_url=self.base_url,
-                                               token=self.settings['token'],
-                                               terminals_available=available,
-                                               page_config=config_data))
+        return self.write(
+            self.render_template('index.html',
+            static=self.static_url,
+            base_url=self.base_url,
+            token=self.settings['token'],
+            terminals_available=available,
+            page_config=config_data)
+            )
 
 
 class ExampleApp(LabServerApp):
 
     default_url = Unicode('/example')
 
+    LabServerApp.lab_config = LabConfig(
+        app_name = 'JupyterLab Example Terminal',
+        app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
+        app_url = '/example_app',
+        schemas_dir = os.path.join(HERE, 'build', 'schemas'),
+        static_dir = os.path.join(HERE, 'build'),
+        templates_dir = os.path.join(HERE, 'templates'),
+        themes_dir = os.path.join(HERE, 'build', 'themes'),
+        user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
+        workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
+    )
+
     def initialize_handlers(self):
         """initialize tornado webapp and httpserver.
         """
+        super().initialize_handlers()
         default_handlers = [
             (ujoin(self.serverapp.base_url, 'example'), ExampleHandler),
         ]
         self.serverapp.web_app.add_handlers('.*$', default_handlers)
-        LabServerApp.lab_config = LabConfig(
-            app_name = 'JupyterLab Example Console',
-            app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
-            app_url = '/example',
-            schemas_dir = os.path.join(HERE, 'build', 'schemas'),
-            static_dir = os.path.join(HERE, 'build'),
-            templates_dir = os.path.join(HERE, 'templates'),
-            themes_dir = os.path.join(HERE, 'build', 'themes'),
-            user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
-            workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
-        )
-        super().initialize_handlers()
 
 
 if __name__ == '__main__':
