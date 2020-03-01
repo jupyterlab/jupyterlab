@@ -1,4 +1,4 @@
-import { ISignal } from '@phosphor/signaling';
+import { ISignal } from '@lumino/signaling';
 import { ServerConnection } from '@jupyterlab/services';
 
 import * as SCHEMA from './_schema';

@@ -9,7 +9,7 @@ import {
   IVirtualPosition
 } from '../positioning';
 import { until_ready } from '../utils';
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 import { EditorLogConsole, create_console } from './console';
 
 export type CodeMirrorHandler = (instance: any, ...args: any[]) => void;

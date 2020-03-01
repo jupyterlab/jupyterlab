@@ -9,10 +9,10 @@ import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { FreeTooltip } from './components/free_tooltip';
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 import { VirtualEditor } from '../../virtual/editor';
 import { VirtualDocument, IForeignContext } from '../../virtual/document';
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 import { IEditorPosition, IRootPosition } from '../../positioning';
 import { LSPConnection } from '../../connection';
 import { LSPConnector } from './components/completion';
@@ -25,7 +25,7 @@ import { Signature } from '../codemirror/features/signature';
 import { ILSPFeatureConstructor, ILSPFeature } from '../codemirror/feature';
 import { JumpToDefinition } from '../codemirror/features/jump_to';
 import { ICommandContext } from '../../command_manager';
-import { JSONObject } from '@phosphor/coreutils';
+import { JSONObject } from '@lumino/coreutils';
 import {
   DocumentConnectionManager,
   IDocumentConnectionData,

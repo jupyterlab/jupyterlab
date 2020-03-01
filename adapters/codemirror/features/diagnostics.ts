@@ -1,6 +1,6 @@
 import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 import { PositionConverter } from '../../../converter';
 import { IVirtualPosition, IEditorPosition } from '../../../positioning';
 import { diagnosticSeverityNames } from '../../../lsp';

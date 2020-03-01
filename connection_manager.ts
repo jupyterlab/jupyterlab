@@ -1,7 +1,7 @@
 import { VirtualDocument, IForeignContext } from './virtual/document';
 import { LSPConnection } from './connection';
 
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { sleep, until_ready } from './utils';
 

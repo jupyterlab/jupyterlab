@@ -6,7 +6,7 @@ import {
   CompletionConnector
 } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ReadonlyJSONObject } from '@phosphor/coreutils';
+import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { completionItemKindNames, CompletionTriggerKind } from '../../../lsp';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../../../converter';

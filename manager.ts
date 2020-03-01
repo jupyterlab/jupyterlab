@@ -1,4 +1,4 @@
-import { Signal } from '@phosphor/signaling';
+import { Signal } from '@lumino/signaling';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
