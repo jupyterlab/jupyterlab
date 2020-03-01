@@ -12,7 +12,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
 import { Cell } from '@jupyterlab/cells';
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 import { DocumentConnectionManager } from '../../connection_manager';
 import { Session } from '@jupyterlab/services';

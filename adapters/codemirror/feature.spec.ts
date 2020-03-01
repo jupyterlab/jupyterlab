@@ -17,7 +17,7 @@ import {
   synchronize_content
 } from './testutils';
 import * as lsProtocol from 'vscode-languageserver-protocol';
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
 import { NotebookModel } from '@jupyterlab/notebook';

@@ -17,7 +17,7 @@ import { Notebook, NotebookModel } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { IOverridesRegistry } from '../../magics/overrides';
 import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
-import { nbformat } from '@jupyterlab/coreutils';
+import * as nbformat from '@jupyterlab/nbformat';
 import { ICellModel } from '@jupyterlab/cells';
 import createNotebook = NBTestUtils.createNotebook;
 import { CodeMirrorAdapter } from './cm_adapter';
