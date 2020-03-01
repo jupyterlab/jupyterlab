@@ -7,7 +7,7 @@ import {
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorLSPFeature, IEditorRange } from '../feature';
-import { Debouncer } from '@jupyterlab/coreutils';
+import { Debouncer } from '@lumino/polling';
 
 export type KeyModifier = 'Alt' | 'Control' | 'Shift' | 'Meta' | 'AltGraph';
 const hover_modifier: KeyModifier = 'Control';

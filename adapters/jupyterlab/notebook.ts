@@ -15,8 +15,8 @@ import { Cell } from '@jupyterlab/cells';
 import { nbformat } from '@jupyterlab/coreutils';
 import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 import { DocumentConnectionManager } from '../../connection_manager';
-import { IClientSession } from '@jupyterlab/apputils';
 import { Session } from '@jupyterlab/services';
+import { SessionContext } from '@jupyterlab/apputils';
 
 export class NotebookAdapter extends JupyterLabWidgetAdapter {
   editor: Notebook;
@@ -26,6 +26,8 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
   jumper: NotebookJumper;
 
   protected current_completion_connector: LSPConnector;
+
+  private _language_info: ILanguageInfoMetadata;
 
   constructor(
     editor_widget: NotebookPanel,
@@ -49,42 +51,40 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       .then()
       .catch(console.warn);
 
-    this.widget.context.session.kernelChanged.connect(
+    this.widget.context.sessionContext.kernelChanged.connect(
       this.on_kernel_changed,
       this
     );
   }
 
-  on_kernel_changed(
-    _session: IClientSession,
-    change: Session.IKernelChangedArgs
+  async on_kernel_changed(
+    _session: SessionContext,
+    change: Session.ISessionConnection.IKernelChangedArgs
   ) {
     if (!change.newValue) {
       console.log('LSP: kernel was shut down');
       return;
     }
-    change.newValue.ready
-      .then(async spec => {
-        console.log(
-          'LSP: Changed to ' +
-            change.newValue.info.language_info.name +
-            ' kernel, reconnecting'
-        );
-        await until_ready(this.is_ready, -1);
-        this.reload_connection();
-      })
-      .catch(e => {
-        console.warn(e);
-        // try to reconnect anyway
-        this.reload_connection();
-      });
+    try {
+      const info = await change.newValue.info;
+      this._language_info = info.language_info;
+      console.log(
+        `LSP: Changed to ${this._language_info.name} kernel, reconnecting`
+      );
+      await until_ready(this.is_ready, -1);
+      this.reload_connection();
+    } catch (err) {
+      console.warn(err);
+      // try to reconnect anyway
+      this.reload_connection();
+    }
   }
 
   dispose() {
     if (this.isDisposed) {
       return;
     }
-    this.widget.context.session.kernelChanged.disconnect(
+    this.widget.context.sessionContext.kernelChanged.disconnect(
       this.on_kernel_changed,
       this
     );
@@ -103,7 +103,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       this.widget.context.isReady &&
       this.widget.content.isVisible &&
       this.widget.content.widgets.length > 0 &&
-      this.widget.context.session.kernel !== null &&
+      this.widget.context.sessionContext.session.kernel !== null &&
       this.language_info() !== null
     );
   };
@@ -113,12 +113,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
   }
 
   protected language_info(): ILanguageInfoMetadata {
-    try {
-      return this.widget.context.session.kernel.info.language_info;
-    } catch (e) {
-      console.log('LSP: Could not get kernel metadata');
-      return null;
-    }
+    return this._language_info;
   }
 
   get mime_type(): string {
@@ -173,7 +168,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       editor: cell.editor,
       connections: this.connection_manager.connections,
       virtual_editor: this.virtual_editor,
-      session: this.widget.session
+      session: this.widget.sessionContext.session
     });
   }
 

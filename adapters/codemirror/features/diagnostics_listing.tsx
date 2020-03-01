@@ -246,11 +246,6 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
     })
   ];
 
-  constructor(model: DiagnosticsListing.Model) {
-    super();
-    this.model = model;
-  }
-
   sort(key: string) {
     if (key === this.sort_key) {
       this.sort_direction = this.sort_direction * -1;

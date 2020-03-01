@@ -1,4 +1,4 @@
-import { DataConnector } from '@jupyterlab/coreutils';
+import { DataConnector } from '@jupyterlab/statedb';
 import {
   CompletionHandler,
   ContextConnector,
@@ -10,7 +10,6 @@ import { ReadonlyJSONObject } from '@lumino/coreutils';
 import { completionItemKindNames, CompletionTriggerKind } from '../../../lsp';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../../../converter';
-import { IClientSession } from '@jupyterlab/apputils';
 import { VirtualDocument } from '../../../virtual/document';
 import { VirtualEditor } from '../../../virtual/editor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
@@ -20,6 +19,7 @@ import {
   IVirtualPosition
 } from '../../../positioning';
 import { LSPConnection } from '../../../connection';
+import { Session } from '@jupyterlab/services';
 
 /*
 Feedback: anchor - not clear from docs
@@ -86,8 +86,8 @@ export class LSPConnector extends DataConnector<
     return this.options.session?.kernel != null;
   }
 
-  protected get _kernel_language(): string {
-    return this.options.session.kernel.info.language_info.name;
+  protected async _kernel_language(): Promise<string> {
+    return (await this.options.session.kernel.info).language_info.name;
   }
 
   get fallback_connector() {
@@ -146,29 +146,29 @@ export class LSPConnector extends DataConnector<
     );
 
     try {
-      if (
-        this._kernel_connector &&
-        this._has_kernel &&
+      if (this._kernel_connector && this._has_kernel) {
         // TODO: this would be awesome if we could connect to rpy2 for R suggestions in Python,
         //  but this is not the job of this extension; nevertheless its better to keep this in
         //  mind to avoid introducing design decisions which would make this impossible
         //  (for other extensions)
-        document.language === this._kernel_language
-      ) {
-        return Promise.all([
-          this._kernel_connector.fetch(request),
-          this.hint(
-            token,
-            typed_character,
-            virtual_start,
-            virtual_end,
-            virtual_cursor,
-            document,
-            position_in_token
-          )
-        ]).then(([kernel, lsp]) =>
-          this.merge_replies(kernel, lsp, this._editor)
-        );
+        const kernelLanguage = await this._kernel_language();
+
+        if (document.language === kernelLanguage) {
+          return Promise.all([
+            this._kernel_connector.fetch(request),
+            this.hint(
+              token,
+              typed_character,
+              virtual_start,
+              virtual_end,
+              virtual_cursor,
+              document,
+              position_in_token
+            )
+          ]).then(([kernel, lsp]) =>
+            this.merge_replies(kernel, lsp, this._editor)
+          );
+        }
       }
 
       return this.hint(
@@ -396,7 +396,7 @@ export namespace LSPConnector {
      */
     connections: Map<VirtualDocument.id_path, LSPConnection>;
 
-    session?: IClientSession;
+    session?: Session.ISessionConnection;
   }
 }
 
