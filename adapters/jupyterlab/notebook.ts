@@ -103,7 +103,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       this.widget.context.isReady &&
       this.widget.content.isVisible &&
       this.widget.content.widgets.length > 0 &&
-      this.widget.context.sessionContext.session.kernel !== null &&
+      this.widget.context.sessionContext.session?.kernel !== null &&
       this.language_info() !== null
     );
   };
