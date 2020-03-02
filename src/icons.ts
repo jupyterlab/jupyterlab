@@ -7,7 +7,10 @@ import stepOverSvgStr from '../style/icons/step-over.svg';
 import variableSvgStr from '../style/icons/variable.svg';
 import viewBreakpointSvgStr from '../style/icons/view-breakpoint.svg';
 
-export { runIcon, stopIcon } from '@jupyterlab/ui-components';
+export {
+  runIcon as continueIcon,
+  stopIcon as terminateIcon
+} from '@jupyterlab/ui-components';
 
 export const closeAllIcon = new LabIcon({
   name: 'debugger:close-all',

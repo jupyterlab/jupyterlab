@@ -27,11 +27,11 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { Session } from '@jupyterlab/services';
 
 import {
-  runIcon,
+  continueIcon,
   stepIntoIcon,
   stepOutIcon,
   stepOverIcon,
-  stopIcon
+  terminateIcon
 } from './icons';
 
 import { Debugger } from './debugger';
@@ -339,7 +339,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
       caption: 'Continue',
-      icon: runIcon,
+      icon: continueIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -352,7 +352,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.terminate, {
       label: 'Terminate',
       caption: 'Terminate',
-      icon: stopIcon,
+      icon: terminateIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
