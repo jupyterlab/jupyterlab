@@ -11,6 +11,8 @@ import { BreakpointsBody } from './body';
 
 import { BreakpointsHeader } from './header';
 
+import { closeAllIcon } from '../icons';
+
 import { BreakpointsModel } from './model';
 
 /**
@@ -31,7 +33,7 @@ export class Breakpoints extends Panel {
     header.toolbar.addItem(
       'closeAll',
       new ToolbarButton({
-        iconClass: 'jp-CloseAllIcon',
+        icon: closeAllIcon,
         onClick: () => {
           void service.clearBreakpoints();
         },

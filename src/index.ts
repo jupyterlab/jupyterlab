@@ -26,7 +26,13 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
 
-import { runIcon, stopIcon } from '@jupyterlab/ui-components';
+import {
+  runIcon,
+  stepIntoIcon,
+  stepOutIcon,
+  stepOverIcon,
+  stopIcon
+} from './icons';
 
 import { Debugger } from './debugger';
 
@@ -359,7 +365,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.next, {
       label: 'Next',
       caption: 'Next',
-      iconClass: 'jp-MaterialIcon jp-StepOverIcon',
+      icon: stepOverIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -371,7 +377,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.stepIn, {
       label: 'StepIn',
       caption: 'Step In',
-      iconClass: 'jp-MaterialIcon jp-StepInIcon',
+      icon: stepIntoIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -383,7 +389,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.stepOut, {
       label: 'StepOut',
       caption: 'Step Out',
-      iconClass: 'jp-MaterialIcon jp-StepOutIcon',
+      icon: stepOutIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },

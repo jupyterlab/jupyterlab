@@ -26,6 +26,8 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
+import { textEditorIcon } from '@jupyterlab/ui-components';
+
 import { chain, each } from '@lumino/algorithm';
 
 import { Token } from '@lumino/coreutils';
@@ -171,7 +173,7 @@ export class TrackerHandler implements IDisposable {
     widget.title.label = PathExt.basename(path);
     widget.title.closable = true;
     widget.title.caption = path;
-    widget.title.iconClass = 'jp-MaterialIcon jp-TextEditorIcon';
+    widget.title.icon = textEditorIcon;
     widget.disposed.connect(() => editorHandler.dispose());
     this._shell.add(widget, 'main');
     void this._readOnlyEditorTracker.add(widget);
