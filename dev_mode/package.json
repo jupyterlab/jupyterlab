@@ -272,6 +272,7 @@
       "@jupyterlab/example-cell": "../examples/cell",
       "@jupyterlab/example-console": "../examples/console",
       "@jupyterlab/example-filebrowser": "../examples/filebrowser",
+      "@jupyterlab/example-listings": "../examples/listings",
       "@jupyterlab/example-notebook": "../examples/notebook",
       "@jupyterlab/example-terminal": "../examples/terminal",
       "@jupyterlab/application": "../packages/application",

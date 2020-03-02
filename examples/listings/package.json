@@ -1,0 +1,15 @@
+{
+  "name": "@jupyterlab/example-listings",
+  "version": "2.0.0",
+  "private": true,
+  "scripts": {
+    "build": "webpack",
+    "clean": "rimraf build",
+    "prepublishOnly": "npm run build",
+    "start": "concurrently \"jupyter lab --dev-mode\" \"python main.py\""
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "concurrently": "5.1.0"
+  }
+}
