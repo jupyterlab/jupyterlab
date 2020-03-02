@@ -26,6 +26,8 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
 
+import { runIcon, stopIcon } from '@jupyterlab/ui-components';
+
 import { Debugger } from './debugger';
 
 import { TrackerHandler } from './handlers/tracker';
@@ -331,7 +333,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
       caption: 'Continue',
-      iconClass: 'jp-MaterialIcon jp-RunIcon',
+      icon: runIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -344,7 +346,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.terminate, {
       label: 'Terminate',
       caption: 'Terminate',
-      iconClass: 'jp-MaterialIcon jp-StopIcon',
+      icon: stopIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
