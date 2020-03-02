@@ -51,7 +51,6 @@ export class Variables extends Panel {
     this._header.toolbar.addItem(
       'view-VariableSwitch',
       new ToolbarButton({
-        className: 'jp-SwitchButton',
         iconClass: 'jp-ToggleSwitch',
         onClick,
         tooltip: 'Table / Tree View'
