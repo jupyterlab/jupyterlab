@@ -164,6 +164,11 @@
   display: inline;
 }
 
+.jp-extensionmanager-entry.jp-extensionmanager-entry-mod-blacklisted
+  .jp-extensionmanager-entry-blacklisted {
+  display: inline;
+}
+
 /* Precedence order update/error/warning matters! */
 .jp-extensionmanager-entry.jp-extensionmanager-entry-update {
   border-left: solid 8px var(--jp-brand-color2);

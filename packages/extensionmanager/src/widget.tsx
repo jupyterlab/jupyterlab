@@ -9,6 +9,8 @@ import {
   caretRightIcon,
   Collapse,
   InputGroup,
+  //  notTrustedIcon as blacklistIcon,
+  bugIcon as blacklistIcon,
   jupyterIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
@@ -157,6 +159,10 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
     flagClasses.push(`jp-extensionmanager-entry-mod-whitelisted`);
     title = `${entry.name} (Developed by Project Jupyter)`;
   }
+  if (entry.isBlacklisted) {
+    flagClasses.push(`jp-extensionmanager-entry-mod-blacklisted`);
+    title = `${entry.name} is blacklisted`;
+  }
   return (
     <li
       className={`jp-extensionmanager-entry ${flagClasses.join(' ')}`}
@@ -174,6 +180,13 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           height="auto"
           width="1em"
         />
+        {entry.isBlacklisted === true && (
+          <blacklistIcon.react
+            className="jp-extensionmanager-entry-blacklisted"
+            top="1px"
+            kind="menuItem"
+          />
+        )}
       </div>
       <div className="jp-extensionmanager-entry-content">
         <div className="jp-extensionmanager-entry-description">

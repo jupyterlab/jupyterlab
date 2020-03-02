@@ -3,4 +3,5 @@
 
 export * from './model';
 export * from './query';
+export * from './listings';
 export * from './widget';

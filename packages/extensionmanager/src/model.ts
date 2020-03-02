@@ -25,6 +25,8 @@ import { reportInstallError } from './dialog';
 
 import { Searcher, ISearchResult, isJupyterOrg } from './query';
 
+import { Lister, IListResult } from './listings';
+
 /**
  * Information about an extension.
  */
@@ -68,6 +70,15 @@ export interface IEntry {
    * The installed version of the extension.
    */
   installed_version: string;
+
+  isBlacklisted: boolean;
+}
+
+export interface IListEntry {
+  /**
+   * The name of the extension.
+   */
+  name: string;
 }
 
 /**
@@ -399,8 +410,10 @@ export class ListModel extends VDomModel {
    * @param res Promise to an npm query result.
    */
   protected async translateSearchResult(
-    res: Promise<ISearchResult>
+    res: Promise<ISearchResult>,
+    blacklistMap: Map<string, IListEntry>
   ): Promise<{ [key: string]: IEntry }> {
+    console.log('::::', typeof blacklistMap);
     let entries: { [key: string]: IEntry } = {};
     for (let obj of (await res).objects) {
       let pkg = obj.package;
@@ -420,8 +433,19 @@ export class ListModel extends VDomModel {
         enabled: false,
         status: null,
         latest_version: pkg.version,
-        installed_version: ''
+        installed_version: '',
+        isBlacklisted: blacklistMap.has(pkg.name)
       };
+    }
+    return entries;
+  }
+
+  protected async translateBlacklistResult(
+    res: Promise<IListResult>
+  ): Promise<Map<string, IListEntry>> {
+    let entries: Map<string, IListEntry> = new Map();
+    for (let obj of (await res).blacklist) {
+      entries.set(obj, { name: obj });
     }
     return entries;
   }
@@ -432,7 +456,8 @@ export class ListModel extends VDomModel {
    * @param res Promise to the server reply data.
    */
   protected async translateInstalled(
-    res: Promise<IInstalledEntry[]>
+    res: Promise<IInstalledEntry[]>,
+    blacklistMap: Map<string, IListEntry>
   ): Promise<{ [key: string]: IEntry }> {
     const promises = [];
     const entries: { [key: string]: IEntry } = {};
@@ -447,7 +472,8 @@ export class ListModel extends VDomModel {
             enabled: pkg.enabled,
             status: pkg.status,
             latest_version: pkg.latest_version,
-            installed_version: pkg.installed_version
+            installed_version: pkg.installed_version,
+            isBlacklisted: blacklistMap.has(pkg.name)
           };
         })
       );
@@ -496,7 +522,9 @@ export class ListModel extends VDomModel {
    *
    * @returns {Promise<{ [key: string]: IEntry; }>} The search result as a map of entries.
    */
-  protected async performSearch(): Promise<{ [key: string]: IEntry }> {
+  protected async performSearch(
+    blacklistingMap: Map<string, IListEntry>
+  ): Promise<{ [key: string]: IEntry }> {
     if (this.query === null) {
       this._searchResult = [];
       this._totalEntries = 0;
@@ -510,7 +538,7 @@ export class ListModel extends VDomModel {
       this.page,
       this.pagination
     );
-    let searchMapPromise = this.translateSearchResult(search);
+    let searchMapPromise = this.translateSearchResult(search, blacklistingMap);
 
     let searchMap: { [key: string]: IEntry };
     try {
@@ -521,13 +549,24 @@ export class ListModel extends VDomModel {
       this.searchError = reason.toString();
     }
 
+    return searchMap;
+  }
+
+  protected async performGetBlacklist(): Promise<Map<string, IListEntry>> {
+    // Start the search without waiting for it:
+    let blacklist = this.lister.getBlackList();
+    let blacklistMapPromise = this.translateBlacklistResult(blacklist);
+
+    let blacklistMap: Map<string, IListEntry>;
     try {
-      this._totalEntries = (await search).total;
-    } catch (error) {
-      this._totalEntries = 0;
+      blacklistMap = await blacklistMapPromise;
+      this.blacklistError = null;
+    } catch (reason) {
+      blacklistMap = new Map();
+      this.blacklistError = reason.toString();
     }
 
-    return searchMap;
+    return blacklistMap;
   }
 
   /**
@@ -538,12 +577,14 @@ export class ListModel extends VDomModel {
    * @returns {Promise<{ [key: string]: IEntry; }>} A map of installed extensions.
    */
   protected async queryInstalled(
-    refreshInstalled: boolean
+    refreshInstalled: boolean,
+    blacklistMap: Map<string, IListEntry>
   ): Promise<{ [key: string]: IEntry }> {
     let installedMap;
     try {
       installedMap = await this.translateInstalled(
-        this.fetchInstalled(refreshInstalled)
+        this.fetchInstalled(refreshInstalled),
+        blacklistMap
       );
       this.installedError = null;
     } catch (reason) {
@@ -562,8 +603,13 @@ export class ListModel extends VDomModel {
    */
   protected async update(refreshInstalled = false) {
     // Start both queries before awaiting:
-    const searchMapPromise = this.performSearch();
-    const installedMapPromise = this.queryInstalled(refreshInstalled);
+    const blacklistingPromise = this.performGetBlacklist();
+    const blacklistingMap = await blacklistingPromise;
+    const searchMapPromise = this.performSearch(blacklistingMap);
+    const installedMapPromise = this.queryInstalled(
+      refreshInstalled,
+      blacklistingMap
+    );
 
     // Await results:
     const searchMap = await searchMapPromise;
@@ -665,6 +711,11 @@ export class ListModel extends VDomModel {
   searchError: string | null = null;
 
   /**
+   * Contains an error message if an error occurred when searching for lists.
+   */
+  blacklistError: string | null = null;
+
+  /**
    * Contains an error message if an error occurred when querying the server extension.
    */
   serverConnectionError: string | null = null;
@@ -693,6 +744,8 @@ export class ListModel extends VDomModel {
    * A helper for performing searches of jupyterlab extensions on the NPM repository.
    */
   protected searcher = new Searcher();
+
+  protected lister = new Lister();
 
   /**
    * The service manager to use for building.
