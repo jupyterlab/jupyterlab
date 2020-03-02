@@ -10,7 +10,7 @@ A JupyterLab debugger UI extension.
 
 ## Prerequisites
 
-- JupyterLab 1.2+
+- JupyterLab 2.0+
 - xeus-python 0.6.7+
 - notebook 6+
 
@@ -30,13 +30,9 @@ conda install -c conda-forge xeus-python=0.6.7 notebook>=6 ptvsd
 
 ## Development
 
-The current master branch targets the JupyterLab 2.0 beta release.
-
 ```bash
 # Create a new conda environment
-conda create -n jupyterlab-debugger -c conda-forge \
-                                    -c conda-forge/label/prerelease-jupyterlab \
-                                    nodejs xeus-python=0.6 ptvsd jupyterlab=2
+conda create -n jupyterlab-debugger -c conda-forge nodejs xeus-python=0.6 ptvsd jupyterlab=2
 
 # Activate the conda environment
 conda activate jupyterlab-debugger
