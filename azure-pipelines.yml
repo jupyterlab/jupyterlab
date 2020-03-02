@@ -16,9 +16,7 @@ steps:
 
 - bash: |
     source activate jupyterlab-debugger
-    conda install --yes --quiet -c conda-forge \
-                                -c conda-forge/label/prerelease-jupyterlab \
-                                nodejs jupyterlab=2 xeus-python=0.6.7 ptvsd python=$PYTHON_VERSION
+    conda install --yes --quiet -c conda-forge nodejs jupyterlab=2 xeus-python=0.6.7 ptvsd python=$PYTHON_VERSION
   displayName: Install dependencies
 
 - bash: |
