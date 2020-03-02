@@ -232,8 +232,8 @@ export class FileEditorCommandManager extends ContextCommandManager {
   entry_point = CommandEntryPoint.FileEditorContextMenu;
 
   get current_adapter() {
-    let fileEditor = this.tracker.currentWidget.content;
-    return file_editor_adapters.get(fileEditor.id);
+    let fileEditorId = this.tracker.currentWidget?.content?.id;
+    return fileEditorId && file_editor_adapters.get(fileEditorId);
   }
 
   context_from_active_document(): ICommandContext {

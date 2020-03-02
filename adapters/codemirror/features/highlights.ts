@@ -108,7 +108,12 @@ export class Highlights extends CodeMirrorLSPFeature {
         this.virtual_document.document_info,
         false
       );
-      this.handleHighlight(highlights, this.virtual_document.document_info.uri);
+      if (!this.virtual_document.isDisposed) {
+        this.handleHighlight(
+          highlights,
+          this.virtual_document.document_info.uri
+        );
+      }
     } catch (e) {
       console.warn('Could not get highlights:', e);
     }

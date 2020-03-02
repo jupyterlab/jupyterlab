@@ -338,6 +338,11 @@ export class VirtualDocument {
 
   document_at_source_position(position: ISourcePosition): VirtualDocument {
     let source_line = this.source_lines.get(position.line);
+
+    if (source_line == null) {
+      return this;
+    }
+
     let source_position_ce: CodeEditor.IPosition = {
       line: source_line.editor_line,
       column: position.ch
