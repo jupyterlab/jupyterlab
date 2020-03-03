@@ -9,7 +9,7 @@
     "jupyter.lab.setting-deprecated": { "type": "boolean", "default": false },
     "jupyter.lab.setting-icon": {
       "type": "string",
-      "default": "ui-components:settings"
+      "default": ""
     },
     "jupyter.lab.setting-icon-class": {
       "type": "string",
