@@ -50,7 +50,7 @@
     "create:package": "node buildutils/lib/create-package.js",
     "create:test": "node buildutils/lib/create-test-package.js",
     "create:theme": "node buildutils/lib/create-theme.js",
-    "deduplicate": "jlpm yarn-deduplicate -s fewer",
+    "deduplicate": "jlpm yarn-deduplicate -s fewer --fail",
     "docs": "lerna run docs",
     "eslint": "eslint --fix .",
     "eslint:check": "eslint .",
