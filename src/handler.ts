@@ -19,8 +19,6 @@ import { bugIcon } from '@jupyterlab/ui-components';
 
 import { DisposableSet } from '@lumino/disposable';
 
-import { Widget } from '@lumino/widgets';
-
 import { DebuggerModel } from './model';
 
 import { DebugSession } from './session';
@@ -41,16 +39,17 @@ function updateToolbar(
   widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
   onClick: () => void
 ) {
-  const iconContainer = bugIcon.element({
-    elementPosition: 'center'
+  const icon = new ToolbarButton({
+    icon: bugIcon,
+    tooltip: 'Enable / Disable Debugger',
+    onClick
   });
-  const icon = new Widget({ node: iconContainer });
   widget.toolbar.addItem('debugger-icon', icon);
 
   const button = new ToolbarButton({
     iconClass: 'jp-ToggleSwitch',
-    onClick,
-    tooltip: 'Enable / Disable Debugger'
+    tooltip: 'Enable / Disable Debugger',
+    onClick
   });
   widget.toolbar.addItem('debugger-button', button);
 
