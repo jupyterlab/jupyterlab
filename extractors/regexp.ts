@@ -36,7 +36,7 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
     let match: RegExpExecArray = this.global_expression.exec(code);
     let host_code_fragment: string;
 
-    while (match !== null) {
+    while (match != null) {
       let matched_string = match[0];
       let foreign_code_fragment = matched_string.replace(
         this.expression,

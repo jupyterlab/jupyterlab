@@ -444,7 +444,7 @@ export class VirtualDocument {
       let kept_cell_code = '';
 
       for (let result of results) {
-        if (result.foreign_code !== null) {
+        if (result.foreign_code != null) {
           let foreign_document: VirtualDocument;
           // if not standalone, try to append to existing document
           let foreign_exists = this.foreign_documents.has(extractor.language);
@@ -484,7 +484,7 @@ export class VirtualDocument {
             foreign_shift
           );
         }
-        if (result.host_code !== null) {
+        if (result.host_code != null) {
           kept_cell_code += result.host_code;
         }
       }
@@ -502,7 +502,7 @@ export class VirtualDocument {
     let cell_override = this.cell_magics_overrides.reverse.override_for(
       raw_code
     );
-    if (cell_override !== null) {
+    if (cell_override != null) {
       return cell_override;
     } else {
       let lines = this.line_magics_overrides.reverse_replace_all(
@@ -529,7 +529,7 @@ export class VirtualDocument {
 
     // cell magics are replaced if requested and matched
     let cell_override = this.cell_magics_overrides.override_for(cell_code);
-    if (cell_override !== null) {
+    if (cell_override != null) {
       lines = cell_override.split('\n');
       skip_inspect = lines.map(l => [this.id_path]);
     } else {

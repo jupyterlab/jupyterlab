@@ -61,8 +61,8 @@ export class LineMagicsMap extends ReversibleMagicsMap {
     for (let i = 0; i < raw_lines.length; i++) {
       let line = raw_lines[i];
       let override = map.override_for(line);
-      substituted_lines.push(override === null ? line : override);
-      skip_inspect.push(override !== null);
+      substituted_lines.push(override == null ? line : override);
+      skip_inspect.push(override != null);
     }
     return {
       lines: substituted_lines,

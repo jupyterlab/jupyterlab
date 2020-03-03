@@ -25,7 +25,7 @@ class DiagnosticsPanel {
   is_registered = false;
 
   get widget() {
-    if (this._widget == null || this._widget.content.model === null) {
+    if (this._widget == null || this._widget.content.model == null) {
       if (this._widget && !this._widget.isDisposed) {
         this._widget.dispose();
       }

@@ -98,7 +98,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         adapter = file_editor_adapters.get(id);
       }
 
-      if (adapter !== null) {
+      if (adapter != null) {
         status_bar_item.model.adapter = adapter;
       }
     });

@@ -39,7 +39,7 @@ export class FreeTooltip extends Tooltip {
     // @ts-ignore
     const editor = this._editor as CodeEditor.IEditor;
     const cursor: CodeEditor.IPosition =
-      this.position === null ? editor.getCursorPosition() : this.position;
+      this.position == null ? editor.getCursorPosition() : this.position;
 
     const end = editor.getOffsetAt(cursor);
     const line = editor.getLine(cursor.line);

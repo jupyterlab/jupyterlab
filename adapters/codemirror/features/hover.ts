@@ -144,7 +144,7 @@ export class Hover extends CodeMirrorLSPFeature {
 
   protected is_event_inside_visible(event: MouseEvent) {
     let target = event.target as HTMLElement;
-    return target.closest('.CodeMirror-sizer') !== null;
+    return target.closest('.CodeMirror-sizer') != null;
   }
 
   public async _handleMouseOver(event: MouseEvent) {

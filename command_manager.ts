@@ -130,7 +130,7 @@ export abstract class ContextCommandManager extends LSPCommandManager {
     // is the current widget of given type (notebook/editor)
     // also the currently used widget in the entire app?
     return (
-      this.tracker.currentWidget !== null &&
+      this.tracker.currentWidget != null &&
       this.tracker.currentWidget === this.app.shell.currentWidget
     );
   }
@@ -156,7 +156,7 @@ export abstract class ContextCommandManager extends LSPCommandManager {
         context = null;
       }
     }
-    if (context === null) {
+    if (context == null) {
       context = this.context_from_active_document();
     }
     return context;
