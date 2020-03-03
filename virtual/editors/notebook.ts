@@ -214,8 +214,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       let cm_editor = cell.editor as CodeMirrorEditor;
       let pos = cm_editor.editor.coordsChar(object, mode);
 
-      // @ts-ignore
-      if (pos.outside === true) {
+      if ((pos as any).outside === 1) {
         continue;
       }
 
