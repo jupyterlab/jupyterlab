@@ -47,14 +47,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     this.editor = editor_widget.content;
     this.completion_manager = completion_manager;
     this.jumper = jumper;
-    this.init_once_ready()
-      .then()
-      .catch(console.warn);
-
-    this.widget.context.sessionContext.kernelChanged.connect(
-      this.on_kernel_changed,
-      this
-    );
+    this.init_once_ready().catch(console.warn);
   }
 
   private async update_language_info() {
@@ -163,6 +156,11 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     // after registering all features
     this.connect_document(this.virtual_editor.virtual_document, false).catch(
       console.warn
+    );
+
+    this.widget.context.sessionContext.kernelChanged.connect(
+      this.on_kernel_changed,
+      this
     );
   }
 
