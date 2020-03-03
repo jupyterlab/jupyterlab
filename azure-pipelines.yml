@@ -89,3 +89,9 @@ jobs:
           testResultsFiles: '$(testResultsFiles)'
           testRunTitle: 'Windows - $(name)'
           mergeTestResults: true
+
+trigger:
+  branches:
+    include:
+    - master
+    - 1.x
