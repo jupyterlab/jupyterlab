@@ -411,13 +411,20 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     if (settingRegistry) {
       const setting = await settingRegistry.load(main.id);
       const updateVariableSettings = () => {
-        const list = setting.get('variableFilter').composite as string[];
-        const variableFilter = new Set<string>(list);
-        sidebar.variables.filter = variableFilter;
+        const filters = setting.get('variableFilters').composite as {
+          [key: string]: string[];
+        };
+        const kernelName = service.session?.connection?.kernel?.name;
+        const list = filters[kernelName];
+        if (!list) {
+          return;
+        }
+        sidebar.variables.filter = new Set<string>(list);
       };
 
       updateVariableSettings();
       setting.changed.connect(updateVariableSettings);
+      sidebar.service.sessionChanged.connect(updateVariableSettings);
     }
 
     sidebar.service.eventMessage.connect(_ => {
