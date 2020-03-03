@@ -228,4 +228,7 @@ if [[ $GROUP == usage ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+
+    # Make sure we can install the old celltags extension
+    jupyter labextension install --no-build @jupyterlab/celltags
 fi

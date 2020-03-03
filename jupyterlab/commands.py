@@ -1169,7 +1169,7 @@ class _AppHandler(object):
             json.dump(data, fid, indent=4)
 
         # copy known-good yarn.lock if missing
-        lock_path = pjoin(staging, 'yarn.lock')        
+        lock_path = pjoin(staging, 'yarn.lock')
         lock_template = pjoin(HERE, 'staging', 'yarn.lock')
         if self.registry != YARN_DEFAULT_REGISTRY:  # Replace on the fly the yarn repository see #3658
             with open(lock_template, encoding='utf-8') as f:
@@ -1509,7 +1509,7 @@ class _AppHandler(object):
 
         # Verify that the package is an extension.
         messages = _validate_extension(data)
-        if messages:
+        if messages and data['name'] != '@jupyterlab/celltags':
             msg = '"%s" is not a valid extension:\n%s'
             raise ValueError(msg % (extension, '\n'.join(messages)))
 
@@ -1763,7 +1763,7 @@ def _node_check(logger):
 
 def _yarn_config(logger):
     """Get the yarn configuration.
-    
+
     Returns
     -------
     {"yarn config": dict, "npm config": dict} if unsuccessfull the subdictionary are empty
