@@ -57,6 +57,12 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     );
   }
 
+  private async update_language_info() {
+    this._language_info = (
+      await this.widget.context.sessionContext.session.kernel.info
+    ).language_info;
+  }
+
   async on_kernel_changed(
     _session: SessionContext,
     change: Session.ISessionConnection.IKernelChangedArgs
@@ -66,8 +72,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       return;
     }
     try {
-      const info = await change.newValue.info;
-      this._language_info = info.language_info;
+      await this.update_language_info();
       console.log(
         `LSP: Changed to ${this._language_info.name} kernel, reconnecting`
       );
@@ -103,8 +108,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       this.widget.context.isReady &&
       this.widget.content.isVisible &&
       this.widget.content.widgets.length > 0 &&
-      this.widget.context.sessionContext.session?.kernel !== null &&
-      this.language_info() !== null
+      this.widget.context.sessionContext.session?.kernel !== null
     );
   };
 
@@ -139,7 +143,9 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
 
   async init_once_ready() {
     console.log('LSP: waiting for', this.document_path, 'to fully load');
+    await this.widget.context.sessionContext.ready;
     await until_ready(this.is_ready, -1);
+    await this.update_language_info();
     console.log('LSP:', this.document_path, 'ready for connection');
 
     this.virtual_editor = new VirtualEditorForNotebook(
