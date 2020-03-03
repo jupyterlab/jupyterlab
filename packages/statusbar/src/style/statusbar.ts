@@ -50,7 +50,10 @@ export const item = style(
     maxHeight: vars.height,
     marginLeft: vars.itemMargin,
     marginRight: vars.itemMargin,
-    height: vars.height
+    height: vars.height,
+    whiteSpace: vars.whiteSpace,
+    textOverflow: vars.textOverflow,
+    color: vars.textColor
   },
   itemPadding
 );
