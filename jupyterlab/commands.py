@@ -1717,7 +1717,7 @@ class _AppHandler(object):
         if lab_newer_than_latest:
             # All singleton deps in current version of lab are newer than those
             # in the latest version of the extension
-            return ("The extension "%s" does not yet support the current version of "
+            return ("The extension \"%s\" does not yet support the current version of "
                     "JupyterLab.\n" % name)
 
 
