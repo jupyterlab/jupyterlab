@@ -218,6 +218,11 @@ export class Diagnostics extends CodeMirrorLSPFeature {
     if (response.uri !== this.virtual_document.document_info.uri) {
       return;
     }
+
+    if (this.virtual_document.last_virtual_line === 0) {
+      return;
+    }
+
     /* TODO: gutters */
     try {
       let diagnostics_list: IEditorDiagnostic[] = [];
