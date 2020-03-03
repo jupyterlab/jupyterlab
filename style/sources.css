@@ -1,4 +1,4 @@
-.jp-DebuggerSources-body [data-jp-debugger='true'].jp-Editor .jp-mod-readOnly {
+[data-jp-debugger='true'].jp-Editor .jp-mod-readOnly {
   background: var(--jp-layout-color2);
   height: 100%;
 }
