@@ -78,7 +78,7 @@ import yamlSvgstr from '../../style/icons/filetype/yaml.svg';
 
 // LabIcon instance construction
 export const addIcon = new LabIcon({ name: 'ui-components:add', svgstr: addSvgstr });
-export const blacklistedIcon = new LabIcon({ name: 'ui-components:blaklisted', svgstr: blacklistedSvgstr });
+export const blacklistedIcon = new LabIcon({ name: 'ui-components:blacklisted', svgstr: blacklistedSvgstr });
 export const bugIcon = new LabIcon({ name: 'ui-components:bug', svgstr: bugSvgstr });
 export const buildIcon = new LabIcon({ name: 'ui-components:build', svgstr: buildSvgstr });
 export const caretDownEmptyIcon = new LabIcon({ name: 'ui-components:caret-down-empty', svgstr: caretDownEmptySvgstr });
