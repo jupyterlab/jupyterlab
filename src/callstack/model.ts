@@ -21,8 +21,12 @@ export class CallstackModel {
    */
   set frames(newFrames: CallstackModel.IFrame[]) {
     this._state = newFrames;
-    // default to the new frame is the previous one can't be found
-    if (!this.frame || !newFrames.find(frame => frame.id === this.frame.id)) {
+    const frame = newFrames.find(
+      frame => Private.getFrameId(frame) === Private.getFrameId(this.frame)
+    );
+    // Default to the first frame if the previous one can't be found.
+    // Otherwise keep the current frame selected.
+    if (!frame) {
       this.frame = newFrames[0];
     }
     this._framesChanged.emit(newFrames);
@@ -71,4 +75,17 @@ export namespace CallstackModel {
    * An interface for a frame.
    */
   export interface IFrame extends DebugProtocol.StackFrame {}
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * Construct an id for the given frame.
+   * @param frame The frame.
+   */
+  export function getFrameId(frame: CallstackModel.IFrame) {
+    return `${frame?.source?.path}-${frame?.id}`;
+  }
 }
