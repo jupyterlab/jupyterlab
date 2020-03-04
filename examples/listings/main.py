@@ -1,27 +1,60 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from flask import Flask, g, send_from_directory
-from flask_cors import CORS
+from jupyterlab.labapp import LabApp
+from jupyterlab_server import LabServerApp, LabConfig
+from notebook.base.handlers import IPythonHandler, FileFindHandler
+from notebook.utils import url_path_join as ujoin
+import json
+import os
+from traitlets import Unicode
 
-PORT = 8080
+HERE = os.path.dirname(__file__)
 
-ROOT_FOLDER='./'
+# Turn off the Jupyter configuration system so configuration files on disk do
+# not affect this app. This helps this app to truly be standalone.
+os.environ["JUPYTER_NO_CONFIG"]="1"
 
-app = Flask(__name__, static_folder = ROOT_FOLDER)
+with open(os.path.join(HERE, 'package.json')) as fid:
+    version = json.load(fid)['version']
 
-CORS(app)
+class ExampleApp(LabApp):
+    base_url = '/'
+    default_url = Unicode('/lab',
+                          help='The default URL to redirect to from `/`')
 
-@app.route('/listings/<path:path>', defaults = {'listings': 'listingws'})
-def res(folder, path):
-    return send_from_directory(ROOT_FOLDER + listings, path)
+    lab_config = LabConfig(
+        app_name = 'JupyterLab Example App',
+        app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
+        app_version = version,
+        app_url = '/lab',
+        schemas_dir = os.path.join(HERE, 'build', 'schemas'),
+        static_dir = os.path.join(HERE, 'build'),
+        templates_dir = os.path.join(HERE, 'templates'),
+        themes_dir = os.path.join(HERE, 'build', 'themes'),
+        user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
+        workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
+    )
+
+    def init_webapp(self):
+        """initialize tornado webapp and httpserver.
+        """
+        super().init_webapp()
+        default_handlers = [
+            (
+                ujoin(self.base_url, r"/listings/(.*)"), FileFindHandler,
+                 {'path': os.path.join(HERE, 'lists')}
+            )
+        ]
+        self.web_app.add_handlers('.*$', default_handlers)
+
+    def start(self):
+        settings = self.web_app.settings
+
+        # By default, make terminals available.
+        settings.setdefault('terminals_available', True)
+
+        super().start()
 
 if __name__ == '__main__':
-    print('http://localhost:8080/lists/blacklist.json')
-    print('http://localhost:8080/lists/whitelist.json')
-    app.run(
-        host='0.0.0.0',
-        port = PORT,
-        threaded = True,
-        processes = 1,
-        )
+    ExampleApp.launch_instance()

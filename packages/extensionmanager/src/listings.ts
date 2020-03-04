@@ -7,9 +7,14 @@
  */
 export interface IListResult {
   /**
-   * A collection of search results.
+   * A collection of back listed extensions.
    */
   blacklist: string[];
+
+  /**
+   * A collection of white listed extensions.
+   */
+  whitelist: string[];
 
   /**
    * Timestamp of the search result creation.
@@ -29,21 +34,37 @@ export class Lister {
    * @param whiteListUri The URI of the CDN to use for fetching full package data.
    */
   constructor(
-    blackListUri = 'http://localhost:8080/lists/blacklist.json',
-    whiteListUri = 'http://localhost:8080/lists/whitelist.json'
+    blackListUri = 'http://localhost:8888/listings/blacklist.json',
+    whiteListUri = 'http://localhost:8888/listings/whitelist.json'
   ) {
     this.blackListUri = blackListUri;
     this.whiteListUri = whiteListUri;
   }
 
   /**
-   * Search for a jupyterlab extension.
+   * Get the black list.
    *
    * @param page The page of results to fetch.
    * @param pageination The pagination size to use. See registry API documentation for acceptable values.
    */
   getBlackList(): Promise<IListResult> {
     const uri = new URL('', this.blackListUri);
+    return fetch(uri.toString()).then((response: Response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      return [];
+    });
+  }
+
+  /**
+   * Get the white list.
+   *
+   * @param page The page of results to fetch.
+   * @param pageination The pagination size to use. See registry API documentation for acceptable values.
+   */
+  getWhiteList(): Promise<IListResult> {
+    const uri = new URL('', this.whiteListUri);
     return fetch(uri.toString()).then((response: Response) => {
       if (response.ok) {
         return response.json();

@@ -3,6 +3,7 @@
     "@jupyterlab-examples/launcher",
     "@tpoff/jupyterlab-tpoff_xkcd",
     "@mohansrk/test",
-    "custom-git"
+    "custom-git",
+    "jupyterlabtd_git"
   ]
 }

@@ -9,10 +9,12 @@ import {
   caretRightIcon,
   Collapse,
   InputGroup,
-  //  notTrustedIcon as blacklistIcon,
-  bugIcon as blacklistIcon,
+  Checkbox,
+  Switch,
+  blacklistedIcon,
   jupyterIcon,
-  refreshIcon
+  refreshIcon,
+  whitelistedIcon
 } from '@jupyterlab/ui-components';
 
 import { Message } from '@lumino/messaging';
@@ -20,7 +22,7 @@ import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
-import { isJupyterOrg } from './query';
+import { isJupyterOrg } from './npm';
 
 // TODO: Replace pagination with lazy loading of lower search results
 
@@ -64,6 +66,12 @@ export class SearchBar extends React.Component<
           value={this.state.value}
           rightIcon="search"
         />
+        <br />
+        <Switch
+          checked={false}
+          label="I understand that extensions managed through this interface run arbitrary code that may be dangerous."
+        />
+        <Checkbox label="I understand that extensions managed through this interface run arbitrary code that may be dangerous." />
       </div>
     );
   }
@@ -157,11 +165,12 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   let title = entry.name;
   if (isJupyterOrg(entry.name)) {
     flagClasses.push(`jp-extensionmanager-entry-mod-whitelisted`);
-    title = `${entry.name} (Developed by Project Jupyter)`;
+  }
+  if (entry.isWhitelisted) {
+    flagClasses.push(`jp-extensionmanager-entry-is-whitelisted`);
   }
   if (entry.isBlacklisted) {
-    flagClasses.push(`jp-extensionmanager-entry-mod-blacklisted`);
-    title = `${entry.name} is blacklisted`;
+    flagClasses.push(`jp-extensionmanager-entry-is-blacklisted`);
   }
   return (
     <li
@@ -174,17 +183,22 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             {entry.name}
           </a>
         </div>
-        <jupyterIcon.react
-          className="jp-extensionmanager-entry-jupyter-org"
-          top="1px"
-          height="auto"
-          width="1em"
-        />
-        {entry.isBlacklisted === true && (
-          <blacklistIcon.react
-            className="jp-extensionmanager-entry-blacklisted"
-            top="1px"
-            kind="menuItem"
+        {isJupyterOrg(entry.name) && (
+          <ToolbarButtonComponent
+            icon={jupyterIcon}
+            iconLabel={entry.name + ' (Developed by Project Jupyter)'}
+          />
+        )}
+        {entry.isBlacklisted && (
+          <ToolbarButtonComponent
+            icon={blacklistedIcon}
+            iconLabel={entry.name + ' is blacklisted'}
+          />
+        )}
+        {entry.isWhitelisted && (
+          <ToolbarButtonComponent
+            icon={whitelistedIcon}
+            iconLabel={entry.name + ' is whitelisted'}
           />
         )}
       </div>

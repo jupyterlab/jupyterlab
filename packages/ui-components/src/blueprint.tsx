@@ -22,6 +22,14 @@ import {
   Select as BPSelect,
   ISelectProps
 } from '@blueprintjs/select/lib/cjs/components/select/select';
+import {
+  Checkbox as BPCheckbox,
+  ICheckboxProps
+} from '@blueprintjs/core/lib/cjs/components/forms/controls';
+import {
+  Switch as BPSwitch,
+  ISwitchProps
+} from '@blueprintjs/core/lib/cjs/components/forms/controls';
 export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
 
 import { classes } from './utils';
@@ -76,4 +84,12 @@ export const Collapse = (props: ICollapseProps & CommonProps<any>) => (
 
 export const Select = (props: ISelectProps<any> & CommonProps<any>) => (
   <BPSelect {...props} className={classes(props.className, 'jp-Select')} />
+);
+
+export const Checkbox = (props: ICheckboxProps & CommonProps<any>) => (
+  <BPCheckbox {...props} className={classes(props.className, 'jp-Checkbox')} />
+);
+
+export const Switch = (props: ISwitchProps & CommonProps<any>) => (
+  <BPSwitch {...props} className={classes(props.className, 'jp-Switch')} />
 );

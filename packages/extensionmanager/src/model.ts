@@ -23,7 +23,7 @@ import {
 
 import { reportInstallError } from './dialog';
 
-import { Searcher, ISearchResult, isJupyterOrg } from './query';
+import { Searcher, ISearchResult, isJupyterOrg } from './npm';
 
 import { Lister, IListResult } from './listings';
 
@@ -72,8 +72,13 @@ export interface IEntry {
   installed_version: string;
 
   isBlacklisted: boolean;
+
+  isWhitelisted: boolean;
 }
 
+/***
+ * Information about a listed entry.
+ */
 export interface IListEntry {
   /**
    * The name of the extension.
@@ -411,9 +416,9 @@ export class ListModel extends VDomModel {
    */
   protected async translateSearchResult(
     res: Promise<ISearchResult>,
-    blacklistMap: Map<string, IListEntry>
+    blacklistMap: Map<string, IListEntry>,
+    whitelistMap: Map<string, IListEntry>
   ): Promise<{ [key: string]: IEntry }> {
-    console.log('::::', typeof blacklistMap);
     let entries: { [key: string]: IEntry } = {};
     for (let obj of (await res).objects) {
       let pkg = obj.package;
@@ -434,17 +439,28 @@ export class ListModel extends VDomModel {
         status: null,
         latest_version: pkg.version,
         installed_version: '',
-        isBlacklisted: blacklistMap.has(pkg.name)
+        isBlacklisted: blacklistMap.has(pkg.name),
+        isWhitelisted: whitelistMap.has(pkg.name)
       };
     }
     return entries;
   }
 
-  protected async translateBlacklistResult(
+  protected async translateBlacklistingResult(
     res: Promise<IListResult>
   ): Promise<Map<string, IListEntry>> {
     let entries: Map<string, IListEntry> = new Map();
     for (let obj of (await res).blacklist) {
+      entries.set(obj, { name: obj });
+    }
+    return entries;
+  }
+
+  protected async translateWhitelistingResult(
+    res: Promise<IListResult>
+  ): Promise<Map<string, IListEntry>> {
+    let entries: Map<string, IListEntry> = new Map();
+    for (let obj of (await res).whitelist) {
       entries.set(obj, { name: obj });
     }
     return entries;
@@ -457,7 +473,8 @@ export class ListModel extends VDomModel {
    */
   protected async translateInstalled(
     res: Promise<IInstalledEntry[]>,
-    blacklistMap: Map<string, IListEntry>
+    blacklistMap: Map<string, IListEntry>,
+    whitelistMap: Map<string, IListEntry>
   ): Promise<{ [key: string]: IEntry }> {
     const promises = [];
     const entries: { [key: string]: IEntry } = {};
@@ -473,7 +490,8 @@ export class ListModel extends VDomModel {
             status: pkg.status,
             latest_version: pkg.latest_version,
             installed_version: pkg.installed_version,
-            isBlacklisted: blacklistMap.has(pkg.name)
+            isBlacklisted: blacklistMap.has(pkg.name),
+            isWhitelisted: whitelistMap.has(pkg.name)
           };
         })
       );
@@ -523,7 +541,8 @@ export class ListModel extends VDomModel {
    * @returns {Promise<{ [key: string]: IEntry; }>} The search result as a map of entries.
    */
   protected async performSearch(
-    blacklistingMap: Map<string, IListEntry>
+    blacklistingMap: Map<string, IListEntry>,
+    whitelistingMap: Map<string, IListEntry>
   ): Promise<{ [key: string]: IEntry }> {
     if (this.query === null) {
       this._searchResult = [];
@@ -538,7 +557,11 @@ export class ListModel extends VDomModel {
       this.page,
       this.pagination
     );
-    let searchMapPromise = this.translateSearchResult(search, blacklistingMap);
+    let searchMapPromise = this.translateSearchResult(
+      search,
+      blacklistingMap,
+      whitelistingMap
+    );
 
     let searchMap: { [key: string]: IEntry };
     try {
@@ -553,9 +576,9 @@ export class ListModel extends VDomModel {
   }
 
   protected async performGetBlacklist(): Promise<Map<string, IListEntry>> {
-    // Start the search without waiting for it:
+    // Start the fetch without waiting for it:
     let blacklist = this.lister.getBlackList();
-    let blacklistMapPromise = this.translateBlacklistResult(blacklist);
+    let blacklistMapPromise = this.translateBlacklistingResult(blacklist);
 
     let blacklistMap: Map<string, IListEntry>;
     try {
@@ -569,6 +592,23 @@ export class ListModel extends VDomModel {
     return blacklistMap;
   }
 
+  protected async performGetWhitelist(): Promise<Map<string, IListEntry>> {
+    // Start the fetch without waiting for it:
+    let whitelist = this.lister.getWhiteList();
+    let whitelistMapPromise = this.translateWhitelistingResult(whitelist);
+
+    let whitelisttMap: Map<string, IListEntry>;
+    try {
+      whitelisttMap = await whitelistMapPromise;
+      this.blacklistError = null;
+    } catch (reason) {
+      whitelisttMap = new Map();
+      this.blacklistError = reason.toString();
+    }
+
+    return whitelisttMap;
+  }
+
   /**
    * Query the installed extensions.
    *
@@ -578,13 +618,15 @@ export class ListModel extends VDomModel {
    */
   protected async queryInstalled(
     refreshInstalled: boolean,
-    blacklistMap: Map<string, IListEntry>
+    blacklistMap: Map<string, IListEntry>,
+    whitelisttMap: Map<string, IListEntry>
   ): Promise<{ [key: string]: IEntry }> {
     let installedMap;
     try {
       installedMap = await this.translateInstalled(
         this.fetchInstalled(refreshInstalled),
-        blacklistMap
+        blacklistMap,
+        whitelisttMap
       );
       this.installedError = null;
     } catch (reason) {
@@ -603,12 +645,21 @@ export class ListModel extends VDomModel {
    */
   protected async update(refreshInstalled = false) {
     // Start both queries before awaiting:
+
     const blacklistingPromise = this.performGetBlacklist();
     const blacklistingMap = await blacklistingPromise;
-    const searchMapPromise = this.performSearch(blacklistingMap);
+
+    const whitelistingPromise = this.performGetWhitelist();
+    const whitelistingMap = await whitelistingPromise;
+
+    const searchMapPromise = this.performSearch(
+      blacklistingMap,
+      whitelistingMap
+    );
     const installedMapPromise = this.queryInstalled(
       refreshInstalled,
-      blacklistingMap
+      blacklistingMap,
+      whitelistingMap
     );
 
     // Await results:
