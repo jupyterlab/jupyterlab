@@ -1,5 +1,4 @@
 version: 2
-name: jupyterlab
 sphinx:
   configuration: docs/source/conf.py
 python:
@@ -7,6 +6,3 @@ python:
   install:
     # install docs requirements
     - requirements: docs/requirements.txt
-    # install jupyterlab itself
-    - method: pip
-      path: .
