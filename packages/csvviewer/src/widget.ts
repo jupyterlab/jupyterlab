@@ -386,14 +386,18 @@ export class CSVViewer extends Widget {
       return;
     }
     const rendererConfig = this._baseRenderer;
+    const renderer = new TextRenderer({
+      textColor: rendererConfig.textColor,
+      horizontalAlignment: rendererConfig.horizontalAlignment,
+      backgroundColor: this._searchService.cellBackgroundColorRendererFunc(
+        rendererConfig
+      )
+    });
     this._grid.cellRenderers.update({
-      body: new TextRenderer({
-        textColor: rendererConfig.textColor,
-        horizontalAlignment: rendererConfig.horizontalAlignment,
-        backgroundColor: this._searchService.cellBackgroundColorRendererFunc(
-          rendererConfig
-        )
-      })
+      body: renderer,
+      'column-header': renderer,
+      'corner-header': renderer,
+      'row-header': renderer
     });
   }
 
