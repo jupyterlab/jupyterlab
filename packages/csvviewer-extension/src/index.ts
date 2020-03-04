@@ -271,6 +271,7 @@ namespace Private {
    * The dark theme for the data grid.
    */
   export const DARK_STYLE: DataGrid.Style = {
+    ...DataGrid.defaultStyle,
     voidColor: 'black',
     backgroundColor: '#111111',
     headerBackgroundColor: '#424242',
