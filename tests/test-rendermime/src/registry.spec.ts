@@ -13,6 +13,8 @@ import { PageConfig } from '@jupyterlab/coreutils';
 
 import { Widget } from '@lumino/widgets';
 
+import { SessionContext } from '@jupyterlab/apputils';
+
 import { MathJaxTypesetter } from '@jupyterlab/mathjax2';
 
 import {
@@ -310,6 +312,7 @@ describe('rendermime/registry', () => {
     });
 
     describe('.UrlResolver', () => {
+      let manager: ServiceManager;
       let resolver: RenderMimeRegistry.UrlResolver;
       let contents: Contents.IManager;
       let session: Session.ISessionConnection;
@@ -317,7 +320,7 @@ describe('rendermime/registry', () => {
       const urlParent = encodeURI(pathParent);
 
       before(async () => {
-        const manager = new ServiceManager({ standby: 'never' });
+        manager = new ServiceManager({ standby: 'never' });
         const drive = new Drive({ name: 'extra' });
         const path = pathParent + '/pr%25 ' + UUID.uuid4();
         contents = manager.contents;
@@ -346,6 +349,20 @@ describe('rendermime/registry', () => {
 
       context('#resolveUrl()', () => {
         it('should resolve a relative url', async () => {
+          const path = await resolver.resolveUrl('./foo');
+          expect(path).to.equal(urlParent + '/foo');
+        });
+
+        it('should resolve a relative url with no active session', async () => {
+          const resolver = new RenderMimeRegistry.UrlResolver({
+            session: new SessionContext({
+              sessionManager: manager.sessions,
+              specsManager: manager.kernelspecs,
+              path: pathParent + '/pr%25 ' + UUID.uuid4(),
+              kernelPreference: { canStart: false, shouldStart: false }
+            }),
+            contents: manager.contents
+          });
           const path = await resolver.resolveUrl('./foo');
           expect(path).to.equal(urlParent + '/foo');
         });
