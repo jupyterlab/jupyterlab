@@ -86,12 +86,9 @@ const VariablesComponent = ({
     <>
       <ul>
         {variables.map(variable => {
+          const key = `${variable.evaluateName}-${variable.type}-${variable.value}`;
           return (
-            <VariableComponent
-              key={variable.evaluateName}
-              data={variable}
-              service={service}
-            />
+            <VariableComponent key={key} data={variable} service={service} />
           );
         })}
       </ul>
