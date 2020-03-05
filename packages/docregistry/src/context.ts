@@ -79,9 +79,12 @@ export class Context<T extends DocumentRegistry.IModel>
     this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
-    this.urlResolver = new RenderMimeRegistry.UrlResolver({
-      session: this.sessionContext,
+    const urlResolver = (this.urlResolver = new RenderMimeRegistry.UrlResolver({
+      path: this._path,
       contents: manager.contents
+    }));
+    this.pathChanged.connect((sender, newPath) => {
+      urlResolver.path = newPath;
     });
   }
 
@@ -406,6 +409,11 @@ export class Context<T extends DocumentRegistry.IModel>
         };
       }
       this._path = newPath;
+      if (this.sessionContext.session) {
+        void this.sessionContext.session.setPath(newPath);
+      } else {
+        this.sessionContext.path = newPath;
+      }
       void this.sessionContext.session?.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
