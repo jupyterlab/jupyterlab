@@ -31,8 +31,8 @@ export namespace Time {
    */
   export function format(
     value: string | Date,
-    format = 'YYYY-MM-DD HH:mm'
+    timeFormat = 'YYYY-MM-DD HH:mm'
   ): string {
-    return moment(value).format(format);
+    return moment(value).format(timeFormat);
   }
 }
