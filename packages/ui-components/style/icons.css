@@ -270,44 +270,7 @@
   --jp-warn-color0: var(--md-orange-700);
 }
 
-/**
- * (DEPRECATED) Support for icons as CSS `background-images`
- */
-.jp-MaterialIcon {
-  min-width: 16px;
-  min-height: 16px;
-  background-size: 16px;
-  display: inline-block;
-  vertical-align: middle;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-.jp-Icon {
-  display: inline-block;
-  vertical-align: middle;
-  background-repeat: no-repeat;
-  background-position: center;
-  margin: auto;
-}
-
-.jp-Icon-16 {
-  min-width: 16px;
-  min-height: 16px;
-  background-size: 16px;
-}
-
-.jp-Icon-18 {
-  min-width: 18px;
-  min-height: 18px;
-  background-size: 18px;
-}
-
-.jp-Icon-20 {
-  min-width: 20px;
-  min-height: 20px;
-  background-size: 20px;
-}
-
+/* not sure what to do with this one, used in filebrowser listing */
 .jp-DragIcon {
   margin-right: 4px;
 }

@@ -495,16 +495,18 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
       title={props.tooltip || props.iconLabel}
       minimal
     >
-      <LabIcon.resolveReact
-        icon={props.icon}
-        iconClass={
-          // add some extra classes for proper support of icons-as-css-backgorund
-          classes(props.iconClass, 'jp-Icon', 'jp-Icon-16')
-        }
-        className="jp-ToolbarButtonComponent-icon"
-        tag="span"
-        stylesheet="toolbarButton"
-      />
+      {(props.icon || props.iconClass) && (
+        <LabIcon.resolveReact
+          icon={props.icon}
+          iconClass={
+            // add some extra classes for proper support of icons-as-css-backgorund
+            classes(props.iconClass, 'jp-Icon')
+          }
+          className="jp-ToolbarButtonComponent-icon"
+          tag="span"
+          stylesheet="toolbarButton"
+        />
+      )}
       {props.label && (
         <span className="jp-ToolbarButtonComponent-label">{props.label}</span>
       )}

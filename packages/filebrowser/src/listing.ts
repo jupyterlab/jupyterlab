@@ -23,6 +23,7 @@ import { Contents } from '@jupyterlab/services';
 import {
   caretDownIcon,
   caretUpIcon,
+  classes,
   fileIcon,
   LabIcon
 } from '@jupyterlab/ui-components';
@@ -1836,7 +1837,7 @@ export namespace DirListing {
       // render the file item's icon
       LabIcon.resolveElement({
         icon: fileType?.icon,
-        iconClass: fileType?.iconClass,
+        iconClass: classes(fileType?.iconClass, 'jp-Icon'),
         fallback: fileIcon,
         container: iconContainer,
         className: ITEM_ICON_CLASS,

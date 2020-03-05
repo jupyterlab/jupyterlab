@@ -146,6 +146,7 @@ Now do the actual final release:
 - [ ] Push the commit and tags to master
 - [ ] Run `npm run publish:all` to publish the packages
 - [ ] Create a branch for the release and push to GitHub
+- [ ] Update the API [docs](#updating-api-docs)
 - [ ] Merge the PRs on the other repos and set the default branch of the
       xckd repo
 - [ ] Publish to [conda-forge](https://github.com/jupyterlab/jupyterlab/blob/master/RELEASE.md#publishing-to-conda-forge).
@@ -251,6 +252,10 @@ shasum -a 256 dist/*.tar.gz
 - Fork https://github.com/conda-forge/jupyterlab-feedstock
 - Create a PR with the version bump
 - Update `recipe/meta.yaml` with the new version and md5 and reset the build number to 0.
+
+## Updating API Docs
+
+Run `source scripts/docs_push.sh` to update the `gh-pages` branch that backs http://jupyterlab.github.io/jupyterlab/.
 
 ## Making a patch release
 

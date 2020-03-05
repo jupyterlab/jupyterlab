@@ -102,7 +102,7 @@ This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
-    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v2.0beta
+    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v2.0
 
 When prompted, enter values like the following for all of the cookiecutter
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
@@ -373,7 +373,7 @@ single *Astronomy Picture* tab should come to the foreground.
 
 If your widget is not behaving, compare your code with the reference
 project state at the `01-show-a-panel
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-01-show-a-panel>`__.
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0-01-show-a-panel>`__.
 Once you've got everything working properly, git commit your changes and
 carry on.
 
@@ -460,7 +460,7 @@ panel. You'll address both of these problems in the upcoming sections.
 
 If you don't see a image at all, compare your code with the
 `02-show-an-image
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-02-show-an-image>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0-02-show-an-image>`__
 in the reference project. When it's working, make another git commit.
 
 .. code:: bash
@@ -564,7 +564,7 @@ of the image.
 
 If anything is not working correctly, compare your code with the reference project
 `03-style-and-attribute
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-03-style-and-attribute>`__.
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0-03-style-and-attribute>`__.
 When everything is working as expected, make another commit.
 
 .. code:: bash
@@ -744,7 +744,7 @@ image.
 
 If anything is not working correctly, compare your code with the
 `04-refactor-and-refresh
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-04-refactor-and-refresh>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0-04-refactor-and-refresh>`__
 to debug. Once it is working properly, commit it.
 
 .. code:: bash
@@ -869,7 +869,7 @@ after the refresh.
    The completed extension, showing the `Astronomy Picture of the Day for 24 Jul 2015 <https://apod.nasa.gov/apod/ap150724.html>`__.
 
 Refer to the `05-restore-panel-state
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-05-restore-panel-state>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0-05-restore-panel-state>`__
 if your extension is not working correctly. Make a commit when the state of your
 extension persists properly.
 
@@ -929,7 +929,7 @@ directly. If it doesn't appear, make sure you've updated the package
 name properly in the ``package.json`` and run the npm command correctly.
 Compare your work with the state of the reference project at the
 `06-prepare-to-publish
-tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0b2-06-prepare-to-publish>`__
+tag <https://github.com/jupyterlab/jupyterlab_apod/tree/2.0-06-prepare-to-publish>`__
 for further debugging.
 
 You can now try installing your extension as a user would. Open a new
