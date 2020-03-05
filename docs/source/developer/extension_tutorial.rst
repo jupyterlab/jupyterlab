@@ -81,7 +81,7 @@ the version of JupyterLab manually.
 
 .. code:: bash
 
-    conda install -c conda-forge jupyterlab=1
+    conda install -c conda-forge jupyterlab=2
 
 Create a repository
 ~~~~~~~~~~~~~~~~~~~
@@ -600,7 +600,7 @@ Install this dependency:
     jlpm add @lumino/messaging
 
 
-Then add the class just below the import statements in the ``index.ts``
+Then add the class just below the definition of ``APODResponse`` in the ``index.ts``
 file.
 
 .. code-block:: typescript
