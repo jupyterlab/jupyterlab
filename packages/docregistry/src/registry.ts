@@ -288,7 +288,9 @@ export class DocumentRegistry implements IDisposable {
   addFileType(fileType: Partial<DocumentRegistry.IFileType>): IDisposable {
     let value: DocumentRegistry.IFileType = {
       ...DocumentRegistry.fileTypeDefaults,
-      ...fileType
+      ...fileType,
+      // fall back to fileIcon if needed
+      ...(!(fileType.icon || fileType.iconClass) && { icon: fileIcon })
     };
     this._fileTypes.push(value);
 
