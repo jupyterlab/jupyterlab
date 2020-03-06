@@ -16,19 +16,20 @@ from jupyter_core.application import NoStart
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
 from jupyter_server.serverapp import aliases, flags
 from jupyter_server.utils import url_path_join as ujoin
-from traitlets import Bool, Instance, Unicode
+from traitlets import Bool, Instance, Unicode, default
 
 from ._version import __version__
 from .debuglog import DebugLogFileMixin
 from .extension import load_config, load_jupyter_server_extension
 from .commands import (
-    DEV_DIR, HERE, 
+    DEV_DIR, HERE,
     build, clean, get_app_dir, get_app_version, get_user_settings_dir,
-    get_workspaces_dir, AppOptions,
+    get_workspaces_dir, AppOptions, pjoin, get_app_info
 )
 from .coreconfig import CoreConfig
 
-from jupyter_server.extension.application import ExtensionApp, ExtensionAppJinjaMixin
+from jupyterlab_server import LabServerApp
+# from jupyter_server.extension.application import ExtensionApp, ExtensionAppJinjaMixin
 # from nbclassic.shimconfig import merge_notebook_configs
 
 build_aliases = dict(base_aliases)
@@ -394,8 +395,17 @@ class LabWorkspaceApp(JupyterApp):
 
 
 
-class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
+class LabApp(LabServerApp):
     version = version
+
+    # The name of the extension
+    extension_name = "jupyterlab"
+
+    # The url that your extension will serve its homepage.
+    default_url = '/lab'
+
+    # Should your extension expose other server extensions when launched directly?
+    load_other_extensions = True
 
     description = """
     JupyterLab - An extensible computational environment for Jupyter.
@@ -489,14 +499,6 @@ class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
 
-    # The name of the extension
-    extension_name = "jupyterlab"
-
-    # The url that your extension will serve its homepage.
-    default_url = '/lab'
-
-    # Should your extension expose other server extensions when launched directly?
-    load_other_extensions = True
 
     # Local path to static files directory.
     static_paths = []
@@ -504,75 +506,69 @@ class LabApp(ExtensionApp, ExtensionAppJinjaMixin):
     # Local path to templates directory.
     template_paths = []
 
-    # The config.
-    c = None
 
-    @staticmethod
-    def _jupyter_server_extension_paths():
-        return [{
-            'module': 'jupyterlab'
-        }]
+    @default('app_dir')
+    def _default_app_dir(self):
+        return get_app_dir()
+
+    @default('app_name')
+    def _default_app_name(self):
+        return 'JupyterLab'
+
+    @default('app_namespace')
+    def _default_app_namespace(self):
+        return 'jupyterlab'
+
+    @default('app_settings_dir')
+    def _default_app_settings_dir(self):
+        return pjoin(self.app_dir, 'settings')
+
+    @default('app_version')
+    def _default_app_version(self):
+        info = get_app_info(app_options=AppOptions(app_dir=self.app_dir))
+        return info['version']
+
+    @default('cache_files')
+    def _default_cache_files(self):
+        return False
+
+    @default('schemas_dir')
+    def _default_schemas_dir(self):
+        return pjoin(self.app_dir, 'schemas')
+
+    @default('templates_dir')
+    def _default_templates_dir(self):
+        return pjoin(self.app_dir, 'static')
+
+    @default('themes_dir')
+    def _default_themes_dir(self):
+        return pjoin(self.app_dir, 'themes')
+
+    @default('user_settings_dir')
+    def _default_user_settings_dir(self):
+        return get_user_settings_dir()
+
+    @default('workspaces_dir')
+    def _default_workspaces_dir(self):
+        return get_workspaces_dir()
+
+    @default('static_dir')
+    def _default_static_dir(self):
+        return pjoin(self.app_dir, 'static')
 
     def initialize_templates(self):
-        if self.c == None:
-            self.c = load_config(self)
-            app_dir = getattr(self, 'app_dir', get_app_dir())
-            if getattr(self, 'dev_mode', False) or app_dir.startswith(DEV_DIR):
-                dev_static_dir = ujoin(DEV_DIR, 'static')
-                self.static_paths = [dev_static_dir]
-                self.template_paths = [dev_static_dir]
-            elif getattr(self, 'core_mode', False) or app_dir.startswith(HERE):
-                dev_static_dir = ujoin(HERE, 'static')
-                self.static_paths = [dev_static_dir]
-                self.template_paths = [dev_static_dir]
-            else:
-                self.static_paths = [self.c.static_dir]
-                self.template_paths = [self.c.templates_dir]
-        if len(self.template_paths) > 0:
-            self.settings.update({
-                "{}_template_paths".format(self.extension_name): self.template_paths
-            })
-        self.jinja2_env = Environment(
-            loader=FileSystemLoader(self.template_paths), 
-            extensions=['jinja2.ext.i18n'],
-            autoescape=True,
-            **self.jinja2_options
-        )
-        self.settings.update(
-            {
-                # TODO(@echarles) Discuss this with @Zsailer
-                "{}_jinja2_env".format('lab'): self.jinja2_env 
-#                "{}_jinja2_env".format(self.extension_name): self.jinja2_env 
-            }
-        )
-
-    def initialize_settings(self):
-        """
-        merged_config = merge_notebook_configs(
-            notebook_config_name = 'jupyter_notebook',
-            server_config_name = 'jupyter_server',
-            other_config_name = 'jupyter_lab',
-            argv = sys.argv
-            )        
-        self.settings['ServerApp'] = merged_config['ServerApp']
-        """
-        pass
-        
-    def initialize_handlers(self):
-        """Load any extensions specified by config.
-
-        Import the module, then call the load_jupyter_server_extension function,
-        if one exists.
-
-        If the JupyterLab server extension is not enabled, it will
-        be manually loaded with a warning.
-
-        The extension API is experimental, and may change in future releases.
-        """
-        # TODO(@echarles) Discuss with @Zsailer https://github.com/jupyter/jupyter_server/pull/180
-#        if not self.serverapp.jpserver_extensions.get('jupyterlab', False):
-        self.log.warning('JupyterLab server extension not enabled, manually loading...')
-        load_jupyter_server_extension(self)
+        app_dir = getattr(self, 'app_dir', get_app_dir())
+        if getattr(self, 'dev_mode', False) or app_dir.startswith(DEV_DIR):
+            dev_static_dir = ujoin(DEV_DIR, 'static')
+            self.static_paths = [dev_static_dir]
+            self.template_paths = [dev_static_dir]
+        elif getattr(self, 'core_mode', False) or app_dir.startswith(HERE):
+            dev_static_dir = ujoin(HERE, 'static')
+            self.static_paths = [dev_static_dir]
+            self.template_paths = [dev_static_dir]
+        else:
+            self.static_paths = [self.static_dir]
+            self.template_paths = [self.templates_dir]
 
 #-----------------------------------------------------------------------------
 # Main entry point
