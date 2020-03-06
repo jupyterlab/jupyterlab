@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/services",
-  "version": "5.0.0",
+  "version": "5.0.1",
   "description": "Client APIs for the Jupyter services REST APIs",
   "keywords": [
     "jupyter",
@@ -41,7 +41,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^4.0.0",
+    "@jupyterlab/coreutils": "^4.0.1",
     "@jupyterlab/nbformat": "^2.0.0",
     "@jupyterlab/observables": "^3.0.0",
     "@jupyterlab/settingregistry": "^2.0.0",
