@@ -6,10 +6,12 @@ lib
 jupyterlab/imports.css
 jupyterlab/static
 jupyterlab/schemas
+jupyterlab/listings
 jupyterlab/themes
 jupyterlab/geckodriver
 
 dev_mode/schemas
+dev_mode/listings
 dev_mode/static
 dev_mode/themes
 dev_mode/workspaces

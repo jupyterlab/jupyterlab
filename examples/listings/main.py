@@ -29,7 +29,7 @@ class ExampleApp(LabApp):
         default_handlers = [
             (
                 ujoin(self.base_url, r"/listings/(.*)"), FileFindHandler,
-                 {'path': os.path.join(HERE, 'lists')}
+                 {'path': os.path.join(HERE, 'list')}
             )
         ]
         self.web_app.add_handlers('.*$', default_handlers)

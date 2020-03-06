@@ -65,6 +65,11 @@ export namespace Build {
     readonly schemaDir?: string;
 
     /**
+     * The local listing dir path in the extension package.
+     */
+    readonly listingDir?: string;
+
+    /**
      * The local theme file path in the extension package.
      */
     readonly themePath?: string;
@@ -115,7 +120,7 @@ export namespace Build {
       const data = utils.readJSONFile(packageDataPath);
       const extension = normalizeExtension(data);
 
-      const { schemaDir, themePath } = extension;
+      const { schemaDir, listingDir, themePath } = extension;
 
       // Handle styles.
       if (data.style) {
@@ -153,6 +158,42 @@ export namespace Build {
         schemas.forEach(schema => {
           const file = path.basename(schema);
           fs.copySync(schema, path.join(destination, file));
+        });
+
+        // Write the package.json file for future comparison.
+        fs.copySync(
+          path.join(packageDir, 'package.json'),
+          path.join(destination, 'package.json.orig')
+        );
+      }
+
+      // Handle listings.
+      if (listingDir) {
+        const listings = glob.sync(
+          path.join(path.join(packageDir, listingDir), '*')
+        );
+        const destination = path.join(output, 'listings', name);
+
+        // Remove the existing directory if necessary.
+        if (fs.existsSync(destination)) {
+          try {
+            const oldPackagePath = path.join(destination, 'package.json.orig');
+            const oldPackageData = utils.readJSONFile(oldPackagePath);
+            if (oldPackageData.version === data.version) {
+              fs.removeSync(destination);
+            }
+          } catch (e) {
+            fs.removeSync(destination);
+          }
+        }
+
+        // Make sure the listing directory exists.
+        fs.mkdirpSync(destination);
+
+        // Copy listings.
+        listings.forEach(listing => {
+          const file = path.basename(listing);
+          fs.copySync(listing, path.join(destination, file));
         });
 
         // Write the package.json file for future comparison.
@@ -235,7 +276,13 @@ export namespace Build {
       throw new Error(`Module ${name} does not contain JupyterLab metadata.`);
     }
 
-    let { extension, mimeExtension, schemaDir, themePath } = jupyterlab;
+    let {
+      extension,
+      mimeExtension,
+      schemaDir,
+      listingDir,
+      themePath
+    } = jupyterlab;
 
     extension = extension === true ? main : extension;
     mimeExtension = mimeExtension === true ? main : mimeExtension;
@@ -246,6 +293,6 @@ export namespace Build {
       throw new Error(message);
     }
 
-    return { extension, mimeExtension, schemaDir, themePath };
+    return { extension, mimeExtension, schemaDir, listingDir, themePath };
   }
 }

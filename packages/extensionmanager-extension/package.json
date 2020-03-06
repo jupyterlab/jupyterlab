@@ -17,6 +17,7 @@
     "lib/*.js.map",
     "lib/*.js",
     "schema/*.json",
+    "listing/*.json",
     "style/*.css"
   ],
   "sideEffects": [
@@ -53,6 +54,7 @@
   },
   "jupyterlab": {
     "extension": true,
-    "schemaDir": "schema"
+    "schemaDir": "schema",
+    "listingDir": "listing"
   }
 }

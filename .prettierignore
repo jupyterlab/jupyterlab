@@ -8,6 +8,7 @@ tests/**/coverage
 .eggs
 dev_mode/index.js
 dev_mode/schemas
+dev_mode/listings
 dev_mode/static
 dev_mode/themes
 dev_mode/workspaces
@@ -16,7 +17,9 @@ docs/api
 examples/app/build
 examples/app/themes
 examples/app/schemas
+examples/app/listings
 jupyterlab/schemas
+jupyterlab/listings
 jupyterlab/themes
 jupyterlab/geckodriver
 jupyterlab/staging/yarn.js
