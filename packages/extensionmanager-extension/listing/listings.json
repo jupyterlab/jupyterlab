@@ -1,12 +1,6 @@
 {
-  "listings": [
-    {
-      "type": "white",
-      "uri": ""
-    },
-    {
-      "type": "black",
-      "uri": ""
-    }
-  ]
+  "listings": {
+    "blacklist_uri": "",
+    "whitelist_uri": ""
+  }
 }
