@@ -24,7 +24,6 @@ import {
   caretDownIcon,
   caretUpIcon,
   classes,
-  fileIcon,
   LabIcon
 } from '@jupyterlab/ui-components';
 
@@ -1828,20 +1827,20 @@ export namespace DirListing {
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
-      fileType?: DocumentRegistry.IFileType
+      fileType: DocumentRegistry.IFileType = DocumentRegistry.defaultTextFileType
     ): void {
+      const { icon, iconClass } = fileType;
+
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
       const modified = DOMUtils.findElement(node, ITEM_MODIFIED_CLASS);
 
       // render the file item's icon
       LabIcon.resolveElement({
-        icon: fileType?.icon,
-        iconClass: classes(fileType?.iconClass, 'jp-Icon'),
-        fallback: fileIcon,
+        icon,
+        iconClass: classes(iconClass, 'jp-Icon'),
         container: iconContainer,
         className: ITEM_ICON_CLASS,
-
         stylesheet: 'listing'
       });
 
