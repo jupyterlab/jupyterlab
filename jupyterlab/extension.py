@@ -54,6 +54,7 @@ def load_config(nbapp):
     config.app_version = info['version']
     config.cache_files = True
     config.schemas_dir = pjoin(app_dir, 'schemas')
+    config.listings_dir = pjoin(app_dir, 'listings')
     config.templates_dir = pjoin(app_dir, 'static')
     config.themes_dir = pjoin(app_dir, 'themes')
     config.user_settings_dir = user_settings_dir
