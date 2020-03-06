@@ -3,6 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-Toolbar-item button.jp-DebuggerBugButton.bp3-button.bp3-minimal:hover {
+  background-color: unset;
+  cursor: unset;
+}
+
 .jp-Toolbar-item .jp-ToggleSwitch {
   display: flex;
   align-items: center;

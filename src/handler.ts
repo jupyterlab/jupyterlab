@@ -40,6 +40,7 @@ function updateToolbar(
   onClick: () => void
 ) {
   const icon = new ToolbarButton({
+    className: 'jp-DebuggerBugButton',
     icon: bugIcon,
     tooltip: 'Enable / Disable Debugger',
     onClick
