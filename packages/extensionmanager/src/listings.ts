@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ISignal, Signal } from '@lumino/signaling';
+
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
@@ -30,6 +32,8 @@ export interface IListingApi {
   listings: {
     blacklist_uri: string;
     whitelist_uri: string;
+    builtin_blacklist: string[];
+    builtin_whitelist: string[];
   };
 }
 
@@ -48,10 +52,15 @@ export class Lister {
       .then(data => {
         this.blackListUri = data.listings.blacklist_uri;
         this.whiteListUri = data.listings.whitelist_uri;
+        this._listingUrisLoaded.emit(void 0);
       })
       .catch(error => {
         console.error(error);
       });
+  }
+
+  get listingUrisLoaded(): ISignal<Lister, void> {
+    return this._listingUrisLoaded;
   }
 
   /**
@@ -89,12 +98,16 @@ export class Lister {
   /**
    * The URI of the black listing registry to use.
    */
-  blackListUri: string;
+  private blackListUri: string;
 
   /**
    * The URI of the white listing registry to use.
    */
-  whiteListUri: string;
+  private whiteListUri: string;
+
+  /**
+   */
+  private _listingUrisLoaded = new Signal<Lister, void>(this);
 }
 
 /**

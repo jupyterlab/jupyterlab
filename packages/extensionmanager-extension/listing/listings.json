@@ -1,8 +1,11 @@
 {
   "listings": {
     "blacklist_uri": "",
-    "builtin_blacklist": [],
+
     "whitelist_uri": "",
+
+    "builtin_blacklist": [],
+
     "builtin_whitelist": ["@jupyterlab/*"]
   }
 }

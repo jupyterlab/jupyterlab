@@ -288,15 +288,15 @@ export class Searcher {
  */
 export function isJupyterOrg(name: string): boolean {
   /**
-   * A list of whitelisted NPM orgs.
+   * A list of jupyterlab NPM orgs.
    */
-  const whitelist = ['jupyterlab', 'jupyter-widgets'];
+  const jupyter_org = ['jupyterlab', 'jupyter-widgets'];
   const parts = name.split('/');
   const first = parts[0];
   return (
     parts.length > 1 && // Has a first part
     !!first && // with a finite length
     first[0] === '@' && // corresponding to an org name
-    whitelist.indexOf(first.slice(1)) !== -1 // in the org whitelist.
+    jupyter_org.indexOf(first.slice(1)) !== -1 // in the org whitelist.
   );
 }

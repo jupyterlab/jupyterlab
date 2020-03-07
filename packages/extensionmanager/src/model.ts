@@ -167,6 +167,22 @@ export class ListModel extends VDomModel {
     this.serviceManager = serviceManager;
     this.serverConnectionSettings = ServerConnection.makeSettings();
     this._debouncedUpdate = new Debouncer(this.update.bind(this), 1000);
+    this.lister.listingUrisLoaded.connect(() => {
+      this.performGetBlacklist()
+        .then(data => {
+          this._blacklistingMap = data;
+        })
+        .catch(error => {
+          console.error(error);
+        });
+      this.performGetWhitelist()
+        .then(data => {
+          this._whitelistingMap = data;
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    });
   }
 
   /**
@@ -645,11 +661,6 @@ export class ListModel extends VDomModel {
    */
   protected async update(refreshInstalled = false) {
     // Start both queries before awaiting:
-
-    const blacklistingPromise = this.performGetBlacklist();
-    this._blacklistingMap = await blacklistingPromise;
-    const whitelistingPromise = this.performGetWhitelist();
-    this._whitelistingMap = await whitelistingPromise;
 
     const searchMapPromise = this.performSearch(
       this._blacklistingMap,
