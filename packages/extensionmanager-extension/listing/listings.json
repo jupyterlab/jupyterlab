@@ -1,11 +1,12 @@
 {
   "listings": {
-    "blacklist_uri": "",
-
-    "whitelist_uri": "",
-
-    "builtin_blacklist": [],
-
-    "builtin_whitelist": ["@jupyterlab/*"]
+    "blacklist_uris": [
+      "https://raw.githubusercontent.com/jupyterlab/listings/master/blacklist.json"
+    ],
+    "whitelist_uris": [
+      "https://raw.githubusercontent.com/jupyterlab/listings/master/whitelist.json"
+    ],
+    "blacklist": [],
+    "whitelist": ["@jupyterlab/*"]
   }
 }
