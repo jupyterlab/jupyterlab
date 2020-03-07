@@ -59,8 +59,7 @@ def check_assets():
     targets = [
         'static/package.json',
         'schemas/@jupyterlab/shortcuts-extension/shortcuts.json',
-        'listings/@jupyterlab/extensionmanager-extension/whitelist.json',
-        'listings/@jupyterlab/extensionmanager-extension/blacklist.json',
+        'listings/@jupyterlab/extensionmanager-extension/listings.json',
         'themes/@jupyterlab/theme-light-extension/index.css'
     ]
 
