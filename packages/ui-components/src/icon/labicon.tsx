@@ -805,25 +805,22 @@ namespace Private {
   }
 
   /**
-   * a shim for svgstrs loaded using any loader other than raw-loader,
-   * which in general may look like:
-   *   data:[<mediatype>][;base64],<svg>...
+   * A shim for svgstrs loaded using any loader other than raw-loader,
+   * which in general may look like the raw contents of an .svg file:
+   *   <svg...</svg>
+   * or like a data URL:
+   *   data:[<mediatype>][;base64],<svg...</svg>
    *
-   * see https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+   * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
    */
   export function shimSvgstr(svgstr: string): string {
-    // may be uri encoded, decode
-    svgstr = decodeURIComponent(svgstr);
+    // decode any uri escaping then match to data url schema
+    const [, base64, raw] = decodeURIComponent(svgstr).match(
+      /^(?:data:.*?(;base64)?,)?(.*)/
+    )!;
 
-    if (svgstr.startsWith('data:')) {
-      // split any prefix from the raw svg data
-      const [, base64, raw] = svgstr.split(/^data:.*?(;base64)?,/);
-
-      // convert from base64 if needed
-      return base64 ? atob(raw) : raw;
-    } else {
-      return svgstr;
-    }
+    // decode from base64, if needed
+    return base64 ? atob(raw) : raw;
   }
 
   /**
