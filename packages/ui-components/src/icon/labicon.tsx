@@ -168,7 +168,10 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * Resolve a {name, svgstr} pair into an actual svg node.
    */
   static resolveSvg({ name, svgstr }: LabIcon.IIcon): HTMLElement | null {
-    const svgDoc = new DOMParser().parseFromString(svgstr, 'image/svg+xml');
+    const svgDoc = new DOMParser().parseFromString(
+      Private.shimSvgstr(svgstr),
+      'image/svg+xml'
+    );
 
     const svgError = svgDoc.querySelector('parsererror');
 
@@ -798,6 +801,28 @@ namespace Private {
       let titleNode = document.createElement('title');
       titleNode.textContent = title;
       svgNode.appendChild(titleNode);
+    }
+  }
+
+  /**
+   * a shim for svgstrs loaded using any loader other than raw-loader,
+   * which in general may look like:
+   *   data:[<mediatype>][;base64],<svg>...
+   *
+   * see https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+   */
+  export function shimSvgstr(svgstr: string): string {
+    // may be uri encoded, decode
+    svgstr = decodeURIComponent(svgstr);
+
+    if (svgstr.startsWith('data:')) {
+      // split any prefix from the raw svg data
+      const [, base64, raw] = svgstr.split(/^data:.*?(;base64)?,/);
+
+      // convert from base64 if needed
+      return base64 ? atob(raw) : raw;
+    } else {
+      return svgstr;
     }
   }
 

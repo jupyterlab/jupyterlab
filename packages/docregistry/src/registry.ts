@@ -50,6 +50,18 @@ import {
 
 import { TextModelFactory } from './default';
 
+// monkey patch omni-loader support for svgs in LabIcon
+//
+// const oldResolveSvg = LabIcon.resolveSvg;
+// function resolveSvgShim({ name, svgstr }: LabIcon.IIcon): HTMLElement | null {
+//   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+//   const [, base64, raw] = svgstr.split(/data:.*?(;base64)?,/);
+
+//   // convert from base64 if needed, decode any uri escaped chars
+//   return oldResolveSvg({name, svgstr: decodeURIComponent(base64 ? atob(raw) : raw) });
+// }
+// LabIcon.resolveSvg = resolveSvgShim;
+
 /**
  * The document registry.
  */
