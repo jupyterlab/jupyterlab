@@ -169,7 +169,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    */
   static resolveSvg({ name, svgstr }: LabIcon.IIcon): HTMLElement | null {
     const svgDoc = new DOMParser().parseFromString(
-      Private.shimSvgstr(svgstr),
+      Private.svgstrShim(svgstr),
       'image/svg+xml'
     );
 
@@ -813,10 +813,14 @@ namespace Private {
    *
    * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
    */
-  export function shimSvgstr(svgstr: string): string {
-    // decode any uri escaping then match to data url schema
+  export function svgstrShim(svgstr: string, strict: boolean = true): string {
+    // decode any uri escaping then match to raw svg string
     const [, base64, raw] = decodeURIComponent(svgstr).match(
-      /^(?:data:.*?(;base64)?,)?(.*)/
+      strict
+        ? // match based on data url schema
+          /^(?:data:.*?(;base64)?,)?(.*)/
+        : // match based on open of svg tag
+          /^.*?(?:(base64).*)?,?(<svg.*)/
     )!;
 
     // decode from base64, if needed
