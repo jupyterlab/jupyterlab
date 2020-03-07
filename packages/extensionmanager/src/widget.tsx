@@ -10,7 +10,6 @@ import {
   Collapse,
   InputGroup,
   Checkbox,
-  Switch,
   blacklistedIcon,
   jupyterIcon,
   refreshIcon,
@@ -67,10 +66,6 @@ export class SearchBar extends React.Component<
           rightIcon="search"
         />
         <br />
-        <Switch
-          checked={false}
-          label="I understand that extensions managed through this interface run arbitrary code that may be dangerous."
-        />
         <Checkbox label="I understand that extensions managed through this interface run arbitrary code that may be dangerous." />
       </div>
     );

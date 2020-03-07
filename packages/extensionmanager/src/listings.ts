@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { URLExt } from '@jupyterlab/coreutils';
+
+import { ServerConnection } from '@jupyterlab/services';
+
 /**
  * Listing search result structure (subset).
  *
@@ -22,6 +26,13 @@ export interface IListResult {
   time: string;
 }
 
+export interface IListingApi {
+  listings: {
+    blacklist_uri: string;
+    whitelist_uri: string;
+  };
+}
+
 /**
  * An object for searching an List registry.
  *
@@ -29,16 +40,18 @@ export interface IListResult {
 export class Lister {
   /**
    * Create a Lister object.
-   *
-   * @param blackListUri The URI of the list registry to use.
-   * @param whiteListUri The URI of the CDN to use for fetching full package data.
    */
-  constructor(
-    blackListUri = 'http://localhost:8888/listings/blacklist.json',
-    whiteListUri = 'http://localhost:8888/listings/whitelist.json'
-  ) {
-    this.blackListUri = blackListUri;
-    this.whiteListUri = whiteListUri;
+  constructor() {
+    requestAPI<IListingApi>(
+      '@jupyterlab/extensionmanager-extension/listings.json'
+    )
+      .then(data => {
+        this.blackListUri = data.listings.blacklist_uri;
+        this.whiteListUri = data.listings.whitelist_uri;
+      })
+      .catch(error => {
+        console.error(error);
+      });
   }
 
   /**
@@ -48,7 +61,7 @@ export class Lister {
    * @param pageination The pagination size to use. See registry API documentation for acceptable values.
    */
   getBlackList(): Promise<IListResult> {
-    const uri = new URL('', this.blackListUri);
+    const uri = new URL(this.blackListUri);
     return fetch(uri.toString()).then((response: Response) => {
       if (response.ok) {
         return response.json();
@@ -64,7 +77,7 @@ export class Lister {
    * @param pageination The pagination size to use. See registry API documentation for acceptable values.
    */
   getWhiteList(): Promise<IListResult> {
-    const uri = new URL('', this.whiteListUri);
+    const uri = new URL(this.whiteListUri);
     return fetch(uri.toString()).then((response: Response) => {
       if (response.ok) {
         return response.json();
@@ -85,19 +98,33 @@ export class Lister {
 }
 
 /**
+ * Call the API extension
  *
+ * @param endPoint API REST end point for the extension
+ * @param init Initial values for the request
+ * @returns The response body interpreted as JSON
  */
-export function isWhiteListed(name: string): boolean {
-  /**
-   * A list of whitelisted NPM orgs.
-   */
-  const whitelist = ['jupyterlab', 'jupyter-widgets'];
-  const parts = name.split('/');
-  const first = parts[0];
-  return (
-    parts.length > 1 && // Has a first part
-    !!first && // with a finite length
-    first[0] === '@' && // corresponding to an org name
-    whitelist.indexOf(first.slice(1)) !== -1 // in the org whitelist.
+async function requestAPI<T>(
+  endPoint: string = '',
+  init: RequestInit = {}
+): Promise<T> {
+  // Make request to Jupyter API
+  const settings = ServerConnection.makeSettings();
+  const requestUrl = URLExt.join(
+    settings.baseUrl,
+    settings.appUrl,
+    'api/listings/',
+    endPoint
   );
+  let response: Response;
+  try {
+    response = await ServerConnection.makeRequest(requestUrl, init, settings);
+  } catch (error) {
+    throw new ServerConnection.NetworkError(error);
+  }
+  const data = await response.json();
+  if (!response.ok) {
+    throw new ServerConnection.ResponseError(response, data.message);
+  }
+  return data;
 }

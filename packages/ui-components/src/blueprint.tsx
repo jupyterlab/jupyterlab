@@ -26,10 +26,6 @@ import {
   Checkbox as BPCheckbox,
   ICheckboxProps
 } from '@blueprintjs/core/lib/cjs/components/forms/controls';
-import {
-  Switch as BPSwitch,
-  ISwitchProps
-} from '@blueprintjs/core/lib/cjs/components/forms/controls';
 export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
 
 import { classes } from './utils';
@@ -88,8 +84,4 @@ export const Select = (props: ISelectProps<any> & CommonProps<any>) => (
 
 export const Checkbox = (props: ICheckboxProps & CommonProps<any>) => (
   <BPCheckbox {...props} className={classes(props.className, 'jp-Checkbox')} />
-);
-
-export const Switch = (props: ISwitchProps & CommonProps<any>) => (
-  <BPSwitch {...props} className={classes(props.className, 'jp-Switch')} />
 );

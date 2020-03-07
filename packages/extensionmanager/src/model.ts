@@ -647,19 +647,18 @@ export class ListModel extends VDomModel {
     // Start both queries before awaiting:
 
     const blacklistingPromise = this.performGetBlacklist();
-    const blacklistingMap = await blacklistingPromise;
-
+    this._blacklistingMap = await blacklistingPromise;
     const whitelistingPromise = this.performGetWhitelist();
-    const whitelistingMap = await whitelistingPromise;
+    this._whitelistingMap = await whitelistingPromise;
 
     const searchMapPromise = this.performSearch(
-      blacklistingMap,
-      whitelistingMap
+      this._blacklistingMap,
+      this._whitelistingMap
     );
     const installedMapPromise = this.queryInstalled(
       refreshInstalled,
-      blacklistingMap,
-      whitelistingMap
+      this._blacklistingMap,
+      this._whitelistingMap
     );
 
     // Await results:
@@ -812,6 +811,8 @@ export class ListModel extends VDomModel {
   private _searchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];
   private _debouncedUpdate: Debouncer<void, void>;
+  private _blacklistingMap: Map<string, IListEntry>;
+  private _whitelistingMap: Map<string, IListEntry>;
 }
 
 /**
