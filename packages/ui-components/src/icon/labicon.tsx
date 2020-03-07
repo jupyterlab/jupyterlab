@@ -814,14 +814,18 @@ namespace Private {
    * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
    */
   export function svgstrShim(svgstr: string, strict: boolean = true): string {
-    // decode any uri escaping then match to raw svg string
-    const [, base64, raw] = decodeURIComponent(svgstr).match(
-      strict
-        ? // match based on data url schema
-          /^(?:data:.*?(;base64)?,)?(.*)/
-        : // match based on open of svg tag
-          /^.*?(?:(base64).*)?,?(<svg.*)/
-    )!;
+    // decode any uri escaping, condense leading/lagging whitespace,
+    // then match to raw svg string
+    const [, base64, raw] = decodeURIComponent(svgstr)
+      .replace(/>\s*\n\s*</g, '><')
+      .replace(/\s*\n\s*/g, ' ')
+      .match(
+        strict
+          ? // match based on data url schema
+            /^(?:data:.*?(;base64)?,)?(.*)/
+          : // match based on open of svg tag
+            /(?:(base64).*)?(<svg.*)/
+      )!;
 
     // decode from base64, if needed
     return base64 ? atob(raw) : raw;
