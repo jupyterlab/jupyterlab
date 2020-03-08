@@ -57,31 +57,40 @@ export class SearchBar extends React.Component<
    */
   render(): React.ReactNode {
     return (
-      <div className="jp-extensionmanager-search-bar">
-        <InputGroup
-          className="jp-extensionmanager-search-wrapper"
-          type="text"
-          placeholder={this.props.placeholder}
-          onChange={this.handleChange}
-          value={this.state.value}
-          rightIcon="search"
-          disabled={this.props.disabled}
-        />
-        <br />
-        <Checkbox
-          label="I understand that extensions managed through this interface run arbitrary code that may be dangerous."
-          checked={ListModel.isDisclaimed()}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            this.props.settings
-              .set('disclaimed', e.target.checked)
-              .catch(reason => {
-                console.error(
-                  `Something went wrong when setting disclaimed.\n${reason}`
-                );
-              });
-          }}
-        />
-      </div>
+      <>
+        <div className="jp-extensionmanager-search-bar">
+          <InputGroup
+            className="jp-extensionmanager-search-wrapper"
+            type="text"
+            placeholder={this.props.placeholder}
+            onChange={this.handleChange}
+            value={this.state.value}
+            rightIcon="search"
+            disabled={this.props.disabled}
+          />
+        </div>
+        <CollapsibleSection
+          key="search-section"
+          isOpen={false}
+          header={'Disclaimer'}
+        >
+          <div className="jp-extensionmanager-disclaimer">
+            <Checkbox
+              label="I understand that extensions managed through this interface run arbitrary code that may be dangerous."
+              checked={ListModel.isDisclaimed()}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                this.props.settings
+                  .set('disclaimed', e.target.checked)
+                  .catch(reason => {
+                    console.error(
+                      `Something went wrong when setting disclaimed.\n${reason}`
+                    );
+                  });
+              }}
+            />
+          </div>
+        </CollapsibleSection>
+      </>
     );
   }
 

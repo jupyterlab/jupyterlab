@@ -2,8 +2,6 @@ print-listings:
 #	@exec echo Local Blacklist URI: http://localhost:8888/listings/blacklist.json
 #	@exec echo Local Whitelist URI: http://localhost:8888/listings/whitelist.json
 
-#	  --LabServerApp.blacklist_uris=http://localhost:8888/listings/blacklist.json \
-#	  --LabServerApp.whitelist_uris=http://localhost:8888/listings/whitelist.json
 dev: print-listings
 	@exec python main.py \
 	  --dev \
@@ -11,8 +9,6 @@ dev: print-listings
 	  --LabServerApp.blacklist_uris=https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/blacklist.json \
 	  --LabServerApp.whitelist_uris=https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/whitelist.json
 
-#	  --LabServerApp.blacklist_uris=http://localhost:8888/listings/blacklist.json \
-#	  --LabServerApp.whitelist_uris=http://localhost:8888/listings/whitelist.json
 dev-watch: print-listings
 	@exec python main.py \
 	  --dev \

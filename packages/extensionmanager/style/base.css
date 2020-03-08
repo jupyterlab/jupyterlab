@@ -90,6 +90,10 @@
   padding: 4px;
 }
 
+.jp-extensionmanager-disclaimer {
+  padding: 4px;
+}
+
 .jp-extensionmanager-search-wrapper input {
   background: transparent;
   font-size: var(--jp-ui-font-size1);

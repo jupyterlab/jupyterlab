@@ -16,10 +16,10 @@
       "path": "../services"
     },
     {
-      "path": "../ui-components"
+      "path": "../settingregistry"
     },
     {
-      "path": "../settingregistry"
+      "path": "../ui-components"
     }
   ]
 }
