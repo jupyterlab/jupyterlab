@@ -8,6 +8,7 @@ import {
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { Debouncer } from '@lumino/polling';
 
@@ -160,29 +161,51 @@ export type Action = 'install' | 'uninstall' | 'enable' | 'disable';
  * Model for an extension list.
  */
 export class ListModel extends VDomModel {
-  constructor(serviceManager: ServiceManager) {
+  constructor(
+    serviceManager: ServiceManager,
+    settings: ISettingRegistry.ISettings
+  ) {
     super();
     this._installed = [];
     this._searchResult = [];
     this.serviceManager = serviceManager;
     this.serverConnectionSettings = ServerConnection.makeSettings();
     this._debouncedUpdate = new Debouncer(this.update.bind(this), 1000);
-    this.lister.listingUrisLoaded.connect(() => {
-      this.performGetBlacklist()
-        .then(data => {
-          this._blacklistingMap = data;
-        })
-        .catch(error => {
-          console.error(error);
-        });
-      this.performGetWhitelist()
-        .then(data => {
-          this._whitelistingMap = data;
-        })
-        .catch(error => {
-          console.error(error);
-        });
+    this.lister.listingsLoaded.connect(this._listingIsLoaded, this);
+    _isDisclaimed = settings.composite['disclaimed'] === true;
+    settings.changed.connect(() => {
+      const disclaimed = settings.composite['disclaimed'] === true;
+      _isDisclaimed = disclaimed;
+      void this.update();
     });
+  }
+
+  _listingIsLoaded(_: Lister, listings: IListResult) {
+    this._blacklistMap = new Map<string, IEntry>();
+    listings.blacklist.map(e => {
+      this._blacklistMap.set(e, { name: e });
+    });
+    this._whitelistMap = new Map<string, IEntry>();
+    listings.whitelist.map(e => {
+      this._whitelistMap.set(e, { name: e });
+    });
+    void this.initialize();
+    /*
+    this.performGetBlacklist()
+      .then(data => {
+        this._blacklistingMap = data;
+      })
+      .catch(error => {
+        console.error(error);
+      });
+    this.performGetWhitelist()
+      .then(data => {
+        this._whitelistingMap = data;
+      })
+      .catch(error => {
+        console.error(error);
+      });
+    */
   }
 
   /**
@@ -431,9 +454,7 @@ export class ListModel extends VDomModel {
    * @param res Promise to an npm query result.
    */
   protected async translateSearchResult(
-    res: Promise<ISearchResult>,
-    blacklistMap: Map<string, IListEntry>,
-    whitelistMap: Map<string, IListEntry>
+    res: Promise<ISearchResult>
   ): Promise<{ [key: string]: IEntry }> {
     let entries: { [key: string]: IEntry } = {};
     for (let obj of (await res).objects) {
@@ -455,8 +476,8 @@ export class ListModel extends VDomModel {
         status: null,
         latest_version: pkg.version,
         installed_version: '',
-        isBlacklisted: blacklistMap.has(pkg.name),
-        isWhitelisted: whitelistMap.has(pkg.name)
+        isBlacklisted: this._blacklistMap.has(pkg.name),
+        isWhitelisted: this._whitelistMap.has(pkg.name)
       };
     }
     return entries;
@@ -488,9 +509,7 @@ export class ListModel extends VDomModel {
    * @param res Promise to the server reply data.
    */
   protected async translateInstalled(
-    res: Promise<IInstalledEntry[]>,
-    blacklistMap: Map<string, IListEntry>,
-    whitelistMap: Map<string, IListEntry>
+    res: Promise<IInstalledEntry[]>
   ): Promise<{ [key: string]: IEntry }> {
     const promises = [];
     const entries: { [key: string]: IEntry } = {};
@@ -506,8 +525,8 @@ export class ListModel extends VDomModel {
             status: pkg.status,
             latest_version: pkg.latest_version,
             installed_version: pkg.installed_version,
-            isBlacklisted: blacklistMap.has(pkg.name),
-            isWhitelisted: whitelistMap.has(pkg.name)
+            isBlacklisted: this._blacklistMap.has(pkg.name),
+            isWhitelisted: this._whitelistMap.has(pkg.name)
           };
         })
       );
@@ -556,10 +575,7 @@ export class ListModel extends VDomModel {
    *
    * @returns {Promise<{ [key: string]: IEntry; }>} The search result as a map of entries.
    */
-  protected async performSearch(
-    blacklistingMap: Map<string, IListEntry>,
-    whitelistingMap: Map<string, IListEntry>
-  ): Promise<{ [key: string]: IEntry }> {
+  protected async performSearch(): Promise<{ [key: string]: IEntry }> {
     if (this.query === null) {
       this._searchResult = [];
       this._totalEntries = 0;
@@ -573,11 +589,7 @@ export class ListModel extends VDomModel {
       this.page,
       this.pagination
     );
-    let searchMapPromise = this.translateSearchResult(
-      search,
-      blacklistingMap,
-      whitelistingMap
-    );
+    let searchMapPromise = this.translateSearchResult(search);
 
     let searchMap: { [key: string]: IEntry };
     try {
@@ -590,7 +602,7 @@ export class ListModel extends VDomModel {
 
     return searchMap;
   }
-
+  /*
   protected async performGetBlacklist(): Promise<Map<string, IListEntry>> {
     // Start the fetch without waiting for it:
     let blacklist = this.lister.getBlackList();
@@ -607,7 +619,9 @@ export class ListModel extends VDomModel {
 
     return blacklistMap;
   }
+  */
 
+  /*
   protected async performGetWhitelist(): Promise<Map<string, IListEntry>> {
     // Start the fetch without waiting for it:
     let whitelist = this.lister.getWhiteList();
@@ -624,6 +638,7 @@ export class ListModel extends VDomModel {
 
     return whitelisttMap;
   }
+  */
 
   /**
    * Query the installed extensions.
@@ -633,16 +648,12 @@ export class ListModel extends VDomModel {
    * @returns {Promise<{ [key: string]: IEntry; }>} A map of installed extensions.
    */
   protected async queryInstalled(
-    refreshInstalled: boolean,
-    blacklistMap: Map<string, IListEntry>,
-    whitelisttMap: Map<string, IListEntry>
+    refreshInstalled: boolean
   ): Promise<{ [key: string]: IEntry }> {
     let installedMap;
     try {
       installedMap = await this.translateInstalled(
-        this.fetchInstalled(refreshInstalled),
-        blacklistMap,
-        whitelisttMap
+        this.fetchInstalled(refreshInstalled)
       );
       this.installedError = null;
     } catch (reason) {
@@ -662,15 +673,8 @@ export class ListModel extends VDomModel {
   protected async update(refreshInstalled = false) {
     // Start both queries before awaiting:
 
-    const searchMapPromise = this.performSearch(
-      this._blacklistingMap,
-      this._whitelistingMap
-    );
-    const installedMapPromise = this.queryInstalled(
-      refreshInstalled,
-      this._blacklistingMap,
-      this._whitelistingMap
-    );
+    const searchMapPromise = this.performSearch();
+    const installedMapPromise = this.queryInstalled(refreshInstalled);
 
     // Await results:
     const searchMap = await searchMapPromise;
@@ -822,9 +826,11 @@ export class ListModel extends VDomModel {
   private _searchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];
   private _debouncedUpdate: Debouncer<void, void>;
-  private _blacklistingMap: Map<string, IListEntry>;
-  private _whitelistingMap: Map<string, IListEntry>;
+  private _blacklistMap: Map<string, IListEntry>;
+  private _whitelistMap: Map<string, IListEntry>;
 }
+
+let _isDisclaimed = false;
 
 /**
  * ListModel statics.
@@ -840,6 +846,14 @@ export namespace ListModel {
       return false;
     }
     return semver.lt(entry.installed_version, entry.latest_version);
+  }
+
+  export function isDisclaimed() {
+    return _isDisclaimed;
+  }
+
+  export function toogleDisclaimed() {
+    _isDisclaimed = !_isDisclaimed;
   }
 }
 

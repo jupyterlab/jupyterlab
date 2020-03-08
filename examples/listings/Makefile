@@ -1,6 +1,6 @@
 print-listings:
-	@exec echo Local Blacklist URI: http://localhost:8888/listings/blacklist.json
-	@exec echo Local Whitelist URI: http://localhost:8888/listings/whitelist.json
+#	@exec echo Local Blacklist URI: http://localhost:8888/listings/blacklist.json
+#	@exec echo Local Whitelist URI: http://localhost:8888/listings/whitelist.json
 
 #	  --LabServerApp.blacklist_uris=http://localhost:8888/listings/blacklist.json \
 #	  --LabServerApp.whitelist_uris=http://localhost:8888/listings/whitelist.json

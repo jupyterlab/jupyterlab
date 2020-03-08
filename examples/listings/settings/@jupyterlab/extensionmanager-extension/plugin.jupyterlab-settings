@@ -4,6 +4,10 @@
     // Extension manager settings.
     // *********************************************
 
+    // Disclaimer Status
+    // Whether the user understand that extensions managed through this interface run arbitrary code that may be dangerous
+    "disclaimed": false,
+
     // Enabled Status
     // Enables extension manager (requires Node.js/npm).
     // WARNING: installing untrusted extensions may be unsafe.

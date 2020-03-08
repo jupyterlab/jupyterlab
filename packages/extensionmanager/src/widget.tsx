@@ -3,6 +3,7 @@
 
 import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   Button,
   caretDownIcon,
@@ -64,9 +65,22 @@ export class SearchBar extends React.Component<
           onChange={this.handleChange}
           value={this.state.value}
           rightIcon="search"
+          disabled={this.props.disabled}
         />
         <br />
-        <Checkbox label="I understand that extensions managed through this interface run arbitrary code that may be dangerous." />
+        <Checkbox
+          label="I understand that extensions managed through this interface run arbitrary code that may be dangerous."
+          checked={ListModel.isDisclaimed()}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+            this.props.settings
+              .set('disclaimed', e.target.checked)
+              .catch(reason => {
+                console.error(
+                  `Something went wrong when setting disclaimed.\n${reason}`
+                );
+              });
+          }}
+        />
       </div>
     );
   }
@@ -94,6 +108,10 @@ export namespace SearchBar {
      * The placeholder string to use in the search bar input field when empty.
      */
     placeholder: string;
+
+    disabled: boolean;
+
+    settings: ISettingRegistry.ISettings;
   }
 
   /**
@@ -202,24 +220,28 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {entry.description}
         </div>
         <div className="jp-extensionmanager-entry-buttons">
-          {!entry.installed && (
-            <Button
-              onClick={() => props.performAction('install', entry)}
-              minimal
-              small
-            >
-              Install
-            </Button>
-          )}
-          {ListModel.entryHasUpdate(entry) && (
-            <Button
-              onClick={() => props.performAction('install', entry)}
-              minimal
-              small
-            >
-              Update
-            </Button>
-          )}
+          {!entry.installed &&
+            !entry.isBlacklisted &&
+            ListModel.isDisclaimed() && (
+              <Button
+                onClick={() => props.performAction('install', entry)}
+                minimal
+                small
+              >
+                Install
+              </Button>
+            )}
+          {ListModel.entryHasUpdate(entry) &&
+            !entry.isBlacklisted &&
+            ListModel.isDisclaimed() && (
+              <Button
+                onClick={() => props.performAction('install', entry)}
+                minimal
+                small
+              >
+                Update
+              </Button>
+            )}
           {entry.installed && (
             <Button
               onClick={() => props.performAction('uninstall', entry)}
@@ -468,8 +490,13 @@ export namespace CollapsibleSection {
  * The main view for the discovery extension.
  */
 export class ExtensionView extends VDomRenderer<ListModel> {
-  constructor(serviceManager: ServiceManager) {
-    super(new ListModel(serviceManager));
+  private _settings: ISettingRegistry.ISettings;
+  constructor(
+    serviceManager: ServiceManager,
+    settings: ISettingRegistry.ISettings
+  ) {
+    super(new ListModel(serviceManager, settings));
+    this._settings = settings;
     this.addClass('jp-extensionmanager-view');
   }
 
@@ -488,7 +515,14 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   protected render(): React.ReactElement<any>[] {
     const model = this.model!;
     let pages = Math.ceil(model.totalEntries / model.pagination);
-    let elements = [<SearchBar key="searchbar" placeholder="SEARCH" />];
+    let elements = [
+      <SearchBar
+        key="searchbar"
+        placeholder="SEARCH"
+        disabled={!ListModel.isDisclaimed()}
+        settings={this._settings}
+      />
+    ];
     if (model.promptBuild) {
       elements.push(
         <BuildPrompt
@@ -513,7 +547,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     );
     const content = [];
     if (!model.initialized) {
-      void model.initialize();
+      //      void model.initialize();
       content.push(
         <div key="loading-placeholder" className="jp-extensionmanager-loader">
           Updating extensions list

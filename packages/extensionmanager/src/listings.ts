@@ -13,6 +13,16 @@ import { ServerConnection } from '@jupyterlab/services';
  */
 export interface IListResult {
   /**
+   * A collection of URIs for black listings.
+   */
+  blacklistUris: string[];
+
+  /**
+   * A collection of URIs for white listings.
+   */
+  whitelistUris: string[];
+
+  /**
    * A collection of back listed extensions.
    */
   blacklist: string[];
@@ -21,25 +31,17 @@ export interface IListResult {
    * A collection of white listed extensions.
    */
   whitelist: string[];
-
-  /**
-   * Timestamp of the search result creation.
-   */
-  time: string;
 }
 
 export interface IListingApi {
-  listings: {
-    blacklist_uri: string;
-    whitelist_uri: string;
-    builtin_blacklist: string[];
-    builtin_whitelist: string[];
-  };
+  blacklist_uris: string[];
+  whitelist_uris: string[];
+  blacklist: string[];
+  whitelist: string[];
 }
 
 /**
- * An object for searching an List registry.
- *
+ * An object for getting listings from URIs.
  */
 export class Lister {
   /**
@@ -50,17 +52,21 @@ export class Lister {
       '@jupyterlab/extensionmanager-extension/listings.json'
     )
       .then(data => {
-        this.blackListUri = data.listings.blacklist_uri;
-        this.whiteListUri = data.listings.whitelist_uri;
-        this._listingUrisLoaded.emit(void 0);
+        this._listings = {
+          blacklistUris: data.blacklist_uris,
+          whitelistUris: data.whitelist_uris,
+          blacklist: data.blacklist,
+          whitelist: data.whitelist
+        };
+        this._listingsLoaded.emit(this._listings);
       })
       .catch(error => {
         console.error(error);
       });
   }
 
-  get listingUrisLoaded(): ISignal<Lister, void> {
-    return this._listingUrisLoaded;
+  get listingsLoaded(): ISignal<this, IListResult> {
+    return this._listingsLoaded;
   }
 
   /**
@@ -68,9 +74,8 @@ export class Lister {
    *
    * @param page The page of results to fetch.
    * @param pageination The pagination size to use. See registry API documentation for acceptable values.
-   */
   getBlackList(): Promise<IListResult> {
-    const uri = new URL(this.blackListUri);
+    const uri = new URL(this.blackListUri[0]);
     return fetch(uri.toString()).then((response: Response) => {
       if (response.ok) {
         return response.json();
@@ -78,15 +83,15 @@ export class Lister {
       return [];
     });
   }
+   */
 
   /**
    * Get the white list.
    *
    * @param page The page of results to fetch.
    * @param pageination The pagination size to use. See registry API documentation for acceptable values.
-   */
   getWhiteList(): Promise<IListResult> {
-    const uri = new URL(this.whiteListUri);
+    const uri = new URL(this.whiteListUris[0]);
     return fetch(uri.toString()).then((response: Response) => {
       if (response.ok) {
         return response.json();
@@ -94,20 +99,18 @@ export class Lister {
       return [];
     });
   }
-
-  /**
-   * The URI of the black listing registry to use.
    */
-  private blackListUri: string;
 
-  /**
-   * The URI of the white listing registry to use.
-   */
-  private whiteListUri: string;
+  private _listings: IListResult = {
+    blacklistUris: [],
+    whitelistUris: [],
+    blacklist: [],
+    whitelist: []
+  };
 
   /**
    */
-  private _listingUrisLoaded = new Signal<Lister, void>(this);
+  private _listingsLoaded = new Signal<this, IListResult>(this);
 }
 
 /**
