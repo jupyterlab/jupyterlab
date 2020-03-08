@@ -40,7 +40,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
   ) => {
     const settings = await registry.load(plugin.id);
     let enabled = settings.composite['enabled'] === true;
-    let disclaimed = settings.composite['disclaimed'] === true;
 
     const { commands, serviceManager, shell } = app;
     let view: ExtensionView | undefined;
