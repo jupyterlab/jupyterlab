@@ -11,6 +11,7 @@ Here is an animation showing the extension's use, with a notebook from the [Pyth
 ## Prerequisites
 
 - JupyterLab >=2.0
+- NodeJS 12+
 
 ## Installation
 
