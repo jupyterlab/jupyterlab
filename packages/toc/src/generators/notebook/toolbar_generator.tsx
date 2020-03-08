@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { JSONValue } from '@phosphor/coreutils';
+import { JSONValue } from '@lumino/coreutils';
 import { OptionsManager } from './options_manager';
 import { TagsToolComponent } from './tagstool';
 
@@ -73,16 +73,16 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
             tracker.currentWidget.content.activeCellChanged.connect(() => {
               options.updateWidget();
             });
-            const numbering = tracker.currentWidget.model.metadata.get(
+            const numbering = tracker.currentWidget.model!.metadata.get(
               'toc-autonumbering'
             ) as boolean;
-            const showCode = tracker.currentWidget.model.metadata.get(
+            const showCode = tracker.currentWidget.model!.metadata.get(
               'toc-showcode'
             ) as boolean;
-            const showMarkdown = tracker.currentWidget.model.metadata.get(
+            const showMarkdown = tracker.currentWidget.model!.metadata.get(
               'toc-showmarkdowntxt'
             ) as boolean;
-            const showTags = tracker.currentWidget.model.metadata.get(
+            const showTags = tracker.currentWidget.model!.metadata.get(
               'toc-showtags'
             ) as boolean;
             options.initializeOptions(
@@ -144,7 +144,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
     loadTags() {
       const notebook = tracker.currentWidget;
       if (notebook) {
-        const cells = notebook.model.cells;
+        const cells = notebook.model!.cells;
         const tags = new Set<string>();
         this.tags = [];
         for (let i = 0; i < cells.length; i++) {

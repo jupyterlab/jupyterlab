@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 import { IHeading } from './utils/headings';
 import { TableOfContentsRegistry as Registry } from './registry';
 import { TOCItem } from './toc_item';

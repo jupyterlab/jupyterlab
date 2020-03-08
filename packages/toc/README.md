@@ -10,7 +10,7 @@ Here is an animation showing the extension's use, with a notebook from the [Pyth
 
 ## Prerequisites
 
-- JupyterLab >=1.0
+- JupyterLab >=2.0
 
 ## Installation
 

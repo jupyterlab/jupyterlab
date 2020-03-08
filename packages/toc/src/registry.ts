@@ -2,8 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
-import { Token } from '@phosphor/coreutils';
-import { Widget } from '@phosphor/widgets';
+import { Token } from '@lumino/coreutils';
+import { Widget } from '@lumino/widgets';
 import { IHeading } from './utils/headings';
 
 /**
