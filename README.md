@@ -25,14 +25,14 @@ jupyter labextension install @jupyterlab/debugger
 A kernel with support for debugging is also required to be able to use the debugger:
 
 ```bash
-conda install -c conda-forge "xeus-python>=0.6.7" "notebook>=6" ptvsd
+conda install -c conda-forge xeus-python=0.6.12 notebook=6 ptvsd
 ```
 
 ## Development
 
 ```bash
 # Create a new conda environment
-conda create -n jupyterlab-debugger -c conda-forge nodejs "xeus-python>=0.6.7" ptvsd "jupyterlab=2"
+conda create -n jupyterlab-debugger -c conda-forge nodejs xeus-python=0.6.12 ptvsd jupyterlab=2
 
 # Activate the conda environment
 conda activate jupyterlab-debugger
