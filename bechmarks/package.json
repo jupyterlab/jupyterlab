@@ -5,11 +5,17 @@
     "scripts": {
         "build": "tsc",
         "run": "node --experimental-modules lib/index.js",
-        "download-browsers": "node node_modules/playwright/install.js",
-        "start": "jlpm run download-browsers && jlpm run build && jlpm run run"
+        "jlab:build": "cd .. && jlpm run build",
+        "jlab:start": "fkill -s :9999 && cd .. && jupyter lab --dev --no-browser --port 9999 --LabApp.password= --LabApp.token=",
+        "jlab:wait": "wait-on http-get://localhost:9999/lab",
+        "run-when-ready": "jlpm run jlab:wait && jlpm run run",
+        "start-and-run": "concurrently --kill-others 'jlpm run jlab:start'  'jlpm run run-when-ready' ",
+        "setup": "node node_modules/playwright/install.js && jlpm run jlab:build && jlpm run build",
+        "start": "jlpn run setup && jlpm run start-and-run"
     },
     "dependencies": {
         "concurrently": "5.1.0",
+        "fkill-cli": "6.0.1",
         "playwright": "0.11.1",
         "typescript": "~3.7.3",
         "wait-on": "4.0.1"
