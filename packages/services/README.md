@@ -221,6 +221,8 @@ session connection. The session context also contains some convenience
 functionality, such as preferences for whether a kernel should be started and
 a user-friendly kernel name and status.
 
-Here is a diagram that provides an overview of the different components ([source](./architecture.xml)):
+Here is a diagram that provides an overview of the different components:
 
 ![architecture-diagram](./architecture.png)
+
+_The diagram can be edited on [draw.io](https://draw.io) by importing the [source](./architecture.xml)_.
