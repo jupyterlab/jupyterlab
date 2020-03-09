@@ -293,13 +293,6 @@ Now return to your editor. Modify the imports at the top of the file to add a fe
       Widget
     } from '@lumino/widgets';
 
-Install this new dependency as well:
-
-.. code:: bash
-
-    jlpm add @lumino/widgets
-
-
 Then modify the ``activate`` function again so that it has the following
 code:
 
