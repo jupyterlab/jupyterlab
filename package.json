@@ -2,6 +2,7 @@
   "private": true,
   "workspaces": {
     "packages": [
+      "benchmarks",
       "dev_mode",
       "examples/*",
       "packages/*",

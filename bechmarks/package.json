@@ -1,0 +1,19 @@
+{
+    "name": "@jupyterlab/benchmarks",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "build": "tsc",
+        "run": "node --experimental-modules lib/index.js",
+        "download-browsers": "node node_modules/playwright/install.js",
+        "start": "jlpm run download-browsers && jlpm run build && jlpm run run"
+    },
+    "dependencies": {
+        "concurrently": "5.1.0",
+        "playwright": "0.11.1",
+        "typescript": "~3.7.3",
+        "wait-on": "4.0.1"
+    },
+    "type": "module",
+    "devDependencies": {}
+}
