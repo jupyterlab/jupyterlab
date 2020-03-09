@@ -255,16 +255,7 @@ will pass an instance of ``ICommandPalette`` as the second parameter of
 in that function. The second ``console.log`` line exists only so that
 you can immediately check that your changes work.
 
-Now you will need to install these dependencies. Run the following commands in the
-repository root folder to install the dependencies and save them to your
-`package.json`:
-
-.. code:: bash
-
-    jlpm add @jupyterlab/apputils
-    jlpm add @jupyterlab/application
-
-Finally, run the following to rebuild your extension.
+Run the following to rebuild your extension.
 
 .. code:: bash
 
