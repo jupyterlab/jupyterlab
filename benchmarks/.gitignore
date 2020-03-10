@@ -1,0 +1,4 @@
+yarn.lock
+*.png
+data/
+out.*
