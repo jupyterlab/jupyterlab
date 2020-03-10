@@ -18,6 +18,8 @@ from jupyter_server.serverapp import aliases, flags
 from jupyter_server.utils import url_path_join as ujoin
 from traitlets import Bool, Instance, Unicode, default
 
+from nbclassic.shim import NBClassicConfigShimMixin
+
 from ._version import __version__
 from .debuglog import DebugLogFileMixin
 from .extension import load_config, load_jupyter_server_extension
@@ -395,11 +397,11 @@ class LabWorkspaceApp(JupyterApp):
 
 
 
-class LabApp(LabServerApp):
+class LabApp(NBClassicConfigShimMixin, LabServerApp):
     version = version
 
-    # The name of the extension
     extension_name = "jupyterlab"
+    app_name = "JupyterLab"
 
     # The url that your extension will serve its homepage.
     default_url = '/lab'
@@ -499,26 +501,6 @@ class LabApp(LabServerApp):
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
 
-
-    # Local path to static files directory.
-    static_paths = []
-
-    # Local path to templates directory.
-    template_paths = []
-
-
-    @default('app_dir')
-    def _default_app_dir(self):
-        return get_app_dir()
-
-    @default('app_name')
-    def _default_app_name(self):
-        return 'JupyterLab'
-
-    @default('app_namespace')
-    def _default_app_namespace(self):
-        return 'jupyterlab'
-
     @default('app_settings_dir')
     def _default_app_settings_dir(self):
         return pjoin(self.app_dir, 'settings')
@@ -557,12 +539,11 @@ class LabApp(LabServerApp):
         return pjoin(self.app_dir, 'static')
 
     def initialize_templates(self):
-        app_dir = getattr(self, 'app_dir', get_app_dir())
-        if getattr(self, 'dev_mode', False) or app_dir.startswith(DEV_DIR):
+        if self.dev_mode or self.app_dir.startswith(DEV_DIR):
             dev_static_dir = ujoin(DEV_DIR, 'static')
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
-        elif getattr(self, 'core_mode', False) or app_dir.startswith(HERE):
+        elif self.core_mode or self.app_dir.startswith(HERE):
             dev_static_dir = ujoin(HERE, 'static')
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
