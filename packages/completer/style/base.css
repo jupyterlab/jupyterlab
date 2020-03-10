@@ -51,6 +51,11 @@
   line-height: var(--jp-private-completer-item-height);
 }
 
+.jp-Completer-deprecated .jp-Completer-match {
+  text-decoration: line-through;
+  color: var(--jp-content-font-color2);
+}
+
 .jp-Completer-item .jp-Completer-type {
   display: table-cell;
   box-sizing: border-box;
