@@ -77,9 +77,9 @@ const TYPES = {
 };
 type TYPES_TYPE = keyof typeof TYPES;
 
-const MAX_N = 1000;
+const MAX_N = 10000;
 const NUMBER_SAMPLES = 20;
-const SWITCHES = 5;
+const SWITCHES = 3;
 
 type OUTPUT_TYPE = {
   browser: typeof BROWSERS[number];
@@ -124,6 +124,10 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
     await page.waitForLoadState();
     await waitForLaunch();
     for (let n = 0; n <= MAX_N; n += MAX_N / NUMBER_SAMPLES) {
+      // Skip larger tests on firefox because they are too slow
+      if (n > 4000 && browserName === 'firefox') {
+        continue;
+      }
       console.log(` n=${n}/${MAX_N}`);
       // Open each notebook type we have for this n of samples
       // mapping from type to created id

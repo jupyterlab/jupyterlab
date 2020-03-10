@@ -1,0 +1,34 @@
+{
+  "data": {
+    "url": "./out.csv"
+  },
+  "mark": "point",
+  "encoding": {
+    "x": {
+      "field": "n",
+      "type": "quantitative",
+      "scale": {}
+    },
+    "y": {
+      "field": "time",
+      "type": "quantitative",
+      "scale": {}
+    },
+    "column": {
+      "field": "browser",
+      "type": "nominal"
+    },
+    "color": {
+      "field": "type",
+      "type": "nominal"
+    }
+  },
+  "config": {
+    "line": {
+      "point": true
+    },
+    "scale": {
+      "useUnaggregatedDomain": true
+    }
+  }
+}
