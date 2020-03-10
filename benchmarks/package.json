@@ -11,7 +11,8 @@
         "run-when-ready": "jlpm run jlab:wait && jlpm run run",
         "start-and-run": "concurrently --kill-others 'jlpm run jlab:start'  'jlpm run run-when-ready' ",
         "setup": "node node_modules/playwright/install.js && jlpm run jlab:build && jlpm run build",
-        "start": "jlpn run setup && jlpm run start-and-run"
+        "start": "jlpm run setup && jlpm run start-and-run",
+        "analyze": "cd .. && jupyter lab --dev benchmarks/analysis.vl.json"
     },
     "dependencies": {
         "concurrently": "5.1.0",
