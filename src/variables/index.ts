@@ -3,11 +3,11 @@
 
 import { CommandRegistry } from '@lumino/commands';
 
+import { DataGridTable } from './grid';
+
 import { IDebugger } from '../tokens';
 
 import { Panel, Widget } from '@lumino/widgets';
-
-import { VariablesBodyTable } from './table';
 
 import { VariablesHeader } from './header';
 
@@ -32,7 +32,7 @@ export class Variables extends Panel {
 
     this._header = new VariablesHeader();
     this._tree = new VariablesBodyTree({ model, service });
-    this._table = new VariablesBodyTable({ model, commands });
+    this._table = new DataGridTable({ model, commands });
     this._table.hide();
 
     const onClick = () => {
@@ -84,9 +84,9 @@ export class Variables extends Panel {
    * @param msg The resize message.
    */
   private _resizeBody(msg: Widget.ResizeMessage) {
-    const height = msg.height - this._header.node.offsetHeight;
-    this._table.node.style.height = `${height}px`;
-    this._tree.node.style.height = `${height}px`;
+    // const height = msg.height - this._header.node.offsetHeight;
+    // this._table.node.style.height = `${height}px`;
+    // this._tree.node.style.height = `${height}px`;
   }
 
   private _header: VariablesHeader;
