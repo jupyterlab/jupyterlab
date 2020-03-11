@@ -10,7 +10,8 @@ dev: listings-uris
 	  --dev \
 	  --no-browser \
 	  --LabServerApp.blacklist_uris=${BLACK_LIST_URIS} \
-	  --LabServerApp.whitelist_uris=${WHITE_LIST_URIS}
+	  --LabServerApp.whitelist_uris=${WHITE_LIST_URIS} \
+	  --LabServerApp.listings_refresh_ms=5000
 
 watch: listings-uris
 	@exec python main.py \
@@ -18,4 +19,5 @@ watch: listings-uris
 	  --no-browser \
 	  --watch \
 	  --LabServerApp.blacklist_uris=${BLACK_LIST_URIS} \
-	  --LabServerApp.whitelist_uris=${WHITE_LIST_URIS}
+	  --LabServerApp.whitelist_uris=${WHITE_LIST_URIS} \
+	  --LabServerApp.listings_refresh_ms=5000

@@ -6,7 +6,7 @@
 
     // Disclaimed Status
     // Whether the user understand that extensions managed through this interface run arbitrary code that may be dangerous
-    "disclaimed": false,
+    "disclaimed": true,
 
     // Enabled Status
     // Enables extension manager (requires Node.js/npm).
