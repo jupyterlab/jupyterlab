@@ -505,7 +505,7 @@ class TestExtension(AppHandlerTest):
         pkg = pjoin(app_dir, 'static', 'package.json')
         with open(pkg) as fid:
             data = json.load(fid)
-        assert list(data['jupyterlab']['extensions'].keys()) == [
+        assert sorted(data['jupyterlab']['extensions'].keys()) == [
             '@jupyterlab/application-extension',
             '@jupyterlab/apputils-extension',
             '@jupyterlab/mock-extension',
