@@ -33,7 +33,7 @@ If you use ``conda``, you can get it with:
 
 .. code:: bash
 
-    conda install -c conda-forge nodejs
+    conda install nodejs
 
 If you use `Homebrew <https://brew.sh/>`__ on Mac OS X:
 
