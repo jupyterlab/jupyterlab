@@ -47,6 +47,13 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
 
 .. toctree::
    :maxdepth: 1
+   :caption: Admin Guide
+
+   admin/listings
+
+
+.. toctree::
+   :maxdepth: 1
    :caption: Developer Guide
 
    developer/repo
