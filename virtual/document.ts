@@ -147,7 +147,7 @@ export class VirtualDocument {
    * Virtual lines keep all the lines present in the document AND extracted to the foreign document.
    */
   public virtual_lines: Map<number, IVirtualLine>; // probably should go protected
-  public source_lines: Map<number, ISourceLine>; // probably should go protected
+  protected source_lines: Map<number, ISourceLine>;
 
   protected foreign_extractors: IForeignCodeExtractor[];
   protected overrides_registry: IOverridesRegistry;
@@ -417,6 +417,34 @@ export class VirtualDocument {
     } as IVirtualPosition;
   }
 
+  private choose_foreign_document(extractor: IForeignCodeExtractor) {
+    let foreign_document: VirtualDocument;
+    // if not standalone, try to append to existing document
+    let foreign_exists = this.foreign_documents.has(extractor.language);
+    if (!extractor.standalone && foreign_exists) {
+      foreign_document = this.foreign_documents.get(extractor.language);
+      this.unused_documents.delete(foreign_document);
+    } else {
+      // if standalone, try to re-use existing connection to the server
+      let unused_standalone = this.unused_standalone_documents.get(
+        extractor.language
+      );
+      if (extractor.standalone && unused_standalone.length > 0) {
+        foreign_document = unused_standalone.pop();
+        this.unused_documents.delete(foreign_document);
+      } else {
+        // if (previous document does not exists) or (extractor produces standalone documents
+        // and no old standalone document could be reused): create a new document
+        foreign_document = this.open_foreign(
+          extractor.language,
+          extractor.standalone,
+          extractor.file_extension
+        );
+      }
+    }
+    return foreign_document;
+  }
+
   extract_foreign_code(
     cell_code: string,
     cm_editor: CodeMirror.Editor,
@@ -440,30 +468,7 @@ export class VirtualDocument {
 
       for (let result of results) {
         if (result.foreign_code !== null) {
-          let foreign_document: VirtualDocument;
-          // if not standalone, try to append to existing document
-          let foreign_exists = this.foreign_documents.has(extractor.language);
-          if (!extractor.standalone && foreign_exists) {
-            foreign_document = this.foreign_documents.get(extractor.language);
-            this.unused_documents.delete(foreign_document);
-          } else {
-            // if standalone, try to re-use existing connection to the server
-            let unused_standalone = this.unused_standalone_documents.get(
-              extractor.language
-            );
-            if (extractor.standalone && unused_standalone.length > 0) {
-              foreign_document = unused_standalone.pop();
-              this.unused_documents.delete(foreign_document);
-            } else {
-              // if (previous document does not exists) or (extractor produces standalone documents
-              // and no old standalone document could be reused): create a new document
-              foreign_document = this.open_foreign(
-                extractor.language,
-                extractor.standalone,
-                extractor.file_extension
-              );
-            }
-          }
+          let foreign_document = this.choose_foreign_document(extractor);
 
           foreign_document_map.set(result.range, {
             virtual_line: foreign_document.last_virtual_line,
@@ -476,7 +481,8 @@ export class VirtualDocument {
           foreign_document.append_code_block(
             result.foreign_code,
             cm_editor,
-            foreign_shift
+            foreign_shift,
+            result.virtual_shift
           );
         }
         if (result.host_code !== null) {
@@ -544,7 +550,8 @@ export class VirtualDocument {
   append_code_block(
     cell_code: string,
     cm_editor: CodeMirror.Editor,
-    editor_shift: CodeEditor.IPosition = { line: 0, column: 0 }
+    editor_shift: CodeEditor.IPosition = { line: 0, column: 0 },
+    virtual_shift?: CodeEditor.IPosition
   ) {
     let source_cell_lines = cell_code.split('\n');
 
@@ -564,8 +571,11 @@ export class VirtualDocument {
     }
     for (let i = 0; i < source_cell_lines.length; i++) {
       this.source_lines.set(this.last_source_line + i, {
-        editor_line: i + editor_shift.line,
-        editor_shift: editor_shift,
+        editor_line: i,
+        editor_shift: {
+          line: editor_shift.line,
+          column: i === 0 ? editor_shift.column : 0
+        },
         // TODO: move those to a new abstraction layer (DocumentBlock class)
         editor: cm_editor,
         foreign_documents_map: foreign_document_map,
@@ -669,11 +679,13 @@ export class VirtualDocument {
   }
 
   transform_source_to_editor(pos: ISourcePosition): IEditorPosition {
-    let editor_line = this.source_lines.get(pos.line).editor_line;
-    let editor_shift = this.source_lines.get(pos.line).editor_shift;
+    let source_line = this.source_lines.get(pos.line);
+    let editor_line = source_line.editor_line;
+    let editor_shift = source_line.editor_shift;
     return {
-      ch: pos.ch + editor_shift.column,
-      line: editor_line
+      // only shift column in the first line
+      ch: pos.ch + (editor_line === 0 ? editor_shift.column : 0),
+      line: editor_line + editor_shift.line
       // TODO or:
       //  line: pos.line + editor_shift.line - this.first_line_of_the_block(editor)
     } as IEditorPosition;
