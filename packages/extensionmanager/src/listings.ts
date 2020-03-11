@@ -7,6 +7,21 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
 
+/***
+ * Information about a listed entry.
+ */
+export interface IListEntry {
+  /**
+   * The name of the extension.
+   */
+  name: string;
+  regexp: RegExp | undefined;
+  type: string;
+  reason: string;
+  creation_date: string;
+  last_update_date: string;
+}
+
 /**
  * Listing search result structure (subset).
  *
@@ -25,19 +40,19 @@ export interface IListResult {
   /**
    * A collection of back listed extensions.
    */
-  blacklist: string[];
+  blacklist: IListEntry[];
 
   /**
    * A collection of white listed extensions.
    */
-  whitelist: string[];
+  whitelist: IListEntry[];
 }
 
 export interface IListingApi {
   blacklist_uris: string[];
   whitelist_uris: string[];
-  blacklist: string[];
-  whitelist: string[];
+  blacklist: IListEntry[];
+  whitelist: IListEntry[];
 }
 
 /**
@@ -68,38 +83,6 @@ export class Lister {
   get listingsLoaded(): ISignal<this, IListResult> {
     return this._listingsLoaded;
   }
-
-  /**
-   * Get the black list.
-   *
-   * @param page The page of results to fetch.
-   * @param pageination The pagination size to use. See registry API documentation for acceptable values.
-  getBlackList(): Promise<IListResult> {
-    const uri = new URL(this.blackListUri[0]);
-    return fetch(uri.toString()).then((response: Response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      return [];
-    });
-  }
-   */
-
-  /**
-   * Get the white list.
-   *
-   * @param page The page of results to fetch.
-   * @param pageination The pagination size to use. See registry API documentation for acceptable values.
-  getWhiteList(): Promise<IListResult> {
-    const uri = new URL(this.whiteListUris[0]);
-    return fetch(uri.toString()).then((response: Response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      return [];
-    });
-  }
-   */
 
   private _listings: IListResult = {
     blacklistUris: [],

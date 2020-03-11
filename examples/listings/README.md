@@ -3,5 +3,5 @@
 ```bash
 make dev
 # or...
-make dev-watch
+make watch
 ```

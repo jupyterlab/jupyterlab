@@ -1,18 +1,21 @@
-print-listings:
-#	@exec echo Local Blacklist URI: http://localhost:8888/listings/blacklist.json
-#	@exec echo Local Whitelist URI: http://localhost:8888/listings/whitelist.json
+export BLACK_LIST_URIS=https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/blacklist_simple.json	
+export WHITE_LIST_URIS=https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/whitelist_simple.json
 
-dev: print-listings
+listings-uris:
+	@exec echo Blacklist URIs: ${BLACK_LIST_URIS}
+	@exec echo Whitelist URIs: ${WHITE_LIST_URIS}
+
+dev: listings-uris
 	@exec python main.py \
 	  --dev \
 	  --no-browser \
-	  --LabServerApp.blacklist_uris=https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/blacklist.json \
-	  --LabServerApp.whitelist_uris=https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/whitelist.json
+	  --LabServerApp.blacklist_uris=${BLACK_LIST_URIS} \
+	  --LabServerApp.whitelist_uris=${WHITE_LIST_URIS}
 
-dev-watch: print-listings
+watch: listings-uris
 	@exec python main.py \
 	  --dev \
 	  --no-browser \
 	  --watch \
-	  --LabServerApp.blacklist_uris=https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/blacklist.json \
-	  --LabServerApp.whitelist_uris=https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/whitelist.json
+	  --LabServerApp.blacklist_uris=${BLACK_LIST_URIS} \
+	  --LabServerApp.whitelist_uris=${WHITE_LIST_URIS}

@@ -26,7 +26,7 @@ import { reportInstallError } from './dialog';
 
 import { Searcher, ISearchResult, isJupyterOrg } from './npm';
 
-import { Lister, IListResult } from './listings';
+import { Lister, IListResult, IListEntry } from './listings';
 
 /**
  * Information about an extension.
@@ -72,19 +72,9 @@ export interface IEntry {
    */
   installed_version: string;
 
-  isBlacklisted: boolean;
+  blacklistEntry: IListEntry | undefined;
 
-  isWhitelisted: boolean;
-}
-
-/***
- * Information about a listed entry.
- */
-export interface IListEntry {
-  /**
-   * The name of the extension.
-   */
-  name: string;
+  whitelistEntry: IListEntry | undefined;
 }
 
 /**
@@ -181,13 +171,27 @@ export class ListModel extends VDomModel {
   }
 
   _listingIsLoaded(_: Lister, listings: IListResult) {
-    this._blacklistMap = new Map<string, IEntry>();
+    this._blacklistMap = new Map<string, IListEntry>();
     listings.blacklist.map(e => {
-      this._blacklistMap.set(e, { name: e });
+      this._blacklistMap.set(e.name, {
+        name: e.name,
+        regexp: new RegExp(e.name),
+        type: e.type,
+        reason: e.reason,
+        creation_date: e.creation_date,
+        last_update_date: e.last_update_date
+      });
     });
-    this._whitelistMap = new Map<string, IEntry>();
+    this._whitelistMap = new Map<string, IListEntry>();
     listings.whitelist.map(e => {
-      this._whitelistMap.set(e, { name: e });
+      this._whitelistMap.set(e.name, {
+        name: e.name,
+        regexp: new RegExp(e.name),
+        type: e.type,
+        reason: e.reason,
+        creation_date: e.creation_date,
+        last_update_date: e.last_update_date
+      });
     });
     void this.initialize();
     /*
@@ -476,29 +480,9 @@ export class ListModel extends VDomModel {
         status: null,
         latest_version: pkg.version,
         installed_version: '',
-        isBlacklisted: this._blacklistMap.has(pkg.name),
-        isWhitelisted: this._whitelistMap.has(pkg.name)
+        blacklistEntry: this.isListed(pkg.name, this._blacklistMap),
+        whitelistEntry: this.isListed(pkg.name, this._whitelistMap)
       };
-    }
-    return entries;
-  }
-
-  protected async translateBlacklistingResult(
-    res: Promise<IListResult>
-  ): Promise<Map<string, IListEntry>> {
-    let entries: Map<string, IListEntry> = new Map();
-    for (let obj of (await res).blacklist) {
-      entries.set(obj, { name: obj });
-    }
-    return entries;
-  }
-
-  protected async translateWhitelistingResult(
-    res: Promise<IListResult>
-  ): Promise<Map<string, IListEntry>> {
-    let entries: Map<string, IListEntry> = new Map();
-    for (let obj of (await res).whitelist) {
-      entries.set(obj, { name: obj });
     }
     return entries;
   }
@@ -525,8 +509,8 @@ export class ListModel extends VDomModel {
             status: pkg.status,
             latest_version: pkg.latest_version,
             installed_version: pkg.installed_version,
-            isBlacklisted: this._blacklistMap.has(pkg.name),
-            isWhitelisted: this._whitelistMap.has(pkg.name)
+            blacklistEntry: this.isListed(pkg.name, this._blacklistMap),
+            whitelistEntry: this.isListed(pkg.name, this._whitelistMap)
           };
         })
       );
@@ -534,6 +518,22 @@ export class ListModel extends VDomModel {
     return Promise.all(promises).then(() => {
       return entries;
     });
+  }
+
+  /*
+   * TODO(@echarles) Use a Array instead of a Map
+   */
+  private isListed(
+    name: string,
+    listMap: Map<string, IListEntry>
+  ): IListEntry | undefined {
+    let entry: IListEntry | undefined = undefined;
+    listMap.forEach((listEntry: IListEntry, entryName: string) => {
+      if (listEntry.regexp && listEntry.regexp?.test(name)) {
+        entry = listEntry;
+      }
+    });
+    return entry;
   }
 
   /**
@@ -602,43 +602,6 @@ export class ListModel extends VDomModel {
 
     return searchMap;
   }
-  /*
-  protected async performGetBlacklist(): Promise<Map<string, IListEntry>> {
-    // Start the fetch without waiting for it:
-    let blacklist = this.lister.getBlackList();
-    let blacklistMapPromise = this.translateBlacklistingResult(blacklist);
-
-    let blacklistMap: Map<string, IListEntry>;
-    try {
-      blacklistMap = await blacklistMapPromise;
-      this.blacklistError = null;
-    } catch (reason) {
-      blacklistMap = new Map();
-      this.blacklistError = reason.toString();
-    }
-
-    return blacklistMap;
-  }
-  */
-
-  /*
-  protected async performGetWhitelist(): Promise<Map<string, IListEntry>> {
-    // Start the fetch without waiting for it:
-    let whitelist = this.lister.getWhiteList();
-    let whitelistMapPromise = this.translateWhitelistingResult(whitelist);
-
-    let whitelisttMap: Map<string, IListEntry>;
-    try {
-      whitelisttMap = await whitelistMapPromise;
-      this.blacklistError = null;
-    } catch (reason) {
-      whitelisttMap = new Map();
-      this.blacklistError = reason.toString();
-    }
-
-    return whitelisttMap;
-  }
-  */
 
   /**
    * Query the installed extensions.

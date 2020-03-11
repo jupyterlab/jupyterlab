@@ -188,10 +188,10 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   if (isJupyterOrg(entry.name)) {
     flagClasses.push(`jp-extensionmanager-entry-mod-whitelisted`);
   }
-  if (entry.isWhitelisted) {
+  if (entry.whitelistEntry) {
     flagClasses.push(`jp-extensionmanager-entry-is-whitelisted`);
   }
-  if (entry.isBlacklisted) {
+  if (entry.blacklistEntry) {
     flagClasses.push(`jp-extensionmanager-entry-is-blacklisted`);
   }
   return (
@@ -211,16 +211,16 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             iconLabel={entry.name + ' (Developed by Project Jupyter)'}
           />
         )}
-        {entry.isBlacklisted && (
+        {entry.blacklistEntry && (
           <ToolbarButtonComponent
             icon={blacklistedIcon}
-            iconLabel={entry.name + ' is blacklisted'}
+            iconLabel={`${entry.name} is blacklisted since ${entry.blacklistEntry?.creation_date} - Reason: [${entry.blacklistEntry?.reason}]`}
           />
         )}
-        {entry.isWhitelisted && (
+        {entry.whitelistEntry && (
           <ToolbarButtonComponent
             icon={whitelistedIcon}
-            iconLabel={entry.name + ' is whitelisted'}
+            iconLabel={`${entry.name} is whitelisted since ${entry.whitelistEntry?.creation_date} - Reason: [${entry.whitelistEntry?.reason}]`}
           />
         )}
       </div>
@@ -230,7 +230,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
         </div>
         <div className="jp-extensionmanager-entry-buttons">
           {!entry.installed &&
-            !entry.isBlacklisted &&
+            !entry.blacklistEntry &&
             ListModel.isDisclaimed() && (
               <Button
                 onClick={() => props.performAction('install', entry)}
@@ -241,7 +241,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               </Button>
             )}
           {ListModel.entryHasUpdate(entry) &&
-            !entry.isBlacklisted &&
+            !entry.blacklistEntry &&
             ListModel.isDisclaimed() && (
               <Button
                 onClick={() => props.performAction('install', entry)}
