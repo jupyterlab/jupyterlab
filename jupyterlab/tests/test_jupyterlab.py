@@ -22,7 +22,6 @@ import pytest
 from jupyter_core import paths
 
 from jupyterlab import commands
-from jupyterlab.extension import load_jupyter_server_extension
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, build_check,
@@ -785,4 +784,3 @@ def test_load_extension(serverapp, make_lab_app):
 #    sys.stderr = self.devnull
     app.initialize(serverapp)
     sys.stderr = stderr
-    load_jupyter_server_extension(app)
