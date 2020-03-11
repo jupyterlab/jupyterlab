@@ -526,7 +526,7 @@ JupyterLab Workspaces Directory
 JupyterLab sessions always reside in a workspace. Workspaces contain the state
 of JupyterLab: the files that are currently open, the layout of the application
 areas and tabs, etc. When the page is refreshed, the workspace is restored.
-By default, the location is ``~/.jupyter/lab/workspacess/``, where ``~`` is the user's home directory. This folder is not in the JupyterLab application directory,
+By default, the location is ``~/.jupyter/lab/workspaces/``, where ``~`` is the user's home directory. This folder is not in the JupyterLab application directory,
 because these files are typically shared across Python environments.
 The location can be modified using the ``JUPYTERLAB_WORKSPACES_DIR`` environment variable. These files can be imported and exported to create default "profiles",
 using the :ref:`workspace command line tool <url-workspaces-cli>`.

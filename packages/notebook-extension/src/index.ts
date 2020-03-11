@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import {
-  ILabShell,
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -308,7 +307,7 @@ const tools: JupyterFrontEndPlugin<INotebookTools> = {
   id: '@jupyterlab/notebook-extension:tools',
   autoStart: true,
   requires: [INotebookTracker, IEditorServices, IStateDB],
-  optional: [ILabShell, IPropertyInspectorProvider]
+  optional: [IPropertyInspectorProvider]
 };
 
 /**
@@ -410,7 +409,6 @@ function activateNotebookTools(
   tracker: INotebookTracker,
   editorServices: IEditorServices,
   state: IStateDB,
-  labShell: ILabShell | null,
   inspectorProvider: IPropertyInspectorProvider | null
 ): INotebookTools {
   const id = 'notebook-tools';
