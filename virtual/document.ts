@@ -573,8 +573,9 @@ export class VirtualDocument {
       this.source_lines.set(this.last_source_line + i, {
         editor_line: i,
         editor_shift: {
-          line: editor_shift.line,
-          column: i === 0 ? editor_shift.column : 0
+          line: editor_shift.line - (virtual_shift?.line || 0),
+          column:
+            i === 0 ? editor_shift.column - (virtual_shift?.column || 0) : 0
         },
         // TODO: move those to a new abstraction layer (DocumentBlock class)
         editor: cm_editor,
@@ -683,7 +684,7 @@ export class VirtualDocument {
     let editor_line = source_line.editor_line;
     let editor_shift = source_line.editor_shift;
     return {
-      // only shift column in the first line
+      // only shift column in the line beginning the virtual document (first list of the editor in cell magics, but might be any line of editor in line magics!)
       ch: pos.ch + (editor_line === 0 ? editor_shift.column : 0),
       line: editor_line + editor_shift.line
       // TODO or:
