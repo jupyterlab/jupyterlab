@@ -36,14 +36,14 @@ If you use ``pipenv``, you can install it as:
 .. code:: bash
 
     pipenv install jupyterlab
-     pipenv shell
+    pipenv shell
 
 or from a git checkout:
 
 .. code:: bash
 
     pipenv install git+git://github.com/jupyterlab/jupyterlab.git#egg=jupyterlab
-     pipenv shell
+    pipenv shell
 
 When using ``pipenv``, in order to launch ``jupyter lab``, you must activate the project's virtualenv.
 For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`` live (i.e., where you ran the above commands):
@@ -51,7 +51,7 @@ For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`
 .. code:: bash
 
     pipenv shell
-     jupyter lab
+    jupyter lab
 
 Docker
 ~~~~~~
