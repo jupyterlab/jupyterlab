@@ -10,6 +10,8 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { ISettingRegistry } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
+import { LanguageServerManager } from './manager';
+
 import { FileEditorJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/fileeditor';
 import { NotebookJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/notebook';
 
@@ -73,9 +75,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
     labShell: ILabShell,
     status_bar: IStatusBar
   ) => {
-    const connection_manager = new DocumentConnectionManager();
+    const language_server_manager = new LanguageServerManager({});
+    const connection_manager = new DocumentConnectionManager({
+      language_server_manager
+    });
 
     const status_bar_item = new LSPStatus();
+    status_bar_item.model.language_server_manager = language_server_manager;
     status_bar_item.model.connection_manager = connection_manager;
 
     labShell.currentChanged.connect(() => {

@@ -7,6 +7,7 @@ import { sleep, until_ready } from './utils';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as ConnectionModuleType from './connection';
+import { TLanguageServerId, ILanguageServerManager } from './tokens';
 
 export interface IDocumentConnectionData {
   virtual_document: VirtualDocument;
@@ -49,9 +50,10 @@ export class DocumentConnectionManager {
     DocumentConnectionManager,
     Map<VirtualDocument.id_path, VirtualDocument>
   >;
+  language_server_manager: ILanguageServerManager;
   private ignored_languages: Set<string>;
 
-  constructor() {
+  constructor(options: DocumentConnectionManager.IOptions) {
     this.connections = new Map();
     this.documents = new Map();
     this.ignored_languages = new Set();
@@ -60,6 +62,8 @@ export class DocumentConnectionManager {
     this.disconnected = new Signal(this);
     this.closed = new Signal(this);
     this.documents_changed = new Signal(this);
+    this.language_server_manager = options.language_server_manager;
+    Private.setLanguageServerManager(options.language_server_manager);
   }
 
   connect_document_signals(virtual_document: VirtualDocument) {
@@ -123,11 +127,16 @@ export class DocumentConnectionManager {
       language
     );
 
+    const language_server_id = this.language_server_manager.getServerId({
+      language
+    });
+
     // lazily load 1) the underlying library (1.5mb) and/or 2) a live WebSocket-
     // like connection: either already connected or potentiailly in the process
     // of connecting.
     const connection = await Private.connection(
       language,
+      language_server_id,
       uris,
       this.on_new_connection
     );
@@ -135,10 +144,6 @@ export class DocumentConnectionManager {
     // if connecting for the first time, all documents subsequent documents will
     // be re-opened and synced
     this.connections.set(virtual_document.id_path, connection);
-
-    if (connection.isReady) {
-      connection.sendOpen(virtual_document.document_info);
-    }
 
     return connection;
   }
@@ -174,7 +179,6 @@ export class DocumentConnectionManager {
 
     connection.on('serverInitialized', capabilities => {
       this.forEachDocumentOfConnection(connection, virtual_document => {
-        connection.sendOpen(virtual_document.document_info);
         // TODO: is this still neccessary, e.g. for status bar to update responsively?
         this.initialized.emit({ connection, virtual_document });
       });
@@ -273,6 +277,10 @@ export class DocumentConnectionManager {
 }
 
 export namespace DocumentConnectionManager {
+  export interface IOptions {
+    language_server_manager: ILanguageServerManager;
+  }
+
   export function solve_uris(
     virtual_document: VirtualDocument,
     language: string
@@ -285,11 +293,20 @@ export namespace DocumentConnectionManager {
       ? rootUri
       : virtualDocumentsUri;
 
+    const language_server_id = Private.getLanguageServerManager().getServerId({
+      language
+    });
+
     return {
       base: baseUri,
       document: URLExt.join(baseUri, virtual_document.uri),
       server: URLExt.join('ws://jupyter-lsp', language),
-      socket: URLExt.join(wsBase, 'lsp', language)
+      socket: URLExt.join(
+        wsBase,
+        ILanguageServerManager.URL_NS,
+        'ws',
+        language_server_id
+      )
     };
   }
 
@@ -305,14 +322,25 @@ export namespace DocumentConnectionManager {
  * Namespace primarily for language-keyed cache of LSPConnections
  */
 namespace Private {
-  const _connections = new Map<string, LSPConnection>();
+  const _connections: Map<TLanguageServerId, LSPConnection> = new Map();
   let _promise: Promise<typeof ConnectionModuleType>;
+  let _language_server_manager: ILanguageServerManager;
+
+  export function getLanguageServerManager() {
+    return _language_server_manager;
+  }
+  export function setLanguageServerManager(
+    language_server_manager: ILanguageServerManager
+  ) {
+    _language_server_manager = language_server_manager;
+  }
 
   /**
    * Return (or create and initialize) the WebSocket associated with the language
    */
   export async function connection(
     language: string,
+    language_server_id: TLanguageServerId,
     uris: DocumentConnectionManager.IURIs,
     onCreate: (connection: LSPConnection) => void
   ): Promise<LSPConnection> {
@@ -325,7 +353,7 @@ namespace Private {
     }
 
     const { LSPConnection } = await _promise;
-    let connection = _connections.get(language);
+    let connection = _connections.get(language_server_id);
 
     if (connection == null) {
       const socket = new WebSocket(uris.socket);
@@ -336,12 +364,12 @@ namespace Private {
       });
       // TODO: remove remaining unbounded users of connection.on
       connection.setMaxListeners(999);
-      _connections.set(language, connection);
+      _connections.set(language_server_id, connection);
       connection.connect(socket);
       onCreate(connection);
     }
 
-    connection = _connections.get(language);
+    connection = _connections.get(language_server_id);
 
     return connection;
   }

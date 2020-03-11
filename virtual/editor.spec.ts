@@ -9,6 +9,7 @@ import {
 import * as CodeMirror from 'codemirror';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
+import { MockLanguageServerManager } from '../adapters/codemirror/testutils';
 
 class VirtualEditorImplementation extends VirtualEditor {
   private cm_editor: CodeMirror.Editor;
@@ -58,6 +59,17 @@ describe('VirtualEditor', () => {
     'virtualDocumentsUri',
     '/home/username/project/.virtual_documents'
   );
+
+  const LANGSERVER_MANAGER = new MockLanguageServerManager({});
+  const CONNECTION_MANAGER = new DocumentConnectionManager({
+    language_server_manager: LANGSERVER_MANAGER
+  });
+
+  const DEBUG = false;
+
+  if (DEBUG) {
+    console.log(CONNECTION_MANAGER);
+  }
 
   let editor = new VirtualEditorImplementation(
     () => 'python',

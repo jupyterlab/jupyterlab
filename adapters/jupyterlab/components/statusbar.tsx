@@ -21,8 +21,8 @@ import { DefaultIconReact } from '@jupyterlab/ui-components';
 import { JupyterLabWidgetAdapter } from '../jl_adapter';
 import { collect_documents, VirtualDocument } from '../../../virtual/document';
 import { LSPConnection } from '../../../connection';
-import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../../../connection_manager';
+import { ILanguageServerManager } from '../../../tokens';
 
 interface IServerStatusProps {
   server: SCHEMA.LanguageServerSession;
@@ -313,32 +313,11 @@ export namespace LSPStatus {
    */
   export class Model extends VDomModel {
     server_extension_status: SCHEMA.ServersResponse = null;
+    language_server_manager: ILanguageServerManager;
     private _connection_manager: DocumentConnectionManager;
 
-    constructor() {
-      super();
-
-      // PathExt.join skips on of the slashes in https://
-      let url = PageConfig.getBaseUrl() + 'lsp';
-      fetch(url)
-        .then(response => {
-          // TODO: retry a few times
-          if (!response.ok) {
-            throw new Error(response.statusText);
-          }
-          response
-            .json()
-            .then(
-              (data: SCHEMA.ServersResponse) =>
-                (this.server_extension_status = data)
-            )
-            .catch(console.warn);
-        })
-        .catch(console.error);
-    }
-
     get available_servers(): Array<SCHEMA.LanguageServerSession> {
-      return this.server_extension_status.sessions;
+      return Array.from(this.language_server_manager.sessions.values());
     }
 
     get supported_languages(): Set<string> {

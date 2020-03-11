@@ -241,7 +241,7 @@ export abstract class JupyterLabWidgetAdapter
     // recreate virtual document using current path and language
     this.virtual_editor.create_virtual_document();
     // reconnect
-    this.connect_document(this.virtual_editor.virtual_document).catch(
+    this.connect_document(this.virtual_editor.virtual_document, true).catch(
       console.warn
     );
   }
@@ -287,7 +287,18 @@ export abstract class JupyterLabWidgetAdapter
     });
   }
 
-  protected async connect_document(virtual_document: VirtualDocument) {
+  /**
+   * Opens a connection for the document. The connection may or may
+   * not be initialized, yet, and depending on when this is called, the client
+   * may not be fully connected.
+   *
+   * @param virtual_document a VirtualDocument
+   * @param send_open whether to open the document immediately
+   */
+  protected async connect_document(
+    virtual_document: VirtualDocument,
+    send_open = false
+  ): Promise<void> {
     virtual_document.changed.connect(this.document_changed, this);
 
     virtual_document.foreign_document_opened.connect(
@@ -295,15 +306,38 @@ export abstract class JupyterLabWidgetAdapter
       this
     );
 
-    await this.connect(virtual_document).catch(console.warn);
+    const connection_context = await this.connect(virtual_document).catch(
+      console.warn
+    );
+
+    if (!send_open) {
+      return;
+    }
+
+    if (connection_context && connection_context.connection) {
+      connection_context.connection.sendOpenWhenReady(
+        virtual_document.document_info
+      );
+    } else {
+      console.warn(`Connection for ${virtual_document.path} was not opened`);
+    }
   }
 
+  /**
+   * Handler for opening a document contained in a parent document. The assumption
+   * is that the editor already exists for this, and as such the document
+   * should be queued for immediate opening.
+   *
+   * @param host the VirtualDocument that contains the VirtualDocument in another language
+   * @param context information about the foreign VirtualDocument
+   */
   protected async on_foreign_document_opened(
     host: VirtualDocument,
     context: IForeignContext
   ) {
     const { foreign_document } = context;
-    this.connect_document(foreign_document).catch(console.warn);
+
+    await this.connect_document(foreign_document, true);
 
     foreign_document.foreign_document_closed.connect(
       this.on_foreign_document_closed,
@@ -453,6 +487,8 @@ export abstract class JupyterLabWidgetAdapter
       adapter_features
     );
     console.log('LSP: Adapter for', this.document_path, 'is ready.');
+    // the client is now fully ready: signal to the server that the document is "open"
+    connection.sendOpenWhenReady(virtual_document.document_info);
     return adapter;
   }
 
