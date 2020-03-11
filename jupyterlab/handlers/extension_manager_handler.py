@@ -10,6 +10,8 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 
 from jupyter_server.base.handlers import APIHandler
+from jupyter_server.extension.handler import ExtensionHandlerMixin
+
 from tornado import gen, web
 
 from ..commands import (
@@ -207,9 +209,10 @@ class ExtensionManager(object):
             raise gen.Return(None)
 
 
-class ExtensionHandler(APIHandler):
+class ExtensionHandler(ExtensionHandlerMixin, APIHandler):
 
-    def initialize(self, manager):
+    def initialize(self, manager=None, extension_name=None):
+        super(ExtensionHandler, self).initialize(extension_name=extension_name)
         self.manager = manager
 
     @web.authenticated
