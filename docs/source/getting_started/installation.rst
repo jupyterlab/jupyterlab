@@ -124,20 +124,20 @@ This is expected, because your company can block connection to widely used repos
 
 Good start is to ask your network administrator, to allow all http + https communication to widely used Python / Jupyter servers:
 
-- *.pypi.org
-- *.pythonhosted.org
-- *.continuum.io
-- *.anaconda.com
-- *.conda.io
-- *.github.com
-- *.githubusercontent.com
-- *.npmjs.com
-- *.yarnpkg.com
+- \*.pypi.org
+- \*.pythonhosted.org
+- \*.continuum.io
+- \*.anaconda.com
+- \*.conda.io
+- \*.github.com
+- \*.githubusercontent.com
+- \*.npmjs.com
+- \*.yarnpkg.com
 
 Alternatively you can specify proxy user (mostly domain user with password),
 that is allowed to communicate via network. This can be easily achieved
 by setting 2 common environment variables `HTTP_PROXY` and `HTTPS_PROXY`.
-These variables are automatically used by many open-source tools (like `conda`), if setup correctly.
+These variables are automatically used by many open-source tools (like ``conda``), if setup correctly.
 
 .. code:: bash
 
@@ -150,10 +150,10 @@ These variables are automatically used by many open-source tools (like `conda`),
     export HTTPS_PROXY=https://USER:PWD@proxy.company.com:PORT
 
 
-In case you can communicate via HTTP, but installation with `conda` fails
-on connectivity problems to HTTPS servers, you can disable using SSL for `conda`.
+In case you can communicate via HTTP, but installation with ``conda`` fails
+on connectivity problems to HTTPS servers, you can disable using SSL for ``conda``.
 Communication without SSL is generally not recommended and involves potential security risk.
-But if you know, what you are doing, this step can help you to get rid of all HTTPS problems in `conda` quickly.
+But if you know, what you are doing, this step can help you to get rid of all HTTPS problems in ``conda`` quickly.
 
 .. code:: bash
 
@@ -161,7 +161,7 @@ But if you know, what you are doing, this step can help you to get rid of all HT
     conda config --set ssl_verify False
 
 
-You can do similar thing for `pip`.
+You can do similar thing for ``pip``.
 The approach here is to mark repository servers as trusted hosts,
 which means, SSL communication will not be required.
 
@@ -174,7 +174,7 @@ which means, SSL communication will not be required.
 Using the tips from above, you can handle most installation problems
 related to Python libraries.
 
-Many Jupter extensions require to have working `npm` command,
+Many Jupter extensions require to have working ``npm`` command,
 which is required for downloading useful Jupyter extensions / other javascript dependencies.
 
 .. code:: bash
@@ -188,7 +188,3 @@ which is required for downloading useful Jupyter extensions / other javascript d
 
     # Set default registry for NPM (optional, useful in case if common javascript libs cannot be found)
     npm config set registry http://registry.npmjs.org/
-
-
-
-
