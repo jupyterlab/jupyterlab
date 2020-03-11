@@ -280,7 +280,7 @@ class TestExtension(AppHandlerTest):
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
                 check=True,
-                cwd=base_dir
+                cwd=str(base_dir)
             ).stdout.strip()
             for name in self.pinned_packages
         ]
