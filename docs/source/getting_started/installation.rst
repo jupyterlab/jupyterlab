@@ -114,4 +114,81 @@ A tool like `postcss <https://postcss.org/>`__ can be used to convert the CSS fi
 ``jupyterlab/build`` directory manually if desired.
 
 
+Installation behind firewall
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If your computer is behind corporate proxy or firewall,
+you may encounter an HTTP and SSL errors due to custom security profiles managed by corporate IT departments.
+
+This is expected, because your company can block connection to widely used repositories in Python community.
+
+Good start is to ask your network administrator, to allow all http + https communication to widely used Python / Jupyter servers:
+
+- *.pypi.org
+- *.pythonhosted.org
+- *.continuum.io
+- *.anaconda.com
+- *.conda.io
+- *.github.com
+- *.githubusercontent.com
+- *.npmjs.com
+- *.yarnpkg.com
+
+Alternatively you can specify proxy user (mostly domain user with password),
+that is allowed to communicate via network. This can be easily achieved
+by setting 2 common environment variables `HTTP_PROXY` and `HTTPS_PROXY`.
+These variables are automatically used by many open-source tools (like `conda`), if setup correctly.
+
+.. code:: bash
+
+    # For Windows
+    set HTTP_PROXY=http://USER:PWD@proxy.company.com:PORT
+    set HTTPS_PROXY=https://USER:PWD@proxy.comp any.com:PORT
+
+    # For Linux / MacOS
+    export HTTP_PROXY=http://USER:PWD@proxy.company.com:PORT
+    export HTTPS_PROXY=https://USER:PWD@proxy.company.com:PORT
+
+
+In case you can communicate via HTTP, but installation with `conda` fails
+on connectivity problems to HTTPS servers, you can disable using SSL for `conda`.
+Communication without SSL is generally not recommended and involves potential security risk.
+But if you know, what you are doing, this step can help you to get rid of all HTTPS problems in `conda` quickly.
+
+.. code:: bash
+
+    # Setup conda to not use SSL
+    conda config --set ssl_verify False
+
+
+You can do similar thing for `pip`.
+The approach here is to mark repository servers as trusted hosts,
+which means, SSL communication will not be required.
+
+.. code:: bash
+
+    # Install pandas (without SSL)
+    pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org pandas
+
+
+Using the tips from above, you can handle most installation problems
+related to Python libraries.
+
+Many Jupter extensions require to have working `npm` command,
+which is required for downloading useful Jupyter extensions / other javascript dependencies.
+
+.. code:: bash
+
+    # Do not require SSL
+    npm set strict-ssl False
+
+    # Set proxy for NPM
+    npm config set proxy http://USER:PWD@proxy.company.com:PORT
+    npm config set proxy https://USER:PWD@proxy.company.com:PORT
+
+    # Set default registry for NPM (optional, useful in case if common javascript libs cannot be found)
+    npm config set registry http://registry.npmjs.org/
+
+
+
 
