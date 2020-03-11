@@ -685,10 +685,9 @@ export interface IFuture<
    * The future is done when there are no more responses expected from the
    * kernel.
    *
-   * The `done` promise resolves to the reply message if there is one,
-   * otherwise it resolves to `undefined`.
+   * The `done` promise resolves to the reply message.
    */
-  readonly done: Promise<REPLY | undefined>;
+  readonly done: Promise<REPLY>;
 
   /**
    * The reply handler for the kernel future.
