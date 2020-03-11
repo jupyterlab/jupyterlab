@@ -8,6 +8,14 @@ jobs:
     strategy:
       matrix:
         group: [js, integrity, python, usage, docs, nonode]
+        python: [3.5, 3.8]
+        exclude:
+          - group: js
+            python: 3.5
+          - group: integrity
+            python: 3.5
+          - group: docs
+            python: 3.5
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -15,7 +23,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.6
+          python-version: ${{ matrix.python }}
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
@@ -65,7 +73,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.6
+          python-version: 3.5
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
