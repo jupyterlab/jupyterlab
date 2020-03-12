@@ -144,7 +144,7 @@ Here are some widely-used sites that host packages in the Python and JavaScript 
 Alternatively you can specify proxy user (mostly domain user with password),
 that is allowed to communicate via network. This can be easily achieved
 by setting two common environment variables: `HTTP_PROXY` and `HTTPS_PROXY`.
-These variables are automatically used by many open-source tools (like ``conda``), if setup correctly.
+These variables are automatically used by many open-source tools (like ``conda``) if set correctly.
 
 .. code:: bash
 
