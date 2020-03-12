@@ -1,26 +1,27 @@
 {
-    "name": "@jupyterlab/benchmarks",
-    "version": "0.0.0",
-    "private": true,
-    "scripts": {
-        "build": "tsc",
-        "run": "node --experimental-modules lib/index.js",
-        "jlab:build": "cd .. && jlpm run build",
-        "jlab:start": "fkill -s :9999 && cd .. && jupyter lab --dev --no-browser --port 9999 --LabApp.password= --LabApp.token=",
-        "jlab:wait": "wait-on http-get://localhost:9999/lab",
-        "run-when-ready": "jlpm run jlab:wait && jlpm run run",
-        "start-and-run": "concurrently --kill-others 'jlpm run jlab:start'  'jlpm run run-when-ready' ",
-        "setup": "node node_modules/playwright/install.js && jlpm run jlab:build && jlpm run build",
-        "start": "jlpm run setup && jlpm run start-and-run",
-        "analyze": "cd .. && jupyter lab --dev benchmarks/analysis.vl.json"
-    },
-    "dependencies": {
-        "concurrently": "5.1.0",
-        "fkill-cli": "6.0.1",
-        "playwright": "0.11.1",
-        "typescript": "~3.7.3",
-        "wait-on": "4.0.1"
-    },
-    "type": "module",
-    "devDependencies": {}
+  "name": "@jupyterlab/benchmarks",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "analyze": "cd .. && jupyter lab --dev benchmarks/analysis.vl.json",
+    "build": "tsc",
+    "jlab:build": "cd .. && jlpm run build",
+    "jlab:start": "fkill -s :9999 && cd .. && jupyter lab --dev --no-browser --port 9999 --LabApp.password= --LabApp.token=",
+    "jlab:wait": "wait-on http-get://localhost:9999/lab",
+    "run": "node --experimental-modules lib/index.js",
+    "run-when-ready": "jlpm run jlab:wait && jlpm run run",
+    "setup": "jlpm && node node_modules/playwright/install.js && jlpm run jlab:build && jlpm run build",
+    "start": "jlpm run setup && jlpm run start-and-run",
+    "start-and-run": "concurrently --kill-others 'jlpm run jlab:start'  'jlpm run run-when-ready' "
+  },
+  "dependencies": {
+    "playwright": "0.11.1"
+  },
+  "devDependencies": {
+    "concurrently": "5.1.0",
+    "fkill-cli": "6.0.1",
+    "typescript": "~3.7.3",
+    "wait-on": "4.0.1"
+  }
 }
