@@ -4,13 +4,6 @@
 import playwright from 'playwright';
 import fs from 'fs';
 
-/**
- * Exit on any unhandled promise rejections
- */
-process.on('unhandledRejection', up => {
-  throw up;
-});
-
 const DATA_PATH = 'out.csv';
 
 const BROWSERS: Array<'firefox' | 'chromium'> = ['firefox', 'chromium'];
@@ -147,7 +140,7 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
           path: ${JSON.stringify(`benchmarks/${path}`)}
         }).then(widget => widget.node.id)`);
         console.log(`    id=${id}`);
-        waitForWidget(id);
+        await waitForWidget(id);
         widgets.push({ type: type as TYPES_TYPE, id });
       }
       console.log(`  switching`);
@@ -163,7 +156,7 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
             performance.mark('start');
             lab.shell.activateById(${JSON.stringify(id)});
           }`);
-          waitForWidget(id);
+          await waitForWidget(id);
           await page.evaluate("performance.measure('duration', 'start')");
           const time: number = await page.evaluate(
             'performance.getEntriesByName("duration")[0].duration'
@@ -183,7 +176,11 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
     }
     await browser.close();
   }
-})().then(() => stream.close());
+})()
+  .then(() => stream.close())
+  .catch(reason => {
+    throw reason;
+  });
 
 function makeNotebook(cells: Array<object>): object {
   return {
