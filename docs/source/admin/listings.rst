@@ -48,6 +48,6 @@ Server Traits
 
 The administrator can use the following Traits to define the listings loading.
 
-- ``LabServerApp.blacklist_uri``: A list of comma-separated URIs to get the blacklist
-- ``LabServerApp.whitelist_uri``: A list of comma-separated URIs to get the whitelist
+- ``LabServerApp.blacklist_uris``: A list of comma-separated URIs to get the blacklist
+- ``LabServerApp.whitelist_uris``: A list of comma-separated URIs to get the whitelist
 - ``LabServerApp.listings_refresh_ms``: The interval delay in milliseconds to refresh the lists
