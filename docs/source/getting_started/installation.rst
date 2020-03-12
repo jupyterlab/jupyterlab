@@ -179,8 +179,8 @@ which means, SSL communication will not be required for downloading Python libra
     pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org pandas
 
 
-Using the tips from above, you can handle most installation problems
-related to Python libraries.
+Using the tips from above, you can handle many network problems 
+related to installing Python libraries.
 
 Many Jupyter extensions require having a working ``npm`` command,
 which is required for downloading useful Jupyter extensions / other javascript dependencies.
