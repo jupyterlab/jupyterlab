@@ -152,8 +152,9 @@ These variables are automatically used by many open-source tools (like ``conda``
 
 In case you can communicate via HTTP, but installation with ``conda`` fails
 on connectivity problems to HTTPS servers, you can disable using SSL for ``conda``.
-Communication without SSL is generally not recommended and involves potential security risk.
-But if you know, what you are doing, this step can help you to get rid of all HTTPS problems in ``conda`` quickly.
+
+.. warning:: Disable SSL in communication is generally not recommended and involves potential security risk.
+    But for testing purposes, this step can help you to get rid of all HTTPS problems in ``conda`` quickly.
 
 .. code:: bash
 
@@ -163,7 +164,7 @@ But if you know, what you are doing, this step can help you to get rid of all HT
 
 You can do similar thing for ``pip``.
 The approach here is to mark repository servers as trusted hosts,
-which means, SSL communication will not be required.
+which means, SSL communication will not be required for downloading Python libraries.
 
 .. code:: bash
 
