@@ -125,8 +125,6 @@ Example of typical error, when conda cannot connect to own repositories:
 + `CondaHTTPError: HTTP 000 CONNECTION FAILED for url <https://repo.anaconda.com/pkgs/main/win-64/current_repodata.json>`
 
 
-
-
 This may happen because your company can block connections to widely-used repositories in Python and JavaScript communities.
 
 Here are some widely-used sites that host packages in the Python and JavaScript open-source ecosystem. Your network adminstrator may be able to allow http and https connections to these:
@@ -164,7 +162,7 @@ on connectivity problems to HTTPS servers, you can disable using SSL for ``conda
 
 .. code:: bash
 
-    # Set up conda to not use SSL
+    # Configure npm to not use SSL
     conda config --set ssl_verify False
 
 
@@ -188,14 +186,6 @@ Example of typical error message, when ``npm`` cannot connect to own repositorie
 
 + `ValueError: "@jupyterlab/toc" is not a valid npm package`
 
-
-.. code:: bash
-
-    # Do not require SSL
-    npm set strict-ssl False
-
-.. warning:: Disabling SSL in communication is generally not recommended and involves potential security risk.
-
 .. code:: bash
 
     # Set proxy for NPM
@@ -204,3 +194,14 @@ Example of typical error message, when ``npm`` cannot connect to own repositorie
 
     # Set default registry for NPM (optional, useful in case if common JavaScript libs cannot be found)
     npm config set registry http://registry.npmjs.org/
+
+
+In case you can communicate via HTTP, but installation with ``npm`` fails
+on connectivity problems to HTTPS servers, you can disable using SSL for ``npm``.
+
+.. warning:: Disabling SSL in communication is generally not recommended and involves potential security risk.
+
+.. code:: bash
+
+    # Configure npm to not use SSL
+    npm set strict-ssl False
