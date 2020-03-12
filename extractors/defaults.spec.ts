@@ -17,15 +17,21 @@ describe('Default extractors', () => {
     });
   }
 
-  function get_the_only_virtual(
+  function get_the_only_pair(
     foreign_document_map: Map<CodeEditor.IRange, IVirtualDocumentBlock>
   ) {
     expect(foreign_document_map.size).to.equal(1);
 
-    let { virtual_document } = foreign_document_map.get(
-      foreign_document_map.keys().next().value
-    );
+    let range = foreign_document_map.keys().next().value;
+    let { virtual_document } = foreign_document_map.get(range);
 
+    return { range, virtual_document };
+  }
+
+  function get_the_only_virtual(
+    foreign_document_map: Map<CodeEditor.IRange, IVirtualDocumentBlock>
+  ) {
+    let { virtual_document } = get_the_only_pair(foreign_document_map);
     return virtual_document;
   }
 
@@ -76,7 +82,9 @@ describe('Default extractors', () => {
 
     it('parses multiple inputs (into dummy data frames)', () => {
       let code = wrap_in_python_lines('%R -i df -i x ggplot(df)');
-      let r_document = get_the_only_virtual(extract(code).foreign_document_map);
+      let { virtual_document: r_document } = get_the_only_pair(
+        extract(code).foreign_document_map
+      );
       expect(r_document.value).to.equal(
         'df <- data.frame(); x <- data.frame(); ggplot(df)\n'
       );

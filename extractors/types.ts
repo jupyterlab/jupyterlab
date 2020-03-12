@@ -10,6 +10,11 @@ export interface IExtractedCode {
    */
   range: CodeEditor.IRange;
   /**
+   * Shift due to any additional code inserted at the beginning of the virtual document
+   * (usually in order to mock the arguments passed to a magic, or to provide other context clues for the linters)
+   */
+  virtual_shift: CodeEditor.IPosition | null;
+  /**
    * Code to be retained in the virtual document of the host.
    */
   host_code: string | null;

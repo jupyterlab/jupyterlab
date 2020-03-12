@@ -1,6 +1,7 @@
 import { IExtractedCode, IForeignCodeExtractor } from './types';
 import { position_at_offset } from '../positioning';
 import { replacer } from '../magics/overrides';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
   options: RegExpForeignCodeExtractor.IOptions;
@@ -38,19 +39,29 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
 
     while (match != null) {
       let matched_string = match[0];
+      let position_shift: CodeEditor.IPosition = null;
       let foreign_code_fragment = matched_string.replace(
         this.expression,
         // @ts-ignore
         this.options.extract_to_foreign
       );
+      let prefix = '';
+      if (typeof this.options.extract_arguments !== 'undefined') {
+        prefix = matched_string.replace(
+          this.expression,
+          // @ts-ignore
+          this.options.extract_arguments
+        );
+        position_shift = position_at_offset(prefix.length, prefix.split('\n'));
+      }
 
       // NOTE:
       // match.index + matched_string.length === this.sticky_expression.lastIndex
 
-      let end = this.global_expression.lastIndex;
+      let end_index = this.global_expression.lastIndex;
 
       if (this.options.keep_in_host || this.options.keep_in_host == null) {
-        host_code_fragment = code.substring(started_from, end);
+        host_code_fragment = code.substring(started_from, end_index);
       } else {
         if (started_from === match.index) {
           host_code_fragment = '';
@@ -62,15 +73,19 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
       // TODO: this could be slightly optimized (start at start) by using the match[n],
       //  where n is the group to be used; while this reduces the flexibility of extract_to_foreign,
       //  it might be better to enforce such strict requirement
-      let start = match.index + matched_string.indexOf(foreign_code_fragment);
+      let start_offset =
+        match.index + matched_string.indexOf(foreign_code_fragment);
+      let start = position_at_offset(start_offset, lines);
+      let end = position_at_offset(
+        start_offset + foreign_code_fragment.length,
+        lines
+      );
 
       extracts.push({
         host_code: host_code_fragment,
-        foreign_code: foreign_code_fragment,
-        range: {
-          start: position_at_offset(start, lines),
-          end: position_at_offset(start + foreign_code_fragment.length, lines)
-        }
+        foreign_code: prefix + foreign_code_fragment,
+        range: { start, end },
+        virtual_shift: position_shift
       });
 
       started_from = this.global_expression.lastIndex;
@@ -82,7 +97,8 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
       extracts.push({
         host_code: final_host_code_fragment,
         foreign_code: null,
-        range: null
+        range: null,
+        virtual_shift: null
       });
     }
 
@@ -111,7 +127,12 @@ namespace RegExpForeignCodeExtractor {
      */
     extract_to_foreign: string | replacer;
     /**
-     * String boolean if everything (true, default) or nothing (false) should be kept in the host document.
+     * If arguments from the cell or line magic are to be extracted and prepended before the extracted code,
+     * set extract_arguments to a replacer function taking the code and returning the string to be prepended.
+     */
+    extract_arguments?: replacer;
+    /**
+     * Boolean if everything (true, default) or nothing (false) should be kept in the host document.
      *
      * For the R example this should be empty if we wish to ignore the cell,
      * but usually a better option is to retain the foreign code and use language
