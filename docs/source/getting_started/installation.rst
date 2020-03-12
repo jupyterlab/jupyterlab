@@ -118,7 +118,7 @@ Installation behind firewall
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If your computer is behind corporate proxy or firewall,
-you may encounter an HTTP and SSL errors due to custom security profiles managed by corporate IT departments.
+you may encounter HTTP and SSL errors due to custom security profiles managed by corporate IT departments.
 
 This is expected, because your company can block connection to widely used repositories in Python community.
 
