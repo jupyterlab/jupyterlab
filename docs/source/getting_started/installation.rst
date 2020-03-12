@@ -114,8 +114,8 @@ A tool like `postcss <https://postcss.org/>`__ can be used to convert the CSS fi
 ``jupyterlab/build`` directory manually if desired.
 
 
-Installation behind firewall
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Installation problems
+~~~~~~~~~~~~~~~~~~~~~
 
 If your computer is behind corporate proxy or firewall,
 you may encounter HTTP and SSL errors due to custom security profiles managed by corporate IT departments.
