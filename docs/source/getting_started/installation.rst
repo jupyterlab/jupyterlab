@@ -122,7 +122,7 @@ you may encounter HTTP and SSL errors due to custom security profiles managed by
 
 This may happen because your company can block connections to widely-used repositories in Python and JavaScript communities.
 
-Good start is to ask your network administrator, to allow all http + https communication to widely used Python / Jupyter servers:
+Here are some widely-used sites that host packages in the Python and JavaScript open-source ecosystem. Your network adminstrator may be able to allow http and https connections to these:
 
 - \*.pypi.org
 - \*.pythonhosted.org
