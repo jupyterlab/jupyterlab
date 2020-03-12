@@ -165,7 +165,7 @@ on connectivity problems to HTTPS servers, you can disable using SSL for ``conda
 
 .. code:: bash
 
-    # Setup conda to not use SSL
+    # Set up conda to not use SSL
     conda config --set ssl_verify False
 
 
