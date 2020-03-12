@@ -175,7 +175,7 @@ which means, SSL communication will not be required for downloading Python libra
 Using the tips from above, you can handle most installation problems
 related to Python libraries.
 
-Many Jupter extensions require to have working ``npm`` command,
+Many Jupter extensions require having a working ``npm`` command,
 which is required for downloading useful Jupyter extensions / other javascript dependencies.
 
 .. code:: bash
