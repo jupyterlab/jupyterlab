@@ -161,7 +161,6 @@ In case you can communicate via HTTP, but installation with ``conda`` fails
 on connectivity problems to HTTPS servers, you can disable using SSL for ``conda``.
 
 .. warning:: Disabling SSL in communication is generally not recommended and involves potential security risk.
-    But for testing purposes, this step can help you to get rid of all HTTPS problems in ``conda`` quickly.
 
 .. code:: bash
 
@@ -196,7 +195,6 @@ Example of typical error message, when ``npm`` cannot connect to own repositorie
     npm set strict-ssl False
 
 .. warning:: Disabling SSL in communication is generally not recommended and involves potential security risk.
-    But for testing purposes, this step can help you to get rid of SSL related problems in ``npm`` quickly.
 
 .. code:: bash
 
