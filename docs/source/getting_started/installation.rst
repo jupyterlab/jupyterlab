@@ -169,7 +169,7 @@ on connectivity problems to HTTPS servers, you can disable using SSL for ``conda
     conda config --set ssl_verify False
 
 
-You can do similar thing for ``pip``.
+You can do a similar thing for ``pip``.
 The approach here is to mark repository servers as trusted hosts,
 which means, SSL communication will not be required for downloading Python libraries.
 
