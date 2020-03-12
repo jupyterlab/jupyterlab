@@ -95,21 +95,21 @@ export class MarkdownViewer extends Widget {
     const { style } = this.renderer.node;
     switch (option) {
       case 'fontFamily':
-        style.setProperty(option, value as string | null);
+        style.setProperty('font-family', value as string | null);
         break;
       case 'fontSize':
-        style.setProperty(option, value ? value + 'px' : null);
+        style.setProperty('font-size', value ? value + 'px' : null);
         break;
       case 'hideFrontMatter':
         this.update();
         break;
       case 'lineHeight':
-        style.setProperty(option, value ? value.toString() : null);
+        style.setProperty('line-height', value ? value.toString() : null);
         break;
       case 'lineWidth':
         const padding = value ? `calc(50% - ${(value as number) / 2}ch)` : null;
-        style.setProperty('paddingLeft', padding);
-        style.setProperty('paddingRight', padding);
+        style.setProperty('padding-left', padding);
+        style.setProperty('padding-right', padding);
         break;
       case 'renderTimeout':
         if (this._monitor) {

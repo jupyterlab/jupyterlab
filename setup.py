@@ -149,7 +149,9 @@ setup_args['extras_require'] = {
     'test': [
         'pytest',
         'pytest-check-links',
-        'requests'
+        'requests',
+        'wheel',
+        'virtualenv'
     ],
     'docs': [
         'sphinx',
@@ -170,7 +172,6 @@ setup_args['entry_points'] = {
     'console_scripts': [
         'jupyter-lab = jupyterlab.labapp:main',
         'jupyter-labextension = jupyterlab.labextensions:main',
-        'jupyter-labhub = jupyterlab.labhubapp:main',
         'jlpm = jupyterlab.jlpmapp:main',
     ]
 }
