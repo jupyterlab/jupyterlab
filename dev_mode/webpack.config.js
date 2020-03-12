@@ -46,8 +46,12 @@ var extraConfig = Build.ensureAssets({
 var source = fs.readFileSync('index.js').toString();
 var template = Handlebars.compile(source);
 var data = {
-  jupyterlab_extensions: { ...extensions, ...externalExtensions },
-  jupyterlab_mime_extensions: { ...mimeExtensions, ...externalMimeExtension }
+  jupyterlab_extensions: Object.assign({}, extensions, externalExtensions),
+  jupyterlab_mime_extensions: Object.assign(
+    {},
+    mimeExtensions,
+    externalMimeExtension
+  )
 };
 var result = template(data);
 
