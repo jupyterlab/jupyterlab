@@ -187,5 +187,5 @@ which is required for downloading useful Jupyter extensions / other javascript d
     npm config set proxy http://USER:PWD@proxy.company.com:PORT
     npm config set proxy https://USER:PWD@proxy.company.com:PORT
 
-    # Set default registry for NPM (optional, useful in case if common javascript libs cannot be found)
+    # Set default registry for NPM (optional, useful in case if common JavaScript libs cannot be found)
     npm config set registry http://registry.npmjs.org/
