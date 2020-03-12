@@ -147,7 +147,9 @@ setup_args['extras_require'] = {
     'test': [
         'pytest',
         'pytest-check-links',
-        'requests'
+        'requests',
+        'wheel',
+        'virtualenv'
     ],
     'docs': [
         'sphinx',
