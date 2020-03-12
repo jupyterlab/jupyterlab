@@ -321,11 +321,7 @@ export namespace RenderMimeRegistry {
      */
     resolveUrl(url: string): Promise<string> {
       if (this.isLocal(url)) {
-        const sc = Private.sessionConnection(this._session);
-        if (!sc) {
-          throw new Error('Cannot resolve local url with no session');
-        }
-        const cwd = encodeURI(PathExt.dirname(sc.path));
+        const cwd = encodeURI(PathExt.dirname(this._session.path));
         url = PathExt.resolve(cwd, url);
       }
       return Promise.resolve(url);

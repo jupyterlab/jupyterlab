@@ -81,7 +81,7 @@ the version of JupyterLab manually.
 
 .. code:: bash
 
-    conda install -c conda-forge jupyterlab=1
+    conda install -c conda-forge jupyterlab=2
 
 Create a repository
 ~~~~~~~~~~~~~~~~~~~
@@ -102,7 +102,7 @@ This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
-    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v2.0beta
+    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v2.0
 
 When prompted, enter values like the following for all of the cookiecutter
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
@@ -600,7 +600,7 @@ Install this dependency:
     jlpm add @lumino/messaging
 
 
-Then add the class just below the import statements in the ``index.ts``
+Then add the class just below the definition of ``APODResponse`` in the ``index.ts``
 file.
 
 .. code-block:: typescript
