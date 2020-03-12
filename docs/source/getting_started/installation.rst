@@ -120,6 +120,13 @@ Installation problems
 If your computer is behind corporate proxy or firewall,
 you may encounter HTTP and SSL errors due to custom security profiles managed by corporate IT departments.
 
+Example of typical error, when conda cannot connect to own repositories:
+
++ `CondaHTTPError: HTTP 000 CONNECTION FAILED for url <https://repo.anaconda.com/pkgs/main/win-64/current_repodata.json>`
+
+
+
+
 This may happen because your company can block connections to widely-used repositories in Python and JavaScript communities.
 
 Here are some widely-used sites that host packages in the Python and JavaScript open-source ecosystem. Your network adminstrator may be able to allow http and https connections to these:
@@ -175,8 +182,13 @@ which means, SSL communication will not be required for downloading Python libra
 Using the tips from above, you can handle most installation problems
 related to Python libraries.
 
-Many Jupter extensions require having a working ``npm`` command,
+Many Jupyter extensions require having a working ``npm`` command,
 which is required for downloading useful Jupyter extensions / other javascript dependencies.
+
+Example of typical error message, when ``npm`` cannot connect to own repositories:
+
++ `ValueError: "@jupyterlab/toc" is not a valid npm package`
+
 
 .. code:: bash
 
