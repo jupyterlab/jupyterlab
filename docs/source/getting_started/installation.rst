@@ -136,7 +136,7 @@ Good start is to ask your network administrator, to allow all http + https commu
 
 Alternatively you can specify proxy user (mostly domain user with password),
 that is allowed to communicate via network. This can be easily achieved
-by setting 2 common environment variables `HTTP_PROXY` and `HTTPS_PROXY`.
+by setting two common environment variables: `HTTP_PROXY` and `HTTPS_PROXY`.
 These variables are automatically used by many open-source tools (like ``conda``), if setup correctly.
 
 .. code:: bash
