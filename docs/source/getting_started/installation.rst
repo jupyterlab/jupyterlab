@@ -120,7 +120,7 @@ Installation behind firewall
 If your computer is behind corporate proxy or firewall,
 you may encounter HTTP and SSL errors due to custom security profiles managed by corporate IT departments.
 
-This is expected, because your company can block connection to widely used repositories in Python community.
+This may happen because your company can block connections to widely-used repositories in Python and JavaScript communities.
 
 Good start is to ask your network administrator, to allow all http + https communication to widely used Python / Jupyter servers:
 
