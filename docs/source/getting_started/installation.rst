@@ -183,7 +183,7 @@ Using the tips from above, you can handle many network problems
 related to installing Python libraries.
 
 Many Jupyter extensions require having a working ``npm`` command,
-which is required for downloading useful Jupyter extensions / other javascript dependencies.
+which is required for downloading useful Jupyter extensions or other JavaScript dependencies.
 
 Example of typical error message, when ``npm`` cannot connect to own repositories:
 
