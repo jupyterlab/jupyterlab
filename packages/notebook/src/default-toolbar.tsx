@@ -203,6 +203,10 @@ export namespace ToolbarItems {
       {
         name: 'kernelStatus',
         widget: Toolbar.createKernelStatusItem(panel.sessionContext)
+      },
+      {
+        name: 'info',
+        widget: Toolbar.createKernelInfoButton(panel.sessionContext)
       }
     ];
   }

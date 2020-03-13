@@ -2,12 +2,14 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Text } from '@jupyterlab/coreutils';
+import { IInfoReply } from '@jupyterlab/services/src/kernel/messages';
 import {
   Button,
   circleEmptyIcon,
   circleIcon,
   classes,
   LabIcon,
+  infoIcon,
   refreshIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
@@ -20,6 +22,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
+import { showDialog, Dialog } from './dialog';
 import { ISessionContext, sessionContextDialogs } from './sessioncontext';
 import { UseSignal, ReactWidget } from './vdom';
 
@@ -436,6 +439,24 @@ export namespace Toolbar {
   ): Widget {
     return new Private.KernelStatus(sessionContext);
   }
+
+  /**
+   * Create a kernel info button.
+   */
+  export function createKernelInfoButton(
+    sessionContext: ISessionContext
+  ): Widget {
+    return new ToolbarButton({
+      icon: infoIcon,
+      onClick: async () => {
+        const info = await sessionContext.session?.kernel?.info;
+        if (info) {
+          void Private.createKernelInfoDialog(info);
+        }
+      },
+      tooltip: 'Show Kernel Info'
+    });
+  }
 }
 
 /**
@@ -683,7 +704,6 @@ namespace Private {
    * This wraps the ToolbarButtonComponent and watches the kernel
    * session for changes.
    */
-
   export function KernelNameComponent(props: KernelNameComponent.IProps) {
     const callback = () => {
       void props.dialogs.selectKernel(props.sessionContext);
@@ -755,5 +775,23 @@ namespace Private {
         status === 'busy' || status === 'starting' || status === 'restarting'
       );
     }
+  }
+
+  /**
+   * Show the kernel info in a dialog.
+   * @param info The kernel info
+   */
+  export function createKernelInfoDialog(info: IInfoReply) {
+    const body = <pre>{info.banner}</pre>;
+
+    return showDialog({
+      body,
+      buttons: [
+        Dialog.createButton({
+          label: 'Dismiss',
+          className: 'jp-mod-accept jp-mod-styled'
+        })
+      ]
+    });
   }
 }
