@@ -1,1 +1,20 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="3 3 16 16"><defs><linearGradient gradientUnits="userSpaceOnUse" y2="-2.623" x2="0" y1="986.67"><stop stop-color="#ffce3b"/><stop offset="1" stop-color="#ffd762"/></linearGradient><linearGradient id="0" gradientUnits="userSpaceOnUse" y1="986.67" x2="0" y2="-2.623"><stop stop-color="#ffce3b"/><stop offset="1" stop-color="#fef4ab"/></linearGradient><linearGradient gradientUnits="userSpaceOnUse" x2="1" x1="0" xlink:href="#0"/></defs><g transform="matrix(2 0 0 2-11-2071.72)"><path transform="translate(7 1037.36)" d="m4 0c-2.216 0-4 1.784-4 4 0 2.216 1.784 4 4 4 2.216 0 4-1.784 4-4 0-2.216-1.784-4-4-4" fill="#da4453"/><path d="m11.906 1041.46l.99-.99c.063-.062.094-.139.094-.229 0-.09-.031-.166-.094-.229l-.458-.458c-.063-.062-.139-.094-.229-.094-.09 0-.166.031-.229.094l-.99.99-.99-.99c-.063-.062-.139-.094-.229-.094-.09 0-.166.031-.229.094l-.458.458c-.063.063-.094.139-.094.229 0 .09.031.166.094.229l.99.99-.99.99c-.063.062-.094.139-.094.229 0 .09.031.166.094.229l.458.458c.063.063.139.094.229.094.09 0 .166-.031.229-.094l.99-.99.99.99c.063.063.139.094.229.094.09 0 .166-.031.229-.094l.458-.458c.063-.062.094-.139.094-.229 0-.09-.031-.166-.094-.229l-.99-.99" fill="#fff"/></g></svg>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="24px" height="24px" viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve">
+  <g
+     id="g4"
+     style="fill:#d11d13">
+    <path
+       d="m 12.001,2.085 c -5.478,0 -9.916,4.438 -9.916,9.916 0,5.476 4.438,9.914 9.916,9.914 5.476,0 9.914,-4.438 9.914,-9.914 0,-5.478 -4.438,-9.916 -9.914,-9.916 z m 0.001,18 c -4.465,0 -8.084,-3.619 -8.084,-8.083 0,-4.465 3.619,-8.084 8.084,-8.084 4.464,0 8.083,3.619 8.083,8.084 0,4.464 -3.619,8.083 -8.083,8.083 z"
+       id="path6" />
+    <g
+       id="g9"
+       transform="matrix(0.366025,0,0,0.366025,-12.09664,-11.847823)"
+       style="fill:#000000">
+      <path
+         d="m 57.035,78.88 -0.157,-0.168 -4.395,-4.713 c 0,0 3.116184,-2.904537 9.198,-8.576 l -6.496,-6.966 4.387,-4.09 6.496,6.9655 8.774,-8.1815 4.552,4.882 -8.774,8.231 7.0285,7.7785 -4.012,4.0285 -7.4035,-7.716 z"
+         id="path12" />
+    </g>
+  </g>
+</svg>
