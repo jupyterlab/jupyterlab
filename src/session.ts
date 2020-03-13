@@ -53,7 +53,6 @@ export class DebugSession implements IDebugger.ISession {
     if (this._connection) {
       this._connection.iopubMessage.disconnect(this._handleEvent, this);
     }
-
     this._connection = connection;
 
     if (!this._connection) {
