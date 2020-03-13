@@ -234,6 +234,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
         <div className="jp-extensionmanager-entry-buttons">
           {!entry.installed &&
             !entry.blacklistEntry &&
+            !(!entry.whitelistEntry && listMode === 'white') &&
             ListModel.isDisclaimed() && (
               <Button
                 onClick={() => props.performAction('install', entry)}
@@ -245,6 +246,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             )}
           {ListModel.entryHasUpdate(entry) &&
             !entry.blacklistEntry &&
+            !(!entry.whitelistEntry && listMode === 'white') &&
             ListModel.isDisclaimed() && (
               <Button
                 onClick={() => props.performAction('install', entry)}
@@ -621,7 +623,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         installedContent.push(
           <ListView
             key="installed-items"
-            listMode={model.listMode}
+            listMode={null}
             entries={model.installed}
             numPages={1}
             onPage={value => {
