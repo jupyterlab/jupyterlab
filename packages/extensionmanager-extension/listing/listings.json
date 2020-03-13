@@ -3,9 +3,7 @@
     "blacklist_uris": [
       "https://raw.githubusercontent.com/jupyterlab/listings/master/blacklist.json"
     ],
-    "whitelist_uris": [
-      "https://raw.githubusercontent.com/jupyterlab/listings/master/whitelist.json"
-    ],
+    "whitelist_uris": [""],
     "blacklist": [],
     "whitelist": ["@jupyterlab/*"]
   }

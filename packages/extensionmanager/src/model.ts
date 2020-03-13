@@ -170,7 +170,8 @@ export class ListModel extends VDomModel {
     });
   }
 
-  _listingIsLoaded(_: Lister, listings: IListResult) {
+  private _listingIsLoaded(_: Lister, listings: IListResult) {
+    this._listMode = listings.listMode;
     this._blacklistMap = new Map<string, IListEntry>();
     listings.blacklist.map(e => {
       this._blacklistMap.set(e.name, {
@@ -194,22 +195,6 @@ export class ListModel extends VDomModel {
       });
     });
     void this.initialize();
-    /*
-    this.performGetBlacklist()
-      .then(data => {
-        this._blacklistingMap = data;
-      })
-      .catch(error => {
-        console.error(error);
-      });
-    this.performGetWhitelist()
-      .then(data => {
-        this._whitelistingMap = data;
-      })
-      .catch(error => {
-        console.error(error);
-      });
-    */
   }
 
   /**
@@ -276,6 +261,27 @@ export class ListModel extends VDomModel {
    */
   get totalEntries(): number {
     return this._totalEntries;
+  }
+
+  /**
+   * The list mode.
+   */
+  get listMode(): 'black' | 'white' | null {
+    return this._listMode;
+  }
+
+  /**
+   * The total number of blacklisted results in the current search.
+   */
+  get totalBlacklistedFound(): number {
+    return this._totalBlacklistedFound;
+  }
+
+  /**
+   * The total number of whitelisted results in the current search.
+   */
+  get totalWhitelistedFound(): number {
+    return this._totalWhitelistedFound;
   }
 
   /**
@@ -461,10 +467,22 @@ export class ListModel extends VDomModel {
     res: Promise<ISearchResult>
   ): Promise<{ [key: string]: IEntry }> {
     let entries: { [key: string]: IEntry } = {};
+    this._totalBlacklistedFound = 0;
+    this._totalWhitelistedFound = 0;
+    this._totalEntries = 0;
     for (let obj of (await res).objects) {
       let pkg = obj.package;
       if (pkg.keywords.indexOf('deprecated') >= 0) {
         continue;
+      }
+      this._totalEntries = this._totalEntries + 1;
+      const isBlacklisted = this.isListed(pkg.name, this._blacklistMap);
+      if (isBlacklisted) {
+        this._totalBlacklistedFound = this._totalBlacklistedFound + 1;
+      }
+      const isWhitelisted = this.isListed(pkg.name, this._whitelistMap);
+      if (isWhitelisted) {
+        this._totalWhitelistedFound = this._totalWhitelistedFound + 1;
       }
       entries[pkg.name] = {
         name: pkg.name,
@@ -480,8 +498,8 @@ export class ListModel extends VDomModel {
         status: null,
         latest_version: pkg.version,
         installed_version: '',
-        blacklistEntry: this.isListed(pkg.name, this._blacklistMap),
-        whitelistEntry: this.isListed(pkg.name, this._whitelistMap)
+        blacklistEntry: isBlacklisted,
+        whitelistEntry: isWhitelisted
       };
     }
     return entries;
@@ -789,8 +807,12 @@ export class ListModel extends VDomModel {
   private _searchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];
   private _debouncedUpdate: Debouncer<void, void>;
+
+  private _listMode: 'black' | 'white' | null;
   private _blacklistMap: Map<string, IListEntry>;
   private _whitelistMap: Map<string, IListEntry>;
+  private _totalBlacklistedFound: number = 0;
+  private _totalWhitelistedFound: number = 0;
 }
 
 let _isDisclaimed = false;

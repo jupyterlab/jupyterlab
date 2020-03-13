@@ -179,7 +179,7 @@ namespace BuildPrompt {
  * VDOM for visualizing an extension entry.
  */
 function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
-  const { entry } = props;
+  const { entry, listMode } = props;
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
@@ -193,6 +193,9 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   }
   if (entry.blacklistEntry) {
     flagClasses.push(`jp-extensionmanager-entry-is-blacklisted`);
+  }
+  if (entry.blacklistEntry?.name && listMode === 'black') {
+    return <li></li>;
   }
   return (
     <li
@@ -294,6 +297,8 @@ export namespace ListEntry {
      */
     entry: IEntry;
 
+    listMode: 'black' | 'white' | null;
+
     /**
      * Callback to use for performing an action on the entry.
      */
@@ -310,6 +315,7 @@ export function ListView(props: ListView.IProperties): React.ReactElement<any> {
     entryViews.push(
       <ListEntry
         entry={entry}
+        listMode={props.listMode}
         key={entry.name}
         performAction={props.performAction}
       />
@@ -368,6 +374,8 @@ export namespace ListView {
      */
     numPages: number;
 
+    listMode: 'black' | 'white' | null;
+
     /**
      * The callback to use for changing the page
      */
@@ -377,6 +385,18 @@ export namespace ListView {
      * Callback to use for performing an action on an entry.
      */
     performAction: (action: Action, entry: IEntry) => void;
+  }
+}
+
+function ListingMessage(props: ListingMessage.IProperties) {
+  return (
+    <div className="jp-extensionmanager-listingmessage">{props.children}</div>
+  );
+}
+
+namespace ListingMessage {
+  export interface IProperties {
+    children: React.ReactNode;
   }
 }
 
@@ -535,7 +555,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     if (model.promptBuild) {
       elements.push(
         <BuildPrompt
-          key="buildpromt"
+          key="promt"
           performBuild={() => {
             model.performBuild();
           }}
@@ -601,6 +621,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         installedContent.push(
           <ListView
             key="installed-items"
+            listMode={model.listMode}
             entries={model.installed}
             numPages={1}
             onPage={value => {
@@ -642,18 +663,46 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         );
       } else {
         searchContent.push(
-          <ListView
-            key="search-items"
-            // Filter out installed extensions:
-            entries={model.searchResult.filter(
-              entry => model.installed.indexOf(entry) === -1
+          <>
+            {model.listMode === 'black' && model.totalEntries > 0 && (
+              <ListingMessage>
+                {
+                  <a
+                    href="https://jupyterlab.readthedocs.io/en/latest/user/extensions.html"
+                    target="_blank"
+                  >
+                    {model.totalBlacklistedFound} extensions out of the&nbsp;
+                    {model.totalEntries} found are blacklisted and are not&nbsp;
+                    shown.
+                  </a>
+                }
+              </ListingMessage>
             )}
-            numPages={pages}
-            onPage={value => {
-              this.onPage(value);
-            }}
-            performAction={this.onAction.bind(this)}
-          />
+            {model.listMode === 'white' && model.totalEntries > 0 && (
+              <ListingMessage>
+                <a
+                  href="https://jupyterlab.readthedocs.io/en/latest/user/extensions.html"
+                  target="_blank"
+                >
+                  {model.totalWhitelistedFound} extensions out of the&nbsp;
+                  {model.totalEntries} found are whitelisted.
+                </a>
+              </ListingMessage>
+            )}
+            <ListView
+              key="search-items"
+              listMode={model.listMode}
+              // Filter out installed extensions:
+              entries={model.searchResult.filter(
+                entry => model.installed.indexOf(entry) === -1
+              )}
+              numPages={pages}
+              onPage={value => {
+                this.onPage(value);
+              }}
+              performAction={this.onAction.bind(this)}
+            />
+          </>
         );
       }
 

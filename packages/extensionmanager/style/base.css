@@ -76,6 +76,17 @@
 }
 
 /*
+  Listing messages
+*/
+.jp-extensionmanager-listingmessage {
+  background-color: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
+  padding: 4px 8px;
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 400;
+}
+
+/*
   Error messages
 */
 .jp-extensionmanager-view .jp-extensionmanager-error pre {

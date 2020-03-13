@@ -28,6 +28,10 @@ export interface IListEntry {
  */
 export interface IListResult {
   /**
+   * The mode for the listings, can be black or white.
+   */
+  listMode: 'white' | 'black' | null;
+  /**
    * A collection of URIs for black listings.
    */
   blacklistUris: string[];
@@ -56,7 +60,7 @@ export interface IListingApi {
 }
 
 /**
- * An object for getting listings from URIs.
+ * An object for getting listings from the server API.
  */
 export class Lister {
   /**
@@ -67,12 +71,17 @@ export class Lister {
       '@jupyterlab/extensionmanager-extension/listings.json'
     )
       .then(data => {
-        this._listings = {
-          blacklistUris: data.blacklist_uris,
-          whitelistUris: data.whitelist_uris,
-          blacklist: data.blacklist,
-          whitelist: data.whitelist
-        };
+        if (
+          !(data.blacklist_uris.length > 0 && data.whitelist_uris.length > 0)
+        ) {
+          this._listings = {
+            listMode: data.blacklist_uris.length > 0 ? 'black' : 'white',
+            blacklistUris: data.blacklist_uris,
+            whitelistUris: data.whitelist_uris,
+            blacklist: data.blacklist,
+            whitelist: data.whitelist
+          };
+        }
         this._listingsLoaded.emit(this._listings);
       })
       .catch(error => {
@@ -85,6 +94,7 @@ export class Lister {
   }
 
   private _listings: IListResult = {
+    listMode: null,
     blacklistUris: [],
     whitelistUris: [],
     blacklist: [],
