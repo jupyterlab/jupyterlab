@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { Text } from '@jupyterlab/coreutils';
-import { IInfoReply } from '@jupyterlab/services/src/kernel/messages';
 import {
   Button,
   circleEmptyIcon,
@@ -22,7 +21,6 @@ import { AttachedProperty } from '@lumino/properties';
 import { PanelLayout, Widget } from '@lumino/widgets';
 import * as React from 'react';
 
-import { showDialog, Dialog } from './dialog';
 import { ISessionContext, sessionContextDialogs } from './sessioncontext';
 import { UseSignal, ReactWidget } from './vdom';
 
@@ -444,15 +442,13 @@ export namespace Toolbar {
    * Create a kernel info button.
    */
   export function createKernelInfoButton(
-    sessionContext: ISessionContext
+    sessionContext: ISessionContext,
+    dialogs?: ISessionContext.IDialogs
   ): Widget {
     return new ToolbarButton({
       icon: infoIcon,
-      onClick: async () => {
-        const info = await sessionContext.session?.kernel?.info;
-        if (info) {
-          void Private.createKernelInfoDialog(info);
-        }
+      onClick: () => {
+        return (dialogs ?? sessionContextDialogs).kernelInfo(sessionContext);
       },
       tooltip: 'Show Kernel Info'
     });
@@ -775,23 +771,5 @@ namespace Private {
         status === 'busy' || status === 'starting' || status === 'restarting'
       );
     }
-  }
-
-  /**
-   * Show the kernel info in a dialog.
-   * @param info The kernel info
-   */
-  export function createKernelInfoDialog(info: IInfoReply) {
-    const body = <pre>{info.banner}</pre>;
-
-    return showDialog({
-      body,
-      buttons: [
-        Dialog.createButton({
-          label: 'Dismiss',
-          className: 'jp-mod-accept jp-mod-styled'
-        })
-      ]
-    });
   }
 }

@@ -260,7 +260,7 @@ export namespace ISessionContext {
    */
   export interface IDialogs {
     /**
-     * Select a kernel for the session.
+     * Select a kernel for the session context.
      */
     selectKernel(session: ISessionContext): Promise<void>;
 
@@ -276,6 +276,11 @@ export namespace ISessionContext {
      * this is a no-op, and resolves with `false`.
      */
     restart(session: ISessionContext): Promise<boolean>;
+
+    /**
+     * Show the kernel info for the session context.
+     */
+    kernelInfo(session: ISessionContext): Promise<void>;
   }
 }
 
@@ -1056,6 +1061,27 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
       return true;
     }
     return false;
+  },
+
+  /**
+   * Show the kernel info for the session context.
+   */
+  async kernelInfo(sessionContext: ISessionContext): Promise<void> {
+    const info = await sessionContext.session?.kernel?.info;
+    if (!info) {
+      return;
+    }
+    const body = <pre>{info.banner}</pre>;
+
+    void showDialog({
+      body,
+      buttons: [
+        Dialog.createButton({
+          label: 'Dismiss',
+          className: 'jp-mod-accept jp-mod-styled'
+        })
+      ]
+    });
   }
 };
 
