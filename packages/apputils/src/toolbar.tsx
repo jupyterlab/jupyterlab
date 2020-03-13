@@ -439,19 +439,18 @@ export namespace Toolbar {
   }
 
   /**
-   * Create a kernel info button.
+   * Create a kernel info item.
    */
-  export function createKernelInfoButton(
+  export function createKernelInfoItem(
     sessionContext: ISessionContext,
     dialogs?: ISessionContext.IDialogs
   ): Widget {
-    return new ToolbarButton({
-      icon: infoIcon,
-      onClick: () => {
-        return (dialogs ?? sessionContextDialogs).kernelInfo(sessionContext);
-      },
-      tooltip: 'Show Kernel Info'
-    });
+    return ReactWidget.create(
+      <Private.KernelInfoComponent
+        sessionContext={sessionContext}
+        dialogs={dialogs ?? sessionContextDialogs}
+      />
+    );
   }
 }
 
@@ -771,5 +770,32 @@ namespace Private {
         status === 'busy' || status === 'starting' || status === 'restarting'
       );
     }
+  }
+
+  /**
+   * React component for a kernel info button.
+   */
+  export function KernelInfoComponent(props: {
+    sessionContext: ISessionContext;
+    dialogs: ISessionContext.IDialogs;
+  }) {
+    const onClick = () => {
+      void props.dialogs.kernelInfo(props.sessionContext);
+    };
+    return (
+      <UseSignal
+        signal={props.sessionContext.kernelChanged}
+        initialSender={props.sessionContext}
+      >
+        {sessionContext => (
+          <ToolbarButtonComponent
+            enabled={!!sessionContext?.session?.kernel}
+            icon={infoIcon}
+            onClick={onClick}
+            tooltip={'Show Kernel Info'}
+          />
+        )}
+      </UseSignal>
+    );
   }
 }

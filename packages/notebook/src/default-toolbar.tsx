@@ -206,7 +206,7 @@ export namespace ToolbarItems {
       },
       {
         name: 'info',
-        widget: Toolbar.createKernelInfoButton(panel.sessionContext)
+        widget: Toolbar.createKernelInfoItem(panel.sessionContext)
       }
     ];
   }
