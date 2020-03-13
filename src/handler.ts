@@ -257,13 +257,16 @@ export class DebuggerHandler {
         return;
       }
 
-      if (this._service.isStarted && this._oldConnection.id === connection.id) {
+      if (
+        this._service.isStarted &&
+        this._previousConnection.id === connection.id
+      ) {
         this._service.session.connection = connection;
         await this._service.stop();
         removeHandlers();
       } else {
         this._service.session.connection = connection;
-        this._oldConnection = connection;
+        this._previousConnection = connection;
         await this._service.restoreState(true);
         await createHandler();
       }
@@ -280,7 +283,7 @@ export class DebuggerHandler {
     if (!this._service.session) {
       this._service.session = new DebugSession({ connection });
     } else {
-      this._oldConnection = this._service.session.connection.kernel
+      this._previousConnection = this._service.session.connection.kernel
         ? this._service.session.connection
         : null;
       this._service.session.connection = connection;
@@ -292,14 +295,14 @@ export class DebuggerHandler {
     // check the state of the debug session
     if (!this._service.isStarted) {
       removeHandlers();
-      this._service.session.connection = this._oldConnection ?? connection;
+      this._service.session.connection = this._previousConnection ?? connection;
       await this._service.restoreState(false);
       return;
     }
 
     // if the debugger is started but there is no handler, create a new one
     await createHandler();
-    this._oldConnection = connection;
+    this._previousConnection = connection;
 
     // listen to the disposed signals
     widget.disposed.connect(removeHandlers);
@@ -309,7 +312,7 @@ export class DebuggerHandler {
   private _type: DebuggerHandler.SessionType;
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
-  private _oldConnection: Session.ISessionConnection;
+  private _previousConnection: Session.ISessionConnection;
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
   } = {};
