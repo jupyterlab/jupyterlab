@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/example-listings",
+  "name": "@jupyterlab/listings-example",
   "version": "2.0.0",
   "private": true,
   "scripts": {

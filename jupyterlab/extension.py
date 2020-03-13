@@ -97,7 +97,7 @@ def load_jupyter_server_extension(nbapp):
     web_app = nbapp.web_app
     logger = nbapp.log
     base_url = nbapp.base_url
-
+    
     # Handle the app_dir
     app_dir = getattr(nbapp, 'app_dir', get_app_dir())
 
