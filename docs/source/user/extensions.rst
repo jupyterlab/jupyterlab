@@ -72,10 +72,59 @@ Once enabled, you should see a new tab appear in the :ref:`left sidebar <left-si
 
 .. figure:: images/extension_manager_default.png
    :align: center
-   :class: jp-screenshot
+   :class: jp-screenshotls 
 
    **Figure:** The default view has three components: a search bar, an "Installed"
    section, and a "Discover" section.
+
+
+Disclaimer
+^^^^^^^^^^
+
+.. danger::
+
+    Installing an extension allows it to execute arbitrary code on the
+    server, kernel, and in the client's browser. Therefor we ask you 
+    to explictitly acknowledge this.
+
+
+By default, the disclaimer is not checked.
+
+.. figure:: images/listings/disclaimer_unchecked.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** User has not checked the disclaimer
+
+
+As the disclaimer is not checked, you can search for an extension,
+but can not install it (no Install button is available).
+
+.. figure:: images/listings/disclaimer_unchecked_noinstall.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** With Disclaimer unchecked, you can not install an extension
+
+
+To install an extensino, you first have to explicitly check the disclaimer.
+Once done, this will remain across sessions and the user does not have to 
+check it again.
+
+.. figure:: images/listings/disclaimer_checked.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Disclaimer checked
+
+For ease of use, you can hide the disclaimer so it takes less space on
+your screen.
+
+.. figure:: images/listings/disclaimer_hidden.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Disclaimer is hidden
 
 
 Finding Extensions
@@ -104,6 +153,63 @@ performs a free-text search of JupyterLab extensions on the NPM registry.
    :align: center
    :class: jp-screenshot
    :alt: Screenshot showing an example search result
+
+
+Blacklist
+^^^^^^^^^
+
+If you, or your administrator, has enabled the :ref:`blacklist_mode`,
+JupyterLab will first use the blacklist and remove all blacklisted
+extensions from your search result.
+
+You will be informed of the number of non listed extensions, but will
+not be able to see them. You can also click on that information
+message to be driven to this documentation page.
+
+.. figure:: images/listings/searchresult_blacklisted.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Search result in blacklist mode
+
+
+If you have installed an extension before it is blacklisted,
+the extension entry in the installed list will be highlightd
+in red. It is recommended that you uninstall it. You can move
+your mouse on the red cross to know more about the reason it
+is blacklisted.
+
+.. figure:: images/listings/installed_blacklisted.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Blacklisted installed extension
+
+
+Whitelist
+^^^^^^^^^
+
+If you, or your administrator, has enabled the :ref:`whitelist_mode`
+JupyterLab will first use the whitelist and only show "Install" 
+action for whitelisted extensions. The withelisted extensions
+
+The other extensions will be show in the search result but you
+will not be able to install them.
+
+.. figure:: images/listings/searchresult_whitelisted.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Search result in whitelist mode
+
+
+The installed extensions being whitelisted are highlited in green.
+
+.. figure:: images/listings/installed_whitelisted.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Whitelisted installed extension
 
 
 Installing an Extension
