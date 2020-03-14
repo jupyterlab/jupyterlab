@@ -174,17 +174,13 @@
   display: none;
 }
 
-.jp-extensionmanager-entry.jp-extensionmanager-entry-mod-whitelisted
+.jp-extensionmanager-entry.jp-extensionmanager-entry-mod-jupyterlab-org
   .jp-extensionmanager-entry-jupyter-org {
   display: inline;
 }
 
-.jp-extensionmanager-entry.jp-extensionmanager-entry-is-blacklisted {
+.jp-extensionmanager-entry.jp-extensionmanager-entry-should-be-uninstalled {
   background-color: var(--jp-error-color3);
-}
-
-.jp-extensionmanager-entry.jp-extensionmanager-entry-is-whitelisted {
-  background-color: var(--jp-success-color3);
 }
 
 /* Precedence order update/error/warning matters! */

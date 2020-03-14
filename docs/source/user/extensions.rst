@@ -155,16 +155,43 @@ performs a free-text search of JupyterLab extensions on the NPM registry.
    :alt: Screenshot showing an example search result
 
 
-Blacklist
-^^^^^^^^^
+.. _listings:
 
-If you, or your administrator, has enabled the :ref:`blacklist_mode`,
-JupyterLab will first use the blacklist and remove all blacklisted
+Listings
+^^^^^^^^
+
+When searching extensions, JupyterLab displays the complete search result and 
+the user if free to install any extension.
+
+To bring more security, you or your adminstrator can enable ``blacklists`` or ``whitelists``
+mode. JupyterLab will check the extensions against the defined listings.
+
+Only one mode at a time is allowed. The details to enable configure the listings
+can be read :ref:`listings_conf`. The following details the behavior in the different
+modes.
+
+Default mode
+^^^^^^^^^^^^
+
+In the ``default`` mode, no listing is enabled and the search behavior is unchanged and
+is the one described previously.
+
+Blacklist mode
+^^^^^^^^^^^^^^
+
+Extensions can be freely downloaded without going through a vetting process.
+However, users can add malicious extensions to a blacklist. The extension manager 
+will show all extensions except for those that have 
+been explicitly added to the blacklist. Therfore, the extension manager 
+does not allow you to install blacklisted extensions.
+
+If you, or your administrator, has enabled the blacklist mode,
+JupyterLab will use the blacklist and remove all blacklisted
 extensions from your search result.
 
-You will be informed of the number of non listed extensions, but will
-not be able to see them. You can also click on that information
-message to be driven to this documentation page.
+You will be informed of the number of blacklisted extensions, but will
+not be able to see them. You can click on that message to be driven to 
+this documentation page.
 
 .. figure:: images/listings/searchresult_blacklisted.png
    :align: center
@@ -173,8 +200,8 @@ message to be driven to this documentation page.
    **Figure:** Search result in blacklist mode
 
 
-If you have installed an extension before it is blacklisted,
-the extension entry in the installed list will be highlightd
+If you have installed an extension before it has been blacklisted,
+the extension entry in the installed list will be highlighted
 in red. It is recommended that you uninstall it. You can move
 your mouse on the red cross to know more about the reason it
 is blacklisted.
@@ -186,15 +213,21 @@ is blacklisted.
    **Figure:** Blacklisted installed extension
 
 
-Whitelist
-^^^^^^^^^
+Whitelist mode
+^^^^^^^^^^^^^^
 
-If you, or your administrator, has enabled the :ref:`whitelist_mode`
-JupyterLab will first use the whitelist and only show "Install" 
-action for whitelisted extensions. The withelisted extensions
+A whitelist maintains a set of approved extensions that users can freely 
+search and install. Extensions need to go through some sort of vetting process 
+before they are added to the whitelist. When using a whitelist, the extension manager 
+will highlight extensions that have been explicitly added to the whitelist.
 
-The other extensions will be show in the search result but you
-will not be able to install them.
+If you, or your administrator, has enabled the whitelist mode
+JupyterLab will use the whitelist and only show extensions present
+in the withelist. The other extensions will not be show in the search result.
+
+You will be informed of the number of non whitelisted extensions, but will
+not be able to see them. You can click on that message to be driven to 
+this documentation page.
 
 .. figure:: images/listings/searchresult_whitelisted.png
    :align: center
@@ -203,7 +236,11 @@ will not be able to install them.
    **Figure:** Search result in whitelist mode
 
 
-The installed extensions being whitelisted are highlited in green.
+If you have installed an whitelisted extension and at some point
+in time that extension is removed from the whitelist, the extension entry 
+in the installed list will be highlighted in red. It is recommended that 
+you uninstall it. You can move your mouse on the red cross to get
+an explanation message.
 
 .. figure:: images/listings/installed_whitelisted.png
    :align: center
@@ -637,3 +674,66 @@ because these files are typically shared across Python environments.
 The location can be modified using the ``JUPYTERLAB_WORKSPACES_DIR`` environment variable. These files can be imported and exported to create default "profiles",
 using the :ref:`workspace command line tool <url-workspaces-cli>`.
 
+
+.. _listings_conf:
+
+Listing Configuration
+~~~~~~~~~~~~~~~~~~~~~
+
+By default, JupyterLab ships with blacklist mode enabled. The blacklist can 
+be found on https://github.com/jupyterlab/listings/blacklist.json
+
+Please open a `pull request <https://github.com/jupyterlab/jupyterlab/pulls>`__
+if you think that some extensions should be blacklisted.
+
+Open also a `pull request <https://github.com/jupyterlab/jupyterlab/pulls>`__
+if your extensions is blacklistd and you think it should not.
+
+This is an example of a blacklist.
+
+.. code:: json
+
+   {
+   "blacklist": [
+      {
+         "name": "@jupyterlab-examples/launcher",
+         "type": "jupyterlab",
+         "reason": "@jupyterlab-examples/launcher is blacklisted for test purpose - Do NOT take this for granted!!!",
+         "creation_date": "2020-03-11T03:28:56.782Z",
+         "last_update_date":  "2020-03-11T03:28:56.782Z"
+      }
+   ]
+   }
+
+The ``name`` attribute support regular expressions.
+
+In the following example a ``@jupyterlab/*`` will whitelist
+all jupyterlab organization extensions.
+
+.. code:: json
+
+   {
+   "whitelistlist": [
+      {
+         "name": "@jupyterlab/*",
+         "type": "jupyterlab",
+         "reason": "@jupyterlab-examples/launcher is blacklisted for test purpose - Do NOT take this for granted!!!",
+         "creation_date": "2020-03-11T03:28:56.782Z",
+         "last_update_date":  "2020-03-11T03:28:56.782Z"
+      }
+   ]
+   }
+
+
+The administrator can use the following Traits to define the listings loading.
+
+- ``blacklist_uris``: A list of comma-separated URIs to get the blacklist
+- ``whitelist_uris``: A list of comma-separated URIs to get the whitelist
+- ``listings_refresh_ms``: The interval delay in milliseconds to refresh the lists
+- ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
+
+Launch the server with e.g. ``--LabServerApp.blacklist_uris``.
+
+The details for the listings_request_options are listed
+on the `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__  
+(for example, you could pass ``{'timeout': 10}`` to change the HTTP request timeout value).

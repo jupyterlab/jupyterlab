@@ -1,10 +1,8 @@
 {
   "listings": {
-    "blacklist_uris": [
-      "https://raw.githubusercontent.com/jupyterlab/listings/master/blacklist.json"
-    ],
+    "blacklist_uris": [""],
     "whitelist_uris": [""],
     "blacklist": [],
-    "whitelist": ["@jupyterlab/*"]
+    "whitelist": []
   }
 }

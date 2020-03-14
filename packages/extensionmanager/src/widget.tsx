@@ -179,23 +179,34 @@ namespace BuildPrompt {
  * VDOM for visualizing an extension entry.
  */
 function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
-  const { entry, listMode } = props;
+  const { entry, listMode, viewType } = props;
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
   let title = entry.name;
   if (isJupyterOrg(entry.name)) {
-    flagClasses.push(`jp-extensionmanager-entry-mod-whitelisted`);
+    flagClasses.push(`jp-extensionmanager-entry-mod-jupyterlab-org`);
   }
-  if (entry.whitelistEntry) {
-    flagClasses.push(`jp-extensionmanager-entry-is-whitelisted`);
-  }
-  if (entry.blacklistEntry) {
-    flagClasses.push(`jp-extensionmanager-entry-is-blacklisted`);
-  }
-  if (entry.blacklistEntry?.name && listMode === 'black') {
+  if (
+    listMode === 'black' &&
+    entry.blacklistEntry &&
+    viewType === 'searchResult'
+  ) {
     return <li></li>;
+  }
+  if (
+    listMode === 'white' &&
+    !entry.whitelistEntry &&
+    viewType === 'searchResult'
+  ) {
+    return <li></li>;
+  }
+  if (listMode === 'black' && entry.blacklistEntry?.name) {
+    flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
+  }
+  if (listMode === 'white' && !entry.whitelistEntry) {
+    flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
   }
   return (
     <li
@@ -218,14 +229,26 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           <ToolbarButtonComponent
             icon={blacklistedIcon}
             iconLabel={`${entry.name} is blacklisted since ${entry.blacklistEntry?.creation_date} - Reason: [${entry.blacklistEntry?.reason}]`}
+            onClick={() =>
+              window.open(
+                'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+              )
+            }
           />
         )}
-        {entry.whitelistEntry && (
-          <ToolbarButtonComponent
-            icon={whitelistedIcon}
-            iconLabel={`${entry.name} is whitelisted since ${entry.whitelistEntry?.creation_date} - Reason: [${entry.whitelistEntry?.reason}]`}
-          />
-        )}
+        {!entry.whitelistEntry &&
+          viewType === 'installed' &&
+          listMode === 'white' && (
+            <ToolbarButtonComponent
+              icon={whitelistedIcon}
+              iconLabel={`${entry.name} is not whitelisted, please contact your administrator.`}
+              onClick={() =>
+                window.open(
+                  'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                )
+              }
+            />
+          )}
       </div>
       <div className="jp-extensionmanager-entry-content">
         <div className="jp-extensionmanager-entry-description">
@@ -299,7 +322,15 @@ export namespace ListEntry {
      */
     entry: IEntry;
 
+    /**
+     * The list mode to apply.
+     */
     listMode: 'black' | 'white' | null;
+
+    /**
+     * The requested view type.
+     */
+    viewType: 'installed' | 'searchResult';
 
     /**
      * Callback to use for performing an action on the entry.
@@ -318,6 +349,7 @@ export function ListView(props: ListView.IProperties): React.ReactElement<any> {
       <ListEntry
         entry={entry}
         listMode={props.listMode}
+        viewType={props.viewType}
         key={entry.name}
         performAction={props.performAction}
       />
@@ -376,7 +408,15 @@ export namespace ListView {
      */
     numPages: number;
 
+    /**
+     * The list mode to apply.
+     */
     listMode: 'black' | 'white' | null;
+
+    /**
+     * The requested view type.
+     */
+    viewType: 'installed' | 'searchResult';
 
     /**
      * The callback to use for changing the page
@@ -623,7 +663,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         installedContent.push(
           <ListView
             key="installed-items"
-            listMode={null}
+            listMode={model.listMode}
+            viewType={'installed'}
             entries={model.installed}
             numPages={1}
             onPage={value => {
@@ -694,6 +735,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
             <ListView
               key="search-items"
               listMode={model.listMode}
+              viewType={'searchResult'}
               // Filter out installed extensions:
               entries={model.searchResult.filter(
                 entry => model.installed.indexOf(entry) === -1
