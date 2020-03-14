@@ -15,6 +15,8 @@ import { SourcesBody } from './body';
 
 import { SourcesHeader } from './header';
 
+import { viewBreakpointIcon } from '../icons';
+
 import { SourcesModel } from './model';
 
 /**
@@ -38,7 +40,7 @@ export class Sources extends Panel {
     header.toolbar.addItem(
       'open',
       new ToolbarButton({
-        iconClass: 'jp-ViewBreakpointIcon',
+        icon: viewBreakpointIcon,
         onClick: () => model.open(),
         tooltip: 'Open in the Main Area'
       })

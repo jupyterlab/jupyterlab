@@ -28,6 +28,14 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
 
+import {
+  continueIcon,
+  stepIntoIcon,
+  stepOutIcon,
+  stepOverIcon,
+  terminateIcon
+} from './icons';
+
 import { Debugger } from './debugger';
 
 import { TrackerHandler } from './handlers/tracker';
@@ -334,7 +342,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
       caption: 'Continue',
-      iconClass: 'jp-MaterialIcon jp-RunIcon',
+      icon: continueIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -347,7 +355,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.terminate, {
       label: 'Terminate',
       caption: 'Terminate',
-      iconClass: 'jp-MaterialIcon jp-StopIcon',
+      icon: terminateIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -360,7 +368,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.next, {
       label: 'Next',
       caption: 'Next',
-      iconClass: 'jp-MaterialIcon jp-StepOverIcon',
+      icon: stepOverIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -372,7 +380,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.stepIn, {
       label: 'StepIn',
       caption: 'Step In',
-      iconClass: 'jp-MaterialIcon jp-StepInIcon',
+      icon: stepIntoIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -384,7 +392,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     commands.addCommand(CommandIDs.stepOut, {
       label: 'StepOut',
       caption: 'Step Out',
-      iconClass: 'jp-MaterialIcon jp-StepOutIcon',
+      icon: stepOutIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },

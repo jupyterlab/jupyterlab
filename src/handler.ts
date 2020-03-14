@@ -21,6 +21,10 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 
 import { Kernel, Session } from '@jupyterlab/services';
 
+import { bugIcon } from '@jupyterlab/ui-components';
+
+import { DisposableSet } from '@lumino/disposable';
+
 import { DebuggerModel } from './model';
 
 import { DebugSession } from './session';
@@ -41,15 +45,25 @@ function updateToolbar(
   widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
   onClick: () => void
 ) {
-  const button = new ToolbarButton({
-    className: 'jp-DebuggerSwitchButton',
-    iconClass: 'jp-ToggleSwitch',
-    onClick,
-    tooltip: 'Enable / Disable Debugger'
+  const icon = new ToolbarButton({
+    className: 'jp-DebuggerBugButton',
+    icon: bugIcon,
+    tooltip: 'Enable / Disable Debugger',
+    onClick
   });
+  widget.toolbar.addItem('debugger-icon', icon);
 
+  const button = new ToolbarButton({
+    iconClass: 'jp-ToggleSwitch',
+    tooltip: 'Enable / Disable Debugger',
+    onClick
+  });
   widget.toolbar.addItem('debugger-button', button);
-  return button;
+
+  const elements = new DisposableSet();
+  elements.add(icon);
+  elements.add(button);
+  return elements;
 }
 
 /**
@@ -246,7 +260,6 @@ export class DebuggerHandler {
       if (!button) {
         return;
       }
-      button.parent = null;
       button.dispose();
       delete this._buttons[widget.id];
     };
@@ -343,7 +356,7 @@ export class DebuggerHandler {
       status: Kernel.Status
     ) => void;
   } = {};
-  private _buttons: { [id: string]: ToolbarButton } = {};
+  private _buttons: { [id: string]: DisposableSet } = {};
 }
 
 /**
