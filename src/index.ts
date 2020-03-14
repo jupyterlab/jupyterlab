@@ -18,6 +18,8 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
@@ -315,15 +317,16 @@ const variables: JupyterFrontEndPlugin<void> = {
 const main: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:main',
   requires: [IEditorServices],
-  optional: [ILayoutRestorer, ICommandPalette],
+  optional: [ILayoutRestorer, ICommandPalette, ISettingRegistry],
   provides: IDebugger,
   autoStart: true,
-  activate: (
+  activate: async (
     app: JupyterFrontEnd,
     editorServices: IEditorServices,
     restorer: ILayoutRestorer | null,
-    palette: ICommandPalette | null
-  ): IDebugger => {
+    palette: ICommandPalette | null,
+    settingRegistry: ISettingRegistry | null
+  ): Promise<IDebugger> => {
     const { commands, shell } = app;
 
     const service = new DebuggerService();
@@ -404,6 +407,25 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       callstackCommands,
       editorServices
     });
+
+    if (settingRegistry) {
+      const setting = await settingRegistry.load(main.id);
+      const updateVariableSettings = () => {
+        const filters = setting.get('variableFilters').composite as {
+          [key: string]: string[];
+        };
+        const kernelName = service.session?.connection?.kernel?.name;
+        const list = filters[kernelName];
+        if (!list) {
+          return;
+        }
+        sidebar.variables.filter = new Set<string>(list);
+      };
+
+      updateVariableSettings();
+      setting.changed.connect(updateVariableSettings);
+      sidebar.service.sessionChanged.connect(updateVariableSettings);
+    }
 
     sidebar.service.eventMessage.connect(_ => {
       commands.notifyCommandChanged();
