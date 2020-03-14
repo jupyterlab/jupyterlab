@@ -78,6 +78,7 @@ export class SearchBar extends React.Component<
             <Checkbox
               label="I understand that extensions managed through this interface run arbitrary code that may be dangerous."
               checked={ListModel.isDisclaimed()}
+              alignIndicator="right"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                 this.props.settings
                   .set('disclaimed', e.target.checked)
