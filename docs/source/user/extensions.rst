@@ -680,16 +680,22 @@ using the :ref:`workspace command line tool <url-workspaces-cli>`.
 Listing Configuration
 ~~~~~~~~~~~~~~~~~~~~~
 
-By default, JupyterLab ships with blacklist mode enabled. The blacklist can 
-be found on https://github.com/jupyterlab/listings/blacklist.json
+You or your administrator can use the following traits to define the listings loading.
 
-Please open a `pull request <https://github.com/jupyterlab/jupyterlab/pulls>`__
-if you think that some extensions should be blacklisted.
+- ``blacklist_uris``: A list of comma-separated URIs to get the blacklist
+- ``whitelist_uris``: A list of comma-separated URIs to get the whitelist
+- ``listings_refresh_ms``: The interval delay in milliseconds to refresh the lists
+- ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
 
-Open also a `pull request <https://github.com/jupyterlab/jupyterlab/pulls>`__
-if your extensions is blacklistd and you think it should not.
+For example, to enable blacklist, launch the server with ``--LabServerApp.blacklist_uris``.
 
-This is an example of a blacklist.
+The details for the listings_request_options are listed
+on the `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__  
+(for example, you could pass ``{'timeout': 10}`` to change the HTTP request timeout value).
+
+The listings are json files hosted on the URIs you have given.
+
+This is an example of a blacklist file.
 
 .. code:: json
 
@@ -707,7 +713,7 @@ This is an example of a blacklist.
 
 The ``name`` attribute support regular expressions.
 
-In the following example a ``@jupyterlab/*`` will whitelist
+In the following whitelist example a ``@jupyterlab/*`` will whitelist 
 all jupyterlab organization extensions.
 
 .. code:: json
@@ -723,17 +729,3 @@ all jupyterlab organization extensions.
       }
    ]
    }
-
-
-The administrator can use the following Traits to define the listings loading.
-
-- ``blacklist_uris``: A list of comma-separated URIs to get the blacklist
-- ``whitelist_uris``: A list of comma-separated URIs to get the whitelist
-- ``listings_refresh_ms``: The interval delay in milliseconds to refresh the lists
-- ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
-
-Launch the server with e.g. ``--LabServerApp.blacklist_uris``.
-
-The details for the listings_request_options are listed
-on the `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__  
-(for example, you could pass ``{'timeout': 10}`` to change the HTTP request timeout value).
