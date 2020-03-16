@@ -163,7 +163,7 @@ const VariablesComponent = ({
   const Tbody = (variables: VariablesModel.IVariable[]) => (
     <tbody>
       {variables
-        ?.filter(variable => !filter.has(variable.evaluateName))
+        ?.filter(variable => !filter?.has(variable.evaluateName))
         .map(variable => (
           <tr
             onDoubleClick={() => onVariableDoubleClicked(variable)}

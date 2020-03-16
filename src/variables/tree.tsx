@@ -99,7 +99,7 @@ const VariablesComponent = ({
     <>
       <ul>
         {variables
-          ?.filter(variable => !filter.has(variable.evaluateName))
+          ?.filter(variable => !filter?.has(variable.evaluateName))
           .map(variable => {
             const key = `${variable.evaluateName}-${variable.type}-${variable.value}`;
             return (
