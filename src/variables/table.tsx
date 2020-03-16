@@ -169,7 +169,7 @@ const VariablesComponent = ({
           <tr
             onDoubleClick={() => onVariableDoubleClicked(variable)}
             onClick={() => onVariableClicked(variable)}
-            key={variable.evaluateName}
+            key={`${variable.evaluateName}-${variable.type}-${variable.value}`}
           >
             <td>{variable.name}</td>
             <td>{variable.type}</td>
