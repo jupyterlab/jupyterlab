@@ -86,7 +86,7 @@ export class VariableDetails extends ReactWidget {
    * Instantiate a new Body for the detail table of the selected variable.
    * @param options The instantiation options for VariableDetails.
    */
-  constructor(options: VariablesDetails.IOptions) {
+  constructor(options: VariableDetails.IOptions) {
     super();
     const { details, commands, model, service, title } = options;
 
@@ -214,11 +214,11 @@ namespace VariablesBodyTable {
 }
 
 /**
- * A namespace for VariablesDetails `statics`.
+ * A namespace for VariableDetails `statics`.
  */
-namespace VariablesDetails {
+namespace VariableDetails {
   /**
-   * Instantiation options for `VariablesDetails`.
+   * Instantiation options for `VariableDetails`.
    */
   export interface IOptions {
     /**
