@@ -160,13 +160,12 @@ const VariableComponent = ({
 
   return (
     <li onClick={e => onVariableClicked(e)}>
-      {expandable && (
-        <caretDownEmptyIcon.react
-          stylesheet="menuItem"
-          tag="span"
-          transform={expanded ? 'rotate(0deg)' : 'rotate(-90deg)'}
-        />
-      )}
+      <caretDownEmptyIcon.react
+        visibility={expandable ? 'visible' : 'hidden'}
+        stylesheet="menuItem"
+        tag="span"
+        transform={expanded ? 'rotate(0deg)' : 'rotate(-90deg)'}
+      />
       <span style={styleName}>{variable.name}</span>
       <span>: </span>
       <span style={styleType}>{convertType(variable)}</span>

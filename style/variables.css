@@ -11,13 +11,21 @@
 .jp-DebuggerVariables-body ul {
   list-style: none;
   margin: 0;
-  padding: 0.5em;
+  padding: 0;
+}
+
+.jp-DebuggerVariables-body > ul {
+  padding-top: 0.1em;
 }
 
 .jp-DebuggerVariables-body ul li {
-  padding: 5px 0 5px 0;
+  padding: 5px 0 0 0;
   cursor: pointer;
   color: var(--jp-content-font-color1);
+}
+
+.jp-DebuggerVariables-body ul li > ul {
+  margin-left: 12px;
 }
 
 .jp-DebuggerVariables header .jp-Toolbar {
