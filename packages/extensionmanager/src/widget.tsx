@@ -75,8 +75,12 @@ export class SearchBar extends React.Component<
           header={'Disclaimer'}
         >
           <div className="jp-extensionmanager-disclaimer">
+            <div>
+              Extensions installed contain arbitrary code that can execute on
+              your machine that may contain malicious code
+            </div>
             <Checkbox
-              label="I understand that extensions managed through this interface run arbitrary code that may be dangerous."
+              label="I understand extensions contain arbitrary code."
               checked={ListModel.isDisclaimed()}
               alignIndicator="right"
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
