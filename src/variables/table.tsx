@@ -91,7 +91,8 @@ export class VariableDetails extends ReactWidget {
     const { details, commands, model, service, title } = options;
 
     this.title.icon = variableIcon;
-    this.title.label = `${service.session?.connection?.name} - details of ${title}`;
+    this.title.label = `${service.session?.connection?.name} - ${title}`;
+    this.title.caption = this.title.label;
 
     this._variables = details;
     this._commands = commands;
