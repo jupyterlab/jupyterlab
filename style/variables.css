@@ -15,17 +15,9 @@
 }
 
 .jp-DebuggerVariables-body ul li {
-  padding: 5px;
+  padding: 5px 0 5px 0;
   cursor: pointer;
   color: var(--jp-content-font-color1);
-}
-
-.jp-DebuggerVariables-body ul li .caret {
-  display: inline-block;
-  color: var(--jp-content-font-color2);
-  font-size: 12px;
-  margin-right: 3px;
-  user-select: none;
 }
 
 .jp-DebuggerVariables header .jp-Toolbar {

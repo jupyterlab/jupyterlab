@@ -1,13 +1,15 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ArrayExt } from '@lumino/algorithm';
-
-import { convertType } from '.';
-
 import { ReactWidget } from '@jupyterlab/apputils';
 
+import { caretDownEmptyIcon } from '@jupyterlab/ui-components';
+
+import { ArrayExt } from '@lumino/algorithm';
+
 import React, { useEffect, useState } from 'react';
+
+import { convertType } from '.';
 
 import { IDebugger } from '../tokens';
 
@@ -133,10 +135,6 @@ const VariableComponent = ({
   const [variable] = useState(data);
   const [expanded, setExpanded] = useState(null);
   const [details, setDetails] = useState(null);
-  const stylesCaret = {
-    transform: `rotate(90deg)`
-  };
-
   const styleName = {
     color: 'var(--jp-mirror-editor-attribute-color)'
   };
@@ -163,9 +161,11 @@ const VariableComponent = ({
   return (
     <li onClick={e => onVariableClicked(e)}>
       {expandable && (
-        <span className="caret" style={expanded ? stylesCaret : {}}>
-          ▶
-        </span>
+        <caretDownEmptyIcon.react
+          stylesheet="menuItem"
+          tag="span"
+          transform={expanded ? 'rotate(0deg)' : 'rotate(-90deg)'}
+        />
       )}
       <span style={styleName}>{variable.name}</span>
       <span>: </span>
