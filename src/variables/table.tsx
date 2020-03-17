@@ -86,12 +86,13 @@ export class VariableDetails extends ReactWidget {
    * Instantiate a new Body for the detail table of the selected variable.
    * @param options The instantiation options for VariableDetails.
    */
-  constructor(options: VariablesDetails.IOptions) {
+  constructor(options: VariableDetails.IOptions) {
     super();
     const { details, commands, model, service, title } = options;
 
     this.title.icon = variableIcon;
-    this.title.label = `${service.session?.connection?.name} - details of ${title}`;
+    this.title.label = `${service.session?.connection?.name} - ${title}`;
+    this.title.caption = this.title.label;
 
     this._variables = details;
     this._commands = commands;
@@ -163,12 +164,12 @@ const VariablesComponent = ({
   const Tbody = (variables: VariablesModel.IVariable[]) => (
     <tbody>
       {variables
-        ?.filter(variable => !filter.has(variable.evaluateName))
+        ?.filter(variable => !filter?.has(variable.evaluateName))
         .map(variable => (
           <tr
             onDoubleClick={() => onVariableDoubleClicked(variable)}
             onClick={() => onVariableClicked(variable)}
-            key={variable.evaluateName}
+            key={`${variable.evaluateName}-${variable.type}-${variable.value}`}
           >
             <td>{variable.name}</td>
             <td>{variable.type}</td>
@@ -214,11 +215,11 @@ namespace VariablesBodyTable {
 }
 
 /**
- * A namespace for VariablesDetails `statics`.
+ * A namespace for VariableDetails `statics`.
  */
-namespace VariablesDetails {
+namespace VariableDetails {
   /**
-   * Instantiation options for `VariablesDetails`.
+   * Instantiation options for `VariableDetails`.
    */
   export interface IOptions {
     /**
