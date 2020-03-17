@@ -54,7 +54,6 @@
   },
   "jupyterlab": {
     "extension": true,
-    "schemaDir": "schema",
-    "listingDir": "listing"
+    "schemaDir": "schema"
   }
 }

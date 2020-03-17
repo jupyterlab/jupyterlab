@@ -17,7 +17,7 @@ from traitlets import Unicode
 with open(os.path.join(HERE, 'package.json')) as fid:
     version = json.load(fid)['version']
 
-class ExampleApp(LabApp):
+class ListingsApp(LabApp):
     base_url = '/'
     default_url = Unicode('/lab',
                           help='The default URL to redirect to from `/`')
@@ -43,4 +43,4 @@ class ExampleApp(LabApp):
         super().start()
 
 if __name__ == '__main__':
-    ExampleApp.launch_instance()
+    ListingsApp.launch_instance()

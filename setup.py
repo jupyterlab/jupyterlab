@@ -30,7 +30,6 @@ ensure_python(['>=3.5'])
 data_files_spec = [
     ('share/jupyter/lab/static', '%s/static' % NAME, '**'),
     ('share/jupyter/lab/schemas', '%s/schemas' % NAME, '**'),
-    ('share/jupyter/lab/listings', '%s/listings' % NAME, '**'),
     ('share/jupyter/lab/themes', '%s/themes' % NAME, '**'),
     ('etc/jupyter/jupyter_notebook_config.d',
      'jupyter-config/jupyter_notebook_config.d', 'jupyterlab.json'),
@@ -39,7 +38,7 @@ data_files_spec = [
 package_data_spec = dict()
 package_data_spec[NAME] = [
     'staging/*', 'staging/templates/*', 'static/**', 'tests/mock_packages/**',
-    'themes/**', 'schemas/**', 'listings/**', '*.js'
+    'themes/**', 'schemas/**', '*.js'
 ]
 
 
@@ -59,7 +58,6 @@ def check_assets():
     targets = [
         'static/package.json',
         'schemas/@jupyterlab/shortcuts-extension/shortcuts.json',
-        'listings/@jupyterlab/extensionmanager-extension/listings.json',
         'themes/@jupyterlab/theme-light-extension/index.css'
     ]
 

@@ -11,10 +11,9 @@ import {
   Collapse,
   InputGroup,
   Checkbox,
-  blacklistedIcon,
   jupyterIcon,
-  refreshIcon,
-  whitelistedIcon
+  listingsInfoIcon,
+  refreshIcon
 } from '@jupyterlab/ui-components';
 
 import { Message } from '@lumino/messaging';
@@ -232,8 +231,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
         )}
         {entry.blacklistEntry && (
           <ToolbarButtonComponent
-            icon={blacklistedIcon}
-            iconLabel={`${entry.name} is blacklisted since ${entry.blacklistEntry?.creation_date} - Reason: [${entry.blacklistEntry?.reason}]`}
+            icon={listingsInfoIcon}
+            iconLabel={`${entry.name} extension has been blacklisted since install. Please uninstall immediately and contact your blacklist administrator.`}
             onClick={() =>
               window.open(
                 'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
@@ -245,8 +244,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           viewType === 'installed' &&
           listMode === 'white' && (
             <ToolbarButtonComponent
-              icon={whitelistedIcon}
-              iconLabel={`${entry.name} is not whitelisted, please contact your administrator.`}
+              icon={listingsInfoIcon}
+              iconLabel={`${entry.name} extension has been removed from the whitelist since installation. Please uninstall immediately and contact your whitelist administrator.`}
               onClick={() =>
                 window.open(
                   'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
@@ -434,7 +433,7 @@ export namespace ListView {
     performAction: (action: Action, entry: IEntry) => void;
   }
 }
-
+/*
 function ListingMessage(props: ListingMessage.IProperties) {
   return (
     <div className="jp-extensionmanager-listingmessage">{props.children}</div>
@@ -446,7 +445,7 @@ namespace ListingMessage {
     children: React.ReactNode;
   }
 }
-
+*/
 function ErrorMessage(props: ErrorMessage.IProperties) {
   return (
     <div key="error-msg" className="jp-extensionmanager-error">
@@ -712,6 +711,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       } else {
         searchContent.push(
           <>
+            {/*
             {model.listMode === 'black' && model.totalEntries > 0 && (
               <ListingMessage>
                 {
@@ -737,6 +737,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
                 </a>
               </ListingMessage>
             )}
+            */}
             <ListView
               key="search-items"
               listMode={model.listMode}

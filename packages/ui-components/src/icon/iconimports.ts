@@ -9,7 +9,6 @@ import { LabIcon } from './labicon';
 
 // icon svg import statements
 import addSvgstr from '../../style/icons/toolbar/add.svg';
-import blacklistedSvgstr from '../../style/icons/listing/blacklisted.svg';
 import bugSvgstr from '../../style/icons/toolbar/bug.svg';
 import buildSvgstr from '../../style/icons/sidebar/build.svg';
 import caretDownEmptySvgstr from '../../style/icons/arrow/caret-down-empty.svg';
@@ -49,6 +48,7 @@ import launcherSvgstr from '../../style/icons/filetype/launcher.svg';
 import lineFormSvgstr from '../../style/icons/statusbar/line-form.svg';
 import linkSvgstr from '../../style/icons/toolbar/link.svg';
 import listSvgstr from '../../style/icons/statusbar/list.svg';
+import listingsInfoSvgstr from '../../style/icons/listings/listings-info.svg';
 import markdownSvgstr from '../../style/icons/filetype/markdown.svg';
 import newFolderSvgstr from '../../style/icons/toolbar/new-folder.svg';
 import notTrustedSvgstr from '../../style/icons/statusbar/not-trusted.svg';
@@ -73,12 +73,10 @@ import textEditorSvgstr from '../../style/icons/filetype/text-editor.svg';
 import trustedSvgstr from '../../style/icons/statusbar/trusted.svg';
 import undoSvgstr from '../../style/icons/toolbar/undo.svg';
 import vegaSvgstr from '../../style/icons/filetype/vega.svg';
-import whitelistedSvgstr from '../../style/icons/listing/whitelisted.svg';
 import yamlSvgstr from '../../style/icons/filetype/yaml.svg';
 
 // LabIcon instance construction
 export const addIcon = new LabIcon({ name: 'ui-components:add', svgstr: addSvgstr });
-export const blacklistedIcon = new LabIcon({ name: 'ui-components:blacklisted', svgstr: blacklistedSvgstr });
 export const bugIcon = new LabIcon({ name: 'ui-components:bug', svgstr: bugSvgstr });
 export const buildIcon = new LabIcon({ name: 'ui-components:build', svgstr: buildSvgstr });
 export const caretDownEmptyIcon = new LabIcon({ name: 'ui-components:caret-down-empty', svgstr: caretDownEmptySvgstr });
@@ -118,6 +116,7 @@ export const launcherIcon = new LabIcon({ name: 'ui-components:launcher', svgstr
 export const lineFormIcon = new LabIcon({ name: 'ui-components:line-form', svgstr: lineFormSvgstr });
 export const linkIcon = new LabIcon({ name: 'ui-components:link', svgstr: linkSvgstr });
 export const listIcon = new LabIcon({ name: 'ui-components:list', svgstr: listSvgstr });
+export const listingsInfoIcon = new LabIcon({ name: 'ui-components:listings-info', svgstr: listingsInfoSvgstr });
 export const markdownIcon = new LabIcon({ name: 'ui-components:markdown', svgstr: markdownSvgstr });
 export const newFolderIcon = new LabIcon({ name: 'ui-components:new-folder', svgstr: newFolderSvgstr });
 export const notTrustedIcon = new LabIcon({ name: 'ui-components:not-trusted', svgstr: notTrustedSvgstr });
@@ -142,5 +141,4 @@ export const textEditorIcon = new LabIcon({ name: 'ui-components:text-editor', s
 export const trustedIcon = new LabIcon({ name: 'ui-components:trusted', svgstr: trustedSvgstr });
 export const undoIcon = new LabIcon({ name: 'ui-components:undo', svgstr: undoSvgstr });
 export const vegaIcon = new LabIcon({ name: 'ui-components:vega', svgstr: vegaSvgstr });
-export const whitelistedIcon = new LabIcon({ name: 'ui-components:whitelisted', svgstr: whitelistedSvgstr });
 export const yamlIcon = new LabIcon({ name: 'ui-components:yaml', svgstr: yamlSvgstr });

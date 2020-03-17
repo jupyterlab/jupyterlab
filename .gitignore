@@ -6,7 +6,6 @@ lib
 jupyterlab/imports.css
 jupyterlab/static
 jupyterlab/schemas
-jupyterlab/listings
 jupyterlab/themes
 jupyterlab/geckodriver
 

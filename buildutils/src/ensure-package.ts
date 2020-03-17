@@ -281,22 +281,6 @@ export async function ensurePackage(
     }
   }
 
-  // Ensure that the `listing` directories match what is in the `package.json`
-  const listingDir = data.jupyterlab && data.jupyterlab.listingDir;
-  const listings = glob.sync(
-    path.join(pkgPath, listingDir || 'listing', '*.json')
-  );
-  if (listingDir && !listings.length) {
-    messages.push(`No listings found in ${path.join(pkgPath, listingDir)}.`);
-  } else if (!listingDir && listings.length) {
-    messages.push(`Schemas found, but no listing indicated in ${pkgPath}`);
-  }
-  for (let listing of listings) {
-    if (!published.has(listing)) {
-      messages.push(`Schema ${listing} not published in ${pkgPath}`);
-    }
-  }
-
   // Ensure that the `style` directories match what is in the `package.json`
   const styles = glob.sync(path.join(pkgPath, 'style', '**/*.*'));
   for (let style of styles) {

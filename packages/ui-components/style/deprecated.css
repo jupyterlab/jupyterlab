@@ -13,7 +13,6 @@
 
 :root {
   --jp-icon-add: url('icons/toolbar/add.svg');
-  --jp-icon-blacklisted: url('icons/listing/blacklisted.svg');
   --jp-icon-bug: url('icons/toolbar/bug.svg');
   --jp-icon-build: url('icons/sidebar/build.svg');
   --jp-icon-caret-down-empty-thin: url('icons/arrow/caret-down-empty-thin.svg');
@@ -53,6 +52,7 @@
   --jp-icon-line-form: url('icons/statusbar/line-form.svg');
   --jp-icon-link: url('icons/toolbar/link.svg');
   --jp-icon-list: url('icons/statusbar/list.svg');
+  --jp-icon-listings-info: url('icons/listings/listings-info.svg');
   --jp-icon-markdown: url('icons/filetype/markdown.svg');
   --jp-icon-new-folder: url('icons/toolbar/new-folder.svg');
   --jp-icon-not-trusted: url('icons/statusbar/not-trusted.svg');
@@ -77,7 +77,6 @@
   --jp-icon-trusted: url('icons/statusbar/trusted.svg');
   --jp-icon-undo: url('icons/toolbar/undo.svg');
   --jp-icon-vega: url('icons/filetype/vega.svg');
-  --jp-icon-whitelisted: url('icons/listing/whitelisted.svg');
   --jp-icon-yaml: url('icons/filetype/yaml.svg');
 }
 
@@ -85,9 +84,6 @@
 
 .jp-AddIcon {
   background-image: var(--jp-icon-add);
-}
-.jp-BlacklistedIcon {
-  background-image: var(--jp-icon-blacklisted);
 }
 .jp-BugIcon {
   background-image: var(--jp-icon-bug);
@@ -206,6 +202,9 @@
 .jp-ListIcon {
   background-image: var(--jp-icon-list);
 }
+.jp-ListingsInfoIcon {
+  background-image: var(--jp-icon-listings-info);
+}
 .jp-MarkdownIcon {
   background-image: var(--jp-icon-markdown);
 }
@@ -277,9 +276,6 @@
 }
 .jp-VegaIcon {
   background-image: var(--jp-icon-vega);
-}
-.jp-WhitelistedIcon {
-  background-image: var(--jp-icon-whitelisted);
 }
 .jp-YamlIcon {
   background-image: var(--jp-icon-yaml);
