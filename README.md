@@ -1,6 +1,6 @@
 # @jupyterlab/debugger
 
-[![Build Status](https://dev.azure.com/jupyterlab/jupyterlab/_apis/build/status/jupyterlab.debugger?branchName=master)](https://dev.azure.com/jupyterlab/jupyterlab/_build/latest?definitionId=3&branchName=master)
+![Github Actions Status](https://github.com/jupyterlab/debugger/workflows/tests/badge.svg)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/debugger/stable?urlpath=/lab/tree/examples/index.ipynb)
 [![npm](https://img.shields.io/npm/v/@jupyterlab/debugger.svg)](https://www.npmjs.com/package/@jupyterlab/debugger)
 
