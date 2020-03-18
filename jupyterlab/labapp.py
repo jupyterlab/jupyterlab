@@ -14,7 +14,7 @@ from jupyter_core.application import JupyterApp, base_aliases, base_flags
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
 from notebook.notebookapp import NotebookApp, aliases, flags
 from notebook.utils import url_path_join as ujoin
-from traitlets import Bool, Instance, Unicode, Integer
+from traitlets import Bool, Instance, Unicode
 
 from ._version import __version__
 from .debuglog import DebugLogFileMixin
