@@ -89,7 +89,7 @@ export class Lister {
 }
 
 /**
- * Call the API extension
+ * Call the listings API REST handler.
  *
  * @param endPoint API REST end point for the extension
  * @param init Initial values for the request
