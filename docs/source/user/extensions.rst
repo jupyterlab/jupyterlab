@@ -373,7 +373,7 @@ all jupyterlab organization extensions.
 .. code:: json
 
    {
-   "whitelistlist": [
+   "whitelist": [
       {
          "name": "@jupyterlab/*",
          "type": "jupyterlab",
