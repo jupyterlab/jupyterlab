@@ -26,7 +26,7 @@ import { reportInstallError } from './dialog';
 
 import { Searcher, ISearchResult, isJupyterOrg } from './npm';
 
-import { Lister, IListResult, IListEntry } from './listings';
+import { Lister, ListResult, IListEntry } from './listings';
 
 /**
  * Information about an extension.
@@ -170,30 +170,34 @@ export class ListModel extends VDomModel {
     });
   }
 
-  private _listingIsLoaded(_: Lister, listings: IListResult) {
-    this._listMode = listings.listMode;
+  private _listingIsLoaded(_: Lister, listings: ListResult) {
+    this._listMode = listings!.mode;
     this._blacklistMap = new Map<string, IListEntry>();
-    listings.blacklist.map(e => {
-      this._blacklistMap.set(e.name, {
-        name: e.name,
-        regexp: new RegExp(e.name),
-        type: e.type,
-        reason: e.reason,
-        creation_date: e.creation_date,
-        last_update_date: e.last_update_date
+    if (this._listMode === 'black') {
+      listings!.entries.map(e => {
+        this._blacklistMap.set(e.name, {
+          name: e.name,
+          regexp: new RegExp(e.name),
+          type: e.type,
+          reason: e.reason,
+          creation_date: e.creation_date,
+          last_update_date: e.last_update_date
+        });
       });
-    });
+    }
     this._whitelistMap = new Map<string, IListEntry>();
-    listings.whitelist.map(e => {
-      this._whitelistMap.set(e.name, {
-        name: e.name,
-        regexp: new RegExp(e.name),
-        type: e.type,
-        reason: e.reason,
-        creation_date: e.creation_date,
-        last_update_date: e.last_update_date
+    if (this._listMode === 'white') {
+      listings!.entries.map(e => {
+        this._whitelistMap.set(e.name, {
+          name: e.name,
+          regexp: new RegExp(e.name),
+          type: e.type,
+          reason: e.reason,
+          creation_date: e.creation_date,
+          last_update_date: e.last_update_date
+        });
       });
-    });
+    }
     void this.initialize();
   }
 

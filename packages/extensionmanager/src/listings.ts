@@ -23,34 +23,20 @@ export interface IListEntry {
 }
 
 /**
- * Listing search result structure (subset).
+ * Listing search result type.
+ *
+ * - The mode for the listings, can be black or white.
+ * - A collection of URIs for black or white listings, depending
+ * on the mode.
+ * - A collection of black or white listed extensions,  depending
+ * on the mode.
  *
  */
-export interface IListResult {
-  /**
-   * The mode for the listings, can be black or white.
-   */
-  listMode: 'white' | 'black' | null;
-  /**
-   * A collection of URIs for black listings.
-   */
-  blacklistUris: string[];
-
-  /**
-   * A collection of URIs for white listings.
-   */
-  whitelistUris: string[];
-
-  /**
-   * A collection of back listed extensions.
-   */
-  blacklist: IListEntry[];
-
-  /**
-   * A collection of white listed extensions.
-   */
-  whitelist: IListEntry[];
-}
+export type ListResult = null | {
+  mode: 'white' | 'black';
+  uris: string[];
+  entries: IListEntry[];
+};
 
 export interface IListingApi {
   blacklist_uris: string[];
@@ -75,11 +61,13 @@ export class Lister {
           !(data.blacklist_uris.length > 0 && data.whitelist_uris.length > 0)
         ) {
           this._listings = {
-            listMode: data.blacklist_uris.length > 0 ? 'black' : 'white',
-            blacklistUris: data.blacklist_uris,
-            whitelistUris: data.whitelist_uris,
-            blacklist: data.blacklist,
-            whitelist: data.whitelist
+            mode: data.blacklist_uris.length > 0 ? 'black' : 'white',
+            uris:
+              data.blacklist_uris.length > 0
+                ? data.blacklist_uris
+                : data.whitelist_uris,
+            entries:
+              data.blacklist_uris.length > 0 ? data.blacklist : data.whitelist
           };
         }
         this._listingsLoaded.emit(this._listings);
@@ -89,21 +77,15 @@ export class Lister {
       });
   }
 
-  get listingsLoaded(): ISignal<this, IListResult> {
+  get listingsLoaded(): ISignal<this, ListResult> {
     return this._listingsLoaded;
   }
 
-  private _listings: IListResult = {
-    listMode: null,
-    blacklistUris: [],
-    whitelistUris: [],
-    blacklist: [],
-    whitelist: []
-  };
+  private _listings: ListResult = null;
 
   /**
    */
-  private _listingsLoaded = new Signal<this, IListResult>(this);
+  private _listingsLoaded = new Signal<this, ListResult>(this);
 }
 
 /**
