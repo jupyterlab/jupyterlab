@@ -172,10 +172,10 @@ export class ListModel extends VDomModel {
 
   private _listingIsLoaded(_: Lister, listings: ListResult) {
     this._listMode = listings!.mode;
-    this._blacklistMap = new Map<string, IListEntry>();
+    this._blacklistArray = new Array<IListEntry>();
     if (this._listMode === 'black') {
       listings!.entries.map(e => {
-        this._blacklistMap.set(e.name, {
+        this._blacklistArray.concat({
           name: e.name,
           regexp: new RegExp(e.name),
           type: e.type,
@@ -185,10 +185,10 @@ export class ListModel extends VDomModel {
         });
       });
     }
-    this._whitelistMap = new Map<string, IListEntry>();
+    this._whitelistArray = new Array<IListEntry>();
     if (this._listMode === 'white') {
       listings!.entries.map(e => {
-        this._whitelistMap.set(e.name, {
+        this._whitelistArray.concat({
           name: e.name,
           regexp: new RegExp(e.name),
           type: e.type,
@@ -480,11 +480,11 @@ export class ListModel extends VDomModel {
         continue;
       }
       this._totalEntries = this._totalEntries + 1;
-      const isBlacklisted = this.isListed(pkg.name, this._blacklistMap);
+      const isBlacklisted = this.isListed(pkg.name, this._blacklistArray);
       if (isBlacklisted) {
         this._totalBlacklistedFound = this._totalBlacklistedFound + 1;
       }
-      const isWhitelisted = this.isListed(pkg.name, this._whitelistMap);
+      const isWhitelisted = this.isListed(pkg.name, this._whitelistArray);
       if (isWhitelisted) {
         this._totalWhitelistedFound = this._totalWhitelistedFound + 1;
       }
@@ -531,8 +531,8 @@ export class ListModel extends VDomModel {
             status: pkg.status,
             latest_version: pkg.latest_version,
             installed_version: pkg.installed_version,
-            blacklistEntry: this.isListed(pkg.name, this._blacklistMap),
-            whitelistEntry: this.isListed(pkg.name, this._whitelistMap)
+            blacklistEntry: this.isListed(pkg.name, this._blacklistArray),
+            whitelistEntry: this.isListed(pkg.name, this._whitelistArray)
           };
         })
       );
@@ -542,15 +542,12 @@ export class ListModel extends VDomModel {
     });
   }
 
-  /*
-   * TODO(@echarles) Use a Array instead of a Map
-   */
   private isListed(
     name: string,
-    listMap: Map<string, IListEntry>
+    listArray: Array<IListEntry>
   ): IListEntry | undefined {
     let entry: IListEntry | undefined = undefined;
-    listMap.forEach((listEntry: IListEntry, entryName: string) => {
+    listArray.forEach((listEntry: IListEntry) => {
       if (listEntry.regexp && listEntry.regexp?.test(name)) {
         entry = listEntry;
       }
@@ -813,8 +810,8 @@ export class ListModel extends VDomModel {
   private _debouncedUpdate: Debouncer<void, void>;
 
   private _listMode: 'black' | 'white' | null;
-  private _blacklistMap: Map<string, IListEntry>;
-  private _whitelistMap: Map<string, IListEntry>;
+  private _blacklistArray: Array<IListEntry>;
+  private _whitelistArray: Array<IListEntry>;
   private _totalBlacklistedFound: number = 0;
   private _totalWhitelistedFound: number = 0;
 }
