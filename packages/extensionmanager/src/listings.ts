@@ -28,7 +28,7 @@ export interface IListEntry {
  * - The mode for the listings, can be black or white.
  * - A collection of URIs for black or white listings, depending
  * on the mode.
- * - A collection of black or white listed extensions,  depending
+ * - A collection of black or white listed extensions, depending
  * on the mode.
  *
  */

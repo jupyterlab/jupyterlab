@@ -290,13 +290,13 @@ export function isJupyterOrg(name: string): boolean {
   /**
    * A list of jupyterlab NPM orgs.
    */
-  const jupyter_org = ['jupyterlab', 'jupyter-widgets'];
+  const jupyterOrg = ['jupyterlab', 'jupyter-widgets'];
   const parts = name.split('/');
   const first = parts[0];
   return (
     parts.length > 1 && // Has a first part
     !!first && // with a finite length
     first[0] === '@' && // corresponding to an org name
-    jupyter_org.indexOf(first.slice(1)) !== -1 // in the org whitelist.
+    jupyterOrg.indexOf(first.slice(1)) !== -1 // in the org whitelist.
   );
 }
