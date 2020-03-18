@@ -253,7 +253,7 @@ Listings
 ~~~~~~~~
 
 When searching extensions, JupyterLab displays the complete search result and 
-the user if free to install any extension. This is the :ref:`default_mode`.
+the user is free to install any extension. This is the :ref:`default_mode`.
 
 To bring more security, you or your administrator can enable ``blacklists`` or ``whitelists``
 mode. JupyterLab will check the extensions against the defined listings.
