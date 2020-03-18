@@ -16,7 +16,7 @@ import { Panel } from '@lumino/widgets';
 import { VariablesModel } from './model';
 
 export class DataGridTable extends Panel {
-  constructor(options?: DataGridTable.IOptions) {
+  constructor(options: DataGridTable.IOptions) {
     super();
     const grid = new DataGrid();
     const dataModel = new VariableDataModel(options.model);
@@ -27,9 +27,20 @@ export class DataGridTable extends Panel {
     grid.stretchLastColumn = true;
     this.node.style.height = '100%';
     grid.node.style.height = '100%';
+    this._grid = grid;
     this.addWidget(grid);
     this.addClass('jp-DebuggerVariables-body');
   }
+
+  /**
+   * Set the variable filter list.
+   */
+  set filter(filter: Set<string>) {
+    (this._grid.dataModel as VariableDataModel).filter = filter;
+    this.update();
+  }
+
+  private _grid: DataGrid;
 }
 
 /**
@@ -54,11 +65,17 @@ namespace DataGridTable {
 export class VariableDataModel extends DataModel {
   constructor(model: VariablesModel) {
     super();
+    this._model = model;
     const updated = (model: VariablesModel) => {
       this.setData(model.scopes);
     };
 
     model.changed.connect(updated, this);
+  }
+
+  set filter(filter: Set<string>) {
+    this._filter = filter;
+    this.setData(this._model.scopes);
   }
 
   rowCount(region: DataModel.RowRegion): number {
@@ -95,19 +112,24 @@ export class VariableDataModel extends DataModel {
       });
       return;
     }
-    scopes.forEach(scope =>
-      scope.variables.forEach((variable, index) => {
-        this._data.name[index] = variable.name;
-        this._data.type[index] = variable.type;
-        this._data.value[index] = variable.value;
-        this.emitChanged({
-          type: 'rows-inserted',
-          region: 'body',
-          index: 1,
-          span: 1
-        });
-      })
-    );
+    scopes.forEach(scope => {
+      let index = 0;
+      scope.variables.forEach(variable => {
+        if (!this._filter.has(variable.evaluateName)) {
+          console.log(variable);
+          this._data.name[index] = variable.name;
+          this._data.type[index] = variable.type;
+          this._data.value[index] = variable.value;
+          this.emitChanged({
+            type: 'rows-inserted',
+            region: 'body',
+            index: 1,
+            span: 1
+          });
+          ++index;
+        }
+      });
+    });
   }
 
   private clearData() {
@@ -118,6 +140,8 @@ export class VariableDataModel extends DataModel {
     };
   }
 
+  private _filter = new Set<string>();
+  private _model: VariablesModel;
   private _data: { name: string[]; type: string[]; value: string[] } = {
     name: [],
     type: [],

@@ -91,7 +91,7 @@ export class Variables extends Panel {
 
   private _header: VariablesHeader;
   private _tree: VariablesBodyTree;
-  private _table: VariablesBodyTable;
+  private _table: DataGridTable;
 }
 
 /**
