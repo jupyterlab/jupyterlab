@@ -306,7 +306,7 @@ Whitelist mode
 A whitelist maintains a set of approved extensions that users can freely 
 search and install. Extensions need to go through some sort of vetting process 
 before they are added to the whitelist. When using a whitelist, the extension manager 
-will highlight extensions that have been explicitly added to the whitelist.
+will only show extensions that have been explicitly added to the whitelist.
 
 If you, or your administrator, has enabled the whitelist mode
 JupyterLab will use the whitelist and only show extensions present
