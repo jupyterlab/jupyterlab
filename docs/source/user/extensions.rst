@@ -377,7 +377,7 @@ all jupyterlab organization extensions.
       {
          "name": "@jupyterlab/*",
          "type": "jupyterlab",
-         "reason": "@jupyterlab-examples/launcher is blacklisted for test purpose - Do NOT take this for granted!!!",
+         "reason": "All @jupyterlab org extensions are whitelisted, of course...",
          "creation_date": "2020-03-11T03:28:56.782Z",
          "last_update_date":  "2020-03-11T03:28:56.782Z"
       }
