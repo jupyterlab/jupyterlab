@@ -16,10 +16,10 @@ export interface IListEntry {
    */
   name: string;
   regexp: RegExp | undefined;
-  type: string;
-  reason: string;
-  creation_date: string;
-  last_update_date: string;
+  type: string | undefined;
+  reason: string | undefined;
+  creation_date: string | undefined;
+  last_update_date: string | undefined;
 }
 
 /**

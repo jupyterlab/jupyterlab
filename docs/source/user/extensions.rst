@@ -344,6 +344,12 @@ on the `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request
 
 The listings are json files hosted on the URIs you have given.
 
+For each entry, you have to define the `name` of the extension as published in the NPM registry.
+The ``name`` attribute support regular expressions.
+
+Optionally, you can also add some more fields for your records (``type``, ``reason``, ``creation_date``,
+``last_update_date``). These optional fields are not used in the user interface.
+
 This is an example of a blacklist file.
 
 .. code:: json
@@ -360,7 +366,6 @@ This is an example of a blacklist file.
    ]
    }
 
-The ``name`` attribute support regular expressions.
 
 In the following whitelist example a ``@jupyterlab/*`` will whitelist 
 all jupyterlab organization extensions.
