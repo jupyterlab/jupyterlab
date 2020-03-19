@@ -868,7 +868,8 @@ export namespace Completer {
         this._createMatchNode(item.label),
         !!item.type,
         item.type,
-        orderedTypes
+        orderedTypes,
+        item.icon
       );
     }
 
@@ -921,24 +922,33 @@ export namespace Completer {
       matchNode: HTMLElement,
       typesExist: boolean,
       type: any,
-      orderedTypes: string[]
+      orderedTypes: string[],
+      icon?: string
     ): HTMLLIElement {
-      // If there are types provided add those.
-      if (typesExist) {
+      // Add the icon or type monogram
+      if (icon) {
+        let iconNode = document.createElement('img');
+        iconNode.className = 'jp-Completer-type';
+        iconNode.src = icon;
+        li.appendChild(iconNode);
+      } else if (typesExist) {
         const typeNode = document.createElement('span');
         typeNode.textContent = (type[0] || '').toLowerCase();
         const colorIndex = (orderedTypes.indexOf(type) % N_COLORS) + 1;
         typeNode.className = 'jp-Completer-type';
         typeNode.setAttribute(`data-color-index`, colorIndex.toString());
+        li.appendChild(typeNode);
+      }
+
+      li.appendChild(matchNode);
+
+      // If there is a type, add the type extension and title
+      if (typesExist) {
         li.title = type;
         const typeExtendedNode = document.createElement('code');
         typeExtendedNode.className = 'jp-Completer-typeExtended';
         typeExtendedNode.textContent = type.toLocaleLowerCase();
-        li.appendChild(typeNode);
-        li.appendChild(matchNode);
         li.appendChild(typeExtendedNode);
-      } else {
-        li.appendChild(matchNode);
       }
       return li;
     }
