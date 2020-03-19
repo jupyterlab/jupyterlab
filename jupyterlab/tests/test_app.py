@@ -211,6 +211,14 @@ jest_flags['watchAll'] = (
 )
 
 
+def _jupyter_server_extension_paths():
+    return [
+        {
+            'module': __name__,
+            'app': JestApp
+        }
+    ]
+
 class JestApp(ProcessTestApp):
     """A notebook app that runs a jest test."""
 
@@ -231,6 +239,10 @@ class JestApp(ProcessTestApp):
     test_config = Dict(dict(foo='bar'))
 
     open_browser = False
+
+    enabled_extensions = {}
+
+    handlers = []
 
     def get_command(self):
         """Get the command to run"""
