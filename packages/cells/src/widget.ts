@@ -1076,11 +1076,11 @@ export namespace CodeCell {
               label = 'execute_input';
               break;
             default:
-              return false;
+              return true;
           }
           const value = msg.header.date;
           if (!value) {
-            return false;
+            return true;
           }
           const timingInfo: any = Object.assign(
             {},
