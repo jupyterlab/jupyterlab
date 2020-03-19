@@ -3,7 +3,7 @@
 
 import { CommandRegistry } from '@lumino/commands';
 
-import { DataGridTable } from './grid';
+import { VariablesBodyGrid } from './grid';
 
 import { IDebugger } from '../tokens';
 
@@ -32,7 +32,7 @@ export class Variables extends Panel {
 
     this._header = new VariablesHeader();
     this._tree = new VariablesBodyTree({ model, service });
-    this._table = new DataGridTable({ model, commands });
+    this._table = new VariablesBodyGrid({ model, commands });
     this._table.hide();
 
     const onClick = () => {
@@ -91,7 +91,7 @@ export class Variables extends Panel {
 
   private _header: VariablesHeader;
   private _tree: VariablesBodyTree;
-  private _table: DataGridTable;
+  private _table: VariablesBodyGrid;
 }
 
 /**

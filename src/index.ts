@@ -46,9 +46,9 @@ import { DebuggerHandler } from './handler';
 
 import { IDebugger } from './tokens';
 
-import { VariableDetails } from './variables/table';
-
 import { DebuggerModel } from './model';
+
+import { VariableDetailsGrid } from './variables/grid';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -273,7 +273,7 @@ const variables: JupyterFrontEndPlugin<void> = {
   requires: [IDebugger],
   activate: (app: JupyterFrontEnd, service: IDebugger) => {
     const { commands, shell } = app;
-    const tracker = new WidgetTracker<MainAreaWidget<VariableDetails>>({
+    const tracker = new WidgetTracker<MainAreaWidget<VariableDetailsGrid>>({
       namespace: 'variableDetails'
     });
 
@@ -300,8 +300,8 @@ const variables: JupyterFrontEndPlugin<void> = {
         }
 
         const model = (service.model as DebuggerModel).variables;
-        const widget = new MainAreaWidget<VariableDetails>({
-          content: new VariableDetails({
+        const widget = new MainAreaWidget<VariableDetailsGrid>({
+          content: new VariableDetailsGrid({
             commands,
             service,
             details,
