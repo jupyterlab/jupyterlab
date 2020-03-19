@@ -57,7 +57,7 @@ jobs:
         JS:
           name: 'javascript'
           testResultsFiles: 'tests/**/junit.xml'
-          python.version: '3.5'
+          python.version: '3.6'
         Python:
           name: 'python'
         Integrity:
