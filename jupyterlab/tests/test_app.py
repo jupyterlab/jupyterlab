@@ -125,6 +125,8 @@ class ProcessTestApp(ProcessApp):
     schemas_dir = Unicode(_create_schemas_dir())
     user_settings_dir = Unicode(_create_user_settings_dir())
     workspaces_dir = Unicode(_create_workspaces_dir())
+    enabled_extensions = {}
+    handlers = []
 
     def __init__(self):
         self.env_patch = TestEnv()
@@ -239,10 +241,6 @@ class JestApp(ProcessTestApp):
     test_config = Dict(dict(foo='bar'))
 
     open_browser = False
-
-    enabled_extensions = {}
-
-    handlers = []
 
     def get_command(self):
         """Get the command to run"""
