@@ -12,6 +12,8 @@ HERE = osp.dirname(osp.realpath(__file__))
 
 class NodeApp(ProcessApp):
 
+    handlers = []
+
     def get_command(self):
         """Get the command and kwargs to run.
         """

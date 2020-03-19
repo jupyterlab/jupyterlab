@@ -32,15 +32,27 @@ def main():
     spec = importlib.util.spec_from_file_location("example", mod_path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
+    sys.modules['example'] = mod
 
     class App(mod.ExampleApp):
         """An app that launches an example and waits for it to start up, checking for
         JS console errors, JS errors, and Python logged errors.
         """
+        extension_name = 'example'
         open_browser = Bool(False)
         default_url = '/example'
         base_url = '/foo/'
         ip = '127.0.0.1'
+
+        def _jupyter_server_extension_paths():
+            return [
+                {
+                    'module': 'example',
+                    'app': App
+                }
+            ]
+
+        mod._jupyter_server_extension_paths = _jupyter_server_extension_paths
 
         def start(self):
             run_test(self, run_browser)

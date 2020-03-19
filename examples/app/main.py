@@ -16,21 +16,19 @@ os.environ["JUPYTER_NO_CONFIG"]="1"
 with open(os.path.join(HERE, 'package.json')) as fid:
     version = json.load(fid)['version']
 
-
 def _jupyter_server_extension_paths():
     return [
         {
-            'module': 'main',
+            'module': __name__,
             'app': ExampleApp
         }
     ]
-
 
 class ExampleApp(LabServerApp):
     default_url = Unicode('/example',
                           help='The default URL to redirect to from `/`')
 
-    extension_name = 'main'
+    extension_name = __name__
     app_name = 'JupyterLab Example App'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
     app_version = version
