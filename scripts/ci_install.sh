@@ -27,10 +27,10 @@ fi
 
 if [[ $GROUP == nonode ]]; then
     # Build the wheel
-    pip install wheel
     python setup.py bdist_wheel
 
-    # Remove NodeJS
+    # Remove NodeJS, twice to take care of system and locally installed node versions.
+    sudo rm -rf $(which node)
     sudo rm -rf $(which node)
     ! node
 fi

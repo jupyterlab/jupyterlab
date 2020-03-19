@@ -154,7 +154,9 @@ setup_args['extras_require'] = {
         'pytest-tornasync', 
         'pytest-console-scripts',
         'pytest-check-links',
-        'requests'
+        'requests',
+        'wheel',
+        'virtualenv'
     ],
     'test:sys_platform == "win32"': ['nose-exclude'],
     'docs': [

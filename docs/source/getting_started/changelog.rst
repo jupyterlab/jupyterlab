@@ -9,7 +9,7 @@ JupyterLab Changelog
 February 2020
 ^^^^^^^^^^^^^
 
-Here are some highlights for this release. See the `JupyterLab 2.0 <https://github.com/jupyterlab/jupyterlab/milestone/2.0?closed=1>`__
+Here are some highlights for this release. See the `JupyterLab 2.0 <https://github.com/jupyterlab/jupyterlab/milestone/36?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
 User-facing changes
