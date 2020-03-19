@@ -25,13 +25,22 @@ HERE = os.path.dirname(__file__)
 with open(os.path.join(HERE, 'package.json')) as fid:
     version = json.load(fid)['version']
 
-class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterHandler):
+def _jupyter_server_extension_paths():
+    return [
+        {
+            'module': 'main',
+            'app': ExampleApp
+        }
+    ]
+
+class ExampleHandler(
+    ExtensionHandlerJinjaMixin,
+    ExtensionHandlerMixin,
+    JupyterHandler
+    ):
     """
     Serve a notebook file from the filesystem in the notebook interface
     """
-
-    def initialize(self):
-        super().initialize('lab')
 
     def get(self):
         """Get the main page for the application's interface."""
@@ -41,7 +50,7 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
             'baseUrl': self.base_url,
             'token': self.settings['token'],
             'notebookPath': os.path.join(HERE, 'test.ipynb'),
-            'fullStaticUrl': ujoin(self.base_url, 'static', 'example_app'), 
+            'fullStaticUrl': ujoin(self.base_url, 'static', self.extension_name),
             'frontendUrl': ujoin(self.base_url, 'example/'),
             # FIXME: Don't use a CDN here
             'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
@@ -61,27 +70,23 @@ class ExampleHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterH
 class ExampleApp(LabServerApp):
 
     default_url = Unicode('/example')
-
-    LabServerApp.lab_config = LabConfig(
-        app_name = 'JupyterLab Example Notebook',
-        app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
-        app_url = '/example_app',
-        schemas_dir = os.path.join(HERE, 'build', 'schemas'),
-        static_dir = os.path.join(HERE, 'build'),
-        templates_dir = os.path.join(HERE, 'templates'),
-        themes_dir = os.path.join(HERE, 'build', 'themes'),
-        user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
-        workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
-    )
+    extension_name = 'main'
+    app_name = 'JupyterLab Example Notebook'
+    app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
+    app_url = '/example_app'
+    schemas_dir = os.path.join(HERE, 'build', 'schemas')
+    static_dir = os.path.join(HERE, 'build')
+    templates_dir = os.path.join(HERE, 'templates')
+    themes_dir = os.path.join(HERE, 'build', 'themes')
+    user_settings_dir = os.path.join(HERE, 'build', 'user_settings')
+    workspaces_dir = os.path.join(HERE, 'build', 'workspaces')
 
     def initialize_handlers(self):
-        """initialize tornado webapp and httpserver.
+        """Add example handler to Lab Server's handler list.
         """
-        super().initialize_handlers()
-        default_handlers = [
-            (ujoin(self.serverapp.base_url, 'example'), ExampleHandler),
-        ]
-        self.serverapp.web_app.add_handlers('.*$', default_handlers)
+        self.handlers.append(
+            ('/example', ExampleHandler)
+        )
 
 
 if __name__ == '__main__':

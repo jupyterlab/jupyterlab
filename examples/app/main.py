@@ -1,7 +1,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from jupyterlab_server import LabServerApp, LabConfig
+from jupyterlab_server import LabServerApp
 from jupyter_server.utils import url_path_join as ujoin
 import json
 import os
@@ -16,22 +16,31 @@ os.environ["JUPYTER_NO_CONFIG"]="1"
 with open(os.path.join(HERE, 'package.json')) as fid:
     version = json.load(fid)['version']
 
+
+def _jupyter_server_extension_paths():
+    return [
+        {
+            'module': 'main',
+            'app': ExampleApp
+        }
+    ]
+
+
 class ExampleApp(LabServerApp):
     default_url = Unicode('/example',
                           help='The default URL to redirect to from `/`')
 
-    LabServerApp.lab_config = LabConfig(
-        app_name = 'JupyterLab Example App',
-        app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
-        app_version = version,
-        app_url = '/example',
-        schemas_dir = os.path.join(HERE, 'build', 'schemas'),
-        static_dir = os.path.join(HERE, 'build'),
-        templates_dir = os.path.join(HERE, 'templates'),
-        themes_dir = os.path.join(HERE, 'build', 'themes'),
-        user_settings_dir = os.path.join(HERE, 'build', 'user_settings'),
-        workspaces_dir = os.path.join(HERE, 'build', 'workspaces'),
-    )
+    extension_name = 'main'
+    app_name = 'JupyterLab Example App'
+    app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
+    app_version = version
+    app_url = '/example'
+    schemas_dir = os.path.join(HERE, 'build', 'schemas')
+    static_dir = os.path.join(HERE, 'build')
+    templates_dir = os.path.join(HERE, 'templates')
+    themes_dir = os.path.join(HERE, 'build', 'themes')
+    user_settings_dir = os.path.join(HERE, 'build', 'user_settings')
+    workspaces_dir = os.path.join(HERE, 'build', 'workspaces')
 
 if __name__ == '__main__':
     ExampleApp.launch_instance()
