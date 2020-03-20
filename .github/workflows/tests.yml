@@ -7,16 +7,16 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [js, js:application, js:apputils, js:cells, integrity, python, usage, docs, nonode]
+        group: [js, js-application, js-apputils, js-cells, integrity, python, usage, docs, nonode]
         python: [3.5, 3.8]
         exclude:
           - group: js
             python: 3.5
-          - group: js:application
+          - group: js-application
             python: 3.5
-          - group: js:apputils
+          - group: js-apputils
             python: 3.5
-          - group: js:cells
+          - group: js-cells
             python: 3.5
           - group: integrity
             python: 3.5
