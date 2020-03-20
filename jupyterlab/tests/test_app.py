@@ -41,6 +41,29 @@ def _create_notebook_dir():
     with open(readonly_filepath, 'w') as fid:
         fid.write('hello from a readonly file')
 
+    index_filepath = osp.join(root_dir, 'index.html')
+    with open(index_filepath, 'w') as fid:
+        fid.write("""
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Jupyter Lab Test{% endblock %}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block meta %}
+    {% endblock %}
+</head>
+<body>
+  <div id="site">
+    {% block site %}
+    {% endblock site %}
+  </div>
+  {% block after_site %}
+  {% endblock after_site %}
+</body>
+</html>""")
+
     os.chmod(readonly_filepath, S_IRUSR | S_IRGRP | S_IROTH)
     atexit.register(lambda: shutil.rmtree(root_dir, True))
     return root_dir
@@ -121,21 +144,27 @@ class ProcessTestApp(ProcessApp):
     """A process app for running tests, includes a mock contents directory.
     """
     allow_origin = Unicode('*')
-    root_dir = Unicode(_create_notebook_dir())
-    schemas_dir = Unicode(_create_schemas_dir())
-    user_settings_dir = Unicode(_create_user_settings_dir())
-    workspaces_dir = Unicode(_create_workspaces_dir())
+    root_dir = _create_notebook_dir()
+    schemas_dir = _create_schemas_dir()
+    user_settings_dir = _create_user_settings_dir()
+    workspaces_dir = _create_workspaces_dir()
+
+    def initialize_templates(self):
+        self.static_paths = [self.root_dir]
+        self.template_paths = [self.root_dir]
 
     def initialize_settings(self):
+
         self.env_patch = TestEnv()
         self.env_patch.start()
+
         self._install_default_kernels()
         self.settings['kernel_manager'].default_kernel_name = 'echo'
-        self.static_dir = self.root_dir
-        self.templates_dir = self.root_dir
         self.schemas_dir = self.schemas_dir
         self.user_settings_dir = self.user_settings_dir
         self.workspaces_dir = self.workspaces_dir
+        self.static_dir = self.root_dir
+        self.templates_dir = self.root_dir
         super().initialize_settings()
 
     def _install_kernel(self, kernel_name, kernel_spec):
@@ -174,8 +203,8 @@ class ProcessTestApp(ProcessApp):
         write_kernel_spec(ipykernel_dir)
 
     def _process_finished(self, future):
-        self.http_server.stop()
-        self.io_loop.stop()
+        self.serverapp.http_server.stop()
+        self.serverapp.io_loop.stop()
         self.env_patch.stop()
         try:
             os._exit(future.result())
@@ -219,7 +248,6 @@ class JestApp(ProcessTestApp):
     extension_name = __name__
     app_name = 'JupyterLab Jest Application'
     app_url = '/lab'
-
 
     coverage = Bool(False, help='Whether to run coverage').tag(config=True)
 
@@ -280,9 +308,11 @@ class JestApp(ProcessTestApp):
         if self.log_level > logging.INFO:
             cmd += ['--silent']
 
-        config = dict(baseUrl=self.settings['base_url'],
-                      terminalsAvailable=str(terminalsAvailable),
-                      token=self.settings['token'])
+        config = dict(
+            baseUrl='http://localhost:{}{}'.format(self.serverapp.port, self.settings['base_url']),
+            terminalsAvailable=str(terminalsAvailable),
+            token=self.settings['token']
+            )
         config.update(**self.test_config)
 
         td = tempfile.mkdtemp()
@@ -300,6 +330,12 @@ class JestApp(ProcessTestApp):
 class KarmaTestApp(ProcessTestApp):
     """A notebook app that runs the jupyterlab karma tests.
     """
+
+    default_url = Unicode('/lab')
+    extension_name = __name__
+    app_name = 'JupyterLab Karma Application'
+    app_url = '/lab'
+
     karma_pattern = Unicode('src/*.spec.ts*')
     karma_base_dir = Unicode('')
     karma_coverage_dir = Unicode('')
@@ -309,9 +345,12 @@ class KarmaTestApp(ProcessTestApp):
         terminalsAvailable = self.web_app.settings['terminals_available']
         # Compatibility with Notebook 4.2.
         token = getattr(self, 'token', '')
-        config = dict(baseUrl=self.settings['base_url'], token=self.settings['token'],
-                      terminalsAvailable=str(terminalsAvailable),
-                      foo='bar')
+        config = dict(
+            baseUrl='http://localhost:{}{}'.format(self.serverapp.port, self.settings['base_url']),
+            token=self.settings['token'],
+            terminalsAvailable=str(terminalsAvailable),
+            foo='bar'
+            )
 
         cwd = self.karma_base_dir
 
@@ -374,6 +413,6 @@ def run_karma(base_dir, coverage_dir=''):
     """Run a karma test in the given base directory.
     """
     logging.disable(logging.WARNING)
-    KarmaTestApp.karma_base_dir = karma_base_dir
-    KarmaTestApp.karma_coverage_dir = karma_coverage_dir
+    KarmaTestApp.karma_base_dir = base_dir
+    KarmaTestApp.karma_coverage_dir = coverage_dir
     KarmaTestApp.launch_instance()
