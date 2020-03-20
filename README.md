@@ -1,6 +1,6 @@
 # @jupyterlab/debugger
 
-![Github Actions Status](https://github.com/jupyterlab/debugger/workflows/tests/badge.svg)
+![Github Actions Status](https://github.com/jupyterlab/debugger/workflows/Tests/badge.svg)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/debugger/stable?urlpath=/lab/tree/examples/index.ipynb)
 [![npm](https://img.shields.io/npm/v/@jupyterlab/debugger.svg)](https://www.npmjs.com/package/@jupyterlab/debugger)
 
