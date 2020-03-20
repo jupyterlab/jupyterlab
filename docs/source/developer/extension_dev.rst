@@ -229,9 +229,9 @@ not enabled in our build configuration. To build a compatible package set
 Another option to try out your extension with a local version of JupyterLab is to add it to the
 list of locally installed packages and to have JupyterLab register your extension when it starts up.
 
-You can do this by adding your extension to the `jupyterlab.externalExtensions` or
-`jupyterlab.externalMimeExtensions` keys in the `dev_mode/package.json` file. It should be a mapping
-of extension name to version, just like a in `dependencies`. Then run `jlpm run integrity`
+You can do this by adding your extension to the `jupyterlab.externalExtensions` key
+ in the `dev_mode/package.json` file. It should be a mapping
+of extension name to version, just like in `dependencies`. Then run `jlpm run integrity`
 and these extensions should be added automatically to the `dependencies` and pulled in.
 
 When you then run `jlpm run build && jupyter lab --dev` or `jupyter lab --dev --watch` this extension
@@ -243,7 +243,6 @@ extensions:
       "externalExtensions": {
         "@jupyter-widgets/jupyterlab-manager": "2.0.0"
       },
-      "externalMimeExtensions": {},
       ...
 
 If you publish your extension on ``npm.org``, users will be able to install
