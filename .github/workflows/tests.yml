@@ -3,17 +3,11 @@ name: Test
 on: [push, pull_request]
 
 jobs:
-  linuxtests:
-    name: Linux
+  linuxjs:
+    name: JS
     strategy:
       matrix:
-        group: [integrity, docs, python, usage, nonode]
-        python: [3.5, 3.8]
-        exclude:
-          - group: integrity
-            python: 3.5
-          - group: docs
-            python: 3.5
+        group: [js-application, js-apputils, js-cells, js-codeeditor, js-codemirror, js-completer, js-console, js-coreutils, js-csvviewer, js-docmanager, js-docregistry, js-filebrowser, js-fileeditor, js-imageviewer, js-inspector, js-logconsole, js-mainmenu, js-nbformat, js-notebook, js-observables, js-outputarea, js-rendermime, js-services, js-settingregistry, js-statedb, js-statusbar, js-terminal, js-ui-components]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -21,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python }}
+          python-version: 3.8
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
@@ -59,11 +53,17 @@ jobs:
         run: |
           bash ./scripts/ci_script.sh
 
-  linuxjs:
-    name: JS
+  linuxtests:
+    name: Linux
     strategy:
       matrix:
-        group: [js-application, js-apputils, js-cells, js-codeeditor, js-codemirror, js-completer, js-console, js-coreutils, js-csvviewer, js-docmanager, js-docregistry, js-filebrowser, js-fileeditor, js-imageviewer, js-inspector, js-logconsole, js-mainmenu, js-nbformat, js-notebook, js-observables, js-outputarea, js-rendermime, js-services, js-settingregistry, js-statedb, js-statusbar, js-terminal, js-ui-components]
+        group: [integrity, docs, python, usage, nonode]
+        python: [3.5, 3.8]
+        exclude:
+          - group: integrity
+            python: 3.5
+          - group: docs
+            python: 3.5
       fail-fast: false
     runs-on: ubuntu-latest
     steps:
@@ -71,7 +71,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.8
+          python-version: ${{ matrix.python }}
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
