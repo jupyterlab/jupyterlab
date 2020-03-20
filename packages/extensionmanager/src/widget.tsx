@@ -69,7 +69,7 @@ export class SearchBar extends React.Component<
           />
         </div>
         <CollapsibleSection
-          key="search-section"
+          key="warning-section"
           isOpen={false}
           header={'Warning'}
         >
