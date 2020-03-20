@@ -2,13 +2,6 @@
 
 Run bunchmarks on JupyterLab
 
-Install tools and run benchmarks: `jlpm start`
-Analyze benchmarks: `jlpm run analyze`
-
-## Plotly
-
-To benchmark plotly
-
 First add the plotly and ipwydigets to the `dev_mode/package.json`:
 
 ```json
@@ -25,8 +18,14 @@ Then install the python packages:
 pip install plotly==4.5.4 ipywidgets==7.5.1
 ```
 
-Run tests:
+Then install tools and benchmark:
 
 ```bash
 jlpm start
+```
+
+Finally ou can analyze the benchmarks
+
+```
+jlpm run analyze
 ```

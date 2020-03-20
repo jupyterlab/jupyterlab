@@ -6,6 +6,9 @@ import fs from 'fs';
 
 const DATA_PATH = 'out.csv';
 
+// number of points to plot in each graph
+const N_PLOTLY_GRAPHS = 4;
+
 const BROWSERS: Array<'firefox' | 'chromium'> = ['firefox', 'chromium'];
 const TYPES = {
   /**
@@ -66,6 +69,51 @@ const TYPES = {
           `HTML(f\'<div>{"".join("<div>I am a long string which is repeatedly added to the dom: %d</div>" % i for i in range(${n}))}</div>\')`
         ]
       }
+    ]),
+  /**
+   * Create a notebook with a couple of plotly plots, each with `n * 10` points
+   */
+  plotly: (n: number) =>
+    makeNotebook([
+      {
+        cell_type: 'code',
+        execution_count: 1,
+        metadata: {},
+        outputs: [],
+        source: [
+          'import plotly.graph_objects as go\n',
+          `fig = go.Figure(data=go.Scatter(y=range(${n}), x=range(${n}))`
+        ]
+      },
+      ...Array.from({ length: N_PLOTLY_GRAPHS }, () => ({
+        cell_type: 'code',
+        execution_count: 1,
+        metadata: {},
+        outputs: [
+          {
+            data: {
+              'application/vnd.plotly.v1+json': {
+                config: {
+                  plotlyServerURL: 'https://plot.ly'
+                },
+                data: [
+                  (points => ({
+                    type: 'scatter',
+                    x: points,
+                    y: points
+                  }))(Array.from({ length: n * 10 }, (_, i) => i))
+                ],
+                layout: {
+                  autosize: true
+                }
+              }
+            },
+            metadata: {},
+            output_type: 'display_data'
+          }
+        ],
+        source: ['fig']
+      }))
     ])
 };
 type TYPES_TYPE = keyof typeof TYPES;
