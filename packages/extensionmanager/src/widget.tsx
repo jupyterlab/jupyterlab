@@ -71,7 +71,7 @@ export class SearchBar extends React.Component<
         <CollapsibleSection
           key="search-section"
           isOpen={false}
-          header={'Disclaimer'}
+          header={'Warning'}
         >
           <div className="jp-extensionmanager-disclaimer">
             <div>
