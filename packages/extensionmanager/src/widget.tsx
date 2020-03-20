@@ -433,19 +433,7 @@ export namespace ListView {
     performAction: (action: Action, entry: IEntry) => void;
   }
 }
-/*
-function ListingMessage(props: ListingMessage.IProperties) {
-  return (
-    <div className="jp-extensionmanager-listingmessage">{props.children}</div>
-  );
-}
 
-namespace ListingMessage {
-  export interface IProperties {
-    children: React.ReactNode;
-  }
-}
-*/
 function ErrorMessage(props: ErrorMessage.IProperties) {
   return (
     <div key="error-msg" className="jp-extensionmanager-error">
@@ -711,33 +699,6 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       } else {
         searchContent.push(
           <>
-            {/*
-            {model.listMode === 'black' && model.totalEntries > 0 && (
-              <ListingMessage>
-                {
-                  <a
-                    href="https://jupyterlab.readthedocs.io/en/latest/user/extensions.html"
-                    target="_blank"
-                  >
-                    {model.totalBlacklistedFound} extensions out of the&nbsp;
-                    {model.totalEntries} found are blacklisted and are not&nbsp;
-                    shown.
-                  </a>
-                }
-              </ListingMessage>
-            )}
-            {model.listMode === 'white' && model.totalEntries > 0 && (
-              <ListingMessage>
-                <a
-                  href="https://jupyterlab.readthedocs.io/en/latest/user/extensions.html"
-                  target="_blank"
-                >
-                  {model.totalWhitelistedFound} extensions out of the&nbsp;
-                  {model.totalEntries} found are whitelisted.
-                </a>
-              </ListingMessage>
-            )}
-            */}
             <ListView
               key="search-items"
               listMode={model.listMode}

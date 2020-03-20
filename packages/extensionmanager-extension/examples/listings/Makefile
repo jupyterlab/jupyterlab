@@ -1,7 +1,7 @@
 export BLACK_LIST_URIS="https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/blacklist_simple.json"
 # export BLACK_LIST_URIS=""
-export WHITE_LIST_URIS="https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/whitelist_only_jlab.json"
-# export WHITE_LIST_URIS=""
+# export WHITE_LIST_URIS="https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/whitelist_only_jlab.json"
+export WHITE_LIST_URIS=""
 export LISTINGS_REFRESH_MS=30000
 export LISTINGS_REQUEST_OPTS="{'timeout': 10}"
 

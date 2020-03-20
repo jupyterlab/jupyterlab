@@ -175,7 +175,7 @@ export class ListModel extends VDomModel {
     this._blacklistArray = new Array<IListEntry>();
     if (this._listMode === 'black') {
       listings!.entries.map(e => {
-        this._blacklistArray.concat({
+        this._blacklistArray.push({
           name: e.name,
           regexp: new RegExp(e.name),
           type: e.type,
@@ -188,7 +188,7 @@ export class ListModel extends VDomModel {
     this._whitelistArray = new Array<IListEntry>();
     if (this._listMode === 'white') {
       listings!.entries.map(e => {
-        this._whitelistArray.concat({
+        this._whitelistArray.push({
           name: e.name,
           regexp: new RegExp(e.name),
           type: e.type,
