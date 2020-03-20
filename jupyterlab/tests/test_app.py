@@ -125,29 +125,20 @@ class ProcessTestApp(ProcessApp):
     schemas_dir = Unicode(_create_schemas_dir())
     user_settings_dir = Unicode(_create_user_settings_dir())
     workspaces_dir = Unicode(_create_workspaces_dir())
-    enabled_extensions = {}
-    handlers = []
 
-    def __init__(self):
+    def initialize_settings(self):
         self.env_patch = TestEnv()
         self.env_patch.start()
-        ProcessApp.__init__(self)
-
-    def init_server_extensions(self):
-        """Disable server extensions"""
-        pass
-
-    def start(self):
         self._install_default_kernels()
-        self.kernel_manager.default_kernel_name = 'echo'
-        self.lab_config.static_dir = self.root_dir
-        self.lab_config.templates_dir = self.root_dir
-        self.lab_config.schemas_dir = self.schemas_dir
-        self.lab_config.user_settings_dir = self.user_settings_dir
-        self.lab_config.workspaces_dir = self.workspaces_dir
-        ProcessApp.start(self)
+        self.settings['kernel_manager'].default_kernel_name = 'echo'
+        self.static_dir = self.root_dir
+        self.templates_dir = self.root_dir
+        self.schemas_dir = self.schemas_dir
+        self.user_settings_dir = self.user_settings_dir
+        self.workspaces_dir = self.workspaces_dir
+        super().initialize_settings()
 
-    def install_kernel(self, kernel_name, kernel_spec):
+    def _install_kernel(self, kernel_name, kernel_spec):
         """Install a kernel spec to the data directory.
 
         Parameters
@@ -165,7 +156,7 @@ class ProcessTestApp(ProcessApp):
 
     def _install_default_kernels(self):
         # Install echo and ipython kernels - should be done after env patch
-        self.install_kernel(
+        self._install_kernel(
             kernel_name="echo",
             kernel_spec={
                 'argv': [
@@ -224,6 +215,12 @@ def _jupyter_server_extension_paths():
 class JestApp(ProcessTestApp):
     """A notebook app that runs a jest test."""
 
+    default_url = Unicode('/lab')
+    extension_name = __name__
+    app_name = 'JupyterLab Jest Application'
+    app_url = '/lab'
+
+
     coverage = Bool(False, help='Whether to run coverage').tag(config=True)
 
     testPathPattern = Unicode('').tag(config=True)
@@ -242,9 +239,10 @@ class JestApp(ProcessTestApp):
 
     open_browser = False
 
+
     def get_command(self):
         """Get the command to run"""
-        terminalsAvailable = self.web_app.settings['terminals_available']
+        terminalsAvailable = self.settings['terminals_available']
         debug = self.log.level == logging.DEBUG
 
         # find jest
@@ -282,9 +280,9 @@ class JestApp(ProcessTestApp):
         if self.log_level > logging.INFO:
             cmd += ['--silent']
 
-        config = dict(baseUrl=self.connection_url,
+        config = dict(baseUrl=self.settings['base_url'],
                       terminalsAvailable=str(terminalsAvailable),
-                      token=self.token)
+                      token=self.settings['token'])
         config.update(**self.test_config)
 
         td = tempfile.mkdtemp()
@@ -311,7 +309,7 @@ class KarmaTestApp(ProcessTestApp):
         terminalsAvailable = self.web_app.settings['terminals_available']
         # Compatibility with Notebook 4.2.
         token = getattr(self, 'token', '')
-        config = dict(baseUrl=self.connection_url, token=token,
+        config = dict(baseUrl=self.settings['base_url'], token=self.settings['token'],
                       terminalsAvailable=str(terminalsAvailable),
                       foo='bar')
 
@@ -368,18 +366,14 @@ class KarmaTestApp(ProcessTestApp):
 def run_jest(jest_dir):
     """Run a jest test in the given base directory.
     """
-    app = JestApp.instance()
-    app.jest_dir = jest_dir
-    app.initialize()
-    app.start()
+    JestApp.jest_dir = jest_dir
+    JestApp.launch_instance()
 
 
 def run_karma(base_dir, coverage_dir=''):
     """Run a karma test in the given base directory.
     """
     logging.disable(logging.WARNING)
-    app = KarmaTestApp.instance()
-    app.karma_base_dir = base_dir
-    app.karma_coverage_dir = coverage_dir
-    app.initialize([])
-    app.start()
+    KarmaTestApp.karma_base_dir = karma_base_dir
+    KarmaTestApp.karma_coverage_dir = karma_coverage_dir
+    KarmaTestApp.launch_instance()
