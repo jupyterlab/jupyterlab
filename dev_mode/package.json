@@ -233,7 +233,6 @@
       "@jupyterlab/vega5-extension": ""
     },
     "externalExtensions": {},
-    "externalMimeExtensions": {},
     "buildDir": "./static",
     "outputDir": ".",
     "singletonPackages": [

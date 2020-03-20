@@ -19,16 +19,27 @@ var package_data = require('./package.json');
 var jlab = package_data.jupyterlab;
 var extensions = jlab.extensions;
 var mimeExtensions = jlab.mimeExtensions;
-var packageNames = Object.keys(mimeExtensions).concat(Object.keys(extensions));
-const { externalExtensions, externalMimeExtension } = jlab;
+const { externalExtensions } = jlab;
+const packageNames = Object.keys(mimeExtensions).concat(
+  Object.keys(extensions),
+  Object.keys(externalExtensions)
+);
 
-// set values to '' b/c regular extensions also have '' values.
+// go throught each external extension
+// add to mapping of extension and mime extensions, of package name
+// to path of the extension.
 for (const key in externalExtensions) {
-  externalExtensions[key] = '';
+  const {
+    jupyterlab: { extension, mimeExtension }
+  } = require(`${key}/package.json`);
+  if (extension !== undefined) {
+    extensions[key] = extension === true ? '' : extension;
+  }
+  if (mimeExtension !== undefined) {
+    mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
+  }
 }
-for (const key in externalMimeExtension) {
-  externalMimeExtension[key] = '';
-}
+
 // Ensure a clear build directory.
 var buildDir = plib.resolve(jlab.buildDir);
 if (fs.existsSync(buildDir)) {
@@ -46,12 +57,8 @@ var extraConfig = Build.ensureAssets({
 var source = fs.readFileSync('index.js').toString();
 var template = Handlebars.compile(source);
 var data = {
-  jupyterlab_extensions: Object.assign({}, extensions, externalExtensions),
-  jupyterlab_mime_extensions: Object.assign(
-    {},
-    mimeExtensions,
-    externalMimeExtension
-  )
+  jupyterlab_extensions: extensions,
+  jupyterlab_mime_extensions: mimeExtensions
 };
 var result = template(data);
 

@@ -152,10 +152,10 @@ function ensureJupyterlab(): string[] {
   corePackage.jupyterlab.mimeExtensions = {};
   corePackage.jupyterlab.linkedPackages = {};
   // start with known external dependencies
-  corePackage.dependencies = {
-    ...corePackage.jupyterlab.externalExtensions,
-    ...corePackage.jupyterlab.externalMimeExtensions
-  };
+  corePackage.dependencies = Object.assign(
+    {},
+    corePackage.jupyterlab.externalExtensions
+  );
   corePackage.resolutions = {};
 
   let singletonPackages: string[] = corePackage.jupyterlab.singletonPackages;
