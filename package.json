@@ -30,6 +30,7 @@
     "build:packages": "cd packages/metapackage && jlpm run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-|application-top)*\" --concurrency 1",
     "build:test": "lerna run build --scope \"@jupyterlab/test-*\" --concurrency 1",
+    "build:test:scope": "lerna run build --concurrency 1",
     "build:testutils": "cd testutils && jlpm run build",
     "build:utils": "cd buildutils && jlpm run build",
     "bump:js:major": "node buildutils/lib/bump-js-major.js",
