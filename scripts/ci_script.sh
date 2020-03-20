@@ -17,11 +17,26 @@ if [[ $GROUP == python ]]; then
 fi
 
 
-if [[ $GROUP == js ]]; then
+if [[ $GROUP == js* ]]; then
 
     jlpm build:packages
     jlpm build:test
-    FORCE_COLOR=1 jlpm test --loglevel success
+
+    if [[ $GROUP == js:* ]]; then
+        # extract the group name
+        FORCE_COLOR=1 jlpm test:scope --loglevel success --scope "@jupyterlab/test-${GROUP#*:}"
+    else
+        FORCE_COLOR=1 jlpm test --loglevel success
+    fi
+
+    jlpm run clean
+fi
+
+if [[ $GROUP == jsscope ]]; then
+
+    jlpm build:packages
+    jlpm build:test
+    FORCE_COLOR=1 jlpm test:scope --loglevel success --scope $JSTESTGROUP
 
     jlpm run clean
 fi

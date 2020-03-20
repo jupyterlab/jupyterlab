@@ -75,6 +75,7 @@
     "test:examples": "python examples/test_examples.py",
     "test:firefox": "lerna run test:firefox --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
     "test:ie": "lerna run test:ie --scope \"@jupyterlab/test-*\" --concurrency 1 --stream",
+    "test:scope": "lerna run test --concurrency 1 --stream",
     "test:summary": "lerna run test --scope \"@jupyterlab/test-*\" --parallel --no-bail | grep -Ei '.* test.*(failed|passed|total|completed|skipped)' | sort",
     "tslint": "tslint --fix -c tslint.json --project tsconfigbase.json '**/*{.ts,.tsx}'",
     "tslint:check": "tslint -c tslint.json --project tsconfigbase.json '**/*{.ts,.tsx}'",
