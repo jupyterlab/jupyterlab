@@ -19,13 +19,14 @@ fi
 
 if [[ $GROUP == js* ]]; then
 
-    jlpm build:packages
-
     if [[ $GROUP == js-* ]]; then
         # extract the group name
-       jlpm build:test:scope --scope "@jupyterlab/test-${GROUP#*-}"
-       FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope "@jupyterlab/test-${GROUP#*-}"
+        export PKG="${GROUP#*-}"
+        jlpm run build:packages:scope --scope "@jupyterlab/$PKG"
+        jlpm run build:test:scope --scope "@jupyterlab/test-$PKG"
+        FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope "@jupyterlab/test-$PKG"
     else
+        jlpm build:packages
         jlpm build:test
         FORCE_COLOR=1 jlpm test --loglevel success
     fi

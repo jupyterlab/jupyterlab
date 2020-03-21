@@ -28,6 +28,7 @@
     "build:dev:prod": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build:prod",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
     "build:packages": "cd packages/metapackage && jlpm run build",
+    "build:packages:scope": "lerna run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-|application-top)*\" --concurrency 1",
     "build:test": "lerna run build --scope \"@jupyterlab/test-*\" --concurrency 1",
     "build:test:scope": "lerna run build --concurrency 1",
