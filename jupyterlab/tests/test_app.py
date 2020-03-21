@@ -41,7 +41,14 @@ def _create_notebook_dir():
     with open(readonly_filepath, 'w') as fid:
         fid.write('hello from a readonly file')
 
-    index_filepath = osp.join(root_dir, 'index.html')
+    os.chmod(readonly_filepath, S_IRUSR | S_IRGRP | S_IROTH)
+    atexit.register(lambda: shutil.rmtree(root_dir, True))
+    return root_dir
+
+
+def _create_template_dir():
+    template_dir = tempfile.mkdtemp(prefix='mock_static')
+    index_filepath = osp.join(template_dir, 'index.html')
     with open(index_filepath, 'w') as fid:
         fid.write("""
 <!DOCTYPE HTML>
@@ -55,6 +62,7 @@ def _create_notebook_dir():
     {% endblock %}
 </head>
 <body>
+  <h1>JupytereLab Test Application</h1>
   <div id="site">
     {% block site %}
     {% endblock site %}
@@ -63,10 +71,12 @@ def _create_notebook_dir():
   {% endblock after_site %}
 </body>
 </html>""")
+    return template_dir
 
-    os.chmod(readonly_filepath, S_IRUSR | S_IRGRP | S_IROTH)
-    atexit.register(lambda: shutil.rmtree(root_dir, True))
-    return root_dir
+
+def _create_static_dir():
+    static_dir = tempfile.mkdtemp(prefix='mock_static')
+    return static_dir
 
 
 def _create_schemas_dir():
@@ -145,18 +155,23 @@ class ProcessTestApp(ProcessApp):
     """
     allow_origin = Unicode('*')
     root_dir = _create_notebook_dir()
+    static_dir = _create_static_dir()
+    template_dir = _create_template_dir()
     schemas_dir = _create_schemas_dir()
     user_settings_dir = _create_user_settings_dir()
     workspaces_dir = _create_workspaces_dir()
 
-    def initialize_templates(self):
-        self.static_paths = [self.root_dir]
-        self.template_paths = [self.root_dir]
-
-    def initialize_settings(self):
-
+    def _prepare_config(self):
         self.env_patch = TestEnv()
         self.env_patch.start()
+        ProcessApp.__init__(self)
+        super()._prepare_config()
+
+    def initialize_templates(self):
+        self.static_paths = [self.static_dir]
+        self.template_paths = [self.template_dir]
+
+    def initialize_settings(self):
 
         self._install_default_kernels()
         self.settings['kernel_manager'].default_kernel_name = 'echo'
