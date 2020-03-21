@@ -8,6 +8,16 @@ import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { NotebookPanel } from './panel';
 import { NotebookTools } from './notebooktools';
+import { NotebookWidgetFactory } from './widgetfactory';
+
+/* tslint:disable */
+/**
+ * The notebook widget factory token.
+ */
+export const INotebookWidgetFactory = new Token<NotebookWidgetFactory.IFactory>(
+  '@jupyterlab/notebook:INotebookWidgetFactory'
+);
+/* tslint:enable */
 
 /* tslint:disable */
 /**
