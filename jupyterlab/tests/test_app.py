@@ -313,11 +313,9 @@ class JestApp(ProcessTestApp):
         if self.log_level > logging.INFO:
             cmd += ['--silent']
 
-        config = dict(
-            baseUrl='http://localhost:{}{}'.format(self.serverapp.port, self.settings['base_url']),
-            terminalsAvailable=str(terminalsAvailable),
-            token=self.settings['token']
-            )
+        config = dict(baseUrl=self.serverapp.connection_url,
+                      terminalsAvailable=str(terminalsAvailable),
+                      token=self.settings['token'])
         config.update(**self.test_config)
 
         td = tempfile.mkdtemp()
@@ -350,12 +348,9 @@ class KarmaTestApp(ProcessTestApp):
         terminalsAvailable = self.settings['terminals_available']
         # Compatibility with Notebook 4.2.
         token = getattr(self, 'token', '')
-        config = dict(
-            baseUrl='http://localhost:{}{}'.format(self.serverapp.port, self.settings['base_url']),
-            token=self.settings['token'],
-            terminalsAvailable=str(terminalsAvailable),
-            foo='bar'
-            )
+        config = dict(baseUrl=self.serverapp.connection_url, token=token,
+                      terminalsAvailable=str(terminalsAvailable),
+                      foo='bar')
 
         cwd = self.karma_base_dir
 
@@ -367,7 +362,6 @@ class KarmaTestApp(ProcessTestApp):
             fid.write("""
             require('es6-promise/dist/es6-promise.js');
             require('@lumino/widgets/style/index.css');
-
             var node = document.createElement('script');
             node.id = 'jupyter-config-data';
             node.type = 'application/json';
