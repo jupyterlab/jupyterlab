@@ -173,7 +173,7 @@ class ProcessTestApp(ProcessApp):
         self.env_patch.start()
         ProcessApp.__init__(self)
 
-`       # TODO(@echarles) This should not be needed.
+        # TODO(@echarles) This should not be needed.
         self.settings['allow_origin'] = ProcessTestApp.allow_origin
 
         self._install_default_kernels()
