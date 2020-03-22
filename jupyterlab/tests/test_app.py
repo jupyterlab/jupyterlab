@@ -155,7 +155,7 @@ class TestEnv(object):
 class ProcessTestApp(ProcessApp):
     """A process app for running tests, includes a mock contents directory.
     """
-    allow_origin = Unicode('*')
+    allow_origin = '*'
     root_dir = _create_notebook_dir()
     static_dir = _create_static_dir()
     template_dir = _create_template_dir()
@@ -172,6 +172,9 @@ class ProcessTestApp(ProcessApp):
         self.env_patch = TestEnv()
         self.env_patch.start()
         ProcessApp.__init__(self)
+
+`       # TODO(@echarles) This should not be needed.
+        self.settings['allow_origin'] = ProcessTestApp.allow_origin
 
         self._install_default_kernels()
         self.settings['kernel_manager'].default_kernel_name = 'echo'
