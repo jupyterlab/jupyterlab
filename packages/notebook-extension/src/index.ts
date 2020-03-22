@@ -266,7 +266,7 @@ const FORMAT_LABEL: { [k: string]: string } = {
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [INotebookWidgetFactory],
+  requires: [INotebookWidgetFactory, IDocumentManager],
   optional: [
     ICommandPalette,
     IFileBrowserFactory,
@@ -390,11 +390,9 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
  */
 const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> = {
   id: '@jupyterlab/notebook-extension:widget-factory',
-  provides: INotebookTracker,
+  provides: INotebookWidgetFactory,
   requires: [
     NotebookPanel.IContentFactory,
-    INotebookWidgetFactory,
-    IDocumentManager,
     IEditorServices,
     IRenderMimeRegistry
   ],
