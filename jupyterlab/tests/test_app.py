@@ -273,16 +273,6 @@ class JestApp(ProcessTestApp):
 
     open_browser = False
 
-    def _jupyter_server_extension_paths():
-        return [
-            {
-                'module': __name__,
-                'app': JestApp
-            }
-        ]
-
-    sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
-
     def get_command(self):
         """Get the command to run"""
         terminalsAvailable = self.settings['terminals_available']
@@ -355,16 +345,6 @@ class KarmaTestApp(ProcessTestApp):
     karma_base_dir = Unicode('')
     karma_coverage_dir = Unicode('')
 
-    def _jupyter_server_extension_paths():
-        return [
-            {
-                'module': __name__,
-                'app': KarmaTestApp
-            }
-        ]
-
-    sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
-
     def get_command(self):
         """Get the command to run."""
         terminalsAvailable = self.settings['terminals_available']
@@ -430,6 +410,14 @@ class KarmaTestApp(ProcessTestApp):
 def run_jest(jest_dir):
     """Run a jest test in the given base directory.
     """
+    def _jupyter_server_extension_paths():
+        return [
+            {
+                'module': __name__,
+                'app': JestApp
+            }
+        ]
+    sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
     JestApp.jest_dir = jest_dir
     ServerApp.jpserver_extensions = Dict({__name__: True})
     ServerApp.launch_instance()
@@ -439,6 +427,14 @@ def run_karma(base_dir, coverage_dir=''):
     """Run a karma test in the given base directory.
     """
     logging.disable(logging.WARNING)
+    def _jupyter_server_extension_paths():
+        return [
+            {
+                'module': __name__,
+                'app': KarmaTestApp
+            }
+        ]
+    sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
     KarmaTestApp.karma_base_dir = base_dir
     KarmaTestApp.karma_coverage_dir = coverage_dir
     ServerApp.jpserver_extensions = Dict({__name__: True})
