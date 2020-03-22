@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@jupyterlab/nbformat": "^2.0.1",
+    "@jupyterlab/testutils": "^2.0.2",
     "chai": "^4.2.0",
     "jest": "^24.9.0",
     "jest-junit": "^10.0.0",
