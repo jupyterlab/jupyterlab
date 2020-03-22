@@ -171,6 +171,7 @@ class ProcessTestApp(ProcessApp):
 
         self.env_patch = TestEnv()
         self.env_patch.start()
+        ProcessApp.__init__(self)
 
         self._install_default_kernels()
         self.settings['kernel_manager'].default_kernel_name = 'echo'
