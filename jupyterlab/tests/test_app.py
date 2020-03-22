@@ -346,8 +346,7 @@ class KarmaTestApp(ProcessTestApp):
     def get_command(self):
         """Get the command to run."""
         terminalsAvailable = self.settings['terminals_available']
-        # Compatibility with Notebook 4.2.
-        token = getattr(self, 'token', '')
+        token = self.settings['token']
         config = dict(baseUrl=self.serverapp.connection_url, token=token,
                       terminalsAvailable=str(terminalsAvailable),
                       foo='bar')
@@ -362,6 +361,7 @@ class KarmaTestApp(ProcessTestApp):
             fid.write("""
             require('es6-promise/dist/es6-promise.js');
             require('@lumino/widgets/style/index.css');
+
             var node = document.createElement('script');
             node.id = 'jupyter-config-data';
             node.type = 'application/json';
