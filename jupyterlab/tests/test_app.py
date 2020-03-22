@@ -22,6 +22,8 @@ from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
 from jupyter_core.application import base_aliases, base_flags
 
+from jupyter_server.serverapp import ServerApp
+
 from jupyterlab_server import LabConfig
 from jupyterlab_server.process_app import ProcessApp
 import jupyterlab_server
@@ -62,7 +64,7 @@ def _create_template_dir():
     {% endblock %}
 </head>
 <body>
-  <h1>JupytereLab Test Application</h1>
+  <h1>JupyterLab Test Application</h1>
   <div id="site">
     {% block site %}
     {% endblock site %}
@@ -161,17 +163,14 @@ class ProcessTestApp(ProcessApp):
     user_settings_dir = _create_user_settings_dir()
     workspaces_dir = _create_workspaces_dir()
 
-    def _prepare_config(self):
-        self.env_patch = TestEnv()
-        self.env_patch.start()
-        ProcessApp.__init__(self)
-        super()._prepare_config()
-
     def initialize_templates(self):
         self.static_paths = [self.static_dir]
         self.template_paths = [self.template_dir]
 
     def initialize_settings(self):
+
+        self.env_patch = TestEnv()
+        self.env_patch.start()
 
         self._install_default_kernels()
         self.settings['kernel_manager'].default_kernel_name = 'echo'
@@ -248,14 +247,6 @@ jest_flags['watchAll'] = (
 )
 
 
-def _jupyter_server_extension_paths():
-    return [
-        {
-            'module': __name__,
-            'app': JestApp
-        }
-    ]
-
 class JestApp(ProcessTestApp):
     """A notebook app that runs a jest test."""
 
@@ -282,6 +273,15 @@ class JestApp(ProcessTestApp):
 
     open_browser = False
 
+    def _jupyter_server_extension_paths():
+        return [
+            {
+                'module': __name__,
+                'app': JestApp
+            }
+        ]
+
+    sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
 
     def get_command(self):
         """Get the command to run"""
@@ -355,9 +355,19 @@ class KarmaTestApp(ProcessTestApp):
     karma_base_dir = Unicode('')
     karma_coverage_dir = Unicode('')
 
+    def _jupyter_server_extension_paths():
+        return [
+            {
+                'module': __name__,
+                'app': KarmaTestApp
+            }
+        ]
+
+    sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
+
     def get_command(self):
         """Get the command to run."""
-        terminalsAvailable = self.web_app.settings['terminals_available']
+        terminalsAvailable = self.settings['terminals_available']
         # Compatibility with Notebook 4.2.
         token = getattr(self, 'token', '')
         config = dict(
@@ -421,7 +431,8 @@ def run_jest(jest_dir):
     """Run a jest test in the given base directory.
     """
     JestApp.jest_dir = jest_dir
-    JestApp.launch_instance()
+    ServerApp.jpserver_extensions = Dict({__name__: True})
+    ServerApp.launch_instance()
 
 
 def run_karma(base_dir, coverage_dir=''):
@@ -430,4 +441,5 @@ def run_karma(base_dir, coverage_dir=''):
     logging.disable(logging.WARNING)
     KarmaTestApp.karma_base_dir = base_dir
     KarmaTestApp.karma_coverage_dir = coverage_dir
-    KarmaTestApp.launch_instance()
+    ServerApp.jpserver_extensions = Dict({__name__: True})
+    ServerApp.launch_instance()
