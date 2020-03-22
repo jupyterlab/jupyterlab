@@ -17,7 +17,7 @@ import tempfile
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from traitlets import Bool, Dict, Unicode
+from traitlets import Bool, Dict, Unicode, default
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
 from jupyter_core.application import base_aliases, base_flags
@@ -30,22 +30,6 @@ import jupyterlab_server
 
 
 HERE = osp.realpath(osp.dirname(__file__))
-
-
-def _create_notebook_dir():
-    """Create a temporary directory with some file structure."""
-    root_dir = tempfile.mkdtemp(prefix='mock_contents')
-    os.mkdir(osp.join(root_dir, 'src'))
-    with open(osp.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
-        fid.write('hello')
-
-    readonly_filepath = osp.join(root_dir, 'src', 'readonly-temp.txt')
-    with open(readonly_filepath, 'w') as fid:
-        fid.write('hello from a readonly file')
-
-    os.chmod(readonly_filepath, S_IRUSR | S_IRGRP | S_IROTH)
-    atexit.register(lambda: shutil.rmtree(root_dir, True))
-    return root_dir
 
 
 def _create_template_dir():
@@ -156,16 +140,10 @@ class ProcessTestApp(ProcessApp):
     """A process app for running tests, includes a mock contents directory.
     """
     allow_origin = '*'
-    root_dir = _create_notebook_dir()
-    static_dir = _create_static_dir()
-    template_dir = _create_template_dir()
-    schemas_dir = _create_schemas_dir()
-    user_settings_dir = _create_user_settings_dir()
-    workspaces_dir = _create_workspaces_dir()
 
     def initialize_templates(self):
-        self.static_paths = [self.static_dir]
-        self.template_paths = [self.template_dir]
+        self.static_paths = [_create_static_dir()]
+        self.template_paths = [_create_template_dir()]
 
     def initialize_settings(self):
 
@@ -173,16 +151,17 @@ class ProcessTestApp(ProcessApp):
         self.env_patch.start()
         ProcessApp.__init__(self)
 
-        # TODO(@echarles) This should not be needed.
         self.settings['allow_origin'] = ProcessTestApp.allow_origin
+
+        self.static_dir = self.static_paths[0]
+        self.template_dir = self.template_paths[0]
+        self.schemas_dir = _create_schemas_dir()
+        self.user_settings_dir = _create_user_settings_dir()
+        self.workspaces_dir = _create_workspaces_dir()
 
         self._install_default_kernels()
         self.settings['kernel_manager'].default_kernel_name = 'echo'
-        self.schemas_dir = self.schemas_dir
-        self.user_settings_dir = self.user_settings_dir
-        self.workspaces_dir = self.workspaces_dir
-        self.static_dir = self.root_dir
-        self.templates_dir = self.root_dir
+
         super().initialize_settings()
 
     def _install_kernel(self, kernel_name, kernel_spec):
@@ -405,6 +384,25 @@ class KarmaTestApp(ProcessTestApp):
         return cmd, dict(env=env, cwd=cwd)
 
 
+class RootServerApp(ServerApp):
+
+    @default('root_dir')
+    def _default_root_dir(self):
+        """Create a temporary directory with some file structure."""
+        root_dir = tempfile.mkdtemp(prefix='mock_root')
+        os.mkdir(osp.join(root_dir, 'src'))
+        with open(osp.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
+            fid.write('hello')
+
+        readonly_filepath = osp.join(root_dir, 'src', 'readonly-temp.txt')
+        with open(readonly_filepath, 'w') as fid:
+            fid.write('hello from a readonly file')
+
+        os.chmod(readonly_filepath, S_IRUSR | S_IRGRP | S_IROTH)
+        atexit.register(lambda: shutil.rmtree(root_dir, True))
+        return root_dir
+
+
 def run_jest(jest_dir):
     """Run a jest test in the given base directory.
     """
@@ -417,8 +415,8 @@ def run_jest(jest_dir):
         ]
     sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
     JestApp.jest_dir = jest_dir
-    ServerApp.jpserver_extensions = Dict({__name__: True})
-    ServerApp.launch_instance()
+    RootServerApp.jpserver_extensions = Dict({__name__: True})
+    RootServerApp.launch_instance()
 
 
 def run_karma(base_dir, coverage_dir=''):
@@ -435,5 +433,5 @@ def run_karma(base_dir, coverage_dir=''):
     sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
     KarmaTestApp.karma_base_dir = base_dir
     KarmaTestApp.karma_coverage_dir = coverage_dir
-    ServerApp.jpserver_extensions = Dict({__name__: True})
-    ServerApp.launch_instance(argv=[])
+    RootServerApp.jpserver_extensions = Dict({__name__: True})
+    RootServerApp.launch_instance(argv=[])
