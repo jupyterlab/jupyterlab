@@ -432,4 +432,4 @@ def run_karma(base_dir, coverage_dir=''):
     KarmaTestApp.karma_base_dir = base_dir
     KarmaTestApp.karma_coverage_dir = coverage_dir
     ServerApp.jpserver_extensions = Dict({__name__: True})
-    ServerApp.launch_instance()
+    ServerApp.launch_instance(argv=[])
