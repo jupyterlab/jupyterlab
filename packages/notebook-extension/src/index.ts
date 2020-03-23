@@ -45,6 +45,7 @@ import {
   NotebookTools,
   INotebookTools,
   INotebookTracker,
+  INotebookWidgetFactory,
   NotebookActions,
   NotebookModelFactory,
   NotebookPanel,
@@ -265,12 +266,7 @@ const FORMAT_LABEL: { [k: string]: string } = {
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [
-    NotebookPanel.IContentFactory,
-    IDocumentManager,
-    IEditorServices,
-    IRenderMimeRegistry
-  ],
+  requires: [INotebookWidgetFactory, IDocumentManager],
   optional: [
     ICommandPalette,
     IFileBrowserFactory,
@@ -390,6 +386,21 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The notebook widget factory provider.
+ */
+const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> = {
+  id: '@jupyterlab/notebook-extension:widget-factory',
+  provides: INotebookWidgetFactory,
+  requires: [
+    NotebookPanel.IContentFactory,
+    IEditorServices,
+    IRenderMimeRegistry
+  ],
+  activate: activateWidgetFactory,
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -397,7 +408,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   trackerPlugin,
   tools,
   commandEditItem,
-  notebookTrustItem
+  notebookTrustItem,
+  widgetFactoryPlugin
 ];
 export default plugins;
 
@@ -490,24 +502,14 @@ function activateNotebookTools(
 }
 
 /**
- * Activate the notebook handler extension.
+ * Activate the notebook widget factory.
  */
-function activateNotebookHandler(
+function activateWidgetFactory(
   app: JupyterFrontEnd,
   contentFactory: NotebookPanel.IContentFactory,
-  docManager: IDocumentManager,
   editorServices: IEditorServices,
-  rendermime: IRenderMimeRegistry,
-  palette: ICommandPalette | null,
-  browserFactory: IFileBrowserFactory | null,
-  launcher: ILauncher | null,
-  restorer: ILayoutRestorer | null,
-  mainMenu: IMainMenu | null,
-  settingRegistry: ISettingRegistry | null,
-  sessionDialogs: ISessionContextDialogs | null
-): INotebookTracker {
-  const services = app.serviceManager;
-
+  rendermime: IRenderMimeRegistry
+): NotebookWidgetFactory.IFactory {
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
@@ -521,6 +523,27 @@ function activateNotebookHandler(
     notebookConfig: StaticNotebook.defaultNotebookConfig,
     mimeTypeService: editorServices.mimeTypeService
   });
+  app.docRegistry.addWidgetFactory(factory);
+  return factory;
+}
+
+/**
+ * Activate the notebook handler extension.
+ */
+function activateNotebookHandler(
+  app: JupyterFrontEnd,
+  factory: NotebookWidgetFactory.IFactory,
+  docManager: IDocumentManager,
+  palette: ICommandPalette | null,
+  browserFactory: IFileBrowserFactory | null,
+  launcher: ILauncher | null,
+  restorer: ILayoutRestorer | null,
+  mainMenu: IMainMenu | null,
+  settingRegistry: ISettingRegistry | null,
+  sessionDialogs: ISessionContextDialogs | null
+): INotebookTracker {
+  const services = app.serviceManager;
+
   const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
   const clonedOutputs = new WidgetTracker<
@@ -550,7 +573,6 @@ function activateNotebookHandler(
 
   let registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
-  registry.addWidgetFactory(factory);
 
   addCommands(
     app,
