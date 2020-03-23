@@ -44,8 +44,6 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Widget } from '@lumino/widgets';
 
-import { Throttler } from '@lumino/polling';
-
 /**
  * The command IDs used by the document manager plugin.
  */
@@ -244,18 +242,9 @@ ${fileTypes}`;
       }
     });
 
-    // callback to registry change that ensures not to invoke reload method when there is already a promise that is pending
-    let reloadSettingsRegistry = () => {
-      let reloadThrottle = new Throttler(() =>
-        settingRegistry.reload(pluginId)
-      );
-
-      return reloadThrottle.invoke.bind(reloadThrottle);
-    };
-
     // If the document registry gains or loses a factory or file type,
     // regenerate the settings description with the available options.
-    registry.changed.connect(reloadSettingsRegistry());
+    registry.changed.connect(() => settingRegistry.reload(pluginId));
 
     return docManager;
   }
