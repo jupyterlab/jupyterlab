@@ -18,14 +18,8 @@ Then install the python packages:
 pip install plotly==4.5.4 ipywidgets==7.5.1
 ```
 
-Then install tools and benchmark:
+Then run the build, run the benchmarks, and view the results:
 
 ```bash
-jlpm start
-```
-
-Finally ou can analyze the benchmarks
-
-```
-jlpm run analyze
+jlpm all
 ```
