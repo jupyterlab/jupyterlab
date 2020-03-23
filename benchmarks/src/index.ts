@@ -166,7 +166,7 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
     await waitForLaunch();
     for (let n = 0; n <= MAX_N; n += MAX_N / NUMBER_SAMPLES) {
       // Skip larger tests on firefox because they are too slow
-      if (n > 4000 && browserName === 'firefox') {
+      if (n > 2000 && browserName === 'firefox') {
         continue;
       }
       console.log(` n=${n}/${MAX_N}`);
