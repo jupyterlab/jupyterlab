@@ -121,7 +121,6 @@ class BrowserApp(LabApp):
     """
     extension_name = __name__
     open_browser = Bool(False)
-    base_url = '/foo/'
     ip = '127.0.0.1'
     flags = test_flags
     aliases = test_aliases
@@ -131,6 +130,7 @@ class BrowserApp(LabApp):
         self.settings.setdefault('page_config_data', dict())
         self.settings['page_config_data']['browserTest'] = True
         self.settings['page_config_data']['buildAvailable'] = False
+        self.serverapp.base_url = '/lab'
         super().initialize_settings()
 
     def initialize_handlers(self):
