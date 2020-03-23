@@ -81,7 +81,11 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
    * Focus the input.
    */
   focusInput() {
-    (this.refs.searchInputNode as HTMLInputElement).focus();
+    // Select (and focus) any text already present.
+    // This makes typing in the box starts a new query (the common case),
+    // while arrow keys can be used to move cursor in preparation for
+    // modifying previous query.
+    (this.refs.searchInputNode as HTMLInputElement).select();
   }
 
   componentDidUpdate() {
