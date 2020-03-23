@@ -384,7 +384,7 @@ class KarmaTestApp(ProcessTestApp):
         return cmd, dict(env=env, cwd=cwd)
 
 
-class RootServerApp(ServerApp):
+class RootedServerApp(ServerApp):
 
     @default('root_dir')
     def _default_root_dir(self):
@@ -415,8 +415,9 @@ def run_jest(jest_dir):
         ]
     sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
     JestApp.jest_dir = jest_dir
-    RootServerApp.jpserver_extensions = Dict({__name__: True})
-    RootServerApp.launch_instance()
+    RootedServerApp.jpserver_extensions = Dict({__name__: True})
+    RootedServerApp.flags = jest_flags
+    RootedServerApp.launch_instance()
 
 
 def run_karma(base_dir, coverage_dir=''):
@@ -433,5 +434,5 @@ def run_karma(base_dir, coverage_dir=''):
     sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
     KarmaTestApp.karma_base_dir = base_dir
     KarmaTestApp.karma_coverage_dir = coverage_dir
-    RootServerApp.jpserver_extensions = Dict({__name__: True})
-    RootServerApp.launch_instance(argv=[])
+    RootedServerApp.jpserver_extensions = Dict({__name__: True})
+    RootedServerApp.launch_instance(argv=[])

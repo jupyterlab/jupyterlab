@@ -13,9 +13,9 @@ import sys
 import subprocess
 
 from tornado.ioloop import IOLoop
-from jupyter_server.serverapp import flags, aliases
+from jupyter_server.serverapp import flags, aliases, ServerApp
 from jupyter_server.utils import urljoin, pathname2url
-from traitlets import Bool
+from traitlets import Bool, Dict
 
 from .labapp import LabApp, get_app_dir
 from .tests.test_app import TestEnv
@@ -119,6 +119,7 @@ class BrowserApp(LabApp):
     """An app the launches JupyterLab and waits for it to start up, checking for
     JS console errors, JS errors, and Python logged errors.
     """
+    extension_name = __name__
     open_browser = Bool(False)
     base_url = '/foo/'
     ip = '127.0.0.1'
@@ -126,13 +127,15 @@ class BrowserApp(LabApp):
     aliases = test_aliases
     test_browser = True
 
-    def start(self):
-        web_app = self.serverapp.web_app
-        web_app.settings.setdefault('page_config_data', dict())
-        web_app.settings['page_config_data']['browserTest'] = True
-        web_app.settings['page_config_data']['buildAvailable'] = False
+    def initialize_settings(self):
+        self.settings.setdefault('page_config_data', dict())
+        self.settings['page_config_data']['browserTest'] = True
+        self.settings['page_config_data']['buildAvailable'] = False
+        super().initialize_settings()
+
+    def initialize_handlers(self):
         run_test(self, run_browser if self.test_browser else lambda url: 0)
-        super().start()
+        super().initialize_handlers()
 
 
 if __name__ == '__main__':
@@ -140,4 +143,13 @@ if __name__ == '__main__':
     if skip_option in sys.argv:
         BrowserApp.test_browser = False
         sys.argv.remove(skip_option)
-    BrowserApp.launch_instance()
+    def _jupyter_server_extension_paths():
+        return [
+            {
+                'module': __name__,
+                'app': BrowserApp
+            }
+        ]
+    sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
+    ServerApp.jpserver_extensions = Dict({__name__: True})
+    ServerApp.launch_instance()
