@@ -5,7 +5,7 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-private-completer-item-height: 22px;
+  --jp-private-completer-item-height: 24px;
   /* Shift the baseline of the type character to align with the match text */
   --jp-private-completer-type-offset: 2px;
 }
@@ -66,6 +66,16 @@
   font-family: var(--jp-code-font-family);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
+  vertical-align: middle;
+}
+
+.jp-Completer-item .jp-Completer-icon {
+  display: table-cell;
+  box-sizing: border-box;
+  height: var(--jp-private-completer-item-height);
+  background: transparent;
+  width: var(--jp-private-completer-item-height);
+  vertical-align: middle;
 }
 
 .jp-Completer-deprecated .jp-Completer-match {
@@ -102,6 +112,7 @@
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
   padding-right: 8px;
+  vertical-align: middle;
 }
 
 .jp-Completer-item:hover {
