@@ -560,10 +560,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             return self.override_theme_url
         return ''
 
-    def initialize_settings(self):
-        handlers = []
-        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir)
-
+    def initialize_templates(self):
         # Determine which model to run JupyterLab
         if self.core_mode or self.app_dir.startswith(HERE):
             self.core_mode = True
@@ -593,6 +590,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         else:
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
+
+    def initialize_settings(self):
+        handlers = []
+        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir)
 
         # Set config for Jupyterlab
         page_config = self.serverapp.web_app.settings.setdefault('page_config_data', {})
