@@ -2,7 +2,7 @@
   "data": {
     "url": "./out.csv"
   },
-  "mark": "point",
+  "mark": { "type": "errorband", "extent": "ci" },
   "encoding": {
     "x": {
       "field": "n",
