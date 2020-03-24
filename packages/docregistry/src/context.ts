@@ -414,7 +414,6 @@ export class Context<T extends DocumentRegistry.IModel>
       } else {
         this.sessionContext.path = newPath;
       }
-      void this.sessionContext.session?.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
         ...changeModel
