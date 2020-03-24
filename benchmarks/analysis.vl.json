@@ -3,11 +3,12 @@
     "url": "./out.csv"
   },
   "mark": {
-    "type": "errorband",
-    "extent": "ci",
+    "type": "boxplot",
+    "extent": "min-max",
     "clip": true
   },
   "encoding": {
+    "size": { "value": 5 },
     "x": {
       "field": "n",
       "type": "quantitative",
