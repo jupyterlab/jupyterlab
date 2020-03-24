@@ -468,6 +468,28 @@ export namespace renderSVG {
 }
 
 /**
+ * Replace URLs with links.
+ *
+ * @param content - The plain text content.
+ *
+ * @returns The content where all URLs have been replaced with corresponding links.
+ */
+function autolink(content: string): string {
+  return content.replace(
+    // Same pattern as in classic notebook with word boundaries (\b).
+    /\b((https?|ftp)(:[^'"<>\s]+))\b/g,
+    url => {
+      const a = document.createElement('a');
+      a.href = url;
+      a.textContent = url;
+      a.rel = 'noopener';
+      a.target = '_blank';
+      return a.outerHTML;
+    }
+  );
+}
+
+/**
  * Render text into a host node.
  *
  * @params options - The options for rendering.
@@ -485,7 +507,7 @@ export function renderText(options: renderText.IRenderOptions): Promise<void> {
 
   // Set the sanitized content for the host node.
   const pre = document.createElement('pre');
-  pre.innerHTML = content;
+  pre.innerHTML = autolink(content);
   host.appendChild(pre);
 
   // Return the rendered promise.
