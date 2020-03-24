@@ -69,15 +69,6 @@
   vertical-align: middle;
 }
 
-.jp-Completer-item .jp-Completer-icon {
-  display: table-cell;
-  box-sizing: border-box;
-  height: var(--jp-private-completer-item-height);
-  background: transparent;
-  width: var(--jp-private-completer-item-height);
-  vertical-align: middle;
-}
-
 .jp-Completer-deprecated .jp-Completer-match {
   text-decoration: line-through;
   color: var(--jp-content-font-color2);
@@ -87,8 +78,19 @@
   display: table-cell;
   box-sizing: border-box;
   height: var(--jp-private-completer-item-height);
-  text-align: center;
   background: transparent;
+  width: var(--jp-private-completer-item-height);
+}
+
+.jp-Completer-item .jp-Completer-icon {
+  vertical-align: middle;
+  /* Normal element size from LabIconStyle.ISheetOptions */
+  height: 16px;
+  width: 16px;
+}
+
+.jp-Completer-item .jp-Completer-monogram {
+  text-align: center;
   color: white;
   width: var(--jp-private-completer-item-height);
   min-width: var(--jp-private-completer-item-height);
