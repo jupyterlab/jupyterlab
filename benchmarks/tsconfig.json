@@ -7,7 +7,7 @@
     "outDir": "./lib",
     "rootDir": "./src",
     "strict": true,
-    "lib": ["ES2019"],
+    "lib": ["ES2019", "DOM"],
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true
