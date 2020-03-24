@@ -481,7 +481,7 @@ function autolink(content: string): string {
     url => {
       const a = document.createElement('a');
       a.href = url;
-      a.innerHTML = url;
+      a.textContent = url;
       a.rel = 'noopener';
       a.target = '_blank';
       return a.outerHTML;
