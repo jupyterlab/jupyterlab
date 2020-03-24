@@ -313,16 +313,17 @@ describe('rendermime/registry', () => {
 
     describe('.UrlResolver', () => {
       let manager: ServiceManager;
-      let resolver: RenderMimeRegistry.UrlResolver;
+      let resolverSession: RenderMimeRegistry.UrlResolver;
+      let resolverPath: RenderMimeRegistry.UrlResolver;
       let contents: Contents.IManager;
       let session: Session.ISessionConnection;
       const pathParent = 'has%20üni';
       const urlParent = encodeURI(pathParent);
+      const path = pathParent + '/pr%25 ' + UUID.uuid4();
 
       before(async () => {
         manager = new ServiceManager({ standby: 'never' });
         const drive = new Drive({ name: 'extra' });
-        const path = pathParent + '/pr%25 ' + UUID.uuid4();
         contents = manager.contents;
         contents.addDrive(drive);
         await manager.ready;
@@ -331,8 +332,12 @@ describe('rendermime/registry', () => {
           path: path,
           type: 'test'
         });
-        resolver = new RenderMimeRegistry.UrlResolver({
+        resolverSession = new RenderMimeRegistry.UrlResolver({
           session,
+          contents: manager.contents
+        });
+        resolverPath = new RenderMimeRegistry.UrlResolver({
+          path: path,
           contents: manager.contents
         });
       });
@@ -343,14 +348,65 @@ describe('rendermime/registry', () => {
 
       context('#constructor', () => {
         it('should create a UrlResolver instance', () => {
-          expect(resolver).to.be.an.instanceof(RenderMimeRegistry.UrlResolver);
+          expect(resolverSession).to.be.an.instanceof(
+            RenderMimeRegistry.UrlResolver
+          );
+          expect(resolverPath).to.be.an.instanceof(
+            RenderMimeRegistry.UrlResolver
+          );
+        });
+      });
+
+      context('.path', () => {
+        it('should give precedence to the explicit path over the session', async () => {
+          const resolver = new RenderMimeRegistry.UrlResolver({
+            session: new SessionContext({
+              sessionManager: manager.sessions,
+              specsManager: manager.kernelspecs,
+              path: pathParent + '/pr%25 ' + UUID.uuid4(),
+              kernelPreference: { canStart: false, shouldStart: false }
+            }),
+            contents: manager.contents,
+            path: '/some/path/file.txt'
+          });
+          expect(await resolver.resolveUrl('./foo')).to.equal('some/path/foo');
+        });
+
+        it('should fall back to the session path if only the session is given', () => {
+          expect(resolverSession.path).to.equal(path);
+        });
+
+        it('should allow the path to be changed', async () => {
+          const resolver = new RenderMimeRegistry.UrlResolver({
+            session: new SessionContext({
+              sessionManager: manager.sessions,
+              specsManager: manager.kernelspecs,
+              path: pathParent + '/pr%25 ' + UUID.uuid4(),
+              kernelPreference: { canStart: false, shouldStart: false }
+            }),
+            contents: manager.contents
+          });
+          resolver.path = '/some/path/file.txt';
+          expect(await resolver.resolveUrl('./foo')).to.equal('some/path/foo');
+          const resolver2 = new RenderMimeRegistry.UrlResolver({
+            path: '/some/path/file.txt',
+            contents: manager.contents
+          });
+          resolver2.path = '/other/path/file.txt';
+          expect(await resolver2.resolveUrl('./foo')).to.equal(
+            'other/path/foo'
+          );
         });
       });
 
       context('#resolveUrl()', () => {
         it('should resolve a relative url', async () => {
-          const path = await resolver.resolveUrl('./foo');
-          expect(path).to.equal(urlParent + '/foo');
+          expect(await resolverSession.resolveUrl('./foo')).to.equal(
+            urlParent + '/foo'
+          );
+          expect(await resolverPath.resolveUrl('./foo')).to.equal(
+            urlParent + '/foo'
+          );
         });
 
         it('should resolve a relative url with no active session', async () => {
@@ -368,48 +424,58 @@ describe('rendermime/registry', () => {
         });
 
         it('should ignore urls that have a protocol', async () => {
-          const path = await resolver.resolveUrl('http://foo');
-          expect(path).to.equal('http://foo');
+          expect(await resolverSession.resolveUrl('http://foo')).to.equal(
+            'http://foo'
+          );
+          expect(await resolverPath.resolveUrl('http://foo')).to.equal(
+            'http://foo'
+          );
         });
 
         it('should resolve URLs with escapes', async () => {
-          const url = await resolver.resolveUrl('has%20space');
-          expect(url).to.equal(urlParent + '/has%20space');
+          expect(await resolverSession.resolveUrl('has%20space')).to.equal(
+            urlParent + '/has%20space'
+          );
+          expect(await resolverPath.resolveUrl('has%20space')).to.equal(
+            urlParent + '/has%20space'
+          );
         });
       });
 
       context('#getDownloadUrl()', () => {
         it('should resolve an absolute server url to a download url', async () => {
-          const contextPromise = resolver.getDownloadUrl('foo');
+          const contextPromise = resolverPath.getDownloadUrl('foo');
           const contentsPromise = contents.getDownloadUrl('foo');
           const values = await Promise.all([contextPromise, contentsPromise]);
           expect(values[0]).to.equal(values[1]);
         });
 
         it('should resolve escapes correctly', async () => {
-          const contextPromise = resolver.getDownloadUrl('foo%2520test');
+          const contextPromise = resolverPath.getDownloadUrl('foo%2520test');
           const contentsPromise = contents.getDownloadUrl('foo%20test');
           const values = await Promise.all([contextPromise, contentsPromise]);
           expect(values[0]).to.equal(values[1]);
         });
 
         it('should ignore urls that have a protocol', async () => {
-          const path = await resolver.getDownloadUrl('http://foo');
+          const path = await resolverPath.getDownloadUrl('http://foo');
           expect(path).to.equal('http://foo');
         });
       });
 
       context('#isLocal', () => {
         it('should return true for a registered IDrive`', () => {
-          expect(resolver.isLocal('extra:path/to/file')).to.equal(true);
+          expect(resolverPath.isLocal('extra:path/to/file')).to.equal(true);
         });
 
         it('should return false for an unrecognized Drive`', () => {
-          expect(resolver.isLocal('unregistered:path/to/file')).to.equal(false);
+          expect(resolverPath.isLocal('unregistered:path/to/file')).to.equal(
+            false
+          );
         });
 
         it('should return true for a normal filesystem-like path`', () => {
-          expect(resolver.isLocal('path/to/file')).to.equal(true);
+          expect(resolverPath.isLocal('path/to/file')).to.equal(true);
         });
       });
     });

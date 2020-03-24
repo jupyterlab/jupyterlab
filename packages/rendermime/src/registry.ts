@@ -337,12 +337,12 @@ export namespace RenderMimeRegistry {
     /**
      * Resolve a relative url to an absolute url path.
      */
-    resolveUrl(url: string): Promise<string> {
+    async resolveUrl(url: string): Promise<string> {
       if (this.isLocal(url)) {
         const cwd = encodeURI(PathExt.dirname(this.path));
         url = PathExt.resolve(cwd, url);
       }
-      return Promise.resolve(url);
+      return url;
     }
 
     /**
@@ -351,12 +351,12 @@ export namespace RenderMimeRegistry {
      * #### Notes
      * This URL may include a query parameter.
      */
-    getDownloadUrl(url: string): Promise<string> {
+    async getDownloadUrl(url: string): Promise<string> {
       if (this.isLocal(url)) {
         // decode url->path before passing to contents api
         return this._contents.getDownloadUrl(decodeURI(url));
       }
-      return Promise.resolve(url);
+      return url;
     }
 
     /**
