@@ -3,6 +3,7 @@
  */
 import playwright from 'playwright';
 import fs from 'fs';
+import NotebookType from './notebookType';
 
 const DATA_PATH = 'out.csv';
 
@@ -16,195 +17,15 @@ const SWITCHES = 5;
  */
 const MAX_TIME = 2 * 1000;
 
-const TYPES = {
-  '100 n outputs each of a div': {
-    waitFor: async () => null,
-    notebook: (n: number) =>
-      makeNotebook([
-        {
-          cell_type: 'code',
-          execution_count: 1,
-          metadata: {},
-          outputs: Array.from({ length: n * 100 }, (_, i) => ({
-            data: {
-              'text/plain': [
-                `'I am a long string which is repeatedly added to the dom: ${i}'`
-              ]
-            },
-            metadata: {},
-            output_type: 'display_data'
-          })),
-          source: [
-            'from IPython.display import display\n',
-            '\n',
-            `for i in range(${n * 100}):\n`,
-            "    display('I am a long string which is repeatedly added to the dom: %d' % i)"
-          ]
-        }
-      ])
-  },
-  'one output with 100 n divs': {
-    waitFor: async () => null,
-    notebook: (n: number) =>
-      makeNotebook([
-        {
-          cell_type: 'code',
-          execution_count: 1,
-          metadata: {},
-          outputs: [
-            {
-              data: {
-                'text/html': [
-                  `<div>${Array.from(
-                    { length: n * 100 },
-                    (_, i) =>
-                      `<div>I am a long string which is repeatedly added to the dom: ${i}</div>`
-                  ).join('')}</div>`
-                ],
-                'text/plain': ['<IPython.core.display.HTML object>']
-              },
-              execution_count: 1,
-              metadata: {},
-              output_type: 'execute_result'
-            }
-          ],
-          source: [
-            'from IPython.display import HTML\n',
-            '\n',
-            `HTML(f\'<div>{"".join("<div>I am a long string which is repeatedly added to the dom: %d</div>" % i for i in range(${n *
-              100}))}</div>\')`
-          ]
-        }
-      ])
-  },
-  '4 plotly outputs each with 1000 n points': {
-    waitFor: waitForPlotly,
-    notebook: (n: number) =>
-      makeNotebook([
-        {
-          cell_type: 'code',
-          execution_count: 1,
-          metadata: {},
-          outputs: [],
-          source: [
-            'import plotly.graph_objects as go\n',
-            `data = list(range(${n}))\n`,
-            'fig = go.Figure(data=go.Scatter(y=data, x=data))'
-          ]
-        },
-        ...Array.from({ length: 4 }, () => ({
-          cell_type: 'code',
-          execution_count: 1,
-          metadata: {},
-          outputs: [
-            {
-              data: {
-                'application/vnd.plotly.v1+json': {
-                  config: {
-                    plotlyServerURL: 'https://plot.ly'
-                  },
-                  data: [
-                    (points => ({
-                      type: 'scatter',
-                      x: points,
-                      y: points
-                    }))(Array.from({ length: n * 10 }, (_, i) => i))
-                  ],
-                  layout: {
-                    autosize: true
-                  }
-                }
-              },
-              metadata: {},
-              output_type: 'display_data'
-            }
-          ],
-          source: ['fig']
-        }))
-      ])
-  },
-  'n + 1 plotly ouputs each with four points': {
-    waitFor: waitForPlotly,
-    notebook: (n: number) =>
-      makeNotebook([
-        {
-          cell_type: 'code',
-          execution_count: 1,
-          metadata: {},
-          outputs: [],
-          source: [
-            'import plotly.graph_objects as go\n',
-            `data = list(range(${n}))\n`,
-            `fig = go.Figure(data=go.Scatter(y=data, x=data))`
-          ]
-        },
-        ...Array.from({ length: n + 1 }, () => ({
-          cell_type: 'code',
-          execution_count: 1,
-          metadata: {},
-          outputs: [
-            {
-              data: {
-                'application/vnd.plotly.v1+json': {
-                  config: {
-                    plotlyServerURL: 'https://plot.ly'
-                  },
-                  data: [
-                    (points => ({
-                      type: 'scatter',
-                      x: points,
-                      y: points
-                    }))(Array.from({ length: 4 }, (_, i) => i))
-                  ],
-                  layout: {
-                    autosize: true
-                  }
-                }
-              },
-              metadata: {},
-              output_type: 'display_data'
-            }
-          ],
-          source: ['fig']
-        }))
-      ])
-  }
-};
-
-/**
- * Wait for width to be changed to greater than the default of 700px which happens after rendering is done.
- */
-async function waitForPlotly({
-  widgetID,
-  page
-}: {
-  widgetID: string;
-  page: playwright.Page;
-}): Promise<void> {
-  await page.waitForFunction(
-    (widgetID: string) => {
-      const selector = `#${widgetID} .svg-container`;
-      console.log(`selector=${selector}`);
-      const el = document.querySelector(selector);
-      if (!el) {
-        return false;
-      }
-      const width = (el as HTMLDivElement).style['width'];
-      console.log(` width=${width}`);
-      // It's 100px originally, then 700px, then finally is recieved to page width
-      return width !== '700px' && width !== '100px';
-    },
-    {},
-    widgetID
-  );
-}
-
-type TYPES_TYPE = keyof typeof TYPES;
+const notebookEnv = process.env.BENCHMARK_NOTEBOOKS;
+const NOTEBOOK_PACKAGES: Array<string> = notebookEnv
+  ? JSON.parse(notebookEnv)
+  : ['./largePlotly', './longOutput', './manyPlotly', './manyOutputs'];
 
 type OUTPUT_TYPE = {
   browser: typeof BROWSERS[number];
   time: number;
-  type: TYPES_TYPE;
+  type: string;
   n: number;
 };
 
@@ -220,6 +41,9 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
 }
 
 (async () => {
+  const notebooks: Array<NotebookType> = (
+    await Promise.all(NOTEBOOK_PACKAGES.map(path => import(path)))
+  ).map(pkg => pkg.default);
   await writeLine('browser,n,type,time');
   await fs.promises.mkdir('data', { recursive: true });
 
@@ -228,7 +52,7 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
     /**
      * List of types that are now too big for this browser.
      */
-    const tooLong = new Set<TYPES_TYPE>();
+    const tooLong = new Set<string>();
     const browser = await playwright[browserName].launch({ headless: false });
     const context = await browser.newContext();
     const page = await context.newPage();
@@ -236,9 +60,9 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
       width: 1280,
       height: 960
     });
-    page.on('console', (msg: playwright.ConsoleMessage) => {
-      console.log(`browser type=${msg.type()} text=${msg.text()}`);
-    });
+    // page.on('console', (msg: playwright.ConsoleMessage) => {
+    //   console.log(`browser type=${msg.type()} text=${msg.text()}`);
+    // });
     /**
      * Wait for a widget to be visible.
      */
@@ -255,22 +79,22 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
     await waitForLaunch();
     for (let n = 0; n <= MAX_N; n += MAX_N / NUMBER_SAMPLES) {
       // stop testing if we don't have atleast two tests to keep running
-      if (Object.keys(TYPES).length - tooLong.size < 2) {
+      if (notebooks.length - tooLong.size < 2) {
         break;
       }
       console.log(` n=${n}/${MAX_N}`);
       // Open each notebook type we have for this n of samples
       // mapping from type to created id
-      const widgets: Array<{ type: TYPES_TYPE; id: string }> = [];
+      const widgets: Array<{ type: string; id: string }> = [];
 
       console.log(`  opening`);
-      for (const [type, { notebook, waitFor }] of Object.entries(TYPES)) {
-        const typeCast = type as TYPES_TYPE;
-        if (tooLong.has(typeCast)) {
+      for (const { notebook, waitFor, label } of notebooks) {
+        if (tooLong.has(label)) {
           continue;
         }
-        console.log(`   type=${type}`);
-        const path = `data/${type}-${n}.ipynb`;
+        console.log(`   type=${label}`);
+        const path = `data/${label}-${n}.ipynb`;
+
         await fs.promises.writeFile(
           path,
           JSON.stringify(notebook(n), null, ' '),
@@ -283,11 +107,11 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
         console.log(`    id=${id}`);
         await waitForWidget(id);
         await waitFor({ widgetID: id, page });
-        widgets.push({ type: typeCast, id });
+        widgets.push({ type: label, id });
       }
       console.log(`  switching`);
 
-      let totalTimes = new Map<TYPES_TYPE, number>();
+      let totalTimes = new Map<string, number>();
       // Then switch between them repeatedly
       for (let i = 0; i < SWITCHES; i++) {
         console.log(`   i=${i}/${SWITCHES}`);
@@ -300,7 +124,12 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
             lab.shell.activateById(${JSON.stringify(id)});
           }`);
           await waitForWidget(id);
-          await TYPES[type].waitFor({ widgetID: id, page });
+          await notebooks
+            .find(n => n.label === type)!
+            .waitFor({
+              widgetID: id,
+              page
+            });
           await page.evaluate("performance.measure('duration', 'start')");
           const time: number = await page.evaluate(
             'performance.getEntriesByName("duration")[0].duration'
@@ -309,7 +138,7 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
           totalTimes.set(type, (totalTimes.get(type) || 0) + time);
           await writeOutput({
             browser: browserName,
-            type: type as TYPES_TYPE,
+            type,
             n,
             time
           });
@@ -342,30 +171,3 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
   .catch(reason => {
     throw reason;
   });
-
-function makeNotebook(cells: Array<object>): object {
-  return {
-    cells,
-    metadata: {
-      kernelspec: {
-        display_name: 'Python 3',
-        language: 'python',
-        name: 'python3'
-      },
-      language_info: {
-        codemirror_mode: {
-          name: 'ipython',
-          version: 3
-        },
-        file_extension: '.py',
-        mimetype: 'text/x-python',
-        name: 'python',
-        nbconvert_exporter: 'python',
-        pygments_lexer: 'ipython3',
-        version: '3.8.0'
-      }
-    },
-    nbformat: 4,
-    nbformat_minor: 4
-  };
-}
