@@ -6,10 +6,9 @@
   "scripts": {
     "build:jlab": "cd .. && jlpm run build",
     "build:benchmark": "tsc",
-    "kill:jlab": "fkill -s :9999",
-    "start:jlab": "cd .. && jupyter lab --dev --no-browser --port 9999 --LabApp.password= --LabApp.token=",
+    "start:jlab": "fkill -s :9999 && cd .. && jupyter lab --dev --no-browser --port 9999 --LabApp.password= --LabApp.token=",
     "start:benchmark": "wait-on http-get://localhost:9999/lab && node --experimental-modules lib/index.js",
-    "start:all": "npm-run-all kill:jlab --parallel start:jlab start:benchmark --race",
+    "start:all": "npm-run-all --parallel start:jlab start:benchmark --race",
     "start:analysis": "cd .. && jupyter lab --dev benchmarks/analysis.vl.json",
     "all": "npm-run-all build:* start:all start:analysis"
   },
