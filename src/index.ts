@@ -10,6 +10,7 @@ import {
 
 import {
   ICommandPalette,
+  IThemeManager,
   MainAreaWidget,
   WidgetTracker
 } from '@jupyterlab/apputils';
@@ -210,7 +211,6 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
     });
-
     const updateHandlerAndCommands = async (widget: NotebookPanel) => {
       const { sessionContext } = widget;
       await sessionContext.ready;
@@ -271,7 +271,12 @@ const variables: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:variables',
   autoStart: true,
   requires: [IDebugger],
-  activate: (app: JupyterFrontEnd, service: IDebugger) => {
+  optional: [IThemeManager],
+  activate: (
+    app: JupyterFrontEnd,
+    service: IDebugger,
+    themeManager: IThemeManager
+  ) => {
     const { commands, shell } = app;
     const tracker = new WidgetTracker<MainAreaWidget<VariableDetailsGrid>>({
       namespace: 'variableDetails'
@@ -311,6 +316,19 @@ const variables: JupyterFrontEndPlugin<void> = {
         });
         widget.id = id;
         void tracker.add(widget);
+
+        if (themeManager) {
+          const updateStyle = () => {
+            const isLight =
+              themeManager && themeManager.theme
+                ? themeManager.isLight(themeManager.theme)
+                : true;
+            widget.content.theme = isLight ? 'light' : 'dark';
+          };
+          themeManager.themeChanged.connect(updateStyle);
+          updateStyle();
+        }
+
         shell.add(widget, 'main', {
           mode: tracker.currentWidget ? 'split-right' : 'split-bottom'
         });
@@ -325,7 +343,7 @@ const variables: JupyterFrontEndPlugin<void> = {
 const main: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:main',
   requires: [IEditorServices],
-  optional: [ILayoutRestorer, ICommandPalette, ISettingRegistry],
+  optional: [ILayoutRestorer, ICommandPalette, ISettingRegistry, IThemeManager],
   provides: IDebugger,
   autoStart: true,
   activate: async (
@@ -333,7 +351,8 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
     editorServices: IEditorServices,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null,
-    settingRegistry: ISettingRegistry | null
+    settingRegistry: ISettingRegistry | null,
+    themeManager: IThemeManager | null
   ): Promise<IDebugger> => {
     const { commands, shell } = app;
 
@@ -433,6 +452,18 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
       updateVariableSettings();
       setting.changed.connect(updateVariableSettings);
       sidebar.service.sessionChanged.connect(updateVariableSettings);
+    }
+
+    if (themeManager) {
+      const updateStyle = () => {
+        const isLight =
+          themeManager && themeManager.theme
+            ? themeManager.isLight(themeManager.theme)
+            : true;
+        sidebar.variables.theme = isLight ? 'light' : 'dark';
+      };
+      themeManager.themeChanged.connect(updateStyle);
+      updateStyle();
     }
 
     sidebar.service.eventMessage.connect(_ => {

@@ -7,7 +7,8 @@ import {
   BasicSelectionModel,
   DataGrid,
   DataModel,
-  SelectionModel
+  SelectionModel,
+  TextRenderer
 } from '@lumino/datagrid';
 
 import { CommandRegistry } from '@lumino/commands';
@@ -20,6 +21,7 @@ import { VariablesModel } from './model';
 
 import { CommandIDs } from '..';
 
+import { Theme } from '.';
 import { IDebugger } from '../tokens';
 
 export class VariablesBodyGrid extends Panel {
@@ -32,7 +34,6 @@ export class VariablesBodyGrid extends Panel {
     const updated = (model: VariablesModel) => {
       this._grid.dataModel.setData(model.scopes);
     };
-
     this._model.changed.connect(updated, this);
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariables-body');
@@ -44,6 +45,10 @@ export class VariablesBodyGrid extends Panel {
   set filter(filter: Set<string>) {
     (this._grid.dataModel as VariableDataGridModel).filter = filter;
     this._grid.dataModel.setData(this._model.scopes);
+  }
+
+  set theme(theme: Theme) {
+    this._grid.theme = theme;
   }
 
   private _grid: VariableGrid;
@@ -75,6 +80,13 @@ export class VariableGrid extends Panel {
     this.update();
   }
 
+  set theme(theme: Theme) {
+    const { dataStyle, textRender } =
+      theme === 'dark' ? Private.DARK_STYLE : Private.LIGHT_STYLE;
+    this._grid.cellRenderers.update({}, textRender);
+    this._grid.style = dataStyle;
+  }
+
   get dataModel(): VariableDataGridModel {
     return this._grid.dataModel as VariableDataGridModel;
   }
@@ -98,7 +110,7 @@ export class VariableDetailsGrid extends Panel {
     this.title.label = `${service.session?.connection?.name} - details of ${title}`;
     this._grid = new VariableGrid({ commands });
     const detailsScope = {
-      name: 'TEst',
+      name: title,
       variables: details
     };
     this._grid.dataModel.setData([detailsScope]);
@@ -107,6 +119,10 @@ export class VariableDetailsGrid extends Panel {
 
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariableDetails');
+  }
+
+  set theme(theme: Theme) {
+    this._grid.theme = theme;
   }
 
   /**
@@ -298,4 +314,42 @@ namespace VariableGrid {
      */
     commands: CommandRegistry;
   }
+}
+
+namespace Private {
+  export const DARK_STYLE = {
+    dataStyle: {
+      voidColor: '#212121',
+      gridLineColor: '#424242',
+      backgroundColor: '#212121',
+      headerGridLineColor: '#424242',
+      headerBackgroundColor: '#616161',
+      selectionFillColor: '#2196f32e'
+    },
+    textRender: new TextRenderer({
+      font: '12px sans-serif',
+      textColor: '#ffffff',
+      backgroundColor: '',
+      verticalAlignment: 'center',
+      horizontalAlignment: 'left'
+    })
+  };
+
+  export const LIGHT_STYLE = {
+    dataStyle: {
+      voidColor: '#ffffff',
+      gridLineColor: '#bdbdbd',
+      backgroundColor: '#ffffff',
+      headerGridLineColor: '#bdbdbd',
+      headerBackgroundColor: '#d2d2d2',
+      selectionFillColor: '#2196f32e'
+    },
+    textRender: new TextRenderer({
+      font: '12px sans-serif',
+      textColor: '#000000',
+      backgroundColor: '',
+      verticalAlignment: 'center',
+      horizontalAlignment: 'left'
+    })
+  };
 }

@@ -71,6 +71,10 @@ export class Variables extends Panel {
     this._table.filter = filter;
   }
 
+  set theme(theme: Theme) {
+    this._table.theme = theme;
+  }
+
   /**
    * A message handler invoked on a `'resize'` message.
    */
@@ -93,6 +97,8 @@ export class Variables extends Panel {
   private _tree: VariablesBodyTree;
   private _table: VariablesBodyGrid;
 }
+
+export type Theme = 'dark' | 'light';
 
 /**
  * Convert a variable to a primitive type.
