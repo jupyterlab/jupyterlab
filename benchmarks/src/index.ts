@@ -6,15 +6,18 @@ import fs from 'fs';
 
 const DATA_PATH = 'out.csv';
 
-// number of points to plot in each graph
-const N_PLOTLY_GRAPHS = 4;
-
 const BROWSERS: Array<'firefox' | 'chromium'> = ['firefox', 'chromium'];
+const MAX_N = 100;
+const NUMBER_SAMPLES = 20;
+const SWITCHES = 5;
+
+/**
+ * Max time to stop testing if mean of previous sample was > this.
+ */
+const MAX_TIME = 2 * 1000;
+
 const TYPES = {
-  /**
-   * Create a notebook with many outputs
-   */
-  'many-outputs': {
+  '100 n outputs each of a div': {
     waitFor: async () => null,
     notebook: (n: number) =>
       makeNotebook([
@@ -22,7 +25,7 @@ const TYPES = {
           cell_type: 'code',
           execution_count: 1,
           metadata: {},
-          outputs: Array.from({ length: n }, (_, i) => ({
+          outputs: Array.from({ length: n * 100 }, (_, i) => ({
             data: {
               'text/plain': [
                 `'I am a long string which is repeatedly added to the dom: ${i}'`
@@ -34,16 +37,13 @@ const TYPES = {
           source: [
             'from IPython.display import display\n',
             '\n',
-            `for i in range(${n}):\n`,
+            `for i in range(${n * 100}):\n`,
             "    display('I am a long string which is repeatedly added to the dom: %d' % i)"
           ]
         }
       ])
   },
-  /**
-   * Create a notebook with one long output
-   */
-  'long-output': {
+  'one output with 100 n divs': {
     waitFor: async () => null,
     notebook: (n: number) =>
       makeNotebook([
@@ -56,7 +56,7 @@ const TYPES = {
               data: {
                 'text/html': [
                   `<div>${Array.from(
-                    { length: n },
+                    { length: n * 100 },
                     (_, i) =>
                       `<div>I am a long string which is repeatedly added to the dom: ${i}</div>`
                   ).join('')}</div>`
@@ -71,15 +71,13 @@ const TYPES = {
           source: [
             'from IPython.display import HTML\n',
             '\n',
-            `HTML(f\'<div>{"".join("<div>I am a long string which is repeatedly added to the dom: %d</div>" % i for i in range(${n}))}</div>\')`
+            `HTML(f\'<div>{"".join("<div>I am a long string which is repeatedly added to the dom: %d</div>" % i for i in range(${n *
+              100}))}</div>\')`
           ]
         }
       ])
   },
-  /**
-   * Create a notebook with a couple of plotly plots, each with `n * 10` points
-   */
-  'big-plotly': {
+  '4 plotly outputs each with 1000 n points': {
     waitFor: waitForPlotly,
     notebook: (n: number) =>
       makeNotebook([
@@ -94,7 +92,7 @@ const TYPES = {
             'fig = go.Figure(data=go.Scatter(y=data, x=data))'
           ]
         },
-        ...Array.from({ length: N_PLOTLY_GRAPHS }, () => ({
+        ...Array.from({ length: 4 }, () => ({
           cell_type: 'code',
           execution_count: 1,
           metadata: {},
@@ -125,10 +123,7 @@ const TYPES = {
         }))
       ])
   },
-  /**
-   * Create a notebook with n / 100 plotly graphs, each with four points
-   */
-  'many-plotly': {
+  'n + 1 plotly ouputs each with four points': {
     waitFor: waitForPlotly,
     notebook: (n: number) =>
       makeNotebook([
@@ -143,7 +138,7 @@ const TYPES = {
             `fig = go.Figure(data=go.Scatter(y=data, x=data))`
           ]
         },
-        ...Array.from({ length: Math.floor(n / 100) + 1 }, () => ({
+        ...Array.from({ length: n + 1 }, () => ({
           cell_type: 'code',
           execution_count: 1,
           metadata: {},
@@ -205,15 +200,6 @@ async function waitForPlotly({
 }
 
 type TYPES_TYPE = keyof typeof TYPES;
-
-const MAX_N = 10000;
-const NUMBER_SAMPLES = 20;
-const SWITCHES = 5;
-
-/**
- * Max time to stop testing if mean of previous sample was > this.
- */
-const MAX_TIME = 2 * 1000;
 
 type OUTPUT_TYPE = {
   browser: typeof BROWSERS[number];
