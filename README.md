@@ -4,7 +4,7 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/jupyterlab/debugger/stable?urlpath=/lab/tree/examples/index.ipynb)
 [![npm](https://img.shields.io/npm/v/@jupyterlab/debugger.svg)](https://www.npmjs.com/package/@jupyterlab/debugger)
 
-A JupyterLab debugger UI extension.
+A JupyterLab debugger UI extension. This extension is under active development.
 
 ![screencast](./screencast.gif)
 
@@ -16,16 +16,19 @@ A JupyterLab debugger UI extension.
 
 ## Installation
 
-This extension is under active development and is available as a pre-release:
+A kernel with support for debugging is required to be able to use the debugger.
+
+It is generally recommended to create a new `conda` environment to install the dependencies:
+
+```bash
+conda create -n jupyterlab-debugger -c conda-forge xeus-python=0.6.12 notebook=6 jupyterlab=2 ptvsd
+conda activate jupyterlab-debugger
+```
+
+Then, run the following command to install the extension:
 
 ```bash
 jupyter labextension install @jupyterlab/debugger
-```
-
-A kernel with support for debugging is also required to be able to use the debugger:
-
-```bash
-conda install -c conda-forge xeus-python=0.6.12 notebook=6 ptvsd
 ```
 
 ## Development
