@@ -2,7 +2,11 @@
   "data": {
     "url": "./out.csv"
   },
-  "mark": { "type": "errorband", "extent": "ci" },
+  "mark": {
+    "type": "errorband",
+    "extent": "ci",
+    "clip": true
+  },
   "encoding": {
     "x": {
       "field": "n",
@@ -12,13 +16,15 @@
     "y": {
       "field": "time",
       "type": "quantitative",
-      "scale": {}
+      "scale": {
+        "domain": [0, 2000]
+      }
     },
-    "column": {
+    "row": {
       "field": "browser",
       "type": "nominal"
     },
-    "color": {
+    "column": {
       "field": "type",
       "type": "nominal"
     }
