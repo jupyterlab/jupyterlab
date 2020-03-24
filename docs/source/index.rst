@@ -59,7 +59,6 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
    developer/patterns
    developer/css
    developer/virtualdom
-   developer/examples
    developer/ui_helpers
    developer/terminology
    developer/extension_tutorial
