@@ -409,11 +409,7 @@ export class Context<T extends DocumentRegistry.IModel>
         };
       }
       this._path = newPath;
-      if (this.sessionContext.session) {
-        void this.sessionContext.session.setPath(newPath);
-      } else {
-        this.sessionContext.path = newPath;
-      }
+      void this.sessionContext.session?.setPath(newPath);
       const updateModel = {
         ...this._contentsModel,
         ...changeModel
