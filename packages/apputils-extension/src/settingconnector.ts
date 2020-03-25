@@ -1,8 +1,10 @@
 import { PageConfig } from '@jupyterlab/coreutils';
 
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import { DataConnector, IDataConnector } from '@jupyterlab/statedb';
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { Throttler } from '@lumino/polling';
 
 /**
  * A data connector for fetching settings.
@@ -19,8 +21,19 @@ export class SettingConnector extends DataConnector<
     this._connector = connector;
   }
 
+  /**
+   * Fetch settings for a plugin.
+   * @param id - The plugin ID
+   *
+   * #### Notes
+   * The REST API requests are throttled at one request per plugin per 100ms.
+   */
   fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
-    return this._connector.fetch(id);
+    const throttlers = this._throttlers;
+    if (!(id in throttlers)) {
+      throttlers[id] = new Throttler(() => this._connector.fetch(id), 100);
+    }
+    return throttlers[id].invoke();
   }
 
   async list(
@@ -44,4 +57,5 @@ export class SettingConnector extends DataConnector<
   }
 
   private _connector: IDataConnector<ISettingRegistry.IPlugin, string>;
+  private _throttlers: { [key: string]: Throttler } = Object.create(null);
 }
