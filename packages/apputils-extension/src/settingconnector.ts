@@ -31,12 +31,7 @@ export class SettingConnector extends DataConnector<
   fetch(id: string): Promise<ISettingRegistry.IPlugin | undefined> {
     const throttlers = this._throttlers;
     if (!(id in throttlers)) {
-      throttlers[id] = new Throttler(async () => {
-        const fetched = await this._connector.fetch(id);
-        throttlers[id].dispose();
-        delete throttlers[id];
-        return fetched;
-      }, 100);
+      throttlers[id] = new Throttler(() => this._connector.fetch(id), 100);
     }
     return throttlers[id].invoke();
   }
