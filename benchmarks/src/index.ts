@@ -1,8 +1,10 @@
 /**
  * Runs a number of benchmarks and saves the results to the
  */
-import playwright from 'playwright';
+import child_process from 'child_process';
 import fs from 'fs';
+import playwright from 'playwright';
+import util from 'util';
 import NotebookType from './notebookType';
 
 const DATA_PATH = 'out.csv';
@@ -100,6 +102,7 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
           JSON.stringify(notebook(n), null, ' '),
           { flag: 'w' }
         );
+        await util.promisify(child_process.exec)(`jupyter trust "${path}"`);
         await page.evaluate('lab.restored');
         const id: string = await page.evaluate(`lab.commands.execute('docmanager:open', {
           path: ${JSON.stringify(`benchmarks/${path}`)}
