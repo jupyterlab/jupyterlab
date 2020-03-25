@@ -62,6 +62,8 @@ export namespace CommandIDs {
 
   export const createConsole = 'fileeditor:create-console';
 
+  export const replaceSelection = 'fileeditor:replace-selection';
+
   export const runCode = 'fileeditor:run-code';
 
   export const runAllCode = 'fileeditor:run-all';
@@ -358,6 +360,28 @@ export namespace Commands {
       },
       label: 'Auto Close Brackets for Text Editor',
       isToggled: () => config.autoClosingBrackets
+    });
+  }
+
+  /**
+   * Add the replace selection for text editor command
+   */
+  export function addReplaceSelectionCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.replaceSelection, {
+      execute: args => {
+        const text: string = (args['text'] as string) || '';
+        let widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+        widget.content.editor.replaceSelection(text);
+      },
+      isEnabled,
+      label: 'Replace Selection in Editor'
     });
   }
 

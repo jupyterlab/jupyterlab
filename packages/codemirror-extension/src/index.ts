@@ -26,10 +26,6 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
 
-import { INotebookTracker } from '@jupyterlab/notebook';
-
-import { IConsoleTracker } from '@jupyterlab/console';
-
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -47,8 +43,6 @@ namespace CommandIDs {
   export const find = 'codemirror:find';
 
   export const goToLine = 'codemirror:go-to-line';
-
-  export const insertText = 'codemirror:insert-text';
 }
 
 /**
@@ -65,12 +59,7 @@ const services: JupyterFrontEndPlugin<IEditorServices> = {
  */
 const commands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [
-    IEditorTracker,
-    INotebookTracker,
-    IConsoleTracker,
-    ISettingRegistry
-  ],
+  requires: [IEditorTracker, ISettingRegistry],
   optional: [IMainMenu],
   activate: activateEditorCommands,
   autoStart: true
@@ -149,8 +138,6 @@ function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
 function activateEditorCommands(
   app: JupyterFrontEnd,
   tracker: IEditorTracker,
-  notebookTracker: INotebookTracker,
-  consoleTracker: IConsoleTracker,
   settingRegistry: ISettingRegistry,
   mainMenu: IMainMenu | null
 ): void {
@@ -345,28 +332,6 @@ function activateEditorCommands(
       let spec = Mode.findByMIME(mime);
       let name = spec && spec.name;
       return args['name'] === name;
-    }
-  });
-
-  commands.addCommand(CommandIDs.insertText, {
-    label: 'Insert Text',
-    execute: args => {
-      const text: string = (args['text'] as string) || '';
-      let widget = tracker.currentWidget;
-      let currentCell = notebookTracker.activeCell;
-      let currentConsole = consoleTracker.currentWidget;
-
-      if (widget && widget.content.editor.hasFocus()) {
-        widget.content.editor.insertText(text);
-      } else if (currentCell && currentCell.editor.hasFocus()) {
-        currentCell.editor.insertText(text);
-      } else if (
-        currentConsole &&
-        currentConsole.console.promptCell &&
-        currentConsole.console.promptCell.editor.hasFocus()
-      ) {
-        currentConsole.console.insertText(text);
-      }
     }
   });
 
