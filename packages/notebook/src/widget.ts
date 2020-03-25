@@ -1538,7 +1538,7 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
-   * Handle emtpy backspace signals from cells (delete the cell).
+   * Handle empty backspace signals from cells (delete the cell).
    */
 
   private _onEmptyBackspace(editor: CodeEditor.IEditor) {
