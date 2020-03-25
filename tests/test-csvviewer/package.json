@@ -21,7 +21,7 @@
     "@jupyterlab/services": "^5.0.2",
     "@jupyterlab/testutils": "^2.0.2",
     "@lumino/coreutils": "^1.4.2",
-    "@lumino/datagrid": "^0.5.3",
+    "@lumino/datagrid": "^0.6.0",
     "@lumino/widgets": "^1.11.1",
     "chai": "^4.2.0",
     "csv-spectrum": "~1.0.0",
