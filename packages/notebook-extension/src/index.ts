@@ -227,7 +227,7 @@ namespace CommandIDs {
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
 
-  export const insertText = 'notebook:insert-text';
+  export const replaceSelection = 'notebook:replace-selection';
 }
 
 /**
@@ -1901,13 +1901,13 @@ function addCommands(
     },
     isEnabled
   });
-  commands.addCommand(CommandIDs.insertText, {
-    label: 'Insert text into cell',
+  commands.addCommand(CommandIDs.replaceSelection, {
+    label: 'Replace Selection in Notebook Cell',
     execute: args => {
       const current = getCurrent(args);
       const text: string = (args['text'] as string) || '';
       if (current) {
-        return NotebookActions.insertText(current.content, text);
+        return NotebookActions.replaceSelection(current.content, text);
       }
     },
     isEnabled

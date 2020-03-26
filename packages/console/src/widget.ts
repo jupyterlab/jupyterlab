@@ -363,15 +363,15 @@ export class CodeConsole extends Widget {
   }
 
   /**
-   * Inserts text into the prompt cell.
-   * @param text - The text to be inserted.
+   * Replaces the selected text in the prompt cell.
+   * @param text - The text to replace the selection.
    */
-  insertText(text: string): void {
+  replaceSelection(text: string): void {
     let promptCell = this.promptCell;
     if (!promptCell) {
       return;
     }
-    promptCell.editor.insertText(text);
+    promptCell.editor.replaceSelection(text);
   }
 
   /**

@@ -89,7 +89,7 @@ namespace CommandIDs {
 
   export const interactionMode = 'console:interaction-mode';
 
-  export const insertText = 'console:insert-text';
+  export const replaceSelection = 'console:replace-selection';
 }
 
 /**
@@ -433,15 +433,15 @@ async function activateConsole(
     isEnabled
   });
 
-  commands.addCommand(CommandIDs.insertText, {
-    label: 'Insert Text',
+  commands.addCommand(CommandIDs.replaceSelection, {
+    label: 'Replace Selection in Console',
     execute: args => {
       let current = getCurrent(args);
       if (!current) {
         return;
       }
       const text: string = (args['text'] as string) || '';
-      current.console.insertText(text);
+      current.console.replaceSelection(text);
     }
   });
 

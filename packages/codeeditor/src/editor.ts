@@ -570,7 +570,7 @@ export namespace CodeEditor {
     /**
      * Replaces selection with the given text.
      */
-    insertText(text: string): void;
+    replaceSelection?(text: string): void;
   }
 
   /**

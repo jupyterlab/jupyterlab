@@ -188,6 +188,8 @@ export namespace Commands {
 
     addAutoClosingBracketsCommand(commands, settingRegistry, id);
 
+    addReplaceSelectionCommand(commands, tracker, isEnabled);
+
     addCreateConsoleCommand(commands, tracker, isEnabled);
 
     addRunCodeCommand(commands, tracker, isEnabled);

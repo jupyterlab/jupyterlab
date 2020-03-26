@@ -660,16 +660,18 @@ export namespace NotebookActions {
   }
 
   /**
-   * Inserts text into the active cell of the notebook.
+   * Replaces the selection in the active cell of the notebook.
+   *
    * @param notebook - The target notebook widget.
-   * @param text - The text to be inserted.
+   * @param text - The text to replace the selection.
    */
-  export function insertText(notebook: Notebook, text: string): void {
+  export function replaceSelection(notebook: Notebook, text: string): void {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
-    notebook.activeCell.editor.insertText(text);
+    notebook.activeCell.editor.replaceSelection(text);
   }
+
   /**
    * Select the above the active cell.
    *
