@@ -35,6 +35,7 @@
   --jp-icon-edit: url('icons/toolbar/edit.svg');
   --jp-icon-ellipses: url('icons/toolbar/ellipses.svg');
   --jp-icon-extension: url('icons/sidebar/extension.svg');
+  --jp-icon-fast-forward: url('icons/toolbar/fast-forward.svg');
   --jp-icon-file-upload: url('icons/toolbar/file-upload.svg');
   --jp-icon-file: url('icons/filetype/file.svg');
   --jp-icon-filter-list: url('icons/toolbar/filter-list.svg');
@@ -62,8 +63,8 @@
   --jp-icon-r-kernel: url('icons/filetype/r-kernel.svg');
   --jp-icon-react: url('icons/filetype/react.svg');
   --jp-icon-refresh: url('icons/toolbar/refresh.svg');
-  --jp-icon-restart-and-run: url('icons/toolbar/restart-and-run.svg');
   --jp-icon-regex: url('icons/search/regex.svg');
+  --jp-icon-restart-and-run: url('icons/toolbar/restart-and-run.svg');
   --jp-icon-run: url('icons/toolbar/run.svg');
   --jp-icon-running: url('icons/sidebar/running.svg');
   --jp-icon-save: url('icons/toolbar/save.svg');
@@ -151,6 +152,9 @@
 .jp-ExtensionIcon {
   background-image: var(--jp-icon-extension);
 }
+.jp-FastForwardIcon {
+  background-image: var(--jp-icon-fast-forward);
+}
 .jp-FileIcon {
   background-image: var(--jp-icon-file);
 }
@@ -232,11 +236,11 @@
 .jp-RefreshIcon {
   background-image: var(--jp-icon-refresh);
 }
-.jp-RestartAndRunIcon {
-  background-image: var(--jp-icon-restart-and-run);
-}
 .jp-RegexIcon {
   background-image: var(--jp-icon-regex);
+}
+.jp-RestartAndRunIcon {
+  background-image: var(--jp-icon-restart-and-run);
 }
 .jp-RunIcon {
   background-image: var(--jp-icon-run);
