@@ -380,7 +380,7 @@ export namespace Commands {
         if (!widget) {
           return;
         }
-        widget.content.editor.replaceSelection(text);
+        widget.content.editor.replaceSelection?.(text);
       },
       isEnabled,
       label: 'Replace Selection in Editor'

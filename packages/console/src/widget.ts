@@ -371,7 +371,7 @@ export class CodeConsole extends Widget {
     if (!promptCell) {
       return;
     }
-    promptCell.editor.replaceSelection(text);
+    promptCell.editor.replaceSelection?.(text);
   }
 
   /**

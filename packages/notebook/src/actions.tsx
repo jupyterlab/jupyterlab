@@ -669,7 +669,7 @@ export namespace NotebookActions {
     if (!notebook.model || !notebook.activeCell) {
       return;
     }
-    notebook.activeCell.editor.replaceSelection(text);
+    notebook.activeCell.editor.replaceSelection?.(text);
   }
 
   /**

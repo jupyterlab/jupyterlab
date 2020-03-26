@@ -442,7 +442,8 @@ async function activateConsole(
       }
       const text: string = (args['text'] as string) || '';
       current.console.replaceSelection(text);
-    }
+    },
+    isEnabled
   });
 
   commands.addCommand(CommandIDs.interrupt, {
