@@ -35,6 +35,7 @@
   --jp-icon-edit: url('icons/toolbar/edit.svg');
   --jp-icon-ellipses: url('icons/toolbar/ellipses.svg');
   --jp-icon-extension: url('icons/sidebar/extension.svg');
+  --jp-icon-fast-forward: url('icons/toolbar/fast-forward.svg');
   --jp-icon-file-upload: url('icons/toolbar/file-upload.svg');
   --jp-icon-file: url('icons/filetype/file.svg');
   --jp-icon-filter-list: url('icons/toolbar/filter-list.svg');
@@ -149,6 +150,9 @@
 }
 .jp-ExtensionIcon {
   background-image: var(--jp-icon-extension);
+}
+.jp-FastForwardIcon {
+  background-image: var(--jp-icon-fast-forward);
 }
 .jp-FileIcon {
   background-image: var(--jp-icon-file);
