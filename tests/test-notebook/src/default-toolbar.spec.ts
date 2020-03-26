@@ -217,7 +217,7 @@ describe('@jupyterlab/notebook', () => {
             'run',
             'interrupt',
             'restart',
-            'restart-and-run',
+            'restart-and-run-all',
             'cellType',
             'spacer',
             'kernelName',
