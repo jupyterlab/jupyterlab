@@ -63,6 +63,7 @@
   --jp-icon-r-kernel: url('icons/filetype/r-kernel.svg');
   --jp-icon-react: url('icons/filetype/react.svg');
   --jp-icon-refresh: url('icons/toolbar/refresh.svg');
+  --jp-icon-restart-and-run: url('icons/toolbar/restart-and-run.svg');
   --jp-icon-regex: url('icons/search/regex.svg');
   --jp-icon-run: url('icons/toolbar/run.svg');
   --jp-icon-running: url('icons/sidebar/running.svg');
@@ -234,6 +235,9 @@
 }
 .jp-RefreshIcon {
   background-image: var(--jp-icon-refresh);
+}
+.jp-RestartAndRunIcon {
+  background-image: var(--jp-icon-restart-and-run);
 }
 .jp-RegexIcon {
   background-image: var(--jp-icon-regex);
