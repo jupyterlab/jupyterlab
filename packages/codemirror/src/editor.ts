@@ -573,6 +573,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
 
   /**
    * Replaces the current selection with the given text.
+   *
    * @param text The text to be inserted.
    */
   replaceSelection(text: string): void {
