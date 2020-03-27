@@ -96,6 +96,29 @@ export interface IJupyterLabPackageData {
   };
 }
 
+// Mapping of manager name to function that take name and gives command
+const managerCommand: { [key: string]: (name: string) => string } = {
+  pip: name => `pip install ${name}`,
+  conda: name => `conda install -c conda-forge ${name}`
+};
+
+function getInstallCommands(info: IInstallInfo) {
+  let commands = Array<string>();
+  for (const manager of info.managers) {
+    const name = info.overrides?.[manager]?.name ?? info.base.name;
+    if (!name) {
+      console.warn(`No package name found for manager ${manager}`);
+      continue;
+    }
+    const command = managerCommand[manager]?.(name);
+    if (!command) {
+      console.warn(`Don't know how to install packages for manager ${manager}`);
+    }
+    commands.push(command);
+  }
+  return commands;
+}
+
 /**
  * Prompt the user what do about companion packages, if present.
  *
@@ -110,8 +133,15 @@ export function presentCompanions(
     entries.push(
       <p key="server-companion">
         This package has indicated that it needs a corresponding server
-        extension:
-        <code> {serverCompanion.base.name!}</code>
+        extension. Please contact your Administrator to update the server with
+        one of the following commands:
+        {getInstallCommands(serverCompanion).map(command => {
+          return (
+            <p>
+              <code>{command}</code>
+            </p>
+          );
+        })}
       </p>
     );
   }
@@ -139,6 +169,20 @@ export function presentCompanions(
         );
       }
       entries.push(<ul key={'kernel-companion-end'}>{kernelEntries}</ul>);
+      entries.push(
+        <p key={`kernel-companion-${index}`}>
+          This package has indicated that it needs a corresponding kernel
+          package. Please contact your Administrator to update the server with
+          one of the following commands:
+          {getInstallCommands(entry.kernelInfo).map(command => {
+            return (
+              <p>
+                <code>{command}</code>
+              </p>
+            );
+          })}
+        </p>
+      );
     }
   }
   let body = (
