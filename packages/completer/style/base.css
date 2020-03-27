@@ -73,6 +73,7 @@
   background: transparent;
   color: white;
   width: var(--jp-private-completer-item-height);
+  min-width: var(--jp-private-completer-item-height);
   font-family: var(--jp-ui-font-family);
   font-size: var(--jp-ui-font-size1);
   line-height: calc(
