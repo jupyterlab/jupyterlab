@@ -116,7 +116,11 @@ export class SearchInstance implements IDisposable {
   }
 
   private async _replaceCurrent(newText: string) {
-    if (this._activeProvider && this._displayState.query && !!newText) {
+    if (
+      this._activeProvider &&
+      this._displayState.query &&
+      newText !== undefined
+    ) {
       await this._activeProvider.replaceCurrentMatch(newText);
       this.updateIndices();
     }
