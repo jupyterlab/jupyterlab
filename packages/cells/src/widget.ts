@@ -1326,7 +1326,17 @@ export abstract class AttachmentsCell extends Cell {
       const mimeType = matches[1];
       const encodedData = matches[3];
       const bundle: nbformat.IMimeBundle = { [mimeType]: encodedData };
-      const URI = encodeURI(blob.name)
+
+      // Find an unused URI
+      let URI = encodeURI(blob.name)
+      let URI_array = URI.split(/(\.)(?=[^\.]+$)/);
+      URI_array.splice(1, 0, '');
+      let i = 1;
+      while (this.model.attachments.has(URI)){
+        URI_array[1] = `_${i}`;
+        URI = URI_array.join('');
+        i = i+1;
+      }
       this.model.attachments.set(URI, bundle);
       this.updateCellSourceWithAttachment(blob.name, URI);
     };
