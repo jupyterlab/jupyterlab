@@ -1169,7 +1169,8 @@ export abstract class AttachmentsCell extends Cell {
    * Modify the cell source to include a reference to the attachment.
    */
   protected abstract updateCellSourceWithAttachment(
-    attachmentName: string
+    attachmentName: string,
+    URI: string
   ): void;
 
   /**
@@ -1325,8 +1326,9 @@ export abstract class AttachmentsCell extends Cell {
       const mimeType = matches[1];
       const encodedData = matches[3];
       const bundle: nbformat.IMimeBundle = { [mimeType]: encodedData };
-      this.model.attachments.set(blob.name, bundle);
-      this.updateCellSourceWithAttachment(blob.name);
+      const URI = encodeURI(blob.name)
+      this.model.attachments.set(URI, bundle);
+      this.updateCellSourceWithAttachment(blob.name, URI);
     };
     reader.onerror = evt => {
       console.error(`Failed to attach ${blob.name}` + evt);
@@ -1445,8 +1447,8 @@ export class MarkdownCell extends AttachmentsCell {
   /**
    * Modify the cell source to include a reference to the attachment.
    */
-  protected updateCellSourceWithAttachment(attachmentName: string) {
-    const textToBeAppended = `![${attachmentName}](attachment:${attachmentName})`;
+  protected updateCellSourceWithAttachment(attachmentName: string, URI: string) {
+    const textToBeAppended = `![${attachmentName}](attachment:${URI})`;
     this.model.value.insert(this.model.value.text.length, textToBeAppended);
   }
 
