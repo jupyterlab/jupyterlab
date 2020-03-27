@@ -174,7 +174,7 @@ def dedupe_yarn(path, logger=None):
         pins above, for example, known-bad versions
     """
     had_dupes = ProgressProcess(
-        ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer'],
+        ['node', YARN_PATH, 'yarn-deduplicate', '-s', 'fewer', '--fail'],
         cwd=path, logger=logger
     ).wait() != 0
 
@@ -1507,11 +1507,25 @@ class _AppHandler(object):
         info = self._extract_package(extension, tempdir, pin=pin)
         data = info['data']
 
+        # Check for compatible version unless:
+        # - A specific version was requested (@ in name,
+        #   but after first char to allow for scope marker).
+        # - Package is locally installed.
+        allow_fallback = '@' not in extension[1:] and not info['is_dir']
+        name = info['name']
+
         # Verify that the package is an extension.
         messages = _validate_extension(data)
         if messages:
             msg = '"%s" is not a valid extension:\n%s'
-            raise ValueError(msg % (extension, '\n'.join(messages)))
+            msg = msg % (extension, '\n'.join(messages))
+            if allow_fallback:
+                try:
+                    version = self._latest_compatible_package_version(name)
+                except URLError:
+                    raise ValueError(msg)
+            else:
+                raise ValueError(msg)
 
         # Verify package compatibility.
         deps = data.get('dependencies', dict())
@@ -1520,12 +1534,7 @@ class _AppHandler(object):
             msg = _format_compatibility_errors(
                 data['name'], data['version'], errors
             )
-            # Check for compatible version unless:
-            # - A specific version was requested (@ in name,
-            #   but after first char to allow for scope marker).
-            # - Package is locally installed.
-            if '@' not in extension[1:] and not info['is_dir']:
-                name = info['name']
+            if allow_fallback:
                 try:
                     version = self._latest_compatible_package_version(name)
                 except URLError:
