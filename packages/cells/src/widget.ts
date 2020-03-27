@@ -1447,7 +1447,7 @@ export class MarkdownCell extends AttachmentsCell {
   /**
    * Modify the cell source to include a reference to the attachment.
    */
-  protected updateCellSourceWithAttachment(attachmentName: string, URI: string) {
+  protected updateCellSourceWithAttachment(attachmentName: string, URI?: string) {
     const textToBeAppended = `![${attachmentName}](attachment:${URI})`;
     this.model.value.insert(this.model.value.text.length, textToBeAppended);
   }
