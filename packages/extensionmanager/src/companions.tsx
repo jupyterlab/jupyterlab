@@ -99,7 +99,7 @@ export interface IJupyterLabPackageData {
 function getInstallCommands(info: IInstallInfo) {
   let commands = Array<string>();
   if (info.overrides?.pip?.name) {
-    commands.push(`pip install ${info.overrides!['pip']!.name}`);
+    commands.push(`pip install ${info.overrides.pip.name}`);
   } else {
     const pip = info.managers.find(s => s === 'pip');
     if (pip) {
@@ -107,9 +107,7 @@ function getInstallCommands(info: IInstallInfo) {
     }
   }
   if (info.overrides?.conda?.name) {
-    commands.push(
-      `conda install -c conda-forge ${info.overrides!['conda']!.name}`
-    );
+    commands.push(`conda install -c conda-forge ${info.overrides.conda.name}`);
   } else {
     const conda = info.managers.find(s => s === 'conda');
     if (conda) {
