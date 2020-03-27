@@ -17,11 +17,28 @@ if [[ $GROUP == python ]]; then
 fi
 
 
-if [[ $GROUP == js ]]; then
+if [[ $GROUP == js* ]]; then
+
+    if [[ $GROUP == js-* ]]; then
+        # extract the group name
+        export PKG="${GROUP#*-}"
+        jlpm run build:packages:scope --scope "@jupyterlab/$PKG"
+        jlpm run build:test:scope --scope "@jupyterlab/test-$PKG"
+        FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope "@jupyterlab/test-$PKG"
+    else
+        jlpm build:packages
+        jlpm build:test
+        FORCE_COLOR=1 jlpm test --loglevel success
+    fi
+
+    jlpm run clean
+fi
+
+if [[ $GROUP == jsscope ]]; then
 
     jlpm build:packages
     jlpm build:test
-    FORCE_COLOR=1 jlpm coverage --loglevel success
+    FORCE_COLOR=1 jlpm test:scope --loglevel success --scope $JSTESTGROUP
 
     jlpm run clean
 fi

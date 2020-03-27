@@ -38,6 +38,7 @@
   "dependencies": {
     "@jupyterlab/application": "^2.0.2",
     "@jupyterlab/apputils": "^2.0.2",
+    "@jupyterlab/coreutils": "^4.0.2",
     "@jupyterlab/markdownviewer": "^2.0.2",
     "@jupyterlab/rendermime": "^2.0.2",
     "@jupyterlab/settingregistry": "^2.0.1"

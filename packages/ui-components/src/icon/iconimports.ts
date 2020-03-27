@@ -31,6 +31,7 @@ import downloadSvgstr from '../../style/icons/toolbar/download.svg';
 import editSvgstr from '../../style/icons/toolbar/edit.svg';
 import ellipsesSvgstr from '../../style/icons/toolbar/ellipses.svg';
 import extensionSvgstr from '../../style/icons/sidebar/extension.svg';
+import fastForwardSvgstr from '../../style/icons/toolbar/fast-forward.svg';
 import fileSvgstr from '../../style/icons/filetype/file.svg';
 import fileUploadSvgstr from '../../style/icons/toolbar/file-upload.svg';
 import filterListSvgstr from '../../style/icons/toolbar/filter-list.svg';
@@ -99,6 +100,7 @@ export const downloadIcon = new LabIcon({ name: 'ui-components:download', svgstr
 export const editIcon = new LabIcon({ name: 'ui-components:edit', svgstr: editSvgstr });
 export const ellipsesIcon = new LabIcon({ name: 'ui-components:ellipses', svgstr: ellipsesSvgstr });
 export const extensionIcon = new LabIcon({ name: 'ui-components:extension', svgstr: extensionSvgstr });
+export const fastForwardIcon = new LabIcon({ name: 'ui-components:fast-forward', svgstr: fastForwardSvgstr });
 export const fileIcon = new LabIcon({ name: 'ui-components:file', svgstr: fileSvgstr });
 export const fileUploadIcon = new LabIcon({ name: 'ui-components:file-upload', svgstr: fileUploadSvgstr });
 export const filterListIcon = new LabIcon({ name: 'ui-components:filter-list', svgstr: filterListSvgstr });
