@@ -96,23 +96,25 @@ export interface IJupyterLabPackageData {
   };
 }
 
+// Mapping of manager name to function that take name and gives command
+const managerCommand: { [key: string]: (name: string) => string } = {
+  pip: name => `pip install ${name}`,
+  conda: name => `conda install -c conda-forge ${name}`
+};
+
 function getInstallCommands(info: IInstallInfo) {
   let commands = Array<string>();
-  if (info.overrides?.pip?.name) {
-    commands.push(`pip install ${info.overrides.pip.name}`);
-  } else {
-    const pip = info.managers.find(s => s === 'pip');
-    if (pip) {
-      commands.push(`pip install ${info.base.name}`);
+  for (const manager of info.managers) {
+    const name = info.overrides?.[manager]?.name ?? info.base.name;
+    if (!name) {
+      console.warn(`No package name found for manager ${manager}`);
+      continue;
     }
-  }
-  if (info.overrides?.conda?.name) {
-    commands.push(`conda install -c conda-forge ${info.overrides.conda.name}`);
-  } else {
-    const conda = info.managers.find(s => s === 'conda');
-    if (conda) {
-      commands.push(`conda install -c conda-forge ${info.base.name}`);
+    const command = managerCommand[manager]?.(name);
+    if (!command) {
+      console.warn(`Don't know how to install packages for manager ${manager}`);
     }
+    commands.push(command);
   }
   return commands;
 }
