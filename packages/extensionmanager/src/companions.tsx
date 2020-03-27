@@ -141,7 +141,7 @@ export function presentCompanions(
     entries.push(
       <p key="server-companion">
         This package has indicated that it needs a corresponding server
-        extension. Please contact your Adminstrator to update the server with
+        extension. Please contact your Administrator to update the server with
         one of the following commands:
         {getInstallCommands(serverCompanion).map(command => {
           return (
