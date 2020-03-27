@@ -270,7 +270,7 @@ export class ListModel extends VDomModel {
   /**
    * The list mode.
    */
-  get listMode(): 'black' | 'white' | null {
+  get listMode(): 'black' | 'white' | 'default' {
     return this._listMode;
   }
 
@@ -809,7 +809,7 @@ export class ListModel extends VDomModel {
   private _pendingActions: Promise<any>[] = [];
   private _debouncedUpdate: Debouncer<void, void>;
 
-  private _listMode: 'black' | 'white' | null;
+  private _listMode: 'black' | 'white' | 'default';
   private _blacklistArray: Array<IListEntry>;
   private _whitelistArray: Array<IListEntry>;
   private _totalBlacklistedFound: number = 0;

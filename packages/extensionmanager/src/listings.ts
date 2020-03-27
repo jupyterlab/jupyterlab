@@ -33,7 +33,7 @@ export interface IListEntry {
  *
  */
 export type ListResult = null | {
-  mode: 'white' | 'black';
+  mode: 'white' | 'black' | 'default';
   uris: string[];
   entries: IListEntry[];
 };
@@ -57,8 +57,18 @@ export class Lister {
       '@jupyterlab/extensionmanager-extension/listings.json'
     )
       .then(data => {
-        if (
-          !(data.blacklist_uris.length > 0 && data.whitelist_uris.length > 0)
+        this._listings = {
+          mode: 'default',
+          uris: [],
+          entries: []
+        };
+        if (data.blacklist_uris.length > 0 && data.whitelist_uris.length > 0) {
+          console.warn(
+            'Simultaneous black and white list are not allowed. Continuing with default mode.'
+          );
+        } else if (
+          data.blacklist_uris.length > 0 ||
+          data.whitelist_uris.length > 0
         ) {
           this._listings = {
             mode: data.blacklist_uris.length > 0 ? 'black' : 'white',

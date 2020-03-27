@@ -352,7 +352,7 @@ export namespace ListEntry {
     /**
      * The list mode to apply.
      */
-    listMode: 'black' | 'white' | null;
+    listMode: 'black' | 'white' | 'default';
 
     /**
      * The requested view type.
@@ -438,7 +438,7 @@ export namespace ListView {
     /**
      * The list mode to apply.
      */
-    listMode: 'black' | 'white' | null;
+    listMode: 'black' | 'white' | 'default';
 
     /**
      * The requested view type.
