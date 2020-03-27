@@ -1170,7 +1170,7 @@ export abstract class AttachmentsCell extends Cell {
    */
   protected abstract updateCellSourceWithAttachment(
     attachmentName: string,
-    URI: string
+    URI?: string
   ): void;
 
   /**
