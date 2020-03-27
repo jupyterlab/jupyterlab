@@ -1273,9 +1273,9 @@ export abstract class AttachmentsCell extends Cell {
           CONTENTS_MIME_RICH
         ) as DirListing.IContentsThunk;
         if (model.type === 'file') {
-          this.updateCellSourceWithAttachment(model.name);
+          this.updateCellSourceWithAttachment(model.name, encodeURI(model.name));
           void withContent().then(fullModel => {
-            this.model.attachments.set(fullModel.name, {
+            this.model.attachments.set(encodeURI(fullModel.name), {
               [fullModel.mimetype]: fullModel.content
             });
           });
@@ -1283,10 +1283,10 @@ export abstract class AttachmentsCell extends Cell {
       } else {
         // Pure mimetype, no useful name to infer
         const name = UUID.uuid4();
-        this.model.attachments.set(name, {
+        this.model.attachments.set(encodeURI(name), {
           [mimeType]: event.mimeData.getData(mimeType)
         });
-        this.updateCellSourceWithAttachment(name);
+        this.updateCellSourceWithAttachment(name, encodeURI(name));
       }
     }
   }
