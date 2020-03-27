@@ -27,6 +27,14 @@
   outline: 0;
 }
 
+.jp-DocumentSearch-overlay button:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DocumentSearch-overlay button:active {
+  background-color: var(--jp-layout-color3);
+}
+
 .jp-DocumentSearch-overlay-row {
   display: flex;
   align-items: center;
@@ -217,7 +225,6 @@
   text-align: center;
   cursor: pointer;
   box-sizing: border-box;
-  background-color: var(--jp-toolbar-background);
   color: var(--jp-font-color1);
   width: 100%;
   height: 100%;
