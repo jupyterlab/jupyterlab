@@ -35,6 +35,12 @@
   );
 }
 
+.jp-Completer-docpanel pre {
+  border: none;
+  margin: 0px;
+  padding: 0px;
+}
+
 .jp-Completer-list {
   margin: 0;
   padding: 0;
