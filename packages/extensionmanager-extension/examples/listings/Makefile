@@ -2,7 +2,7 @@ export BLACK_LIST_URIS="https://raw.githubusercontent.com/datalayer-jupyterlab/j
 # export BLACK_LIST_URIS=""
 # export WHITE_LIST_URIS="https://raw.githubusercontent.com/datalayer-jupyterlab/jupyterlab-listings-example/master/whitelist_only_jlab.json"
 export WHITE_LIST_URIS=""
-export LISTINGS_REFRESH_MS=30000
+export LISTINGS_REFRESH_MS=600
 export LISTINGS_REQUEST_OPTS="{'timeout': 10}"
 
 listings-uris:
@@ -17,7 +17,7 @@ dev: listings-uris
 	  --no-browser \
 	  --LabServerApp.blacklist_uris=${BLACK_LIST_URIS} \
 	  --LabServerApp.whitelist_uris=${WHITE_LIST_URIS} \
-	  --LabServerApp.listings_refresh_ms=${LISTINGS_REFRESH_MS} \
+	  --LabServerApp.listings_refresh_seconds=${LISTINGS_REFRESH_MS} \
 	  --LabServerApp.listings_request_options=${LISTINGS_REQUEST_OPTS}
 
 watch: listings-uris
@@ -27,5 +27,5 @@ watch: listings-uris
 	  --watch \
 	  --LabServerApp.blacklist_uris=${BLACK_LIST_URIS} \
 	  --LabServerApp.whitelist_uris=${WHITE_LIST_URIS} \
-	  --LabServerApp.listings_refresh_ms=${LISTINGS_REFRESH_MS} \
+	  --LabServerApp.listings_refresh_seconds=${LISTINGS_REFRESH_MS} \
 	  --LabServerApp.listings_request_options=${LISTINGS_REQUEST_OPTS}

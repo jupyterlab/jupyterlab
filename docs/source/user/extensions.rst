@@ -335,7 +335,7 @@ You or your administrator can use the following traits to define the listings lo
 
 - ``blacklist_uris``: A list of comma-separated URIs to get the blacklist
 - ``whitelist_uris``: A list of comma-separated URIs to get the whitelist
-- ``listings_refresh_ms``: The interval delay in milliseconds to refresh the lists
+- ``listings_refresh_seconds``: The interval delay in seconds to refresh the lists
 - ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
 
 For example, to enable blacklist, launch the server with ``--LabServerApp.blacklist_uris``.
