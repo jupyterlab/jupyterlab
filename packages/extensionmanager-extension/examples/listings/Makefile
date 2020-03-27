@@ -8,7 +8,7 @@ export LISTINGS_REQUEST_OPTS="{'timeout': 10}"
 listings-uris:
 	@exec echo Using blacklist URIs: ${BLACK_LIST_URIS}
 	@exec echo Using whitelist URIs: ${WHITE_LIST_URIS}
-	@exec echo Refreshing lists every ${LISTINGS_REFRESH_MS} milliseconds
+	@exec echo Refreshing lists every ${LISTINGS_REFRESH_MS} seconds
 	@exec echo Using ${LISTINGS_REQUEST_OPTS} for the HTTP requests
 
 dev: listings-uris
