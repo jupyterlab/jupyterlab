@@ -10,7 +10,6 @@ import {
   caretRightIcon,
   Collapse,
   InputGroup,
-  Checkbox,
   jupyterIcon,
   listingsInfoIcon,
   refreshIcon
@@ -70,28 +69,52 @@ export class SearchBar extends React.Component<
         </div>
         <CollapsibleSection
           key="warning-section"
-          isOpen={false}
+          isOpen={true}
+          disabled={false}
           header={'Warning'}
         >
           <div className="jp-extensionmanager-disclaimer">
             <div>
               Extensions installed contain arbitrary code that can execute on
-              your machine that may contain malicious code
+              your machine that may contain malicious code.
             </div>
-            <Checkbox
-              label="I understand extensions contain arbitrary code."
-              checked={ListModel.isDisclaimed()}
-              alignIndicator="right"
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                this.props.settings
-                  .set('disclaimed', e.target.checked)
-                  .catch(reason => {
-                    console.error(
-                      `Something went wrong when setting disclaimed.\n${reason}`
-                    );
-                  });
-              }}
-            />
+            <div style={{ paddingTop: 8 }}>
+              I understand extensions contain arbitrary code.
+            </div>
+            <div style={{ paddingTop: 8 }}>
+              {ListModel.isDisclaimed() && (
+                <Button
+                  className="jp-extensionmanager-disclaimer-disable"
+                  onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
+                    this.props.settings
+                      .set('disclaimed', false)
+                      .catch(reason => {
+                        console.error(
+                          `Something went wrong when setting disclaimed.\n${reason}`
+                        );
+                      });
+                  }}
+                >
+                  Disable
+                </Button>
+              )}
+              {!ListModel.isDisclaimed() && (
+                <Button
+                  className="jp-extensionmanager-disclaimer-enable"
+                  onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
+                    this.props.settings
+                      .set('disclaimed', true)
+                      .catch(reason => {
+                        console.error(
+                          `Something went wrong when setting disclaimed.\n${reason}`
+                        );
+                      });
+                  }}
+                >
+                  Enable
+                </Button>
+              )}
+            </div>
           </div>
         </CollapsibleSection>
       </>
@@ -458,7 +481,7 @@ export class CollapsibleSection extends React.Component<
   constructor(props: CollapsibleSection.IProperties) {
     super(props);
     this.state = {
-      isOpen: props.isOpen || true
+      isOpen: props.isOpen ? true : false
     };
   }
 
@@ -466,23 +489,27 @@ export class CollapsibleSection extends React.Component<
    * Render the collapsible section using the virtual DOM.
    */
   render(): React.ReactNode {
+    let icon = this.state.isOpen ? caretDownIconStyled : caretRightIconStyled;
+    let isOpen = this.state.isOpen;
+    let className = 'jp-extensionmanager-headerText';
+    if (this.props.disabled) {
+      icon = caretRightIconStyled;
+      isOpen = false;
+      className = 'jp-extensionmanager-headerTextDisabled';
+    }
     return (
       <>
         <header>
           <ToolbarButtonComponent
-            icon={
-              this.state.isOpen ? caretDownIconStyled : caretRightIconStyled
-            }
+            icon={icon}
             onClick={() => {
               this.handleCollapse();
             }}
           />
-          <span className="jp-extensionmanager-headerText">
-            {this.props.header}
-          </span>
-          {this.props.headerElements}
+          <span className={className}>{this.props.header}</span>
+          {!this.props.disabled && this.props.headerElements}
         </header>
-        <Collapse isOpen={this.state.isOpen}>{this.props.children}</Collapse>
+        <Collapse isOpen={isOpen}>{this.props.children}</Collapse>
       </>
     );
   }
@@ -536,6 +563,12 @@ export namespace CollapsibleSection {
      * If given, this will be diplayed instead of the children.
      */
     errorMessage?: string | null;
+
+    /**
+     * If true, the section will be collapsed and will not respond
+     * to open nor close actions.
+     */
+    disabled?: boolean;
   }
 
   /**
@@ -670,7 +703,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       content.push(
         <CollapsibleSection
           key="installed-section"
-          isOpen={true}
+          isOpen={ListModel.isDisclaimed()}
+          disabled={!ListModel.isDisclaimed()}
           header="Installed"
           headerElements={
             <ToolbarButtonComponent
@@ -720,7 +754,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       content.push(
         <CollapsibleSection
           key="search-section"
-          isOpen={false}
+          isOpen={ListModel.isDisclaimed()}
+          disabled={!ListModel.isDisclaimed()}
           header={model.query ? 'Search Results' : 'Discover'}
           onCollapse={(isOpen: boolean) => {
             if (isOpen && model.query === null) {

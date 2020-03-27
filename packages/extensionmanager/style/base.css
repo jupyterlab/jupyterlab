@@ -65,6 +65,12 @@
   margin: 0px 4px;
 }
 
+.jp-extensionmanager-view header .jp-extensionmanager-headerTextDisabled {
+  flex: 1 0 auto;
+  margin: 0px 4px;
+  color: var(--jp-layout-color3);
+}
+
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
   border: 1px solid transparent;
   background-color: var(--jp-layout-color1);
@@ -103,8 +109,8 @@
 
 .jp-extensionmanager-disclaimer {
   color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-font-size0);
-  font-weight: 600;
+  font-size: var(--jp-ui-font-size1);
+  font-weight: normal;
   margin: 8px 8px 8px 32px;
 }
 
@@ -289,6 +295,24 @@
   to {
     left: 100%;
   }
+}
+
+/*
+  Disclaimer buttons
+*/
+
+.jp-extensionmanager-disclaimer-disable {
+  background-color: var(--jp-brand-color1) !important;
+  color: white !important;
+  border: 0;
+  background-image: none !important;
+}
+
+.jp-extensionmanager-disclaimer-enable {
+  background-color: var(--jp-error-color1) !important;
+  color: white !important;
+  border: 0;
+  background-image: none !important;
 }
 
 /*
