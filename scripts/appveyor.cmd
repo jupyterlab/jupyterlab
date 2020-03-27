@@ -20,12 +20,11 @@ IF "%NAME%"=="python" (
     python -m jupyterlab.browser_check
 
 ) ELSE (
-    set NODE_OPTIONS=--max-old-space-size=1028
-    jlpm run build:packages
+    jlpm run build:packages:scope --scope "@jupyterlab/%NAME%"
     if !errorlevel! neq 0 exit /b !errorlevel!
-    jlpm run build:test
+    jlpm run build:test:scope --scope "@jupyterlab/test-%NAME%"
     if !errorlevel! neq 0 exit /b !errorlevel!
-    setx FORCE_COLOR 1 && jlpm coverage --loglevel success
+    setx FORCE_COLOR 1 && jlpm run test:scope --loglevel success --scope "@jupyterlab/test-%NAME%"
 )
 
 if !errorlevel! neq 0 exit /b !errorlevel!
