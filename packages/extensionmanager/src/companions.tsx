@@ -178,7 +178,7 @@ export function presentCompanions(
       }
       entries.push(<ul key={'kernel-companion-end'}>{kernelEntries}</ul>);
       entries.push(
-        <p key="server-companion">
+        <p key={`kernel-companion-${index}`}>
           This package has indicated that it needs a corresponding server
           extension. Please contact your Adminstrator to update the server with
           one of the following commands:
