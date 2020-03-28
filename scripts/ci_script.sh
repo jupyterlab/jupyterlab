@@ -27,9 +27,6 @@ fi
 
 if [[ $GROUP == docs ]]; then
 
-    # Run the link check - allow for a link to fail once
-    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
-
     # Build the docs
     jlpm build:packages
     jlpm docs
@@ -40,6 +37,9 @@ if [[ $GROUP == docs ]]; then
     make linkcheck
     make html
     popd
+
+    # Run the link check - allow for a link to fail once
+    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
 fi
 
 
