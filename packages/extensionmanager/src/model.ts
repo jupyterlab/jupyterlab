@@ -164,8 +164,7 @@ export class ListModel extends VDomModel {
     this.lister.listingsLoaded.connect(this._listingIsLoaded, this);
     _isDisclaimed = settings.composite['disclaimed'] === true;
     settings.changed.connect(() => {
-      const disclaimed = settings.composite['disclaimed'] === true;
-      _isDisclaimed = disclaimed;
+      _isDisclaimed = settings.composite['disclaimed'] === true;
       void this.update();
     });
   }
@@ -596,10 +595,7 @@ export class ListModel extends VDomModel {
    */
   protected async performSearch(): Promise<{ [key: string]: IEntry }> {
     if (this.query === null) {
-      this._searchResult = [];
-      this._totalEntries = 0;
-      this.searchError = null;
-      return {};
+      this.query = '';
     }
 
     // Start the search without waiting for it:
