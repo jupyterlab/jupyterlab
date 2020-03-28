@@ -490,11 +490,8 @@ Storing Extension Data
 ^^^^^^^^^^^^^^^^^^^^^^
 
 In addition to the file system that is accessed by using the
-``@jupyterlab/services`` package, JupyterLab offers two ways for
-extensions to store data: a client-side state database that is built on
-top of ``localStorage`` and a plugin settings system that provides for
-default setting values and user overrides.
-
+``@jupyterlab/services`` package, JupyterLab exposes a plugin settings
+system that can be used to provide default setting values and user overrides.
 
 Extension Settings
 ``````````````````
