@@ -19,6 +19,7 @@ examples/chrome-example-test.js
 jupyterlab/chrome-test.js
 jupyterlab/geckodriver
 jupyterlab/schemas
+packages/extensionmanager-extension/examples/listings
 jupyterlab/staging/index.js
 jupyterlab/staging/yarn.js
 jupyterlab/themes

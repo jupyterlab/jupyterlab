@@ -53,6 +53,7 @@
   --jp-icon-line-form: url('icons/statusbar/line-form.svg');
   --jp-icon-link: url('icons/toolbar/link.svg');
   --jp-icon-list: url('icons/statusbar/list.svg');
+  --jp-icon-listings-info: url('icons/listings/listings-info.svg');
   --jp-icon-markdown: url('icons/filetype/markdown.svg');
   --jp-icon-new-folder: url('icons/toolbar/new-folder.svg');
   --jp-icon-not-trusted: url('icons/statusbar/not-trusted.svg');
@@ -204,6 +205,9 @@
 }
 .jp-ListIcon {
   background-image: var(--jp-icon-list);
+}
+.jp-ListingsInfoIcon {
+  background-image: var(--jp-icon-listings-info);
 }
 .jp-MarkdownIcon {
   background-image: var(--jp-icon-markdown);

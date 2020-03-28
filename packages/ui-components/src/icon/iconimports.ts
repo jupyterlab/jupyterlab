@@ -49,6 +49,7 @@ import launcherSvgstr from '../../style/icons/filetype/launcher.svg';
 import lineFormSvgstr from '../../style/icons/statusbar/line-form.svg';
 import linkSvgstr from '../../style/icons/toolbar/link.svg';
 import listSvgstr from '../../style/icons/statusbar/list.svg';
+import listingsInfoSvgstr from '../../style/icons/listings/listings-info.svg';
 import markdownSvgstr from '../../style/icons/filetype/markdown.svg';
 import newFolderSvgstr from '../../style/icons/toolbar/new-folder.svg';
 import notTrustedSvgstr from '../../style/icons/statusbar/not-trusted.svg';
@@ -117,6 +118,7 @@ export const launcherIcon = new LabIcon({ name: 'ui-components:launcher', svgstr
 export const lineFormIcon = new LabIcon({ name: 'ui-components:line-form', svgstr: lineFormSvgstr });
 export const linkIcon = new LabIcon({ name: 'ui-components:link', svgstr: linkSvgstr });
 export const listIcon = new LabIcon({ name: 'ui-components:list', svgstr: listSvgstr });
+export const listingsInfoIcon = new LabIcon({ name: 'ui-components:listings-info', svgstr: listingsInfoSvgstr });
 export const markdownIcon = new LabIcon({ name: 'ui-components:markdown', svgstr: markdownSvgstr });
 export const newFolderIcon = new LabIcon({ name: 'ui-components:new-folder', svgstr: newFolderSvgstr });
 export const notTrustedIcon = new LabIcon({ name: 'ui-components:not-trusted', svgstr: notTrustedSvgstr });
