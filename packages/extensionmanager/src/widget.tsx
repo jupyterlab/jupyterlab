@@ -732,22 +732,20 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         );
       } else {
         searchContent.push(
-          <>
-            <ListView
-              key="search-items"
-              listMode={model.listMode}
-              viewType={'searchResult'}
-              // Filter out installed extensions:
-              entries={model.searchResult.filter(
-                entry => model.installed.indexOf(entry) === -1
-              )}
-              numPages={pages}
-              onPage={value => {
-                this.onPage(value);
-              }}
-              performAction={this.onAction.bind(this)}
-            />
-          </>
+          <ListView
+            key="search-items"
+            listMode={model.listMode}
+            viewType={'searchResult'}
+            // Filter out installed extensions:
+            entries={model.searchResult.filter(
+              entry => model.installed.indexOf(entry) === -1
+            )}
+            numPages={pages}
+            onPage={value => {
+              this.onPage(value);
+            }}
+            performAction={this.onAction.bind(this)}
+          />
         );
       }
 
