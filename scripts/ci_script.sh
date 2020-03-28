@@ -45,6 +45,9 @@ fi
 
 
 if [[ $GROUP == docs ]]; then
+    # Run the link check - allow for a link to fail once
+    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+
     # Build the docs
     jlpm build:packages
     jlpm docs
@@ -54,10 +57,6 @@ if [[ $GROUP == docs ]]; then
     pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
     make html
     popd
-
-    # Run the link check - allow for a link to fail once
-    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
-
 fi
 
 
