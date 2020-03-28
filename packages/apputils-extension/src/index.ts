@@ -173,38 +173,41 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 
     // Create debounced recovery dialog function.
     let dialog: Dialog<unknown> | null;
-    const recovery = new Throttler(async () => {
-      if (dialog) {
-        return;
-      }
-
-      dialog = new Dialog({
-        title: 'Loading...',
-        body: `The loading screen is taking a long time.
-          Would you like to clear the workspace or keep waiting?`,
-        buttons: [
-          Dialog.cancelButton({ label: 'Keep Waiting' }),
-          Dialog.warnButton({ label: 'Clear Workspace' })
-        ]
-      });
-
-      try {
-        const result = await dialog.launch();
-        dialog.dispose();
-        dialog = null;
-        if (result.button.accept && commands.hasCommand(CommandIDs.reset)) {
-          return commands.execute(CommandIDs.reset);
+    const recovery = new Throttler(
+      async () => {
+        if (dialog) {
+          return;
         }
 
-        // Re-invoke the recovery timer in the next frame.
-        requestAnimationFrame(() => {
-          // Because recovery can be stopped, handle invocation rejection.
-          void recovery.invoke().catch(_ => undefined);
+        dialog = new Dialog({
+          title: 'Loading...',
+          body: `The loading screen is taking a long time.
+          Would you like to clear the workspace or keep waiting?`,
+          buttons: [
+            Dialog.cancelButton({ label: 'Keep Waiting' }),
+            Dialog.warnButton({ label: 'Clear Workspace' })
+          ]
         });
-      } catch (error) {
-        /* no-op */
-      }
-    }, SPLASH_RECOVER_TIMEOUT);
+
+        try {
+          const result = await dialog.launch();
+          dialog.dispose();
+          dialog = null;
+          if (result.button.accept && commands.hasCommand(CommandIDs.reset)) {
+            return commands.execute(CommandIDs.reset);
+          }
+
+          // Re-invoke the recovery timer in the next frame.
+          requestAnimationFrame(() => {
+            // Because recovery can be stopped, handle invocation rejection.
+            void recovery.invoke().catch(_ => undefined);
+          });
+        } catch (error) {
+          /* no-op */
+        }
+      },
+      { limit: SPLASH_RECOVER_TIMEOUT, edge: 'trailing' }
+    );
 
     // Return ISplashScreen.
     let splashCount = 0;
