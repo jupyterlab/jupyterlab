@@ -79,7 +79,7 @@ describe('@jupyterlab/apputils', () => {
         const widget2 = createWidget();
         Widget.attach(widget, document.body);
         focus(widget);
-        tracker.add(widget);
+        await tracker.add(widget);
         let called = false;
         tracker.currentChanged.connect(() => {
           called = true;
@@ -96,7 +96,7 @@ describe('@jupyterlab/apputils', () => {
         Widget.attach(widget, document.body);
         Widget.attach(widget2, document.body);
         focus(widget);
-        tracker.add(widget);
+        await tracker.add(widget);
         await tracker.add(widget2);
         let promise = signalToPromise(tracker.currentChanged);
         focus(widget2);
