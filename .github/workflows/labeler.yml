@@ -2,7 +2,7 @@ name: Pull Request Labeler
 # This workflow is supposed to run every 5 minutes
 on:
   schedule:
-    - cron: '*/120 * * * *'
+    - cron: '*/20 * * * *'
 jobs:
   triage:
     name: Update PR Labels
