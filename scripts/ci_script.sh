@@ -53,7 +53,6 @@ if [[ $GROUP == docs ]]; then
     pushd docs
     pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
     make html
-    make linkcheck
     popd
 
     # Run the link check - allow for a link to fail once

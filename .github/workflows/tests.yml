@@ -113,7 +113,7 @@ jobs:
     name: Windows
     strategy:
       matrix:
-        group: [python, integrity, application, apputils, cells, codeeditor, codemirror, completer, console, coreutils, csvviewer, docmanager, docregistry, filebrowser, fileeditor, imageviewer, inspector, logconsole, mainmenu, nbformat, notebook, observables, outputarea, rendermime, services, settingregistry, statedb, statusbar, terminal, ui-components]
+        group: [javascript, python, integrity]
       fail-fast: false
     runs-on: windows-latest
     steps:
