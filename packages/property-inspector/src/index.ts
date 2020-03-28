@@ -164,6 +164,7 @@ export class SideBarPropertyInspectorProvider extends PropertyInspectorProvider 
     }
     layout.widget = this._placeholder;
     labshell.currentChanged.connect(this._onShellCurrentChanged, this);
+    this._onShellCurrentChanged();
   }
 
   /**
