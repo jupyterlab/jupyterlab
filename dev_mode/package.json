@@ -184,7 +184,7 @@
     "react-dom": "~16.9.0"
   },
   "engines": {
-    "node": ">=6.11.5"
+    "node": ">=10.0.0"
   },
   "jupyterlab": {
     "name": "JupyterLab",

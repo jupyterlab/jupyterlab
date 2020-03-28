@@ -69,7 +69,7 @@ You can launch a binder with the latest JupyterLab master to test something (thi
 
 ### Installing Node.js and jlpm
 
-Building JupyterLab from its GitHub source code requires Node.js. The development version requires Node.js version 12+.
+Building JupyterLab from its GitHub source code requires Node.js. The development version requires Node.js version 10+.
 
 If you use `conda`, you can get it with:
 
