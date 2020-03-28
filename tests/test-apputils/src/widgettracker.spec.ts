@@ -55,15 +55,54 @@ describe('@jupyterlab/apputils', () => {
     });
 
     describe('#currentChanged', () => {
-      it('should emit when the current widget has been updated', async () => {
+      it('should emit for the first added widget', async () => {
         const widget = createWidget();
         let promise = signalToPromise(tracker.currentChanged);
-
-        Widget.attach(widget, document.body);
-        focus(widget);
         void tracker.add(widget);
         await promise;
         widget.dispose();
+      });
+
+      it('should emit when a widget is added and there is another widget that does not have focus', async () => {
+        const widget = createWidget();
+        const widget2 = createWidget();
+        await tracker.add(widget);
+        let promise = signalToPromise(tracker.currentChanged);
+        await tracker.add(widget2);
+        await promise;
+        widget.dispose();
+        widget2.dispose();
+      });
+
+      it('should not emit when a widget is added and there is another widget that has focus', async () => {
+        const widget = createWidget();
+        const widget2 = createWidget();
+        Widget.attach(widget, document.body);
+        focus(widget);
+        tracker.add(widget);
+        let called = false;
+        tracker.currentChanged.connect(() => {
+          called = true;
+        });
+        await tracker.add(widget2);
+        expect(called).to.equal(false);
+        widget.dispose();
+        widget2.dispose();
+      });
+
+      it('should emit when the focus changes', async () => {
+        const widget = createWidget();
+        const widget2 = createWidget();
+        Widget.attach(widget, document.body);
+        Widget.attach(widget2, document.body);
+        focus(widget);
+        tracker.add(widget);
+        await tracker.add(widget2);
+        let promise = signalToPromise(tracker.currentChanged);
+        focus(widget2);
+        await promise;
+        widget.dispose();
+        widget2.dispose();
       });
     });
 

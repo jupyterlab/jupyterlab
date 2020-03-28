@@ -142,6 +142,7 @@ export class WidgetTracker<T extends Widget = Widget>
         pool.current = focus.currentWidget;
         return;
       }
+
       this.onCurrentChanged(widget);
       this._currentChanged.emit(widget);
     }, this);
@@ -216,11 +217,16 @@ export class WidgetTracker<T extends Widget = Widget>
    * the tracker can be checked with the `has()` method. The promise this method
    * returns resolves after the widget has been added and saved to an underlying
    * restoration connector, if one is available.
+   *
+   * The newly added widget becomes the current widget unless the focus tracker
+   * already had a focused widget.
    */
   async add(widget: T): Promise<void> {
     this._focusTracker.add(widget);
     await this._pool.add(widget);
-    this._pool.current = widget;
+    if (!this._focusTracker.activeWidget) {
+      this._pool.current = widget;
+    }
   }
 
   /**
