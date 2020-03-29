@@ -84,15 +84,15 @@ def run_test(app, func):
             app.log.info('Exiting normally')
             result = 0
 
-        app.http_server.stop()
-        app.io_loop.stop()
-        env_patch.stop()
         try:
+            app.http_server.stop()
+            app.io_loop.stop()
+            env_patch.stop()
             os._exit(result)
         except Exception as e:
             self.log.error(str(e))
             if 'Stream is closed' in str(e):
-                os._exit(0)
+                os._exit(result)
             os._exit(1)
 
     # The entry URL for browser tests is different in notebook >= 6.0,
