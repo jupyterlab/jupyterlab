@@ -1283,7 +1283,7 @@ export abstract class AttachmentsCell extends Cell {
         }
       } else {
         // Pure mimetype, no useful name to infer
-        const URI = UUID.uuid4();
+        const URI = this._generateURI();
         this.model.attachments.set(URI, {
           [mimeType]: event.mimeData.getData(mimeType)
         });
