@@ -45,7 +45,7 @@ fi
 
 
 if [[ $GROUP == docs ]]; then
-    # Run the link check - allow for a link to fail once
+    # Run the link check - allow for a link to fail once (--lf means only run last failed)
     py.test --check-links -k .md . || py.test --check-links -k .md --lf .
 
     # Build the docs
@@ -56,6 +56,12 @@ if [[ $GROUP == docs ]]; then
     pushd docs
     pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
     make html
+
+    # Remove internal sphinx files and use pytest-check-links on the generated html
+    rm build/html/genindex.html
+    rm build/html/search.html
+    py.test --check-links -k .html build/html || py.test --check-links -k .html --lf build/html
+
     popd
 fi
 
