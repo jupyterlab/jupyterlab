@@ -1,2 +1,1 @@
-declare var jest: any;
-jest.setTimeout(20000);
+// jest.setTimeout(20000);

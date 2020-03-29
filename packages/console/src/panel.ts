@@ -45,7 +45,8 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       basePath,
       name,
       manager,
-      modelFactory
+      modelFactory,
+      sessionContext
     } = options;
     let contentFactory = (this.contentFactory =
       options.contentFactory || ConsolePanel.defaultContentFactory);
@@ -54,15 +55,17 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       path = `${basePath || ''}/console-${count}-${UUID.uuid4()}`;
     }
 
-    let sessionContext = (this._sessionContext = new SessionContext({
-      sessionManager: manager.sessions,
-      specsManager: manager.kernelspecs,
-      path,
-      name: name || `Console ${count}`,
-      type: 'console',
-      kernelPreference: options.kernelPreference,
-      setBusy: options.setBusy
-    }));
+    sessionContext = this._sessionContext =
+      sessionContext ||
+      new SessionContext({
+        sessionManager: manager.sessions,
+        specsManager: manager.kernelspecs,
+        path,
+        name: name || `Console ${count}`,
+        type: 'console',
+        kernelPreference: options.kernelPreference,
+        setBusy: options.setBusy
+      });
 
     let resolver = new RenderMimeRegistry.UrlResolver({
       session: sessionContext,
@@ -81,7 +84,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     void sessionContext.initialize().then(async value => {
       if (value) {
-        await sessionContextDialogs.selectKernel(sessionContext);
+        await sessionContextDialogs.selectKernel(sessionContext!);
       }
       this._connected = new Date();
       this._updateTitlePanel();
@@ -158,7 +161,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
   private _executed: Date | null = null;
   private _connected: Date | null = null;
-  private _sessionContext: SessionContext;
+  private _sessionContext: ISessionContext;
 }
 
 /**
@@ -203,6 +206,11 @@ export namespace ConsolePanel {
      * A kernel preference.
      */
     kernelPreference?: ISessionContext.IKernelPreference;
+
+    /**
+     * An existing session context to use.
+     */
+    sessionContext?: SessionContext;
 
     /**
      * The model factory for the console widget.

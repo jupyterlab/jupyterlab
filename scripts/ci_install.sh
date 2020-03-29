@@ -16,7 +16,8 @@ mkdir ~/.jupyter
 # Install and enable the server extension
 pip install -q --upgrade pip
 pip --version
-pip install -e ".[test]"
+# Show a verbose install if the install fails, for debugging
+pip install -e ".[test]" || pip install -v -e ".[test]"
 jlpm versions
 jlpm config current
 jupyter serverextension enable --py jupyterlab

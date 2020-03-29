@@ -23,8 +23,15 @@ if [[ $GROUP == js* ]]; then
         # extract the group name
         export PKG="${GROUP#*-}"
         jlpm run build:packages:scope --scope "@jupyterlab/$PKG"
-        jlpm run build:test:scope --scope "@jupyterlab/test-$PKG"
-        FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope "@jupyterlab/test-$PKG"
+        here=$(pwd)
+        if [[ -d "${here}/tests/test-${GROUP}" ]];then
+            scope="@jupyterlab/test-${PKG}"
+        else
+            scope="@jupyterlab/${PKG}"
+            jlpm run build:testutils
+        fi
+        jlpm run build:test:scope --scope ${scope}
+        FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope ${scope}
     else
         jlpm build:packages
         jlpm build:test
@@ -60,8 +67,7 @@ if [[ $GROUP == docs ]]; then
     # Remove internal sphinx files and use pytest-check-links on the generated html
     rm build/html/genindex.html
     rm build/html/search.html
-    # FIXME: re-enable pending https://github.com/minrk/pytest-check-links/pull/7
-    #py.test --check-links -k .html build/html || py.test --check-links -k .html --lf build/html
+    py.test --check-links -k .html build/html || py.test --check-links -k .html --lf build/html
 
     popd
 fi
