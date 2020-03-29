@@ -370,17 +370,37 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     });
   }
 
-  get svgElement() {
-    if (this._svgElement === null) {
+  get svgElement(): HTMLElement | null {
+    if (this._svgElement === undefined) {
       this._svgElement = this._initSvg({ uuid: this._uuid });
     }
 
     return this._svgElement;
   }
 
-  get svgReactAttrs() {
-    if (this._svgReactAttrs === null && this._svgElement !== null) {
-      getReactAttrs(this._svgElement, { ignore: ['data-icon-id'] });
+  get svgInnerHTML(): string | null {
+    if (this._svgInnerHTML === undefined) {
+      if (this.svgElement === null) {
+        // the svg element resolved to null, mark this null too
+        this._svgInnerHTML = null;
+      } else {
+        this._svgInnerHTML = this.svgElement.innerHTML;
+      }
+    }
+
+    return this._svgInnerHTML;
+  }
+
+  get svgReactAttrs(): any | null {
+    if (this._svgReactAttrs === undefined) {
+      if (this.svgElement === null) {
+        // the svg element resolved to null, mark this null too
+        this._svgReactAttrs = null;
+      } else {
+        this._svgReactAttrs = getReactAttrs(this.svgElement, {
+          ignore: ['data-icon-id']
+        });
+      }
     }
 
     return this._svgReactAttrs;
@@ -398,6 +418,11 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     const uuidOld = this._uuid;
     this._uuid = uuid;
 
+    // empty the svg parsing intermediates cache
+    this._svgElement = undefined;
+    this._svgInnerHTML = undefined;
+    this._svgReactAttrs = undefined;
+
     // update icon elements created using .element method
     document
       .querySelectorAll(`[data-icon-id="${uuidOld}"]`)
@@ -407,10 +432,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           oldSvgElement.replaceWith(svgElement);
         }
       });
-
-    // reset asset caches
-    this._svgElement = null;
-    this._svgReactAttrs = null;
 
     // trigger update of icon elements created using other methods
     this._svgReplaced.emit();
@@ -451,16 +472,15 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         const Tag = tag;
 
         // ensure that svg html is valid
-        const svgElement = this._initSvg();
-        if (!svgElement) {
+        if (!(this.svgInnerHTML && this.svgReactAttrs)) {
           // bail if failing silently
           return <></>;
         }
 
         const svgComponent = (
           <svg
-            {...getReactAttrs(svgElement)}
-            dangerouslySetInnerHTML={{ __html: svgElement.innerHTML }}
+            {...this.svgReactAttrs}
+            dangerouslySetInnerHTML={{ __html: this.svgInnerHTML }}
             ref={ref}
           />
         );
@@ -583,9 +603,14 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   protected _svgstr: string;
   protected _uuid: string;
 
-  // cache vars
-  protected _svgElement: HTMLElement | null = null;
-  protected _svgReactAttrs: any | null = null;
+  /**
+   * Cache for svg parsing intermediates
+   *   - undefined: the cache has not yet been populated
+   *   - null: a valid, but empty, value
+   */
+  protected _svgElement: HTMLElement | null | undefined = undefined;
+  protected _svgInnerHTML: string | null | undefined = undefined;
+  protected _svgReactAttrs: any | null | undefined = undefined;
 }
 
 /**
