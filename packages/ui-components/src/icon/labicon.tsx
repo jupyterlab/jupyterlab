@@ -327,25 +327,22 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     }
 
     // ensure that svg html is valid
-    const svgElement = this._initSvg({ uuid: this._uuid });
-    if (!svgElement) {
+    if (!this.svgElement) {
       // bail if failing silently, return blank element
       return document.createElement('div');
     }
 
-    let ret: HTMLElement;
+    let returnSvgElement = true;
     if (container) {
       // take ownership by removing any existing children
       while (container.firstChild) {
         container.firstChild.remove();
       }
-
-      ret = svgElement;
     } else {
       // create a container if needed
       container = document.createElement(tag);
 
-      ret = container;
+      returnSvgElement = false;
     }
     if (label != null) {
       container.textContent = label;
@@ -353,9 +350,10 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     Private.initContainer({ container, className, styleProps, title });
 
     // add the svg node to the container
+    let svgElement = this.svgElement.cloneNode(true) as HTMLElement;
     container.appendChild(svgElement);
 
-    return ret;
+    return returnSvgElement ? svgElement : container;
   }
 
   render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
@@ -370,6 +368,22 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
       label,
       ...options?.props
     });
+  }
+
+  get svgElement() {
+    if (this._svgElement === null) {
+      this._svgElement = this._initSvg({ uuid: this._uuid });
+    }
+
+    return this._svgElement;
+  }
+
+  get svgReactAttrs() {
+    if (this._svgReactAttrs === null && this._svgElement !== null) {
+      getReactAttrs(this._svgElement, { ignore: ['data-icon-id'] });
+    }
+
+    return this._svgReactAttrs;
   }
 
   get svgstr() {
@@ -393,6 +407,10 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
           oldSvgElement.replaceWith(svgElement);
         }
       });
+
+    // reset asset caches
+    this._svgElement = null;
+    this._svgReactAttrs = null;
 
     // trigger update of icon elements created using other methods
     this._svgReplaced.emit();
@@ -564,6 +582,10 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   protected _svgReplaced = new Signal<this, void>(this);
   protected _svgstr: string;
   protected _uuid: string;
+
+  // cache vars
+  protected _svgElement: HTMLElement | null = null;
+  protected _svgReactAttrs: any | null = null;
 }
 
 /**
