@@ -1344,7 +1344,7 @@ export abstract class AttachmentsCell extends Cell {
    * Generates a unique URI for a file 
    * while preserving the file extension.
    */
-  private _generateURI(name: string): string {
+  private _generateURI(name = ''): string {
     const lastIndex = name.lastIndexOf('.');
     return lastIndex !== -1 ? UUID.uuid4().concat(name.substring(lastIndex)) : UUID.uuid4();
   }
