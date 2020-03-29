@@ -60,7 +60,8 @@ if [[ $GROUP == docs ]]; then
     # Remove internal sphinx files and use pytest-check-links on the generated html
     rm build/html/genindex.html
     rm build/html/search.html
-    py.test --check-links -k .html build/html || py.test --check-links -k .html --lf build/html
+    # FIXME: re-enable pending https://github.com/minrk/pytest-check-links/pull/7
+    #py.test --check-links -k .html build/html || py.test --check-links -k .html --lf build/html
 
     popd
 fi
