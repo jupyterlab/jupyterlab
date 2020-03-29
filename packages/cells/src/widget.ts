@@ -1329,7 +1329,7 @@ export abstract class AttachmentsCell extends Cell {
       const bundle: nbformat.IMimeBundle = { [mimeType]: encodedData };
       const URI = this._generateURI(blob.name);
 
-      if (mimeType.includes('image')){
+      if (mimeType.startsWith('image/')){
         this.model.attachments.set(URI, bundle);
         this.updateCellSourceWithAttachment(name, URI);
       }
