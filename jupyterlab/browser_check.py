@@ -48,6 +48,9 @@ class LogErrorHandler(logging.Handler):
         # known startup error message
         if 'paste' in record.msg:
             return
+        # handle known shutdown message
+        if 'Stream is closed' in record.msg:
+            return
         return super().filter(record)
 
     def emit(self, record):
