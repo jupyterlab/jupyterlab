@@ -41,27 +41,8 @@ export class MenuSvg extends Menu {
    * The index will be clamped to the bounds of the items.
    */
   insertItem(index: number, options: Menu.IItemOptions): Menu.IItem {
-    if (options.submenu?.renderer === Menu.defaultRenderer) {
-      // create a "view" of the submenu with a different default renderer
-      const submenu = Object.create(options.submenu, {
-        renderer: {
-          configurable: true,
-          enumerable: true,
-          value: MenuSvg.defaultRenderer
-        }
-      });
-
-      // Widget.title is an AttachedProperty, and needs special handling
-      submenu.title.label = options.submenu.title.label;
-      submenu.title.mnemonic = options.submenu.title.mnemonic;
-      submenu.title.icon = options.submenu.title.icon;
-      submenu.title.iconClass = options.submenu.title.iconClass;
-      submenu.title.iconLabel = options.submenu.title.iconLabel;
-      submenu.title.caption = options.submenu.title.caption;
-      submenu.title.className = options.submenu.title.className;
-      submenu.title.dataset = options.submenu.title.dataset;
-
-      options.submenu = submenu;
+    if (options.submenu) {
+      MenuSvg.overrideDefaultRenderer(options.submenu);
     }
 
     return super.insertItem(index, options);
@@ -69,6 +50,20 @@ export class MenuSvg extends Menu {
 }
 
 export namespace MenuSvg {
+  export function overrideDefaultRenderer(menu: Menu): void {
+    // override renderer, if needed
+    if (menu.renderer === Menu.defaultRenderer) {
+      (menu as any).renderer = defaultRenderer;
+    }
+
+    // recurse through submenus
+    for (const item of (menu as any)._items as Menu.IItem[]) {
+      if (item.submenu) {
+        overrideDefaultRenderer(item.submenu);
+      }
+    }
+  }
+
   /**
    * a modified implementation of the Menu Renderer
    */
