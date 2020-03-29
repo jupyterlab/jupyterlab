@@ -1273,20 +1273,21 @@ export abstract class AttachmentsCell extends Cell {
           CONTENTS_MIME_RICH
         ) as DirListing.IContentsThunk;
         if (model.type === 'file') {
-          this.updateCellSourceWithAttachment(model.name, encodeURI(model.name));
+          const URI = this._generateURI(model.name);
+          this.updateCellSourceWithAttachment(model.name, URI);
           void withContent().then(fullModel => {
-            this.model.attachments.set(encodeURI(fullModel.name), {
+            this.model.attachments.set(URI, {
               [fullModel.mimetype]: fullModel.content
             });
           });
         }
       } else {
         // Pure mimetype, no useful name to infer
-        const name = UUID.uuid4();
-        this.model.attachments.set(encodeURI(name), {
+        const URI = UUID.uuid4();
+        this.model.attachments.set(URI, {
           [mimeType]: event.mimeData.getData(mimeType)
         });
-        this.updateCellSourceWithAttachment(name, encodeURI(name));
+        this.updateCellSourceWithAttachment(URI, URI);
       }
     }
   }
@@ -1326,24 +1327,26 @@ export abstract class AttachmentsCell extends Cell {
       const mimeType = matches[1];
       const encodedData = matches[3];
       const bundle: nbformat.IMimeBundle = { [mimeType]: encodedData };
+      const URI = this._generateURI(blob.name);
 
-      // Find an unused URI
-      let URI = encodeURI(blob.name)
-      let URI_array = URI.split(/(\.)(?=[^\.]+$)/);
-      URI_array.splice(1, 0, '');
-      let i = 1;
-      while (this.model.attachments.has(URI)){
-        URI_array[1] = `_${i}`;
-        URI = URI_array.join('');
-        i = i+1;
+      if (mimeType.includes('image')){
+        this.model.attachments.set(URI, bundle);
+        this.updateCellSourceWithAttachment(name, URI);
       }
-      this.model.attachments.set(URI, bundle);
-      this.updateCellSourceWithAttachment(blob.name, URI);
     };
     reader.onerror = evt => {
       console.error(`Failed to attach ${blob.name}` + evt);
     };
     reader.readAsDataURL(blob);
+  }
+
+  /**
+   * Generates a unique URI for a file 
+   * while preserving the file extension.
+   */
+  private _generateURI(name: string): string {
+    const lastIndex = name.lastIndexOf('.');
+    return lastIndex !== -1 ? UUID.uuid4().concat(name.substring(lastIndex)) : UUID.uuid4();
   }
 
   /**
