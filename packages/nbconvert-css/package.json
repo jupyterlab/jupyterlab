@@ -42,12 +42,12 @@
     "@jupyterlab/rendermime": "^1.2.2"
   },
   "devDependencies": {
-    "@jupyterlab/apputils": "^1.2.1",
-    "@jupyterlab/cells": "^1.2.2",
-    "@jupyterlab/codemirror": "^1.2.1",
-    "@jupyterlab/notebook": "^1.2.2",
-    "@jupyterlab/outputarea": "^1.2.2",
-    "@jupyterlab/rendermime": "^1.2.1",
+    "@jupyterlab/apputils": "^1.2.2",
+    "@jupyterlab/cells": "^1.2.3",
+    "@jupyterlab/codemirror": "^1.2.2",
+    "@jupyterlab/notebook": "^1.2.3",
+    "@jupyterlab/outputarea": "^1.2.3",
+    "@jupyterlab/rendermime": "^1.2.2",
     "css-loader": "~2.1.1",
     "file-loader": "~3.0.1",
     "mini-css-extract-plugin": "~0.6.0",
