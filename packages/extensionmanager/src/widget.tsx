@@ -10,7 +10,6 @@ import {
   caretRightIcon,
   Collapse,
   InputGroup,
-  jupyterIcon,
   listingsInfoIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
@@ -20,7 +19,6 @@ import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
-import { isJupyterOrg } from './npm';
 
 // TODO: Replace pagination with lazy loading of lower search results
 
@@ -35,6 +33,9 @@ const caretRightIconStyled = caretRightIcon.bindprops({
   height: 'auto',
   width: '20px'
 });
+
+const badgeSize = 32;
+const badgeQuerySize = Math.floor(devicePixelRatio * badgeSize);
 
 /**
  * Search bar VDOM component.
@@ -202,6 +203,13 @@ namespace BuildPrompt {
   }
 }
 
+function getExtensionGitHubUser(entry: IEntry) {
+  if (entry.url && entry.url.startsWith('https://github.com/')) {
+    return entry.url.split('/')[3];
+  }
+  return null;
+}
+
 /**
  * VDOM for visualizing an extension entry.
  */
@@ -212,9 +220,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
   let title = entry.name;
-  if (isJupyterOrg(entry.name)) {
-    flagClasses.push(`jp-extensionmanager-entry-mod-jupyterlab-org`);
-  }
+  const githubUser = getExtensionGitHubUser(entry);
   if (
     listMode === 'black' &&
     entry.blacklistEntry &&
@@ -239,36 +245,30 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
     <li
       className={`jp-extensionmanager-entry ${flagClasses.join(' ')}`}
       title={title}
+      style={{ display: 'flex' }}
     >
-      <div className="jp-extensionmanager-entry-title">
-        <div className="jp-extensionmanager-entry-name">
-          <a href={entry.url} target="_blank" rel="noopener">
-            {entry.name}
-          </a>
-        </div>
-        {isJupyterOrg(entry.name) && (
-          <ToolbarButtonComponent
-            icon={jupyterIcon}
-            iconLabel={entry.name + ' (Developed by Project Jupyter)'}
+      <div style={{ marginRight: '8px' }}>
+        {githubUser && (
+          <img
+            src={`https://github.com/${githubUser}.png?size=${badgeQuerySize}`}
+            style={{ width: '32px', height: '32px' }}
           />
         )}
-        {entry.blacklistEntry && (
-          <ToolbarButtonComponent
-            icon={listingsInfoIcon}
-            iconLabel={`${entry.name} extension has been blacklisted since install. Please uninstall immediately and contact your blacklist administrator.`}
-            onClick={() =>
-              window.open(
-                'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
-              )
-            }
-          />
+        {!githubUser && (
+          <div style={{ width: `${badgeSize}px`, height: `${badgeSize}px` }} />
         )}
-        {!entry.whitelistEntry &&
-          viewType === 'installed' &&
-          listMode === 'white' && (
+      </div>
+      <div style={{ flexDirection: 'column' }}>
+        <div className="jp-extensionmanager-entry-title">
+          <div className="jp-extensionmanager-entry-name">
+            <a href={entry.url} target="_blank" rel="noopener">
+              {entry.name}
+            </a>
+          </div>
+          {entry.blacklistEntry && (
             <ToolbarButtonComponent
               icon={listingsInfoIcon}
-              iconLabel={`${entry.name} extension has been removed from the whitelist since installation. Please uninstall immediately and contact your whitelist administrator.`}
+              iconLabel={`${entry.name} extension has been blacklisted since install. Please uninstall immediately and contact your blacklist administrator.`}
               onClick={() =>
                 window.open(
                   'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
@@ -276,63 +276,77 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               }
             />
           )}
-      </div>
-      <div className="jp-extensionmanager-entry-content">
-        <div className="jp-extensionmanager-entry-description">
-          {entry.description}
+          {!entry.whitelistEntry &&
+            viewType === 'installed' &&
+            listMode === 'white' && (
+              <ToolbarButtonComponent
+                icon={listingsInfoIcon}
+                iconLabel={`${entry.name} extension has been removed from the whitelist since installation. Please uninstall immediately and contact your whitelist administrator.`}
+                onClick={() =>
+                  window.open(
+                    'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                  )
+                }
+              />
+            )}
         </div>
-        <div className="jp-extensionmanager-entry-buttons">
-          {!entry.installed &&
-            !entry.blacklistEntry &&
-            !(!entry.whitelistEntry && listMode === 'white') &&
-            ListModel.isDisclaimed() && (
+        <div className="jp-extensionmanager-entry-content">
+          <div className="jp-extensionmanager-entry-description">
+            {entry.description}
+          </div>
+          <div className="jp-extensionmanager-entry-buttons">
+            {!entry.installed &&
+              !entry.blacklistEntry &&
+              !(!entry.whitelistEntry && listMode === 'white') &&
+              ListModel.isDisclaimed() && (
+                <Button
+                  onClick={() => props.performAction('install', entry)}
+                  minimal
+                  small
+                >
+                  Install
+                </Button>
+              )}
+            {ListModel.entryHasUpdate(entry) &&
+              !entry.blacklistEntry &&
+              !(!entry.whitelistEntry && listMode === 'white') &&
+              ListModel.isDisclaimed() && (
+                <Button
+                  onClick={() => props.performAction('install', entry)}
+                  minimal
+                  small
+                >
+                  Update
+                </Button>
+              )}
+            {entry.installed && (
               <Button
-                onClick={() => props.performAction('install', entry)}
+                onClick={() => props.performAction('uninstall', entry)}
                 minimal
                 small
               >
-                Install
+                Uninstall
               </Button>
             )}
-          {ListModel.entryHasUpdate(entry) &&
-            !entry.blacklistEntry &&
-            !(!entry.whitelistEntry && listMode === 'white') &&
-            ListModel.isDisclaimed() && (
+            {entry.enabled && (
               <Button
-                onClick={() => props.performAction('install', entry)}
+                onClick={() => props.performAction('disable', entry)}
                 minimal
                 small
               >
-                Update
+                Disable
               </Button>
             )}
-          {entry.installed && (
-            <Button
-              onClick={() => props.performAction('uninstall', entry)}
-              minimal
-              small
-            >
-              Uninstall
-            </Button>
-          )}
-          {entry.enabled && (
-            <Button
-              onClick={() => props.performAction('disable', entry)}
-              minimal
-              small
-            >
-              Disable
-            </Button>
-          )}
-          {entry.installed && !entry.enabled && (
-            <Button
-              onClick={() => props.performAction('enable', entry)}
-              minimal
-              small
-            >
-              Enable
-            </Button>
-          )}
+            {entry.installed && !entry.enabled && (
+              <Button
+                onClick={() => props.performAction('enable', entry)}
+                minimal
+                small
+              >
+                Enable
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </li>
