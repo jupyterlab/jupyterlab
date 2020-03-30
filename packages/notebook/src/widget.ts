@@ -1458,7 +1458,6 @@ export class Notebook extends StaticNotebook {
       });
     }
     cell.editor.edgeRequested.connect(this._onEdgeRequest, this);
-    cell.editor.emptyBackspace.connect(this._onEmptyBackspace, this);
     // If the insertion happened above, increment the active cell
     // index, otherwise it stays the same.
     this.activeCellIndex =
@@ -1535,22 +1534,6 @@ export class Notebook extends StaticNotebook {
       }
     }
     this.mode = 'edit';
-  }
-
-  /**
-   * Handle empty backspace signals from cells (delete the cell).
-   */
-
-  private _onEmptyBackspace(editor: CodeEditor.IEditor) {
-    let activeCellIndex = this.activeCellIndex;
-    const model = this.model!;
-    const cells = model.cells;
-    const child = cells.get(activeCellIndex);
-    const deletable = child.metadata.get('deletable') !== false;
-
-    if (deletable) {
-      cells.remove(activeCellIndex);
-    }
   }
 
   /**
