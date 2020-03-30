@@ -77,6 +77,9 @@ export namespace MenuSvg {
       (menu as any).renderer = MenuSvg.defaultRenderer;
     }
 
+    // ensure correct renderer on any submenus that get added in the future
+    menu.insertItem = MenuSvg.prototype.insertItem;
+
     // recurse through submenus
     for (const item of (menu as any)._items as Menu.IItem[]) {
       if (item.submenu) {
