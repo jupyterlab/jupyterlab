@@ -851,10 +851,13 @@ namespace Private {
   }
 
   /**
-   * A shim for svgstrs loaded using any loader other than raw-loader,
-   * which in general may look like the raw contents of an .svg file:
+   * A shim for svgstrs loaded using any loader other than raw-loader.
+   * This function assumes that svgstr will look like one of:
+   *
+   * - the raw contents of an .svg file:
    *   <svg...</svg>
-   * or like a data URL:
+   *
+   * - a data URL:
    *   data:[<mediatype>][;base64],<svg...</svg>
    *
    * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
