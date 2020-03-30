@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/template",
-  "version": "2.0.1",
+  "version": "2.1.0-a.0",
   "description": "JupyterLab - Package Template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
