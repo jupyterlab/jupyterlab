@@ -1331,7 +1331,7 @@ export abstract class AttachmentsCell extends Cell {
 
       if (mimeType.startsWith('image/')){
         this.model.attachments.set(URI, bundle);
-        this.updateCellSourceWithAttachment(name, URI);
+        this.updateCellSourceWithAttachment(blob.name, URI);
       }
     };
     reader.onerror = evt => {
