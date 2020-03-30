@@ -228,6 +228,8 @@ namespace CommandIDs {
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
+
+  export const replaceSelection = 'notebook:replace-selection';
 }
 
 /**
@@ -1939,6 +1941,17 @@ function addCommands(
 
       if (current) {
         return NotebookActions.selectLastRunCell(current.content);
+      }
+    },
+    isEnabled
+  });
+  commands.addCommand(CommandIDs.replaceSelection, {
+    label: 'Replace Selection in Notebook Cell',
+    execute: args => {
+      const current = getCurrent(args);
+      const text: string = (args['text'] as string) || '';
+      if (current) {
+        return NotebookActions.replaceSelection(current.content, text);
       }
     },
     isEnabled

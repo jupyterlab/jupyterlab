@@ -363,6 +363,19 @@ export class CodeConsole extends Widget {
   }
 
   /**
+   * Replaces the selected text in the prompt cell.
+   *
+   * @param text - The text to replace the selection.
+   */
+  replaceSelection(text: string): void {
+    let promptCell = this.promptCell;
+    if (!promptCell) {
+      return;
+    }
+    promptCell.editor.replaceSelection?.(text);
+  }
+
+  /**
    * Serialize the output.
    *
    * #### Notes
