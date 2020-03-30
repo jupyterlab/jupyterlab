@@ -39,7 +39,7 @@
     "@jupyterlab/services": "^5.0.2",
     "@jupyterlab/ui-components": "^2.0.2",
     "@lumino/messaging": "^1.3.3",
-    "@lumino/polling": "^1.1.1",
+    "@lumino/polling": "^1.0.4",
     "react": "~16.9.0",
     "react-paginate": "^6.3.2",
     "semver": "^6.3.0"
