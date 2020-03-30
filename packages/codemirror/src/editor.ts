@@ -80,11 +80,6 @@ const UP_ARROW = 38;
 const DOWN_ARROW = 40;
 
 /**
- * The key code for the backspace key.
- */
-const BACKSPACE = 8;
-
-/**
  * The time that a collaborator name hover persists.
  */
 const HOVER_TIMEOUT = 1000;
@@ -180,11 +175,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * A signal emitted when either the top or bottom edge is requested.
    */
   readonly edgeRequested = new Signal<this, CodeEditor.EdgeLocation>(this);
-
-  /**
-   * A signal emitted when backspace is pressed in an empty cell.
-   */
-  readonly emptyBackspace = new Signal<this, void>(this);
 
   /**
    * The DOM node that hosts the editor.
@@ -657,10 +647,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       if (!event.shiftKey) {
         this.edgeRequested.emit('bottom');
       }
-      return false;
-    }
-    if (event.keyCode === BACKSPACE && this._model.value.text === '') {
-      this.emptyBackspace.emit();
       return false;
     }
     return false;

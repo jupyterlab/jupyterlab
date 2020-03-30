@@ -385,11 +385,6 @@ export namespace CodeEditor {
     readonly edgeRequested: ISignal<IEditor, EdgeLocation>;
 
     /**
-     * A signal emitted when hitting backspace in an empty editor.
-     */
-    readonly emptyBackspace: ISignal<IEditor, void>;
-
-    /**
      * The default selection style for the editor.
      */
     selectionStyle: CodeEditor.ISelectionStyle;
