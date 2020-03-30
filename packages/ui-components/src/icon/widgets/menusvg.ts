@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { h, VirtualElement } from '@lumino/virtualdom';
-import { Menu } from '@lumino/widgets';
+import { Menu, ContextMenu } from '@lumino/widgets';
 
 import { caretRightIcon, checkIcon } from '../iconimports';
 import { LabIconStyle } from '../../style';
@@ -11,6 +11,26 @@ import { classes } from '../../utils';
 const submenuIcon = caretRightIcon.bindprops({
   stylesheet: 'menuItem'
 });
+
+/**
+ * An object which implements a universal context menu.
+ * Tweaked to use inline svg icons
+ */
+export class ContextMenuSvg extends ContextMenu {
+  /**
+   * Construct a new context menu.
+   *
+   * @param options - The options for initializing the menu.
+   */
+  constructor(options: ContextMenu.IOptions) {
+    super(options);
+
+    // override the vanilla .menu
+    this.menu = new MenuSvg(options);
+  }
+
+  readonly menu: MenuSvg;
+}
 
 /**
  * a widget which displays items as a canonical menu.
@@ -53,7 +73,8 @@ export namespace MenuSvg {
   export function overrideDefaultRenderer(menu: Menu): void {
     // override renderer, if needed
     if (menu.renderer === Menu.defaultRenderer) {
-      (menu as any).renderer = defaultRenderer;
+      // cast away readonly on menu.renderer
+      (menu as any).renderer = MenuSvg.defaultRenderer;
     }
 
     // recurse through submenus
