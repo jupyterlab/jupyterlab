@@ -98,23 +98,21 @@ const VariablesComponent = ({
   }, [data]);
 
   return (
-    <>
-      <ul>
-        {variables
-          ?.filter(variable => !filter?.has(variable.evaluateName))
-          .map(variable => {
-            const key = `${variable.evaluateName}-${variable.type}-${variable.value}`;
-            return (
-              <VariableComponent
-                key={key}
-                data={variable}
-                service={service}
-                filter={filter}
-              />
-            );
-          })}
-      </ul>
-    </>
+    <ul>
+      {variables
+        ?.filter(variable => !filter.has(variable.evaluateName))
+        .map(variable => {
+          const key = `${variable.evaluateName}-${variable.type}-${variable.value}`;
+          return (
+            <VariableComponent
+              key={key}
+              data={variable}
+              service={service}
+              filter={filter}
+            />
+          );
+        })}
+    </ul>
   );
 };
 

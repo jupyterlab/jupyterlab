@@ -88,9 +88,8 @@ export class Variables extends Panel {
    * @param msg The resize message.
    */
   private _resizeBody(msg: Widget.ResizeMessage) {
-    // const height = msg.height - this._header.node.offsetHeight;
-    // this._table.node.style.height = `${height}px`;
-    // this._tree.node.style.height = `${height}px`;
+    const height = msg.height - this._header.node.offsetHeight;
+    this._tree.node.style.height = `${height}px`;
   }
 
   private _header: VariablesHeader;
