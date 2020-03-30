@@ -242,9 +242,22 @@ ${fileTypes}`;
       }
     });
 
+    // callback to registry change that ensures not to invoke reload method when there is already a promise that is pending
+    let reloadSettingsRegistry = () => {
+      let promisePending = false;
+
+      return async () => {
+        if (!promisePending) {
+          promisePending = true;
+          await settingRegistry.reload(pluginId);
+          promisePending = false;
+        }
+      };
+    };
+
     // If the document registry gains or loses a factory or file type,
     // regenerate the settings description with the available options.
-    registry.changed.connect(() => settingRegistry.reload(pluginId));
+    registry.changed.connect(reloadSettingsRegistry());
 
     return docManager;
   }
