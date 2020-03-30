@@ -228,9 +228,10 @@ export class Completer extends Widget {
     }
 
     let node: HTMLElement | null = null;
-
-    if (model.completionItems && model.completionItems().items.length) {
-      node = this._createCompletionItemNode(model);
+    let completionItemList =
+      model.completionItems && model.completionItems().items;
+    if (completionItemList && completionItemList.length) {
+      node = this._createCompletionItemNode(model, completionItemList);
     } else {
       node = this._createIItemNode(model);
     }
@@ -261,12 +262,11 @@ export class Completer extends Widget {
   }
 
   private _createCompletionItemNode(
-    model: Completer.IModel
+    model: Completer.IModel,
+    items: CompletionHandler.ICompletionItem[]
   ): HTMLElement | null {
-    let items = model.completionItems && model.completionItems().items;
-
     // If there are no items, reset and bail.
-    if (!items || !items.length) {
+    if (!items.length) {
       this._resetFlag = true;
       this.reset();
       if (!this.isHidden) {

@@ -174,10 +174,9 @@ export class CompleterModel implements Completer.IModel {
    */
   completionItems?(): CompletionHandler.ICompletionItems {
     let query = this._query;
-    if (!query) {
-      return this._completionItems;
+    if (query) {
+      this._markup(query);
     }
-    this._markup(query);
     return this._completionItems;
   }
 
