@@ -8,7 +8,7 @@ jobs:
     name: Update PR Labels
     runs-on: ubuntu-latest
     steps:
-      - if: github.repository == "jupyterlab/jupyterlab"
+      - if: github.repository == 'jupyterlab/jupyterlab'
         uses: paulfantom/periodic-labeler@dffbc90404f371f76444a69221c2f7ad079e2319
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
