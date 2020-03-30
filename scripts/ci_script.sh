@@ -45,6 +45,9 @@ fi
 
 
 if [[ $GROUP == docs ]]; then
+    # Run the link check - allow for a link to fail once (--lf means only run last failed)
+    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+
     # Build the docs
     jlpm build:packages
     jlpm docs
@@ -53,12 +56,14 @@ if [[ $GROUP == docs ]]; then
     pushd docs
     pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
     make html
-    make linkcheck
+
+    # Remove internal sphinx files and use pytest-check-links on the generated html
+    rm build/html/genindex.html
+    rm build/html/search.html
+    # FIXME: re-enable pending https://github.com/minrk/pytest-check-links/pull/7
+    #py.test --check-links -k .html build/html || py.test --check-links -k .html --lf build/html
+
     popd
-
-    # Run the link check - allow for a link to fail once
-    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
-
 fi
 
 
