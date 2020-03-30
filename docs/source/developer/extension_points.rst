@@ -72,6 +72,8 @@ After a command has been added to the application command registry
 you can add them to various places in the application user interface,
 where they will be rendered using the metadata you provided.
 
+For example, you can add a button the Notebook toolbar to run the command with the ``CommandToolbarButtonComponent``.
+
 Add a Command to the Command Palette
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -125,6 +127,22 @@ right-clicks on a DOM element matching ``.jp-Notebook`` (that is to say, a noteb
 The selector can be any valid CSS selector, and may target your own UI elements, or existing ones.
 A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
 
+If you don't want JupyterLab's custom context menu to appear for your element, because you have
+your own right click behavior that you want to trigger, you can add the `data-jp-suppress-context-menu` data attribute
+to any node to have it and its children not trigger it.
+
+For example, if you are building a custom React element, it would look like this:
+
+.. code::
+
+    function MyElement(props: {}) {
+      return (
+        <div data-jp-suppress-context-menu>
+          <p>Hi</p>
+          <p onContextMenu={() => {console.log("right clicked")}}>There</p>
+        </div>
+      )
+    }
 
 .. _copy_shareable_link:
 

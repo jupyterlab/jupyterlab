@@ -3,13 +3,14 @@
 
 import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   Button,
   caretDownIcon,
   caretRightIcon,
   Collapse,
   InputGroup,
-  jupyterIcon,
+  listingsInfoIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
 
@@ -18,7 +19,6 @@ import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
-import { isJupyterOrg } from './query';
 
 // TODO: Replace pagination with lazy loading of lower search results
 
@@ -33,6 +33,9 @@ const caretRightIconStyled = caretRightIcon.bindprops({
   height: 'auto',
   width: '20px'
 });
+
+const badgeSize = 32;
+const badgeQuerySize = Math.floor(devicePixelRatio * badgeSize);
 
 /**
  * Search bar VDOM component.
@@ -53,16 +56,69 @@ export class SearchBar extends React.Component<
    */
   render(): React.ReactNode {
     return (
-      <div className="jp-extensionmanager-search-bar">
-        <InputGroup
-          className="jp-extensionmanager-search-wrapper"
-          type="text"
-          placeholder={this.props.placeholder}
-          onChange={this.handleChange}
-          value={this.state.value}
-          rightIcon="search"
-        />
-      </div>
+      <>
+        <div className="jp-extensionmanager-search-bar">
+          <InputGroup
+            className="jp-extensionmanager-search-wrapper"
+            type="text"
+            placeholder={this.props.placeholder}
+            onChange={this.handleChange}
+            value={this.state.value}
+            rightIcon="search"
+            disabled={this.props.disabled}
+          />
+        </div>
+        <CollapsibleSection
+          key="warning-section"
+          isOpen={true}
+          disabled={false}
+          header={'Warning'}
+        >
+          <div className="jp-extensionmanager-disclaimer">
+            <div>
+              Extensions installed contain arbitrary code that can execute on
+              your machine that may contain malicious code.
+            </div>
+            <div style={{ paddingTop: 8 }}>
+              I understand extensions contain arbitrary code.
+            </div>
+            <div style={{ paddingTop: 8 }}>
+              {ListModel.isDisclaimed() && (
+                <Button
+                  className="jp-extensionmanager-disclaimer-disable"
+                  onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
+                    this.props.settings
+                      .set('disclaimed', false)
+                      .catch(reason => {
+                        console.error(
+                          `Something went wrong when setting disclaimed.\n${reason}`
+                        );
+                      });
+                  }}
+                >
+                  Disable
+                </Button>
+              )}
+              {!ListModel.isDisclaimed() && (
+                <Button
+                  className="jp-extensionmanager-disclaimer-enable"
+                  onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
+                    this.props.settings
+                      .set('disclaimed', true)
+                      .catch(reason => {
+                        console.error(
+                          `Something went wrong when setting disclaimed.\n${reason}`
+                        );
+                      });
+                  }}
+                >
+                  Enable
+                </Button>
+              )}
+            </div>
+          </div>
+        </CollapsibleSection>
+      </>
     );
   }
 
@@ -89,6 +145,10 @@ export namespace SearchBar {
      * The placeholder string to use in the search bar input field when empty.
      */
     placeholder: string;
+
+    disabled: boolean;
+
+    settings: ISettingRegistry.ISettings;
   }
 
   /**
@@ -143,88 +203,150 @@ namespace BuildPrompt {
   }
 }
 
+function getExtensionGitHubUser(entry: IEntry) {
+  if (entry.url && entry.url.startsWith('https://github.com/')) {
+    return entry.url.split('/')[3];
+  }
+  return null;
+}
+
 /**
  * VDOM for visualizing an extension entry.
  */
 function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
-  const { entry } = props;
+  const { entry, listMode, viewType } = props;
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
   let title = entry.name;
-  if (isJupyterOrg(entry.name)) {
-    flagClasses.push(`jp-extensionmanager-entry-mod-whitelisted`);
-    title = `${entry.name} (Developed by Project Jupyter)`;
+  const githubUser = getExtensionGitHubUser(entry);
+  if (
+    listMode === 'black' &&
+    entry.blacklistEntry &&
+    viewType === 'searchResult'
+  ) {
+    return <li></li>;
+  }
+  if (
+    listMode === 'white' &&
+    !entry.whitelistEntry &&
+    viewType === 'searchResult'
+  ) {
+    return <li></li>;
+  }
+  if (listMode === 'black' && entry.blacklistEntry?.name) {
+    flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
+  }
+  if (listMode === 'white' && !entry.whitelistEntry) {
+    flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
   }
   return (
     <li
       className={`jp-extensionmanager-entry ${flagClasses.join(' ')}`}
       title={title}
+      style={{ display: 'flex' }}
     >
-      <div className="jp-extensionmanager-entry-title">
-        <div className="jp-extensionmanager-entry-name">
-          <a href={entry.url} target="_blank" rel="noopener">
-            {entry.name}
-          </a>
-        </div>
-        <jupyterIcon.react
-          className="jp-extensionmanager-entry-jupyter-org"
-          top="1px"
-          height="auto"
-          width="1em"
-        />
+      <div style={{ marginRight: '8px' }}>
+        {githubUser && (
+          <img
+            src={`https://github.com/${githubUser}.png?size=${badgeQuerySize}`}
+            style={{ width: '32px', height: '32px' }}
+          />
+        )}
+        {!githubUser && (
+          <div style={{ width: `${badgeSize}px`, height: `${badgeSize}px` }} />
+        )}
       </div>
-      <div className="jp-extensionmanager-entry-content">
-        <div className="jp-extensionmanager-entry-description">
-          {entry.description}
+      <div style={{ flexDirection: 'column' }}>
+        <div className="jp-extensionmanager-entry-title">
+          <div className="jp-extensionmanager-entry-name">
+            <a href={entry.url} target="_blank" rel="noopener">
+              {entry.name}
+            </a>
+          </div>
+          {entry.blacklistEntry && (
+            <ToolbarButtonComponent
+              icon={listingsInfoIcon}
+              iconLabel={`${entry.name} extension has been blacklisted since install. Please uninstall immediately and contact your blacklist administrator.`}
+              onClick={() =>
+                window.open(
+                  'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                )
+              }
+            />
+          )}
+          {!entry.whitelistEntry &&
+            viewType === 'installed' &&
+            listMode === 'white' && (
+              <ToolbarButtonComponent
+                icon={listingsInfoIcon}
+                iconLabel={`${entry.name} extension has been removed from the whitelist since installation. Please uninstall immediately and contact your whitelist administrator.`}
+                onClick={() =>
+                  window.open(
+                    'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                  )
+                }
+              />
+            )}
         </div>
-        <div className="jp-extensionmanager-entry-buttons">
-          {!entry.installed && (
-            <Button
-              onClick={() => props.performAction('install', entry)}
-              minimal
-              small
-            >
-              Install
-            </Button>
-          )}
-          {ListModel.entryHasUpdate(entry) && (
-            <Button
-              onClick={() => props.performAction('install', entry)}
-              minimal
-              small
-            >
-              Update
-            </Button>
-          )}
-          {entry.installed && (
-            <Button
-              onClick={() => props.performAction('uninstall', entry)}
-              minimal
-              small
-            >
-              Uninstall
-            </Button>
-          )}
-          {entry.enabled && (
-            <Button
-              onClick={() => props.performAction('disable', entry)}
-              minimal
-              small
-            >
-              Disable
-            </Button>
-          )}
-          {entry.installed && !entry.enabled && (
-            <Button
-              onClick={() => props.performAction('enable', entry)}
-              minimal
-              small
-            >
-              Enable
-            </Button>
-          )}
+        <div className="jp-extensionmanager-entry-content">
+          <div className="jp-extensionmanager-entry-description">
+            {entry.description}
+          </div>
+          <div className="jp-extensionmanager-entry-buttons">
+            {!entry.installed &&
+              !entry.blacklistEntry &&
+              !(!entry.whitelistEntry && listMode === 'white') &&
+              ListModel.isDisclaimed() && (
+                <Button
+                  onClick={() => props.performAction('install', entry)}
+                  minimal
+                  small
+                >
+                  Install
+                </Button>
+              )}
+            {ListModel.entryHasUpdate(entry) &&
+              !entry.blacklistEntry &&
+              !(!entry.whitelistEntry && listMode === 'white') &&
+              ListModel.isDisclaimed() && (
+                <Button
+                  onClick={() => props.performAction('install', entry)}
+                  minimal
+                  small
+                >
+                  Update
+                </Button>
+              )}
+            {entry.installed && (
+              <Button
+                onClick={() => props.performAction('uninstall', entry)}
+                minimal
+                small
+              >
+                Uninstall
+              </Button>
+            )}
+            {entry.enabled && (
+              <Button
+                onClick={() => props.performAction('disable', entry)}
+                minimal
+                small
+              >
+                Disable
+              </Button>
+            )}
+            {entry.installed && !entry.enabled && (
+              <Button
+                onClick={() => props.performAction('enable', entry)}
+                minimal
+                small
+              >
+                Enable
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </li>
@@ -242,6 +364,16 @@ export namespace ListEntry {
     entry: IEntry;
 
     /**
+     * The list mode to apply.
+     */
+    listMode: 'black' | 'white' | 'default';
+
+    /**
+     * The requested view type.
+     */
+    viewType: 'installed' | 'searchResult';
+
+    /**
      * Callback to use for performing an action on the entry.
      */
     performAction: (action: Action, entry: IEntry) => void;
@@ -257,6 +389,8 @@ export function ListView(props: ListView.IProperties): React.ReactElement<any> {
     entryViews.push(
       <ListEntry
         entry={entry}
+        listMode={props.listMode}
+        viewType={props.viewType}
         key={entry.name}
         performAction={props.performAction}
       />
@@ -316,6 +450,16 @@ export namespace ListView {
     numPages: number;
 
     /**
+     * The list mode to apply.
+     */
+    listMode: 'black' | 'white' | 'default';
+
+    /**
+     * The requested view type.
+     */
+    viewType: 'installed' | 'searchResult';
+
+    /**
      * The callback to use for changing the page
      */
     onPage: (page: number) => void;
@@ -351,7 +495,7 @@ export class CollapsibleSection extends React.Component<
   constructor(props: CollapsibleSection.IProperties) {
     super(props);
     this.state = {
-      isOpen: props.isOpen || true
+      isOpen: props.isOpen ? true : false
     };
   }
 
@@ -359,23 +503,27 @@ export class CollapsibleSection extends React.Component<
    * Render the collapsible section using the virtual DOM.
    */
   render(): React.ReactNode {
+    let icon = this.state.isOpen ? caretDownIconStyled : caretRightIconStyled;
+    let isOpen = this.state.isOpen;
+    let className = 'jp-extensionmanager-headerText';
+    if (this.props.disabled) {
+      icon = caretRightIconStyled;
+      isOpen = false;
+      className = 'jp-extensionmanager-headerTextDisabled';
+    }
     return (
       <>
         <header>
           <ToolbarButtonComponent
-            icon={
-              this.state.isOpen ? caretDownIconStyled : caretRightIconStyled
-            }
+            icon={icon}
             onClick={() => {
               this.handleCollapse();
             }}
           />
-          <span className="jp-extensionmanager-headerText">
-            {this.props.header}
-          </span>
-          {this.props.headerElements}
+          <span className={className}>{this.props.header}</span>
+          {!this.props.disabled && this.props.headerElements}
         </header>
-        <Collapse isOpen={this.state.isOpen}>{this.props.children}</Collapse>
+        <Collapse isOpen={isOpen}>{this.props.children}</Collapse>
       </>
     );
   }
@@ -429,6 +577,12 @@ export namespace CollapsibleSection {
      * If given, this will be diplayed instead of the children.
      */
     errorMessage?: string | null;
+
+    /**
+     * If true, the section will be collapsed and will not respond
+     * to open nor close actions.
+     */
+    disabled?: boolean;
   }
 
   /**
@@ -446,8 +600,13 @@ export namespace CollapsibleSection {
  * The main view for the discovery extension.
  */
 export class ExtensionView extends VDomRenderer<ListModel> {
-  constructor(serviceManager: ServiceManager) {
-    super(new ListModel(serviceManager));
+  private _settings: ISettingRegistry.ISettings;
+  constructor(
+    serviceManager: ServiceManager,
+    settings: ISettingRegistry.ISettings
+  ) {
+    super(new ListModel(serviceManager, settings));
+    this._settings = settings;
     this.addClass('jp-extensionmanager-view');
   }
 
@@ -466,11 +625,18 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   protected render(): React.ReactElement<any>[] {
     const model = this.model!;
     let pages = Math.ceil(model.totalEntries / model.pagination);
-    let elements = [<SearchBar key="searchbar" placeholder="SEARCH" />];
+    let elements = [
+      <SearchBar
+        key="searchbar"
+        placeholder="SEARCH"
+        disabled={!ListModel.isDisclaimed()}
+        settings={this._settings}
+      />
+    ];
     if (model.promptBuild) {
       elements.push(
         <BuildPrompt
-          key="buildpromt"
+          key="promt"
           performBuild={() => {
             model.performBuild();
           }}
@@ -491,7 +657,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     );
     const content = [];
     if (!model.initialized) {
-      void model.initialize();
+      //      void model.initialize();
       content.push(
         <div key="loading-placeholder" className="jp-extensionmanager-loader">
           Updating extensions list
@@ -536,6 +702,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         installedContent.push(
           <ListView
             key="installed-items"
+            listMode={model.listMode}
+            viewType={'installed'}
             entries={model.installed}
             numPages={1}
             onPage={value => {
@@ -549,7 +717,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       content.push(
         <CollapsibleSection
           key="installed-section"
-          isOpen={true}
+          isOpen={ListModel.isDisclaimed()}
+          disabled={!ListModel.isDisclaimed()}
           header="Installed"
           headerElements={
             <ToolbarButtonComponent
@@ -579,6 +748,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         searchContent.push(
           <ListView
             key="search-items"
+            listMode={model.listMode}
+            viewType={'searchResult'}
             // Filter out installed extensions:
             entries={model.searchResult.filter(
               entry => model.installed.indexOf(entry) === -1
@@ -595,7 +766,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       content.push(
         <CollapsibleSection
           key="search-section"
-          isOpen={false}
+          isOpen={ListModel.isDisclaimed()}
+          disabled={!ListModel.isDisclaimed()}
           header={model.query ? 'Search Results' : 'Discover'}
           onCollapse={(isOpen: boolean) => {
             if (isOpen && model.query === null) {

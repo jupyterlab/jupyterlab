@@ -17,6 +17,7 @@
     "lib/*.js.map",
     "lib/*.js",
     "schema/*.json",
+    "listing/*.json",
     "style/*.css"
   ],
   "sideEffects": [

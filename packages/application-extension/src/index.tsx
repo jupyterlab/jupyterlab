@@ -822,13 +822,21 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   id: '@jupyterlab/application-extension:property-inspector',
   autoStart: true,
   requires: [ILabShell],
+  optional: [ILayoutRestorer],
   provides: IPropertyInspectorProvider,
-  activate: (app: JupyterFrontEnd, labshell: ILabShell) => {
+  activate: (
+    app: JupyterFrontEnd,
+    labshell: ILabShell,
+    restorer: ILayoutRestorer | null
+  ) => {
     const widget = new SideBarPropertyInspectorProvider(labshell);
     widget.title.icon = buildIcon;
     widget.title.caption = 'Property Inspector';
     widget.id = 'jp-property-inspector';
     labshell.add(widget, 'left');
+    if (restorer) {
+      restorer.add(widget, 'jp-property-inspector');
+    }
     return widget;
   }
 };

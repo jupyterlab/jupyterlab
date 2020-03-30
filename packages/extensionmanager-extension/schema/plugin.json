@@ -7,6 +7,12 @@
     "enabled": {
       "title": "Enabled Status",
       "description": "Enables extension manager (requires Node.js/npm).\nWARNING: installing untrusted extensions may be unsafe.",
+      "default": true,
+      "type": "boolean"
+    },
+    "disclaimed": {
+      "title": "Disclaimed Status",
+      "description": "Whether the user understand that extensions managed through this interface run arbitrary code that may be dangerous",
       "default": false,
       "type": "boolean"
     }

@@ -17,19 +17,35 @@ if [[ $GROUP == python ]]; then
 fi
 
 
-if [[ $GROUP == js ]]; then
+if [[ $GROUP == js* ]]; then
+
+    if [[ $GROUP == js-* ]]; then
+        # extract the group name
+        export PKG="${GROUP#*-}"
+        jlpm run build:packages:scope --scope "@jupyterlab/$PKG"
+        jlpm run build:test:scope --scope "@jupyterlab/test-$PKG"
+        FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope "@jupyterlab/test-$PKG"
+    else
+        jlpm build:packages
+        jlpm build:test
+        FORCE_COLOR=1 jlpm test --loglevel success
+    fi
+
+    jlpm run clean
+fi
+
+if [[ $GROUP == jsscope ]]; then
 
     jlpm build:packages
     jlpm build:test
-    FORCE_COLOR=1 jlpm coverage --loglevel success
+    FORCE_COLOR=1 jlpm test:scope --loglevel success --scope $JSTESTGROUP
 
     jlpm run clean
 fi
 
 
 if [[ $GROUP == docs ]]; then
-
-    # Run the link check - allow for a link to fail once
+    # Run the link check - allow for a link to fail once (--lf means only run last failed)
     py.test --check-links -k .md . || py.test --check-links -k .md --lf .
 
     # Build the docs
@@ -39,8 +55,14 @@ if [[ $GROUP == docs ]]; then
     # Verify tutorial docs build
     pushd docs
     pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
-    make linkcheck
     make html
+
+    # Remove internal sphinx files and use pytest-check-links on the generated html
+    rm build/html/genindex.html
+    rm build/html/search.html
+    # FIXME: re-enable pending https://github.com/minrk/pytest-check-links/pull/7
+    #py.test --check-links -k .html build/html || py.test --check-links -k .html --lf build/html
+
     popd
 fi
 

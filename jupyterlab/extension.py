@@ -54,6 +54,7 @@ def load_config(nbapp):
     config.app_version = info['version']
     config.cache_files = True
     config.schemas_dir = pjoin(app_dir, 'schemas')
+    config.listings_dir = pjoin(app_dir, 'listings')
     config.templates_dir = pjoin(app_dir, 'static')
     config.themes_dir = pjoin(app_dir, 'themes')
     config.user_settings_dir = user_settings_dir
@@ -96,7 +97,7 @@ def load_jupyter_server_extension(nbapp):
     web_app = nbapp.web_app
     logger = nbapp.log
     base_url = nbapp.base_url
-
+    
     # Handle the app_dir
     app_dir = getattr(nbapp, 'app_dir', get_app_dir())
 

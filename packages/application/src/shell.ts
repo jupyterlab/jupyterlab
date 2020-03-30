@@ -175,7 +175,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this.addClass(APPLICATION_SHELL_CLASS);
     this.id = 'main';
 
-    let headerPanel = (this._headerPanel = new Panel());
+    let headerPanel = (this._headerPanel = new BoxPanel());
     let topHandler = (this._topHandler = new Private.PanelHandler());
     let bottomPanel = (this._bottomPanel = new BoxPanel());
     let hboxPanel = new BoxPanel();
@@ -206,6 +206,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     dockPanel.spacing = 5;
     hsplitPanel.spacing = 1;
 
+    headerPanel.direction = 'top-to-bottom';
     hboxPanel.direction = 'left-to-right';
     hsplitPanel.orientation = 'horizontal';
     bottomPanel.direction = 'bottom-to-top';
