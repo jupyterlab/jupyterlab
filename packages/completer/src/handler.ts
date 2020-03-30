@@ -7,7 +7,12 @@ import { Text } from '@jupyterlab/coreutils';
 
 import { IDataConnector } from '@jupyterlab/statedb';
 
-import { ReadonlyJSONObject, JSONObject, JSONArray } from '@lumino/coreutils';
+import {
+  ReadonlyJSONObject,
+  JSONObject,
+  JSONArray,
+  PartialJSONObject
+} from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -397,6 +402,16 @@ export class CompletionHandler implements IDisposable {
 
     // Update the original request.
     model.original = state;
+    // Update the cursor.
+    model.cursor = {
+      start: Text.charIndexToJsIndex(reply.start, text),
+      end: Text.charIndexToJsIndex(reply.end, text)
+    };
+
+    if (reply.items && model.setCompletionItems) {
+      model.setCompletionItems(reply.items);
+      return;
+    }
 
     // Dedupe the matches.
     const matches: string[] = [];
@@ -434,12 +449,6 @@ export class CompletionHandler implements IDisposable {
 
     // Update the options, including the type map.
     model.setOptions(matches, typeMap);
-
-    // Update the cursor.
-    model.cursor = {
-      start: Text.charIndexToJsIndex(reply.start, text),
-      end: Text.charIndexToJsIndex(reply.end, text)
-    };
   }
 
   private _connector: IDataConnector<
@@ -478,6 +487,85 @@ export namespace CompletionHandler {
   }
 
   /**
+   * Wrapper object for ICompletionItem.
+   * Implementers of this interface should be responsible for
+   * deduping and sorting the items in the list.
+   */
+  export interface ICompletionItems {
+    /**
+     * Collection of completion items.
+     */
+    items: Array<ICompletionItem>;
+  }
+
+  /**
+   * Completion item object based off of LSP CompletionItem
+   */
+  export interface ICompletionItem extends PartialJSONObject {
+    /**
+     * User facing completion.
+     * If insertText is not set, this will be inserted.
+     */
+    label: string;
+
+    /**
+     * Completion to be inserted.
+     */
+    insertText?: string;
+
+    /**
+     * Range to be replaced by this completion.
+     */
+    range?: IRange;
+
+    /**
+     * Type of this completion item.
+     */
+    type?: string;
+
+    /**
+     * Image url for icon to be rendered with completion type.
+     */
+    icon?: string;
+
+    /**
+     * A human-readable string with additional information
+     * about this item, like type or symbol information.
+     */
+    documentation?: string;
+
+    /**
+     * A string used to help filter a set of completion items.
+     */
+    filterText?: string;
+
+    /**
+     * Indicates if the item is deprecated.
+     */
+    deprecated?: boolean;
+
+    /**
+     * Any metadata that accompanies this completion item.
+     */
+    data?: any;
+  }
+
+  /**
+   * Replacement range of completion item.
+   */
+  export interface IRange extends PartialJSONObject {
+    /**
+     * The starting index for the substring being replaced by completion.
+     */
+    start: number;
+
+    /**
+     * The end index for the substring being replaced by completion.
+     */
+    end: number;
+  }
+
+  /**
    * A reply to a completion request.
    */
   export interface IReply {
@@ -500,6 +588,11 @@ export namespace CompletionHandler {
      * Any metadata that accompanies the completion reply.
      */
     metadata: ReadonlyJSONObject;
+
+    /**
+     * Hook for extensions to send ICompletionItems.
+     */
+    items?: ICompletionItems;
   }
 
   /**
