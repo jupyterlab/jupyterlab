@@ -320,8 +320,11 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createRestartRunAllButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon$='fast-forward']")).to
-            .exist;
+          expect(
+            button.node.querySelector(
+              "[data-icon$='ui-components:restart-and-run']"
+            )
+          ).to.exist;
         });
       });
     });
