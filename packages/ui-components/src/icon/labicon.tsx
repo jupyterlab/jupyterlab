@@ -370,7 +370,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     });
   }
 
-  get svgElement(): HTMLElement | null {
+  protected get svgElement(): HTMLElement | null {
     if (this._svgElement === undefined) {
       this._svgElement = this._initSvg({ uuid: this._uuid });
     }
@@ -378,7 +378,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     return this._svgElement;
   }
 
-  get svgInnerHTML(): string | null {
+  protected get svgInnerHTML(): string | null {
     if (this._svgInnerHTML === undefined) {
       if (this.svgElement === null) {
         // the svg element resolved to null, mark this null too
@@ -391,7 +391,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     return this._svgInnerHTML;
   }
 
-  get svgReactAttrs(): any | null {
+  protected get svgReactAttrs(): any | null {
     if (this._svgReactAttrs === undefined) {
       if (this.svgElement === null) {
         // the svg element resolved to null, mark this null too
