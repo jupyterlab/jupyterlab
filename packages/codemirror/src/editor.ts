@@ -163,6 +163,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       this._lastChange = change;
     });
 
+    // Turn off paste handling in codemirror since sometimes we want to
+    // replace it with our own.
+    editor.on('paste', (instance: CodeMirror.Editor, event: any) => {
+      if (!this._config['handlePaste']) {
+        event.codemirrorIgnore = true;
+      }
+    });
+
     // Manually refresh on paste to make sure editor is properly sized.
     editor.getWrapperElement().addEventListener('paste', () => {
       if (this.hasFocus()) {
