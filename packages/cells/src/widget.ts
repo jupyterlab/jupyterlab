@@ -1224,7 +1224,19 @@ export abstract class AttachmentsCell extends Cell {
    */
   private _evtPaste(event: ClipboardEvent): void {
     if (event.clipboardData) {
-      this._attachFiles(event.clipboardData.items);
+      const items = event.clipboardData.items;
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type === 'text/plain') {
+          // Skip if this text is the path to a file
+          if (i < items.length - 1 && items[i + 1].kind === 'file') {
+            continue;
+          }
+          items[i].getAsString(text => {
+            this.editor.replaceSelection?.(text);
+          });
+        }
+        this._attachFiles(event.clipboardData.items);
+      }
     }
     event.preventDefault();
   }
@@ -1384,6 +1396,9 @@ export class MarkdownCell extends AttachmentsCell {
         model: this.model.attachments
       })
     });
+
+    // Stop codemirror handling paste
+    this.editor.setOption('handlePaste', false);
 
     // Throttle the rendering rate of the widget.
     this._monitor = new ActivityMonitor({
