@@ -1329,7 +1329,7 @@ export abstract class AttachmentsCell extends Cell {
       const bundle: nbformat.IMimeBundle = { [mimeType]: encodedData };
       const URI = this._generateURI(blob.name);
 
-      if (mimeType.startsWith('image/')){
+      if (mimeType.startsWith('image/')) {
         this.model.attachments.set(URI, bundle);
         this.updateCellSourceWithAttachment(blob.name, URI);
       }
@@ -1341,12 +1341,14 @@ export abstract class AttachmentsCell extends Cell {
   }
 
   /**
-   * Generates a unique URI for a file 
+   * Generates a unique URI for a file
    * while preserving the file extension.
    */
   private _generateURI(name = ''): string {
     const lastIndex = name.lastIndexOf('.');
-    return lastIndex !== -1 ? UUID.uuid4().concat(name.substring(lastIndex)) : UUID.uuid4();
+    return lastIndex !== -1
+      ? UUID.uuid4().concat(name.substring(lastIndex))
+      : UUID.uuid4();
   }
 
   /**
@@ -1460,8 +1462,12 @@ export class MarkdownCell extends AttachmentsCell {
   /**
    * Modify the cell source to include a reference to the attachment.
    */
-  protected updateCellSourceWithAttachment(attachmentName: string, URI?: string) {
-    const textToBeAppended = `![${attachmentName}](attachment:${URI ?? attachmentName})`;
+  protected updateCellSourceWithAttachment(
+    attachmentName: string,
+    URI?: string
+  ) {
+    const textToBeAppended = `![${attachmentName}](attachment:${URI ??
+      attachmentName})`;
     this.model.value.insert(this.model.value.text.length, textToBeAppended);
   }
 
