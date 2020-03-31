@@ -1,7 +1,7 @@
-<svg width="16" version="1.1" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <path d="m9 13.5c-2.49 0-4.5-2.01-4.5-4.5s2.01-4.5 4.5-4.5v-1.5c-3.31 0-5.99 2.69-5.99 6s2.68 6 5.99 6c2.9248 4.15e-4 5.4207-2.1148 5.9-5h-1.52c-0.46 2-2.24 3.5-4.38 3.5z" fill="#616161"/>
-  <g transform="rotate(-44.812 10.037 5.3555)" fill="#616161">
-    <path d="m7.5859 5.6158 4.9177-0.10571 0.10983-4.9258z"/>
-    <path d="m9.9695 7.9839 4.9177-0.10571 0.10983-4.9258z"/>
+<svg width="16" version="1.1" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+  <g class="jp-icon3" fill="#616161">
+    <path d="M9 13.5c-2.49 0-4.5-2.01-4.5-4.5S6.51 4.5 9 4.5V3C5.69 3 3.01 5.69 3.01 9S5.69 15 9 15a5.98 5.98 0 005.9-5h-1.52c-.46 2-2.24 3.5-4.38 3.5z"/>
+    <path d="M8.481 7.268l3.415-3.541L8.502.154z"/>
+    <path d="M11.842 7.268l3.413-3.541L11.861.155z"/>
   </g>
 </svg>
