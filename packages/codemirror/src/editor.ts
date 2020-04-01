@@ -572,6 +572,15 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Replaces the current selection with the given text.
+   *
+   * @param text The text to be inserted.
+   */
+  replaceSelection(text: string): void {
+    this.doc.replaceSelection(text);
+  }
+
+  /**
    * Get a list of tokens for the current editor text content.
    */
   getTokens(): CodeEditor.IToken[] {
@@ -1274,7 +1283,6 @@ export namespace CodeMirrorEditor {
     (CodeMirror.commands as any)[name] = command;
   }
 }
-
 /**
  * The namespace for module private data.
  */

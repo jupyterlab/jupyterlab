@@ -55,6 +55,8 @@ namespace CommandIDs {
   export const reset = 'apputils:reset';
 
   export const resetOnLoad = 'apputils:reset-on-load';
+
+  export const runFirstEnabled = 'apputils:run-first-enabled';
 }
 
 /**
@@ -173,38 +175,41 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 
     // Create debounced recovery dialog function.
     let dialog: Dialog<unknown> | null;
-    const recovery = new Throttler(async () => {
-      if (dialog) {
-        return;
-      }
-
-      dialog = new Dialog({
-        title: 'Loading...',
-        body: `The loading screen is taking a long time.
-          Would you like to clear the workspace or keep waiting?`,
-        buttons: [
-          Dialog.cancelButton({ label: 'Keep Waiting' }),
-          Dialog.warnButton({ label: 'Clear Workspace' })
-        ]
-      });
-
-      try {
-        const result = await dialog.launch();
-        dialog.dispose();
-        dialog = null;
-        if (result.button.accept && commands.hasCommand(CommandIDs.reset)) {
-          return commands.execute(CommandIDs.reset);
+    const recovery = new Throttler(
+      async () => {
+        if (dialog) {
+          return;
         }
 
-        // Re-invoke the recovery timer in the next frame.
-        requestAnimationFrame(() => {
-          // Because recovery can be stopped, handle invocation rejection.
-          void recovery.invoke().catch(_ => undefined);
+        dialog = new Dialog({
+          title: 'Loading...',
+          body: `The loading screen is taking a long time.
+          Would you like to clear the workspace or keep waiting?`,
+          buttons: [
+            Dialog.cancelButton({ label: 'Keep Waiting' }),
+            Dialog.warnButton({ label: 'Clear Workspace' })
+          ]
         });
-      } catch (error) {
-        /* no-op */
-      }
-    }, SPLASH_RECOVER_TIMEOUT);
+
+        try {
+          const result = await dialog.launch();
+          dialog.dispose();
+          dialog = null;
+          if (result.button.accept && commands.hasCommand(CommandIDs.reset)) {
+            return commands.execute(CommandIDs.reset);
+          }
+
+          // Re-invoke the recovery timer in the next frame.
+          requestAnimationFrame(() => {
+            // Because recovery can be stopped, handle invocation rejection.
+            void recovery.invoke().catch(_ => undefined);
+          });
+        } catch (error) {
+          /* no-op */
+        }
+      },
+      { limit: SPLASH_RECOVER_TIMEOUT, edge: 'trailing' }
+    );
 
     // Return ISplashScreen.
     let splashCount = 0;
@@ -455,6 +460,32 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
 };
 
 /**
+ * Utility commands
+ */
+const utilityCommands: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:utilityCommands',
+  autoStart: true,
+  activate: app => {
+    const { commands } = app;
+    commands.addCommand(CommandIDs.runFirstEnabled, {
+      label: 'Run First Enabled Command',
+      execute: args => {
+        const commands: string[] = args.commands as string[];
+        const commandArgs: any = args.args;
+        const argList = Array.isArray(args);
+        for (let i = 0; i < commands.length; i++) {
+          let cmd = commands[i];
+          let arg = argList ? commandArgs[i] : commandArgs;
+          if (app.commands.isEnabled(cmd, arg)) {
+            return app.commands.execute(cmd, arg);
+          }
+        }
+      }
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -467,7 +498,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   splash,
   sessionDialogs,
   themesPlugin,
-  themesPaletteMenuPlugin
+  themesPaletteMenuPlugin,
+  utilityCommands
 ];
 export default plugins;
 

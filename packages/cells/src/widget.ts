@@ -1076,11 +1076,11 @@ export namespace CodeCell {
               label = 'execute_input';
               break;
             default:
-              return false;
+              return true;
           }
           const value = msg.header.date;
           if (!value) {
-            return false;
+            return true;
           }
           const timingInfo: any = Object.assign(
             {},
@@ -1169,7 +1169,8 @@ export abstract class AttachmentsCell extends Cell {
    * Modify the cell source to include a reference to the attachment.
    */
   protected abstract updateCellSourceWithAttachment(
-    attachmentName: string
+    attachmentName: string,
+    URI?: string
   ): void;
 
   /**
@@ -1272,20 +1273,21 @@ export abstract class AttachmentsCell extends Cell {
           CONTENTS_MIME_RICH
         ) as DirListing.IContentsThunk;
         if (model.type === 'file') {
-          this.updateCellSourceWithAttachment(model.name);
+          const URI = this._generateURI(model.name);
+          this.updateCellSourceWithAttachment(model.name, URI);
           void withContent().then(fullModel => {
-            this.model.attachments.set(fullModel.name, {
+            this.model.attachments.set(URI, {
               [fullModel.mimetype]: fullModel.content
             });
           });
         }
       } else {
         // Pure mimetype, no useful name to infer
-        const name = UUID.uuid4();
-        this.model.attachments.set(name, {
+        const URI = this._generateURI();
+        this.model.attachments.set(URI, {
           [mimeType]: event.mimeData.getData(mimeType)
         });
-        this.updateCellSourceWithAttachment(name);
+        this.updateCellSourceWithAttachment(URI, URI);
       }
     }
   }
@@ -1325,13 +1327,28 @@ export abstract class AttachmentsCell extends Cell {
       const mimeType = matches[1];
       const encodedData = matches[3];
       const bundle: nbformat.IMimeBundle = { [mimeType]: encodedData };
-      this.model.attachments.set(blob.name, bundle);
-      this.updateCellSourceWithAttachment(blob.name);
+      const URI = this._generateURI(blob.name);
+
+      if (mimeType.startsWith('image/')) {
+        this.model.attachments.set(URI, bundle);
+        this.updateCellSourceWithAttachment(blob.name, URI);
+      }
     };
     reader.onerror = evt => {
       console.error(`Failed to attach ${blob.name}` + evt);
     };
     reader.readAsDataURL(blob);
+  }
+
+  /**
+   * Generates a unique URI for a file
+   * while preserving the file extension.
+   */
+  private _generateURI(name = ''): string {
+    const lastIndex = name.lastIndexOf('.');
+    return lastIndex !== -1
+      ? UUID.uuid4().concat(name.substring(lastIndex))
+      : UUID.uuid4();
   }
 
   /**
@@ -1445,8 +1462,12 @@ export class MarkdownCell extends AttachmentsCell {
   /**
    * Modify the cell source to include a reference to the attachment.
    */
-  protected updateCellSourceWithAttachment(attachmentName: string) {
-    const textToBeAppended = `![${attachmentName}](attachment:${attachmentName})`;
+  protected updateCellSourceWithAttachment(
+    attachmentName: string,
+    URI?: string
+  ) {
+    const textToBeAppended = `![${attachmentName}](attachment:${URI ??
+      attachmentName})`;
     this.model.value.insert(this.model.value.text.length, textToBeAppended);
   }
 

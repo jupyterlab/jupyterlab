@@ -35,6 +35,7 @@
   --jp-icon-edit: url('icons/toolbar/edit.svg');
   --jp-icon-ellipses: url('icons/toolbar/ellipses.svg');
   --jp-icon-extension: url('icons/sidebar/extension.svg');
+  --jp-icon-fast-forward: url('icons/toolbar/fast-forward.svg');
   --jp-icon-file-upload: url('icons/toolbar/file-upload.svg');
   --jp-icon-file: url('icons/filetype/file.svg');
   --jp-icon-filter-list: url('icons/toolbar/filter-list.svg');
@@ -52,6 +53,7 @@
   --jp-icon-line-form: url('icons/statusbar/line-form.svg');
   --jp-icon-link: url('icons/toolbar/link.svg');
   --jp-icon-list: url('icons/statusbar/list.svg');
+  --jp-icon-listings-info: url('icons/listings/listings-info.svg');
   --jp-icon-markdown: url('icons/filetype/markdown.svg');
   --jp-icon-new-folder: url('icons/toolbar/new-folder.svg');
   --jp-icon-not-trusted: url('icons/statusbar/not-trusted.svg');
@@ -150,6 +152,9 @@
 .jp-ExtensionIcon {
   background-image: var(--jp-icon-extension);
 }
+.jp-FastForwardIcon {
+  background-image: var(--jp-icon-fast-forward);
+}
 .jp-FileIcon {
   background-image: var(--jp-icon-file);
 }
@@ -200,6 +205,9 @@
 }
 .jp-ListIcon {
   background-image: var(--jp-icon-list);
+}
+.jp-ListingsInfoIcon {
+  background-image: var(--jp-icon-listings-info);
 }
 .jp-MarkdownIcon {
   background-image: var(--jp-icon-markdown);

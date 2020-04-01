@@ -8,6 +8,7 @@ import {
   ServerConnection,
   ServiceManager
 } from '@jupyterlab/services';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { Debouncer } from '@lumino/polling';
 
@@ -23,7 +24,9 @@ import {
 
 import { reportInstallError } from './dialog';
 
-import { Searcher, ISearchResult, isJupyterOrg } from './query';
+import { Searcher, ISearchResult, isJupyterOrg } from './npm';
+
+import { Lister, ListResult, IListEntry } from './listings';
 
 /**
  * Information about an extension.
@@ -68,6 +71,10 @@ export interface IEntry {
    * The installed version of the extension.
    */
   installed_version: string;
+
+  blacklistEntry: IListEntry | undefined;
+
+  whitelistEntry: IListEntry | undefined;
 }
 
 /**
@@ -144,13 +151,53 @@ export type Action = 'install' | 'uninstall' | 'enable' | 'disable';
  * Model for an extension list.
  */
 export class ListModel extends VDomModel {
-  constructor(serviceManager: ServiceManager) {
+  constructor(
+    serviceManager: ServiceManager,
+    settings: ISettingRegistry.ISettings
+  ) {
     super();
     this._installed = [];
     this._searchResult = [];
     this.serviceManager = serviceManager;
     this.serverConnectionSettings = ServerConnection.makeSettings();
     this._debouncedUpdate = new Debouncer(this.update.bind(this), 1000);
+    this.lister.listingsLoaded.connect(this._listingIsLoaded, this);
+    _isDisclaimed = settings.composite['disclaimed'] === true;
+    settings.changed.connect(() => {
+      _isDisclaimed = settings.composite['disclaimed'] === true;
+      void this.update();
+    });
+  }
+
+  private _listingIsLoaded(_: Lister, listings: ListResult) {
+    this._listMode = listings!.mode;
+    this._blacklistArray = new Array<IListEntry>();
+    if (this._listMode === 'black') {
+      listings!.entries.map(e => {
+        this._blacklistArray.push({
+          name: e.name,
+          regexp: new RegExp(e.name),
+          type: e.type,
+          reason: e.reason,
+          creation_date: e.creation_date,
+          last_update_date: e.last_update_date
+        });
+      });
+    }
+    this._whitelistArray = new Array<IListEntry>();
+    if (this._listMode === 'white') {
+      listings!.entries.map(e => {
+        this._whitelistArray.push({
+          name: e.name,
+          regexp: new RegExp(e.name),
+          type: e.type,
+          reason: e.reason,
+          creation_date: e.creation_date,
+          last_update_date: e.last_update_date
+        });
+      });
+    }
+    void this.initialize();
   }
 
   /**
@@ -217,6 +264,27 @@ export class ListModel extends VDomModel {
    */
   get totalEntries(): number {
     return this._totalEntries;
+  }
+
+  /**
+   * The list mode.
+   */
+  get listMode(): 'black' | 'white' | 'default' {
+    return this._listMode;
+  }
+
+  /**
+   * The total number of blacklisted results in the current search.
+   */
+  get totalBlacklistedFound(): number {
+    return this._totalBlacklistedFound;
+  }
+
+  /**
+   * The total number of whitelisted results in the current search.
+   */
+  get totalWhitelistedFound(): number {
+    return this._totalWhitelistedFound;
   }
 
   /**
@@ -402,10 +470,22 @@ export class ListModel extends VDomModel {
     res: Promise<ISearchResult>
   ): Promise<{ [key: string]: IEntry }> {
     let entries: { [key: string]: IEntry } = {};
+    this._totalBlacklistedFound = 0;
+    this._totalWhitelistedFound = 0;
+    this._totalEntries = 0;
     for (let obj of (await res).objects) {
       let pkg = obj.package;
       if (pkg.keywords.indexOf('deprecated') >= 0) {
         continue;
+      }
+      this._totalEntries = this._totalEntries + 1;
+      const isBlacklisted = this.isListed(pkg.name, this._blacklistArray);
+      if (isBlacklisted) {
+        this._totalBlacklistedFound = this._totalBlacklistedFound + 1;
+      }
+      const isWhitelisted = this.isListed(pkg.name, this._whitelistArray);
+      if (isWhitelisted) {
+        this._totalWhitelistedFound = this._totalWhitelistedFound + 1;
       }
       entries[pkg.name] = {
         name: pkg.name,
@@ -420,7 +500,9 @@ export class ListModel extends VDomModel {
         enabled: false,
         status: null,
         latest_version: pkg.version,
-        installed_version: ''
+        installed_version: '',
+        blacklistEntry: isBlacklisted,
+        whitelistEntry: isWhitelisted
       };
     }
     return entries;
@@ -447,7 +529,9 @@ export class ListModel extends VDomModel {
             enabled: pkg.enabled,
             status: pkg.status,
             latest_version: pkg.latest_version,
-            installed_version: pkg.installed_version
+            installed_version: pkg.installed_version,
+            blacklistEntry: this.isListed(pkg.name, this._blacklistArray),
+            whitelistEntry: this.isListed(pkg.name, this._whitelistArray)
           };
         })
       );
@@ -455,6 +539,19 @@ export class ListModel extends VDomModel {
     return Promise.all(promises).then(() => {
       return entries;
     });
+  }
+
+  private isListed(
+    name: string,
+    listArray: Array<IListEntry>
+  ): IListEntry | undefined {
+    let entry: IListEntry | undefined = undefined;
+    listArray.forEach((listEntry: IListEntry) => {
+      if (listEntry.regexp && listEntry.regexp?.test(name)) {
+        entry = listEntry;
+      }
+    });
+    return entry;
   }
 
   /**
@@ -498,10 +595,7 @@ export class ListModel extends VDomModel {
    */
   protected async performSearch(): Promise<{ [key: string]: IEntry }> {
     if (this.query === null) {
-      this._searchResult = [];
-      this._totalEntries = 0;
-      this.searchError = null;
-      return {};
+      this.query = '';
     }
 
     // Start the search without waiting for it:
@@ -519,12 +613,6 @@ export class ListModel extends VDomModel {
     } catch (reason) {
       searchMap = {};
       this.searchError = reason.toString();
-    }
-
-    try {
-      this._totalEntries = (await search).total;
-    } catch (error) {
-      this._totalEntries = 0;
     }
 
     return searchMap;
@@ -562,6 +650,7 @@ export class ListModel extends VDomModel {
    */
   protected async update(refreshInstalled = false) {
     // Start both queries before awaiting:
+
     const searchMapPromise = this.performSearch();
     const installedMapPromise = this.queryInstalled(refreshInstalled);
 
@@ -665,6 +754,11 @@ export class ListModel extends VDomModel {
   searchError: string | null = null;
 
   /**
+   * Contains an error message if an error occurred when searching for lists.
+   */
+  blacklistError: string | null = null;
+
+  /**
    * Contains an error message if an error occurred when querying the server extension.
    */
   serverConnectionError: string | null = null;
@@ -694,6 +788,8 @@ export class ListModel extends VDomModel {
    */
   protected searcher = new Searcher();
 
+  protected lister = new Lister();
+
   /**
    * The service manager to use for building.
    */
@@ -708,7 +804,15 @@ export class ListModel extends VDomModel {
   private _searchResult: IEntry[];
   private _pendingActions: Promise<any>[] = [];
   private _debouncedUpdate: Debouncer<void, void>;
+
+  private _listMode: 'black' | 'white' | 'default';
+  private _blacklistArray: Array<IListEntry>;
+  private _whitelistArray: Array<IListEntry>;
+  private _totalBlacklistedFound: number = 0;
+  private _totalWhitelistedFound: number = 0;
 }
+
+let _isDisclaimed = false;
 
 /**
  * ListModel statics.
@@ -724,6 +828,14 @@ export namespace ListModel {
       return false;
     }
     return semver.lt(entry.installed_version, entry.latest_version);
+  }
+
+  export function isDisclaimed() {
+    return _isDisclaimed;
+  }
+
+  export function toogleDisclaimed() {
+    _isDisclaimed = !_isDisclaimed;
   }
 }
 

@@ -79,9 +79,12 @@ export class Context<T extends DocumentRegistry.IModel>
     this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
-    this.urlResolver = new RenderMimeRegistry.UrlResolver({
-      session: this.sessionContext,
+    const urlResolver = (this.urlResolver = new RenderMimeRegistry.UrlResolver({
+      path: this._path,
       contents: manager.contents
+    }));
+    this.pathChanged.connect((sender, newPath) => {
+      urlResolver.path = newPath;
     });
   }
 

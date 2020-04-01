@@ -566,6 +566,11 @@ export namespace CodeEditor {
      * Gets the list of tokens for the editor model.
      */
     getTokens(): IToken[];
+
+    /**
+     * Replaces selection with the given text.
+     */
+    replaceSelection?(text: string): void;
   }
 
   /**

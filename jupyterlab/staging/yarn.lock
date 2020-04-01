@@ -3,9 +3,9 @@
 
 
 "@babel/runtime@^7.1.2":
-  version "7.8.7"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.8.7.tgz#8fefce9802db54881ba59f90bb28719b4996324d"
-  integrity sha512-+AATMUFppJDw6aiR5NVPHqIQBlV/Pj8wY/EZH+lmvRdUo9xBaz/rF3alAwFJQavvKfeOlPE7oaaDHVbcySbCsg==
+  version "7.9.2"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.9.2.tgz#d90df0583a3a252f09aaa619665367bae518db06"
+  integrity sha512-NE2DtOdufG7R5vnfQUTehdTfNycfUANEtCa9PssN9O/xmTzP4E08UI797ixaei6hBEVL9BI/PsdJS5x7mWoB9Q==
   dependencies:
     regenerator-runtime "^0.13.4"
 
@@ -44,83 +44,83 @@
     tslib "~1.10.0"
 
 "@fortawesome/fontawesome-free@^5.12.0":
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-5.12.1.tgz#2a98fea9fbb8a606ddc79a4680034e9d5591c550"
-  integrity sha512-ZtjIIFplxncqxvogq148C3hBLQE+W3iJ8E4UvJ09zIJUgzwLcROsWwFDErVSXY2Plzao5J9KUYNHKHMEUYDMKw==
+  version "5.13.0"
+  resolved "https://registry.yarnpkg.com/@fortawesome/fontawesome-free/-/fontawesome-free-5.13.0.tgz#fcb113d1aca4b471b709e8c9c168674fbd6e06d9"
+  integrity sha512-xKOeQEl5O47GPZYIMToj6uuA2syyFlq9EMSl2ui0uytjY9xbe8XS0pexNWmxrdcCyNGyDmLyYw5FtKsalBUeOg==
 
-"@jupyterlab/application-extension@^2.0.2", "@jupyterlab/application-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/application-extension/-/application-extension-2.0.2.tgz#4fbec1f95e09550df40849452e1dc6c99ef4673e"
-  integrity sha512-Esq0rlxo2LIuqH0+6RsUEU8IXwGEr3p5oKPtOcUWGATs1mBnV3tRWJ205eMuwHnPUq/vE3B0pu4mQFdIjl1cNw==
+"@jupyterlab/application-extension@^2.1.0-a.0", "@jupyterlab/application-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/application-extension/-/application-extension-2.1.0-a.0.tgz#559d0ba28cc680b84c5c55388b1937e808eea072"
+  integrity sha512-wgw7l1hDRRTj2kOaJusYdCtUGgB+cpBfgq8YXh3w3vgWkK2di1/JiLgJX4oofET7uxbybysJzY+VHeC453nhQA==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/property-inspector" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statedb" "^2.0.1"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/property-inspector" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
     react "~16.9.0"
 
-"@jupyterlab/application@^2.0.2", "@jupyterlab/application@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/application/-/application-2.0.2.tgz#393965798c4e04f522f9aa6a9b02b883a35a6634"
-  integrity sha512-/4KG2jBaUx5s+uuEKpTjJC3kOEQWKmpDNorOLP8PPsdWMl1VlrYJJmnpvIUOLLnJZAycnK7O4z7jBDp6wv4S2Q==
+"@jupyterlab/application@^2.1.0-a.0", "@jupyterlab/application@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/application/-/application-2.1.0-a.0.tgz#5c5bb7ab7082dc1ad14dfb854a009d57282514f3"
+  integrity sha512-DAASWsxA32ARU9as6FyHmb9ZkRut+m1a8788jHaKLtcR7Kazqb9LLGUmjdW3CJRDjcYwXVGzGgnMlo+p3W3mSg==
   dependencies:
     "@fortawesome/fontawesome-free" "^5.12.0"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/statedb" "^2.0.1"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/application" "^1.8.4"
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/messaging" "^1.3.3"
-    "@lumino/polling" "^1.0.4"
+    "@lumino/polling" "^1.1.1"
     "@lumino/properties" "^1.1.6"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/apputils-extension@^2.0.2", "@jupyterlab/apputils-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/apputils-extension/-/apputils-extension-2.0.2.tgz#c06c5ea51b1bebde4ae2466ee2207a6093533881"
-  integrity sha512-gYGzaZ4Gl4rbOJyc7PZu+LHmcRK8yHvSXNJI/brfsAOmWB7AV06azofhvwzQPz84XREC6bp666tPUz+VRXUeSA==
+"@jupyterlab/apputils-extension@^2.1.0-a.0", "@jupyterlab/apputils-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/apputils-extension/-/apputils-extension-2.1.0-a.0.tgz#9a022e9525c9dcd8d5e600bb9321db9dda69ade8"
+  integrity sha512-XRRc58rw0GA/HfZpAb0hwZRPNOIeoaVrJwmbnGvmm3x5ZdCR046WMo7l0RVCLJ4Y9wufxY/s47SJciwsxJC1cA==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statedb" "^2.0.1"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
-    "@lumino/polling" "^1.0.4"
+    "@lumino/polling" "^1.1.1"
     "@lumino/widgets" "^1.11.1"
     es6-promise "~4.2.8"
 
-"@jupyterlab/apputils@^2.0.2", "@jupyterlab/apputils@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/apputils/-/apputils-2.0.2.tgz#23e158e9d2092045570c798e7430895c0ad4709f"
-  integrity sha512-mJO/h3x+jtKXPJegdOB5LkvOWLjACKElWCWZXGtizHASYXKrCCAYQ3VDkmrdx2zibu+gDqlMFtbPJxMvYt65Vw==
+"@jupyterlab/apputils@^2.1.0-a.0", "@jupyterlab/apputils@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/apputils/-/apputils-2.1.0-a.0.tgz#10633f4247028c33cbef22ab40f33340d5a9e5eb"
+  integrity sha512-PSkoG4H3r7RGYnoOM52fjSRVn6Lc6XorcXiHkZRfeL0yBFlDbQGIlabIO7Dfsp13OzaZXXQa1aY/iXKK2fLs8A==
   dependencies:
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statedb" "^2.0.1"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
@@ -136,22 +136,22 @@
     react-dom "~16.9.0"
     sanitize-html "~1.20.1"
 
-"@jupyterlab/attachments@^2.0.2", "@jupyterlab/attachments@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/attachments/-/attachments-2.0.2.tgz#6963771c11a19a67b164f11834faef2f856c8322"
-  integrity sha512-qSiiPydDRmTHq5xQpw1p70V3frH6uGdllSDokPKHarHDlbM0LNNNiJQ5AceyJdNfdASeX5UKmYkXm2fUeXxDtg==
+"@jupyterlab/attachments@^2.1.0-a.0", "@jupyterlab/attachments@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/attachments/-/attachments-2.1.0-a.0.tgz#a10f8dfa61e8db224cb5fcedef5b76840771d29b"
+  integrity sha512-oz3Fuud0CWBQtxGOQrtMrsvPoSjbSMbfXVNvFkzD4U42LbV3cOzG7qkcdT7ivTXfTVtDzM1j2MIqQ4a5LvOhqQ==
   dependencies:
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
     "@lumino/disposable" "^1.3.5"
     "@lumino/signaling" "^1.3.5"
 
-"@jupyterlab/buildutils@^2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/buildutils/-/buildutils-2.0.2.tgz#001fa2dd700648fd71bf8392641f7cdcfc2a63ee"
-  integrity sha512-Z0z7TIAdtRq7LLxvWmsntFxi8d4EM1ERzCQP6QxFcIfHMcayOfSsH4cGrc5MgWwRM0vkc7SNcjfMfUeg75VBFQ==
+"@jupyterlab/buildutils@^2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/buildutils/-/buildutils-2.1.0-a.0.tgz#416df4626a30efa61d4c06d6a002d184a09f9a11"
+  integrity sha512-eSSYkHUImbldtvqr8JidAE/qxGQbnq1cYX90VQ+decm/7utT6yOALGAsZ91IZXipx05Z19X7n9/zPztroMuNzw==
   dependencies:
     "@lumino/coreutils" "^1.4.2"
     "@yarnpkg/lockfile" "^1.1.0"
@@ -171,24 +171,25 @@
     sort-package-json "~1.31.0"
     typescript "~3.7.3"
     webpack "^4.41.2"
+    which "^2.0.2"
 
-"@jupyterlab/cells@^2.0.2", "@jupyterlab/cells@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/cells/-/cells-2.0.2.tgz#1346d47e5943ee8df5052e945d55464f217ac737"
-  integrity sha512-RGZv0Ebzaj6O3+ItLXtex17p7P6IT0kpIjNtoBdE4YT3xoEsTtslQAcZGuEifh5chwm/648KXFT7Hwi9pRkelg==
+"@jupyterlab/cells@^2.1.0-a.0", "@jupyterlab/cells@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/cells/-/cells-2.1.0-a.0.tgz#e9451af2e3ae75f981727a8161aaa0b878e889ca"
+  integrity sha512-r/4TG7upkSmAsbhblWxKRteddZDVG+Sp/9Eo6TuBFCL9ru14dcP97w15zdw6+ctw10NvD48sZYU6ZeDX0uOplg==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/attachments" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/codemirror" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/filebrowser" "^2.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/outputarea" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/attachments" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/codemirror" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/filebrowser" "^2.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/outputarea" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/dragdrop" "^1.5.1"
@@ -198,35 +199,35 @@
     "@lumino/widgets" "^1.11.1"
     react "~16.9.0"
 
-"@jupyterlab/celltags-extension@^2.0.2", "@jupyterlab/celltags-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/celltags-extension/-/celltags-extension-2.0.2.tgz#732c354f4998c639037778807d9d36a367b33252"
-  integrity sha512-2KcFiHOb8D9ZQbcqtDsk67P8op6TQcR4B/mJTb2pFpc/6oLipBY4gqqft2KwkFJU+7fIUFaSIz/bmcZCynkMlA==
+"@jupyterlab/celltags-extension@^2.1.0-a.0", "@jupyterlab/celltags-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/celltags-extension/-/celltags-extension-2.1.0-a.0.tgz#aa169a816f17b3004169031b7f49bda86fdd9961"
+  integrity sha512-BXO771Z3q7fWOXDPQGye6eW2wmPLmNI66z7m+JDC768Sl9nFwwnRYrJecPAOhJh49xEr/pRVWIW/M4WqkbL/4A==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/celltags" "^2.0.2"
-    "@jupyterlab/notebook" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/celltags" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
 
-"@jupyterlab/celltags@^2.0.2", "@jupyterlab/celltags@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/celltags/-/celltags-2.0.2.tgz#04d085bd1a69556585c9765a3f43fa52494870f7"
-  integrity sha512-NeA5cGRuhxv/JsOydrMnaoVf+xyWBXuq3DJ6iIWQMFam3sqbdQ1aUyR0tAIVyoKOxCLexc79QkliEupfCf1miA==
+"@jupyterlab/celltags@^2.1.0-a.0", "@jupyterlab/celltags@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/celltags/-/celltags-2.1.0-a.0.tgz#6f073030acecd12c4d031a784f7422c305f75f43"
+  integrity sha512-zN263usnnl/M90n0l2HjuE6EQ+7nAPkZx1jx5OtWo4EZKQiGeY6Xtu+bfLxxwCZyxHY40Fd+eiv30CttNzvmnw==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/cells" "^2.0.2"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/cells" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/codeeditor@^2.0.2", "@jupyterlab/codeeditor@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/codeeditor/-/codeeditor-2.0.2.tgz#6ff469a068595b783bd639120db34b39d116df7f"
-  integrity sha512-l1SrLJN3QNXQB1WH0YrMjKsM3ZOPAYI05r7hBS0U1Kq5vpb73LQ+8w08s15y/yPcuCgibVhonIEQCyiu1wUA3w==
+"@jupyterlab/codeeditor@^2.1.0-a.0", "@jupyterlab/codeeditor@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/codeeditor/-/codeeditor-2.1.0-a.0.tgz#7989ae50a394beb4e37dda84e3c137cec1cc37c8"
+  integrity sha512-KBQjpN/aSLVovaUGcb7pmkuFlTjLWOIgZA2YzV9dEqjFFMWagdzWW5sFUYJ8gyBrKD/eiDoxSSftVFaU1iOxHg==
   dependencies:
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/dragdrop" "^1.5.1"
@@ -234,67 +235,67 @@
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/codemirror-extension@^2.0.2", "@jupyterlab/codemirror-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/codemirror-extension/-/codemirror-extension-2.0.2.tgz#e2c951046e398874ab09c44eb77cbed8d10935be"
-  integrity sha512-YUguDusKO1AzTwPDBPbLWfNgBLRCD48uZaZsytd5vSrvi7SwP6dtLNClYtw1pFakdPLf026+V/ZzaGy3DT21iw==
+"@jupyterlab/codemirror-extension@^2.1.0-a.0", "@jupyterlab/codemirror-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/codemirror-extension/-/codemirror-extension-2.1.0-a.0.tgz#c024db0601f20e2003485c88382f6cc3654dd081"
+  integrity sha512-y1Gu8f9u7ioW26Hiz+l+w6Km+r2kQ/UcZUrVDDjCQmDyhNF+XsLdys9hATUoZLHUUXvAdmH/6iuMVdlYT01pDg==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/codemirror" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/fileeditor" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statusbar" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/codemirror" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/fileeditor" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
     "@lumino/widgets" "^1.11.1"
     codemirror "~5.49.2"
 
-"@jupyterlab/codemirror@^2.0.2", "@jupyterlab/codemirror@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/codemirror/-/codemirror-2.0.2.tgz#519fa4d9fe572d430d4bf19adefd3b1a7f627d7a"
-  integrity sha512-IQm/yiPHJtQgJlQt/qqX0/pChGsQn/2JIe38q6R2Hi6V4DbI8WpyVOBhhKIoUqWwGNLsZgoCna2dnB+R7j0Emw==
+"@jupyterlab/codemirror@^2.1.0-a.0", "@jupyterlab/codemirror@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/codemirror/-/codemirror-2.1.0-a.0.tgz#335057eedffdfe7b9f0a8ef2561797dfc5e294dd"
+  integrity sha512-UyRLBeS3xOp7ZEk7bgWl7u7fqEEKeUP/HGaQF9tUHqcSvH0qN1lcRfNLlx3B+dh+unlp91JOTevYOmBBOPW/5Q==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/statusbar" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
-    "@lumino/polling" "^1.0.4"
+    "@lumino/polling" "^1.1.1"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
     codemirror "~5.49.2"
     react "~16.9.0"
 
-"@jupyterlab/completer-extension@^2.0.2", "@jupyterlab/completer-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/completer-extension/-/completer-extension-2.0.2.tgz#51886d3779ea4d2b5d00509c79f10ef9ba3ce522"
-  integrity sha512-5v6qlmShrECdQD1Tc57GVF43mOJcSLYTNSQrRlfEYCOWQQkyPRIKz8FbJwoZhdYLNZevAes+fIC8GohG7IxEEw==
+"@jupyterlab/completer-extension@^2.1.0-a.0", "@jupyterlab/completer-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/completer-extension/-/completer-extension-2.1.0-a.0.tgz#4fc4583955a1f64dad750e97af33f6bc7630d878"
+  integrity sha512-xtf4ho5nKWDi5JRf7UKhu2wlGxabTYwEbpg7eG4OHcSIMS0nAInmlZzOGiP7SadMolDUrJOBAK74m6nSRkkTdw==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/completer" "^2.0.2"
-    "@jupyterlab/console" "^2.0.2"
-    "@jupyterlab/fileeditor" "^2.0.2"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/completer" "^2.1.0-a.0"
+    "@jupyterlab/console" "^2.1.0-a.0"
+    "@jupyterlab/fileeditor" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/completer@^2.0.2", "@jupyterlab/completer@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/completer/-/completer-2.0.2.tgz#1d4849201d11d37708f358e9e8d40e0e4d776c5c"
-  integrity sha512-UT0TP64oiGfx86zSgnjY22n5JW33mrhN0ItfeNjA/Ppk9Q+BuQW1+gGephUJyhDdr8z57Qn8hhFUkyc1Dp7Z4Q==
+"@jupyterlab/completer@^2.1.0-a.0", "@jupyterlab/completer@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/completer/-/completer-2.1.0-a.0.tgz#5f5a7ccf2f37e20f63b20386d1796cadeca7265b"
+  integrity sha512-ODW6z2ODD7DICHiQ6aE+o2zcdJBUg6QKmcdsnVuUoSAYkiV/dm+NqQ+ne/l7yhbu36/XKi5yv1Rw4Cx7LzEAuA==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/statedb" "^2.0.1"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
@@ -303,42 +304,42 @@
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/console-extension@^2.0.2", "@jupyterlab/console-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/console-extension/-/console-extension-2.0.2.tgz#0ca385dc9edc9c0745c566aa47b730e63cc007ac"
-  integrity sha512-iUW9gScQsX3rHMRmv3El9+gtC/hJ7fDEcD8s8DDHcGDFymNjza8rY/Zp0Ry3Hi3PuCHZrajpCOAmA8coizekjA==
+"@jupyterlab/console-extension@^2.1.0-a.0", "@jupyterlab/console-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/console-extension/-/console-extension-2.1.0-a.0.tgz#7cca4bd5b0118ec15a220629d4657481ca0a3a0c"
+  integrity sha512-fWGgDK9ij3KX7U7meM5yDo79NYN9/2yPFMMy/xun6qpQTXPwqjzq/85DwA7F6VU45fZCG3QFtfrA5NiOdi78kw==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/console" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/filebrowser" "^2.0.2"
-    "@jupyterlab/launcher" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/console" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/filebrowser" "^2.1.0-a.0"
+    "@jupyterlab/launcher" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/properties" "^1.1.6"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/console@^2.0.2", "@jupyterlab/console@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/console/-/console-2.0.2.tgz#acd58f47311fc671784bf131eed8b6a2c65a040d"
-  integrity sha512-6p7Cb+Q6qhtpvBWr04MTNSVMjfrssxvWCe+03QdgnoFE0HX9Q4hupPv25xbXYrUYNV65fsG4lGvAkWkMfbk8PA==
+"@jupyterlab/console@^2.1.0-a.0", "@jupyterlab/console@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/console/-/console-2.1.0-a.0.tgz#d24baab00ce382a58b4160eddd4cfb7daa8c89dd"
+  integrity sha512-qSWPV84sB1ZMg1E03/QgpDGfPT3s12605QxkXIZkSqXnerwuiK8HdpPcqx9ULXeQkVHABqgqd4DI15ZW4aG/Ig==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/cells" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/cells" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
@@ -347,10 +348,10 @@
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/coreutils@^4.0.2", "@jupyterlab/coreutils@~4.0.2":
-  version "4.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/coreutils/-/coreutils-4.0.2.tgz#2ee81799249f5f4741157ac42ff50a2ee48a0475"
-  integrity sha512-v4RXIAeykoPjIymdCxUxPLl8lkn18jroGnDflZjvdMk21TZQQJSIrJ5bjrGByh9scco8yNg46z8m1LPguF3z8A==
+"@jupyterlab/coreutils@^4.1.0-a.0", "@jupyterlab/coreutils@~4.1.0-a.0":
+  version "4.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/coreutils/-/coreutils-4.1.0-a.0.tgz#393ce893c9c747ebd6a9e4ca75eaaf62648d7c0e"
+  integrity sha512-Z2aGfaqhf/Lw7RR3qtMx9+f8kCWo6bU+p8oWslRtB4cGE6og7AG82iJ9GHoBw/9hHhUg9W2G+geV5u+uwghiYg==
   dependencies:
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
@@ -360,66 +361,66 @@
     path-posix "~1.0.0"
     url-parse "~1.4.7"
 
-"@jupyterlab/csvviewer-extension@^2.0.2", "@jupyterlab/csvviewer-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/csvviewer-extension/-/csvviewer-extension-2.0.2.tgz#1c6704e072371300b0012322c5874f3b843697b6"
-  integrity sha512-aAOOMOfk4M89unBs4OJmz6aHOvzX8YwsNArxAjvbzDZVfshd12M1FLyE5GWim8Ben+hlcSIIMVMOQw9RK/RF1g==
+"@jupyterlab/csvviewer-extension@^2.1.0-a.0", "@jupyterlab/csvviewer-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/csvviewer-extension/-/csvviewer-extension-2.1.0-a.0.tgz#2df010520a6c5c5f645d4c899d21b672df0d7d73"
+  integrity sha512-CUaGjvnuPGiJDpaQTLuA3GChGGU3l1vfPkvaZvvPbKgN2RJQcuwyTvQAx19Eg5oI2DSlFFgS9o9X1VCZdpDNqQ==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/csvviewer" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/documentsearch" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@lumino/datagrid" "^0.5.3"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/csvviewer" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/documentsearch" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@lumino/datagrid" "^0.6.0"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/csvviewer@^2.0.2", "@jupyterlab/csvviewer@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/csvviewer/-/csvviewer-2.0.2.tgz#6a732b02d660c6542925b146e22918ecb5061ff0"
-  integrity sha512-5Fj58gfJwKbQqBP3gLl3q8Hciw4FlzJsXNt/K4LbDJX4nCJm5JAjgv0S11bBbFciaBWAitpBrnfqxup0SV/X4w==
+"@jupyterlab/csvviewer@^2.1.0-a.0", "@jupyterlab/csvviewer@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/csvviewer/-/csvviewer-2.1.0-a.0.tgz#009e42d94b0624644dcf212f8d49524cfab5aefe"
+  integrity sha512-CPI2BxkfpkWom5gIXHQvgEpSNVZNah+ooG+1NndGk2JXYGncvhi/82ht+EkC4m8mN4TssA/5IYF6eFyeRddU7g==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
-    "@lumino/datagrid" "^0.5.3"
+    "@lumino/datagrid" "^0.6.0"
     "@lumino/disposable" "^1.3.5"
     "@lumino/messaging" "^1.3.3"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/docmanager-extension@^2.0.2", "@jupyterlab/docmanager-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/docmanager-extension/-/docmanager-extension-2.0.2.tgz#14019e509538d928d43347a0e01627dd897ec49a"
-  integrity sha512-9zXsE6hjjENPqORBAQRCXNDCkrtk8VE0nvM4GtGv9Wyog/JJ2TsjVFuqFxKHxZunix4Id6xZNnLb0RPZf+UH1A==
+"@jupyterlab/docmanager-extension@^2.1.0-a.0", "@jupyterlab/docmanager-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/docmanager-extension/-/docmanager-extension-2.1.0-a.0.tgz#948b1c6f445739506d8622937ea0b48ad3bdad43"
+  integrity sha512-+agRxjlxlIGdHNR3BY8I+E588uvgKC4u4RrckyL8v73xMj9BOs3U/2b6bySU0NKls3Jj2ZaKw23jL7Byq2Y2XA==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docmanager" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statusbar" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docmanager" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/docmanager@^2.0.2", "@jupyterlab/docmanager@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/docmanager/-/docmanager-2.0.2.tgz#6eb6a0f1134a8b8717c4264e8f5166b3f3937140"
-  integrity sha512-59/Oa/akU2pzKF96OFOV+vz8s9xpEVowe6NIhJooOxU6AZdDsN3o2sMCVkoCsnlnwPQ8N6siGKbBP9QlPk0taQ==
+"@jupyterlab/docmanager@^2.1.0-a.0", "@jupyterlab/docmanager@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/docmanager/-/docmanager-2.1.0-a.0.tgz#39c0737805e81d524770734f01e68e300b117cf3"
+  integrity sha512-Vip4ntHUouhR93NeZwSou0nZ0OZq0V4PaSYlnD0iQyTFWbd+oq1JIT65ys/95BYCVNzJJ1PlRqpFthlFVRrWsQ==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/statusbar" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
@@ -429,20 +430,20 @@
     "@lumino/widgets" "^1.11.1"
     react "~16.9.0"
 
-"@jupyterlab/docregistry@^2.0.2", "@jupyterlab/docregistry@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/docregistry/-/docregistry-2.0.2.tgz#45ee6be76aae72e9df0a1a1bc69effaae401235b"
-  integrity sha512-kGk1AIzcXkpaNI1pwFbyLYiQuSdJUQ/j2A+G8WYhcY64Zwp1tayr0VvaRuEzwcDHueiBYesaarCxY7VNP+Cf3g==
+"@jupyterlab/docregistry@^2.1.0-a.0", "@jupyterlab/docregistry@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/docregistry/-/docregistry-2.1.0-a.0.tgz#b8c758a0da835b82c31bf29090b6648b3f25d6df"
+  integrity sha512-RXJfo0+d8a7LMZUgfgsAWYeCR1B0fi3bK8b8mS4l7RHCzoCikPc9Zfj52MqLQfjpCB8REK42lNHPPAmzNS8VlQ==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/codemirror" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/codemirror" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
@@ -450,265 +451,268 @@
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/documentsearch-extension@^2.0.2", "@jupyterlab/documentsearch-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/documentsearch-extension/-/documentsearch-extension-2.0.2.tgz#5d2f6cb820e2f4bfe5f2e8f94323450701cd37f4"
-  integrity sha512-BDVOWncVtr7V1deGCOqbsdt95XuBdSGPHrsgFQz6KeTbXlZXcnx6Wzs+c6AWL6n6c9cvW8ihS50uxbyD2R+gtw==
+"@jupyterlab/documentsearch-extension@^2.1.0-a.0", "@jupyterlab/documentsearch-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/documentsearch-extension/-/documentsearch-extension-2.1.0-a.0.tgz#e04e43763b84c752f800e2cfb800ee0a3e41c05f"
+  integrity sha512-t2rnLRxMjBo1hKIpMkr+Wys1aVFVZDHgaD4we4KiEdaa37nWRUEg0+nQUICnKNlI3rrDpruCkK4EjudQwylBVw==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/documentsearch" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/documentsearch" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/documentsearch@^2.0.2", "@jupyterlab/documentsearch@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/documentsearch/-/documentsearch-2.0.2.tgz#209249a8d6d5a101b1139d918e2d279859d30ab6"
-  integrity sha512-M48NLAEYc8df5HEYFb+vwakVpI1lIyFpUNZpp4ZpFYaSuGmzk9wTQswwsTcYNhvIzkH7eqjncqGWZAPgZhfVYQ==
+"@jupyterlab/documentsearch@^2.1.0-a.0", "@jupyterlab/documentsearch@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/documentsearch/-/documentsearch-2.1.0-a.0.tgz#6829487254c9ba4c51c5fa1a927052fce41d07d3"
+  integrity sha512-0YT2Tb4+Aze1/EfWWDUa9BoQwW2brWNTRk6Y47UBFp0dAPxDNVb8XVmEIMDScvgD2IYxMfiNIGvpmRL1Z9cfsA==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/cells" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/codemirror" "^2.0.2"
-    "@jupyterlab/fileeditor" "^2.0.2"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/cells" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/codemirror" "^2.1.0-a.0"
+    "@jupyterlab/fileeditor" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
-    "@lumino/polling" "^1.0.4"
+    "@lumino/polling" "^1.1.1"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
     codemirror "~5.49.2"
     react "~16.9.0"
 
-"@jupyterlab/extensionmanager-extension@^2.0.2", "@jupyterlab/extensionmanager-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/extensionmanager-extension/-/extensionmanager-extension-2.0.2.tgz#30cc5d55f1be21c27d4e998cf542c3553974d237"
-  integrity sha512-V3R+yY/xD9yPlNRorMugTpQSHlUIBrVCYVE3sHFgL6qP0h/9Rge89otzdVrwoyKftDlR8EP5+VBwi5kWqUHzGQ==
+"@jupyterlab/extensionmanager-extension@^2.1.0-a.0", "@jupyterlab/extensionmanager-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/extensionmanager-extension/-/extensionmanager-extension-2.1.0-a.0.tgz#70fe777f35f7b462ccd4a913155367f5e9360a0d"
+  integrity sha512-dbRmeLbxUhebFEHF38aBhYjkCpUCACJNsz+XUTo3SfyLbT6UAoWrMxFgB6+qGanbqGPOTncA7Gm+jGFYwtg6eQ==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/extensionmanager" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/extensionmanager" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
 
-"@jupyterlab/extensionmanager@^2.0.2", "@jupyterlab/extensionmanager@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/extensionmanager/-/extensionmanager-2.0.2.tgz#ce60f829f6d80a31f5dcd3f2d09a8ffbcc41af65"
-  integrity sha512-fwymoDTnZ2PkEegHJq+uYiBbAYdUMCuf9VBBucmL+rIoAcaarngkHPWiDAaTu4Sdx4Ov8NHJRfRFbUnW7uz/gQ==
+"@jupyterlab/extensionmanager@^2.1.0-a.0", "@jupyterlab/extensionmanager@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/extensionmanager/-/extensionmanager-2.1.0-a.0.tgz#6be947e0c9ac6a6e41f962e3edda786e519b574e"
+  integrity sha512-do3+WBwlnNb8qi5140ieuxKZvyQS5psvi/AYQw5w9m2dRtN60PsfZ9zl8cDbbHH9bVrYvh8+mzlejE3MVcmalQ==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/messaging" "^1.3.3"
-    "@lumino/polling" "^1.0.4"
+    "@lumino/polling" "^1.1.1"
+    "@lumino/signaling" "^1.3.5"
     react "~16.9.0"
     react-paginate "^6.3.2"
     semver "^6.3.0"
 
-"@jupyterlab/filebrowser-extension@^2.0.2", "@jupyterlab/filebrowser-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/filebrowser-extension/-/filebrowser-extension-2.0.2.tgz#da802d130b7e06a942504d58f7990773c0fdd35f"
-  integrity sha512-g4iHGDnT0BCSVC5rIFJoyxm9kMityhFNwJXLljsProZkLtgFRn4PjkUcRyt0fpwS0aDJ/OcfPgxcYtU7ILzPRg==
+"@jupyterlab/filebrowser-extension@^2.1.0-a.0", "@jupyterlab/filebrowser-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/filebrowser-extension/-/filebrowser-extension-2.1.0-a.0.tgz#f5788ac8a3088a3b95c7d6d3b9ca45c9e29c5b26"
+  integrity sha512-E4VEG5uaWbeGT2EHIacc9rU3teAuKeofgmVT5S62wMVLSU9W6AYcC8II/oyujCLFzPQWcifdX0D3d5F18yJ/RA==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docmanager" "^2.0.2"
-    "@jupyterlab/filebrowser" "^2.0.2"
-    "@jupyterlab/launcher" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statedb" "^2.0.1"
-    "@jupyterlab/statusbar" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docmanager" "^2.1.0-a.0"
+    "@jupyterlab/filebrowser" "^2.1.0-a.0"
+    "@jupyterlab/launcher" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/commands" "^1.10.1"
     "@lumino/messaging" "^1.3.3"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/filebrowser@^2.0.2", "@jupyterlab/filebrowser@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/filebrowser/-/filebrowser-2.0.2.tgz#7e19e9bfb409ec6b2242f441351ae3f6315dd13e"
-  integrity sha512-jztQ3NVfkjd4LqtQYxsfVmGf5D5pCk4F9/ktH2PESA3V02uQMkuRZ24u0cikdzz05cEp05Oe94/9gba9SPCE0A==
+"@jupyterlab/filebrowser@^2.1.0-a.0", "@jupyterlab/filebrowser@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/filebrowser/-/filebrowser-2.1.0-a.0.tgz#e833e1362d28e9068ea5d7350b885325b44cd465"
+  integrity sha512-vrO0bOQv9V06JP5zVzC4rmTNugwjdC0gpcyQ4vrYNykHvZqRO8d4rvqQJFmfjb1qCtvBh7mdxtqunRMX0aWtiQ==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docmanager" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/statedb" "^2.0.1"
-    "@jupyterlab/statusbar" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docmanager" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/domutils" "^1.1.7"
     "@lumino/dragdrop" "^1.5.1"
     "@lumino/messaging" "^1.3.3"
-    "@lumino/polling" "^1.0.4"
+    "@lumino/polling" "^1.1.1"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
     react "~16.9.0"
 
-"@jupyterlab/fileeditor-extension@^2.0.2", "@jupyterlab/fileeditor-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/fileeditor-extension/-/fileeditor-extension-2.0.2.tgz#a69dcb82f064000b743bced81a1ad537236d4220"
-  integrity sha512-rLy3c98wD8whqoCkhO2E42lhwc8Y8VmPhN41GLgK9MjH6vlK3yH0Xn5ATu2bogIWA2xQF+vemYTcKzO0kx+/VA==
+"@jupyterlab/fileeditor-extension@^2.1.0-a.0", "@jupyterlab/fileeditor-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/fileeditor-extension/-/fileeditor-extension-2.1.0-a.0.tgz#e2f61b4bb6a56b115be65a8bbaf0478500f0a4d8"
+  integrity sha512-AIGUg33cPjk0I0JqZ9UUMqL767OTZWENw5bWdkqKOaSOSF9Sl3Xo0C7AmUryFR7DoOjH63aa5+kmRBgt6fzPMw==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/console" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/filebrowser" "^2.0.2"
-    "@jupyterlab/fileeditor" "^2.0.2"
-    "@jupyterlab/launcher" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statusbar" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/console" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/filebrowser" "^2.1.0-a.0"
+    "@jupyterlab/fileeditor" "^2.1.0-a.0"
+    "@jupyterlab/launcher" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/fileeditor@^2.0.2", "@jupyterlab/fileeditor@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/fileeditor/-/fileeditor-2.0.2.tgz#48b98f08aec07923f445092d54af2b9311b9bfe3"
-  integrity sha512-Tt9xpw1m26HaDTQCHgeVcbZrzECedyjp+jkCKYR4aDyewWCzMIV7AN39CF+noWu/+6LmNoV2km6XGGNv1LGv9A==
+"@jupyterlab/fileeditor@^2.1.0-a.0", "@jupyterlab/fileeditor@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/fileeditor/-/fileeditor-2.1.0-a.0.tgz#41671eeb694033af3d201f533322ff39d19c0749"
+  integrity sha512-hkS5NOOEe0tGL6egDuaCD+RBe8LnUBLBc1ZBclWU0Vp0X20kUv5cyq0ZYmtjR0nvCIV1w7N8+7AGFyyuHeSzrw==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/statusbar" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/messaging" "^1.3.3"
     "@lumino/widgets" "^1.11.1"
     react "~16.9.0"
 
-"@jupyterlab/help-extension@^2.0.2", "@jupyterlab/help-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/help-extension/-/help-extension-2.0.2.tgz#db41904a128d3488d94d1cd309044879f4a3f605"
-  integrity sha512-ag1I4JOXAu4z9PSHmz6sbW0H4ZvJQ04MogiO2Bz0iQ8Z+WrdOSXO0HMbuYtnx5mpukIkMFj13HHvKJXj3nsl0w==
+"@jupyterlab/help-extension@^2.1.0-a.0", "@jupyterlab/help-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/help-extension/-/help-extension-2.1.0-a.0.tgz#eae4a920941e769961c686d1ee47daa88816be94"
+  integrity sha512-OWondCq8Yhd3wMCArH5lZ0Brx4aUCHn6WavbmHHu75HrvJ4CSLj9/ZXzlrCxXfePcyndlo0x5G06Ty1t3iB+8Q==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/inspector" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/inspector" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/widgets" "^1.11.1"
     react "~16.9.0"
 
-"@jupyterlab/htmlviewer-extension@^2.0.2", "@jupyterlab/htmlviewer-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/htmlviewer-extension/-/htmlviewer-extension-2.0.2.tgz#3b5753047c2f1c084762f15cba4ffa3a92ea2fea"
-  integrity sha512-wieGTD1FpPOsdacBQJJHIyYyZl/Uw4NZjt8earmlMc9btcqM3mjbOYv7anAlVvfstYpSz5xokJIqalOv6GtOPw==
+"@jupyterlab/htmlviewer-extension@^2.1.0-a.0", "@jupyterlab/htmlviewer-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/htmlviewer-extension/-/htmlviewer-extension-2.1.0-a.0.tgz#4e0203c18fcfc9baa14f55ef84b7bc2e557b4fa0"
+  integrity sha512-eFKL6ilRYLO5hkTKZnyUJVimwpzQ88RGoq/pidQz3cqHaLLbSy5aAiqkNVdMKD1xnogD21IpyPx8SzB6kY4jpw==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/htmlviewer" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/htmlviewer" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
 
-"@jupyterlab/htmlviewer@^2.0.2", "@jupyterlab/htmlviewer@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/htmlviewer/-/htmlviewer-2.0.2.tgz#8df7b7ece5d3e3d2ee243db8cb9a758cce6c092a"
-  integrity sha512-w+WqjqyA1WQOyfBK2imj53Z9wvsOwYftJ8tpf4eXp2y9ZBZhkKVVn2LTgG/NgVIOCAnfkAmafaULGEWeq1Bl6g==
+"@jupyterlab/htmlviewer@^2.1.0-a.0", "@jupyterlab/htmlviewer@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/htmlviewer/-/htmlviewer-2.1.0-a.0.tgz#fe5e4d2b99924d0b775ce6d8034c7f72b6855f55"
+  integrity sha512-uTz4QX9fX49gcOLRCeqIKDqtdNy9Hu7n6ynmHQ3k3+CRTXkGB9OO9FZwfIC/Z9FIMgJXdHJaGv05imfR1eLdxw==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/signaling" "^1.3.5"
     react "~16.9.0"
 
-"@jupyterlab/hub-extension@^2.0.2", "@jupyterlab/hub-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/hub-extension/-/hub-extension-2.0.2.tgz#8db94dfbdb23085ed25c221163805a4a9e15af1e"
-  integrity sha512-LODbcyIuVSP9xb//Y2FOhXFyC2cfK+RxSdR1NUyu9clp7hcqp0VKqw5pEZK0EQ6Wdkd/ZVZ80ydsrnbqwEg/XA==
+"@jupyterlab/hub-extension@^2.1.0-a.0", "@jupyterlab/hub-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/hub-extension/-/hub-extension-2.1.0-a.0.tgz#a272828804dcdf40975a69643a40056b9ce16d33"
+  integrity sha512-AS+QAjf43XVaT9+JlOj6gYQagf5jQlunvBDkREe5omUuMsMLMcWjU34IDxm+gMwYqlkQ9cIFjHfvu+8g6+k3AA==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
 
-"@jupyterlab/imageviewer-extension@^2.0.2", "@jupyterlab/imageviewer-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/imageviewer-extension/-/imageviewer-extension-2.0.2.tgz#56b4317ae80ef9d8abff4531b4260ab09b3f6f05"
-  integrity sha512-Zo3+3wfoSsII+4zAt1KfvGXejIzl+GGqtKeInU4nnUeytGcSwDZEOaMm2Q0roIrSAOSNrqDtMbORb6MKPLoLyw==
+"@jupyterlab/imageviewer-extension@^2.1.0-a.0", "@jupyterlab/imageviewer-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/imageviewer-extension/-/imageviewer-extension-2.1.0-a.0.tgz#a417d906a0446d52ed1178b52ca02fa0745608cd"
+  integrity sha512-DbZ8wRdJ8goFgmmhETMUvN0f1tVhRULg85M3aD6GQBCAJn8nYHiE+J6X42kEl9YbPMo3Hz0tI5AR3ES6KqVKQw==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/imageviewer" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/imageviewer" "^2.1.0-a.0"
 
-"@jupyterlab/imageviewer@^2.0.2", "@jupyterlab/imageviewer@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/imageviewer/-/imageviewer-2.0.2.tgz#7858e428f242a07e255c478634ddf10bed74424f"
-  integrity sha512-GaqsQeuD56jiIfSBk9je8cf2NaHe5L+k2+O7hHlLjuhUrxBk1YoHE31FxbHOmKlW89wRRwtS44Q6Y901AOiziA==
+"@jupyterlab/imageviewer@^2.1.0-a.0", "@jupyterlab/imageviewer@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/imageviewer/-/imageviewer-2.1.0-a.0.tgz#9d566ca1490104ab7c18bceead150b6b885562a2"
+  integrity sha512-ng1uR2dcK7io78YucdqAjzCOwLtb9SBPKgJkRnBNh/yJ+tJD/2mhty7GC6Ej9cKLiYTr2dK8TN03FYdO8HaZcg==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/messaging" "^1.3.3"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/inspector-extension@^2.0.2", "@jupyterlab/inspector-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/inspector-extension/-/inspector-extension-2.0.2.tgz#510eeab150d2d90d7a5f6e1e95a877f4ffb4ce89"
-  integrity sha512-aE7gRtdvMIyn/PlKiHyK4glToCQw3tig05e0HOLSHxsYQbWz2aEAMne+rT8jLi8F/wWXrYkd9FobAjhYrQwI5Q==
+"@jupyterlab/inspector-extension@^2.1.0-a.0", "@jupyterlab/inspector-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/inspector-extension/-/inspector-extension-2.1.0-a.0.tgz#27254606a1994d54e3f22dcfcd2361a16ce0e8c1"
+  integrity sha512-JQ/NM7BrjesZumvbbnyL7aOwo73sYYDC4in2DeNy0Axk7D/CuFKeB+l3cJ+9yx3vhOsLGObMIDIHyA7HJ5SPKw==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/console" "^2.0.2"
-    "@jupyterlab/inspector" "^2.0.2"
-    "@jupyterlab/launcher" "^2.0.2"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/console" "^2.1.0-a.0"
+    "@jupyterlab/inspector" "^2.1.0-a.0"
+    "@jupyterlab/launcher" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
 
-"@jupyterlab/inspector@^2.0.2", "@jupyterlab/inspector@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/inspector/-/inspector-2.0.2.tgz#824f95a1d8adb769367f4cf1d6328fda1fc6a8f4"
-  integrity sha512-VoE71Rb7MPD1LzG/xWgVr/x64J5tWBmg4SvkVRH2Hdr50MktAglND1OachxbPyUvBx8vndeff5pTmrEQ1mMwNg==
+"@jupyterlab/inspector@^2.1.0-a.0", "@jupyterlab/inspector@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/inspector/-/inspector-2.1.0-a.0.tgz#d7170ad7c4d1cef960928bf200f8d7357fb0af2a"
+  integrity sha512-UyzI1uzAa03DS8NMIjNXWgyvBinBY1l1mtquazzYQPbECkZqpG8uqZYEQphvSIQCLVvrgzW6DJcLNGqDbYU1jQ==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/statedb" "^2.0.1"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
-    "@lumino/polling" "^1.0.4"
+    "@lumino/polling" "^1.1.1"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/javascript-extension@^2.0.2", "@jupyterlab/javascript-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/javascript-extension/-/javascript-extension-2.0.2.tgz#5a9075c0b90aa5bc42cd71526b66c3080d16998a"
-  integrity sha512-pPBPwr+8dTZs4+Aivh5cxCU2nahINPpgNLEaKcrH5OFxMGYb31M1nYChPEl3Eby7yHhBZ4b9SVjohOCTrEZa+w==
+"@jupyterlab/javascript-extension@^2.1.0-a.0", "@jupyterlab/javascript-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/javascript-extension/-/javascript-extension-2.1.0-a.0.tgz#3740abe92e829b13d2a4f97ac5478b75d136c375"
+  integrity sha512-9co9JaMxtO6Y+9Px7J04H+c4VWvApEAyWhXIA5gB8Ef1L13PZDI7xd9ZkauCngJX8o3r11S45/GfEyX3gtPREQ==
   dependencies:
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
 
-"@jupyterlab/json-extension@^2.0.2", "@jupyterlab/json-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/json-extension/-/json-extension-2.0.2.tgz#e292deceed614bdae11b063482f387061ef749cb"
-  integrity sha512-Vtf+Yn8YZkurZ1ruc/6fjpc5idSeEOi5KfbBiIby0AYYaNvl4/y575oO3cLs8pvwTM2PwHqLMXyCFycFWtpeCQ==
+"@jupyterlab/json-extension@^2.1.0-a.0", "@jupyterlab/json-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/json-extension/-/json-extension-2.1.0-a.0.tgz#30e9c904adb28199dcf568b6ecf0157438245d42"
+  integrity sha512-nYQ2qBlXLCbdcnZu06ZAKGw5xV9G9DqaQMv/eMCMKGtVgU2euWVQPzy/qT21kSzCHwomTZBszk8ixslk8Tlhng==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/messaging" "^1.3.3"
     "@lumino/widgets" "^1.11.1"
@@ -717,26 +721,26 @@
     react-highlighter "^0.4.3"
     react-json-tree "^0.11.2"
 
-"@jupyterlab/launcher-extension@^2.0.2", "@jupyterlab/launcher-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/launcher-extension/-/launcher-extension-2.0.2.tgz#d1760fb22676fd716fda1e438442849b4a3ead19"
-  integrity sha512-9mr0hRC/ViqOZyi1uB7QJZ/i/B2CngOqZcrCi4hN1HpbJLnMQM8yTpZz8lloqQM9TrKMBgzhCiBc0cyGn9mMUg==
+"@jupyterlab/launcher-extension@^2.1.0-a.0", "@jupyterlab/launcher-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/launcher-extension/-/launcher-extension-2.1.0-a.0.tgz#0935f1c4c504eeaaaf0e67bef10ecef9a1f4ca37"
+  integrity sha512-JG/hMfjbCiOli8XNmAkcfcYBEhDnq4aTmF21+vV5dupsfyyBRPMnbhlRLwKCiLWHVr8wO3pDXdYlH9GVcQh/7w==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/launcher" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/launcher" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/launcher@^2.0.2", "@jupyterlab/launcher@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/launcher/-/launcher-2.0.2.tgz#8a8cefb54f01777e5d9bf2b3d08199b608573688"
-  integrity sha512-3vFRUCvHJkpBSp3/6e2sDwAdOLW8h957wnw6pAvysiwvgBNB66QZ4P72/HhN5QuhDDz6VQn//M5HztKz0NRF4A==
+"@jupyterlab/launcher@^2.1.0-a.0", "@jupyterlab/launcher@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/launcher/-/launcher-2.1.0-a.0.tgz#b5cee11d81dd76b39e80094fb90646e8ed9b7e0e"
+  integrity sha512-FTMjHZfxtzQJjGZn092vjqfXLFNktJTuu7BWCyvkgx1hAC7fKSHCM7ux+WUeUrMRM/BP2ltBrlllyXoWq8MWQw==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
@@ -745,268 +749,269 @@
     "@lumino/widgets" "^1.11.1"
     react "~16.9.0"
 
-"@jupyterlab/logconsole-extension@^2.0.2", "@jupyterlab/logconsole-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/logconsole-extension/-/logconsole-extension-2.0.2.tgz#98b44eda8077c5d77721e2cd49f6c4c940798e0c"
-  integrity sha512-Q8lMQdYBW3vQ4Nl+m3J8XU7qFLV8Ei5E+QlVUzjvw1RgtqrtVi4h67bCDAs+JzWnRJIY3OAf1l6hZ1A5jUfnZw==
+"@jupyterlab/logconsole-extension@^2.1.0-a.0", "@jupyterlab/logconsole-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/logconsole-extension/-/logconsole-extension-2.1.0-a.0.tgz#cf19b281c993628375974cf0fbbc25008ad3c15e"
+  integrity sha512-yoIoYDtERLrV27nARw6y7F/AfB4CYjjTWZSI2SRcHJc7ywxb4xe4rOknWcCCVihrktD8VDc+ylCeNxJfKDMfog==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/logconsole" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statusbar" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/logconsole" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
     react "~16.9.0"
 
-"@jupyterlab/logconsole@^2.0.2", "@jupyterlab/logconsole@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/logconsole/-/logconsole-2.0.2.tgz#206ccce17595dbe8f05ad215b4d4f1dd83725e4e"
-  integrity sha512-uRlzermVZIYBerYv6C/Vlh5L2MhK3DX1Rm3UzZR4h0Iz0PdDVjFffZPYd7Y1IbLCSKsERFTE38xjgls0iiZgog==
+"@jupyterlab/logconsole@^2.1.0-a.0", "@jupyterlab/logconsole@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/logconsole/-/logconsole-2.1.0-a.0.tgz#dee3a7411eb344532368b353acd3459536b043e3"
+  integrity sha512-SG2LgehZjZB2/o0bTluiNG6caDmtLxs8mmN1akK8xul8IeY+palT/w1h6j+V+JqshHhbcPmMZe0eYFESWw4/jg==
   dependencies:
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/outputarea" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/outputarea" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/messaging" "^1.3.3"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/mainmenu-extension@^2.0.2", "@jupyterlab/mainmenu-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/mainmenu-extension/-/mainmenu-extension-2.0.2.tgz#8fbc4d6242cee7a2248ee639e5cb23e73099b0db"
-  integrity sha512-yRHzbznWmiFa3nXMi5EXNiMapEUMoRIb1s/EfBFEIqbfZwghzrl1P6bhpzp2Z902/KvJOUUjNBR58eDShxYBWg==
+"@jupyterlab/mainmenu-extension@^2.1.0-a.0", "@jupyterlab/mainmenu-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/mainmenu-extension/-/mainmenu-extension-2.1.0-a.0.tgz#fdad2384edb953d139fbf88ddb71689bfab27d7a"
+  integrity sha512-FGIe2jRS/Jo4BpPtw3rVWU3b/cysenjWzXOs092TlX5+ZWu5cStNxlR6DAE9wC9sZDTBMsdYHlA+Ka8ZpoDIPw==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/disposable" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/mainmenu@^2.0.2", "@jupyterlab/mainmenu@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/mainmenu/-/mainmenu-2.0.2.tgz#243a4db7dd5e2525bbd3ba52a796d92d34520553"
-  integrity sha512-jeDx1uYE4QpAVWy3XdJIQ73+J1Mb5YXRrQkTG4S0SsT248Kkl7uz0i2j+EE7RNJlGvJlD1t+SjSuOtegZvRpnA==
+"@jupyterlab/mainmenu@^2.1.0-a.0", "@jupyterlab/mainmenu@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/mainmenu/-/mainmenu-2.1.0-a.0.tgz#2fe708da89affd2358d6514ff0e2090daafb0444"
+  integrity sha512-CZRwdJPAJ+tUoBeDqiRFWbaV1Sus2RlmpeHP/M2RDS7CvdcFdT51E+dHlLJChWQJaAjALxwHNqNQ1v3SUBismg==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
-    "@lumino/algorithm" "^1.2.3"
-    "@lumino/commands" "^1.10.1"
-    "@lumino/coreutils" "^1.4.2"
-    "@lumino/disposable" "^1.3.5"
-    "@lumino/widgets" "^1.11.1"
-
-"@jupyterlab/markdownviewer-extension@^2.0.2", "@jupyterlab/markdownviewer-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/markdownviewer-extension/-/markdownviewer-extension-2.0.2.tgz#3c5aafe65d120ccef0de258b7ab23a4069996f57"
-  integrity sha512-8R3AslRPHPSXp+dPzXWyvP8qmxNfyE4xSNQnuVQAy5i3Oe3klI+UgLL2/osabqQufwdDwlCkfJ5OOI4QLY9JQg==
-  dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/markdownviewer" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-
-"@jupyterlab/markdownviewer@^2.0.2", "@jupyterlab/markdownviewer@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/markdownviewer/-/markdownviewer-2.0.2.tgz#9a64ad9bc3e283e5a61970b23c47261e37734631"
-  integrity sha512-idtRB/uaQXbhrIYfzybrIwVj1xfJRkH7uCmjVkRdA+9VBRasZquGZ2KRczPjSdDRUmOZfvjORms+S1qt03kkiw==
-  dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@lumino/coreutils" "^1.4.2"
-    "@lumino/messaging" "^1.3.3"
-    "@lumino/widgets" "^1.11.1"
-
-"@jupyterlab/mathjax2-extension@^2.0.2", "@jupyterlab/mathjax2-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/mathjax2-extension/-/mathjax2-extension-2.0.2.tgz#a09a443a42cb4578304517e184a8a4ca34481773"
-  integrity sha512-yt10wbxZectyxzh3BoF6xp2fGx0YzEadVVFGwCfyNslIFNQRHsmlZsANjAdGtFnNtzRjWC68/gyq8sXKd27X+g==
-  dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/mathjax2" "^2.0.1"
-    "@jupyterlab/rendermime" "^2.0.2"
-
-"@jupyterlab/mathjax2@^2.0.1", "@jupyterlab/mathjax2@~2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/mathjax2/-/mathjax2-2.0.1.tgz#aaf3f159d7b0962dd7b7ecc5c9870ae828bd9d2b"
-  integrity sha512-Br38a/E9hR8oK3fqtt7c3yn387rnJ/qWyuv+FD1PQhsf5bngCkQlZO9Bm+YO4B/ZGebMpKOm5c7mIP1CRAnnSg==
-  dependencies:
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
-    "@lumino/coreutils" "^1.4.2"
-
-"@jupyterlab/metapackage@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/metapackage/-/metapackage-2.0.2.tgz#35c0c6f97a0037d435e7e90827272fba46779fa0"
-  integrity sha512-LcFAYFd/uWBbkjn0GbYXTr12ol+rdz5ZocxKfvemKtObp/t6OZaA3DYoQSLTntTh7/pRobXi5iA+sP+f+jnhRg==
-  dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/application-extension" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/apputils-extension" "^2.0.2"
-    "@jupyterlab/attachments" "^2.0.2"
-    "@jupyterlab/cells" "^2.0.2"
-    "@jupyterlab/celltags" "^2.0.2"
-    "@jupyterlab/celltags-extension" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/codemirror" "^2.0.2"
-    "@jupyterlab/codemirror-extension" "^2.0.2"
-    "@jupyterlab/completer" "^2.0.2"
-    "@jupyterlab/completer-extension" "^2.0.2"
-    "@jupyterlab/console" "^2.0.2"
-    "@jupyterlab/console-extension" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/csvviewer" "^2.0.2"
-    "@jupyterlab/csvviewer-extension" "^2.0.2"
-    "@jupyterlab/docmanager" "^2.0.2"
-    "@jupyterlab/docmanager-extension" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/documentsearch" "^2.0.2"
-    "@jupyterlab/documentsearch-extension" "^2.0.2"
-    "@jupyterlab/extensionmanager" "^2.0.2"
-    "@jupyterlab/extensionmanager-extension" "^2.0.2"
-    "@jupyterlab/filebrowser" "^2.0.2"
-    "@jupyterlab/filebrowser-extension" "^2.0.2"
-    "@jupyterlab/fileeditor" "^2.0.2"
-    "@jupyterlab/fileeditor-extension" "^2.0.2"
-    "@jupyterlab/help-extension" "^2.0.2"
-    "@jupyterlab/htmlviewer" "^2.0.2"
-    "@jupyterlab/htmlviewer-extension" "^2.0.2"
-    "@jupyterlab/hub-extension" "^2.0.2"
-    "@jupyterlab/imageviewer" "^2.0.2"
-    "@jupyterlab/imageviewer-extension" "^2.0.2"
-    "@jupyterlab/inspector" "^2.0.2"
-    "@jupyterlab/inspector-extension" "^2.0.2"
-    "@jupyterlab/javascript-extension" "^2.0.2"
-    "@jupyterlab/json-extension" "^2.0.2"
-    "@jupyterlab/launcher" "^2.0.2"
-    "@jupyterlab/launcher-extension" "^2.0.2"
-    "@jupyterlab/logconsole" "^2.0.2"
-    "@jupyterlab/logconsole-extension" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/mainmenu-extension" "^2.0.2"
-    "@jupyterlab/markdownviewer" "^2.0.2"
-    "@jupyterlab/markdownviewer-extension" "^2.0.2"
-    "@jupyterlab/mathjax2" "^2.0.1"
-    "@jupyterlab/mathjax2-extension" "^2.0.2"
-    "@jupyterlab/nbconvert-css" "^2.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/notebook-extension" "^2.0.2"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/outputarea" "^2.0.2"
-    "@jupyterlab/pdf-extension" "^2.0.1"
-    "@jupyterlab/property-inspector" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/rendermime-extension" "^2.0.2"
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
-    "@jupyterlab/running" "^2.0.2"
-    "@jupyterlab/running-extension" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/settingeditor" "^2.0.2"
-    "@jupyterlab/settingeditor-extension" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/shortcuts-extension" "^2.0.2"
-    "@jupyterlab/statedb" "^2.0.1"
-    "@jupyterlab/statusbar" "^2.0.2"
-    "@jupyterlab/statusbar-extension" "^2.0.2"
-    "@jupyterlab/tabmanager-extension" "^2.0.2"
-    "@jupyterlab/terminal" "^2.0.2"
-    "@jupyterlab/terminal-extension" "^2.0.2"
-    "@jupyterlab/theme-dark-extension" "^2.0.2"
-    "@jupyterlab/theme-light-extension" "^2.0.2"
-    "@jupyterlab/tooltip" "^2.0.2"
-    "@jupyterlab/tooltip-extension" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
-    "@jupyterlab/ui-components-extension" "^2.0.2"
-    "@jupyterlab/vdom" "^2.0.2"
-    "@jupyterlab/vdom-extension" "^2.0.2"
-    "@jupyterlab/vega5-extension" "^2.0.1"
-
-"@jupyterlab/nbconvert-css@^2.0.2", "@jupyterlab/nbconvert-css@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/nbconvert-css/-/nbconvert-css-2.0.2.tgz#778bc9006fdf7ac6a4a4e6ab1e52d0d765b36f2c"
-  integrity sha512-c88yGc2p7WwB3gcotxDpF/UN2tgTC9mZTzNxse/8S8TMVaSCwjEixpx42sKmSRdJ4F07gemwHlgcgJGFQg0KDg==
-  dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/cells" "^2.0.2"
-    "@jupyterlab/codemirror" "^2.0.2"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/outputarea" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-
-"@jupyterlab/nbformat@^2.0.1", "@jupyterlab/nbformat@~2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/nbformat/-/nbformat-2.0.1.tgz#2af01e20755632f5fb8530942c470e0f31f34df4"
-  integrity sha512-rlf4A3PKxqDV98IeXf/VtdhqcbnKvBRGL+VNxhMOZe3e+DmjIBilRE+VpHmXovwEanOAkNl0fD5Xk3HAkqxxGQ==
-  dependencies:
-    "@lumino/coreutils" "^1.4.2"
-
-"@jupyterlab/notebook-extension@^2.0.2", "@jupyterlab/notebook-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/notebook-extension/-/notebook-extension-2.0.2.tgz#88ee3257965b4ed9a160d6ba785affc2ab8925e1"
-  integrity sha512-QjDoSd0ZuWmtcu1RNO7h44ibqezTDS1APFKyCoBAjsrPZAgkpca8U2JrXeguZfUyr8g4umIEjH/9zBaAp11/UQ==
-  dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/cells" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docmanager" "^2.0.2"
-    "@jupyterlab/filebrowser" "^2.0.2"
-    "@jupyterlab/launcher" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/property-inspector" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statedb" "^2.0.1"
-    "@jupyterlab/statusbar" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
+    "@lumino/widgets" "^1.11.1"
+
+"@jupyterlab/markdownviewer-extension@^2.1.0-a.0", "@jupyterlab/markdownviewer-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/markdownviewer-extension/-/markdownviewer-extension-2.1.0-a.0.tgz#4e5de777199a986add9fee59b0eb4847f9b1f9f8"
+  integrity sha512-Qsba5e1NnuYFgwIGbMGgFDimla3vpOSajU56NpArtV0mXHWKdD5W9Ma2be5VqT5jC8NIs/dHitcf/IaoCJbyjQ==
+  dependencies:
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/markdownviewer" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+
+"@jupyterlab/markdownviewer@^2.1.0-a.0", "@jupyterlab/markdownviewer@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/markdownviewer/-/markdownviewer-2.1.0-a.0.tgz#38981786e23c8ef1eb46ad69090babbacae19e26"
+  integrity sha512-pzB+HdS3D4hmNE9UdhvUuwnltj7FiWj7/JT5CvUat+J6h5bgMsKJRk7k+zY8hv1IvsDeOn0LOYkjsMS4R1KN1w==
+  dependencies:
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@lumino/coreutils" "^1.4.2"
     "@lumino/messaging" "^1.3.3"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/notebook@^2.0.2", "@jupyterlab/notebook@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/notebook/-/notebook-2.0.2.tgz#e51360c799eaf9bb22e5522136fda21563785cde"
-  integrity sha512-+OLNJXQpvLjscoinjSvy4m1OOryV2zs90jWkTFXwvNRaplBH3wt9e1UsrGSTFMqWHwRWoLlpphap7CkW5muwRg==
+"@jupyterlab/mathjax2-extension@^2.1.0-a.0", "@jupyterlab/mathjax2-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/mathjax2-extension/-/mathjax2-extension-2.1.0-a.0.tgz#dc3579144c7460c000cdb8f19b999655c9f8d622"
+  integrity sha512-yFBXmfmfHVBwA9eJqmVo6t0qkR2q4wtjJN1igOUhsT2dgfEQqUDLxVz9MumEBjUT+KR4c9FW1on4CIKBQ0qI0g==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/cells" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/statusbar" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/mathjax2" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+
+"@jupyterlab/mathjax2@^2.1.0-a.0", "@jupyterlab/mathjax2@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/mathjax2/-/mathjax2-2.1.0-a.0.tgz#149d73a6280f543e1fd10a2c19a2840d7b360fba"
+  integrity sha512-McmMP05UIh2amjwUDuQnxR0ggntWT0p6VjNjV0ndxtOqT29chDKxCGt2Ly+JofArpdayMcw7Vf24/YICb8Tqgw==
+  dependencies:
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
+    "@lumino/coreutils" "^1.4.2"
+
+"@jupyterlab/metapackage@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/metapackage/-/metapackage-2.1.0-a.0.tgz#f921f65b35c001e3648b3b3ba594841e50512bfa"
+  integrity sha512-9CX7gn3HZHmgtWs/PpzT2nn8DqaFmMQQSJtKAV+YL0RwwUXfyQCDBO+eKsb3f8PESs+SW2/xnxsdEGYu0W1IqQ==
+  dependencies:
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/application-extension" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/apputils-extension" "^2.1.0-a.0"
+    "@jupyterlab/attachments" "^2.1.0-a.0"
+    "@jupyterlab/cells" "^2.1.0-a.0"
+    "@jupyterlab/celltags" "^2.1.0-a.0"
+    "@jupyterlab/celltags-extension" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/codemirror" "^2.1.0-a.0"
+    "@jupyterlab/codemirror-extension" "^2.1.0-a.0"
+    "@jupyterlab/completer" "^2.1.0-a.0"
+    "@jupyterlab/completer-extension" "^2.1.0-a.0"
+    "@jupyterlab/console" "^2.1.0-a.0"
+    "@jupyterlab/console-extension" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/csvviewer" "^2.1.0-a.0"
+    "@jupyterlab/csvviewer-extension" "^2.1.0-a.0"
+    "@jupyterlab/docmanager" "^2.1.0-a.0"
+    "@jupyterlab/docmanager-extension" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/documentsearch" "^2.1.0-a.0"
+    "@jupyterlab/documentsearch-extension" "^2.1.0-a.0"
+    "@jupyterlab/extensionmanager" "^2.1.0-a.0"
+    "@jupyterlab/extensionmanager-extension" "^2.1.0-a.0"
+    "@jupyterlab/filebrowser" "^2.1.0-a.0"
+    "@jupyterlab/filebrowser-extension" "^2.1.0-a.0"
+    "@jupyterlab/fileeditor" "^2.1.0-a.0"
+    "@jupyterlab/fileeditor-extension" "^2.1.0-a.0"
+    "@jupyterlab/help-extension" "^2.1.0-a.0"
+    "@jupyterlab/htmlviewer" "^2.1.0-a.0"
+    "@jupyterlab/htmlviewer-extension" "^2.1.0-a.0"
+    "@jupyterlab/hub-extension" "^2.1.0-a.0"
+    "@jupyterlab/imageviewer" "^2.1.0-a.0"
+    "@jupyterlab/imageviewer-extension" "^2.1.0-a.0"
+    "@jupyterlab/inspector" "^2.1.0-a.0"
+    "@jupyterlab/inspector-extension" "^2.1.0-a.0"
+    "@jupyterlab/javascript-extension" "^2.1.0-a.0"
+    "@jupyterlab/json-extension" "^2.1.0-a.0"
+    "@jupyterlab/launcher" "^2.1.0-a.0"
+    "@jupyterlab/launcher-extension" "^2.1.0-a.0"
+    "@jupyterlab/logconsole" "^2.1.0-a.0"
+    "@jupyterlab/logconsole-extension" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu-extension" "^2.1.0-a.0"
+    "@jupyterlab/markdownviewer" "^2.1.0-a.0"
+    "@jupyterlab/markdownviewer-extension" "^2.1.0-a.0"
+    "@jupyterlab/mathjax2" "^2.1.0-a.0"
+    "@jupyterlab/mathjax2-extension" "^2.1.0-a.0"
+    "@jupyterlab/nbconvert-css" "^2.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/notebook-extension" "^2.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/outputarea" "^2.1.0-a.0"
+    "@jupyterlab/pdf-extension" "^2.1.0-a.0"
+    "@jupyterlab/property-inspector" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/rendermime-extension" "^2.1.0-a.0"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
+    "@jupyterlab/running" "^2.1.0-a.0"
+    "@jupyterlab/running-extension" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/settingeditor" "^2.1.0-a.0"
+    "@jupyterlab/settingeditor-extension" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/shortcuts-extension" "^2.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
+    "@jupyterlab/statusbar-extension" "^2.1.0-a.0"
+    "@jupyterlab/tabmanager-extension" "^2.1.0-a.0"
+    "@jupyterlab/terminal" "^2.1.0-a.0"
+    "@jupyterlab/terminal-extension" "^2.1.0-a.0"
+    "@jupyterlab/theme-dark-extension" "^2.1.0-a.0"
+    "@jupyterlab/theme-light-extension" "^2.1.0-a.0"
+    "@jupyterlab/tooltip" "^2.1.0-a.0"
+    "@jupyterlab/tooltip-extension" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
+    "@jupyterlab/ui-components-extension" "^2.1.0-a.0"
+    "@jupyterlab/vdom" "^2.1.0-a.0"
+    "@jupyterlab/vdom-extension" "^2.1.0-a.0"
+    "@jupyterlab/vega5-extension" "^2.1.0-a.0"
+
+"@jupyterlab/nbconvert-css@^2.1.0-a.0", "@jupyterlab/nbconvert-css@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/nbconvert-css/-/nbconvert-css-2.1.0-a.0.tgz#b6fca63687d52b1b87dd5cff4ce4010f4104efa7"
+  integrity sha512-EEcKyd7cLLMvVT3GIpKt2NEEm241sZLB/bEqBSp7CEa29fQsg12cS645Y759eDu/GYt5A3UOL7BPtyaTzgbMCA==
+  dependencies:
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/cells" "^2.1.0-a.0"
+    "@jupyterlab/codemirror" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/outputarea" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+
+"@jupyterlab/nbformat@^2.1.0-a.0", "@jupyterlab/nbformat@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/nbformat/-/nbformat-2.1.0-a.0.tgz#38325718dde9901c0a02767aa0d7502f04a86210"
+  integrity sha512-/BQCrxetoJFJmBy/6SlVB1WfelVyHT49s20VatUMM6yaTU+oHq1DRJYe6eYT9wtPAHwDmEpzfiPxcTgx5BCj3g==
+  dependencies:
+    "@lumino/coreutils" "^1.4.2"
+
+"@jupyterlab/notebook-extension@^2.1.0-a.0", "@jupyterlab/notebook-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/notebook-extension/-/notebook-extension-2.1.0-a.0.tgz#c2c5ea7f0154e3009ef510e793051de51ff1abf4"
+  integrity sha512-zQQx3EcBVx1NT2ulkVb7UaNCIVEFjUxv0fnbBOafSJIRPGZvUU94dGHYEKA6kxR3HTtc5zxu+oDrZVbf5r714w==
+  dependencies:
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/cells" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docmanager" "^2.1.0-a.0"
+    "@jupyterlab/filebrowser" "^2.1.0-a.0"
+    "@jupyterlab/launcher" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/property-inspector" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
+    "@lumino/algorithm" "^1.2.3"
+    "@lumino/commands" "^1.10.1"
+    "@lumino/coreutils" "^1.4.2"
+    "@lumino/disposable" "^1.3.5"
+    "@lumino/messaging" "^1.3.3"
+    "@lumino/widgets" "^1.11.1"
+
+"@jupyterlab/notebook@^2.1.0-a.0", "@jupyterlab/notebook@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/notebook/-/notebook-2.1.0-a.0.tgz#8cc4b1b54429b87f16f27cb77aa1af7e827054b6"
+  integrity sha512-lYPMmmdWVab8rQDdhxjiXAjiT2Z+x3XfOH6jgh1BRkTe3nZY5tUstiXlOPv80bnC2CGdUccEUMfa5FbaYQr88A==
+  dependencies:
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/cells" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/domutils" "^1.1.7"
@@ -1018,10 +1023,10 @@
     "@lumino/widgets" "^1.11.1"
     react "~16.9.0"
 
-"@jupyterlab/observables@^3.0.1", "@jupyterlab/observables@~3.0.1":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/observables/-/observables-3.0.1.tgz#001ab3d64d47e97eae52d17a0190845f1586db9c"
-  integrity sha512-iD7w8JYBRT9UXVS3IvljvoDf0ZiHQEu1Pm+784UTa27Az0i6idyV1iWZ+xIHtV+s7ampVjMGiBbqXD6m4HRNpg==
+"@jupyterlab/observables@^3.1.0-a.0", "@jupyterlab/observables@~3.1.0-a.0":
+  version "3.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/observables/-/observables-3.1.0-a.0.tgz#3d0509df802badc2c5a9292f5f03e30a749d2ffb"
+  integrity sha512-mtRoIK5YW/lHoiX4yNXSMylnHCSMdBYd4Po/LqTz03SsUoCoCUIgaHgkzMrcNkQ+Ov6MkxVNxYFpQW63ZH9w2Q==
   dependencies:
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
@@ -1029,17 +1034,17 @@
     "@lumino/messaging" "^1.3.3"
     "@lumino/signaling" "^1.3.5"
 
-"@jupyterlab/outputarea@^2.0.2", "@jupyterlab/outputarea@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/outputarea/-/outputarea-2.0.2.tgz#2cfd9c1ae6d159400816f0756cfcc328564115d9"
-  integrity sha512-bO4brGkYxJYk0OvIjBEUOmy6PjxM1Arcit1Hgx6b+p7fZYUxOlHUqhNkbIvIOs97qXTVwmKaRqTNXuN6/VvMPQ==
+"@jupyterlab/outputarea@^2.1.0-a.0", "@jupyterlab/outputarea@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/outputarea/-/outputarea-2.1.0-a.0.tgz#706ab504e905f023b055f048b049cf8c92123ba4"
+  integrity sha512-js+MacjuBUCTwvkmdHhF6nkPFSRqxjFd8hQRpgIcLmcCZgBCUoQwpt6LCkb3XfdKbXXGIzOAUOobhOVc0hh4yw==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
-    "@jupyterlab/services" "^5.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
@@ -1048,58 +1053,58 @@
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/pdf-extension@^2.0.1", "@jupyterlab/pdf-extension@~2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/pdf-extension/-/pdf-extension-2.0.1.tgz#a8ae987bf27ac4b3b5c3508ca141f56551c6acaf"
-  integrity sha512-Iv0bmBFeqhVhJ1BniVe+krdWuUe86IEt70rpWwOH/fHTN+Zm2Fthzoh1c/qcY4PxKY+Gkw0sOsYw/Er7Fv7eNw==
+"@jupyterlab/pdf-extension@^2.1.0-a.0", "@jupyterlab/pdf-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/pdf-extension/-/pdf-extension-2.1.0-a.0.tgz#31e23484d173af5f03da56c994bacabec43ffd32"
+  integrity sha512-YqGC1P6P0kHJ+0Im9bT0Bd4xZxWJ1tOa031myfwNAo4k0rOwmPahjmU6v9yaSn/OV+2c2IY5c1dExPA17W6jTQ==
   dependencies:
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/property-inspector@^2.0.2", "@jupyterlab/property-inspector@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/property-inspector/-/property-inspector-2.0.2.tgz#8691bb22918aa9b2f26c141b1697ecca25e86832"
-  integrity sha512-vApIRdJHM7NB8lCrFuQawv1r9uTN3+B7QNJYmWsWiw6p+IH+lVQMh9g0jXgGrMcI31PEolf2heOGt+KkWQ8Vig==
+"@jupyterlab/property-inspector@^2.1.0-a.0", "@jupyterlab/property-inspector@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/property-inspector/-/property-inspector-2.1.0-a.0.tgz#e63b0807f2548d17b7b96a2f7d53493c73894631"
+  integrity sha512-wqaIzB5xXhjZUrRmcikNGsz56wwZ9r35fKDTm280wpzyugDj7XZ9tNTkLC2Ij8DtEqrqWcFKT8D9wSWcvhy6Tg==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
     react "~16.9.0"
 
-"@jupyterlab/rendermime-extension@^2.0.2", "@jupyterlab/rendermime-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/rendermime-extension/-/rendermime-extension-2.0.2.tgz#94cf532e70ef57edf2fcc52e6db70661bfd69a9d"
-  integrity sha512-U9RtKysUWGBN5YsTowjjBd7F6MMCNuz05ESkVxShwDD40jeeb2dSoPDQNsT/U+CKihwvKXQ9X6+wtTxSJcUBUA==
+"@jupyterlab/rendermime-extension@^2.1.0-a.0", "@jupyterlab/rendermime-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/rendermime-extension/-/rendermime-extension-2.1.0-a.0.tgz#2583e21012c3267cc688c1ff125c9fa50e981377"
+  integrity sha512-iUZG34HXfmvNNl7yr2bEnHIkci7UburIWxxDnX2ZId8v7A3BSJR2by/rqNlLGliQMOhP/AZzKeII1kq6GJcGXA==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/docmanager" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/docmanager" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
 
-"@jupyterlab/rendermime-interfaces@^2.0.1", "@jupyterlab/rendermime-interfaces@~2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/rendermime-interfaces/-/rendermime-interfaces-2.0.1.tgz#f4dae5690b13ad743dda2aebbfc5e1efd079be58"
-  integrity sha512-QYJcQNKNmrBXHXC31AvBRYk+QqKB0rZrvVXbhggFXBQiYQX1K/lnFvKjphmhhnpUhLKtgUrex+04cJ9Kek00HA==
+"@jupyterlab/rendermime-interfaces@^2.1.0-a.0", "@jupyterlab/rendermime-interfaces@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/rendermime-interfaces/-/rendermime-interfaces-2.1.0-a.0.tgz#b9c2816a8f36208c3cb0665baa55a68b7fa0ea2f"
+  integrity sha512-3sb+m6B+FfHkZsZClWeuw8reOgHxN7ckSYlq0F3FZzXsw9uQR+mmeG/teXv9WdxY+xfWL8E/cjI4dfIVKgjjGA==
   dependencies:
     "@lumino/coreutils" "^1.4.2"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/rendermime@^2.0.2", "@jupyterlab/rendermime@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/rendermime/-/rendermime-2.0.2.tgz#1e317ed136f4f798efaeae43948306c1dce4171c"
-  integrity sha512-JUGUteRLrwEHX5kPU1rLAIzChEwEQyxDbSCes63fgO5Hn+JXNKKQexWXeHZOm5l1JBGNiokQCz8Jy6fQHmEMYQ==
+"@jupyterlab/rendermime@^2.1.0-a.0", "@jupyterlab/rendermime@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/rendermime/-/rendermime-2.1.0-a.0.tgz#eddea12332a2364178728ac22137b64f5d6a5900"
+  integrity sha512-9bHm4iJ70GBRD90yMA0u7fluB1nW184hXEDQp4S3LryeHlry+RaeG60NatzayChDaBHO1U+kEdJUJQno0cSlbQ==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codemirror" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
-    "@jupyterlab/services" "^5.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codemirror" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/messaging" "^1.3.3"
@@ -1108,75 +1113,75 @@
     lodash.escape "^4.0.1"
     marked "^0.8.0"
 
-"@jupyterlab/running-extension@^2.0.2", "@jupyterlab/running-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/running-extension/-/running-extension-2.0.2.tgz#9235a72464da78dc4d5d6cf6a304fecc8b7037fa"
-  integrity sha512-/Hee4ye96qtrraNk8szgCOqnLRIznJCFLdpw5TWvucp4b/wacHiKEtaN1eoBCYsA7dU+KY+o4Nne5cg2QeZ0Gg==
+"@jupyterlab/running-extension@^2.1.0-a.0", "@jupyterlab/running-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/running-extension/-/running-extension-2.1.0-a.0.tgz#b944174910e1c4c666dac78d32ae6c1e4067f095"
+  integrity sha512-+LNeLRkMFQu69ZrnX4cJnrOn5tdRWHXCadngk4DI+MKLHQyhHaUMzXlIJDlfOu11oiOLCvjtVqWXEreIIRI2uQ==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/running" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/running" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
 
-"@jupyterlab/running@^2.0.2", "@jupyterlab/running@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/running/-/running-2.0.2.tgz#1e9e57e459fab8f6f7c887c0bac0f8d484271eb2"
-  integrity sha512-i/8SgTj0RoX07kMQ4TPrxG9UWMxGDGYtlCD8OYuNeNn0GR7nblzGwEJjSqubIu1WeKkViisrF5bYbxf6YIYm0w==
+"@jupyterlab/running@^2.1.0-a.0", "@jupyterlab/running@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/running/-/running-2.1.0-a.0.tgz#8de5a139c1ea31f1b762c5ab55fa116ada5697ea"
+  integrity sha512-u9r7fTX4gNae3qb8XUONqjqhBzf7Dow7noMfBYStxE3gqz+dhIpX/rrqGzXyDflse3mNmkCQ5iQmBG85SqwsSA==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/signaling" "^1.3.5"
     react "~16.9.0"
 
-"@jupyterlab/services@^5.0.2", "@jupyterlab/services@~5.0.2":
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/services/-/services-5.0.2.tgz#9e3e398c1cf022f35c406a743b46bc60a6723192"
-  integrity sha512-gBwXikSRWIrj0XiuYMSXd0TXLZJrE18rTtRwrvne0T/gJPg0+4JbORPkaKfFdbX84oQv8XLOT74xUHSPDhst0A==
+"@jupyterlab/services@^5.1.0-a.0", "@jupyterlab/services@~5.1.0-a.0":
+  version "5.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/services/-/services-5.1.0-a.0.tgz#6e70304ad8f448785be7719069b94dad7b441718"
+  integrity sha512-B9U9hGwk5cmh4PKRvS7wqy0O48X+/zx0KBMukP0zJBN8FamINDnSeFjhBrVkbhcqvQEZfvAgH6ciZz2PSzjoVg==
   dependencies:
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/nbformat" "^2.0.1"
-    "@jupyterlab/observables" "^3.0.1"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statedb" "^2.0.1"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/nbformat" "^2.1.0-a.0"
+    "@jupyterlab/observables" "^3.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
-    "@lumino/polling" "^1.0.4"
+    "@lumino/polling" "^1.1.1"
     "@lumino/signaling" "^1.3.5"
     node-fetch "^2.6.0"
     ws "^7.2.0"
 
-"@jupyterlab/settingeditor-extension@^2.0.2", "@jupyterlab/settingeditor-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/settingeditor-extension/-/settingeditor-extension-2.0.2.tgz#77bd30759a74f45e4ffa9ea64c64f161e6e8941d"
-  integrity sha512-+qmpR7tE77ol0mcbEUZ9b+JKAgIUCBSX7rAui6TeozZngkWrukLBB1e45kIFexTCj6hb58arG2Yy09+YAEG6ig==
+"@jupyterlab/settingeditor-extension@^2.1.0-a.0", "@jupyterlab/settingeditor-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/settingeditor-extension/-/settingeditor-extension-2.1.0-a.0.tgz#80efbb2fc10752cc23b2f30d065842e937510e38"
+  integrity sha512-HMcVy9hCWM3zvIt7qlQgNjzF9qHhoJMRTJgHwiiveio2JUDWHJJI79mAK4nGTmNm67OuRatOZO/ZoMoALK/8YQ==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/settingeditor" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statedb" "^2.0.1"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/settingeditor" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/disposable" "^1.3.5"
 
-"@jupyterlab/settingeditor@^2.0.2", "@jupyterlab/settingeditor@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/settingeditor/-/settingeditor-2.0.2.tgz#177e35137c3854b531be5b122b00e93c05a55151"
-  integrity sha512-NzmvaPlwv6SH4aW7AfDSubQ3J0K3lLUuJAMtlvBDzQq3Hg2PX2m0PFql47VsdUgKQyrZQoodC8ceagUd/ON4Jg==
+"@jupyterlab/settingeditor@^2.1.0-a.0", "@jupyterlab/settingeditor@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/settingeditor/-/settingeditor-2.1.0-a.0.tgz#96da180213b8777c313942d87afb10074e0df1c8"
+  integrity sha512-nDxwgR25Yey6v+YL23GBr0jCYbH7CFlQYrKKSeylbIbGCp90361kqnZy40iv4nWyKjNKMv0WKksY3bSG75rnbA==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/inspector" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statedb" "^2.0.1"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/inspector" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/messaging" "^1.3.3"
@@ -1185,12 +1190,12 @@
     react "~16.9.0"
     react-dom "~16.9.0"
 
-"@jupyterlab/settingregistry@^2.0.1", "@jupyterlab/settingregistry@~2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/settingregistry/-/settingregistry-2.0.1.tgz#a4bfd4afe5286c8abb327d76852f0acef6f110d3"
-  integrity sha512-38c5CFXLLNT1zKk0vS/UoD7TA90YpOrs/I5Zc8wY8GIl31IzTmTgre5H5cFSgvgg/imEbsYVWiUXtvTuQHGDWw==
+"@jupyterlab/settingregistry@^2.1.0-a.0", "@jupyterlab/settingregistry@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/settingregistry/-/settingregistry-2.1.0-a.0.tgz#533e73d9955bf9ba352cd3fb5e7161556764e759"
+  integrity sha512-iEyJ6u4o279daiEKi5BMhqRnuL7h5Df4cRVgjNG0lxttID62u0K/tys8YDsernTrEikJoaQ3my3HHrOTH6GrIA==
   dependencies:
-    "@jupyterlab/statedb" "^2.0.1"
+    "@jupyterlab/statedb" "^2.1.0-a.0"
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
@@ -1198,21 +1203,21 @@
     ajv "^6.10.2"
     json5 "^2.1.1"
 
-"@jupyterlab/shortcuts-extension@^2.0.2", "@jupyterlab/shortcuts-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/shortcuts-extension/-/shortcuts-extension-2.0.2.tgz#7eeee3be4725a6ceef5923f10579b961542d6a47"
-  integrity sha512-sbV5xtS8lJnlS2t4Zu2R7Mjn2Gtdj62q0xwlzEEMC5Xl1y15Yy/fh2+pqywi8oEBrH/YIDDDI/B+SUdIaQFEGg==
+"@jupyterlab/shortcuts-extension@^2.1.0-a.0", "@jupyterlab/shortcuts-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/shortcuts-extension/-/shortcuts-extension-2.1.0-a.0.tgz#ba6240eefac645136567ffaf38d3e4859af64477"
+  integrity sha512-f064XZUhKfl8vx6ekO8QIbBRT2rs4Sv+z1CDMdvMk4eCcNHZmzIOIwXqLE+3uJbgiyXwt4e09BSCjX5tykCLHg==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
 
-"@jupyterlab/statedb@^2.0.1", "@jupyterlab/statedb@~2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/statedb/-/statedb-2.0.1.tgz#5a93726a96fff7e4b1c9571c771302912bd45ad4"
-  integrity sha512-M8Z9yc5grOa0dspEFBkB3qetAozPKbXYryOCaB2/MYBalTaZfNivJyVVnxf3xQRKolYavOn9ohONmuQq0OMFWQ==
+"@jupyterlab/statedb@^2.1.0-a.0", "@jupyterlab/statedb@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/statedb/-/statedb-2.1.0-a.0.tgz#6519da806c589edc4326dfd99b8fabc9fccca572"
+  integrity sha512-12x/YGFvysyFFMH2PnH6IVAeFVRbMDocZlua//TWTkoodM5x2yxPSayuJo7RLDGFARoySxsgUQ5IObnYLWk7DA==
   dependencies:
     "@lumino/commands" "^1.10.1"
     "@lumino/coreutils" "^1.4.2"
@@ -1220,78 +1225,78 @@
     "@lumino/properties" "^1.1.6"
     "@lumino/signaling" "^1.3.5"
 
-"@jupyterlab/statusbar-extension@^2.0.2", "@jupyterlab/statusbar-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/statusbar-extension/-/statusbar-extension-2.0.2.tgz#0ff8a0d40c93393376c7a53b1c2554d399a9aa8a"
-  integrity sha512-M1hiC7erybnAwazVFk7LsELj+gjAecSqvxHl8z0rT5ilkg53Dyxd2xDTg5SucVGkkAztXl8W61XkZJIzpjm0hQ==
+"@jupyterlab/statusbar-extension@^2.1.0-a.0", "@jupyterlab/statusbar-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/statusbar-extension/-/statusbar-extension-2.1.0-a.0.tgz#52167b56e5447a1c0935c323d8f88f2894068db2"
+  integrity sha512-As89mmwVGYzqKa9Rb10LWAY9c1GpVEP0f4/V4XcomMhITtUUtk1cCmZTrJioc7rdbYrY4iO7HgapVjM/0mmz9A==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/cells" "^2.0.2"
-    "@jupyterlab/console" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/fileeditor" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/statusbar" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/cells" "^2.1.0-a.0"
+    "@jupyterlab/console" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/fileeditor" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/statusbar" "^2.1.0-a.0"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/statusbar@^2.0.2", "@jupyterlab/statusbar@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/statusbar/-/statusbar-2.0.2.tgz#35924235e6a5efff72b0d1e2ade6cd36158b55d1"
-  integrity sha512-CGSaIm62ABWrQzAt6Jr79Px1iJMZw+LqlSVGMUDK7uPpeQ0w2Sk0V2B9bydSqJyDyzb/Ja495CYRqLu6rJn94A==
+"@jupyterlab/statusbar@^2.1.0-a.0", "@jupyterlab/statusbar@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/statusbar/-/statusbar-2.1.0-a.0.tgz#e3f66df33821e6a486479bfebb8479da278f97c0"
+  integrity sha512-/q0LCWu8TTcsKzXvRardGOfFAX3HEqYJoG3NgujRaIF8PO57aSXeEM7aeMkik+h55OeWJes/UXJQ3+YA+Fe+7A==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
     "@lumino/messaging" "^1.3.3"
-    "@lumino/polling" "^1.0.4"
+    "@lumino/polling" "^1.1.1"
     "@lumino/signaling" "^1.3.5"
     "@lumino/widgets" "^1.11.1"
     csstype "~2.6.9"
     react "~16.9.0"
     typestyle "^2.0.4"
 
-"@jupyterlab/tabmanager-extension@^2.0.2", "@jupyterlab/tabmanager-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/tabmanager-extension/-/tabmanager-extension-2.0.2.tgz#a17cb8d59f9e2e447037de5ba21085448e560287"
-  integrity sha512-2MGueDdVy+BwOORN9+OdWY2y1AiEnK7nxEzlfKEqAhEH35/K1Kg+3ExKvXMZHaCCz9hhrpyNUfUtUpXAONjgIA==
+"@jupyterlab/tabmanager-extension@^2.1.0-a.0", "@jupyterlab/tabmanager-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/tabmanager-extension/-/tabmanager-extension-2.1.0-a.0.tgz#1a5eeb9c3e878622b911408c0cd0703d1458efca"
+  integrity sha512-3yqnzoaGMtirp2JEnsRLlMPnItbZj4cqBFSeYG6Iu1m7LjYKs200AQQ4Rc+/gu6fMErjAPYVsd6k9mviVbXtow==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/terminal-extension@^2.0.2", "@jupyterlab/terminal-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/terminal-extension/-/terminal-extension-2.0.2.tgz#a70594bce3f3eb82afd936b3564e07603d75f38c"
-  integrity sha512-W8ycwAVsUONS3wNq7LzybIw0XSmYlrhZGt8wveb8N38YeXi15wu3Swbgn0SFd4aVItNRSlYv3MHLZDiSC8PzhQ==
+"@jupyterlab/terminal-extension@^2.1.0-a.0", "@jupyterlab/terminal-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/terminal-extension/-/terminal-extension-2.1.0-a.0.tgz#7cf5ab2f1585323f26d88c4903b3a3a54351a2c6"
+  integrity sha512-TGpqU7XNlPtCqgRQqbubdYrtGVDDaep6pcyJtlu5/99b27iSAn1eGrPvMxctUwL21jRWGaHiGEaEth5/uQ4k3Q==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/launcher" "^2.0.2"
-    "@jupyterlab/mainmenu" "^2.0.2"
-    "@jupyterlab/running" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/settingregistry" "^2.0.1"
-    "@jupyterlab/terminal" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/launcher" "^2.1.0-a.0"
+    "@jupyterlab/mainmenu" "^2.1.0-a.0"
+    "@jupyterlab/running" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/settingregistry" "^2.1.0-a.0"
+    "@jupyterlab/terminal" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/terminal@^2.0.2", "@jupyterlab/terminal@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/terminal/-/terminal-2.0.2.tgz#5fb12d8890e5e6bcad4d36f844abc14d9eaf478d"
-  integrity sha512-wxDdVhJyjSZABkxshBkWYfmaFZTYYmatkpr/goYLVRoQtJFIbUTJDP3CWQG6J1FABXOZFbD0Z4C5MtQw6U2j+A==
+"@jupyterlab/terminal@^2.1.0-a.0", "@jupyterlab/terminal@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/terminal/-/terminal-2.1.0-a.0.tgz#c490f85ae06cff98bf1bfe1a8f3f2801df336abc"
+  integrity sha512-s62rjoXajR7lTFlUS7mHXvOAonmUnvFquxlpC9uC+XaSmlpg7wwzVamHv1vkVZ8nkZYcVHRJbSRNHtOK46FGXQ==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/domutils" "^1.1.7"
     "@lumino/messaging" "^1.3.3"
@@ -1299,69 +1304,69 @@
     xterm "~4.2.0"
     xterm-addon-fit "~0.3.0"
 
-"@jupyterlab/theme-dark-extension@^2.0.2", "@jupyterlab/theme-dark-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/theme-dark-extension/-/theme-dark-extension-2.0.2.tgz#21e24d7e5e8973b8a207573b8f637359152bc836"
-  integrity sha512-9aNlcAe3VO4nOMMcFiMF001k/T442dliaYYoLx+/2RPvTlo1/TbGA2ssMSAG5oDp9l4g6wPeJCAoZjIlRMPGmQ==
+"@jupyterlab/theme-dark-extension@^2.1.0-a.0", "@jupyterlab/theme-dark-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/theme-dark-extension/-/theme-dark-extension-2.1.0-a.0.tgz#416c41d1a922e7063aba8c2441c113bacedfdb5b"
+  integrity sha512-6Zt00MS4wM4pF+Atx5iXOAEdpffHAvMjTHJ0ocNrTFKXDmrnvZf8GJBl6VloaKTJUY+1Zog5g6R2Ib4WRFCg4Q==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
 
-"@jupyterlab/theme-light-extension@^2.0.2", "@jupyterlab/theme-light-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/theme-light-extension/-/theme-light-extension-2.0.2.tgz#2a19a02e1a63fb9656b6e3889639261381c3be9e"
-  integrity sha512-txN4SQ6MCuwrdcyrcPrzASjnXDSbhTQMLNvnQ9ZCEmFgH/S1Ht0MbD/0R7RAw0sW96pHE3pAkVjnIeO4HiMHPw==
+"@jupyterlab/theme-light-extension@^2.1.0-a.0", "@jupyterlab/theme-light-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/theme-light-extension/-/theme-light-extension-2.1.0-a.0.tgz#999a940133718baae03259ab65bca4972443a690"
+  integrity sha512-uvxegB35tqXYhTPW8GL+w9VyQ23wuTajG3OGuMhH1ONLWBSe1+EG/uLu3MpIUJz4FQ5ID6VxctyZcchuEL3YCQ==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
 
-"@jupyterlab/tooltip-extension@^2.0.2", "@jupyterlab/tooltip-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/tooltip-extension/-/tooltip-extension-2.0.2.tgz#a5724b4ab42bba2abe93633a77ada4cb5ee99b88"
-  integrity sha512-zsocYrmReVCxk9kcpjsHWtHWeE08qbMrTqgpLBSjp50hAnaIFlffTgXGH7uVDXAQk6an/iXyUJYFK0oeAEEyIw==
+"@jupyterlab/tooltip-extension@^2.1.0-a.0", "@jupyterlab/tooltip-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/tooltip-extension/-/tooltip-extension-2.1.0-a.0.tgz#57c156aaa457ba4189ac2298106376fec2f82830"
+  integrity sha512-PII+JNh+IdLQqvw6OjB9s008fuqzS9ORoTeviLuvKTkqKu8KR26L/wNMUUgLocDSiqb0UQV7ZG8zZHkyUMIw6g==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/console" "^2.0.2"
-    "@jupyterlab/coreutils" "^4.0.2"
-    "@jupyterlab/fileeditor" "^2.0.2"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
-    "@jupyterlab/tooltip" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/console" "^2.1.0-a.0"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
+    "@jupyterlab/fileeditor" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
+    "@jupyterlab/tooltip" "^2.1.0-a.0"
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/tooltip@^2.0.2", "@jupyterlab/tooltip@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/tooltip/-/tooltip-2.0.2.tgz#a3aff0536daa917c2bda54e6208a0f073934e4e6"
-  integrity sha512-knE/kA1DxJb7y3j5l7FMdhfTPAX3gLZdSLxeJVk7YFQDFIfGheQMg4hr+cD2CQ3rHae+worOl8mi0LjkRDSrrw==
+"@jupyterlab/tooltip@^2.1.0-a.0", "@jupyterlab/tooltip@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/tooltip/-/tooltip-2.1.0-a.0.tgz#a7d685a4d68f5edf94145ecd075a2e67179d5d52"
+  integrity sha512-5AxN8WOGCWRiUjRgHe+pdZ71Ab98PpDmizNecnCzcyQj06WZuwdMEHYU33ezcF6fVsZbWs8L8CS/cqtkna9idA==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/codeeditor" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/services" "^5.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/codeeditor" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/messaging" "^1.3.3"
     "@lumino/widgets" "^1.11.1"
 
-"@jupyterlab/ui-components-extension@^2.0.2", "@jupyterlab/ui-components-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/ui-components-extension/-/ui-components-extension-2.0.2.tgz#9d9a98de65a6c986d22054db058d85731ac9db08"
-  integrity sha512-GhAZTICgS105Hk1SIEiAYhfavbT62kMh8a6+W0ujwRwz2m+74WSajvAAI2Aj3lKErTi2nXP1j1JrLdFbOj6wxg==
+"@jupyterlab/ui-components-extension@^2.1.0-a.0", "@jupyterlab/ui-components-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/ui-components-extension/-/ui-components-extension-2.1.0-a.0.tgz#fd312f93565b06e4e2ebdaa10480e9b4412c6d9d"
+  integrity sha512-XSgqPNoc+L3SHsRbB3ZzDzY0EJQxrALr/kVuPhz7NfNZKmDtYBz/BRbTropKHZqGeUWjcqZPBrXHmfJyUK8N+Q==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
 
-"@jupyterlab/ui-components@^2.0.2", "@jupyterlab/ui-components@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/ui-components/-/ui-components-2.0.2.tgz#84a68bbb4fdca0d83ea2892fcf78a8a373716fa9"
-  integrity sha512-yQ/M3ZtA/Zo8qsvvcwe17qdeTE7xZ6U5l5M/6OVvxIMKR0qXnqSpv8w7jJAgbRusr29Dj8tHbdrEMFethlfwUg==
+"@jupyterlab/ui-components@^2.1.0-a.0", "@jupyterlab/ui-components@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/ui-components/-/ui-components-2.1.0-a.0.tgz#d64f97e62c913717ead57b323d4f70f07a2a5b97"
+  integrity sha512-D7jMg3GaNcj8+uZhW4+ByOLkG+ChEUdYnWjlCOrOTX/RKPAf7Nv5lTD9G9/SDgD66qQElV6K6djbrGij/xsp4A==
   dependencies:
     "@blueprintjs/core" "^3.22.2"
     "@blueprintjs/select" "^3.11.2"
-    "@jupyterlab/coreutils" "^4.0.2"
+    "@jupyterlab/coreutils" "^4.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/signaling" "^1.3.5"
     "@lumino/virtualdom" "^1.6.1"
@@ -1370,28 +1375,28 @@
     react-dom "~16.9.0"
     typestyle "^2.0.4"
 
-"@jupyterlab/vdom-extension@^2.0.2", "@jupyterlab/vdom-extension@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/vdom-extension/-/vdom-extension-2.0.2.tgz#6935d12cf58aaf60628f0449de95c8e8d305fd02"
-  integrity sha512-Rv7tI0jmEJLRnwWe9ihBRzHzq9aTUcE5eO6UPhS5TuJrxEZuM82LVJRhNKRiBr0l6OYmYp71VXOrRn3ZuVdLoQ==
+"@jupyterlab/vdom-extension@^2.1.0-a.0", "@jupyterlab/vdom-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/vdom-extension/-/vdom-extension-2.1.0-a.0.tgz#4ede0a1ea27f25c618b6589b30451a1532f740ae"
+  integrity sha512-Y4Qg3IX7xoSPXQI8jJj64nR1vaM2eCXjhVVR0eHhKMl425QG0i4EQqDkM64nyy58RgUeSr0JBP9oUbhgStBrUQ==
   dependencies:
-    "@jupyterlab/application" "^2.0.2"
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/notebook" "^2.0.2"
-    "@jupyterlab/rendermime" "^2.0.2"
-    "@jupyterlab/ui-components" "^2.0.2"
-    "@jupyterlab/vdom" "^2.0.2"
+    "@jupyterlab/application" "^2.1.0-a.0"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/notebook" "^2.1.0-a.0"
+    "@jupyterlab/rendermime" "^2.1.0-a.0"
+    "@jupyterlab/ui-components" "^2.1.0-a.0"
+    "@jupyterlab/vdom" "^2.1.0-a.0"
 
-"@jupyterlab/vdom@^2.0.2", "@jupyterlab/vdom@~2.0.2":
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/vdom/-/vdom-2.0.2.tgz#d7d72a48a1c155cec30fa6ff3d0022c04d54c102"
-  integrity sha512-BkGmM6toSxGL1FWCh5o3oYz+7zf7MRrRYkFbYUoRa+yTyPQldgmqUjG7FTxiQCuAC0Jd+him7JpPYFQ+Hh9+iw==
+"@jupyterlab/vdom@^2.1.0-a.0", "@jupyterlab/vdom@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/vdom/-/vdom-2.1.0-a.0.tgz#31ef6d5b6e6a78b1729b209ed84bfdb84902d03d"
+  integrity sha512-or5l7pB7KETXQ7MtVK1W8j/sZqaSfViOZPNyiH0rL+VqyrJeJmpNeeifMgaHo4GfuJ17PhHNCXIgXLkgRz1A7g==
   dependencies:
-    "@jupyterlab/apputils" "^2.0.2"
-    "@jupyterlab/docregistry" "^2.0.2"
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
-    "@jupyterlab/services" "^5.0.2"
+    "@jupyterlab/apputils" "^2.1.0-a.0"
+    "@jupyterlab/docregistry" "^2.1.0-a.0"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
+    "@jupyterlab/services" "^5.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/messaging" "^1.3.3"
     "@lumino/widgets" "^1.11.1"
@@ -1399,12 +1404,12 @@
     react "~16.9.0"
     react-dom "~16.9.0"
 
-"@jupyterlab/vega5-extension@^2.0.1", "@jupyterlab/vega5-extension@~2.0.1":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/vega5-extension/-/vega5-extension-2.0.1.tgz#0c7d54fef0d4361c3bf50281b20a64658bbd52e4"
-  integrity sha512-S1i6ZUKD2sBRDV19HbIwQytu27wrOiP6C+YcHw6CCdh8YE+XJBkQi1omuh3QmLQoLglL2wu7hafdvYHahy10aw==
+"@jupyterlab/vega5-extension@^2.1.0-a.0", "@jupyterlab/vega5-extension@~2.1.0-a.0":
+  version "2.1.0-a.0"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/vega5-extension/-/vega5-extension-2.1.0-a.0.tgz#646534546d384cfca96b45e623a1b2341ef7d878"
+  integrity sha512-YEAysMc5w5/bVCS3nearlJWKPGo7gvI1IQMh5KqnBY1kZa6OIgX89+B+5f94t8GXIWzFf4rLThlfs/Mds5Ezuw==
   dependencies:
-    "@jupyterlab/rendermime-interfaces" "^2.0.1"
+    "@jupyterlab/rendermime-interfaces" "^2.1.0-a.0"
     "@lumino/coreutils" "^1.4.2"
     "@lumino/widgets" "^1.11.1"
     vega "^5.9.0"
@@ -1450,10 +1455,10 @@
   resolved "https://registry.yarnpkg.com/@lumino/coreutils/-/coreutils-1.4.2.tgz#44cd3d55bb692e876c792f1ecc0df3daa1de63e9"
   integrity sha512-SmQ4YDANe25rZd0bLoW7LVAHmgySjkrJmyNPnPW0GrpBt2u4/6D+EQJ8PCCMNWuJvrljBCdlmgOFsT38qYhfcw==
 
-"@lumino/datagrid@^0.5.3":
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/@lumino/datagrid/-/datagrid-0.5.3.tgz#62ac692a199e033d811cc2229fa979b01c058889"
-  integrity sha512-5W86WnbZKrX/P+WkXMPRkToM0yISjmKu2ewJ2CtyKw+OsGsBcgshM147k4wxDskAtIv/+wsgdth7sIdzx6OW+A==
+"@lumino/datagrid@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@lumino/datagrid/-/datagrid-0.6.0.tgz#8272fe4cf8bb27f3ec9cc8fee279329c35695d19"
+  integrity sha512-TkpCm4AbCAVwGg3pC5618YnjfHSyzhWxRaM1FQ7RKWS+mZoKhMWVbN0I2o2OLpdaBjvf7sV9JUp08rsouHRqOQ==
   dependencies:
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
@@ -1499,10 +1504,10 @@
     "@lumino/algorithm" "^1.2.3"
     "@lumino/collections" "^1.2.3"
 
-"@lumino/polling@^1.0.4":
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/@lumino/polling/-/polling-1.0.4.tgz#85f956933fa63c47edf808c141cdb9a7a1a49f4c"
-  integrity sha512-9OYIDTohToj6SLrxOr+FbeyPvirBU/r53FgmPxulcDgUVnVk4tqTSLIJAUu3mjJd9hnmZZqpSn9ppyjQAo3qSg==
+"@lumino/polling@^1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@lumino/polling/-/polling-1.1.1.tgz#15dcb848dca26573d416f00493e343bc43d79d01"
+  integrity sha512-4ofwz9zOkh3GtTTPKfX9KmsZD66g8M0BG/lLji86GRCQvQDGJaI35c0qD62jMzacfsVxbCBfp89/sbXGDoRIZA==
   dependencies:
     "@lumino/coreutils" "^1.4.2"
     "@lumino/disposable" "^1.3.5"
@@ -1545,9 +1550,9 @@
     "@lumino/virtualdom" "^1.6.1"
 
 "@nteract/transform-vdom@^4.0.3":
-  version "4.0.11"
-  resolved "https://registry.yarnpkg.com/@nteract/transform-vdom/-/transform-vdom-4.0.11.tgz#12343cddee18e151176ffdbfb66efabb35339644"
-  integrity sha512-SyN2oU97IpINFLyY2rBdXgmGrzK1QbFlrNmq7pA44DQqBU/x6kk7Mm2FdE59PyRMG4/au+LZ4kPSVD2zEMHInQ==
+  version "4.0.15"
+  resolved "https://registry.yarnpkg.com/@nteract/transform-vdom/-/transform-vdom-4.0.15.tgz#cad56590f91377a5db0aa3e9a3e7d53de4c9bb1d"
+  integrity sha512-eI5bIsrKGrWlkKWRQLZrGMTBqm/mst/433bxe59nUunqmzfHlzfAqA8lPkeXDMp9jVGc0qDEmQfly/DFO4DrFA==
   dependencies:
     lodash.clonedeep "^4.5.0"
 
@@ -1589,157 +1594,156 @@
   integrity sha512-KfRL3PuHmqQLOG+2tGpRO26Ctg+Cq1E01D2DMriKEATHgWLfeNDmq9e29Q9WIky0dQ3NPkd1mzYH8Lm936Z9qw==
 
 "@types/react@~16.9.16":
-  version "16.9.23"
-  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.23.tgz#1a66c6d468ba11a8943ad958a8cb3e737568271c"
-  integrity sha512-SsGVT4E7L2wLN3tPYLiF20hmZTPGuzaayVunfgXzUn1x4uHVsKH6QDJQ/TdpHqwsTLd4CwrmQ2vOgxN7gE24gw==
+  version "16.9.27"
+  resolved "https://registry.yarnpkg.com/@types/react/-/react-16.9.27.tgz#7fc5db99e3ec3f21735b44d3560cff684856814a"
+  integrity sha512-j+RvQb9w7a2kZFBOgTh+s/elCwtqWUMN6RJNdmz0ntmwpeoMHKnyhUcmYBu7Yw94Rtj9938D+TJSn6WGcq2+OA==
   dependencies:
     "@types/prop-types" "*"
     csstype "^2.2.0"
 
-"@webassemblyjs/ast@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.8.5.tgz#51b1c5fe6576a34953bf4b253df9f0d490d9e359"
-  integrity sha512-aJMfngIZ65+t71C3y2nBBg5FFG0Okt9m0XEgWZ7Ywgn1oMAT8cNwx00Uv1cQyHtidq0Xn94R4TAywO+LCQ+ZAQ==
+"@webassemblyjs/ast@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/ast/-/ast-1.9.0.tgz#bd850604b4042459a5a41cd7d338cbed695ed964"
+  integrity sha512-C6wW5L+b7ogSDVqymbkkvuW9kruN//YisMED04xzeBBqjHa2FYnmvOlS6Xj68xWQRgWvI9cIglsjFowH/RJyEA==
   dependencies:
-    "@webassemblyjs/helper-module-context" "1.8.5"
-    "@webassemblyjs/helper-wasm-bytecode" "1.8.5"
-    "@webassemblyjs/wast-parser" "1.8.5"
+    "@webassemblyjs/helper-module-context" "1.9.0"
+    "@webassemblyjs/helper-wasm-bytecode" "1.9.0"
+    "@webassemblyjs/wast-parser" "1.9.0"
 
-"@webassemblyjs/floating-point-hex-parser@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/floating-point-hex-parser/-/floating-point-hex-parser-1.8.5.tgz#1ba926a2923613edce496fd5b02e8ce8a5f49721"
-  integrity sha512-9p+79WHru1oqBh9ewP9zW95E3XAo+90oth7S5Re3eQnECGq59ly1Ri5tsIipKGpiStHsUYmY3zMLqtk3gTcOtQ==
+"@webassemblyjs/floating-point-hex-parser@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/floating-point-hex-parser/-/floating-point-hex-parser-1.9.0.tgz#3c3d3b271bddfc84deb00f71344438311d52ffb4"
+  integrity sha512-TG5qcFsS8QB4g4MhrxK5TqfdNe7Ey/7YL/xN+36rRjl/BlGE/NcBvJcqsRgCP6Z92mRE+7N50pRIi8SmKUbcQA==
 
-"@webassemblyjs/helper-api-error@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-api-error/-/helper-api-error-1.8.5.tgz#c49dad22f645227c5edb610bdb9697f1aab721f7"
-  integrity sha512-Za/tnzsvnqdaSPOUXHyKJ2XI7PDX64kWtURyGiJJZKVEdFOsdKUCPTNEVFZq3zJ2R0G5wc2PZ5gvdTRFgm81zA==
+"@webassemblyjs/helper-api-error@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-api-error/-/helper-api-error-1.9.0.tgz#203f676e333b96c9da2eeab3ccef33c45928b6a2"
+  integrity sha512-NcMLjoFMXpsASZFxJ5h2HZRcEhDkvnNFOAKneP5RbKRzaWJN36NC4jqQHKwStIhGXu5mUWlUUk7ygdtrO8lbmw==
 
-"@webassemblyjs/helper-buffer@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-buffer/-/helper-buffer-1.8.5.tgz#fea93e429863dd5e4338555f42292385a653f204"
-  integrity sha512-Ri2R8nOS0U6G49Q86goFIPNgjyl6+oE1abW1pS84BuhP1Qcr5JqMwRFT3Ah3ADDDYGEgGs1iyb1DGX+kAi/c/Q==
+"@webassemblyjs/helper-buffer@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-buffer/-/helper-buffer-1.9.0.tgz#a1442d269c5feb23fcbc9ef759dac3547f29de00"
+  integrity sha512-qZol43oqhq6yBPx7YM3m9Bv7WMV9Eevj6kMi6InKOuZxhw+q9hOkvq5e/PpKSiLfyetpaBnogSbNCfBwyB00CA==
 
-"@webassemblyjs/helper-code-frame@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-code-frame/-/helper-code-frame-1.8.5.tgz#9a740ff48e3faa3022b1dff54423df9aa293c25e"
-  integrity sha512-VQAadSubZIhNpH46IR3yWO4kZZjMxN1opDrzePLdVKAZ+DFjkGD/rf4v1jap744uPVU6yjL/smZbRIIJTOUnKQ==
+"@webassemblyjs/helper-code-frame@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-code-frame/-/helper-code-frame-1.9.0.tgz#647f8892cd2043a82ac0c8c5e75c36f1d9159f27"
+  integrity sha512-ERCYdJBkD9Vu4vtjUYe8LZruWuNIToYq/ME22igL+2vj2dQ2OOujIZr3MEFvfEaqKoVqpsFKAGsRdBSBjrIvZA==
   dependencies:
-    "@webassemblyjs/wast-printer" "1.8.5"
+    "@webassemblyjs/wast-printer" "1.9.0"
 
-"@webassemblyjs/helper-fsm@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-fsm/-/helper-fsm-1.8.5.tgz#ba0b7d3b3f7e4733da6059c9332275d860702452"
-  integrity sha512-kRuX/saORcg8se/ft6Q2UbRpZwP4y7YrWsLXPbbmtepKr22i8Z4O3V5QE9DbZK908dh5Xya4Un57SDIKwB9eow==
+"@webassemblyjs/helper-fsm@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-fsm/-/helper-fsm-1.9.0.tgz#c05256b71244214671f4b08ec108ad63b70eddb8"
+  integrity sha512-OPRowhGbshCb5PxJ8LocpdX9Kl0uB4XsAjl6jH/dWKlk/mzsANvhwbiULsaiqT5GZGT9qinTICdj6PLuM5gslw==
 
-"@webassemblyjs/helper-module-context@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-module-context/-/helper-module-context-1.8.5.tgz#def4b9927b0101dc8cbbd8d1edb5b7b9c82eb245"
-  integrity sha512-/O1B236mN7UNEU4t9X7Pj38i4VoU8CcMHyy3l2cV/kIF4U5KoHXDVqcDuOs1ltkac90IM4vZdHc52t1x8Yfs3g==
+"@webassemblyjs/helper-module-context@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-module-context/-/helper-module-context-1.9.0.tgz#25d8884b76839871a08a6c6f806c3979ef712f07"
+  integrity sha512-MJCW8iGC08tMk2enck1aPW+BE5Cw8/7ph/VGZxwyvGbJwjktKkDK7vy7gAmMDx88D7mhDTCNKAW5tED+gZ0W8g==
   dependencies:
-    "@webassemblyjs/ast" "1.8.5"
-    mamacro "^0.0.3"
+    "@webassemblyjs/ast" "1.9.0"
 
-"@webassemblyjs/helper-wasm-bytecode@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-wasm-bytecode/-/helper-wasm-bytecode-1.8.5.tgz#537a750eddf5c1e932f3744206551c91c1b93e61"
-  integrity sha512-Cu4YMYG3Ddl72CbmpjU/wbP6SACcOPVbHN1dI4VJNJVgFwaKf1ppeFJrwydOG3NDHxVGuCfPlLZNyEdIYlQ6QQ==
+"@webassemblyjs/helper-wasm-bytecode@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-wasm-bytecode/-/helper-wasm-bytecode-1.9.0.tgz#4fed8beac9b8c14f8c58b70d124d549dd1fe5790"
+  integrity sha512-R7FStIzyNcd7xKxCZH5lE0Bqy+hGTwS3LJjuv1ZVxd9O7eHCedSdrId/hMOd20I+v8wDXEn+bjfKDLzTepoaUw==
 
-"@webassemblyjs/helper-wasm-section@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-wasm-section/-/helper-wasm-section-1.8.5.tgz#74ca6a6bcbe19e50a3b6b462847e69503e6bfcbf"
-  integrity sha512-VV083zwR+VTrIWWtgIUpqfvVdK4ff38loRmrdDBgBT8ADXYsEZ5mPQ4Nde90N3UYatHdYoDIFb7oHzMncI02tA==
+"@webassemblyjs/helper-wasm-section@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/helper-wasm-section/-/helper-wasm-section-1.9.0.tgz#5a4138d5a6292ba18b04c5ae49717e4167965346"
+  integrity sha512-XnMB8l3ek4tvrKUUku+IVaXNHz2YsJyOOmz+MMkZvh8h1uSJpSen6vYnw3IoQ7WwEuAhL8Efjms1ZWjqh2agvw==
   dependencies:
-    "@webassemblyjs/ast" "1.8.5"
-    "@webassemblyjs/helper-buffer" "1.8.5"
-    "@webassemblyjs/helper-wasm-bytecode" "1.8.5"
-    "@webassemblyjs/wasm-gen" "1.8.5"
+    "@webassemblyjs/ast" "1.9.0"
+    "@webassemblyjs/helper-buffer" "1.9.0"
+    "@webassemblyjs/helper-wasm-bytecode" "1.9.0"
+    "@webassemblyjs/wasm-gen" "1.9.0"
 
-"@webassemblyjs/ieee754@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/ieee754/-/ieee754-1.8.5.tgz#712329dbef240f36bf57bd2f7b8fb9bf4154421e"
-  integrity sha512-aaCvQYrvKbY/n6wKHb/ylAJr27GglahUO89CcGXMItrOBqRarUMxWLJgxm9PJNuKULwN5n1csT9bYoMeZOGF3g==
+"@webassemblyjs/ieee754@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/ieee754/-/ieee754-1.9.0.tgz#15c7a0fbaae83fb26143bbacf6d6df1702ad39e4"
+  integrity sha512-dcX8JuYU/gvymzIHc9DgxTzUUTLexWwt8uCTWP3otys596io0L5aW02Gb1RjYpx2+0Jus1h4ZFqjla7umFniTg==
   dependencies:
     "@xtuc/ieee754" "^1.2.0"
 
-"@webassemblyjs/leb128@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/leb128/-/leb128-1.8.5.tgz#044edeb34ea679f3e04cd4fd9824d5e35767ae10"
-  integrity sha512-plYUuUwleLIziknvlP8VpTgO4kqNaH57Y3JnNa6DLpu/sGcP6hbVdfdX5aHAV716pQBKrfuU26BJK29qY37J7A==
+"@webassemblyjs/leb128@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/leb128/-/leb128-1.9.0.tgz#f19ca0b76a6dc55623a09cffa769e838fa1e1c95"
+  integrity sha512-ENVzM5VwV1ojs9jam6vPys97B/S65YQtv/aanqnU7D8aSoHFX8GyhGg0CMfyKNIHBuAVjy3tlzd5QMMINa7wpw==
   dependencies:
     "@xtuc/long" "4.2.2"
 
-"@webassemblyjs/utf8@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/utf8/-/utf8-1.8.5.tgz#a8bf3b5d8ffe986c7c1e373ccbdc2a0915f0cedc"
-  integrity sha512-U7zgftmQriw37tfD934UNInokz6yTmn29inT2cAetAsaU9YeVCveWEwhKL1Mg4yS7q//NGdzy79nlXh3bT8Kjw==
+"@webassemblyjs/utf8@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/utf8/-/utf8-1.9.0.tgz#04d33b636f78e6a6813227e82402f7637b6229ab"
+  integrity sha512-GZbQlWtopBTP0u7cHrEx+73yZKrQoBMpwkGEIqlacljhXCkVM1kMQge/Mf+csMJAjEdSwhOyLAS0AoR3AG5P8w==
 
-"@webassemblyjs/wasm-edit@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/wasm-edit/-/wasm-edit-1.8.5.tgz#962da12aa5acc1c131c81c4232991c82ce56e01a"
-  integrity sha512-A41EMy8MWw5yvqj7MQzkDjU29K7UJq1VrX2vWLzfpRHt3ISftOXqrtojn7nlPsZ9Ijhp5NwuODuycSvfAO/26Q==
+"@webassemblyjs/wasm-edit@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/wasm-edit/-/wasm-edit-1.9.0.tgz#3fe6d79d3f0f922183aa86002c42dd256cfee9cf"
+  integrity sha512-FgHzBm80uwz5M8WKnMTn6j/sVbqilPdQXTWraSjBwFXSYGirpkSWE2R9Qvz9tNiTKQvoKILpCuTjBKzOIm0nxw==
   dependencies:
-    "@webassemblyjs/ast" "1.8.5"
-    "@webassemblyjs/helper-buffer" "1.8.5"
-    "@webassemblyjs/helper-wasm-bytecode" "1.8.5"
-    "@webassemblyjs/helper-wasm-section" "1.8.5"
-    "@webassemblyjs/wasm-gen" "1.8.5"
-    "@webassemblyjs/wasm-opt" "1.8.5"
-    "@webassemblyjs/wasm-parser" "1.8.5"
-    "@webassemblyjs/wast-printer" "1.8.5"
+    "@webassemblyjs/ast" "1.9.0"
+    "@webassemblyjs/helper-buffer" "1.9.0"
+    "@webassemblyjs/helper-wasm-bytecode" "1.9.0"
+    "@webassemblyjs/helper-wasm-section" "1.9.0"
+    "@webassemblyjs/wasm-gen" "1.9.0"
+    "@webassemblyjs/wasm-opt" "1.9.0"
+    "@webassemblyjs/wasm-parser" "1.9.0"
+    "@webassemblyjs/wast-printer" "1.9.0"
 
-"@webassemblyjs/wasm-gen@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/wasm-gen/-/wasm-gen-1.8.5.tgz#54840766c2c1002eb64ed1abe720aded714f98bc"
-  integrity sha512-BCZBT0LURC0CXDzj5FXSc2FPTsxwp3nWcqXQdOZE4U7h7i8FqtFK5Egia6f9raQLpEKT1VL7zr4r3+QX6zArWg==
+"@webassemblyjs/wasm-gen@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/wasm-gen/-/wasm-gen-1.9.0.tgz#50bc70ec68ded8e2763b01a1418bf43491a7a49c"
+  integrity sha512-cPE3o44YzOOHvlsb4+E9qSqjc9Qf9Na1OO/BHFy4OI91XDE14MjFN4lTMezzaIWdPqHnsTodGGNP+iRSYfGkjA==
   dependencies:
-    "@webassemblyjs/ast" "1.8.5"
-    "@webassemblyjs/helper-wasm-bytecode" "1.8.5"
-    "@webassemblyjs/ieee754" "1.8.5"
-    "@webassemblyjs/leb128" "1.8.5"
-    "@webassemblyjs/utf8" "1.8.5"
+    "@webassemblyjs/ast" "1.9.0"
+    "@webassemblyjs/helper-wasm-bytecode" "1.9.0"
+    "@webassemblyjs/ieee754" "1.9.0"
+    "@webassemblyjs/leb128" "1.9.0"
+    "@webassemblyjs/utf8" "1.9.0"
 
-"@webassemblyjs/wasm-opt@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/wasm-opt/-/wasm-opt-1.8.5.tgz#b24d9f6ba50394af1349f510afa8ffcb8a63d264"
-  integrity sha512-HKo2mO/Uh9A6ojzu7cjslGaHaUU14LdLbGEKqTR7PBKwT6LdPtLLh9fPY33rmr5wcOMrsWDbbdCHq4hQUdd37Q==
+"@webassemblyjs/wasm-opt@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/wasm-opt/-/wasm-opt-1.9.0.tgz#2211181e5b31326443cc8112eb9f0b9028721a61"
+  integrity sha512-Qkjgm6Anhm+OMbIL0iokO7meajkzQD71ioelnfPEj6r4eOFuqm4YC3VBPqXjFyyNwowzbMD+hizmprP/Fwkl2A==
   dependencies:
-    "@webassemblyjs/ast" "1.8.5"
-    "@webassemblyjs/helper-buffer" "1.8.5"
-    "@webassemblyjs/wasm-gen" "1.8.5"
-    "@webassemblyjs/wasm-parser" "1.8.5"
+    "@webassemblyjs/ast" "1.9.0"
+    "@webassemblyjs/helper-buffer" "1.9.0"
+    "@webassemblyjs/wasm-gen" "1.9.0"
+    "@webassemblyjs/wasm-parser" "1.9.0"
 
-"@webassemblyjs/wasm-parser@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/wasm-parser/-/wasm-parser-1.8.5.tgz#21576f0ec88b91427357b8536383668ef7c66b8d"
-  integrity sha512-pi0SYE9T6tfcMkthwcgCpL0cM9nRYr6/6fjgDtL6q/ZqKHdMWvxitRi5JcZ7RI4SNJJYnYNaWy5UUrHQy998lw==
+"@webassemblyjs/wasm-parser@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/wasm-parser/-/wasm-parser-1.9.0.tgz#9d48e44826df4a6598294aa6c87469d642fff65e"
+  integrity sha512-9+wkMowR2AmdSWQzsPEjFU7njh8HTO5MqO8vjwEHuM+AMHioNqSBONRdr0NQQ3dVQrzp0s8lTcYqzUdb7YgELA==
   dependencies:
-    "@webassemblyjs/ast" "1.8.5"
-    "@webassemblyjs/helper-api-error" "1.8.5"
-    "@webassemblyjs/helper-wasm-bytecode" "1.8.5"
-    "@webassemblyjs/ieee754" "1.8.5"
-    "@webassemblyjs/leb128" "1.8.5"
-    "@webassemblyjs/utf8" "1.8.5"
+    "@webassemblyjs/ast" "1.9.0"
+    "@webassemblyjs/helper-api-error" "1.9.0"
+    "@webassemblyjs/helper-wasm-bytecode" "1.9.0"
+    "@webassemblyjs/ieee754" "1.9.0"
+    "@webassemblyjs/leb128" "1.9.0"
+    "@webassemblyjs/utf8" "1.9.0"
 
-"@webassemblyjs/wast-parser@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/wast-parser/-/wast-parser-1.8.5.tgz#e10eecd542d0e7bd394f6827c49f3df6d4eefb8c"
-  integrity sha512-daXC1FyKWHF1i11obK086QRlsMsY4+tIOKgBqI1lxAnkp9xe9YMcgOxm9kLe+ttjs5aWV2KKE1TWJCN57/Btsg==
+"@webassemblyjs/wast-parser@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/wast-parser/-/wast-parser-1.9.0.tgz#3031115d79ac5bd261556cecc3fa90a3ef451914"
+  integrity sha512-qsqSAP3QQ3LyZjNC/0jBJ/ToSxfYJ8kYyuiGvtn/8MK89VrNEfwj7BPQzJVHi0jGTRK2dGdJ5PRqhtjzoww+bw==
   dependencies:
-    "@webassemblyjs/ast" "1.8.5"
-    "@webassemblyjs/floating-point-hex-parser" "1.8.5"
-    "@webassemblyjs/helper-api-error" "1.8.5"
-    "@webassemblyjs/helper-code-frame" "1.8.5"
-    "@webassemblyjs/helper-fsm" "1.8.5"
+    "@webassemblyjs/ast" "1.9.0"
+    "@webassemblyjs/floating-point-hex-parser" "1.9.0"
+    "@webassemblyjs/helper-api-error" "1.9.0"
+    "@webassemblyjs/helper-code-frame" "1.9.0"
+    "@webassemblyjs/helper-fsm" "1.9.0"
     "@xtuc/long" "4.2.2"
 
-"@webassemblyjs/wast-printer@1.8.5":
-  version "1.8.5"
-  resolved "https://registry.yarnpkg.com/@webassemblyjs/wast-printer/-/wast-printer-1.8.5.tgz#114bbc481fd10ca0e23b3560fa812748b0bae5bc"
-  integrity sha512-w0U0pD4EhlnvRyeJzBqaVSJAo9w/ce7/WPogeXLzGkO6hzhr4GnQIZ4W4uUt5b9ooAaXPtnXlj0gzsXEOUNYMg==
+"@webassemblyjs/wast-printer@1.9.0":
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/@webassemblyjs/wast-printer/-/wast-printer-1.9.0.tgz#4935d54c85fef637b00ce9f52377451d00d47899"
+  integrity sha512-2J0nE95rHXHyQ24cWjMKJ1tqB/ds8z/cyeOZxJhcb+rW+SQASVjuznUSmdz5GpVJTzU8JkhYut0D3siFDD6wsA==
   dependencies:
-    "@webassemblyjs/ast" "1.8.5"
-    "@webassemblyjs/wast-parser" "1.8.5"
+    "@webassemblyjs/ast" "1.9.0"
+    "@webassemblyjs/wast-parser" "1.9.0"
     "@xtuc/long" "4.2.2"
 
 "@xtuc/ieee754@^1.2.0":
@@ -1765,15 +1769,20 @@ accepts@~1.3.7:
     mime-types "~2.1.24"
     negotiator "0.6.2"
 
-acorn-walk@^6.1.1:
-  version "6.2.0"
-  resolved "https://registry.yarnpkg.com/acorn-walk/-/acorn-walk-6.2.0.tgz#123cb8f3b84c2171f1f7fb252615b1c78a6b1a8c"
-  integrity sha512-7evsyfH1cLOCdAzZAd43Cic04yKydNx0cF+7tiA19p1XnLLPU4dpCQOqpjqwokFe//vS0QqfqqjCS2JkiIs0cA==
+acorn-walk@^7.1.1:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/acorn-walk/-/acorn-walk-7.1.1.tgz#345f0dffad5c735e7373d2fec9a1023e6a44b83e"
+  integrity sha512-wdlPY2tm/9XBr7QkKlq0WQVgiuGTX6YWPyRyBviSoScBuLfTVQhvwg6wJ369GJ/1nPfTLMfnrFIfjqVg6d+jQQ==
 
-acorn@^6.0.7, acorn@^6.2.1:
-  version "6.4.0"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.4.0.tgz#b659d2ffbafa24baf5db1cdbb2c94a983ecd2784"
-  integrity sha512-gac8OEcQ2Li1dxIEWGZzsp2BitJxwkwcOm0zHAJLcPJaVvm58FRnk6RkuLRpU1EujipU2ZFODv2P9DLMfnV8mw==
+acorn@^6.2.1:
+  version "6.4.1"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-6.4.1.tgz#531e58ba3f51b9dacb9a6646ca4debf5b14ca474"
+  integrity sha512-ZVA9k326Nwrj3Cj9jlh3wGFutC2ZornPNARZwsNYqQYgN0EsV2d53w5RN/co65Ohn4sUAUtb1rSUAOD6XN9idA==
+
+acorn@^7.1.1:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-7.1.1.tgz#e35668de0b402f359de515c5482a1ab9f89a69bf"
+  integrity sha512-add7dgA5ppRPxCFJoAGfMDi7PIBXq1RtGo7BhbLaxwrXPOmw8gq48Y9ozT01hUKy9byMjlR20EJhu5zlkErEkg==
 
 aggregate-error@^3.0.0:
   version "3.0.1"
@@ -1793,7 +1802,7 @@ ajv-keywords@^3.1.0, ajv-keywords@^3.4.1:
   resolved "https://registry.yarnpkg.com/ajv-keywords/-/ajv-keywords-3.4.1.tgz#ef916e271c64ac12171fd8384eaae6b2345854da"
   integrity sha512-RO1ibKvd27e6FEShVFfPALuHI3WjSVNeK5FIsmme/LYRNxjKuNj+Dt7bucLa6NdSv3JcVTyMlm9kGR84z1XpaQ==
 
-ajv@^6.1.0, ajv@^6.10.2:
+ajv@^6.1.0, ajv@^6.10.2, ajv@^6.12.0:
   version "6.12.0"
   resolved "https://registry.yarnpkg.com/ajv/-/ajv-6.12.0.tgz#06d60b96d87b8454a5adaba86e7854da629db4b7"
   integrity sha512-D6gFiFA0RRLyUbvijN74DWAjXSFxWKaWP7mldxkVhyhAV3+SWA9HEJPHQ2c9soIeTFJqcSdFDGFgdqs1iUU2Hw==
@@ -2164,9 +2173,9 @@ bytes@3.1.0:
   integrity sha512-zauLjrfCG+xvoyaqLoV8bLVXXNGC4JqlxFCutSDWA6fJrTo2ZuvLYTqZ7aHBLZSMOopbzwv8f+wZcVzfVTI2Dg==
 
 cacache@^12.0.2:
-  version "12.0.3"
-  resolved "https://registry.yarnpkg.com/cacache/-/cacache-12.0.3.tgz#be99abba4e1bf5df461cd5a2c1071fc432573390"
-  integrity sha512-kqdmfXEGFepesTuROHMs3MpFLWrPkSSpRqOw80RCflZXy/khxaArvFrQ7uJxSUduzAufc6G0g1VUCOZXxWavPw==
+  version "12.0.4"
+  resolved "https://registry.yarnpkg.com/cacache/-/cacache-12.0.4.tgz#668bcbd105aeb5f1d92fe25570ec9525c8faa40c"
+  integrity sha512-a0tMB40oefvuInr4Cwb3GerbL9xTj1D5yg0T5xrjGCGyfvbxseIXX7BAO/u/hIXdafzOI5JC3wDwHyf24buOAQ==
   dependencies:
     bluebird "^3.5.5"
     chownr "^1.1.1"
@@ -2281,7 +2290,7 @@ child_process@~1.0.2:
   resolved "https://registry.yarnpkg.com/child_process/-/child_process-1.0.2.tgz#b1f7e7fc73d25e7fd1d455adc94e143830182b5a"
   integrity sha1-sffn/HPSXn/R1FWtyU4UODAYK1o=
 
-chokidar@^2.0.2:
+chokidar@^2.1.8:
   version "2.1.8"
   resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-2.1.8.tgz#804b3a7b6a99358c3c5c61e71d8728f041cff917"
   integrity sha512-ZmZUazfOzf0Nve7duiCKD23PFSCs4JPoYyccjUFF3aQkQadqBhfzhjkwBH2mNOG9cTBwhamM37EIsIkZw3nRgg==
@@ -2660,9 +2669,9 @@ cssesc@^3.0.0:
   integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
 
 csstype@^2.2.0, csstype@^2.4.0, csstype@~2.6.9:
-  version "2.6.9"
-  resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.6.9.tgz#05141d0cd557a56b8891394c1911c40c8a98d098"
-  integrity sha512-xz39Sb4+OaTsULgUERcCk+TJj8ylkL4aSVDQiX/ksxbELSqwkgt4d4RD7fovIdgJGSuNYqwZEiVjYY5l0ask+Q==
+  version "2.6.10"
+  resolved "https://registry.yarnpkg.com/csstype/-/csstype-2.6.10.tgz#e63af50e66d7c266edb6b32909cfd0aabe03928b"
+  integrity sha512-D34BqZU4cIlMCY93rZHbrq9pjTAQJ3U8S8rfBqjwHxkGPThWFjzZDQpgMJY0QViLxth6ZKYiwFBo14RdN44U/w==
 
 cyclist@^1.0.1:
   version "1.0.1"
@@ -2714,7 +2723,7 @@ d3-force@^2.0.1:
     d3-quadtree "1"
     d3-timer "1"
 
-d3-format@1, d3-format@^1.4.2:
+d3-format@1, d3-format@^1.4.2, d3-format@^1.4.3:
   version "1.4.3"
   resolved "https://registry.yarnpkg.com/d3-format/-/d3-format-1.4.3.tgz#4e8eb4dff3fdcb891a8489ec6e698601c41b96f1"
   integrity sha512-mm/nE2Y9HgGyjP+rKIekeITVgBtX97o1nrvHCWX8F/yBYyevUTvu9vb5pUnKwrcSw7o7GuwMOWjS9gFDs4O+uQ==
@@ -3090,10 +3099,10 @@ errno@^0.1.3, errno@~0.1.7:
   dependencies:
     prr "~1.0.1"
 
-es-abstract@^1.17.0-next.1:
-  version "1.17.4"
-  resolved "https://registry.yarnpkg.com/es-abstract/-/es-abstract-1.17.4.tgz#e3aedf19706b20e7c2594c35fc0d57605a79e184"
-  integrity sha512-Ae3um/gb8F0mui/jPL+QiqmglkUsaQf7FwBEHYIFkztkneosu9imhqHpBzQ3h1vit8t5iQ74t6PEVvphBZiuiQ==
+es-abstract@^1.17.0-next.1, es-abstract@^1.17.5:
+  version "1.17.5"
+  resolved "https://registry.yarnpkg.com/es-abstract/-/es-abstract-1.17.5.tgz#d8c9d1d66c8981fb9200e2251d799eee92774ae9"
+  integrity sha512-BR9auzDbySxOcfog0tLECW8l28eRGpDpU3Dm3Hp4q/N+VtLTmyj4EUN088XZWQDW/hzj6sYRDXeOFsaAODKvpg==
   dependencies:
     es-to-primitive "^1.2.1"
     function-bind "^1.1.1"
@@ -3323,9 +3332,9 @@ fbjs@^0.8.9:
     ua-parser-js "^0.7.18"
 
 figgy-pudding@^3.5.1:
-  version "3.5.1"
-  resolved "https://registry.yarnpkg.com/figgy-pudding/-/figgy-pudding-3.5.1.tgz#862470112901c727a0e495a80744bd5baa1d6790"
-  integrity sha512-vNKxJHTEKNThjfrdJwHc7brvM6eVevuO5nTj6ez8ZQ1qbXTvGthucRF7S4vf2cr71QVnT70V34v0S1DyQsti0w==
+  version "3.5.2"
+  resolved "https://registry.yarnpkg.com/figgy-pudding/-/figgy-pudding-3.5.2.tgz#b4eee8148abb01dcf1d1ac34367d59e12fa61d6e"
+  integrity sha512-0btnI/H8f2pavGMN8w40mlSKOfTK2SVJmBfBeVIj3kNw0swwgzyRq0d5TJVOwodFmtvpPeWPN/MCcfuWF0Ezbw==
 
 figures@^3.0.0:
   version "3.2.0"
@@ -3393,9 +3402,9 @@ find-cache-dir@^2.1.0:
     pkg-dir "^3.0.0"
 
 find-cache-dir@^3.2.0:
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/find-cache-dir/-/find-cache-dir-3.3.0.tgz#4d74ed1fe9ef1731467ca24378e8f8f5c8b6ed11"
-  integrity sha512-PtXtQb7IrD8O+h6Cq1dbpJH5NzD8+9keN1zZ0YlpDzl1PwXEJEBj6u1Xa92t1Hwluoozd9TNKul5Hi2iqpsWwg==
+  version "3.3.1"
+  resolved "https://registry.yarnpkg.com/find-cache-dir/-/find-cache-dir-3.3.1.tgz#89b33fad4a4670daa94f855f7fbe31d6d84fe880"
+  integrity sha512-t2GDMt3oGC/v+BMwzmllWDuJF/xcDtE5j/fCGbqDD7OLuJkj0cfh1YSA5VKPvwMeLFLNDBkwOKZ2X85jGLVftQ==
   dependencies:
     commondir "^1.0.1"
     make-dir "^3.0.2"
@@ -3506,9 +3515,9 @@ fs.realpath@^1.0.0:
   integrity sha1-FQStJSMVjKpA20onh8sBQRmU6k8=
 
 fsevents@^1.2.7:
-  version "1.2.11"
-  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-1.2.11.tgz#67bf57f4758f02ede88fb2a1712fef4d15358be3"
-  integrity sha512-+ux3lx6peh0BpvY0JebGyZoiR4D+oYzdPZMKJwkZ+sFkNJzpL7tXc/wehS49gUAxg3tmMHPHZkA8JU2rhhgDHw==
+  version "1.2.12"
+  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-1.2.12.tgz#db7e0d8ec3b0b45724fd4d83d43554a8f1f0de5c"
+  integrity sha512-Ggd/Ktt7E7I8pxZRbGIs7vwqAPscSESMrCSkx2FtWeqmheJgCo2R74fTsZFCifr0VTPwqRpPv17+6b8Zp7th0Q==
   dependencies:
     bindings "^1.5.0"
     nan "^2.12.1"
@@ -3890,9 +3899,9 @@ ini@^1.3.4, ini@^1.3.5, ini@~1.3.0:
   integrity sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
 
 inquirer@^7.0.0:
-  version "7.0.6"
-  resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-7.0.6.tgz#ee4ff0ea7ecda5324656fe665878790f66df7d0c"
-  integrity sha512-7SVO4h+QIdMq6XcqIqrNte3gS5MzCCKZdsq9DO4PJziBFNYzP3PGFbDjgadDb//MCahzgjCxvQ/O2wa7kx9o4w==
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/inquirer/-/inquirer-7.1.0.tgz#1298a01859883e17c7264b82870ae1034f92dd29"
+  integrity sha512-5fJMWEmikSYu0nv/flMc475MhGbB7TSPd/2IpFV4I4rMklboCH2rQjYY5kKiYGHqUF9gvaambupcJFFG9dvReg==
   dependencies:
     ansi-escapes "^4.2.1"
     chalk "^3.0.0"
@@ -4121,9 +4130,9 @@ isomorphic-fetch@^2.1.1:
     whatwg-fetch ">=0.10.0"
 
 jest-worker@^25.1.0:
-  version "25.1.0"
-  resolved "https://registry.yarnpkg.com/jest-worker/-/jest-worker-25.1.0.tgz#75d038bad6fdf58eba0d2ec1835856c497e3907a"
-  integrity sha512-ZHhHtlxOWSxCoNOKHGbiLzXnl42ga9CxDr27H36Qn+15pQZd3R/F24jrmjDelw9j/iHUIWMWs08/u2QN50HHOg==
+  version "25.2.1"
+  resolved "https://registry.yarnpkg.com/jest-worker/-/jest-worker-25.2.1.tgz#209617015c768652646aa33a7828cc2ab472a18a"
+  integrity sha512-IHnpekk8H/hCUbBlfeaPZzU6v75bqwJp3n4dUrQuQOAgOneI4tx3jV2o8pvlXnDfcRsfkFIUD//HWXpCmR+evQ==
   dependencies:
     merge-stream "^2.0.0"
     supports-color "^7.0.0"
@@ -4166,11 +4175,11 @@ json5@^1.0.1:
     minimist "^1.2.0"
 
 json5@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/json5/-/json5-2.1.1.tgz#81b6cb04e9ba496f1c7005d07b4368a2638f90b6"
-  integrity sha512-l+3HXD0GEI3huGq1njuqtzYK8OYJyXMkOLtQ53pjWh89tvWS2h6l+1zMkYWqlb57+SiQodKZyvMEFb2X+KrFhQ==
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/json5/-/json5-2.1.2.tgz#43ef1f0af9835dd624751a6b7fa48874fb2d608e"
+  integrity sha512-MoUOQ4WdiN3yxhm7NEVJSJrieAo5hNSLQ5sj05OTRHPL9HOBy8u4Bu88jsC1jvqAdN+E1bJmsUcZH+1HQxliqQ==
   dependencies:
-    minimist "^1.2.0"
+    minimist "^1.2.5"
 
 jsonfile@^4.0.0:
   version "4.0.0"
@@ -4345,11 +4354,6 @@ make-dir@^3.0.2:
   dependencies:
     semver "^6.0.0"
 
-mamacro@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/mamacro/-/mamacro-0.0.3.tgz#ad2c9576197c9f1abf308d0787865bd975a3f3e4"
-  integrity sha512-qMEwh+UujcQ+kbz3T6V+wAmO2U8veoq2w+3wY8MquqwVA3jChfwY+Tk52GZKDfACEPjuZ7r2oJLejwpt8jtwTA==
-
 map-age-cleaner@^0.1.1:
   version "0.1.3"
   resolved "https://registry.yarnpkg.com/map-age-cleaner/-/map-age-cleaner-0.1.3.tgz#7d583a7306434c055fe474b0f45078e6e1b4b92a"
@@ -4370,9 +4374,9 @@ map-visit@^1.0.0:
     object-visit "^1.0.0"
 
 marked@^0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-0.8.0.tgz#ec5c0c9b93878dc52dd54be8d0e524097bd81a99"
-  integrity sha512-MyUe+T/Pw4TZufHkzAfDj6HarCBWia2y27/bhuYkTaiUnfDYFnCP3KUN+9oM7Wi6JA2rymtVYbQu3spE0GCmxQ==
+  version "0.8.2"
+  resolved "https://registry.yarnpkg.com/marked/-/marked-0.8.2.tgz#4faad28d26ede351a7a1aaa5fec67915c869e355"
+  integrity sha512-EGwzEeCcLniFX51DhTpmTom+dSA/MG/OBUDjnWtHbEnjAH180VzUeAw+oE4+Zv+CoYBWyRlYOTR0N8SO9R1PVw==
 
 md5.js@^1.3.4:
   version "1.3.5"
@@ -4506,15 +4510,15 @@ minimatch@^3.0.4:
   dependencies:
     brace-expansion "^1.1.7"
 
-minimist@0.0.8, minimist@~0.0.1:
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.8.tgz#857fcabfc3397d2625b8228262e86aa7a011b05d"
-  integrity sha1-hX/Kv8M5fSYluCKCYuhqp6ARsF0=
+minimist@^1.2.0, minimist@^1.2.5, minimist@~1.2.0:
+  version "1.2.5"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.5.tgz#67d66014b66a6a8aaa0c083c5fd58df4e4e97602"
+  integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
 
-minimist@^1.2.0, minimist@~1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
-  integrity sha1-o1AIsg9BOD7sH7kU9M1d95omQoQ=
+minimist@~0.0.1:
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-0.0.10.tgz#de3f98543dbf96082be48ad1a0c7cda836301dcf"
+  integrity sha1-3j+YVD2/lggr5IrRoMfNqDYwHc8=
 
 minipass-collect@^1.0.2:
   version "1.0.2"
@@ -4568,12 +4572,12 @@ mixin-deep@^1.2.0:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
 
-mkdirp@^0.5.1:
-  version "0.5.1"
-  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
-  integrity sha1-MAV0OOrGz3+MR2fzhkjWaX11yQM=
+mkdirp@^0.5.1, mkdirp@^0.5.3:
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.4.tgz#fd01504a6797ec5c9be81ff43d204961ed64a512"
+  integrity sha512-iG9AK/dJLtJ0XNgTuDbSyNS3zECqDlAhnQW4CsNxBG3LQJBbHmRX1egw39DmtOdCAqY+dKXV+sgPgilNWUKMVw==
   dependencies:
-    minimist "0.0.8"
+    minimist "^1.2.5"
 
 moment@^2.24.0:
   version "2.24.0"
@@ -5080,9 +5084,9 @@ postcss-modules-local-by-default@^3.0.2:
     postcss-value-parser "^4.0.0"
 
 postcss-modules-scope@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/postcss-modules-scope/-/postcss-modules-scope-2.1.1.tgz#33d4fc946602eb5e9355c4165d68a10727689dba"
-  integrity sha512-OXRUPecnHCg8b9xWvldG/jUpRIGPNRka0r4D4j0ESUU2/5IOnpsjfPPmDprM3Ih8CgZ8FXjWqaniK5v4rWt3oQ==
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/postcss-modules-scope/-/postcss-modules-scope-2.2.0.tgz#385cae013cc7743f5a7d7602d1073a89eaae62ee"
+  integrity sha512-YyEgsTMRpNd+HmyC7H/mh3y+MeFWevy7V1evVhJWewmMbjDHIbZbOXICC2y+m1xI1UVfIT1HMW/O04Hxyu9oXQ==
   dependencies:
     postcss "^7.0.6"
     postcss-selector-parser "^6.0.0"
@@ -5349,9 +5353,9 @@ react-highlighter@^0.4.3:
     prop-types "^15.6.0"
 
 react-is@^16.8.1:
-  version "16.13.0"
-  resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.0.tgz#0f37c3613c34fe6b37cd7f763a0d6293ab15c527"
-  integrity sha512-GFMtL0vHkiBv9HluwNZTggSn/sCyEt9n02aM0dSAjGGyqyNlAyftYm4phPxdvCigG15JreC5biwxCgTAJZ7yAA==
+  version "16.13.1"
+  resolved "https://registry.yarnpkg.com/react-is/-/react-is-16.13.1.tgz#789729a4dc36de2999dc156dd6c1d9c18cea56a4"
+  integrity sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==
 
 react-json-tree@^0.11.2:
   version "0.11.2"
@@ -5453,9 +5457,9 @@ regenerator-runtime@^0.11.0:
   integrity sha512-MguG95oij0fC3QV3URf4V2SDYGJhJnJGqvIIgdECeODCT98wSWDAJ94SSuVpYQUoTcGUIL6L4yNB7j1DFFHSBg==
 
 regenerator-runtime@^0.13.4:
-  version "0.13.4"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.4.tgz#e96bf612a3362d12bb69f7e8f74ffeab25c7ac91"
-  integrity sha512-plpwicqEzfEyTQohIKktWigcLzmNStMGwbOUbykx51/29Z3JOGYldaaNGK7ngNXV+UcoqvIMmloZ48Sr74sd+g==
+  version "0.13.5"
+  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.13.5.tgz#d878a1d094b4306d10b9096484b33ebd55e26697"
+  integrity sha512-ZS5w8CpKFinUzOwW3c83oPeVXoNsrLsaCoLtJvAClH135j/R77RuymhiSErhm2lKcwSCIpmvIWSbDkIfAqKQlA==
 
 regex-not@^1.0.0, regex-not@^1.0.2:
   version "1.0.2"
@@ -5689,11 +5693,11 @@ schema-utils@^1.0.0:
     ajv-keywords "^3.1.0"
 
 schema-utils@^2.0.1, schema-utils@^2.5.0, schema-utils@^2.6.0, schema-utils@^2.6.4:
-  version "2.6.4"
-  resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-2.6.4.tgz#a27efbf6e4e78689d91872ee3ccfa57d7bdd0f53"
-  integrity sha512-VNjcaUxVnEeun6B2fiiUDjXXBtD4ZSH7pdbfIu1pOFwgptDPLMo/z9jr4sUfsjFVPqDCEin/F7IYlq7/E6yDbQ==
+  version "2.6.5"
+  resolved "https://registry.yarnpkg.com/schema-utils/-/schema-utils-2.6.5.tgz#c758f0a7e624263073d396e29cd40aa101152d8a"
+  integrity sha512-5KXuwKziQrTVHh8j/Uxz+QUbxkaLW9X/86NBlx/gnKgtsZA2GIVMUn17qWhRFwF8jdYb3Dig5hRO/W5mZqy6SQ==
   dependencies:
-    ajv "^6.10.2"
+    ajv "^6.12.0"
     ajv-keywords "^3.4.1"
 
 semver@7.1.3, semver@^7.1.3:
@@ -5791,9 +5795,9 @@ shebang-regex@^1.0.0:
   integrity sha1-2kL0l0DAtC2yypcoVxyxkMmO/qM=
 
 signal-exit@^3.0.0, signal-exit@^3.0.2:
-  version "3.0.2"
-  resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.2.tgz#b5fdc08f1287ea1178628e415e25132b73646c6d"
-  integrity sha1-tf3AjxKH6hF4Yo5BXiUTK3NkbG0=
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-3.0.3.tgz#a1410c2edd8f077b08b4e253c8eacfcaf057461c"
+  integrity sha512-VUJ49FC8U1OxwZLxIbTTrDvLnf/6TDgxZcK8wxR8zs13xpx7xbG60ndBlhNrFi2EMuFRoeDoJO7wthSLq42EjA==
 
 snapdragon-node@^2.0.1:
   version "2.1.1"
@@ -5992,21 +5996,39 @@ string-width@^4.1.0, string-width@^4.2.0:
     is-fullwidth-code-point "^3.0.0"
     strip-ansi "^6.0.0"
 
-string.prototype.trimleft@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/string.prototype.trimleft/-/string.prototype.trimleft-2.1.1.tgz#9bdb8ac6abd6d602b17a4ed321870d2f8dcefc74"
-  integrity sha512-iu2AGd3PuP5Rp7x2kEZCrB2Nf41ehzh+goo8TV7z8/XDBbsvc6HQIlUl9RjkZ4oyrW1XM5UwlGl1oVEaDjg6Ag==
+string.prototype.trimend@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/string.prototype.trimend/-/string.prototype.trimend-1.0.0.tgz#ee497fd29768646d84be2c9b819e292439614373"
+  integrity sha512-EEJnGqa/xNfIg05SxiPSqRS7S9qwDhYts1TSLR1BQfYUfPe1stofgGKvwERK9+9yf+PpfBMlpBaCHucXGPQfUA==
   dependencies:
     define-properties "^1.1.3"
-    function-bind "^1.1.1"
+    es-abstract "^1.17.5"
+
+string.prototype.trimleft@^2.1.1:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/string.prototype.trimleft/-/string.prototype.trimleft-2.1.2.tgz#4408aa2e5d6ddd0c9a80739b087fbc067c03b3cc"
+  integrity sha512-gCA0tza1JBvqr3bfAIFJGqfdRTyPae82+KTnm3coDXkZN9wnuW3HjGgN386D7hfv5CHQYCI022/rJPVlqXyHSw==
+  dependencies:
+    define-properties "^1.1.3"
+    es-abstract "^1.17.5"
+    string.prototype.trimstart "^1.0.0"
 
 string.prototype.trimright@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/string.prototype.trimright/-/string.prototype.trimright-2.1.1.tgz#440314b15996c866ce8a0341894d45186200c5d9"
-  integrity sha512-qFvWL3/+QIgZXVmJBfpHmxLB7xsUXz6HsUmP8+5dRaC3Q7oKUv9Vo6aMCRZC1smrtyECFsIT30PqBJ1gTjAs+g==
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/string.prototype.trimright/-/string.prototype.trimright-2.1.2.tgz#c76f1cef30f21bbad8afeb8db1511496cfb0f2a3"
+  integrity sha512-ZNRQ7sY3KroTaYjRS6EbNiiHrOkjihL9aQE/8gfQ4DtAC/aEBRHFJa44OmoWxGGqXuJlfKkZW4WcXErGr+9ZFg==
   dependencies:
     define-properties "^1.1.3"
-    function-bind "^1.1.1"
+    es-abstract "^1.17.5"
+    string.prototype.trimend "^1.0.0"
+
+string.prototype.trimstart@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/string.prototype.trimstart/-/string.prototype.trimstart-1.0.0.tgz#afe596a7ce9de905496919406c9734845f01a2f2"
+  integrity sha512-iCP8g01NFYiiBOnwG1Xc3WZLyoo+RuBymwIlWncShXDDJYWN6DbnM3odslBJdgCdRlq94B5s63NWAZlcn2CS4w==
+  dependencies:
+    define-properties "^1.1.3"
+    es-abstract "^1.17.5"
 
 string_decoder@^1.0.0, string_decoder@^1.1.1, string_decoder@~1.1.1:
   version "1.1.1"
@@ -6119,9 +6141,9 @@ terser-webpack-plugin@^2.3.0:
     webpack-sources "^1.4.3"
 
 terser@^4.1.2, terser@^4.4.3:
-  version "4.6.6"
-  resolved "https://registry.yarnpkg.com/terser/-/terser-4.6.6.tgz#da2382e6cafbdf86205e82fb9a115bd664d54863"
-  integrity sha512-4lYPyeNmstjIIESr/ysHg2vUPRGf2tzF9z2yYwnowXVuVzLEamPN1Gfrz7f8I9uEPuHcbFlW4PLIAsJoxXyJ1g==
+  version "4.6.9"
+  resolved "https://registry.yarnpkg.com/terser/-/terser-4.6.9.tgz#deec3d8c4536461f46392e4d457bcd1ba2ab1212"
+  integrity sha512-9UuZOApK4oiTpX4AjnWhTCY3fCqntS3ggPQOku9M3Rvr70VETYsuHjSGuRy0D7X/Z994hfnzMy6TQ/H0WQSmXQ==
   dependencies:
     commander "^2.20.0"
     source-map "~0.6.1"
@@ -6194,7 +6216,7 @@ toidentifier@1.0.0:
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
   integrity sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
 
-topojson-client@^3.0.1:
+topojson-client@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/topojson-client/-/topojson-client-3.1.0.tgz#22e8b1ed08a2b922feeb4af6f53b6ef09a467b99"
   integrity sha512-605uxS6bcYxGXw9qi62XyrV6Q3xwbndjachmNxu8HWTtVPxZfEJN9fd/SZS1Q54Sn2y0TMyMxFj/cJINqGHrKw==
@@ -6451,29 +6473,29 @@ vega-dataflow@^5.1.0, vega-dataflow@^5.1.1, vega-dataflow@^5.4.0, vega-dataflow@
     vega-util "^1.11.0"
 
 vega-embed@^6.2.1:
-  version "6.3.2"
-  resolved "https://registry.yarnpkg.com/vega-embed/-/vega-embed-6.3.2.tgz#e288300b9676b518534812cea280ccc4d6c62a61"
-  integrity sha512-DAae98zhC3fVoS2n7iJHEmS4/HdqudUJPH4r57FddXoXChnJxPv/3jfraSxf0Pjnm4XfpTCy7kND/+5vzRdovg==
+  version "6.5.2"
+  resolved "https://registry.yarnpkg.com/vega-embed/-/vega-embed-6.5.2.tgz#eea405fe7518390db01fc2ad35ab23238e5c148f"
+  integrity sha512-2OI9f57SR6JqTDR4oBRjQZyoGoc0hBh37+nDW/iBcAvj/XPky9ueIZHwZPU1WkAqtUPLIBrINxoCQpuvl4nYWA==
   dependencies:
     fast-json-patch "^3.0.0-1"
     json-stringify-pretty-compact "^2.0.0"
     semver "^7.1.3"
     vega-schema-url-parser "^1.1.0"
-    vega-themes "^2.7.1"
-    vega-tooltip "^0.20.1"
+    vega-themes "^2.8.2"
+    vega-tooltip "^0.22.0"
 
-vega-encode@~4.5.2:
-  version "4.5.2"
-  resolved "https://registry.yarnpkg.com/vega-encode/-/vega-encode-4.5.2.tgz#236dca241be0340a31354755913dc3919867726d"
-  integrity sha512-iL1njX++VE0SAMJuDqc0k9kmsU8AeyRRHv15MXh2+PXe2JmyiSWn6HcF3RzFUy5xmKlZOU5BiL8KrTgTrxh+WA==
+vega-encode@~4.5.3:
+  version "4.5.3"
+  resolved "https://registry.yarnpkg.com/vega-encode/-/vega-encode-4.5.3.tgz#a243cbe2af461313a8a2eef88400548b89cdf52c"
+  integrity sha512-N7EVoDVQOrloutGnnXZj0Pa9JReH2s7Tio/2KUiMb5eGeJQ7jRD2zyqZSG0ZxKODSlxoP3YLmbLVKHIqNJQ5Kg==
   dependencies:
     d3-array "^2.4.0"
-    d3-format "^1.4.2"
+    d3-format "^1.4.3"
     d3-interpolate "^1.4.0"
     vega-dataflow "^5.5.0"
     vega-scale "^6.0.0"
     vega-time "^1.0.0"
-    vega-util "^1.12.2"
+    vega-util "^1.13.1"
 
 vega-event-selector@^2.0.2, vega-event-selector@~2.0.2:
   version "2.0.2"
@@ -6496,7 +6518,7 @@ vega-force@~4.0.3:
     vega-dataflow "^5.4.0"
     vega-util "^1.11.0"
 
-vega-functions@^5.5.0, vega-functions@^5.5.1, vega-functions@~5.5.1:
+vega-functions@^5.5.1, vega-functions@~5.5.1:
   version "5.5.1"
   resolved "https://registry.yarnpkg.com/vega-functions/-/vega-functions-5.5.1.tgz#849a7c9f19c77899c26969b6070c724cd7366131"
   integrity sha512-VTfEwf/ChSOGc4d4yUIgu2XoScky6NH06WN4vwVGY5PREhsyVPsQ+p2zqgD/N/a00EyWPHeOSHEhsPU28oIMtQ==
@@ -6539,9 +6561,9 @@ vega-hierarchy@~4.0.3:
     vega-util "^1.11.0"
 
 vega-lite@^4.0.2:
-  version "4.5.1"
-  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-4.5.1.tgz#e5d3a5080890870025e788659f6935c9dea398b8"
-  integrity sha512-onC8RwSN4hEW9IyyMdfh+V0MThQg4Gi/LFtLwrz/ZxLPzreeZL/Qtj0ea7ysz7VzN4RkBmAcUioeV6ggZ5e8nA==
+  version "4.8.1"
+  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-4.8.1.tgz#cbe3c00ecad2d6f649d474dc02f09477a90c3109"
+  integrity sha512-NHt0f4eyxmtRtwulpKMEiw3jByTd2blcGNDPi9JQObOOJAASk4c0PiNc7lU1gW5lLsDaey1oD/YxxdZwpgqN9w==
   dependencies:
     "@types/clone" "~0.1.30"
     "@types/fast-json-stable-stringify" "^2.0.0"
@@ -6554,31 +6576,31 @@ vega-lite@^4.0.2:
     vega-event-selector "~2.0.2"
     vega-expression "~2.6.3"
     vega-scale "^6.0.0"
-    vega-util "~1.13.0"
-    yargs "~15.1.0"
+    vega-util "~1.13.1"
+    yargs "~15.3.1"
 
-vega-loader@^4.0.0, vega-loader@^4.1.4, vega-loader@~4.1.4:
-  version "4.1.4"
-  resolved "https://registry.yarnpkg.com/vega-loader/-/vega-loader-4.1.4.tgz#1f1f346a0f1621596f2845deee44ba9946c9f069"
-  integrity sha512-BeRjOb4cvrzhuAjzc/Drz1gyTB2LB4ZnK3BU/J6LZ+PzBDlAiOV32+tyvyP+TVKbligwysz7pwhtbury2A7ICg==
+vega-loader@^4.0.0, vega-loader@^4.2.0, vega-loader@~4.2.1:
+  version "4.2.1"
+  resolved "https://registry.yarnpkg.com/vega-loader/-/vega-loader-4.2.1.tgz#556554e6e70f254dc68da15a391ba0d3ad6d1373"
+  integrity sha512-JfF/vwOWzj7MD2Je/5r0beqBApTsQ68e2H8uV1T9wZctMM7WV9+z3JWvQ95yUFiMqyjVYRpXUR25y/b7qPE03Q==
   dependencies:
     d3-dsv "^1.2.0"
     d3-time-format "^2.2.3"
     node-fetch "^2.6.0"
-    topojson-client "^3.0.1"
-    vega-util "^1.11.0"
+    topojson-client "^3.1.0"
+    vega-util "^1.13.1"
 
-vega-parser@~5.12.1:
-  version "5.12.1"
-  resolved "https://registry.yarnpkg.com/vega-parser/-/vega-parser-5.12.1.tgz#e643e7f38cb55d6bece20862dba9a1c8fbca8b66"
-  integrity sha512-b1RTmaXKotNmHibF3HMlWoKd4AhdnFtoWQ8BYPTQkiaak242bm/opHgbrudHGUNceNr+03zpklyrh5DItdfs5A==
+vega-parser@~5.13.1:
+  version "5.13.1"
+  resolved "https://registry.yarnpkg.com/vega-parser/-/vega-parser-5.13.1.tgz#37770fe599808988a4c31e36bb632976a0119786"
+  integrity sha512-xTtfpZTgJ/UMclcSor8adpK95G5hh1YSCZom94eUnFabfsoEHAfl5K3RJd5XVjInUISsGFOyAR5LqXNth4k7BA==
   dependencies:
     vega-dataflow "^5.5.0"
     vega-event-selector "^2.0.2"
     vega-expression "^2.6.3"
-    vega-functions "^5.5.0"
+    vega-functions "^5.5.1"
     vega-scale "^6.0.0"
-    vega-util "^1.12.1"
+    vega-util "^1.13.1"
 
 vega-projection@^1.4.0, vega-projection@~1.4.0:
   version "1.4.0"
@@ -6616,16 +6638,16 @@ vega-scale@^6.0.0, vega-scale@~6.0.0:
     d3-scale "^3.2.1"
     vega-util "^1.12.1"
 
-vega-scenegraph@^4.4.0, vega-scenegraph@^4.5.0, vega-scenegraph@~4.5.1:
-  version "4.5.1"
-  resolved "https://registry.yarnpkg.com/vega-scenegraph/-/vega-scenegraph-4.5.1.tgz#1906b2ae6f31cc9ec31d12c0244f349741deb038"
-  integrity sha512-j77R2b0mBKWCgJ3j8rxBaTVC9mQKn6drH7CPwIqupfE0KnRxvSLDnclT5/2un1OeojeiX6Hg8JTgzVamYpRUEg==
+vega-scenegraph@^4.5.0, vega-scenegraph@^4.6.0, vega-scenegraph@~4.6.0:
+  version "4.6.0"
+  resolved "https://registry.yarnpkg.com/vega-scenegraph/-/vega-scenegraph-4.6.0.tgz#431b31c72ce528285c5808593dbb29cf8ed981e8"
+  integrity sha512-OwHr67kUyY5vG7VR1ovatVyynoHemIUxLgG6w5I4ckzCwCUWgvQRMhxT3bJnoIWvgE9AgLTiIL8mfoSLehK1IA==
   dependencies:
     d3-path "^1.0.9"
     d3-shape "^1.3.7"
     vega-canvas "^1.2.1"
-    vega-loader "^4.1.4"
-    vega-util "^1.13.0"
+    vega-loader "^4.2.0"
+    vega-util "^1.13.1"
 
 vega-schema-url-parser@^1.1.0:
   version "1.1.0"
@@ -6647,10 +6669,10 @@ vega-statistics@^1.7.1, vega-statistics@^1.7.3, vega-statistics@~1.7.3:
   dependencies:
     d3-array "^2.4.0"
 
-vega-themes@^2.7.1:
-  version "2.7.1"
-  resolved "https://registry.yarnpkg.com/vega-themes/-/vega-themes-2.7.1.tgz#649b1fc56ed5b03c729173be9648220221ed9590"
-  integrity sha512-EHCmMpHfEdLMxIH6JYE2+i6Ni8s0pDpaPr6YMDd0Oj7bRL5Z40KRNlHZikiCSdv45y1d6iCggjdGjazPX0RHJQ==
+vega-themes@^2.8.2:
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/vega-themes/-/vega-themes-2.8.3.tgz#3f42a9d29b7274bf963d9d4e1c30ac0d5841d4fa"
+  integrity sha512-BzV/gC2ZAhnv20qpQVtyQW6CYXAGQKjArSdxky1UB1RnR5WMRzPsC+g8ak4k0txTwqhkvMAlDXUMaBgDMTOhQg==
 
 vega-time@^1.0.0, vega-time@~1.0.0:
   version "1.0.0"
@@ -6662,57 +6684,57 @@ vega-time@^1.0.0, vega-time@~1.0.0:
     d3-time-format "^2.2.1"
     vega-util "^1.12.0"
 
-vega-tooltip@^0.20.1:
-  version "0.20.1"
-  resolved "https://registry.yarnpkg.com/vega-tooltip/-/vega-tooltip-0.20.1.tgz#817323c7f9e3fa9db53afe583493fbfe290d7892"
-  integrity sha512-kk1p2VRDAZRdoi9C6UdItOO8GCFbtVfUNT1g3XPpHCYuQ4Lrjffa0SNcT/i69luC3n6qd9VyrceFoPBGM4YvTw==
+vega-tooltip@^0.22.0:
+  version "0.22.1"
+  resolved "https://registry.yarnpkg.com/vega-tooltip/-/vega-tooltip-0.22.1.tgz#231d6c8a105b6ac531bf8275cd0950c30373e558"
+  integrity sha512-mPmzxwvi6+2ZgbZ/+mNC7XbSu5I6Ckon8zdgUfH9neb+vV7CKlV/FYypMdVN/9iDMFUqGzybYdqNOiSPPIxFEQ==
   dependencies:
-    vega-util "^1.12.2"
+    vega-util "^1.13.1"
 
-vega-transforms@~4.6.1:
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/vega-transforms/-/vega-transforms-4.6.1.tgz#c01c8f389b405096401915d21b381ccdbce17c89"
-  integrity sha512-wXS8LDnfYFnXHV3k+h7ciGhf2m43q8+jUPNF+4eymXg7M2Bw77IUh6MPnCzMeZsKuP5o9a94K7hHyK6nvdFr0Q==
+vega-transforms@~4.7.1:
+  version "4.7.1"
+  resolved "https://registry.yarnpkg.com/vega-transforms/-/vega-transforms-4.7.1.tgz#6bde7a05d43df4aa12e9cefe8ae559812c52b21c"
+  integrity sha512-F8KMowHTerCl6VZonbrItqKpTTf1/2TZDCCZ+HO0Izw9RiamkXrgwu3DZQ/H/wUwDiI/WrmKNIHh6L6pYs45AQ==
   dependencies:
     d3-array "^2.4.0"
     vega-dataflow "^5.5.0"
-    vega-statistics "^1.7.1"
+    vega-statistics "^1.7.3"
     vega-time "^1.0.0"
-    vega-util "^1.12.1"
+    vega-util "^1.13.1"
 
-vega-typings@~0.13.0:
-  version "0.13.1"
-  resolved "https://registry.yarnpkg.com/vega-typings/-/vega-typings-0.13.1.tgz#70642c1829a27b3fd9757b370bb8bf05009f01e9"
-  integrity sha512-jU1nb1ZU27IfgU/WJFXMnqFdjdHoKx4PrbhL1yZdCi+WOM6HWFqIpYcLr6IR7hxcfPti8Hf7uulHxNe2IdVtuw==
+vega-typings@~0.15.0:
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/vega-typings/-/vega-typings-0.15.0.tgz#def47bff152deaaa7b796aa483a7db8beb928b9c"
+  integrity sha512-6XreJKYQEpqfsvNCMK+ULnY/Uy6F595LdRqM7lQO8g+lZUHbYDzhMI95a9SEz4e7KyRmdETytYKhHEL0hxQp9w==
   dependencies:
-    vega-util "^1.12.1"
+    vega-util "^1.13.1"
 
-vega-util@^1.11.0, vega-util@^1.12.0, vega-util@^1.12.1, vega-util@^1.12.2, vega-util@^1.13.0, vega-util@^1.8.0, vega-util@~1.13.0:
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.13.0.tgz#3f933bff56f93f2c9346be0fb1a68b5f25d62496"
-  integrity sha512-QYVAq7TLFGps18oA13Nwm82lMkQ7oak2dnQAYgEqCRaX5Nx4YFJ7R3R+iymDM0xFmwvervsTtD5arvMIY+HfFA==
+vega-util@^1.11.0, vega-util@^1.12.0, vega-util@^1.12.1, vega-util@^1.12.2, vega-util@^1.13.1, vega-util@^1.8.0, vega-util@~1.13.1:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.13.1.tgz#3eae51043184c6b873c17b148755c21b01274a0e"
+  integrity sha512-TmvZSMKqhGlS7eAXphqJUhq+NZVYbvXX2ahargTRkVckGWjEUpWhMC7T13vYihrU2Lf/OevKbrruSXKOBxke2w==
 
-vega-view-transforms@~4.5.0:
-  version "4.5.0"
-  resolved "https://registry.yarnpkg.com/vega-view-transforms/-/vega-view-transforms-4.5.0.tgz#c358068902ee412469f8f6095e1e6cff5d3690a1"
-  integrity sha512-8n52147HxNSjQ23NeHN//AWt99zZP+Ukiy4kSbkCJGPZ3dW3NYdunEYNvZWyMmOKSrHIMtgdcHUM9FmPTQpE9w==
+vega-view-transforms@~4.5.2:
+  version "4.5.2"
+  resolved "https://registry.yarnpkg.com/vega-view-transforms/-/vega-view-transforms-4.5.2.tgz#46b488aacc28be4c2f134be2e13f80378f399844"
+  integrity sha512-i12eEWSkCTGRyuFCn+96k2FvftZAygEkbYJOqSyoFdyAvdN37+87GdsDhgJJzGF31hjnN8OfzuVgxfueE0uhEQ==
   dependencies:
-    vega-dataflow "^5.4.1"
-    vega-scenegraph "^4.4.0"
-    vega-util "^1.12.0"
+    vega-dataflow "^5.5.0"
+    vega-scenegraph "^4.6.0"
+    vega-util "^1.13.1"
 
-vega-view@~5.4.0:
-  version "5.4.0"
-  resolved "https://registry.yarnpkg.com/vega-view/-/vega-view-5.4.0.tgz#5c5cb2307b1762e9c2d78901df725bdf3d9a8133"
-  integrity sha512-Q8nH93NceWJRB4/KTehOvsrpbCGGDnkjOCcNQpTsGgu6QRmgMTHtRQTHkE+LhLXMO/55zZrVR22thvMEH9r36w==
+vega-view@~5.5.0:
+  version "5.5.0"
+  resolved "https://registry.yarnpkg.com/vega-view/-/vega-view-5.5.0.tgz#57901e5bce075c1389a949bb761d94b32f9118d0"
+  integrity sha512-hD3J00QRkh3zC1jF81UgxnXpTKY07nVKKG1ut7rlCpVdpEec8Ix6EckOHpAzMkHeY6aG5fbhSQbRYv05tzQy/A==
   dependencies:
     d3-array "^2.4.0"
     d3-timer "^1.0.10"
     vega-dataflow "^5.5.0"
     vega-functions "^5.5.1"
     vega-runtime "^5.0.2"
-    vega-scenegraph "^4.5.0"
-    vega-util "^1.12.1"
+    vega-scenegraph "^4.6.0"
+    vega-util "^1.13.1"
 
 vega-voronoi@~4.1.1:
   version "4.1.1"
@@ -6735,33 +6757,33 @@ vega-wordcloud@~4.0.4:
     vega-util "^1.12.1"
 
 vega@^5.9.0:
-  version "5.9.2"
-  resolved "https://registry.yarnpkg.com/vega/-/vega-5.9.2.tgz#f828a5e3a7a66e354e6fe98061c4b58ab650e20c"
-  integrity sha512-Ry8ZcxQW6JUhCkgYufRqiDG1Rw3nDPqu38h1VMx9vM7QYQ5p1U6fEJJL+yAY/JN9zeCtkm/ViuRqpAahyiZ+bQ==
+  version "5.10.1"
+  resolved "https://registry.yarnpkg.com/vega/-/vega-5.10.1.tgz#4eafef108c065cefa463375350bab7db27e06836"
+  integrity sha512-DSY0G3NnOk425TYVxRlrzdi1xKk3b5yfqjIRRhg+oN+T55PWCBzDnUG3GdqOSJnfs6zTp6485rR4IL8qpbDizA==
   dependencies:
     vega-crossfilter "~4.0.1"
     vega-dataflow "~5.5.0"
-    vega-encode "~4.5.2"
+    vega-encode "~4.5.3"
     vega-event-selector "~2.0.2"
     vega-expression "~2.6.3"
     vega-force "~4.0.3"
     vega-functions "~5.5.1"
     vega-geo "~4.3.0"
     vega-hierarchy "~4.0.3"
-    vega-loader "~4.1.4"
-    vega-parser "~5.12.1"
+    vega-loader "~4.2.1"
+    vega-parser "~5.13.1"
     vega-projection "~1.4.0"
     vega-regression "~1.0.5"
     vega-runtime "~5.0.2"
     vega-scale "~6.0.0"
-    vega-scenegraph "~4.5.1"
+    vega-scenegraph "~4.6.0"
     vega-statistics "~1.7.3"
     vega-time "~1.0.0"
-    vega-transforms "~4.6.1"
-    vega-typings "~0.13.0"
-    vega-util "~1.13.0"
-    vega-view "~5.4.0"
-    vega-view-transforms "~4.5.0"
+    vega-transforms "~4.7.1"
+    vega-typings "~0.15.0"
+    vega-util "~1.13.1"
+    vega-view "~5.5.0"
+    vega-view-transforms "~4.5.2"
     vega-voronoi "~4.1.1"
     vega-wordcloud "~4.0.4"
 
@@ -6778,21 +6800,21 @@ warning@^4.0.2, warning@^4.0.3:
     loose-envify "^1.0.0"
 
 watchpack@^1.6.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/watchpack/-/watchpack-1.6.0.tgz#4bc12c2ebe8aa277a71f1d3f14d685c7b446cd00"
-  integrity sha512-i6dHe3EyLjMmDlU1/bGQpEw25XSjkJULPuAVKCbNRefQVq48yXKUpwg538F7AZTf9kyr57zj++pQFltUa5H7yA==
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/watchpack/-/watchpack-1.6.1.tgz#280da0a8718592174010c078c7585a74cd8cd0e2"
+  integrity sha512-+IF9hfUFOrYOOaKyfaI7h7dquUIOgyEMoQMLA7OP5FxegKA2+XdXThAZ9TU2kucfhDH7rfMHs1oPYziVGWRnZA==
   dependencies:
-    chokidar "^2.0.2"
+    chokidar "^2.1.8"
     graceful-fs "^4.1.2"
     neo-async "^2.5.0"
 
 webpack-bundle-analyzer@^3.6.0:
-  version "3.6.0"
-  resolved "https://registry.yarnpkg.com/webpack-bundle-analyzer/-/webpack-bundle-analyzer-3.6.0.tgz#39b3a8f829ca044682bc6f9e011c95deb554aefd"
-  integrity sha512-orUfvVYEfBMDXgEKAKVvab5iQ2wXneIEorGNsyuOyVYpjYrI7CUOhhXNDd3huMwQ3vNNWWlGP+hzflMFYNzi2g==
+  version "3.6.1"
+  resolved "https://registry.yarnpkg.com/webpack-bundle-analyzer/-/webpack-bundle-analyzer-3.6.1.tgz#bdb637c2304424f2fbff9a950c7be42a839ae73b"
+  integrity sha512-Nfd8HDwfSx1xBwC+P8QMGvHAOITxNBSvu/J/mCJvOwv+G4VWkU7zir9SSenTtyCi0LnVtmsc7G5SZo1uV+bxRw==
   dependencies:
-    acorn "^6.0.7"
-    acorn-walk "^6.1.1"
+    acorn "^7.1.1"
+    acorn-walk "^7.1.1"
     bfj "^6.1.1"
     chalk "^2.4.1"
     commander "^2.18.0"
@@ -6838,14 +6860,14 @@ webpack-sources@^1.1.0, webpack-sources@^1.4.0, webpack-sources@^1.4.1, webpack-
     source-map "~0.6.1"
 
 webpack@^4.41.2:
-  version "4.42.0"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.42.0.tgz#b901635dd6179391d90740a63c93f76f39883eb8"
-  integrity sha512-EzJRHvwQyBiYrYqhyjW9AqM90dE4+s1/XtCfn7uWg6cS72zH+2VPFAlsnW0+W0cDi0XRjNKUMoJtpSi50+Ph6w==
+  version "4.42.1"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-4.42.1.tgz#ae707baf091f5ca3ef9c38b884287cfe8f1983ef"
+  integrity sha512-SGfYMigqEfdGchGhFFJ9KyRpQKnipvEvjc1TwrXEPCM6H5Wywu10ka8o3KGrMzSMxMQKt8aCHUFh5DaQ9UmyRg==
   dependencies:
-    "@webassemblyjs/ast" "1.8.5"
-    "@webassemblyjs/helper-module-context" "1.8.5"
-    "@webassemblyjs/wasm-edit" "1.8.5"
-    "@webassemblyjs/wasm-parser" "1.8.5"
+    "@webassemblyjs/ast" "1.9.0"
+    "@webassemblyjs/helper-module-context" "1.9.0"
+    "@webassemblyjs/wasm-edit" "1.9.0"
+    "@webassemblyjs/wasm-parser" "1.9.0"
     acorn "^6.2.1"
     ajv "^6.10.2"
     ajv-keywords "^3.4.1"
@@ -6857,7 +6879,7 @@ webpack@^4.41.2:
     loader-utils "^1.2.3"
     memory-fs "^0.4.1"
     micromatch "^3.1.10"
-    mkdirp "^0.5.1"
+    mkdirp "^0.5.3"
     neo-async "^2.6.1"
     node-libs-browser "^2.2.1"
     schema-utils "^1.0.0"
@@ -6880,6 +6902,13 @@ which@^1.2.14, which@^1.2.9, which@^1.3.1:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/which/-/which-1.3.1.tgz#a45043d54f5805316da8d62f9f50918d3da70b0a"
   integrity sha512-HxJdYWq1MTIQbJ3nw0cqssHoTNU267KlrDuGZ1WYlxDStUtKUhOaJmh112/TZmHxxUfuJqPXSOm7tDyas0OSIQ==
+  dependencies:
+    isexe "^2.0.0"
+
+which@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/which/-/which-2.0.2.tgz#7c6a8dd0a636a0327e10b59c9286eee93f3f51b1"
+  integrity sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==
   dependencies:
     isexe "^2.0.0"
 
@@ -6926,9 +6955,9 @@ ws@^6.0.0:
     async-limiter "~1.0.0"
 
 ws@^7.2.0:
-  version "7.2.1"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-7.2.1.tgz#03ed52423cd744084b2cf42ed197c8b65a936b8e"
-  integrity sha512-sucePNSafamSKoOqoNfBd8V0StlkzJKL2ZAhGQinCfNQ+oacw+Pk7lcdAElecBF2VkLNZRiIb5Oi1Q5lVUVt2A==
+  version "7.2.3"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.2.3.tgz#a5411e1fb04d5ed0efee76d26d5c46d830c39b46"
+  integrity sha512-HTDl9G9hbkNDk98naoR/cHDws7+EyYMOdL1BmjsZXRUjf7d+MficC4B7HLUPlSiho0vg+CWKrGIt/VJBd1xunQ==
 
 xtend@^4.0.0, xtend@^4.0.1, xtend@~4.0.1:
   version "4.0.2"
@@ -6961,17 +6990,17 @@ yallist@^4.0.0:
   integrity sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
 
 yargs-parser@^13.1.0:
-  version "13.1.1"
-  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-13.1.1.tgz#d26058532aa06d365fe091f6a1fc06b2f7e5eca0"
-  integrity sha512-oVAVsHz6uFrg3XQheFII8ESO2ssAf9luWuAd6Wexsu4F3OtIW0o8IribPXYrD4WC24LWtPrJlGy87y5udK+dxQ==
+  version "13.1.2"
+  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-13.1.2.tgz#130f09702ebaeef2650d54ce6e3e5706f7a4fb38"
+  integrity sha512-3lbsNRf/j+A4QuSZfDRA7HRSfWrzO0YjqTJd5kjAq37Zep1CEgaYmrH9Q3GwPiB9cHyd1Y1UwggGhJGoxipbzg==
   dependencies:
     camelcase "^5.0.0"
     decamelize "^1.2.0"
 
-yargs-parser@^16.1.0:
-  version "16.1.0"
-  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-16.1.0.tgz#73747d53ae187e7b8dbe333f95714c76ea00ecf1"
-  integrity sha512-H/V41UNZQPkUMIT5h5hiwg4QKIY1RPvoBV4XcjUbRM8Bk2oKqqyZ0DIEbTFZB0XjbtSPG8SAa/0DxCQmiRgzKg==
+yargs-parser@^18.1.1:
+  version "18.1.2"
+  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-18.1.2.tgz#2f482bea2136dbde0861683abea7756d30b504f1"
+  integrity sha512-hlIPNR3IzC1YuL1c2UwwDKpXlNFBqD1Fswwh1khz5+d8Cq/8yc/Mn0i+rQXduu8hcrFKvO7Eryk+09NecTQAAQ==
   dependencies:
     camelcase "^5.0.0"
     decamelize "^1.2.0"
@@ -6993,10 +7022,10 @@ yargs@13.2.4:
     y18n "^4.0.0"
     yargs-parser "^13.1.0"
 
-yargs@~15.1.0:
-  version "15.1.0"
-  resolved "https://registry.yarnpkg.com/yargs/-/yargs-15.1.0.tgz#e111381f5830e863a89550bd4b136bb6a5f37219"
-  integrity sha512-T39FNN1b6hCW4SOIk1XyTOWxtXdcen0t+XYrysQmChzSipvhBO8Bj0nK1ozAasdk24dNWuMZvr4k24nz+8HHLg==
+yargs@~15.3.1:
+  version "15.3.1"
+  resolved "https://registry.yarnpkg.com/yargs/-/yargs-15.3.1.tgz#9505b472763963e54afe60148ad27a330818e98b"
+  integrity sha512-92O1HWEjw27sBfgmXiixJWT5hRBp2eobqXicLtPBIDBhYB+1HpwZlXmbW2luivBJHBzki+7VyCLRtAkScbTBQA==
   dependencies:
     cliui "^6.0.0"
     decamelize "^1.2.0"
@@ -7008,7 +7037,7 @@ yargs@~15.1.0:
     string-width "^4.2.0"
     which-module "^2.0.0"
     y18n "^4.0.0"
-    yargs-parser "^16.1.0"
+    yargs-parser "^18.1.1"
 
 yarn-deduplicate@^1.1.1:
   version "1.2.0"

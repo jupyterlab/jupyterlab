@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/coreutils",
-  "version": "4.0.2",
+  "version": "4.1.0-a.0",
   "description": "JupyterLab - Core Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {

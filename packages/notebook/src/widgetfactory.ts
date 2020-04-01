@@ -159,4 +159,25 @@ export namespace NotebookWidgetFactory {
      */
     sessionDialogs?: ISessionContextDialogs;
   }
+
+  /**
+   * The interface for a notebook widget factory.
+   */
+  export interface IFactory
+    extends DocumentRegistry.IWidgetFactory<NotebookPanel, INotebookModel> {
+    /**
+     * A configuration object for cell editor settings.
+     */
+    editorConfig: StaticNotebook.IEditorConfig;
+
+    /**
+     * A configuration object for notebook settings.
+     */
+    notebookConfig: StaticNotebook.INotebookConfig;
+
+    /**
+     * Whether the kernel should be shutdown when the widget is closed.
+     */
+    shutdownOnClose: boolean;
+  }
 }

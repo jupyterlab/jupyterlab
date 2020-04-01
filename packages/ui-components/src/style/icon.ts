@@ -141,7 +141,7 @@ export namespace LabIconStyle {
     stylesheet?: ISheetResolvable | ISheetResolvable[];
 
     /**
-     * @depreacted use stylesheet instead
+     * @deprecated use stylesheet instead
      */
     kind?: IBuiltin;
 

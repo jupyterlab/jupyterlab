@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/buildutils",
-  "version": "2.0.2",
+  "version": "2.1.0-a.0",
   "description": "JupyterLab - Build Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -23,6 +23,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
+    "ensure-max-old-space": "./lib/ensure-max-old-space.js",
     "get-dependency": "./lib/get-dependency.js",
     "remove-dependency": "./lib/remove-dependency.js",
     "update-dependency": "./lib/update-dependency.js",
@@ -55,7 +56,8 @@
     "semver": "^6.3.0",
     "sort-package-json": "~1.31.0",
     "typescript": "~3.7.3",
-    "webpack": "^4.41.2"
+    "webpack": "^4.41.2",
+    "which": "^2.0.2"
   },
   "devDependencies": {
     "@types/duplicate-package-checker-webpack-plugin": "^2.1.0",
