@@ -85,8 +85,8 @@ def run_test(app, func):
             result = 0
 
         try:
-            app.serverapp.http_server.stop()
-            app.serverapp.io_loop.stop()
+            app.http_server.stop()
+            app.io_loop.stop()
             env_patch.stop()
             os._exit(result)
         except Exception as e:
@@ -97,10 +97,10 @@ def run_test(app, func):
 
     # The entry URL for browser tests is different in notebook >= 6.0,
     # since that uses a local HTML file to point the user at the app.
-    if hasattr(app.serverapp, 'browser_open_file'):        
-        url = urljoin('file:', pathname2url(app.serverapp.browser_open_file))
+    if hasattr(app, 'browser_open_file'):        
+        url = urljoin('file:', pathname2url(app.browser_open_file))
     else:
-        url = app.serverapp.display_url
+        url = app.display_url
 
     app.log.addHandler(handler)
     pool = ThreadPoolExecutor()

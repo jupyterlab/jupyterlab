@@ -18,11 +18,19 @@ import sys
 import subprocess
 
 from tornado.ioloop import IOLoop
-from traitlets import Bool, Unicode
+from traitlets import Bool, Dict, Unicode
+from jupyter_server.serverapp import ServerApp
 from jupyterlab.labapp import get_app_dir
 from jupyterlab.browser_check import run_test
+from jupyter_server.serverapp import ServerApp
 
 here = osp.abspath(osp.dirname(__file__))
+
+
+class ExampleServerApp(ServerApp):
+    def start(self):
+        run_test(self, run_browser)
+        super().start()
 
 
 def main():
@@ -54,12 +62,18 @@ def main():
 
         mod._jupyter_server_extension_paths = _jupyter_server_extension_paths
 
-        def start(self):
-            run_test(self, run_browser)
-            super().start()
-
     App.__name__ = osp.basename(example_dir).capitalize() + 'Test'
-    App.launch_instance()
+    
+    def _jupyter_server_extension_paths():
+        return [
+            {
+                'module': 'example',
+                'app': App
+            }
+        ]
+    sys.modules['example']._jupyter_server_extension_paths = _jupyter_server_extension_paths
+    ExampleServerApp.jpserver_extensions = Dict({'example': True})
+    ExampleServerApp.launch_instance()
 
 
 def run_browser(url):
