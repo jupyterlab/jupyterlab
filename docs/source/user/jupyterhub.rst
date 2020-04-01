@@ -1,4 +1,4 @@
-.. _jupyterlab:
+.. _jupyterhub:
 
 JupyterLab on JupyterHub
 ------------------------
