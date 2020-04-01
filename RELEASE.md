@@ -43,7 +43,7 @@ makes sure that we don't have any extra tags or commits in our repo (especially
 since we will push our tags later in the process), and that we are on the correct branch. The script creates a conda env, pulls down a git checkout with the
 appropriate branch, and installs JupyterLab with `pip install -e .`.
 
-If your sh compatible shell is not set up with conda yet, do that first:
+Make sure you are running an sh-compatible shell, and it is set up to be able to do `conda activate`. Then do:
 
 ```bash
 source scripts/release_prep.sh <branch_name>
@@ -119,8 +119,12 @@ Follow instructions printed at the end of the publish step above:
 
 ```bash
 twine upload dist/*
-git push origin <BRANCH> --tags
+git push origin --tags <BRANCH>
 ```
+
+These lines:
+- upload to pypi with twine
+- double-check what branch you are on, then push changes to the correct upstream branch with the `--tags` option.
 
 ## Post release candidate checklist
 
