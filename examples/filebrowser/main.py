@@ -63,7 +63,7 @@ class ExampleHandler(
 
 class ExampleApp(LabServerApp):
 
-    default_url = Unicode('/example')
+    extension_url = '/example'
 
     extension_name = "main"
     app_name = 'JupyterLab Example File Browser'

@@ -69,7 +69,7 @@ class ExampleHandler(
 
 class ExampleApp(LabServerApp):
 
-    default_url = Unicode('/example')
+    extension_url = '/example'
     extension_name = 'main'
     app_name = 'JupyterLab Example Notebook'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')

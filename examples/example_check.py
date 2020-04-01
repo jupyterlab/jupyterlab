@@ -39,8 +39,8 @@ def main():
         JS console errors, JS errors, and Python logged errors.
         """
         extension_name = 'example'
+        extension_url = '/example'
         open_browser = Bool(False)
-        default_url = '/example'
         base_url = '/foo/'
         ip = '127.0.0.1'
 

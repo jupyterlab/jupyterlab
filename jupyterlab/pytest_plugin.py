@@ -29,6 +29,7 @@ def make_lab_app(root_dir, template_dir, app_settings_dir, user_settings_dir, sc
     def _make_lab_app(**kwargs):
         class TestLabApp(LabApp):
             base_url = '/lab'
+            extension_url = '/lab'
             default_url = Unicode('/',
                                 help='The default URL to redirect to from `/`')
             lab_config = LabConfig(

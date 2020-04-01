@@ -54,7 +54,7 @@ class ExampleHandler(
 
 class ExampleApp(LabServerApp):
 
-    default_url = Unicode('/example')
+    extension_url = '/lab'
     extension_name = 'main'
     app_name = 'JupyterLab Example Service'
     app_url = '/example_app'
