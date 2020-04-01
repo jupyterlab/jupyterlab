@@ -23,7 +23,7 @@ import {
   addIcon,
   copyIcon,
   cutIcon,
-  restartAndRunIcon,
+  fastForwardIcon,
   HTMLSelect,
   pasteIcon,
   runIcon,
@@ -161,7 +161,7 @@ export namespace ToolbarItems {
     dialogs?: ISessionContext.IDialogs
   ): Widget {
     return new ToolbarButton({
-      icon: restartAndRunIcon,
+      icon: fastForwardIcon,
       onClick: () => {
         void (dialogs ?? sessionContextDialogs)
           .restart(panel.sessionContext)
