@@ -135,6 +135,7 @@
   display: inline-block;
   padding-right: 2px;
   margin-left: auto;
+  white-space: nowrap;
 }
 
 .jp-DocumentSearch-spacer {
