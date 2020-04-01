@@ -89,11 +89,7 @@ the version of the ``notebook`` package that you have installed:
 Usage with JupyterHub
 ~~~~~~~~~~~~~~~~~~~~~
 
-Install JupyterLab and JupyterHub.
-
-In ``jupyterhub_config.py``, configure the ``Spawner`` to tell the single-user notebook servers to default to JupyterLab:
-
-``c.Spawner.default_url = '/lab'``
+Read the details on our :ref:`JupyterLab on JupyterHub documentation page <jupyterhub>`.
 
 
 Supported browsers
