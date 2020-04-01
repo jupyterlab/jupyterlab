@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/statedb",
-  "version": "2.1.0-a.0",
+  "version": "2.1.0-beta.0",
   "description": "Package for managing state in Jupyterlab",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
