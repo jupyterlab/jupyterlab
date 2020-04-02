@@ -127,6 +127,7 @@
   display: inline-block;
   padding-right: 2px;
   margin-left: auto;
+  white-space: nowrap;
 }
 
 .jp-DocumentSearch-spacer {
@@ -141,7 +142,7 @@
   background-repeat: no-repeat;
   background-position: center;
   vertical-align: middle;
-  margin: 1px 7px 2px;
+  margin: 1px 5px 2px;
 }
 
 .jp-DocumentSearch-up-down-button {
