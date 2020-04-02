@@ -74,7 +74,7 @@ commander
       lernaVersion = 'patch';
     }
     if (lernaVersion === 'preminor') {
-      lernaVersion += ' --preid=a';
+      lernaVersion += ' --preid=alpha';
     }
 
     let cmd = `lerna version -m \"New version\" --force-publish=* --no-push ${lernaVersion}`;
