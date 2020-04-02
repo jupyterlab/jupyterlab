@@ -18,7 +18,6 @@ milestone on GitHub for the full list of pull requests and issues closed.
 * Remove "experimental" from enable extension command label (`#8145 <https://github.com/jupyterlab/jupyterlab/pull/8145>`__)
 * Lint fixes (`#8138 <https://github.com/jupyterlab/jupyterlab/pull/8138>`__)
 * Release notes update (`#8135 <https://github.com/jupyterlab/jupyterlab/pull/8135>`__)
-* Revert "pressing backspace in an empty cell deletes the cell" (`#8133 <https://github.com/jupyterlab/jupyterlab/pull/8133>`__)
 * Upgrade to jupyterlab_server 1.1.0 (`#8127 <https://github.com/jupyterlab/jupyterlab/pull/8127>`__)
 * Fix string quoting (`#8126 <https://github.com/jupyterlab/jupyterlab/pull/8126>`__)
 * Post 2.0 improvements to labicon: work with all svg loaders, improve performance, fix issue with menus from extensions (`#8125 <https://github.com/jupyterlab/jupyterlab/pull/8125>`__)
@@ -66,8 +65,6 @@ See the `JupyterLab
 2.0.2 <https://github.com/jupyterlab/jupyterlab/milestone/XXXX?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
-* Revert "backport pr #7927 on branch 2.0.x (throttle fetch requests in the setting registry's data connector)" (`#8131 <https://github.com/jupyterlab/jupyterlab/pull/8131>`__)
-* Backport pr #7927 on branch 2.0.x (throttle fetch requests in the setting registry's data connector) (`#8130 <https://github.com/jupyterlab/jupyterlab/pull/8130>`__)
 * Fix cell execution when recording timing (`#8057 <https://github.com/jupyterlab/jupyterlab/pull/8057>`__, `#8056 <https://github.com/jupyterlab/jupyterlab/issues/8056>`__)
 * Document the need to enable jupyterlab extension for jupyterhub (`#8036 <https://github.com/jupyterlab/jupyterlab/pull/8036>`__)
 * Update the kernel and session architecture diagram (`#8035 <https://github.com/jupyterlab/jupyterlab/pull/8035>`__)
