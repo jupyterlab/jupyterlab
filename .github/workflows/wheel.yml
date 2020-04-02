@@ -26,10 +26,13 @@ jobs:
     - name: Install the dependencies
       run: python -m pip install xeus-python==0.6.8 "jupyterlab>=2,<3" "notebook>=6,<7" ptvsd
 
-    - name: Build the extension
+    - name: Build and install the extension
       run: |
-        jlpm
-        jlpm run build
+        jlpm && jlpm run build
+        jupyter labextension link .
+
+    - name: Browser check
+      run: python -m jupyterlab.browser_check
 
     - name: Run the tests
       run: |
