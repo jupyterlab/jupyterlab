@@ -211,7 +211,7 @@ describe('protocol', () => {
     });
   });
 
-  const getVariables = async () => {
+  const getVariables = async (start?: number, count?: number) => {
     const stackFramesReply = await debugSession.sendRequest('stackTrace', {
       threadId
     });
@@ -222,7 +222,9 @@ describe('protocol', () => {
     const scopes = scopesReply.body.scopes;
     const variablesReference = scopes[0].variablesReference;
     const variablesReply = await debugSession.sendRequest('variables', {
-      variablesReference
+      variablesReference,
+      start,
+      count
     });
     return variablesReply.body.variables;
   };
@@ -235,6 +237,16 @@ describe('protocol', () => {
       expect(i).to.exist;
       expect(i.type).to.equal('int');
       expect(i.value).to.equal('1');
+    });
+  });
+
+  describe('#variablesPagination', () => {
+    it('should return only one the variable (int) by pagination pointers start and count', async () => {
+      await debugSession.sendRequest('continue', { threadId });
+      const variables = await getVariables(1, 1);
+      const integers = variables.filter(variable => variable.type === 'int');
+      expect(integers).to.exist;
+      expect(integers.length).to.equals(1);
     });
   });
 
