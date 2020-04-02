@@ -10,7 +10,7 @@ JupyterLab Changelog
 ^^^^^^^^^^^^^^^
 
 See the `JupyterLab
-2.1 <https://github.com/jupyterlab/jupyterlab/milestone/XXXX?closed=1>`__
+2.1 <https://github.com/jupyterlab/jupyterlab/milestone/49?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
 * Bump to “alpha” instead of “a” for consistency with other prerelease bumps (`#8150 <https://github.com/jupyterlab/jupyterlab/pull/8150>`__)
