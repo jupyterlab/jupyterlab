@@ -3,86 +3,97 @@
 JupyterLab Changelog
 ====================
 
-`v2.1 <https://github.com/jupyterlab/jupyterlab/releases/tag/v2.1>`__
+`v2.1.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v2.1.0>`__
 ---------------------------------------------------------------------------
 
-2020/04/02
-^^^^^^^^^^^^^^^
+April 2020
+^^^^^^^^^^
 
 See the `JupyterLab
-2.1 <https://github.com/jupyterlab/jupyterlab/milestone/XXXX?closed=1>`__
+2.1 <https://github.com/jupyterlab/jupyterlab/milestone/49?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
-* Bump to “alpha” instead of “a” for consistency with other prerelease bumps (`#8150 <https://github.com/jupyterlab/jupyterlab/pull/8150>`__)
-* Docs: link to jupyterlab on jupyterhub page (`#8146 <https://github.com/jupyterlab/jupyterlab/pull/8146>`__)
-* Remove "experimental" from enable extension command label (`#8145 <https://github.com/jupyterlab/jupyterlab/pull/8145>`__)
-* Lint fixes (`#8138 <https://github.com/jupyterlab/jupyterlab/pull/8138>`__)
-* Release notes update (`#8135 <https://github.com/jupyterlab/jupyterlab/pull/8135>`__)
-* Upgrade to jupyterlab_server 1.1.0 (`#8127 <https://github.com/jupyterlab/jupyterlab/pull/8127>`__)
-* Fix string quoting (`#8126 <https://github.com/jupyterlab/jupyterlab/pull/8126>`__)
-* Post 2.0 improvements to labicon: work with all svg loaders, improve performance, fix issue with menus from extensions (`#8125 <https://github.com/jupyterlab/jupyterlab/pull/8125>`__)
-* Devops fixes (`#8119 <https://github.com/jupyterlab/jupyterlab/pull/8119>`__)
-* Fix property inspector and widget tracker load behavior (`#8114 <https://github.com/jupyterlab/jupyterlab/pull/8114>`__)
-* Revert #7677 (`#8112 <https://github.com/jupyterlab/jupyterlab/pull/8112>`__, `#8083 <https://github.com/jupyterlab/jupyterlab/issues/8083>`__)
-* Update docs on storing extension data (`#8111 <https://github.com/jupyterlab/jupyterlab/pull/8111>`__)
-* Fix initial splash screen loading on leading edge of throttle cycle. (`#8110 <https://github.com/jupyterlab/jupyterlab/pull/8110>`__)
-* Increase timeout for yarn (`#8104 <https://github.com/jupyterlab/jupyterlab/pull/8104>`__, `#8102 <https://github.com/jupyterlab/jupyterlab/issues/8102>`__)
-* Allow replacing with empty strings (`#8100 <https://github.com/jupyterlab/jupyterlab/pull/8100>`__, `#8098 <https://github.com/jupyterlab/jupyterlab/issues/8098>`__)
-* Break up windows js tests (`#8097 <https://github.com/jupyterlab/jupyterlab/pull/8097>`__)
-* Allow spaces in names of files attached to markdown cells (`#8095 <https://github.com/jupyterlab/jupyterlab/pull/8095>`__)
-* Include the document search css in the notebook example (`#8082 <https://github.com/jupyterlab/jupyterlab/pull/8082>`__)
-* Implement larger badges for extension installer ui (`#8078 <https://github.com/jupyterlab/jupyterlab/pull/8078>`__)
-* Update user messages when installing extensions with companions (`#8076 <https://github.com/jupyterlab/jupyterlab/pull/8076>`__)
-* Add back autolink support (`#8075 <https://github.com/jupyterlab/jupyterlab/pull/8075>`__, `#7393 <https://github.com/jupyterlab/jupyterlab/issues/7393>`__)
-* Docs: move "examples" section to "using jupyterlab components"  (`#8074 <https://github.com/jupyterlab/jupyterlab/pull/8074>`__)
-* Focus-with-select when focusing search box (#7932) (`#8073 <https://github.com/jupyterlab/jupyterlab/pull/8073>`__)
-* Show the completer in the notebook example (`#8069 <https://github.com/jupyterlab/jupyterlab/pull/8069>`__)
-* Add a token and plugin for the notebook widget factory (`#8066 <https://github.com/jupyterlab/jupyterlab/pull/8066>`__, `#7996 <https://github.com/jupyterlab/jupyterlab/issues/7996>`__)
-* Experiment with breaking ci tests up into smaller chunks (`#8064 <https://github.com/jupyterlab/jupyterlab/pull/8064>`__)
-* Change header area to a box panel (`#8059 <https://github.com/jupyterlab/jupyterlab/pull/8059>`__, `#7279 <https://github.com/jupyterlab/jupyterlab/issues/7279>`__)
-* Removed 3 links leading to empty pages. (`#8058 <https://github.com/jupyterlab/jupyterlab/pull/8058>`__)
-* Add the `notebook:run` command to the notebook example (`#8053 <https://github.com/jupyterlab/jupyterlab/pull/8053>`__)
-* Enable extension manager by default (`#8050 <https://github.com/jupyterlab/jupyterlab/pull/8050>`__)
-* Add .yarnrc explicitly in python setup (`#8045 <https://github.com/jupyterlab/jupyterlab/pull/8045>`__)
-* Bump acorn from 6.4.0 to 6.4.1 in /jupyterlab/staging (`#8044 <https://github.com/jupyterlab/jupyterlab/pull/8044>`__)
-* Add "restart kernel, re-run whole notebook" button (`#8024 <https://github.com/jupyterlab/jupyterlab/pull/8024>`__)
-* Use path string instead of session context in url resolver (`#8001 <https://github.com/jupyterlab/jupyterlab/pull/8001>`__)
-* Black and white listings for the extension manager (`#7989 <https://github.com/jupyterlab/jupyterlab/pull/7989>`__)
-* Add command and context menu item for opening markdown editor (`#7942 <https://github.com/jupyterlab/jupyterlab/pull/7942>`__)
+User-facing changes
+^^^^^^^^^^^^^^^^^^^
+
+* Display the extension manager in the left sidebar by default. Users will need to acknowledge the disclaimer in the extension manager before using it. (`#8050 <https://github.com/jupyterlab/jupyterlab/pull/8050>`__, `#8145 <https://github.com/jupyterlab/jupyterlab/pull/8145>`__)
+* Added :ref:`blacklist and whitelist support <extension_listings>` for the extension manager (`#7989 <https://github.com/jupyterlab/jupyterlab/pull/7989>`__)
+
+* Automatically link URLs in notebook output text (`#8075 <https://github.com/jupyterlab/jupyterlab/pull/8075>`__, `#7393 <https://github.com/jupyterlab/jupyterlab/issues/7393>`__)
+* Added a "Restart Kernel and Run All Cells…" button to the notebook toolbar (`#8024 <https://github.com/jupyterlab/jupyterlab/pull/8024>`__)
+
+.. image:: changelog_restartrunallbutton.png
+   :align: center
+   :class: jp-screenshot
+
+* Added a context menu item for opening a Markdown editor from the Markdown preview (`#7942 <https://github.com/jupyterlab/jupyterlab/pull/7942>`__)
+* Support Node.js 10+ (`#8112 <https://github.com/jupyterlab/jupyterlab/pull/8112>`__, `#8083 <https://github.com/jupyterlab/jupyterlab/issues/8083>`__)
+* Added a command to replace the selection in an editor with text (inserting if there is no selection). This can be assigned a keyboard shortcut, as shown below. We also added a command to go through a series of commands and run the first enabled command. (`#7908 <https://github.com/jupyterlab/jupyterlab/pull/7908>`__)
+  Here is a keyboard shortcut to insert text in a currently-active notebook editor:
+
+  .. code:: js
+
+   {
+     command: "notebook:replace-selection",
+     selector: ".jp-Notebook",
+     keys: ["Ctrl L"],
+     args: {text: "lambda x: x"}
+   }
+
+
+  Here is a keyboard shortcut to insert text into an editor of the currently active console, file editor, or notebook:
+
+  .. code:: js
+
+   {
+     command: "apputils:run-first-enabled",
+     selector: "body",
+     keys: ["Ctrl L"],
+     args: {
+       commands: [
+         "console:replace-selection",
+         "fileeditor:replace-selection",
+         "notebook:replace-selection",
+       ],
+       args: {text: "lambda x: x"}
+     }
+   }
+
+
+For developers
+^^^^^^^^^^^^^^
+
+* ``NotebookWidgetFactory`` is now a plugin so it can be overridden (`#8066 <https://github.com/jupyterlab/jupyterlab/pull/8066>`__, `#7996 <https://github.com/jupyterlab/jupyterlab/issues/7996>`__)
+* Many improvements to ``LabIcon``: work with all SVG loaders, improve performance, fix issue with menus from extensions (`#8125 <https://github.com/jupyterlab/jupyterlab/pull/8125>`__)
+* Change the header application area to a box panel, which means the header area will display if its children set their minimum height (`#8059 <https://github.com/jupyterlab/jupyterlab/pull/8059>`__, `#7279 <https://github.com/jupyterlab/jupyterlab/issues/7279>`__)
+* JupyterLab's custom context menu is now disabled on all descendants of a DOM element with a ``data-jp-suppress-context-menu`` attribute (`#7877 <https://github.com/jupyterlab/jupyterlab/pull/7877>`__, `#7670 <https://github.com/jupyterlab/jupyterlab/issues/7670>`__)
+
+Bugfixes
+^^^^^^^^
+
+* Fix property inspector restoration on reload (`#8114 <https://github.com/jupyterlab/jupyterlab/pull/8114>`__)
+* Increase the timeout for yarn (`#8104 <https://github.com/jupyterlab/jupyterlab/pull/8104>`__, `#8102 <https://github.com/jupyterlab/jupyterlab/issues/8102>`__)
+* Fix find and replace with empty strings (`#8100 <https://github.com/jupyterlab/jupyterlab/pull/8100>`__, `#8098 <https://github.com/jupyterlab/jupyterlab/issues/8098>`__)
+* Select search text when focusing the search overlay (#7932) (`#8073 <https://github.com/jupyterlab/jupyterlab/pull/8073>`__)
+* Fix attaching images with spaces in their names to markdown cells (`#8095 <https://github.com/jupyterlab/jupyterlab/pull/8095>`__)
+* Fix build errors by distributing the ``.yarnrc`` configuration with the Python package (`#8045 <https://github.com/jupyterlab/jupyterlab/pull/8045>`__)
 * Throttle fetch requests in the setting registry's data connector (`#7927 <https://github.com/jupyterlab/jupyterlab/pull/7927>`__)
-* Command to insert text (`#7908 <https://github.com/jupyterlab/jupyterlab/pull/7908>`__)
-* Add support for disabling jupyterlab's context menu (`#7877 <https://github.com/jupyterlab/jupyterlab/pull/7877>`__, `#7670 <https://github.com/jupyterlab/jupyterlab/issues/7670>`__)
-* Document how to add commands to notebook toolbar (`#7849 <https://github.com/jupyterlab/jupyterlab/pull/7849>`__)
-* Rendermime celloutput gap issue(#7760) (`#7832 <https://github.com/jupyterlab/jupyterlab/pull/7832>`__)
+* Close the gap between lines in notebook output (#7760) (`#7832 <https://github.com/jupyterlab/jupyterlab/pull/7832>`__)
 
 `v2.0.2 <https://github.com/jupyterlab/jupyterlab/releases/tag/v2.0.2>`__
 ---------------------------------------------------------------------------
 
-2020/04/02
-^^^^^^^^^^^^^^^
+April 2020
+^^^^^^^^^^
 
 See the `JupyterLab
-2.0.2 <https://github.com/jupyterlab/jupyterlab/milestone/XXXX?closed=1>`__
+2.0.2 <https://github.com/jupyterlab/jupyterlab/milestone/50?closed=1>`__
 milestone on GitHub for the full list of pull requests and issues closed.
 
 * Fix cell execution when recording timing (`#8057 <https://github.com/jupyterlab/jupyterlab/pull/8057>`__, `#8056 <https://github.com/jupyterlab/jupyterlab/issues/8056>`__)
-* Document the need to enable jupyterlab extension for jupyterhub (`#8036 <https://github.com/jupyterlab/jupyterlab/pull/8036>`__)
-* Update the kernel and session architecture diagram (`#8035 <https://github.com/jupyterlab/jupyterlab/pull/8035>`__)
-* Docs extended: installation behind firewall (`#8034 <https://github.com/jupyterlab/jupyterlab/pull/8034>`__)
-* Docs: update vega and vega-lite versions (`#8033 <https://github.com/jupyterlab/jupyterlab/pull/8033>`__, `#8026 <https://github.com/jupyterlab/jupyterlab/issues/8026>`__)
-* Make ifuture done typings more correct (`#8032 <https://github.com/jupyterlab/jupyterlab/pull/8032>`__)
-* Use conda instead of conda-forge for nodejs install (`#8031 <https://github.com/jupyterlab/jupyterlab/pull/8031>`__)
-* Add github action tests (`#8027 <https://github.com/jupyterlab/jupyterlab/pull/8027>`__)
-* Fix link to 2.0 milestone in changelog (`#8025 <https://github.com/jupyterlab/jupyterlab/pull/8025>`__)
-* Add kernel and session architecture diagram (`#8015 <https://github.com/jupyterlab/jupyterlab/pull/8015>`__, `#7809 <https://github.com/jupyterlab/jupyterlab/issues/7809>`__)
-* Remove unused ilabshell dependency from the notebook tools (`#8014 <https://github.com/jupyterlab/jupyterlab/pull/8014>`__)
-* Fix typo (repeated letter) (`#8011 <https://github.com/jupyterlab/jupyterlab/pull/8011>`__)
-* Elaborate more on the services changes in the changelog. (`#8007 <https://github.com/jupyterlab/jupyterlab/pull/8007>`__)
-* Fix property names in `cssstyledeclaration.setproperty` (#7917) (`#8004 <https://github.com/jupyterlab/jupyterlab/pull/8004>`__, `#7910 <https://github.com/jupyterlab/jupyterlab/issues/7910>`__)
-* Make patch releases increment the version all the way to final release (`#8003 <https://github.com/jupyterlab/jupyterlab/pull/8003>`__)
-* Start adding some docs on workspace format (`#7945 <https://github.com/jupyterlab/jupyterlab/pull/7945>`__)
-* Resolve #7889 to avoid redundant checkpoint calls on loading notebook (`#7926 <https://github.com/jupyterlab/jupyterlab/pull/7926>`__, `#7889 <https://github.com/jupyterlab/jupyterlab/issues/7889>`__)
-
+* Fix font settings for the editor (`#8004 <https://github.com/jupyterlab/jupyterlab/pull/8004>`__, `#7910 <https://github.com/jupyterlab/jupyterlab/issues/7910>`__)
+* Avoid redundant checkpoint calls on loading a notebook (`#7926 <https://github.com/jupyterlab/jupyterlab/pull/7926>`__, `#7889 <https://github.com/jupyterlab/jupyterlab/issues/7889>`__)
+* For developers: make kernel ``IFuture.done`` typings more correct by not including ``undefined`` (`#8032 <https://github.com/jupyterlab/jupyterlab/pull/8032>`__)
 
 `v2.0.0 <https://github.com/jupyterlab/jupyterlab/releases>`__
 --------------------------------------------------------------

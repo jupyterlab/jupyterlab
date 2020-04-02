@@ -161,8 +161,6 @@ performs a free-text search of JupyterLab extensions on the NPM registry.
    :alt: Screenshot showing an example search result
 
 
-.. _listings:
-
 Installing an Extension
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -250,6 +248,7 @@ a dialog to notify you about these. These are informational only, and it
 will be up to you to take these into account or not.
 
 
+.. _extension_listings:
 
 Listings
 ~~~~~~~~
