@@ -56,69 +56,17 @@ export class SearchBar extends React.Component<
    */
   render(): React.ReactNode {
     return (
-      <>
-        <div className="jp-extensionmanager-search-bar">
-          <InputGroup
-            className="jp-extensionmanager-search-wrapper"
-            type="text"
-            placeholder={this.props.placeholder}
-            onChange={this.handleChange}
-            value={this.state.value}
-            rightIcon="search"
-            disabled={this.props.disabled}
-          />
-        </div>
-        <CollapsibleSection
-          key="warning-section"
-          isOpen={true}
-          disabled={false}
-          header={'Warning'}
-        >
-          <div className="jp-extensionmanager-disclaimer">
-            <div>
-              Extensions installed contain arbitrary code that can execute on
-              your machine that may contain malicious code.
-            </div>
-            <div style={{ paddingTop: 8 }}>
-              I understand extensions contain arbitrary code.
-            </div>
-            <div style={{ paddingTop: 8 }}>
-              {ListModel.isDisclaimed() && (
-                <Button
-                  className="jp-extensionmanager-disclaimer-disable"
-                  onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
-                    this.props.settings
-                      .set('disclaimed', false)
-                      .catch(reason => {
-                        console.error(
-                          `Something went wrong when setting disclaimed.\n${reason}`
-                        );
-                      });
-                  }}
-                >
-                  Disable
-                </Button>
-              )}
-              {!ListModel.isDisclaimed() && (
-                <Button
-                  className="jp-extensionmanager-disclaimer-enable"
-                  onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
-                    this.props.settings
-                      .set('disclaimed', true)
-                      .catch(reason => {
-                        console.error(
-                          `Something went wrong when setting disclaimed.\n${reason}`
-                        );
-                      });
-                  }}
-                >
-                  Enable
-                </Button>
-              )}
-            </div>
-          </div>
-        </CollapsibleSection>
-      </>
+      <div className="jp-extensionmanager-search-bar">
+        <InputGroup
+          className="jp-extensionmanager-search-wrapper"
+          type="text"
+          placeholder={this.props.placeholder}
+          onChange={this.handleChange}
+          value={this.state.value}
+          rightIcon="search"
+          disabled={this.props.disabled}
+        />
+      </div>
     );
   }
 
@@ -543,6 +491,14 @@ export class CollapsibleSection extends React.Component<
       }
     );
   }
+
+  componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
+    if (nextProps.forceOpen) {
+      this.setState({
+        isOpen: true
+      });
+    }
+  }
 }
 
 /**
@@ -583,6 +539,11 @@ export namespace CollapsibleSection {
      * to open nor close actions.
      */
     disabled?: boolean;
+
+    /**
+     * If true, the section will be opened if not disabled.
+     */
+    forceOpen?: boolean;
   }
 
   /**
@@ -601,12 +562,14 @@ export namespace CollapsibleSection {
  */
 export class ExtensionView extends VDomRenderer<ListModel> {
   private _settings: ISettingRegistry.ISettings;
+  private _forceOpen: boolean;
   constructor(
     serviceManager: ServiceManager,
     settings: ISettingRegistry.ISettings
   ) {
     super(new ListModel(serviceManager, settings));
     this._settings = settings;
+    this._forceOpen = false;
     this.addClass('jp-extensionmanager-view');
   }
 
@@ -656,8 +619,56 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       />
     );
     const content = [];
+    content.push(
+      <CollapsibleSection
+        key="warning-section"
+        isOpen={!ListModel.isDisclaimed()}
+        disabled={false}
+        header={'Warning'}
+      >
+        <div className="jp-extensionmanager-disclaimer">
+          <div>
+            Extensions installed contain arbitrary code that can execute on your
+            machine that may contain malicious code.
+          </div>
+          <div style={{ paddingTop: 8 }}>
+            I understand extensions contain arbitrary code.
+          </div>
+          <div style={{ paddingTop: 8 }}>
+            {ListModel.isDisclaimed() && (
+              <Button
+                className="jp-extensionmanager-disclaimer-disable"
+                onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
+                  this._settings.set('disclaimed', false).catch(reason => {
+                    console.error(
+                      `Something went wrong when setting disclaimed.\n${reason}`
+                    );
+                  });
+                }}
+              >
+                Disable
+              </Button>
+            )}
+            {!ListModel.isDisclaimed() && (
+              <Button
+                className="jp-extensionmanager-disclaimer-enable"
+                onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
+                  this._forceOpen = true;
+                  this._settings.set('disclaimed', true).catch(reason => {
+                    console.error(
+                      `Something went wrong when setting disclaimed.\n${reason}`
+                    );
+                  });
+                }}
+              >
+                Enable
+              </Button>
+            )}
+          </div>
+        </div>
+      </CollapsibleSection>
+    );
     if (!model.initialized) {
-      //      void model.initialize();
       content.push(
         <div key="loading-placeholder" className="jp-extensionmanager-loader">
           Updating extensions list
@@ -718,6 +729,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         <CollapsibleSection
           key="installed-section"
           isOpen={ListModel.isDisclaimed()}
+          forceOpen={this._forceOpen}
           disabled={!ListModel.isDisclaimed()}
           header="Installed"
           headerElements={
@@ -767,6 +779,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         <CollapsibleSection
           key="search-section"
           isOpen={ListModel.isDisclaimed()}
+          forceOpen={this._forceOpen}
           disabled={!ListModel.isDisclaimed()}
           header={model.query ? 'Search Results' : 'Discover'}
           onCollapse={(isOpen: boolean) => {
@@ -785,6 +798,10 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         {content}
       </div>
     );
+
+    // Reset the force open for future usage.
+    this._forceOpen = false;
+
     return elements;
   }
 
