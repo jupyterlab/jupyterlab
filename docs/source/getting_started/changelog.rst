@@ -74,11 +74,11 @@ Bugfixes
 * Fix property inspector restoration on reload (`#8114 <https://github.com/jupyterlab/jupyterlab/pull/8114>`__)
 * Increase the timeout for yarn (`#8104 <https://github.com/jupyterlab/jupyterlab/pull/8104>`__, `#8102 <https://github.com/jupyterlab/jupyterlab/issues/8102>`__)
 * Fix find and replace with empty strings (`#8100 <https://github.com/jupyterlab/jupyterlab/pull/8100>`__, `#8098 <https://github.com/jupyterlab/jupyterlab/issues/8098>`__)
-* Select search text when focusing the search overlay (#7932) (`#8073 <https://github.com/jupyterlab/jupyterlab/pull/8073>`__)
-* Fix attaching images with spaces in their names to markdown cells (`#8095 <https://github.com/jupyterlab/jupyterlab/pull/8095>`__)
+* Select search text when focusing the search overlay (`#8073 <https://github.com/jupyterlab/jupyterlab/pull/8073>`__, `#7932 <https://github.com/jupyterlab/jupyterlab/pull/7932>`__)
+* Fix attaching images with spaces in their names to Markdown cells (`#8095 <https://github.com/jupyterlab/jupyterlab/pull/8095>`__)
 * Fix build errors by distributing the ``.yarnrc`` configuration with the Python package (`#8045 <https://github.com/jupyterlab/jupyterlab/pull/8045>`__)
 * Throttle fetch requests in the setting registry's data connector (`#7927 <https://github.com/jupyterlab/jupyterlab/pull/7927>`__)
-* Close the gap between lines in notebook output (#7760) (`#7832 <https://github.com/jupyterlab/jupyterlab/pull/7832>`__)
+* Close the gap between lines in notebook output (`#7832 <https://github.com/jupyterlab/jupyterlab/pull/7832>`__, `#7760 <https://github.com/jupyterlab/jupyterlab/pull/7760>`__)
 
 `v2.0.2 <https://github.com/jupyterlab/jupyterlab/releases/tag/v2.0.2>`__
 ---------------------------------------------------------------------------
