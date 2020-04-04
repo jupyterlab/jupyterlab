@@ -1483,7 +1483,7 @@ export class MarkdownCell extends AttachmentsCell {
   ) {
     const textToBeAppended = `![${attachmentName}](attachment:${URI ??
       attachmentName})`;
-    this.model.value.insert(this.model.value.text.length, textToBeAppended);
+    this.editor.replaceSelection?.(textToBeAppended);
   }
 
   /**
