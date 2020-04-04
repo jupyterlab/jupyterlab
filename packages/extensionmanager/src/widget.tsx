@@ -602,7 +602,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
               href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
               target="_blank"
             >
-              Read more on the JupyterLab documentation.
+              Read more in the JupyterLab documentation.
             </a>
           </div>
         </div>
