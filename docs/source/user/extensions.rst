@@ -261,8 +261,8 @@ mode. JupyterLab will check the extensions against the defined listings.
 
 .. warning::
 
-    Only one mode at a time is allowed. If your or your server administrator configures
-    both black and white listings, the extension manager will be disabled
+    Only one mode at a time is allowed. If you or your server administrator configures
+    both black and white listings, the extension manager will be disabled.
 
 
 .. figure:: images/listings/simultaneous_black_white_listings.png
