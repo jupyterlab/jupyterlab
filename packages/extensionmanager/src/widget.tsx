@@ -314,7 +314,7 @@ export namespace ListEntry {
     /**
      * The list mode to apply.
      */
-    listMode: 'black' | 'white' | 'default';
+    listMode: 'black' | 'white' | 'default' | 'invalid';
 
     /**
      * The requested view type.
@@ -400,7 +400,7 @@ export namespace ListView {
     /**
      * The list mode to apply.
      */
-    listMode: 'black' | 'white' | 'default';
+    listMode: 'black' | 'white' | 'default' | 'invalid';
 
     /**
      * The requested view type.
@@ -587,6 +587,27 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   protected render(): React.ReactElement<any>[] {
     const model = this.model!;
+    if (!model.listMode) {
+      return [<div key="empty"></div>];
+    }
+    if (model.listMode === 'invalid') {
+      return [
+        <div style={{ padding: 8 }} key="invalid">
+          <div>
+            The extension manager is disabled. Please contact your system
+            administrator to verify the listings configuration.
+          </div>
+          <div>
+            <a
+              href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
+              target="_blank"
+            >
+              Read more on the JupyterLab documentation.
+            </a>
+          </div>
+        </div>
+      ];
+    }
     let pages = Math.ceil(model.totalEntries / model.pagination);
     let elements = [
       <SearchBar
@@ -892,8 +913,10 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   protected onActivateRequest(msg: Message): void {
     if (this.isAttached) {
       let input = this.inputNode;
-      input.focus();
-      input.select();
+      if (input) {
+        input.focus();
+        input.select();
+      }
     }
   }
 

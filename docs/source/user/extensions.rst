@@ -259,7 +259,18 @@ the user is free to install any extension. This is the :ref:`default_mode`.
 To bring more security, you or your administrator can enable ``blacklists`` or ``whitelists``
 mode. JupyterLab will check the extensions against the defined listings.
 
-Only one mode at a time is allowed.
+.. warning::
+
+    Only one mode at a time is allowed. If your or your server administrator configures
+    both black and white listings, the extension manager will be disabled
+
+
+.. figure:: images/listings/simultaneous_black_white_listings.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Simultaneous black and white listings
+
 
 The following details the behavior for the :ref:`blacklist_mode` and the :ref:`whitelist_mode`.
 The details to enable configure the listings can be read :ref:`listings_conf`. 
