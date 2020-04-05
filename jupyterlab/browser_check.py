@@ -61,7 +61,13 @@ class LogErrorHandler(logging.Handler):
 
 
 def run_test(app, func):
-    """Synchronous entry point to run a test function"""
+    """Synchronous entry point to run a test function.
+
+    func is a function that accepts an app url as a parameter and returns a result.
+
+    func can be synchronous or asynchronous.  If it is synchronous, it will be run
+    in a thread, so asynchronous is preferred.
+    """
     IOLoop.current().spawn_callback(run_test_async, app, func)
 
 
@@ -69,6 +75,9 @@ async def run_test_async(app, func):
     """Run a test against the application.
 
     func is a function that accepts an app url as a parameter and returns a result.
+
+    func can be synchronous or asynchronous.  If it is synchronous, it will be run
+    in a thread, so asynchronous is preferred.
     """
     handler = LogErrorHandler()
     app.log.addHandler(handler)
