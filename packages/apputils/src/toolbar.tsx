@@ -752,7 +752,10 @@ namespace Private {
      */
     private _isBusy(status: ISessionContext.KernelDisplayStatus): boolean {
       return (
-        status === 'busy' || status === 'starting' || status === 'restarting'
+        status === 'busy' ||
+        status === 'starting' ||
+        status === 'restarting' ||
+        status === 'initializing'
       );
     }
   }

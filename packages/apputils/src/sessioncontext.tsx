@@ -122,7 +122,7 @@ export interface ISessionContext extends IObservableDisposable {
   kernelPreference: ISessionContext.IKernelPreference;
 
   /**
-   * The sensible display name for the kernel, or 'No Kernel'
+   * The sensible display name for the kernel, or Private.NO_KERNEL
    *
    * #### Notes
    * This is at this level since the underlying kernel connection does not
@@ -441,16 +441,35 @@ export class SessionContext implements ISessionContext {
    */
   get kernelDisplayName(): string {
     let kernel = this.session?.kernel;
+    if (this._pendingKernelName === Private.NO_KERNEL) {
+      return Private.NO_KERNEL;
+    }
     if (
       !kernel &&
       !this.isReady &&
       this.kernelPreference.canStart !== false &&
       this.kernelPreference.shouldStart !== false
     ) {
-      return 'Kernel';
+      let name =
+        this._pendingKernelName ||
+        SessionContext.getDefaultKernel({
+          specs: this.specsManager.specs,
+          sessions: this.sessionManager.running(),
+          preference: this.kernelPreference
+        }) ||
+        '';
+      if (name) {
+        name = this.specsManager.specs!.kernelspecs[name]!.display_name;
+        return name;
+      }
+      return Private.NO_KERNEL;
+    }
+    if (this._pendingKernelName) {
+      return this.specsManager.specs!.kernelspecs[this._pendingKernelName]!
+        .display_name;
     }
     if (!kernel) {
-      return 'No Kernel!';
+      return Private.NO_KERNEL;
     }
     return (
       this.specsManager.specs?.kernelspecs[kernel.name]?.display_name ??
@@ -467,12 +486,19 @@ export class SessionContext implements ISessionContext {
    */
   get kernelDisplayStatus(): ISessionContext.KernelDisplayStatus {
     let kernel = this.session?.kernel;
+    if (this._pendingKernelName === Private.NO_KERNEL) {
+      return '';
+    }
     if (
       !kernel &&
       !this.isReady &&
       this.kernelPreference.canStart !== false &&
       this.kernelPreference.shouldStart !== false
     ) {
+      return 'initializing';
+    }
+
+    if (!kernel && this._pendingKernelName) {
       return 'initializing';
     }
 
@@ -542,10 +568,13 @@ export class SessionContext implements ISessionContext {
   async changeKernel(
     options: Partial<Kernel.IModel> = {}
   ): Promise<Kernel.IKernelConnection | null> {
-    await this.initialize();
     if (this.isDisposed) {
       throw new Error('Disposed');
     }
+    // Wait for the initialization method to try
+    // and start its kernel first to ensure consistent
+    // ordering.
+    await this._initStarted.promise;
     return this._changeKernel(options);
   }
 
@@ -555,7 +584,13 @@ export class SessionContext implements ISessionContext {
    * @returns A promise that resolves when the session is shut down.
    */
   async shutdown(): Promise<void> {
-    return this._session?.shutdown();
+    if (this.isDisposed || !this._initializing) {
+      return;
+    }
+    await this._initStarted.promise;
+    this._pendingSessionRequest = '';
+    this._pendingKernelName = Private.NO_KERNEL;
+    return this._shutdownSession();
   }
 
   /**
@@ -576,8 +611,26 @@ export class SessionContext implements ISessionContext {
       return this._initPromise.promise;
     }
     this._initializing = true;
+    const needsSelection = await this._initialize();
+    if (!needsSelection) {
+      this._isReady = true;
+      this._ready.resolve(undefined);
+    }
+    if (!this._pendingSessionRequest) {
+      this._initStarted.resolve(void 0);
+    }
+    this._initPromise.resolve(needsSelection);
+    return needsSelection;
+  }
+
+  /**
+   * Inner initialize function that doesn't handle promises.
+   * This makes it easier to consolidate promise handling logic.
+   */
+  async _initialize(): Promise<boolean> {
     let manager = this.sessionManager;
     await manager.ready;
+    await manager.refreshRunning();
     let model = find(manager.running(), item => {
       return item.path === this._path;
     });
@@ -590,13 +643,30 @@ export class SessionContext implements ISessionContext {
         return Promise.reject(err);
       }
     }
-    const needsSelection = await this._startIfNecessary();
-    if (!needsSelection) {
-      this._isReady = true;
-      this._ready.resolve(undefined);
-    }
-    this._initPromise.resolve(needsSelection);
-    return needsSelection;
+
+    return await this._startIfNecessary();
+  }
+
+  /**
+   * Shut down the current session.
+   */
+  private async _shutdownSession(): Promise<void> {
+    const session = this._session;
+    this._session = null;
+    const kernel = session?.kernel || null;
+    this._kernelChanged.emit({
+      name: 'kernel',
+      oldValue: kernel,
+      newValue: null
+    });
+    this._statusChanged.emit('unknown');
+    await session?.shutdown();
+    session?.dispose();
+    this._sessionChanged.emit({
+      name: 'session',
+      oldValue: session,
+      newValue: null
+    });
   }
 
   /**
@@ -647,33 +717,30 @@ export class SessionContext implements ISessionContext {
    * Change the kernel.
    */
   private async _changeKernel(
-    options: Partial<Kernel.IModel> = {}
+    model: Partial<Kernel.IModel> = {},
+    isInit = false
   ): Promise<Kernel.IKernelConnection | null> {
-    if (this.isDisposed) {
-      throw new Error('Disposed');
+    if (model.name) {
+      this._pendingKernelName = model.name;
     }
-    let session = this._session;
-    if (session && session.kernel?.status !== 'dead') {
-      try {
-        return session.changeKernel(options);
-      } catch (err) {
-        void this._handleSessionError(err);
-        throw err;
-      }
-    } else {
-      return this._startSession(options);
-    }
-  }
 
-  /**
-   * Start a session and set up its signals.
-   */
-  private async _startSession(
-    model: Partial<Kernel.IModel> = {}
-  ): Promise<Kernel.IKernelConnection | null> {
-    if (this.isDisposed) {
-      throw 'Client session is disposed.';
+    if (this._session) {
+      await this._shutdownSession();
+    } else if (this._pendingSessionRequest) {
+      this._kernelChanged.emit({
+        name: 'kernel',
+        oldValue: null,
+        newValue: null
+      });
+      this._statusChanged.emit('unknown');
     }
+
+    // Guarantee that the initialized kernel
+    // will be started first.
+    if (!this._pendingSessionRequest) {
+      this._initStarted.resolve(void 0);
+    }
+    const requestId = (this._pendingSessionRequest = UUID.uuid4());
     try {
       const session = await this.sessionManager.startNew({
         path: this._path,
@@ -681,6 +748,14 @@ export class SessionContext implements ISessionContext {
         name: this._name,
         kernel: model
       });
+      // Handle another session starting before we finish.
+      if (this._pendingSessionRequest !== requestId) {
+        await session.shutdown();
+        return null;
+      }
+      if (this._session) {
+        await this._shutdownSession();
+      }
       return this._handleNewSession(session);
     } catch (err) {
       void this._handleSessionError(err);
@@ -706,6 +781,7 @@ export class SessionContext implements ISessionContext {
     }
     this._session = session;
     this._prevKernelName = session.kernel?.name ?? '';
+    this._pendingKernelName = '';
 
     session.disposed.connect(this._onSessionDisposed, this);
     session.propertyChanged.connect(this._onPropertyChanged, this);
@@ -730,17 +806,17 @@ export class SessionContext implements ISessionContext {
 
     // Any existing session/kernel connection was disposed above when the session was
     // disposed, so the oldValue should be null.
+    this._sessionChanged.emit({
+      name: 'session',
+      oldValue: null,
+      newValue: session
+    });
     this._kernelChanged.emit({
       oldValue: null,
       newValue: session.kernel,
       name: 'kernel'
     });
-    this._sessionChanged.emit({
-      oldValue: null,
-      newValue: session,
-      name: 'session'
-    });
-
+    this._statusChanged.emit(session?.kernel?.status || 'unknown');
     return session.kernel;
   }
 
@@ -785,7 +861,6 @@ export class SessionContext implements ISessionContext {
    */
   private _onSessionDisposed(): void {
     if (this._session) {
-      this._session.dispose();
       const oldValue = this._session;
       this._session = null;
       const newValue = this._session;
@@ -894,6 +969,7 @@ export class SessionContext implements ISessionContext {
   private _session: Session.ISessionConnection | null = null;
   private _ready = new PromiseDelegate<void>();
   private _initializing = false;
+  private _initStarted = new PromiseDelegate<void>();
   private _initPromise = new PromiseDelegate<boolean>();
   private _isReady = false;
   private _kernelChanged = new Signal<
@@ -912,12 +988,15 @@ export class SessionContext implements ISessionContext {
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
     this
   );
+
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);
   private _dialog: Dialog<any> | null = null;
   private _setBusy: (() => IDisposable) | undefined;
   private _busyDisposable: IDisposable | null = null;
+  private _pendingKernelName = '';
+  private _pendingSessionRequest = '';
 }
 
 /**
@@ -1003,11 +1082,12 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
     if (sessionContext.isDisposed) {
       return Promise.resolve();
     }
+
     // If there is no existing kernel, offer the option
     // to keep no kernel.
     let label = 'Cancel';
-    if (!sessionContext?.session?.kernel) {
-      label = 'No Kernel';
+    if (sessionContext.kernelDisplayName === Private.NO_KERNEL) {
+      label = Private.NO_KERNEL;
     }
     const buttons = [
       Dialog.cancelButton({ label }),
@@ -1025,7 +1105,10 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
       return;
     }
     let model = result.value;
-    if (model === null && sessionContext?.session?.kernel) {
+    if (
+      model === null &&
+      sessionContext.kernelDisplayName !== Private.NO_KERNEL
+    ) {
       return sessionContext.shutdown();
     }
     if (model) {
@@ -1083,6 +1166,11 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
  * The namespace for module private data.
  */
 namespace Private {
+  /**
+   * The text to show for no kernel.
+   */
+  export const NO_KERNEL = 'No Kernel';
+
   /**
    * A widget that provides a kernel selection.
    */
@@ -1364,7 +1452,7 @@ namespace Private {
     let group = document.createElement('optgroup');
     group.label = 'Use No Kernel';
     let option = document.createElement('option');
-    option.text = 'No Kernel';
+    option.text = Private.NO_KERNEL;
     option.value = 'null';
     group.appendChild(option);
     return group;

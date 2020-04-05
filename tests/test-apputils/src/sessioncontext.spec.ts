@@ -72,6 +72,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#disposed', () => {
       it('should be emitted when the session context is disposed', async () => {
+        sessionContext.kernelPreference = { canStart: false };
         await sessionContext.initialize();
         let called = false;
         sessionContext.disposed.connect((sender, args) => {
@@ -235,7 +236,6 @@ describe('@jupyterlab/apputils', () => {
       it('should connect to an existing kernel', async () => {
         // Shut down and dispose the session so it can be re-instantiated.
         await sessionContext.shutdown();
-        sessionContext.dispose();
 
         const other = await sessionManager.startNew({
           name: '',
@@ -286,17 +286,21 @@ describe('@jupyterlab/apputils', () => {
         expect(sessionContext.kernelDisplayName).to.equal(spec!.display_name);
       });
 
-      it('should display "No Kernel!" when there is no kernel', async () => {
+      it('should display "No Kernel" when there is no kernel', async () => {
         sessionContext.kernelPreference = {
           canStart: false,
           shouldStart: false
         };
-        expect(sessionContext.kernelDisplayName).to.equal('No Kernel!');
+        expect(sessionContext.kernelDisplayName).to.equal('No Kernel');
       });
 
-      it('should display "Kernel" when it looks like we are starting a kernel', async () => {
-        sessionContext.kernelPreference = {};
-        expect(sessionContext.kernelDisplayName).to.equal('Kernel');
+      it('should display the pending kernel name when it looks like we are starting a kernel', async () => {
+        sessionContext.kernelPreference = {
+          autoStartDefault: true,
+          canStart: true,
+          shouldStart: true
+        };
+        expect(sessionContext.kernelDisplayName).to.equal('Echo Kernel');
       });
     });
 
@@ -352,6 +356,7 @@ describe('@jupyterlab/apputils', () => {
         sessionContext.dispose();
         const sessions = await SessionAPI.listRunning();
         expect(sessions.find(s => s.id === id)).to.be.ok;
+        await SessionAPI.shutdownSession(id);
       });
 
       it('should shut down the session when shutdownOnDispose is true', async () => {
@@ -378,6 +383,39 @@ describe('@jupyterlab/apputils', () => {
         expect(kernel.id).to.not.equal(id);
         expect(kernel.name).to.equal(name);
       });
+
+      it('should still work if called before fully initialized', async () => {
+        const initPromise = sessionContext.initialize(); // Start but don't finish init.
+        const name = 'echo';
+        const kernelPromise = sessionContext.changeKernel({ name });
+
+        let lastKernel = null;
+        sessionContext.kernelChanged.connect(() => {
+          lastKernel = sessionContext.session?.kernel;
+        });
+        const results = await Promise.all([kernelPromise, initPromise]);
+        const kernel = results[0];
+        const shouldSelect = results[1];
+        expect(shouldSelect).to.equal(false);
+        expect(lastKernel).to.equal(kernel);
+      });
+
+      it('should handle multiple requests', async () => {
+        await sessionContext.initialize();
+        const name = 'echo';
+        const kernelPromise0 = sessionContext.changeKernel({ name });
+        // The last launched kernel should win.
+        const kernelPromise1 = sessionContext.changeKernel({ name });
+
+        let lastKernel = null;
+        sessionContext.kernelChanged.connect(() => {
+          lastKernel = sessionContext.session?.kernel;
+        });
+        const results = await Promise.all([kernelPromise0, kernelPromise1]);
+        // We can't know which of the two was launched first, so the result
+        // could be either, just make sure it isn't the original kernel.
+        expect(lastKernel).to.be.oneOf([results[0], results[1]]);
+      });
     });
 
     describe('#shutdown', () => {
@@ -387,13 +425,17 @@ describe('@jupyterlab/apputils', () => {
         await sessionContext.shutdown();
         expect(sessionContext.session?.kernel).to.not.be.ok;
       });
+
+      it('should handle a shutdown during startup', async () => {
+        const initPromise = sessionContext.initialize(); // Start but don't finish init.
+        const shutdownPromise = sessionContext.shutdown();
+        const results = await Promise.all([initPromise, shutdownPromise]);
+        expect(results[0]).to.equal(false);
+        expect(sessionContext.session).to.equal(null);
+      });
     });
 
     describe('.getDefaultKernel()', () => {
-      beforeEach(() => {
-        sessionContext.dispose();
-      });
-
       it('should return null if no options are given', () => {
         expect(
           SessionContext.getDefaultKernel({
@@ -467,28 +509,28 @@ describe('@jupyterlab/apputils', () => {
       describe('#selectKernel()', () => {
         it('should select a kernel for the session', async () => {
           await sessionContext.initialize();
-          const session = sessionContext?.session;
 
-          const { id, name } = session!.kernel!;
+          const { id, name } = sessionContext?.session!.kernel!;
           const accept = acceptDialog();
 
           await sessionContextDialogs.selectKernel(sessionContext);
           await accept;
 
+          const session = sessionContext?.session;
           expect(session!.kernel!.id).to.not.equal(id);
           expect(session!.kernel!.name).to.equal(name);
         });
 
         it('should keep the existing kernel if dismissed', async () => {
           await sessionContext.initialize();
-          const session = sessionContext!.session;
 
-          const { id, name } = session!.kernel!;
+          const { id, name } = sessionContext!.session!.kernel!;
           const dismiss = dismissDialog();
 
           await sessionContextDialogs.selectKernel(sessionContext);
           await dismiss;
 
+          const session = sessionContext.session;
           expect(session!.kernel!.id).to.equal(id);
           expect(session!.kernel!.name).to.equal(name);
         });
