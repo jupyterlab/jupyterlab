@@ -5,6 +5,7 @@ This module is meant to run JupyterLab in a headless browser, making sure
 the application launches and starts up without errors.
 """
 import asyncio
+from concurrent.futures import ThreadPoolExecutor
 import inspect
 import logging
 from os import path as osp
@@ -86,10 +87,13 @@ async def run_test_async(app, func):
     if inspect.isawaitable(func):
         test = func(url)
     else:
-        test = asyncio.ensure_future(func(url))
+        loop = asyncio.get_event_loop()
+        executur = ThreadPoolExecutor()
+        task = loop.run_in_executor(executor, func, url)
+        test = asyncio.wait([task])
 
     try:
-        await test
+       await test
     except Exception as e:
         app.log.critical("Caught exception during the test:")
         app.log.error(str(e))
