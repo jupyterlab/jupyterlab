@@ -212,7 +212,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           <div style={{ width: `${badgeSize}px`, height: `${badgeSize}px` }} />
         )}
       </div>
-      <div style={{ flexDirection: 'column' }}>
+      <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
             <a href={entry.url} target="_blank" rel="noopener">
