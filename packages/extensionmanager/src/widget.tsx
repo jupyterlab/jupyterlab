@@ -10,6 +10,7 @@ import {
   caretRightIcon,
   Collapse,
   InputGroup,
+  jupyterIcon,
   listingsInfoIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
@@ -19,6 +20,7 @@ import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
+import { isJupyterOrg } from './npm';
 
 // TODO: Replace pagination with lazy loading of lower search results
 
@@ -168,6 +170,10 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
   let title = entry.name;
+  const entryIsJupyterOrg = isJupyterOrg(entry.name);
+  if (entryIsJupyterOrg) {
+    title = `${entry.name} (Developed by Project Jupyter)`;
+  }
   const githubUser = getExtensionGitHubUser(entry);
   if (
     listMode === 'black' &&
@@ -237,6 +243,14 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 }
               />
             )}
+          {entryIsJupyterOrg && (
+            <jupyterIcon.react
+              className="jp-extensionmanager-is-jupyter-org"
+              top="1px"
+              height="auto"
+              width="1em"
+            />
+          )}
         </div>
         <div className="jp-extensionmanager-entry-content">
           <div className="jp-extensionmanager-entry-description">
