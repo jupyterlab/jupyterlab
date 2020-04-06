@@ -21,8 +21,6 @@
 */
 
 .jp-extensionmanager-is-jupyter-org {
-  position: absolute;
-  right: 8px;
   font-size: var(--jp-ui-font-size0);
   color: var(--jp-ui-font-color2);
 }
@@ -185,9 +183,15 @@
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
 }
 
+.jp-extensionmanager-entry-description {
+  min-width: 0;
+  flex-grow: 1;
+}
+
 .jp-extensionmanager-entry-title {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
 }
 
 .jp-extensionmanager-entry.jp-extensionmanager-entry-should-be-uninstalled {
@@ -213,6 +217,7 @@
   font-weight: 600;
   padding: 0 8px 0 0;
   margin-bottom: 4px;
+  overflow-wrap: anywhere;
 }
 
 .jp-extensionmanager-entry-name a:link {
