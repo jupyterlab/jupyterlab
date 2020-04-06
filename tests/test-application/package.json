@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-application",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -12,10 +12,10 @@
     "watch:src": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.0.2",
-    "@jupyterlab/apputils": "^2.0.2",
+    "@jupyterlab/application": "^2.0.3",
+    "@jupyterlab/apputils": "^2.0.3",
     "@jupyterlab/statedb": "^2.0.1",
-    "@jupyterlab/testutils": "^2.0.2",
+    "@jupyterlab/testutils": "^2.0.3",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
     "@lumino/coreutils": "^1.4.2",
