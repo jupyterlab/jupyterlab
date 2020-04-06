@@ -744,16 +744,30 @@ export class SessionContext implements ISessionContext {
   private async _handleSessionError(
     err: ServerConnection.ResponseError
   ): Promise<void> {
-    let text = await err.response.text();
-    let message = err.message;
+    let traceback = '';
+    let message = '';
     try {
-      message = JSON.parse(text)['traceback'];
+      const json = await err.response.json();
+      traceback = json['traceback'];
+      message = json['message'];
     } catch (err) {
       // no-op
     }
-    let dialog = (this._dialog = new Dialog({
+    const body = (
+      <div>
+        <pre>{err.message}</pre>
+        {message && <pre>{message}</pre>}
+        {traceback && (
+          <details className="jp-mod-wide">
+            <pre>{traceback}</pre>
+          </details>
+        )}
+      </div>
+    );
+
+    const dialog = (this._dialog = new Dialog({
       title: 'Error Starting Kernel',
-      body: <pre>{message}</pre>,
+      body,
       buttons: [Dialog.okButton()]
     }));
     await dialog.launch();
