@@ -66,12 +66,17 @@ export function classesDedupe(
  *
  * @param elem - A DOM element
  *
+ * @param ignore - An optional list of attribute names to ignore
+ *
  * @returns An object with key:value pairs that are the React-friendly
  * translation of elem's attributes
  */
-export function getReactAttrs(elem: Element) {
+export function getReactAttrs(
+  elem: Element,
+  { ignore = [] }: { ignore?: string[] } = {}
+) {
   return elem.getAttributeNames().reduce((d, name) => {
-    if (name === 'style') {
+    if (name === 'style' || ignore.includes(name)) {
       void 0;
     } else if (name.startsWith('data')) {
       d[name] = elem.getAttribute(name);

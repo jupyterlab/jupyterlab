@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-filebrowser",
-  "version": "2.0.2",
+  "version": "2.1.0-rc.0",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -17,13 +17,13 @@
     "watch:src": "tsc -p src --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^4.0.2",
-    "@jupyterlab/docmanager": "^2.0.2",
-    "@jupyterlab/docregistry": "^2.0.2",
-    "@jupyterlab/filebrowser": "^2.0.2",
-    "@jupyterlab/services": "^5.0.2",
-    "@jupyterlab/statedb": "^2.0.1",
-    "@jupyterlab/testutils": "^2.0.2",
+    "@jupyterlab/coreutils": "^4.1.0-rc.0",
+    "@jupyterlab/docmanager": "^2.1.0-rc.0",
+    "@jupyterlab/docregistry": "^2.1.0-rc.0",
+    "@jupyterlab/filebrowser": "^2.1.0-rc.0",
+    "@jupyterlab/services": "^5.1.0-rc.0",
+    "@jupyterlab/statedb": "^2.1.0-rc.0",
+    "@jupyterlab/testutils": "^2.1.0-rc.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
     "@lumino/messaging": "^1.3.3",

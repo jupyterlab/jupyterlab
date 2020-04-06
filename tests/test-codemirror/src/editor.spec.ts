@@ -16,8 +16,6 @@ const UP_ARROW = 38;
 
 const DOWN_ARROW = 40;
 
-const BACKSPACE = 8;
-
 const ENTER = 13;
 
 class LogFileEditor extends CodeMirrorEditor {
@@ -77,37 +75,6 @@ describe('CodeMirrorEditor', () => {
       expect(edge).to.be.null;
       editor.editor.triggerOnKeyDown(event);
       expect(edge).to.equal('bottom');
-    });
-  });
-
-  describe('#backspaceEmpty', () => {
-    it('should emit a signal when backspace in empty cell', () => {
-      const event = generate('keydown', { keyCode: BACKSPACE });
-      let called = false;
-      const listener = (sender: any, args: any) => {
-        expect(sender).to.be.equal(editor);
-        expect(args).to.be.undefined;
-        called = true;
-      };
-      editor.emptyBackspace.connect(listener);
-      expect(called).to.be.false;
-      editor.editor.triggerOnKeyDown(event);
-      expect(called).to.be.true;
-    });
-
-    it('should not emit a signal when backspace in non-empty cell', () => {
-      editor.model.value.text = 'foo\nbar\nbaz';
-      const event = generate('keydown', { keyCode: BACKSPACE });
-      let called = false;
-      const listener = (sender: any, args: any) => {
-        expect(sender).to.be.equal(editor);
-        expect(args).to.be.undefined;
-        called = true;
-      };
-      editor.emptyBackspace.connect(listener);
-      expect(called).to.be.false;
-      editor.editor.triggerOnKeyDown(event);
-      expect(called).to.be.false;
     });
   });
 

@@ -55,6 +55,8 @@ namespace CommandIDs {
   export const reset = 'apputils:reset';
 
   export const resetOnLoad = 'apputils:reset-on-load';
+
+  export const runFirstEnabled = 'apputils:run-first-enabled';
 }
 
 /**
@@ -458,6 +460,32 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
 };
 
 /**
+ * Utility commands
+ */
+const utilityCommands: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:utilityCommands',
+  autoStart: true,
+  activate: app => {
+    const { commands } = app;
+    commands.addCommand(CommandIDs.runFirstEnabled, {
+      label: 'Run First Enabled Command',
+      execute: args => {
+        const commands: string[] = args.commands as string[];
+        const commandArgs: any = args.args;
+        const argList = Array.isArray(args);
+        for (let i = 0; i < commands.length; i++) {
+          let cmd = commands[i];
+          let arg = argList ? commandArgs[i] : commandArgs;
+          if (app.commands.isEnabled(cmd, arg)) {
+            return app.commands.execute(cmd, arg);
+          }
+        }
+      }
+    });
+  }
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -470,7 +498,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   splash,
   sessionDialogs,
   themesPlugin,
-  themesPaletteMenuPlugin
+  themesPaletteMenuPlugin,
+  utilityCommands
 ];
 export default plugins;
 

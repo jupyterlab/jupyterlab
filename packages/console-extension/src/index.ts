@@ -90,6 +90,8 @@ namespace CommandIDs {
   export const shiftEnterToExecute = 'console:shift-enter-to-execute';
 
   export const interactionMode = 'console:interaction-mode';
+
+  export const replaceSelection = 'console:replace-selection';
 }
 
 /**
@@ -429,6 +431,19 @@ async function activateConsole(
         return;
       }
       current.console.insertLinebreak();
+    },
+    isEnabled
+  });
+
+  commands.addCommand(CommandIDs.replaceSelection, {
+    label: 'Replace Selection in Console',
+    execute: args => {
+      let current = getCurrent(args);
+      if (!current) {
+        return;
+      }
+      const text: string = (args['text'] as string) || '';
+      current.console.replaceSelection(text);
     },
     isEnabled
   });

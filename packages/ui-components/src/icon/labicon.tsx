@@ -168,7 +168,10 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * Resolve a {name, svgstr} pair into an actual svg node.
    */
   static resolveSvg({ name, svgstr }: LabIcon.IIcon): HTMLElement | null {
-    const svgDoc = new DOMParser().parseFromString(svgstr, 'image/svg+xml');
+    const svgDoc = new DOMParser().parseFromString(
+      Private.svgstrShim(svgstr),
+      'image/svg+xml'
+    );
 
     const svgError = svgDoc.querySelector('parsererror');
 
@@ -324,25 +327,22 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     }
 
     // ensure that svg html is valid
-    const svgElement = this._initSvg({ uuid: this._uuid });
-    if (!svgElement) {
+    if (!this.svgElement) {
       // bail if failing silently, return blank element
       return document.createElement('div');
     }
 
-    let ret: HTMLElement;
+    let returnSvgElement = true;
     if (container) {
       // take ownership by removing any existing children
       while (container.firstChild) {
         container.firstChild.remove();
       }
-
-      ret = svgElement;
     } else {
       // create a container if needed
       container = document.createElement(tag);
 
-      ret = container;
+      returnSvgElement = false;
     }
     if (label != null) {
       container.textContent = label;
@@ -350,9 +350,10 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     Private.initContainer({ container, className, styleProps, title });
 
     // add the svg node to the container
+    let svgElement = this.svgElement.cloneNode(true) as HTMLElement;
     container.appendChild(svgElement);
 
-    return ret;
+    return returnSvgElement ? svgElement : container;
   }
 
   render(container: HTMLElement, options?: LabIcon.IRendererOptions): void {
@@ -369,6 +370,42 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     });
   }
 
+  protected get svgElement(): HTMLElement | null {
+    if (this._svgElement === undefined) {
+      this._svgElement = this._initSvg({ uuid: this._uuid });
+    }
+
+    return this._svgElement;
+  }
+
+  protected get svgInnerHTML(): string | null {
+    if (this._svgInnerHTML === undefined) {
+      if (this.svgElement === null) {
+        // the svg element resolved to null, mark this null too
+        this._svgInnerHTML = null;
+      } else {
+        this._svgInnerHTML = this.svgElement.innerHTML;
+      }
+    }
+
+    return this._svgInnerHTML;
+  }
+
+  protected get svgReactAttrs(): any | null {
+    if (this._svgReactAttrs === undefined) {
+      if (this.svgElement === null) {
+        // the svg element resolved to null, mark this null too
+        this._svgReactAttrs = null;
+      } else {
+        this._svgReactAttrs = getReactAttrs(this.svgElement, {
+          ignore: ['data-icon-id']
+        });
+      }
+    }
+
+    return this._svgReactAttrs;
+  }
+
   get svgstr() {
     return this._svgstr;
   }
@@ -381,13 +418,17 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     const uuidOld = this._uuid;
     this._uuid = uuid;
 
+    // empty the svg parsing intermediates cache
+    this._svgElement = undefined;
+    this._svgInnerHTML = undefined;
+    this._svgReactAttrs = undefined;
+
     // update icon elements created using .element method
     document
       .querySelectorAll(`[data-icon-id="${uuidOld}"]`)
       .forEach(oldSvgElement => {
-        const svgElement = this._initSvg({ uuid });
-        if (svgElement) {
-          oldSvgElement.replaceWith(svgElement);
+        if (this.svgElement) {
+          oldSvgElement.replaceWith(this.svgElement.cloneNode(true));
         }
       });
 
@@ -430,16 +471,15 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
         const Tag = tag;
 
         // ensure that svg html is valid
-        const svgElement = this._initSvg();
-        if (!svgElement) {
+        if (!(this.svgInnerHTML && this.svgReactAttrs)) {
           // bail if failing silently
           return <></>;
         }
 
         const svgComponent = (
           <svg
-            {...getReactAttrs(svgElement)}
-            dangerouslySetInnerHTML={{ __html: svgElement.innerHTML }}
+            {...this.svgReactAttrs}
+            dangerouslySetInnerHTML={{ __html: this.svgInnerHTML }}
             ref={ref}
           />
         );
@@ -561,6 +601,15 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   protected _svgReplaced = new Signal<this, void>(this);
   protected _svgstr: string;
   protected _uuid: string;
+
+  /**
+   * Cache for svg parsing intermediates
+   *   - undefined: the cache has not yet been populated
+   *   - null: a valid, but empty, value
+   */
+  protected _svgElement: HTMLElement | null | undefined = undefined;
+  protected _svgInnerHTML: string | null | undefined = undefined;
+  protected _svgReactAttrs: any | null | undefined = undefined;
 }
 
 /**
@@ -799,6 +848,36 @@ namespace Private {
       titleNode.textContent = title;
       svgNode.appendChild(titleNode);
     }
+  }
+
+  /**
+   * A shim for svgstrs loaded using any loader other than raw-loader.
+   * This function assumes that svgstr will look like one of:
+   *
+   * - the raw contents of an .svg file:
+   *   <svg...</svg>
+   *
+   * - a data URL:
+   *   data:[<mediatype>][;base64],<svg...</svg>
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs
+   */
+  export function svgstrShim(svgstr: string, strict: boolean = true): string {
+    // decode any uri escaping, condense leading/lagging whitespace,
+    // then match to raw svg string
+    const [, base64, raw] = decodeURIComponent(svgstr)
+      .replace(/>\s*\n\s*</g, '><')
+      .replace(/\s*\n\s*/g, ' ')
+      .match(
+        strict
+          ? // match based on data url schema
+            /^(?:data:.*?(;base64)?,)?(.*)/
+          : // match based on open of svg tag
+            /(?:(base64).*)?(<svg.*)/
+      )!;
+
+    // decode from base64, if needed
+    return base64 ? atob(raw) : raw;
   }
 
   /**
