@@ -17,6 +17,17 @@
 }
 
 /*
+  Jupyter Org
+*/
+
+.jp-extensionmanager-is-jupyter-org {
+  position: absolute;
+  right: 8px;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color2);
+}
+
+/*
   List view layout and styling
 */
 
