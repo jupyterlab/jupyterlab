@@ -628,11 +628,10 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       >
         <div className="jp-extensionmanager-disclaimer">
           <div>
-            Extensions installed contain arbitrary code that can execute on your
-            machine that may contain malicious code.
-          </div>
-          <div style={{ paddingTop: 8 }}>
-            I understand extensions contain arbitrary code.
+            The JupyterLab development team is excited to have a robust
+            third-party extension community. However, we do not review
+            third-party extensions, and some extensions may introduce security
+            risks or contain malicious code that runs on your machine.
           </div>
           <div style={{ paddingTop: 8 }}>
             {ListModel.isDisclaimed() && (
