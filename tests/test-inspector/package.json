@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-inspector",
-  "version": "2.1.0-rc.0",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -12,8 +12,8 @@
     "watch:src": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/inspector": "^2.1.0-rc.0",
-    "@jupyterlab/testutils": "^2.1.0-rc.0",
+    "@jupyterlab/inspector": "^2.1.0",
+    "@jupyterlab/testutils": "^2.1.0",
     "@lumino/signaling": "^1.3.5",
     "@lumino/widgets": "^1.11.1",
     "chai": "^4.2.0",
