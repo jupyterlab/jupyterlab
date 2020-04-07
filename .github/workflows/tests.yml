@@ -18,7 +18,7 @@ jobs:
 
     - name: Update conda
       run: conda update -y -n base conda setuptools
-    
+
     - name: Init conda
       run: |
         conda init bash
@@ -27,13 +27,19 @@ jobs:
       run: conda create -n jupyterlab-debugger --yes --quiet -c conda-forge nodejs jupyterlab=2 xeus-python=0.6.12 ptvsd python=$PYTHON_VERSION
       env:
         PYTHON_VERSION: '3.8'
-    
-    - name: Build the extension
+
+    - name: Build and install the extension
       run: |
         source "$CONDA/etc/profile.d/conda.sh"
         conda activate jupyterlab-debugger
-        jlpm
-        jlpm run build
+        jlpm && jlpm run build
+        jupyter labextension link .
+
+    - name: Browser check
+      run: |
+        source "$CONDA/etc/profile.d/conda.sh"
+        conda activate jupyterlab-debugger
+        python -m jupyterlab.browser_check
 
     - name: Run the tests
       run: |
