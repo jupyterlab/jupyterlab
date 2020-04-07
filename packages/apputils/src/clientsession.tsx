@@ -320,9 +320,21 @@ export class ClientSession implements IClientSession {
       return this._session.status;
     }
     if (this._pendingKernelName === Private.NO_KERNEL) {
-      return 'unknown';
+      return 'idle';
     }
-    return 'starting';
+    if (
+      !this.isReady &&
+      this.kernelPreference.canStart !== false &&
+      this.kernelPreference.shouldStart !== false
+    ) {
+      return 'starting';
+    }
+
+    if (this._pendingKernelName) {
+      return 'starting';
+    }
+
+    return 'unknown';
   }
 
   /**
@@ -392,7 +404,7 @@ export class ClientSession implements IClientSession {
     this._isDisposed = true;
     if (this._session) {
       if (this.kernelPreference.shutdownOnClose) {
-        this._session.shutdown().catch(reason => {
+        this.manager.shutdown(this._session.id).catch(reason => {
           console.error(`Kernel not shut down ${reason}`);
         });
       }
@@ -429,7 +441,7 @@ export class ClientSession implements IClientSession {
    * Select a kernel for the session.
    */
   selectKernel(): Promise<void> {
-    return this.initialize().then(() => {
+    return this._initStarted.promise.then(() => {
       if (this.isDisposed) {
         return Promise.reject('Disposed');
       }
@@ -616,17 +628,15 @@ export class ClientSession implements IClientSession {
   private async _changeKernel(
     model: Partial<Kernel.IModel>
   ): Promise<Kernel.IKernelConnection> {
-    if (model.name) {
-      this._pendingKernelName = model.name;
-    }
+    this._pendingKernelName = model.name;
+
     if (this._session) {
       await this._shutdownSession();
-    } else if (this._pendingSessionRequest) {
+    } else {
       this._kernelChanged.emit({
         oldValue: null,
         newValue: null
       });
-      this._statusChanged.emit('unknown');
     }
 
     // Guarantee that the initialized kernel
@@ -636,28 +646,27 @@ export class ClientSession implements IClientSession {
     }
     const requestId = (this._pendingSessionRequest = UUID.uuid4());
     try {
+      // Use a UUID for the path to overcome a race condition on the server
+      // where it will re-use a session for a given path but only after
+      // the kernel finishes starting.
+      // We later switch to the real path below.
+      this._statusChanged.emit('starting');
       const session = await this.manager.startNew({
-        path: this._path,
+        path: requestId,
         type: this._type,
         name: this._name,
         kernelName: model.name,
         kernelId: model.id
       });
-      // Handle the case where we got the previous session back.
-      // This can happen if the previous session starts after our
-      // check for an existing session.
-      // We have to try again.
-      if (this._pendingSessionId === session.id) {
-        await Session.shutdown(session.id);
-        return this._changeKernel(model);
-      }
-      this._pendingSessionId = '';
-
-      // Handle another session starting before we finish starting.
-      if (this._pendingSessionRequest !== requestId) {
-        this._pendingSessionId = session.id;
+      // Handle a preempt.
+      if (this._pendingSessionRequest !== session.path) {
+        await session.shutdown();
+        session.dispose();
         return null;
       }
+      // Change to the real path.
+      await session.setPath(this._path);
+
       if (this._session) {
         await this._shutdownSession();
       }
@@ -694,12 +703,9 @@ export class ClientSession implements IClientSession {
           return;
         }
         let model = result.value;
-        if (model === null && this._session) {
-          return this._shutdownSession().then(() => {
-            this._kernelChanged.emit({ oldValue: null, newValue: null });
-          });
-        }
-        if (model) {
+        if (model === null) {
+          return this.shutdown();
+        } else {
           return this._changeKernel(model).then(() => undefined);
         }
       })
@@ -783,7 +789,13 @@ export class ClientSession implements IClientSession {
   async _shutdownSession(): Promise<void> {
     const session = this._session;
     this._session = null;
+    this._statusChanged.emit('idle');
+
     if (!session) {
+      this._kernelChanged.emit({
+        oldValue: null,
+        newValue: null
+      });
       return;
     }
     const kernel = session.kernel || null;
@@ -791,7 +803,7 @@ export class ClientSession implements IClientSession {
       oldValue: kernel,
       newValue: null
     });
-    this._statusChanged.emit('unknown');
+
     await session.shutdown();
     session.dispose();
   }
@@ -915,7 +927,6 @@ export class ClientSession implements IClientSession {
   private _busyDisposable: IDisposable | null = null;
   private _pendingKernelName = '';
   private _pendingSessionRequest = '';
-  private _pendingSessionId = '';
 }
 
 /**
