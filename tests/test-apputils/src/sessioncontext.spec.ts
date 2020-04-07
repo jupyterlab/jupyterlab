@@ -100,6 +100,22 @@ describe('@jupyterlab/apputils', () => {
       });
     });
 
+    describe('#sessionChanged', () => {
+      it('should be emitted when the session changes', async () => {
+        let called = false;
+        sessionContext.sessionChanged.connect(
+          (sender, { oldValue, newValue }) => {
+            expect(sender).to.equal(sessionContext);
+            expect(oldValue).to.be.null;
+            expect(newValue).to.equal(sessionContext.session);
+            called = true;
+          }
+        );
+        await sessionContext.initialize();
+        expect(called).to.be.true;
+      });
+    });
+
     describe('#statusChanged', () => {
       it('should be emitted when the status changes', async () => {
         let called = false;
