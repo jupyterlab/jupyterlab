@@ -96,7 +96,8 @@ export class MathJaxTypesetter implements IRenderMime.ILatexTypesetter {
         styles: { '.MathJax_Display': { margin: 0 } },
         linebreaks: { automatic: true }
       },
-      skipStartupTypeset: true
+      skipStartupTypeset: true,
+      messageStyle: 'none'
     });
     MathJax.Hub.Configured();
     this._initPromise.resolve(void 0);
