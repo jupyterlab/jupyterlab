@@ -327,10 +327,10 @@ describe('@jupyterlab/apputils', () => {
         expect(sessionContext.kernelDisplayStatus).to.be.equal('initializing');
       });
 
-      it('should be "" if there is no current kernel', async () => {
+      it('should be "idle" if there is no current kernel', async () => {
         await sessionContext.initialize();
         await sessionContext.shutdown();
-        expect(sessionContext.kernelDisplayStatus).to.be.equal('');
+        expect(sessionContext.kernelDisplayStatus).to.be.equal('idle');
       });
     });
 
@@ -359,16 +359,21 @@ describe('@jupyterlab/apputils', () => {
         await SessionAPI.shutdownSession(id);
       });
 
-      it('should shut down the session when shutdownOnDispose is true', async () => {
+      it('should shut down the session when shutdownOnDispose is true', async done => {
         sessionContext.kernelPreference = {
           ...sessionContext.kernelPreference,
           shutdownOnDispose: true
         };
         await sessionContext.initialize();
         const id = sessionContext.session!.id;
+        // Wait for the session to shut down.
+        sessionContext.sessionManager.runningChanged.connect((_, sessions) => {
+          if (!sessions.find(s => s.id === id)) {
+            done();
+            return;
+          }
+        });
         sessionContext.dispose();
-        const sessions = await SessionAPI.listRunning();
-        expect(sessions.find(s => s.id === id)).to.be.undefined;
       });
     });
 

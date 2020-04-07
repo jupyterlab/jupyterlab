@@ -487,18 +487,19 @@ export class SessionContext implements ISessionContext {
   get kernelDisplayStatus(): ISessionContext.KernelDisplayStatus {
     let kernel = this.session?.kernel;
     if (this._pendingKernelName === Private.NO_KERNEL) {
-      return '';
+      return 'idle';
     }
+
+    if (!kernel && this._pendingKernelName) {
+      return 'starting';
+    }
+
     if (
       !kernel &&
       !this.isReady &&
       this.kernelPreference.canStart !== false &&
       this.kernelPreference.shouldStart !== false
     ) {
-      return 'initializing';
-    }
-
-    if (!kernel && this._pendingKernelName) {
       return 'initializing';
     }
 
@@ -543,7 +544,7 @@ export class SessionContext implements ISessionContext {
     if (this._session) {
       if (this.kernelPreference.shutdownOnDispose) {
         // Fire and forget the session shutdown request
-        this._session.shutdown().catch(reason => {
+        this.sessionManager.shutdown(this._session.id).catch(reason => {
           console.error(`Kernel not shut down ${reason}`);
         });
       }
@@ -726,13 +727,12 @@ export class SessionContext implements ISessionContext {
 
     if (this._session) {
       await this._shutdownSession();
-    } else if (this._pendingSessionRequest) {
+    } else {
       this._kernelChanged.emit({
         name: 'kernel',
         oldValue: null,
         newValue: null
       });
-      this._statusChanged.emit('unknown');
     }
 
     // Guarantee that the initialized kernel
@@ -742,17 +742,26 @@ export class SessionContext implements ISessionContext {
     }
     const requestId = (this._pendingSessionRequest = UUID.uuid4());
     try {
+      // Use a UUID for the path to overcome a race condition on the server
+      // where it will re-use a session for a given path but only after
+      // the kernel finishes starting.
+      // We later switch to the real path below.
+      this._statusChanged.emit('starting');
       const session = await this.sessionManager.startNew({
-        path: this._path,
+        path: requestId,
         type: this._type,
         name: this._name,
         kernel: model
       });
-      // Handle another session starting before we finish.
-      if (this._pendingSessionRequest !== requestId) {
+      // Handle a preempt.
+      if (this._pendingSessionRequest !== session.path) {
         await session.shutdown();
+        session.dispose();
         return null;
       }
+      // Change to the real path.
+      await session.setPath(this._path);
+
       if (this._session) {
         await this._shutdownSession();
       }
