@@ -728,13 +728,19 @@ export class SessionContext implements ISessionContext {
       this._onPropertyChanged(session, 'type');
     }
 
-    // Any existing kernel connection was disposed above when the session was
+    // Any existing session/kernel connection was disposed above when the session was
     // disposed, so the oldValue should be null.
     this._kernelChanged.emit({
       oldValue: null,
       newValue: session.kernel,
       name: 'kernel'
     });
+    this._sessionChanged.emit({
+      oldValue: null,
+      newValue: session,
+      name: 'session'
+    });
+
     return session.kernel;
   }
 
