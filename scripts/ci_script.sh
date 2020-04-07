@@ -39,8 +39,6 @@ if [[ $GROUP == docs ]]; then
     make html
 
     # Remove internal sphinx files and use pytest-check-links on the generated html
-    rm build/html/genindex.html
-    rm build/html/search.html
     py.test --check-links -k .html build/html || py.test --check-links -k .html --lf build/html
 
     popd
