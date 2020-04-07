@@ -750,6 +750,7 @@ namespace Private {
         return response.json();
       })
       .then(data => {
+        console.log('got session data', data.id);
         const model = validate.validateModel(data);
         return updateFromServer(model, settings.baseUrl);
       });
