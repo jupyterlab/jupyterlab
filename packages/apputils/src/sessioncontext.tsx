@@ -491,7 +491,7 @@ export class SessionContext implements ISessionContext {
     }
 
     if (!kernel && this._pendingKernelName) {
-      return 'starting';
+      return 'initializing';
     }
 
     if (
