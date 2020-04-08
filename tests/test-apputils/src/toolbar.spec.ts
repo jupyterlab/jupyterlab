@@ -314,13 +314,14 @@ describe('@jupyterlab/apputils', () => {
           ).to.equal(session.kernelDisplayName);
         });
 
-        it("should display `'No Kernel!'` if there is no kernel", async () => {
+        it("should display `'No Kernel'` if there is no kernel", async () => {
+          session.kernelPreference = { canStart: false };
           const item = Toolbar.createKernelNameItem(session);
           Widget.attach(item, document.body);
           await framePromise();
           expect(
             (item.node.firstChild.lastChild as HTMLElement).textContent
-          ).to.equal('No Kernel!');
+          ).to.equal('No Kernel');
         });
       });
 
@@ -364,6 +365,11 @@ describe('@jupyterlab/apputils', () => {
           await session.kernel.ready;
           await session.shutdown();
           session = await createClientSession();
+          session.kernelPreference = {
+            shouldStart: true,
+            canStart: true,
+            autoStartDefault: true
+          };
           const item = Toolbar.createKernelStatusItem(session);
           expect(item.node.title).to.equal('Kernel Starting');
           expect(item.hasClass('jp-FilledCircleIcon')).to.equal(true);

@@ -62,6 +62,9 @@ function main(): void {
 
   // Handle the mimeType for the current kernel.
   session.kernelChanged.connect(() => {
+    if (!session.kernel) {
+      return;
+    }
     void session.kernel.ready.then(() => {
       const lang = session.kernel.info.language_info;
       const mimeType = mimeService.getMimeTypeByLanguage(lang);

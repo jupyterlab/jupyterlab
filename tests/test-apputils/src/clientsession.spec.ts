@@ -242,9 +242,19 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#kernelDisplayName', () => {
       it('should be the display name of the current kernel', async () => {
-        expect(session.kernelDisplayName).to.equal('No Kernel!');
+        session.kernelPreference = { shouldStart: false };
+        expect(session.kernelDisplayName).to.equal('No Kernel');
         await session.initialize();
-        expect(session.kernelDisplayName).to.not.equal('No Kernel!');
+        expect(session.kernelDisplayName).to.not.equal('Echo Kernel');
+      });
+
+      it('should display the pending kernel name when it looks like we are starting a kernel', async () => {
+        session.kernelPreference = {
+          autoStartDefault: true,
+          canStart: true,
+          shouldStart: true
+        };
+        expect(session.kernelDisplayName).to.equal('Echo Kernel');
       });
     });
 
@@ -275,6 +285,31 @@ describe('@jupyterlab/apputils', () => {
 
         expect(kernel.id).to.not.equal(id);
         expect(kernel.name).to.equal(name);
+      });
+
+      it('should still work if called before fully initialized', async () => {
+        const initPromise = session.initialize(); // Start but don't finish init.
+        const name = 'echo';
+        const kernelPromise = session.changeKernel({ name });
+        const results = await Promise.all([kernelPromise, initPromise]);
+        expect(session.kernel).to.equal(results[0]);
+      });
+
+      it('should handle multiple requests', async () => {
+        await session.initialize();
+        const name = 'echo';
+        const kernelPromise0 = session.changeKernel({ name });
+        // The last launched kernel should win.
+        const kernelPromise1 = session.changeKernel({ name });
+
+        let lastKernel = null;
+        session.kernelChanged.connect(() => {
+          lastKernel = session.kernel;
+        });
+        const results = await Promise.all([kernelPromise0, kernelPromise1]);
+        // We can't know which of the two was launched first, so the result
+        // could be either, just make sure it isn't the original kernel.
+        expect(lastKernel).to.be.oneOf([results[0], results[1]]);
       });
     });
 
@@ -312,6 +347,13 @@ describe('@jupyterlab/apputils', () => {
         expect(session.kernel).to.not.equal(null);
         await session.shutdown();
         expect(session.kernel).to.be.null;
+      });
+
+      it('should handle a shutdown during startup', async () => {
+        const initPromise = session.initialize(); // Start but don't finish init.
+        const shutdownPromise = session.shutdown();
+        await Promise.all([initPromise, shutdownPromise]);
+        expect(session.kernel).to.equal(null);
       });
     });
 
