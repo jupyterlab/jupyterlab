@@ -10,6 +10,7 @@ import {
   caretRightIcon,
   Collapse,
   InputGroup,
+  jupyterIcon,
   listingsInfoIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
@@ -19,6 +20,7 @@ import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
+import { isJupyterOrg } from './npm';
 
 // TODO: Replace pagination with lazy loading of lower search results
 
@@ -56,69 +58,17 @@ export class SearchBar extends React.Component<
    */
   render(): React.ReactNode {
     return (
-      <>
-        <div className="jp-extensionmanager-search-bar">
-          <InputGroup
-            className="jp-extensionmanager-search-wrapper"
-            type="text"
-            placeholder={this.props.placeholder}
-            onChange={this.handleChange}
-            value={this.state.value}
-            rightIcon="search"
-            disabled={this.props.disabled}
-          />
-        </div>
-        <CollapsibleSection
-          key="warning-section"
-          isOpen={true}
-          disabled={false}
-          header={'Warning'}
-        >
-          <div className="jp-extensionmanager-disclaimer">
-            <div>
-              Extensions installed contain arbitrary code that can execute on
-              your machine that may contain malicious code.
-            </div>
-            <div style={{ paddingTop: 8 }}>
-              I understand extensions contain arbitrary code.
-            </div>
-            <div style={{ paddingTop: 8 }}>
-              {ListModel.isDisclaimed() && (
-                <Button
-                  className="jp-extensionmanager-disclaimer-disable"
-                  onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
-                    this.props.settings
-                      .set('disclaimed', false)
-                      .catch(reason => {
-                        console.error(
-                          `Something went wrong when setting disclaimed.\n${reason}`
-                        );
-                      });
-                  }}
-                >
-                  Disable
-                </Button>
-              )}
-              {!ListModel.isDisclaimed() && (
-                <Button
-                  className="jp-extensionmanager-disclaimer-enable"
-                  onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
-                    this.props.settings
-                      .set('disclaimed', true)
-                      .catch(reason => {
-                        console.error(
-                          `Something went wrong when setting disclaimed.\n${reason}`
-                        );
-                      });
-                  }}
-                >
-                  Enable
-                </Button>
-              )}
-            </div>
-          </div>
-        </CollapsibleSection>
-      </>
+      <div className="jp-extensionmanager-search-bar">
+        <InputGroup
+          className="jp-extensionmanager-search-wrapper"
+          type="text"
+          placeholder={this.props.placeholder}
+          onChange={this.handleChange}
+          value={this.state.value}
+          rightIcon="search"
+          disabled={this.props.disabled}
+        />
+      </div>
     );
   }
 
@@ -220,6 +170,10 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
   let title = entry.name;
+  const entryIsJupyterOrg = isJupyterOrg(entry.name);
+  if (entryIsJupyterOrg) {
+    title = `${entry.name} (Developed by Project Jupyter)`;
+  }
   const githubUser = getExtensionGitHubUser(entry);
   if (
     listMode === 'black' &&
@@ -258,7 +212,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           <div style={{ width: `${badgeSize}px`, height: `${badgeSize}px` }} />
         )}
       </div>
-      <div style={{ flexDirection: 'column' }}>
+      <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
             <a href={entry.url} target="_blank" rel="noopener">
@@ -289,6 +243,14 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 }
               />
             )}
+          {entryIsJupyterOrg && (
+            <jupyterIcon.react
+              className="jp-extensionmanager-is-jupyter-org"
+              top="1px"
+              height="auto"
+              width="1em"
+            />
+          )}
         </div>
         <div className="jp-extensionmanager-entry-content">
           <div className="jp-extensionmanager-entry-description">
@@ -366,7 +328,7 @@ export namespace ListEntry {
     /**
      * The list mode to apply.
      */
-    listMode: 'black' | 'white' | 'default';
+    listMode: 'black' | 'white' | 'default' | 'invalid';
 
     /**
      * The requested view type.
@@ -452,7 +414,7 @@ export namespace ListView {
     /**
      * The list mode to apply.
      */
-    listMode: 'black' | 'white' | 'default';
+    listMode: 'black' | 'white' | 'default' | 'invalid';
 
     /**
      * The requested view type.
@@ -543,6 +505,14 @@ export class CollapsibleSection extends React.Component<
       }
     );
   }
+
+  componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
+    if (nextProps.forceOpen) {
+      this.setState({
+        isOpen: true
+      });
+    }
+  }
 }
 
 /**
@@ -583,6 +553,11 @@ export namespace CollapsibleSection {
      * to open nor close actions.
      */
     disabled?: boolean;
+
+    /**
+     * If true, the section will be opened if not disabled.
+     */
+    forceOpen?: boolean;
   }
 
   /**
@@ -601,12 +576,14 @@ export namespace CollapsibleSection {
  */
 export class ExtensionView extends VDomRenderer<ListModel> {
   private _settings: ISettingRegistry.ISettings;
+  private _forceOpen: boolean;
   constructor(
     serviceManager: ServiceManager,
     settings: ISettingRegistry.ISettings
   ) {
     super(new ListModel(serviceManager, settings));
     this._settings = settings;
+    this._forceOpen = false;
     this.addClass('jp-extensionmanager-view');
   }
 
@@ -624,6 +601,27 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   protected render(): React.ReactElement<any>[] {
     const model = this.model!;
+    if (!model.listMode) {
+      return [<div key="empty"></div>];
+    }
+    if (model.listMode === 'invalid') {
+      return [
+        <div style={{ padding: 8 }} key="invalid">
+          <div>
+            The extension manager is disabled. Please contact your system
+            administrator to verify the listings configuration.
+          </div>
+          <div>
+            <a
+              href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
+              target="_blank"
+            >
+              Read more in the JupyterLab documentation.
+            </a>
+          </div>
+        </div>
+      ];
+    }
     let pages = Math.ceil(model.totalEntries / model.pagination);
     let elements = [
       <SearchBar
@@ -656,8 +654,55 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       />
     );
     const content = [];
+    content.push(
+      <CollapsibleSection
+        key="warning-section"
+        isOpen={!ListModel.isDisclaimed()}
+        disabled={false}
+        header={'Warning'}
+      >
+        <div className="jp-extensionmanager-disclaimer">
+          <div>
+            The JupyterLab development team is excited to have a robust
+            third-party extension community. However, we do not review
+            third-party extensions, and some extensions may introduce security
+            risks or contain malicious code that runs on your machine.
+          </div>
+          <div style={{ paddingTop: 8 }}>
+            {ListModel.isDisclaimed() && (
+              <Button
+                className="jp-extensionmanager-disclaimer-disable"
+                onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
+                  this._settings.set('disclaimed', false).catch(reason => {
+                    console.error(
+                      `Something went wrong when setting disclaimed.\n${reason}`
+                    );
+                  });
+                }}
+              >
+                Disable
+              </Button>
+            )}
+            {!ListModel.isDisclaimed() && (
+              <Button
+                className="jp-extensionmanager-disclaimer-enable"
+                onClick={(e: React.MouseEvent<Element, MouseEvent>) => {
+                  this._forceOpen = true;
+                  this._settings.set('disclaimed', true).catch(reason => {
+                    console.error(
+                      `Something went wrong when setting disclaimed.\n${reason}`
+                    );
+                  });
+                }}
+              >
+                Enable
+              </Button>
+            )}
+          </div>
+        </div>
+      </CollapsibleSection>
+    );
     if (!model.initialized) {
-      //      void model.initialize();
       content.push(
         <div key="loading-placeholder" className="jp-extensionmanager-loader">
           Updating extensions list
@@ -718,6 +763,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         <CollapsibleSection
           key="installed-section"
           isOpen={ListModel.isDisclaimed()}
+          forceOpen={this._forceOpen}
           disabled={!ListModel.isDisclaimed()}
           header="Installed"
           headerElements={
@@ -767,6 +813,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         <CollapsibleSection
           key="search-section"
           isOpen={ListModel.isDisclaimed()}
+          forceOpen={this._forceOpen}
           disabled={!ListModel.isDisclaimed()}
           header={model.query ? 'Search Results' : 'Discover'}
           onCollapse={(isOpen: boolean) => {
@@ -785,6 +832,10 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         {content}
       </div>
     );
+
+    // Reset the force open for future usage.
+    this._forceOpen = false;
+
     return elements;
   }
 
@@ -875,8 +926,10 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   protected onActivateRequest(msg: Message): void {
     if (this.isAttached) {
       let input = this.inputNode;
-      input.focus();
-      input.select();
+      if (input) {
+        input.focus();
+        input.select();
+      }
     }
   }
 

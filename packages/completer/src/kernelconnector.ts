@@ -36,7 +36,7 @@ export class KernelConnector extends DataConnector<
     const kernel = this._session?.kernel;
 
     if (!kernel) {
-      return Promise.reject(new Error('No kernel for completion request.'));
+      throw new Error('No kernel for completion request.');
     }
 
     const contents: KernelMessage.ICompleteRequestMsg['content'] = {

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-nbformat",
-  "version": "2.1.0-a.0",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -12,8 +12,8 @@
     "watch:src": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/nbformat": "^2.1.0-a.0",
-    "@jupyterlab/testutils": "^2.1.0-a.0",
+    "@jupyterlab/nbformat": "^2.1.0",
+    "@jupyterlab/testutils": "^2.1.0",
     "chai": "^4.2.0",
     "jest": "^24.9.0",
     "jest-junit": "^10.0.0",

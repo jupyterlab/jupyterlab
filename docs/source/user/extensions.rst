@@ -90,21 +90,21 @@ Disclaimer
 .. danger::
 
     Installing an extension allows it to execute arbitrary code on the
-    server, kernel, and in the client's browser. Therefor we ask you 
-    to explictitly acknowledge this.
+    server, kernel, and in the client's browser. Therefore we ask you 
+    to explicitly acknowledge this.
 
 
-By default, the disclaimer is not checked.
+By default, the disclaimer is not acknowledged.
 
 .. figure:: images/listings/disclaimer_unchecked.png
    :align: center
    :class: jp-screenshot
 
-   **Figure:** User has not checked the disclaimer
+   **Figure:** User has not acknowledged the disclaimer
 
 
-As the disclaimer is not checked, you can search for an extension,
-but can not install it (no Install button is available).
+As the disclaimer is not acknowledged, you can search for an extension,
+but can not install it (no install button is available).
 
 .. figure:: images/listings/disclaimer_unchecked_noinstall.png
    :align: center
@@ -113,7 +113,7 @@ but can not install it (no Install button is available).
    **Figure:** With Disclaimer unchecked, you can not install an extension
 
 
-To install an extensino, you first have to explicitly check the disclaimer.
+To install an extensino, you first have to explicitly acknowledge the disclaimer.
 Once done, this will remain across sessions and the user does not have to 
 check it again.
 
@@ -160,8 +160,6 @@ performs a free-text search of JupyterLab extensions on the NPM registry.
    :class: jp-screenshot
    :alt: Screenshot showing an example search result
 
-
-.. _listings:
 
 Installing an Extension
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -250,6 +248,7 @@ a dialog to notify you about these. These are informational only, and it
 will be up to you to take these into account or not.
 
 
+.. _extension_listings:
 
 Listings
 ~~~~~~~~
@@ -260,7 +259,18 @@ the user is free to install any extension. This is the :ref:`default_mode`.
 To bring more security, you or your administrator can enable ``blacklists`` or ``whitelists``
 mode. JupyterLab will check the extensions against the defined listings.
 
-Only one mode at a time is allowed.
+.. warning::
+
+    Only one mode at a time is allowed. If you or your server administrator configures
+    both black and white listings, the extension manager will be disabled.
+
+
+.. figure:: images/listings/simultaneous_black_white_listings.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Simultaneous black and white listings
+
 
 The following details the behavior for the :ref:`blacklist_mode` and the :ref:`whitelist_mode`.
 The details to enable configure the listings can be read :ref:`listings_conf`. 

@@ -43,7 +43,11 @@ makes sure that we don't have any extra tags or commits in our repo (especially
 since we will push our tags later in the process), and that we are on the correct branch. The script creates a conda env, pulls down a git checkout with the
 appropriate branch, and installs JupyterLab with `pip install -e .`.
 
-`source scripts/release_prep.sh <branch_name>`
+Make sure you are running an sh-compatible shell, and it is set up to be able to do `conda activate`. Then do:
+
+```bash
+source scripts/release_prep.sh <branch_name>
+```
 
 ## Bump version
 
@@ -68,6 +72,9 @@ we are not competing amongst the minor releases for version numbers.
 We are essentially sub-dividing semver to allow us to bump minor versions
 of the JS packages as many times as we need to for minor releases of the
 top level JupyterLab application.
+
+Other note: It's ok if `yarn-deduplicate` exits with a non zero code. This is
+expected!
 
 ### JS major release(s)
 
@@ -109,6 +116,13 @@ IntSlider()
 ## Finish
 
 Follow instructions printed at the end of the publish step above:
+
+```bash
+twine upload dist/*
+git push origin --tags <BRANCH>
+```
+
+These lines:
 
 - upload to pypi with twine
 - double-check what branch you are on, then push changes to the correct upstream branch with the `--tags` option.

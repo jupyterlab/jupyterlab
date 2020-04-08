@@ -727,7 +727,7 @@ extension manager.
 Listings
 ^^^^^^^^
 
-You can develop on the extension manager package and :ref:`listings` with the 
+You can develop on the extension manager package and :ref:`extension_listings` with the 
 example shipped in the ``packages/extensionmanager-extension/examples/listings`` folder.
 
 Follow the ``README.md`` instructions in that folder.
