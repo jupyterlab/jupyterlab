@@ -1,1 +1,2 @@
-// jest.setTimeout(20000);
+declare var jest: any;
+jest.setTimeout(20000);
