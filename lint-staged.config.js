@@ -1,6 +1,7 @@
 const escape = require('shell-quote').quote;
 const fs = require('fs');
 const isWin = process.platform === 'win32';
+const fs = require('fs');
 
 const escapeFileNames = filenames =>
   filenames
@@ -16,15 +17,7 @@ module.exports = {
       `git add ${escapedFileNames}`
     ];
   },
-  '**/*{.ts,.tsx}': filenames => {
-    const escapedFileNames = escapeFileNames(filenames);
-    return [
-      `prettier --write ${escapedFileNames}`,
-      `tslint --fix ${escapedFileNames}`,
-      `git add ${escapedFileNames}`
-    ];
-  },
-  '**/*{.js,.jsx}': filenames => {
+  '**/*{.ts,.tsx,.js,.jsx}': filenames => {
     const escapedFileNames = escapeFileNames(filenames);
     return [
       `prettier --write ${escapedFileNames}`,
