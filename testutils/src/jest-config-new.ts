@@ -10,7 +10,6 @@ module.exports = function(name: string, baseDir: string) {
     transform: {
       '\\.svg$': 'jest-raw-loader'
     },
-    setupFilesAfterEnv: ['@jupyterlab/testutils/lib/jest-script.js'],
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
     testPathIgnorePatterns: ['/lib/', '/node_modules/'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
