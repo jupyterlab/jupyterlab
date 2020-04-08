@@ -39,8 +39,8 @@ class ExampleHandler(
             "appVersion": version,
             'baseUrl': self.base_url,
             'token': self.settings['token'],
-            'fullStaticUrl': ujoin(self.base_url, 'static', 'example'), 
-            'frontendUrl': ujoin(self.base_url, 'example/'),
+            'fullStaticUrl': ujoin(self.base_url, 'static', self.extension_name),
+            'frontendUrl': ujoin(self.base_url, 'main/'),
         }
         return self.write(
             self.render_template(
@@ -54,7 +54,7 @@ class ExampleHandler(
 
 class ExampleApp(LabServerApp):
 
-    extension_url = '/lab'
+    extension_url = '/example'
     extension_name = 'main'
     app_name = 'JupyterLab Example Service'
     app_url = '/example_app'

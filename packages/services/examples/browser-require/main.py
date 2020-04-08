@@ -35,7 +35,7 @@ class ExampleHandler(
             # Use camelCase here, since that's what the lab components expect
             'baseUrl': self.base_url,
             'token': self.settings['token'],
-            'fullStaticUrl': ujoin(self.base_url, 'static', 'main'), 
+            'fullStaticUrl': ujoin(self.base_url, 'static', self.extension_name),
             'frontendUrl': ujoin(self.base_url, 'example/'),
         }
         return self.write(
@@ -50,7 +50,7 @@ class ExampleHandler(
 
 class ExampleApp(LabServerApp):
 
-    extension_url = '/lab'
+    extension_url = '/example'
     extension_name = 'main'
     app_name = 'JupyterLab Example Service'
     app_url = '/example_app'

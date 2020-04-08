@@ -47,23 +47,17 @@ def main():
         JS console errors, JS errors, and Python logged errors.
         """
         extension_name = 'example'
-        extension_url = '/example'
+        default_url = '/example'
         open_browser = Bool(False)
         base_url = '/foo/'
         ip = '127.0.0.1'
 
-        def _jupyter_server_extension_paths():
-            return [
-                {
-                    'module': 'example',
-                    'app': App
-                }
-            ]
-
-        mod._jupyter_server_extension_paths = _jupyter_server_extension_paths
+        def initialize_handlers(self):
+            run_test(self.serverapp, run_browser)
+            super().initialize_handlers()
 
     App.__name__ = osp.basename(example_dir).capitalize() + 'Test'
-    
+
     def _jupyter_server_extension_paths():
         return [
             {
@@ -72,9 +66,8 @@ def main():
             }
         ]
     sys.modules['example']._jupyter_server_extension_paths = _jupyter_server_extension_paths
-    ExampleServerApp.jpserver_extensions = Dict({'example': True})
-    ExampleServerApp.launch_instance()
 
+    App.launch_instance()
 
 def run_browser(url):
     """Run the browser test and return an exit code.

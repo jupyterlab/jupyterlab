@@ -49,7 +49,7 @@ class ExampleHandler(
             # Use camelCase here, since that's what the lab components expect
             'baseUrl': self.base_url,
             'token': self.settings['token'],
-            'notebookPath': os.path.join(HERE, 'test.ipynb'),
+            'notebookPath': 'test.ipynb',
             'fullStaticUrl': ujoin(self.base_url, 'static', self.extension_name),
             'frontendUrl': ujoin(self.base_url, 'example/'),
             # FIXME: Don't use a CDN here

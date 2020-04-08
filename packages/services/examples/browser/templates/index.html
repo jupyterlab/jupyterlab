@@ -11,7 +11,7 @@
       {{ page_config_full | tojson }}
     </script>
   
-    <script src="{{base_url | e}}static/example/bundle.js"></script>
+    <script src="{{page_config['fullStaticUrl'] | e}}/bundle.js" main="index"></script>
     <pre id='output'></pre>
   </body>
 </html>

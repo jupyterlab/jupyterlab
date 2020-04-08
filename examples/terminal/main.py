@@ -64,8 +64,8 @@ class ExampleHandler(
 
 class ExampleApp(LabServerApp):
 
-    default_url = Unicode('/example')
-    extension_name = 'main'
+    extension_url = '/example'
+    extension_name = __name__
     app_name = 'JupyterLab Example Terminal'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
     app_url = '/example_app'
