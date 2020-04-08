@@ -704,28 +704,37 @@ export class ClientSession implements IClientSession {
   /**
    * Handle an error in session startup.
    */
-  private _handleSessionError(
+  private async _handleSessionError(
     err: ServerConnection.ResponseError
   ): Promise<void> {
-    return err.response
-      .text()
-      .then(text => {
-        let message = err.message;
-        try {
-          message = JSON.parse(text)['traceback'];
-        } catch (err) {
-          // no-op
-        }
-        let dialog = (this._dialog = new Dialog({
-          title: 'Error Starting Kernel',
-          body: <pre>{message}</pre>,
-          buttons: [Dialog.okButton()]
-        }));
-        return dialog.launch();
-      })
-      .then(() => {
-        this._dialog = null;
-      });
+    let traceback = '';
+    let message = '';
+    try {
+      const json = await err.response.json();
+      traceback = json['traceback'];
+      message = json['message'];
+    } catch (err) {
+      // no-op
+    }
+    const body = (
+      <div>
+        <pre>{err.message}</pre>
+        {message && <pre>{message}</pre>}
+        {traceback && (
+          <details className="jp-mod-wide">
+            <pre>{traceback}</pre>
+          </details>
+        )}
+      </div>
+    );
+
+    const dialog = (this._dialog = new Dialog({
+      title: 'Error Starting Kernel',
+      body,
+      buttons: [Dialog.okButton()]
+    }));
+    await dialog.launch();
+    this._dialog = null;
   }
 
   /**
