@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-coreutils",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^3.2.0",
-    "@jupyterlab/testutils": "^1.2.3",
+    "@jupyterlab/testutils": "^1.2.4",
     "@phosphor/coreutils": "^1.3.1",
     "@phosphor/disposable": "^1.3.0",
     "@phosphor/signaling": "^1.3.0",

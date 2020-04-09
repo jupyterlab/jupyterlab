@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/vdom",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "A viewer for VDOM documents.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,8 +34,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.2.2",
-    "@jupyterlab/docregistry": "^1.2.2",
+    "@jupyterlab/apputils": "^1.2.3",
+    "@jupyterlab/docregistry": "^1.2.3",
     "@jupyterlab/rendermime-interfaces": "^1.5.0",
     "@jupyterlab/services": "^4.2.0",
     "@nteract/transform-vdom": "^4.0.1",

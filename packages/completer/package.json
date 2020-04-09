@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/completer",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "JupyterLab - Completer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,7 +35,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.2.2",
+    "@jupyterlab/apputils": "^1.2.3",
     "@jupyterlab/codeeditor": "^1.2.0",
     "@jupyterlab/coreutils": "^3.2.0",
     "@jupyterlab/services": "^4.2.0",
