@@ -12,6 +12,9 @@ module.exports = {
   bail: true,
   devtool: devtool,
   mode: 'development',
+  node: {
+    fs: 'empty'
+  },
   module: {
     rules: [
       {
