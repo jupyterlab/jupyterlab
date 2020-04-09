@@ -3,6 +3,18 @@
 JupyterLab Changelog
 ====================
 
+`v1.2.x <https://github.com/jupyterlab/jupyterlab/releases/tag/v1.2.x>`__
+---------------------------------------------------------------------------
+
+* Better handling of slow kernel startup (`#8189 <https://github.com/jupyterlab/jupyterlab/pull/8189>`__)
+* Clean up kernel startup error messages (`#8186 <https://github.com/jupyterlab/jupyterlab/pull/8186>`__)
+* Fix Widget Tracker behavior (`#8118 <https://github.com/jupyterlab/jupyterlab/pull/8118>`__)
+* Increase timeout for yarn (`#8108 <https://github.com/jupyterlab/jupyterlab/pull/8108>`__)
+* Add .yarnrc explicitly in Python setup (`#8107 <https://github.com/jupyterlab/jupyterlab/pull/8107>`__)
+* Better handling of fallback versions for an extension (`#7981 <https://github.com/jupyterlab/jupyterlab/pull/7981>`__)
+* Fix browser check (`#7817 <https://github.com/jupyterlab/jupyterlab/pull/7817>`__)
+
+
 `v1.2.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v1.2.0>`__
 ---------------------------------------------------------------------------
 
