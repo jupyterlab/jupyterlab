@@ -2,29 +2,30 @@ const escape = require('shell-quote').quote;
 const fs = require('fs');
 const isWin = process.platform === 'win32';
 
+const escapeFileNames = filenames =>
+  filenames
+    .filter(filename => fs.existsSync(filename))
+    .map(filename => `"${isWin ? filename : escape([filename])}"`)
+    .join(' ');
+
 module.exports = {
   '**/*{.css,.json,.md}': filenames => {
-    const escapedFileNames = filenames
-      .filter(filename => fs.existsSync(filename))
-      .map(filename => `"${isWin ? filename : escape([filename])}"`)
-      .join(' ');
+    const escapedFileNames = escapeFileNames(filenames);
     return [
       `prettier --write ${escapedFileNames}`,
       `git add ${escapedFileNames}`
     ];
   },
   '**/*{.ts,.tsx}': filenames => {
-    const escapedFileNames = filenames
-      .filter(filename => fs.existsSync(filename))
-      .map(filename => `"${isWin ? filename : escape([filename])}"`)
-      .join(' ');
-    return [`tslint --fix ${escapedFileNames}`, `git add ${escapedFileNames}`];
+    const escapedFileNames = escapeFileNames(filenames);
+    return [
+      `prettier --write ${escapedFileNames}`,
+      `tslint --fix ${escapedFileNames}`,
+      `git add ${escapedFileNames}`
+    ];
   },
-  '**/*{.ts,.tsx,.js,.jsx}': filenames => {
-    const escapedFileNames = filenames
-      .filter(filename => fs.existsSync(filename))
-      .map(filename => `"${isWin ? filename : escape([filename])}"`)
-      .join(' ');
+  '**/*{.js,.jsx}': filenames => {
+    const escapedFileNames = escapeFileNames(filenames);
     return [
       `prettier --write ${escapedFileNames}`,
       `eslint --fix ${escapedFileNames}`,
