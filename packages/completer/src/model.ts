@@ -175,7 +175,7 @@ export class CompleterModel implements Completer.IModel {
   completionItems?(): CompletionHandler.ICompletionItems {
     let query = this._query;
     if (query) {
-      this._markup(query);
+      return this._markup(query);
     }
     return this._completionItems;
   }
@@ -389,8 +389,8 @@ export class CompleterModel implements Completer.IModel {
    * Check if CompletionItem matches against query.
    * Highlight matching prefix by adding <mark> tags.
    */
-  private _markup(query: string): void {
-    let items = this._completionItems.items;
+  private _markup(query: string): CompletionHandler.ICompletionItems {
+    let items = JSONExt.deepCopy(this._completionItems.items);
     let results: CompletionHandler.ICompletionItem[] = [];
     for (let item of items) {
       // See if insert text matches query string
@@ -409,7 +409,7 @@ export class CompleterModel implements Completer.IModel {
         results.push(item);
       }
     }
-    this._completionItems.items = results;
+    return { items: results };
   }
 
   /**
