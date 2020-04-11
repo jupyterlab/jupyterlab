@@ -3,9 +3,9 @@
 
 import { editorServices } from '@jupyterlab/codemirror';
 
-import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
-
 import { defaultRenderMime } from '@jupyterlab/testutils';
+
+import { CodeConsole, ConsolePanel } from '../src';
 
 export const editorFactory = editorServices.factoryService.newInlineEditor.bind(
   editorServices.factoryService

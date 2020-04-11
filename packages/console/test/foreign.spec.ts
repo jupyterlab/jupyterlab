@@ -1,27 +1,25 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
-import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 
-import { KernelMessage, Session } from '@jupyterlab/services';
+import { KernelMessage } from '@jupyterlab/services';
 
 import { Signal } from '@lumino/signaling';
 
 import { Panel } from '@lumino/widgets';
 
-import { ForeignHandler } from '@jupyterlab/console';
-
 import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
 
-import {
-  createSessionContext,
-  createSession,
-  defaultRenderMime,
-  NBTestUtils
-} from '@jupyterlab/testutils';
+import { defaultRenderMime, NBTestUtils } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
+
 import { ISessionContext } from '@jupyterlab/apputils';
+
+import { ForeignHandler } from '../src';
 
 class TestParent extends Panel implements ForeignHandler.IReceiver {
   addCell(cell: CodeCell, msgId?: string): void {
@@ -100,19 +98,39 @@ const relevantTypes = [
 
 describe('@jupyterlab/console', () => {
   describe('ForeignHandler', () => {
-    let foreign: Session.ISessionConnection;
+    let foreign: ISessionContext;
     let handler: TestHandler;
     let sessionContext: ISessionContext;
 
-    before(async function() {
-      // tslint:disable-next-line:no-invalid-this
-      this.timeout(120000);
+    const streamMsg = KernelMessage.createMessage({
+      session: 'foo',
+      channel: 'iopub',
+      msgType: 'stream',
+      content: { name: 'stderr', text: 'foo' }
+    });
 
+    const clearMsg = KernelMessage.createMessage({
+      session: 'foo',
+      channel: 'iopub',
+      msgType: 'clear_output',
+      content: { wait: false }
+    });
+
+    beforeAll(async function() {
       const path = UUID.uuid4();
-      [sessionContext, foreign] = await Promise.all([
-        createSessionContext({ path, type: 'test' }),
-        createSession({ name: '', path, type: 'test' })
-      ]);
+      const kernel0 = new Mock.KernelMock({});
+      const kernel1 = Mock.cloneKernel(kernel0);
+      const connection0 = new Mock.SessionConnectionMock(
+        { model: { path, type: 'test' } },
+        kernel0
+      );
+      sessionContext = new Mock.SessionContextMock({}, connection0);
+      const connection1 = new Mock.SessionConnectionMock(
+        { model: { path, type: 'test2' } },
+        kernel1
+      );
+      foreign = new Mock.SessionContextMock({}, connection1);
+
       await sessionContext.initialize();
       await sessionContext.session!.kernel!.info;
     });
@@ -126,7 +144,7 @@ describe('@jupyterlab/console', () => {
       handler.dispose();
     });
 
-    after(async () => {
+    afterAll(async () => {
       foreign.dispose();
       await sessionContext.shutdown();
       sessionContext.dispose();
@@ -134,51 +152,49 @@ describe('@jupyterlab/console', () => {
 
     describe('#constructor()', () => {
       it('should create a new foreign handler', () => {
-        expect(handler).to.be.an.instanceof(ForeignHandler);
+        expect(handler).toBeInstanceOf(ForeignHandler);
       });
     });
 
     describe('#enabled', () => {
       it('should default to `false`', () => {
-        expect(handler.enabled).to.equal(false);
+        expect(handler.enabled).toBe(false);
       });
 
       it('should allow foreign cells to be injected if `true`', async () => {
-        const code = 'print("#enabled:true")';
         handler.enabled = true;
         let called = false;
         handler.injected.connect(() => {
           called = true;
         });
-        await foreign.kernel!.requestExecute({ code, stop_on_error: true })
-          .done;
-        expect(called).to.equal(true);
+        await foreign.session!.kernel!.requestExecute({ code: 'foo' }).done;
+        Mock.emitIopubMessage(foreign, streamMsg);
+        expect(called).toBe(true);
       });
 
       it('should reject foreign cells if `false`', async () => {
-        const code = 'print("#enabled:false")';
         handler.enabled = false;
         let called = false;
         handler.rejected.connect(() => {
           called = true;
         });
-        await foreign.kernel!.requestExecute({ code, stop_on_error: true })
-          .done;
-        expect(called).to.equal(true);
+        await foreign.session!.kernel!.requestExecute({ code: 'foo' }).done;
+        Mock.emitIopubMessage(foreign, streamMsg);
+        expect(called).toBe(true);
       });
     });
 
     describe('#isDisposed', () => {
       it('should indicate whether the handler is disposed', () => {
-        expect(handler.isDisposed).to.equal(false);
+        expect(handler.isDisposed).toBe(false);
         handler.dispose();
-        expect(handler.isDisposed).to.equal(true);
+        expect(handler.isDisposed).toBe(true);
       });
     });
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(handler.sessionContext.session!.path).to.be.ok;
+        expect(handler.sessionContext.session!.path).toBeTruthy();
       });
     });
 
@@ -189,77 +205,67 @@ describe('@jupyterlab/console', () => {
           sessionContext: handler.sessionContext,
           parent
         });
-        expect(handler.parent).to.equal(parent);
+        expect(handler.parent).toBe(parent);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose the resources held by the handler', () => {
-        expect(handler.isDisposed).to.equal(false);
+        expect(handler.isDisposed).toBe(false);
         handler.dispose();
-        expect(handler.isDisposed).to.equal(true);
+        expect(handler.isDisposed).toBe(true);
       });
 
       it('should be safe to call multiple times', () => {
-        expect(handler.isDisposed).to.equal(false);
+        expect(handler.isDisposed).toBe(false);
         handler.dispose();
         handler.dispose();
-        expect(handler.isDisposed).to.equal(true);
+        expect(handler.isDisposed).toBe(true);
       });
     });
 
     describe('#onIOPubMessage()', () => {
       it('should be called when messages come through', async () => {
-        const code = 'print("onIOPubMessage:disabled")';
-        const promise = new PromiseDelegate<void>();
         handler.enabled = false;
         let called = false;
         handler.received.connect(() => {
           called = true;
-          promise.resolve(void 0);
         });
-        await foreign.kernel!.requestExecute({ code, stop_on_error: true })
-          .done;
-        await promise.promise;
-        expect(called).to.equal(true);
+        await foreign.session!.kernel!.requestExecute({ code: 'foo' }).done;
+        Mock.emitIopubMessage(foreign, streamMsg);
+        expect(called).toBe(true);
       });
 
       it('should inject relevant cells into the parent', async () => {
-        const code = 'print("#onIOPubMessage:enabled")';
-        const promise = new PromiseDelegate<void>();
         handler.enabled = true;
         const parent = handler.parent as TestParent;
-        expect(parent.widgets.length).to.equal(0);
+        expect(parent.widgets.length).toBe(0);
         let called = false;
         handler.injected.connect(() => {
-          expect(parent.widgets.length).to.be.greaterThan(0);
+          expect(parent.widgets.length).toBeGreaterThan(0);
           called = true;
-          promise.resolve(void 0);
         });
-        await foreign.kernel!.requestExecute({ code, stop_on_error: true })
-          .done;
-        await promise.promise;
-        expect(called).to.equal(true);
+        await foreign.session!.kernel!.requestExecute({ code: 'foo' }).done;
+        Mock.emitIopubMessage(foreign, streamMsg);
+        expect(called).toBe(true);
       });
 
       it('should not reject relevant iopub messages', async () => {
-        const code = 'print("#onIOPubMessage:relevant")';
-        const promise = new PromiseDelegate<void>();
         let called = false;
+        let errored = false;
         handler.enabled = true;
         handler.rejected.connect(() => {
-          promise.reject('rejected relevant iopub message');
+          errored = true;
         });
-        handler.injected.connect((sender, msg) => {
-          if (KernelMessage.isStreamMsg(msg)) {
+        handler.received.connect((sender, msg) => {
+          if (KernelMessage.isClearOutputMsg(msg)) {
             called = true;
-            promise.resolve(void 0);
           }
         });
-        await foreign.kernel!.requestExecute({ code, stop_on_error: true })
-          .done;
-        await promise.promise;
-        expect(called).to.equal(true);
+        await foreign.session!.kernel!.requestExecute({ code: 'foo' }).done;
+        Mock.emitIopubMessage(foreign, clearMsg);
+        expect(called).toBe(true);
+        expect(errored).toBe(false);
       });
     });
   });

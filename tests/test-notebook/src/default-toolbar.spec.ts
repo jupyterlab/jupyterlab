@@ -232,8 +232,6 @@ describe('@jupyterlab/notebook', () => {
       let panel: NotebookPanel;
 
       beforeEach(async function() {
-        // tslint:disable-next-line:no-invalid-this
-        this.timeout(120000);
         context = await initNotebookContext({ startKernel: true });
         panel = NBTestUtils.createNotebookPanel(context);
         context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
@@ -272,7 +270,7 @@ describe('@jupyterlab/notebook', () => {
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await p.promise;
-        }).timeout(30000); // Allow for slower CI
+        });
 
         it("should add an inline svg node with the 'run' icon", async () => {
           const button = ToolbarItems.createRunButton(panel);
@@ -314,7 +312,7 @@ describe('@jupyterlab/notebook', () => {
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await acceptDialog();
           await p.promise;
-        }).timeout(30000); // Allow for slower CI
+        });
 
         it("should add an inline svg node with the 'fast-forward' icon", async () => {
           const button = ToolbarItems.createRestartRunAllButton(panel);
