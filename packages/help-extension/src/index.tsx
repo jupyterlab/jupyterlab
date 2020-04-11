@@ -316,7 +316,7 @@ function activate(
           <a
             href={contributorsURL}
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             className="jp-Button-flat"
           >
             CONTRIBUTOR LIST
@@ -324,7 +324,7 @@ function activate(
           <a
             href={jupyterURL}
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             className="jp-Button-flat"
           >
             ABOUT PROJECT JUPYTER

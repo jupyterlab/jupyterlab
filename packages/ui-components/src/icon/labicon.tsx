@@ -796,6 +796,7 @@ namespace Private {
       }
     }
   );
+  blankReact.displayName = 'BlankReact';
 
   export function initContainer({
     container,
@@ -930,7 +931,7 @@ namespace Private {
         label = undefined;
       }
 
-      return ReactDOM.render(
+      ReactDOM.render(
         <this._icon.react
           container={container}
           label={label}

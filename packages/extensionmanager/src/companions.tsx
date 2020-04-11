@@ -137,7 +137,7 @@ export function presentCompanions(
         one of the following commands:
         {getInstallCommands(serverCompanion).map(command => {
           return (
-            <p>
+            <p key={command}>
               <code>{command}</code>
             </p>
           );
@@ -176,7 +176,7 @@ export function presentCompanions(
           one of the following commands:
           {getInstallCommands(entry.kernelInfo).map(command => {
             return (
-              <p>
+              <p key={command}>
                 <code>{command}</code>
               </p>
             );

@@ -68,11 +68,9 @@ export class HTMLSelect extends React.Component<IHTMLSelectProps> {
       const props: IOptionProps =
         typeof option === 'object' ? option : { value: option };
       return (
-        <option
-          {...props}
-          key={props.value}
-          children={props.label || props.value}
-        />
+        <option {...props} key={props.value}>
+          {props.label || props.value}
+        </option>
       );
     });
 

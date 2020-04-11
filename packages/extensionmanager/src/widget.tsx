@@ -215,7 +215,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
-            <a href={entry.url} target="_blank" rel="noopener">
+            <a href={entry.url} target="_blank" rel="noopener noreferrer">
               {entry.name}
             </a>
           </div>
@@ -506,7 +506,7 @@ CollapsibleSection.IState
     );
   }
 
-  componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
+  UNSAFE_componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
     if (nextProps.forceOpen) {
       this.setState({
         isOpen: true
@@ -615,6 +615,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
             <a
               href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Read more in the JupyterLab documentation.
             </a>
