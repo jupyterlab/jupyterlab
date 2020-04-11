@@ -20,9 +20,6 @@ import { INotebookModel, NotebookModelFactory } from '@jupyterlab/notebook';
 
 export { NBTestUtils } from './notebook-utils';
 
-import * as Mock from './mock';
-export { Mock };
-
 export { defaultRenderMime } from './rendermime';
 
 /**

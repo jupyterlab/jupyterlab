@@ -13,7 +13,9 @@ import { Panel } from '@lumino/widgets';
 
 import { CodeCellModel, CodeCell } from '@jupyterlab/cells';
 
-import { defaultRenderMime, NBTestUtils, Mock } from '@jupyterlab/testutils';
+import { defaultRenderMime, NBTestUtils } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 import { ISessionContext } from '@jupyterlab/apputils';
 

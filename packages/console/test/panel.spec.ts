@@ -9,7 +9,9 @@ import { Widget } from '@lumino/widgets';
 
 import { CodeConsole, ConsolePanel } from '../src';
 
-import { dismissDialog, Mock } from '@jupyterlab/testutils';
+import { dismissDialog } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 import {
   createConsolePanelFactory,
