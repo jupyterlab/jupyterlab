@@ -107,7 +107,7 @@ describe('jupyter.services - Comm', () => {
     describe('#registerCommTarget()', () => {
       it('should call the provided callback', async () => {
         const promise = new PromiseDelegate<
-        [Kernel.IComm, KernelMessage.ICommOpenMsg]
+          [Kernel.IComm, KernelMessage.ICommOpenMsg]
         >();
         const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           promise.resolve([comm, msg]);
@@ -128,7 +128,7 @@ describe('jupyter.services - Comm', () => {
 
       it('should do nothing if the kernel does not handle comms', async () => {
         const promise = new PromiseDelegate<
-        [Kernel.IComm, KernelMessage.ICommOpenMsg]
+          [Kernel.IComm, KernelMessage.ICommOpenMsg]
         >();
         const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           promise.resolve([comm, msg]);

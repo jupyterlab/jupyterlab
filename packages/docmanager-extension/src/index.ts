@@ -832,7 +832,7 @@ namespace Private {
   /**
    * A counter for unique IDs.
    */
-  export let id = 0;
+  export const id = 0;
 
   export function createRevertConfirmNode(
     checkpoint: Contents.ICheckpointModel,

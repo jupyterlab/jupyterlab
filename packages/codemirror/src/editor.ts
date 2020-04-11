@@ -875,26 +875,26 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._changeGuard = true;
     const doc = this.doc;
     switch (args.type) {
-    case 'insert':
-      const pos = doc.posFromIndex(args.start);
-      // Replace the range, including a '+input' orign,
-      // which indicates that CodeMirror may merge changes
-      // for undo/redo purposes.
-      doc.replaceRange(args.value, pos, pos, '+input');
-      break;
-    case 'remove':
-      const from = doc.posFromIndex(args.start);
-      const to = doc.posFromIndex(args.end);
-      // Replace the range, including a '+input' orign,
-      // which indicates that CodeMirror may merge changes
-      // for undo/redo purposes.
-      doc.replaceRange('', from, to, '+input');
-      break;
-    case 'set':
-      doc.setValue(args.value);
-      break;
-    default:
-      break;
+      case 'insert':
+        const pos = doc.posFromIndex(args.start);
+        // Replace the range, including a '+input' orign,
+        // which indicates that CodeMirror may merge changes
+        // for undo/redo purposes.
+        doc.replaceRange(args.value, pos, pos, '+input');
+        break;
+      case 'remove':
+        const from = doc.posFromIndex(args.start);
+        const to = doc.posFromIndex(args.end);
+        // Replace the range, including a '+input' orign,
+        // which indicates that CodeMirror may merge changes
+        // for undo/redo purposes.
+        doc.replaceRange('', from, to, '+input');
+        break;
+      case 'set':
+        doc.setValue(args.value);
+        break;
+      default:
+        break;
     }
     this._changeGuard = false;
   }
@@ -936,17 +936,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'focus':
-      this._evtFocus(event as FocusEvent);
-      break;
-    case 'blur':
-      this._evtBlur(event as FocusEvent);
-      break;
-    case 'scroll':
-      this._evtScroll();
-      break;
-    default:
-      break;
+      case 'focus':
+        this._evtFocus(event as FocusEvent);
+        break;
+      case 'blur':
+        this._evtBlur(event as FocusEvent);
+        break;
+      case 'scroll':
+        this._evtScroll();
+        break;
+      default:
+        break;
     }
   }
 
@@ -1441,73 +1441,73 @@ namespace Private {
   ): void {
     const el = editor.getWrapperElement();
     switch (option) {
-    case 'lineWrap':
-      const lineWrapping = value === 'off' ? false : true;
-      const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
-      const maxWidth =
-          value === 'bounded' ? `${config.wordWrapColumn}ch` : null;
-      const width =
-          value === 'wordWrapColumn' ? `${config.wordWrapColumn}ch` : null;
-      lines.style.setProperty('max-width', maxWidth);
-      lines.style.setProperty('width', width);
-      editor.setOption('lineWrapping', lineWrapping);
-      break;
-    case 'wordWrapColumn':
-      const { lineWrap } = config;
-      if (lineWrap === 'wordWrapColumn' || lineWrap === 'bounded') {
+      case 'lineWrap':
+        const lineWrapping = value === 'off' ? false : true;
         const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
-        const prop = lineWrap === 'wordWrapColumn' ? 'width' : 'maxWidth';
-        lines.style[prop] = `${value}ch`;
-      }
-      break;
-    case 'tabSize':
-      editor.setOption('indentUnit', value);
-      break;
-    case 'insertSpaces':
-      editor.setOption('indentWithTabs', !value);
-      break;
-    case 'autoClosingBrackets':
-      editor.setOption('autoCloseBrackets', value);
-      break;
-    case 'rulers':
-      const rulers = value as Array<number>;
-      editor.setOption(
-        'rulers',
-        rulers.map(column => {
-          return {
-            column,
-            className: 'jp-CodeMirror-ruler'
-          };
-        })
-      );
-      break;
-    case 'readOnly':
-      el.classList.toggle(READ_ONLY_CLASS, value);
-      editor.setOption(option, value);
-      break;
-    case 'fontFamily':
-      el.style.fontFamily = value;
-      break;
-    case 'fontSize':
-      el.style.setProperty('font-size', value ? value + 'px' : null);
-      break;
-    case 'lineHeight':
-      el.style.lineHeight = value ? value.toString() : null;
-      break;
-    case 'gutters':
-      editor.setOption(option, getActiveGutters(config));
-      break;
-    case 'lineNumbers':
-      editor.setOption(option, value);
-      editor.setOption('gutters', getActiveGutters(config));
-      break;
-    case 'codeFolding':
-      editor.setOption('foldGutter', value);
-      editor.setOption('gutters', getActiveGutters(config));
-      break;
-    default:
-      editor.setOption(option, value);
-      break;
+        const maxWidth =
+          value === 'bounded' ? `${config.wordWrapColumn}ch` : null;
+        const width =
+          value === 'wordWrapColumn' ? `${config.wordWrapColumn}ch` : null;
+        lines.style.setProperty('max-width', maxWidth);
+        lines.style.setProperty('width', width);
+        editor.setOption('lineWrapping', lineWrapping);
+        break;
+      case 'wordWrapColumn':
+        const { lineWrap } = config;
+        if (lineWrap === 'wordWrapColumn' || lineWrap === 'bounded') {
+          const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
+          const prop = lineWrap === 'wordWrapColumn' ? 'width' : 'maxWidth';
+          lines.style[prop] = `${value}ch`;
+        }
+        break;
+      case 'tabSize':
+        editor.setOption('indentUnit', value);
+        break;
+      case 'insertSpaces':
+        editor.setOption('indentWithTabs', !value);
+        break;
+      case 'autoClosingBrackets':
+        editor.setOption('autoCloseBrackets', value);
+        break;
+      case 'rulers':
+        const rulers = value as Array<number>;
+        editor.setOption(
+          'rulers',
+          rulers.map(column => {
+            return {
+              column,
+              className: 'jp-CodeMirror-ruler'
+            };
+          })
+        );
+        break;
+      case 'readOnly':
+        el.classList.toggle(READ_ONLY_CLASS, value);
+        editor.setOption(option, value);
+        break;
+      case 'fontFamily':
+        el.style.fontFamily = value;
+        break;
+      case 'fontSize':
+        el.style.setProperty('font-size', value ? value + 'px' : null);
+        break;
+      case 'lineHeight':
+        el.style.lineHeight = value ? value.toString() : null;
+        break;
+      case 'gutters':
+        editor.setOption(option, getActiveGutters(config));
+        break;
+      case 'lineNumbers':
+        editor.setOption(option, value);
+        editor.setOption('gutters', getActiveGutters(config));
+        break;
+      case 'codeFolding':
+        editor.setOption('foldGutter', value);
+        editor.setOption('gutters', getActiveGutters(config));
+        break;
+      default:
+        editor.setOption(option, value);
+        break;
     }
   }
 }

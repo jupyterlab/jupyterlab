@@ -528,20 +528,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     options?: DocumentRegistry.IOpenOptions
   ): void {
     switch (area || 'main') {
-    case 'main':
-      return this._addToMainArea(widget, options);
-    case 'left':
-      return this._addToLeftArea(widget, options);
-    case 'right':
-      return this._addToRightArea(widget, options);
-    case 'header':
-      return this._addToHeaderArea(widget, options);
-    case 'top':
-      return this._addToTopArea(widget, options);
-    case 'bottom':
-      return this._addToBottomArea(widget, options);
-    default:
-      throw new Error(`Invalid area: ${area}`);
+      case 'main':
+        return this._addToMainArea(widget, options);
+      case 'left':
+        return this._addToLeftArea(widget, options);
+      case 'right':
+        return this._addToRightArea(widget, options);
+      case 'header':
+        return this._addToHeaderArea(widget, options);
+      case 'top':
+        return this._addToTopArea(widget, options);
+      case 'bottom':
+        return this._addToBottomArea(widget, options);
+      default:
+        throw new Error(`Invalid area: ${area}`);
     }
   }
 
@@ -611,20 +611,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   isEmpty(area: ILabShell.Area): boolean {
     switch (area) {
-    case 'left':
-      return this._leftHandler.stackedPanel.widgets.length === 0;
-    case 'main':
-      return this._dockPanel.isEmpty;
-    case 'header':
-      return this._headerPanel.widgets.length === 0;
-    case 'top':
-      return this._topHandler.panel.widgets.length === 0;
-    case 'bottom':
-      return this._bottomPanel.widgets.length === 0;
-    case 'right':
-      return this._rightHandler.stackedPanel.widgets.length === 0;
-    default:
-      return true;
+      case 'left':
+        return this._leftHandler.stackedPanel.widgets.length === 0;
+      case 'main':
+        return this._dockPanel.isEmpty;
+      case 'header':
+        return this._headerPanel.widgets.length === 0;
+      case 'top':
+        return this._topHandler.panel.widgets.length === 0;
+      case 'bottom':
+        return this._bottomPanel.widgets.length === 0;
+      case 'right':
+        return this._rightHandler.stackedPanel.widgets.length === 0;
+      default:
+        return true;
     }
   }
 
@@ -693,20 +693,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   widgets(area?: ILabShell.Area): IIterator<Widget> {
     switch (area || 'main') {
-    case 'main':
-      return this._dockPanel.widgets();
-    case 'left':
-      return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
-    case 'right':
-      return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
-    case 'header':
-      return this._headerPanel.children();
-    case 'top':
-      return this._topHandler.panel.children();
-    case 'bottom':
-      return this._bottomPanel.children();
-    default:
-      throw new Error(`Invalid area: ${area}`);
+      case 'main':
+        return this._dockPanel.widgets();
+      case 'left':
+        return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
+      case 'right':
+        return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
+      case 'header':
+        return this._headerPanel.children();
+      case 'top':
+        return this._topHandler.panel.children();
+      case 'bottom':
+        return this._bottomPanel.children();
+      default:
+        throw new Error(`Invalid area: ${area}`);
     }
   }
 
@@ -910,8 +910,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return index < len - 1
       ? bars[index + 1]
       : index === len - 1
-        ? bars[0]
-        : null;
+      ? bars[0]
+      : null;
   }
 
   /*
@@ -982,16 +982,16 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     msg: Message
   ): boolean => {
     switch (msg.type) {
-    case 'child-added':
-      (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
-      this._tracker.add((msg as Widget.ChildMessage).child);
-      break;
-    case 'child-removed':
-      (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
-      this._tracker.remove((msg as Widget.ChildMessage).child);
-      break;
-    default:
-      break;
+      case 'child-added':
+        (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
+        this._tracker.add((msg as Widget.ChildMessage).child);
+        break;
+      case 'child-removed':
+        (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
+        this._tracker.remove((msg as Widget.ChildMessage).child);
+        break;
+      default:
+        break;
     }
     return true;
   };

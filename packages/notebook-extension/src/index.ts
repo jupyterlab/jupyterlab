@@ -443,15 +443,15 @@ function activateNotebookTools(
   // Create message hook for triggers to save to the database.
   const hook = (sender: any, message: Message): boolean => {
     switch (message.type) {
-    case 'activate-request':
-      void state.save(id, { open: true });
-      break;
-    case 'after-hide':
-    case 'close-request':
-      void state.remove(id);
-      break;
-    default:
-      break;
+      case 'activate-request':
+        void state.save(id, { open: true });
+        break;
+      case 'after-hide':
+      case 'close-request':
+        void state.remove(id);
+        break;
+      default:
+        break;
     }
     return true;
   };
@@ -549,7 +549,7 @@ function activateNotebookHandler(
   const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
   const clonedOutputs = new WidgetTracker<
-  MainAreaWidget<Private.ClonedOutputArea>
+    MainAreaWidget<Private.ClonedOutputArea>
   >({
     namespace: 'cloned-outputs'
   });
@@ -2383,9 +2383,9 @@ namespace Private {
     get index(): number {
       return this._cell
         ? ArrayExt.findFirstIndex(
-          this._notebook.content.widgets,
-          c => c === this._cell
-        )
+            this._notebook.content.widgets,
+            c => c === this._cell
+          )
         : this._index;
     }
 

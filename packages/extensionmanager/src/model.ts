@@ -494,8 +494,8 @@ export class ListModel extends VDomModel {
           'homepage' in pkg.links
             ? pkg.links.homepage
             : 'repository' in pkg.links
-              ? pkg.links.repository
-              : pkg.links.npm,
+            ? pkg.links.repository
+            : pkg.links.npm,
         installed: false,
         enabled: false,
         status: null,

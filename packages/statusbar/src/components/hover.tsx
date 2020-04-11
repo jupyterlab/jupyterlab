@@ -106,17 +106,17 @@ export class Popup extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'keydown':
-      this._evtKeydown(event as KeyboardEvent);
-      break;
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    case 'resize':
-      this.onResize();
-      break;
-    default:
-      break;
+      case 'keydown':
+        this._evtKeydown(event as KeyboardEvent);
+        break;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      case 'resize':
+        this.onResize();
+        break;
+      default:
+        break;
     }
   }
 
@@ -135,13 +135,13 @@ export class Popup extends Widget {
   private _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
     switch (event.keyCode) {
-    case 27: // Escape.
-      event.stopPropagation();
-      event.preventDefault();
-      this.dispose();
-      break;
-    default:
-      break;
+      case 27: // Escape.
+        event.stopPropagation();
+        event.preventDefault();
+        this.dispose();
+        break;
+      default:
+        break;
     }
   }
 

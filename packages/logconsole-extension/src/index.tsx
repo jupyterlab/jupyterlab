@@ -143,8 +143,8 @@ function activateLogConsole(
       options.source !== undefined
         ? options.source
         : nbtracker.currentWidget
-          ? nbtracker.currentWidget.context.path
-          : null;
+        ? nbtracker.currentWidget.context.path
+        : null;
 
     logConsoleWidget = new MainAreaWidget({ content: logConsolePanel });
     logConsoleWidget.addClass('jp-LogConsole');
@@ -388,12 +388,12 @@ export class LogLevelSwitcher extends ReactWidget {
             logger === null
               ? []
               : [
-                'Critical',
-                'Error',
-                'Warning',
-                'Info',
-                'Debug'
-              ].map(label => ({ label, value: label.toLowerCase() }))
+                  'Critical',
+                  'Error',
+                  'Warning',
+                  'Info',
+                  'Debug'
+                ].map(label => ({ label, value: label.toLowerCase() }))
           }
         />
       </>

@@ -27,13 +27,13 @@ export namespace FileDialog {
    */
   export interface IDirectoryOptions
     extends Partial<
-    Pick<
-    Dialog.IOptions<Promise<Contents.IModel[]>>,
-    Exclude<
-    keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
-    'body' | 'buttons' | 'defaultButton'
-    >
-    >
+      Pick<
+        Dialog.IOptions<Promise<Contents.IModel[]>>,
+        Exclude<
+          keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
+          'body' | 'buttons' | 'defaultButton'
+        >
+      >
     > {
     /**
      * Document manager

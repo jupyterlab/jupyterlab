@@ -141,17 +141,17 @@ export class Completer extends Widget {
       return;
     }
     switch (event.type) {
-    case 'keydown':
-      this._evtKeydown(event as KeyboardEvent);
-      break;
-    case 'mousedown':
-      this._evtMousedown(event as MouseEvent);
-      break;
-    case 'scroll':
-      this._evtScroll(event as MouseEvent);
-      break;
-    default:
-      break;
+      case 'keydown':
+        this._evtKeydown(event as KeyboardEvent);
+        break;
+      case 'mousedown':
+        this._evtMousedown(event as MouseEvent);
+        break;
+      case 'scroll':
+        this._evtScroll(event as MouseEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -343,45 +343,45 @@ export class Completer extends Widget {
       return;
     }
     switch (event.keyCode) {
-    case 9: // Tab key
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      const model = this._model;
-      if (!model) {
+      case 9: // Tab key
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        const model = this._model;
+        if (!model) {
+          return;
+        }
+        const populated = this._populateSubset();
+        // If there is a common subset in the options,
+        // then emit a completion signal with that subset.
+        if (model.query) {
+          model.subsetMatch = true;
+          this._selected.emit(model.query);
+          model.subsetMatch = false;
+        }
+        // If the query changed, update rendering of the options.
+        if (populated) {
+          this.update();
+        }
         return;
-      }
-      const populated = this._populateSubset();
-      // If there is a common subset in the options,
-      // then emit a completion signal with that subset.
-      if (model.query) {
-        model.subsetMatch = true;
-        this._selected.emit(model.query);
-        model.subsetMatch = false;
-      }
-      // If the query changed, update rendering of the options.
-      if (populated) {
-        this.update();
-      }
-      return;
-    case 27: // Esc key
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      this.reset();
-      return;
-    case 33: // PageUp
-    case 34: // PageDown
-    case 38: // Up arrow key
-    case 40: // Down arrow key
-      event.preventDefault();
-      event.stopPropagation();
-      event.stopImmediatePropagation();
-      const cycle = Private.keyCodeMap[event.keyCode];
-      this._cycle(cycle);
-      return;
-    default:
-      return;
+      case 27: // Esc key
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        this.reset();
+        return;
+      case 33: // PageUp
+      case 34: // PageDown
+      case 38: // Up arrow key
+      case 40: // Down arrow key
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        const cycle = Private.keyCodeMap[event.keyCode];
+        this._cycle(cycle);
+        return;
+      default:
+        return;
     }
   }
 

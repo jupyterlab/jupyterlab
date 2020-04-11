@@ -69,8 +69,8 @@ namespace LineFormComponent {
  * A component for rendering a "go-to-line" form.
  */
 class LineFormComponent extends React.Component<
-LineFormComponent.IProps,
-LineFormComponent.IState
+  LineFormComponent.IProps,
+  LineFormComponent.IState
 > {
   /**
    * Construct a new LineFormComponent.

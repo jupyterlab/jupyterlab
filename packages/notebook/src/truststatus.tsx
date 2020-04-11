@@ -85,7 +85,7 @@ namespace NotebookTrustComponent {
  * The NotebookTrust status item.
  */
 export class NotebookTrustStatus extends VDomRenderer<
-NotebookTrustStatus.Model
+  NotebookTrustStatus.Model
 > {
   /**
    * Construct a new status item.

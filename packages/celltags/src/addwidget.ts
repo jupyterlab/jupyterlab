@@ -76,20 +76,20 @@ export class AddWidget extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'mousedown':
-      this._evtMouseDown(event as MouseEvent);
-      break;
-    case 'keydown':
-      this._evtKeyDown(event as KeyboardEvent);
-      break;
-    case 'blur':
-      this._evtBlur();
-      break;
-    case 'focus':
-      this._evtFocus();
-      break;
-    default:
-      break;
+      case 'mousedown':
+        this._evtMouseDown(event as MouseEvent);
+        break;
+      case 'keydown':
+        this._evtKeyDown(event as KeyboardEvent);
+        break;
+      case 'blur':
+        this._evtBlur();
+        break;
+      case 'focus':
+        this._evtFocus();
+        break;
+      default:
+        break;
     }
   }
 

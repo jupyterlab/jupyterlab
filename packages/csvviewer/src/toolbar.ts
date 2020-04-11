@@ -71,11 +71,11 @@ export class CSVDelimiter extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'change':
-      this._delimiterChanged.emit(this.selectNode.value);
-      break;
-    default:
-      break;
+      case 'change':
+        this._delimiterChanged.emit(this.selectNode.value);
+        break;
+      default:
+        break;
     }
   }
 

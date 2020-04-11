@@ -108,8 +108,8 @@ namespace Private {
    * An attached property for a console's foreign handler.
    */
   export const foreignHandlerProperty = new AttachedProperty<
-  CodeConsole,
-  ForeignHandler | undefined
+    CodeConsole,
+    ForeignHandler | undefined
   >({
     name: 'foreignHandler',
     create: () => undefined

@@ -100,24 +100,24 @@ abstract class PropertyInspectorProvider extends Widget
     const owner = sender.owner;
     const current = this._tracker.currentWidget;
     switch (action) {
-    case 'content':
-      if (current === owner) {
-        this.setContent(sender.content);
-      }
-      break;
-    case 'dispose':
-      if (owner) {
-        this._tracker.remove(owner);
-        this._inspectors.delete(owner);
-      }
-      break;
-    case 'show-panel':
-      if (current === owner) {
-        this.showPanel();
-      }
-      break;
-    default:
-      throw new Error('Unsupported inspector action');
+      case 'content':
+        if (current === owner) {
+          this.setContent(sender.content);
+        }
+        break;
+      case 'dispose':
+        if (owner) {
+          this._tracker.remove(owner);
+          this._inspectors.delete(owner);
+        }
+        break;
+      case 'show-panel':
+        if (current === owner) {
+          this.showPanel();
+        }
+        break;
+      default:
+        throw new Error('Unsupported inspector action');
     }
   }
 
@@ -302,8 +302,8 @@ namespace Private {
     private _content: Widget | null = null;
     private _owner: Widget | null = null;
     private _onAction = new Signal<
-    PropertyInspector,
-    Private.PropertyInspectorAction
+      PropertyInspector,
+      Private.PropertyInspectorAction
     >(this);
   }
 }

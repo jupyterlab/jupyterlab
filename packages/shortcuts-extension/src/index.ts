@@ -208,8 +208,8 @@ namespace Private {
    */
   function normalizeOptions(
     value:
-    | ReadonlyPartialJSONValue
-    | Partial<CommandRegistry.IKeyBindingOptions>
+      | ReadonlyPartialJSONValue
+      | Partial<CommandRegistry.IKeyBindingOptions>
   ): CommandRegistry.IKeyBindingOptions | undefined {
     if (!value || typeof value !== 'object') {
       return undefined;

@@ -242,8 +242,8 @@ export namespace IRenderMime {
      * The options used to open a document with the renderer factory.
      */
     readonly documentWidgetFactoryOptions?:
-    | IDocumentWidgetFactoryOptions
-    | ReadonlyArray<IDocumentWidgetFactoryOptions>;
+      | IDocumentWidgetFactoryOptions
+      | ReadonlyArray<IDocumentWidgetFactoryOptions>;
 
     /**
      * The optional file type associated with the extension.

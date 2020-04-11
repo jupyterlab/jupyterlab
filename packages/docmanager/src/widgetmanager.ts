@@ -232,17 +232,17 @@ export class DocumentWidgetManager implements IDisposable {
    */
   messageHook(handler: IMessageHandler, msg: Message): boolean {
     switch (msg.type) {
-    case 'close-request':
-      void this.onClose(handler as Widget);
-      return false;
-    case 'activate-request':
-      const context = this.contextForWidget(handler as Widget);
-      if (context) {
-        this._activateRequested.emit(context.path);
-      }
-      break;
-    default:
-      break;
+      case 'close-request':
+        void this.onClose(handler as Widget);
+        return false;
+      case 'activate-request':
+        const context = this.contextForWidget(handler as Widget);
+        if (context) {
+          this._activateRequested.emit(context.path);
+        }
+        break;
+      default:
+        break;
     }
     return true;
   }
@@ -434,8 +434,8 @@ namespace Private {
    * A private attached property for a widget context.
    */
   export const contextProperty = new AttachedProperty<
-  Widget,
-  DocumentRegistry.Context | undefined
+    Widget,
+    DocumentRegistry.Context | undefined
   >({
     name: 'context',
     create: () => undefined
@@ -445,8 +445,8 @@ namespace Private {
    * A private attached property for a widget factory.
    */
   export const factoryProperty = new AttachedProperty<
-  Widget,
-  DocumentRegistry.WidgetFactory | undefined
+    Widget,
+    DocumentRegistry.WidgetFactory | undefined
   >({
     name: 'factory',
     create: () => undefined
@@ -456,8 +456,8 @@ namespace Private {
    * A private attached property for the widgets associated with a context.
    */
   export const widgetsProperty = new AttachedProperty<
-  DocumentRegistry.Context,
-  IDocumentWidget[]
+    DocumentRegistry.Context,
+    IDocumentWidget[]
   >({
     name: 'widgets',
     create: () => []
@@ -467,8 +467,8 @@ namespace Private {
    * A private attached property for a widget's disposables.
    */
   export const disposablesProperty = new AttachedProperty<
-  Widget,
-  DisposableSet
+    Widget,
+    DisposableSet
   >({
     name: 'disposables',
     create: () => new DisposableSet()

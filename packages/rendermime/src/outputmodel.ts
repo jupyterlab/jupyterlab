@@ -95,11 +95,11 @@ export class OutputModel implements IOutputModel {
     for (const key in value) {
       // Ignore data and metadata that were stripped.
       switch (key) {
-      case 'data':
-      case 'metadata':
-        break;
-      default:
-        this._raw[key] = Private.extract(value, key);
+        case 'data':
+        case 'metadata':
+          break;
+        default:
+          this._raw[key] = Private.extract(value, key);
       }
     }
     this.type = value.output_type;
@@ -183,14 +183,14 @@ export class OutputModel implements IOutputModel {
       output[key] = Private.extract(this._raw, key);
     }
     switch (this.type) {
-    case 'display_data':
-    case 'execute_result':
-    case 'update_display_data':
-      output['data'] = this.data as PartialJSONObject;
-      output['metadata'] = this.metadata as PartialJSONObject;
-      break;
-    default:
-      break;
+      case 'display_data':
+      case 'execute_result':
+      case 'update_display_data':
+        output['data'] = this.data as PartialJSONObject;
+        output['metadata'] = this.metadata as PartialJSONObject;
+        break;
+      default:
+        break;
     }
     // Remove transient data.
     delete output['transient'];

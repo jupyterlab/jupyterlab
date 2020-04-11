@@ -19,14 +19,14 @@ export function validateProperty(
   if (typeName !== void 0) {
     let valid = true;
     switch (typeName) {
-    case 'array':
-      valid = Array.isArray(value);
-      break;
-    case 'object':
-      valid = typeof value !== 'undefined';
-      break;
-    default:
-      valid = typeof value === typeName;
+      case 'array':
+        valid = Array.isArray(value);
+        break;
+      case 'object':
+        valid = typeof value !== 'undefined';
+        break;
+      default:
+        valid = typeof value === typeName;
     }
     if (!valid) {
       throw new Error(`Property '${name}' is not of type '${typeName}'`);
@@ -35,14 +35,14 @@ export function validateProperty(
     if (values.length > 0) {
       let valid = true;
       switch (typeName) {
-      case 'string':
-      case 'number':
-      case 'boolean':
-        valid = values.includes(value);
-        break;
-      default:
-        valid = values.findIndex(v => v === value) >= 0;
-        break;
+        case 'string':
+        case 'number':
+        case 'boolean':
+          valid = values.includes(value);
+          break;
+        default:
+          valid = values.findIndex(v => v === value) >= 0;
+          break;
       }
       if (!valid) {
         throw new Error(

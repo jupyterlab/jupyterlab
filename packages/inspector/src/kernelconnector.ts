@@ -13,9 +13,9 @@ import { InspectionHandler } from './handler';
  * The default connector for making inspection requests from the Jupyter API.
  */
 export class KernelConnector extends DataConnector<
-InspectionHandler.IReply,
-void,
-InspectionHandler.IRequest
+  InspectionHandler.IReply,
+  void,
+  InspectionHandler.IRequest
 > {
   /**
    * Create a new kernel connector for inspection requests.

@@ -63,8 +63,8 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
 
   private _changed = new Signal<this, void>(this);
   private _providerMap: Private.ProviderMap = new Map<
-  string,
-  ISearchProviderConstructor<any>
+    string,
+    ISearchProviderConstructor<any>
   >();
 }
 

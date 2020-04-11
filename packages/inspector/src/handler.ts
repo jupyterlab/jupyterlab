@@ -176,9 +176,9 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
 
   private _cleared = new Signal<InspectionHandler, void>(this);
   private _connector: IDataConnector<
-  InspectionHandler.IReply,
-  void,
-  InspectionHandler.IRequest
+    InspectionHandler.IReply,
+    void,
+    InspectionHandler.IRequest
   >;
   private _disposed = new Signal<this, void>(this);
   private _editor: CodeEditor.IEditor | null = null;

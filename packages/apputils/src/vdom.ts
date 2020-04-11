@@ -233,8 +233,8 @@ export interface IUseSignalState<SENDER, ARGS> {
  * ```
  */
 export class UseSignal<SENDER, ARGS> extends React.Component<
-IUseSignalProps<SENDER, ARGS>,
-IUseSignalState<SENDER, ARGS>
+  IUseSignalProps<SENDER, ARGS>,
+  IUseSignalState<SENDER, ARGS>
 > {
   constructor(props: IUseSignalProps<SENDER, ARGS>) {
     super(props);

@@ -31,7 +31,7 @@ export namespace IObservableJSON {
    * A type alias for observable JSON changed args.
    */
   export type IChangedArgs = IObservableMap.IChangedArgs<
-  ReadonlyPartialJSONValue
+    ReadonlyPartialJSONValue
   >;
 }
 

@@ -194,28 +194,28 @@ export class ObservableUndoableList<T> extends ObservableList<T>
     let index = 0;
     const serializer = this._serializer;
     switch (change.type) {
-    case 'add':
-      each(change.newValues, () => {
-        this.remove(change.newIndex);
-      });
-      break;
-    case 'set':
-      index = change.oldIndex;
-      each(change.oldValues, value => {
-        this.set(index++, serializer.fromJSON(value));
-      });
-      break;
-    case 'remove':
-      index = change.oldIndex;
-      each(change.oldValues, value => {
-        this.insert(index++, serializer.fromJSON(value));
-      });
-      break;
-    case 'move':
-      this.move(change.newIndex, change.oldIndex);
-      break;
-    default:
-      return;
+      case 'add':
+        each(change.newValues, () => {
+          this.remove(change.newIndex);
+        });
+        break;
+      case 'set':
+        index = change.oldIndex;
+        each(change.oldValues, value => {
+          this.set(index++, serializer.fromJSON(value));
+        });
+        break;
+      case 'remove':
+        index = change.oldIndex;
+        each(change.oldValues, value => {
+          this.insert(index++, serializer.fromJSON(value));
+        });
+        break;
+      case 'move':
+        this.move(change.newIndex, change.oldIndex);
+        break;
+      default:
+        return;
     }
   }
 
@@ -226,28 +226,28 @@ export class ObservableUndoableList<T> extends ObservableList<T>
     let index = 0;
     const serializer = this._serializer;
     switch (change.type) {
-    case 'add':
-      index = change.newIndex;
-      each(change.newValues, value => {
-        this.insert(index++, serializer.fromJSON(value));
-      });
-      break;
-    case 'set':
-      index = change.newIndex;
-      each(change.newValues, value => {
-        this.set(change.newIndex++, serializer.fromJSON(value));
-      });
-      break;
-    case 'remove':
-      each(change.oldValues, () => {
-        this.remove(change.oldIndex);
-      });
-      break;
-    case 'move':
-      this.move(change.oldIndex, change.newIndex);
-      break;
-    default:
-      return;
+      case 'add':
+        index = change.newIndex;
+        each(change.newValues, value => {
+          this.insert(index++, serializer.fromJSON(value));
+        });
+        break;
+      case 'set':
+        index = change.newIndex;
+        each(change.newValues, value => {
+          this.set(change.newIndex++, serializer.fromJSON(value));
+        });
+        break;
+      case 'remove':
+        each(change.oldValues, () => {
+          this.remove(change.oldIndex);
+        });
+        break;
+      case 'move':
+        this.move(change.oldIndex, change.newIndex);
+        break;
+      default:
+        return;
     }
   }
 
@@ -290,7 +290,7 @@ export namespace ObservableUndoableList {
    * A default, identity serializer.
    */
   export class IdentitySerializer<T extends JSONValue>
-  implements ISerializer<T> {
+    implements ISerializer<T> {
     /**
      * Identity serialize.
      */

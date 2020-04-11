@@ -522,22 +522,22 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
     widget: Widget
   ): DockLayout.ITabAreaConfig | null => {
     switch (area.type) {
-    case 'split-area':
-      const iterator = iter(area.children);
-      let tab: DockLayout.ITabAreaConfig | null = null;
-      let value: DockLayout.AreaConfig | undefined;
-      do {
-        value = iterator.next();
-        if (value) {
-          tab = findTab(value, widget);
-        }
-      } while (!tab && value);
-      return tab;
-    case 'tab-area':
-      const { id } = widget;
-      return area.widgets.some(widget => widget.id === id) ? area : null;
-    default:
-      return null;
+      case 'split-area':
+        const iterator = iter(area.children);
+        let tab: DockLayout.ITabAreaConfig | null = null;
+        let value: DockLayout.AreaConfig | undefined;
+        do {
+          value = iterator.next();
+          if (value) {
+            tab = findTab(value, widget);
+          }
+        } while (!tab && value);
+        return tab;
+      case 'tab-area':
+        const { id } = widget;
+        return area.widgets.some(widget => widget.id === id) ? area : null;
+      default:
+        return null;
     }
   };
 

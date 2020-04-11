@@ -617,26 +617,26 @@ export class DocumentRegistry implements IDisposable {
     model: Partial<Contents.IModel>
   ): DocumentRegistry.IFileType {
     switch (model.type) {
-    case 'directory':
-      return (
-        find(this._fileTypes, ft => ft.contentType === 'directory') ||
+      case 'directory':
+        return (
+          find(this._fileTypes, ft => ft.contentType === 'directory') ||
           DocumentRegistry.defaultDirectoryFileType
-      );
-    case 'notebook':
-      return (
-        find(this._fileTypes, ft => ft.contentType === 'notebook') ||
+        );
+      case 'notebook':
+        return (
+          find(this._fileTypes, ft => ft.contentType === 'notebook') ||
           DocumentRegistry.defaultNotebookFileType
-      );
-    default:
-      // Find the best matching extension.
-      if (model.name || model.path) {
-        const name = model.name || PathExt.basename(model.path!);
-        const fts = this.getFileTypesForPath(name);
-        if (fts.length > 0) {
-          return fts[0];
+        );
+      default:
+        // Find the best matching extension.
+        if (model.name || model.path) {
+          const name = model.name || PathExt.basename(model.path!);
+          const fts = this.getFileTypesForPath(name);
+          if (fts.length > 0) {
+            return fts[0];
+          }
         }
-      }
-      return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
+        return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
     }
   }
 
@@ -1068,7 +1068,7 @@ export namespace DocumentRegistry {
    */
   export interface IWidgetFactory<T extends IDocumentWidget, U extends IModel>
     extends IDisposable,
-    IWidgetFactoryOptions {
+      IWidgetFactoryOptions {
     /**
      * A signal emitted when a new widget is created.
      */
@@ -1224,10 +1224,10 @@ export namespace DocumentRegistry {
      * The type of the changed item.
      */
     readonly type:
-    | 'widgetFactory'
-    | 'modelFactory'
-    | 'widgetExtension'
-    | 'fileType';
+      | 'widgetFactory'
+      | 'modelFactory'
+      | 'widgetExtension'
+      | 'fileType';
 
     /**
      * The name of the item or the widget factory being extended.

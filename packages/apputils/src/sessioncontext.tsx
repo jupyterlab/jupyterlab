@@ -69,12 +69,12 @@ export interface ISessionContext extends IObservableDisposable {
    * A signal emitted when the session connection changes.
    */
   readonly sessionChanged: ISignal<
-  this,
-  IChangedArgs<
-  Session.ISessionConnection | null,
-  Session.ISessionConnection | null,
-  'session'
-  >
+    this,
+    IChangedArgs<
+      Session.ISessionConnection | null,
+      Session.ISessionConnection | null,
+      'session'
+    >
   >;
 
   // Signals proxied from the session connection for convenience.
@@ -83,12 +83,12 @@ export interface ISessionContext extends IObservableDisposable {
    * A signal emitted when the kernel changes, proxied from the session connection.
    */
   readonly kernelChanged: ISignal<
-  this,
-  IChangedArgs<
-  Kernel.IKernelConnection | null,
-  Kernel.IKernelConnection | null,
-  'kernel'
-  >
+    this,
+    IChangedArgs<
+      Kernel.IKernelConnection | null,
+      Kernel.IKernelConnection | null,
+      'kernel'
+    >
   >;
 
   /**
@@ -340,8 +340,8 @@ export class SessionContext implements ISessionContext {
    * A signal emitted when the kernel connection changes, proxied from the session connection.
    */
   get kernelChanged(): ISignal<
-  this,
-  Session.ISessionConnection.IKernelChangedArgs
+    this,
+    Session.ISessionConnection.IKernelChangedArgs
   > {
     return this._kernelChanged;
   }
@@ -350,12 +350,12 @@ export class SessionContext implements ISessionContext {
    * A signal emitted when the session connection changes.
    */
   get sessionChanged(): ISignal<
-  this,
-  IChangedArgs<
-  Session.ISessionConnection | null,
-  Session.ISessionConnection | null,
-  'session'
-  >
+    this,
+    IChangedArgs<
+      Session.ISessionConnection | null,
+      Session.ISessionConnection | null,
+      'session'
+    >
   > {
     return this._sessionChanged;
   }
@@ -885,17 +885,17 @@ export class SessionContext implements ISessionContext {
     property: 'path' | 'name' | 'type'
   ) {
     switch (property) {
-    case 'path':
-      this._path = sender.path;
-      break;
-    case 'name':
-      this._name = sender.name;
-      break;
-    case 'type':
-      this._type = sender.type;
-      break;
-    default:
-      throw new Error(`unrecognized property ${property}`);
+      case 'path':
+        this._path = sender.path;
+        break;
+      case 'name':
+        this._name = sender.name;
+        break;
+      case 'type':
+        this._type = sender.type;
+        break;
+      default:
+        throw new Error(`unrecognized property ${property}`);
     }
     this._propertyChanged.emit(property);
   }
@@ -982,16 +982,16 @@ export class SessionContext implements ISessionContext {
   private _initPromise = new PromiseDelegate<boolean>();
   private _isReady = false;
   private _kernelChanged = new Signal<
-  this,
-  Session.ISessionConnection.IKernelChangedArgs
+    this,
+    Session.ISessionConnection.IKernelChangedArgs
   >(this);
   private _sessionChanged = new Signal<
-  this,
-  IChangedArgs<
-  Session.ISessionConnection | null,
-  Session.ISessionConnection | null,
-  'session'
-  >
+    this,
+    IChangedArgs<
+      Session.ISessionConnection | null,
+      Session.ISessionConnection | null,
+      'session'
+    >
   >(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(

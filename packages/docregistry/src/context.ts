@@ -40,7 +40,7 @@ import { DocumentRegistry } from './registry';
  * This class is typically instantiated by the document manager.
  */
 export class Context<T extends DocumentRegistry.IModel>
-implements DocumentRegistry.IContext<T> {
+  implements DocumentRegistry.IContext<T> {
   /**
    * Construct a new document context.
    */

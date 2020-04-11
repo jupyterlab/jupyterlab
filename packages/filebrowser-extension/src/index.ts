@@ -844,10 +844,10 @@ function addCommands(
       // in the current filebrowser selection
       const factories = tracker.currentWidget
         ? OpenWithMenu._intersection(
-          map(tracker.currentWidget.selectedItems(), i => {
-            return OpenWithMenu._getFactories(i);
-          })
-        )
+            map(tracker.currentWidget.selectedItems(), i => {
+              return OpenWithMenu._getFactories(i);
+            })
+          )
         : undefined;
 
       if (factories) {

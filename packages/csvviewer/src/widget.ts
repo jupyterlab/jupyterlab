@@ -405,8 +405,8 @@ export class CSVViewer extends Widget {
   private _grid: DataGrid;
   private _searchService: GridSearchService;
   private _monitor: ActivityMonitor<
-  DocumentRegistry.IModel,
-  void
+    DocumentRegistry.IModel,
+    void
   > | null = null;
   private _delimiter = ',';
   private _revealed = new PromiseDelegate<void>();
@@ -499,7 +499,7 @@ namespace Private {
  * A widget factory for CSV widgets.
  */
 export class CSVViewerFactory extends ABCWidgetFactory<
-IDocumentWidget<CSVViewer>
+  IDocumentWidget<CSVViewer>
 > {
   /**
    * Create a new widget given a context.
@@ -515,7 +515,7 @@ IDocumentWidget<CSVViewer>
  * A widget factory for TSV widgets.
  */
 export class TSVViewerFactory extends ABCWidgetFactory<
-IDocumentWidget<CSVViewer>
+  IDocumentWidget<CSVViewer>
 > {
   /**
    * Create a new widget given a context.

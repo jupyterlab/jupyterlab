@@ -79,11 +79,11 @@ export class PluginList extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'mousedown':
-      this._evtMousedown(event as MouseEvent);
-      break;
-    default:
-      break;
+      case 'mousedown':
+        this._evtMousedown(event as MouseEvent);
+        break;
+      default:
+        break;
     }
   }
 

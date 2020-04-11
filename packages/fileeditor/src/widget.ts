@@ -212,11 +212,11 @@ export class FileEditor extends Widget {
       return;
     }
     switch (event.type) {
-    case 'mousedown':
-      this._ensureFocus();
-      break;
-    default:
-      break;
+      case 'mousedown':
+        this._ensureFocus();
+        break;
+      default:
+        break;
     }
   }
 
@@ -301,8 +301,8 @@ export namespace FileEditor {
  * A widget factory for editors.
  */
 export class FileEditorFactory extends ABCWidgetFactory<
-IDocumentWidget<FileEditor>,
-DocumentRegistry.ICodeModel
+  IDocumentWidget<FileEditor>,
+  DocumentRegistry.ICodeModel
 > {
   /**
    * Construct a new editor widget factory.
@@ -354,7 +354,7 @@ export namespace FileEditorFactory {
      * The factory options associated with the factory.
      */
     factoryOptions: DocumentRegistry.IWidgetFactoryOptions<
-    IDocumentWidget<FileEditor>
+      IDocumentWidget<FileEditor>
     >;
   }
 }

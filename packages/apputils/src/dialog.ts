@@ -197,21 +197,21 @@ export class Dialog<T> extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'keydown':
-      this._evtKeydown(event as KeyboardEvent);
-      break;
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    case 'focus':
-      this._evtFocus(event as FocusEvent);
-      break;
-    case 'contextmenu':
-      event.preventDefault();
-      event.stopPropagation();
-      break;
-    default:
-      break;
+      case 'keydown':
+        this._evtKeydown(event as KeyboardEvent);
+        break;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      case 'focus':
+        this._evtFocus(event as FocusEvent);
+        break;
+      case 'contextmenu':
+        event.preventDefault();
+        event.stopPropagation();
+        break;
+      default:
+        break;
     }
   }
 
@@ -290,27 +290,27 @@ export class Dialog<T> extends Widget {
   protected _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
     switch (event.keyCode) {
-    case 27: // Escape.
-      event.stopPropagation();
-      event.preventDefault();
-      this.reject();
-      break;
-    case 9: // Tab.
-      // Handle a tab on the last button.
-      const node = this._buttonNodes[this._buttons.length - 1];
-      if (document.activeElement === node && !event.shiftKey) {
+      case 27: // Escape.
         event.stopPropagation();
         event.preventDefault();
-        this._first.focus();
-      }
-      break;
-    case 13: // Enter.
-      event.stopPropagation();
-      event.preventDefault();
-      this.resolve();
-      break;
-    default:
-      break;
+        this.reject();
+        break;
+      case 9: // Tab.
+        // Handle a tab on the last button.
+        const node = this._buttonNodes[this._buttons.length - 1];
+        if (document.activeElement === node && !event.shiftKey) {
+          event.stopPropagation();
+          event.preventDefault();
+          this._first.focus();
+        }
+        break;
+      case 13: // Enter.
+        event.stopPropagation();
+        event.preventDefault();
+        this.resolve();
+        break;
+      default:
+        break;
     }
   }
 

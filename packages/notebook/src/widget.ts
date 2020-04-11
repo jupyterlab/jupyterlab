@@ -325,11 +325,11 @@ export class StaticNotebook extends Widget {
     args: IObservableMap.IChangedArgs<ReadonlyPartialJSONValue>
   ): void {
     switch (args.key) {
-    case 'language_info':
-      this._updateMimetype();
-      break;
-    default:
-      break;
+      case 'language_info':
+        this._updateMimetype();
+        break;
+      default:
+        break;
     }
   }
 
@@ -406,50 +406,50 @@ export class StaticNotebook extends Widget {
   ) {
     let index = 0;
     switch (args.type) {
-    case 'add':
-      index = args.newIndex;
-      each(args.newValues, value => {
-        this._insertCell(index++, value);
-      });
-      break;
-    case 'move':
-      this._moveCell(args.oldIndex, args.newIndex);
-      break;
-    case 'remove':
-      each(args.oldValues, value => {
-        this._removeCell(args.oldIndex);
-      });
-      // Add default cell if there are no cells remaining.
-      if (!sender.length) {
-        const model = this.model;
-        // Add the cell in a new context to avoid triggering another
-        // cell changed event during the handling of this signal.
-        requestAnimationFrame(() => {
-          if (model && !model.isDisposed && !model.cells.length) {
-            model.cells.push(
-              model.contentFactory.createCell(
-                this.notebookConfig.defaultCell,
-                {}
-              )
-            );
-          }
+      case 'add':
+        index = args.newIndex;
+        each(args.newValues, value => {
+          this._insertCell(index++, value);
         });
-      }
-      break;
-    case 'set':
-      // TODO: reuse existing widgets if possible.
-      index = args.newIndex;
-      each(args.newValues, value => {
-        // Note: this ordering (insert then remove)
-        // is important for getting the active cell
-        // index for the editable notebook correct.
-        this._insertCell(index, value);
-        this._removeCell(index + 1);
-        index++;
-      });
-      break;
-    default:
-      return;
+        break;
+      case 'move':
+        this._moveCell(args.oldIndex, args.newIndex);
+        break;
+      case 'remove':
+        each(args.oldValues, value => {
+          this._removeCell(args.oldIndex);
+        });
+        // Add default cell if there are no cells remaining.
+        if (!sender.length) {
+          const model = this.model;
+          // Add the cell in a new context to avoid triggering another
+          // cell changed event during the handling of this signal.
+          requestAnimationFrame(() => {
+            if (model && !model.isDisposed && !model.cells.length) {
+              model.cells.push(
+                model.contentFactory.createCell(
+                  this.notebookConfig.defaultCell,
+                  {}
+                )
+              );
+            }
+          });
+        }
+        break;
+      case 'set':
+        // TODO: reuse existing widgets if possible.
+        index = args.newIndex;
+        each(args.newValues, value => {
+          // Note: this ordering (insert then remove)
+          // is important for getting the active cell
+          // index for the editable notebook correct.
+          this._insertCell(index, value);
+          this._removeCell(index + 1);
+          index++;
+        });
+        break;
+      default:
+        return;
     }
   }
 
@@ -459,18 +459,18 @@ export class StaticNotebook extends Widget {
   private _insertCell(index: number, cell: ICellModel): void {
     let widget: Cell;
     switch (cell.type) {
-    case 'code':
-      widget = this._createCodeCell(cell as ICodeCellModel);
-      widget.model.mimeType = this._mimetype;
-      break;
-    case 'markdown':
-      widget = this._createMarkdownCell(cell as IMarkdownCellModel);
-      if (cell.value.text === '') {
-        (widget as MarkdownCell).rendered = false;
-      }
-      break;
-    default:
-      widget = this._createRawCell(cell as IRawCellModel);
+      case 'code':
+        widget = this._createCodeCell(cell as ICodeCellModel);
+        widget.model.mimeType = this._mimetype;
+        break;
+      case 'markdown':
+        widget = this._createMarkdownCell(cell as IMarkdownCellModel);
+        if (cell.value.text === '') {
+          (widget as MarkdownCell).rendered = false;
+        }
+        break;
+      default:
+        widget = this._createRawCell(cell as IRawCellModel);
     }
     widget.addClass(NB_CELL_CLASS);
     const layout = this.layout as PanelLayout;
@@ -599,15 +599,15 @@ export class StaticNotebook extends Widget {
       const cell = this.widgets[i];
       let config: Partial<CodeEditor.IConfig>;
       switch (cell.model.type) {
-      case 'code':
-        config = this._editorConfig.code;
-        break;
-      case 'markdown':
-        config = this._editorConfig.markdown;
-        break;
-      default:
-        config = this._editorConfig.raw;
-        break;
+        case 'code':
+          config = this._editorConfig.code;
+          break;
+        case 'markdown':
+          config = this._editorConfig.markdown;
+          break;
+        default:
+          config = this._editorConfig.raw;
+          break;
       }
       Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
         cell.editor.setOption(key, config[key] ?? null);
@@ -1158,8 +1158,8 @@ export class Notebook extends StaticNotebook {
    * selection.
    */
   getContiguousSelection():
-  | { head: number; anchor: number }
-  | { head: null; anchor: null } {
+    | { head: number; anchor: number }
+    | { head: null; anchor: null } {
     const cells = this.widgets;
     const first = ArrayExt.findFirstIndex(cells, c => this.isSelected(c));
 
@@ -1247,54 +1247,54 @@ export class Notebook extends StaticNotebook {
     }
 
     switch (event.type) {
-    case 'contextmenu':
-      if (event.eventPhase === Event.CAPTURING_PHASE) {
-        this._evtContextMenuCapture(event as PointerEvent);
-      }
-      break;
-    case 'mousedown':
-      if (event.eventPhase === Event.CAPTURING_PHASE) {
-        this._evtMouseDownCapture(event as MouseEvent);
-      } else {
-        this._evtMouseDown(event as MouseEvent);
-      }
-      break;
-    case 'mouseup':
-      if (event.currentTarget === document) {
-        this._evtDocumentMouseup(event as MouseEvent);
-      }
-      break;
-    case 'mousemove':
-      if (event.currentTarget === document) {
-        this._evtDocumentMousemove(event as MouseEvent);
-      }
-      break;
-    case 'keydown':
-      this._ensureFocus(true);
-      break;
-    case 'dblclick':
-      this._evtDblClick(event as MouseEvent);
-      break;
-    case 'focusin':
-      this._evtFocusIn(event as MouseEvent);
-      break;
-    case 'focusout':
-      this._evtFocusOut(event as MouseEvent);
-      break;
-    case 'lm-dragenter':
-      this._evtDragEnter(event as IDragEvent);
-      break;
-    case 'lm-dragleave':
-      this._evtDragLeave(event as IDragEvent);
-      break;
-    case 'lm-dragover':
-      this._evtDragOver(event as IDragEvent);
-      break;
-    case 'lm-drop':
-      this._evtDrop(event as IDragEvent);
-      break;
-    default:
-      break;
+      case 'contextmenu':
+        if (event.eventPhase === Event.CAPTURING_PHASE) {
+          this._evtContextMenuCapture(event as PointerEvent);
+        }
+        break;
+      case 'mousedown':
+        if (event.eventPhase === Event.CAPTURING_PHASE) {
+          this._evtMouseDownCapture(event as MouseEvent);
+        } else {
+          this._evtMouseDown(event as MouseEvent);
+        }
+        break;
+      case 'mouseup':
+        if (event.currentTarget === document) {
+          this._evtDocumentMouseup(event as MouseEvent);
+        }
+        break;
+      case 'mousemove':
+        if (event.currentTarget === document) {
+          this._evtDocumentMousemove(event as MouseEvent);
+        }
+        break;
+      case 'keydown':
+        this._ensureFocus(true);
+        break;
+      case 'dblclick':
+        this._evtDblClick(event as MouseEvent);
+        break;
+      case 'focusin':
+        this._evtFocusIn(event as MouseEvent);
+        break;
+      case 'focusout':
+        this._evtFocusOut(event as MouseEvent);
+        break;
+      case 'lm-dragenter':
+        this._evtDragEnter(event as IDragEvent);
+        break;
+      case 'lm-dragleave':
+        this._evtDragLeave(event as IDragEvent);
+        break;
+      case 'lm-dragover':
+        this._evtDragOver(event as IDragEvent);
+        break;
+      case 'lm-drop':
+        this._evtDrop(event as IDragEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -1802,25 +1802,25 @@ export class Notebook extends StaticNotebook {
 
     // If in select mode, update the selection
     switch (this._mouseMode) {
-    case 'select':
-      const target = event.target as HTMLElement;
-      const index = this._findCell(target);
-      if (index !== -1) {
-        this.extendContiguousSelectionTo(index);
-      }
-      break;
-    case 'couldDrag':
-      // Check for a drag initialization.
-      const data = this._dragData!;
-      const dx = Math.abs(event.clientX - data.pressX);
-      const dy = Math.abs(event.clientY - data.pressY);
-      if (dx >= DRAG_THRESHOLD || dy >= DRAG_THRESHOLD) {
-        this._mouseMode = null;
-        this._startDrag(data.index, event.clientX, event.clientY);
-      }
-      break;
-    default:
-      break;
+      case 'select':
+        const target = event.target as HTMLElement;
+        const index = this._findCell(target);
+        if (index !== -1) {
+          this.extendContiguousSelectionTo(index);
+        }
+        break;
+      case 'couldDrag':
+        // Check for a drag initialization.
+        const data = this._dragData!;
+        const dx = Math.abs(event.clientX - data.pressX);
+        const dy = Math.abs(event.clientY - data.pressY);
+        if (dx >= DRAG_THRESHOLD || dy >= DRAG_THRESHOLD) {
+          this._mouseMode = null;
+          this._startDrag(data.index, event.clientX, event.clientY);
+        }
+        break;
+      default:
+        break;
     }
   }
 
@@ -1961,15 +1961,15 @@ export class Notebook extends StaticNotebook {
       each(values, (cell: nbformat.ICell) => {
         let value: ICellModel;
         switch (cell.cell_type) {
-        case 'code':
-          value = factory.createCodeCell({ cell });
-          break;
-        case 'markdown':
-          value = factory.createMarkdownCell({ cell });
-          break;
-        default:
-          value = factory.createRawCell({ cell });
-          break;
+          case 'code':
+            value = factory.createCodeCell({ cell });
+            break;
+          case 'markdown':
+            value = factory.createMarkdownCell({ cell });
+            break;
+          default:
+            value = factory.createRawCell({ cell });
+            break;
         }
         model.cells.insert(index++, value);
       });

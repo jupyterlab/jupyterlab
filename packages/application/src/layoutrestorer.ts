@@ -366,10 +366,10 @@ export class LayoutRestorer implements ILayoutRestorer {
     const widgets = !Array.isArray(area.widgets)
       ? null
       : area.widgets
-        .map(name =>
-          internal.has(`${name}`) ? internal.get(`${name}`) : null
-        )
-        .filter(widget => !!widget);
+          .map(name =>
+            internal.has(`${name}`) ? internal.get(`${name}`) : null
+          )
+          .filter(widget => !!widget);
     return {
       collapsed,
       currentWidget: currentWidget!,

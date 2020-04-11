@@ -82,23 +82,23 @@ export class BreadCrumbs extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    case 'lm-dragenter':
-      this._evtDragEnter(event as IDragEvent);
-      break;
-    case 'lm-dragleave':
-      this._evtDragLeave(event as IDragEvent);
-      break;
-    case 'lm-dragover':
-      this._evtDragOver(event as IDragEvent);
-      break;
-    case 'lm-drop':
-      this._evtDrop(event as IDragEvent);
-      break;
-    default:
-      return;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      case 'lm-dragenter':
+        this._evtDragEnter(event as IDragEvent);
+        break;
+      case 'lm-dragleave':
+        this._evtDragLeave(event as IDragEvent);
+        break;
+      case 'lm-dragover':
+        this._evtDragOver(event as IDragEvent);
+        break;
+      case 'lm-drop':
+        this._evtDrop(event as IDragEvent);
+        break;
+      default:
+        return;
     }
   }
 

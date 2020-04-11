@@ -666,8 +666,8 @@ namespace Private {
    * An attached property for a context save handler.
    */
   export const saveHandlerProperty = new AttachedProperty<
-  DocumentRegistry.Context,
-  SaveHandler | undefined
+    DocumentRegistry.Context,
+    SaveHandler | undefined
   >({
     name: 'saveHandler',
     create: () => undefined

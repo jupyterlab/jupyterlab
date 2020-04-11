@@ -203,25 +203,25 @@ export abstract class KernelFutureHandler<
    */
   async handleMsg(msg: KernelMessage.IMessage): Promise<void> {
     switch (msg.channel) {
-    case 'control':
-    case 'shell':
-      if (
-        msg.channel === this.msg.channel &&
+      case 'control':
+      case 'shell':
+        if (
+          msg.channel === this.msg.channel &&
           (msg.parent_header as KernelMessage.IHeader<
-          KernelMessage.MessageType
+            KernelMessage.MessageType
           >).msg_id === this.msg.header.msg_id
-      ) {
-        await this._handleReply(msg as REPLY);
-      }
-      break;
-    case 'stdin':
-      await this._handleStdin(msg as KernelMessage.IStdinMessage);
-      break;
-    case 'iopub':
-      await this._handleIOPub(msg as KernelMessage.IIOPubMessage);
-      break;
-    default:
-      break;
+        ) {
+          await this._handleReply(msg as REPLY);
+        }
+        break;
+      case 'stdin':
+        await this._handleStdin(msg as KernelMessage.IStdinMessage);
+        break;
+      case 'iopub':
+        await this._handleIOPub(msg as KernelMessage.IIOPubMessage);
+        break;
+      default:
+        break;
     }
   }
 

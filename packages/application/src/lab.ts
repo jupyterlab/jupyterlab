@@ -177,7 +177,7 @@ export namespace JupyterLab {
    */
   export interface IOptions
     extends JupyterFrontEnd.IOptions<LabShell>,
-    Partial<IInfo> {
+      Partial<IInfo> {
     paths?: Partial<JupyterFrontEnd.IPaths>;
   }
 

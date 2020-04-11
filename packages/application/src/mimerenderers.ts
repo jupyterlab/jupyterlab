@@ -174,8 +174,8 @@ namespace Private {
    * that was used to create a mimedocument.
    */
   export const factoryNameProperty = new AttachedProperty<
-  MimeDocument,
-  string | undefined
+    MimeDocument,
+    string | undefined
   >({
     name: 'factoryName',
     create: () => undefined

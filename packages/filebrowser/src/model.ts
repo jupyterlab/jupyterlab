@@ -593,8 +593,8 @@ export class FileBrowserModel implements IDisposable {
       oldValue && oldValue.path && PathExt.dirname(oldValue.path) === path
         ? oldValue
         : newValue && newValue.path && PathExt.dirname(newValue.path) === path
-          ? newValue
-          : undefined;
+        ? newValue
+        : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {

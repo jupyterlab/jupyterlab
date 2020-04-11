@@ -77,17 +77,17 @@ export class TagWidget extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'mousedown':
-      this._evtClick();
-      break;
-    case 'mouseover':
-      this._evtMouseOver();
-      break;
-    case 'mouseout':
-      this._evtMouseOut();
-      break;
-    default:
-      break;
+      case 'mousedown':
+        this._evtClick();
+        break;
+      case 'mouseover':
+        this._evtMouseOver();
+        break;
+      case 'mouseout':
+        this._evtMouseOut();
+        break;
+      default:
+        break;
     }
   }
 

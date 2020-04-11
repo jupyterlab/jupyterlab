@@ -309,11 +309,11 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      this.handleClick(event);
-      break;
-    default:
-      break;
+      case 'click':
+        this.handleClick(event);
+        break;
+      default:
+        break;
     }
   }
 

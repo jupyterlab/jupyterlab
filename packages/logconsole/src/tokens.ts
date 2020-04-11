@@ -125,10 +125,10 @@ export type IContentChange = 'append' | 'clear';
 
 export type IStateChange =
   | IChangedArgs<
-  IRenderMimeRegistry | null,
-  IRenderMimeRegistry | null,
-  'rendermime'
-  >
+      IRenderMimeRegistry | null,
+      IRenderMimeRegistry | null,
+      'rendermime'
+    >
   | IChangedArgs<LogLevel, LogLevel, 'level'>;
 
 export interface ILoggerOutputAreaModel extends IOutputAreaModel {

@@ -87,20 +87,20 @@ export class CodeEditorWrapper extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'lm-dragenter':
-      this._evtDragEnter(event as IDragEvent);
-      break;
-    case 'lm-dragleave':
-      this._evtDragLeave(event as IDragEvent);
-      break;
-    case 'lm-dragover':
-      this._evtDragOver(event as IDragEvent);
-      break;
-    case 'lm-drop':
-      this._evtDrop(event as IDragEvent);
-      break;
-    default:
-      break;
+      case 'lm-dragenter':
+        this._evtDragEnter(event as IDragEvent);
+        break;
+      case 'lm-dragleave':
+        this._evtDragLeave(event as IDragEvent);
+        break;
+      case 'lm-dragover':
+        this._evtDragOver(event as IDragEvent);
+        break;
+      case 'lm-drop':
+        this._evtDrop(event as IDragEvent);
+        break;
+      default:
+        break;
     }
   }
 

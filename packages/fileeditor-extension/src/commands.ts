@@ -91,9 +91,9 @@ export namespace Commands {
   function getCreateConsoleFunction(
     commands: CommandRegistry
   ): (
-      widget: IDocumentWidget<FileEditor>,
-      args?: ReadonlyPartialJSONObject
-    ) => Promise<void> {
+    widget: IDocumentWidget<FileEditor>,
+    args?: ReadonlyPartialJSONObject
+  ) => Promise<void> {
     return async function createConsole(
       widget: IDocumentWidget<FileEditor>,
       args?: ReadonlyPartialJSONObject

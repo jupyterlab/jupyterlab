@@ -213,17 +213,17 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     const factory = this.contentFactory;
     for (const cell of value.cells) {
       switch (cell.cell_type) {
-      case 'code':
-        cells.push(factory.createCodeCell({ cell }));
-        break;
-      case 'markdown':
-        cells.push(factory.createMarkdownCell({ cell }));
-        break;
-      case 'raw':
-        cells.push(factory.createRawCell({ cell }));
-        break;
-      default:
-        continue;
+        case 'code':
+          cells.push(factory.createCodeCell({ cell }));
+          break;
+        case 'markdown':
+          cells.push(factory.createMarkdownCell({ cell }));
+          break;
+        case 'raw':
+          cells.push(factory.createRawCell({ cell }));
+          break;
+        default:
+          continue;
       }
     }
     this.cells.beginCompoundOperation();
@@ -307,20 +307,20 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     change: IObservableList.IChangedArgs<ICellModel>
   ): void {
     switch (change.type) {
-    case 'add':
-      change.newValues.forEach(cell => {
-        cell.contentChanged.connect(this.triggerContentChange, this);
-      });
-      break;
-    case 'remove':
-      break;
-    case 'set':
-      change.newValues.forEach(cell => {
-        cell.contentChanged.connect(this.triggerContentChange, this);
-      });
-      break;
-    default:
-      break;
+      case 'add':
+        change.newValues.forEach(cell => {
+          cell.contentChanged.connect(this.triggerContentChange, this);
+        });
+        break;
+      case 'remove':
+        break;
+      case 'set':
+        change.newValues.forEach(cell => {
+          cell.contentChanged.connect(this.triggerContentChange, this);
+        });
+        break;
+      default:
+        break;
     }
     this.triggerContentChange();
   }
@@ -469,13 +469,13 @@ export namespace NotebookModel {
      */
     createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel {
       switch (type) {
-      case 'code':
-        return this.createCodeCell(opts);
-      case 'markdown':
-        return this.createMarkdownCell(opts);
-      case 'raw':
-      default:
-        return this.createRawCell(opts);
+        case 'code':
+          return this.createCodeCell(opts);
+        case 'markdown':
+          return this.createMarkdownCell(opts);
+        case 'raw':
+        default:
+          return this.createRawCell(opts);
       }
     }
 

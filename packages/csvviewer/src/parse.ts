@@ -191,8 +191,8 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     rowDelimiter === '\r\n'
       ? [CRLF, 2]
       : rowDelimiter === '\r'
-        ? [CR, 1]
-        : [LF, 1];
+      ? [CR, 1]
+      : [LF, 1];
 
   // Always start off at the beginning of a row.
   let state = NEW_ROW;
@@ -232,165 +232,165 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
     // after the switch statement). In some situations, we may increment i
     // inside this loop to skip over indices as a shortcut.
     switch (state) {
-    // At the beginning of a row or field, we can have a quote, row delimiter, or field delimiter.
-    case NEW_ROW:
-    case NEW_FIELD:
-      switch (char) {
-      // If we have a quote, we are starting an escaped field.
-      case CH_QUOTE:
-        state = QUOTED_FIELD;
-        break;
+      // At the beginning of a row or field, we can have a quote, row delimiter, or field delimiter.
+      case NEW_ROW:
+      case NEW_FIELD:
+        switch (char) {
+          // If we have a quote, we are starting an escaped field.
+          case CH_QUOTE:
+            state = QUOTED_FIELD;
+            break;
 
-        // A field delimiter means we are starting a new field.
-      case CH_DELIMITER:
-        state = NEW_FIELD;
-        break;
+          // A field delimiter means we are starting a new field.
+          case CH_DELIMITER:
+            state = NEW_FIELD;
+            break;
 
-        // A row delimiter means we are starting a new row.
-      case CH_CR:
-        if (rowDelimiterCode === CR) {
-          state = NEW_ROW;
-        } else if (
-          rowDelimiterCode === CRLF &&
+          // A row delimiter means we are starting a new row.
+          case CH_CR:
+            if (rowDelimiterCode === CR) {
+              state = NEW_ROW;
+            } else if (
+              rowDelimiterCode === CRLF &&
               data.charCodeAt(i + 1) === CH_LF
-        ) {
-          // If we see an expected \r\n, then increment to the end of the delimiter.
-          i++;
-          state = NEW_ROW;
-        } else {
-          throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter C ${data.charCodeAt(
-            i + 1
-          )}`;
-        }
-        break;
-      case CH_LF:
-        if (rowDelimiterCode === LF) {
-          state = NEW_ROW;
-        } else {
-          throw `string index ${i} (in row ${nrows}, column ${col}): line feed found, but row delimiter starts with a carriage return`;
-        }
-        break;
+            ) {
+              // If we see an expected \r\n, then increment to the end of the delimiter.
+              i++;
+              state = NEW_ROW;
+            } else {
+              throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter C ${data.charCodeAt(
+                i + 1
+              )}`;
+            }
+            break;
+          case CH_LF:
+            if (rowDelimiterCode === LF) {
+              state = NEW_ROW;
+            } else {
+              throw `string index ${i} (in row ${nrows}, column ${col}): line feed found, but row delimiter starts with a carriage return`;
+            }
+            break;
 
-        // Otherwise, we are starting an unquoted field.
-      default:
-        state = UNQUOTED_FIELD;
+          // Otherwise, we are starting an unquoted field.
+          default:
+            state = UNQUOTED_FIELD;
+            break;
+        }
         break;
-      }
-      break;
 
       // We are in a quoted field.
-    case QUOTED_FIELD:
-      // Skip ahead until we see another quote, which either ends the quoted
-      // field or starts an escaped quote.
-      i = data.indexOf(quote, i);
-      if (i < 0) {
-        throw `string index ${i} (in row ${nrows}, column ${col}): mismatched quote`;
-      }
-      state = QUOTED_FIELD_QUOTE;
-      break;
+      case QUOTED_FIELD:
+        // Skip ahead until we see another quote, which either ends the quoted
+        // field or starts an escaped quote.
+        i = data.indexOf(quote, i);
+        if (i < 0) {
+          throw `string index ${i} (in row ${nrows}, column ${col}): mismatched quote`;
+        }
+        state = QUOTED_FIELD_QUOTE;
+        break;
 
       // We just saw a quote in a quoted field. This could be the end of the
       // field, or it could be a repeated quote (i.e., an escaped quote according
       // to RFC 4180).
-    case QUOTED_FIELD_QUOTE:
-      switch (char) {
-      // Another quote means we just saw an escaped quote, so we are still in
-      // the quoted field.
-      case CH_QUOTE:
-        state = QUOTED_FIELD;
-        break;
+      case QUOTED_FIELD_QUOTE:
+        switch (char) {
+          // Another quote means we just saw an escaped quote, so we are still in
+          // the quoted field.
+          case CH_QUOTE:
+            state = QUOTED_FIELD;
+            break;
 
-        // A field or row delimiter means the quoted field just ended and we are
-        // going into a new field or new row.
-      case CH_DELIMITER:
-        state = NEW_FIELD;
-        break;
+          // A field or row delimiter means the quoted field just ended and we are
+          // going into a new field or new row.
+          case CH_DELIMITER:
+            state = NEW_FIELD;
+            break;
 
-        // A row delimiter means we are starting a new row in the next index.
-      case CH_CR:
-        if (rowDelimiterCode === CR) {
-          state = NEW_ROW;
-        } else if (
-          rowDelimiterCode === CRLF &&
+          // A row delimiter means we are starting a new row in the next index.
+          case CH_CR:
+            if (rowDelimiterCode === CR) {
+              state = NEW_ROW;
+            } else if (
+              rowDelimiterCode === CRLF &&
               data.charCodeAt(i + 1) === CH_LF
-        ) {
-          // If we see an expected \r\n, then increment to the end of the delimiter.
-          i++;
-          state = NEW_ROW;
-        } else {
-          throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter C ${data.charCodeAt(
-            i + 1
-          )}`;
-        }
-        break;
-      case CH_LF:
-        if (rowDelimiterCode === LF) {
-          state = NEW_ROW;
-        } else {
-          throw `string index ${i} (in row ${nrows}, column ${col}): line feed found, but row delimiter starts with a carriage return`;
-        }
-        break;
+            ) {
+              // If we see an expected \r\n, then increment to the end of the delimiter.
+              i++;
+              state = NEW_ROW;
+            } else {
+              throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter C ${data.charCodeAt(
+                i + 1
+              )}`;
+            }
+            break;
+          case CH_LF:
+            if (rowDelimiterCode === LF) {
+              state = NEW_ROW;
+            } else {
+              throw `string index ${i} (in row ${nrows}, column ${col}): line feed found, but row delimiter starts with a carriage return`;
+            }
+            break;
 
-      default:
-        throw `string index ${i} (in row ${nrows}, column ${col}): quote in escaped field not followed by quote, delimiter, or row delimiter`;
-      }
-      break;
+          default:
+            throw `string index ${i} (in row ${nrows}, column ${col}): quote in escaped field not followed by quote, delimiter, or row delimiter`;
+        }
+        break;
 
       // We are in an unquoted field, so the only thing we look for is the next
       // row or field delimiter.
-    case UNQUOTED_FIELD:
-      // Skip ahead to either the next field delimiter or possible start of a
-      // row delimiter (CR or LF).
-      while (i < endIndex) {
-        char = data.charCodeAt(i);
-        if (char === CH_DELIMITER || char === CH_LF || char === CH_CR) {
-          break;
-        }
-        i++;
-      }
-
-      // Process the character we're seeing in an unquoted field.
-      switch (char) {
-      // A field delimiter means we are starting a new field.
-      case CH_DELIMITER:
-        state = NEW_FIELD;
-        break;
-
-        // A row delimiter means we are starting a new row in the next index.
-      case CH_CR:
-        if (rowDelimiterCode === CR) {
-          state = NEW_ROW;
-        } else if (
-          rowDelimiterCode === CRLF &&
-              data.charCodeAt(i + 1) === CH_LF
-        ) {
-          // If we see an expected \r\n, then increment to the end of the delimiter.
+      case UNQUOTED_FIELD:
+        // Skip ahead to either the next field delimiter or possible start of a
+        // row delimiter (CR or LF).
+        while (i < endIndex) {
+          char = data.charCodeAt(i);
+          if (char === CH_DELIMITER || char === CH_LF || char === CH_CR) {
+            break;
+          }
           i++;
-          state = NEW_ROW;
-        } else {
-          throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter C ${data.charCodeAt(
-            i + 1
-          )}`;
         }
-        break;
-      case CH_LF:
-        if (rowDelimiterCode === LF) {
-          state = NEW_ROW;
-        } else {
-          throw `string index ${i} (in row ${nrows}, column ${col}): line feed found, but row delimiter starts with a carriage return`;
-        }
-        break;
 
-        // Otherwise, we continue on in the unquoted field.
-      default:
-        continue;
-      }
-      break;
+        // Process the character we're seeing in an unquoted field.
+        switch (char) {
+          // A field delimiter means we are starting a new field.
+          case CH_DELIMITER:
+            state = NEW_FIELD;
+            break;
+
+          // A row delimiter means we are starting a new row in the next index.
+          case CH_CR:
+            if (rowDelimiterCode === CR) {
+              state = NEW_ROW;
+            } else if (
+              rowDelimiterCode === CRLF &&
+              data.charCodeAt(i + 1) === CH_LF
+            ) {
+              // If we see an expected \r\n, then increment to the end of the delimiter.
+              i++;
+              state = NEW_ROW;
+            } else {
+              throw `string index ${i} (in row ${nrows}, column ${col}): carriage return found, but not as part of a row delimiter C ${data.charCodeAt(
+                i + 1
+              )}`;
+            }
+            break;
+          case CH_LF:
+            if (rowDelimiterCode === LF) {
+              state = NEW_ROW;
+            } else {
+              throw `string index ${i} (in row ${nrows}, column ${col}): line feed found, but row delimiter starts with a carriage return`;
+            }
+            break;
+
+          // Otherwise, we continue on in the unquoted field.
+          default:
+            continue;
+        }
+        break;
 
       // We should never reach this point since the parser state is handled above,
       // so throw an error if we do.
-    default:
-      throw `string index ${i} (in row ${nrows}, column ${col}): state not recognized`;
+      default:
+        throw `string index ${i} (in row ${nrows}, column ${col}): state not recognized`;
     }
 
     // Increment i to the next character index
@@ -398,50 +398,50 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
 
     // Update return values based on state.
     switch (state) {
-    case NEW_ROW:
-      nrows++;
+      case NEW_ROW:
+        nrows++;
 
-      // If ncols is undefined, set it to the number of columns in this row (first row implied).
-      if (ncols === undefined) {
-        if (nrows !== 1) {
-          throw new Error('Error parsing default number of columns');
-        }
-        ncols = col;
-      }
-
-      // Pad or truncate the column offsets in the previous row if we are
-      // returning them.
-      if (columnOffsets === true) {
-        if (col < ncols) {
-          // We didn't have enough columns, so add some more column offsets that
-          // point to just before the row delimiter we just saw.
-          for (; col < ncols; col++) {
-            offsets.push(i - rowDelimiterLength);
+        // If ncols is undefined, set it to the number of columns in this row (first row implied).
+        if (ncols === undefined) {
+          if (nrows !== 1) {
+            throw new Error('Error parsing default number of columns');
           }
-        } else if (col > ncols) {
-          // We had too many columns, so truncate them.
-          offsets.length = offsets.length - (col - ncols);
+          ncols = col;
         }
-      }
 
-      // Shortcut return if nrows reaches the maximum rows we are to parse.
-      if (nrows === maxRows) {
-        return { nrows, ncols: columnOffsets ? ncols : 0, offsets };
-      }
-      break;
+        // Pad or truncate the column offsets in the previous row if we are
+        // returning them.
+        if (columnOffsets === true) {
+          if (col < ncols) {
+            // We didn't have enough columns, so add some more column offsets that
+            // point to just before the row delimiter we just saw.
+            for (; col < ncols; col++) {
+              offsets.push(i - rowDelimiterLength);
+            }
+          } else if (col > ncols) {
+            // We had too many columns, so truncate them.
+            offsets.length = offsets.length - (col - ncols);
+          }
+        }
 
-    case NEW_FIELD:
-      // If we are returning column offsets, log the current index.
-      if (columnOffsets === true) {
-        offsets.push(i);
-      }
+        // Shortcut return if nrows reaches the maximum rows we are to parse.
+        if (nrows === maxRows) {
+          return { nrows, ncols: columnOffsets ? ncols : 0, offsets };
+        }
+        break;
 
-      // Update the column counter.
-      col++;
-      break;
+      case NEW_FIELD:
+        // If we are returning column offsets, log the current index.
+        if (columnOffsets === true) {
+          offsets.push(i);
+        }
 
-    default:
-      break;
+        // Update the column counter.
+        col++;
+        break;
+
+      default:
+        break;
     }
   }
 

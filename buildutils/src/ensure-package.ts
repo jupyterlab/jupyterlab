@@ -274,8 +274,8 @@ export async function ensurePackage(
   const published = new Set<string>(
     data.files
       ? data.files.reduce((acc: string[], curr: string) => {
-        return acc.concat(glob.sync(path.join(pkgPath, curr)));
-      }, [])
+          return acc.concat(glob.sync(path.join(pkgPath, curr)));
+        }, [])
       : []
   );
 
@@ -570,13 +570,13 @@ function getImports(sourceFile: ts.SourceFile): string[] {
 
   function handleNode(node: any): void {
     switch (node.kind) {
-    case ts.SyntaxKind.ImportDeclaration:
-      imports.push(node.moduleSpecifier.text);
-      break;
-    case ts.SyntaxKind.ImportEqualsDeclaration:
-      imports.push(node.moduleReference.expression.text);
-      break;
-    default:
+      case ts.SyntaxKind.ImportDeclaration:
+        imports.push(node.moduleSpecifier.text);
+        break;
+      case ts.SyntaxKind.ImportEqualsDeclaration:
+        imports.push(node.moduleReference.expression.text);
+        break;
+      default:
       // no-op
     }
     ts.forEachChild(node, handleNode);

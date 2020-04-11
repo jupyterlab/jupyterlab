@@ -197,5 +197,5 @@ namespace Private {
    * Type of statusbar item with defaults filled in.
    */
   export type IFullItem = Required<Pick<IStatusBar.IItem, DefaultKeys>> &
-  Omit<IStatusBar.IItem, DefaultKeys>;
+    Omit<IStatusBar.IItem, DefaultKeys>;
 }

@@ -326,25 +326,25 @@ export namespace NotebookTools {
     processMessage(msg: Message): void {
       super.processMessage(msg);
       switch (msg.type) {
-      case 'activenotebookpanel-changed':
-        this.onActiveNotebookPanelChanged(msg);
-        break;
-      case 'activecell-changed':
-        this.onActiveCellChanged(msg);
-        break;
-      case 'selection-changed':
-        this.onSelectionChanged(msg);
-        break;
-      case 'activecell-metadata-changed':
-        this.onActiveCellMetadataChanged(msg as ObservableJSON.ChangeMessage);
-        break;
-      case 'activenotebookpanel-metadata-changed':
-        this.onActiveNotebookPanelMetadataChanged(
-          msg as ObservableJSON.ChangeMessage
-        );
-        break;
-      default:
-        break;
+        case 'activenotebookpanel-changed':
+          this.onActiveNotebookPanelChanged(msg);
+          break;
+        case 'activecell-changed':
+          this.onActiveCellChanged(msg);
+          break;
+        case 'selection-changed':
+          this.onSelectionChanged(msg);
+          break;
+        case 'activecell-metadata-changed':
+          this.onActiveCellMetadataChanged(msg as ObservableJSON.ChangeMessage);
+          break;
+        case 'activenotebookpanel-metadata-changed':
+          this.onActiveNotebookPanelMetadataChanged(
+            msg as ObservableJSON.ChangeMessage
+          );
+          break;
+        default:
+          break;
       }
     }
 
@@ -648,11 +648,11 @@ export namespace NotebookTools {
      */
     handleEvent(event: Event): void {
       switch (event.type) {
-      case 'change':
-        this.onValueChanged();
-        break;
-      default:
-        break;
+        case 'change':
+          this.onValueChanged();
+          break;
+        default:
+          break;
       }
     }
 

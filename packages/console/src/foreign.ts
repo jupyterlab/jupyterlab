@@ -99,39 +99,39 @@ export class ForeignHandler implements IDisposable {
     const parentMsgId = parentHeader.msg_id as string;
     let cell: CodeCell | undefined;
     switch (msgType) {
-    case 'execute_input':
-      const inputMsg = msg as KernelMessage.IExecuteInputMsg;
-      cell = this._newCell(parentMsgId);
-      const model = cell.model;
-      model.executionCount = inputMsg.content.execution_count;
-      model.value.text = inputMsg.content.code;
-      model.trusted = true;
-      parent.update();
-      return true;
-    case 'execute_result':
-    case 'display_data':
-    case 'stream':
-    case 'error':
-      cell = this._parent.getCell(parentMsgId);
-      if (!cell) {
+      case 'execute_input':
+        const inputMsg = msg as KernelMessage.IExecuteInputMsg;
+        cell = this._newCell(parentMsgId);
+        const model = cell.model;
+        model.executionCount = inputMsg.content.execution_count;
+        model.value.text = inputMsg.content.code;
+        model.trusted = true;
+        parent.update();
+        return true;
+      case 'execute_result':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+        cell = this._parent.getCell(parentMsgId);
+        if (!cell) {
+          return false;
+        }
+        const output: nbformat.IOutput = {
+          ...msg.content,
+          output_type: msgType
+        };
+        cell.model.outputs.add(output);
+        parent.update();
+        return true;
+      case 'clear_output':
+        const wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+        cell = this._parent.getCell(parentMsgId);
+        if (cell) {
+          cell.model.outputs.clear(wait);
+        }
+        return true;
+      default:
         return false;
-      }
-      const output: nbformat.IOutput = {
-        ...msg.content,
-        output_type: msgType
-      };
-      cell.model.outputs.add(output);
-      parent.update();
-      return true;
-    case 'clear_output':
-      const wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-      cell = this._parent.getCell(parentMsgId);
-      if (cell) {
-        cell.model.outputs.clear(wait);
-      }
-      return true;
-    default:
-      return false;
     }
   }
 

@@ -178,8 +178,8 @@ function activate(
 
   // Generate a cache of the kernel help links.
   const kernelInfoCache = new Map<
-  string,
-  KernelMessage.IInfoReplyMsg['content']
+    string,
+    KernelMessage.IInfoReplyMsg['content']
   >();
   serviceManager.sessions.runningChanged.connect((m, sessions) => {
     // If a new session has been added, it is at the back

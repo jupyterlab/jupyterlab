@@ -221,8 +221,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
    */
   clone(
     options: Pick<
-    Kernel.IKernelConnection.IOptions,
-    'clientId' | 'username' | 'handleComms'
+      Kernel.IKernelConnection.IOptions,
+      'clientId' | 'username' | 'handleComms'
     > = {}
   ): Kernel.IKernelConnection {
     return new KernelConnection({
@@ -328,7 +328,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   ): Kernel.IFuture<
     KernelMessage.IShellControlMessage,
     KernelMessage.IShellControlMessage
-    > {
+  > {
     this._sendMessage(msg);
     this._anyMessage.emit({ msg, direction: 'send' });
 
@@ -574,7 +574,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       content
     });
     return Private.handleShellMessage(this, msg) as Promise<
-    KernelMessage.ICompleteReplyMsg
+      KernelMessage.ICompleteReplyMsg
     >;
   }
 
@@ -598,7 +598,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       content: content
     });
     return Private.handleShellMessage(this, msg) as Promise<
-    KernelMessage.IInspectReplyMsg
+      KernelMessage.IInspectReplyMsg
     >;
   }
 
@@ -622,7 +622,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       content
     });
     return Private.handleShellMessage(this, msg) as Promise<
-    KernelMessage.IHistoryReplyMsg
+      KernelMessage.IHistoryReplyMsg
     >;
   }
 
@@ -648,7 +648,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   ): Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
-    > {
+  > {
     const defaults: JSONObject = {
       silent: false,
       store_history: true,
@@ -669,8 +669,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
       true,
       disposeOnDone
     ) as Kernel.IShellFuture<
-    KernelMessage.IExecuteRequestMsg,
-    KernelMessage.IExecuteReplyMsg
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
     >;
   }
 
@@ -690,7 +690,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
   ): Kernel.IControlFuture<
     KernelMessage.IDebugRequestMsg,
     KernelMessage.IDebugReplyMsg
-    > {
+  > {
     const msg = KernelMessage.createMessage({
       msgType: 'debug_request',
       channel: 'control',
@@ -703,8 +703,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
       true,
       disposeOnDone
     ) as Kernel.IControlFuture<
-    KernelMessage.IDebugRequestMsg,
-    KernelMessage.IDebugReplyMsg
+      KernelMessage.IDebugRequestMsg,
+      KernelMessage.IDebugReplyMsg
     >;
   }
 
@@ -728,7 +728,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       content
     });
     return Private.handleShellMessage(this, msg) as Promise<
-    KernelMessage.IIsCompleteReplyMsg
+      KernelMessage.IIsCompleteReplyMsg
     >;
   }
 
@@ -750,7 +750,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       content
     });
     return Private.handleShellMessage(this, msg) as Promise<
-    KernelMessage.ICommInfoReplyMsg
+      KernelMessage.ICommInfoReplyMsg
     >;
   }
 
@@ -1060,11 +1060,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._msgChain = Promise.resolve();
     this._kernelSession = '';
     this._futures = new Map<
-    string,
-    KernelFutureHandler<
-    KernelMessage.IShellControlMessage,
-    KernelMessage.IShellControlMessage
-    >
+      string,
+      KernelFutureHandler<
+        KernelMessage.IShellControlMessage,
+        KernelMessage.IShellControlMessage
+      >
     >();
     this._comms = new Map<string, Kernel.IComm>();
     this._displayIdToParentIds.clear();
@@ -1290,44 +1290,44 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
-      case 'status':
-        // Updating the status is synchronous, and we call no async user code
-        const executionState = (msg as KernelMessage.IStatusMsg).content
-          .execution_state;
-        if (executionState === 'restarting') {
-          // The kernel has been auto-restarted by the server. After
-          // processing for this message is completely done, we want to
-          // handle this restart, so we don't await, but instead schedule
-          // the work as a microtask (i.e., in a promise resolution). We
-          // schedule this here so that it comes before any microtasks that
-          // might be scheduled in the status signal emission below.
-          void Promise.resolve().then(async () => {
-            // handleRestart changes the status to 'restarting', so we call it
-            // first so that the status won't flip back and forth between
-            // 'restarting' and 'autorestarting'.
-            await this._handleRestart();
-            this._updateStatus('autorestarting');
-          });
-        }
-        this._updateStatus(executionState);
-        break;
-      case 'comm_open':
-        if (this.handleComms) {
-          await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
-        }
-        break;
-      case 'comm_msg':
-        if (this.handleComms) {
-          await this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
-        }
-        break;
-      case 'comm_close':
-        if (this.handleComms) {
-          await this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
-        }
-        break;
-      default:
-        break;
+        case 'status':
+          // Updating the status is synchronous, and we call no async user code
+          const executionState = (msg as KernelMessage.IStatusMsg).content
+            .execution_state;
+          if (executionState === 'restarting') {
+            // The kernel has been auto-restarted by the server. After
+            // processing for this message is completely done, we want to
+            // handle this restart, so we don't await, but instead schedule
+            // the work as a microtask (i.e., in a promise resolution). We
+            // schedule this here so that it comes before any microtasks that
+            // might be scheduled in the status signal emission below.
+            void Promise.resolve().then(async () => {
+              // handleRestart changes the status to 'restarting', so we call it
+              // first so that the status won't flip back and forth between
+              // 'restarting' and 'autorestarting'.
+              await this._handleRestart();
+              this._updateStatus('autorestarting');
+            });
+          }
+          this._updateStatus(executionState);
+          break;
+        case 'comm_open':
+          if (this.handleComms) {
+            await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);
+          }
+          break;
+        case 'comm_msg':
+          if (this.handleComms) {
+            await this._handleCommMsg(msg as KernelMessage.ICommMsgMsg);
+          }
+          break;
+        case 'comm_close':
+          if (this.handleComms) {
+            await this._handleCommClose(msg as KernelMessage.ICommCloseMsg);
+          }
+          break;
+        default:
+          break;
       }
       // If the message was a status dead message, we might have disposed ourselves.
       if (!this.isDisposed) {
@@ -1453,11 +1453,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _reconnectTimeout: any = null;
 
   private _futures = new Map<
-  string,
-  KernelFutureHandler<
-  KernelMessage.IShellControlMessage,
-  KernelMessage.IShellControlMessage
-  >
+    string,
+    KernelFutureHandler<
+      KernelMessage.IShellControlMessage,
+      KernelMessage.IShellControlMessage
+    >
   >();
   private _comms = new Map<string, Kernel.IComm>();
   private _targetRegistry: {
@@ -1494,13 +1494,13 @@ namespace Private {
    */
   export function logKernelStatus(kernel: Kernel.IKernelConnection): void {
     switch (kernel.status) {
-    case 'idle':
-    case 'busy':
-    case 'unknown':
-      return;
-    default:
-      console.debug(`Kernel: ${kernel.status} (${kernel.id})`);
-      break;
+      case 'idle':
+      case 'busy':
+      case 'unknown':
+        return;
+      default:
+        console.debug(`Kernel: ${kernel.status} (${kernel.id})`);
+        break;
     }
   }
 

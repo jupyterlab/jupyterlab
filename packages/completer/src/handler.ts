@@ -55,17 +55,17 @@ export class CompletionHandler implements IDisposable {
    * rejected promises.
    */
   get connector(): IDataConnector<
-  CompletionHandler.IReply,
-  void,
-  CompletionHandler.IRequest
+    CompletionHandler.IReply,
+    void,
+    CompletionHandler.IRequest
   > {
     return this._connector;
   }
   set connector(
     connector: IDataConnector<
-    CompletionHandler.IReply,
-    void,
-    CompletionHandler.IRequest
+      CompletionHandler.IReply,
+      void,
+      CompletionHandler.IRequest
     >
   ) {
     this._connector = connector;
@@ -141,11 +141,11 @@ export class CompletionHandler implements IDisposable {
    */
   processMessage(msg: Message): void {
     switch (msg.type) {
-    case CompletionHandler.Msg.InvokeRequest.type:
-      this.onInvokeRequest(msg);
-      break;
-    default:
-      break;
+      case CompletionHandler.Msg.InvokeRequest.type:
+        this.onInvokeRequest(msg);
+        break;
+      default:
+        break;
     }
   }
 
@@ -443,9 +443,9 @@ export class CompletionHandler implements IDisposable {
   }
 
   private _connector: IDataConnector<
-  CompletionHandler.IReply,
-  void,
-  CompletionHandler.IRequest
+    CompletionHandler.IReply,
+    void,
+    CompletionHandler.IRequest
   >;
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;

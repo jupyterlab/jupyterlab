@@ -148,16 +148,16 @@ export class OutputArea extends Widget {
    * The kernel future associated with the output area.
    */
   get future(): Kernel.IShellFuture<
-  KernelMessage.IExecuteRequestMsg,
-  KernelMessage.IExecuteReplyMsg
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
   > {
     return this._future;
   }
 
   set future(
     value: Kernel.IShellFuture<
-    KernelMessage.IExecuteRequestMsg,
-    KernelMessage.IExecuteReplyMsg
+      KernelMessage.IExecuteRequestMsg,
+      KernelMessage.IExecuteReplyMsg
     >
   ) {
     // Bail if the model is disposed.
@@ -214,44 +214,44 @@ export class OutputArea extends Widget {
     args: IOutputAreaModel.ChangedArgs
   ): void {
     switch (args.type) {
-    case 'add':
-      this._insertOutput(args.newIndex, args.newValues[0]);
-      this.outputLengthChanged.emit(this.model.length);
-      break;
-    case 'remove':
-      if (this.widgets.length) {
-        // all items removed from model
-        if (this.model.length === 0) {
-          this._clear();
-        } else {
-          // range of items removed from model
-          // remove widgets corresponding to removed model items
-          const startIndex = args.oldIndex;
-          for (
-            let i = 0;
-            i < args.oldValues.length && startIndex < this.widgets.length;
-            ++i
-          ) {
-            const widget = this.widgets[startIndex];
-            widget.parent = null;
-            widget.dispose();
-          }
-
-          // apply item offset to target model item indices in _displayIdMap
-          this._moveDisplayIdIndices(startIndex, args.oldValues.length);
-
-          // prevent jitter caused by immediate height change
-          this._preventHeightChangeJitter();
-        }
+      case 'add':
+        this._insertOutput(args.newIndex, args.newValues[0]);
         this.outputLengthChanged.emit(this.model.length);
-      }
-      break;
-    case 'set':
-      this._setOutput(args.newIndex, args.newValues[0]);
-      this.outputLengthChanged.emit(this.model.length);
-      break;
-    default:
-      break;
+        break;
+      case 'remove':
+        if (this.widgets.length) {
+          // all items removed from model
+          if (this.model.length === 0) {
+            this._clear();
+          } else {
+            // range of items removed from model
+            // remove widgets corresponding to removed model items
+            const startIndex = args.oldIndex;
+            for (
+              let i = 0;
+              i < args.oldValues.length && startIndex < this.widgets.length;
+              ++i
+            ) {
+              const widget = this.widgets[startIndex];
+              widget.parent = null;
+              widget.dispose();
+            }
+
+            // apply item offset to target model item indices in _displayIdMap
+            this._moveDisplayIdIndices(startIndex, args.oldValues.length);
+
+            // prevent jitter caused by immediate height change
+            this._preventHeightChangeJitter();
+          }
+          this.outputLengthChanged.emit(this.model.length);
+        }
+        break;
+      case 'set':
+        this._setOutput(args.newIndex, args.newValues[0]);
+        this.outputLengthChanged.emit(this.model.length);
+        break;
+      default:
+        break;
     }
   }
 
@@ -496,28 +496,28 @@ export class OutputArea extends Widget {
     let targets: number[] | undefined;
 
     switch (msgType) {
-    case 'execute_result':
-    case 'display_data':
-    case 'stream':
-    case 'error':
-      output = { ...msg.content, output_type: msgType };
-      model.add(output);
-      break;
-    case 'clear_output':
-      const wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
-      model.clear(wait);
-      break;
-    case 'update_display_data':
-      output = { ...msg.content, output_type: 'display_data' };
-      targets = this._displayIdMap.get(displayId);
-      if (targets) {
-        for (const index of targets) {
-          model.set(index, output);
+      case 'execute_result':
+      case 'display_data':
+      case 'stream':
+      case 'error':
+        output = { ...msg.content, output_type: msgType };
+        model.add(output);
+        break;
+      case 'clear_output':
+        const wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+        model.clear(wait);
+        break;
+      case 'update_display_data':
+        output = { ...msg.content, output_type: 'display_data' };
+        targets = this._displayIdMap.get(displayId);
+        if (targets) {
+          for (const index of targets) {
+            model.set(index, output);
+          }
         }
-      }
-      break;
-    default:
-      break;
+        break;
+      default:
+        break;
     }
     if (displayId && msgType === 'display_data') {
       targets = this._displayIdMap.get(displayId) || [];
@@ -557,8 +557,8 @@ export class OutputArea extends Widget {
 
   private _minHeightTimeout: number | null = null;
   private _future: Kernel.IShellFuture<
-  KernelMessage.IExecuteRequestMsg,
-  KernelMessage.IExecuteReplyMsg
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
   >;
   private _displayIdMap = new Map<string, number[]>();
 }
@@ -954,8 +954,8 @@ namespace Private {
   }
 
   export const currentPreferredMimetype = new AttachedProperty<
-  IRenderMime.IRenderer,
-  string
+    IRenderMime.IRenderer,
+    string
   >({
     name: 'preferredMimetype',
     create: owner => ''

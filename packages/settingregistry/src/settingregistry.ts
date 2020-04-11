@@ -302,9 +302,9 @@ export class SettingRegistry implements ISettingRegistry {
     plugin: string,
     key: string
   ): Promise<{
-      composite: PartialJSONValue | undefined;
-      user: PartialJSONValue | undefined;
-    }> {
+    composite: PartialJSONValue | undefined;
+    user: PartialJSONValue | undefined;
+  }> {
     // Wait for data preload before allowing normal operation.
     await this._ready;
 
@@ -782,9 +782,9 @@ export class Settings implements ISettingRegistry.ISettings {
   get(
     key: string
   ): {
-      composite: ReadonlyPartialJSONValue | undefined;
-      user: ReadonlyPartialJSONValue | undefined;
-    } {
+    composite: ReadonlyPartialJSONValue | undefined;
+    user: ReadonlyPartialJSONValue | undefined;
+  } {
     const { composite, user } = this;
 
     return {

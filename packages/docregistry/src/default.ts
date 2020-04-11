@@ -427,8 +427,8 @@ export abstract class ABCWidgetFactory<
   }
 
   private _toolbarFactory:
-  | ((widget: T) => DocumentRegistry.IToolbarItem[])
-  | undefined;
+    | ((widget: T) => DocumentRegistry.IToolbarItem[])
+    | undefined;
   private _isDisposed = false;
   private _name: string;
   private _readOnly: boolean;

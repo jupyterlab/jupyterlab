@@ -42,7 +42,7 @@ export namespace DOMUtils {
     className: string
   ): HTMLCollectionOf<HTMLElement> {
     return parent.getElementsByClassName(className) as HTMLCollectionOf<
-    HTMLElement
+      HTMLElement
     >;
   }
 

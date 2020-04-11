@@ -79,18 +79,18 @@ function activate(
     linkHandler: !docManager
       ? undefined
       : {
-        handleLink: (node: HTMLElement, path: string, id?: string) => {
-          // If node has the download attribute explicitly set, use the
-          // default browser downloading behavior.
-          if (node.tagName === 'A' && node.hasAttribute('download')) {
-            return;
+          handleLink: (node: HTMLElement, path: string, id?: string) => {
+            // If node has the download attribute explicitly set, use the
+            // default browser downloading behavior.
+            if (node.tagName === 'A' && node.hasAttribute('download')) {
+              return;
+            }
+            app.commandLinker.connectNode(node, CommandIDs.handleLink, {
+              path,
+              id
+            });
           }
-          app.commandLinker.connectNode(node, CommandIDs.handleLink, {
-            path,
-            id
-          });
-        }
-      },
+        },
     latexTypesetter: latexTypesetter ?? undefined
   });
 }

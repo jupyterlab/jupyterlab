@@ -513,18 +513,18 @@ export class Cell extends Widget {
     args: IObservableMap.IChangedArgs<PartialJSONValue | undefined>
   ): void {
     switch (args.key) {
-    case 'jupyter':
-      if (this.syncCollapse) {
-        this.loadCollapseState();
-      }
-      break;
-    case 'editable':
-      if (this.syncEditable) {
-        this.loadEditableState();
-      }
-      break;
-    default:
-      break;
+      case 'jupyter':
+        if (this.syncCollapse) {
+          this.loadCollapseState();
+        }
+        break;
+      case 'editable':
+        if (this.syncEditable) {
+          this.loadEditableState();
+        }
+        break;
+      default:
+        break;
     }
   }
 
@@ -578,7 +578,7 @@ export namespace Cell {
    */
   export interface IContentFactory
     extends OutputArea.IContentFactory,
-    InputArea.IContentFactory {
+      InputArea.IContentFactory {
     /**
      * Create a new cell header for the parent widget.
      */
@@ -951,11 +951,11 @@ export class CodeCell extends Cell {
    */
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
-    case 'executionCount':
-      this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
-      break;
-    default:
-      break;
+      case 'executionCount':
+        this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
+        break;
+      default:
+        break;
     }
   }
 
@@ -971,18 +971,18 @@ export class CodeCell extends Cell {
       return;
     }
     switch (args.key) {
-    case 'scrolled':
-      if (this.syncScrolled) {
-        this.loadScrolledState();
-      }
-      break;
-    case 'collapsed':
-      if (this.syncCollapse) {
-        this.loadCollapseState();
-      }
-      break;
-    default:
-      break;
+      case 'scrolled':
+        if (this.syncScrolled) {
+          this.loadScrolledState();
+        }
+        break;
+      case 'collapsed':
+        if (this.syncCollapse) {
+          this.loadCollapseState();
+        }
+        break;
+      default:
+        break;
     }
     super.onMetadataChanged(model, args);
   }
@@ -1050,11 +1050,11 @@ export namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
     let future:
-    | Kernel.IFuture<
-    KernelMessage.IExecuteRequestMsg,
-    KernelMessage.IExecuteReplyMsg
-    >
-    | undefined;
+      | Kernel.IFuture<
+          KernelMessage.IExecuteRequestMsg,
+          KernelMessage.IExecuteReplyMsg
+        >
+      | undefined;
     try {
       const msgPromise = OutputArea.execute(
         code,
@@ -1067,16 +1067,16 @@ export namespace CodeCell {
         const recordTimingHook = (msg: KernelMessage.IIOPubMessage) => {
           let label: string;
           switch (msg.header.msg_type) {
-          case 'status':
-            label = `status.${
-              (msg as KernelMessage.IStatusMsg).content.execution_state
-            }`;
-            break;
-          case 'execute_input':
-            label = 'execute_input';
-            break;
-          default:
-            return true;
+            case 'status':
+              label = `status.${
+                (msg as KernelMessage.IStatusMsg).content.execution_state
+              }`;
+              break;
+            case 'execute_input':
+              label = 'execute_input';
+              break;
+            default:
+              return true;
           }
           const value = msg.header.date;
           if (!value) {
@@ -1142,26 +1142,26 @@ export abstract class AttachmentsCell extends Cell {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'paste':
-      this._evtPaste(event as ClipboardEvent);
-      break;
-    case 'dragenter':
-      event.preventDefault();
-      break;
-    case 'dragover':
-      event.preventDefault();
-      break;
-    case 'drop':
-      this._evtNativeDrop(event as DragEvent);
-      break;
-    case 'lm-dragover':
-      this._evtDragOver(event as IDragEvent);
-      break;
-    case 'lm-drop':
-      this._evtDrop(event as IDragEvent);
-      break;
-    default:
-      break;
+      case 'paste':
+        this._evtPaste(event as ClipboardEvent);
+        break;
+      case 'dragenter':
+        event.preventDefault();
+        break;
+      case 'dragover':
+        event.preventDefault();
+        break;
+      case 'drop':
+        this._evtNativeDrop(event as DragEvent);
+        break;
+      case 'lm-dragover':
+        this._evtDragOver(event as IDragEvent);
+        break;
+      case 'lm-drop':
+        this._evtDrop(event as IDragEvent);
+        break;
+      default:
+        break;
     }
   }
 

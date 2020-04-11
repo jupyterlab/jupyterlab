@@ -72,10 +72,10 @@ export class AttachmentModel implements IAttachmentModel {
     for (const key in value) {
       // Ignore data and metadata that were stripped.
       switch (key) {
-      case 'data':
-        break;
-      default:
-        this._raw[key] = Private.extract(value, key);
+        case 'data':
+          break;
+        default:
+          this._raw[key] = Private.extract(value, key);
       }
     }
   }

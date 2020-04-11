@@ -368,8 +368,8 @@ namespace Private {
    * An attached property to indicate whether an object has been injected.
    */
   export const injectedProperty = new AttachedProperty<
-  IObservableDisposable,
-  boolean
+    IObservableDisposable,
+    boolean
   >({
     name: 'injected',
     create: () => false
@@ -379,8 +379,8 @@ namespace Private {
    * An attached property for an object's ID.
    */
   export const nameProperty = new AttachedProperty<
-  IObservableDisposable,
-  string
+    IObservableDisposable,
+    string
   >({
     name: 'name',
     create: () => ''

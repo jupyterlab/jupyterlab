@@ -457,8 +457,8 @@ namespace Private {
    * An attached property for an item's key.
    */
   export const keyProperty = new AttachedProperty<
-  ILauncher.IItemOptions,
-  number
+    ILauncher.IItemOptions,
+    number
   >({
     name: 'key',
     create: () => id++

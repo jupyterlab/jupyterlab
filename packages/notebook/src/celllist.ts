@@ -475,15 +475,15 @@ export class CellList implements IObservableUndoableList<ICellModel> {
           const cellType = cellDB.createValue(id + '.type');
           let cell: ICellModel;
           switch (cellType.get()) {
-          case 'code':
-            cell = this._factory.createCodeCell({ id: id });
-            break;
-          case 'markdown':
-            cell = this._factory.createMarkdownCell({ id: id });
-            break;
-          default:
-            cell = this._factory.createRawCell({ id: id });
-            break;
+            case 'code':
+              cell = this._factory.createCodeCell({ id: id });
+              break;
+            case 'markdown':
+              cell = this._factory.createMarkdownCell({ id: id });
+              break;
+            default:
+              cell = this._factory.createRawCell({ id: id });
+              break;
           }
           this._cellMap.set(id, cell);
         }

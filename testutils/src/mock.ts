@@ -139,8 +139,8 @@ export function cloneKernel(
  * @param model The model of the kernel
  */
 export const KernelMock = jest.fn<
-Kernel.IKernelConnection,
-[Private.RecursivePartial<Kernel.IKernelConnection.IOptions>]
+  Kernel.IKernelConnection,
+  [Private.RecursivePartial<Kernel.IKernelConnection.IOptions>]
 >(options => {
   const model = options.model || {};
   if (!model.id) {
@@ -213,12 +213,12 @@ Kernel.IKernelConnection,
   };
   // Add signals.
   const iopubMessageSignal = new Signal<
-  Kernel.IKernelConnection,
-  KernelMessage.IIOPubMessage
+    Kernel.IKernelConnection,
+    KernelMessage.IIOPubMessage
   >(thisObject);
   const statusChangedSignal = new Signal<
-  Kernel.IKernelConnection,
-  Kernel.Status
+    Kernel.IKernelConnection,
+    Kernel.Status
   >(thisObject);
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
@@ -232,11 +232,11 @@ Kernel.IKernelConnection,
  * @param model A session model to use
  */
 export const SessionConnectionMock = jest.fn<
-Session.ISessionConnection,
-[
-  Private.RecursivePartial<Session.ISessionConnection.IOptions>,
-  Kernel.IKernelConnection | null
-]
+  Session.ISessionConnection,
+  [
+    Private.RecursivePartial<Session.ISessionConnection.IOptions>,
+    Kernel.IKernelConnection | null
+  ]
 >((options, kernel) => {
   const name = kernel?.name || options.model?.name || KERNEL_MODELS[0].name;
   kernel = kernel || new KernelMock({ model: { name } });
@@ -264,16 +264,16 @@ Session.ISessionConnection,
     })
   };
   const statusChangedSignal = new Signal<
-  Session.ISessionConnection,
-  Kernel.Status
+    Session.ISessionConnection,
+    Kernel.Status
   >(thisObject);
   const kernelChangedSignal = new Signal<
-  Session.ISessionConnection,
-  Session.ISessionConnection.IKernelChangedArgs
+    Session.ISessionConnection,
+    Session.ISessionConnection.IKernelChangedArgs
   >(thisObject);
   const iopubMessageSignal = new Signal<
-  Session.ISessionConnection,
-  KernelMessage.IIOPubMessage
+    Session.ISessionConnection,
+    KernelMessage.IIOPubMessage
   >(thisObject);
 
   kernel!.iopubMessage.connect((_, args) => {
@@ -296,8 +296,8 @@ Session.ISessionConnection,
  * @param session The session connection object to use
  */
 export const SessionContextMock = jest.fn<
-SessionContext,
-[Partial<SessionContext.IOptions>, Session.ISessionConnection | null]
+  SessionContext,
+  [Partial<SessionContext.IOptions>, Session.ISessionConnection | null]
 >((options, connection) => {
   const session =
     connection ||
@@ -338,21 +338,21 @@ SessionContext,
   };
 
   const propertyChangedSignal = new Signal<
-  ISessionContext,
-  'path' | 'name' | 'type'
+    ISessionContext,
+    'path' | 'name' | 'type'
   >(thisObject);
 
   const statusChangedSignal = new Signal<ISessionContext, Kernel.Status>(
     thisObject
   );
   const kernelChangedSignal = new Signal<
-  ISessionContext,
-  Session.ISessionConnection.IKernelChangedArgs
+    ISessionContext,
+    Session.ISessionConnection.IKernelChangedArgs
   >(thisObject);
 
   const iopubMessageSignal = new Signal<
-  ISessionContext,
-  KernelMessage.IIOPubMessage
+    ISessionContext,
+    KernelMessage.IIOPubMessage
   >(thisObject);
 
   session!.statusChanged.connect((_, args) => {
@@ -401,7 +401,7 @@ export const MockShellFuture = jest.fn<Kernel.IShellFuture, []>(() => ({
  */
 namespace Private {
   export function flattenArray<T>(arr: T[][]): T[] {
-    let result: T[] = [];
+    const result: T[] = [];
 
     arr.forEach(innerArr => {
       innerArr.forEach(elem => {
@@ -434,7 +434,7 @@ namespace Private {
     partialModel: Partial<Kernel.IModel>
   ): Promise<Kernel.IModel> {
     if (partialModel.id) {
-      let kernelIdx = KERNEL_MODELS.findIndex(model => {
+      const kernelIdx = KERNEL_MODELS.findIndex(model => {
         return model.id === partialModel.id;
       });
       if (kernelIdx !== -1) {
@@ -447,7 +447,7 @@ namespace Private {
         );
       }
     } else if (partialModel.name) {
-      let kernelIdx = KERNEL_MODELS.findIndex(model => {
+      const kernelIdx = KERNEL_MODELS.findIndex(model => {
         return model.name === partialModel.name;
       });
       if (kernelIdx !== -1) {
@@ -472,8 +472,8 @@ namespace Private {
   );
 
   export const lastMessageProperty = new AttachedProperty<
-  Kernel.IKernelConnection,
-  string
+    Kernel.IKernelConnection,
+    string
   >({
     name: 'lastMessageId',
     create: () => ''

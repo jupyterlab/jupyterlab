@@ -49,7 +49,7 @@ export type CMMainAreaWidget = MainAreaWidget<FileEditor> & {
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
 export class CodeMirrorSearchProvider
-implements ISearchProvider<CMMainAreaWidget> {
+  implements ISearchProvider<CMMainAreaWidget> {
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query

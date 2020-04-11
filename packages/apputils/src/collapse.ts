@@ -107,11 +107,11 @@ export class Collapse<T extends Widget = Widget> extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    default:
-      break;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      default:
+        break;
     }
   }
 

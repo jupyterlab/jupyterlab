@@ -314,27 +314,27 @@ export class Logger implements ILogger {
     }
     let output: nbformat.IOutput | null = null;
     switch (log.type) {
-    case 'text':
-      output = {
-        output_type: 'display_data',
-        data: {
-          'text/plain': log.data
-        }
-      };
-      break;
-    case 'html':
-      output = {
-        output_type: 'display_data',
-        data: {
-          'text/html': log.data
-        }
-      };
-      break;
-    case 'output':
-      output = log.data;
-      break;
-    default:
-      break;
+      case 'text':
+        output = {
+          output_type: 'display_data',
+          data: {
+            'text/plain': log.data
+          }
+        };
+        break;
+      case 'html':
+        output = {
+          output_type: 'display_data',
+          data: {
+            'text/html': log.data
+          }
+        };
+        break;
+      case 'output':
+        output = log.data;
+        break;
+      default:
+        break;
     }
 
     if (output) {

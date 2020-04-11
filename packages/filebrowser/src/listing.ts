@@ -614,54 +614,54 @@ export class DirListing extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'mousedown':
-      this._evtMousedown(event as MouseEvent);
-      break;
-    case 'mouseup':
-      this._evtMouseup(event as MouseEvent);
-      break;
-    case 'mousemove':
-      this._evtMousemove(event as MouseEvent);
-      break;
-    case 'keydown':
-      this._evtKeydown(event as KeyboardEvent);
-      break;
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    case 'dblclick':
-      this._evtDblClick(event as MouseEvent);
-      break;
-    case 'dragenter':
-    case 'dragover':
-      this.addClass('jp-mod-native-drop');
-      event.preventDefault();
-      break;
-    case 'dragleave':
-    case 'dragend':
-      this.removeClass('jp-mod-native-drop');
-      break;
-    case 'drop':
-      this.removeClass('jp-mod-native-drop');
-      this._evtNativeDrop(event as DragEvent);
-      break;
-    case 'scroll':
-      this._evtScroll(event as MouseEvent);
-      break;
-    case 'lm-dragenter':
-      this._evtDragEnter(event as IDragEvent);
-      break;
-    case 'lm-dragleave':
-      this._evtDragLeave(event as IDragEvent);
-      break;
-    case 'lm-dragover':
-      this._evtDragOver(event as IDragEvent);
-      break;
-    case 'lm-drop':
-      this._evtDrop(event as IDragEvent);
-      break;
-    default:
-      break;
+      case 'mousedown':
+        this._evtMousedown(event as MouseEvent);
+        break;
+      case 'mouseup':
+        this._evtMouseup(event as MouseEvent);
+        break;
+      case 'mousemove':
+        this._evtMousemove(event as MouseEvent);
+        break;
+      case 'keydown':
+        this._evtKeydown(event as KeyboardEvent);
+        break;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      case 'dblclick':
+        this._evtDblClick(event as MouseEvent);
+        break;
+      case 'dragenter':
+      case 'dragover':
+        this.addClass('jp-mod-native-drop');
+        event.preventDefault();
+        break;
+      case 'dragleave':
+      case 'dragend':
+        this.removeClass('jp-mod-native-drop');
+        break;
+      case 'drop':
+        this.removeClass('jp-mod-native-drop');
+        this._evtNativeDrop(event as DragEvent);
+        break;
+      case 'scroll':
+        this._evtScroll(event as MouseEvent);
+        break;
+      case 'lm-dragenter':
+        this._evtDragEnter(event as IDragEvent);
+        break;
+      case 'lm-dragleave':
+        this._evtDragLeave(event as IDragEvent);
+        break;
+      case 'lm-dragover':
+        this._evtDragOver(event as IDragEvent);
+        break;
+      case 'lm-drop':
+        this._evtDrop(event as IDragEvent);
+        break;
+      default:
+        break;
     }
   }
 
@@ -955,37 +955,37 @@ export class DirListing extends Widget {
    */
   private _evtKeydown(event: KeyboardEvent): void {
     switch (event.keyCode) {
-    case 13: // Enter
-      // Do nothing if any modifier keys are pressed.
-      if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
-        return;
-      }
-      event.preventDefault();
-      event.stopPropagation();
+      case 13: // Enter
+        // Do nothing if any modifier keys are pressed.
+        if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
 
-      const selected = Object.keys(this._selection);
-      const name = selected[0];
-      const items = this._sortedItems;
-      const i = ArrayExt.findFirstIndex(items, value => value.name === name);
-      if (i === -1) {
-        return;
-      }
+        const selected = Object.keys(this._selection);
+        const name = selected[0];
+        const items = this._sortedItems;
+        const i = ArrayExt.findFirstIndex(items, value => value.name === name);
+        if (i === -1) {
+          return;
+        }
 
-      const item = this._sortedItems[i];
-      this._handleOpen(item);
-      break;
-    case 38: // Up arrow
-      this.selectPrevious(event.shiftKey);
-      event.stopPropagation();
-      event.preventDefault();
-      break;
-    case 40: // Down arrow
-      this.selectNext(event.shiftKey);
-      event.stopPropagation();
-      event.preventDefault();
-      break;
-    default:
-      break;
+        const item = this._sortedItems[i];
+        this._handleOpen(item);
+        break;
+      case 38: // Up arrow
+        this.selectPrevious(event.shiftKey);
+        event.stopPropagation();
+        event.preventDefault();
+        break;
+      case 40: // Down arrow
+        this.selectNext(event.shiftKey);
+        event.stopPropagation();
+        event.preventDefault();
+        break;
+      default:
+        break;
     }
 
     // Detects printable characters typed by the user.
@@ -2005,32 +2005,32 @@ namespace Private {
       };
       edit.onkeydown = (event: KeyboardEvent) => {
         switch (event.keyCode) {
-        case 13: // Enter
-          event.stopPropagation();
-          event.preventDefault();
-          edit.blur();
-          break;
-        case 27: // Escape
-          event.stopPropagation();
-          event.preventDefault();
-          edit.blur();
-          break;
-        case 38: // Up arrow
-          event.stopPropagation();
-          event.preventDefault();
-          if (edit.selectionStart !== edit.selectionEnd) {
-            edit.selectionStart = edit.selectionEnd = 0;
-          }
-          break;
-        case 40: // Down arrow
-          event.stopPropagation();
-          event.preventDefault();
-          if (edit.selectionStart !== edit.selectionEnd) {
-            edit.selectionStart = edit.selectionEnd = edit.value.length;
-          }
-          break;
-        default:
-          break;
+          case 13: // Enter
+            event.stopPropagation();
+            event.preventDefault();
+            edit.blur();
+            break;
+          case 27: // Escape
+            event.stopPropagation();
+            event.preventDefault();
+            edit.blur();
+            break;
+          case 38: // Up arrow
+            event.stopPropagation();
+            event.preventDefault();
+            if (edit.selectionStart !== edit.selectionEnd) {
+              edit.selectionStart = edit.selectionEnd = 0;
+            }
+            break;
+          case 40: // Down arrow
+            event.stopPropagation();
+            event.preventDefault();
+            if (edit.selectionStart !== edit.selectionEnd) {
+              edit.selectionStart = edit.selectionEnd = edit.value.length;
+            }
+            break;
+          default:
+            break;
         }
       };
     });

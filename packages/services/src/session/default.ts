@@ -50,8 +50,8 @@ export class SessionConnection implements Session.ISessionConnection {
    * A signal emitted when the kernel changes.
    */
   get kernelChanged(): ISignal<
-  this,
-  Session.ISessionConnection.IKernelChangedArgs
+    this,
+    Session.ISessionConnection.IKernelChangedArgs
   > {
     return this._kernelChanged;
   }
@@ -409,8 +409,8 @@ export class SessionConnection implements Session.ISessionConnection {
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);
   private _kernelChanged = new Signal<
-  this,
-  Session.ISessionConnection.IKernelChangedArgs
+    this,
+    Session.ISessionConnection.IKernelChangedArgs
   >(this);
   private _statusChanged = new Signal<this, Kernel.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
@@ -424,7 +424,7 @@ export class SessionConnection implements Session.ISessionConnection {
     options: Kernel.IKernelConnection.IOptions
   ) => Kernel.IKernelConnection;
   private _kernelConnectionOptions: Omit<
-  Kernel.IKernelConnection.IOptions,
-  'model' | 'username' | 'clientId' | 'serverSettings'
+    Kernel.IKernelConnection.IOptions,
+    'model' | 'username' | 'clientId' | 'serverSettings'
   >;
 }

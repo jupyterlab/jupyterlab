@@ -149,14 +149,14 @@ export class JSONEditor extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'blur':
-      this._evtBlur(event as FocusEvent);
-      break;
-    case 'click':
-      this._evtClick(event as MouseEvent);
-      break;
-    default:
-      break;
+      case 'blur':
+        this._evtBlur(event as FocusEvent);
+        break;
+      case 'click':
+        this._evtClick(event as MouseEvent);
+        break;
+      default:
+        break;
     }
   }
 

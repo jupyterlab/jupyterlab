@@ -43,8 +43,8 @@ const badgeQuerySize = Math.floor(devicePixelRatio * badgeSize);
  * Search bar VDOM component.
  */
 export class SearchBar extends React.Component<
-SearchBar.IProperties,
-SearchBar.IState
+  SearchBar.IProperties,
+  SearchBar.IState
 > {
   constructor(props: SearchBar.IProperties) {
     super(props);
@@ -233,16 +233,16 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {!entry.whitelistEntry &&
             viewType === 'installed' &&
             listMode === 'white' && (
-            <ToolbarButtonComponent
-              icon={listingsInfoIcon}
-              iconLabel={`${entry.name} extension has been removed from the whitelist since installation. Please uninstall immediately and contact your whitelist administrator.`}
-              onClick={() =>
-                window.open(
-                  'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
-                )
-              }
-            />
-          )}
+              <ToolbarButtonComponent
+                icon={listingsInfoIcon}
+                iconLabel={`${entry.name} extension has been removed from the whitelist since installation. Please uninstall immediately and contact your whitelist administrator.`}
+                onClick={() =>
+                  window.open(
+                    'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                  )
+                }
+              />
+            )}
           {entryIsJupyterOrg && (
             <jupyterIcon.react
               className="jp-extensionmanager-is-jupyter-org"
@@ -261,26 +261,26 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               !entry.blacklistEntry &&
               !(!entry.whitelistEntry && listMode === 'white') &&
               ListModel.isDisclaimed() && (
-              <Button
-                onClick={() => props.performAction('install', entry)}
-                minimal
-                small
-              >
+                <Button
+                  onClick={() => props.performAction('install', entry)}
+                  minimal
+                  small
+                >
                   Install
-              </Button>
-            )}
+                </Button>
+              )}
             {ListModel.entryHasUpdate(entry) &&
               !entry.blacklistEntry &&
               !(!entry.whitelistEntry && listMode === 'white') &&
               ListModel.isDisclaimed() && (
-              <Button
-                onClick={() => props.performAction('install', entry)}
-                minimal
-                small
-              >
+                <Button
+                  onClick={() => props.performAction('install', entry)}
+                  minimal
+                  small
+                >
                   Update
-              </Button>
-            )}
+                </Button>
+              )}
             {entry.installed && (
               <Button
                 onClick={() => props.performAction('uninstall', entry)}
@@ -451,8 +451,8 @@ namespace ErrorMessage {
  *
  */
 export class CollapsibleSection extends React.Component<
-CollapsibleSection.IProperties,
-CollapsibleSection.IState
+  CollapsibleSection.IProperties,
+  CollapsibleSection.IState
 > {
   constructor(props: CollapsibleSection.IProperties) {
     super(props);
@@ -866,16 +866,16 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   onAction(action: Action, entry: IEntry) {
     switch (action) {
-    case 'install':
-      return this.model!.install(entry);
-    case 'uninstall':
-      return this.model!.uninstall(entry);
-    case 'enable':
-      return this.model!.enable(entry);
-    case 'disable':
-      return this.model!.disable(entry);
-    default:
-      throw new Error(`Invalid action: ${action}`);
+      case 'install':
+        return this.model!.install(entry);
+      case 'uninstall':
+        return this.model!.uninstall(entry);
+      case 'enable':
+        return this.model!.enable(entry);
+      case 'disable':
+        return this.model!.disable(entry);
+      default:
+        throw new Error(`Invalid action: ${action}`);
     }
   }
 
@@ -891,15 +891,15 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-    case 'input':
-      this.onSearch(this.inputNode.value);
-      break;
-    case 'focus':
-    case 'blur':
-      this._toggleFocused();
-      break;
-    default:
-      break;
+      case 'input':
+        this.onSearch(this.inputNode.value);
+        break;
+      case 'focus':
+      case 'blur':
+        this._toggleFocused();
+        break;
+      default:
+        break;
     }
   }
 

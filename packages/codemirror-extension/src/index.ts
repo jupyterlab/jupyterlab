@@ -88,7 +88,7 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
       const current = labShell.currentWidget;
       if (current && tracker.has(current) && item.model) {
         item.model.editor = (current as IDocumentWidget<
-        FileEditor
+          FileEditor
         >).content.editor;
       }
     });

@@ -154,28 +154,28 @@ export class DSVModel extends DataModel implements IDisposable {
 
     // Look up the field and value for the region.
     switch (region) {
-    case 'body':
-      if (this._header.length === 0) {
-        value = this._getField(row, column);
-      } else {
-        value = this._getField(row + 1, column);
-      }
-      break;
-    case 'column-header':
-      if (this._header.length === 0) {
-        value = (column + 1).toString();
-      } else {
-        value = this._header[column];
-      }
-      break;
-    case 'row-header':
-      value = (row + 1).toString();
-      break;
-    case 'corner-header':
-      value = '';
-      break;
-    default:
-      throw 'unreachable';
+      case 'body':
+        if (this._header.length === 0) {
+          value = this._getField(row, column);
+        } else {
+          value = this._getField(row + 1, column);
+        }
+        break;
+      case 'column-header':
+        if (this._header.length === 0) {
+          value = (column + 1).toString();
+        } else {
+          value = this._header[column];
+        }
+        break;
+      case 'row-header':
+        value = (row + 1).toString();
+        break;
+      case 'corner-header':
+        value = '';
+        break;
+      default:
+        throw 'unreachable';
     }
 
     // Return the final value.

@@ -13,8 +13,8 @@ import { Throttler } from '@lumino/polling';
  * This connector adds a query parameter to the base services setting manager.
  */
 export class SettingConnector extends DataConnector<
-ISettingRegistry.IPlugin,
-string
+  ISettingRegistry.IPlugin,
+  string
 > {
   constructor(connector: IDataConnector<ISettingRegistry.IPlugin, string>) {
     super();

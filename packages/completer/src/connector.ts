@@ -13,9 +13,9 @@ import { CompletionHandler } from './handler';
  * A context+kernel connector for completion handlers.
  */
 export class CompletionConnector extends DataConnector<
-CompletionHandler.IReply,
-void,
-CompletionHandler.IRequest
+  CompletionHandler.IReply,
+  void,
+  CompletionHandler.IRequest
 > {
   /**
    * Create a new connector for completion requests.

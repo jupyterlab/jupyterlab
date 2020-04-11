@@ -24,8 +24,8 @@ import {
  * A widget factory for notebook panels.
  */
 export class NotebookWidgetFactory extends ABCWidgetFactory<
-NotebookPanel,
-INotebookModel
+  NotebookPanel,
+  INotebookModel
 > {
   /**
    * Construct a new notebook widget factory.

@@ -308,8 +308,8 @@ export class LogConsolePanel extends StackedPanel {
    * Signal for source changes
    */
   get sourceChanged(): ISignal<
-  this,
-  IChangedArgs<string | null, string | null, 'source'>
+    this,
+    IChangedArgs<string | null, string | null, 'source'>
   > {
     return this._sourceChanged;
   }
@@ -474,8 +474,8 @@ export class LogConsolePanel extends StackedPanel {
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _source: string | null = null;
   private _sourceChanged = new Signal<
-  this,
-  IChangedArgs<string | null, string | null, 'source'>
+    this,
+    IChangedArgs<string | null, string | null, 'source'>
   >(this);
   private _sourceDisplayed = new Signal<this, ISourceDisplayed>(this);
   private _placeholder: Widget;

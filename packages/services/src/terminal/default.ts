@@ -364,8 +364,8 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
 
   private _connectionStatus: Terminal.ConnectionStatus = 'connecting';
   private _connectionStatusChanged = new Signal<
-  this,
-  Terminal.ConnectionStatus
+    this,
+    Terminal.ConnectionStatus
   >(this);
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);
