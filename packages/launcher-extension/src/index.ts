@@ -94,5 +94,5 @@ namespace Private {
   /**
    * The incrementing id used for launcher widgets.
    */
-  export const id = 0;
+  export let id = 0;
 }

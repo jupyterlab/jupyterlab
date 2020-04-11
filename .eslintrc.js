@@ -41,7 +41,7 @@ module.exports = {
     'no-undef': 'warn',
     'no-case-declarations': 'warn',
     'no-useless-escape': 'off',
-    'prefer-const': 'warn'
+    'prefer-const': 'off'
   },
   settings: {
     react: {
