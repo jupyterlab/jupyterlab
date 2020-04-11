@@ -283,7 +283,7 @@ namespace Private {
   /**
    * The counter for new consoles.
    */
-  export const count = 1;
+  export let count = 1;
 
   /**
    * Update the title of a console panel.

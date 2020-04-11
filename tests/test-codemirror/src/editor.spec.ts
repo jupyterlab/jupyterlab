@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 // tslint:disable-next-line
-// / <reference path="../../../packages/codemirror/typings/codemirror/codemirror.d.ts"/>
+/// <reference path="../../../packages/codemirror/typings/codemirror/codemirror.d.ts"/>
 
 import { expect } from 'chai';
 

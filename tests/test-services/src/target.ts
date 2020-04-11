@@ -4,6 +4,7 @@
 declare let define: any;
 
 if (typeof define !== 'function') {
+  // @ts-ignore
   const define = require('amdefine')(module); // eslint-disable-line
 }
 

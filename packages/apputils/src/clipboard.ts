@@ -103,5 +103,5 @@ namespace Private {
   /**
    * The application clipboard instance.
    */
-  export const instance = new MimeData();
+  export let instance = new MimeData();
 }

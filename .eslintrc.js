@@ -220,7 +220,7 @@ module.exports = {
     'default-case': 'error',
     'dot-notation': 'off',
     'no-undef': 'off',
-    'prefer-const': 'warn',
+    'prefer-const': 'off',
     eqeqeq: ['error', 'smart'],
     'guard-for-in': 'off',
     'id-blacklist': ['error', 'any', 'boolean', 'Undefined'],
@@ -242,7 +242,6 @@ module.exports = {
     'no-var': 'error',
     'one-var': ['error', 'never'],
     radix: 'error',
-    'spaced-comment': 'error',
     '@typescript-eslint/no-non-null-assertion': 'off'
   },
   settings: {}

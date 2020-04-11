@@ -362,7 +362,7 @@ namespace Private {
   /**
    * An incrementing counter for ids.
    */
-  export const id = 0;
+  export let id = 0;
 
   /**
    * The light terminal theme.
