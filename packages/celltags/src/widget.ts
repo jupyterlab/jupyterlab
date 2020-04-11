@@ -23,13 +23,13 @@ export class TagWidget extends Widget {
    * Create tag div with icon and attach to this.node.
    */
   buildTag() {
-    let text = document.createElement('span');
+    const text = document.createElement('span');
     text.textContent = this.name;
     text.style.textOverflow = 'ellipsis';
-    let tag = document.createElement('div');
+    const tag = document.createElement('div');
     tag.className = 'tag-holder';
     tag.appendChild(text);
-    let iconContainer = checkIcon.element({
+    const iconContainer = checkIcon.element({
       tag: 'span',
       elementPosition: 'center',
       height: '18px',
@@ -77,17 +77,17 @@ export class TagWidget extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'mousedown':
-        this._evtClick();
-        break;
-      case 'mouseover':
-        this._evtMouseOver();
-        break;
-      case 'mouseout':
-        this._evtMouseOut();
-        break;
-      default:
-        break;
+    case 'mousedown':
+      this._evtClick();
+      break;
+    case 'mouseover':
+      this._evtMouseOver();
+      break;
+    case 'mouseout':
+      this._evtMouseOut();
+      break;
+    default:
+      break;
     }
   }
 
@@ -95,7 +95,7 @@ export class TagWidget extends Widget {
    * Handle `update-request` messages. Check if applied to current active cell.
    */
   onUpdateRequest() {
-    let applied = this.parent.checkApplied(this.name);
+    const applied = this.parent.checkApplied(this.name);
     if (applied !== this.applied) {
       this.toggleApplied();
     }

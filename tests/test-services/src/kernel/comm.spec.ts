@@ -107,7 +107,7 @@ describe('jupyter.services - Comm', () => {
     describe('#registerCommTarget()', () => {
       it('should call the provided callback', async () => {
         const promise = new PromiseDelegate<
-          [Kernel.IComm, KernelMessage.ICommOpenMsg]
+        [Kernel.IComm, KernelMessage.ICommOpenMsg]
         >();
         const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           promise.resolve([comm, msg]);
@@ -128,7 +128,7 @@ describe('jupyter.services - Comm', () => {
 
       it('should do nothing if the kernel does not handle comms', async () => {
         const promise = new PromiseDelegate<
-          [Kernel.IComm, KernelMessage.ICommOpenMsg]
+        [Kernel.IComm, KernelMessage.ICommOpenMsg]
         >();
         const hook = (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
           promise.resolve([comm, msg]);
@@ -146,7 +146,7 @@ describe('jupyter.services - Comm', () => {
         expect(await isFulfilled(promise.promise, 300)).to.be.false;
 
         // The kernel comm has not been closed - we just completely ignored it.
-        let reply = await kernel2.requestExecute(
+        const reply = await kernel2.requestExecute(
           { code: `assert comm._closed is False` },
           true
         ).done;
@@ -259,7 +259,7 @@ describe('jupyter.services - Comm', () => {
       });
 
       it('should be called when the server side closes', async () => {
-        let promise = new PromiseDelegate<void>();
+        const promise = new PromiseDelegate<void>();
         kernel.registerCommTarget('test', (comm, msg) => {
           comm.onClose = data => {
             promise.resolve(void 0);
@@ -288,7 +288,7 @@ describe('jupyter.services - Comm', () => {
             data: {}
           }
         });
-        comm.onMsg(msg);
+        await comm.onMsg(msg);
         expect(called).to.equal(true);
       });
 
@@ -307,11 +307,11 @@ describe('jupyter.services - Comm', () => {
 
     describe('#open()', () => {
       it('should send a message to the server', async () => {
-        let future = kernel.requestExecute({ code: TARGET });
+        const future = kernel.requestExecute({ code: TARGET });
         await future.done;
         const encoder = new TextEncoder();
         const data = encoder.encode('hello');
-        let future2 = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [
+        const future2 = comm.open({ foo: 'bar' }, { fizz: 'buzz' }, [
           data,
           data.buffer
         ]);

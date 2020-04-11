@@ -66,7 +66,7 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
     // Remove all of our listeners.
     Signal.disconnectReceiver(this);
 
-    let editor = (this._editor = newValue);
+    const editor = (this._editor = newValue);
     if (editor) {
       // Clear the inspector in preparation for a new editor.
       this._cleared.emit(void 0);
@@ -176,9 +176,9 @@ export class InspectionHandler implements IDisposable, IInspector.IInspectable {
 
   private _cleared = new Signal<InspectionHandler, void>(this);
   private _connector: IDataConnector<
-    InspectionHandler.IReply,
-    void,
-    InspectionHandler.IRequest
+  InspectionHandler.IReply,
+  void,
+  InspectionHandler.IRequest
   >;
   private _disposed = new Signal<this, void>(this);
   private _editor: CodeEditor.IEditor | null = null;

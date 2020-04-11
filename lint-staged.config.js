@@ -1,7 +1,6 @@
 const escape = require('shell-quote').quote;
 const fs = require('fs');
 const isWin = process.platform === 'win32';
-const fs = require('fs');
 
 const escapeFileNames = filenames =>
   filenames

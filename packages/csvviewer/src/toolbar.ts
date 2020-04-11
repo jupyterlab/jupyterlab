@@ -71,11 +71,11 @@ export class CSVDelimiter extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'change':
-        this._delimiterChanged.emit(this.selectNode.value);
-        break;
-      default:
-        break;
+    case 'change':
+      this._delimiterChanged.emit(this.selectNode.value);
+      break;
+    default:
+      break;
     }
   }
 
@@ -119,13 +119,13 @@ namespace Private {
    * Create the node for the delimiter switcher.
    */
   export function createNode(selected: string): HTMLElement {
-    let div = document.createElement('div');
-    let label = document.createElement('span');
-    let select = document.createElement('select');
+    const div = document.createElement('div');
+    const label = document.createElement('span');
+    const select = document.createElement('select');
     label.textContent = 'Delimiter: ';
     label.className = CSV_DELIMITER_LABEL_CLASS;
     each(zip(DELIMITERS, LABELS), ([delimiter, label]) => {
-      let option = document.createElement('option');
+      const option = document.createElement('option');
       option.value = delimiter;
       option.textContent = label;
       if (delimiter === selected) {
@@ -134,7 +134,7 @@ namespace Private {
       select.appendChild(option);
     });
     div.appendChild(label);
-    let node = Styling.wrapSelect(select);
+    const node = Styling.wrapSelect(select);
     node.classList.add(CSV_DELIMITER_DROPDOWN_CLASS);
     div.appendChild(node);
     return div;

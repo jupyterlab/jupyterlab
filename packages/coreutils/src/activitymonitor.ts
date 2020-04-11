@@ -21,8 +21,8 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
    * A signal emitted when activity has ceased.
    */
   get activityStopped(): ISignal<
-    this,
-    ActivityMonitor.IArguments<Sender, Args>
+  this,
+  ActivityMonitor.IArguments<Sender, Args>
   > {
     return this._activityStopped;
   }
@@ -79,8 +79,8 @@ export class ActivityMonitor<Sender, Args> implements IDisposable {
   private _args: Args;
   private _isDisposed = false;
   private _activityStopped = new Signal<
-    this,
-    ActivityMonitor.IArguments<Sender, Args>
+  this,
+  ActivityMonitor.IArguments<Sender, Args>
   >(this);
 }
 

@@ -6,7 +6,7 @@ import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 /**
  * Handle the default `fetch` and `WebSocket` providers.
  */
-declare var global: any;
+declare let global: any;
 
 let FETCH: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
 let HEADERS: typeof Headers;
@@ -17,7 +17,7 @@ if (typeof window === 'undefined') {
   // Mangle the require statements so it does not get picked up in the
   // browser assets.
   /* tslint:disable */
-  let fetchMod = require('node-fetch');
+  const fetchMod = require('node-fetch');
   FETCH = global.fetch ?? fetchMod;
   REQUEST = global.Request ?? fetchMod.Request;
   HEADERS = global.Headers ?? fetchMod.Headers;

@@ -49,7 +49,7 @@ export type CMMainAreaWidget = MainAreaWidget<FileEditor> & {
 type MatchMap = { [key: number]: { [key: number]: ISearchMatch } };
 
 export class CodeMirrorSearchProvider
-  implements ISearchProvider<CMMainAreaWidget> {
+implements ISearchProvider<CMMainAreaWidget> {
   /**
    * Get an initial query value if applicable so that it can be entered
    * into the search box as an initial query
@@ -348,7 +348,7 @@ export class CodeMirrorSearchProvider
     const end = CodeMirror.Pos(this._cm.doc.lastLine());
     const content = this._cm.doc.getRange(start, end);
     const lines = content.split('\n');
-    let totalMatchIndex = 0;
+    const totalMatchIndex = 0;
     lines.forEach((line, lineNumber) => {
       query.lastIndex = 0;
       let match = query.exec(line);

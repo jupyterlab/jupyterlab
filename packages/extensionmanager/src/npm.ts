@@ -241,7 +241,7 @@ export class Searcher {
   ): Promise<ISearchResult> {
     const uri = new URL('/-/v1/search', this.repoUri);
     // Note: Spaces are encoded to '+' signs!
-    let text = `${query} keywords:"jupyterlab-extension"`;
+    const text = `${query} keywords:"jupyterlab-extension"`;
     uri.searchParams.append('text', text);
     uri.searchParams.append('size', pageination.toString());
     uri.searchParams.append('from', (pageination * page).toString());

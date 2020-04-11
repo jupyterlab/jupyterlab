@@ -232,8 +232,8 @@ function SearchIndices(props: ISearchIndexProps) {
       {props.totalMatches === 0
         ? '-/-'
         : `${props.currentIndex === null ? '-' : props.currentIndex + 1}/${
-            props.totalMatches
-          }`}
+          props.totalMatches
+        }`}
     </div>
   );
 }
@@ -246,8 +246,8 @@ interface IFilterToggleProps {
 interface IFilterToggleState {}
 
 class FilterToggle extends React.Component<
-  IFilterToggleProps,
-  IFilterToggleState
+IFilterToggleProps,
+IFilterToggleState
 > {
   render() {
     let className = `${ELLIPSES_BUTTON_CLASS} ${BUTTON_CONTENT_CLASS}`;
@@ -280,8 +280,8 @@ interface IFilterSelectionProps {
 interface IFilterSelectionState {}
 
 class FilterSelection extends React.Component<
-  IFilterSelectionProps,
-  IFilterSelectionState
+IFilterSelectionProps,
+IFilterSelectionState
 > {
   render() {
     return (
@@ -318,8 +318,8 @@ interface ISearchOverlayProps {
 }
 
 class SearchOverlay extends React.Component<
-  ISearchOverlayProps,
-  IDisplayState
+ISearchOverlayProps,
+IDisplayState
 > {
   constructor(props: ISearchOverlayProps) {
     super(props);

@@ -32,7 +32,7 @@ async function startNew(
 }
 
 describe('session/manager', () => {
-  let kernelManager: KernelManager = new KernelManager({ standby: 'never' });
+  const kernelManager: KernelManager = new KernelManager({ standby: 'never' });
   let manager: SessionManager;
   let session: Session.ISessionConnection;
 
@@ -52,7 +52,7 @@ describe('session/manager', () => {
   });
 
   afterAll(async () => {
-    let sessions = await SessionAPI.listRunning();
+    const sessions = await SessionAPI.listRunning();
     await Promise.all(sessions.map(s => SessionAPI.shutdownSession(s.id)));
   });
 
@@ -100,7 +100,7 @@ describe('session/manager', () => {
 
     describe('#runningChanged', () => {
       it('should be emitted when the running sessions changed', async () => {
-        let promise = testEmission(manager.runningChanged, {
+        const promise = testEmission(manager.runningChanged, {
           test: (sender, args) => {
             expect(sender).to.equal(manager);
             expect(toArray(args).length).to.be.greaterThan(0);

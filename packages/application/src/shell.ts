@@ -175,17 +175,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this.addClass(APPLICATION_SHELL_CLASS);
     this.id = 'main';
 
-    let headerPanel = (this._headerPanel = new BoxPanel());
-    let topHandler = (this._topHandler = new Private.PanelHandler());
-    let bottomPanel = (this._bottomPanel = new BoxPanel());
-    let hboxPanel = new BoxPanel();
-    let dockPanel = (this._dockPanel = new DockPanelSvg());
+    const headerPanel = (this._headerPanel = new BoxPanel());
+    const topHandler = (this._topHandler = new Private.PanelHandler());
+    const bottomPanel = (this._bottomPanel = new BoxPanel());
+    const hboxPanel = new BoxPanel();
+    const dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
-    let hsplitPanel = new SplitPanel();
-    let leftHandler = (this._leftHandler = new Private.SideBarHandler());
-    let rightHandler = (this._rightHandler = new Private.SideBarHandler());
-    let rootLayout = new BoxLayout();
+    const hsplitPanel = new SplitPanel();
+    const leftHandler = (this._leftHandler = new Private.SideBarHandler());
+    const rightHandler = (this._rightHandler = new Private.SideBarHandler());
+    const rootLayout = new BoxLayout();
 
     headerPanel.id = 'jp-header-panel';
     topHandler.panel.id = 'jp-top-panel';
@@ -435,12 +435,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Activate the next Tab in the active TabBar.
    */
   activateNextTab(): void {
-    let current = this._currentTabBar();
+    const current = this._currentTabBar();
     if (!current) {
       return;
     }
 
-    let ci = current.currentIndex;
+    const ci = current.currentIndex;
     if (ci === -1) {
       return;
     }
@@ -454,7 +454,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
 
     if (ci === current.titles.length - 1) {
-      let nextBar = this._adjacentBar('next');
+      const nextBar = this._adjacentBar('next');
       if (nextBar) {
         nextBar.currentIndex = 0;
         if (nextBar.currentTitle) {
@@ -468,12 +468,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Activate the previous Tab in the active TabBar.
    */
   activatePreviousTab(): void {
-    let current = this._currentTabBar();
+    const current = this._currentTabBar();
     if (!current) {
       return;
     }
 
-    let ci = current.currentIndex;
+    const ci = current.currentIndex;
     if (ci === -1) {
       return;
     }
@@ -487,9 +487,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
 
     if (ci === 0) {
-      let prevBar = this._adjacentBar('previous');
+      const prevBar = this._adjacentBar('previous');
       if (prevBar) {
-        let len = prevBar.titles.length;
+        const len = prevBar.titles.length;
         prevBar.currentIndex = len - 1;
         if (prevBar.currentTitle) {
           prevBar.currentTitle.owner.activate();
@@ -502,7 +502,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Activate the next TabBar.
    */
   activateNextTabBar(): void {
-    let nextBar = this._adjacentBar('next');
+    const nextBar = this._adjacentBar('next');
     if (nextBar) {
       if (nextBar.currentTitle) {
         nextBar.currentTitle.owner.activate();
@@ -514,7 +514,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Activate the next TabBar.
    */
   activatePreviousTabBar(): void {
-    let nextBar = this._adjacentBar('previous');
+    const nextBar = this._adjacentBar('previous');
     if (nextBar) {
       if (nextBar.currentTitle) {
         nextBar.currentTitle.owner.activate();
@@ -528,20 +528,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     options?: DocumentRegistry.IOpenOptions
   ): void {
     switch (area || 'main') {
-      case 'main':
-        return this._addToMainArea(widget, options);
-      case 'left':
-        return this._addToLeftArea(widget, options);
-      case 'right':
-        return this._addToRightArea(widget, options);
-      case 'header':
-        return this._addToHeaderArea(widget, options);
-      case 'top':
-        return this._addToTopArea(widget, options);
-      case 'bottom':
-        return this._addToBottomArea(widget, options);
-      default:
-        throw new Error(`Invalid area: ${area}`);
+    case 'main':
+      return this._addToMainArea(widget, options);
+    case 'left':
+      return this._addToLeftArea(widget, options);
+    case 'right':
+      return this._addToRightArea(widget, options);
+    case 'header':
+      return this._addToHeaderArea(widget, options);
+    case 'top':
+      return this._addToTopArea(widget, options);
+    case 'bottom':
+      return this._addToBottomArea(widget, options);
+    default:
+      throw new Error(`Invalid area: ${area}`);
     }
   }
 
@@ -611,20 +611,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   isEmpty(area: ILabShell.Area): boolean {
     switch (area) {
-      case 'left':
-        return this._leftHandler.stackedPanel.widgets.length === 0;
-      case 'main':
-        return this._dockPanel.isEmpty;
-      case 'header':
-        return this._headerPanel.widgets.length === 0;
-      case 'top':
-        return this._topHandler.panel.widgets.length === 0;
-      case 'bottom':
-        return this._bottomPanel.widgets.length === 0;
-      case 'right':
-        return this._rightHandler.stackedPanel.widgets.length === 0;
-      default:
-        return true;
+    case 'left':
+      return this._leftHandler.stackedPanel.widgets.length === 0;
+    case 'main':
+      return this._dockPanel.isEmpty;
+    case 'header':
+      return this._headerPanel.widgets.length === 0;
+    case 'top':
+      return this._topHandler.panel.widgets.length === 0;
+    case 'bottom':
+      return this._bottomPanel.widgets.length === 0;
+    case 'right':
+      return this._rightHandler.stackedPanel.widgets.length === 0;
+    default:
+      return true;
     }
   }
 
@@ -693,20 +693,20 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   widgets(area?: ILabShell.Area): IIterator<Widget> {
     switch (area || 'main') {
-      case 'main':
-        return this._dockPanel.widgets();
-      case 'left':
-        return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
-      case 'right':
-        return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
-      case 'header':
-        return this._headerPanel.children();
-      case 'top':
-        return this._topHandler.panel.children();
-      case 'bottom':
-        return this._bottomPanel.children();
-      default:
-        throw new Error(`Invalid area: ${area}`);
+    case 'main':
+      return this._dockPanel.widgets();
+    case 'left':
+      return iter(this._leftHandler.sideBar.titles.map(t => t.owner));
+    case 'right':
+      return iter(this._rightHandler.sideBar.titles.map(t => t.owner));
+    case 'header':
+      return this._headerPanel.children();
+    case 'top':
+      return this._topHandler.panel.children();
+    case 'bottom':
+      return this._bottomPanel.children();
+    default:
+      throw new Error(`Invalid area: ${area}`);
     }
   }
 
@@ -733,7 +733,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     }
     options = options || this._sideOptionsCache.get(widget) || {};
     this._sideOptionsCache.set(widget, options);
-    let rank = 'rank' in options ? options.rank : DEFAULT_RANK;
+    const rank = 'rank' in options ? options.rank : DEFAULT_RANK;
     this._leftHandler.addWidget(widget, rank!);
     this._onLayoutModified();
   }
@@ -910,8 +910,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     return index < len - 1
       ? bars[index + 1]
       : index === len - 1
-      ? bars[0]
-      : null;
+        ? bars[0]
+        : null;
   }
 
   /*
@@ -982,16 +982,16 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     msg: Message
   ): boolean => {
     switch (msg.type) {
-      case 'child-added':
-        (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
-        this._tracker.add((msg as Widget.ChildMessage).child);
-        break;
-      case 'child-removed':
-        (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
-        this._tracker.remove((msg as Widget.ChildMessage).child);
-        break;
-      default:
-        break;
+    case 'child-added':
+      (msg as Widget.ChildMessage).child.addClass(ACTIVITY_CLASS);
+      this._tracker.add((msg as Widget.ChildMessage).child);
+      break;
+    case 'child-removed':
+      (msg as Widget.ChildMessage).child.removeClass(ACTIVITY_CLASS);
+      this._tracker.remove((msg as Widget.ChildMessage).child);
+      break;
+    default:
+      break;
     }
     return true;
   };
@@ -1148,7 +1148,7 @@ namespace Private {
      * @param id - The widget's unique ID.
      */
     activate(id: string): void {
-      let widget = this._findWidgetByID(id);
+      const widget = this._findWidgetByID(id);
       if (widget) {
         this._sideBar.currentTitle = widget.title;
         widget.activate();
@@ -1177,8 +1177,8 @@ namespace Private {
     addWidget(widget: Widget, rank: number): void {
       widget.parent = null;
       widget.hide();
-      let item = { widget, rank };
-      let index = this._findInsertIndex(item);
+      const item = { widget, rank };
+      const index = this._findInsertIndex(item);
       ArrayExt.insert(this._items, index, item);
       this._stackedPanel.insertWidget(index, widget);
       const title = this._sideBar.insertTab(index, widget.title);
@@ -1203,9 +1203,9 @@ namespace Private {
      * Dehydrate the side bar data.
      */
     dehydrate(): ILabShell.ISideArea {
-      let collapsed = this._sideBar.currentTitle === null;
-      let widgets = toArray(this._stackedPanel.widgets);
-      let currentWidget = widgets[this._sideBar.currentIndex];
+      const collapsed = this._sideBar.currentTitle === null;
+      const widgets = toArray(this._stackedPanel.widgets);
+      const currentWidget = widgets[this._sideBar.currentIndex];
       return { collapsed, currentWidget, widgets };
     }
 
@@ -1238,7 +1238,7 @@ namespace Private {
      * Find the widget which owns the given title, or `null`.
      */
     private _findWidgetByTitle(title: Title<Widget>): Widget | null {
-      let item = find(this._items, value => value.widget.title === title);
+      const item = find(this._items, value => value.widget.title === title);
       return item ? item.widget : null;
     }
 
@@ -1246,7 +1246,7 @@ namespace Private {
      * Find the widget with the given id, or `null`.
      */
     private _findWidgetByID(id: string): Widget | null {
-      let item = find(this._items, value => value.widget.id === id);
+      const item = find(this._items, value => value.widget.id === id);
       return item ? item.widget : null;
     }
 

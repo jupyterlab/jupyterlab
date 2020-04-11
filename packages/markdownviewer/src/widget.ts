@@ -94,30 +94,30 @@ export class MarkdownViewer extends Widget {
     this._config[option] = value;
     const { style } = this.renderer.node;
     switch (option) {
-      case 'fontFamily':
-        style.setProperty('font-family', value as string | null);
-        break;
-      case 'fontSize':
-        style.setProperty('font-size', value ? value + 'px' : null);
-        break;
-      case 'hideFrontMatter':
-        this.update();
-        break;
-      case 'lineHeight':
-        style.setProperty('line-height', value ? value.toString() : null);
-        break;
-      case 'lineWidth':
-        const padding = value ? `calc(50% - ${(value as number) / 2}ch)` : null;
-        style.setProperty('padding-left', padding);
-        style.setProperty('padding-right', padding);
-        break;
-      case 'renderTimeout':
-        if (this._monitor) {
-          this._monitor.timeout = value as number;
-        }
-        break;
-      default:
-        break;
+    case 'fontFamily':
+      style.setProperty('font-family', value as string | null);
+      break;
+    case 'fontSize':
+      style.setProperty('font-size', value ? value + 'px' : null);
+      break;
+    case 'hideFrontMatter':
+      this.update();
+      break;
+    case 'lineHeight':
+      style.setProperty('line-height', value ? value.toString() : null);
+      break;
+    case 'lineWidth':
+      const padding = value ? `calc(50% - ${(value as number) / 2}ch)` : null;
+      style.setProperty('padding-left', padding);
+      style.setProperty('padding-right', padding);
+      break;
+    case 'renderTimeout':
+      if (this._monitor) {
+        this._monitor.timeout = value as number;
+      }
+      break;
+    default:
+      break;
     }
   }
 

@@ -69,7 +69,7 @@ export class FileBrowserModel implements IDisposable {
   constructor(options: FileBrowserModel.IOptions) {
     this.manager = options.manager;
     this._driveName = options.driveName || '';
-    let rootPath = this._driveName ? this._driveName + ':' : '';
+    const rootPath = this._driveName ? this._driveName + ':' : '';
     this._model = {
       path: rootPath,
       name: PathExt.basename(rootPath),
@@ -258,13 +258,13 @@ export class FileBrowserModel implements IDisposable {
       // Otherwise wait for the pending request to complete before continuing.
       await this._pending;
     }
-    let oldValue = this.path;
-    let options: Contents.IFetchOptions = { content: true };
+    const oldValue = this.path;
+    const options: Contents.IFetchOptions = { content: true };
     this._pendingPath = newValue;
     if (oldValue !== newValue) {
       this._sessions.length = 0;
     }
-    let services = this.manager.services;
+    const services = this.manager.services;
     this._pending = services.contents
       .get(newValue, options)
       .then(contents => {
@@ -315,7 +315,7 @@ export class FileBrowserModel implements IDisposable {
    */
   async download(path: string): Promise<void> {
     const url = await this.manager.services.contents.getDownloadUrl(path);
-    let element = document.createElement('a');
+    const element = document.createElement('a');
     element.href = url;
     element.download = '';
     document.body.appendChild(element);
@@ -395,9 +395,8 @@ export class FileBrowserModel implements IDisposable {
     const largeFile = file.size > LARGE_FILE_SIZE;
 
     if (largeFile && !supportsChunked) {
-      let msg = `Cannot upload file (>${LARGE_FILE_SIZE / (1024 * 1024)} MB). ${
-        file.name
-      }`;
+      const msg = `Cannot upload file (>${LARGE_FILE_SIZE /
+        (1024 * 1024)} MB). ${file.name}`;
       console.warn(msg);
       throw msg;
     }
@@ -441,16 +440,16 @@ export class FileBrowserModel implements IDisposable {
     // Gather the file model parameters.
     let path = this._model.path;
     path = path ? path + '/' + file.name : file.name;
-    let name = file.name;
-    let type: Contents.ContentType = 'file';
-    let format: Contents.FileFormat = 'base64';
+    const name = file.name;
+    const type: Contents.ContentType = 'file';
+    const format: Contents.FileFormat = 'base64';
 
     const uploadInner = async (
       blob: Blob,
       chunk?: number
     ): Promise<Contents.IModel> => {
       await this._uploadCheckDisposed();
-      let reader = new FileReader();
+      const reader = new FileReader();
       reader.readAsDataURL(blob);
       await new Promise((resolve, reject) => {
         reader.onload = resolve;
@@ -462,7 +461,7 @@ export class FileBrowserModel implements IDisposable {
       // remove header https://stackoverflow.com/a/24289420/907060
       const content = (reader.result as string).split(',')[1];
 
-      let model: Partial<Contents.IModel> = {
+      const model: Partial<Contents.IModel> = {
         type,
         format,
         name,
@@ -587,15 +586,15 @@ export class FileBrowserModel implements IDisposable {
     sender: Contents.IManager,
     change: Contents.IChangedArgs
   ): void {
-    let path = this._model.path;
-    let { sessions } = this.manager.services;
-    let { oldValue, newValue } = change;
-    let value =
+    const path = this._model.path;
+    const { sessions } = this.manager.services;
+    const { oldValue, newValue } = change;
+    const value =
       oldValue && oldValue.path && PathExt.dirname(oldValue.path) === path
         ? oldValue
         : newValue && newValue.path && PathExt.dirname(newValue.path) === path
-        ? newValue
-        : undefined;
+          ? newValue
+          : undefined;
 
     // If either the old value or the new value is in the current path, update.
     if (value) {

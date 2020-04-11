@@ -64,7 +64,7 @@ const shortcuts: JupyterFrontEndPlugin<void> = {
       loaded = {};
       schema.properties!.shortcuts.default = Object.keys(registry.plugins)
         .map(plugin => {
-          let shortcuts =
+          const shortcuts =
             registry.plugins[plugin]!.schema['jupyter.lab.shortcuts'] || [];
           loaded[plugin] = shortcuts;
           return shortcuts;
@@ -93,8 +93,8 @@ List of keyboard shortcuts:`;
     registry.pluginChanged.connect(async (sender, plugin) => {
       if (plugin !== shortcuts.id) {
         // If the plugin changed its shortcuts, reload everything.
-        let oldShortcuts = loaded[plugin];
-        let newShortcuts =
+        const oldShortcuts = loaded[plugin];
+        const newShortcuts =
           registry.plugins[plugin]!.schema['jupyter.lab.shortcuts'] || [];
         if (
           oldShortcuts === undefined ||
@@ -208,8 +208,8 @@ namespace Private {
    */
   function normalizeOptions(
     value:
-      | ReadonlyPartialJSONValue
-      | Partial<CommandRegistry.IKeyBindingOptions>
+    | ReadonlyPartialJSONValue
+    | Partial<CommandRegistry.IKeyBindingOptions>
   ): CommandRegistry.IKeyBindingOptions | undefined {
     if (!value || typeof value !== 'object') {
       return undefined;

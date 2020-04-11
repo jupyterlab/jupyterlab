@@ -258,9 +258,9 @@ describe('filebrowser/model', () => {
       });
 
       it('should be resilient to a slow initial fetch', async () => {
-        let delayedServiceManager = new ServiceManager({ standby: 'never' });
+        const delayedServiceManager = new ServiceManager({ standby: 'never' });
         (delayedServiceManager as any).contents = new DelayedContentsManager();
-        let manager = new DocumentManager({
+        const manager = new DocumentManager({
           registry,
           opener,
           manager: delayedServiceManager

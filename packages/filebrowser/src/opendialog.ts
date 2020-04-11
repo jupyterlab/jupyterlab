@@ -27,13 +27,13 @@ export namespace FileDialog {
    */
   export interface IDirectoryOptions
     extends Partial<
-      Pick<
-        Dialog.IOptions<Promise<Contents.IModel[]>>,
-        Exclude<
-          keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
-          'body' | 'buttons' | 'defaultButton'
-        >
-      >
+    Pick<
+    Dialog.IOptions<Promise<Contents.IModel[]>>,
+    Exclude<
+    keyof Dialog.IOptions<Promise<Contents.IModel[]>>,
+    'body' | 'buttons' | 'defaultButton'
+    >
+    >
     > {
     /**
      * Document manager
@@ -64,7 +64,7 @@ export namespace FileDialog {
   export function getOpenFiles(
     options: IFileOptions
   ): Promise<Dialog.IResult<Contents.IModel[]>> {
-    let dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
+    const dialogOptions: Partial<Dialog.IOptions<Contents.IModel[]>> = {
       title: options.title,
       buttons: [
         Dialog.cancelButton(),
@@ -77,7 +77,7 @@ export namespace FileDialog {
       renderer: options.renderer,
       body: new OpenDialog(options.manager, options.filter)
     };
-    let dialog = new Dialog(dialogOptions);
+    const dialog = new Dialog(dialogOptions);
     return dialog.launch();
   }
 
@@ -120,7 +120,7 @@ class OpenDialog extends Widget
     );
 
     // Build the sub widgets
-    let layout = new PanelLayout();
+    const layout = new PanelLayout();
     layout.addWidget(this._browser);
 
     // Set Widget content

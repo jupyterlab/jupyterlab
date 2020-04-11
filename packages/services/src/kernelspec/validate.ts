@@ -8,7 +8,7 @@ import { validateProperty } from '../validate';
  * Validate a server kernelspec model to a client side model.
  */
 export function validateSpecModel(data: any): ISpecModel {
-  let spec = data.spec;
+  const spec = data.spec;
   if (!spec) {
     throw new Error('Invalid kernel spec');
   }
@@ -48,11 +48,11 @@ export function validateSpecModels(data: any): ISpecModels {
     throw new Error('No kernelspecs found');
   }
   let keys = Object.keys(data.kernelspecs);
-  let kernelspecs: { [key: string]: ISpecModel } = Object.create(null);
+  const kernelspecs: { [key: string]: ISpecModel } = Object.create(null);
   let defaultSpec = data.default;
 
   for (let i = 0; i < keys.length; i++) {
-    let ks = data.kernelspecs[keys[i]];
+    const ks = data.kernelspecs[keys[i]];
     try {
       kernelspecs[keys[i]] = validateSpecModel(ks);
     } catch (err) {

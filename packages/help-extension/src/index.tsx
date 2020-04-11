@@ -144,14 +144,14 @@ function activate(
     // We *don't* allow same origin requests, which
     // can prevent some content from being loaded onto the
     // help pages.
-    let content = new IFrame({
+    const content = new IFrame({
       sandbox: ['allow-scripts', 'allow-forms']
     });
     content.url = url;
     content.addClass(HELP_CLASS);
     content.title.label = text;
     content.id = `${namespace}-${++counter}`;
-    let widget = new MainAreaWidget({ content });
+    const widget = new MainAreaWidget({ content });
     widget.addClass('jp-Help');
     return widget;
   }
@@ -178,8 +178,8 @@ function activate(
 
   // Generate a cache of the kernel help links.
   const kernelInfoCache = new Map<
-    string,
-    KernelMessage.IInfoReplyMsg['content']
+  string,
+  KernelMessage.IInfoReplyMsg['content']
   >();
   serviceManager.sessions.runningChanged.connect((m, sessions) => {
     // If a new session has been added, it is at the back
@@ -233,7 +233,7 @@ function activate(
       const kernelName = spec.display_name;
       let kernelIconUrl = spec.resources['logo-64x64'];
       if (kernelIconUrl) {
-        let index = kernelIconUrl.indexOf('kernelspecs');
+        const index = kernelIconUrl.indexOf('kernelspecs');
         kernelIconUrl = baseUrl + kernelIconUrl.slice(index);
       }
       commands.addCommand(bannerCommand, {
@@ -242,15 +242,15 @@ function activate(
         isEnabled: usesKernel,
         execute: () => {
           // Create the header of the about dialog
-          let headerLogo = <img src={kernelIconUrl} />;
-          let title = (
+          const headerLogo = <img src={kernelIconUrl} />;
+          const title = (
             <span className="jp-About-header">
               {headerLogo}
               <div className="jp-About-header-info">{kernelName}</div>
             </span>
           );
           const banner = <pre>{kernelInfo.banner}</pre>;
-          let body = <div className="jp-About-body">{banner}</div>;
+          const body = <div className="jp-About-body">{banner}</div>;
 
           return showDialog({
             title,
@@ -291,13 +291,13 @@ function activate(
     label: `About ${app.name}`,
     execute: () => {
       // Create the header of the about dialog
-      let versionNumber = `Version ${app.version}`;
-      let versionInfo = (
+      const versionNumber = `Version ${app.version}`;
+      const versionInfo = (
         <span className="jp-About-version-info">
           <span className="jp-About-version">{versionNumber}</span>
         </span>
       );
-      let title = (
+      const title = (
         <span className="jp-About-header">
           <jupyterIcon.react margin="7px 9.5px" height="auto" width="58px" />
           <div className="jp-About-header-info">
@@ -308,10 +308,10 @@ function activate(
       );
 
       // Create the body of the about dialog
-      let jupyterURL = 'https://jupyter.org/about.html';
-      let contributorsURL =
+      const jupyterURL = 'https://jupyter.org/about.html';
+      const contributorsURL =
         'https://github.com/jupyterlab/jupyterlab/graphs/contributors';
-      let externalLinks = (
+      const externalLinks = (
         <span className="jp-About-externalLinks">
           <a
             href={contributorsURL}
@@ -331,12 +331,12 @@ function activate(
           </a>
         </span>
       );
-      let copyright = (
+      const copyright = (
         <span className="jp-About-copyright">
           © 2015-2020 Project Jupyter Contributors
         </span>
       );
-      let body = (
+      const body = (
         <div className="jp-About-body">
           {externalLinks}
           {copyright}
@@ -372,7 +372,7 @@ function activate(
         return;
       }
 
-      let widget = newHelpWidget(url, text);
+      const widget = newHelpWidget(url, text);
       void tracker.add(widget);
       shell.add(widget, 'main');
       return widget;

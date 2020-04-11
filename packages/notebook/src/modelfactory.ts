@@ -15,12 +15,12 @@ import { INotebookModel, NotebookModel } from './model';
  * A model factory for notebooks.
  */
 export class NotebookModelFactory
-  implements DocumentRegistry.IModelFactory<INotebookModel> {
+implements DocumentRegistry.IModelFactory<INotebookModel> {
   /**
    * Construct a new notebook model factory.
    */
   constructor(options: NotebookModelFactory.IOptions) {
-    let codeCellContentFactory = options.codeCellContentFactory;
+    const codeCellContentFactory = options.codeCellContentFactory;
     this.contentFactory =
       options.contentFactory ||
       new NotebookModel.ContentFactory({ codeCellContentFactory });
@@ -74,7 +74,7 @@ export class NotebookModelFactory
    * @returns A new document model.
    */
   createNew(languagePreference?: string, modelDB?: IModelDB): INotebookModel {
-    let contentFactory = this.contentFactory;
+    const contentFactory = this.contentFactory;
     return new NotebookModel({ languagePreference, contentFactory, modelDB });
   }
 

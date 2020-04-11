@@ -264,7 +264,7 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
         item.model!.editor = cell && cell.editor;
       } else if (newValue && editorTracker.has(newValue)) {
         item.model!.editor = (newValue as IDocumentWidget<
-          FileEditor
+        FileEditor
         >).content.editor;
       } else {
         item.model!.editor = null;
@@ -304,7 +304,7 @@ export const memoryUsageItem: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [IStatusBar],
   activate: (app: JupyterFrontEnd, statusBar: IStatusBar) => {
-    let item = new MemoryUsage();
+    const item = new MemoryUsage();
 
     statusBar.registerStatusItem(
       '@jupyterlab/statusbar-extension:memory-usage-status',

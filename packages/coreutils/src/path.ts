@@ -39,7 +39,7 @@ export namespace PathExt {
    * @param path - The file path.
    */
   export function dirname(path: string): string {
-    let dir = removeSlash(posix.dirname(path));
+    const dir = removeSlash(posix.dirname(path));
     return dir === '.' ? '' : dir;
   }
 

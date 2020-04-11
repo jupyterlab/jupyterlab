@@ -43,8 +43,8 @@ const badgeQuerySize = Math.floor(devicePixelRatio * badgeSize);
  * Search bar VDOM component.
  */
 export class SearchBar extends React.Component<
-  SearchBar.IProperties,
-  SearchBar.IState
+SearchBar.IProperties,
+SearchBar.IState
 > {
   constructor(props: SearchBar.IProperties) {
     super(props);
@@ -76,7 +76,7 @@ export class SearchBar extends React.Component<
    * Handler for search input changes.
    */
   handleChange = (e: React.FormEvent<HTMLElement>) => {
-    let target = e.target as HTMLInputElement;
+    const target = e.target as HTMLInputElement;
     this.setState({
       value: target.value
     });
@@ -233,16 +233,16 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {!entry.whitelistEntry &&
             viewType === 'installed' &&
             listMode === 'white' && (
-              <ToolbarButtonComponent
-                icon={listingsInfoIcon}
-                iconLabel={`${entry.name} extension has been removed from the whitelist since installation. Please uninstall immediately and contact your whitelist administrator.`}
-                onClick={() =>
-                  window.open(
-                    'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
-                  )
-                }
-              />
-            )}
+            <ToolbarButtonComponent
+              icon={listingsInfoIcon}
+              iconLabel={`${entry.name} extension has been removed from the whitelist since installation. Please uninstall immediately and contact your whitelist administrator.`}
+              onClick={() =>
+                window.open(
+                  'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
+                )
+              }
+            />
+          )}
           {entryIsJupyterOrg && (
             <jupyterIcon.react
               className="jp-extensionmanager-is-jupyter-org"
@@ -261,26 +261,26 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               !entry.blacklistEntry &&
               !(!entry.whitelistEntry && listMode === 'white') &&
               ListModel.isDisclaimed() && (
-                <Button
-                  onClick={() => props.performAction('install', entry)}
-                  minimal
-                  small
-                >
+              <Button
+                onClick={() => props.performAction('install', entry)}
+                minimal
+                small
+              >
                   Install
-                </Button>
-              )}
+              </Button>
+            )}
             {ListModel.entryHasUpdate(entry) &&
               !entry.blacklistEntry &&
               !(!entry.whitelistEntry && listMode === 'white') &&
               ListModel.isDisclaimed() && (
-                <Button
-                  onClick={() => props.performAction('install', entry)}
-                  minimal
-                  small
-                >
+              <Button
+                onClick={() => props.performAction('install', entry)}
+                minimal
+                small
+              >
                   Update
-                </Button>
-              )}
+              </Button>
+            )}
             {entry.installed && (
               <Button
                 onClick={() => props.performAction('uninstall', entry)}
@@ -347,7 +347,7 @@ export namespace ListEntry {
  */
 export function ListView(props: ListView.IProperties): React.ReactElement<any> {
   const entryViews = [];
-  for (let entry of props.entries) {
+  for (const entry of props.entries) {
     entryViews.push(
       <ListEntry
         entry={entry}
@@ -451,8 +451,8 @@ namespace ErrorMessage {
  *
  */
 export class CollapsibleSection extends React.Component<
-  CollapsibleSection.IProperties,
-  CollapsibleSection.IState
+CollapsibleSection.IProperties,
+CollapsibleSection.IState
 > {
   constructor(props: CollapsibleSection.IProperties) {
     super(props);
@@ -622,8 +622,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         </div>
       ];
     }
-    let pages = Math.ceil(model.totalEntries / model.pagination);
-    let elements = [
+    const pages = Math.ceil(model.totalEntries / model.pagination);
+    const elements = [
       <SearchBar
         key="searchbar"
         placeholder="SEARCH"
@@ -734,7 +734,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     } else {
       // List installed and discovery sections
 
-      let installedContent = [];
+      const installedContent = [];
       if (model.installedError !== null) {
         installedContent.push(
           <ErrorMessage key="install-error">
@@ -781,7 +781,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         </CollapsibleSection>
       );
 
-      let searchContent = [];
+      const searchContent = [];
       if (model.searchError !== null) {
         searchContent.push(
           <ErrorMessage key="search-error">
@@ -865,16 +865,16 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   onAction(action: Action, entry: IEntry) {
     switch (action) {
-      case 'install':
-        return this.model!.install(entry);
-      case 'uninstall':
-        return this.model!.uninstall(entry);
-      case 'enable':
-        return this.model!.enable(entry);
-      case 'disable':
-        return this.model!.disable(entry);
-      default:
-        throw new Error(`Invalid action: ${action}`);
+    case 'install':
+      return this.model!.install(entry);
+    case 'uninstall':
+      return this.model!.uninstall(entry);
+    case 'enable':
+      return this.model!.enable(entry);
+    case 'disable':
+      return this.model!.disable(entry);
+    default:
+      throw new Error(`Invalid action: ${action}`);
     }
   }
 
@@ -890,15 +890,15 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'input':
-        this.onSearch(this.inputNode.value);
-        break;
-      case 'focus':
-      case 'blur':
-        this._toggleFocused();
-        break;
-      default:
-        break;
+    case 'input':
+      this.onSearch(this.inputNode.value);
+      break;
+    case 'focus':
+    case 'blur':
+      this._toggleFocused();
+      break;
+    default:
+      break;
     }
   }
 
@@ -925,7 +925,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   protected onActivateRequest(msg: Message): void {
     if (this.isAttached) {
-      let input = this.inputNode;
+      const input = this.inputNode;
       if (input) {
         input.focus();
         input.select();
@@ -937,7 +937,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    * Toggle the focused modifier based on the input node focus state.
    */
   private _toggleFocused(): void {
-    let focused = document.activeElement === this.inputNode;
+    const focused = document.activeElement === this.inputNode;
     this.toggleClass('lm-mod-focused', focused);
   }
 }

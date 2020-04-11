@@ -52,7 +52,7 @@ describe('@jupyterlab/notebook', () => {
         it('should save when clicked', async () => {
           const button = ToolbarItems.createSaveButton(panel);
           Widget.attach(button, document.body);
-          let promise = signalToPromise(context.fileChanged);
+          const promise = signalToPromise(context.fileChanged);
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await promise;

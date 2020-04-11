@@ -72,15 +72,16 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    */
   constructor(options: NotebookModel.IOptions = {}) {
     super(options.languagePreference, options.modelDB);
-    let factory = options.contentFactory || NotebookModel.defaultContentFactory;
+    const factory =
+      options.contentFactory || NotebookModel.defaultContentFactory;
     this.contentFactory = factory.clone(this.modelDB.view('cells'));
     this._cells = new CellList(this.modelDB, this.contentFactory);
     this._cells.changed.connect(this._onCellsChanged, this);
 
     // Handle initial metadata.
-    let metadata = this.modelDB.createMap('metadata');
+    const metadata = this.modelDB.createMap('metadata');
     if (!metadata.has('language_info')) {
-      let name = options.languagePreference || '';
+      const name = options.languagePreference || '';
       metadata.set('language_info', { name });
     }
     this._ensureMetadata();
@@ -125,7 +126,9 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel name of the document.
    */
   get defaultKernelName(): string {
-    let spec = this.metadata.get('kernelspec') as nbformat.IKernelspecMetadata;
+    const spec = this.metadata.get(
+      'kernelspec'
+    ) as nbformat.IKernelspecMetadata;
     return spec ? spec.name : '';
   }
 
@@ -140,7 +143,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * The default kernel language of the document.
    */
   get defaultKernelLanguage(): string {
-    let info = this.metadata.get(
+    const info = this.metadata.get(
       'language_info'
     ) as nbformat.ILanguageInfoMetadata;
     return info ? info.name : '';
@@ -154,7 +157,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     if (this.isDisposed) {
       return;
     }
-    let cells = this.cells;
+    const cells = this.cells;
     this._cells = null!;
     cells.dispose();
     super.dispose();
@@ -181,14 +184,14 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.INotebookContent {
-    let cells: nbformat.ICell[] = [];
+    const cells: nbformat.ICell[] = [];
     for (let i = 0; i < (this.cells?.length || 0); i++) {
-      let cell = this.cells.get(i);
+      const cell = this.cells.get(i);
       cells.push(cell.toJSON());
     }
     this._ensureMetadata();
-    let metadata = Object.create(null) as nbformat.INotebookMetadata;
-    for (let key of this.metadata.keys()) {
+    const metadata = Object.create(null) as nbformat.INotebookMetadata;
+    for (const key of this.metadata.keys()) {
       metadata[key] = JSON.parse(JSON.stringify(this.metadata.get(key)));
     }
     return {
@@ -206,21 +209,21 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Should emit a [contentChanged] signal.
    */
   fromJSON(value: nbformat.INotebookContent): void {
-    let cells: ICellModel[] = [];
-    let factory = this.contentFactory;
-    for (let cell of value.cells) {
+    const cells: ICellModel[] = [];
+    const factory = this.contentFactory;
+    for (const cell of value.cells) {
       switch (cell.cell_type) {
-        case 'code':
-          cells.push(factory.createCodeCell({ cell }));
-          break;
-        case 'markdown':
-          cells.push(factory.createMarkdownCell({ cell }));
-          break;
-        case 'raw':
-          cells.push(factory.createRawCell({ cell }));
-          break;
-        default:
-          continue;
+      case 'code':
+        cells.push(factory.createCodeCell({ cell }));
+        break;
+      case 'markdown':
+        cells.push(factory.createMarkdownCell({ cell }));
+        break;
+      case 'raw':
+        cells.push(factory.createRawCell({ cell }));
+        break;
+      default:
+        continue;
       }
     }
     this.cells.beginCompoundOperation();
@@ -268,8 +271,8 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
 
     // Update the metadata.
     this.metadata.clear();
-    let metadata = value.metadata;
-    for (let key in metadata) {
+    const metadata = value.metadata;
+    for (const key in metadata) {
       // orig_nbformat is not intended to be stored per spec.
       if (key === 'orig_nbformat') {
         continue;
@@ -290,7 +293,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
   initialize(): void {
     super.initialize();
     if (!this.cells.length) {
-      let factory = this.contentFactory;
+      const factory = this.contentFactory;
       this.cells.push(factory.createCodeCell({}));
     }
     this.cells.clearUndo();
@@ -304,20 +307,20 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
     change: IObservableList.IChangedArgs<ICellModel>
   ): void {
     switch (change.type) {
-      case 'add':
-        change.newValues.forEach(cell => {
-          cell.contentChanged.connect(this.triggerContentChange, this);
-        });
-        break;
-      case 'remove':
-        break;
-      case 'set':
-        change.newValues.forEach(cell => {
-          cell.contentChanged.connect(this.triggerContentChange, this);
-        });
-        break;
-      default:
-        break;
+    case 'add':
+      change.newValues.forEach(cell => {
+        cell.contentChanged.connect(this.triggerContentChange, this);
+      });
+      break;
+    case 'remove':
+      break;
+    case 'set':
+      change.newValues.forEach(cell => {
+        cell.contentChanged.connect(this.triggerContentChange, this);
+      });
+      break;
+    default:
+      break;
     }
     this.triggerContentChange();
   }
@@ -326,7 +329,7 @@ export class NotebookModel extends DocumentModel implements INotebookModel {
    * Make sure we have the required metadata fields.
    */
   private _ensureMetadata(): void {
-    let metadata = this.metadata;
+    const metadata = this.metadata;
     if (!metadata.has('language_info')) {
       metadata.set('language_info', { name: '' });
     }
@@ -466,15 +469,13 @@ export namespace NotebookModel {
      */
     createCell(type: nbformat.CellType, opts: CellModel.IOptions): ICellModel {
       switch (type) {
-        case 'code':
-          return this.createCodeCell(opts);
-          break;
-        case 'markdown':
-          return this.createMarkdownCell(opts);
-          break;
-        case 'raw':
-        default:
-          return this.createRawCell(opts);
+      case 'code':
+        return this.createCodeCell(opts);
+      case 'markdown':
+        return this.createMarkdownCell(opts);
+      case 'raw':
+      default:
+        return this.createRawCell(opts);
       }
     }
 

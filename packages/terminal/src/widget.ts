@@ -131,17 +131,17 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this._options[option] = value;
 
     switch (option) {
-      case 'shutdownOnClose': // Do not transmit to XTerm
-        break;
-      case 'theme':
-        this._term.setOption(
-          'theme',
-          Private.getXTermTheme(value as ITerminal.Theme)
-        );
-        break;
-      default:
-        this._term.setOption(option, value);
-        break;
+    case 'shutdownOnClose': // Do not transmit to XTerm
+      break;
+    case 'theme':
+      this._term.setOption(
+        'theme',
+        Private.getXTermTheme(value as ITerminal.Theme)
+      );
+      break;
+    default:
+      this._term.setOption(option, value);
+      break;
     }
 
     this._needsResize = true;
@@ -187,11 +187,11 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
   processMessage(msg: Message): void {
     super.processMessage(msg);
     switch (msg.type) {
-      case 'fit-request':
-        this.onFitRequest(msg);
-        break;
-      default:
-        break;
+    case 'fit-request':
+      this.onFitRequest(msg);
+      break;
+    default:
+      break;
     }
   }
 
@@ -243,7 +243,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * A message handler invoked on an `'fit-request'` message.
    */
   protected onFitRequest(msg: Message): void {
-    let resize = Widget.ResizeMessage.UnknownSize;
+    const resize = Widget.ResizeMessage.UnknownSize;
     MessageLoop.sendMessage(this, resize);
   }
 
@@ -303,16 +303,16 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     msg: TerminalNS.IMessage
   ): void {
     switch (msg.type) {
-      case 'stdout':
-        if (msg.content) {
-          this._term.write(msg.content[0] as string);
-        }
-        break;
-      case 'disconnect':
-        this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
-        break;
-      default:
-        break;
+    case 'stdout':
+      if (msg.content) {
+        this._term.write(msg.content[0] as string);
+      }
+      break;
+    case 'disconnect':
+      this._term.write('\r\n\r\n[Finished... Term Session]\r\n');
+      break;
+    default:
+      break;
     }
   }
 
@@ -335,7 +335,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Set the size of the terminal in the session.
    */
   private _setSessionSize(): void {
-    let content = [
+    const content = [
       this._term.rows,
       this._term.cols,
       this._offsetHeight,
@@ -362,7 +362,7 @@ namespace Private {
   /**
    * An incrementing counter for ids.
    */
-  export let id = 0;
+  export const id = 0;
 
   /**
    * The light terminal theme.
@@ -411,13 +411,13 @@ namespace Private {
     theme: ITerminal.Theme
   ): ITerminal.IThemeObject {
     switch (theme) {
-      case 'light':
-        return lightTheme;
-      case 'dark':
-        return darkTheme;
-      case 'inherit':
-      default:
-        return inheritTheme();
+    case 'light':
+      return lightTheme;
+    case 'dark':
+      return darkTheme;
+    case 'inherit':
+    default:
+      return inheritTheme();
     }
   }
 }

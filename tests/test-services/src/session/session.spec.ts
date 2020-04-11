@@ -99,7 +99,7 @@ describe('session', () => {
     it('should fail for wrong response status', async () => {
       const sessionModel = createSessionModel();
       const serverSettings = getRequestHandler(200, sessionModel);
-      let sessionPromise = SessionAPI.startSession(
+      const sessionPromise = SessionAPI.startSession(
         sessionModel as any,
         serverSettings
       );
@@ -109,7 +109,7 @@ describe('session', () => {
     it('should fail for error response status', async () => {
       const serverSettings = getRequestHandler(500, {});
       const sessionModel = createSessionModel();
-      let sessionPromise = SessionAPI.startSession(
+      const sessionPromise = SessionAPI.startSession(
         sessionModel as any,
         serverSettings
       );
@@ -120,7 +120,7 @@ describe('session', () => {
       const sessionModel = createSessionModel();
       (sessionModel as any).path = 1;
       const serverSettings = getRequestHandler(201, sessionModel);
-      let sessionPromise = SessionAPI.startSession(
+      const sessionPromise = SessionAPI.startSession(
         sessionModel as any,
         serverSettings
       );
@@ -136,11 +136,10 @@ describe('session', () => {
         notebook: { path: sessionModel.path }
       };
       const serverSettings = getRequestHandler(201, data);
-      let model = await SessionAPI.startSession(
+      const model = await SessionAPI.startSession(
         sessionModel as any,
         serverSettings
       );
-      console.log(model);
       expect(model.path).not.empty;
     });
   });

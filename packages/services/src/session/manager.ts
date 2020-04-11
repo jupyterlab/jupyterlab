@@ -101,8 +101,8 @@ export class SessionManager extends BaseManager implements Session.IManager {
    */
   connectTo(
     options: Omit<
-      Session.ISessionConnection.IOptions,
-      'connectToKernel' | 'serverSettings'
+    Session.ISessionConnection.IOptions,
+    'connectToKernel' | 'serverSettings'
     >
   ): Session.ISessionConnection {
     const sessionConnection = new SessionConnection({
@@ -155,8 +155,8 @@ export class SessionManager extends BaseManager implements Session.IManager {
   async startNew(
     createOptions: Session.ISessionOptions,
     connectOptions: Omit<
-      Session.ISessionConnection.IOptions,
-      'model' | 'connectToKernel' | 'serverSettings'
+    Session.ISessionConnection.IOptions,
+    'model' | 'connectToKernel' | 'serverSettings'
     > = {}
   ): Promise<Session.ISessionConnection> {
     const model = await startSession(createOptions, this.serverSettings);
@@ -228,13 +228,13 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * Find a session by path.
    */
   async findByPath(path: string): Promise<Session.IModel | undefined> {
-    for (let m of this._models.values()) {
+    for (const m of this._models.values()) {
       if (m.path === path) {
         return m;
       }
     }
     await this.refreshRunning();
-    for (let m of this._models.values()) {
+    for (const m of this._models.values()) {
       if (m.path === path) {
         return m;
       }

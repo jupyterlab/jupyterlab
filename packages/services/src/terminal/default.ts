@@ -141,11 +141,11 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
    */
   reconnect(): Promise<void> {
     this._errorIfDisposed();
-    let result = new PromiseDelegate<void>();
+    const result = new PromiseDelegate<void>();
 
     // Set up a listener for the connection status changing, which accepts or
     // rejects after the retries are done.
-    let fulfill = (sender: this, status: Terminal.ConnectionStatus) => {
+    const fulfill = (sender: this, status: Terminal.ConnectionStatus) => {
       if (status === 'connected') {
         result.resolve();
         this.connectionStatusChanged.disconnect(fulfill, this);
@@ -185,7 +185,7 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
       // attemps should pick a random number in a growing range so that we
       // don't overload the server with synchronized reconnection attempts
       // across multiple kernels.
-      let timeout = Private.getRandomIntInclusive(
+      const timeout = Private.getRandomIntInclusive(
         0,
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
@@ -364,8 +364,8 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
 
   private _connectionStatus: Terminal.ConnectionStatus = 'connecting';
   private _connectionStatusChanged = new Signal<
-    this,
-    Terminal.ConnectionStatus
+  this,
+  Terminal.ConnectionStatus
   >(this);
   private _isDisposed = false;
   private _disposed = new Signal<this, void>(this);

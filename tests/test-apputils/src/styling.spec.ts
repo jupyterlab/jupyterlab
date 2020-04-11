@@ -13,18 +13,18 @@ describe('@jupyterlab/apputils', () => {
   describe('Styling', () => {
     describe('.styleNode()', () => {
       it('should style descendant nodes for select, input and button', () => {
-        let vnode = h.div({}, [h.button(), h.select(), h.input()]);
-        let node = VirtualDOM.realize(vnode);
+        const vnode = h.div({}, [h.button(), h.select(), h.input()]);
+        const node = VirtualDOM.realize(vnode);
         Styling.styleNode(node);
         expect(node.querySelectorAll('.jp-mod-styled').length).to.equal(3);
       });
 
       it('should wrap a select node', () => {
-        let parent = document.createElement('div');
-        let select = document.createElement('select');
+        const parent = document.createElement('div');
+        const select = document.createElement('select');
         parent.appendChild(select);
         Styling.styleNode(parent);
-        let wrapper = parent.firstChild as HTMLElement;
+        const wrapper = parent.firstChild as HTMLElement;
         expect(wrapper.className).to.equal('jp-select-wrapper');
         expect(select.parentElement).to.equal(wrapper);
         expect(select.className).to.equal('jp-mod-styled');
@@ -41,14 +41,14 @@ describe('@jupyterlab/apputils', () => {
 
     describe('.styleNodeByTag()', () => {
       it('should style descendant nodes for the given tag', () => {
-        let vnode = h.div({}, [h.span(), h.div({}, h.span())]);
-        let node = VirtualDOM.realize(vnode);
+        const vnode = h.div({}, [h.span(), h.div({}, h.span())]);
+        const node = VirtualDOM.realize(vnode);
         Styling.styleNodeByTag(node, 'span');
         expect(node.querySelectorAll('.jp-mod-styled').length).to.equal(2);
       });
 
       it('should style the node itself', () => {
-        let div = document.createElement('div');
+        const div = document.createElement('div');
         Styling.styleNodeByTag(div, 'div');
         expect(div.className).to.contain('jp-mod-styled');
       });
@@ -56,8 +56,8 @@ describe('@jupyterlab/apputils', () => {
 
     describe('.wrapSelect()', () => {
       it('should wrap the select node', () => {
-        let select = document.createElement('select');
-        let wrapper = Styling.wrapSelect(select);
+        const select = document.createElement('select');
+        const wrapper = Styling.wrapSelect(select);
         expect(wrapper.className).to.equal('jp-select-wrapper');
         expect(select.parentElement).to.equal(wrapper);
         expect(select.className).to.equal('jp-mod-styled');

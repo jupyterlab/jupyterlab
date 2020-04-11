@@ -113,7 +113,7 @@ export interface IWidgetTracker<T extends Widget = Widget> extends IDisposable {
  * internally by plugins to restore state as well.
  */
 export class WidgetTracker<T extends Widget = Widget>
-  implements IWidgetTracker<T>, IRestorable<T> {
+implements IWidgetTracker<T>, IRestorable<T> {
   /**
    * Create a new widget tracker.
    *

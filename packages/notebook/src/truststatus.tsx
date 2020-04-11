@@ -85,7 +85,7 @@ namespace NotebookTrustComponent {
  * The NotebookTrust status item.
  */
 export class NotebookTrustStatus extends VDomRenderer<
-  NotebookTrustStatus.Model
+NotebookTrustStatus.Model
 > {
   /**
    * Construct a new status item.
@@ -227,9 +227,9 @@ export namespace NotebookTrustStatus {
       if (model === null) {
         return { total: 0, trusted: 0 };
       }
-      let cells = toArray(model.cells);
+      const cells = toArray(model.cells);
 
-      let trusted = cells.reduce((accum, current) => {
+      const trusted = cells.reduce((accum, current) => {
         if (current.trusted) {
           return accum + 1;
         } else {
@@ -237,7 +237,7 @@ export namespace NotebookTrustStatus {
         }
       }, 0);
 
-      let total = cells.length;
+      const total = cells.length;
 
       return {
         total,

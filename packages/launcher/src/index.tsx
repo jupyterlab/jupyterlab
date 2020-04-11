@@ -87,7 +87,7 @@ export class LauncherModel extends VDomModel implements ILauncher {
    */
   add(options: ILauncher.IItemOptions): IDisposable {
     // Create a copy of the options to circumvent mutations to the original.
-    let item = Private.createItem(options);
+    const item = Private.createItem(options);
 
     this._items.push(item);
     this.stateChanged.emit(void 0);
@@ -154,16 +154,16 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     }
 
     // First group-by categories
-    let categories = Object.create(null);
+    const categories = Object.create(null);
     each(this.model.items(), (item, index) => {
-      let cat = item.category || 'Other';
+      const cat = item.category || 'Other';
       if (!(cat in categories)) {
         categories[cat] = [];
       }
       categories[cat].push(item);
     });
     // Within each category sort by rank
-    for (let cat in categories) {
+    for (const cat in categories) {
       categories[cat] = categories[cat].sort(
         (a: ILauncher.IItemOptions, b: ILauncher.IItemOptions) => {
           return Private.sortCmp(a, b, this._cwd, this._commands);
@@ -172,16 +172,16 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     }
 
     // Variable to help create sections
-    let sections: React.ReactElement<any>[] = [];
+    const sections: React.ReactElement<any>[] = [];
     let section: React.ReactElement<any>;
 
     // Assemble the final ordered list of categories, beginning with
     // KNOWN_CATEGORIES.
-    let orderedCategories: string[] = [];
+    const orderedCategories: string[] = [];
     each(KNOWN_CATEGORIES, (cat, index) => {
       orderedCategories.push(cat);
     });
-    for (let cat in categories) {
+    for (const cat in categories) {
       if (KNOWN_CATEGORIES.indexOf(cat) === -1) {
         orderedCategories.push(cat);
       }
@@ -370,7 +370,7 @@ function Card(
   const title = kernel ? label : caption || label;
 
   // Build the onclick handler.
-  let onclick = () => {
+  const onclick = () => {
     // If an item has already been launched,
     // don't try to launch another.
     if (launcher.pending === true) {
@@ -397,7 +397,7 @@ function Card(
 
   // With tabindex working, you can now pick a kernel by tabbing around and
   // pressing Enter.
-  let onkeypress = (event: React.KeyboardEvent) => {
+  const onkeypress = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
       onclick();
     }
@@ -457,8 +457,8 @@ namespace Private {
    * An attached property for an item's key.
    */
   export const keyProperty = new AttachedProperty<
-    ILauncher.IItemOptions,
-    number
+  ILauncher.IItemOptions,
+  number
   >({
     name: 'key',
     create: () => id++
@@ -487,8 +487,8 @@ namespace Private {
     commands: CommandRegistry
   ): number {
     // First, compare by rank.
-    let r1 = a.rank;
-    let r2 = b.rank;
+    const r1 = a.rank;
+    const r2 = b.rank;
     if (r1 !== r2 && r1 !== undefined && r2 !== undefined) {
       return r1 < r2 ? -1 : 1; // Infinity safe
     }

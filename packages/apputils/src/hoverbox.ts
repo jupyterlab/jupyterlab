@@ -133,10 +133,10 @@ export namespace HoverBox {
       privilege === 'forceAbove'
         ? false
         : privilege === 'forceBelow'
-        ? true
-        : privilege === 'above'
-        ? spaceAbove < maxHeight && spaceAbove < spaceBelow
-        : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
+          ? true
+          : privilege === 'above'
+            ? spaceAbove < maxHeight && spaceAbove < spaceBelow
+            : spaceBelow >= maxHeight || spaceBelow >= spaceAbove;
 
     if (renderBelow) {
       maxHeight = Math.min(spaceBelow - marginTop, maxHeight);
@@ -187,7 +187,7 @@ export namespace HoverBox {
     }
 
     // Move left to fit in the window.
-    let right = node.getBoundingClientRect().right;
+    const right = node.getBoundingClientRect().right;
     if (right > window.innerWidth) {
       left -= right - window.innerWidth;
       node.style.left = `${Math.ceil(left)}px`;

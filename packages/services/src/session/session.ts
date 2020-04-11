@@ -36,12 +36,12 @@ export interface ISessionConnection extends IObservableDisposable {
    * A signal emitted when the kernel changes.
    */
   kernelChanged: ISignal<
-    this,
-    IChangedArgs<
-      Kernel.IKernelConnection | null,
-      Kernel.IKernelConnection | null,
-      'kernel'
-    >
+  this,
+  IChangedArgs<
+  Kernel.IKernelConnection | null,
+  Kernel.IKernelConnection | null,
+  'kernel'
+  >
   >;
 
   /**
@@ -212,8 +212,8 @@ export namespace ISessionConnection {
      * Kernel connection options
      */
     kernelConnectionOptions?: Omit<
-      Kernel.IKernelConnection.IOptions,
-      'model' | 'username' | 'clientId' | 'serverSettings'
+    Kernel.IKernelConnection.IOptions,
+    'model' | 'username' | 'clientId' | 'serverSettings'
     >;
   }
 
@@ -221,9 +221,9 @@ export namespace ISessionConnection {
    * An arguments object for the kernel changed signal.
    */
   export type IKernelChangedArgs = IChangedArgs<
-    Kernel.IKernelConnection | null,
-    Kernel.IKernelConnection | null,
-    'kernel'
+  Kernel.IKernelConnection | null,
+  Kernel.IKernelConnection | null,
+  'kernel'
   >;
 }
 
@@ -282,8 +282,8 @@ export interface IManager extends IDisposable {
   startNew(
     createOptions: ISessionOptions,
     connectOptions?: Omit<
-      ISessionConnection.IOptions,
-      'model' | 'connectToKernel' | 'serverSettings'
+    ISessionConnection.IOptions,
+    'model' | 'connectToKernel' | 'serverSettings'
     >
   ): Promise<ISessionConnection>;
 
@@ -316,8 +316,8 @@ export interface IManager extends IDisposable {
    */
   connectTo(
     options: Omit<
-      ISessionConnection.IOptions,
-      'connectToKernel' | 'serverSettings'
+    ISessionConnection.IOptions,
+    'connectToKernel' | 'serverSettings'
     >
   ): ISessionConnection;
 

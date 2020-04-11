@@ -108,7 +108,7 @@ const main: JupyterFrontEndPlugin<void> = {
     // will short-circuit and ask the user to navigate away.
     const workspace = resolver.name;
 
-    console.log(`Starting application in workspace: "${workspace}"`);
+    console.debug(`Starting application in workspace: "${workspace}"`);
 
     // If there were errors registering plugins, tell the user.
     if (app.registerPluginErrors.length !== 0) {
@@ -522,22 +522,22 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
     widget: Widget
   ): DockLayout.ITabAreaConfig | null => {
     switch (area.type) {
-      case 'split-area':
-        const iterator = iter(area.children);
-        let tab: DockLayout.ITabAreaConfig | null = null;
-        let value: DockLayout.AreaConfig | undefined;
-        do {
-          value = iterator.next();
-          if (value) {
-            tab = findTab(value, widget);
-          }
-        } while (!tab && value);
-        return tab;
-      case 'tab-area':
-        const { id } = widget;
-        return area.widgets.some(widget => widget.id === id) ? area : null;
-      default:
-        return null;
+    case 'split-area':
+      const iterator = iter(area.children);
+      let tab: DockLayout.ITabAreaConfig | null = null;
+      let value: DockLayout.AreaConfig | undefined;
+      do {
+        value = iterator.next();
+        if (value) {
+          tab = findTab(value, widget);
+        }
+      } while (!tab && value);
+      return tab;
+    case 'tab-area':
+      const { id } = widget;
+      return area.widgets.some(widget => widget.id === id) ? area : null;
+    default:
+      return null;
     }
   };
 
@@ -547,7 +547,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
     if (!mainArea || mainArea.mode !== 'multiple-document') {
       return null;
     }
-    let area = mainArea.dock?.main;
+    const area = mainArea.dock?.main;
     if (!area) {
       return null;
     }

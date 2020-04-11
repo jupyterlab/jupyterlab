@@ -48,9 +48,9 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       modelFactory,
       sessionContext
     } = options;
-    let contentFactory = (this.contentFactory =
+    const contentFactory = (this.contentFactory =
       options.contentFactory || ConsolePanel.defaultContentFactory);
-    let count = Private.count++;
+    const count = Private.count++;
     if (!path) {
       path = `${basePath || ''}/console-${count}-${UUID.uuid4()}`;
     }
@@ -67,7 +67,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
         setBusy: options.setBusy
       });
 
-    let resolver = new RenderMimeRegistry.UrlResolver({
+    const resolver = new RenderMimeRegistry.UrlResolver({
       session: sessionContext,
       contents: manager.contents
     });
@@ -130,7 +130,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    let prompt = this.console.promptCell;
+    const prompt = this.console.promptCell;
     if (prompt) {
       prompt.editor.focus();
     }
@@ -283,7 +283,7 @@ namespace Private {
   /**
    * The counter for new consoles.
    */
-  export let count = 1;
+  export const count = 1;
 
   /**
    * Update the title of a console panel.
@@ -293,7 +293,7 @@ namespace Private {
     connected: Date | null,
     executed: Date | null
   ) {
-    let sessionContext = panel.console.sessionContext.session;
+    const sessionContext = panel.console.sessionContext.session;
     if (sessionContext) {
       let caption =
         `Name: ${sessionContext.name}\n` +

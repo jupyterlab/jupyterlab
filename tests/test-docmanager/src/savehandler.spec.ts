@@ -104,7 +104,7 @@ describe('docregistry/savehandler', () => {
       });
 
       it('should trigger a save', () => {
-        let promise = signalToPromise(context.fileChanged);
+        const promise = signalToPromise(context.fileChanged);
         context.model.fromString('bar');
         expect(handler.isActive).to.equal(false);
         handler.saveInterval = 1;
@@ -116,7 +116,7 @@ describe('docregistry/savehandler', () => {
         let called = 0;
         // Lower the duration multiplier.
         (handler as any)._multiplier = 1;
-        let promise = testEmission(context.fileChanged, {
+        const promise = testEmission(context.fileChanged, {
           test: () => {
             if (called === 0) {
               context.model.fromString('bar');

@@ -45,7 +45,7 @@ describe('apputils', () => {
           first: ready.promise,
           registry: new CommandRegistry()
         });
-        let promise = restorer.restored;
+        const promise = restorer.restored;
         ready.resolve(void 0);
         await promise;
       });

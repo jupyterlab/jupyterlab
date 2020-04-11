@@ -115,24 +115,24 @@ export class Tooltip extends Widget {
     const target = event.target as HTMLElement;
 
     switch (event.type) {
-      case 'keydown':
-        if (node.contains(target)) {
-          return;
-        }
-        this.dispose();
-        break;
-      case 'mousedown':
-        if (node.contains(target)) {
-          this.activate();
-          return;
-        }
-        this.dispose();
-        break;
-      case 'scroll':
-        this._evtScroll(event as MouseEvent);
-        break;
-      default:
-        break;
+    case 'keydown':
+      if (node.contains(target)) {
+        return;
+      }
+      this.dispose();
+      break;
+    case 'mousedown':
+      if (node.contains(target)) {
+        this.activate();
+        return;
+      }
+      this.dispose();
+      break;
+    case 'scroll':
+      this._evtScroll(event as MouseEvent);
+      break;
+    default:
+      break;
     }
   }
 

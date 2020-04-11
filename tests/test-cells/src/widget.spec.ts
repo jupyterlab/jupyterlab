@@ -535,7 +535,7 @@ describe('cells/widget', () => {
     describe('#loadScrolledState()', () => {
       it('should load the output scrolled state from the model', () => {
         const model = new CodeCellModel({});
-        let widget = new CodeCell({ model, rendermime });
+        const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputsScrolled).toEqual(false);
 
@@ -552,7 +552,7 @@ describe('cells/widget', () => {
     describe('#saveScrolledState()', () => {
       it('should save the collapse state to the model', () => {
         const model = new CodeCellModel({});
-        let widget = new CodeCell({ model, rendermime });
+        const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputsScrolled).toEqual(false);
 
@@ -570,7 +570,7 @@ describe('cells/widget', () => {
     describe('#syncScrolled', () => {
       it('should control automatic syncing of scrolled state with model', () => {
         const model = new CodeCellModel({});
-        let widget = new CodeCell({ model, rendermime });
+        const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.syncScrolled).toEqual(false);
         expect(widget.outputsScrolled).toEqual(false);
@@ -603,7 +603,7 @@ describe('cells/widget', () => {
     describe('#loadCollapseState()', () => {
       it('should load the output collapse state from the model', () => {
         const model = new CodeCellModel({});
-        let widget = new CodeCell({ model, rendermime });
+        const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         widget.loadCollapseState();
         expect(widget.outputHidden).toEqual(false);
@@ -621,7 +621,7 @@ describe('cells/widget', () => {
     describe('#saveCollapseState()', () => {
       it('should save the collapse state to the model `collapsed` metadata', () => {
         const model = new CodeCellModel({});
-        let widget = new CodeCell({ model, rendermime });
+        const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.outputHidden).toEqual(false);
 
@@ -645,7 +645,7 @@ describe('cells/widget', () => {
     describe('#syncCollapse', () => {
       it('should control automatic syncing of collapse state with model', () => {
         const model = new CodeCellModel({});
-        let widget = new CodeCell({ model, rendermime });
+        const widget = new CodeCell({ model, rendermime });
         widget.initializeState();
         expect(widget.syncCollapse).toEqual(false);
         expect(widget.outputHidden).toEqual(false);
@@ -732,11 +732,7 @@ describe('cells/widget', () => {
       it('should fulfill a promise if there is no code to execute', async () => {
         const widget = new CodeCell({ model, rendermime, contentFactory });
         widget.initializeState();
-        try {
-          await CodeCell.execute(widget, sessionContext);
-        } catch (error) {
-          throw error;
-        }
+        await CodeCell.execute(widget, sessionContext);
       });
 
       it('should fulfill a promise if there is code to execute', async () => {
@@ -783,7 +779,7 @@ describe('cells/widget', () => {
         expect(widget.promptNode.textContent).toEqual('[*]:');
         await expect(future1).rejects.toThrow('Canceled');
         expect(widget.promptNode.textContent).toEqual('[*]:');
-        let msg = await future2;
+        const msg = await future2;
         expect(msg).not.toBeUndefined;
 
         // The `if` is a Typescript type guard so that msg.content works below.

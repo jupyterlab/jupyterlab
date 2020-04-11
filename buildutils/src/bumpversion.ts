@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -81,7 +81,7 @@ commander
     if (opts.force) {
       cmd += ' --yes';
     }
-    let oldVersion = utils.run(
+    const oldVersion = utils.run(
       'git rev-parse HEAD',
       {
         stdio: 'pipe',
@@ -100,7 +100,7 @@ commander
       utils.run(cmd);
     }
 
-    let newVersion = utils.run(
+    const newVersion = utils.run(
       'git rev-parse HEAD',
       {
         stdio: 'pipe',

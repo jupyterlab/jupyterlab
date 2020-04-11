@@ -30,7 +30,7 @@ describe('kernel/manager', () => {
   });
 
   afterAll(async () => {
-    let models = await KernelAPI.listRunning();
+    const models = await KernelAPI.listRunning();
     await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
   });
 
@@ -130,7 +130,7 @@ describe('kernel/manager', () => {
         manager.runningChanged.connect(() => {
           called = true;
         });
-        let kernel = await manager.startNew();
+        const kernel = await manager.startNew();
         await kernel.info;
         expect(called).to.equal(true);
       });

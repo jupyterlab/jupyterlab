@@ -31,9 +31,9 @@ export namespace Clipboard {
    * This can only be called in response to a user input event.
    */
   export function copyToSystem(clipboardData: ClipboardData): void {
-    let node = document.body;
-    let handler = (event: ClipboardEvent) => {
-      let data = event.clipboardData || (window as any).clipboardData;
+    const node = document.body;
+    const handler = (event: ClipboardEvent) => {
+      const data = event.clipboardData || (window as any).clipboardData;
       if (typeof clipboardData === 'string') {
         data.setData('text', clipboardData);
       } else {
@@ -69,13 +69,13 @@ export namespace Clipboard {
     let sel = window.getSelection();
 
     // Save the current selection.
-    let savedRanges: any[] = [];
+    const savedRanges: any[] = [];
     for (let i = 0, len = sel?.rangeCount || 0; i < len; ++i) {
       savedRanges[i] = sel!.getRangeAt(i).cloneRange();
     }
 
     // Select the node content.
-    let range = document.createRange();
+    const range = document.createRange();
     range.selectNodeContents(node);
     if (sel) {
       sel.removeAllRanges();
@@ -103,5 +103,5 @@ namespace Private {
   /**
    * The application clipboard instance.
    */
-  export let instance = new MimeData();
+  export const instance = new MimeData();
 }

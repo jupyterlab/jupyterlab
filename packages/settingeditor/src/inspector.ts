@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -55,9 +55,9 @@ export function createInspector(
  * multiple client objects can lead to missed fetch responses.
  */
 class InspectorConnector extends DataConnector<
-  InspectionHandler.IReply,
-  void,
-  InspectionHandler.IRequest
+InspectionHandler.IReply,
+void,
+InspectionHandler.IRequest
 > {
   constructor(editor: RawEditor) {
     super();
@@ -125,16 +125,16 @@ namespace Private {
    */
   function renderError(error: ISchemaValidator.IError): string {
     switch (error.keyword) {
-      case 'additionalProperties':
-        return `**\`[additional property error]\`**
+    case 'additionalProperties':
+      return `**\`[additional property error]\`**
           \`${error.params?.additionalProperty}\` is not a valid property`;
-      case 'syntax':
-        return `**\`[syntax error]\`** *${error.message}*`;
-      case 'type':
-        return `**\`[type error]\`**
+    case 'syntax':
+      return `**\`[syntax error]\`** *${error.message}*`;
+    case 'type':
+      return `**\`[type error]\`**
           \`${error.dataPath}\` ${error.message}`;
-      default:
-        return `**\`[error]\`** *${error.message}*`;
+    default:
+      return `**\`[error]\`** *${error.message}*`;
     }
   }
 }

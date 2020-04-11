@@ -22,16 +22,16 @@ export class AddWidget extends Widget {
    * Create input box with icon and attach to this.node.
    */
   buildTag() {
-    let text = document.createElement('input');
+    const text = document.createElement('input');
     text.value = 'Add Tag';
     text.contentEditable = 'true';
     text.className = 'add-tag';
     text.style.width = '49px';
     this.input = text;
-    let tag = document.createElement('div');
+    const tag = document.createElement('div');
     tag.className = 'tag-holder';
     tag.appendChild(text);
-    let iconContainer = addIcon.element({
+    const iconContainer = addIcon.element({
       tag: 'span',
       elementPosition: 'center',
       height: '18px',
@@ -76,20 +76,20 @@ export class AddWidget extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'mousedown':
-        this._evtMouseDown(event as MouseEvent);
-        break;
-      case 'keydown':
-        this._evtKeyDown(event as KeyboardEvent);
-        break;
-      case 'blur':
-        this._evtBlur();
-        break;
-      case 'focus':
-        this._evtFocus();
-        break;
-      default:
-        break;
+    case 'mousedown':
+      this._evtMouseDown(event as MouseEvent);
+      break;
+    case 'keydown':
+      this._evtKeyDown(event as KeyboardEvent);
+      break;
+    case 'blur':
+      this._evtBlur();
+      break;
+    case 'focus':
+      this._evtFocus();
+      break;
+    default:
+      break;
     }
   }
 
@@ -105,7 +105,7 @@ export class AddWidget extends Widget {
       this.input.focus();
     } else if (event.target !== this.input) {
       if (this.input.value !== '') {
-        let value = this.input.value;
+        const value = this.input.value;
         (this.parent as TagTool).addTag(value);
         this.input.blur();
         this._evtBlur();
@@ -129,7 +129,7 @@ export class AddWidget extends Widget {
    * @param event - The DOM event sent to the widget
    */
   private _evtKeyDown(event: KeyboardEvent) {
-    let tmp = document.createElement('span');
+    const tmp = document.createElement('span');
     tmp.className = 'add-tag';
     tmp.innerHTML = this.input.value;
     // set width to the pixel length of the text
@@ -138,7 +138,7 @@ export class AddWidget extends Widget {
     document.body.removeChild(tmp);
     // if they hit Enter, add the tag and reset state
     if (event.keyCode === 13) {
-      let value = this.input.value;
+      const value = this.input.value;
       (this.parent as TagTool).addTag(value);
       this.input.blur();
       this._evtBlur();

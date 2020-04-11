@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -45,7 +45,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
 
     // Add the initial factories.
     if (options.initialFactories) {
-      for (let factory of options.initialFactories) {
+      for (const factory of options.initialFactories) {
         this.addFactory(factory);
       }
     }
@@ -97,7 +97,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
   ): string | undefined {
     // Try to find a safe factory first, if preferred.
     if (safe === 'ensure' || safe === 'prefer') {
-      for (let mt of this.mimeTypes) {
+      for (const mt of this.mimeTypes) {
         if (mt in bundle && this._factories[mt].safe) {
           return mt;
         }
@@ -106,7 +106,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
 
     if (safe !== 'ensure') {
       // Otherwise, search for the best factory among all factories.
-      for (let mt of this.mimeTypes) {
+      for (const mt of this.mimeTypes) {
         if (mt in bundle) {
           return mt;
         }
@@ -162,7 +162,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    */
   clone(options: IRenderMimeRegistry.ICloneOptions = {}): RenderMimeRegistry {
     // Create the clone.
-    let clone = new RenderMimeRegistry({
+    const clone = new RenderMimeRegistry({
       resolver: options.resolver || this.resolver || undefined,
       sanitizer: options.sanitizer || this.sanitizer || undefined,
       linkHandler: options.linkHandler || this.linkHandler || undefined,
@@ -211,7 +211,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
         rank = 100;
       }
     }
-    for (let mt of factory.mimeTypes) {
+    for (const mt of factory.mimeTypes) {
       this._factories[mt] = factory;
       this._ranks[mt] = { rank, id: this._id++ };
     }
@@ -237,7 +237,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    * @returns The rank of the mime type or undefined.
    */
   getRank(mimeType: string): number | undefined {
-    let rank = this._ranks[mimeType];
+    const rank = this._ranks[mimeType];
     return rank && rank.rank;
   }
 
@@ -255,7 +255,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
     if (!this._ranks[mimeType]) {
       return;
     }
-    let id = this._id++;
+    const id = this._id++;
     this._ranks[mimeType] = { rank, id };
     this._types = null;
   }
@@ -435,8 +435,8 @@ namespace Private {
    */
   export function sortedTypes(map: RankMap): string[] {
     return Object.keys(map).sort((a, b) => {
-      let p1 = map[a];
-      let p2 = map[b];
+      const p1 = map[a];
+      const p2 = map[b];
       if (p1.rank !== p2.rank) {
         return p1.rank - p2.rank;
       }

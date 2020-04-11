@@ -51,9 +51,9 @@ export namespace ICompletionManager {
      * The data connector used to populate the completer.
      */
     connector: IDataConnector<
-      CompletionHandler.IReply,
-      void,
-      CompletionHandler.IRequest
+    CompletionHandler.IReply,
+    void,
+    CompletionHandler.IRequest
     >;
   }
 

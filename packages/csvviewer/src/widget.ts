@@ -242,8 +242,8 @@ export class CSVViewer extends Widget {
   constructor(options: CSVViewer.IOptions) {
     super();
 
-    let context = (this._context = options.context);
-    let layout = (this.layout = new PanelLayout());
+    const context = (this._context = options.context);
+    const layout = (this.layout = new PanelLayout());
 
     this.addClass(CSV_CLASS);
 
@@ -365,9 +365,9 @@ export class CSVViewer extends Widget {
    * Create the model for the grid.
    */
   private _updateGrid(): void {
-    let data: string = this._context.model.toString();
-    let delimiter = this._delimiter;
-    let oldModel = this._grid.dataModel as DSVModel;
+    const data: string = this._context.model.toString();
+    const delimiter = this._delimiter;
+    const oldModel = this._grid.dataModel as DSVModel;
     const dataModel = (this._grid.dataModel = new DSVModel({
       data,
       delimiter
@@ -405,8 +405,8 @@ export class CSVViewer extends Widget {
   private _grid: DataGrid;
   private _searchService: GridSearchService;
   private _monitor: ActivityMonitor<
-    DocumentRegistry.IModel,
-    void
+  DocumentRegistry.IModel,
+  void
   > | null = null;
   private _delimiter = ',';
   private _revealed = new PromiseDelegate<void>();
@@ -454,7 +454,7 @@ export class CSVDocumentWidget extends DocumentWidget<CSVViewer> {
    * Set URI fragment identifier for rows
    */
   setFragment(fragment: string): void {
-    let parseFragments = fragment.split('=');
+    const parseFragments = fragment.split('=');
 
     // TODO: expand to allow columns and cells to be selected
     // reference: https://tools.ietf.org/html/rfc7111#section-3
@@ -499,7 +499,7 @@ namespace Private {
  * A widget factory for CSV widgets.
  */
 export class CSVViewerFactory extends ABCWidgetFactory<
-  IDocumentWidget<CSVViewer>
+IDocumentWidget<CSVViewer>
 > {
   /**
    * Create a new widget given a context.
@@ -515,7 +515,7 @@ export class CSVViewerFactory extends ABCWidgetFactory<
  * A widget factory for TSV widgets.
  */
 export class TSVViewerFactory extends ABCWidgetFactory<
-  IDocumentWidget<CSVViewer>
+IDocumentWidget<CSVViewer>
 > {
   /**
    * Create a new widget given a context.

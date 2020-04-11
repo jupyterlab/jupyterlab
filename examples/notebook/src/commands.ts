@@ -233,7 +233,7 @@ export const SetupCommands = (
     cmdIds.redo
   ].forEach(command => palette.addItem({ command, category }));
 
-  let bindings = [
+  const bindings = [
     {
       selector: '.jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled',
       keys: ['Tab'],

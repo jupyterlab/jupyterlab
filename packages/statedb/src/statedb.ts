@@ -31,16 +31,16 @@ export class StateDB<
         const { contents, type } = transformation;
 
         switch (type) {
-          case 'cancel':
-            return;
-          case 'clear':
-            return this._clear();
-          case 'merge':
-            return this._merge(contents || {});
-          case 'overwrite':
-            return this._overwrite(contents || {});
-          default:
-            return;
+        case 'cancel':
+          return;
+        case 'clear':
+          return this._clear();
+        case 'merge':
+          return this._merge(contents || {});
+        case 'overwrite':
+          return this._overwrite(contents || {});
+        default:
+          return;
         }
       });
     }

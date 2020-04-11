@@ -69,7 +69,7 @@ export class JSONEditor extends Widget {
     this.node.appendChild(this.headerNode);
     this.node.appendChild(this.editorHostNode);
 
-    let model = new CodeEditor.Model();
+    const model = new CodeEditor.Model();
 
     model.value.text = 'No data!';
     model.mimeType = 'application/json';
@@ -149,14 +149,14 @@ export class JSONEditor extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'blur':
-        this._evtBlur(event as FocusEvent);
-        break;
-      case 'click':
-        this._evtClick(event as MouseEvent);
-        break;
-      default:
-        break;
+    case 'blur':
+      this._evtBlur(event as FocusEvent);
+      break;
+    case 'click':
+      this._evtClick(event as MouseEvent);
+      break;
+    default:
+      break;
     }
   }
 
@@ -164,7 +164,7 @@ export class JSONEditor extends Widget {
    * Handle `after-attach` messages for the widget.
    */
   protected onAfterAttach(msg: Message): void {
-    let node = this.editorHostNode;
+    const node = this.editorHostNode;
     node.addEventListener('blur', this, true);
     node.addEventListener('click', this, true);
     this.revertButtonNode.hidden = true;
@@ -193,7 +193,7 @@ export class JSONEditor extends Widget {
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    let node = this.editorHostNode;
+    const node = this.editorHostNode;
     node.removeEventListener('blur', this, true);
     node.removeEventListener('click', this, true);
     this.headerNode.removeEventListener('click', this);
@@ -222,7 +222,7 @@ export class JSONEditor extends Widget {
   private _onValueChanged(): void {
     let valid = true;
     try {
-      let value = JSON.parse(this.editor.model.value.text);
+      const value = JSON.parse(this.editor.model.value.text);
       this.removeClass(ERROR_CLASS);
       this._inputDirty =
         !this._changeGuard && !JSONExt.deepEqual(value, this._originalValue);
@@ -249,7 +249,7 @@ export class JSONEditor extends Widget {
    * Handle click events for the buttons.
    */
   private _evtClick(event: MouseEvent): void {
-    let target = event.target as HTMLElement;
+    const target = event.target as HTMLElement;
     if (this.revertButtonNode.contains(target)) {
       this._setValue();
     } else if (this.commitButtonNode.contains(target)) {
@@ -268,23 +268,23 @@ export class JSONEditor extends Widget {
    * Merge the user content.
    */
   private _mergeContent(): void {
-    let model = this.editor.model;
-    let old = this._originalValue;
-    let user = JSON.parse(model.value.text) as JSONObject;
-    let source = this.source;
+    const model = this.editor.model;
+    const old = this._originalValue;
+    const user = JSON.parse(model.value.text) as JSONObject;
+    const source = this.source;
     if (!source) {
       return;
     }
 
     // If it is in user and has changed from old, set in new.
-    for (let key in user) {
+    for (const key in user) {
       if (!JSONExt.deepEqual(user[key], old[key] || null)) {
         source.set(key, user[key]);
       }
     }
 
     // If it was in old and is not in user, remove from source.
-    for (let key in old) {
+    for (const key in old) {
       if (!(key in user)) {
         source.delete(key);
       }
@@ -300,14 +300,14 @@ export class JSONEditor extends Widget {
     this.revertButtonNode.hidden = true;
     this.commitButtonNode.hidden = true;
     this.removeClass(ERROR_CLASS);
-    let model = this.editor.model;
-    let content = this._source ? this._source.toJSON() : {};
+    const model = this.editor.model;
+    const content = this._source ? this._source.toJSON() : {};
     this._changeGuard = true;
     if (content === void 0) {
       model.value.text = 'No data!';
       this._originalValue = JSONExt.emptyObject;
     } else {
-      let value = JSON.stringify(content, null, 4);
+      const value = JSON.stringify(content, null, 4);
       model.value.text = value;
       this._originalValue = content;
       // Move the cursor to within the brace.

@@ -74,7 +74,7 @@ class TestHandler extends ForeignHandler {
       ) {
         this.rejected.emit(msg);
       } else {
-        console.log(session, this.sessionContext.session?.kernel?.clientId);
+        console.debug(session, this.sessionContext.session?.kernel?.clientId);
       }
     }
     this.received.emit(msg);

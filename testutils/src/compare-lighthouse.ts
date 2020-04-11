@@ -8,7 +8,7 @@ import { readFileSync } from 'fs-extra';
 const firstFilePath = process.argv[2];
 const secondFilePath = process.argv[3];
 
-console.log(`\`${firstFilePath}\` -> \`${secondFilePath}\`\n\n`);
+console.debug(`\`${firstFilePath}\` -> \`${secondFilePath}\`\n\n`);
 interface IOutput {
   audits: {
     [name: string]: {
@@ -41,7 +41,7 @@ for (const auditName in first.audits) {
   if (isNaN(percentChange)) {
     continue;
   }
-  console.log(
+  console.debug(
     `**${firstAudit.title}**\n* ${percentChange.toFixed(0)}% Δ\n* ${
       firstAudit.displayValue
     } -> ${secondAudit.displayValue}\n* ${firstAudit.description}\n`

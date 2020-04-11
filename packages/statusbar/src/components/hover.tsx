@@ -23,7 +23,7 @@ const hoverItem = style({
  * @returns the popup that was created.
  */
 export function showPopup(options: Popup.IOptions): Popup {
-  let dialog = new Popup(options);
+  const dialog = new Popup(options);
   dialog.launch();
   return dialog;
 }
@@ -41,7 +41,7 @@ export class Popup extends Widget {
     this._body.addClass(hoverItem);
     this._anchor = options.anchor;
     this._align = options.align;
-    let layout = (this.layout = new PanelLayout());
+    const layout = (this.layout = new PanelLayout());
     layout.addWidget(options.body);
     this._body.node.addEventListener('resize', () => {
       this.update();
@@ -106,17 +106,17 @@ export class Popup extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'keydown':
-        this._evtKeydown(event as KeyboardEvent);
-        break;
-      case 'click':
-        this._evtClick(event as MouseEvent);
-        break;
-      case 'resize':
-        this.onResize();
-        break;
-      default:
-        break;
+    case 'keydown':
+      this._evtKeydown(event as KeyboardEvent);
+      break;
+    case 'click':
+      this._evtClick(event as MouseEvent);
+      break;
+    case 'resize':
+      this.onResize();
+      break;
+    default:
+      break;
     }
   }
 
@@ -135,13 +135,13 @@ export class Popup extends Widget {
   private _evtKeydown(event: KeyboardEvent): void {
     // Check for escape key
     switch (event.keyCode) {
-      case 27: // Escape.
-        event.stopPropagation();
-        event.preventDefault();
-        this.dispose();
-        break;
-      default:
-        break;
+    case 27: // Escape.
+      event.stopPropagation();
+      event.preventDefault();
+      this.dispose();
+      break;
+    default:
+      break;
     }
   }
 

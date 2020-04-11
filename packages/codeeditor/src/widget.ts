@@ -87,20 +87,20 @@ export class CodeEditorWrapper extends Widget {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'lm-dragenter':
-        this._evtDragEnter(event as IDragEvent);
-        break;
-      case 'lm-dragleave':
-        this._evtDragLeave(event as IDragEvent);
-        break;
-      case 'lm-dragover':
-        this._evtDragOver(event as IDragEvent);
-        break;
-      case 'lm-drop':
-        this._evtDrop(event as IDragEvent);
-        break;
-      default:
-        break;
+    case 'lm-dragenter':
+      this._evtDragEnter(event as IDragEvent);
+      break;
+    case 'lm-dragleave':
+      this._evtDragLeave(event as IDragEvent);
+      break;
+    case 'lm-dragover':
+      this._evtDragOver(event as IDragEvent);
+      break;
+    case 'lm-drop':
+      this._evtDrop(event as IDragEvent);
+      break;
+    default:
+      break;
     }
   }
 
@@ -116,7 +116,7 @@ export class CodeEditorWrapper extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    let node = this.node;
+    const node = this.node;
     node.addEventListener('lm-dragenter', this);
     node.addEventListener('lm-dragleave', this);
     node.addEventListener('lm-dragover', this);
@@ -133,7 +133,7 @@ export class CodeEditorWrapper extends Widget {
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    let node = this.node;
+    const node = this.node;
     node.removeEventListener('lm-dragenter', this);
     node.removeEventListener('lm-dragleave', this);
     node.removeEventListener('lm-dragover', this);

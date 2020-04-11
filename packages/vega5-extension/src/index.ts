@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -77,8 +77,8 @@ export class RenderedVega extends Widget implements IRenderMime.IRenderer {
     }
     const metadata = model.metadata[this._mimeType] as
       | {
-          embed_options?: VegaModuleType.EmbedOptions;
-        }
+        embed_options?: VegaModuleType.EmbedOptions;
+      }
       | undefined;
     const embedOptions =
       metadata && metadata.embed_options ? metadata.embed_options : {};

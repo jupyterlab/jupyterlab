@@ -517,7 +517,7 @@ describe('@jupyterlab/notebook', () => {
 
     describe('NotebookTools.createNBConvertSelector()', () => {
       it('should create a raw mimetype selector', () => {
-        let optionsMap: { [key: string]: JSONValue } = {
+        const optionsMap: { [key: string]: JSONValue } = {
           None: '-',
           LaTeX: 'text/latex',
           reST: 'text/restructuredtext',
@@ -546,7 +546,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should have no effect on a code cell', () => {
-        let optionsMap: { [key: string]: JSONValue } = {
+        const optionsMap: { [key: string]: JSONValue } = {
           None: '-',
           LaTeX: 'text/latex',
           reST: 'text/restructuredtext',

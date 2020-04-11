@@ -53,12 +53,12 @@ describe('@jupyterlab/filebrowser', () => {
   describe('FilterFileBrowserModel', () => {
     describe('#constructor()', () => {
       it('should construct a new filtered file browser model', () => {
-        let model = new FilterFileBrowserModel({ manager });
+        const model = new FilterFileBrowserModel({ manager });
         expect(model).to.be.an.instanceof(FilterFileBrowserModel);
       });
 
       it('should accept filter option', () => {
-        let model = new FilterFileBrowserModel({
+        const model = new FilterFileBrowserModel({
           manager,
           filter: (model: Contents.IModel) => false
         });
@@ -68,11 +68,11 @@ describe('@jupyterlab/filebrowser', () => {
 
     describe('#items()', () => {
       it('should list all elements if no filter is defined', async () => {
-        let filteredModel = new FilterFileBrowserModel({
+        const filteredModel = new FilterFileBrowserModel({
           manager
         });
         await filteredModel.cd();
-        let model = new FileBrowserModel({ manager });
+        const model = new FileBrowserModel({ manager });
         await model.cd();
 
         const filteredItems = toArray(filteredModel.items());
@@ -81,12 +81,12 @@ describe('@jupyterlab/filebrowser', () => {
       });
 
       it('should list all directories whatever the filter', async () => {
-        let filteredModel = new FilterFileBrowserModel({
+        const filteredModel = new FilterFileBrowserModel({
           manager,
           filter: (model: Contents.IModel) => false
         });
         await filteredModel.cd();
-        let model = new FileBrowserModel({ manager });
+        const model = new FileBrowserModel({ manager });
         await model.cd();
 
         const filteredItems = toArray(filteredModel.items());
@@ -96,12 +96,12 @@ describe('@jupyterlab/filebrowser', () => {
       });
 
       it('should respect the filter', async () => {
-        let filteredModel = new FilterFileBrowserModel({
+        const filteredModel = new FilterFileBrowserModel({
           manager,
           filter: (model: Contents.IModel) => model.type === 'notebook'
         });
         await filteredModel.cd();
-        let model = new FileBrowserModel({ manager });
+        const model = new FileBrowserModel({ manager });
         await model.cd();
 
         const filteredItems = toArray(
@@ -122,7 +122,7 @@ describe('@jupyterlab/filebrowser', () => {
 
   describe('FileDialog.getOpenFiles()', () => {
     it('should create a dialog', async () => {
-      let dialog = FileDialog.getOpenFiles({
+      const dialog = FileDialog.getOpenFiles({
         manager
       });
 
@@ -139,7 +139,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       document.body.appendChild(node);
 
-      let dialog = FileDialog.getOpenFiles({
+      const dialog = FileDialog.getOpenFiles({
         manager,
         title: 'Select a notebook',
         host: node,
@@ -151,7 +151,7 @@ describe('@jupyterlab/filebrowser', () => {
       const result = await dialog;
 
       expect(result.button.accept).true;
-      let items = result.value!;
+      const items = result.value!;
       expect(items.length).equal(1);
 
       document.body.removeChild(node);
@@ -162,7 +162,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       document.body.appendChild(node);
 
-      let dialog = FileDialog.getOpenFiles({
+      const dialog = FileDialog.getOpenFiles({
         manager,
         title: 'Select a notebook',
         host: node,
@@ -173,7 +173,7 @@ describe('@jupyterlab/filebrowser', () => {
       await framePromise();
 
       let counter = 0;
-      let listing = node.getElementsByClassName('jp-DirListing-content')[0];
+      const listing = node.getElementsByClassName('jp-DirListing-content')[0];
       expect(listing).to.be.ok;
 
       let items = listing.getElementsByTagName('li');
@@ -198,8 +198,8 @@ describe('@jupyterlab/filebrowser', () => {
       });
 
       await acceptDialog();
-      let result = await dialog;
-      let files = result.value!;
+      const result = await dialog;
+      const files = result.value!;
       expect(files.length).equal(1);
       expect(files[0].type).equal('notebook');
       expect(files[0].name).matches(/Untitled\d*.ipynb/);
@@ -208,7 +208,7 @@ describe('@jupyterlab/filebrowser', () => {
     });
 
     it('should return current path if nothing is selected', async () => {
-      let dialog = FileDialog.getOpenFiles({
+      const dialog = FileDialog.getOpenFiles({
         manager
       });
 
@@ -225,7 +225,7 @@ describe('@jupyterlab/filebrowser', () => {
 
   describe('FileDialog.getExistingDirectory()', () => {
     it('should create a dialog', async () => {
-      let dialog = FileDialog.getExistingDirectory({
+      const dialog = FileDialog.getExistingDirectory({
         manager
       });
 
@@ -242,7 +242,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       document.body.appendChild(node);
 
-      let dialog = FileDialog.getExistingDirectory({
+      const dialog = FileDialog.getExistingDirectory({
         manager,
         title: 'Select a folder',
         host: node
@@ -263,7 +263,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       document.body.appendChild(node);
 
-      let dialog = FileDialog.getExistingDirectory({
+      const dialog = FileDialog.getExistingDirectory({
         manager,
         title: 'Select a folder',
         host: node
@@ -273,7 +273,7 @@ describe('@jupyterlab/filebrowser', () => {
       await framePromise();
 
       let counter = 0;
-      let listing = node.getElementsByClassName('jp-DirListing-content')[0];
+      const listing = node.getElementsByClassName('jp-DirListing-content')[0];
       expect(listing).to.be.ok;
 
       let items = listing.getElementsByTagName('li');
@@ -297,8 +297,8 @@ describe('@jupyterlab/filebrowser', () => {
       });
 
       await acceptDialog();
-      let result = await dialog;
-      let files = result.value!;
+      const result = await dialog;
+      const files = result.value!;
       expect(files.length).equal(1);
       expect(files[0].type).equal('directory');
       expect(files[0].name).matches(/Untitled Folder( \d+)?/);
@@ -307,7 +307,7 @@ describe('@jupyterlab/filebrowser', () => {
     });
 
     it('should return current path if nothing is selected', async () => {
-      let dialog = FileDialog.getExistingDirectory({
+      const dialog = FileDialog.getExistingDirectory({
         manager
       });
 

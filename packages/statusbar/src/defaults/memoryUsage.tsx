@@ -288,11 +288,7 @@ namespace Private {
     const response = await request;
 
     if (response.ok) {
-      try {
-        return await response.json();
-      } catch (error) {
-        throw error;
-      }
+      return await response.json();
     }
 
     return null;

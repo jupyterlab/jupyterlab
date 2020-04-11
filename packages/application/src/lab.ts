@@ -79,7 +79,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     this.docRegistry.addModelFactory(new Base64ModelFactory());
 
     if (options.mimeExtensions) {
-      for (let plugin of createRendermimePlugins(options.mimeExtensions)) {
+      for (const plugin of createRendermimePlugins(options.mimeExtensions)) {
         this.registerPlugin(plugin);
       }
     }
@@ -177,7 +177,7 @@ export namespace JupyterLab {
    */
   export interface IOptions
     extends JupyterFrontEnd.IOptions<LabShell>,
-      Partial<IInfo> {
+    Partial<IInfo> {
     paths?: Partial<JupyterFrontEnd.IPaths>;
   }
 

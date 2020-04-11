@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -164,7 +164,7 @@ const RENDER_TIMEOUT = 1000;
  */
 const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 
-/******************************************************************************
+/** ****************************************************************************
  * Cell
  ******************************************************************************/
 
@@ -178,22 +178,22 @@ export class Cell extends Widget {
   constructor(options: Cell.IOptions) {
     super();
     this.addClass(CELL_CLASS);
-    let model = (this._model = options.model);
-    let contentFactory = (this.contentFactory =
+    const model = (this._model = options.model);
+    const contentFactory = (this.contentFactory =
       options.contentFactory || Cell.defaultContentFactory);
     this.layout = new PanelLayout();
 
     // Header
-    let header = contentFactory.createCellHeader();
+    const header = contentFactory.createCellHeader();
     header.addClass(CELL_HEADER_CLASS);
     (this.layout as PanelLayout).addWidget(header);
 
     // Input
-    let inputWrapper = (this._inputWrapper = new Panel());
+    const inputWrapper = (this._inputWrapper = new Panel());
     inputWrapper.addClass(CELL_INPUT_WRAPPER_CLASS);
-    let inputCollapser = new InputCollapser();
+    const inputCollapser = new InputCollapser();
     inputCollapser.addClass(CELL_INPUT_COLLAPSER_CLASS);
-    let input = (this._input = new InputArea({
+    const input = (this._input = new InputArea({
       model,
       contentFactory,
       updateOnShow: options.updateEditorOnShow
@@ -208,7 +208,7 @@ export class Cell extends Widget {
     });
 
     // Footer
-    let footer = this.contentFactory.createCellFooter();
+    const footer = this.contentFactory.createCellFooter();
     footer.addClass(CELL_FOOTER_CLASS);
     (this.layout as PanelLayout).addWidget(footer);
 
@@ -351,7 +351,7 @@ export class Cell extends Widget {
     if (this._inputHidden === value) {
       return;
     }
-    let layout = this._inputWrapper.layout as PanelLayout;
+    const layout = this._inputWrapper.layout as PanelLayout;
     if (value) {
       this._input.parent = null;
       layout.addWidget(this._inputPlaceholder);
@@ -447,7 +447,7 @@ export class Cell extends Widget {
    * Clone the cell, using the same model.
    */
   clone(): Cell {
-    let constructor = this.constructor as typeof Cell;
+    const constructor = this.constructor as typeof Cell;
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory
@@ -513,18 +513,18 @@ export class Cell extends Widget {
     args: IObservableMap.IChangedArgs<PartialJSONValue | undefined>
   ): void {
     switch (args.key) {
-      case 'jupyter':
-        if (this.syncCollapse) {
-          this.loadCollapseState();
-        }
-        break;
-      case 'editable':
-        if (this.syncEditable) {
-          this.loadEditableState();
-        }
-        break;
-      default:
-        break;
+    case 'jupyter':
+      if (this.syncCollapse) {
+        this.loadCollapseState();
+      }
+      break;
+    case 'editable':
+      if (this.syncEditable) {
+        this.loadEditableState();
+      }
+      break;
+    default:
+      break;
     }
   }
 
@@ -578,7 +578,7 @@ export namespace Cell {
    */
   export interface IContentFactory
     extends OutputArea.IContentFactory,
-      InputArea.IContentFactory {
+    InputArea.IContentFactory {
     /**
      * Create a new cell header for the parent widget.
      */
@@ -673,7 +673,7 @@ export namespace Cell {
   export const defaultContentFactory = new ContentFactory();
 }
 
-/******************************************************************************
+/** ****************************************************************************
  * CodeCell
  ******************************************************************************/
 
@@ -689,16 +689,16 @@ export class CodeCell extends Cell {
     this.addClass(CODE_CELL_CLASS);
 
     // Only save options not handled by parent constructor.
-    let rendermime = (this._rendermime = options.rendermime);
-    let contentFactory = this.contentFactory;
-    let model = this.model;
+    const rendermime = (this._rendermime = options.rendermime);
+    const contentFactory = this.contentFactory;
+    const model = this.model;
 
     // Insert the output before the cell footer.
-    let outputWrapper = (this._outputWrapper = new Panel());
+    const outputWrapper = (this._outputWrapper = new Panel());
     outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-    let outputCollapser = new OutputCollapser();
+    const outputCollapser = new OutputCollapser();
     outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
-    let output = (this._output = new OutputArea({
+    const output = (this._output = new OutputArea({
       model: model.outputs,
       rendermime,
       contentFactory: contentFactory
@@ -758,7 +758,7 @@ export class CodeCell extends Cell {
     if (this._outputHidden === value) {
       return;
     }
-    let layout = this._outputWrapper.layout as PanelLayout;
+    const layout = this._outputWrapper.layout as PanelLayout;
     if (value) {
       layout.removeWidget(this._output);
       layout.addWidget(this._outputPlaceholder);
@@ -909,7 +909,7 @@ export class CodeCell extends Cell {
    * Clone the cell, using the same model.
    */
   clone(): CodeCell {
-    let constructor = this.constructor as typeof CodeCell;
+    const constructor = this.constructor as typeof CodeCell;
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory,
@@ -951,11 +951,11 @@ export class CodeCell extends Cell {
    */
   protected onStateChanged(model: ICellModel, args: IChangedArgs<any>): void {
     switch (args.name) {
-      case 'executionCount':
-        this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
-        break;
-      default:
-        break;
+    case 'executionCount':
+      this.setPrompt(`${(model as ICodeCellModel).executionCount || ''}`);
+      break;
+    default:
+      break;
     }
   }
 
@@ -971,18 +971,18 @@ export class CodeCell extends Cell {
       return;
     }
     switch (args.key) {
-      case 'scrolled':
-        if (this.syncScrolled) {
-          this.loadScrolledState();
-        }
-        break;
-      case 'collapsed':
-        if (this.syncCollapse) {
-          this.loadCollapseState();
-        }
-        break;
-      default:
-        break;
+    case 'scrolled':
+      if (this.syncScrolled) {
+        this.loadScrolledState();
+      }
+      break;
+    case 'collapsed':
+      if (this.syncCollapse) {
+        this.loadCollapseState();
+      }
+      break;
+    default:
+      break;
     }
     super.onMetadataChanged(model, args);
   }
@@ -991,7 +991,7 @@ export class CodeCell extends Cell {
    * Handle changes in the number of outputs in the output area.
    */
   private _outputLengthHandler(sender: OutputArea, args: number) {
-    let force = args === 0 ? true : false;
+    const force = args === 0 ? true : false;
     this.toggleClass(NO_OUTPUTS_CLASS, force);
   }
 
@@ -1032,13 +1032,13 @@ export namespace CodeCell {
     sessionContext: ISessionContext,
     metadata?: JSONObject
   ): Promise<KernelMessage.IExecuteReplyMsg | void> {
-    let model = cell.model;
-    let code = model.value.text;
+    const model = cell.model;
+    const code = model.value.text;
     if (!code.trim() || !sessionContext.session?.kernel) {
       model.clearExecution();
       return;
     }
-    let cellId = { cellId: model.id };
+    const cellId = { cellId: model.id };
     metadata = {
       ...model.metadata.toJSON(),
       ...metadata,
@@ -1050,11 +1050,11 @@ export namespace CodeCell {
     cell.setPrompt('*');
     model.trusted = true;
     let future:
-      | Kernel.IFuture<
-          KernelMessage.IExecuteRequestMsg,
-          KernelMessage.IExecuteReplyMsg
-        >
-      | undefined;
+    | Kernel.IFuture<
+    KernelMessage.IExecuteRequestMsg,
+    KernelMessage.IExecuteReplyMsg
+    >
+    | undefined;
     try {
       const msgPromise = OutputArea.execute(
         code,
@@ -1067,16 +1067,16 @@ export namespace CodeCell {
         const recordTimingHook = (msg: KernelMessage.IIOPubMessage) => {
           let label: string;
           switch (msg.header.msg_type) {
-            case 'status':
-              label = `status.${
-                (msg as KernelMessage.IStatusMsg).content.execution_state
-              }`;
-              break;
-            case 'execute_input':
-              label = 'execute_input';
-              break;
-            default:
-              return true;
+          case 'status':
+            label = `status.${
+              (msg as KernelMessage.IStatusMsg).content.execution_state
+            }`;
+            break;
+          case 'execute_input':
+            label = 'execute_input';
+            break;
+          default:
+            return true;
           }
           const value = msg.header.date;
           if (!value) {
@@ -1142,26 +1142,26 @@ export abstract class AttachmentsCell extends Cell {
    */
   handleEvent(event: Event): void {
     switch (event.type) {
-      case 'paste':
-        this._evtPaste(event as ClipboardEvent);
-        break;
-      case 'dragenter':
-        event.preventDefault();
-        break;
-      case 'dragover':
-        event.preventDefault();
-        break;
-      case 'drop':
-        this._evtNativeDrop(event as DragEvent);
-        break;
-      case 'lm-dragover':
-        this._evtDragOver(event as IDragEvent);
-        break;
-      case 'lm-drop':
-        this._evtDrop(event as IDragEvent);
-        break;
-      default:
-        break;
+    case 'paste':
+      this._evtPaste(event as ClipboardEvent);
+      break;
+    case 'dragenter':
+      event.preventDefault();
+      break;
+    case 'dragover':
+      event.preventDefault();
+      break;
+    case 'drop':
+      this._evtNativeDrop(event as DragEvent);
+      break;
+    case 'lm-dragover':
+      this._evtDragOver(event as IDragEvent);
+      break;
+    case 'lm-drop':
+      this._evtDrop(event as IDragEvent);
+      break;
+    default:
+      break;
     }
   }
 
@@ -1178,7 +1178,7 @@ export abstract class AttachmentsCell extends Cell {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    let node = this.node;
+    const node = this.node;
     node.addEventListener('lm-dragover', this);
     node.addEventListener('lm-drop', this);
     node.addEventListener('dragenter', this);
@@ -1192,7 +1192,7 @@ export abstract class AttachmentsCell extends Cell {
    * message
    */
   protected onBeforeDetach(msg: Message): void {
-    let node = this.node;
+    const node = this.node;
     node.removeEventListener('drop', this);
     node.removeEventListener('dragover', this);
     node.removeEventListener('dragenter', this);
@@ -1357,7 +1357,7 @@ export abstract class AttachmentsCell extends Cell {
   readonly model: IAttachmentsCellModel;
 }
 
-/******************************************************************************
+/** ****************************************************************************
  * MarkdownCell
  ******************************************************************************/
 
@@ -1489,11 +1489,11 @@ export class MarkdownCell extends AttachmentsCell {
    * Update the rendered input.
    */
   private _updateRenderedInput(): Promise<void> {
-    let model = this.model;
-    let text = (model && model.value.text) || DEFAULT_MARKDOWN_TEXT;
+    const model = this.model;
+    const text = (model && model.value.text) || DEFAULT_MARKDOWN_TEXT;
     // Do not re-render if the text has not changed.
     if (text !== this._prevText) {
-      let mimeModel = new MimeModel({ data: { 'text/markdown': text } });
+      const mimeModel = new MimeModel({ data: { 'text/markdown': text } });
       if (!this._renderer) {
         this._renderer = this._rendermime.createRenderer('text/markdown');
         this._renderer.addClass(MARKDOWN_OUTPUT_CLASS);
@@ -1508,7 +1508,7 @@ export class MarkdownCell extends AttachmentsCell {
    * Clone the cell, using the same model.
    */
   clone(): MarkdownCell {
-    let constructor = this.constructor as typeof MarkdownCell;
+    const constructor = this.constructor as typeof MarkdownCell;
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory,
@@ -1544,7 +1544,7 @@ export namespace MarkdownCell {
   }
 }
 
-/******************************************************************************
+/** ****************************************************************************
  * RawCell
  ******************************************************************************/
 
@@ -1564,7 +1564,7 @@ export class RawCell extends Cell {
    * Clone the cell, using the same model.
    */
   clone(): RawCell {
-    let constructor = this.constructor as typeof RawCell;
+    const constructor = this.constructor as typeof RawCell;
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory

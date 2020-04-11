@@ -29,7 +29,7 @@ import {
 import { Session } from '@jupyterlab/services';
 
 // stub for node global
-declare var global: any;
+declare let global: any;
 
 /**
  * This can be used by test modules that wouldn't otherwise import
@@ -725,4 +725,4 @@ export class TerminalTester extends SocketTester {
  * const x: B = {b: 'test'}
  */
 type MakeOptional<T, K> = Pick<T, Exclude<keyof T, K>> &
-  { [P in Extract<keyof T, K>]?: T[P] };
+{ [P in Extract<keyof T, K>]?: T[P] };

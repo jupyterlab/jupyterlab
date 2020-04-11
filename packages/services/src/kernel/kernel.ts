@@ -288,8 +288,8 @@ export interface IKernelConnection extends IObservableDisposable {
     disposeOnDone?: boolean,
     metadata?: JSONObject
   ): IShellFuture<
-    KernelMessage.IExecuteRequestMsg,
-    KernelMessage.IExecuteReplyMsg
+  KernelMessage.IExecuteRequestMsg,
+  KernelMessage.IExecuteReplyMsg
   >;
 
   /**
@@ -312,8 +312,8 @@ export interface IKernelConnection extends IObservableDisposable {
     content: KernelMessage.IDebugRequestMsg['content'],
     disposeOnDone?: boolean
   ): IControlFuture<
-    KernelMessage.IDebugRequestMsg,
-    KernelMessage.IDebugReplyMsg
+  KernelMessage.IDebugRequestMsg,
+  KernelMessage.IDebugReplyMsg
   >;
 
   /**
@@ -513,8 +513,8 @@ export interface IKernelConnection extends IObservableDisposable {
    */
   clone(
     options?: Pick<
-      IKernelConnection.IOptions,
-      'clientId' | 'username' | 'handleComms'
+    IKernelConnection.IOptions,
+    'clientId' | 'username' | 'handleComms'
     >
   ): IKernelConnection;
 }
@@ -623,8 +623,8 @@ export interface IManager extends IBaseManager {
   startNew(
     createOptions?: IKernelOptions,
     connectOptions?: Omit<
-      IKernelConnection.IOptions,
-      'model' | 'serverSettings'
+    IKernelConnection.IOptions,
+    'model' | 'serverSettings'
     >
   ): Promise<IKernelConnection>;
 

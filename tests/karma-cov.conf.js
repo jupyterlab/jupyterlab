@@ -1,5 +1,5 @@
-var path = require('path');
-var baseConf = require('./karma.conf');
+const path = require('path');
+const baseConf = require('./karma.conf');
 
 module.exports = function(config) {
   baseConf(config);

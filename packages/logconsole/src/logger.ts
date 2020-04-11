@@ -143,8 +143,8 @@ export class LoggerOutputAreaModel extends OutputAreaModel
   }): boolean {
     const { value, lastModel } = options;
 
-    let oldSeconds = Math.trunc(lastModel.timestamp.getTime() / 1000);
-    let newSeconds = Math.trunc(value.timestamp / 1000);
+    const oldSeconds = Math.trunc(lastModel.timestamp.getTime() / 1000);
+    const newSeconds = Math.trunc(value.timestamp / 1000);
 
     return oldSeconds === newSeconds;
   }
@@ -226,7 +226,7 @@ export class Logger implements ILogger {
     return this._level;
   }
   set level(newValue: LogLevel) {
-    let oldValue = this._level;
+    const oldValue = this._level;
     if (oldValue === newValue) {
       return;
     }
@@ -272,8 +272,8 @@ export class Logger implements ILogger {
   }
   set rendermime(value: IRenderMimeRegistry | null) {
     if (value !== this._rendermime) {
-      let oldValue = this._rendermime;
-      let newValue = (this._rendermime = value);
+      const oldValue = this._rendermime;
+      const newValue = (this._rendermime = value);
       this._stateChanged.emit({ name: 'rendermime', oldValue, newValue });
     }
   }
@@ -314,27 +314,27 @@ export class Logger implements ILogger {
     }
     let output: nbformat.IOutput | null = null;
     switch (log.type) {
-      case 'text':
-        output = {
-          output_type: 'display_data',
-          data: {
-            'text/plain': log.data
-          }
-        };
-        break;
-      case 'html':
-        output = {
-          output_type: 'display_data',
-          data: {
-            'text/html': log.data
-          }
-        };
-        break;
-      case 'output':
-        output = log.data;
-        break;
-      default:
-        break;
+    case 'text':
+      output = {
+        output_type: 'display_data',
+        data: {
+          'text/plain': log.data
+        }
+      };
+      break;
+    case 'html':
+      output = {
+        output_type: 'display_data',
+        data: {
+          'text/html': log.data
+        }
+      };
+      break;
+    case 'output':
+      output = log.data;
+      break;
+    default:
+      break;
     }
 
     if (output) {

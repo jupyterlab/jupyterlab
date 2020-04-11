@@ -80,7 +80,9 @@ export class NotebookActions {
    * standalone class is because at run time, the `Private.executed` variable
    * does not yet exist, so it needs to be referenced via a getter.
    */
-  private constructor() {}
+  private constructor() {
+    // Intentionally empty.
+  }
 }
 
 /**
@@ -117,13 +119,13 @@ export namespace NotebookActions {
     const selections = editor.getSelections();
     const orig = child.model.value.text;
 
-    let offsets = [0];
+    const offsets = [0];
 
     for (let i = 0; i < selections.length; i++) {
       // append start and end to handle selections
       // cursors will have same start and end
-      let start = editor.getOffsetAt(selections[i].start);
-      let end = editor.getOffsetAt(selections[i].end);
+      const start = editor.getOffsetAt(selections[i].start);
+      const end = editor.getOffsetAt(selections[i].end);
       if (start < end) {
         offsets.push(start);
         offsets.push(end);
@@ -137,9 +139,9 @@ export namespace NotebookActions {
 
     offsets.push(orig.length);
 
-    let clones: ICellModel[] = [];
+    const clones: ICellModel[] = [];
     for (let i = 0; i + 1 < offsets.length; i++) {
-      let clone = Private.cloneCell(nbModel, child.model);
+      const clone = Private.cloneCell(nbModel, child.model);
       clones.push(clone);
     }
 
@@ -904,12 +906,12 @@ export namespace NotebookActions {
 
     const newCells = values.map(cell => {
       switch (cell.cell_type) {
-        case 'code':
-          return model.contentFactory.createCodeCell({ cell });
-        case 'markdown':
-          return model.contentFactory.createMarkdownCell({ cell });
-        default:
-          return model.contentFactory.createRawCell({ cell });
+      case 'code':
+        return model.contentFactory.createCodeCell({ cell });
+      case 'markdown':
+        return model.contentFactory.createMarkdownCell({ cell });
+      default:
+        return model.contentFactory.createRawCell({ cell });
       }
     });
 
@@ -920,35 +922,35 @@ export namespace NotebookActions {
 
     // Set the starting index of the paste operation depending upon the mode.
     switch (mode) {
-      case 'below':
-        index = notebook.activeCellIndex;
-        break;
-      case 'above':
-        index = notebook.activeCellIndex - 1;
-        break;
-      case 'replace':
-        // Find the cells to delete.
-        const toDelete: number[] = [];
+    case 'below':
+      index = notebook.activeCellIndex;
+      break;
+    case 'above':
+      index = notebook.activeCellIndex - 1;
+      break;
+    case 'replace':
+      // Find the cells to delete.
+      const toDelete: number[] = [];
 
-        notebook.widgets.forEach((child, index) => {
-          const deletable = child.model.metadata.get('deletable') !== false;
+      notebook.widgets.forEach((child, index) => {
+        const deletable = child.model.metadata.get('deletable') !== false;
 
-          if (notebook.isSelectedOrActive(child) && deletable) {
-            toDelete.push(index);
-          }
-        });
-
-        // If cells are not deletable, we may not have anything to delete.
-        if (toDelete.length > 0) {
-          // Delete the cells as one undo event.
-          toDelete.reverse().forEach(i => {
-            cells.remove(i);
-          });
+        if (notebook.isSelectedOrActive(child) && deletable) {
+          toDelete.push(index);
         }
-        index = toDelete[0];
-        break;
-      default:
-        break;
+      });
+
+      // If cells are not deletable, we may not have anything to delete.
+      if (toDelete.length > 0) {
+        // Delete the cells as one undo event.
+        toDelete.reverse().forEach(i => {
+          cells.remove(i);
+        });
+      }
+      index = toDelete[0];
+      break;
+    default:
+      break;
     }
 
     newCells.forEach(cell => {
@@ -1477,15 +1479,15 @@ namespace Private {
     cell: ICellModel
   ): ICellModel {
     switch (cell.type) {
-      case 'code':
-        // TODO why isn't modeldb or id passed here?
-        return model.contentFactory.createCodeCell({ cell: cell.toJSON() });
-      case 'markdown':
-        // TODO why isn't modeldb or id passed here?
-        return model.contentFactory.createMarkdownCell({ cell: cell.toJSON() });
-      default:
-        // TODO why isn't modeldb or id passed here?
-        return model.contentFactory.createRawCell({ cell: cell.toJSON() });
+    case 'code':
+      // TODO why isn't modeldb or id passed here?
+      return model.contentFactory.createCodeCell({ cell: cell.toJSON() });
+    case 'markdown':
+      // TODO why isn't modeldb or id passed here?
+      return model.contentFactory.createMarkdownCell({ cell: cell.toJSON() });
+    default:
+      // TODO why isn't modeldb or id passed here?
+      return model.contentFactory.createRawCell({ cell: cell.toJSON() });
     }
   }
 
@@ -1555,58 +1557,58 @@ namespace Private {
     sessionContext?: ISessionContext
   ): Promise<boolean> {
     switch (cell.model.type) {
-      case 'markdown':
-        (cell as MarkdownCell).rendered = true;
-        cell.inputHidden = false;
-        executed.emit({ notebook, cell });
-        break;
-      case 'code':
-        if (sessionContext) {
-          const deletedCells = notebook.model?.deletedCells ?? [];
-          return CodeCell.execute(cell as CodeCell, sessionContext, {
-            deletedCells,
-            recordTiming: notebook.notebookConfig.recordTiming
+    case 'markdown':
+      (cell as MarkdownCell).rendered = true;
+      cell.inputHidden = false;
+      executed.emit({ notebook, cell });
+      break;
+    case 'code':
+      if (sessionContext) {
+        const deletedCells = notebook.model?.deletedCells ?? [];
+        return CodeCell.execute(cell as CodeCell, sessionContext, {
+          deletedCells,
+          recordTiming: notebook.notebookConfig.recordTiming
+        })
+          .then(reply => {
+            deletedCells.splice(0, deletedCells.length);
+            if (cell.isDisposed) {
+              return false;
+            }
+
+            if (!reply) {
+              return true;
+            }
+
+            if (reply.content.status === 'ok') {
+              const content = reply.content;
+
+              if (content.payload && content.payload.length) {
+                handlePayload(content, notebook, cell);
+              }
+
+              return true;
+            } else {
+              throw new Error('KernelReplyNotOK');
+            }
           })
-            .then(reply => {
-              deletedCells.splice(0, deletedCells.length);
-              if (cell.isDisposed) {
-                return false;
-              }
+          .catch(reason => {
+            if (cell.isDisposed || reason.message.startsWith('Canceled')) {
+              return false;
+            }
+            throw reason;
+          })
+          .then(ran => {
+            if (ran) {
+              executed.emit({ notebook, cell });
+            }
 
-              if (!reply) {
-                return true;
-              }
-
-              if (reply.content.status === 'ok') {
-                const content = reply.content;
-
-                if (content.payload && content.payload.length) {
-                  handlePayload(content, notebook, cell);
-                }
-
-                return true;
-              } else {
-                throw new Error('KernelReplyNotOK');
-              }
-            })
-            .catch(reason => {
-              if (cell.isDisposed || reason.message.startsWith('Canceled')) {
-                return false;
-              }
-              throw reason;
-            })
-            .then(ran => {
-              if (ran) {
-                executed.emit({ notebook, cell });
-              }
-
-              return ran;
-            });
-        }
-        (cell.model as ICodeCellModel).clearExecution();
-        break;
-      default:
-        break;
+            return ran;
+          });
+      }
+      (cell.model as ICodeCellModel).clearExecution();
+      break;
+    default:
+      break;
     }
 
     return Promise.resolve(true);
@@ -1672,7 +1674,7 @@ namespace Private {
     notebook.mode = 'command';
     clipboard.clear();
 
-    let data = notebook.widgets
+    const data = notebook.widgets
       .filter(cell => notebook.isSelectedOrActive(cell))
       .map(cell => cell.model.toJSON())
       .map(cellJSON => {
@@ -1721,20 +1723,20 @@ namespace Private {
         let newCell: ICellModel;
 
         switch (value) {
-          case 'code':
-            newCell = model.contentFactory.createCodeCell({ cell });
-            break;
-          case 'markdown':
-            newCell = model.contentFactory.createMarkdownCell({ cell });
-            if (child.model.type === 'code') {
-              newCell.trusted = false;
-            }
-            break;
-          default:
-            newCell = model.contentFactory.createRawCell({ cell });
-            if (child.model.type === 'code') {
-              newCell.trusted = false;
-            }
+        case 'code':
+          newCell = model.contentFactory.createCodeCell({ cell });
+          break;
+        case 'markdown':
+          newCell = model.contentFactory.createMarkdownCell({ cell });
+          if (child.model.type === 'code') {
+            newCell.trusted = false;
+          }
+          break;
+        default:
+          newCell = model.contentFactory.createRawCell({ cell });
+          if (child.model.type === 'code') {
+            newCell.trusted = false;
+          }
         }
         cells.set(index, newCell);
       }

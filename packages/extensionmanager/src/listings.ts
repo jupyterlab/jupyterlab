@@ -7,7 +7,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
 
-/***
+/** *
  * Information about a listed entry.
  */
 export interface IListEntry {

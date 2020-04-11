@@ -19,10 +19,10 @@ Distributed under the terms of the Modified BSD License.
 <h2>JupyterLab Packages</h2>
 <div style='display:flex;flex-direction:column'>`;
 
-let data = utils.readJSONFile('./package.json');
-let pkgs = Object.keys(data.dependencies);
+const data = utils.readJSONFile('./package.json');
+const pkgs = Object.keys(data.dependencies);
 pkgs.forEach(function(pkg) {
-  let name = pkg.split('/')[1];
+  const name = pkg.split('/')[1];
   index += `<a href="${name}/index.html">${name}</a>\n`;
 });
 

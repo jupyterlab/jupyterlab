@@ -62,7 +62,7 @@ export class DSVModel extends DataModel implements IDisposable {
     // Guess the row delimiter if it was not supplied. This will be fooled if a
     // different line delimiter possibility appears in the first row.
     if (rowDelimiter === undefined) {
-      let i = data.slice(0, 5000).indexOf('\r');
+      const i = data.slice(0, 5000).indexOf('\r');
       if (i === -1) {
         rowDelimiter = '\n';
       } else if (data[i + 1] === '\n') {
@@ -84,7 +84,7 @@ export class DSVModel extends DataModel implements IDisposable {
 
     // Cache the header row.
     if (header === true && this._columnCount! > 0) {
-      let h = [];
+      const h = [];
       for (let c = 0; c < this._columnCount!; c++) {
         h.push(this._getField(0, c));
       }
@@ -154,28 +154,28 @@ export class DSVModel extends DataModel implements IDisposable {
 
     // Look up the field and value for the region.
     switch (region) {
-      case 'body':
-        if (this._header.length === 0) {
-          value = this._getField(row, column);
-        } else {
-          value = this._getField(row + 1, column);
-        }
-        break;
-      case 'column-header':
-        if (this._header.length === 0) {
-          value = (column + 1).toString();
-        } else {
-          value = this._header[column];
-        }
-        break;
-      case 'row-header':
-        value = (row + 1).toString();
-        break;
-      case 'corner-header':
-        value = '';
-        break;
-      default:
-        throw 'unreachable';
+    case 'body':
+      if (this._header.length === 0) {
+        value = this._getField(row, column);
+      } else {
+        value = this._getField(row + 1, column);
+      }
+      break;
+    case 'column-header':
+      if (this._header.length === 0) {
+        value = (column + 1).toString();
+      } else {
+        value = this._header[column];
+      }
+      break;
+    case 'row-header':
+      value = (row + 1).toString();
+      break;
+    case 'corner-header':
+      value = '';
+      break;
+    default:
+      throw 'unreachable';
     }
 
     // Return the final value.
@@ -245,7 +245,7 @@ export class DSVModel extends DataModel implements IDisposable {
 
     // Parse the data up to and including the requested row, starting from the
     // last row offset we have.
-    let { nrows, offsets } = PARSERS[this._parser]({
+    const { nrows, offsets } = PARSERS[this._parser]({
       data: this._data,
       startIndex: this._rowOffsets[this._rowCount! - 1],
       delimiter: this._delimiter,
@@ -266,7 +266,7 @@ export class DSVModel extends DataModel implements IDisposable {
     this._startedParsing = true;
 
     // Update the row count.
-    let oldRowCount = this._rowCount!;
+    const oldRowCount = this._rowCount!;
     this._rowCount = oldRowCount + nrows - 1;
 
     // If we didn't reach the requested row, we must be done.
@@ -276,7 +276,7 @@ export class DSVModel extends DataModel implements IDisposable {
     }
 
     // Copy the new offsets into a new row offset array.
-    let oldRowOffsets = this._rowOffsets;
+    const oldRowOffsets = this._rowOffsets;
     this._rowOffsets = new Uint32Array(this._rowCount);
     this._rowOffsets.set(oldRowOffsets);
     this._rowOffsets.set(offsets, oldRowCount - 1);
@@ -286,7 +286,7 @@ export class DSVModel extends DataModel implements IDisposable {
     // If the full column offsets array is small enough, build a cache big
     // enough for all column offsets. We allocate up to 128 megabytes:
     // 128*(2**20 bytes/M)/(4 bytes/entry) = 33554432 entries.
-    let maxColumnOffsetsRows = Math.floor(33554432 / this._columnCount);
+    const maxColumnOffsetsRows = Math.floor(33554432 / this._columnCount);
 
     // We need to expand the column offset array if we were storing all column
     // offsets before. Check to see if the previous size was small enough that
@@ -296,7 +296,7 @@ export class DSVModel extends DataModel implements IDisposable {
       // store, or if we should cut over to a small cache.
       if (this._rowCount <= maxColumnOffsetsRows) {
         // Expand the existing column offset array for new column offsets.
-        let oldColumnOffsets = this._columnOffsets;
+        const oldColumnOffsets = this._columnOffsets;
         this._columnOffsets = new Uint32Array(
           this._rowCount * this._columnCount
         );
@@ -305,7 +305,7 @@ export class DSVModel extends DataModel implements IDisposable {
       } else {
         // If not, then our cache size is at most the maximum number of rows we
         // fill in the cache at a time.
-        let oldColumnOffsets = this._columnOffsets;
+        const oldColumnOffsets = this._columnOffsets;
         this._columnOffsets = new Uint32Array(
           Math.min(this._maxCacheGet, maxColumnOffsetsRows) * this._columnCount
         );
@@ -347,7 +347,7 @@ export class DSVModel extends DataModel implements IDisposable {
     let nextIndex;
 
     // Find the index for the first character in the field.
-    let index = this._getOffsetIndex(row, column);
+    const index = this._getOffsetIndex(row, column);
 
     // Initialize the trim adjustments.
     let trimRight = 0;
@@ -441,7 +441,7 @@ export class DSVModel extends DataModel implements IDisposable {
       }
 
       // Parse the data to get the column offsets.
-      let { offsets } = PARSERS[this._parser]({
+      const { offsets } = PARSERS[this._parser]({
         data: this._data,
         delimiter: this._delimiter,
         rowDelimiter: this._rowDelimiter,
@@ -479,10 +479,10 @@ export class DSVModel extends DataModel implements IDisposable {
     let chunkRows = Math.pow(2, 32) - 1;
 
     // We give the UI a chance to draw by delaying the chunk parsing.
-    let delay = 30; // milliseconds
+    const delay = 30; // milliseconds
 
     // Define a function to parse a chunk up to and including endRow.
-    let parseChunk = (endRow: number) => {
+    const parseChunk = (endRow: number) => {
       try {
         this._computeRowOffsets(endRow);
       } catch (e) {
@@ -505,7 +505,7 @@ export class DSVModel extends DataModel implements IDisposable {
     this._resetParser();
 
     // Parse the first rows to give us the start of the data right away.
-    let done = parseChunk(currentRows);
+    const done = parseChunk(currentRows);
 
     // If we are done, return early.
     if (done) {
@@ -513,9 +513,9 @@ export class DSVModel extends DataModel implements IDisposable {
     }
 
     // Define a function to recursively parse the next chunk after a delay.
-    let delayedParse = () => {
+    const delayedParse = () => {
       // Parse up to the new end row.
-      let done = parseChunk(currentRows + chunkRows);
+      const done = parseChunk(currentRows + chunkRows);
       currentRows += chunkRows;
 
       // Gradually double the chunk size until we reach a million rows, if we

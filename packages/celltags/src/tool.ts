@@ -31,8 +31,8 @@ export class TagTool extends NotebookTools.Tool {
    * Add an AddWidget input box to the layout.
    */
   createTagInput() {
-    let layout = this.layout as PanelLayout;
-    let input = new AddWidget();
+    const layout = this.layout as PanelLayout;
+    const input = new AddWidget();
     input.id = 'add-tag';
     layout.insertWidget(0, input);
   }
@@ -46,7 +46,9 @@ export class TagTool extends NotebookTools.Tool {
    */
   checkApplied(name: string): boolean {
     if (this.tracker.activeCell) {
-      let tags = this.tracker.activeCell.model.metadata.get('tags') as string[];
+      const tags = this.tracker.activeCell.model.metadata.get(
+        'tags'
+      ) as string[];
       if (tags) {
         for (let i = 0; i < tags.length; i++) {
           if (tags[i] === name) {
@@ -64,9 +66,9 @@ export class TagTool extends NotebookTools.Tool {
    * @param name - The name of the tag.
    */
   addTag(name: string) {
-    let cell = this.tracker.activeCell;
+    const cell = this.tracker.activeCell;
     let tags = cell.model.metadata.get('tags') as string[];
-    let newTags = name.split(/[,\s]+/);
+    const newTags = name.split(/[,\s]+/);
     if (tags === undefined) {
       tags = [];
     }
@@ -86,9 +88,9 @@ export class TagTool extends NotebookTools.Tool {
    * @param name - The name of the tag.
    */
   removeTag(name: string) {
-    let cell = this.tracker.activeCell;
-    let tags = cell.model.metadata.get('tags') as string[];
-    let idx = tags.indexOf(name);
+    const cell = this.tracker.activeCell;
+    const tags = cell.model.metadata.get('tags') as string[];
+    const idx = tags.indexOf(name);
     if (idx > -1) {
       tags.splice(idx, 1);
     }
@@ -105,7 +107,7 @@ export class TagTool extends NotebookTools.Tool {
    * active cell.
    */
   loadActiveTags() {
-    let layout = this.layout as PanelLayout;
+    const layout = this.layout as PanelLayout;
     for (let i = 0; i < layout.widgets.length; i++) {
       layout.widgets[i].update();
     }
@@ -116,16 +118,16 @@ export class TagTool extends NotebookTools.Tool {
    * stored tag list.
    */
   pullTags() {
-    let notebook = this.tracker.currentWidget;
+    const notebook = this.tracker.currentWidget;
     if (this.tracker && this.tracker.currentWidget) {
-      let cells = notebook.model.cells;
-      let allTags: string[] = [];
+      const cells = notebook.model.cells;
+      const allTags: string[] = [];
       for (let i = 0; i < cells.length; i++) {
-        let metadata = cells.get(i).metadata;
-        let tags = metadata.get('tags') as string[];
+        const metadata = cells.get(i).metadata;
+        const tags = metadata.get('tags') as string[];
         if (tags) {
           for (let j = 0; j < tags.length; j++) {
-            let name = tags[j] as string;
+            const name = tags[j] as string;
             if (name !== '') {
               if (allTags.indexOf(name) < 0) {
                 allTags.push(name);
@@ -144,12 +146,12 @@ export class TagTool extends NotebookTools.Tool {
    */
   refreshTags() {
     this.pullTags();
-    let layout = this.layout as PanelLayout;
-    let tags: string[] = this.tagList;
-    let toDispose: TagWidget[] = [];
-    let nWidgets = layout.widgets.length;
+    const layout = this.layout as PanelLayout;
+    const tags: string[] = this.tagList;
+    const toDispose: TagWidget[] = [];
+    const nWidgets = layout.widgets.length;
     for (let i = 0; i < nWidgets; i++) {
-      let idx = tags.indexOf((layout.widgets[i] as TagWidget).name);
+      const idx = tags.indexOf((layout.widgets[i] as TagWidget).name);
       if (idx < 0 && layout.widgets[i].id !== 'add-tag') {
         toDispose.push(layout.widgets[i] as TagWidget);
       } else if (layout.widgets[i].id !== 'add-tag') {
@@ -160,8 +162,8 @@ export class TagTool extends NotebookTools.Tool {
       toDispose[i].dispose();
     }
     for (let i = 0; i < tags.length; i++) {
-      let widget = new TagWidget(tags[i]);
-      let idx = layout.widgets.length - 1;
+      const widget = new TagWidget(tags[i]);
+      const idx = layout.widgets.length - 1;
       layout.insertWidget(idx, widget);
     }
   }
@@ -171,10 +173,10 @@ export class TagTool extends NotebookTools.Tool {
    * that each string doesn't include spaces.
    */
   validateTags(cell: Cell, taglist: string[]) {
-    let results: string[] = [];
+    const results: string[] = [];
     for (let i = 0; i < taglist.length; i++) {
       if (taglist[i] !== '' && typeof taglist[i] === 'string') {
-        let spl = taglist[i].split(/[,\s]+/);
+        const spl = taglist[i].split(/[,\s]+/);
         for (let j = 0; j < spl.length; j++) {
           if (spl[j] !== '' && results.indexOf(spl[j]) < 0) {
             results.push(spl[j]);
@@ -234,7 +236,7 @@ export class TagTool extends NotebookTools.Tool {
    * Handle a change to active cell metadata.
    */
   protected onActiveCellMetadataChanged(): void {
-    let tags = this.tracker.activeCell.model.metadata.get('tags');
+    const tags = this.tracker.activeCell.model.metadata.get('tags');
     let taglist: string[] = [];
     if (tags === undefined) {
       return;

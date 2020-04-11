@@ -113,14 +113,14 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
     let handleComms = options.handleComms ?? true;
     // By default, handle comms only if no other kernel connection is.
     if (options.handleComms === undefined) {
-      for (let kc of this._kernelConnections) {
+      for (const kc of this._kernelConnections) {
         if (kc.id === id && kc.handleComms) {
           handleComms = false;
           break;
         }
       }
     }
-    let kernelConnection = new KernelConnection({
+    const kernelConnection = new KernelConnection({
       handleComms,
       ...options,
       serverSettings: this.serverSettings
@@ -174,8 +174,8 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
   async startNew(
     createOptions: IKernelOptions = {},
     connectOptions: Omit<
-      Kernel.IKernelConnection.IOptions,
-      'model' | 'serverSettings'
+    Kernel.IKernelConnection.IOptions,
+    'model' | 'serverSettings'
     > = {}
   ): Promise<Kernel.IKernelConnection> {
     const model = await startNew(createOptions, this.serverSettings);

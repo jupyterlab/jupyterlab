@@ -53,7 +53,9 @@ export class DocumentManager implements IDocumentManager {
     this._opener = options.opener;
     this._when = options.when || options.manager.ready;
 
-    let widgetManager = new DocumentWidgetManager({ registry: this.registry });
+    const widgetManager = new DocumentWidgetManager({
+      registry: this.registry
+    });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
     this._widgetManager = widgetManager;
     this._setBusy = options.setBusy;
@@ -279,10 +281,10 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName: string | null = 'default'
   ): IDocumentWidget | undefined {
-    let newPath = PathExt.normalize(path);
+    const newPath = PathExt.normalize(path);
     let widgetNames = [widgetName];
     if (widgetName === 'default') {
-      let factory = this.registry.defaultWidgetFactory(newPath);
+      const factory = this.registry.defaultWidgetFactory(newPath);
       if (!factory) {
         return undefined;
       }
@@ -293,10 +295,10 @@ export class DocumentManager implements IDocumentManager {
         .map(f => f.name);
     }
 
-    for (let context of this._contextsForPath(newPath)) {
+    for (const context of this._contextsForPath(newPath)) {
       for (const widgetName of widgetNames) {
         if (widgetName !== null) {
-          let widget = this._widgetManager.findWidget(context, widgetName);
+          const widget = this._widgetManager.findWidget(context, widgetName);
           if (widget) {
             return widget;
           }
@@ -370,7 +372,7 @@ export class DocumentManager implements IDocumentManager {
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined {
-    let widget = this.findWidget(path, widgetName);
+    const widget = this.findWidget(path, widgetName);
     if (widget) {
       this._opener.open(widget, options || {});
       return widget;
@@ -458,16 +460,16 @@ export class DocumentManager implements IDocumentManager {
     // widgets that have different models.
 
     // Allow options to be passed when adding a sibling.
-    let adopter = (
+    const adopter = (
       widget: IDocumentWidget,
       options?: DocumentRegistry.IOpenOptions
     ) => {
       this._widgetManager.adoptWidget(context, widget);
       this._opener.open(widget, options);
     };
-    let modelDBFactory =
+    const modelDBFactory =
       this.services.contents.getModelDBFactory(path) || undefined;
-    let context = new Context({
+    const context = new Context({
       opener: adopter,
       manager: this.services,
       factory,
@@ -477,7 +479,7 @@ export class DocumentManager implements IDocumentManager {
       setBusy: this._setBusy,
       sessionDialogs: this._dialogs
     });
-    let handler = new SaveHandler({
+    const handler = new SaveHandler({
       context,
       saveInterval: this.autosaveInterval
     });
@@ -506,9 +508,9 @@ export class DocumentManager implements IDocumentManager {
     path: string,
     widgetName: string
   ): DocumentRegistry.WidgetFactory | undefined {
-    let { registry } = this;
+    const { registry } = this;
     if (widgetName === 'default') {
-      let factory = registry.defaultWidgetFactory(path);
+      const factory = registry.defaultWidgetFactory(path);
       if (!factory) {
         return undefined;
       }
@@ -532,18 +534,18 @@ export class DocumentManager implements IDocumentManager {
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined {
-    let widgetFactory = this._widgetFactoryFor(path, widgetName);
+    const widgetFactory = this._widgetFactoryFor(path, widgetName);
     if (!widgetFactory) {
       return undefined;
     }
-    let modelName = widgetFactory.modelName || 'text';
-    let factory = this.registry.getModelFactory(modelName);
+    const modelName = widgetFactory.modelName || 'text';
+    const factory = this.registry.getModelFactory(modelName);
     if (!factory) {
       return undefined;
     }
 
     // Handle the kernel pereference.
-    let preference = this.registry.getKernelPreference(
+    const preference = this.registry.getKernelPreference(
       path,
       widgetFactory.name,
       kernel
@@ -570,7 +572,7 @@ export class DocumentManager implements IDocumentManager {
       throw new Error(`Invalid argument 'which': ${which}`);
     }
 
-    let widget = this._widgetManager.createWidget(widgetFactory, context);
+    const widget = this._widgetManager.createWidget(widgetFactory, context);
     this._opener.open(widget, options || {});
 
     // If the initial opening of the context fails, dispose of the widget.
@@ -664,8 +666,8 @@ namespace Private {
    * An attached property for a context save handler.
    */
   export const saveHandlerProperty = new AttachedProperty<
-    DocumentRegistry.Context,
-    SaveHandler | undefined
+  DocumentRegistry.Context,
+  SaveHandler | undefined
   >({
     name: 'saveHandler',
     create: () => undefined

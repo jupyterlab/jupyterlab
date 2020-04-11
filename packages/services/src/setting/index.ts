@@ -18,8 +18,8 @@ const SERVICE_SETTINGS_URL = 'api/settings';
  * The settings API service manager.
  */
 export class SettingManager extends DataConnector<
-  ISettingRegistry.IPlugin,
-  string
+ISettingRegistry.IPlugin,
+string
 > {
   /**
    * Create a new setting manager.

@@ -33,7 +33,7 @@ export function getLernaPaths(basePath = '.'): string[] {
     throw e;
   }
   let paths: string[] = [];
-  for (let config of packages) {
+  for (const config of packages) {
     paths = paths.concat(glob.sync(path.join(basePath, config)));
   }
   return paths.filter(pkgPath => {
@@ -45,7 +45,7 @@ export function getLernaPaths(basePath = '.'): string[] {
  * Get all of the core package paths.
  */
 export function getCorePaths(): string[] {
-  let spec = path.resolve(path.join('.', 'packages', '*'));
+  const spec = path.resolve(path.join('.', 'packages', '*'));
   return glob.sync(spec);
 }
 
@@ -59,8 +59,8 @@ export function getCorePaths(): string[] {
  * @returns Whether the file has changed.
  */
 export function writePackageData(pkgJsonPath: string, data: any): boolean {
-  let text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
-  let orig = fs
+  const text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
+  const orig = fs
     .readFileSync(pkgJsonPath, 'utf8')
     .split('\r\n')
     .join('\n');
@@ -92,15 +92,15 @@ export function writeJSONFile(filePath: string, data: any): boolean {
       ? Array.isArray(value)
         ? value.map(sortObjByKey)
         : Object.keys(value)
-            .sort()
-            .reduce((o: any, key) => {
-              const v = value[key];
-              o[key] = sortObjByKey(v);
-              return o;
-            }, {})
+          .sort()
+          .reduce((o: any, key) => {
+            const v = value[key];
+            o[key] = sortObjByKey(v);
+            return o;
+          }, {})
       : value;
   }
-  let text = JSON.stringify(data, sortObjByKey(data), 2) + '\n';
+  const text = JSON.stringify(data, sortObjByKey(data), 2) + '\n';
   let orig = {};
   try {
     orig = readJSONFile(filePath);
@@ -150,8 +150,8 @@ export function fromTemplate(
       // try to match the indentation level of the {{var}} in the input template.
       templ = templ.split(`{{${key}}}`).reduce((acc, cur) => {
         // Regex: 0 or more non-newline whitespaces followed by end of string
-        let indentRe = acc.match(/([^\S\r\n]*).*$/);
-        let indent = indentRe ? indentRe[1] : '';
+        const indentRe = acc.match(/([^\S\r\n]*).*$/);
+        const indent = indentRe ? indentRe[1] : '';
         return acc + val.split('\n').join('\n' + indent) + cur;
       });
     } else {
@@ -198,7 +198,7 @@ export function prebump() {
   run('python -m pip install bump2version');
 
   // Make sure we start in a clean git state.
-  let status = run('git status --porcelain', {
+  const status = run('git status --porcelain', {
     stdio: 'pipe',
     encoding: 'utf8'
   });
@@ -220,8 +220,8 @@ export function postbump() {
   const curr = getPythonVersion();
 
   // Update the dev mode version.
-  let filePath = path.resolve(path.join('.', 'dev_mode', 'package.json'));
-  let data = readJSONFile(filePath);
+  const filePath = path.resolve(path.join('.', 'dev_mode', 'package.json'));
+  const data = readJSONFile(filePath);
   data.jupyterlab.version = curr;
   writeJSONFile(filePath, data);
 
@@ -242,7 +242,7 @@ export function run(
   options = options || {};
   options['stdio'] = options.stdio || 'inherit';
   if (!quiet) {
-    console.log('>', cmd);
+    console.debug('>', cmd);
   }
   const value = childProcess.execSync(cmd, options);
   if (value === null) {

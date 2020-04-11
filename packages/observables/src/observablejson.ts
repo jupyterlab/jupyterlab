@@ -31,7 +31,7 @@ export namespace IObservableJSON {
    * A type alias for observable JSON changed args.
    */
   export type IChangedArgs = IObservableMap.IChangedArgs<
-    ReadonlyPartialJSONValue
+  ReadonlyPartialJSONValue
   >;
 }
 
@@ -56,7 +56,7 @@ export class ObservableJSON extends ObservableMap<ReadonlyPartialJSONValue> {
     const out: PartialJSONObject = Object.create(null);
     const keys = this.keys();
 
-    for (let key of keys) {
+    for (const key of keys) {
       const value = this.get(key);
 
       if (value !== undefined) {
