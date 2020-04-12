@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { ServiceManager } from '@jupyterlab/services';
 
@@ -11,7 +11,7 @@ import {
   TextModelFactory
 } from '@jupyterlab/docregistry';
 
-import { SaveHandler } from '@jupyterlab/docmanager';
+import { SaveHandler } from '../src';
 
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
@@ -22,15 +22,16 @@ import {
   waitForDialog
 } from '@jupyterlab/testutils';
 
+import * as Mock from '@jupyterlab/testutils/lib/mock';
+
 describe('docregistry/savehandler', () => {
   let manager: ServiceManager.IManager;
   const factory = new TextModelFactory();
   let context: Context<DocumentRegistry.IModel>;
   let handler: SaveHandler;
 
-  before(() => {
-    manager = new ServiceManager({ standby: 'never' });
-    return manager.ready;
+  beforeAll(() => {
+    manager = new Mock.ServiceManagerMock();
   });
 
   beforeEach(() => {
@@ -51,63 +52,63 @@ describe('docregistry/savehandler', () => {
   describe('SaveHandler', () => {
     describe('#constructor()', () => {
       it('should create a new save handler', () => {
-        expect(handler).to.be.an.instanceof(SaveHandler);
+        expect(handler).toBeInstanceOf(SaveHandler);
       });
     });
 
     describe('#saveInterval()', () => {
       it('should be the save interval of the handler', () => {
-        expect(handler.saveInterval).to.equal(120);
+        expect(handler.saveInterval).toBe(120);
       });
 
       it('should be set-able', () => {
         handler.saveInterval = 200;
-        expect(handler.saveInterval).to.equal(200);
+        expect(handler.saveInterval).toBe(200);
       });
     });
 
     describe('#isActive', () => {
       it('should test whether the handler is active', () => {
-        expect(handler.isActive).to.equal(false);
+        expect(handler.isActive).toBe(false);
         handler.start();
-        expect(handler.isActive).to.equal(true);
+        expect(handler.isActive).toBe(true);
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether the handler is disposed', () => {
-        expect(handler.isDisposed).to.equal(false);
+        expect(handler.isDisposed).toBe(false);
         handler.dispose();
-        expect(handler.isDisposed).to.equal(true);
+        expect(handler.isDisposed).toBe(true);
       });
 
       it('should be true after the context is disposed', () => {
         context.dispose();
-        expect(handler.isDisposed).to.equal(true);
+        expect(handler.isDisposed).toBe(true);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the handler', () => {
-        expect(handler.isDisposed).to.equal(false);
+        expect(handler.isDisposed).toBe(false);
         handler.dispose();
-        expect(handler.isDisposed).to.equal(true);
+        expect(handler.isDisposed).toBe(true);
         handler.dispose();
-        expect(handler.isDisposed).to.equal(true);
+        expect(handler.isDisposed).toBe(true);
       });
     });
 
     describe('#start()', () => {
       it('should start the save handler', () => {
         handler.start();
-        expect(handler.isActive).to.equal(true);
+        expect(handler.isActive).toBe(true);
       });
 
       it('should trigger a save', () => {
         const promise = signalToPromise(context.fileChanged);
         context.model.fromString('bar');
-        expect(handler.isActive).to.equal(false);
-        handler.saveInterval = 1;
+        expect(handler.isActive).toBe(false);
+        handler.saveInterval = 0.1;
         handler.start();
         return promise;
       });
@@ -126,8 +127,8 @@ describe('docregistry/savehandler', () => {
           }
         });
         context.model.fromString('foo');
-        expect(handler.isActive).to.equal(false);
-        handler.saveInterval = 1;
+        expect(handler.isActive).toBe(false);
+        handler.saveInterval = 0.1;
         handler.start();
         return promise;
       });
@@ -140,7 +141,7 @@ describe('docregistry/savehandler', () => {
         context.model.fromString('foo');
         await context.initialize(true);
 
-        // The server has a one second resolution for saves.
+        // The context allows up to 0.5 difference in timestamps before complaining.
         setTimeout(async () => {
           await manager.contents.save(context.path, {
             type: factory.contentType,
@@ -151,7 +152,7 @@ describe('docregistry/savehandler', () => {
           handler.start();
           context.model.fromString('baz');
           context.fileChanged.connect(() => {
-            expect(context.model.toString()).to.equal('baz');
+            expect(context.model.toString()).toBe('baz');
             delegate.resolve(undefined);
           });
         }, 1500);
@@ -181,11 +182,11 @@ describe('docregistry/savehandler', () => {
         await context.initialize(true);
         context.model.fromString('foo');
         context.fileChanged.connect(() => {
-          expect(context.model.toString()).to.equal('bar');
+          expect(context.model.toString()).toBe('bar');
           delegate.resolve(undefined);
         });
 
-        // The server has a one second resolution for saves.
+        // The context allows up to 0.5 difference in timestamps before complaining.
         setTimeout(async () => {
           await manager.contents.save(context.path, {
             type: factory.contentType,
@@ -207,9 +208,9 @@ describe('docregistry/savehandler', () => {
     describe('#stop()', () => {
       it('should stop the save timer', () => {
         handler.start();
-        expect(handler.isActive).to.equal(true);
+        expect(handler.isActive).toBe(true);
         handler.stop();
-        expect(handler.isActive).to.equal(false);
+        expect(handler.isActive).toBe(false);
       });
     });
   });

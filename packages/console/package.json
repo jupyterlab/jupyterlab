@@ -35,6 +35,7 @@
     "prepublishOnly": "npm run build",
     "test": "jest",
     "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
     "test:watch": "npm run test -- --watch",
     "watch": "tsc -b --watch"
   },

@@ -20,6 +20,9 @@
       "path": "../packages/codemirror"
     },
     {
+      "path": "../packages/coreutils"
+    },
+    {
       "path": "../packages/docregistry"
     },
     {

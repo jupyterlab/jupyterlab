@@ -493,7 +493,7 @@ export class Context<T extends DocumentRegistry.IModel>
   /**
    * Save the document contents to disk.
    */
-  private _save(): Promise<void> {
+  private async _save(): Promise<void> {
     this._saveState.emit('started');
     const model = this._model;
     let content: PartialJSONValue;
@@ -511,55 +511,44 @@ export class Context<T extends DocumentRegistry.IModel>
       format: this._factory.fileFormat,
       content
     };
+    try {
+      let value: Contents.IModel;
+      await this._manager.ready;
+      if (!model.modelDB.isCollaborative) {
+        value = await this._maybeSave(options);
+      } else {
+        value = await this._manager.contents.save(this._path, options);
+      }
+      if (this.isDisposed) {
+        return;
+      }
 
-    return this._manager.ready
-      .then(() => {
-        if (!model.modelDB.isCollaborative) {
-          return this._maybeSave(options);
-        }
-        return this._manager.contents.save(this._path, options);
-      })
-      .then(value => {
-        if (this.isDisposed) {
-          return;
-        }
+      model.dirty = false;
+      this._updateContentsModel(value);
 
-        model.dirty = false;
-        this._updateContentsModel(value);
+      if (!this._isPopulated) {
+        await this._populate();
+      }
 
-        if (!this._isPopulated) {
-          return this._populate();
-        }
-      })
-      .catch(err => {
-        // If the save has been canceled by the user,
-        // throw the error so that whoever called save()
-        // can decide what to do.
-        if (err.message === 'Cancel') {
-          throw err;
-        }
-
-        // Otherwise show an error message and throw the error.
-        const localPath = this._manager.contents.localPath(this._path);
-        const name = PathExt.basename(localPath);
-        void this._handleError(err, `File Save Error for ${name}`);
+      // Emit completion.
+      this._saveState.emit('completed');
+    } catch (err) {
+      // If the save has been canceled by the user,
+      // throw the error so that whoever called save()
+      // can decide what to do.
+      if (err.message === 'Cancel') {
         throw err;
-      })
-      .then(
-        value => {
-          // Capture all success paths and emit completion.
-          this._saveState.emit('completed');
-          return value;
-        },
-        err => {
-          // Capture all error paths and emit failure.
-          this._saveState.emit('failed');
-          throw err;
-        }
-      )
-      .catch(() => {
-        /* no-op */
-      });
+      }
+
+      // Otherwise show an error message and throw the error.
+      const localPath = this._manager.contents.localPath(this._path);
+      const name = PathExt.basename(localPath);
+      void this._handleError(err, `File Save Error for ${name}`);
+
+      // Emit failure.
+      this._saveState.emit('failed');
+      throw err;
+    }
   }
 
   /**

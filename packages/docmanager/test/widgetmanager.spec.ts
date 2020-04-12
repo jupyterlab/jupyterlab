@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { DocumentWidgetManager } from '@jupyterlab/docmanager';
+import { DocumentWidgetManager } from '../src';
 
 import {
   DocumentRegistry,
@@ -23,6 +23,8 @@ import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 
 import { acceptDialog, dismissDialog } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(
@@ -69,8 +71,8 @@ describe('@jupyterlab/docmanager', () => {
     readOnly: true
   });
 
-  before(() => {
-    services = new ServiceManager({ standby: 'never' });
+  beforeAll(() => {
+    services = new Mock.ServiceManagerMock();
   });
 
   beforeEach(() => {
@@ -92,25 +94,25 @@ describe('@jupyterlab/docmanager', () => {
   describe('DocumentWidgetManager', () => {
     describe('#constructor()', () => {
       it('should create a new document widget manager', () => {
-        expect(manager).to.be.an.instanceof(DocumentWidgetManager);
+        expect(manager).toBeInstanceOf(DocumentWidgetManager);
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether the manager is disposed', () => {
-        expect(manager.isDisposed).to.equal(false);
+        expect(manager.isDisposed).toBe(false);
         manager.dispose();
-        expect(manager.isDisposed).to.equal(true);
+        expect(manager.isDisposed).toBe(true);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the manager', () => {
-        expect(manager.isDisposed).to.equal(false);
+        expect(manager.isDisposed).toBe(false);
         manager.dispose();
-        expect(manager.isDisposed).to.equal(true);
+        expect(manager.isDisposed).toBe(true);
         manager.dispose();
-        expect(manager.isDisposed).to.equal(true);
+        expect(manager.isDisposed).toBe(true);
       });
     });
 
@@ -118,7 +120,7 @@ describe('@jupyterlab/docmanager', () => {
       it('should create a widget', () => {
         const widget = manager.createWidget(widgetFactory, context);
 
-        expect(widget).to.be.an.instanceof(Widget);
+        expect(widget).toBeInstanceOf(Widget);
       });
 
       it('should emit the widgetCreated signal', () => {
@@ -128,7 +130,7 @@ describe('@jupyterlab/docmanager', () => {
           called = true;
         });
         manager.createWidget(widgetFactory, context);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
@@ -139,7 +141,9 @@ describe('@jupyterlab/docmanager', () => {
 
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
-        expect(manager.methods).to.contain('messageHook');
+        expect(manager.methods).toEqual(
+          expect.arrayContaining(['messageHook'])
+        );
       });
 
       it('should add the document class', () => {
@@ -147,7 +151,7 @@ describe('@jupyterlab/docmanager', () => {
         const widget = new DocumentWidget({ content, context });
 
         manager.adoptWidget(context, widget);
-        expect(widget.hasClass('jp-Document')).to.equal(true);
+        expect(widget.hasClass('jp-Document')).toBe(true);
       });
 
       it('should be retrievable', () => {
@@ -155,7 +159,7 @@ describe('@jupyterlab/docmanager', () => {
         const widget = new DocumentWidget({ content, context });
 
         manager.adoptWidget(context, widget);
-        expect(manager.contextForWidget(widget)).to.equal(context);
+        expect(manager.contextForWidget(widget)).toBe(context);
       });
     });
 
@@ -163,11 +167,11 @@ describe('@jupyterlab/docmanager', () => {
       it('should find a registered widget', () => {
         const widget = manager.createWidget(widgetFactory, context);
 
-        expect(manager.findWidget(context, 'test')).to.equal(widget);
+        expect(manager.findWidget(context, 'test')).toBe(widget);
       });
 
       it('should return undefined if not found', () => {
-        expect(manager.findWidget(context, 'test')).to.be.undefined;
+        expect(manager.findWidget(context, 'test')).toBeUndefined();
       });
     });
 
@@ -175,11 +179,11 @@ describe('@jupyterlab/docmanager', () => {
       it('should return the context for a widget', () => {
         const widget = manager.createWidget(widgetFactory, context);
 
-        expect(manager.contextForWidget(widget)).to.equal(context);
+        expect(manager.contextForWidget(widget)).toBe(context);
       });
 
       it('should return undefined if not tracked', () => {
-        expect(manager.contextForWidget(new Widget())).to.be.undefined;
+        expect(manager.contextForWidget(new Widget())).toBeUndefined();
       });
     });
 
@@ -188,13 +192,13 @@ describe('@jupyterlab/docmanager', () => {
         const widget = manager.createWidget(widgetFactory, context);
         const clone = manager.cloneWidget(widget)!;
 
-        expect(clone.hasClass('WidgetFactory')).to.equal(true);
-        expect(clone.hasClass('jp-Document')).to.equal(true);
-        expect(manager.contextForWidget(clone)).to.equal(context);
+        expect(clone.hasClass('WidgetFactory')).toBe(true);
+        expect(clone.hasClass('jp-Document')).toBe(true);
+        expect(manager.contextForWidget(clone)).toBe(context);
       });
 
       it('should return undefined if the source widget is not managed', () => {
-        expect(manager.cloneWidget(new Widget())).to.be.undefined;
+        expect(manager.cloneWidget(new Widget())).toBeUndefined();
       });
     });
 
@@ -204,8 +208,8 @@ describe('@jupyterlab/docmanager', () => {
         const clone = manager.cloneWidget(widget)!;
 
         await manager.closeWidgets(context);
-        expect(widget.isDisposed).to.equal(true);
-        expect(clone.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
+        expect(clone.isDisposed).toBe(true);
       });
     });
 
@@ -216,21 +220,23 @@ describe('@jupyterlab/docmanager', () => {
 
         manager.adoptWidget(context, widget);
         MessageLoop.sendMessage(widget, new Message('foo'));
-        expect(manager.methods).to.contain('messageHook');
+        expect(manager.methods).toEqual(
+          expect.arrayContaining(['messageHook'])
+        );
       });
 
       it('should return false for close-request messages', () => {
         const widget = manager.createWidget(widgetFactory, context);
         const msg = new Message('close-request');
 
-        expect(manager.messageHook(widget, msg)).to.equal(false);
+        expect(manager.messageHook(widget, msg)).toBe(false);
       });
 
       it('should return true for other messages', () => {
         const widget = manager.createWidget(widgetFactory, context);
         const msg = new Message('foo');
 
-        expect(manager.messageHook(widget, msg)).to.equal(true);
+        expect(manager.messageHook(widget, msg)).toBe(true);
       });
     });
 
@@ -242,8 +248,10 @@ describe('@jupyterlab/docmanager', () => {
         const delegate = new PromiseDelegate();
 
         widget.title.changed.connect(async () => {
-          expect(manager.methods).to.contain('setCaption');
-          expect(widget.title.caption).to.contain('Last Checkpoint');
+          expect(manager.methods).toEqual(
+            expect.arrayContaining(['setCaption'])
+          );
+          expect(widget.title.caption).toContain('Last Checkpoint');
           await dismissDialog();
           delegate.resolve(undefined);
         });
@@ -257,11 +265,12 @@ describe('@jupyterlab/docmanager', () => {
         const delegate = new PromiseDelegate();
 
         widget.disposed.connect(async () => {
-          expect(manager.methods).to.contain('onClose');
+          expect(manager.methods).toEqual(expect.arrayContaining(['onClose']));
           await dismissDialog();
           delegate.resolve(undefined);
         });
         widget.close();
+        await delegate.promise;
       });
 
       it('should prompt the user before closing', async () => {
@@ -271,10 +280,9 @@ describe('@jupyterlab/docmanager', () => {
         const widget = manager.createWidget(widgetFactory, context);
         const closed = manager.onClose(widget);
 
-        await acceptDialog();
-        await closed;
+        await Promise.all([acceptDialog(), closed]);
 
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
 
       it('should not prompt if the factory is readonly', async () => {
@@ -282,7 +290,7 @@ describe('@jupyterlab/docmanager', () => {
 
         await manager.onClose(readonly);
 
-        expect(readonly.isDisposed).to.equal(true);
+        expect(readonly.isDisposed).toBe(true);
       });
 
       it('should not prompt if the other widget is writable', async () => {
@@ -294,8 +302,8 @@ describe('@jupyterlab/docmanager', () => {
 
         await manager.onClose(one);
 
-        expect(one.isDisposed).to.equal(true);
-        expect(two.isDisposed).to.equal(false);
+        expect(one.isDisposed).toBe(true);
+        expect(two.isDisposed).toBe(false);
         two.dispose();
       });
 
@@ -310,8 +318,8 @@ describe('@jupyterlab/docmanager', () => {
         await acceptDialog();
         await closed;
 
-        expect(writable.isDisposed).to.equal(true);
-        expect(readonly.isDisposed).to.equal(false);
+        expect(writable.isDisposed).toBe(true);
+        expect(readonly.isDisposed).toBe(false);
         readonly.dispose();
       });
 
@@ -321,7 +329,7 @@ describe('@jupyterlab/docmanager', () => {
         const promise = manager.onClose(widget);
         await dismissDialog();
         await promise;
-        expect(widget.isDisposed).to.equal(false);
+        expect(widget.isDisposed).toBe(false);
       });
     });
   });

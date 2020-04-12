@@ -1,13 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { ServiceManager } from '@jupyterlab/services';
 
 import { Widget } from '@lumino/widgets';
 
-import { DocumentManager } from '@jupyterlab/docmanager';
+import { DocumentManager } from '../src';
 
 import {
   DocumentRegistry,
@@ -18,6 +18,8 @@ import {
 } from '@jupyterlab/docregistry';
 
 import { dismissDialog } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 class WidgetFactory extends ABCWidgetFactory<IDocumentWidget> {
   protected createNewWidget(
@@ -75,9 +77,8 @@ describe('@jupyterlab/docmanager', () => {
     fileTypes: []
   });
 
-  before(() => {
-    services = new ServiceManager({ standby: 'never' });
-    return services.ready;
+  beforeAll(() => {
+    services = new Mock.ServiceManagerMock();
   });
 
   beforeEach(() => {
@@ -105,37 +106,37 @@ describe('@jupyterlab/docmanager', () => {
   describe('DocumentWidgetManager', () => {
     describe('#constructor()', () => {
       it('should create a new document manager', () => {
-        expect(manager).to.be.an.instanceof(DocumentManager);
+        expect(manager).toBeInstanceOf(DocumentManager);
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether the manager is disposed', () => {
-        expect(manager.isDisposed).to.equal(false);
+        expect(manager.isDisposed).toBe(false);
         manager.dispose();
-        expect(manager.isDisposed).to.equal(true);
+        expect(manager.isDisposed).toBe(true);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the manager', () => {
-        expect(manager.isDisposed).to.equal(false);
+        expect(manager.isDisposed).toBe(false);
         manager.dispose();
-        expect(manager.isDisposed).to.equal(true);
+        expect(manager.isDisposed).toBe(true);
         manager.dispose();
-        expect(manager.isDisposed).to.equal(true);
+        expect(manager.isDisposed).toBe(true);
       });
     });
 
     describe('#services', () => {
-      it('should get the service manager for the manager', () => {
-        expect(manager.services).to.be.an.instanceof(ServiceManager);
+      it('should get the service manager for the manager', async () => {
+        await manager.services.ready;
       });
     });
 
     describe('#registry', () => {
       it('should get the registry used by the manager', () => {
-        expect(manager.registry).to.be.an.instanceof(DocumentRegistry);
+        expect(manager.registry).toBeInstanceOf(DocumentRegistry);
       });
     });
 
@@ -146,7 +147,7 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         widget = manager.open(model.path)!;
-        expect(widget.hasClass('WidgetFactory')).to.equal(true);
+        expect(widget.hasClass('WidgetFactory')).toBe(true);
         await dismissDialog();
       });
 
@@ -165,7 +166,7 @@ describe('@jupyterlab/docmanager', () => {
         context = manager.contextForWidget(widget)!;
         await context.ready;
         await context.sessionContext.ready;
-        expect(context.sessionContext.session?.kernel).to.be.ok;
+        expect(context.sessionContext.session?.kernel).toBeTruthy();
         await context.sessionContext.shutdown();
       });
 
@@ -177,7 +178,7 @@ describe('@jupyterlab/docmanager', () => {
         widget = manager.open(model.path, 'default')!;
         context = manager.contextForWidget(widget)!;
         await dismissDialog();
-        expect(context.sessionContext.session?.kernel).to.be.not.ok;
+        expect(context.sessionContext.session?.kernel).toBeFalsy();
       });
 
       it('should return undefined if the factory is not found', async () => {
@@ -186,7 +187,7 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         widget = manager.open(model.path, 'foo');
-        expect(widget).to.be.undefined;
+        expect(widget).toBeUndefined();
       });
 
       it('should return undefined if the factory has no model factory', async () => {
@@ -201,7 +202,7 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         widget = manager.open(model.path, 'foo');
-        expect(widget).to.be.undefined;
+        expect(widget).toBeUndefined();
       });
     });
 
@@ -212,7 +213,7 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         widget = manager.createNew(model.path)!;
-        expect(widget.hasClass('WidgetFactory')).to.equal(true);
+        expect(widget.hasClass('WidgetFactory')).toBe(true);
         await dismissDialog();
       });
 
@@ -231,7 +232,7 @@ describe('@jupyterlab/docmanager', () => {
         context = manager.contextForWidget(widget)!;
         await context.ready;
         await context.sessionContext.ready;
-        expect(context.sessionContext.session!.kernel!.id).to.equal(id);
+        expect(context.sessionContext.session!.kernel!.id).toBe(id);
         await context.sessionContext.shutdown();
       });
 
@@ -243,7 +244,7 @@ describe('@jupyterlab/docmanager', () => {
         widget = manager.createNew(model.path, 'default')!;
         context = manager.contextForWidget(widget)!;
         await dismissDialog();
-        expect(context.sessionContext.session?.kernel).to.be.not.ok;
+        expect(context.sessionContext.session?.kernel).toBeFalsy();
       });
 
       it('should return undefined if the factory is not found', async () => {
@@ -252,7 +253,7 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         widget = manager.createNew(model.path, 'foo');
-        expect(widget).to.be.undefined;
+        expect(widget).toBeUndefined();
       });
 
       it('should return undefined if the factory has no model factory', async () => {
@@ -267,7 +268,7 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         widget = manager.createNew(model.path, 'foo');
-        expect(widget).to.be.undefined;
+        expect(widget).toBeUndefined();
       });
     });
 
@@ -278,7 +279,7 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         widget = manager.createNew(model.path);
-        expect(manager.findWidget(model.path, 'test')).to.equal(widget);
+        expect(manager.findWidget(model.path, 'test')).toBe(widget);
         await dismissDialog();
       });
 
@@ -288,12 +289,12 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         widget = manager.createNew(model.path);
-        expect(manager.findWidget(model.path)).to.equal(widget);
+        expect(manager.findWidget(model.path)).toBe(widget);
         await dismissDialog();
       });
 
       it('should fail to find a widget', () => {
-        expect(manager.findWidget('foo')).to.be.undefined;
+        expect(manager.findWidget('foo')).toBeUndefined();
       });
 
       it('should fail to find a widget with non default factory and the default widget name', async () => {
@@ -307,7 +308,7 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         widget = manager.createNew(model.path, 'test2');
-        expect(manager.findWidget(model.path)).to.be.undefined;
+        expect(manager.findWidget(model.path)).toBeUndefined();
       });
 
       it('should find a widget with non default factory given a file and a null widget name', async () => {
@@ -321,7 +322,7 @@ describe('@jupyterlab/docmanager', () => {
           ext: '.txt'
         });
         widget = manager.createNew(model.path, 'test2');
-        expect(manager.findWidget(model.path, null)).to.equal(widget);
+        expect(manager.findWidget(model.path, null)).toBe(widget);
         await dismissDialog();
       });
     });
@@ -334,13 +335,13 @@ describe('@jupyterlab/docmanager', () => {
         });
         widget = manager.createNew(model.path)!;
         context = manager.contextForWidget(widget)!;
-        expect(context.path).to.equal(model.path);
+        expect(context.path).toBe(model.path);
         await dismissDialog();
       });
 
       it('should fail to find the context for the widget', () => {
         widget = new Widget();
-        expect(manager.contextForWidget(widget)).to.be.undefined;
+        expect(manager.contextForWidget(widget)).toBeUndefined();
       });
     });
 
@@ -352,7 +353,7 @@ describe('@jupyterlab/docmanager', () => {
         });
         widget = manager.createNew(model.path)!;
         const clone = manager.cloneWidget(widget)!;
-        expect(manager.contextForWidget(widget)).to.equal(
+        expect(manager.contextForWidget(widget)).toBe(
           manager.contextForWidget(clone)
         );
         await dismissDialog();
@@ -360,7 +361,7 @@ describe('@jupyterlab/docmanager', () => {
 
       it('should return undefined if the source widget is not managed', () => {
         widget = new Widget();
-        expect(manager.cloneWidget(widget)).to.be.undefined;
+        expect(manager.cloneWidget(widget)).toBeUndefined();
       });
 
       it('should allow widget factories to have custom clone behavior', () => {
@@ -368,15 +369,15 @@ describe('@jupyterlab/docmanager', () => {
         const clonedWidget: CloneTestWidget = manager.cloneWidget(
           widget
         ) as CloneTestWidget;
-        expect(clonedWidget.counter).to.equal(1);
+        expect(clonedWidget.counter).toBe(1);
         const newWidget: CloneTestWidget = manager.createNew(
           'bar',
           'CloneTestWidget'
         ) as CloneTestWidget;
-        expect(newWidget.counter).to.equal(0);
+        expect(newWidget.counter).toBe(0);
         expect(
           (manager.cloneWidget(clonedWidget) as CloneTestWidget).counter
-        ).to.equal(2);
+        ).toBe(2);
       });
     });
 
@@ -400,7 +401,7 @@ describe('@jupyterlab/docmanager', () => {
         });
         await dismissDialog();
         await manager.closeFile(path);
-        expect(called).to.equal(2);
+        expect(called).toBe(2);
       });
 
       it('should be a no-op if there are no open files on that path', () => {
@@ -428,7 +429,7 @@ describe('@jupyterlab/docmanager', () => {
         });
         await dismissDialog();
         await manager.closeAll();
-        expect(called).to.equal(2);
+        expect(called).toBe(2);
       });
 
       it('should be a no-op if there are no open documents', async () => {

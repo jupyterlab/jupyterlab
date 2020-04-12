@@ -6,28 +6,16 @@
       "path": "../apputils"
     },
     {
-      "path": "../cells"
-    },
-    {
-      "path": "../codeeditor"
-    },
-    {
       "path": "../coreutils"
     },
     {
-      "path": "../nbformat"
-    },
-    {
-      "path": "../observables"
-    },
-    {
-      "path": "../rendermime"
+      "path": "../docregistry"
     },
     {
       "path": "../services"
     },
     {
-      "path": "../ui-components"
+      "path": "../statusbar"
     },
     {
       "path": "../../testutils"

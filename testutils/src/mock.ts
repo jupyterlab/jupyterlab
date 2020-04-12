@@ -10,14 +10,20 @@ import {
   KernelMessage,
   KernelSpec,
   Session,
-  ServiceManager
+  ServiceManager,
+  Contents,
+  ServerConnection
 } from '@jupyterlab/services';
+
+import { ArrayIterator } from '@lumino/algorithm';
 
 import { AttachedProperty } from '@lumino/properties';
 
 import { UUID } from '@lumino/coreutils';
 
 import { Signal } from '@lumino/signaling';
+
+import { PathExt } from '@jupyterlab/coreutils';
 
 export const KERNELSPECS: KernelSpec.ISpecModel[] = [
   {
@@ -118,7 +124,7 @@ export function emitIopubMessage(
  */
 export function createSimpleSessionContext(
   model: Private.RecursivePartial<Session.IModel> = {}
-): SessionContext {
+): ISessionContext {
   const kernel = new KernelMock({ model: model?.kernel || {} });
   const session = new SessionConnectionMock({ model }, kernel);
   return new SessionContextMock({}, session);
@@ -157,7 +163,7 @@ export const KernelMock = jest.fn<
   };
   let executionCount = 0;
   const spec = Private.kernelSpecForKernelName(model!.name!)!;
-  const thisObject = {
+  const thisObject: Kernel.IKernelConnection = {
     ...jest.requireActual('@jupyterlab/services'),
     ...options,
     ...model,
@@ -192,7 +198,7 @@ export const KernelMock = jest.fn<
       });
       return Promise.resolve(historyReply);
     }),
-    requestExecute: jest.fn(code => {
+    requestExecute: jest.fn(options => {
       const msgId = UUID.uuid4();
       executionCount++;
       Private.lastMessageProperty.set(thisObject, msgId);
@@ -203,7 +209,7 @@ export const KernelMock = jest.fn<
         username: thisObject.username,
         msgId,
         content: {
-          code,
+          code: options.code,
           execution_count: executionCount
         }
       });
@@ -247,7 +253,7 @@ export const SessionConnectionMock = jest.fn<
     ...options.model,
     kernel: kernel!.model
   };
-  const thisObject = {
+  const thisObject: Session.ISessionConnection = {
     ...jest.requireActual('@jupyterlab/services'),
     id: UUID.uuid4(),
     ...options,
@@ -259,13 +265,22 @@ export const SessionConnectionMock = jest.fn<
       return Private.changeKernel(kernel!, partialModel!);
     }),
     selectKernel: jest.fn(),
-    shutdown: jest.fn(() => {
-      return Promise.resolve();
-    })
+    shutdown: jest.fn(() => Promise.resolve(void 0))
   };
+  const disposedSignal = new Signal<Session.ISessionConnection, undefined>(
+    thisObject
+  );
+  const propertyChangedSignal = new Signal<
+    Session.ISessionConnection,
+    'path' | 'name' | 'type'
+  >(thisObject);
   const statusChangedSignal = new Signal<
     Session.ISessionConnection,
     Kernel.Status
+  >(thisObject);
+  const connectionStatusChangedSignal = new Signal<
+    Session.ISessionConnection,
+    Kernel.ConnectionStatus
   >(thisObject);
   const kernelChangedSignal = new Signal<
     Session.ISessionConnection,
@@ -276,6 +291,11 @@ export const SessionConnectionMock = jest.fn<
     KernelMessage.IIOPubMessage
   >(thisObject);
 
+  const unhandledMessageSignal = new Signal<
+    Session.ISessionConnection,
+    KernelMessage.IMessage
+  >(thisObject);
+
   kernel!.iopubMessage.connect((_, args) => {
     iopubMessageSignal.emit(args);
   }, thisObject);
@@ -284,9 +304,13 @@ export const SessionConnectionMock = jest.fn<
     statusChangedSignal.emit(args);
   }, thisObject);
 
+  (thisObject as any).disposed = disposedSignal;
+  (thisObject as any).connectionStatusChanged = connectionStatusChangedSignal;
+  (thisObject as any).propertyChanged = propertyChangedSignal;
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).kernelChanged = kernelChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
+  (thisObject as any).unhandledMessage = unhandledMessageSignal;
   return thisObject;
 });
 
@@ -296,7 +320,7 @@ export const SessionConnectionMock = jest.fn<
  * @param session The session connection object to use
  */
 export const SessionContextMock = jest.fn<
-  SessionContext,
+  ISessionContext,
   [Partial<SessionContext.IOptions>, Session.ISessionConnection | null]
 >((options, connection) => {
   const session =
@@ -311,7 +335,7 @@ export const SessionContextMock = jest.fn<
       },
       null
     );
-  const thisObject = {
+  const thisObject: ISessionContext = {
     ...jest.requireActual('@jupyterlab/apputils'),
     ...options,
     path: session.path,
@@ -320,22 +344,18 @@ export const SessionContextMock = jest.fn<
     kernel: session.kernel,
     session,
     dispose: jest.fn(),
-    initialize: jest.fn(() => {
-      return Promise.resolve();
-    }),
-    ready: jest.fn(() => {
-      return Promise.resolve();
-    }),
+    initialize: jest.fn(() => Promise.resolve(void 0)),
+    ready: Promise.resolve(void 0),
     changeKernel: jest.fn(partialModel => {
       return Private.changeKernel(
-        session.kernel || Private.RUNNING_KERNELS_MOCKS[0],
+        session.kernel || Private.RUNNING_KERNELS[0],
         partialModel!
       );
     }),
-    shutdown: jest.fn(() => {
-      return Promise.resolve();
-    })
+    shutdown: jest.fn(() => Promise.resolve(void 0))
   };
+
+  const disposedSignal = new Signal<ISessionContext, undefined>(thisObject);
 
   const propertyChangedSignal = new Signal<
     ISessionContext,
@@ -371,30 +391,169 @@ export const SessionContextMock = jest.fn<
   (thisObject as any).kernelChanged = kernelChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
   (thisObject as any).propertyChanged = propertyChangedSignal;
+  (thisObject as any).disposed = disposedSignal;
   (thisObject as any).session = session;
 
   return thisObject;
 });
 
 /**
+ * A mock contents manager.
+ */
+export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
+  const files: { [key: string]: Contents.IModel } = {};
+  const checkpoints: { [key: string]: Contents.ICheckpointModel } = {};
+
+  const thisObject: Contents.IManager = {
+    ...jest.requireActual('@jupyterlab/services'),
+    ready: Promise.resolve(void 0),
+    newUntitled: jest.fn(options => {
+      options = options || {};
+      const name = UUID.uuid4() + options.ext || '.txt';
+      const path = PathExt.join(options.path || '', name);
+      let content = '';
+      if (options.type === 'notebook') {
+        content = JSON.stringify({});
+      }
+      const timeStamp = new Date().toISOString();
+      const model: Contents.IModel = {
+        path,
+        content,
+        name,
+        last_modified: timeStamp,
+        writable: true,
+        created: timeStamp,
+        type: options.type || 'file',
+        format: 'text',
+        mimetype: 'plain/text'
+      };
+      files[path] = model;
+      fileChangedSignal.emit({
+        type: 'new',
+        oldValue: null,
+        newValue: model
+      });
+      return Promise.resolve(model);
+    }),
+    createCheckpoint: jest.fn(path => {
+      const lastModified = new Date().toISOString();
+      checkpoints[path] = { id: UUID.uuid4(), last_modified: lastModified };
+      return Promise.resolve();
+    }),
+    listCheckpoints: jest.fn(path => {
+      if (checkpoints[path]) {
+        return Promise.resolve([checkpoints[path]]);
+      }
+      return Promise.resolve([]);
+    }),
+    getModelDBFactory: jest.fn(() => {
+      return null;
+    }),
+    normalize: jest.fn(path => {
+      return path;
+    }),
+    localPath: jest.fn(path => {
+      return path;
+    }),
+    get: jest.fn((path, _) => {
+      if (!files[path]) {
+        const resp = new Response(void 0, { status: 404 });
+        return Promise.reject(new ServerConnection.ResponseError(resp));
+      }
+      return Promise.resolve(files[path]);
+    }),
+    save: jest.fn((path, options) => {
+      const timeStamp = new Date().toISOString();
+      if (files[path]) {
+        files[path] = { ...files[path], ...options, last_modified: timeStamp };
+      } else {
+        files[path] = {
+          path,
+          name: PathExt.basename(path),
+          content: '',
+          writable: true,
+          created: timeStamp,
+          type: 'file',
+          format: 'text',
+          mimetype: 'plain/text',
+          ...options,
+          last_modified: timeStamp
+        };
+      }
+      fileChangedSignal.emit({
+        type: 'save',
+        oldValue: null,
+        newValue: files[path]
+      });
+      return Promise.resolve(files[path]);
+    })
+  };
+  const fileChangedSignal = new Signal<
+    Contents.IManager,
+    Contents.IChangedArgs
+  >(thisObject);
+  (thisObject as any).fileChanged = fileChangedSignal;
+  return thisObject;
+});
+
+/**
+ * A mock sessions manager.
+ */
+export const SessionManagerMock = jest.fn<Session.IManager, []>(() => {
+  const sessions: Session.IModel[] = [];
+  const thisObject: Session.IManager = {
+    ...jest.requireActual('@jupyterlab/services'),
+    ready: Promise.resolve(void 0),
+    startNew: jest.fn(options => {
+      const session = new SessionConnectionMock({ model: options }, null);
+      sessions.push(session.model);
+      return session;
+    }),
+    connectTo: jest.fn(options => {
+      return new SessionConnectionMock(options, null);
+    }),
+    refreshRunning: jest.fn(() => Promise.resolve(void 0)),
+    running: jest.fn(() => new ArrayIterator(sessions))
+  };
+  return thisObject;
+});
+
+/**
+ * A mock kernel specs manager
+ */
+export const KernelSpecManagerMock = jest.fn<KernelSpec.IManager, []>(() => {
+  const thisObject: KernelSpec.IManager = {
+    ...jest.requireActual('@jupyterlab/services'),
+    specs: { default: KERNELSPECS[0].name, kernelspecs: KERNELSPECS },
+    refreshSpecs: jest.fn(() => Promise.resolve(void 0))
+  };
+  return thisObject;
+});
+
+/**
  * A mock service manager.
  */
-export const ServiceManagerMock = jest.fn<ServiceManager, []>(() => ({
-  ...jest.requireActual('@jupyterlab/services'),
-  ready: jest.fn(() => {
-    return Promise.resolve();
-  })
-}));
+export const ServiceManagerMock = jest.fn<ServiceManager.IManager, []>(() => {
+  const thisObject: ServiceManager.IManager = {
+    ...jest.requireActual('@jupyterlab/services'),
+    ready: Promise.resolve(void 0),
+    contents: new ContentsManagerMock(),
+    sessions: new SessionManagerMock(),
+    kernelspecs: new KernelSpecManagerMock()
+  };
+  return thisObject;
+});
 
 /**
  * A mock kernel shell future.
  */
-export const MockShellFuture = jest.fn<Kernel.IShellFuture, []>(() => ({
-  ...jest.requireActual('@jupyterlab/services'),
-  done: jest.fn(() => {
-    return Promise.resolve();
-  })
-}));
+export const MockShellFuture = jest.fn<Kernel.IShellFuture, []>(() => {
+  const thisObject: Kernel.IShellFuture = {
+    ...jest.requireActual('@jupyterlab/services'),
+    done: Promise.resolve(void 0)
+  };
+  return thisObject;
+});
 
 /**
  * A namespace for module private data.
@@ -438,9 +597,9 @@ namespace Private {
         return model.id === partialModel.id;
       });
       if (kernelIdx !== -1) {
-        (kernel.model as any) = RUNNING_KERNELS_MOCKS[kernelIdx].model;
+        (kernel.model as any) = RUNNING_KERNELS[kernelIdx].model;
         (kernel.id as any) = partialModel.id;
-        return Promise.resolve(RUNNING_KERNELS_MOCKS[kernelIdx]);
+        return Promise.resolve(RUNNING_KERNELS[kernelIdx]);
       } else {
         throw new Error(
           `Unable to change kernel to one with id: ${partialModel.id}`
@@ -451,9 +610,9 @@ namespace Private {
         return model.name === partialModel.name;
       });
       if (kernelIdx !== -1) {
-        (kernel.model as any) = RUNNING_KERNELS_MOCKS[kernelIdx].model;
+        (kernel.model as any) = RUNNING_KERNELS[kernelIdx].model;
         (kernel.id as any) = partialModel.id;
-        return Promise.resolve(RUNNING_KERNELS_MOCKS[kernelIdx]);
+        return Promise.resolve(RUNNING_KERNELS[kernelIdx]);
       } else {
         throw new Error(
           `Unable to change kernel to one with name: ${partialModel.name}`
@@ -465,7 +624,7 @@ namespace Private {
   }
 
   // This list of running kernels simply mirrors the KERNEL_MODELS and KERNELSPECS lists
-  export const RUNNING_KERNELS_MOCKS: Kernel.IKernelConnection[] = KERNEL_MODELS.map(
+  export const RUNNING_KERNELS: Kernel.IKernelConnection[] = KERNEL_MODELS.map(
     (model, _) => {
       return new KernelMock({ model });
     }
