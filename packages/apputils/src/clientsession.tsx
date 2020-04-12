@@ -644,12 +644,18 @@ export class ClientSession implements IClientSession {
     if (!this._pendingSessionRequest) {
       this._initStarted.resolve(void 0);
     }
-    const requestId = (this._pendingSessionRequest = UUID.uuid4());
+
+    // Use a UUID for the path to overcome a race condition on the server
+    // where it will re-use a session for a given path but only after
+    // the kernel finishes starting.
+    // We later switch to the real path below.
+    // Use the correct directory so the kernel will be started in that directory.
+    const dirName = PathExt.dirname(this._path);
+    const requestId = (this._pendingSessionRequest = PathExt.join(
+      dirName,
+      UUID.uuid4()
+    ));
     try {
-      // Use a UUID for the path to overcome a race condition on the server
-      // where it will re-use a session for a given path but only after
-      // the kernel finishes starting.
-      // We later switch to the real path below.
       this._statusChanged.emit('starting');
       const session = await this.manager.startNew({
         path: requestId,
