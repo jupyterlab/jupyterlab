@@ -101,8 +101,11 @@ function main() {
   register.forEach(function(item) { lab.registerPluginModule(item); });
   lab.start({ ignorePlugins: ignorePlugins });
 
-  // Expose global lab instance when in dev mode.
-  if ((PageConfig.getOption('devMode') || '').toLowerCase() === 'true') {
+  // Expose global lab instance when in dev mode or when toggled explicitly.
+  var exposeGlobal = (PageConfig.getOption('exposeGlobal') || '').toLowerCase() === 'true';
+  var devMode = (PageConfig.getOption('devMode') || '').toLowerCase() === 'true';
+
+  if (exposeGlobal || devMode) {
     window.lab = lab;
   }
 
