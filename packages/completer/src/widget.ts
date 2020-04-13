@@ -39,7 +39,7 @@ const MIN_HEIGHT = 20;
 /**
  * The maximum height of a completer widget.
  */
-const MAX_HEIGHT = 200;
+const MAX_HEIGHT = 300;
 
 /**
  * A flag to indicate that event handlers are caught in the capture phase.

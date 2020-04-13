@@ -6,7 +6,6 @@
 
 :root {
   --jp-private-completer-item-height: 22px;
-  --jp-private-completer-docpanel-padding: 2px;
   /* Shift the baseline of the type character to align with the match text */
   --jp-private-completer-type-offset: 2px;
 }
@@ -28,17 +27,15 @@
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   width: 300px;
   overflow: scroll;
-  padding: var(--jp-private-completer-docpanel-padding);
-  max-height: calc(
-    (10 * var(--jp-private-completer-item-height)) +
-      (2 * var(--jp-private-completer-docpanel-padding))
-  );
+  padding: 0 8px 0 6px;
+  max-height: calc((10 * var(--jp-private-completer-item-height)));
 }
 
 .jp-Completer-docpanel pre {
   border: none;
   margin: 0px;
   padding: 0px;
+  white-space: pre-wrap;
 }
 
 .jp-Completer-list {
