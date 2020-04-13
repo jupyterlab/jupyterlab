@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/htmlviewer",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "A viewer for HTML documents.",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,9 +32,9 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.2.3",
+    "@jupyterlab/apputils": "^1.2.4",
     "@jupyterlab/coreutils": "^3.2.0",
-    "@jupyterlab/docregistry": "^1.2.3",
+    "@jupyterlab/docregistry": "^1.2.4",
     "@phosphor/coreutils": "^1.3.1",
     "@phosphor/signaling": "^1.3.0",
     "react": "~16.8.4"

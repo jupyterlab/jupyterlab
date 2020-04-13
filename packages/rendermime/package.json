@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/rendermime",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "JupyterLab - RenderMime",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,8 +35,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.2.3",
-    "@jupyterlab/codemirror": "^1.2.3",
+    "@jupyterlab/apputils": "^1.2.4",
+    "@jupyterlab/codemirror": "^1.2.4",
     "@jupyterlab/coreutils": "^3.2.0",
     "@jupyterlab/observables": "^2.4.0",
     "@jupyterlab/rendermime-interfaces": "^1.5.0",

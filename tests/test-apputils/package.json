@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-apputils",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -12,9 +12,9 @@
     "watch:src": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.2.3",
+    "@jupyterlab/apputils": "^1.2.4",
     "@jupyterlab/services": "^4.2.0",
-    "@jupyterlab/testutils": "^1.2.4",
+    "@jupyterlab/testutils": "^1.2.5",
     "@phosphor/algorithm": "^1.2.0",
     "@phosphor/commands": "^1.7.0",
     "@phosphor/coreutils": "^1.3.1",
