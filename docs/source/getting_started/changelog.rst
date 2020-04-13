@@ -6,6 +6,7 @@ JupyterLab Changelog
 `v1.2.x <https://github.com/jupyterlab/jupyterlab/milestone/54>`__
 ---------------------------------------------------------------------------
 
+* Fix cwd for kernels `#8212 <https://github.com/jupyterlab/jupyterlab/pull/8212>`__)
 * Better handling of slow kernel startup (`#8189 <https://github.com/jupyterlab/jupyterlab/pull/8189>`__)
 * Clean up kernel startup error messages (`#8186 <https://github.com/jupyterlab/jupyterlab/pull/8186>`__)
 * Fix Widget Tracker behavior (`#8118 <https://github.com/jupyterlab/jupyterlab/pull/8118>`__)
