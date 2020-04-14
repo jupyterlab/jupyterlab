@@ -201,3 +201,14 @@ on connectivity problems to HTTPS servers, you can disable using SSL for ``npm``
 
     # Configure npm to not use SSL
     npm set strict-ssl False
+
+Problems with Extensions and Settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Jupyterlab changes its internal state with `PUT` requests with JSON5 compatible payload. `JSON5 <https://json5.org/>`__ is not necessarily compatible on all existing systems. If by enabling extensions or changing settings on Jupyterlab's UI causes 400 return codes, it is likely that the `PUT` request's body was parsed unsuccessfully by a routing layer that does not accept JSON5 payload.
+
+Common symptoms of this during debugging are:
+
+- The settings are selected but nothing changes, or when extension manager is 
+- Jupyterlab's logs don't have the 400 return codes when `PUT` requests are issued.
+- If your Jupyterlab logs are on elastic search, you'll see `Unexpected token / in JSON at position`, signalling that the comments are invalid JSON.
