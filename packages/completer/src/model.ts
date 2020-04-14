@@ -393,7 +393,7 @@ export class CompleterModel implements Completer.IModel {
     let items = JSONExt.deepCopy(this._completionItems.items);
     let results: CompletionHandler.ICompletionItem[] = [];
     for (let item of items) {
-      // See if insert text matches query string
+      // See if label matches query string
       let match = StringExt.matchSumOfSquares(item.label, query);
       if (match) {
         // Highlight label text if there's a match
