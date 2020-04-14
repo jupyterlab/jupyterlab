@@ -494,7 +494,13 @@ export namespace CompletionHandler {
   export type ICompletionItems = ReadonlyArray<ICompletionItem>;
 
   /**
-   * Completion item object based off of LSP CompletionItem
+   * Completion item object based off of LSP CompletionItem.
+   * Compared to the old kernel completions interface, this enhances the completions UI to support:
+   * - differentiation between inserted text and user facing text
+   * - documentation for each completion item to be displayed adjacently
+   * - deprecation styling
+   * - custom icons
+   * and other potential new features.
    */
   export interface ICompletionItem extends PartialJSONObject {
     /**
