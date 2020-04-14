@@ -514,11 +514,6 @@ export namespace CompletionHandler {
     insertText?: string;
 
     /**
-     * Range to be replaced by this completion.
-     */
-    range?: IRange;
-
-    /**
      * Type of this completion item.
      */
     type?: string;
@@ -535,34 +530,9 @@ export namespace CompletionHandler {
     documentation?: string;
 
     /**
-     * A string used to help filter a set of completion items.
-     */
-    filterText?: string;
-
-    /**
      * Indicates if the item is deprecated.
      */
     deprecated?: boolean;
-
-    /**
-     * Any metadata that accompanies this completion item.
-     */
-    data?: any;
-  }
-
-  /**
-   * Replacement range of completion item.
-   */
-  export interface IRange extends PartialJSONObject {
-    /**
-     * The starting index for the substring being replaced by completion.
-     */
-    start: number;
-
-    /**
-     * The end index for the substring being replaced by completion.
-     */
-    end: number;
   }
 
   /**
