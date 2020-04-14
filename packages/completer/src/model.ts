@@ -402,6 +402,8 @@ export class CompleterModel implements Completer.IModel {
           match.indices,
           Private.mark
         );
+        // If no insertText is present, preserve original label value
+        // by setting it as the insertText.
         if (!item.insertText) {
           item.insertText = item.label;
         }
