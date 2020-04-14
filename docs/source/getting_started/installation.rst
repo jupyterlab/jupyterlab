@@ -205,7 +205,7 @@ on connectivity problems to HTTPS servers, you can disable using SSL for ``npm``
 Problems with Extensions and Settings
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Jupyterlab changes its internal state with `PUT` requests with JSON5 compatible payload. `JSON5 <https://json5.org/>`__ is not necessarily compatible on all existing systems. If by enabling extensions or changing settings on Jupyterlab's UI causes 400 return codes, it is likely that the `PUT` request's body was parsed unsuccessfully by a routing layer that does not accept JSON5 payload.
+Jupyterlab saves settings via `PUT` requests to the server with a JSON5-compatible payload, even though it claims the PUT request is valid JSON. `JSON5 <https://json5.org/>`__ is a superset of JSON that allows comments, etc. There may be deployment problems, manifest as 400 error return codes when saving settings, if these `PUT` requests are rejected by a routing layer that tries to validate the payload as JSON instead of JSON5.
 
 Common symptoms of this during debugging are:
 
