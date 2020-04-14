@@ -101,12 +101,12 @@ function main() {
   register.forEach(function(item) { lab.registerPluginModule(item); });
   lab.start({ ignorePlugins: ignorePlugins });
 
-  // Expose global lab instance when in dev mode or when toggled explicitly.
-  var exposeGlobal = (PageConfig.getOption('exposeGlobal') || '').toLowerCase() === 'true';
+  // Expose global app instance when in dev mode or when toggled explicitly.
+  var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
   var devMode = (PageConfig.getOption('devMode') || '').toLowerCase() === 'true';
 
-  if (exposeGlobal || devMode) {
-    window.lab = lab;
+  if (exposeAppInBrowser || devMode) {
+    window.jupyterlab = lab;
   }
 
   // Handle a browser test.

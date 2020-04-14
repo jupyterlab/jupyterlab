@@ -396,9 +396,9 @@ lab_flags['watch'] = (
     {'LabApp': {'watch': True}},
     "Start the app in watch mode."
 )
-lab_flags['expose-global'] = (
-    {'LabApp': {'expose_global': True}},
-    "Expose the global app instance to browser via window.lab"
+lab_flags['expose-app-in-browser'] = (
+    {'LabApp': {'expose_app_in_browser': True}},
+    "Expose the global app instance to browser via window.jupyterlab"
 )
 
 
@@ -480,8 +480,8 @@ class LabApp(NotebookApp):
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
 
-    expose_global = Bool(False, config=True,
-        help="Whether to expose the global app instance to browser via window.lab")
+    expose_app_in_browser = Bool(False, config=True,
+        help="Whether to expose the global app instance to browser via window.jupyterlab")
 
     def init_webapp(self, *args, **kwargs):
         super().init_webapp(*args, **kwargs)
