@@ -211,4 +211,4 @@ Common symptoms of this during debugging are:
 
 - The settings are selected but nothing changes, or when extension manager is 
 - JupyterLab's logs don't have the 400 return codes when `PUT` requests are issued.
-- If your Jupyterlab logs are on elastic search, you'll see `Unexpected token / in JSON at position`, signalling that the comments are invalid JSON.
+- If your JupyterLab logs are on Elastic Search, you'll see `Unexpected token / in JSON at position`. This comes from the JSON5 comments not being valid JSON.
