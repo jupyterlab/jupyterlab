@@ -812,36 +812,13 @@ export namespace Completer {
       item: CompletionHandler.ICompletionItem,
       orderedTypes: string[]
     ): HTMLLIElement {
-      let li = document.createElement('li');
-      li.className = ITEM_CLASS;
-      // Set the raw, un-marked up value as a data attribute.
-      li.setAttribute('data-value', item.insertText || item.label);
-
-      let matchNode = document.createElement('code');
-      matchNode.className = 'jp-Completer-match';
-      // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = defaultSanitizer.sanitize(item.label, {
-        allowedTags: ['mark']
-      });
-
-      if (item.type) {
-        let typeNode = document.createElement('span');
-        let type = item.type;
-        typeNode.textContent = (type[0] || '').toLowerCase();
-        let colorIndex = (orderedTypes.indexOf(type) % N_COLORS) + 1;
-        typeNode.className = 'jp-Completer-type';
-        typeNode.setAttribute(`data-color-index`, colorIndex.toString());
-        li.title = type;
-        let typeExtendedNode = document.createElement('code');
-        typeExtendedNode.className = 'jp-Completer-typeExtended';
-        typeExtendedNode.textContent = type.toLocaleLowerCase();
-        li.appendChild(typeNode);
-        li.appendChild(matchNode);
-        li.appendChild(typeExtendedNode);
-      } else {
-        li.appendChild(matchNode);
-      }
-      return li;
+      return this._constructNode(
+        this._createBaseNode(item.insertText || item.label),
+        this._createMatchNode(item.label),
+        !!item.type,
+        item.type,
+        orderedTypes
+      );
     }
 
     /**
@@ -852,22 +829,52 @@ export namespace Completer {
       typeMap: TypeMap,
       orderedTypes: string[]
     ): HTMLLIElement {
+      return this._constructNode(
+        this._createBaseNode(item.raw),
+        this._createMatchNode(item.text),
+        !JSONExt.deepEqual(typeMap, {}),
+        typeMap[item.raw] || '',
+        orderedTypes
+      );
+    }
+
+    /**
+     * Create base node with the value to be inserted
+     */
+    private _createBaseNode(value: string): HTMLLIElement {
       let li = document.createElement('li');
       li.className = ITEM_CLASS;
       // Set the raw, un-marked up value as a data attribute.
-      li.setAttribute('data-value', item.raw);
+      li.setAttribute('data-value', value);
+      return li;
+    }
 
+    /**
+     * Create match node to highlight potential prefix match within result.
+     */
+    private _createMatchNode(result: string): HTMLElement {
       let matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = defaultSanitizer.sanitize(item.text, {
+      matchNode.innerHTML = defaultSanitizer.sanitize(result, {
         allowedTags: ['mark']
       });
+      return matchNode;
+    }
 
+    /**
+     * Attaches type and match nodes to base node.
+     */
+    private _constructNode(
+      li: HTMLLIElement,
+      matchNode: HTMLElement,
+      typesExist: boolean,
+      type: any,
+      orderedTypes: string[]
+    ): HTMLLIElement {
       // If there are types provided add those.
-      if (!JSONExt.deepEqual(typeMap, {})) {
+      if (typesExist) {
         let typeNode = document.createElement('span');
-        let type = typeMap[item.raw] || '';
         typeNode.textContent = (type[0] || '').toLowerCase();
         let colorIndex = (orderedTypes.indexOf(type) % N_COLORS) + 1;
         typeNode.className = 'jp-Completer-type';
