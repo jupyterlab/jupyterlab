@@ -209,6 +209,6 @@ Jupyterlab saves settings via `PUT` requests to the server with a JSON5-compatib
 
 Common symptoms of this during debugging are:
 
-- The settings are selected but nothing changes, or when extension manager is 
+- The settings are selected but nothing changes, or when extension manager is enabled but the manager tab is not added.
 - JupyterLab's logs don't have the 400 return codes when `PUT` requests are issued.
 - If your JupyterLab logs are on Elastic Search, you'll see `Unexpected token / in JSON at position`. This comes from the JSON5 comments not being valid JSON.
