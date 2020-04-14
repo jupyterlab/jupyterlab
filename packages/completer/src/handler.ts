@@ -487,16 +487,11 @@ export namespace CompletionHandler {
   }
 
   /**
-   * Wrapper object for ICompletionItem.
+   * Type alias for ICompletionItem list.
    * Implementers of this interface should be responsible for
    * deduping and sorting the items in the list.
    */
-  export interface ICompletionItems {
-    /**
-     * Collection of completion items.
-     */
-    items: Array<ICompletionItem>;
-  }
+  export type ICompletionItems = ReadonlyArray<ICompletionItem>;
 
   /**
    * Completion item object based off of LSP CompletionItem

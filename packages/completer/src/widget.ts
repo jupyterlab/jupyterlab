@@ -228,8 +228,7 @@ export class Completer extends Widget {
     }
 
     let node: HTMLElement | null = null;
-    let completionItemList =
-      model.completionItems && model.completionItems().items;
+    let completionItemList = model.completionItems && model.completionItems();
     if (completionItemList && completionItemList.length) {
       node = this._createCompletionItemNode(model, completionItemList);
     } else {
@@ -263,7 +262,7 @@ export class Completer extends Widget {
 
   private _createCompletionItemNode(
     model: Completer.IModel,
-    items: CompletionHandler.ICompletionItem[]
+    items: CompletionHandler.ICompletionItems
   ): HTMLElement | null {
     // If there are no items, reset and bail.
     if (!items.length) {

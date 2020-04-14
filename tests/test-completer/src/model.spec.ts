@@ -59,12 +59,10 @@ describe('completer/model', () => {
         };
         model.stateChanged.connect(listener);
         expect(called).to.equal(0);
-        model.setCompletionItems!({ items: [{ label: 'foo' }] });
+        model.setCompletionItems!([{ label: 'foo' }]);
         expect(called).to.equal(1);
-        model.setCompletionItems!({ items: [{ label: 'foo' }] });
-        model.setCompletionItems!({
-          items: [{ label: 'foo' }, { label: 'bar' }]
-        });
+        model.setCompletionItems!([{ label: 'foo' }]);
+        model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
         expect(called).to.equal(2);
       });
 
@@ -95,18 +93,14 @@ describe('completer/model', () => {
         };
         model.stateChanged.connect(listener);
         expect(called).to.equal(0);
-        model.setCompletionItems!({ items: [{ label: 'foo' }] });
-        model.setCompletionItems!({ items: [{ label: 'foo' }] });
+        model.setCompletionItems!([{ label: 'foo' }]);
+        model.setCompletionItems!([{ label: 'foo' }]);
         expect(called).to.equal(1);
-        model.setCompletionItems!({
-          items: [{ label: 'foo' }, { label: 'bar' }]
-        });
-        model.setCompletionItems!({
-          items: [{ label: 'foo' }, { label: 'bar' }]
-        });
+        model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
+        model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
         expect(called).to.equal(2);
-        model.setCompletionItems!({ items: [] });
-        model.setCompletionItems!({ items: [] });
+        model.setCompletionItems!([]);
+        model.setCompletionItems!([]);
         expect(called).to.equal(3);
       });
 
@@ -190,39 +184,47 @@ describe('completer/model', () => {
     describe('#completionItems()', () => {
       it('should default to { items: [] }', () => {
         let model = new CompleterModel();
-        let want: CompletionHandler.ICompletionItems = { items: [] };
+        let want: CompletionHandler.ICompletionItems = [];
         expect(model.completionItems!()).to.deep.equal(want);
       });
 
       it('should return unmarked ICompletionItems if query is blank', () => {
         let model = new CompleterModel();
-        let want: CompletionHandler.ICompletionItems = {
-          items: [{ label: 'foo' }, { label: 'bar' }, { label: 'baz' }]
-        };
-        model.setCompletionItems!({
-          items: [{ label: 'foo' }, { label: 'bar' }, { label: 'baz' }]
-        });
+        let want: CompletionHandler.ICompletionItems = [
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' }
+        ];
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' }
+        ]);
         expect(model.completionItems!()).to.deep.equal(want);
       });
 
       it('should return a marked list of items if query is set', () => {
         let model = new CompleterModel();
-        let want: CompletionHandler.ICompletionItems = {
-          items: [{ label: '<mark>f</mark>oo', insertText: 'foo' }]
-        };
-        model.setCompletionItems!({
-          items: [{ label: 'foo' }, { label: 'bar' }, { label: 'baz' }]
-        });
+        let want: CompletionHandler.ICompletionItems = [
+          { label: '<mark>f</mark>oo', insertText: 'foo' }
+        ];
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' }
+        ]);
         model.query = 'f';
         expect(model.completionItems!()).to.deep.equal(want);
       });
 
       it('should return { items: [] } if reset', () => {
         let model = new CompleterModel();
-        let want: CompletionHandler.ICompletionItems = { items: [] };
-        model.setCompletionItems!({
-          items: [{ label: 'foo' }, { label: 'bar' }, { label: 'baz' }]
-        });
+        let want: CompletionHandler.ICompletionItems = [];
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' }
+        ]);
         model.reset();
         expect(model.completionItems!()).to.deep.equal(want);
       });

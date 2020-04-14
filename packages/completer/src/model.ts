@@ -185,12 +185,12 @@ export class CompleterModel implements Completer.IModel {
    * new types to KNOWN_TYPES.
    */
   setCompletionItems?(newValue: CompletionHandler.ICompletionItems): void {
-    if (JSONExt.deepEqual(newValue.items, this._completionItems.items)) {
+    if (JSONExt.deepEqual(newValue, this._completionItems)) {
       return;
     }
     this._completionItems = newValue;
     this._orderedTypes = Private.findOrderedCompletionItemTypes(
-      this._completionItems.items
+      this._completionItems
     );
     this._stateChanged.emit(undefined);
   }
@@ -390,7 +390,7 @@ export class CompleterModel implements Completer.IModel {
    * Highlight matching prefix by adding <mark> tags.
    */
   private _markup(query: string): CompletionHandler.ICompletionItems {
-    let items = JSONExt.deepCopy(this._completionItems.items);
+    let items = JSONExt.deepCopy(this._completionItems);
     let results: CompletionHandler.ICompletionItem[] = [];
     for (let item of items) {
       // See if label matches query string
@@ -411,7 +411,7 @@ export class CompleterModel implements Completer.IModel {
         results.push(item);
       }
     }
-    return { items: results };
+    return results;
   }
 
   /**
@@ -447,7 +447,7 @@ export class CompleterModel implements Completer.IModel {
   private _reset(): void {
     this._current = null;
     this._cursor = null;
-    this._completionItems = { items: [] };
+    this._completionItems = [];
     this._options = [];
     this._original = null;
     this._query = '';
@@ -459,7 +459,7 @@ export class CompleterModel implements Completer.IModel {
   private _current: Completer.ITextState | null = null;
   private _cursor: Completer.ICursorSpan | null = null;
   private _isDisposed = false;
-  private _completionItems: CompletionHandler.ICompletionItems = { items: [] };
+  private _completionItems: CompletionHandler.ICompletionItems = [];
   private _options: string[] = [];
   private _original: Completer.ITextState | null = null;
   private _query = '';
@@ -542,7 +542,7 @@ namespace Private {
    *
    */
   export function findOrderedCompletionItemTypes(
-    items: CompletionHandler.ICompletionItem[]
+    items: CompletionHandler.ICompletionItems
   ): string[] {
     const newTypeSet = new Set<string>();
     items.forEach(item => {
