@@ -147,6 +147,7 @@ def load_jupyter_server_extension(nbapp):
 
     # Client-side code assumes notebookVersion is a JSON-encoded string
     page_config['notebookVersion'] = dumps(version_info)
+    page_config['exposeAppInBrowser'] = getattr(nbapp, 'expose_app_in_browser', False)
 
     if nbapp.file_to_run and type(nbapp).__name__ == "LabApp":
         relpath = os.path.relpath(nbapp.file_to_run, nbapp.notebook_dir)
