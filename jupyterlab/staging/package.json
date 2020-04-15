@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application-top",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -134,8 +134,8 @@
     "@jupyterlab/markdownviewer-extension": "~1.2.4",
     "@jupyterlab/mathjax2": "~1.2.0",
     "@jupyterlab/mathjax2-extension": "~1.2.4",
-    "@jupyterlab/metapackage": "~1.2.7",
-    "@jupyterlab/nbconvert-css": "~0.3.7",
+    "@jupyterlab/metapackage": "~1.2.8",
+    "@jupyterlab/nbconvert-css": "~0.3.8",
     "@jupyterlab/notebook": "~1.2.5",
     "@jupyterlab/notebook-extension": "~1.2.5",
     "@jupyterlab/observables": "~2.4.0",
@@ -185,7 +185,7 @@
   },
   "jupyterlab": {
     "name": "JupyterLab",
-    "version": "1.2.10",
+    "version": "1.2.11",
     "extensions": {
       "@jupyterlab/application-extension": "",
       "@jupyterlab/apputils-extension": "",

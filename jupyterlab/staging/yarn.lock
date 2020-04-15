@@ -784,10 +784,10 @@
     "@jupyterlab/rendermime-interfaces" "^1.5.0"
     "@phosphor/coreutils" "^1.3.1"
 
-"@jupyterlab/metapackage@~1.2.7":
-  version "1.2.7"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/metapackage/-/metapackage-1.2.7.tgz#005430bf239e31a7283508e6462a70a1af60a29e"
-  integrity sha512-/kpAmJtKt44wlKuwROV6cCUrM+oEiQ3OLjjmjcyUWexqeG1M8W6eFh4wKOk2lW3FnwEypLyk9zdSXkRZt3u8Zg==
+"@jupyterlab/metapackage@~1.2.8":
+  version "1.2.8"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/metapackage/-/metapackage-1.2.8.tgz#5f981ac48beccf6942bf31c9691bec1b10c83ce8"
+  integrity sha512-IxJ4UWMedDE0I/H1s/AxcZ1T3VWWfEGHfI+bqu0KmmJ4BuIiJecaHSiPahZATFgXtCMWfTisTbPHIgGU6yV1BQ==
   dependencies:
     "@jupyterlab/application" "^1.2.4"
     "@jupyterlab/application-extension" "^1.2.4"
@@ -836,7 +836,7 @@
     "@jupyterlab/markdownviewer-extension" "^1.2.4"
     "@jupyterlab/mathjax2" "^1.2.0"
     "@jupyterlab/mathjax2-extension" "^1.2.4"
-    "@jupyterlab/nbconvert-css" "^0.3.7"
+    "@jupyterlab/nbconvert-css" "^0.3.8"
     "@jupyterlab/notebook" "^1.2.5"
     "@jupyterlab/notebook-extension" "^1.2.5"
     "@jupyterlab/observables" "^2.4.0"
@@ -867,10 +867,10 @@
     "@jupyterlab/vega4-extension" "^1.2.0"
     "@jupyterlab/vega5-extension" "^1.2.0"
 
-"@jupyterlab/nbconvert-css@^0.3.7", "@jupyterlab/nbconvert-css@~0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@jupyterlab/nbconvert-css/-/nbconvert-css-0.3.7.tgz#9206bb80bf9b6f39b8c938dfd898af1ba1658929"
-  integrity sha512-r0CcR2q8659EHEE8VI0YWMCUPX48IeA33GJ3lKFFlc+9t3BnIL9BlmytduHk4b0kbbreNgpAHtsqBjEV3fzF/g==
+"@jupyterlab/nbconvert-css@^0.3.8", "@jupyterlab/nbconvert-css@~0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/nbconvert-css/-/nbconvert-css-0.3.8.tgz#3ee39af40c8436c629576a54ebcb665f1bfe986b"
+  integrity sha512-T+YmkdwuLHeuMYu7O6brBqM4qsBnFa10/Apzh9UFuAngUrZAaJ0uahs1ElSqRlSSGlpTwoQQ5rrUB+5hL87q/g==
   dependencies:
     "@jupyterlab/apputils" "^1.2.4"
     "@jupyterlab/cells" "^1.2.5"
@@ -2144,9 +2144,9 @@ cli-cursor@^2.1.0:
     restore-cursor "^2.0.0"
 
 cli-width@^2.0.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-2.2.0.tgz#ff19ede8a9a5e579324147b0c11f0fbcbabed639"
-  integrity sha1-/xnt6Kml5XkyQUewwR8PvLq+1jk=
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/cli-width/-/cli-width-2.2.1.tgz#b0433d0b4e9c847ef18868a4ef16fd5fc8271c48"
+  integrity sha512-GRMWDxpOB6Dgk2E5Uo+3eEBvtOOlimMmpbFiKuLFnQzYDavtLFY3K5ona41jgN/WdRZtG7utuVSVTL4HbZHGkw==
 
 cliui@^5.0.0:
   version "5.0.0"
@@ -4366,9 +4366,12 @@ object-inspect@^1.7.0:
   integrity sha512-a7pEHdh1xKIAgTySUGgLMx/xwDZskN1Ud6egYYN3EdRW4ZMPNEDUTF+hwy2LUC+Bl+SyLXANnwz/jyh/qutKUw==
 
 object-is@^1.0.1:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/object-is/-/object-is-1.0.2.tgz#6b80eb84fe451498f65007982f035a5b445edec4"
-  integrity sha512-Epah+btZd5wrrfjkJZq1AOB9O6OxUQto45hzFd7lXGrpHPGE0W1k+426yrZV+k6NJOzLNNW/nVsmZdIWsAqoOQ==
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/object-is/-/object-is-1.1.2.tgz#c5d2e87ff9e119f78b7a088441519e2eec1573b6"
+  integrity sha512-5lHCz+0uufF6wZ7CRFWJN3hp8Jqblpgve06U5CMQ3f//6iDjPr2PEo9MWCjEssDsa+UZEL4PkFpr+BMop6aKzQ==
+  dependencies:
+    define-properties "^1.1.3"
+    es-abstract "^1.17.5"
 
 object-keys@^1.0.11, object-keys@^1.0.12, object-keys@^1.1.1:
   version "1.1.1"
@@ -6013,9 +6016,9 @@ watchpack@^1.6.0:
     neo-async "^2.5.0"
 
 webpack-bundle-analyzer@^3.4.1:
-  version "3.6.1"
-  resolved "https://registry.yarnpkg.com/webpack-bundle-analyzer/-/webpack-bundle-analyzer-3.6.1.tgz#bdb637c2304424f2fbff9a950c7be42a839ae73b"
-  integrity sha512-Nfd8HDwfSx1xBwC+P8QMGvHAOITxNBSvu/J/mCJvOwv+G4VWkU7zir9SSenTtyCi0LnVtmsc7G5SZo1uV+bxRw==
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/webpack-bundle-analyzer/-/webpack-bundle-analyzer-3.7.0.tgz#84da434e89442899b884d9ad38e466d0db02a56f"
+  integrity sha512-mETdjZ30a3Yf+NTB/wqTgACK7rAYQl5uxKK0WVTNmF0sM3Uv8s3R58YZMW7Rhu0Lk2Rmuhdj5dcH5Q76zCDVdA==
   dependencies:
     acorn "^7.1.1"
     acorn-walk "^7.1.1"

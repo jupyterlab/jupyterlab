@@ -6,13 +6,31 @@ JupyterLab Changelog
 `v1.2.x <https://github.com/jupyterlab/jupyterlab/milestone/54>`__
 ---------------------------------------------------------------------------
 
-* Fix cwd for kernels `#8212 <https://github.com/jupyterlab/jupyterlab/pull/8212>`__)
+v1.2.11
+~~~~~~~
+* Expose global app instance with command-line option: (`#8218 <https://github.com/jupyterlab/jupyterlab/pull/8218>`__)
+
+v1.2.10
+~~~~~~~
+* Fix cwd for kernels (`#8212 <https://github.com/jupyterlab/jupyterlab/pull/8212>`__)
+
+v1.2.9
+~~~~~~~
 * Better handling of slow kernel startup (`#8189 <https://github.com/jupyterlab/jupyterlab/pull/8189>`__)
 * Clean up kernel startup error messages (`#8186 <https://github.com/jupyterlab/jupyterlab/pull/8186>`__)
+
+v1.2.8
+~~~~~~~
 * Fix Widget Tracker behavior (`#8118 <https://github.com/jupyterlab/jupyterlab/pull/8118>`__)
 * Increase timeout for yarn (`#8108 <https://github.com/jupyterlab/jupyterlab/pull/8108>`__)
 * Add .yarnrc explicitly in Python setup (`#8107 <https://github.com/jupyterlab/jupyterlab/pull/8107>`__)
+
+v1.2.7
+~~~~~~~
 * Better handling of fallback versions for an extension (`#7981 <https://github.com/jupyterlab/jupyterlab/pull/7981>`__)
+
+v1.2.6
+~~~~~~~
 * Fix browser check (`#7817 <https://github.com/jupyterlab/jupyterlab/pull/7817>`__)
 
 
@@ -20,7 +38,7 @@ JupyterLab Changelog
 ---------------------------------------------------------------------------
 
 October 29, 2019
-^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~
 
 Here are some highlights for this release. See the `JupyterLab
 1.2.0 <https://github.com/jupyterlab/jupyterlab/milestone/38?closed=1>`__
