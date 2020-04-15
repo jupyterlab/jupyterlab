@@ -293,13 +293,26 @@ export class DocumentWidgetManager implements IDisposable {
     // Handle dirty state.
     return this._maybeClose(widget)
       .then(result => {
+        const [shouldClose, ignoreSave] = result;
         if (widget.isDisposed) {
           return true;
         }
-        if (result) {
-          widget.dispose();
+        if (shouldClose) {
+          if (!ignoreSave) {
+            const context = Private.contextProperty.get(widget);
+            if (!context) {
+              return true;
+            }
+            void context.save().then(() => {
+              if (!widget.isDisposed) {
+                widget.dispose();
+              }
+            });
+          } else {
+            widget.dispose();
+          }
         }
-        return result;
+        return shouldClose;
       })
       .catch(error => {
         widget.dispose();
@@ -320,15 +333,15 @@ export class DocumentWidgetManager implements IDisposable {
   /**
    * Ask the user whether to close an unsaved file.
    */
-  private _maybeClose(widget: Widget): Promise<boolean> {
+  private _maybeClose(widget: Widget): Promise<[boolean, boolean]> {
     // Bail if the model is not dirty or other widgets are using the model.)
     const context = Private.contextProperty.get(widget);
     if (!context) {
-      return Promise.resolve(true);
+      return Promise.resolve([true, true]);
     }
     let widgets = Private.widgetsProperty.get(context);
     if (!widgets) {
-      return Promise.resolve(true);
+      return Promise.resolve([true, true]);
     }
     // Filter by whether the factories are read only.
     widgets = toArray(
@@ -342,19 +355,23 @@ export class DocumentWidgetManager implements IDisposable {
     );
     const factory = Private.factoryProperty.get(widget);
     if (!factory) {
-      return Promise.resolve(true);
+      return Promise.resolve([true, true]);
     }
     const model = context.model;
     if (!model.dirty || widgets.length > 1 || factory.readOnly) {
-      return Promise.resolve(true);
+      return Promise.resolve([true, true]);
     }
     const fileName = widget.title.label;
     return showDialog({
-      title: 'Close without saving?',
-      body: `File "${fileName}" has unsaved changes, close without saving?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+      title: 'Confirm close',
+      body: `File "${fileName}" has unsaved changes, save before closing?`,
+      buttons: [
+        Dialog.cancelButton(),
+        Dialog.warnButton({ label: "Don't save" }),
+        Dialog.okButton({ label: 'Save' })
+      ]
     }).then(result => {
-      return result.button.accept;
+      return [result.button.accept, result.button.displayType === 'warn'];
     });
   }
 
