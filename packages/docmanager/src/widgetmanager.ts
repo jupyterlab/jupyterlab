@@ -289,35 +289,26 @@ export class DocumentWidgetManager implements IDisposable {
    *
    * @returns A promise that resolves with whether the widget was closed.
    */
-  protected onClose(widget: Widget): Promise<boolean> {
+  protected async onClose(widget: Widget): Promise<boolean> {
     // Handle dirty state.
-    return this._maybeClose(widget)
-      .then(result => {
-        const [shouldClose, ignoreSave] = result;
-        if (widget.isDisposed) {
+    const [shouldClose, ignoreSave] = await this._maybeClose(widget);
+    if (widget.isDisposed) {
+      return true;
+    }
+    if (shouldClose) {
+      if (!ignoreSave) {
+        const context = Private.contextProperty.get(widget);
+        if (!context) {
           return true;
         }
-        if (shouldClose) {
-          if (!ignoreSave) {
-            const context = Private.contextProperty.get(widget);
-            if (!context) {
-              return true;
-            }
-            void context.save().then(() => {
-              if (!widget.isDisposed) {
-                widget.dispose();
-              }
-            });
-          } else {
-            widget.dispose();
-          }
-        }
-        return shouldClose;
-      })
-      .catch(error => {
-        widget.dispose();
-        throw error;
-      });
+        await context.save();
+      }
+      if (widget.isDisposed) {
+        return true;
+      }
+      widget.dispose();
+    }
+    return shouldClose;
   }
 
   /**
@@ -367,7 +358,7 @@ export class DocumentWidgetManager implements IDisposable {
       body: `File "${fileName}" has unsaved changes, save before closing?`,
       buttons: [
         Dialog.cancelButton(),
-        Dialog.warnButton({ label: "Don't save" }),
+        Dialog.warnButton({ label: 'Discard changes' }),
         Dialog.okButton({ label: 'Save' })
       ]
     }).then(result => {
