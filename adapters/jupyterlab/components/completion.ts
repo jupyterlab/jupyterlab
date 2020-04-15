@@ -265,7 +265,7 @@ export class LSPConnector extends DataConnector<
       end: token.offset + prefix.length,
       matches: [],
       metadata: {},
-      items: { items }
+      items
     };
   }
 
@@ -292,7 +292,7 @@ export class LSPConnector extends DataConnector<
         items.push({ label: match });
       });
     }
-    return { ...reply, items: { items } };
+    return { ...reply, items };
   }
 
   private merge_replies(
@@ -301,14 +301,14 @@ export class LSPConnector extends DataConnector<
     editor: CodeEditor.IEditor
   ): CompletionHandler.IReply {
     console.log('[LSP][Completer] Merging completions:', lsp, kernel);
-    if (!kernel.items.items.length) {
+    if (!kernel.items.length) {
       return lsp;
     }
-    if (!lsp.items.items.length) {
+    if (!lsp.items.length) {
       return kernel;
     }
     // Combine ICompletionItems across multiple IReply objects
-    const aggregatedItems = lsp.items.items.concat(kernel.items.items);
+    const aggregatedItems = lsp.items.concat(kernel.items);
     // De-dupe and filter items
     const labelSet = new Set<String>();
     const processedItems = new Array<CompletionHandler.ICompletionItem>();
@@ -325,7 +325,7 @@ export class LSPConnector extends DataConnector<
     });
     // TODO: Sort items
     // Return reply with processed items.
-    return { ...lsp, items: { items: processedItems } };
+    return { ...lsp, items: processedItems };
   }
 
   // TODO: Remove this
