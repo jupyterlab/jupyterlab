@@ -129,10 +129,10 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   ): IMainMenu => {
     const { commands } = app;
 
-    let menu = new MainMenu(commands);
+    const menu = new MainMenu(commands);
     menu.id = 'jp-MainMenu';
 
-    let logo = new Widget();
+    const logo = new Widget();
     jupyterIcon.element({
       container: logo.node,
       elementPosition: 'center',
@@ -364,8 +364,8 @@ export function createFileMenu(
         ]
       }).then(result => {
         if (result.button.accept) {
-          let setting = ServerConnection.makeSettings();
-          let apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
+          const setting = ServerConnection.makeSettings();
+          const apiURL = URLExt.join(setting.baseUrl, 'api/shutdown');
           return ServerConnection.makeRequest(
             apiURL,
             { method: 'POST' },
@@ -801,7 +801,7 @@ export function createTabsMenu(
       });
       // Update the ID of the previous active tab if a new tab is selected.
       labShell.currentChanged.connect((_, args) => {
-        let widget = args.oldValue;
+        const widget = args.oldValue;
         if (!widget) {
           return;
         }
@@ -825,7 +825,7 @@ namespace Private {
     it: Iterable<T>,
     predicate: (value: T) => boolean
   ): T | undefined {
-    for (let value of it) {
+    for (const value of it) {
       if (predicate(value)) {
         return value;
       }
@@ -841,7 +841,7 @@ namespace Private {
     s: Set<E>,
     label: keyof E
   ): string {
-    let widget = app.shell.currentWidget;
+    const widget = app.shell.currentWidget;
     const extender = widget
       ? find(s, value => value.tracker.has(widget!))
       : undefined;
@@ -864,7 +864,7 @@ namespace Private {
     executor: keyof E
   ): () => Promise<any> {
     return () => {
-      let widget = app.shell.currentWidget;
+      const widget = app.shell.currentWidget;
       const extender = widget
         ? find(s, value => value.tracker.has(widget!))
         : undefined;
@@ -874,7 +874,7 @@ namespace Private {
       // Coerce the result to be a function. When Typedoc is updated to use
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a function.
-      let f = (extender[executor] as any) as (w: Widget) => Promise<any>;
+      const f = (extender[executor] as any) as (w: Widget) => Promise<any>;
       return f(widget!);
     };
   }
@@ -889,7 +889,7 @@ namespace Private {
     executor: keyof E
   ): () => boolean {
     return () => {
-      let widget = app.shell.currentWidget;
+      const widget = app.shell.currentWidget;
       const extender = widget
         ? find(s, value => value.tracker.has(widget!))
         : undefined;
@@ -911,7 +911,7 @@ namespace Private {
     toggled: keyof E
   ): () => boolean {
     return () => {
-      let widget = app.shell.currentWidget;
+      const widget = app.shell.currentWidget;
       const extender = widget
         ? find(s, value => value.tracker.has(widget!))
         : undefined;

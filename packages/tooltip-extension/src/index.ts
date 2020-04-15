@@ -289,25 +289,25 @@ namespace Private {
    * Fetch a tooltip's content from the API server.
    */
   export function fetch(options: IFetchOptions): Promise<JSONObject> {
-    let { detail, editor, kernel } = options;
-    let code = editor.model.value.text;
-    let position = editor.getCursorPosition();
-    let offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
+    const { detail, editor, kernel } = options;
+    const code = editor.model.value.text;
+    const position = editor.getCursorPosition();
+    const offset = Text.jsIndexToCharIndex(editor.getOffsetAt(position), code);
 
     // Clear hints if the new text value is empty or kernel is unavailable.
     if (!code || !kernel) {
       return Promise.reject(void 0);
     }
 
-    let contents: KernelMessage.IInspectRequestMsg['content'] = {
+    const contents: KernelMessage.IInspectRequestMsg['content'] = {
       code,
       cursor_pos: offset,
       detail_level: detail || 0
     };
-    let current = ++pending;
+    const current = ++pending;
 
     return kernel.requestInspect(contents).then(msg => {
-      let value = msg.content;
+      const value = msg.content;
 
       // If a newer request is pending, bail.
       if (current !== pending) {

@@ -25,14 +25,14 @@ describe('CodeEditor.Model', () => {
     });
 
     it('should create a CodeEditor Model with an initial value', () => {
-      let other = new CodeEditor.Model({ value: 'Initial text here' });
+      const other = new CodeEditor.Model({ value: 'Initial text here' });
       expect(other).to.be.an.instanceof(CodeEditor.Model);
       expect(other.value.text).to.equal('Initial text here');
       other.dispose();
     });
 
     it('should create a CodeEditor Model with an initial mimetype', () => {
-      let other = new CodeEditor.Model({
+      const other = new CodeEditor.Model({
         value: 'import this',
         mimeType: 'text/x-python'
       });

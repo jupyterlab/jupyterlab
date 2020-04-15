@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -59,7 +59,7 @@ export abstract class Placeholder extends ReactWidget {
    * Handle the click event.
    */
   protected handleClick(e: React.MouseEvent<HTMLDivElement>): void {
-    let callback = this._callback;
+    const callback = this._callback;
     callback(e);
   }
 

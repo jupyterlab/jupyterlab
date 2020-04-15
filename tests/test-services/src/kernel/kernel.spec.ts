@@ -32,7 +32,7 @@ describe('kernel', () => {
   });
 
   afterEach(async () => {
-    let models = await KernelAPI.listRunning();
+    const models = await KernelAPI.listRunning();
     await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
   });
 

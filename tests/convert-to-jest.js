@@ -13,7 +13,7 @@ if (target.indexOf('test-') !== 0) {
 }
 
 // Make sure folder exists
-let testSrc = path.join(__dirname, target);
+const testSrc = path.join(__dirname, target);
 
 console.log(testSrc); // eslint-disable-line
 if (!fs.existsSync(testSrc)) {

@@ -59,15 +59,15 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
     });
 
     if (context.model.modelDB.isCollaborative) {
-      let modelDB = context.model.modelDB;
+      const modelDB = context.model.modelDB;
       void modelDB.connected.then(() => {
-        let collaborators = modelDB.collaborators;
+        const collaborators = modelDB.collaborators;
         if (!collaborators) {
           return;
         }
 
         // Setup the selection style for collaborators
-        let localCollaborator = collaborators.localCollaborator;
+        const localCollaborator = collaborators.localCollaborator;
         this.editor.uuid = localCollaborator.sessionId;
 
         this.editor.selectionStyle = {
@@ -140,11 +140,11 @@ export class FileEditorCodeWrapper extends CodeEditorWrapper {
   private _onCollaboratorsChanged(): void {
     // If there are selections corresponding to non-collaborators,
     // they are stale and should be removed.
-    let collaborators = this._context.model.modelDB.collaborators;
+    const collaborators = this._context.model.modelDB.collaborators;
     if (!collaborators) {
       return;
     }
-    for (let key of this.editor.model.selections.keys()) {
+    for (const key of this.editor.model.selections.keys()) {
       if (!collaborators.has(key)) {
         this.editor.model.selections.delete(key);
       }
@@ -169,7 +169,9 @@ export class FileEditor extends Widget {
     const context = (this._context = options.context);
     this._mimeTypeService = options.mimeTypeService;
 
-    let editorWidget = (this.editorWidget = new FileEditorCodeWrapper(options));
+    const editorWidget = (this.editorWidget = new FileEditorCodeWrapper(
+      options
+    ));
     this.editor = editorWidget.editor;
     this.model = editorWidget.model;
 
@@ -177,7 +179,7 @@ export class FileEditor extends Widget {
     context.pathChanged.connect(this._onPathChanged, this);
     this._onPathChanged();
 
-    let layout = (this.layout = new StackedLayout());
+    const layout = (this.layout = new StackedLayout());
     layout.addWidget(editorWidget);
   }
 
@@ -223,7 +225,7 @@ export class FileEditor extends Widget {
    */
   protected onAfterAttach(msg: Message): void {
     super.onAfterAttach(msg);
-    let node = this.node;
+    const node = this.node;
     node.addEventListener('mousedown', this);
   }
 
@@ -231,7 +233,7 @@ export class FileEditor extends Widget {
    * Handle `before-detach` messages for the widget.
    */
   protected onBeforeDetach(msg: Message): void {
-    let node = this.node;
+    const node = this.node;
     node.removeEventListener('mousedown', this);
   }
 
@@ -316,8 +318,8 @@ export class FileEditorFactory extends ABCWidgetFactory<
   protected createNewWidget(
     context: DocumentRegistry.CodeContext
   ): IDocumentWidget<FileEditor> {
-    let func = this._services.factoryService.newDocumentEditor;
-    let factory: CodeEditor.Factory = options => {
+    const func = this._services.factoryService.newDocumentEditor;
+    const factory: CodeEditor.Factory = options => {
       return func(options);
     };
     const content = new FileEditor({

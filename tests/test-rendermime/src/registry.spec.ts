@@ -45,7 +45,7 @@ describe('rendermime/registry', () => {
   let RESOLVER: IRenderMime.IResolver;
 
   before(async () => {
-    let fileContext = await createFileContextWithKernel();
+    const fileContext = await createFileContextWithKernel();
     await fileContext.initialize(true);
 
     // The context initialization kicks off a sessionContext initialization,

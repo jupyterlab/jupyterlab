@@ -440,7 +440,7 @@ export class SessionContext implements ISessionContext {
    * kernel.
    */
   get kernelDisplayName(): string {
-    let kernel = this.session?.kernel;
+    const kernel = this.session?.kernel;
     if (this._pendingKernelName === Private.NO_KERNEL) {
       return Private.NO_KERNEL;
     }
@@ -485,7 +485,7 @@ export class SessionContext implements ISessionContext {
    * the user.
    */
   get kernelDisplayStatus(): ISessionContext.KernelDisplayStatus {
-    let kernel = this.session?.kernel;
+    const kernel = this.session?.kernel;
     if (this._pendingKernelName === Private.NO_KERNEL) {
       return 'idle';
     }
@@ -629,15 +629,15 @@ export class SessionContext implements ISessionContext {
    * This makes it easier to consolidate promise handling logic.
    */
   async _initialize(): Promise<boolean> {
-    let manager = this.sessionManager;
+    const manager = this.sessionManager;
     await manager.ready;
     await manager.refreshRunning();
-    let model = find(manager.running(), item => {
+    const model = find(manager.running(), item => {
       return item.path === this._path;
     });
     if (model) {
       try {
-        let session = manager.connectTo({ model });
+        const session = manager.connectTo({ model });
         this._handleNewSession(session);
       } catch (err) {
         void this._handleSessionError(err);
@@ -676,7 +676,7 @@ export class SessionContext implements ISessionContext {
    * @returns Whether to ask the user to pick a kernel.
    */
   private async _startIfNecessary(): Promise<boolean> {
-    let preference = this.kernelPreference;
+    const preference = this.kernelPreference;
     if (
       this.isDisposed ||
       this.session?.kernel ||
@@ -691,7 +691,7 @@ export class SessionContext implements ISessionContext {
     if (preference.id) {
       options = { id: preference.id };
     } else {
-      let name = SessionContext.getDefaultKernel({
+      const name = SessionContext.getDefaultKernel({
         specs: this.specsManager.specs,
         sessions: this.sessionManager.running(),
         preference
@@ -1109,7 +1109,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
       Dialog.okButton({ label: 'Select' })
     ];
 
-    let dialog = new Dialog({
+    const dialog = new Dialog({
       title: 'Select Kernel',
       body: new Private.KernelSelector(sessionContext),
       buttons
@@ -1119,7 +1119,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
     if (sessionContext.isDisposed || !result.button.accept) {
       return;
     }
-    let model = result.value;
+    const model = result.value;
     if (
       model === null &&
       sessionContext.kernelDisplayName !== Private.NO_KERNEL
@@ -1146,7 +1146,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
     if (sessionContext.isDisposed) {
       throw new Error('session already disposed');
     }
-    let kernel = sessionContext.session?.kernel;
+    const kernel = sessionContext.session?.kernel;
     if (!kernel && sessionContext.prevKernelName) {
       await sessionContext.changeKernel({
         name: sessionContext.prevKernelName
@@ -1158,7 +1158,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
       throw new Error('No kernel to restart');
     }
 
-    let restartBtn = Dialog.warnButton({ label: 'Restart' });
+    const restartBtn = Dialog.warnButton({ label: 'Restart' });
     const result = await showDialog({
       title: 'Restart Kernel?',
       body:
@@ -1201,7 +1201,7 @@ namespace Private {
      * Get the value of the kernel selector widget.
      */
     getValue(): Kernel.IModel {
-      let selector = this.node.querySelector('select') as HTMLSelectElement;
+      const selector = this.node.querySelector('select') as HTMLSelectElement;
       return JSON.parse(selector.value) as Kernel.IModel;
     }
   }
@@ -1211,13 +1211,13 @@ namespace Private {
    */
   function createSelectorNode(sessionContext: ISessionContext) {
     // Create the dialog body.
-    let body = document.createElement('div');
-    let text = document.createElement('label');
+    const body = document.createElement('div');
+    const text = document.createElement('label');
     text.textContent = `Select kernel for: "${sessionContext.name}"`;
     body.appendChild(text);
 
-    let options = getKernelSearch(sessionContext);
-    let selector = document.createElement('select');
+    const options = getKernelSearch(sessionContext);
+    const selector = document.createElement('select');
     populateKernelSelect(selector, options);
     body.appendChild(selector);
     return body;
@@ -1229,8 +1229,8 @@ namespace Private {
   export function getDefaultKernel(
     options: SessionContext.IKernelSearch
   ): string | null {
-    let { specs, preference } = options;
-    let {
+    const { specs, preference } = options;
+    const {
       name,
       language,
       shouldStart,
@@ -1242,14 +1242,14 @@ namespace Private {
       return null;
     }
 
-    let defaultName = autoStartDefault ? specs.default : null;
+    const defaultName = autoStartDefault ? specs.default : null;
 
     if (!name && !language) {
       return defaultName;
     }
 
     // Look for an exact match of a spec name.
-    for (let specName in specs.kernelspecs) {
+    for (const specName in specs.kernelspecs) {
       if (specName === name) {
         return name;
       }
@@ -1261,17 +1261,17 @@ namespace Private {
     }
 
     // Check for a single kernel matching the language.
-    let matches: string[] = [];
-    for (let specName in specs.kernelspecs) {
-      let kernelLanguage = specs.kernelspecs[specName]?.language;
+    const matches: string[] = [];
+    for (const specName in specs.kernelspecs) {
+      const kernelLanguage = specs.kernelspecs[specName]?.language;
       if (language === kernelLanguage) {
         matches.push(specName);
       }
     }
 
     if (matches.length === 1) {
-      let specName = matches[0];
-      console.log(
+      const specName = matches[0];
+      console.warn(
         'No exact match found for ' +
           specName +
           ', using kernel ' +
@@ -1298,8 +1298,8 @@ namespace Private {
       node.removeChild(node.firstChild);
     }
 
-    let { preference, sessions, specs } = options;
-    let { name, id, language, canStart, shouldStart } = preference;
+    const { preference, sessions, specs } = options;
+    const { name, id, language, canStart, shouldStart } = preference;
 
     if (!specs || canStart === false) {
       node.appendChild(optionForNone());
@@ -1311,23 +1311,23 @@ namespace Private {
     node.disabled = false;
 
     // Create mappings of display names and languages for kernel name.
-    let displayNames: { [key: string]: string } = Object.create(null);
-    let languages: { [key: string]: string } = Object.create(null);
-    for (let name in specs.kernelspecs) {
-      let spec = specs.kernelspecs[name]!;
+    const displayNames: { [key: string]: string } = Object.create(null);
+    const languages: { [key: string]: string } = Object.create(null);
+    for (const name in specs.kernelspecs) {
+      const spec = specs.kernelspecs[name]!;
       displayNames[name] = spec.display_name;
       languages[name] = spec.language;
     }
 
     // Handle a kernel by name.
-    let names: string[] = [];
+    const names: string[] = [];
     if (name && name in specs.kernelspecs) {
       names.push(name);
     }
 
     // Then look by language.
     if (language) {
-      for (let specName in specs.kernelspecs) {
+      for (const specName in specs.kernelspecs) {
         if (name !== specName && languages[specName] === language) {
           names.push(specName);
         }
@@ -1340,11 +1340,11 @@ namespace Private {
     }
 
     // Handle a preferred kernels in order of display name.
-    let preferred = document.createElement('optgroup');
+    const preferred = document.createElement('optgroup');
     preferred.label = 'Start Preferred Kernel';
 
     names.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
-    for (let name of names) {
+    for (const name of names) {
       preferred.appendChild(optionForName(name, displayNames[name]));
     }
 
@@ -1355,19 +1355,19 @@ namespace Private {
     // Add an option for no kernel
     node.appendChild(optionForNone());
 
-    let other = document.createElement('optgroup');
+    const other = document.createElement('optgroup');
     other.label = 'Start Other Kernel';
 
     // Add the rest of the kernel names in alphabetical order.
-    let otherNames: string[] = [];
-    for (let specName in specs.kernelspecs) {
+    const otherNames: string[] = [];
+    for (const specName in specs.kernelspecs) {
       if (names.indexOf(specName) !== -1) {
         continue;
       }
       otherNames.push(specName);
     }
     otherNames.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
-    for (let otherName of otherNames) {
+    for (const otherName of otherNames) {
       other.appendChild(optionForName(otherName, displayNames[otherName]));
     }
     // Add a separator option if there were any other names.
@@ -1388,8 +1388,8 @@ namespace Private {
     }
 
     // Add the sessions using the preferred language first.
-    let matchingSessions: Session.IModel[] = [];
-    let otherSessions: Session.IModel[] = [];
+    const matchingSessions: Session.IModel[] = [];
+    const otherSessions: Session.IModel[] = [];
 
     each(sessions, session => {
       if (
@@ -1404,7 +1404,7 @@ namespace Private {
       }
     });
 
-    let matching = document.createElement('optgroup');
+    const matching = document.createElement('optgroup');
     matching.label = 'Use Kernel from Preferred Session';
     node.appendChild(matching);
 
@@ -1414,12 +1414,12 @@ namespace Private {
       });
 
       each(matchingSessions, session => {
-        let name = session.kernel ? displayNames[session.kernel.name] : '';
+        const name = session.kernel ? displayNames[session.kernel.name] : '';
         matching.appendChild(optionForSession(session, name));
       });
     }
 
-    let otherSessionsNode = document.createElement('optgroup');
+    const otherSessionsNode = document.createElement('optgroup');
     otherSessionsNode.label = 'Use Kernel from Other Session';
     node.appendChild(otherSessionsNode);
 
@@ -1429,7 +1429,7 @@ namespace Private {
       });
 
       each(otherSessions, session => {
-        let name = session.kernel
+        const name = session.kernel
           ? displayNames[session.kernel.name] || session.kernel.name
           : '';
         otherSessionsNode.appendChild(optionForSession(session, name));
@@ -1454,7 +1454,7 @@ namespace Private {
    * Create an option element for a kernel name.
    */
   function optionForName(name: string, displayName: string): HTMLOptionElement {
-    let option = document.createElement('option');
+    const option = document.createElement('option');
     option.text = displayName;
     option.value = JSON.stringify({ name });
     return option;
@@ -1464,9 +1464,9 @@ namespace Private {
    * Create an option for no kernel.
    */
   function optionForNone(): HTMLOptGroupElement {
-    let group = document.createElement('optgroup');
+    const group = document.createElement('optgroup');
     group.label = 'Use No Kernel';
-    let option = document.createElement('option');
+    const option = document.createElement('option');
     option.text = Private.NO_KERNEL;
     option.value = 'null';
     group.appendChild(option);
@@ -1480,8 +1480,8 @@ namespace Private {
     session: Session.IModel,
     displayName: string
   ): HTMLOptionElement {
-    let option = document.createElement('option');
-    let sessionName = session.name || PathExt.basename(session.path);
+    const option = document.createElement('option');
+    const sessionName = session.name || PathExt.basename(session.path);
     option.text = sessionName;
     option.value = JSON.stringify({ id: session.kernel?.id });
     option.title =

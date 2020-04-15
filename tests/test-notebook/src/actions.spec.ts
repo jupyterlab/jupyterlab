@@ -259,9 +259,9 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should increment deletedCells model when cells deleted', () => {
-        let next = widget.widgets[1];
+        const next = widget.widgets[1];
         widget.select(next);
-        let count = widget.model!.deletedCells.length;
+        const count = widget.model!.deletedCells.length;
         NotebookActions.deleteCells(widget);
         expect(widget.model!.deletedCells.length).to.equal(count + 2);
       });
@@ -490,7 +490,7 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should delete deletedCells metadata when cell run', () => {
-        let cell = widget.activeCell as CodeCell;
+        const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         return NotebookActions.run(widget, sessionContext).then(result => {
           expect(result).to.equal(true);
@@ -1490,7 +1490,7 @@ describe('@jupyterlab/notebook', () => {
         model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         const cell = model.cells.get(0);
         expect(cell.trusted).to.not.equal(true);
-        let promise = NotebookActions.trust(widget);
+        const promise = NotebookActions.trust(widget);
         await acceptDialog();
         await promise;
         expect(cell.trusted).to.equal(true);
@@ -1501,7 +1501,7 @@ describe('@jupyterlab/notebook', () => {
         model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
         const cell = model.cells.get(0);
         expect(cell.trusted).to.not.equal(true);
-        let promise = NotebookActions.trust(widget);
+        const promise = NotebookActions.trust(widget);
         await dismissDialog();
         await promise;
         expect(cell.trusted).to.not.equal(true);

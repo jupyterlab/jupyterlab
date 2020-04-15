@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -19,7 +19,7 @@ utils.getLernaPaths().forEach(pkgPath => {
   if (!pkgData.public) {
     return;
   }
-  console.log(`Checking ${name}...`);
+  console.debug(`Checking ${name}...`);
 
   // Make sure each glob resolves to at least one file.
   pkgData.files.forEach((fGlob: string) => {

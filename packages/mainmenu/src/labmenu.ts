@@ -107,7 +107,7 @@ export class JupyterLabMenu implements IJupyterLabMenu {
       added.push(this.menu.insertItem(insertIndex++, { type: 'separator' }));
     }
     // Insert the group.
-    for (let item of items) {
+    for (const item of items) {
       added.push(this.menu.insertItem(insertIndex++, item));
     }
     // Insert a separator after the group.

@@ -83,7 +83,7 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
       // Automatically disable if statusbar missing
       return;
     }
-    let item = new EditorSyntaxStatus({ commands: app.commands });
+    const item = new EditorSyntaxStatus({ commands: app.commands });
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
       if (current && tracker.has(current) && item.model) {
@@ -190,7 +190,7 @@ function activateEditorCommands(
   function updateTracker(): void {
     tracker.forEach(widget => {
       if (widget.content.editor instanceof CodeMirrorEditor) {
-        let cm = widget.content.editor.editor;
+        const cm = widget.content.editor.editor;
         cm.setOption('keyMap', keyMap);
         cm.setOption('theme', theme);
         cm.setOption('scrollPastEnd', scrollPastEnd);
@@ -222,7 +222,7 @@ function activateEditorCommands(
    */
   tracker.widgetAdded.connect((sender, widget) => {
     if (widget.content.editor instanceof CodeMirrorEditor) {
-      let cm = widget.content.editor.editor;
+      const cm = widget.content.editor.editor;
       cm.setOption('keyMap', keyMap);
       cm.setOption('theme', theme);
       cm.setOption('scrollPastEnd', scrollPastEnd);
@@ -275,7 +275,7 @@ function activateEditorCommands(
 
   commands.addCommand(CommandIDs.changeKeyMap, {
     label: args => {
-      let title = args['keyMap'] as string;
+      const title = args['keyMap'] as string;
       return title === 'sublime' ? 'Sublime Text' : title;
     },
     execute: args => {
@@ -292,11 +292,11 @@ function activateEditorCommands(
   commands.addCommand(CommandIDs.find, {
     label: 'Find...',
     execute: () => {
-      let widget = tracker.currentWidget;
+      const widget = tracker.currentWidget;
       if (!widget) {
         return;
       }
-      let editor = widget.content.editor as CodeMirrorEditor;
+      const editor = widget.content.editor as CodeMirrorEditor;
       editor.execCommand('find');
     },
     isEnabled
@@ -305,11 +305,11 @@ function activateEditorCommands(
   commands.addCommand(CommandIDs.goToLine, {
     label: 'Go to Line...',
     execute: () => {
-      let widget = tracker.currentWidget;
+      const widget = tracker.currentWidget;
       if (!widget) {
         return;
       }
-      let editor = widget.content.editor as CodeMirrorEditor;
+      const editor = widget.content.editor as CodeMirrorEditor;
       editor.execCommand('jumpToLine');
     },
     isEnabled
@@ -318,10 +318,10 @@ function activateEditorCommands(
   commands.addCommand(CommandIDs.changeMode, {
     label: args => args['name'] as string,
     execute: args => {
-      let name = args['name'] as string;
-      let widget = tracker.currentWidget;
+      const name = args['name'] as string;
+      const widget = tracker.currentWidget;
       if (name && widget) {
-        let spec = Mode.findByName(name);
+        const spec = Mode.findByName(name);
         if (spec) {
           widget.content.model.mimeType = spec.mime;
         }
@@ -329,21 +329,21 @@ function activateEditorCommands(
     },
     isEnabled,
     isToggled: args => {
-      let widget = tracker.currentWidget;
+      const widget = tracker.currentWidget;
       if (!widget) {
         return false;
       }
-      let mime = widget.content.model.mimeType;
-      let spec = Mode.findByMIME(mime);
-      let name = spec && spec.name;
+      const mime = widget.content.model.mimeType;
+      const spec = Mode.findByMIME(mime);
+      const name = spec && spec.name;
       return args['name'] === name;
     }
   });
 
   Mode.getModeInfo()
     .sort((a, b) => {
-      let aName = a.name || '';
-      let bName = b.name || '';
+      const aName = a.name || '';
+      const bName = b.name || '';
       return aName.localeCompare(bName);
     })
     .forEach(spec => {
@@ -404,7 +404,7 @@ function activateEditorCommands(
     mainMenu.editMenu.goToLiners.add({
       tracker,
       goToLine: (widget: IDocumentWidget<FileEditor>) => {
-        let editor = widget.content.editor as CodeMirrorEditor;
+        const editor = widget.content.editor as CodeMirrorEditor;
         editor.execCommand('jumpToLine');
       }
     } as IEditMenu.IGoToLiner<IDocumentWidget<FileEditor>>);

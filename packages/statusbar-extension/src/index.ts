@@ -304,7 +304,7 @@ export const memoryUsageItem: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   requires: [IStatusBar],
   activate: (app: JupyterFrontEnd, statusBar: IStatusBar) => {
-    let item = new MemoryUsage();
+    const item = new MemoryUsage();
 
     statusBar.registerStatusItem(
       '@jupyterlab/statusbar-extension:memory-usage-status',

@@ -23,7 +23,7 @@ const hoverItem = style({
  * @returns the popup that was created.
  */
 export function showPopup(options: Popup.IOptions): Popup {
-  let dialog = new Popup(options);
+  const dialog = new Popup(options);
   dialog.launch();
   return dialog;
 }
@@ -41,7 +41,7 @@ export class Popup extends Widget {
     this._body.addClass(hoverItem);
     this._anchor = options.anchor;
     this._align = options.align;
-    let layout = (this.layout = new PanelLayout());
+    const layout = (this.layout = new PanelLayout());
     layout.addWidget(options.body);
     this._body.node.addEventListener('resize', () => {
       this.update();

@@ -102,7 +102,7 @@ describe('@jupyterlab/apputils', () => {
       it('should return false if the target item does not exist', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
-        let value = widget.insertAfter('c', 'd', new Widget());
+        const value = widget.insertAfter('c', 'd', new Widget());
         expect(value).to.be.false;
       });
     });
@@ -119,7 +119,7 @@ describe('@jupyterlab/apputils', () => {
       it('should return false if the target item does not exist', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
-        let value = widget.insertBefore('c', 'd', new Widget());
+        const value = widget.insertBefore('c', 'd', new Widget());
         expect(value).to.be.false;
       });
     });

@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -98,7 +98,7 @@ export namespace Build {
   export function ensureAssets(
     options: IEnsureOptions
   ): webpack.Configuration[] {
-    let { output, packageNames } = options;
+    const { output, packageNames } = options;
 
     const themeConfig: webpack.Configuration[] = [];
 

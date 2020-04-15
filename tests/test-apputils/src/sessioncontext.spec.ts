@@ -282,7 +282,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#kernelDisplayName', () => {
       it('should be the display name of the current kernel', async () => {
         await sessionContext.initialize();
-        let spec = await sessionContext.session!.kernel!.spec;
+        const spec = await sessionContext.session!.kernel!.spec;
         expect(sessionContext.kernelDisplayName).to.equal(spec!.display_name);
       });
 
@@ -315,7 +315,7 @@ describe('@jupyterlab/apputils', () => {
 
       it('should be the connection status of the current kernel if not connected', async () => {
         await sessionContext.initialize();
-        let reconnect = sessionContext.session!.kernel!.reconnect();
+        const reconnect = sessionContext.session!.kernel!.reconnect();
         expect(sessionContext.kernelDisplayStatus).to.be.equal(
           sessionContext.session?.kernel?.connectionStatus
         );

@@ -16,15 +16,7 @@ module.exports = {
       `git add ${escapedFileNames}`
     ];
   },
-  '**/*{.ts,.tsx}': filenames => {
-    const escapedFileNames = escapeFileNames(filenames);
-    return [
-      `prettier --write ${escapedFileNames}`,
-      `tslint --fix ${escapedFileNames}`,
-      `git add ${escapedFileNames}`
-    ];
-  },
-  '**/*{.js,.jsx}': filenames => {
+  '**/*{.ts,.tsx,.js,.jsx}': filenames => {
     const escapedFileNames = escapeFileNames(filenames);
     return [
       `prettier --write ${escapedFileNames}`,

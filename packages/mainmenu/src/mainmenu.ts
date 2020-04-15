@@ -106,9 +106,9 @@ export class MainMenu extends MenuBar implements IMainMenu {
       return;
     }
 
-    let rank = 'rank' in options ? options.rank : 100;
-    let rankItem = { menu, rank };
-    let index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
+    const rank = 'rank' in options ? options.rank : 100;
+    const rankItem = { menu, rank };
+    const index = ArrayExt.upperBound(this._items, rankItem, Private.itemCmp);
 
     // Upon disposal, remove the menu and its rank reference.
     menu.disposed.connect(this._onMenuDisposed, this);
@@ -140,7 +140,7 @@ export class MainMenu extends MenuBar implements IMainMenu {
    */
   private _onMenuDisposed(menu: Menu): void {
     this.removeMenu(menu);
-    let index = ArrayExt.findFirstIndex(
+    const index = ArrayExt.findFirstIndex(
       this._items,
       item => item.menu === menu
     );

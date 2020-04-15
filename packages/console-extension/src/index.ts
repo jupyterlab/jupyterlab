@@ -195,13 +195,13 @@ async function activateConsole(
           return;
         }
         disposables = new DisposableSet();
-        let baseUrl = PageConfig.getBaseUrl();
-        for (let name in specs.kernelspecs) {
-          let rank = name === specs.default ? 0 : Infinity;
+        const baseUrl = PageConfig.getBaseUrl();
+        for (const name in specs.kernelspecs) {
+          const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
           let kernelIconUrl = spec.resources['logo-64x64'];
           if (kernelIconUrl) {
-            let index = kernelIconUrl.indexOf('kernelspecs');
+            const index = kernelIconUrl.indexOf('kernelspecs');
             kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
           }
           disposables.add(
@@ -327,8 +327,8 @@ async function activateConsole(
   let command = CommandIDs.open;
   commands.addCommand(command, {
     execute: (args: IOpenOptions) => {
-      let path = args['path'];
-      let widget = tracker.find(value => {
+      const path = args['path'];
+      const widget = tracker.find(value => {
         return value.console.sessionContext.session?.path === path;
       });
       if (widget) {
@@ -338,7 +338,7 @@ async function activateConsole(
         return widget;
       } else {
         return manager.ready.then(() => {
-          let model = find(manager.sessions.running(), item => {
+          const model = find(manager.sessions.running(), item => {
             return item.path === path;
           });
           if (model) {
@@ -369,7 +369,7 @@ async function activateConsole(
     },
     icon: args => (args['isPalette'] ? undefined : consoleIcon),
     execute: args => {
-      let basePath =
+      const basePath =
         (args['basePath'] as string) ||
         (args['cwd'] as string) ||
         browserFactory.defaultBrowser.model.path;
@@ -379,8 +379,8 @@ async function activateConsole(
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyPartialJSONObject): ConsolePanel | null {
-    let widget = tracker.currentWidget;
-    let activate = args['activate'] !== false;
+    const widget = tracker.currentWidget;
+    const activate = args['activate'] !== false;
     if (activate && widget) {
       shell.activateById(widget.id);
     }
@@ -390,7 +390,7 @@ async function activateConsole(
   commands.addCommand(CommandIDs.clear, {
     label: 'Clear Console Cells',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
@@ -402,7 +402,7 @@ async function activateConsole(
   commands.addCommand(CommandIDs.runUnforced, {
     label: 'Run Cell (unforced)',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
@@ -414,7 +414,7 @@ async function activateConsole(
   commands.addCommand(CommandIDs.runForced, {
     label: 'Run Cell (forced)',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
@@ -426,7 +426,7 @@ async function activateConsole(
   commands.addCommand(CommandIDs.linebreak, {
     label: 'Insert Line Break',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
@@ -438,7 +438,7 @@ async function activateConsole(
   commands.addCommand(CommandIDs.replaceSelection, {
     label: 'Replace Selection in Console',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
@@ -451,11 +451,11 @@ async function activateConsole(
   commands.addCommand(CommandIDs.interrupt, {
     label: 'Interrupt Kernel',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
-      let kernel = current.console.sessionContext.session?.kernel;
+      const kernel = current.console.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
       }
@@ -466,7 +466,7 @@ async function activateConsole(
   commands.addCommand(CommandIDs.restart, {
     label: 'Restart Kernel…',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
@@ -502,7 +502,7 @@ async function activateConsole(
 
   commands.addCommand(CommandIDs.inject, {
     execute: args => {
-      let path = args['path'];
+      const path = args['path'];
       tracker.find(widget => {
         if (widget.console.sessionContext.session?.path === path) {
           if (args['activate'] !== false) {
@@ -523,7 +523,7 @@ async function activateConsole(
   commands.addCommand(CommandIDs.changeKernel, {
     label: 'Change Kernel…',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }
@@ -579,7 +579,7 @@ async function activateConsole(
     mainMenu.kernelMenu.kernelUsers.add({
       tracker,
       interruptKernel: current => {
-        let kernel = current.console.sessionContext.session?.kernel;
+        const kernel = current.console.sessionContext.session?.kernel;
         if (kernel) {
           return kernel.interrupt();
         }

@@ -76,7 +76,7 @@ export class SearchBar extends React.Component<
    * Handler for search input changes.
    */
   handleChange = (e: React.FormEvent<HTMLElement>) => {
-    let target = e.target as HTMLInputElement;
+    const target = e.target as HTMLInputElement;
     this.setState({
       value: target.value
     });
@@ -215,7 +215,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
       <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
-            <a href={entry.url} target="_blank" rel="noopener">
+            <a href={entry.url} target="_blank" rel="noopener noreferrer">
               {entry.name}
             </a>
           </div>
@@ -347,7 +347,7 @@ export namespace ListEntry {
  */
 export function ListView(props: ListView.IProperties): React.ReactElement<any> {
   const entryViews = [];
-  for (let entry of props.entries) {
+  for (const entry of props.entries) {
     entryViews.push(
       <ListEntry
         entry={entry}
@@ -506,7 +506,7 @@ export class CollapsibleSection extends React.Component<
     );
   }
 
-  componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
+  UNSAFE_componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
     if (nextProps.forceOpen) {
       this.setState({
         isOpen: true
@@ -615,6 +615,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
             <a
               href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Read more in the JupyterLab documentation.
             </a>
@@ -622,8 +623,8 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         </div>
       ];
     }
-    let pages = Math.ceil(model.totalEntries / model.pagination);
-    let elements = [
+    const pages = Math.ceil(model.totalEntries / model.pagination);
+    const elements = [
       <SearchBar
         key="searchbar"
         placeholder="SEARCH"
@@ -734,7 +735,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     } else {
       // List installed and discovery sections
 
-      let installedContent = [];
+      const installedContent = [];
       if (model.installedError !== null) {
         installedContent.push(
           <ErrorMessage key="install-error">
@@ -781,7 +782,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         </CollapsibleSection>
       );
 
-      let searchContent = [];
+      const searchContent = [];
       if (model.searchError !== null) {
         searchContent.push(
           <ErrorMessage key="search-error">
@@ -925,7 +926,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   protected onActivateRequest(msg: Message): void {
     if (this.isAttached) {
-      let input = this.inputNode;
+      const input = this.inputNode;
       if (input) {
         input.focus();
         input.select();
@@ -937,7 +938,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    * Toggle the focused modifier based on the input node focus state.
    */
   private _toggleFocused(): void {
-    let focused = document.activeElement === this.inputNode;
+    const focused = document.activeElement === this.inputNode;
     this.toggleClass('lm-mod-focused', focused);
   }
 }

@@ -14,7 +14,7 @@ import { KernelTester } from '../utils';
 
 describe('Kernel.IShellFuture', () => {
   let tester: KernelTester;
-  let kernelManager = new KernelManager();
+  const kernelManager = new KernelManager();
 
   afterEach(() => {
     if (tester) {
@@ -23,7 +23,7 @@ describe('Kernel.IShellFuture', () => {
   });
 
   afterAll(async () => {
-    let models = await KernelAPI.listRunning();
+    const models = await KernelAPI.listRunning();
     await Promise.all(models.map(m => KernelAPI.shutdownKernel(m.id)));
   });
 

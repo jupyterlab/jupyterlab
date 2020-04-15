@@ -401,7 +401,7 @@ export const MockShellFuture = jest.fn<Kernel.IShellFuture, []>(() => ({
  */
 namespace Private {
   export function flattenArray<T>(arr: T[][]): T[] {
-    let result: T[] = [];
+    const result: T[] = [];
 
     arr.forEach(innerArr => {
       innerArr.forEach(elem => {
@@ -434,7 +434,7 @@ namespace Private {
     partialModel: Partial<Kernel.IModel>
   ): Promise<Kernel.IModel> {
     if (partialModel.id) {
-      let kernelIdx = KERNEL_MODELS.findIndex(model => {
+      const kernelIdx = KERNEL_MODELS.findIndex(model => {
         return model.id === partialModel.id;
       });
       if (kernelIdx !== -1) {
@@ -447,7 +447,7 @@ namespace Private {
         );
       }
     } else if (partialModel.name) {
-      let kernelIdx = KERNEL_MODELS.findIndex(model => {
+      const kernelIdx = KERNEL_MODELS.findIndex(model => {
         return model.name === partialModel.name;
       });
       if (kernelIdx !== -1) {

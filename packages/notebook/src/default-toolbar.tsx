@@ -283,7 +283,7 @@ export class CellTypeSwitcher extends ReactWidget {
     if (this._notebook.activeCell) {
       value = this._notebook.activeCell.model.type;
     }
-    for (let widget of this._notebook.widgets) {
+    for (const widget of this._notebook.widgets) {
       if (this._notebook.isSelectedOrActive(widget)) {
         if (widget.model.type !== value) {
           value = '-';

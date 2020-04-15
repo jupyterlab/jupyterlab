@@ -120,7 +120,7 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
         shell.activateById(widget.id);
 
         // Handle dirty state for open documents.
-        let context = docManager.contextForWidget(widget);
+        const context = docManager.contextForWidget(widget);
         if (context && !contexts.has(context)) {
           if (status) {
             handleContext(status, context);
@@ -412,7 +412,7 @@ function addCommands(
       const errorTitle = (args['error'] as string) || 'Error';
       const path =
         typeof args['path'] === 'undefined' ? '' : (args['path'] as string);
-      let options: Partial<Contents.ICreateOptions> = {
+      const options: Partial<Contents.ICreateOptions> = {
         type: args['type'] as Contents.ContentType,
         path
       };
@@ -565,7 +565,7 @@ function addCommands(
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget!);
+        const context = docManager.contextForWidget(shell.currentWidget!);
         if (!context) {
           return showDialog({
             title: 'Cannot Save',
@@ -624,7 +624,7 @@ function addCommands(
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget!);
+        const context = docManager.contextForWidget(shell.currentWidget!);
         if (!context) {
           return showDialog({
             title: 'Cannot Save',
@@ -644,7 +644,7 @@ function addCommands(
     execute: () => {
       // Checks that shell.currentWidget is valid:
       if (isEnabled()) {
-        let context = docManager.contextForWidget(shell.currentWidget!);
+        const context = docManager.contextForWidget(shell.currentWidget!);
         if (!context) {
           return showDialog({
             title: 'Cannot Download',
@@ -740,7 +740,7 @@ function addLabCommands(
         return;
       }
       // Clone the widget.
-      let child = docManager.cloneWidget(widget);
+      const child = docManager.cloneWidget(widget);
       if (child) {
         opener.open(child, options);
       }
@@ -753,7 +753,7 @@ function addLabCommands(
     execute: () => {
       // Implies contextMenuWidget() !== null
       if (isEnabled()) {
-        let context = docManager.contextForWidget(contextMenuWidget()!);
+        const context = docManager.contextForWidget(contextMenuWidget()!);
         return renameDialog(docManager, context!.path);
       }
     }
@@ -763,8 +763,8 @@ function addLabCommands(
     label: () => `Show in File Browser`,
     isEnabled,
     execute: async () => {
-      let widget = contextMenuWidget();
-      let context = widget && docManager.contextForWidget(widget);
+      const widget = contextMenuWidget();
+      const context = widget && docManager.contextForWidget(widget);
       if (!context) {
         return;
       }
@@ -800,7 +800,7 @@ function handleContext(
   context: DocumentRegistry.Context
 ): void {
   let disposable: IDisposable | null = null;
-  let onStateChanged = (sender: any, args: IChangedArgs<any>) => {
+  const onStateChanged = (sender: any, args: IChangedArgs<any>) => {
     if (args.name === 'dirty') {
       if (args.newValue === true) {
         if (!disposable) {
@@ -838,22 +838,22 @@ namespace Private {
     checkpoint: Contents.ICheckpointModel,
     fileType: string
   ): HTMLElement {
-    let body = document.createElement('div');
-    let confirmMessage = document.createElement('p');
-    let confirmText = document.createTextNode(`Are you sure you want to revert
+    const body = document.createElement('div');
+    const confirmMessage = document.createElement('p');
+    const confirmText = document.createTextNode(`Are you sure you want to revert
       the ${fileType} to the latest checkpoint? `);
-    let cannotUndoText = document.createElement('strong');
+    const cannotUndoText = document.createElement('strong');
     cannotUndoText.textContent = 'This cannot be undone.';
 
     confirmMessage.appendChild(confirmText);
     confirmMessage.appendChild(cannotUndoText);
 
-    let lastCheckpointMessage = document.createElement('p');
-    let lastCheckpointText = document.createTextNode(
+    const lastCheckpointMessage = document.createElement('p');
+    const lastCheckpointText = document.createTextNode(
       'The checkpoint was last updated at: '
     );
-    let lastCheckpointDate = document.createElement('p');
-    let date = new Date(checkpoint.last_modified);
+    const lastCheckpointDate = document.createElement('p');
+    const date = new Date(checkpoint.last_modified);
     lastCheckpointDate.style.textAlign = 'center';
     lastCheckpointDate.textContent =
       Time.format(date, 'dddd, MMMM Do YYYY, h:mm:ss a') +

@@ -75,6 +75,7 @@ interface IReplaceEntryProps {
 class SearchEntry extends React.Component<ISearchEntryProps> {
   constructor(props: ISearchEntryProps) {
     super(props);
+    this.searchInputRef = React.createRef();
   }
 
   /**
@@ -85,7 +86,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
     // This makes typing in the box starts a new query (the common case),
     // while arrow keys can be used to move cursor in preparation for
     // modifying previous query.
-    (this.refs.searchInputNode as HTMLInputElement).select();
+    this.searchInputRef.current?.select();
   }
 
   componentDidUpdate() {
@@ -119,7 +120,7 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
           tabIndex={2}
           onFocus={e => this.props.onInputFocus()}
           onBlur={e => this.props.onInputBlur()}
-          ref="searchInputNode"
+          ref={this.searchInputRef}
         />
         <button
           className={BUTTON_WRAPPER_CLASS}
@@ -141,11 +142,14 @@ class SearchEntry extends React.Component<ISearchEntryProps> {
       </div>
     );
   }
+
+  private searchInputRef: React.RefObject<HTMLInputElement>;
 }
 
 class ReplaceEntry extends React.Component<IReplaceEntryProps> {
   constructor(props: any) {
     super(props);
+    this.replaceInputRef = React.createRef();
   }
 
   render() {
@@ -158,7 +162,7 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
           onKeyDown={e => this.props.onReplaceKeydown(e)}
           onChange={e => this.props.onChange(e)}
           tabIndex={3}
-          ref="replaceInputNode"
+          ref={this.replaceInputRef}
         />
         <button
           className={REPLACE_BUTTON_WRAPPER_CLASS}
@@ -187,6 +191,8 @@ class ReplaceEntry extends React.Component<IReplaceEntryProps> {
       </div>
     );
   }
+
+  private replaceInputRef: React.RefObject<HTMLInputElement>;
 }
 
 interface IUpDownProps {
@@ -324,7 +330,7 @@ class SearchOverlay extends React.Component<
   constructor(props: ISearchOverlayProps) {
     super(props);
     this.state = props.overlayState;
-
+    this.replaceEntryRef = React.createRef();
     this._toggleSearchOutput = this._toggleSearchOutput.bind(this);
   }
 
@@ -532,7 +538,7 @@ class SearchOverlay extends React.Component<
                 this.props.onReplaceAll(this.state.replaceText)
               }
               replaceText={this.state.replaceText}
-              ref="replaceEntry"
+              ref={this.replaceEntryRef}
             />
             <div className={SPACER_CLASS}></div>
             {filterToggle}
@@ -551,6 +557,8 @@ class SearchOverlay extends React.Component<
       </div>
     ];
   }
+
+  private replaceEntryRef: React.RefObject<ReplaceEntry>;
 
   private _debouncedStartSearch = new Debouncer(() => {
     this._executeSearch(true, this.state.searchText);

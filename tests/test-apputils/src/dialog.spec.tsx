@@ -408,7 +408,7 @@ describe('@jupyterlab/apputils', () => {
 
       describe('#createButtonNode()', () => {
         it('should create a button node for the dialog', () => {
-          let node = renderer.createButtonNode(data);
+          const node = renderer.createButtonNode(data);
           expect(node.className).toContain('jp-Dialog-button');
           expect(node.querySelector('.jp-Dialog-buttonIcon')).toBeTruthy();
           expect(node.querySelector('.jp-Dialog-buttonLabel')).toBeTruthy();
@@ -417,7 +417,7 @@ describe('@jupyterlab/apputils', () => {
 
       describe('#renderIcon()', () => {
         it('should render an icon element for a dialog item', () => {
-          let node = renderer.renderIcon(data);
+          const node = renderer.renderIcon(data);
           expect(node.className).toContain('jp-Dialog-buttonIcon');
           expect(node.textContent).toBe('foo');
         });
@@ -425,7 +425,7 @@ describe('@jupyterlab/apputils', () => {
 
       describe('#createItemClass()', () => {
         it('should create the class name for the button', () => {
-          let value = renderer.createItemClass(data);
+          const value = renderer.createItemClass(data);
           expect(value).toContain('jp-Dialog-button');
           expect(value).toContain('jp-mod-reject');
           expect(value).toContain(data.className);
@@ -434,7 +434,7 @@ describe('@jupyterlab/apputils', () => {
 
       describe('#createIconClass()', () => {
         it('should create the class name for the button icon', () => {
-          let value = renderer.createIconClass(data);
+          const value = renderer.createIconClass(data);
           expect(value).toContain('jp-Dialog-buttonIcon');
           expect(value).toContain(data.iconClass);
         });
@@ -442,7 +442,7 @@ describe('@jupyterlab/apputils', () => {
 
       describe('#renderLabel()', () => {
         it('should render a label element for a button', () => {
-          let node = renderer.renderLabel(data);
+          const node = renderer.renderLabel(data);
           expect(node.className).toBe('jp-Dialog-buttonLabel');
           expect(node.title).toBe(data.caption);
           expect(node.textContent).toBe(data.label);

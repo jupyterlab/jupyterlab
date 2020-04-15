@@ -70,7 +70,7 @@ describe('CodeMirrorEditorFactory', () => {
         model
       }) as CodeMirrorEditor;
       expect(editor).to.be.an.instanceof(CodeMirrorEditor);
-      for (let key in Object.keys(options)) {
+      for (const key in Object.keys(options)) {
         const option = key as keyof CodeMirrorEditor.IConfig;
         expect(editor.getOption(option)).to.equal(options[option]);
       }
@@ -93,7 +93,7 @@ describe('CodeMirrorEditorFactory', () => {
         model
       }) as CodeMirrorEditor;
       expect(editor).to.be.an.instanceof(CodeMirrorEditor);
-      for (let key in Object.keys(options)) {
+      for (const key in Object.keys(options)) {
         const option = key as keyof CodeMirrorEditor.IConfig;
         expect(editor.getOption(option)).to.equal(options[option]);
       }

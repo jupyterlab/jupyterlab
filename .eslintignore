@@ -1,29 +1,29 @@
+node_modules
 **/build
 **/lib
 **/node_modules
+**/mock_packages
 **/static
+**/typings
+**/schemas
+**/themes
 tests/**/coverage
+*.map.js
+*.bundle.js
 
 dev_mode/index.js
-dev_mode/schemas
 !dev_mode/static/index.out.js
-dev_mode/static
-dev_mode/themes
 dev_mode/workspaces
 docs/_build
 docs/api
-examples/app/build
-examples/app/schemas
-examples/app/themes
+docs/build
 examples/chrome-example-test.js
 jupyterlab/chrome-test.js
 jupyterlab/geckodriver
-jupyterlab/schemas
 packages/extensionmanager-extension/examples/listings
-jupyterlab/staging/index.js
-jupyterlab/staging/yarn.js
-jupyterlab/themes
 packages/ui-components/src/icon/iconimports.ts
+jupyterlab/staging/yarn.js
+jupyterlab/staging/index.js
 
 # jetbrains IDE stuff
 .idea/

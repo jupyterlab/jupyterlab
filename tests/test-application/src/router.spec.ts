@@ -104,7 +104,7 @@ describe('apputils', () => {
         router.register({ command: 'c', pattern: /.*/, rank: 30 });
         router.register({ command: 'd', pattern: /.*/, rank: 40 });
 
-        let promise = signalToPromise(router.routed);
+        const promise = signalToPromise(router.routed);
         await router.route();
         await promise;
         expect(recorded).to.deep.equal(wanted);

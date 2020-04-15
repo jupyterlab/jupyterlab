@@ -26,16 +26,16 @@ describe('completer/model', () => {
   describe('CompleterModel', () => {
     describe('#constructor()', () => {
       it('should create a completer model', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         expect(model).to.be.an.instanceof(CompleterModel);
       });
     });
 
     describe('#stateChanged', () => {
       it('should signal when model options have changed', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         let called = 0;
-        let listener = (sender: any, args: void) => {
+        const listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -47,9 +47,9 @@ describe('completer/model', () => {
       });
 
       it('should not signal when options have not changed', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         let called = 0;
-        let listener = (sender: any, args: void) => {
+        const listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -66,9 +66,9 @@ describe('completer/model', () => {
       });
 
       it('should signal when original request changes', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         let called = 0;
-        let listener = (sender: any, args: void) => {
+        const listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -80,9 +80,9 @@ describe('completer/model', () => {
       });
 
       it('should not signal when original request has not changed', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         let called = 0;
-        let listener = (sender: any, args: void) => {
+        const listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -96,14 +96,14 @@ describe('completer/model', () => {
       });
 
       it('should signal when current text changes', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         let called = 0;
-        let currentValue = 'foo';
-        let newValue = 'foob';
-        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
-        let request = makeState(currentValue);
-        let change = makeState(newValue);
-        let listener = (sender: any, args: void) => {
+        const currentValue = 'foo';
+        const newValue = 'foob';
+        const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
+        const request = makeState(currentValue);
+        const change = makeState(newValue);
+        const listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -118,14 +118,14 @@ describe('completer/model', () => {
       });
 
       it('should not signal when current text is unchanged', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         let called = 0;
-        let currentValue = 'foo';
-        let newValue = 'foob';
-        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
-        let request = makeState(currentValue);
-        let change = makeState(newValue);
-        let listener = (sender: any, args: void) => {
+        const currentValue = 'foo';
+        const newValue = 'foob';
+        const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
+        const request = makeState(currentValue);
+        const change = makeState(newValue);
+        const listener = (sender: any, args: void) => {
           called++;
         };
         model.stateChanged.connect(listener);
@@ -144,8 +144,8 @@ describe('completer/model', () => {
 
     describe('#items()', () => {
       it('should return an unfiltered list of items if query is blank', () => {
-        let model = new CompleterModel();
-        let want: Completer.IItem[] = [
+        const model = new CompleterModel();
+        const want: Completer.IItem[] = [
           { raw: 'foo', text: 'foo' },
           { raw: 'bar', text: 'bar' },
           { raw: 'baz', text: 'baz' }
@@ -155,8 +155,8 @@ describe('completer/model', () => {
       });
 
       it('should return a filtered list of items if query is set', () => {
-        let model = new CompleterModel();
-        let want: Completer.IItem[] = [
+        const model = new CompleterModel();
+        const want: Completer.IItem[] = [
           { raw: 'foo', text: '<mark>f</mark>oo' }
         ];
         model.setOptions(['foo', 'bar', 'baz']);
@@ -165,8 +165,8 @@ describe('completer/model', () => {
       });
 
       it('should order list based on score', () => {
-        let model = new CompleterModel();
-        let want: Completer.IItem[] = [
+        const model = new CompleterModel();
+        const want: Completer.IItem[] = [
           { raw: 'qux', text: '<mark>qux</mark>' },
           { raw: 'quux', text: '<mark>qu</mark>u<mark>x</mark>' }
         ];
@@ -176,8 +176,8 @@ describe('completer/model', () => {
       });
 
       it('should break ties in score by locale sort', () => {
-        let model = new CompleterModel();
-        let want: Completer.IItem[] = [
+        const model = new CompleterModel();
+        const want: Completer.IItem[] = [
           { raw: 'quux', text: '<mark>qu</mark>ux' },
           { raw: 'qux', text: '<mark>qu</mark>x' }
         ];
@@ -189,22 +189,22 @@ describe('completer/model', () => {
 
     describe('#options()', () => {
       it('should default to an empty iterator', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         expect(model.options().next()).to.be.undefined;
       });
 
       it('should return model options', () => {
-        let model = new CompleterModel();
-        let options = ['foo'];
+        const model = new CompleterModel();
+        const options = ['foo'];
         model.setOptions(options, {});
         expect(toArray(model.options())).to.not.equal(options);
         expect(toArray(model.options())).to.deep.equal(options);
       });
 
       it('should return the typeMap', () => {
-        let model = new CompleterModel();
-        let options = ['foo'];
-        let typeMap = { foo: 'instance' };
+        const model = new CompleterModel();
+        const options = ['foo'];
+        const typeMap = { foo: 'instance' };
         model.setOptions(options, typeMap);
         expect(JSONExt.deepEqual(model.typeMap(), typeMap)).to.be.ok;
       });
@@ -212,13 +212,13 @@ describe('completer/model', () => {
 
     describe('#original', () => {
       it('should default to null', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         expect(model.original).to.be.null;
       });
 
       it('should return the original request', () => {
-        let model = new CompleterModel();
-        let request = makeState('foo');
+        const model = new CompleterModel();
+        const request = makeState('foo');
         model.original = request;
         expect(model.original).to.equal(request);
       });
@@ -226,24 +226,24 @@ describe('completer/model', () => {
 
     describe('#current', () => {
       it('should default to null', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         expect(model.current).to.be.null;
       });
 
       it('should initially equal the original request', () => {
-        let model = new CompleterModel();
-        let request = makeState('foo');
+        const model = new CompleterModel();
+        const request = makeState('foo');
         model.original = request;
         expect(model.current).to.equal(request);
       });
 
       it('should not set if original request is nonexistent', () => {
-        let model = new CompleterModel();
-        let currentValue = 'foo';
-        let newValue = 'foob';
-        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
-        let request = makeState(currentValue);
-        let change = makeState(newValue);
+        const model = new CompleterModel();
+        const currentValue = 'foo';
+        const newValue = 'foob';
+        const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
+        const request = makeState(currentValue);
+        const change = makeState(newValue);
         model.current = change;
         expect(model.current).to.be.null;
         model.original = request;
@@ -253,11 +253,11 @@ describe('completer/model', () => {
       });
 
       it('should not set if cursor is nonexistent', () => {
-        let model = new CompleterModel();
-        let currentValue = 'foo';
-        let newValue = 'foob';
-        let request = makeState(currentValue);
-        let change = makeState(newValue);
+        const model = new CompleterModel();
+        const currentValue = 'foo';
+        const newValue = 'foob';
+        const request = makeState(currentValue);
+        const change = makeState(newValue);
         model.original = request;
         model.cursor = null;
         model.current = change;
@@ -265,12 +265,12 @@ describe('completer/model', () => {
       });
 
       it('should reset model if change is shorter than original', () => {
-        let model = new CompleterModel();
-        let currentValue = 'foo';
-        let newValue = 'fo';
-        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
-        let request = makeState(currentValue);
-        let change = makeState(newValue);
+        const model = new CompleterModel();
+        const currentValue = 'foo';
+        const newValue = 'fo';
+        const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
+        const request = makeState(currentValue);
+        const change = makeState(newValue);
         model.original = request;
         model.cursor = cursor;
         model.current = change;
@@ -282,14 +282,14 @@ describe('completer/model', () => {
 
     describe('#cursor', () => {
       it('should default to null', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         expect(model.cursor).to.be.null;
       });
 
       it('should not set if original request is nonexistent', () => {
-        let model = new CompleterModel();
-        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
-        let request = makeState('foo');
+        const model = new CompleterModel();
+        const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
+        const request = makeState('foo');
         model.cursor = cursor;
         expect(model.cursor).to.be.null;
         model.original = request;
@@ -300,7 +300,7 @@ describe('completer/model', () => {
 
     describe('#isDisposed', () => {
       it('should be true if model has been disposed', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         expect(model.isDisposed).to.equal(false);
         model.dispose();
         expect(model.isDisposed).to.equal(true);
@@ -309,7 +309,7 @@ describe('completer/model', () => {
 
     describe('#dispose()', () => {
       it('should dispose of the model resources', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         model.setOptions(['foo'], { foo: 'instance' });
         expect(model.isDisposed).to.equal(false);
         model.dispose();
@@ -317,7 +317,7 @@ describe('completer/model', () => {
       });
 
       it('should be safe to call multiple times', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         expect(model.isDisposed).to.equal(false);
         model.dispose();
         model.dispose();
@@ -327,12 +327,12 @@ describe('completer/model', () => {
 
     describe('#handleTextChange()', () => {
       it('should set current change value', () => {
-        let model = new CompleterModel();
-        let currentValue = 'foo';
-        let newValue = 'foob';
-        let cursor: Completer.ICursorSpan = { start: 0, end: 0 };
-        let request = makeState(currentValue);
-        let change = makeState(newValue);
+        const model = new CompleterModel();
+        const currentValue = 'foo';
+        const newValue = 'foob';
+        const cursor: Completer.ICursorSpan = { start: 0, end: 0 };
+        const request = makeState(currentValue);
+        const change = makeState(newValue);
         (change as any).column = 4;
         model.original = request;
         model.cursor = cursor;
@@ -342,12 +342,12 @@ describe('completer/model', () => {
       });
 
       it('should reset if last char is whitespace && column < original', () => {
-        let model = new CompleterModel();
-        let currentValue = 'foo';
-        let newValue = 'foo ';
-        let request = makeState(currentValue);
+        const model = new CompleterModel();
+        const currentValue = 'foo';
+        const newValue = 'foo ';
+        const request = makeState(currentValue);
         (request as any).column = 3;
-        let change = makeState(newValue);
+        const change = makeState(newValue);
         (change as any).column = 0;
         model.original = request;
         expect(model.original).to.equal(request);
@@ -358,36 +358,36 @@ describe('completer/model', () => {
 
     describe('#createPatch()', () => {
       it('should return a patch value', () => {
-        let model = new CompleterModel();
-        let patch = 'foobar';
-        let want: Completer.IPatch = {
+        const model = new CompleterModel();
+        const patch = 'foobar';
+        const want: Completer.IPatch = {
           start: 0,
           end: 3,
           value: patch
         };
-        let cursor: Completer.ICursorSpan = { start: 0, end: 3 };
+        const cursor: Completer.ICursorSpan = { start: 0, end: 3 };
         model.original = makeState('foo');
         model.cursor = cursor;
         expect(model.createPatch(patch)).to.deep.equal(want);
       });
 
       it('should return undefined if original request or cursor are null', () => {
-        let model = new CompleterModel();
+        const model = new CompleterModel();
         expect(model.createPatch('foo')).to.be.undefined;
       });
 
       it('should handle line breaks in original value', () => {
-        let model = new CompleterModel();
-        let currentValue = 'foo\nbar';
-        let patch = 'barbaz';
-        let start = currentValue.length;
-        let end = currentValue.length;
-        let want: Completer.IPatch = {
+        const model = new CompleterModel();
+        const currentValue = 'foo\nbar';
+        const patch = 'barbaz';
+        const start = currentValue.length;
+        const end = currentValue.length;
+        const want: Completer.IPatch = {
           start,
           end,
           value: patch
         };
-        let cursor: Completer.ICursorSpan = { start, end };
+        const cursor: Completer.ICursorSpan = { start, end };
         model.original = makeState(currentValue);
         model.cursor = cursor;
         expect(model.createPatch(patch)).to.deep.equal(want);

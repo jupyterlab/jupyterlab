@@ -336,7 +336,7 @@ export class SettingRegistry implements ISettingRegistry {
     await this._ready;
 
     const plugins = this.plugins;
-    const registry = this;
+    const registry = this; // eslint-disable-line
 
     // If the plugin exists, resolve.
     if (plugin in plugins) {
@@ -360,8 +360,8 @@ export class SettingRegistry implements ISettingRegistry {
     await this._ready;
 
     const fetched = await this.connector.fetch(plugin);
-    const plugins = this.plugins;
-    const registry = this;
+    const plugins = this.plugins; // eslint-disable-line
+    const registry = this; // eslint-disable-line
 
     if (fetched === undefined) {
       throw [
@@ -543,7 +543,7 @@ export class SettingRegistry implements ISettingRegistry {
           await this._load(await this._transform('fetch', plugin));
         } catch (errors) {
           /* Ignore preload errors. */
-          console.log('Ignored setting registry preload errors.', errors);
+          console.warn('Ignored setting registry preload errors.', errors);
         }
       })
     );
@@ -1158,7 +1158,7 @@ namespace Private {
 
     // Iterate through and populate each child property.
     const props = schema.properties || {};
-    for (let property in props) {
+    for (const property in props) {
       result[property] = reifyDefault(props[property]);
     }
 

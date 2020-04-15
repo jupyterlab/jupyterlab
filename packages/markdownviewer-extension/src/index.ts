@@ -133,7 +133,7 @@ function activate(
   commands.addCommand(CommandIDs.markdownPreview, {
     label: 'Markdown Preview',
     execute: args => {
-      let path = args['path'];
+      const path = args['path'];
       if (typeof path !== 'string') {
         return;
       }
@@ -147,11 +147,11 @@ function activate(
 
   commands.addCommand(CommandIDs.markdownEditor, {
     execute: () => {
-      let widget = tracker.currentWidget;
+      const widget = tracker.currentWidget;
       if (!widget) {
         return;
       }
-      let path = widget.context.path;
+      const path = widget.context.path;
       return commands.execute('docmanager:open', {
         path,
         factory: 'Editor',
@@ -161,7 +161,7 @@ function activate(
       });
     },
     isVisible: () => {
-      let widget = tracker.currentWidget;
+      const widget = tracker.currentWidget;
       return (
         (widget && PathExt.extname(widget.context.path) === '.md') || false
       );

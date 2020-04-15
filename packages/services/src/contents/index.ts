@@ -31,7 +31,7 @@ const FILES_URL = 'files';
  * The object to reference listCheckpoints promises
  * used as a flag to check and return the existing promise if it's pending
  */
-let checkpointPromiseStore: {
+const checkpointPromiseStore: {
   [key: string]: Promise<Contents.ICheckpointModel[]>;
 } = {};
 
@@ -556,7 +556,7 @@ export class ContentsManager implements Contents.IManager {
    * @param options - The options used to initialize the object.
    */
   constructor(options: ContentsManager.IOptions = {}) {
-    let serverSettings = (this.serverSettings =
+    const serverSettings = (this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings());
     this._defaultDrive = options.defaultDrive ?? new Drive({ serverSettings });
     this._defaultDrive.fileChanged.connect(this._onFileChanged, this);
@@ -606,7 +606,7 @@ export class ContentsManager implements Contents.IManager {
    * does not provide one.
    */
   getModelDBFactory(path: string): ModelDB.IFactory | null {
-    let [drive] = this._driveForPath(path);
+    const [drive] = this._driveForPath(path);
     return drive?.modelDBFactory ?? null;
   }
 
@@ -678,9 +678,9 @@ export class ContentsManager implements Contents.IManager {
     path: string,
     options?: Contents.IFetchOptions
   ): Promise<Contents.IModel> {
-    let [drive, localPath] = this._driveForPath(path);
+    const [drive, localPath] = this._driveForPath(path);
     return drive.get(localPath, options).then(contentsModel => {
-      let listing: Contents.IModel[] = [];
+      const listing: Contents.IModel[] = [];
       if (contentsModel.type === 'directory' && contentsModel.content) {
         each(contentsModel.content, (item: Contents.IModel) => {
           listing.push({
@@ -713,7 +713,7 @@ export class ContentsManager implements Contents.IManager {
    * The returned URL may include a query parameter.
    */
   getDownloadUrl(path: string): Promise<string> {
-    let [drive, localPath] = this._driveForPath(path);
+    const [drive, localPath] = this._driveForPath(path);
     return drive.getDownloadUrl(localPath);
   }
 
@@ -727,8 +727,8 @@ export class ContentsManager implements Contents.IManager {
    */
   newUntitled(options: Contents.ICreateOptions = {}): Promise<Contents.IModel> {
     if (options.path) {
-      let globalPath = this.normalize(options.path);
-      let [drive, localPath] = this._driveForPath(globalPath);
+      const globalPath = this.normalize(options.path);
+      const [drive, localPath] = this._driveForPath(globalPath);
       return drive
         .newUntitled({ ...options, path: localPath })
         .then(contentsModel => {
@@ -750,7 +750,7 @@ export class ContentsManager implements Contents.IManager {
    * @returns A promise which resolves when the file is deleted.
    */
   delete(path: string): Promise<void> {
-    let [drive, localPath] = this._driveForPath(path);
+    const [drive, localPath] = this._driveForPath(path);
     return drive.delete(localPath);
   }
 
@@ -765,8 +765,8 @@ export class ContentsManager implements Contents.IManager {
    *   the file is renamed.
    */
   rename(path: string, newPath: string): Promise<Contents.IModel> {
-    let [drive1, path1] = this._driveForPath(path);
-    let [drive2, path2] = this._driveForPath(newPath);
+    const [drive1, path1] = this._driveForPath(path);
+    const [drive2, path2] = this._driveForPath(newPath);
     if (drive1 !== drive2) {
       throw Error('ContentsManager: renaming files must occur within a Drive');
     }
@@ -818,8 +818,8 @@ export class ContentsManager implements Contents.IManager {
    * The server will select the name of the copied file.
    */
   copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
-    let [drive1, path1] = this._driveForPath(fromFile);
-    let [drive2, path2] = this._driveForPath(toDir);
+    const [drive1, path1] = this._driveForPath(fromFile);
+    const [drive2, path2] = this._driveForPath(toDir);
     if (drive1 === drive2) {
       return drive1.copy(path1, path2).then(contentsModel => {
         return {
@@ -841,7 +841,7 @@ export class ContentsManager implements Contents.IManager {
    *   checkpoint is created.
    */
   createCheckpoint(path: string): Promise<Contents.ICheckpointModel> {
-    let [drive, localPath] = this._driveForPath(path);
+    const [drive, localPath] = this._driveForPath(path);
     return drive.createCheckpoint(localPath);
   }
 
@@ -854,7 +854,7 @@ export class ContentsManager implements Contents.IManager {
    *    the file.
    */
   listCheckpoints(path: string): Promise<Contents.ICheckpointModel[]> {
-    let [drive, localPath] = this._driveForPath(path);
+    const [drive, localPath] = this._driveForPath(path);
     return drive.listCheckpoints(localPath);
   }
 
@@ -868,7 +868,7 @@ export class ContentsManager implements Contents.IManager {
    * @returns A promise which resolves when the checkpoint is restored.
    */
   restoreCheckpoint(path: string, checkpointID: string): Promise<void> {
-    let [drive, localPath] = this._driveForPath(path);
+    const [drive, localPath] = this._driveForPath(path);
     return drive.restoreCheckpoint(localPath, checkpointID);
   }
 
@@ -882,7 +882,7 @@ export class ContentsManager implements Contents.IManager {
    * @returns A promise which resolves when the checkpoint is deleted.
    */
   deleteCheckpoint(path: string, checkpointID: string): Promise<void> {
-    let [drive, localPath] = this._driveForPath(path);
+    const [drive, localPath] = this._driveForPath(path);
     return drive.deleteCheckpoint(localPath, checkpointID);
   }
 
@@ -1036,12 +1036,12 @@ export class Drive implements Contents.IDrive {
       if (options.type === 'notebook') {
         delete options['format'];
       }
-      let content = options.content ? '1' : '0';
-      let params: PartialJSONObject = { ...options, content };
+      const content = options.content ? '1' : '0';
+      const params: PartialJSONObject = { ...options, content };
       url += URLExt.objectToQueryString(params);
     }
 
-    let settings = this.serverSettings;
+    const settings = this.serverSettings;
     return ServerConnection.makeRequest(url, {}, settings)
       .then(response => {
         if (response.status !== 200) {
@@ -1066,7 +1066,7 @@ export class Drive implements Contents.IDrive {
    * The returned URL may include a query parameter.
    */
   getDownloadUrl(localPath: string): Promise<string> {
-    let baseUrl = this.serverSettings.baseUrl;
+    const baseUrl = this.serverSettings.baseUrl;
     let url = URLExt.join(baseUrl, FILES_URL, URLExt.encodeParts(localPath));
     const xsrfTokenMatch = document.cookie.match('\\b_xsrf=([^;]*)\\b');
     if (xsrfTokenMatch) {
@@ -1097,9 +1097,9 @@ export class Drive implements Contents.IDrive {
       body = JSON.stringify(options);
     }
 
-    let settings = this.serverSettings;
-    let url = this._getUrl(options.path ?? '');
-    let init = {
+    const settings = this.serverSettings;
+    const url = this._getUrl(options.path ?? '');
+    const init = {
       method: 'POST',
       body
     };
@@ -1132,9 +1132,9 @@ export class Drive implements Contents.IDrive {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
    */
   delete(localPath: string): Promise<void> {
-    let url = this._getUrl(localPath);
-    let settings = this.serverSettings;
-    let init = { method: 'DELETE' };
+    const url = this._getUrl(localPath);
+    const settings = this.serverSettings;
+    const init = { method: 'DELETE' };
     return ServerConnection.makeRequest(url, init, settings).then(response => {
       // Translate certain errors to more specific ones.
       // TODO: update IPEP27 to specify errors more precisely, so
@@ -1169,9 +1169,9 @@ export class Drive implements Contents.IDrive {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   rename(oldLocalPath: string, newLocalPath: string): Promise<Contents.IModel> {
-    let settings = this.serverSettings;
-    let url = this._getUrl(oldLocalPath);
-    let init = {
+    const settings = this.serverSettings;
+    const url = this._getUrl(oldLocalPath);
+    const init = {
       method: 'PATCH',
       body: JSON.stringify({ path: newLocalPath })
     };
@@ -1212,9 +1212,9 @@ export class Drive implements Contents.IDrive {
     localPath: string,
     options: Partial<Contents.IModel> = {}
   ): Promise<Contents.IModel> {
-    let settings = this.serverSettings;
-    let url = this._getUrl(localPath);
-    let init = {
+    const settings = this.serverSettings;
+    const url = this._getUrl(localPath);
+    const init = {
       method: 'PUT',
       body: JSON.stringify(options)
     };
@@ -1253,9 +1253,9 @@ export class Drive implements Contents.IDrive {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   copy(fromFile: string, toDir: string): Promise<Contents.IModel> {
-    let settings = this.serverSettings;
-    let url = this._getUrl(toDir);
-    let init = {
+    const settings = this.serverSettings;
+    const url = this._getUrl(toDir);
+    const init = {
       method: 'POST',
       body: JSON.stringify({ copy_from: fromFile })
     };
@@ -1289,8 +1289,8 @@ export class Drive implements Contents.IDrive {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   createCheckpoint(localPath: string): Promise<Contents.ICheckpointModel> {
-    let url = this._getUrl(localPath, 'checkpoints');
-    let init = { method: 'POST' };
+    const url = this._getUrl(localPath, 'checkpoints');
+    const init = { method: 'POST' };
     return ServerConnection.makeRequest(url, init, this.serverSettings)
       .then(response => {
         if (response.status !== 201) {
@@ -1316,7 +1316,7 @@ export class Drive implements Contents.IDrive {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents) and validates the response model.
    */
   listCheckpoints(localPath: string): Promise<Contents.ICheckpointModel[]> {
-    let url = this._getUrl(localPath, 'checkpoints');
+    const url = this._getUrl(localPath, 'checkpoints');
     if (!checkpointPromiseStore[localPath]) {
       checkpointPromiseStore[localPath] = ServerConnection.makeRequest(
         url,
@@ -1358,8 +1358,8 @@ export class Drive implements Contents.IDrive {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
    */
   restoreCheckpoint(localPath: string, checkpointID: string): Promise<void> {
-    let url = this._getUrl(localPath, 'checkpoints', checkpointID);
-    let init = { method: 'POST' };
+    const url = this._getUrl(localPath, 'checkpoints', checkpointID);
+    const init = { method: 'POST' };
     return ServerConnection.makeRequest(url, init, this.serverSettings).then(
       response => {
         if (response.status !== 204) {
@@ -1382,8 +1382,8 @@ export class Drive implements Contents.IDrive {
    * Uses the [Jupyter Notebook API](http://petstore.swagger.io/?url=https://raw.githubusercontent.com/jupyter/notebook/master/notebook/services/api/api.yaml#!/contents).
    */
   deleteCheckpoint(localPath: string, checkpointID: string): Promise<void> {
-    let url = this._getUrl(localPath, 'checkpoints', checkpointID);
-    let init = { method: 'DELETE' };
+    const url = this._getUrl(localPath, 'checkpoints', checkpointID);
+    const init = { method: 'DELETE' };
     return ServerConnection.makeRequest(url, init, this.serverSettings).then(
       response => {
         if (response.status !== 204) {
@@ -1397,8 +1397,8 @@ export class Drive implements Contents.IDrive {
    * Get a REST url for a file given a path.
    */
   private _getUrl(...args: string[]): string {
-    let parts = args.map(path => URLExt.encodeParts(path));
-    let baseUrl = this.serverSettings.baseUrl;
+    const parts = args.map(path => URLExt.encodeParts(path));
+    const baseUrl = this.serverSettings.baseUrl;
     return URLExt.join(baseUrl, this._apiEndpoint, ...parts);
   }
 
