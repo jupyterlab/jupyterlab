@@ -21,6 +21,7 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
 
 import { Completer } from './widget';
+import { DummyConnector } from './dummyconnector';
 
 /**
  * A class added to editors that can host a completer.
@@ -65,6 +66,9 @@ export class CompletionHandler implements IDisposable {
     void,
     CompletionHandler.IRequest
   > {
+    if (!this._connector) {
+      return new DummyConnector();
+    }
     return this._connector;
   }
   set connector(
@@ -365,7 +369,7 @@ export class CompletionHandler implements IDisposable {
         });
     }
 
-    return this._connector
+    return this.connector
       .fetch(request)
       .then(reply => {
         if (this.isDisposed) {
@@ -498,7 +502,7 @@ export class CompletionHandler implements IDisposable {
     }
   }
 
-  private _connector: IDataConnector<
+  private _connector?: IDataConnector<
     CompletionHandler.IReply,
     void,
     CompletionHandler.IRequest
@@ -537,7 +541,7 @@ export namespace CompletionHandler {
      * it is acceptable for the other methods to be simple functions that return
      * rejected promises.
      */
-    connector: IDataConnector<IReply, void, IRequest>;
+    connector?: IDataConnector<IReply, void, IRequest>;
     /**
      * Fetcher for ICompletionItems.
      * If this is set, it'll be used in lieu of the data connector.

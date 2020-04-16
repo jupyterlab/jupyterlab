@@ -50,7 +50,7 @@ export namespace ICompletionManager {
     /**
      * The data connector used to populate the completer.
      */
-    connector: IDataConnector<
+    connector?: IDataConnector<
       CompletionHandler.IReply,
       void,
       CompletionHandler.IRequest
