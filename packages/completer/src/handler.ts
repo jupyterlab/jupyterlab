@@ -481,13 +481,13 @@ export class CompletionHandler implements IDisposable {
     if (!model) {
       return;
     }
-    if (reply.items && model.setCompletionItems) {
+    if (model.setCompletionItems) {
       model.setCompletionItems(reply.items);
     }
   }
 
   /**
-   * If completion requets fails, reset model and fail silently.
+   * If completion request fails, reset model and fail silently.
    */
   private _onFailure() {
     const model = this.completer.model;
