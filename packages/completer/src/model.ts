@@ -9,7 +9,7 @@ import {
   toArray
 } from '@lumino/algorithm';
 
-import { JSONExt } from '@lumino/coreutils';
+import { JSONExt, ReadonlyPartialJSONArray } from '@lumino/coreutils';
 
 import { StringExt } from '@lumino/algorithm';
 
@@ -185,7 +185,12 @@ export class CompleterModel implements Completer.IModel {
    * new types to KNOWN_TYPES.
    */
   setCompletionItems?(newValue: CompletionHandler.ICompletionItems): void {
-    if (JSONExt.deepEqual(newValue, this._completionItems)) {
+    if (
+      JSONExt.deepEqual(
+        (newValue as unknown) as ReadonlyPartialJSONArray,
+        (this._completionItems as unknown) as ReadonlyPartialJSONArray
+      )
+    ) {
       return;
     }
     this._completionItems = newValue;
@@ -390,9 +395,12 @@ export class CompleterModel implements Completer.IModel {
    * Highlight matching prefix by adding <mark> tags.
    */
   private _markup(query: string): CompletionHandler.ICompletionItems {
-    let items = JSONExt.deepCopy(this._completionItems);
+    let items = JSONExt.deepCopy(
+      (this._completionItems as unknown) as ReadonlyPartialJSONArray
+    );
     let results: CompletionHandler.ICompletionItem[] = [];
-    for (let item of items) {
+    for (let i of items) {
+      const item = (i as unknown) as CompletionHandler.ICompletionItem;
       // See if label matches query string
       let match = StringExt.matchSumOfSquares(item.label, query);
       if (match) {

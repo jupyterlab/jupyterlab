@@ -7,12 +7,7 @@ import { Text } from '@jupyterlab/coreutils';
 
 import { IDataConnector } from '@jupyterlab/statedb';
 
-import {
-  ReadonlyJSONObject,
-  JSONObject,
-  JSONArray,
-  PartialJSONObject
-} from '@lumino/coreutils';
+import { ReadonlyJSONObject, JSONObject, JSONArray } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -567,7 +562,7 @@ export namespace CompletionHandler {
    * - custom icons
    * and other potential new features.
    */
-  export interface ICompletionItem extends PartialJSONObject {
+  export interface ICompletionItem {
     /**
      * User facing completion.
      * If insertText is not set, this will be inserted.
