@@ -106,8 +106,7 @@ export class SettingManager extends DataConnector<
     const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + appUrl;
     const url = Private.url(base, id);
-    // NOTE: The body is JSON5, so it must be converted to valid JSON beforehand by wrapping it as a string
-    // in the form {'raw': '...'} where '...' is the JSON5 payload string.
+    // NOTE: 'raw' is JSON5 (not valid JSON), so we encode it as a string in a valid JSON body
     const init = { body: JSON.stringify({ raw }), method: 'PUT' };
     const response = await makeRequest(url, init, serverSettings);
 
