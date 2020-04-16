@@ -124,8 +124,8 @@ const BreakpointComponent = ({
       title={breakpoint.source.path}
     >
       <span className={'jp-DebuggerBreakpoint-marker'}>●</span>
-      <span className={'jp-DebuggerBreakpoint-source'}>
-        {breakpoint.source.path}
+      <span className={'jp-DebuggerBreakpoint-source jp-left-truncated'}>
+        <bdi>{breakpoint.source.path}</bdi>
       </span>
       <span className={'jp-DebuggerBreakpoint-line'}>{breakpoint.line}</span>
     </div>
