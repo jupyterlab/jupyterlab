@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import * as json5 from 'json5';
+
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -106,7 +108,8 @@ export class SettingManager extends DataConnector<
     const { makeRequest, ResponseError } = ServerConnection;
     const base = baseUrl + appUrl;
     const url = Private.url(base, id);
-    const init = { body: raw, method: 'PUT' };
+    // NOTE: The body is JSON5, so it must be converted to valid JSON beforehand.
+    const init = { body: JSON.stringify(json5.parse(raw)), method: 'PUT' };
     const response = await makeRequest(url, init, serverSettings);
 
     if (response.status !== 204) {
