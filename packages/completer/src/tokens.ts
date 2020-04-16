@@ -55,6 +55,14 @@ export namespace ICompletionManager {
       void,
       CompletionHandler.IRequest
     >;
+
+    /**
+     * Set this to output enhanced completions (see CompletionHandler.ICompletionItem).
+     * If this is set, it'll be used in lieu of the data connector.
+     */
+    fetchItems?: (
+      request: CompletionHandler.IRequest
+    ) => Promise<CompletionHandler.ICompletionItemsReply>;
   }
 
   /**

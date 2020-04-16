@@ -44,6 +44,7 @@ export class CompletionHandler implements IDisposable {
     this.completer.selected.connect(this.onCompletionSelected, this);
     this.completer.visibilityChanged.connect(this.onVisibilityChanged, this);
     this._connector = options.connector;
+    this._fetchItems = options.fetchItems;
   }
 
   /**
@@ -354,6 +355,16 @@ export class CompletionHandler implements IDisposable {
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };
 
+    if (this._fetchItems) {
+      return this._fetchItems(request)
+        .then(reply => {
+          this._onFetchItemsReply(state, reply);
+        })
+        .catch(_ => {
+          this._onFailure();
+        });
+    }
+
     return this._connector
       .fetch(request)
       .then(reply => {
@@ -372,14 +383,34 @@ export class CompletionHandler implements IDisposable {
 
         this._onReply(state, reply);
       })
-      .catch(reason => {
-        // Completion request failures or negative results fail silently.
-        const model = this.completer.model;
-
-        if (model) {
-          model.reset(true);
-        }
+      .catch(_ => {
+        this._onFailure();
       });
+  }
+
+  /**
+   * Updates model with text state and current cursor position.
+   */
+  private _updateModel(
+    state: Completer.ITextState,
+    start: number,
+    end: number
+  ): Completer.IModel | null {
+    const model = this.completer.model;
+    const text = state.text;
+
+    if (!model) {
+      return null;
+    }
+
+    // Update the original request.
+    model.original = state;
+    // Update the cursor.
+    model.cursor = {
+      start: Text.charIndexToJsIndex(start, text),
+      end: Text.charIndexToJsIndex(end, text)
+    };
+    return model;
   }
 
   /**
@@ -393,23 +424,8 @@ export class CompletionHandler implements IDisposable {
     state: Completer.ITextState,
     reply: CompletionHandler.IReply
   ): void {
-    const model = this.completer.model;
-    const text = state.text;
-
+    const model = this._updateModel(state, reply.start, reply.end);
     if (!model) {
-      return;
-    }
-
-    // Update the original request.
-    model.original = state;
-    // Update the cursor.
-    model.cursor = {
-      start: Text.charIndexToJsIndex(reply.start, text),
-      end: Text.charIndexToJsIndex(reply.end, text)
-    };
-
-    if (reply.items && model.setCompletionItems) {
-      model.setCompletionItems(reply.items);
       return;
     }
 
@@ -451,11 +467,49 @@ export class CompletionHandler implements IDisposable {
     model.setOptions(matches, typeMap);
   }
 
+  /**
+   * Receive completion items from provider.
+   *
+   * @param state - The state of the editor when completion request was made.
+   *
+   * @param reply - The API response returned for a completion request.
+   */
+  private _onFetchItemsReply(
+    state: Completer.ITextState,
+    reply: CompletionHandler.ICompletionItemsReply
+  ) {
+    const model = this._updateModel(state, reply.start, reply.end);
+    if (!model) {
+      return;
+    }
+    if (reply.items && model.setCompletionItems) {
+      model.setCompletionItems(reply.items);
+    }
+  }
+
+  /**
+   * If completion requets fails, reset model and fail silently.
+   */
+  private _onFailure() {
+    const model = this.completer.model;
+
+    if (model) {
+      model.reset(true);
+    }
+  }
+
   private _connector: IDataConnector<
     CompletionHandler.IReply,
     void,
     CompletionHandler.IRequest
   >;
+  private _fetchItems?: (
+    request: CompletionHandler.IRequest
+  ) => Promise<{
+    start: number;
+    end: number;
+    items: CompletionHandler.ICompletionItems;
+  }>;
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
   private _pending = 0;
@@ -484,6 +538,13 @@ export namespace CompletionHandler {
      * rejected promises.
      */
     connector: IDataConnector<IReply, void, IRequest>;
+    /**
+     * Fetcher for ICompletionItems.
+     * If this is set, it'll be used in lieu of the data connector.
+     */
+    fetchItems?: (
+      request: CompletionHandler.IRequest
+    ) => Promise<CompletionHandler.ICompletionItemsReply>;
   }
 
   /**
@@ -537,6 +598,24 @@ export namespace CompletionHandler {
   }
 
   /**
+   * A reply to a completion items fetch request.
+   */
+  export interface ICompletionItemsReply {
+    /**
+     * The starting index for the substring being replaced by completion.
+     */
+    start: number;
+    /**
+     * The end index for the substring being replaced by completion.
+     */
+    end: number;
+    /**
+     * A list of completion items.
+     */
+    items: CompletionHandler.ICompletionItems;
+  }
+
+  /**
    * A reply to a completion request.
    */
   export interface IReply {
@@ -559,11 +638,6 @@ export namespace CompletionHandler {
      * Any metadata that accompanies the completion reply.
      */
     metadata: ReadonlyJSONObject;
-
-    /**
-     * Hook for extensions to send ICompletionItems.
-     */
-    items?: ICompletionItems;
   }
 
   /**
