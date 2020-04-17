@@ -90,10 +90,14 @@ const manager: JupyterFrontEndPlugin<ICompletionManager> = {
       register: (
         completable: ICompletionManager.ICompletable
       ): ICompletionManager.ICompletableAttributes => {
-        const { connector, editor, parent } = completable;
+        const { connector, editor, parent, fetchItems } = completable;
         const model = new CompleterModel();
         const completer = new Completer({ editor, model });
-        const handler = new CompletionHandler({ completer, connector });
+        const handler = new CompletionHandler({
+          completer,
+          connector,
+          fetchItems
+        });
         const id = parent.id;
 
         // Hide the widget when it first loads.
