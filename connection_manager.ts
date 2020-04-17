@@ -248,6 +248,7 @@ export class DocumentConnectionManager {
     }
   }
 
+  // Travis: per language configuration here?
   async connect(options: ISocketConnectionOptions) {
     console.log('LSP: connection requested', options);
     let connection = await this.connect_socket(options);
