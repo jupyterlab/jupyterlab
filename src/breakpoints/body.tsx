@@ -88,13 +88,6 @@ const BreakpointCellComponent = ({
   breakpoints: IDebugger.IBreakpoint[];
   model: BreakpointsModel;
 }) => {
-  const removeFirstCharIfSlash = (breakpoint: IDebugger.IBreakpoint) => {
-    breakpoint.source.path =
-      breakpoint.source.path[0] === '/'
-        ? breakpoint.source.path.slice(1)
-        : breakpoint.source.path;
-    return breakpoint;
-  };
   return (
     <>
       {breakpoints
@@ -104,7 +97,7 @@ const BreakpointCellComponent = ({
         .map((breakpoint: IDebugger.IBreakpoint, index) => (
           <BreakpointComponent
             key={breakpoint.source.path + index}
-            breakpoint={removeFirstCharIfSlash(breakpoint)}
+            breakpoint={breakpoint}
             model={model}
           />
         ))}
@@ -124,6 +117,11 @@ const BreakpointComponent = ({
   breakpoint: IDebugger.IBreakpoint;
   model: BreakpointsModel;
 }) => {
+  const moveToEndFirstCharIfSlash = (breakpointSourcePath: string) => {
+    return breakpointSourcePath[0] === '/'
+      ? breakpointSourcePath.slice(1) + '/'
+      : breakpointSourcePath;
+  };
   return (
     <div
       className={`jp-DebuggerBreakpoint`}
@@ -132,7 +130,7 @@ const BreakpointComponent = ({
     >
       <span className={'jp-DebuggerBreakpoint-marker'}>●</span>
       <span className={'jp-DebuggerBreakpoint-source jp-left-truncated'}>
-        {breakpoint.source.path}
+        {moveToEndFirstCharIfSlash(breakpoint.source.path)}
       </span>
       <span className={'jp-DebuggerBreakpoint-line'}>{breakpoint.line}</span>
     </div>
