@@ -779,16 +779,11 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   private async _finishSaveAs(newPath: string): Promise<void> {
     this._path = newPath;
-    return this.sessionContext.session
-      ?.setPath(newPath)
-      .then(() => {
-        void this.sessionContext.session?.setName(newPath.split('/').pop()!);
-        return this.save();
-      })
-      .then(() => {
-        this._pathChanged.emit(this._path);
-        return this._maybeCheckpoint(true);
-      });
+    await this.sessionContext.session?.setPath(newPath);
+    await this.sessionContext.session?.setName(newPath.split('/').pop()!);
+    await this.save();
+    this._pathChanged.emit(this._path);
+    await this._maybeCheckpoint(true);
   }
 
   private _manager: ServiceManager.IManager;
