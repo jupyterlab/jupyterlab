@@ -27,8 +27,8 @@
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   width: 300px;
   overflow: scroll;
-  padding: 0 8px 0 6px;
-  max-height: calc((10 * var(--jp-private-completer-item-height)));
+  padding: 8px;
+  max-height: calc((10 * var(--jp-private-completer-item-height)) - 16px);
 }
 
 .jp-Completer-docpanel pre {
