@@ -301,7 +301,11 @@ export class DocumentWidgetManager implements IDisposable {
         if (!context) {
           return true;
         }
-        await context.save();
+        if (context.contentsModel?.writable) {
+          await context.save();
+        } else {
+          await context.saveAs();
+        }
       }
       if (widget.isDisposed) {
         return true;
@@ -353,13 +357,14 @@ export class DocumentWidgetManager implements IDisposable {
       return Promise.resolve([true, true]);
     }
     const fileName = widget.title.label;
+    const saveLabel = context.contentsModel?.writable ? 'Save' : 'Save as';
     return showDialog({
       title: 'Confirm close',
       body: `File "${fileName}" has unsaved changes, save before closing?`,
       buttons: [
         Dialog.cancelButton(),
         Dialog.warnButton({ label: 'Discard changes' }),
-        Dialog.okButton({ label: 'Save' })
+        Dialog.okButton({ label: saveLabel })
       ]
     }).then(result => {
       return [result.button.accept, result.button.displayType === 'warn'];
