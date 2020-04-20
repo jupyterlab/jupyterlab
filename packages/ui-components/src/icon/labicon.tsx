@@ -14,6 +14,11 @@ import badSvgstr from '../../style/debug/bad.svg';
 import blankSvgstr from '../../style/debug/blank.svg';
 import refreshSvgstr from '../../style/icons/toolbar/refresh.svg';
 
+const _classToVariableMap = [0, 1, 2, 3, 4].reduce(
+  (o, i) => o.set(`jp-icon${i}`, `--jp-inverse-layout-color${i}`),
+  new Map<string, string>()
+);
+
 export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   /** *********
    * statics *
@@ -168,14 +173,11 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * Resolve a {name, svgstr} pair into an actual svg node.
    */
   static resolveSvg({ name, svgstr }: LabIcon.IIcon): HTMLElement | null {
-    const svgDoc = new DOMParser().parseFromString(
-      Private.svgstrShim(svgstr),
-      'image/svg+xml'
-    );
+    const svgDoc = Private.deserializeSvg(svgstr);
 
+    // error element varies by browser, search at top level of svg document
     const svgError = svgDoc.querySelector('parsererror');
 
-    // structure of error element varies by browser, search at top level
     if (svgError) {
       // parse failed, svgElement will be an error box
       const errmsg = `SVG HTML was malformed for LabIcon instance.\nname: ${name}, svgstr: ${svgstr}`;
@@ -256,6 +258,35 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     this._initRender({ render, unrender });
 
     LabIcon._instances.set(this.name, this);
+  }
+
+  updateBackgroundImage() {
+    if (!this.svgElementRaw) {
+      // bail
+      return;
+    }
+
+    const svgElement = this.svgElementRaw.cloneNode(true) as HTMLElement;
+    const computedStyle = getComputedStyle(document.documentElement);
+
+    ['fill', 'stroke'].forEach(attr => {
+      svgElement.querySelectorAll(`[${attr}]`).forEach(e => {
+        e.classList.forEach(cls => {
+          if (_classToVariableMap.has(cls)) {
+            const cssvar = _classToVariableMap.get(cls)!;
+            e.setAttribute(attr, computedStyle.getPropertyValue(cssvar));
+          }
+        });
+      });
+    });
+
+    document.documentElement.style.setProperty(
+      `--jp-icon-${this.name
+        .split(':')
+        .slice(-1)
+        .pop()}`,
+      `url("${Private.serializeSvg(svgElement)}")`
+    );
   }
 
   /**
@@ -370,9 +401,28 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     });
   }
 
+  protected get svgElementRaw(): HTMLElement | null {
+    if (this._svgElementRaw === undefined) {
+      this._svgElementRaw = LabIcon.resolveSvg(this);
+    }
+
+    return this._svgElementRaw;
+  }
+
   protected get svgElement(): HTMLElement | null {
     if (this._svgElement === undefined) {
-      this._svgElement = this._initSvg({ uuid: this._uuid });
+      if (this.svgElementRaw === null) {
+        // the raw svg element resolved to null, mark this null too
+        this._svgElement = null;
+      } else {
+        this._svgElement = this.svgElementRaw.cloneNode(true) as HTMLElement;
+
+        if (this._svgElement.tagName !== 'parsererror') {
+          // svgElement is an actual svg node, augment it
+          this._svgElement.dataset.icon = this.name;
+          this._svgElement.dataset.iconId = this._uuid;
+        }
+      }
     }
 
     return this._svgElement;
@@ -419,6 +469,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     this._uuid = uuid;
 
     // empty the svg parsing intermediates cache
+    this._svgElementRaw = undefined;
     this._svgElement = undefined;
     this._svgInnerHTML = undefined;
     this._svgReactAttrs = undefined;
@@ -529,35 +580,6 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     }
   }
 
-  protected _initSvg({
-    title,
-    uuid
-  }: { title?: string; uuid?: string } = {}): HTMLElement | null {
-    const svgElement = LabIcon.resolveSvg(this);
-
-    if (!svgElement) {
-      // bail on null svg element
-      return svgElement;
-    }
-
-    if (svgElement.tagName !== 'parsererror') {
-      // svgElement is an actual svg node, augment it
-      svgElement.dataset.icon = this.name;
-
-      if (uuid) {
-        svgElement.dataset.iconId = uuid;
-      }
-
-      if (title) {
-        Private.setTitleSvg(svgElement, title);
-      }
-    }
-
-    return svgElement;
-  }
-
-  readonly name: string;
-
   /**
    * A React component that will create the icon.
    *
@@ -594,6 +616,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    * @param ref - forwarded to the ref prop of the icon's svg element
    */
   readonly react: LabIcon.IReact;
+  readonly name: string;
 
   protected _className: string;
   protected _loading: boolean;
@@ -607,6 +630,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
    *   - undefined: the cache has not yet been populated
    *   - null: a valid, but empty, value
    */
+  protected _svgElementRaw: HTMLElement | null | undefined = undefined;
   protected _svgElement: HTMLElement | null | undefined = undefined;
   protected _svgInnerHTML: string | null | undefined = undefined;
   protected _svgReactAttrs: any | null | undefined = undefined;
@@ -879,6 +903,49 @@ namespace Private {
 
     // decode from base64, if needed
     return base64 ? atob(raw) : raw;
+  }
+
+  export function deserializeSvg(
+    svgstr: string,
+    strict: boolean = true
+  ): Document {
+    return new DOMParser().parseFromString(
+      Private.svgstrShim(svgstr),
+      'image/svg+xml'
+    );
+  }
+
+  // ref: https://github.com/bhovhannes/svg-url-loader/blob/master/src/loader.js
+  const REGEX_DOUBLE_QUOTE = /"/g;
+  const REGEX_NEWLINE = /\s*\n\s*/g;
+  const REGEX_MULTIPLE_SPACES = /\s+/g;
+  const REGEX_UNSAFE_CHARS = /[{}\|\\\^~\[\]`"<>#%]/g;
+
+  export function serializeSvg(
+    svgElement: HTMLElement,
+    base64: boolean = false
+  ): string {
+    if (base64) {
+      return 'data:image/svg+xml;base64,' + btoa(svgElement.outerHTML);
+    } else {
+      return (
+        'data:image/svg+xml,' +
+        svgElement.outerHTML
+          .replace(REGEX_DOUBLE_QUOTE, "'")
+          .replace(REGEX_NEWLINE, ' ')
+          .replace(REGEX_MULTIPLE_SPACES, ' ')
+          .replace(REGEX_UNSAFE_CHARS, function(match) {
+            return (
+              '%' +
+              match[0]
+                .charCodeAt(0)
+                .toString(16)
+                .toUpperCase()
+            );
+          })
+          .trim()
+      );
+    }
   }
 
   /**
