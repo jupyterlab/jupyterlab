@@ -20,7 +20,7 @@ const _classToVariableMap = [0, 1, 2, 3, 4].reduce(
 );
 
 export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
-  /** *********
+  /***********
    * statics *
    ***********/
 
@@ -208,7 +208,7 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
   private static _debug: boolean = false;
   private static _instances = new Map<string, LabIcon>();
 
-  /** *********
+  /***********
    * members *
    ***********/
 
@@ -640,9 +640,9 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
  * A namespace for LabIcon statics.
  */
 export namespace LabIcon {
-  /** ***********
+  /**************
    * interfaces *
-   *************/
+   **************/
 
   /**
    * The simplest possible interface for defining a generic icon.
@@ -720,7 +720,7 @@ export namespace LabIcon {
     fallback?: LabIcon;
   }
 
-  /** ******
+  /*********
    * types *
    *********/
 
