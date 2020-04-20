@@ -196,15 +196,46 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     }
   }
 
+  static updateBackgroundImages(): void {
+    const computedStyle = getComputedStyle(document.documentElement);
+
+    // clean up any existing icon background image sheet
+    if (LabIcon._sheet && LabIcon._sheet.parentElement) {
+      LabIcon._sheet.parentElement.removeChild(LabIcon._sheet);
+      LabIcon._sheet = null;
+    }
+
+    // create new icon background image sheet
+    LabIcon._sheet = document.createElement('style');
+
+    let sheetVars = '';
+    // populate sheet
+    LabIcon._instances.forEach((val, name) => {
+      const varName = `--jp-icon-${name
+        .split(':')
+        .slice(-1)
+        .pop()}`;
+      sheetVars += `${varName}:url("${val.backgroundImage({
+        computedStyle
+      })}");`;
+    });
+
+    LabIcon._sheet.innerHTML = `:root{${sheetVars}}`; //"div {border: 2px solid black; background-color: blue;}";
+
+    // attach sheet to document
+    document.body.appendChild(LabIcon._sheet);
+  }
+
   /**
    * Toggle icon debug from off-to-on, or vice-versa.
    *
    * @param debug - optional boolean to force debug on or off
    */
-  static toggleDebug(debug?: boolean) {
+  static toggleDebug(debug?: boolean): void {
     LabIcon._debug = debug ?? !LabIcon._debug;
   }
 
+  private static _sheet: HTMLElement | null = null;
   private static _debug: boolean = false;
   private static _instances = new Map<string, LabIcon>();
 
@@ -260,33 +291,31 @@ export class LabIcon implements LabIcon.ILabIcon, VirtualElement.IRenderer {
     LabIcon._instances.set(this.name, this);
   }
 
-  updateBackgroundImage() {
+  protected backgroundImage({
+    computedStyle
+  }: { computedStyle?: CSSStyleDeclaration } = {}): string {
     if (!this.svgElementRaw) {
       // bail
-      return;
+      return '';
     }
 
+    if (!computedStyle) {
+      computedStyle = getComputedStyle(document.documentElement);
+    }
     const svgElement = this.svgElementRaw.cloneNode(true) as HTMLElement;
-    const computedStyle = getComputedStyle(document.documentElement);
 
     ['fill', 'stroke'].forEach(attr => {
       svgElement.querySelectorAll(`[${attr}]`).forEach(e => {
         e.classList.forEach(cls => {
           if (_classToVariableMap.has(cls)) {
             const cssvar = _classToVariableMap.get(cls)!;
-            e.setAttribute(attr, computedStyle.getPropertyValue(cssvar));
+            e.setAttribute(attr, computedStyle!.getPropertyValue(cssvar));
           }
         });
       });
     });
 
-    document.documentElement.style.setProperty(
-      `--jp-icon-${this.name
-        .split(':')
-        .slice(-1)
-        .pop()}`,
-      `url("${Private.serializeSvg(svgElement)}")`
-    );
+    return Private.serializeSvg(svgElement);
   }
 
   /**

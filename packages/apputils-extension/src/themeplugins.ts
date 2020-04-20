@@ -21,6 +21,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { LabIcon } from '@jupyterlab/ui-components';
+
 import { Menu } from '@lumino/widgets';
 
 namespace CommandIDs {
@@ -81,6 +83,9 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
       // Set any CSS overrides
       manager.loadCSSOverrides();
+
+      // Update CSS background images
+      LabIcon.updateBackgroundImages();
 
       commands.notifyCommandChanged(CommandIDs.changeTheme);
     });
