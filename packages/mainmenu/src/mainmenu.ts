@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MenuSvg } from '@jupyterlab/ui-components';
-
 import { ArrayExt } from '@lumino/algorithm';
 
 import { CommandRegistry } from '@lumino/commands';
@@ -99,9 +97,6 @@ export class MainMenu extends MenuBar implements IMainMenu {
    * Add a new menu to the main menu bar.
    */
   addMenu(menu: Menu, options: IMainMenu.IAddOptions = {}): void {
-    // override default renderer with svg-supporting renderer
-    MenuSvg.overrideDefaultRenderer(menu);
-
     if (ArrayExt.firstIndexOf(this.menus, menu) > -1) {
       return;
     }

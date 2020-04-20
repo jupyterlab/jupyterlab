@@ -7,8 +7,6 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { ContextMenuSvg } from '@jupyterlab/ui-components';
-
 import { IIterator } from '@lumino/algorithm';
 
 import { Application, IPlugin } from '@lumino/application';
@@ -41,12 +39,6 @@ export abstract class JupyterFrontEnd<
    */
   constructor(options: JupyterFrontEnd.IOptions<T>) {
     super(options);
-
-    // render context menu/submenus with inline svg icon tweaks
-    this.contextMenu = new ContextMenuSvg({
-      commands: this.commands,
-      renderer: options.contextMenuRenderer
-    });
 
     // The default restored promise if one does not exist in the options.
     const restored = new Promise<void>(resolve => {
@@ -182,8 +174,6 @@ export abstract class JupyterFrontEnd<
       event.stopPropagation();
     }
   }
-
-  readonly contextMenu: ContextMenuSvg;
 
   private _contextMenuEvent: MouseEvent;
 }

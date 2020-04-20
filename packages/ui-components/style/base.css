@@ -9,6 +9,7 @@
 @import './icons.css';
 @import './iconsalt.css';
 @import './iconshover.css';
+@import './lumino.css';
 
 /* Override Blueprint's _reset.scss styles */
 html {

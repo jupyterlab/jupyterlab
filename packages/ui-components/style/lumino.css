@@ -1,0 +1,24 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.lm-mod-toggled .lm-Menu-itemIcon {
+  background-image: var(--jp-icon-check);
+
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  min-width: 16px;
+  min-height: 16px;
+}
+
+[data-type='submenu'] .lm-Menu-itemSubmenuIcon {
+  background-image: var(--jp-icon-caret-right);
+
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px;
+  min-width: 16px;
+  min-height: 16px;
+}
