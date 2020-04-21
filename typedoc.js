@@ -17,5 +17,5 @@ module.exports = {
   out: 'docs/api',
   readme: 'README.md',
   theme: 'typedoc-theme',
-  tsconfig: 'tsconfig.json'
+  tsconfig: 'tsconfigbase.json'
 };
