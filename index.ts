@@ -235,6 +235,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     notebook_command_manager.add(lsp_commands);
 
     function updateOptions(settings: ISettingRegistry.ISettings): void {
+      console.log(connection_manager)
       const options = settings.composite;
 
       // Object.keys(options).forEach((key) => {
