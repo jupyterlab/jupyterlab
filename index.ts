@@ -244,7 +244,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
       //    CodeMirrorExtension.modifierKey = modifier;
       //  }
       // });
-
       const languageServerSettings = options.language_servers || {};
       connection_manager.updateServerConfigurations(languageServerSettings);
     }

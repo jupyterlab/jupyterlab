@@ -150,12 +150,12 @@ export class DocumentConnectionManager {
 
   public async updateServerConfigurations(
     //TODO: define types for server configurations
-    settings: any
+    allSettings: any
   ) {
     console.log(this.language_server_manager)
-    for (let language_server_id in settings) {
-      const config = settings[language_server_id].config
-      await Private.updateServerConfiguration(language_server_id, config)
+    for (let language_server_id in allSettings) {
+      const serverSettings = allSettings[language_server_id]
+      await Private.updateServerConfiguration(language_server_id, serverSettings)
     }
   }
 
