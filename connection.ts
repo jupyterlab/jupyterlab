@@ -11,7 +11,7 @@ import {
 } from 'lsp-ws-connection';
 import { until_ready } from './utils';
 
-interface ILSPOptions extends ILspOptions {}
+interface ILSPOptions extends ILspOptions { }
 
 export class LSPConnection extends LspWsConnection {
   protected documentsToOpen: IDocumentInfo[];
@@ -30,7 +30,13 @@ export class LSPConnection extends LspWsConnection {
   }
 
   protected onServerInitialized(params: lsProtocol.InitializeResult) {
-    super.onServerInitialized(params);
+    const settings = {
+      "yaml.schemas": {
+        "http://json.schemastore.org/composer": "/*"
+      }
+    }
+    const initParams = { ...params, settings }
+    super.onServerInitialized(initParams);
     while (this.documentsToOpen.length) {
       this.sendOpen(this.documentsToOpen.pop());
     }

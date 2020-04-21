@@ -148,6 +148,14 @@ export class DocumentConnectionManager {
     return connection;
   }
 
+  public updateServerConfigurations(
+    options?: {}
+  ) {
+    for (let [, connection] of this.connections) {
+      connection.sendConfigurationChange(options)
+    }
+  }
+
   /**
    * Fired the first time a connection is opened. These _should_ be the only
    * invocation of `.on` (once remaining LSPFeature.connection_handlers are made
