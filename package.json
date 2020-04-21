@@ -50,7 +50,7 @@
     "create:test": "node buildutils/lib/create-test-package.js",
     "create:theme": "node buildutils/lib/create-theme.js",
     "deduplicate": "jlpm yarn-deduplicate -s fewer --fail",
-    "docs": "lerna run docs",
+    "docs": "typedoc --options typedoc.js .",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --fix .",
     "eslint:check": "eslint --ext .js,.jsx,.ts,.tsx .",
     "get:dependency": "node buildutils/lib/get-dependency.js",
@@ -92,6 +92,7 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@strictsoftware/typedoc-plugin-monorepo": "^0.3.1",
     "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
     "eslint": "^6.8.0",
@@ -102,7 +103,9 @@
     "lerna": "^3.19.0",
     "lint-staged": "^9.5.0",
     "prettier": "^1.19.1",
+    "react-docgen-typescript-loader": "^3.3.0",
     "shell-quote": "^1.7.2",
+    "typedoc": "^0.15.4",
     "yarn": "1.21.1"
   }
 }
