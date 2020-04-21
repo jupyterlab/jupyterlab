@@ -52,6 +52,12 @@ For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`
 
     pipenv shell
     jupyter lab
+    
+Alternatively, you can run ``jupyter lab`` inside the virtualenv with 
+
+.. code:: bash
+
+    pipenv run jupyter lab
 
 Docker
 ~~~~~~
