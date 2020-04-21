@@ -126,7 +126,7 @@ export namespace Contents {
   /**
    * A contents file format.
    */
-  export type FileFormat = 'json' | 'text' | 'base64';
+  export type FileFormat = 'json' | 'text' | 'base64' | 'null';
 
   /**
    * The options used to fetch a file.
