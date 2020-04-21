@@ -402,7 +402,13 @@ export class CompleterModel implements Completer.IModel {
     for (let i of items) {
       const item = (i as unknown) as CompletionHandler.ICompletionItem;
       // See if label matches query string
-      let match = StringExt.matchSumOfSquares(item.label, query);
+      // With ICompletionItems, the label may include parameters, so we exclude them from the matcher.
+      // e.g. Given label `foo(b, a, r)` and query `bar`,
+      // don't count parameters, `b`, `a`, and `r` as matches.
+      const index = item.label.indexOf('(');
+      const prefix = index > -1 ? item.label.substring(0, index) : item.label;
+      let match = StringExt.matchSumOfSquares(prefix, query);
+      // Filter non-matching items.
       if (match) {
         // Highlight label text if there's a match
         let marked = StringExt.highlight(
