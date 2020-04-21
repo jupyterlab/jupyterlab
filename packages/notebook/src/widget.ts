@@ -1593,7 +1593,7 @@ export class Notebook extends StaticNotebook {
       // position of the click event.
       target = document.elementFromPoint(
         event.clientX,
-        event.clientY,
+        event.clientY
       ) as HTMLElement;
       index = this._findCell(target);
     }
