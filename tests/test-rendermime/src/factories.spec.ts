@@ -104,8 +104,11 @@ describe('rendermime/factories', () => {
       it('should autolink URLs', async () => {
         const f = textRendererFactory;
         const urls = [
+          'https://example.com',
+          'https://example.com/',
           'https://example.com#anchor',
           'http://localhost:9090/app',
+          'http://localhost:9090/app/',
           'http://127.0.0.1/test?query=string'
         ];
         await Promise.all(
