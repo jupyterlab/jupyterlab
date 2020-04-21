@@ -31,6 +31,9 @@ jobs:
         jlpm && jlpm run build
         jupyter labextension link .
 
+    - name: Install libgbm1 to fix puppeteer
+      run: sudo apt-get install libgbm1
+
     - name: Browser check
       run: python -m jupyterlab.browser_check
 
