@@ -8,6 +8,7 @@ import { sleep, until_ready } from './utils';
 // Name-only import so as to not trigger inclusion in main bundle
 import * as ConnectionModuleType from './connection';
 import { TLanguageServerId, ILanguageServerManager } from './tokens';
+import { ClientConfigurationSchema } from './_schema'
 
 export interface IDocumentConnectionData {
   virtual_document: VirtualDocument;
@@ -148,11 +149,17 @@ export class DocumentConnectionManager {
     return connection;
   }
 
-  public updateServerConfigurations(
-    options?: {}
+  public async updateServerConfigurations(
+    //TODO: define types for server configurations
+    options: any
   ) {
-    for (let [, connection] of this.connections) {
-      connection.sendConfigurationChange(options)
+    for (let language in options) {
+      let connection = this.connections.get(language)
+
+      if (connection) {
+        const config = options[language].config
+        await connection.sendConfigurationChange(config)
+      }
     }
   }
 

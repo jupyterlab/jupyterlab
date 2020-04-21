@@ -236,14 +236,16 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     function updateOptions(settings: ISettingRegistry.ISettings): void {
       const options = settings.composite;
+
       // Object.keys(options).forEach((key) => {
       //  if (key === 'modifier') {
       //    // let modifier = options[key] as KeyModifier;
       //    CodeMirrorExtension.modifierKey = modifier;
       //  }
       // });
-      console.log(connection_manager)
-      connection_manager.updateServerConfigurations(options)
+
+      const languageServerSettings = options.language_servers || {};
+      connection_manager.updateServerConfigurations(languageServerSettings);
     }
 
     settingRegistry

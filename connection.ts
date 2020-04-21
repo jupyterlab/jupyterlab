@@ -30,13 +30,7 @@ export class LSPConnection extends LspWsConnection {
   }
 
   protected onServerInitialized(params: lsProtocol.InitializeResult) {
-    const settings = {
-      "yaml.schemas": {
-        "http://json.schemastore.org/composer": "/*"
-      }
-    }
-    const initParams = { ...params, settings }
-    super.onServerInitialized(initParams);
+    super.onServerInitialized(params);
     while (this.documentsToOpen.length) {
       this.sendOpen(this.documentsToOpen.pop());
     }
