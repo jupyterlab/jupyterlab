@@ -23,12 +23,12 @@ describe('Mode', () => {
       CodeMirror.defineMode('foo', () => {
         return {};
       });
-      let spec = (await Mode.ensure('text/foo'))!;
+      const spec = (await Mode.ensure('text/foo'))!;
       expect(spec.name).to.equal('FOO');
     });
 
     it('should load a bundled spec', async () => {
-      let spec = (await Mode.ensure('application/json'))!;
+      const spec = (await Mode.ensure('application/json'))!;
       expect(spec.name).to.equal('JSON');
     });
 
@@ -66,7 +66,7 @@ describe('Mode', () => {
     });
 
     it('should default to plain text', async () => {
-      let spec = (await Mode.ensure('this is not a mode'))!;
+      const spec = (await Mode.ensure('this is not a mode'))!;
       expect(spec.name).to.equal('Plain Text');
     });
   });

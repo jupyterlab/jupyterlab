@@ -45,26 +45,29 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       basePath,
       name,
       manager,
-      modelFactory
+      modelFactory,
+      sessionContext
     } = options;
-    let contentFactory = (this.contentFactory =
+    const contentFactory = (this.contentFactory =
       options.contentFactory || ConsolePanel.defaultContentFactory);
-    let count = Private.count++;
+    const count = Private.count++;
     if (!path) {
       path = `${basePath || ''}/console-${count}-${UUID.uuid4()}`;
     }
 
-    let sessionContext = (this._sessionContext = new SessionContext({
-      sessionManager: manager.sessions,
-      specsManager: manager.kernelspecs,
-      path,
-      name: name || `Console ${count}`,
-      type: 'console',
-      kernelPreference: options.kernelPreference,
-      setBusy: options.setBusy
-    }));
+    sessionContext = this._sessionContext =
+      sessionContext ||
+      new SessionContext({
+        sessionManager: manager.sessions,
+        specsManager: manager.kernelspecs,
+        path,
+        name: name || `Console ${count}`,
+        type: 'console',
+        kernelPreference: options.kernelPreference,
+        setBusy: options.setBusy
+      });
 
-    let resolver = new RenderMimeRegistry.UrlResolver({
+    const resolver = new RenderMimeRegistry.UrlResolver({
       session: sessionContext,
       contents: manager.contents
     });
@@ -81,7 +84,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
     void sessionContext.initialize().then(async value => {
       if (value) {
-        await sessionContextDialogs.selectKernel(sessionContext);
+        await sessionContextDialogs.selectKernel(sessionContext!);
       }
       this._connected = new Date();
       this._updateTitlePanel();
@@ -127,7 +130,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
    * Handle `'activate-request'` messages.
    */
   protected onActivateRequest(msg: Message): void {
-    let prompt = this.console.promptCell;
+    const prompt = this.console.promptCell;
     if (prompt) {
       prompt.editor.focus();
     }
@@ -158,7 +161,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
 
   private _executed: Date | null = null;
   private _connected: Date | null = null;
-  private _sessionContext: SessionContext;
+  private _sessionContext: ISessionContext;
 }
 
 /**
@@ -203,6 +206,11 @@ export namespace ConsolePanel {
      * A kernel preference.
      */
     kernelPreference?: ISessionContext.IKernelPreference;
+
+    /**
+     * An existing session context to use.
+     */
+    sessionContext?: SessionContext;
 
     /**
      * The model factory for the console widget.
@@ -285,7 +293,7 @@ namespace Private {
     connected: Date | null,
     executed: Date | null
   ) {
-    let sessionContext = panel.console.sessionContext.session;
+    const sessionContext = panel.console.sessionContext.session;
     if (sessionContext) {
       let caption =
         `Name: ${sessionContext.name}\n` +

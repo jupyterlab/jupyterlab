@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -162,7 +162,7 @@ export class Router implements IRouter {
         const result = await commands.execute(command, current);
         if (result === stop) {
           queue.length = 0;
-          console.log(`Routing ${request} was short-circuited by ${command}`);
+          console.debug(`Routing ${request} was short-circuited by ${command}`);
         }
       } catch (reason) {
         console.warn(`Routing ${request} to ${command} failed`, reason);

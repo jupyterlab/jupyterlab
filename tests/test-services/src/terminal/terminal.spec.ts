@@ -14,7 +14,7 @@ import { handleRequest } from '../utils';
 describe('terminal', () => {
   let defaultSession: Terminal.ITerminalConnection;
   let session: Terminal.ITerminalConnection;
-  let manager = new TerminalManager();
+  const manager = new TerminalManager();
 
   beforeAll(async () => {
     defaultSession = await manager.startNew();
@@ -38,7 +38,7 @@ describe('terminal', () => {
     describe('#messageReceived', () => {
       it('should be emitted when a message is received', async () => {
         session = await manager.startNew();
-        let emission = testEmission(session.messageReceived, {
+        const emission = testEmission(session.messageReceived, {
           test: (sender, msg) => {
             return msg.type === 'stdout';
           }

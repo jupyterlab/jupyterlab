@@ -64,7 +64,7 @@ export class RenderedVDOM extends Widget implements IRenderMime.IRenderer {
    */
   dispose(): void {
     // Dispose of comm disposables
-    for (let targetName in this._comms) {
+    for (const targetName in this._comms) {
       this._comms[targetName].dispose();
     }
     super.dispose();

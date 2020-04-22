@@ -51,7 +51,7 @@ describe('terminal/index', () => {
   describe('Terminal', () => {
     let widget: LogTerminal;
     let session: TerminalNS.ITerminalConnection;
-    let manager = new TerminalManager();
+    const manager = new TerminalManager();
 
     before(async () => {
       session = await manager.startNew();

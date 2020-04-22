@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -21,7 +21,7 @@ export async function handlePackage(packagePath: string): Promise<string[]> {
   try {
     data = utils.readJSONFile(packagePath);
   } catch (e) {
-    console.log('Skipping package ' + packagePath);
+    console.debug('Skipping package ' + packagePath);
     return cmds;
   }
 
@@ -31,14 +31,14 @@ export async function handlePackage(packagePath: string): Promise<string[]> {
 
   const pkg = data.name;
 
-  let npmData = await packageJson(pkg, { allVersions: true });
-  let versions = Object.keys(npmData.versions).sort(semver.rcompare);
-  let tags = npmData['dist-tags'];
+  const npmData = await packageJson(pkg, { allVersions: true });
+  const versions = Object.keys(npmData.versions).sort(semver.rcompare);
+  const tags = npmData['dist-tags'];
 
   // Go through the versions. The latest prerelease is 'next', the latest
   // non-prerelease should be 'stable'.
-  let next = semver.prerelease(versions[0]) ? versions[0] : undefined;
-  let latest = versions.find(i => !semver.prerelease(i));
+  const next = semver.prerelease(versions[0]) ? versions[0] : undefined;
+  const latest = versions.find(i => !semver.prerelease(i));
 
   if (latest && latest !== tags.latest) {
     cmds.push(`npm dist-tag add ${pkg}@${latest} latest`);
@@ -68,7 +68,7 @@ points to the latest prerelease after it.`
   .option('--lerna', 'Update dist-tags in all lerna packages')
   .option('--path [path]', 'Path to package or monorepo to update')
   .action(async (args: any) => {
-    let basePath = path.resolve(args.path || '.');
+    const basePath = path.resolve(args.path || '.');
     let cmds: string[][] = [];
     let paths: string[] = [];
     if (args.lerna) {
@@ -76,9 +76,9 @@ points to the latest prerelease after it.`
       cmds = await Promise.all(paths.map(handlePackage));
     }
     cmds.push(await handlePackage(basePath));
-    let out = flatten(cmds).join('\n');
+    const out = flatten(cmds).join('\n');
     if (out) {
-      console.log(out);
+      console.debug(out);
     }
   });
 

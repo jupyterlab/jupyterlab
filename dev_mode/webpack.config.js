@@ -1,24 +1,24 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-var plib = require('path');
-var fs = require('fs-extra');
-var Handlebars = require('handlebars');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var webpack = require('webpack');
-var BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+const plib = require('path');
+const fs = require('fs-extra');
+const Handlebars = require('handlebars');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
 
-var Build = require('@jupyterlab/buildutils').Build;
-var WPPlugin = require('@jupyterlab/buildutils').WPPlugin;
-var package_data = require('./package.json');
+const Build = require('@jupyterlab/buildutils').Build;
+const WPPlugin = require('@jupyterlab/buildutils').WPPlugin;
+const package_data = require('./package.json');
 
 // Handle the extensions.
-var jlab = package_data.jupyterlab;
-var extensions = jlab.extensions;
-var mimeExtensions = jlab.mimeExtensions;
+const jlab = package_data.jupyterlab;
+const extensions = jlab.extensions;
+const mimeExtensions = jlab.mimeExtensions;
 const { externalExtensions } = jlab;
 const packageNames = Object.keys(mimeExtensions).concat(
   Object.keys(extensions),
@@ -41,26 +41,26 @@ for (const key in externalExtensions) {
 }
 
 // Ensure a clear build directory.
-var buildDir = plib.resolve(jlab.buildDir);
+const buildDir = plib.resolve(jlab.buildDir);
 if (fs.existsSync(buildDir)) {
   fs.removeSync(buildDir);
 }
 fs.ensureDirSync(buildDir);
 
 // Build the assets
-var extraConfig = Build.ensureAssets({
+const extraConfig = Build.ensureAssets({
   packageNames: packageNames,
   output: jlab.outputDir
 });
 
 // Create the entry point file.
-var source = fs.readFileSync('index.js').toString();
-var template = Handlebars.compile(source);
-var data = {
+const source = fs.readFileSync('index.js').toString();
+const template = Handlebars.compile(source);
+const data = {
   jupyterlab_extensions: extensions,
   jupyterlab_mime_extensions: mimeExtensions
 };
-var result = template(data);
+const result = template(data);
 
 fs.writeFileSync(plib.join(buildDir, 'index.out.js'), result);
 fs.copySync('./package.json', plib.join(buildDir, 'package.json'));
@@ -70,43 +70,21 @@ fs.copySync(
 );
 
 // Set up variables for the watch mode ignore plugins
-let watched = {};
-let ignoreCache = Object.create(null);
+const watched = {};
+const ignoreCache = Object.create(null);
 Object.keys(jlab.linkedPackages).forEach(function(name) {
-  if (name in watched) return;
+  if (name in watched) {
+    return;
+  }
   const localPkgPath = require.resolve(plib.join(name, 'package.json'));
   watched[name] = plib.dirname(localPkgPath);
 });
 
 // Set up source-map-loader to look in watched lib dirs
-let sourceMapRes = Object.values(watched).reduce((res, name) => {
+const sourceMapRes = Object.values(watched).reduce((res, name) => {
   res.push(new RegExp(name + '/lib'));
   return res;
 }, []);
-
-/**
- * Sync a local path to a linked package path if they are files and differ.
- */
-function maybeSync(localPath, name, rest) {
-  const stats = fs.statSync(localPath);
-  if (!stats.isFile(localPath)) {
-    return;
-  }
-  const source = fs.realpathSync(plib.join(jlab.linkedPackages[name], rest));
-  if (source === fs.realpathSync(localPath)) {
-    return;
-  }
-  fs.watchFile(source, { interval: 500 }, function(curr) {
-    if (!curr || curr.nlink === 0) {
-      return;
-    }
-    try {
-      fs.copySync(source, localPath);
-    } catch (err) {
-      console.error(err);
-    }
-  });
-}
 
 /**
  * A filter function set up to exclude all files that are not
@@ -131,7 +109,6 @@ function ignored(path) {
     const rest = path.slice(rootPath.length);
     if (rest.indexOf('node_modules') === -1) {
       ignore = false;
-      maybeSync(path, name, rest);
     }
     return true;
   });
@@ -293,7 +270,8 @@ module.exports = [
       ]
     },
     watchOptions: {
-      poll: 333
+      poll: 500,
+      aggregateTimeout: 1000
     },
     node: {
       fs: 'empty'

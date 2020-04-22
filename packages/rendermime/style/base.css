@@ -22,6 +22,20 @@
   border: none;
   margin: 0px;
   padding: 0px;
+  line-height: normal;
+}
+
+.jp-RenderedText pre a:link {
+  text-decoration: none;
+  color: var(--jp-content-link-color);
+}
+.jp-RenderedText pre a:hover {
+  text-decoration: underline;
+  color: var(--jp-content-link-color);
+}
+.jp-RenderedText pre a:visited {
+  text-decoration: none;
+  color: var(--jp-content-link-color);
 }
 
 /* console foregrounds and backgrounds */

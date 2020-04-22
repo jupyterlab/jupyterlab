@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -168,14 +168,14 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
 
     this.value.changed.connect(this.onGenericChange, this);
 
-    let cellType = this.modelDB.createValue('type');
+    const cellType = this.modelDB.createValue('type');
     cellType.set(this.type);
 
-    let observableMetadata = this.modelDB.createMap('metadata');
+    const observableMetadata = this.modelDB.createMap('metadata');
     observableMetadata.changed.connect(this.onGenericChange, this);
 
-    let cell = options.cell;
-    let trusted = this.modelDB.createValue('trusted');
+    const cell = options.cell;
+    const trusted = this.modelDB.createValue('trusted');
     trusted.changed.connect(this.onTrustedChanged, this);
 
     if (!cell) {
@@ -190,7 +190,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
     } else {
       this.value.text = cell.source as string;
     }
-    let metadata = JSONExt.deepCopy(cell.metadata);
+    const metadata = JSONExt.deepCopy(cell.metadata);
     if (this.type !== 'raw') {
       delete metadata['format'];
     }
@@ -199,7 +199,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
       delete metadata['scrolled'];
     }
 
-    for (let key in metadata) {
+    for (const key in metadata) {
       observableMetadata.set(key, metadata[key]);
     }
   }
@@ -242,7 +242,7 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * Set the trusted state of the model.
    */
   set trusted(newValue: boolean) {
-    let oldValue = this.trusted;
+    const oldValue = this.trusted;
     if (oldValue === newValue) {
       return;
     }
@@ -253,9 +253,9 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.ICell {
-    let metadata: nbformat.IBaseCellMetadata = Object.create(null);
-    for (let key of this.metadata.keys()) {
-      let value = JSON.parse(JSON.stringify(this.metadata.get(key)));
+    const metadata: nbformat.IBaseCellMetadata = Object.create(null);
+    for (const key of this.metadata.keys()) {
+      const value = JSON.parse(JSON.stringify(this.metadata.get(key)));
       metadata[key] = value as JSONValue;
     }
     if (this.trusted) {
@@ -322,10 +322,10 @@ export class AttachmentsCellModel extends CellModel {
    */
   constructor(options: AttachmentsCellModel.IOptions) {
     super(options);
-    let factory =
+    const factory =
       options.contentFactory || AttachmentsCellModel.defaultContentFactory;
     let attachments: nbformat.IAttachments | undefined;
-    let cell = options.cell;
+    const cell = options.cell;
     if (cell && (cell.cell_type === 'raw' || cell.cell_type === 'markdown')) {
       attachments = (cell as nbformat.IRawCell | nbformat.IMarkdownCell)
         .attachments;
@@ -349,7 +349,7 @@ export class AttachmentsCellModel extends CellModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.IRawCell | nbformat.IMarkdownCell {
-    let cell = super.toJSON() as nbformat.IRawCell | nbformat.IMarkdownCell;
+    const cell = super.toJSON() as nbformat.IRawCell | nbformat.IMarkdownCell;
     if (this.attachments.length) {
       cell.attachments = this.attachments.toJSON();
     }
@@ -461,11 +461,12 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    */
   constructor(options: CodeCellModel.IOptions) {
     super(options);
-    let factory = options.contentFactory || CodeCellModel.defaultContentFactory;
-    let trusted = this.trusted;
-    let cell = options.cell as nbformat.ICodeCell;
+    const factory =
+      options.contentFactory || CodeCellModel.defaultContentFactory;
+    const trusted = this.trusted;
+    const cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
-    let executionCount = this.modelDB.createValue('executionCount');
+    const executionCount = this.modelDB.createValue('executionCount');
     if (!executionCount.get()) {
       if (cell && cell.cell_type === 'code') {
         executionCount.set(cell.execution_count || null);
@@ -487,7 +488,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     // Sync `collapsed` and `jupyter.outputs_hidden` for the first time, giving
     // preference to `collapsed`.
     if (this.metadata.has('collapsed')) {
-      let collapsed = this.metadata.get('collapsed') as boolean | undefined;
+      const collapsed = this.metadata.get('collapsed') as boolean | undefined;
       Private.collapseChanged(this.metadata, {
         type: 'change',
         key: 'collapsed',
@@ -495,7 +496,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
         newValue: collapsed
       });
     } else if (this.metadata.has('jupyter')) {
-      let jupyter = this.metadata.get('jupyter') as JSONObject;
+      const jupyter = this.metadata.get('jupyter') as JSONObject;
       if (jupyter.hasOwnProperty('outputs_hidden')) {
         Private.collapseChanged(this.metadata, {
           type: 'change',
@@ -521,7 +522,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     return this.modelDB.getValue('executionCount') as nbformat.ExecutionCount;
   }
   set executionCount(newValue: nbformat.ExecutionCount) {
-    let oldValue = this.executionCount;
+    const oldValue = this.executionCount;
     if (newValue === oldValue) {
       return;
     }
@@ -557,7 +558,7 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
    * Serialize the model to JSON.
    */
   toJSON(): nbformat.ICodeCell {
-    let cell = super.toJSON() as nbformat.ICodeCell;
+    const cell = super.toJSON() as nbformat.ICodeCell;
     cell.execution_count = this.executionCount || null;
     cell.outputs = this.outputs.toJSON();
     return cell;

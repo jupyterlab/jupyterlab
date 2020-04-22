@@ -225,17 +225,17 @@ Vega/Vega-Lite
 Vega:
 
 -  File extensions: ``.vg``, ``.vg.json``
--  MIME type: ``application/vnd.vega.v2+json``
+-  MIME type: ``application/vnd.vega.v5+json``
 
 Vega-Lite:
 
 -  File extensions: ``.vl``, ``.vl.json``
--  MIME type: ``application/vnd.vegalite.v1+json``
+-  MIME type: ``application/vnd.vegalite.v3+json``
 
 Vega and Vega-Lite are declarative visualization grammars that enable
 visualizations to be encoded as JSON data. For more information, see the
 documentation of Vega or Vega-Lite. JupyterLab supports rendering Vega
-2.x and Vega-Lite 1.x data in files and cell output.
+5.x and Vega-Lite 3.x data in files and cell output.
 
 .. _open-vega:
 

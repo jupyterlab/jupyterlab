@@ -161,14 +161,14 @@ export async function isFulfilled<T>(
   p: PromiseLike<T>,
   delay = 0
 ): Promise<boolean> {
-  let x = Object.create(null);
+  const x = Object.create(null);
   let race: any;
   if (delay > 0) {
     race = sleep(delay, x);
   } else {
     race = x;
   }
-  let result = await Promise.race([p, race]).catch(() => false);
+  const result = await Promise.race([p, race]).catch(() => false);
   return result !== x;
 }
 
@@ -278,7 +278,7 @@ export async function initNotebookContext(
     options.startKernel === undefined ? false : options.startKernel;
   await manager.ready;
 
-  let context = new Context({
+  const context = new Context({
     manager,
     factory,
     path,

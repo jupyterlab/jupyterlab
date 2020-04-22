@@ -96,7 +96,7 @@ export class RunningSessionManagers implements IRunningSessionManagers {
   add(manager: IRunningSessions.IManager): IDisposable {
     this._managers.push(manager);
     return new DisposableDelegate(() => {
-      let i = this._managers.indexOf(manager);
+      const i = this._managers.indexOf(manager);
 
       if (i > -1) {
         this._managers.splice(i, 1);

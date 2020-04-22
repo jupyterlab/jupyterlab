@@ -45,15 +45,15 @@ export class Context<T extends DocumentRegistry.IModel>
    * Construct a new document context.
    */
   constructor(options: Context.IOptions<T>) {
-    let manager = (this._manager = options.manager);
+    const manager = (this._manager = options.manager);
     this._factory = options.factory;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._opener = options.opener || Private.noOp;
     this._path = this._manager.contents.normalize(options.path);
     const localPath = this._manager.contents.localPath(this._path);
-    let lang = this._factory.preferredLanguage(PathExt.basename(localPath));
+    const lang = this._factory.preferredLanguage(PathExt.basename(localPath));
 
-    let dbFactory = options.modelDBFactory;
+    const dbFactory = options.modelDBFactory;
     if (dbFactory) {
       const localPath = manager.contents.localPath(this._path);
       this._modelDB = dbFactory.createNew(localPath);
@@ -66,7 +66,7 @@ export class Context<T extends DocumentRegistry.IModel>
       return this._populatedPromise.promise;
     });
 
-    let ext = PathExt.extname(this._path);
+    const ext = PathExt.extname(this._path);
     this.sessionContext = new SessionContext({
       sessionManager: manager.sessions,
       specsManager: manager.kernelspecs,
@@ -79,9 +79,12 @@ export class Context<T extends DocumentRegistry.IModel>
     this.sessionContext.propertyChanged.connect(this._onSessionChanged, this);
     manager.contents.fileChanged.connect(this._onFileChanged, this);
 
-    this.urlResolver = new RenderMimeRegistry.UrlResolver({
-      session: this.sessionContext,
+    const urlResolver = (this.urlResolver = new RenderMimeRegistry.UrlResolver({
+      path: this._path,
       contents: manager.contents
+    }));
+    this.pathChanged.connect((sender, newPath) => {
+      urlResolver.path = newPath;
     });
   }
 
@@ -283,7 +286,7 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   async download(): Promise<void> {
     const url = await this._manager.contents.getDownloadUrl(this._path);
-    let element = document.createElement('a');
+    const element = document.createElement('a');
     element.href = url;
     element.download = '';
     document.body.appendChild(element);
@@ -305,7 +308,7 @@ export class Context<T extends DocumentRegistry.IModel>
    * Create a checkpoint for the file.
    */
   createCheckpoint(): Promise<Contents.ICheckpointModel> {
-    let contents = this._manager.contents;
+    const contents = this._manager.contents;
     return this._manager.ready.then(() => {
       return contents.createCheckpoint(this._path);
     });
@@ -315,7 +318,7 @@ export class Context<T extends DocumentRegistry.IModel>
    * Delete a checkpoint for the file.
    */
   deleteCheckpoint(checkpointId: string): Promise<void> {
-    let contents = this._manager.contents;
+    const contents = this._manager.contents;
     return this._manager.ready.then(() => {
       return contents.deleteCheckpoint(this._path, checkpointId);
     });
@@ -325,8 +328,8 @@ export class Context<T extends DocumentRegistry.IModel>
    * Restore the file to a known checkpoint state.
    */
   restoreCheckpoint(checkpointId?: string): Promise<void> {
-    let contents = this._manager.contents;
-    let path = this._path;
+    const contents = this._manager.contents;
+    const path = this._path;
     return this._manager.ready.then(() => {
       if (checkpointId) {
         return contents.restoreCheckpoint(path, checkpointId);
@@ -345,7 +348,7 @@ export class Context<T extends DocumentRegistry.IModel>
    * List available checkpoints for a file.
    */
   listCheckpoints(): Promise<Contents.ICheckpointModel[]> {
-    let contents = this._manager.contents;
+    const contents = this._manager.contents;
     return this._manager.ready.then(() => {
       return contents.listCheckpoints(this._path);
     });
@@ -368,7 +371,7 @@ export class Context<T extends DocumentRegistry.IModel>
     widget: Widget,
     options: DocumentRegistry.IOpenOptions = {}
   ): IDisposable {
-    let opener = this._opener;
+    const opener = this._opener;
     if (opener) {
       opener(widget, options);
     }
@@ -425,7 +428,7 @@ export class Context<T extends DocumentRegistry.IModel>
     if (type !== 'path') {
       return;
     }
-    let path = this.sessionContext.session!.path;
+    const path = this.sessionContext.session!.path;
     if (path !== this._path) {
       this._path = path;
       this._pathChanged.emit(path);
@@ -436,7 +439,7 @@ export class Context<T extends DocumentRegistry.IModel>
    * Update our contents model, without the content.
    */
   private _updateContentsModel(model: Contents.IModel): void {
-    let newModel: Contents.IModel = {
+    const newModel: Contents.IModel = {
       path: model.path,
       name: model.name,
       type: model.type,
@@ -447,7 +450,7 @@ export class Context<T extends DocumentRegistry.IModel>
       mimetype: model.mimetype,
       format: model.format
     };
-    let mod = this._contentsModel ? this._contentsModel.last_modified : null;
+    const mod = this._contentsModel ? this._contentsModel.last_modified : null;
     this._contentsModel = newModel;
     if (!mod || newModel.last_modified !== mod) {
       this._fileChanged.emit(newModel);
@@ -468,7 +471,7 @@ export class Context<T extends DocumentRegistry.IModel>
         return;
       }
       // Update the kernel preference.
-      let name =
+      const name =
         this._model.defaultKernelName ||
         this.sessionContext.kernelPreference.name;
       this.sessionContext.kernelPreference = {
@@ -492,7 +495,7 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   private _save(): Promise<void> {
     this._saveState.emit('started');
-    let model = this._model;
+    const model = this._model;
     let content: PartialJSONValue;
     if (this._factory.fileFormat === 'json') {
       content = model.toJSON();
@@ -503,7 +506,7 @@ export class Context<T extends DocumentRegistry.IModel>
       }
     }
 
-    let options = {
+    const options = {
       type: this._factory.contentType,
       format: this._factory.fileFormat,
       content
@@ -566,13 +569,13 @@ export class Context<T extends DocumentRegistry.IModel>
    * deserializing the content.
    */
   private _revert(initializeModel: boolean = false): Promise<void> {
-    let opts: Contents.IFetchOptions = {
+    const opts: Contents.IFetchOptions = {
       format: this._factory.fileFormat,
       type: this._factory.contentType,
       content: true
     };
-    let path = this._path;
-    let model = this._model;
+    const path = this._path;
+    const model = this._model;
     return this._manager.ready
       .then(() => {
         return this._manager.contents.get(path, opts);
@@ -581,7 +584,7 @@ export class Context<T extends DocumentRegistry.IModel>
         if (this.isDisposed) {
           return;
         }
-        let dirty = false;
+        const dirty = false;
         if (contents.format === 'json') {
           model.fromJSON(contents.content);
           if (initializeModel) {
@@ -626,9 +629,9 @@ export class Context<T extends DocumentRegistry.IModel>
   private _maybeSave(
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
-    let path = this._path;
+    const path = this._path;
     // Make sure the file has not changed on disk.
-    let promise = this._manager.contents.get(path, { content: false });
+    const promise = this._manager.contents.get(path, { content: false });
     return promise.then(
       model => {
         if (this.isDisposed) {
@@ -638,9 +641,9 @@ export class Context<T extends DocumentRegistry.IModel>
         // (our last save)
         // In some cases the filesystem reports an inconsistent time,
         // so we allow 0.5 seconds difference before complaining.
-        let modified = this.contentsModel?.last_modified;
-        let tClient = modified ? new Date(modified) : new Date();
-        let tDisk = new Date(model.last_modified);
+        const modified = this.contentsModel?.last_modified;
+        const tClient = modified ? new Date(modified) : new Date();
+        const tDisk = new Date(model.last_modified);
         if (modified && tDisk.getTime() - tClient.getTime() > 500) {
           // 500 ms
           return this._timeConflict(tClient, model, options);
@@ -664,7 +667,7 @@ export class Context<T extends DocumentRegistry.IModel>
     title: string
   ): Promise<void> {
     // Check for a more specific error message.
-    let error = { message: '' };
+    const error = { message: '' };
     if (err instanceof ServerConnection.ResponseError) {
       const text = await err.response.text();
       let body = '';
@@ -716,19 +719,19 @@ export class Context<T extends DocumentRegistry.IModel>
     model: Contents.IModel,
     options: Partial<Contents.IModel>
   ): Promise<Contents.IModel> {
-    let tDisk = new Date(model.last_modified);
+    const tDisk = new Date(model.last_modified);
     console.warn(
       `Last saving performed ${tClient} ` +
         `while the current file seems to have been saved ` +
         `${tDisk}`
     );
-    let body =
+    const body =
       `"${this.path}" has changed on disk since the last time it ` +
       `was opened or saved. ` +
       `Do you want to overwrite the file on disk with the version ` +
       ` open here, or load the version on disk (revert)?`;
-    let revertBtn = Dialog.okButton({ label: 'Revert' });
-    let overwriteBtn = Dialog.warnButton({ label: 'Overwrite' });
+    const revertBtn = Dialog.okButton({ label: 'Revert' });
+    const overwriteBtn = Dialog.warnButton({ label: 'Overwrite' });
     return showDialog({
       title: 'File Changed',
       body,
@@ -753,8 +756,8 @@ export class Context<T extends DocumentRegistry.IModel>
    * Handle a time conflict.
    */
   private _maybeOverWrite(path: string): Promise<void> {
-    let body = `"${path}" already exists. Do you want to replace it?`;
-    let overwriteBtn = Dialog.warnButton({ label: 'Overwrite' });
+    const body = `"${path}" already exists. Do you want to replace it?`;
+    const overwriteBtn = Dialog.warnButton({ label: 'Overwrite' });
     return showDialog({
       title: 'File Overwrite?',
       body,
@@ -776,16 +779,11 @@ export class Context<T extends DocumentRegistry.IModel>
    */
   private async _finishSaveAs(newPath: string): Promise<void> {
     this._path = newPath;
-    return this.sessionContext.session
-      ?.setPath(newPath)
-      .then(() => {
-        void this.sessionContext.session?.setName(newPath.split('/').pop()!);
-        return this.save();
-      })
-      .then(() => {
-        this._pathChanged.emit(this._path);
-        return this._maybeCheckpoint(true);
-      });
+    await this.sessionContext.session?.setPath(newPath);
+    await this.sessionContext.session?.setName(newPath.split('/').pop()!);
+    await this.save();
+    this._pathChanged.emit(this._path);
+    await this._maybeCheckpoint(true);
   }
 
   private _manager: ServiceManager.IManager;
@@ -869,7 +867,7 @@ namespace Private {
    * Get a new file path from the user.
    */
   export function getSavePath(path: string): Promise<string | undefined> {
-    let saveBtn = Dialog.okButton({ label: 'Save' });
+    const saveBtn = Dialog.okButton({ label: 'Save' });
     return showDialog({
       title: 'Save File As..',
       body: new SaveWidget(path),
@@ -912,7 +910,7 @@ namespace Private {
    * Create the node for a save widget.
    */
   function createSaveNode(path: string): HTMLElement {
-    let input = document.createElement('input');
+    const input = document.createElement('input');
     input.value = path;
     return input;
   }

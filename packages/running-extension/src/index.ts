@@ -46,8 +46,8 @@ function activate(
   app: JupyterFrontEnd,
   restorer: ILayoutRestorer | null
 ): IRunningSessionManagers {
-  let runningSessionManagers = new RunningSessionManagers();
-  let running = new RunningSessions(runningSessionManagers);
+  const runningSessionManagers = new RunningSessionManagers();
+  const running = new RunningSessions(runningSessionManagers);
   running.id = 'jp-running-sessions';
   running.title.caption = 'Running Terminals and Kernels';
   running.title.icon = runningIcon;
@@ -73,8 +73,8 @@ function addKernelRunningSessionManager(
   managers: IRunningSessionManagers,
   app: JupyterFrontEnd
 ) {
-  let manager = app.serviceManager.sessions;
-  let specsManager = app.serviceManager.kernelspecs;
+  const manager = app.serviceManager.sessions;
+  const specsManager = app.serviceManager.kernelspecs;
   function filterSessions(m: Session.IModel) {
     return !!(
       (m.name || PathExt.basename(m.path)).indexOf('.') !== -1 || m.name
@@ -98,7 +98,7 @@ function addKernelRunningSessionManager(
       this._model = model;
     }
     open() {
-      let { path, type } = this._model;
+      const { path, type } = this._model;
       if (type.toLowerCase() === 'console') {
         void app.commands.execute('console:open', { path });
       } else {
@@ -109,7 +109,7 @@ function addKernelRunningSessionManager(
       return manager.shutdown(this._model.id);
     }
     icon() {
-      let { name, path, type } = this._model;
+      const { name, path, type } = this._model;
       if ((name || PathExt.basename(path)).indexOf('.ipynb') !== -1) {
         return notebookIcon;
       } else if (type.toLowerCase() === 'console') {
@@ -121,7 +121,7 @@ function addKernelRunningSessionManager(
       return this._model.name || PathExt.basename(this._model.path);
     }
     labelTitle() {
-      let { kernel, path } = this._model;
+      const { kernel, path } = this._model;
       let kernelName = kernel?.name;
       if (kernelName && specsManager.specs) {
         const spec = specsManager.specs.kernelspecs[kernelName];

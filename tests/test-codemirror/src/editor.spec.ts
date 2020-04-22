@@ -22,7 +22,7 @@ class LogFileEditor extends CodeMirrorEditor {
   methods: string[] = [];
 
   protected onKeydown(event: KeyboardEvent): boolean {
-    let value = super.onKeydown(event);
+    const value = super.onKeydown(event);
     this.methods.push('onKeydown');
     return value;
   }

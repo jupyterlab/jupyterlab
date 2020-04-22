@@ -187,7 +187,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * @returns An iterator over the toolbar item names.
    */
   names(): IIterator<string> {
-    let layout = this.layout as ToolbarLayout;
+    const layout = this.layout as ToolbarLayout;
     return map(layout.widgets, widget => {
       return Private.nameProperty.get(widget);
     });
@@ -209,7 +209,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * The item can be removed from the toolbar by setting its parent to `null`.
    */
   addItem(name: string, widget: T): boolean {
-    let layout = this.layout as ToolbarLayout;
+    const layout = this.layout as ToolbarLayout;
     return this.insertItem(layout.widgets.length, name, widget);
   }
 
@@ -230,12 +230,12 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
    * The item can be removed from the toolbar by setting its parent to `null`.
    */
   insertItem(index: number, name: string, widget: T): boolean {
-    let existing = find(this.names(), value => value === name);
+    const existing = find(this.names(), value => value === name);
     if (existing) {
       return false;
     }
     widget.addClass(TOOLBAR_ITEM_CLASS);
-    let layout = this.layout as ToolbarLayout;
+    const layout = this.layout as ToolbarLayout;
     layout.insertWidget(index, widget);
     Private.nameProperty.set(widget, name);
     return true;
@@ -287,10 +287,10 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
     name: string,
     widget: T
   ): boolean {
-    let nameWithIndex = map(this.names(), (name, i) => {
+    const nameWithIndex = map(this.names(), (name, i) => {
       return { name: name, index: i };
     });
-    let target = find(nameWithIndex, x => x.name === at);
+    const target = find(nameWithIndex, x => x.name === at);
     if (target) {
       return this.insertItem(target.index + offset, name, widget);
     }
@@ -609,7 +609,7 @@ namespace Private {
   export function propsFromCommand(
     options: CommandToolbarButtonComponent.IProps
   ): ToolbarButtonComponent.IProps {
-    let { commands, id, args } = options;
+    const { commands, id, args } = options;
 
     const iconClass = commands.iconClass(id, args);
     const iconLabel = commands.iconLabel(id, args);
@@ -727,7 +727,7 @@ namespace Private {
         return;
       }
 
-      let status = sessionContext.kernelDisplayStatus;
+      const status = sessionContext.kernelDisplayStatus;
 
       // set the icon
       if (this._isBusy(status)) {
@@ -752,7 +752,10 @@ namespace Private {
      */
     private _isBusy(status: ISessionContext.KernelDisplayStatus): boolean {
       return (
-        status === 'busy' || status === 'starting' || status === 'restarting'
+        status === 'busy' ||
+        status === 'starting' ||
+        status === 'restarting' ||
+        status === 'initializing'
       );
     }
   }

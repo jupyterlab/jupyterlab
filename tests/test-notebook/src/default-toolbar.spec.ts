@@ -25,7 +25,8 @@ import {
   signalToPromise,
   sleep,
   NBTestUtils,
-  framePromise
+  framePromise,
+  acceptDialog
 } from '@jupyterlab/testutils';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
@@ -51,7 +52,7 @@ describe('@jupyterlab/notebook', () => {
         it('should save when clicked', async () => {
           const button = ToolbarItems.createSaveButton(panel);
           Widget.attach(button, document.body);
-          let promise = signalToPromise(context.fileChanged);
+          const promise = signalToPromise(context.fileChanged);
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await promise;
@@ -216,6 +217,7 @@ describe('@jupyterlab/notebook', () => {
             'run',
             'interrupt',
             'restart',
+            'restart-and-run',
             'cellType',
             'spacer',
             'kernelName',
@@ -230,8 +232,6 @@ describe('@jupyterlab/notebook', () => {
       let panel: NotebookPanel;
 
       beforeEach(async function() {
-        // tslint:disable-next-line:no-invalid-this
-        this.timeout(120000);
         context = await initNotebookContext({ startKernel: true });
         panel = NBTestUtils.createNotebookPanel(context);
         context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
@@ -270,13 +270,56 @@ describe('@jupyterlab/notebook', () => {
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await p.promise;
-        }).timeout(30000); // Allow for slower CI
+        });
 
         it("should add an inline svg node with the 'run' icon", async () => {
           const button = ToolbarItems.createRunButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
           expect(button.node.querySelector("[data-icon$='run']")).to.exist;
+        });
+      });
+
+      describe('#createRestartRunAllButton()', () => {
+        it('should restart and run all when clicked', async () => {
+          const button = ToolbarItems.createRestartRunAllButton(panel);
+          const widget = panel.content;
+
+          // Clear the first two cells.
+          const codeCell = widget.widgets[0] as CodeCell;
+          codeCell.model.outputs.clear();
+          const mdCell = widget.widgets[1] as MarkdownCell;
+          mdCell.rendered = false;
+
+          Widget.attach(button, document.body);
+          const p = new PromiseDelegate();
+          context.sessionContext.statusChanged.connect((sender, status) => {
+            // Find the right status idle message
+            if (status === 'idle' && codeCell.model.outputs.length > 0) {
+              expect(
+                widget.widgets
+                  .filter(cell => cell.model.type === 'markdown')
+                  .every(cell => (cell as MarkdownCell).rendered)
+              );
+              expect(widget.activeCellIndex).to.equal(
+                widget.widgets.filter(cell => cell.model.type === 'code').length
+              );
+              button.dispose();
+              p.resolve(0);
+            }
+          });
+          await framePromise();
+          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          await acceptDialog();
+          await p.promise;
+        });
+
+        it("should add an inline svg node with the 'fast-forward' icon", async () => {
+          const button = ToolbarItems.createRestartRunAllButton(panel);
+          Widget.attach(button, document.body);
+          await framePromise();
+          expect(button.node.querySelector("[data-icon$='fast-forward']")).to
+            .exist;
         });
       });
     });

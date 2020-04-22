@@ -29,7 +29,7 @@ import {
 import { Session } from '@jupyterlab/services';
 
 // stub for node global
-declare var global: any;
+declare let global: any;
 
 /**
  * This can be used by test modules that wouldn't otherwise import

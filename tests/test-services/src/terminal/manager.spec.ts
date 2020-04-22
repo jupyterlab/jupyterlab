@@ -27,7 +27,7 @@ describe('terminal', () => {
   });
 
   afterAll(async () => {
-    let models = await TerminalAPI.listRunning();
+    const models = await TerminalAPI.listRunning();
     await Promise.all(models.map(m => TerminalAPI.shutdownTerminal(m.name)));
   });
 
@@ -96,7 +96,7 @@ describe('terminal', () => {
 
     describe('#startNew()', () => {
       it('should startNew a new terminal session', async () => {
-        let session = await manager.startNew();
+        const session = await manager.startNew();
         expect(session.name).to.be.ok;
       });
 
@@ -112,8 +112,8 @@ describe('terminal', () => {
 
     describe('#connectTo()', () => {
       it('should connect to an existing session', async () => {
-        let session = await manager.startNew();
-        let session2 = manager.connectTo({ model: session.model });
+        const session = await manager.startNew();
+        const session2 = manager.connectTo({ model: session.model });
         expect(session).to.not.equal(session2);
         expect(session2.name).to.equal(session.name);
       });
@@ -127,7 +127,7 @@ describe('terminal', () => {
       });
 
       it('should emit a runningChanged signal', async () => {
-        let session = await manager.startNew();
+        const session = await manager.startNew();
         let called = false;
         manager.runningChanged.connect(() => {
           called = true;
@@ -153,7 +153,7 @@ describe('terminal', () => {
     describe('#refreshRunning()', () => {
       it('should update the running session models', async () => {
         const before = toArray(manager.running()).length;
-        let model = await TerminalAPI.startNew();
+        const model = await TerminalAPI.startNew();
         await manager.refreshRunning();
         const running = toArray(manager.running());
         expect(running.length).to.equal(before + 1);

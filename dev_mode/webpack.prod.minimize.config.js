@@ -1,6 +1,6 @@
 const TerserPlugin = require('terser-webpack-plugin');
-var merge = require('webpack-merge');
-var config = require('./webpack.config');
+const merge = require('webpack-merge');
+const config = require('./webpack.config');
 
 config[0] = merge(config[0], {
   mode: 'production',

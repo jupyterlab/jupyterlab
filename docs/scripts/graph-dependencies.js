@@ -1,23 +1,23 @@
-var childProcess = require('child_process');
-var fs = require('fs-extra');
-var glob = require('glob');
-var path = require('path');
-var url = require('url');
+const childProcess = require('child_process');
+const fs = require('fs-extra');
+const glob = require('glob');
+const path = require('path');
+const url = require('url');
 
-var basePath = path.resolve('..');
-var baseUrl = 'https://github.com/jupyterlab/jupyterlab/tree/master/packages';
-var packages = glob.sync(path.join(basePath, 'packages/*'));
+const basePath = path.resolve('..');
+const baseUrl = 'https://github.com/jupyterlab/jupyterlab/tree/master/packages';
+const packages = glob.sync(path.join(basePath, 'packages/*'));
 
 // Begin the graph specification
-var text = 'digraph G {\n';
+let text = 'digraph G {\n';
 text += 'ratio = 0.6;\n';
 text += 'rankdir=LR;\n';
 
 packages.forEach(function(packagePath) {
   // Load the package.json data.
-  var dataPath = path.join(packagePath, 'package.json');
+  const dataPath = path.join(packagePath, 'package.json');
   try {
-    var data = require(dataPath);
+    const data = require(dataPath); // eslint-disable-line @typescript-eslint/no-unused-vars
   } catch (e) {
     return;
   }
@@ -44,14 +44,14 @@ packages.forEach(function(packagePath) {
   }
 
   // Construct a URL to the package on GitHub.
-  var Url = url.resolve(baseUrl, 'packages/' + path.basename(packagePath));
+  const Url = url.resolve(baseUrl, 'packages/' + path.basename(packagePath));
 
   // Remove the '@jupyterlab' part of the name.
-  var name = '"' + data.name.split('/')[1] + '"';
+  const name = '"' + data.name.split('/')[1] + '"';
   text += name + '[URL="' + Url + '"];\n';
 
-  var deps = data.dependencies || [];
-  for (var dep in deps) {
+  const deps = data.dependencies || [];
+  for (let dep in deps) {
     // Don't include non-jupyterlab dependencies.
     if (dep.indexOf('@jupyterlab') === -1) {
       continue;
@@ -66,4 +66,4 @@ fs.writeFileSync('./dependencies.gv', text);
 childProcess.execSync(
   'cat dependencies.gv | tred | dot -Tsvg -o dependency-graph.svg'
 );
-fs.unlink('./dependencies.gv');
+fs.unlinkSync('./dependencies.gv');

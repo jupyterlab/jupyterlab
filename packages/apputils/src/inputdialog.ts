@@ -227,7 +227,7 @@ class InputDialogBase<T> extends Widget implements Dialog.IBodyWidget<T> {
     this.addClass(INPUT_DIALOG_CLASS);
 
     if (label !== undefined) {
-      let labelElement = document.createElement('label');
+      const labelElement = document.createElement('label');
       labelElement.textContent = label;
 
       // Initialize the node
@@ -388,7 +388,7 @@ class InputItemsDialog extends InputDialogBase<string> {
 
     this._list = document.createElement('select');
     options.items.forEach((item, index) => {
-      let option = document.createElement('option');
+      const option = document.createElement('option');
       if (index === defaultIndex) {
         option.selected = true;
         current = item;
@@ -400,7 +400,7 @@ class InputItemsDialog extends InputDialogBase<string> {
 
     if (options.editable) {
       /* Use of list and datalist */
-      let data = document.createElement('datalist');
+      const data = document.createElement('datalist');
       data.id = 'input-dialog-items';
       data.appendChild(this._list);
 

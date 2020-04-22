@@ -100,6 +100,27 @@ describe('rendermime/factories', () => {
           '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
         );
       });
+
+      it('should autolink URLs', async () => {
+        const f = textRendererFactory;
+        const urls = [
+          'https://example.com#anchor',
+          'http://localhost:9090/app',
+          'http://127.0.0.1/test?query=string'
+        ];
+        await Promise.all(
+          urls.map(async url => {
+            const source = `Here is some text with an URL such as ${url} inside.`;
+            const mimeType = 'text/plain';
+            const model = createModel(mimeType, source);
+            const w = f.createRenderer({ mimeType, ...defaultOptions });
+            await w.renderModel(model);
+            expect(w.node.innerHTML).to.equal(
+              `<pre>Here is some text with an URL such as <a href="${url}" rel="noopener" target="_blank">${url}</a> inside.</pre>`
+            );
+          })
+        );
+      });
     });
   });
 

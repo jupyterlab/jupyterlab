@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -82,12 +82,12 @@ commander
     utils.run(`git tag v${curr}`);
 
     // Prompt the user to finalize.
-    console.log('*'.repeat(40));
-    console.log('*'.repeat(40));
-    console.log('Ready to publish!');
-    console.log('Run these command when ready:');
-    console.log('twine upload dist/*');
-    console.log('git push origin <BRANCH> --tags');
+    console.debug('*'.repeat(40));
+    console.debug('*'.repeat(40));
+    console.debug('Ready to publish!');
+    console.debug('Run these command when ready:');
+    console.debug('twine upload dist/*');
+    console.debug('git push origin <BRANCH> --tags');
   });
 
 commander.parse(process.argv);

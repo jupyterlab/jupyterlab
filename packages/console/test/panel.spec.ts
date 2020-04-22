@@ -1,17 +1,17 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
-
-import { ServiceManager } from '@jupyterlab/services';
+import 'jest';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
 
-import { CodeConsole, ConsolePanel } from '@jupyterlab/console';
+import { CodeConsole, ConsolePanel } from '../src';
 
-import { dismissDialog, acceptDialog } from '@jupyterlab/testutils';
+import { dismissDialog } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 import {
   createConsolePanelFactory,
@@ -38,10 +38,10 @@ const contentFactory = createConsolePanelFactory();
 
 describe('console/panel', () => {
   let panel: TestPanel;
-  const manager = new ServiceManager({ standby: 'never' });
+  const manager = new Mock.ServiceManagerMock();
 
-  before(() => {
-    return manager.ready;
+  beforeAll(async () => {
+    return await manager.ready;
   });
 
   beforeEach(() => {
@@ -49,7 +49,8 @@ describe('console/panel', () => {
       manager,
       contentFactory,
       rendermime,
-      mimeTypeService
+      mimeTypeService,
+      sessionContext: Mock.createSimpleSessionContext()
     });
   });
 
@@ -60,36 +61,37 @@ describe('console/panel', () => {
   describe('ConsolePanel', () => {
     describe('#constructor()', () => {
       it('should create a new console panel', () => {
-        expect(panel).to.be.an.instanceof(ConsolePanel);
-        expect(Array.from(panel.node.classList)).to.contain('jp-ConsolePanel');
+        expect(panel).toBeInstanceOf(ConsolePanel);
+        expect(Array.from(panel.node.classList)).toEqual(
+          expect.arrayContaining(['jp-ConsolePanel'])
+        );
       });
     });
 
     describe('#console', () => {
       it('should be a code console widget created at instantiation', () => {
-        expect(panel.console).to.be.an.instanceof(CodeConsole);
+        expect(panel.console).toBeInstanceOf(CodeConsole);
       });
     });
 
     describe('#session', () => {
       it('should be a client session object', () => {
-        expect(panel.sessionContext.sessionChanged).to.be.ok;
+        expect(panel.sessionContext.kernelChanged).toBeTruthy();
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the panel', () => {
         panel.dispose();
-        expect(panel.isDisposed).to.equal(true);
+        expect(panel.isDisposed).toBe(true);
         panel.dispose();
-        expect(panel.isDisposed).to.equal(true);
+        expect(panel.isDisposed).toBe(true);
       });
     });
 
     describe('#onAfterAttach()', () => {
       it('should start the session', async () => {
         Widget.attach(panel, document.body);
-        await acceptDialog();
         await panel.sessionContext.ready;
         await panel.sessionContext.session!.kernel!.info;
       });
@@ -97,23 +99,19 @@ describe('console/panel', () => {
 
     describe('#onActivateRequest()', () => {
       it('should give the focus to the console prompt', () => {
-        expect(panel.methods).to.not.contain('onActivateRequest');
         Widget.attach(panel, document.body);
         MessageLoop.sendMessage(panel, Widget.Msg.ActivateRequest);
-        expect(panel.methods).to.contain('onActivateRequest');
-        expect(panel.console.promptCell!.editor.hasFocus()).to.equal(true);
+        expect(panel.console.promptCell!.editor.hasFocus()).toBe(true);
         return dismissDialog();
       });
     });
 
     describe('#onCloseRequest()', () => {
       it('should dispose of the panel resources after closing', () => {
-        expect(panel.methods).to.not.contain('onCloseRequest');
         Widget.attach(panel, document.body);
-        expect(panel.isDisposed).to.equal(false);
+        expect(panel.isDisposed).toBe(false);
         MessageLoop.sendMessage(panel, Widget.Msg.CloseRequest);
-        expect(panel.methods).to.contain('onCloseRequest');
-        expect(panel.isDisposed).to.equal(true);
+        expect(panel.isDisposed).toBe(true);
       });
     });
 
@@ -121,7 +119,7 @@ describe('console/panel', () => {
       describe('#constructor', () => {
         it('should create a new code console factory', () => {
           const factory = new ConsolePanel.ContentFactory({ editorFactory });
-          expect(factory).to.be.an.instanceof(ConsolePanel.ContentFactory);
+          expect(factory).toBeInstanceOf(ConsolePanel.ContentFactory);
         });
       });
 
@@ -133,7 +131,7 @@ describe('console/panel', () => {
             mimeTypeService,
             sessionContext: panel.sessionContext
           };
-          expect(contentFactory.createConsole(options)).to.be.an.instanceof(
+          expect(contentFactory.createConsole(options)).toBeInstanceOf(
             CodeConsole
           );
         });

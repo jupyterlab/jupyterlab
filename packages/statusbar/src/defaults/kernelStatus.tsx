@@ -19,12 +19,14 @@ import { JSONExt, JSONArray } from '@lumino/coreutils';
 function KernelStatusComponent(
   props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> {
+  let statusText = '';
+  if (props.status) {
+    statusText = ` | ${Text.titleCase(props.status)}`;
+  }
   return (
     <TextItem
       onClick={props.handleClick}
-      source={`${props.kernelName} | ${Text.titleCase(
-        props.status ?? 'undefined'
-      )}`}
+      source={`${props.kernelName}${statusText}`}
       title={`Change kernel for ${props.activityName}`}
     />
   );
@@ -147,7 +149,7 @@ export namespace KernelStatus {
       const oldState = this._getAllState();
       this._sessionContext = sessionContext;
       this._kernelStatus = sessionContext?.kernelDisplayStatus;
-      this._kernelName = sessionContext?.kernelDisplayName ?? 'No Kernel!';
+      this._kernelName = sessionContext?.kernelDisplayName ?? 'No Kernel';
       sessionContext?.statusChanged.connect(this._onKernelStatusChanged, this);
       sessionContext?.connectionStatusChanged.connect(
         this._onKernelStatusChanged,
@@ -173,17 +175,11 @@ export namespace KernelStatus {
       change: Session.ISessionConnection.IKernelChangedArgs
     ) => {
       const oldState = this._getAllState();
-      const { newValue } = change;
-      if (newValue !== null) {
-        // sync setting of status and display name
-        this._kernelStatus = this._sessionContext?.kernelDisplayStatus;
-        this._kernelName = _sessionContext.kernelDisplayName;
-        this._triggerChange(oldState, this._getAllState());
-      } else {
-        this._kernelStatus = '';
-        this._kernelName = 'No Kernel!';
-        this._triggerChange(oldState, this._getAllState());
-      }
+
+      // sync setting of status and display name
+      this._kernelStatus = this._sessionContext?.kernelDisplayStatus;
+      this._kernelName = _sessionContext.kernelDisplayName;
+      this._triggerChange(oldState, this._getAllState());
     };
 
     private _getAllState(): Private.State {

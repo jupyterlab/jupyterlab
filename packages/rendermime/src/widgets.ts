@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -246,7 +246,7 @@ export class RenderedImage extends RenderedCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    let metadata = model.metadata[this.mimeType] as
+    const metadata = model.metadata[this.mimeType] as
       | ReadonlyPartialJSONObject
       | undefined;
     return renderers.renderImage({
@@ -327,7 +327,7 @@ export class RenderedSVG extends RenderedCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
-    let metadata = model.metadata[this.mimeType] as
+    const metadata = model.metadata[this.mimeType] as
       | ReadonlyJSONObject
       | undefined;
     return renderers.renderSVG({

@@ -51,7 +51,7 @@ class LogEditor extends JSONEditor {
 describe('codeeditor', () => {
   describe('JSONEditor', () => {
     let editor: LogEditor;
-    let editorServices = new CodeMirrorEditorFactory();
+    const editorServices = new CodeMirrorEditorFactory();
     const editorFactory = editorServices.newInlineEditor.bind(editorServices);
 
     beforeEach(() => {
@@ -64,7 +64,7 @@ describe('codeeditor', () => {
 
     describe('#constructor', () => {
       it('should create a new metadata editor', () => {
-        let newEditor = new JSONEditor({ editorFactory });
+        const newEditor = new JSONEditor({ editorFactory });
         expect(newEditor).to.be.an.instanceof(JSONEditor);
       });
     });
@@ -105,13 +105,13 @@ describe('codeeditor', () => {
       });
 
       it('should be settable', () => {
-        let source = new ObservableJSON();
+        const source = new ObservableJSON();
         editor.source = source;
         expect(editor.source).to.equal(source);
       });
 
       it('should update the text area value', () => {
-        let model = editor.model;
+        const model = editor.model;
         expect(model.value.text).to.equal('No data!');
         editor.source = new ObservableJSON();
         expect(model.value.text).to.equal('{}');
@@ -183,7 +183,7 @@ describe('codeeditor', () => {
           editor.source = new ObservableJSON();
           editor.editor.focus();
           editor.source.set('foo', 1);
-          let model = editor.model;
+          const model = editor.model;
           expect(model.value.text).to.equal('{}');
           simulate(editor.editorHostNode, 'blur');
           expect(model.value.text).to.equal('{\n    "foo": 1\n}');
@@ -193,7 +193,7 @@ describe('codeeditor', () => {
           editor.source = new ObservableJSON();
           editor.model.value.text = 'foo';
           editor.source.set('foo', 1);
-          let model = editor.model;
+          const model = editor.model;
           expect(model.value.text).to.equal('foo');
           simulate(editor.editorHostNode, 'blur');
           expect(model.value.text).to.equal('foo');
@@ -251,7 +251,7 @@ describe('codeeditor', () => {
           editor.model.value.text = '{"foo":1, "bar": 2}';
           editor.source.set('foo', 2);
           simulate(editor.commitButtonNode, 'click');
-          let expected = '{\n    "foo": 2,\n    "bar": 2\n}';
+          const expected = '{\n    "foo": 2,\n    "bar": 2\n}';
           expect(editor.model.value.text).to.equal(expected);
         });
 
@@ -262,7 +262,7 @@ describe('codeeditor', () => {
           editor.model.value.text = '{"foo":1, "bar": 2, "baz": 3}';
           editor.source.set('foo', 2);
           simulate(editor.commitButtonNode, 'click');
-          let value = '{\n    "foo": 2,\n    "bar": 2,\n    "baz": 3\n}';
+          const value = '{\n    "foo": 2,\n    "bar": 2,\n    "baz": 3\n}';
           expect(editor.model.value.text).to.equal(value);
         });
 
@@ -292,7 +292,7 @@ describe('codeeditor', () => {
           editor.model.value.text = '{"foo": 2, "bar": 3}';
           editor.source.set('foo', null);
           simulate(editor.commitButtonNode, 'click');
-          let expected = '{\n    "foo": 2,\n    "bar": 3\n}';
+          const expected = '{\n    "foo": 2,\n    "bar": 3\n}';
           expect(editor.model.value.text).to.equal(expected);
         });
       });

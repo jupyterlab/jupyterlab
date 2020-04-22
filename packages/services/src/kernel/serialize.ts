@@ -42,23 +42,23 @@ export function serialize(msg: KernelMessage.IMessage): string | ArrayBuffer {
  * Deserialize a binary message to a Kernel Message.
  */
 function deserializeBinary(buf: ArrayBuffer): KernelMessage.IMessage {
-  let data = new DataView(buf);
+  const data = new DataView(buf);
   // read the header: 1 + nbufs 32b integers
-  let nbufs = data.getUint32(0);
-  let offsets: number[] = [];
+  const nbufs = data.getUint32(0);
+  const offsets: number[] = [];
   if (nbufs < 2) {
     throw new Error('Invalid incoming Kernel Message');
   }
   for (let i = 1; i <= nbufs; i++) {
     offsets.push(data.getUint32(i * 4));
   }
-  let jsonBytes = new Uint8Array(buf.slice(offsets[0], offsets[1]));
-  let msg = JSON.parse(new TextDecoder('utf8').decode(jsonBytes));
+  const jsonBytes = new Uint8Array(buf.slice(offsets[0], offsets[1]));
+  const msg = JSON.parse(new TextDecoder('utf8').decode(jsonBytes));
   // the remaining chunks are stored as DataViews in msg.buffers
   msg.buffers = [];
   for (let i = 1; i < nbufs; i++) {
-    let start = offsets[i];
-    let stop = offsets[i + 1] || buf.byteLength;
+    const start = offsets[i];
+    const stop = offsets[i + 1] || buf.byteLength;
     msg.buffers.push(new DataView(buf.slice(start, stop)));
   }
   return msg;
@@ -70,32 +70,32 @@ function deserializeBinary(buf: ArrayBuffer): KernelMessage.IMessage {
  * Serialize Kernel message to ArrayBuffer.
  */
 function serializeBinary(msg: KernelMessage.IMessage): ArrayBuffer {
-  let offsets: number[] = [];
-  let buffers: ArrayBuffer[] = [];
-  let encoder = new TextEncoder();
+  const offsets: number[] = [];
+  const buffers: ArrayBuffer[] = [];
+  const encoder = new TextEncoder();
   let origBuffers: (ArrayBuffer | ArrayBufferView)[] = [];
   if (msg.buffers !== undefined) {
     origBuffers = msg.buffers;
     delete msg['buffers'];
   }
-  let jsonUtf8 = encoder.encode(JSON.stringify(msg));
+  const jsonUtf8 = encoder.encode(JSON.stringify(msg));
   buffers.push(jsonUtf8.buffer);
   for (let i = 0; i < origBuffers.length; i++) {
     // msg.buffers elements could be either views or ArrayBuffers
     // buffers elements are ArrayBuffers
-    let b: any = origBuffers[i];
+    const b: any = origBuffers[i];
     buffers.push(b instanceof ArrayBuffer ? b : b.buffer);
   }
-  let nbufs = buffers.length;
+  const nbufs = buffers.length;
   offsets.push(4 * (nbufs + 1));
   for (let i = 0; i + 1 < buffers.length; i++) {
     offsets.push(offsets[offsets.length - 1] + buffers[i].byteLength);
   }
-  let msgBuf = new Uint8Array(
+  const msgBuf = new Uint8Array(
     offsets[offsets.length - 1] + buffers[buffers.length - 1].byteLength
   );
   // use DataView.setUint32 for network byte-order
-  let view = new DataView(msgBuf.buffer);
+  const view = new DataView(msgBuf.buffer);
   // write nbufs to first 4 bytes
   view.setUint32(0, nbufs);
   // write offsets to next 4 * nbufs bytes

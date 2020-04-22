@@ -96,6 +96,29 @@ export interface IJupyterLabPackageData {
   };
 }
 
+// Mapping of manager name to function that take name and gives command
+const managerCommand: { [key: string]: (name: string) => string } = {
+  pip: name => `pip install ${name}`,
+  conda: name => `conda install -c conda-forge ${name}`
+};
+
+function getInstallCommands(info: IInstallInfo) {
+  const commands = Array<string>();
+  for (const manager of info.managers) {
+    const name = info.overrides?.[manager]?.name ?? info.base.name;
+    if (!name) {
+      console.warn(`No package name found for manager ${manager}`);
+      continue;
+    }
+    const command = managerCommand[manager]?.(name);
+    if (!command) {
+      console.warn(`Don't know how to install packages for manager ${manager}`);
+    }
+    commands.push(command);
+  }
+  return commands;
+}
+
 /**
  * Prompt the user what do about companion packages, if present.
  *
@@ -105,13 +128,20 @@ export function presentCompanions(
   kernelCompanions: KernelCompanion[],
   serverCompanion: IInstallInfo | undefined
 ): Promise<boolean> {
-  let entries = [];
+  const entries = [];
   if (serverCompanion) {
     entries.push(
       <p key="server-companion">
         This package has indicated that it needs a corresponding server
-        extension:
-        <code> {serverCompanion.base.name!}</code>
+        extension. Please contact your Administrator to update the server with
+        one of the following commands:
+        {getInstallCommands(serverCompanion).map(command => {
+          return (
+            <p key={command}>
+              <code>{command}</code>
+            </p>
+          );
+        })}
       </p>
     );
   }
@@ -122,7 +152,7 @@ export function presentCompanions(
         kernel.
       </p>
     );
-    for (let [index, entry] of kernelCompanions.entries()) {
+    for (const [index, entry] of kernelCompanions.entries()) {
       entries.push(
         <p key={`companion-${index}`}>
           The package
@@ -130,8 +160,8 @@ export function presentCompanions(
           following kernels:
         </p>
       );
-      let kernelEntries = [];
-      for (let [index, kernel] of entry.kernels.entries()) {
+      const kernelEntries = [];
+      for (const [index, kernel] of entry.kernels.entries()) {
         kernelEntries.push(
           <li key={`kernels-${index}`}>
             <code>{kernel.display_name}</code>
@@ -139,9 +169,23 @@ export function presentCompanions(
         );
       }
       entries.push(<ul key={'kernel-companion-end'}>{kernelEntries}</ul>);
+      entries.push(
+        <p key={`kernel-companion-${index}`}>
+          This package has indicated that it needs a corresponding kernel
+          package. Please contact your Administrator to update the server with
+          one of the following commands:
+          {getInstallCommands(entry.kernelInfo).map(command => {
+            return (
+              <p key={command}>
+                <code>{command}</code>
+              </p>
+            );
+          })}
+        </p>
+      );
     }
   }
-  let body = (
+  const body = (
     <div>
       {entries}
       <p>

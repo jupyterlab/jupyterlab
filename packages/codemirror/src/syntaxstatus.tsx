@@ -90,14 +90,14 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
    */
   private _handleClick = () => {
     const modeMenu = new Menu({ commands: this._commands });
-    let command = 'codemirror:change-mode';
+    const command = 'codemirror:change-mode';
     if (this._popup) {
       this._popup.dispose();
     }
     Mode.getModeInfo()
       .sort((a, b) => {
-        let aName = a.name || '';
-        let bName = b.name || '';
+        const aName = a.name || '';
+        const bName = b.name || '';
         return aName.localeCompare(bName);
       })
       .forEach(spec => {
@@ -105,7 +105,7 @@ export class EditorSyntaxStatus extends VDomRenderer<EditorSyntaxStatus.Model> {
           return;
         }
 
-        let args: JSONObject = {
+        const args: JSONObject = {
           insertSpaces: true,
           name: spec.name!
         };

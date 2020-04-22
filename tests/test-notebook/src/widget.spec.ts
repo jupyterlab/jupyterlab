@@ -353,7 +353,7 @@ describe('@jupyter/notebook', () => {
             ...widget.notebookConfig,
             defaultCell: 'raw'
           };
-          let promise = signalToPromise(model.cells.changed);
+          const promise = signalToPromise(model.cells.changed);
           model.cells.clear();
           await promise;
           expect(model.cells.length).to.equal(0);
@@ -468,7 +468,7 @@ describe('@jupyter/notebook', () => {
       it('should not be called if the model does not change', () => {
         const widget = createWidget();
         widget.methods = [];
-        widget.model = widget.model;
+        widget.model = widget.model; // eslint-disable-line
         expect(widget.methods).to.not.contain('onModelChanged');
       });
     });
@@ -606,7 +606,7 @@ describe('@jupyter/notebook', () => {
         widget.activeCellChanged.connect(() => {
           called = true;
         });
-        widget.activeCellIndex = widget.activeCellIndex;
+        widget.activeCellIndex = widget.activeCellIndex; // eslint-disable-line
         expect(called).to.equal(false);
       });
     });

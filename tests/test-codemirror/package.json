@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-codemirror",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -12,15 +12,15 @@
     "watch:src": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/codeeditor": "^2.0.2",
-    "@jupyterlab/codemirror": "^2.0.2",
-    "@jupyterlab/testutils": "^2.0.2",
+    "@jupyterlab/codeeditor": "^2.1.0",
+    "@jupyterlab/codemirror": "^2.1.0",
+    "@jupyterlab/testutils": "^2.1.0",
     "chai": "^4.2.0",
     "codemirror": "~5.49.2",
-    "jest": "^24.9.0",
+    "jest": "^25.2.3",
     "jest-junit": "^10.0.0",
     "simulate-event": "~1.4.0",
-    "ts-jest": "^24.2.0"
+    "ts-jest": "^25.2.1"
   },
   "devDependencies": {
     "@types/chai": "^4.2.7",

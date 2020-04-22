@@ -24,8 +24,8 @@ import { handleRequest, SessionTester, init } from '../utils';
 
 init();
 
-let kernelManager = new KernelManager();
-let sessionManager = new SessionManager({ kernelManager });
+const kernelManager = new KernelManager();
+const sessionManager = new SessionManager({ kernelManager });
 
 /**
  * Start a new session with a unique name.
@@ -413,7 +413,7 @@ describe('session', () => {
 
       it('should handle a specific error status', async () => {
         handleRequest(defaultSession, 410, {});
-        let promise = defaultSession.shutdown();
+        const promise = defaultSession.shutdown();
         try {
           await promise;
           throw Error('should not get here');
