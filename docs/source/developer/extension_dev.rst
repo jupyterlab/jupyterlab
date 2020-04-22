@@ -26,10 +26,10 @@ Tutorials
 
 We provide a set of guides to get started writing third-party extensions for JupyterLab:
 
-- :ref:`extension_tutorial`: an in-depth tutorial to learn how to make a simple JupyterLab extension.
-- The `JupyterLab Extension Examples Repository <https://github.com/jupyterlab/extension-examples>`_: a short tutorial series
+- :ref:`extension_tutorial`: An in-depth tutorial to learn how to make a simple JupyterLab extension.
+- The `JupyterLab Extension Examples Repository <https://github.com/jupyterlab/extension-examples>`_: A short tutorial series
   to learn how to develop extensions for JupyterLab, by example.
-- :ref:`developer-extension-points`: a list of the most common JupyterLab extension points.
+- :ref:`developer-extension-points`: A list of the most common JupyterLab extension points.
 
 Cookiecutters
 ~~~~~~~~~~~~~
