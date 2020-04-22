@@ -41,6 +41,14 @@ We provide several cookiecutters to create JupyterLab plugin extensions:
 - `mimerender-cookiecutter-ts <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`_: Create a MIME Renderer JupyterLab extension in TypeScript
 - `theme-cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_: Create a new theme for JupyterLab
 
+API Documentation
+~~~~~~~~~~~~~~~~~
+
+If you are looking for lower level details on the JupyterLab and Lumino API:
+
+- `JupyterLab API Documentation <https://jupyterlab.github.io/jupyterlab/>`_
+- `Lumino API Documentation <https://jupyterlab.github.io/lumino/>`_
+
 Plugins
 ~~~~~~~
 
