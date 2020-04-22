@@ -16,12 +16,20 @@ JupyterLab can be extended in four ways via:
    extend the functionality of document widgets added to the
    application, and we cover them in :ref:`documents`.
 
-See :ref:`extension_tutorial` to learn how to make a simple JupyterLab extension.
-
 A JupyterLab application is comprised of:
 
 -  A core Application object
 -  Plugins
+
+Tutorials
+~~~~~~~~~
+
+We provide a set of guides to get started writing third-party extensions for JupyterLab:
+
+- :ref:`extension_tutorial`: an in-depth tutorial to learn how to make a simple JupyterLab extension.
+- The `JupyterLab Extension Examples Repository <https://github.com/jupyterlab/extension-examples>`_: a short tutorial series
+  to learn how to develop extensions for JupyterLab, by example.
+- :ref:`developer-extension-points`: a list of the most common JupyterLab extension points.
 
 Plugins
 ~~~~~~~
@@ -727,7 +735,7 @@ extension manager.
 Listings
 ^^^^^^^^
 
-You can develop on the extension manager package and :ref:`extension_listings` with the 
+You can develop on the extension manager package and :ref:`extension_listings` with the
 example shipped in the ``packages/extensionmanager-extension/examples/listings`` folder.
 
 Follow the ``README.md`` instructions in that folder.
