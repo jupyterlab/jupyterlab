@@ -63,7 +63,7 @@ What you end up with is a DOM node (by default a 'div') that has an inline svg n
 
 ## How JupyterLab handles icons
 
-The ui-components package provides icons to the rest of JupyterLab, in the form of a set of `LabIcon` instances (currently about 80). All of the icons in the core JupyterLab packages are rendered using one of these `LabIcon` instances.
+The @jupyterlab/ui-components package provides icons to the rest of JupyterLab, in the form of a set of `LabIcon` instances (currently about 80). All of the icons in the core JupyterLab packages are rendered using one of these `LabIcon` instances.
 
 ## Using the icons in your own code
 
