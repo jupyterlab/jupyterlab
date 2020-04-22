@@ -8,6 +8,8 @@ A JupyterLab package that provides UI elements of various types (React component
 
 ## Background
 
+### Icon handling in Jupyterlab
+
 Pre jlab-2.0, most icons were created using the icons-as-css-background pattern:
 
 - Set up the icon's svg as a `background-image` in CSS:
@@ -60,6 +62,10 @@ Post jlab-2.0, nearly all icons in core are now created using [LabIcon](https://
   ```
 
 What you end up with is a DOM node (by default a 'div') that has an inline svg node as a child.
+
+### `background-image` vs inline svg
+
+The big limitation of the old icon-as-css-background pattern is that svg images rendered as `background-image` are invisible to CSS. On the other hand, an icon rendered as an inline svg node is fully exposed to the CSS. This allows us to dynamicly change icon styling as needed simply by modifying our CSS. Most importantly, this allows us to recolor icons according to Jupyterlab's current theme.
 
 ## How JupyterLab handles icons
 
