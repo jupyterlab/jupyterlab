@@ -120,3 +120,37 @@ ReactDOM.unmountComponentAtNode(elem);
 ```
 
 This cleanup step is not a special property of `LabIcon`, but is instead needed for any React component that is rendered directly at the top level by `ReactDOM`: failure to call `unmountComponentAtNode` can result in a [memory leak](https://stackoverflow.com/a/48198011/425458).
+
+## How to create your own custom `LabIcon`
+
+You can create your own custom icon by constructing a new instance of `LabIcon`:
+
+```typescript
+export const fooIcon = new LabIcon({
+  name: 'barpkg:foo',
+  svgstr: '<svg>...</svg>'
+});
+```
+
+where `name` should be of the form "your-pkg:icon-name", and `svgstr` is the raw contents of your icon's svg file.
+
+## How to create a new `LabIcon` from an external svg file
+
+Although you can copy-and-paste an svg directly into the `LabIcon` constructor, the best practice is to keep the svg for each of your icons in its own separate svg file. You will need to have an `svg.d.ts` file at the root of your project's `src` directory:
+
+```typescript
+// svg.d.ts
+
+declare module '*.svg' {
+  const value: string;
+  export default value;
+}
+```
+
+You can then `import` the contents of an svg file:
+
+```typescript
+import fooSvgstr from 'path-to-your/foo.svg';
+
+export const fooIcon = new LabIcon({ name: 'barpkg:foo', svgstr: fooSvgstr });
+```
