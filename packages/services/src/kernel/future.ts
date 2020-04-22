@@ -171,7 +171,11 @@ export abstract class KernelFutureHandler<
       // is waiting for the promise to resolve. This prevents the error from
       // being displayed in the console, but does not prevent it from being
       // caught by a client who is waiting for it.
-      this._done.reject(new Error('Canceled'));
+      this._done.reject(
+        new Error(
+          `Canceled future for ${this.msg.header.msg_type} message before replies were done`
+        )
+      );
       this._done.promise.catch(() => {
         /* no-op */
       });
