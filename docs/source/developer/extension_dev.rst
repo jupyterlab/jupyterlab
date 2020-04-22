@@ -46,9 +46,9 @@ A plugin adds a core functionality to the application:
    interface, by exporting a plugin object or array of plugin objects as
    the default export.
 
-   We provide two cookiecutters to create JupyterLab plugin extensions in
-   `JavaScript <https://github.com/jupyterlab/extension-cookiecutter-js>`__ and
-   `TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`__.
+We provide two cookiecutters to create JupyterLab plugin extensions in
+`JavaScript <https://github.com/jupyterlab/extension-cookiecutter-js>`__ and
+`TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`__.
 
 The default plugins in the JupyterLab application include:
 
