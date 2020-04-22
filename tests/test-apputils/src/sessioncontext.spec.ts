@@ -421,6 +421,24 @@ describe('@jupyterlab/apputils', () => {
         // could be either, just make sure it isn't the original kernel.
         expect(lastKernel).to.be.oneOf([results[0], results[1]]);
       });
+
+      it('should handle an error during kernel change', async () => {
+        await sessionContext.initialize();
+        await sessionContext.session?.kernel?.info;
+        let status = 'idle';
+        sessionContext.statusChanged.connect(() => {
+          status = sessionContext.kernelDisplayStatus;
+        });
+        let caught = false;
+        const promise = sessionContext
+          .changeKernel({ name: 'does-not-exist' })
+          .catch(() => {
+            caught = true;
+          });
+        await Promise.all([promise, acceptDialog()]);
+        expect(caught).to.equal(true);
+        expect(status).to.equal('unknown');
+      });
     });
 
     describe('#shutdown', () => {
