@@ -5,6 +5,8 @@ import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
+import { LabIcon } from '@jupyterlab/ui-components';
+
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
 
 import { JSONObject, JSONExt } from '@lumino/coreutils';
@@ -923,13 +925,13 @@ export namespace Completer {
       typesExist: boolean,
       type: any,
       orderedTypes: string[],
-      icon?: string
+      icon?: LabIcon
     ): HTMLLIElement {
       // Add the icon or type monogram
       if (icon) {
-        let iconNode = document.createElement('img');
-        iconNode.className = 'jp-Completer-type jp-Completer-icon';
-        iconNode.src = icon;
+        let iconNode = icon.element({
+          className: 'jp-Completer-type jp-Completer-icon'
+        });
         li.appendChild(iconNode);
       } else if (typesExist) {
         const typeNode = document.createElement('span');
