@@ -54,7 +54,7 @@ fi
 if [[ $GROUP == docs ]]; then
     # Verify tutorial docs build
     pushd docs
-    pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
+    pip install -r requirements.txt
     make html
 
     # Remove internal sphinx files and use pytest-check-links on the generated html
