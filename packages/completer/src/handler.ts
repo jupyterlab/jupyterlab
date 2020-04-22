@@ -5,6 +5,8 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { Text } from '@jupyterlab/coreutils';
 
+import { LabIcon } from '@jupyterlab/ui-components';
+
 import { IDataConnector } from '@jupyterlab/statedb';
 
 import { ReadonlyJSONObject, JSONObject, JSONArray } from '@lumino/coreutils';
@@ -580,9 +582,9 @@ export namespace CompletionHandler {
     type?: string;
 
     /**
-     * Image url for icon to be rendered with completion type.
+     * LabIcon object for icon to be rendered with completion type.
      */
-    icon?: string;
+    icon?: LabIcon;
 
     /**
      * A human-readable string with additional information
