@@ -11,7 +11,7 @@ import {
 } from 'lsp-ws-connection';
 import { until_ready } from './utils';
 
-interface ILSPOptions extends ILspOptions { }
+interface ILSPOptions extends ILspOptions {}
 
 export class LSPConnection extends LspWsConnection {
   protected documentsToOpen: IDocumentInfo[];

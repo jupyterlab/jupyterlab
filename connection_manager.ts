@@ -130,7 +130,7 @@ export class DocumentConnectionManager {
     const language_server_id = this.language_server_manager.getServerId({
       language
     });
-    console.log("LS ID: ", language_server_id)
+    console.log('LS ID: ', language_server_id);
     // lazily load 1) the underlying library (1.5mb) and/or 2) a live WebSocket-
     // like connection: either already connected or potentiailly in the process
     // of connecting.
@@ -148,14 +148,14 @@ export class DocumentConnectionManager {
     return connection;
   }
 
-  public async updateServerConfigurations(
-    //TODO: define types for server configurations
+  public updateServerConfigurations(
+    // TODO: define types for server configurations
     allSettings: any
   ) {
-    console.log(this.language_server_manager)
+    console.log(this.language_server_manager);
     for (let language_server_id in allSettings) {
-      const serverSettings = allSettings[language_server_id]
-      await Private.updateServerConfiguration(language_server_id, serverSettings)
+      const serverSettings = allSettings[language_server_id];
+      Private.updateServerConfiguration(language_server_id, serverSettings);
     }
   }
 
@@ -385,13 +385,13 @@ namespace Private {
     return connection;
   }
 
-  export async function updateServerConfiguration(
+  export function updateServerConfiguration(
     language_server_id: any,
     settings: any
-  ): Promise<any> {
-    const connection = _connections.get(language_server_id)
+  ): void {
+    const connection = _connections.get(language_server_id);
     if (connection) {
-      await connection.sendConfigurationChange(settings)
+      connection.sendConfigurationChange(settings);
     }
   }
 }
