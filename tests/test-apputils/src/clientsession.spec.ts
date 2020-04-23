@@ -320,7 +320,6 @@ describe('@jupyterlab/apputils', () => {
           status = session.status;
         });
         let caught = false;
-        session.kernel.ready.catch(() => {});
         const promise = session
           .changeKernel({ name: 'does-not-exist' })
           .catch(() => {
