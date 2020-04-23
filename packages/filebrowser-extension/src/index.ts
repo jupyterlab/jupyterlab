@@ -821,7 +821,7 @@ function addCommands(
   });
 
   commands.addCommand(CommandIDs.toggleShowLastModified, {
-    label: 'Show Last Modified',
+    label: 'Toggle Last Modified Column',
     execute: () => {
       const header = DOMUtils.findElement(document.body, 'jp-id-modified');
       const column = DOMUtils.findElements(
