@@ -42,7 +42,6 @@ export class CompletionHandler implements IDisposable {
     this.completer.selected.connect(this.onCompletionSelected, this);
     this.completer.visibilityChanged.connect(this.onVisibilityChanged, this);
     this._connector = options.connector;
-    this._fetchItems = options.fetchItems;
   }
 
   /**
@@ -63,10 +62,14 @@ export class CompletionHandler implements IDisposable {
     void,
     CompletionHandler.IRequest
   > {
-    if (!this._connector) {
+    if (this._connector.responseType) {
       return new DummyConnector();
     }
-    return this._connector;
+    return this._connector as IDataConnector<
+      CompletionHandler.IReply,
+      void,
+      CompletionHandler.IRequest
+    >;
   }
   set connector(
     connector: IDataConnector<
@@ -356,9 +359,23 @@ export class CompletionHandler implements IDisposable {
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };
 
-    if (this._fetchItems) {
-      return this._fetchItems(request)
+    if (
+      this._connector.responseType &&
+      this._connector.responseType ===
+        CompletionHandler.ICompletionItemsResponseType
+    ) {
+      return (this._connector as IDataConnector<
+        CompletionHandler.ICompletionItemsReply,
+        void,
+        CompletionHandler.IRequest
+      >)
+        .fetch(request)
         .then(reply => {
+          this._validate(pending, request);
+          if (!reply) {
+            throw new Error(`Invalid request: ${request}`);
+          }
+
           this._onFetchItemsReply(state, reply);
         })
         .catch(_ => {
@@ -369,15 +386,7 @@ export class CompletionHandler implements IDisposable {
     return this.connector
       .fetch(request)
       .then(reply => {
-        if (this.isDisposed) {
-          throw new Error('Handler is disposed');
-        }
-
-        // If a newer completion request has created a pending request, bail.
-        if (pending !== this._pending) {
-          throw new Error('A newer completion request is pending');
-        }
-
+        this._validate(pending, request);
         if (!reply) {
           throw new Error(`Invalid request: ${request}`);
         }
@@ -387,6 +396,16 @@ export class CompletionHandler implements IDisposable {
       .catch(_ => {
         this._onFailure();
       });
+  }
+
+  private _validate(pending: number, request: CompletionHandler.IRequest) {
+    if (this.isDisposed) {
+      throw new Error('Handler is disposed');
+    }
+    // If a newer completion request has created a pending request, bail.
+    if (pending !== this._pending) {
+      throw new Error('A newer completion request is pending');
+    }
   }
 
   /**
@@ -499,18 +518,13 @@ export class CompletionHandler implements IDisposable {
     }
   }
 
-  private _connector?: IDataConnector<
-    CompletionHandler.IReply,
-    void,
-    CompletionHandler.IRequest
-  >;
-  private _fetchItems?: (
-    request: CompletionHandler.IRequest
-  ) => Promise<{
-    start: number;
-    end: number;
-    items: CompletionHandler.ICompletionItems;
-  }>;
+  private _connector:
+    | IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest>
+    | IDataConnector<
+        CompletionHandler.ICompletionItemsReply,
+        void,
+        CompletionHandler.IRequest
+      >;
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
   private _pending = 0;
@@ -532,20 +546,19 @@ export namespace CompletionHandler {
 
     /**
      * The data connector used to populate completion requests.
-     *
+     * Use the connector with ICompletionItemsReply for enhanced completions.
      * #### Notes
      * The only method of this connector that will ever be called is `fetch`, so
      * it is acceptable for the other methods to be simple functions that return
      * rejected promises.
      */
-    connector?: IDataConnector<IReply, void, IRequest>;
-    /**
-     * Fetcher for ICompletionItems.
-     * If this is set, it'll be used in lieu of the data connector.
-     */
-    fetchItems?: (
-      request: CompletionHandler.IRequest
-    ) => Promise<CompletionHandler.ICompletionItemsReply>;
+    connector:
+      | IDataConnector<IReply, void, IRequest>
+      | IDataConnector<
+          CompletionHandler.ICompletionItemsReply,
+          void,
+          CompletionHandler.IRequest
+        >;
   }
 
   /**
@@ -615,6 +628,8 @@ export namespace CompletionHandler {
      */
     items: CompletionHandler.ICompletionItems;
   }
+
+  export const ICompletionItemsResponseType = 'ICompletionItemsReply';
 
   /**
    * A reply to a completion request.

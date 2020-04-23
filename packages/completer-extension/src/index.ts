@@ -90,13 +90,12 @@ const manager: JupyterFrontEndPlugin<ICompletionManager> = {
       register: (
         completable: ICompletionManager.ICompletable
       ): ICompletionManager.ICompletableAttributes => {
-        const { connector, editor, parent, fetchItems } = completable;
+        const { connector, editor, parent } = completable;
         const model = new CompleterModel();
         const completer = new Completer({ editor, model });
         const handler = new CompletionHandler({
           completer,
-          connector,
-          fetchItems
+          connector
         });
         const id = parent.id;
 

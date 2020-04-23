@@ -30,6 +30,13 @@ import { ISignal } from '@lumino/signaling';
  */
 export interface IDataConnector<T, U = T, V = string, W = string> {
   /**
+   * Response type of the data connector as a string.
+   * Used as a discriminant if a property has multiple connectors
+   * with different response types.
+   */
+  responseType?: string;
+
+  /**
    * Retrieve an item from the data connector.
    *
    * @param id - The identifier used to retrieve an item.

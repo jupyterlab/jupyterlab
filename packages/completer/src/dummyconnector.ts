@@ -17,7 +17,7 @@ export class DummyConnector extends DataConnector<
 > {
   fetch(_: CompletionHandler.IRequest): Promise<CompletionHandler.IReply> {
     return Promise.reject(
-      'Attempting to fetch with DummyConnector. Please ensure a valid connector or fetchItems is registered'
+      'Attempting to fetch with DummyConnector. Please ensure connector responseType is set.'
     );
   }
 }

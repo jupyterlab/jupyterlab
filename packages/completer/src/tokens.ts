@@ -49,20 +49,19 @@ export namespace ICompletionManager {
 
     /**
      * The data connector used to populate the completer.
+     * Use the connector with ICompletionItemsReply for enhanced completions.
      */
-    connector?: IDataConnector<
-      CompletionHandler.IReply,
-      void,
-      CompletionHandler.IRequest
-    >;
-
-    /**
-     * Set this to output enhanced completions (see CompletionHandler.ICompletionItem).
-     * If this is set, it'll be used in lieu of the data connector.
-     */
-    fetchItems?: (
-      request: CompletionHandler.IRequest
-    ) => Promise<CompletionHandler.ICompletionItemsReply>;
+    connector:
+      | IDataConnector<
+          CompletionHandler.IReply,
+          void,
+          CompletionHandler.IRequest
+        >
+      | IDataConnector<
+          CompletionHandler.ICompletionItemsReply,
+          void,
+          CompletionHandler.IRequest
+        >;
   }
 
   /**
