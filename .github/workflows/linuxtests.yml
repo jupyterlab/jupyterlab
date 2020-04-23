@@ -7,7 +7,7 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, docs, changelog, python, usage, nonode]
+        group: [integrity, docs, docs2, python, usage, nonode]
         python: [3.5, 3.8]
         exclude:
           - group: integrity
