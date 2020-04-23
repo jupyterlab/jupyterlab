@@ -372,7 +372,6 @@
       "@jupyterlab/test-completer": "../tests/test-completer",
       "@jupyterlab/test-coreutils": "../tests/test-coreutils",
       "@jupyterlab/test-csvviewer": "../tests/test-csvviewer",
-      "@jupyterlab/test-docmanager": "../tests/test-docmanager",
       "@jupyterlab/test-docregistry": "../tests/test-docregistry",
       "@jupyterlab/test-filebrowser": "../tests/test-filebrowser",
       "@jupyterlab/test-fileeditor": "../tests/test-fileeditor",
