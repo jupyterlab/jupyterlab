@@ -239,11 +239,10 @@ will be loaded by default. For example, this is how you can add the Jupyter Widg
 extensions:
 
 ::
-      ...
-      "externalExtensions": {
-        "@jupyter-widgets/jupyterlab-manager": "2.0.0"
-      },
-      ...
+
+    "externalExtensions": {
+      "@jupyter-widgets/jupyterlab-manager": "2.0.0"
+    },
 
 If you publish your extension on ``npm.org``, users will be able to install
 it as simply ``jupyter labextension install <foo>``, where ``<foo>`` is
