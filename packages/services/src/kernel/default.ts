@@ -1245,7 +1245,10 @@ export class DefaultKernel implements Kernel.IKernel {
       .catch(error => {
         // Log any errors in handling the message, thus resetting the _msgChain
         // promise so we can process more messages.
-        console.error(error);
+        // Ignore the "Canceled" errors that are thrown during kernel dispose.
+        if (error.message.startsWith('Canceled future for ')) {
+          console.error(error);
+        }
       });
 
     // Emit the message receive signal

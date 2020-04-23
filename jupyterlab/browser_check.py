@@ -132,7 +132,7 @@ def run_browser(url):
     if not osp.exists(osp.join(target, 'node_modules')):
         os.makedirs(target)
         subprocess.call(["jlpm", "init", "-y"], cwd=target)
-        subprocess.call(["jlpm", "add", "puppeteer"], cwd=target)
+        subprocess.call(["jlpm", "add", "puppeteer@^2"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
     return subprocess.check_call(["node", "chrome-test.js", url], cwd=target)
 

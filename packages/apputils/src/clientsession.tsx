@@ -733,33 +733,40 @@ export class ClientSession implements IClientSession {
       this._session.dispose();
     }
     this._session = session;
-    if (session.path !== this._path) {
-      this._path = session.path;
-      this._propertyChanged.emit('path');
-    }
-    if (session.name !== this._name) {
-      this._name = session.name;
-      this._propertyChanged.emit('name');
-    }
-    if (session.type !== this._type) {
-      this._type = session.type;
-      this._propertyChanged.emit('type');
-    }
 
-    session.terminated.connect(this._onTerminated, this);
-    session.propertyChanged.connect(this._onPropertyChanged, this);
-    session.kernelChanged.connect(this._onKernelChanged, this);
-    session.statusChanged.connect(this._onStatusChanged, this);
-    session.iopubMessage.connect(this._onIopubMessage, this);
-    session.unhandledMessage.connect(this._onUnhandledMessage, this);
-    this._prevKernelName = session.kernel.name;
+    if (session) {
+      if (session.path !== this._path) {
+        this._path = session.path;
+        this._propertyChanged.emit('path');
+      }
+      if (session.name !== this._name) {
+        this._name = session.name;
+        this._propertyChanged.emit('name');
+      }
+      if (session.type !== this._type) {
+        this._type = session.type;
+        this._propertyChanged.emit('type');
+      }
+
+      session.terminated.connect(this._onTerminated, this);
+      session.propertyChanged.connect(this._onPropertyChanged, this);
+      session.kernelChanged.connect(this._onKernelChanged, this);
+      session.statusChanged.connect(this._onStatusChanged, this);
+      session.iopubMessage.connect(this._onIopubMessage, this);
+      session.unhandledMessage.connect(this._onUnhandledMessage, this);
+      this._prevKernelName = session.kernel.name;
+    }
     this._pendingKernelName = '';
 
     // The session kernel was disposed above when the session was disposed, so
     // the oldValue should be null.
-    this._kernelChanged.emit({ oldValue: null, newValue: session.kernel });
+    this._kernelChanged.emit({
+      oldValue: null,
+      newValue: session && session.kernel
+    });
     this._statusChanged.emit('unknown');
-    return session.kernel;
+
+    return session && session.kernel;
   }
 
   /**
@@ -768,6 +775,7 @@ export class ClientSession implements IClientSession {
   private async _handleSessionError(
     err: ServerConnection.ResponseError
   ): Promise<void> {
+    this._handleNewSession(null);
     let traceback = '';
     let message = '';
     try {
@@ -788,7 +796,6 @@ export class ClientSession implements IClientSession {
         )}
       </div>
     );
-
     const dialog = (this._dialog = new Dialog({
       title: 'Error Starting Kernel',
       body,
