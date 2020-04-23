@@ -362,6 +362,57 @@ describe('@jupyterlab/apputils', () => {
         expect(kernel.id).to.not.equal(id);
         expect(kernel.name).to.equal(name);
       });
+
+      it('should still work if called before fully initialized', async () => {
+        const initPromise = sessionContext.initialize(); // Start but don't finish init.
+        const name = 'echo';
+        const kernelPromise = sessionContext.changeKernel({ name });
+
+        let lastKernel = null;
+        sessionContext.kernelChanged.connect(() => {
+          lastKernel = sessionContext.session?.kernel;
+        });
+        const results = await Promise.all([kernelPromise, initPromise]);
+        const kernel = results[0];
+        const shouldSelect = results[1];
+        expect(shouldSelect).to.equal(false);
+        expect(lastKernel).to.equal(kernel);
+      });
+
+      it('should handle multiple requests', async () => {
+        await sessionContext.initialize();
+        const name = 'echo';
+        const kernelPromise0 = sessionContext.changeKernel({ name });
+        // The last launched kernel should win.
+        const kernelPromise1 = sessionContext.changeKernel({ name });
+
+        let lastKernel = null;
+        sessionContext.kernelChanged.connect(() => {
+          lastKernel = sessionContext.session?.kernel;
+        });
+        const results = await Promise.all([kernelPromise0, kernelPromise1]);
+        // We can't know which of the two was launched first, so the result
+        // could be either, just make sure it isn't the original kernel.
+        expect(lastKernel).to.be.oneOf([results[0], results[1]]);
+      });
+
+      it('should handle an error during kernel change', async () => {
+        await sessionContext.initialize();
+        await sessionContext.session?.kernel?.info;
+        let status = 'idle';
+        sessionContext.statusChanged.connect(() => {
+          status = sessionContext.kernelDisplayStatus;
+        });
+        let caught = false;
+        const promise = sessionContext
+          .changeKernel({ name: 'does-not-exist' })
+          .catch(() => {
+            caught = true;
+          });
+        await Promise.all([promise, acceptDialog()]);
+        expect(caught).to.equal(true);
+        expect(status).to.equal('unknown');
+      });
     });
 
     describe('#shutdown', () => {

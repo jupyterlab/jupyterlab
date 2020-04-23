@@ -479,7 +479,7 @@ export class SessionContext implements ISessionContext {
     return (
       (kernel?.connectionStatus === 'connected'
         ? kernel?.status
-        : kernel?.connectionStatus) ?? ''
+        : kernel?.connectionStatus) ?? 'unknown'
     );
   }
 
@@ -692,7 +692,7 @@ export class SessionContext implements ISessionContext {
    * Handle a new session object.
    */
   private _handleNewSession(
-    session: Session.ISessionConnection
+    session: Session.ISessionConnection | null
   ): Kernel.IKernelConnection | null {
     if (this.isDisposed) {
       throw Error('Disposed');
@@ -705,37 +705,43 @@ export class SessionContext implements ISessionContext {
       this._session.dispose();
     }
     this._session = session;
-    this._prevKernelName = session.kernel?.name ?? '';
+    this._pendingKernelName = '';
 
-    session.disposed.connect(this._onSessionDisposed, this);
-    session.propertyChanged.connect(this._onPropertyChanged, this);
-    session.kernelChanged.connect(this._onKernelChanged, this);
-    session.statusChanged.connect(this._onStatusChanged, this);
-    session.connectionStatusChanged.connect(
-      this._onConnectionStatusChanged,
-      this
-    );
-    session.iopubMessage.connect(this._onIopubMessage, this);
-    session.unhandledMessage.connect(this._onUnhandledMessage, this);
+    if (session) {
+      this._prevKernelName = session.kernel?.name ?? '';
 
-    if (session.path !== this._path) {
-      this._onPropertyChanged(session, 'path');
-    }
-    if (session.name !== this._name) {
-      this._onPropertyChanged(session, 'name');
-    }
-    if (session.type !== this._type) {
-      this._onPropertyChanged(session, 'type');
+      session.disposed.connect(this._onSessionDisposed, this);
+      session.propertyChanged.connect(this._onPropertyChanged, this);
+      session.kernelChanged.connect(this._onKernelChanged, this);
+      session.statusChanged.connect(this._onStatusChanged, this);
+      session.connectionStatusChanged.connect(
+        this._onConnectionStatusChanged,
+        this
+      );
+      session.iopubMessage.connect(this._onIopubMessage, this);
+      session.unhandledMessage.connect(this._onUnhandledMessage, this);
+
+      if (session.path !== this._path) {
+        this._onPropertyChanged(session, 'path');
+      }
+      if (session.name !== this._name) {
+        this._onPropertyChanged(session, 'name');
+      }
+      if (session.type !== this._type) {
+        this._onPropertyChanged(session, 'type');
+      }
     }
 
     // Any existing kernel connection was disposed above when the session was
     // disposed, so the oldValue should be null.
     this._kernelChanged.emit({
       oldValue: null,
-      newValue: session.kernel,
+      newValue: session?.kernel || null,
       name: 'kernel'
     });
-    return session.kernel;
+    this._statusChanged.emit(session?.kernel?.status || 'unknown');
+
+    return session?.kernel || null;
   }
 
   /**
@@ -744,6 +750,7 @@ export class SessionContext implements ISessionContext {
   private async _handleSessionError(
     err: ServerConnection.ResponseError
   ): Promise<void> {
+    this._handleNewSession(null);
     let traceback = '';
     let message = '';
     try {
