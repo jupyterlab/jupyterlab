@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { InputArea } from '@jupyterlab/cells';
+
 import { IEditorMimeTypeService, CodeEditor } from '@jupyterlab/codeeditor';
 
 import { ABCWidgetFactory, DocumentRegistry } from '@jupyterlab/docregistry';
@@ -19,8 +21,6 @@ import {
   ISessionContextDialogs,
   sessionContextDialogs
 } from '@jupyterlab/apputils';
-
-import { InputArea } from '@jupyterlab/cells/src';
 
 /**
  * A widget factory for notebook panels.
