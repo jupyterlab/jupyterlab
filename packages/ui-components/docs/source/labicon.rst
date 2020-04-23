@@ -1,32 +1,14 @@
-.. _ui_components:
-
-Reusing JupyterLab UI
----------------------
-
-The `@jupyterlab/ui-components <http://jupyterlab.github.io/jupyterlab/ui-components/index.html>`__
-package provides UI elements that are widely used in JupyterLab core,
-and that can be reused in your own extensions.
-
-For example, all of the icons in JupyterLab core can be reused via
-``LabIcon``. You can also use ``LabIcon`` to create your own custom
-icons that will be able to automatically change color to match the
-current JupyterLab theme.
-
-.. contents:: Explainer docs
-   :local:
-   :depth: 1
-
 ``LabIcon`` - set up and render icons
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+=====================================
 
 ``LabIcon`` is the icon class used by JupyterLab, and is part of the new
 icon system introduced in JupyterLab v2.0.
 
 Background
-^^^^^^^^^^
+----------
 
 Icon handling in Jupyterlab
-'''''''''''''''''''''''''''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Pre jlab-2.0, most icons were created using the icons-as-css-background
 pattern:
@@ -86,7 +68,7 @@ What you end up with is a DOM node (by default a ‘div’) that has an
 inline svg node as a child.
 
 ``background-image`` vs inline svg
-''''''''''''''''''''''''''''''''''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The big limitation of the old icon-as-css-background pattern is that svg
 images rendered as ``background-image`` are invisible to CSS. On the
@@ -96,7 +78,7 @@ simply by modifying our CSS. Most importantly, this allows us to recolor
 icons according to Jupyterlab’s current theme.
 
 How JupyterLab handles icons
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------
 
 The @jupyterlab/ui-components package provides icons to the rest of
 JupyterLab, in the form of a set of ``LabIcon`` instances (currently
@@ -104,7 +86,7 @@ about 80). All of the icons in the core JupyterLab packages are rendered
 using one of these ``LabIcon`` instances.
 
 Using the icons in your own code
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+--------------------------------
 
 You can use any of JupyterLab icons in your own code via an ``import``
 statement. For example, to use ``jupyterIcon`` you would first do:
@@ -114,7 +96,7 @@ statement. For example, to use ``jupyterIcon`` you would first do:
    import { jupyterIcon } from '@jupyterlab/ui-components';
 
 How to render an icon into a DOM node
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------
 
 Icons can be added as children to any ``div`` or ``span`` nodes using
 the ``icon.element(...)`` method (where ``icon`` is any instance of
@@ -136,7 +118,7 @@ parameters into ``.element(...)``. Any valid CSS parameter can be used
 instead of ``foo-bar: '8px'``, you’d need to use ``fooBar: '8px'``.
 
 How to render an icon as a React component
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------------------
 
 Icons can also be rendered using React. The ``icon.react`` parameter
 holds a standard React component that will display the icon on render.
@@ -147,16 +129,16 @@ tree of another React component:
 
 .. code:: jsx
 
-   public render() {
-     return (
-       <div className="outer">
-         <div className="inner">
-           <jupyterIcon.react tag="span" right="7px" top="5px" />
-           "and here's a text node"
+     public render() {
+       return (
+         <div className="outer">
+           <div className="inner">
+             <jupyterIcon.react tag="span" right="7px" top="5px" />
+             "and here's a text node"
+           </div>
          </div>
-       </div>
-     );
-   }
+       );
+     }
 
 Alternatively, you can just render the icon directly into any existing
 DOM node ``elem`` by using the ``ReactDOM`` module:
@@ -179,7 +161,7 @@ can result in a `memory
 leak <https://stackoverflow.com/a/48198011/425458>`__.
 
 How to create your own custom ``LabIcon``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------------------------
 
 You can create your own custom icon by constructing a new instance of
 ``LabIcon``:
@@ -195,7 +177,7 @@ where ``name`` should be of the form “your-pkg:icon-name”, and
 ``svgstr`` is the raw contents of your icon’s svg file.
 
 How to create a new ``LabIcon`` from an external svg file
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+---------------------------------------------------------
 
 Although you can copy-and-paste an svg directly into the ``LabIcon``
 constructor, the best practice is to keep the svg for each of your icons

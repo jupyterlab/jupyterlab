@@ -17,8 +17,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
-import shutil
+# import os
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
@@ -31,16 +30,6 @@ from recommonmark.transform import AutoStructify
 # If your documentation needs a minimal Sphinx version, state it here.
 #
 # needs_sphinx = '1.0'
-
-# Path to a directory where markdown sources are kept
-md_dir = 'source/_markdown'
-
-# A list of paths to any markdown sources located above this docs dir.
-# Used to work around the fact that you generally can't link to files
-# outside of the docs build
-md_sources = [
-    '../packages/ui-components/markdown/labicon.md'
-]
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -247,17 +236,7 @@ github_doc_root = 'https://github.com/jupyterlab/jupyterlab/tree/master/docs/'
 # markdown documents.
 linkcheck_anchors = False
 
-def copyMarkdown():
-    shutil.rmtree(md_dir, ignore_errors=True)
-    os.makedirs(md_dir)
-
-    for pth in md_sources:
-        shutil.copy(pth, md_dir)
-
 def setup(app):
-    # set up the markdown sources
-    copyMarkdown()
-
     app.add_config_value('recommonmark_config', {
         'url_resolver': lambda url: github_doc_root + url,
         'auto_toc_tree_section': 'Contents',
