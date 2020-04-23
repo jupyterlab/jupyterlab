@@ -62,7 +62,7 @@ export class CompletionHandler implements IDisposable {
     void,
     CompletionHandler.IRequest
   > {
-    if (this._connector.responseType) {
+    if ('responseType' in this._connector) {
       return new DummyConnector();
     }
     return this._connector as IDataConnector<
@@ -359,11 +359,7 @@ export class CompletionHandler implements IDisposable {
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };
 
-    if (
-      this._connector.responseType &&
-      this._connector.responseType ===
-        CompletionHandler.ICompletionItemsResponseType
-    ) {
+    if ('responseType' in this._connector) {
       return (this._connector as IDataConnector<
         CompletionHandler.ICompletionItemsReply,
         void,
@@ -520,11 +516,13 @@ export class CompletionHandler implements IDisposable {
 
   private _connector:
     | IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest>
-    | IDataConnector<
+    | (IDataConnector<
         CompletionHandler.ICompletionItemsReply,
         void,
         CompletionHandler.IRequest
-      >;
+      > & {
+        responseType: typeof CompletionHandler.ICompletionItemsResponseType;
+      });
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
   private _pending = 0;
@@ -554,11 +552,13 @@ export namespace CompletionHandler {
      */
     connector:
       | IDataConnector<IReply, void, IRequest>
-      | IDataConnector<
+      | (IDataConnector<
           CompletionHandler.ICompletionItemsReply,
           void,
           CompletionHandler.IRequest
-        >;
+        > & {
+          responseType: typeof CompletionHandler.ICompletionItemsResponseType;
+        });
   }
 
   /**
@@ -629,7 +629,7 @@ export namespace CompletionHandler {
     items: CompletionHandler.ICompletionItems;
   }
 
-  export const ICompletionItemsResponseType = 'ICompletionItemsReply';
+  export const ICompletionItemsResponseType = 'ICompletionItemsReply' as const;
 
   /**
    * A reply to a completion request.

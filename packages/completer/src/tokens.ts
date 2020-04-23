@@ -57,11 +57,13 @@ export namespace ICompletionManager {
           void,
           CompletionHandler.IRequest
         >
-      | IDataConnector<
+      | (IDataConnector<
           CompletionHandler.ICompletionItemsReply,
           void,
           CompletionHandler.IRequest
-        >;
+        > & {
+          responseType: typeof CompletionHandler.ICompletionItemsResponseType;
+        });
   }
 
   /**
