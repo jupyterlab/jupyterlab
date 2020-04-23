@@ -67,9 +67,20 @@ if [[ $GROUP == docs ]]; then
     # Remove internal sphinx files and use pytest-check-links on the generated html
     rm build/html/genindex.html
     rm build/html/search.html
-    py.test --check-links -k .html build/html || py.test --check-links -k .html --lf build/html
+
+    # Changelog as a lot of links and is covered in a separate job.
+    changelog=./docs/source/getting_started/changelog.rst
+    py.test --check-links -k .html ----deselect=$changelog build/html || py.test --check-links -k .html --lf build/html
 
     popd
+fi
+
+
+
+if [[ $GROUP == changelog ]]; then
+    # Run the link check - allow for a link to fail once (--lf means only run last failed)
+    changelog=./docs/source/getting_started/changelog.rst
+    py.test --check-links $changlog || py.test --check-links --lf $changelog
 fi
 
 
