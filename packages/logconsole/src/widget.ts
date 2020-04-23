@@ -126,19 +126,6 @@ class LogConsoleOutputArea extends OutputArea {
 }
 
 /**
- * Implementation of `IContentFactory` for Output Area
- * which creates custom output prompts.
- */
-class LogConsoleContentFactory extends OutputArea.ContentFactory {
-  /**
-   * Create the output prompt for the widget.
-   */
-  createOutputPrompt(): LogConsoleOutputPrompt {
-    return new LogConsoleOutputPrompt();
-  }
-}
-
-/**
  * Implements a panel which supports pinning the position to the end if it is
  * scrolled to the end.
  *
@@ -421,7 +408,6 @@ export class LogConsolePanel extends StackedPanel {
       if (!this._outputAreas.has(viewId)) {
         const outputArea = new LogConsoleOutputArea({
           rendermime: logger.rendermime,
-          contentFactory: new LogConsoleContentFactory(),
           model: logger.outputAreaModel
         });
         outputArea.id = viewId;
