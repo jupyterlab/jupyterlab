@@ -67,7 +67,7 @@ if [[ $GROUP == docs ]]; then
 
     # Changelog as a lot of links and is covered in a separate job.
     changelog=./docs/source/getting_started/changelog.rst
-    py.test --check-links -k .html ----deselect=$changelog build/html || py.test --check-links -k .html --lf build/html
+    py.test --check-links -k .html --deselect=$changelog build/html || py.test --check-links -k .html --lf build/html
 
     popd
 fi
