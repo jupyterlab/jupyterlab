@@ -124,7 +124,7 @@ namespace CommandIDs {
   export const toggleNavigateToCurrentDirectory =
     'filebrowser:toggle-navigate-to-current-directory';
 
-  export const toggleShowLastModified = 'filebrowser:toggle-show-last-modified';
+  export const toggleLastModified = 'filebrowser:toggle-last-modified';
 }
 
 /**
@@ -820,7 +820,7 @@ function addCommands(
     }
   });
 
-  commands.addCommand(CommandIDs.toggleShowLastModified, {
+  commands.addCommand(CommandIDs.toggleLastModified, {
     label: 'Toggle Last Modified Column',
     execute: () => {
       const header = DOMUtils.findElement(document.body, 'jp-id-modified');
@@ -1035,7 +1035,7 @@ function addCommands(
     rank: 13
   });
   app.contextMenu.addItem({
-    command: CommandIDs.toggleShowLastModified,
+    command: CommandIDs.toggleLastModified,
     selector: '.jp-DirListing-header',
     rank: 14
   });
