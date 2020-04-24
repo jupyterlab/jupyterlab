@@ -3,6 +3,15 @@
 JupyterLab Changelog
 ====================
 
+`v2.1.x <https://github.com/jupyterlab/jupyterlab/milestone/55>`__
+------------------------------------------------------------------
+
+v2.1.1
+^^^^^^
+* Pin puppeteer to fix ci (`#8260 <https://github.com/jupyterlab/jupyterlab/pull/8260>`__)
+* Fix Save As for files without sessions (`#8248 <https://github.com/jupyterlab/jupyterlab/pull/8248>`__)
+
+
 `v2.1.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v2.1.0>`__
 ---------------------------------------------------------------------------
 

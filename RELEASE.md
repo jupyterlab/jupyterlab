@@ -49,6 +49,10 @@ Make sure you are running an sh-compatible shell, and it is set up to be able to
 source scripts/release_prep.sh <branch_name>
 ```
 
+## Add a changelog entry
+
+Ensure there is a changelog entry for the release in `docs/source/getting_started/changelog.rst`.
+
 ## Bump version
 
 The next step is to bump the appropriate version numbers. We use
