@@ -40,4 +40,5 @@ jobs:
     - name: Run the tests
       run: |
         export XEUS_LOG=1
+        alias xpython="python -m xpython_launcher"
         jlpm run test
