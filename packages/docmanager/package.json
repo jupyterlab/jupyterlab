@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/docmanager",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "JupyterLab - Document Manager",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,7 +37,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^2.1.0",
     "@jupyterlab/coreutils": "^4.1.0",
-    "@jupyterlab/docregistry": "^2.1.0",
+    "@jupyterlab/docregistry": "^2.1.1",
     "@jupyterlab/services": "^5.1.0",
     "@jupyterlab/statusbar": "^2.1.0",
     "@lumino/algorithm": "^1.2.3",

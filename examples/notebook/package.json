@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-notebook",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -10,14 +10,14 @@
   "dependencies": {
     "@jupyterlab/codemirror": "^2.1.0",
     "@jupyterlab/completer": "^2.1.0",
-    "@jupyterlab/docmanager": "^2.1.0",
-    "@jupyterlab/docregistry": "^2.1.0",
-    "@jupyterlab/documentsearch": "^2.1.0",
+    "@jupyterlab/docmanager": "^2.1.1",
+    "@jupyterlab/docregistry": "^2.1.1",
+    "@jupyterlab/documentsearch": "^2.1.1",
     "@jupyterlab/mathjax2": "^2.1.0",
-    "@jupyterlab/notebook": "^2.1.0",
+    "@jupyterlab/notebook": "^2.1.1",
     "@jupyterlab/rendermime": "^2.1.0",
     "@jupyterlab/services": "^5.1.0",
-    "@jupyterlab/theme-light-extension": "^2.1.0",
+    "@jupyterlab/theme-light-extension": "^2.1.1",
     "@lumino/commands": "^1.10.1",
     "@lumino/widgets": "^1.11.1",
     "es6-promise": "~4.2.8"

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-settingregistry",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -14,7 +14,7 @@
   "dependencies": {
     "@jupyterlab/settingregistry": "^2.1.0",
     "@jupyterlab/statedb": "^2.1.0",
-    "@jupyterlab/testutils": "^2.1.0",
+    "@jupyterlab/testutils": "^2.1.1",
     "@lumino/coreutils": "^1.4.2",
     "chai": "^4.2.0",
     "jest": "^24.9.0",

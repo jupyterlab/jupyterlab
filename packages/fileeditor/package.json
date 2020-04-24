@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/fileeditor",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "JupyterLab - Editor Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,7 +37,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^2.1.0",
     "@jupyterlab/codeeditor": "^2.1.0",
-    "@jupyterlab/docregistry": "^2.1.0",
+    "@jupyterlab/docregistry": "^2.1.1",
     "@jupyterlab/statusbar": "^2.1.0",
     "@jupyterlab/ui-components": "^2.1.0",
     "@lumino/coreutils": "^1.4.2",

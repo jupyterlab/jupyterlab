@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-apputils",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -14,7 +14,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^2.1.0",
     "@jupyterlab/services": "^5.1.0",
-    "@jupyterlab/testutils": "^2.1.0",
+    "@jupyterlab/testutils": "^2.1.1",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
     "@lumino/coreutils": "^1.4.2",
