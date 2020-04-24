@@ -6,6 +6,10 @@ JupyterLab Changelog
 `v1.2.x <https://github.com/jupyterlab/jupyterlab/milestone/54>`__
 ---------------------------------------------------------------------------
 
+v1.2.12
+^^^^^^^
+* Fix ClientSession error handling (`#8251 <https://github.com/jupyterlab/jupyterlab/pull/8251>`__)
+
 v1.2.11
 ^^^^^^^
 * Expose global app instance with command-line option: (`#8218 <https://github.com/jupyterlab/jupyterlab/pull/8218>`__)
