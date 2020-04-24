@@ -46,7 +46,14 @@ const targetData = utils.readJSONFile(path.join(pkgPath, name, 'package.json'));
   targetData['devDependencies'][dep] = sourceData['devDependencies'][dep];
 });
 // Update scripts
-['build:test', 'test', 'test:cov', 'test:debug', 'watch'].forEach(script => {
+[
+  'build:test',
+  'test',
+  'test:cov',
+  'test:debug',
+  'test:debug:watch',
+  'watch'
+].forEach(script => {
   targetData['scripts'][script] = sourceData['scripts'][script];
 });
 utils.writeJSONFile(path.join(pkgPath, name, 'package.json'), targetData);
@@ -66,7 +73,7 @@ glob.sync(path.join(testSrc, 'src', '**', '*.ts*')).forEach(function(filePath) {
 
 // Commit changes (needed for jlpm jest-codemods)
 utils.run(
-  `git add test-${name} && git commit -m "wip modernize ${name} tests"`
+  `git add test-${name}; git add ../packages/${name}; git commit -m "wip modernize ${name} tests"; true`
 );
 
 // Run jest-codemods to convert from chai to jest.
@@ -93,9 +100,9 @@ utils.run(
 );
 utils.run(`git add -f ${pkgPath}/${name}/.vscode/launch.json`);
 
-// Run integrity and build the new tests
+// Run integrity
 const rootDir = path.resolve('..');
-utils.run(`jlpm integrity && cd packages/${name} && jlpm run build:test`, {
+utils.run(`jlpm integrity`, {
   cwd: rootDir
 });
 
