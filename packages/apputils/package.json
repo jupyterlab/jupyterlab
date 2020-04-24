@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "JupyterLab - Application Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,7 +36,7 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^3.2.0",
-    "@jupyterlab/services": "^4.2.0",
+    "@jupyterlab/services": "^4.2.1",
     "@jupyterlab/ui-components": "^1.2.1",
     "@phosphor/algorithm": "^1.2.0",
     "@phosphor/commands": "^1.7.0",

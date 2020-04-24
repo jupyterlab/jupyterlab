@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-codemirror",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -13,8 +13,8 @@
   },
   "dependencies": {
     "@jupyterlab/codeeditor": "^1.2.0",
-    "@jupyterlab/codemirror": "^1.2.4",
-    "@jupyterlab/testutils": "^1.2.5",
+    "@jupyterlab/codemirror": "^1.2.5",
+    "@jupyterlab/testutils": "^1.2.6",
     "chai": "^4.2.0",
     "codemirror": "~5.47.0",
     "jest": "^24.7.1",
