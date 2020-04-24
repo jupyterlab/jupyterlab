@@ -449,7 +449,7 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       }
       const model = files.get(path)!;
       if (model.type === 'directory') {
-        if (options?.content == true) {
+        if (options?.content !== false) {
           const content: Contents.IModel[] = [];
           files.forEach(fileModel => {
             if (PathExt.dirname(fileModel.path) == model.path) {
@@ -460,7 +460,7 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
         }
         return Promise.resolve(model);
       }
-      if (options?.content == true) {
+      if (options?.content != false) {
         return Promise.resolve(model);
       }
       return Promise.resolve({ ...model, content: '' });

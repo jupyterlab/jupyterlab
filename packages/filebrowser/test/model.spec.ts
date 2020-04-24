@@ -1,11 +1,11 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import 'jest';
 
 import expect from 'expect';
 
-// Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
-
-//import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -15,20 +15,20 @@ import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 
 import { StateDB } from '@jupyterlab/statedb';
 
-import { FileBrowserModel } from '../src';
+import { FileBrowserModel, CHUNK_SIZE, LARGE_FILE_SIZE } from '../src';
 
 import { Contents, ServiceManager } from '@jupyterlab/services';
 
 import {
   acceptDialog,
   dismissDialog,
-  //signalToPromises,
+  signalToPromises,
   sleep
 } from '@jupyterlab/testutils';
 
 import * as Mock from '@jupyterlab/testutils/lib/mock';
 
-//import { toArray } from '@lumino/algorithm';
+import { toArray } from '@lumino/algorithm';
 
 /**
  * A contents manager that delays requests by less each time it is called
@@ -374,133 +374,131 @@ describe('filebrowser/model', () => {
         expect(called).toBe(true);
       });
 
-      //   describe('older notebook version', () => {
-      //     let prevNotebookVersion: string;
+      describe('older notebook version', () => {
+        let prevNotebookVersion: string;
 
-      //     beforeAll(() => {
-      //       prevNotebookVersion = PageConfig.setOption(
-      //         'notebookVersion',
-      //         JSON.stringify([5, 0, 0])
-      //       );
-      //     });
+        beforeAll(() => {
+          prevNotebookVersion = PageConfig.setOption(
+            'notebookVersion',
+            JSON.stringify([5, 0, 0])
+          );
+        });
 
-      //     it('should not upload large file', async () => {
-      //       const fname = UUID.uuid4() + '.html';
-      //       const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
-      //       try {
-      //         await model.upload(file);
-      //         throw new Error('Upload should have failed');
-      //       } catch (err) {
-      //         expect(err).toBe(`Cannot upload file (>15 MB). ${fname}`);
-      //       }
-      //     });
+        it('should not upload large file', async () => {
+          const fname = UUID.uuid4() + '.html';
+          const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
+          try {
+            await model.upload(file);
+            throw new Error('Upload should have failed');
+          } catch (err) {
+            expect(err).toBe(`Cannot upload file (>15 MB). ${fname}`);
+          }
+        });
 
-      //     afterAll(() => {
-      //       PageConfig.setOption('notebookVersion', prevNotebookVersion);
-      //     });
-      //   });
+        afterAll(() => {
+          PageConfig.setOption('notebookVersion', prevNotebookVersion);
+        });
+      });
 
-      //   describe('newer notebook version', () => {
-      //     let prevNotebookVersion: string;
+      describe('newer notebook version', () => {
+        let prevNotebookVersion: string;
 
-      //     beforeAll(() => {
-      //       prevNotebookVersion = PageConfig.setOption(
-      //         'notebookVersion',
-      //         JSON.stringify([5, 1, 0])
-      //       );
-      //     });
+        beforeAll(() => {
+          prevNotebookVersion = PageConfig.setOption(
+            'notebookVersion',
+            JSON.stringify([5, 1, 0])
+          );
+        });
 
-      //     for (const ending of ['.txt', '.ipynb']) {
-      //       for (const size of [
-      //         CHUNK_SIZE - 1,
-      //         CHUNK_SIZE,
-      //         CHUNK_SIZE + 1,
-      //         2 * CHUNK_SIZE
-      //       ]) {
-      //         it(`should upload a large ${ending} file of size ${size}`, async () => {
-      //           const fname = UUID.uuid4() + ending;
-      //           // minimal valid (according to server) notebook
-      //           let content =
-      //             '{"nbformat": 4, "metadata": {"_": ""}, "nbformat_minor": 2, "cells": []}';
-      //           // make metadata longer so that total document is `size` long
-      //           content = content.replace(
-      //             '"_": ""',
-      //             `"_": "${' '.repeat(size - content.length)}"`
-      //           );
-      //           const file = new File([content], fname, { type: 'text/plain' });
-      //           await model.upload(file);
-      //           const {
-      //             content: newContent
-      //           } = await model.manager.services.contents.get(fname);
-      //           // the contents of notebooks are returned as objects instead of strings
-      //           if (ending === '.ipynb') {
-      //             expect(newContent).toEqual(JSON.parse(content));
-      //           } else {
-      //             expect(newContent).toBe(content);
-      //           }
-      //         });
-      //       }
-      //     }
-      //     it(`should produce progress as a large file uploads`, async () => {
-      //       const fname = UUID.uuid4() + '.txt';
-      //       const file = new File([new ArrayBuffer(2 * CHUNK_SIZE)], fname);
+        for (const ending of ['.txt', '.ipynb']) {
+          for (const size of [
+            CHUNK_SIZE - 1,
+            CHUNK_SIZE,
+            CHUNK_SIZE + 1,
+            2 * CHUNK_SIZE
+          ]) {
+            it(`should upload a large ${ending} file of size ${size}`, async () => {
+              const fname = UUID.uuid4() + ending;
 
-      //       const [start, first, second, finished] = signalToPromises(
-      //         model.uploadChanged,
-      //         4
-      //       );
+              // minimal valid (according to server) notebook
+              let content =
+                '{"nbformat": 4, "metadata": {"_": ""}, "nbformat_minor": 2, "cells": []}';
+              // make metadata longer so that total document is `size` long
+              content = content.replace(
+                '"_": ""',
+                `"_": "${' '.repeat(size - content.length)}"`
+              );
+              const file = new File([content], fname, { type: 'text/plain' });
+              await model.upload(file);
+              // Ensure we get the file back.
+              const contentModel = await model.manager.services.contents.get(
+                fname
+              );
+              expect(contentModel.content.length).toBeGreaterThan(0);
+            });
+          }
+        }
 
-      //       const uploaded = model.upload(file);
-      //       expect(toArray(model.uploads())).toEqual([]);
-      //       expect(await start).toEqual([
-      //         model,
-      //         {
-      //           name: 'start',
-      //           oldValue: null,
-      //           newValue: { path: fname, progress: 0 }
-      //         }
-      //       ]);
-      //       expect(toArray(model.uploads())).toEqual([
-      //         { path: fname, progress: 0 }
-      //       ]);
-      //       expect(await first).toEqual([
-      //         model,
-      //         {
-      //           name: 'update',
-      //           oldValue: { path: fname, progress: 0 },
-      //           newValue: { path: fname, progress: 0 }
-      //         }
-      //       ]);
-      //       expect(toArray(model.uploads())).toEqual([
-      //         { path: fname, progress: 0 }
-      //       ]);
-      //       expect(await second).toEqual([
-      //         model,
-      //         {
-      //           name: 'update',
-      //           oldValue: { path: fname, progress: 0 },
-      //           newValue: { path: fname, progress: 1 / 2 }
-      //         }
-      //       ]);
-      //       expect(toArray(model.uploads())).toEqual([
-      //         { path: fname, progress: 1 / 2 }
-      //       ]);
-      //       expect(await finished).toEqual([
-      //         model,
-      //         {
-      //           name: 'finish',
-      //           oldValue: { path: fname, progress: 1 / 2 },
-      //           newValue: null
-      //         }
-      //       ]);
-      //       expect(toArray(model.uploads())).toEqual([]);
-      //       await uploaded;
-      //     });
+        it(`should produce progress as a large file uploads`, async () => {
+          const fname = UUID.uuid4() + '.txt';
+          const file = new File([new ArrayBuffer(2 * CHUNK_SIZE)], fname);
 
-      //     afterAll(() => {
-      //       PageConfig.setOption('notebookVersion', prevNotebookVersion);
-      //     });
-      //   });
+          const [start, first, second, finished] = signalToPromises(
+            model.uploadChanged,
+            4
+          );
+
+          const uploaded = model.upload(file);
+          expect(toArray(model.uploads())).toEqual([]);
+          expect(await start).toEqual([
+            model,
+            {
+              name: 'start',
+              oldValue: null,
+              newValue: { path: fname, progress: 0 }
+            }
+          ]);
+          expect(toArray(model.uploads())).toEqual([
+            { path: fname, progress: 0 }
+          ]);
+          expect(await first).toEqual([
+            model,
+            {
+              name: 'update',
+              oldValue: { path: fname, progress: 0 },
+              newValue: { path: fname, progress: 0 }
+            }
+          ]);
+          expect(toArray(model.uploads())).toEqual([
+            { path: fname, progress: 0 }
+          ]);
+          expect(await second).toEqual([
+            model,
+            {
+              name: 'update',
+              oldValue: { path: fname, progress: 0 },
+              newValue: { path: fname, progress: 1 / 2 }
+            }
+          ]);
+          expect(toArray(model.uploads())).toEqual([
+            { path: fname, progress: 1 / 2 }
+          ]);
+          expect(await finished).toEqual([
+            model,
+            {
+              name: 'finish',
+              oldValue: { path: fname, progress: 1 / 2 },
+              newValue: null
+            }
+          ]);
+          expect(toArray(model.uploads())).toEqual([]);
+          await uploaded;
+        });
+
+        afterAll(() => {
+          PageConfig.setOption('notebookVersion', prevNotebookVersion);
+        });
+      });
     });
   });
 });
