@@ -1826,15 +1826,21 @@ export namespace DirListing {
           icon.className = `${ITEM_ICON_CLASS} ${fileType.iconClass || ''}`;
           icon.textContent = fileType.iconLabel || '';
         }
+        // Set a data attribute so we can target the node
+        node.setAttribute('data-file-type', fileType.name);
       } else {
         // use default icon as CSS background image
         icon.className = ITEM_ICON_CLASS;
         icon.textContent = '';
         // clean up the svg icon annotation, if any
         delete icon.dataset.icon;
+
+        // Set a data attribute so we can target the node
+        node.setAttribute('data-file-type', '');
       }
 
       node.title = model.name;
+
       // If an item is being edited currently, its text node is unavailable.
       if (text && text.textContent !== model.name) {
         text.textContent = model.name;
