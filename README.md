@@ -11,7 +11,7 @@ A JupyterLab debugger UI extension. This extension is under active development.
 ## Prerequisites
 
 - JupyterLab 2.0+
-- xeus-python 0.6.7+
+- xeus-python 0.7.1+
 - notebook 6+
 
 ## Installation
@@ -21,7 +21,7 @@ A kernel with support for debugging is required to be able to use the debugger.
 It is generally recommended to create a new `conda` environment to install the dependencies:
 
 ```bash
-conda create -n jupyterlab-debugger -c conda-forge xeus-python=0.6.12 notebook=6 jupyterlab=2 ptvsd
+conda create -n jupyterlab-debugger -c conda-forge xeus-python=0.7.1 notebook=6 jupyterlab=2 ptvsd
 conda activate jupyterlab-debugger
 ```
 
@@ -35,7 +35,7 @@ jupyter labextension install @jupyterlab/debugger
 
 ```bash
 # Create a new conda environment
-conda create -n jupyterlab-debugger -c conda-forge nodejs xeus-python=0.6.12 ptvsd jupyterlab=2
+conda create -n jupyterlab-debugger -c conda-forge nodejs xeus-python=0.7.1 ptvsd jupyterlab=2
 
 # Activate the conda environment
 conda activate jupyterlab-debugger
