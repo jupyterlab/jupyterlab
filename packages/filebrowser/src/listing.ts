@@ -1829,7 +1829,7 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType: DocumentRegistry.IFileType = DocumentRegistry.defaultTextFileType
     ): void {
-      const { icon, iconClass } = fileType;
+      const { icon, iconClass, name } = fileType;
 
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
@@ -1870,6 +1870,7 @@ export namespace DirListing {
       }
 
       node.title = hoverText;
+      node.setAttribute('data-file-type', name);
 
       // If an item is being edited currently, its text node is unavailable.
       if (text && text.textContent !== model.name) {
