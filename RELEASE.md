@@ -47,7 +47,7 @@ appropriate branch, and installs JupyterLab with `pip install -e .`.
 
 ## Add a changelog entry
 
-Ensure there is a changelog entry for the release in `docs/docs/source/getting_started/changelog.rst`.
+Ensure there is a changelog entry for the release in `docs/source/getting_started/changelog.rst`.
 
 ## Bump version
 
