@@ -1,17 +1,21 @@
+import 'jest';
+
+import expect from 'expect';
+
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-
-import { expect } from 'chai';
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 
-import { BreadCrumbs, FileBrowserModel } from '@jupyterlab/filebrowser';
+import { BreadCrumbs, FileBrowserModel } from '../src';
 
 import { ServiceManager } from '@jupyterlab/services';
 
 import { framePromise, signalToPromise } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
@@ -59,7 +63,7 @@ describe('filebrowser/model', () => {
   let third: string;
   let path: string;
 
-  before(async () => {
+  beforeAll(async () => {
     const opener: DocumentManager.IWidgetOpener = {
       open: widget => {
         /* no op */
@@ -69,7 +73,7 @@ describe('filebrowser/model', () => {
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new ServiceManager({ standby: 'never' });
+    serviceManager = new Mock.ServiceManagerMock();
     manager = new DocumentManager({
       registry,
       opener,
@@ -106,30 +110,30 @@ describe('filebrowser/model', () => {
     describe('#constructor()', () => {
       it('should create a new BreadCrumbs instance', () => {
         const bread = new BreadCrumbs({ model });
-        expect(bread).to.be.an.instanceof(BreadCrumbs);
+        expect(bread).toBeInstanceOf(BreadCrumbs);
         const items = crumbs.node.querySelectorAll(ITEM_QUERY);
-        expect(items.length).to.equal(1);
+        expect(items.length).toBe(1);
       });
 
       it('should add the jp-BreadCrumbs class', () => {
-        expect(crumbs.hasClass('jp-BreadCrumbs')).to.equal(true);
+        expect(crumbs.hasClass('jp-BreadCrumbs')).toBe(true);
       });
     });
 
     describe('#handleEvent()', () => {
-      context('click', () => {
+      describe('click', () => {
         it('should switch to the parent directory', async () => {
           Widget.attach(crumbs, document.body);
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           let items = crumbs.node.querySelectorAll(ITEM_QUERY);
-          expect(items.length).to.equal(4);
+          expect(items.length).toBe(4);
           const promise = signalToPromise(model.pathChanged);
-          expect(items[2].textContent).to.equal(second);
+          expect(items[2].textContent).toBe(second);
           simulate(items[2], 'click');
           await promise;
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           items = crumbs.node.querySelectorAll(ITEM_QUERY);
-          expect(items.length).to.equal(3);
+          expect(items.length).toBe(3);
         });
 
         it('should switch to the home directory', async () => {
@@ -141,8 +145,8 @@ describe('filebrowser/model', () => {
           await promise;
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           items = crumbs.node.querySelectorAll(ITEM_QUERY);
-          expect(items.length).to.equal(1);
-          expect(model.path).to.equal('');
+          expect(items.length).toBe(1);
+          expect(model.path).toBe('');
         });
 
         it('should switch to the grandparent directory', async () => {
@@ -154,8 +158,8 @@ describe('filebrowser/model', () => {
           await promise;
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           items = crumbs.node.querySelectorAll(ITEM_QUERY);
-          expect(items.length).to.equal(2);
-          expect(model.path).to.equal(first);
+          expect(items.length).toBe(2);
+          expect(model.path).toBe(first);
         });
 
         it('should refresh the current directory', async () => {
@@ -163,13 +167,13 @@ describe('filebrowser/model', () => {
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           let items = crumbs.node.querySelectorAll(ITEM_QUERY);
           const promise = signalToPromise(model.refreshed);
-          expect(items[3].textContent).to.equal(third);
+          expect(items[3].textContent).toBe(third);
           simulate(items[3], 'click');
           await promise;
           MessageLoop.sendMessage(crumbs, Widget.Msg.UpdateRequest);
           items = crumbs.node.querySelectorAll(ITEM_QUERY);
-          expect(items.length).to.equal(4);
-          expect(model.path).to.equal(path);
+          expect(items.length).toBe(4);
+          expect(model.path).toBe(path);
         });
       });
     });
@@ -177,15 +181,19 @@ describe('filebrowser/model', () => {
     describe('#onAfterAttach()', () => {
       it('should post an update request', async () => {
         Widget.attach(crumbs, document.body);
-        expect(crumbs.methods).to.contain('onAfterAttach');
+        expect(crumbs.methods).toEqual(
+          expect.arrayContaining(['onAfterAttach'])
+        );
         await framePromise();
-        expect(crumbs.methods).to.contain('onUpdateRequest');
+        expect(crumbs.methods).toEqual(
+          expect.arrayContaining(['onUpdateRequest'])
+        );
       });
 
       it('should add event listeners', () => {
         Widget.attach(crumbs, document.body);
         simulate(crumbs.node, 'click');
-        expect(crumbs.events).to.contain('click');
+        expect(crumbs.events).toEqual(expect.arrayContaining(['click']));
       });
     });
 
@@ -194,7 +202,7 @@ describe('filebrowser/model', () => {
         Widget.attach(crumbs, document.body);
         Widget.detach(crumbs);
         simulate(crumbs.node, 'click');
-        expect(crumbs.events).to.not.contain('click');
+        expect(crumbs.events).not.toEqual(expect.arrayContaining(['click']));
       });
     });
 
@@ -206,9 +214,11 @@ describe('filebrowser/model', () => {
         await model.cd('..');
         await framePromise();
 
-        expect(crumbs.methods).to.contain('onUpdateRequest');
+        expect(crumbs.methods).toEqual(
+          expect.arrayContaining(['onUpdateRequest'])
+        );
         const items = crumbs.node.querySelectorAll(ITEM_QUERY);
-        expect(items.length).to.equal(3);
+        expect(items.length).toBe(3);
         model.dispose();
       });
     });

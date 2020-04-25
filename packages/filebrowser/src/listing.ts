@@ -560,11 +560,7 @@ export class DirListing extends Widget {
    */
   modelForClick(event: MouseEvent): Contents.IModel | undefined {
     const items = this._sortedItems;
-    const index = Private.hitTestNodes(
-      this._items,
-      event.clientX,
-      event.clientY
-    );
+    const index = Private.hitTestNodes(this._items, event);
     if (index !== -1) {
       return items[index];
     }
@@ -855,14 +851,12 @@ export class DirListing extends Widget {
       }
     }
 
-    const index = Private.hitTestNodes(
-      this._items,
-      event.clientX,
-      event.clientY
-    );
+    let index = Private.hitTestNodes(this._items, event);
+
     if (index === -1) {
       return;
     }
+
     this._handleFileSelect(event);
 
     if (event.button !== 0) {
@@ -1058,11 +1052,7 @@ export class DirListing extends Widget {
    */
   private _evtDragEnter(event: IDragEvent): void {
     if (event.mimeData.hasData(CONTENTS_MIME)) {
-      const index = Private.hitTestNodes(
-        this._items,
-        event.clientX,
-        event.clientY
-      );
+      const index = Private.hitTestNodes(this._items, event);
       if (index === -1) {
         return;
       }
@@ -1100,11 +1090,7 @@ export class DirListing extends Widget {
     if (dropTarget) {
       dropTarget.classList.remove(DROP_TARGET_CLASS);
     }
-    const index = Private.hitTestNodes(
-      this._items,
-      event.clientX,
-      event.clientY
-    );
+    const index = Private.hitTestNodes(this._items, event);
     this._items[index].classList.add(DROP_TARGET_CLASS);
   }
 
@@ -1284,11 +1270,7 @@ export class DirListing extends Widget {
   private _handleFileSelect(event: MouseEvent): void {
     // Fetch common variables.
     const items = this._sortedItems;
-    const index = Private.hitTestNodes(
-      this._items,
-      event.clientX,
-      event.clientY
-    );
+    const index = Private.hitTestNodes(this._items, event);
 
     clearTimeout(this._selectTimer);
 
@@ -1847,7 +1829,7 @@ export namespace DirListing {
       model: Contents.IModel,
       fileType: DocumentRegistry.IFileType = DocumentRegistry.defaultTextFileType
     ): void {
-      const { icon, iconClass } = fileType;
+      const { icon, iconClass, name } = fileType;
 
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
@@ -1888,6 +1870,7 @@ export namespace DirListing {
       }
 
       node.title = hoverText;
+      node.setAttribute('data-file-type', name);
 
       // If an item is being edited currently, its text node is unavailable.
       if (text && text.textContent !== model.name) {
@@ -2074,11 +2057,13 @@ namespace Private {
    */
   export function hitTestNodes(
     nodes: HTMLElement[],
-    x: number,
-    y: number
+    event: MouseEvent
   ): number {
-    return ArrayExt.findFirstIndex(nodes, node =>
-      ElementExt.hitTest(node, x, y)
+    return ArrayExt.findFirstIndex(
+      nodes,
+      node =>
+        ElementExt.hitTest(node, event.clientX, event.clientY) ||
+        event.target === node
     );
   }
 

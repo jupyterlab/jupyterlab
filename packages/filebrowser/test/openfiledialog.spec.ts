@@ -1,18 +1,16 @@
+import 'jest';
+
+import expect from 'expect';
+
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
 import { toArray } from '@lumino/algorithm';
-
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
-import {
-  FileDialog,
-  FilterFileBrowserModel,
-  FileBrowserModel
-} from '@jupyterlab/filebrowser';
-import { ServiceManager, Contents } from '@jupyterlab/services';
+import { FileDialog, FilterFileBrowserModel, FileBrowserModel } from '../src';
 
-import { expect } from 'chai';
+import { ServiceManager, Contents } from '@jupyterlab/services';
 import {
   acceptDialog,
   dismissDialog,
@@ -20,6 +18,9 @@ import {
   sleep,
   framePromise
 } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
+
 import { simulate } from 'simulate-event';
 
 describe('@jupyterlab/filebrowser', () => {
@@ -27,7 +28,7 @@ describe('@jupyterlab/filebrowser', () => {
   let serviceManager: ServiceManager.IManager;
   let registry: DocumentRegistry;
 
-  before(async () => {
+  beforeAll(async () => {
     const opener: DocumentManager.IWidgetOpener = {
       open: widget => {
         /* no op */
@@ -37,7 +38,7 @@ describe('@jupyterlab/filebrowser', () => {
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new ServiceManager({ standby: 'never' });
+    serviceManager = new Mock.ServiceManagerMock();
     manager = new DocumentManager({
       registry,
       opener,
@@ -54,7 +55,7 @@ describe('@jupyterlab/filebrowser', () => {
     describe('#constructor()', () => {
       it('should construct a new filtered file browser model', () => {
         const model = new FilterFileBrowserModel({ manager });
-        expect(model).to.be.an.instanceof(FilterFileBrowserModel);
+        expect(model).toBeInstanceOf(FilterFileBrowserModel);
       });
 
       it('should accept filter option', () => {
@@ -62,7 +63,7 @@ describe('@jupyterlab/filebrowser', () => {
           manager,
           filter: (model: Contents.IModel) => false
         });
-        expect(model).to.be.an.instanceof(FilterFileBrowserModel);
+        expect(model).toBeInstanceOf(FilterFileBrowserModel);
       });
     });
 
@@ -77,7 +78,7 @@ describe('@jupyterlab/filebrowser', () => {
 
         const filteredItems = toArray(filteredModel.items());
         const items = toArray(model.items());
-        expect(filteredItems.length).equal(items.length);
+        expect(filteredItems.length).toBe(items.length);
       });
 
       it('should list all directories whatever the filter', async () => {
@@ -92,7 +93,7 @@ describe('@jupyterlab/filebrowser', () => {
         const filteredItems = toArray(filteredModel.items());
         const items = toArray(model.items());
         const folders = items.filter(item => item.type === 'directory');
-        expect(filteredItems.length).equal(folders.length);
+        expect(filteredItems.length).toBe(folders.length);
       });
 
       it('should respect the filter', async () => {
@@ -111,11 +112,11 @@ describe('@jupyterlab/filebrowser', () => {
         const shownItems = items.filter(
           item => item.type === 'directory' || item.type === 'notebook'
         );
-        expect(filteredItems.length).equal(shownItems.length);
+        expect(filteredItems.length).toBe(shownItems.length);
         const notebooks = filteredItems.filter(
           item => item.type === 'notebook'
         );
-        expect(notebooks.length).to.be.greaterThan(0);
+        expect(notebooks.length).toBeGreaterThan(0);
       });
     });
   });
@@ -130,8 +131,8 @@ describe('@jupyterlab/filebrowser', () => {
 
       const result = await dialog;
 
-      expect(result.button.accept).false;
-      expect(result.value).null;
+      expect(result.button.accept).toBe(false);
+      expect(result.value).toBeNull();
     });
 
     it('should accept options', async () => {
@@ -150,9 +151,9 @@ describe('@jupyterlab/filebrowser', () => {
 
       const result = await dialog;
 
-      expect(result.button.accept).true;
+      expect(result.button.accept).toBe(true);
       const items = result.value!;
-      expect(items.length).equal(1);
+      expect(items.length).toBe(1);
 
       document.body.removeChild(node);
     });
@@ -174,7 +175,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       let counter = 0;
       const listing = node.getElementsByClassName('jp-DirListing-content')[0];
-      expect(listing).to.be.ok;
+      expect(listing).toBeTruthy();
 
       let items = listing.getElementsByTagName('li');
       counter = 0;
@@ -186,23 +187,18 @@ describe('@jupyterlab/filebrowser', () => {
       }
 
       // Fails if there is no items shown
-      expect(items.length).to.be.greaterThan(0);
+      expect(items.length).toBeGreaterThan(0);
 
       // Emulate notebook file selection
-      // Get node coordinates we need to be precised as code test for hit position
-      const rect = items.item(items.length - 1)!.getBoundingClientRect();
-
-      simulate(items.item(items.length - 1)!, 'mousedown', {
-        clientX: 0.5 * (rect.left + rect.right),
-        clientY: 0.5 * (rect.bottom + rect.top)
-      });
+      const item = listing.querySelector('li[data-file-type="notebook"]')!;
+      simulate(item, 'mousedown');
 
       await acceptDialog();
       const result = await dialog;
       const files = result.value!;
-      expect(files.length).equal(1);
-      expect(files[0].type).equal('notebook');
-      expect(files[0].name).matches(/Untitled\d*.ipynb/);
+      expect(files.length).toBe(1);
+      expect(files[0].type).toBe('notebook');
+      expect(files[0].name).toEqual(expect.stringMatching(/Untitled.*.ipynb/));
 
       document.body.removeChild(node);
     });
@@ -217,9 +213,9 @@ describe('@jupyterlab/filebrowser', () => {
       const result = await dialog;
       const items = result.value!;
 
-      expect(items.length).equal(1);
-      expect(items[0].type).equal('directory');
-      expect(items[0].path).equal('');
+      expect(items.length).toBe(1);
+      expect(items[0].type).toBe('directory');
+      expect(items[0].path).toBe('');
     });
   });
 
@@ -233,8 +229,8 @@ describe('@jupyterlab/filebrowser', () => {
 
       const result = await dialog;
 
-      expect(result.button.accept).false;
-      expect(result.value).null;
+      expect(result.button.accept).toBe(false);
+      expect(result.value).toBeNull();
     });
 
     it('should accept options', async () => {
@@ -252,8 +248,8 @@ describe('@jupyterlab/filebrowser', () => {
 
       const result = await dialog;
 
-      expect(result.button.accept).true;
-      expect(result.value!.length).equal(1);
+      expect(result.button.accept).toBe(true);
+      expect(result.value!.length).toBe(1);
 
       document.body.removeChild(node);
     });
@@ -274,7 +270,7 @@ describe('@jupyterlab/filebrowser', () => {
 
       let counter = 0;
       const listing = node.getElementsByClassName('jp-DirListing-content')[0];
-      expect(listing).to.be.ok;
+      expect(listing).toBeTruthy();
 
       let items = listing.getElementsByTagName('li');
       // Wait for the directory listing to be populated
@@ -285,23 +281,19 @@ describe('@jupyterlab/filebrowser', () => {
       }
 
       // Fails if there is no items shown
-      expect(items.length).to.be.greaterThan(0);
+      expect(items.length).toBeGreaterThan(0);
 
       // Emulate notebook file selection
-      // Get node coordinates we need to be precised as code test for hit position
-      const rect = items.item(items.length - 1)!.getBoundingClientRect();
-
-      simulate(items.item(items.length - 1)!, 'mousedown', {
-        clientX: 0.5 * (rect.left + rect.right),
-        clientY: 0.5 * (rect.bottom + rect.top)
-      });
+      simulate(items.item(items.length - 1)!, 'mousedown');
 
       await acceptDialog();
       const result = await dialog;
       const files = result.value!;
-      expect(files.length).equal(1);
-      expect(files[0].type).equal('directory');
-      expect(files[0].name).matches(/Untitled Folder( \d+)?/);
+      expect(files.length).toBe(1);
+      expect(files[0].type).toBe('directory');
+      expect(files[0].name).toEqual(
+        expect.stringMatching(/Untitled Folder( \d+)?/)
+      );
 
       document.body.removeChild(node);
     });
@@ -316,9 +308,9 @@ describe('@jupyterlab/filebrowser', () => {
       const result = await dialog;
       const items = result.value!;
 
-      expect(items.length).equal(1);
-      expect(items[0].type).equal('directory');
-      expect(items[0].path).equal('');
+      expect(items.length).toBe(1);
+      expect(items[0].type).toBe('directory');
+      expect(items[0].path).toBe('');
     });
   });
 });

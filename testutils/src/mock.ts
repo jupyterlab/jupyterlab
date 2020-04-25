@@ -12,7 +12,8 @@ import {
   Session,
   ServiceManager,
   Contents,
-  ServerConnection
+  ServerConnection,
+  ContentsManager
 } from '@jupyterlab/services';
 
 import { ArrayIterator } from '@lumino/algorithm';
@@ -401,33 +402,19 @@ export const SessionContextMock = jest.fn<
  * A mock contents manager.
  */
 export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
-  const files: { [key: string]: Contents.IModel } = {};
+  const files = new Map<string, Contents.IModel>();
+  const dummy = new ContentsManager();
   const checkpoints: { [key: string]: Contents.ICheckpointModel } = {};
+
+  const baseModel = Private.createFile({ type: 'directory' });
+  files.set('', { ...baseModel, path: '', name: '' });
 
   const thisObject: Contents.IManager = {
     ...jest.requireActual('@jupyterlab/services'),
     ready: Promise.resolve(void 0),
     newUntitled: jest.fn(options => {
-      options = options || {};
-      const name = UUID.uuid4() + options.ext || '.txt';
-      const path = PathExt.join(options.path || '', name);
-      let content = '';
-      if (options.type === 'notebook') {
-        content = JSON.stringify({});
-      }
-      const timeStamp = new Date().toISOString();
-      const model: Contents.IModel = {
-        path,
-        content,
-        name,
-        last_modified: timeStamp,
-        writable: true,
-        created: timeStamp,
-        type: options.type || 'file',
-        format: 'text',
-        mimetype: 'plain/text'
-      };
-      files[path] = model;
+      const model = Private.createFile(options || {});
+      files.set(model.path, model);
       fileChangedSignal.emit({
         type: 'new',
         oldValue: null,
@@ -450,24 +437,80 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       return null;
     }),
     normalize: jest.fn(path => {
-      return path;
+      return dummy.normalize(path);
     }),
     localPath: jest.fn(path => {
-      return path;
+      return dummy.localPath(path);
     }),
-    get: jest.fn((path, _) => {
-      if (!files[path]) {
-        const resp = new Response(void 0, { status: 404 });
-        return Promise.reject(new ServerConnection.ResponseError(resp));
+    get: jest.fn((path, options) => {
+      path = Private.fixSlash(path);
+      if (!files.has(path)) {
+        return Private.makeResponseError(404);
       }
-      return Promise.resolve(files[path]);
+      const model = files.get(path)!;
+      if (model.type === 'directory') {
+        if (options?.content !== false) {
+          const content: Contents.IModel[] = [];
+          files.forEach(fileModel => {
+            if (PathExt.dirname(fileModel.path) == model.path) {
+              content.push(fileModel);
+            }
+          });
+          return Promise.resolve({ ...model, content });
+        }
+        return Promise.resolve(model);
+      }
+      if (options?.content != false) {
+        return Promise.resolve(model);
+      }
+      return Promise.resolve({ ...model, content: '' });
+    }),
+    driveName: jest.fn(path => {
+      return dummy.driveName(path);
+    }),
+    rename: jest.fn((oldPath, newPath) => {
+      oldPath = Private.fixSlash(oldPath);
+      newPath = Private.fixSlash(newPath);
+      if (!files.has(oldPath)) {
+        return Private.makeResponseError(404);
+      }
+      const oldValue = files.get(oldPath)!;
+      files.delete(oldPath);
+      const name = PathExt.basename(newPath);
+      const newValue = { ...oldValue, name, path: newPath };
+      files.set(newPath, newValue);
+      fileChangedSignal.emit({
+        type: 'rename',
+        oldValue,
+        newValue
+      });
+      return Promise.resolve(newValue);
+    }),
+    delete: jest.fn(path => {
+      path = Private.fixSlash(path);
+      if (!files.has(path)) {
+        return Private.makeResponseError(404);
+      }
+      const oldValue = files.get(path)!;
+      files.delete(path);
+      fileChangedSignal.emit({
+        type: 'delete',
+        oldValue,
+        newValue: null
+      });
+      return Promise.resolve(void 0);
     }),
     save: jest.fn((path, options) => {
+      path = Private.fixSlash(path);
       const timeStamp = new Date().toISOString();
-      if (files[path]) {
-        files[path] = { ...files[path], ...options, last_modified: timeStamp };
+      if (files.has(path)) {
+        files.set(path, {
+          ...files.get(path)!,
+          ...options,
+          last_modified: timeStamp
+        });
       } else {
-        files[path] = {
+        files.set(path, {
           path,
           name: PathExt.basename(path),
           content: '',
@@ -478,16 +521,18 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
           mimetype: 'plain/text',
           ...options,
           last_modified: timeStamp
-        };
+        });
       }
       fileChangedSignal.emit({
         type: 'save',
         oldValue: null,
-        newValue: files[path]
+        newValue: files.get(path)!
       });
-      return Promise.resolve(files[path]);
-    })
+      return Promise.resolve(files.get(path)!);
+    }),
+    dispose: jest.fn()
   };
+
   const fileChangedSignal = new Signal<
     Contents.IManager,
     Contents.IChangedArgs
@@ -500,21 +545,35 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
  * A mock sessions manager.
  */
 export const SessionManagerMock = jest.fn<Session.IManager, []>(() => {
-  const sessions: Session.IModel[] = [];
+  let sessions: Session.IModel[] = [];
   const thisObject: Session.IManager = {
     ...jest.requireActual('@jupyterlab/services'),
     ready: Promise.resolve(void 0),
     startNew: jest.fn(options => {
       const session = new SessionConnectionMock({ model: options }, null);
       sessions.push(session.model);
+      runningChangedSignal.emit(sessions);
       return session;
     }),
     connectTo: jest.fn(options => {
       return new SessionConnectionMock(options, null);
     }),
+    stopIfNeeded: jest.fn(path => {
+      const length = sessions.length;
+      sessions = sessions.filter(model => model.path !== path);
+      if (sessions.length !== length) {
+        runningChangedSignal.emit(sessions);
+      }
+      return Promise.resolve(void 0);
+    }),
     refreshRunning: jest.fn(() => Promise.resolve(void 0)),
     running: jest.fn(() => new ArrayIterator(sessions))
   };
+
+  const runningChangedSignal = new Signal<Session.IManager, Session.IModel[]>(
+    thisObject
+  );
+  (thisObject as any).runningChanged = runningChangedSignal;
   return thisObject;
 });
 
@@ -539,7 +598,8 @@ export const ServiceManagerMock = jest.fn<ServiceManager.IManager, []>(() => {
     ready: Promise.resolve(void 0),
     contents: new ContentsManagerMock(),
     sessions: new SessionManagerMock(),
-    kernelspecs: new KernelSpecManagerMock()
+    kernelspecs: new KernelSpecManagerMock(),
+    dispose: jest.fn()
   };
   return thisObject;
 });
@@ -574,6 +634,55 @@ namespace Private {
   export type RecursivePartial<T> = {
     [P in keyof T]?: RecursivePartial<T[P]>;
   };
+
+  export function createFile(
+    options?: Contents.ICreateOptions
+  ): Contents.IModel {
+    options = options || {};
+    let name = UUID.uuid4();
+    switch (options.type) {
+      case 'directory':
+        name = `Untitled Folder_${name}`;
+        break;
+      case 'notebook':
+        name = `Untitled_${name}.ipynb`;
+        break;
+      default:
+        name = `untitled_${name}${options.ext || '.txt'}`;
+    }
+
+    const path = PathExt.join(options.path || '', name);
+    let content = '';
+    if (options.type === 'notebook') {
+      content = JSON.stringify({});
+    }
+    const timeStamp = new Date().toISOString();
+    return {
+      path,
+      content,
+      name,
+      last_modified: timeStamp,
+      writable: true,
+      created: timeStamp,
+      type: options.type || 'file',
+      format: 'text',
+      mimetype: 'plain/text'
+    };
+  }
+
+  export function fixSlash(path: string): string {
+    if (path.endsWith('/')) {
+      path = path.slice(0, path.length - 1);
+    }
+    return path;
+  }
+
+  export function makeResponseError(
+    status: number
+  ): Promise<ServerConnection.ResponseError> {
+    const resp = new Response(void 0, { status });
+    return Promise.reject(new ServerConnection.ResponseError(resp));
+  }
 
   export function cloneKernel(
     options: RecursivePartial<Kernel.IKernelConnection.IOptions>

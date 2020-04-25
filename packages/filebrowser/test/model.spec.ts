@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
+
+import expect from 'expect';
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
@@ -13,17 +15,9 @@ import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 
 import { StateDB } from '@jupyterlab/statedb';
 
-import {
-  FileBrowserModel,
-  LARGE_FILE_SIZE,
-  CHUNK_SIZE
-} from '@jupyterlab/filebrowser';
+import { FileBrowserModel, CHUNK_SIZE, LARGE_FILE_SIZE } from '../src';
 
-import {
-  Contents,
-  ContentsManager,
-  ServiceManager
-} from '@jupyterlab/services';
+import { Contents, ServiceManager } from '@jupyterlab/services';
 
 import {
   acceptDialog,
@@ -32,13 +26,15 @@ import {
   sleep
 } from '@jupyterlab/testutils';
 
+import * as Mock from '@jupyterlab/testutils/lib/mock';
+
 import { toArray } from '@lumino/algorithm';
 
 /**
  * A contents manager that delays requests by less each time it is called
  * in order to simulate out-of-order responses from the server.
  */
-class DelayedContentsManager extends ContentsManager {
+class DelayedContentsManager extends Mock.ContentsManagerMock {
   get(
     path: string,
     options?: Contents.IFetchOptions
@@ -63,19 +59,19 @@ describe('filebrowser/model', () => {
   let registry: DocumentRegistry;
   let model: FileBrowserModel;
   let name: string;
+  let subDir: string;
   let state: StateDB;
+  const opener: DocumentManager.IWidgetOpener = {
+    open: widget => {
+      /* no op */
+    }
+  };
 
-  before(() => {
-    const opener: DocumentManager.IWidgetOpener = {
-      open: widget => {
-        /* no op */
-      }
-    };
-
+  beforeAll(() => {
     registry = new DocumentRegistry({
       textModelFactory: new TextModelFactory()
     });
-    serviceManager = new ServiceManager({ standby: 'never' });
+    serviceManager = new Mock.ServiceManagerMock();
     manager = new DocumentManager({
       registry,
       opener,
@@ -87,8 +83,10 @@ describe('filebrowser/model', () => {
   beforeEach(async () => {
     await state.clear();
     model = new FileBrowserModel({ manager, state });
-    const contents = await manager.newUntitled({ type: 'file' });
+    let contents = await manager.newUntitled({ type: 'file' });
     name = contents.name;
+    contents = await manager.newUntitled({ type: 'directory' });
+    subDir = contents.path;
     return model.cd();
   });
 
@@ -100,7 +98,7 @@ describe('filebrowser/model', () => {
     describe('#constructor()', () => {
       it('should construct a new file browser model', () => {
         model = new FileBrowserModel({ manager });
-        expect(model).to.be.an.instanceof(FileBrowserModel);
+        expect(model).toBeInstanceOf(FileBrowserModel);
       });
     });
 
@@ -108,14 +106,14 @@ describe('filebrowser/model', () => {
       it('should be emitted when the path changes', async () => {
         let called = false;
         model.pathChanged.connect((sender, args) => {
-          expect(sender).to.equal(model);
-          expect(args.name).to.equal('path');
-          expect(args.oldValue).to.equal('');
-          expect(args.newValue).to.equal('src');
+          expect(sender).toBe(model);
+          expect(args.name).toBe('path');
+          expect(args.oldValue).toBe('');
+          expect(args.newValue).toBe(subDir);
           called = true;
         });
-        await model.cd('src');
-        expect(called).to.equal(true);
+        await model.cd(subDir);
+        expect(called).toBe(true);
       });
     });
 
@@ -123,23 +121,23 @@ describe('filebrowser/model', () => {
       it('should be emitted after a refresh', async () => {
         let called = false;
         model.refreshed.connect((sender, arg) => {
-          expect(sender).to.equal(model);
-          expect(arg).to.be.undefined;
+          expect(sender).toBe(model);
+          expect(arg).toBeUndefined();
           called = true;
         });
         await model.cd();
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
 
       it('should be emitted when the path changes', async () => {
         let called = false;
         model.refreshed.connect((sender, arg) => {
-          expect(sender).to.equal(model);
-          expect(arg).to.be.undefined;
+          expect(sender).toBe(model);
+          expect(arg).toBeUndefined();
           called = true;
         });
-        await model.cd('src');
-        expect(called).to.equal(true);
+        await model.cd(subDir);
+        expect(called).toBe(true);
       });
     });
 
@@ -147,63 +145,63 @@ describe('filebrowser/model', () => {
       it('should be emitted when a file is created', async () => {
         let called = false;
         model.fileChanged.connect((sender, args) => {
-          expect(sender).to.equal(model);
-          expect(args.type).to.equal('new');
-          expect(args.oldValue).to.be.null;
-          expect(args.newValue!.type).to.equal('file');
+          expect(sender).toBe(model);
+          expect(args.type).toBe('new');
+          expect(args.oldValue).toBeNull();
+          expect(args.newValue!.type).toBe('file');
           called = true;
         });
         await manager.newUntitled({ type: 'file' });
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
 
       it('should be emitted when a file is renamed', async () => {
         let called = false;
         model.fileChanged.connect((sender, args) => {
-          expect(sender).to.equal(model);
-          expect(args.type).to.equal('rename');
-          expect(args.oldValue!.path).to.equal(name);
-          expect(args.newValue!.path).to.equal(name + '.bak');
+          expect(sender).toBe(model);
+          expect(args.type).toBe('rename');
+          expect(args.oldValue!.path).toBe(name);
+          expect(args.newValue!.path).toBe(name + '.bak');
           called = true;
         });
         await manager.rename(name, name + '.bak');
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
 
       it('should be emitted when a file is deleted', async () => {
         let called = false;
         model.fileChanged.connect((sender, args) => {
-          expect(sender).to.equal(model);
-          expect(args.type).to.equal('delete');
-          expect(args.oldValue!.path).to.equal(name);
-          expect(args.newValue).to.be.null;
+          expect(sender).toBe(model);
+          expect(args.type).toBe('delete');
+          expect(args.oldValue!.path).toBe(name);
+          expect(args.newValue).toBeNull();
           called = true;
         });
         await manager.deleteFile(name);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
     describe('#path', () => {
       it('should be the current path of the model', async () => {
-        expect(model.path).to.equal('');
-        await model.cd('src/');
-        expect(model.path).to.equal('src');
+        expect(model.path).toBe('');
+        await model.cd(subDir);
+        expect(model.path).toBe(subDir);
       });
     });
 
     describe('#items()', () => {
       it('should get an iterator of items in the current path', () => {
         const items = model.items();
-        expect(items.next()).to.be.ok;
+        expect(items.next()).toBeTruthy();
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether the model is disposed', () => {
-        expect(model.isDisposed).to.equal(false);
+        expect(model.isDisposed).toBe(false);
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
+        expect(model.isDisposed).toBe(true);
       });
     });
 
@@ -216,7 +214,7 @@ describe('filebrowser/model', () => {
           type: 'test'
         });
         await model.cd();
-        expect(model.sessions().next()).to.be.ok;
+        expect(model.sessions().next()).toBeTruthy();
         await session.shutdown();
       });
     });
@@ -224,13 +222,13 @@ describe('filebrowser/model', () => {
     describe('#dispose()', () => {
       it('should dispose of the resources held by the model', () => {
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
+        expect(model.isDisposed).toBe(true);
       });
 
       it('should be safe to call more than once', () => {
         model.dispose();
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
+        expect(model.isDisposed).toBe(true);
       });
     });
 
@@ -242,24 +240,29 @@ describe('filebrowser/model', () => {
 
     describe('#cd()', () => {
       it('should change directory', async () => {
-        await model.cd('src');
-        expect(model.path).to.equal('src');
+        await model.cd(subDir);
+        expect(model.path).toBe(subDir);
       });
 
       it('should accept a relative path', async () => {
-        await model.cd('./src');
-        expect(model.path).to.equal('src');
+        await model.cd(subDir);
+        expect(model.path).toBe(subDir);
       });
 
       it('should accept a parent directory', async () => {
-        await model.cd('src');
+        await model.cd(subDir);
         await model.cd('..');
-        expect(model.path).to.equal('');
+        expect(model.path).toBe('');
       });
 
       it('should be resilient to a slow initial fetch', async () => {
-        const delayedServiceManager = new ServiceManager({ standby: 'never' });
+        const delayedServiceManager = new Mock.ServiceManagerMock();
         (delayedServiceManager as any).contents = new DelayedContentsManager();
+        const contents = await delayedServiceManager.contents.newUntitled({
+          type: 'directory'
+        });
+        subDir = contents.path;
+
         const manager = new DocumentManager({
           registry,
           opener,
@@ -271,9 +274,9 @@ describe('filebrowser/model', () => {
         // If it is too slow, it can come in after the directory change,
         // causing a directory set by, e.g., the tree handler to be wrong.
         // This checks to make sure we are handling that case correctly.
-        await model.cd('src'); // should delay 500ms
+        await model.cd(subDir); // should delay 500ms
         await sleep(2000);
-        expect(model.path).to.equal('src');
+        expect(model.path).toBe(subDir);
 
         manager.dispose();
         delayedServiceManager.contents.dispose();
@@ -287,11 +290,11 @@ describe('filebrowser/model', () => {
         const id = 'foo';
         const model2 = new FileBrowserModel({ manager, state });
         await model.restore(id);
-        await model.cd('src');
-        expect(model.path).to.equal('src');
-        expect(model2.path).to.equal('');
+        await model.cd(subDir);
+        expect(model.path).toBe(subDir);
+        expect(model2.path).toBe('');
         await model2.restore(id);
-        expect(model2.path).to.equal('src');
+        expect(model2.path).toBe(subDir);
         model2.dispose();
       });
 
@@ -299,12 +302,12 @@ describe('filebrowser/model', () => {
         const id = 'bar';
         const model2 = new FileBrowserModel({ manager, state });
         await model.restore(id);
-        await model.cd('src');
-        expect(model.path).to.equal('src');
-        expect(model2.path).to.equal('');
+        await model.cd(subDir);
+        expect(model.path).toBe(subDir);
+        expect(model2.path).toBe('');
         await model2.restore(id);
         await model2.restore(id);
-        expect(model2.path).to.equal('src');
+        expect(model2.path).toBe(subDir);
         model2.dispose();
       });
     });
@@ -322,7 +325,7 @@ describe('filebrowser/model', () => {
           type: 'text/html'
         });
         const contents = await model.upload(file);
-        expect(contents.name).to.equal(fname);
+        expect(contents.name).toBe(fname);
       });
 
       it('should overwrite', async () => {
@@ -331,11 +334,11 @@ describe('filebrowser/model', () => {
           type: 'text/html'
         });
         const contents = await model.upload(file);
-        expect(contents.name).to.equal(fname);
+        expect(contents.name).toBe(fname);
         const promise = model.upload(file);
         await acceptDialog();
         await promise;
-        expect(contents.name).to.equal(fname);
+        expect(contents.name).toBe(fname);
       });
 
       it('should not overwrite', async () => {
@@ -344,13 +347,13 @@ describe('filebrowser/model', () => {
           type: 'text/html'
         });
         const contents = await model.upload(file);
-        expect(contents.name).to.equal(fname);
+        expect(contents.name).toBe(fname);
         const promise = model.upload(file);
         await dismissDialog();
         try {
           await promise;
         } catch (e) {
-          expect(e).to.equal('File not uploaded');
+          expect(e).toBe('File not uploaded');
         }
       });
 
@@ -358,23 +361,23 @@ describe('filebrowser/model', () => {
         const fname = UUID.uuid4() + '.html';
         let called = false;
         model.fileChanged.connect((sender, args) => {
-          expect(sender).to.equal(model);
-          expect(args.type).to.equal('save');
-          expect(args.oldValue).to.be.null;
-          expect(args.newValue!.path).to.equal(fname);
+          expect(sender).toBe(model);
+          expect(args.type).toBe('save');
+          expect(args.oldValue).toBeNull();
+          expect(args.newValue!.path).toBe(fname);
           called = true;
         });
         const file = new File(['<p>Hello world!</p>'], fname, {
           type: 'text/html'
         });
         await model.upload(file);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
 
       describe('older notebook version', () => {
         let prevNotebookVersion: string;
 
-        before(() => {
+        beforeAll(() => {
           prevNotebookVersion = PageConfig.setOption(
             'notebookVersion',
             JSON.stringify([5, 0, 0])
@@ -388,11 +391,11 @@ describe('filebrowser/model', () => {
             await model.upload(file);
             throw new Error('Upload should have failed');
           } catch (err) {
-            expect(err).to.equal(`Cannot upload file (>15 MB). ${fname}`);
+            expect(err).toBe(`Cannot upload file (>15 MB). ${fname}`);
           }
         });
 
-        after(() => {
+        afterAll(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
         });
       });
@@ -400,7 +403,7 @@ describe('filebrowser/model', () => {
       describe('newer notebook version', () => {
         let prevNotebookVersion: string;
 
-        before(() => {
+        beforeAll(() => {
           prevNotebookVersion = PageConfig.setOption(
             'notebookVersion',
             JSON.stringify([5, 1, 0])
@@ -416,6 +419,7 @@ describe('filebrowser/model', () => {
           ]) {
             it(`should upload a large ${ending} file of size ${size}`, async () => {
               const fname = UUID.uuid4() + ending;
+
               // minimal valid (according to server) notebook
               let content =
                 '{"nbformat": 4, "metadata": {"_": ""}, "nbformat_minor": 2, "cells": []}';
@@ -426,18 +430,15 @@ describe('filebrowser/model', () => {
               );
               const file = new File([content], fname, { type: 'text/plain' });
               await model.upload(file);
-              const {
-                content: newContent
-              } = await model.manager.services.contents.get(fname);
-              // the contents of notebooks are returned as objects instead of strings
-              if (ending === '.ipynb') {
-                expect(newContent).to.deep.equal(JSON.parse(content));
-              } else {
-                expect(newContent).to.equal(content);
-              }
+              // Ensure we get the file back.
+              const contentModel = await model.manager.services.contents.get(
+                fname
+              );
+              expect(contentModel.content.length).toBeGreaterThan(0);
             });
           }
         }
+
         it(`should produce progress as a large file uploads`, async () => {
           const fname = UUID.uuid4() + '.txt';
           const file = new File([new ArrayBuffer(2 * CHUNK_SIZE)], fname);
@@ -448,8 +449,8 @@ describe('filebrowser/model', () => {
           );
 
           const uploaded = model.upload(file);
-          expect(toArray(model.uploads())).to.deep.equal([]);
-          expect(await start).to.deep.equal([
+          expect(toArray(model.uploads())).toEqual([]);
+          expect(await start).toEqual([
             model,
             {
               name: 'start',
@@ -457,10 +458,10 @@ describe('filebrowser/model', () => {
               newValue: { path: fname, progress: 0 }
             }
           ]);
-          expect(toArray(model.uploads())).to.deep.equal([
+          expect(toArray(model.uploads())).toEqual([
             { path: fname, progress: 0 }
           ]);
-          expect(await first).to.deep.equal([
+          expect(await first).toEqual([
             model,
             {
               name: 'update',
@@ -468,10 +469,10 @@ describe('filebrowser/model', () => {
               newValue: { path: fname, progress: 0 }
             }
           ]);
-          expect(toArray(model.uploads())).to.deep.equal([
+          expect(toArray(model.uploads())).toEqual([
             { path: fname, progress: 0 }
           ]);
-          expect(await second).to.deep.equal([
+          expect(await second).toEqual([
             model,
             {
               name: 'update',
@@ -479,10 +480,10 @@ describe('filebrowser/model', () => {
               newValue: { path: fname, progress: 1 / 2 }
             }
           ]);
-          expect(toArray(model.uploads())).to.deep.equal([
+          expect(toArray(model.uploads())).toEqual([
             { path: fname, progress: 1 / 2 }
           ]);
-          expect(await finished).to.deep.equal([
+          expect(await finished).toEqual([
             model,
             {
               name: 'finish',
@@ -490,11 +491,11 @@ describe('filebrowser/model', () => {
               newValue: null
             }
           ]);
-          expect(toArray(model.uploads())).to.deep.equal([]);
+          expect(toArray(model.uploads())).toEqual([]);
           await uploaded;
         });
 
-        after(() => {
+        afterAll(() => {
           PageConfig.setOption('notebookVersion', prevNotebookVersion);
         });
       });
