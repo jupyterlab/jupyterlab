@@ -64,7 +64,7 @@ delete tsData['compilerOptions']['skipLibCheck'];
 utils.writeJSONFile(path.join(testSrc, 'tsconfig.json'), tsData);
 
 // Update the test files to use imports from `../src` and import "jest"
-glob.sync(path.join(testSrc, 'src', '**', '*.ts*')).forEach(function (filePath) {
+glob.sync(path.join(testSrc, 'src', '**', '*.ts*')).forEach(function(filePath) {
   console.debug(filePath);
   let src = fs.readFileSync(filePath, 'utf8');
   src = src.split(`'@jupyterlab/${name}/src';`).join(`'../src';`);
