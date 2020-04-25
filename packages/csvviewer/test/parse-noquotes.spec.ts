@@ -1,9 +1,8 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
-import { parseDSVNoQuotes as parser } from '@jupyterlab/csvviewer';
+import { parseDSVNoQuotes as parser } from '../src';
 
 describe('csvviewer/parsenoquotes', () => {
   describe('parseDSVNoQuotes', () => {
@@ -13,14 +12,14 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.ncols).to.deep.equal(0);
-      expect(results.offsets).to.deep.equal([0, 9, 18]);
+      expect(results.nrows).toEqual(3);
+      expect(results.ncols).toEqual(0);
+      expect(results.offsets).toEqual([0, 9, 18]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.ncols).to.deep.equal(4);
-      expect(results.offsets).to.deep.equal([
+      expect(results.nrows).toEqual(3);
+      expect(results.ncols).toEqual(4);
+      expect(results.offsets).toEqual([
         0,
         2,
         4,
@@ -44,13 +43,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.offsets).to.deep.equal([0, 8, 16]);
+      expect(results.nrows).toEqual(3);
+      expect(results.offsets).toEqual([0, 8, 16]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.ncols).to.deep.equal(4);
-      expect(results.offsets).to.deep.equal([
+      expect(results.nrows).toEqual(3);
+      expect(results.ncols).toEqual(4);
+      expect(results.offsets).toEqual([
         0,
         2,
         4,
@@ -72,13 +71,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(1);
-      expect(results.offsets).to.deep.equal([0]);
+      expect(results.nrows).toEqual(1);
+      expect(results.offsets).toEqual([0]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(1);
-      expect(results.ncols).to.deep.equal(4);
-      expect(results.offsets).to.deep.equal([0, 2, 4, 6]);
+      expect(results.nrows).toEqual(1);
+      expect(results.ncols).toEqual(4);
+      expect(results.offsets).toEqual([0, 2, 4, 6]);
     });
 
     it('handles changing the field delimiter', () => {
@@ -87,13 +86,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.offsets).to.deep.equal([0, 8, 16]);
+      expect(results.nrows).toEqual(3);
+      expect(results.offsets).toEqual([0, 8, 16]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.ncols).to.deep.equal(4);
-      expect(results.offsets).to.deep.equal([
+      expect(results.nrows).toEqual(3);
+      expect(results.ncols).toEqual(4);
+      expect(results.offsets).toEqual([
         0,
         2,
         4,
@@ -115,13 +114,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(2);
-      expect(results.offsets).to.deep.equal([8, 16]);
+      expect(results.nrows).toEqual(2);
+      expect(results.offsets).toEqual([8, 16]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(2);
-      expect(results.ncols).to.deep.equal(4);
-      expect(results.offsets).to.deep.equal([8, 10, 12, 14, 16, 18, 20, 22]);
+      expect(results.nrows).toEqual(2);
+      expect(results.ncols).toEqual(4);
+      expect(results.offsets).toEqual([8, 10, 12, 14, 16, 18, 20, 22]);
     });
 
     it('handles a max row argument', () => {
@@ -130,13 +129,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(2);
-      expect(results.offsets).to.deep.equal([0, 8]);
+      expect(results.nrows).toEqual(2);
+      expect(results.offsets).toEqual([0, 8]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(2);
-      expect(results.ncols).to.deep.equal(4);
-      expect(results.offsets).to.deep.equal([0, 2, 4, 6, 8, 10, 12, 14]);
+      expect(results.nrows).toEqual(2);
+      expect(results.ncols).toEqual(4);
+      expect(results.offsets).toEqual([0, 2, 4, 6, 8, 10, 12, 14]);
     });
 
     it('handles a start index and max row argument', () => {
@@ -145,13 +144,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(1);
-      expect(results.offsets).to.deep.equal([8]);
+      expect(results.nrows).toEqual(1);
+      expect(results.offsets).toEqual([8]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(1);
-      expect(results.ncols).to.deep.equal(4);
-      expect(results.offsets).to.deep.equal([8, 10, 12, 14]);
+      expect(results.nrows).toEqual(1);
+      expect(results.ncols).toEqual(4);
+      expect(results.offsets).toEqual([8, 10, 12, 14]);
     });
 
     it('adjusts columns to match first row by default', () => {
@@ -160,13 +159,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.offsets).to.deep.equal([0, 8, 11]);
+      expect(results.nrows).toEqual(3);
+      expect(results.offsets).toEqual([0, 8, 11]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.ncols).to.deep.equal(4);
-      expect(results.offsets).to.deep.equal([
+      expect(results.nrows).toEqual(3);
+      expect(results.ncols).toEqual(4);
+      expect(results.offsets).toEqual([
         0,
         2,
         4,
@@ -188,13 +187,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.offsets).to.deep.equal([0, 9, 13]);
+      expect(results.nrows).toEqual(3);
+      expect(results.offsets).toEqual([0, 9, 13]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.ncols).to.deep.equal(4);
-      expect(results.offsets).to.deep.equal([
+      expect(results.nrows).toEqual(3);
+      expect(results.ncols).toEqual(4);
+      expect(results.offsets).toEqual([
         0,
         2,
         4,
@@ -216,13 +215,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.offsets).to.deep.equal([0, 8, 11]);
+      expect(results.nrows).toEqual(3);
+      expect(results.offsets).toEqual([0, 8, 11]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.ncols).to.deep.equal(5);
-      expect(results.offsets).to.deep.equal([
+      expect(results.nrows).toEqual(3);
+      expect(results.ncols).toEqual(5);
+      expect(results.offsets).toEqual([
         0,
         2,
         4,
@@ -247,13 +246,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.offsets).to.deep.equal([0, 9, 13]);
+      expect(results.nrows).toEqual(3);
+      expect(results.offsets).toEqual([0, 9, 13]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.ncols).to.deep.equal(5);
-      expect(results.offsets).to.deep.equal([
+      expect(results.nrows).toEqual(3);
+      expect(results.ncols).toEqual(5);
+      expect(results.offsets).toEqual([
         0,
         2,
         4,
@@ -278,13 +277,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(1);
-      expect(results.offsets).to.deep.equal([0]);
+      expect(results.nrows).toEqual(1);
+      expect(results.offsets).toEqual([0]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(1);
-      expect(results.ncols).to.deep.equal(7);
-      expect(results.offsets).to.deep.equal([0, 2, 4, 6, 7, 7, 7]);
+      expect(results.nrows).toEqual(1);
+      expect(results.ncols).toEqual(7);
+      expect(results.offsets).toEqual([0, 2, 4, 6, 7, 7, 7]);
     });
 
     it('adjusts columns to match ncols with one row and trailing delimiter', () => {
@@ -293,13 +292,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(1);
-      expect(results.offsets).to.deep.equal([0]);
+      expect(results.nrows).toEqual(1);
+      expect(results.offsets).toEqual([0]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(1);
-      expect(results.ncols).to.deep.equal(7);
-      expect(results.offsets).to.deep.equal([0, 2, 4, 6, 7, 7, 7]);
+      expect(results.nrows).toEqual(1);
+      expect(results.ncols).toEqual(7);
+      expect(results.offsets).toEqual([0, 2, 4, 6, 7, 7, 7]);
     });
 
     it('handles a single row delimiter', () => {
@@ -308,13 +307,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(1);
-      expect(results.offsets).to.deep.equal([0]);
+      expect(results.nrows).toEqual(1);
+      expect(results.offsets).toEqual([0]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(1);
-      expect(results.ncols).to.deep.equal(1);
-      expect(results.offsets).to.deep.equal([0]);
+      expect(results.nrows).toEqual(1);
+      expect(results.ncols).toEqual(1);
+      expect(results.offsets).toEqual([0]);
     });
 
     it('handles adding columns or merging columns as necessary', () => {
@@ -323,13 +322,13 @@ describe('csvviewer/parsenoquotes', () => {
       let results;
 
       results = parser({ ...options, columnOffsets: false });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.offsets).to.deep.equal([0, 6, 15]);
+      expect(results.nrows).toEqual(3);
+      expect(results.offsets).toEqual([0, 6, 15]);
 
       results = parser({ ...options, columnOffsets: true });
-      expect(results.nrows).to.deep.equal(3);
-      expect(results.ncols).to.deep.equal(3);
-      expect(results.offsets).to.deep.equal([0, 2, 4, 6, 7, 9, 15, 17, 18]);
+      expect(results.nrows).toEqual(3);
+      expect(results.ncols).toEqual(3);
+      expect(results.offsets).toEqual([0, 2, 4, 6, 7, 9, 15, 17, 18]);
     });
   });
 });

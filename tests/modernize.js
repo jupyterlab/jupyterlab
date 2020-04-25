@@ -63,18 +63,19 @@ const tsData = utils.readJSONFile(path.join(testSrc, 'tsconfig.json'));
 delete tsData['compilerOptions']['skipLibCheck'];
 utils.writeJSONFile(path.join(testSrc, 'tsconfig.json'), tsData);
 
-// Update the test files to use imports from `../src`
+// Update the test files to use imports from `../src` and import "jest"
 glob.sync(path.join(testSrc, 'src', '**', '*.ts*')).forEach(function(filePath) {
   console.debug(filePath);
   let src = fs.readFileSync(filePath, 'utf8');
   src = src.split(`'@jupyterlab/${name}/src';`).join(`'../src';`);
-  fs.writeFileSync(filePath, src, 'utf8');
+  let lines = src.split('\n');
+  let i = 0;
+  while (!lines[i++].startsWith('//')) {
+    // no-op
+  }
+  lines.splice(i, 0, ["\nimport 'jest';"]);
+  fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
 });
-
-// Commit changes (needed for jlpm jest-codemods)
-utils.run(
-  `git add test-${name}; git add ../packages/${name}; git commit -m "wip modernize ${name} tests"; true`
-);
 
 // Run jest-codemods to convert from chai to jest.
 console.debug('------------------------------------');
@@ -85,7 +86,7 @@ console.debug("Yes, and I'm not afraid of false positive transformations");
 console.debug('Yes, use the globals provided by Jest(recommended)');
 console.debug('.');
 console.debug('------------------------------------');
-utils.run('jlpm jest-codemods', { cwd: testSrc });
+utils.run('jlpm jest-codemods --force', { cwd: testSrc });
 
 // Move the test files to `/packages/{name}/test`
 utils.run(`git mv ${testSrc}/src ${pkgPath}/${name}/test`);
@@ -100,16 +101,11 @@ utils.run(
 );
 utils.run(`git add -f ${pkgPath}/${name}/.vscode/launch.json`);
 
+// Remove local folder
+utils.run(`git rm -rf ${testSrc} && rm -rf ${testSrc}`);
+
 // Run integrity
 const rootDir = path.resolve('..');
 utils.run(`jlpm integrity`, {
   cwd: rootDir
 });
-
-// Remove local folder
-utils.run(`git rm -rf ${testSrc}`);
-
-// Commit the changes
-utils.run(
-  `git add ${pkgPath}/${name} && git commit --no-verify -m "wip modernize ${name} tests`
-);

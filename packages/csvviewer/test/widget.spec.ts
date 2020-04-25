@@ -1,13 +1,12 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { UUID } from '@lumino/coreutils';
 
-import { ServiceManager } from '@jupyterlab/services';
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
-import { CSVViewer, GridSearchService } from '@jupyterlab/csvviewer';
+import { CSVViewer, GridSearchService } from '../src';
 
 import {
   Context,
@@ -18,7 +17,7 @@ import { JSONModel, DataGrid, CellRenderer } from '@lumino/datagrid';
 
 function createContext(): Context<DocumentRegistry.IModel> {
   const factory = new TextModelFactory();
-  const manager = new ServiceManager({ standby: 'never' });
+  const manager = new Mock.ServiceManagerMock();
   const path = UUID.uuid4() + '.csv';
   return new Context({ factory, manager, path });
 }
@@ -30,7 +29,7 @@ describe('csvviewer/widget', () => {
     describe('#constructor()', () => {
       it('should instantiate a `CSVViewer`', () => {
         const widget = new CSVViewer({ context });
-        expect(widget).to.be.an.instanceof(CSVViewer);
+        expect(widget).toBeInstanceOf(CSVViewer);
         widget.dispose();
       });
     });
@@ -38,24 +37,24 @@ describe('csvviewer/widget', () => {
     describe('#context', () => {
       it('should be the context for the file', () => {
         const widget = new CSVViewer({ context });
-        expect(widget.context).to.equal(context);
+        expect(widget.context).toBe(context);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
         const widget = new CSVViewer({ context });
-        expect(widget.isDisposed).to.equal(false);
+        expect(widget.isDisposed).toBe(false);
         widget.dispose();
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
 
       it('should be safe to call multiple times', () => {
         const widget = new CSVViewer({ context });
-        expect(widget.isDisposed).to.equal(false);
+        expect(widget.isDisposed).toBe(false);
         widget.dispose();
         widget.dispose();
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
     });
   });
@@ -111,14 +110,14 @@ describe('csvviewer/widget', () => {
       // (0,1) is the current match
       const query = /match/;
       searchService.find(query);
-      expect(fakeRenderCell(0, 1)).to.equal('currentMatch');
-      expect(fakeRenderCell(1, 1)).to.equal('anotherMatch');
-      expect(fakeRenderCell(0, 0)).to.equal('');
+      expect(fakeRenderCell(0, 1)).toBe('currentMatch');
+      expect(fakeRenderCell(1, 1)).toBe('anotherMatch');
+      expect(fakeRenderCell(0, 0)).toBe('');
 
       // search again, the current match "moves" to be (1,1)
       searchService.find(query);
-      expect(fakeRenderCell(0, 1)).to.equal('anotherMatch');
-      expect(fakeRenderCell(1, 1)).to.equal('currentMatch');
+      expect(fakeRenderCell(0, 1)).toBe('anotherMatch');
+      expect(fakeRenderCell(1, 1)).toBe('currentMatch');
     });
   });
 });

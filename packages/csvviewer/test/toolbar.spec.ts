@@ -1,13 +1,12 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { Widget } from '@lumino/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { CSVDelimiter } from '@jupyterlab/csvviewer';
+import { CSVDelimiter } from '../src';
 
 const DELIMITERS = [',', ';', '\t'];
 
@@ -16,15 +15,17 @@ describe('csvviewer/toolbar', () => {
     describe('#constructor()', () => {
       it('should instantiate a `CSVDelimiter` toolbar widget', () => {
         const widget = new CSVDelimiter({ selected: ',' });
-        expect(widget).to.be.an.instanceof(CSVDelimiter);
-        expect(Array.from(widget.node.classList)).to.contain('jp-CSVDelimiter');
+        expect(widget).toBeInstanceOf(CSVDelimiter);
+        expect(Array.from(widget.node.classList)).toEqual(
+          expect.arrayContaining(['jp-CSVDelimiter'])
+        );
         widget.dispose();
       });
 
       it('should allow pre-selecting the delimiter', () => {
         const wanted = DELIMITERS[DELIMITERS.length - 1];
         const widget = new CSVDelimiter({ selected: wanted });
-        expect(widget.selectNode.value).to.equal(wanted);
+        expect(widget.selectNode.value).toBe(wanted);
         widget.dispose();
       });
     });
@@ -41,7 +42,7 @@ describe('csvviewer/toolbar', () => {
         Widget.attach(widget, document.body);
         widget.selectNode.selectedIndex = index;
         simulate(widget.selectNode, 'change');
-        expect(delimiter).to.equal(wanted);
+        expect(delimiter).toBe(wanted);
         widget.dispose();
       });
     });
@@ -49,7 +50,7 @@ describe('csvviewer/toolbar', () => {
     describe('#selectNode', () => {
       it('should return the delimiter dropdown select tag', () => {
         const widget = new CSVDelimiter({ selected: ',' });
-        expect(widget.selectNode.tagName.toLowerCase()).to.equal('select');
+        expect(widget.selectNode.tagName.toLowerCase()).toBe('select');
         widget.dispose();
       });
     });
@@ -57,17 +58,17 @@ describe('csvviewer/toolbar', () => {
     describe('#dispose()', () => {
       it('should dispose of the resources held by the widget', () => {
         const widget = new CSVDelimiter({ selected: ',' });
-        expect(widget.isDisposed).to.equal(false);
+        expect(widget.isDisposed).toBe(false);
         widget.dispose();
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
 
       it('should be safe to call multiple times', () => {
         const widget = new CSVDelimiter({ selected: ',' });
-        expect(widget.isDisposed).to.equal(false);
+        expect(widget.isDisposed).toBe(false);
         widget.dispose();
         widget.dispose();
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
     });
   });
