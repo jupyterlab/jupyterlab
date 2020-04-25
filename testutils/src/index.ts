@@ -22,6 +22,8 @@ export { NBTestUtils } from './notebook-utils';
 
 export { defaultRenderMime } from './rendermime';
 
+export { JupyterServer } from './start_jupyter_server';
+
 /**
  * Test a single emission from a signal.
  *

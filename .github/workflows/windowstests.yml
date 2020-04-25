@@ -7,7 +7,7 @@ jobs:
     name: Windows
     strategy:
       matrix:
-        group: [javascript, python, integrity]
+        group: [python, integrity]
       fail-fast: false
     runs-on: windows-latest
     steps:

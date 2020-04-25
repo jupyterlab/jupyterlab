@@ -43,7 +43,8 @@ export async function startNew(
 
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
   // TODO: Validate model
@@ -64,7 +65,8 @@ export async function listRunning(
   const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
 
@@ -100,7 +102,8 @@ export async function shutdownTerminal(
       `The terminal session "${name}"" does not exist on the server`;
     console.warn(msg);
   } else if (response.status !== 204) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
 }
 

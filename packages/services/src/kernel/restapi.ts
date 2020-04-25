@@ -46,7 +46,8 @@ export async function listRunning(
   const url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
   validateModels(data);
@@ -76,7 +77,8 @@ export async function startNew(
   };
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
   validateModel(data);
@@ -110,7 +112,8 @@ export async function restartKernel(
 
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
   validateModel(data);
@@ -137,7 +140,8 @@ export async function interruptKernel(
   const init = { method: 'POST' };
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 204) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
 }
 
@@ -171,7 +175,8 @@ export async function shutdownKernel(
     const msg = `The kernel "${id}" does not exist on the server`;
     console.warn(msg);
   } else if (response.status !== 204) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
 }
 
@@ -197,7 +202,8 @@ export async function getKernelModel(
   if (response.status === 404) {
     return undefined;
   } else if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
   validateModel(data);

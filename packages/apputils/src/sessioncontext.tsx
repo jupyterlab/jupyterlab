@@ -852,9 +852,8 @@ export class SessionContext implements ISessionContext {
     let traceback = '';
     let message = '';
     try {
-      const json = await err.response.json();
-      traceback = json['traceback'];
-      message = json['message'];
+      traceback = err.traceback;
+      message = err.message;
     } catch (err) {
       // no-op
     }
