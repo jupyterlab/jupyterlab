@@ -28,7 +28,7 @@ pandoc $SOURCE/README.rst -f rst -t gfm -o $PKG_ROOT/README.md    #--resource-pa
 echo "built $PKG_ROOT/README.md"
 
 # make the dev docs for the monorepo's docs
-pandoc $SOURCE/ui_components.rst -f rst -t rst --wrap=preserve --shift-heading-level-by=1 -o $MONOREPO_DEVDOC/ui_components.rst
+pandoc $SOURCE/ui_components.rst -f rst -t rst --wrap=preserve -o $MONOREPO_DEVDOC/ui_components.rst
 echo "built $MONOREPO_DEVDOC/ui_components.rst"
 
 popd > /dev/null

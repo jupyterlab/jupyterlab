@@ -199,5 +199,127 @@ You can then `import` the contents of an svg file:
 ```typescript
 import fooSvgstr from 'path-to-your/foo.svg';
 
-export const fooIcon = new LabIcon({ name: 'barpkg:foo', svgstr: fooSvgstr });
+export const fooIcon = new LabIcon({
+  name: 'barpkg:foo',
+  svgstr: fooSvgstr
+});
 ```
+
+## Sync icon color to JupyterLab theme
+
+<em>Example svgs with class annotation can be found in <a href="https://github.com/jupyterlab/jupyterlab/tree/f0153e0258b32674c9aec106383ddf7b618cebab/packages/ui-components/style/icons">ui-components/style/icons</a></em>
+
+You can ensure that the colors of your custom `LabIcon` sync up to the
+colors of the current JuptyerLab theme by adding appropriate `class`
+annotations to each colored element of your icon's svg.
+
+In other words, each element of your svg that a `fill="..."` or a
+`stroke="..."` property should also have a `class="jp-icon<whatever>"`
+property.
+
+### Available icon classes
+
+<em>Icon-related CSS classes are defined in <a href="https://github.com/jupyterlab/jupyterlab/blob/f0153e0258b32674c9aec106383ddf7b618cebab/packages/ui-components/style/icons.css">ui-components/style/icons.css</a></em>
+
+All colors shown are for the standard light/dark theme, mouse over for
+hex values.
+
+#### `jp-iconX`: contrast to theme background
+
+<ul>
+<li>jp-icon0: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#111"/><title>#111</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#fff"/><title>#fff</title></svg></li>
+<li>jp-icon1: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#212121"/><title>#212121</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#fff"/><title>#fff</title></svg></li>
+<li>jp-icon2: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#424242"/><title>#424242</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#eee"/><title>#eee</title></svg></li>
+<li>jp-icon3: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#616161"/><title>#616161</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#bdbdbd"/><title>#bdbdbd</title></svg></li>
+<li>jp-icon4: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#757575"/><title>#757575</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#757575"/><title>#757575</title></svg></li>
+</ul>
+
+Most one-color icons in JupyterLab (including the sidebar and toolbar
+icons) are colored using the `jp-icon3` class.
+
+For light/dark themes, `jp-icon0` corresponds to the darkest/lighest
+background color, while `jp-icon1` is somewhat lighter/darker, and so
+forth.
+
+#### `jp-icon-accentX`: match to theme background
+
+<ul>
+<li>jp-icon-accent0: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#fff"/><title>#fff</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#111"/><title>#111</title></svg></li>
+<li>jp-icon-accent1: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#fff"/><title>#fff</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#212121"/><title>#212121</title></svg></li>
+<li>jp-icon-accent2: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#eee"/><title>#eee</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#424242"/><title>#424242</title></svg></li>
+<li>jp-icon-accent3: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#bdbdbd"/><title>#bdbdbd</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#616161"/><title>#616161bdbdbd</title></svg></li>
+<li>jp-icon-accent4: <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#757575"/><title>#757575</title></svg> / <svg width="16" viewBox="0 0 1 1"><rect width="1" height="1" fill="#757575"/><title>#757575</title></svg></li>
+</ul>
+
+For light/dark themes, `jp-icon-accent0` corresponds to the
+lighest/darkest background color, while `jp-icon-accent1` is somewhat
+darker/lighter, and so forth.
+
+### Adding classes to a one-color icon
+
+For most simple, one-color icons, it is desirable for the icon's color
+to strongly constrast with that of the application's background. You can
+acheive this using one of the `jp-iconX` classes.
+
+**Example: check icon**
+
+_svg source:_
+
+```html
+<svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 24 24">
+  <path
+    class="jp-icon3"
+    fill="#616161"
+    d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"
+  />
+</svg>
+```
+
+_rendered icon:_
+
+<svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 24 24">
+  <path class="jp-icon3" fill="#616161" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+</svg>
+
+### Adding classes to a multi-colored icon
+
+For more complex icons, each element that needs to match the background
+should be annotated with a `jp-icon-accentX` class, while each element
+that needs to contrast with the background should be annotated with a
+`jp-iconX` class.
+
+**Example: close-circle icon**
+
+_svg source:_
+
+```html
+<svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 24 24">
+  <circle class="jp-icon3" fill="#616161" cx="12" cy="12" r="11" />
+  <rect
+    class="jp-icon-accent0"
+    fill="#fff"
+    height="18"
+    width="2"
+    x="11"
+    y="3"
+    transform="rotate(315, 12, 12)"
+  />
+  <rect
+    class="jp-icon-accent0"
+    fill="#fff"
+    height="18"
+    width="2"
+    x="11"
+    y="3"
+    transform="rotate(45, 12, 12)"
+  />
+</svg>
+```
+
+_rendered icon:_
+
+<svg xmlns="http://www.w3.org/2000/svg" width="100" viewBox="0 0 24 24">
+  <circle class="jp-icon3" fill="#616161" cx="12" cy="12" r="11"/>
+  <rect class="jp-icon-accent0" fill="#fff" height="18" width="2" x="11" y="3" transform="rotate(315, 12, 12)"/>
+  <rect class="jp-icon-accent0" fill="#fff" height="18" width="2" x="11" y="3" transform="rotate(45, 12, 12)"/>
+</svg>
