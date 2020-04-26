@@ -387,12 +387,12 @@ export class ListModel extends VDomModel {
         if (!data || !data.jupyterlab || !data.jupyterlab.discovery) {
           return true;
         }
-        let discovery = data.jupyterlab.discovery;
-        let kernelCompanions: KernelCompanion[] = [];
+        const discovery = data.jupyterlab.discovery;
+        const kernelCompanions: KernelCompanion[] = [];
         if (discovery.kernel) {
           // match specs
-          for (let kernelInfo of discovery.kernel) {
-            let matches = Private.matchSpecs(
+          for (const kernelInfo of discovery.kernel) {
+            const matches = Private.matchSpecs(
               kernelInfo,
               this.serviceManager.kernelspecs.specs
             );
@@ -410,7 +410,7 @@ export class ListModel extends VDomModel {
    * Trigger a build check to incorporate actions taken.
    */
   triggerBuildCheck(): void {
-    let builder = this.serviceManager.builder;
+    const builder = this.serviceManager.builder;
     if (builder.isAvailable && !this.promptBuild) {
       const completed = builder.getStatus().then(response => {
         if (response.status === 'building') {
@@ -469,12 +469,12 @@ export class ListModel extends VDomModel {
   protected async translateSearchResult(
     res: Promise<ISearchResult>
   ): Promise<{ [key: string]: IEntry }> {
-    let entries: { [key: string]: IEntry } = {};
+    const entries: { [key: string]: IEntry } = {};
     this._totalBlacklistedFound = 0;
     this._totalWhitelistedFound = 0;
     this._totalEntries = 0;
-    for (let obj of (await res).objects) {
-      let pkg = obj.package;
+    for (const obj of (await res).objects) {
+      const pkg = obj.package;
       if (pkg.keywords.indexOf('deprecated') >= 0) {
         continue;
       }
@@ -518,7 +518,7 @@ export class ListModel extends VDomModel {
   ): Promise<{ [key: string]: IEntry }> {
     const promises = [];
     const entries: { [key: string]: IEntry } = {};
-    for (let pkg of await res) {
+    for (const pkg of await res) {
       promises.push(
         res.then(info => {
           entries[pkg.name] = {
@@ -599,12 +599,12 @@ export class ListModel extends VDomModel {
     }
 
     // Start the search without waiting for it:
-    let search = this.searcher.searchExtensions(
+    const search = this.searcher.searchExtensions(
       this.query,
       this.page,
       this.pagination
     );
-    let searchMapPromise = this.translateSearchResult(search);
+    const searchMapPromise = this.translateSearchResult(search);
 
     let searchMap: { [key: string]: IEntry };
     try {
@@ -659,14 +659,14 @@ export class ListModel extends VDomModel {
     const installedMap = await installedMapPromise;
 
     // Map results to attributes:
-    let installed: IEntry[] = [];
-    for (let key of Object.keys(installedMap)) {
+    const installed: IEntry[] = [];
+    for (const key of Object.keys(installedMap)) {
       installed.push(installedMap[key]);
     }
     this._installed = installed.sort(Private.comparator);
 
-    let searchResult: IEntry[] = [];
-    for (let key of Object.keys(searchMap)) {
+    const searchResult: IEntry[] = [];
+    for (const key of Object.keys(searchMap)) {
       // Filter out installed entries from search results:
       if (installedMap[key] === undefined) {
         searchResult.push(searchMap[key]);
@@ -694,7 +694,7 @@ export class ListModel extends VDomModel {
       EXTENSION_API_PATH,
       this.serverConnectionSettings.baseUrl
     );
-    let request: RequestInit = {
+    const request: RequestInit = {
       method: 'POST',
       body: JSON.stringify({
         cmd: action,
@@ -851,8 +851,8 @@ namespace Private {
       return 0;
     }
 
-    let testA = isJupyterOrg(a.name);
-    let testB = isJupyterOrg(b.name);
+    const testA = isJupyterOrg(a.name);
+    const testB = isJupyterOrg(b.name);
 
     if (testA === testB) {
       // Retain sort-order from API
@@ -877,7 +877,7 @@ namespace Private {
     if (!specs) {
       return [];
     }
-    let matches: KernelSpec.ISpecModel[] = [];
+    const matches: KernelSpec.ISpecModel[] = [];
     let reLang: RegExp | null = null;
     let reName: RegExp | null = null;
     if (kernelInfo.kernel_spec.language) {
@@ -886,8 +886,8 @@ namespace Private {
     if (kernelInfo.kernel_spec.display_name) {
       reName = new RegExp(kernelInfo.kernel_spec.display_name);
     }
-    for (let key of Object.keys(specs.kernelspecs)) {
-      let spec = specs.kernelspecs[key]!;
+    for (const key of Object.keys(specs.kernelspecs)) {
+      const spec = specs.kernelspecs[key]!;
       let match = false;
       if (reLang) {
         match = reLang.test(spec.language);

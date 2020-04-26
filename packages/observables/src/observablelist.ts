@@ -404,12 +404,12 @@ export class ObservableList<T> implements IObservableList<T> {
    * An `index` which is non-integral or out of range.
    */
   set(index: number, value: T): void {
-    let oldValue = this._array[index];
+    const oldValue = this._array[index];
     if (value === undefined) {
       throw new Error('Cannot set an undefined item');
     }
     // Bail if the value does not change.
-    let itemCmp = this._itemCmp;
+    const itemCmp = this._itemCmp;
     if (itemCmp(oldValue, value)) {
       return;
     }
@@ -437,7 +437,7 @@ export class ObservableList<T> implements IObservableList<T> {
    * No changes.
    */
   push(value: T): number {
-    let num = this._array.push(value);
+    const num = this._array.push(value);
     this._changed.emit({
       type: 'add',
       oldIndex: -1,
@@ -493,8 +493,8 @@ export class ObservableList<T> implements IObservableList<T> {
    * Iterators pointing at the removed value and beyond are invalidated.
    */
   removeValue(value: T): number {
-    let itemCmp = this._itemCmp;
-    let index = ArrayExt.findFirstIndex(this._array, item => {
+    const itemCmp = this._itemCmp;
+    const index = ArrayExt.findFirstIndex(this._array, item => {
       return itemCmp(item, value);
     });
     this.remove(index);
@@ -519,7 +519,7 @@ export class ObservableList<T> implements IObservableList<T> {
    * An `index` which is non-integral.
    */
   remove(index: number): T | undefined {
-    let value = ArrayExt.removeAt(this._array, index);
+    const value = ArrayExt.removeAt(this._array, index);
     if (value === undefined) {
       return;
     }
@@ -543,7 +543,7 @@ export class ObservableList<T> implements IObservableList<T> {
    * All current iterators are invalidated.
    */
   clear(): void {
-    let copy = this._array.slice();
+    const copy = this._array.slice();
     this._array.length = 0;
     this._changed.emit({
       type: 'remove',
@@ -575,7 +575,7 @@ export class ObservableList<T> implements IObservableList<T> {
     if (this.length <= 1 || fromIndex === toIndex) {
       return;
     }
-    let values = [this._array[fromIndex]];
+    const values = [this._array[fromIndex]];
     ArrayExt.move(this._array, fromIndex, toIndex);
     this._changed.emit({
       type: 'move',
@@ -600,7 +600,7 @@ export class ObservableList<T> implements IObservableList<T> {
    * No changes.
    */
   pushAll(values: IterableOrArrayLike<T>): number {
-    let newIndex = this.length;
+    const newIndex = this.length;
     each(values, value => {
       this._array.push(value);
     });
@@ -634,7 +634,7 @@ export class ObservableList<T> implements IObservableList<T> {
    * An `index` which is non-integral.
    */
   insertAll(index: number, values: IterableOrArrayLike<T>): void {
-    let newIndex = index;
+    const newIndex = index;
     each(values, value => {
       ArrayExt.insert(this._array, index++, value);
     });
@@ -666,7 +666,7 @@ export class ObservableList<T> implements IObservableList<T> {
    * A `startIndex` or `endIndex` which is non-integral.
    */
   removeRange(startIndex: number, endIndex: number): number {
-    let oldValues = this._array.slice(startIndex, endIndex);
+    const oldValues = this._array.slice(startIndex, endIndex);
     for (let i = startIndex; i < endIndex; i++) {
       ArrayExt.removeAt(this._array, startIndex);
     }

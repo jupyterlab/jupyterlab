@@ -63,7 +63,7 @@ function activate(
       launcher.title.icon = launcherIcon;
       launcher.title.label = 'Launcher';
 
-      let main = new MainAreaWidget({ content: launcher });
+      const main = new MainAreaWidget({ content: launcher });
 
       // If there are any other widgets open, remove the launcher close icon.
       main.title.closable = !!toArray(labShell.widgets('main')).length;

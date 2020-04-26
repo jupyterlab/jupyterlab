@@ -122,7 +122,13 @@ describe('Logger', () => {
   });
 
   describe('#level', () => {
-    let levels: LogLevel[] = ['critical', 'error', 'warning', 'info', 'debug'];
+    const levels: LogLevel[] = [
+      'critical',
+      'error',
+      'warning',
+      'info',
+      'debug'
+    ];
     it('should default to "warning"', () => {
       expect(logger.level).toEqual('warning');
     });
@@ -172,7 +178,7 @@ describe('Logger', () => {
 
     it('setting to its current value has no effect', () => {
       const s = new SignalLogger(logger.stateChanged);
-      logger.level = logger.level;
+      logger.level = logger.level; // eslint-disable-line
       expect(s.args.length).toBe(0);
       expect(logger.length).toBe(0);
       s.dispose();
@@ -226,7 +232,7 @@ describe('Logger', () => {
     it('setting to current value has no effect', () => {
       logger.rendermime = new RenderMimeRegistry();
       const s = new SignalLogger(logger.stateChanged);
-      logger.rendermime = logger.rendermime;
+      logger.rendermime = logger.rendermime; // eslint-disable-line
       expect(s.args).toEqual([]);
       s.dispose();
     });

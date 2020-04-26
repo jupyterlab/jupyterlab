@@ -1,0 +1,400 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import 'jest';
+
+import { Message, MessageLoop } from '@lumino/messaging';
+
+import { Widget } from '@lumino/widgets';
+
+import { SessionContext } from '@jupyterlab/apputils';
+
+import { CodeConsole } from '../src';
+
+import {
+  CodeCell,
+  CodeCellModel,
+  RawCellModel,
+  RawCell
+} from '@jupyterlab/cells';
+
+import { createSessionContext, NBTestUtils } from '@jupyterlab/testutils';
+
+import {
+  createConsoleFactory,
+  rendermime,
+  mimeTypeService,
+  editorFactory
+} from './utils';
+
+class TestConsole extends CodeConsole {
+  methods: string[] = [];
+
+  protected newPromptCell(): void {
+    this.methods.push('newPromptCell');
+    super.newPromptCell();
+  }
+
+  protected onActivateRequest(msg: Message): void {
+    this.methods.push('onActivateRequest');
+    super.onActivateRequest(msg);
+  }
+
+  protected onAfterAttach(msg: Message): void {
+    this.methods.push('onAfterAttach');
+    super.onAfterAttach(msg);
+  }
+
+  protected onUpdateRequest(msg: Message): void {
+    this.methods.push('onUpdateRequest');
+    super.onUpdateRequest(msg);
+  }
+}
+
+const contentFactory = createConsoleFactory();
+
+describe('console/widget', () => {
+  describe('CodeConsole', () => {
+    let widget: TestConsole;
+
+    beforeEach(async () => {
+      const sessionContext = await createSessionContext();
+      widget = new TestConsole({
+        contentFactory,
+        rendermime,
+        sessionContext,
+        mimeTypeService
+      });
+    });
+
+    afterEach(async () => {
+      await widget.sessionContext.shutdown();
+      widget.sessionContext.dispose();
+      widget.dispose();
+    });
+
+    describe('#constructor()', () => {
+      it('should create a new console content widget', () => {
+        Widget.attach(widget, document.body);
+        expect(widget).toBeInstanceOf(CodeConsole);
+        expect(Array.from(widget.node.classList)).toEqual(
+          expect.arrayContaining(['jp-CodeConsole'])
+        );
+      });
+    });
+
+    describe('#cells', () => {
+      it('should exist upon instantiation', () => {
+        expect(widget.cells).toBeTruthy();
+      });
+
+      it('should reflect the contents of the widget', async () => {
+        const force = true;
+        Widget.attach(widget, document.body);
+        await (widget.sessionContext as SessionContext).initialize();
+        await widget.execute(force);
+        expect(widget.cells.length).toBe(1);
+        widget.clear();
+        expect(widget.cells.length).toBe(0);
+      });
+    });
+
+    describe('#executed', () => {
+      it('should emit a date upon execution', async () => {
+        let called: Date | null = null;
+        const force = true;
+        Widget.attach(widget, document.body);
+        widget.executed.connect((sender, time) => {
+          called = time;
+        });
+        await (widget.sessionContext as SessionContext).initialize();
+        await widget.execute(force);
+        expect(called).toBeInstanceOf(Date);
+      });
+    });
+
+    describe('#promptCell', () => {
+      it('should be a code cell widget', () => {
+        Widget.attach(widget, document.body);
+        expect(widget.promptCell).toBeInstanceOf(CodeCell);
+      });
+
+      it('should be replaced after execution', async () => {
+        const force = true;
+        Widget.attach(widget, document.body);
+
+        const old = widget.promptCell;
+        expect(old).toBeInstanceOf(CodeCell);
+
+        await (widget.sessionContext as SessionContext).initialize();
+        await widget.execute(force);
+        expect(widget.promptCell).toBeInstanceOf(CodeCell);
+        expect(widget.promptCell).not.toBe(old);
+      });
+    });
+
+    describe('#session', () => {
+      it('should be a client session object', () => {
+        expect(widget.sessionContext.sessionChanged).toBeTruthy();
+      });
+    });
+
+    describe('#contentFactory', () => {
+      it('should be the content factory used by the widget', () => {
+        expect(widget.contentFactory).toBeInstanceOf(
+          CodeConsole.ContentFactory
+        );
+      });
+    });
+
+    describe('#addCell()', () => {
+      it('should add a code cell to the content widget', () => {
+        const contentFactory = NBTestUtils.createCodeCellFactory();
+        const model = new CodeCellModel({});
+        const cell = new CodeCell({
+          model,
+          contentFactory,
+          rendermime
+        }).initializeState();
+        Widget.attach(widget, document.body);
+        expect(widget.cells.length).toBe(0);
+        widget.addCell(cell);
+        expect(widget.cells.length).toBe(1);
+      });
+    });
+
+    describe('#clear()', () => {
+      it('should clear all of the content cells except the banner', async () => {
+        const force = true;
+        Widget.attach(widget, document.body);
+        await (widget.sessionContext as SessionContext).initialize();
+        await widget.execute(force);
+        expect(widget.cells.length).toBeGreaterThan(0);
+        widget.clear();
+        expect(widget.cells.length).toBe(0);
+        expect(widget.promptCell!.model.value.text).toBe('');
+      });
+    });
+
+    describe('#dispose()', () => {
+      it('should dispose the content widget', () => {
+        Widget.attach(widget, document.body);
+        expect(widget.isDisposed).toBe(false);
+        widget.dispose();
+        expect(widget.isDisposed).toBe(true);
+      });
+
+      it('should be safe to dispose multiple times', () => {
+        Widget.attach(widget, document.body);
+        expect(widget.isDisposed).toBe(false);
+        widget.dispose();
+        widget.dispose();
+        expect(widget.isDisposed).toBe(true);
+      });
+    });
+
+    describe('#execute()', () => {
+      it('should execute contents of the prompt if forced', async () => {
+        const force = true;
+        Widget.attach(widget, document.body);
+        expect(widget.cells.length).toBe(0);
+        await (widget.sessionContext as SessionContext).initialize();
+        await widget.execute(force);
+        expect(widget.cells.length).toBeGreaterThan(0);
+      });
+
+      it('should check if code is multiline and allow amending', async () => {
+        const force = false;
+        const timeout = 9000;
+        Widget.attach(widget, document.body);
+        widget.promptCell!.model.value.text = 'for x in range(5):';
+        expect(widget.cells.length).toBe(0);
+        const session = widget.sessionContext as SessionContext;
+        session.kernelPreference = { name: 'ipython' };
+        await session.initialize();
+        await widget.execute(force, timeout);
+        expect(widget.cells.length).toBe(0);
+      });
+    });
+
+    describe('#inject()', () => {
+      it('should add a code cell and execute it', async () => {
+        const code = 'print("#inject()")';
+        Widget.attach(widget, document.body);
+        expect(widget.cells.length).toBe(0);
+        await widget.inject(code);
+        expect(widget.cells.length).toBeGreaterThan(0);
+      });
+    });
+
+    describe('#insertLinebreak()', () => {
+      it('should insert a line break into the prompt', () => {
+        Widget.attach(widget, document.body);
+
+        const model = widget.promptCell!.model;
+        expect(model.value.text).toHaveLength(0);
+        widget.insertLinebreak();
+        expect(model.value.text).toBe('\n');
+      });
+    });
+
+    describe('#serialize()', () => {
+      it('should serialize the contents of a console', () => {
+        Widget.attach(widget, document.body);
+        widget.promptCell!.model.value.text = 'foo';
+
+        const serialized = widget.serialize();
+        expect(serialized).toHaveLength(1);
+        expect(serialized[0].source).toBe('foo');
+      });
+    });
+
+    describe('#newPromptCell()', () => {
+      it('should be called after attach, creating a prompt', () => {
+        expect(widget.promptCell).toBeFalsy();
+        expect(widget.methods).toEqual(
+          expect.not.arrayContaining(['newPromptCell'])
+        );
+        Widget.attach(widget, document.body);
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['newPromptCell'])
+        );
+        expect(widget.promptCell).toBeTruthy();
+      });
+
+      it('should be called after execution, creating a prompt', async () => {
+        expect(widget.promptCell).toBeFalsy();
+        expect(widget.methods).toEqual(
+          expect.not.arrayContaining(['newPromptCell'])
+        );
+        Widget.attach(widget, document.body);
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['newPromptCell'])
+        );
+
+        const old = widget.promptCell;
+        const force = true;
+        expect(old).toBeInstanceOf(CodeCell);
+        widget.methods = [];
+
+        await (widget.sessionContext as SessionContext).initialize();
+        await widget.execute(force);
+
+        expect(widget.promptCell).toBeInstanceOf(CodeCell);
+        expect(widget.promptCell).not.toBe(old);
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['newPromptCell'])
+        );
+      });
+    });
+
+    describe('#onActivateRequest()', () => {
+      it('should focus the prompt editor', () => {
+        expect(widget.promptCell).toBeFalsy();
+        expect(widget.methods).toEqual(
+          expect.not.arrayContaining(['onActivateRequest'])
+        );
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['onActivateRequest'])
+        );
+        expect(widget.promptCell!.editor.hasFocus()).toBe(true);
+      });
+    });
+
+    describe('#onAfterAttach()', () => {
+      it('should be called after attach, creating a prompt', () => {
+        expect(widget.promptCell).toBeFalsy();
+        expect(widget.methods).toEqual(
+          expect.not.arrayContaining(['onAfterAttach'])
+        );
+        Widget.attach(widget, document.body);
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['onAfterAttach'])
+        );
+        expect(widget.promptCell).toBeTruthy();
+      });
+    });
+
+    describe('.ContentFactory', () => {
+      describe('#constructor', () => {
+        it('should create a new ContentFactory', () => {
+          const factory = new CodeConsole.ContentFactory({ editorFactory });
+          expect(factory).toBeInstanceOf(CodeConsole.ContentFactory);
+        });
+      });
+
+      describe('#createCodeCell', () => {
+        it('should create a code cell', () => {
+          const model = new CodeCellModel({});
+          const prompt = contentFactory.createCodeCell({
+            rendermime: widget.rendermime,
+            model,
+            contentFactory
+          });
+          expect(prompt).toBeInstanceOf(CodeCell);
+        });
+      });
+
+      describe('#createRawCell', () => {
+        it('should create a foreign cell', () => {
+          const model = new RawCellModel({});
+          const prompt = contentFactory.createRawCell({
+            model,
+            contentFactory
+          });
+          expect(prompt).toBeInstanceOf(RawCell);
+        });
+      });
+    });
+
+    describe('.ModelFactory', () => {
+      describe('#constructor()', () => {
+        it('should create a new model factory', () => {
+          const factory = new CodeConsole.ModelFactory({});
+          expect(factory).toBeInstanceOf(CodeConsole.ModelFactory);
+        });
+
+        it('should accept a codeCellContentFactory', () => {
+          const codeCellContentFactory = new CodeCellModel.ContentFactory();
+          const factory = new CodeConsole.ModelFactory({
+            codeCellContentFactory
+          });
+          expect(factory.codeCellContentFactory).toBe(codeCellContentFactory);
+        });
+      });
+
+      describe('#codeCellContentFactory', () => {
+        it('should be the code cell content factory used by the factory', () => {
+          const factory = new CodeConsole.ModelFactory({});
+          expect(factory.codeCellContentFactory).toBe(
+            CodeCellModel.defaultContentFactory
+          );
+        });
+      });
+
+      describe('#createCodeCell()', () => {
+        it('should create a code cell', () => {
+          const factory = new CodeConsole.ModelFactory({});
+          expect(factory.createCodeCell({})).toBeInstanceOf(CodeCellModel);
+        });
+      });
+
+      describe('#createRawCell()', () => {
+        it('should create a raw cell model', () => {
+          const factory = new CodeConsole.ModelFactory({});
+          expect(factory.createRawCell({})).toBeInstanceOf(RawCellModel);
+        });
+      });
+    });
+
+    describe('.defaultModelFactory', () => {
+      it('should be a ModelFactory', () => {
+        expect(CodeConsole.defaultModelFactory).toBeInstanceOf(
+          CodeConsole.ModelFactory
+        );
+      });
+    });
+  });
+});

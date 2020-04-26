@@ -1,14 +1,14 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-var data = require('./package.json');
-var Build = require('@jupyterlab/buildutils').Build;
+const data = require('./package.json');
+const Build = require('@jupyterlab/buildutils').Build;
 
-var names = Object.keys(data.dependencies).filter(function(name) {
-  var packageData = require(name + '/package.json');
+const names = Object.keys(data.dependencies).filter(function(name) {
+  const packageData = require(name + '/package.json');
   return packageData.jupyterlab !== undefined;
 });
 
-var extras = Build.ensureAssets({
+const extras = Build.ensureAssets({
   packageNames: names,
   output: './build'
 });

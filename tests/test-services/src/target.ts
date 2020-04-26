@@ -1,11 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-declare var define: any;
+declare let define: any;
 
 if (typeof define !== 'function') {
   // @ts-ignore
-  const define = require('amdefine')(module); // tslint:disable-line
+  const define = require('amdefine')(module); // eslint-disable-line
 }
 
 module.exports = {

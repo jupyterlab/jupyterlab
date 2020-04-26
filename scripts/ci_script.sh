@@ -25,8 +25,15 @@ if [[ $GROUP == js* ]]; then
         # extract the group name
         export PKG="${GROUP#*-}"
         jlpm run build:packages:scope --scope "@jupyterlab/$PKG"
-        jlpm run build:test:scope --scope "@jupyterlab/test-$PKG"
-        FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope "@jupyterlab/test-$PKG"
+        here=$(pwd)
+        if [[ -d "${here}/tests/test-${GROUP}" ]];then
+            scope="@jupyterlab/test-${PKG}"
+        else
+            scope="@jupyterlab/${PKG}"
+            jlpm run build:testutils
+        fi
+        jlpm run build:test:scope --scope ${scope}
+        FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope ${scope}
     else
         jlpm build:packages
         jlpm build:test
@@ -47,13 +54,6 @@ fi
 
 
 if [[ $GROUP == docs ]]; then
-    # Run the link check - allow for a link to fail once (--lf means only run last failed)
-    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
-
-    # Build the docs
-    jlpm build:packages
-    jlpm docs
-
     # Verify tutorial docs build
     pushd docs
     pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
@@ -62,10 +62,26 @@ if [[ $GROUP == docs ]]; then
     # Remove internal sphinx files and use pytest-check-links on the generated html
     rm build/html/genindex.html
     rm build/html/search.html
-    # FIXME: re-enable pending https://github.com/minrk/pytest-check-links/pull/7
-    #py.test --check-links -k .html build/html || py.test --check-links -k .html --lf build/html
+
+    # Changelog has a lot of links and is covered in a separate job.
+    changelog=./docs/source/getting_started/changelog.rst
+    py.test --check-links -k .html --deselect $changelog build/html || py.test --check-links -k .html --deselect $changelog --lf build/html
 
     popd
+fi
+
+
+if [[ $GROUP == docs2 ]]; then
+    # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
+    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+
+    # Build the API docs
+    jlpm build:packages
+    jlpm docs
+
+    # Run the link check on the changelog - allow for a link to fail once (--lf means only run last failed)
+    changelog=./docs/source/getting_started/changelog.rst
+    py.test --check-links $changlog || py.test --check-links --lf $changelog
 fi
 
 
@@ -78,7 +94,10 @@ if [[ $GROUP == integrity ]]; then
 
     # Lint our files.
     jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
+fi
 
+
+if [[ $GROUP == integrity2 ]]; then
     # Build the packages individually.
     jlpm run build:src
 

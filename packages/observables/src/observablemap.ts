@@ -150,7 +150,7 @@ export class ObservableMap<T> implements IObservableMap<T> {
   constructor(options: ObservableMap.IOptions<T> = {}) {
     this._itemCmp = options.itemCmp || Private.itemCmp;
     if (options.values) {
-      for (let key in options.values) {
+      for (const key in options.values) {
         this._map.set(key, options.values[key]);
       }
     }
@@ -200,12 +200,12 @@ export class ObservableMap<T> implements IObservableMap<T> {
    * This is a no-op if the value does not change.
    */
   set(key: string, value: T): T | undefined {
-    let oldVal = this._map.get(key);
+    const oldVal = this._map.get(key);
     if (value === undefined) {
       throw Error('Cannot set an undefined value, use remove');
     }
     // Bail if the value does not change.
-    let itemCmp = this._itemCmp;
+    const itemCmp = this._itemCmp;
     if (oldVal !== undefined && itemCmp(oldVal, value)) {
       return oldVal;
     }
@@ -247,7 +247,7 @@ export class ObservableMap<T> implements IObservableMap<T> {
    * @returns - a list of keys.
    */
   keys(): string[] {
-    let keyList: string[] = [];
+    const keyList: string[] = [];
     this._map.forEach((v: T, k: string) => {
       keyList.push(k);
     });
@@ -260,7 +260,7 @@ export class ObservableMap<T> implements IObservableMap<T> {
    * @returns - a list of values.
    */
   values(): T[] {
-    let valList: T[] = [];
+    const valList: T[] = [];
     this._map.forEach((v: T, k: string) => {
       valList.push(v);
     });
@@ -279,8 +279,8 @@ export class ObservableMap<T> implements IObservableMap<T> {
    * This is a no-op if the value does not change.
    */
   delete(key: string): T | undefined {
-    let oldVal = this._map.get(key);
-    let removed = this._map.delete(key);
+    const oldVal = this._map.get(key);
+    const removed = this._map.delete(key);
     if (removed) {
       this._changed.emit({
         type: 'remove',
@@ -297,7 +297,7 @@ export class ObservableMap<T> implements IObservableMap<T> {
    */
   clear(): void {
     // Delete one by one to emit the correct signals.
-    let keyList = this.keys();
+    const keyList = this.keys();
     for (let i = 0; i < keyList.length; i++) {
       this.delete(keyList[i]);
     }

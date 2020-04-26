@@ -173,7 +173,7 @@ export class RestorablePool<
    */
   find(fn: (obj: T) => boolean): T | undefined {
     const values = this._objects.values();
-    for (let value of values) {
+    for (const value of values) {
       if (fn(value)) {
         return value;
       }

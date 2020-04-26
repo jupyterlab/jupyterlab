@@ -66,13 +66,13 @@ class LogWidget extends CodeEditorWrapper {
 
 describe('CodeEditorWrapper', () => {
   let widget: LogWidget;
-  let editorFactory = (options: CodeEditor.IOptions) => {
+  const editorFactory = (options: CodeEditor.IOptions) => {
     options.uuid = 'foo';
     return new LogEditor(options);
   };
 
   beforeEach(() => {
-    let model = new CodeEditor.Model();
+    const model = new CodeEditor.Model();
     widget = new LogWidget({ factory: editorFactory, model });
   });
 
@@ -88,7 +88,7 @@ describe('CodeEditorWrapper', () => {
     it('should add a focus listener', () => {
       widget.node.tabIndex = -1;
       simulate(widget.node, 'focus');
-      let editor = widget.editor as LogEditor;
+      const editor = widget.editor as LogEditor;
       expect(editor.events).to.contain('focus');
     });
   });
@@ -109,7 +109,7 @@ describe('CodeEditorWrapper', () => {
     });
 
     it('should remove the focus listener', () => {
-      let editor = widget.editor as LogEditor;
+      const editor = widget.editor as LogEditor;
       expect(editor.isDisposed).to.be.false;
       widget.dispose();
       expect(editor.isDisposed).to.be.true;
@@ -124,7 +124,7 @@ describe('CodeEditorWrapper', () => {
     describe('focus', () => {
       it('should be a no-op if the editor was not resized', () => {
         Widget.attach(widget, document.body);
-        let editor = widget.editor as LogEditor;
+        const editor = widget.editor as LogEditor;
         editor.methods = [];
         simulate(editor.editor.getInputField(), 'focus');
         expect(editor.methods).to.eql([]);
@@ -132,7 +132,7 @@ describe('CodeEditorWrapper', () => {
 
       it('should refresh if editor was resized', () => {
         Widget.attach(widget, document.body);
-        let editor = widget.editor as LogEditor;
+        const editor = widget.editor as LogEditor;
         MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
         editor.methods = [];
         simulate(editor.editor.getInputField(), 'focus');
@@ -153,7 +153,7 @@ describe('CodeEditorWrapper', () => {
   describe('#onAfterAttach()', () => {
     it('should refresh the editor', async () => {
       Widget.attach(widget, document.body);
-      let editor = widget.editor as LogEditor;
+      const editor = widget.editor as LogEditor;
       await framePromise();
       expect(editor.methods).to.contain('refresh');
     });
@@ -163,7 +163,7 @@ describe('CodeEditorWrapper', () => {
     it('should refresh the editor', async () => {
       widget.hide();
       Widget.attach(widget, document.body);
-      let editor = widget.editor as LogEditor;
+      const editor = widget.editor as LogEditor;
       expect(editor.methods).to.not.contain('refresh');
       widget.show();
       expect(widget.methods).to.contain('onAfterShow');
@@ -174,14 +174,14 @@ describe('CodeEditorWrapper', () => {
 
   describe('#onResize()', () => {
     it('should set the size of the editor', () => {
-      let msg = new Widget.ResizeMessage(10, 10);
-      let editor = widget.editor as LogEditor;
+      const msg = new Widget.ResizeMessage(10, 10);
+      const editor = widget.editor as LogEditor;
       MessageLoop.sendMessage(widget, msg);
       expect(editor.methods).to.contain('setSize');
     });
 
     it('should refresh the editor', () => {
-      let editor = widget.editor as LogEditor;
+      const editor = widget.editor as LogEditor;
       Widget.attach(widget, document.body);
       editor.focus();
       editor.methods = [];
@@ -190,7 +190,7 @@ describe('CodeEditorWrapper', () => {
     });
 
     it('should defer the refresh until focused', () => {
-      let editor = widget.editor as LogEditor;
+      const editor = widget.editor as LogEditor;
       Widget.attach(widget, document.body);
       editor.methods = [];
       MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);

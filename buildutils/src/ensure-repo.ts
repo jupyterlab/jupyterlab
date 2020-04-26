@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -22,13 +22,13 @@ import {
 type Dict<T> = { [key: string]: T };
 
 // Data to ignore.
-let MISSING: Dict<string[]> = {
+const MISSING: Dict<string[]> = {
   '@jupyterlab/buildutils': ['path'],
   '@jupyterlab/testutils': ['fs'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
-let UNUSED: Dict<string[]> = {
+const UNUSED: Dict<string[]> = {
   '@jupyterlab/apputils': ['@types/react'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
@@ -44,9 +44,9 @@ let UNUSED: Dict<string[]> = {
 };
 
 // Packages that are allowed to have differing versions
-let DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
+const DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
 
-let SKIP_CSS: Dict<string[]> = {
+const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
   '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
@@ -79,11 +79,11 @@ let SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/ui-extension': ['@blueprintjs/icons']
 };
 
-let pkgData: Dict<any> = {};
-let pkgPaths: Dict<string> = {};
-let pkgNames: Dict<string> = {};
-let depCache: Dict<string> = {};
-let locals: Dict<string> = {};
+const pkgData: Dict<any> = {};
+const pkgPaths: Dict<string> = {};
+const pkgNames: Dict<string> = {};
+const depCache: Dict<string> = {};
+const locals: Dict<string> = {};
 
 /**
  * Ensure the metapackage package.
@@ -91,23 +91,23 @@ let locals: Dict<string> = {};
  * @returns An array of messages for changes.
  */
 function ensureMetaPackage(): string[] {
-  let basePath = path.resolve('.');
-  let mpPath = path.join(basePath, 'packages', 'metapackage');
-  let mpJson = path.join(mpPath, 'package.json');
-  let mpData = utils.readJSONFile(mpJson);
-  let messages: string[] = [];
-  let seen: Dict<boolean> = {};
+  const basePath = path.resolve('.');
+  const mpPath = path.join(basePath, 'packages', 'metapackage');
+  const mpJson = path.join(mpPath, 'package.json');
+  const mpData = utils.readJSONFile(mpJson);
+  const messages: string[] = [];
+  const seen: Dict<boolean> = {};
 
   utils.getCorePaths().forEach(pkgPath => {
     if (path.resolve(pkgPath) === path.resolve(mpPath)) {
       return;
     }
-    let name = pkgNames[pkgPath];
+    const name = pkgNames[pkgPath];
     if (!name) {
       return;
     }
     seen[name] = true;
-    let data = pkgData[name];
+    const data = pkgData[name];
     let valid = true;
 
     // Ensure it is a dependency.
@@ -144,9 +144,9 @@ function ensureMetaPackage(): string[] {
  * Ensure the jupyterlab application package.
  */
 function ensureJupyterlab(): string[] {
-  let basePath = path.resolve('.');
-  let corePath = path.join(basePath, 'dev_mode', 'package.json');
-  let corePackage = utils.readJSONFile(corePath);
+  const basePath = path.resolve('.');
+  const corePath = path.join(basePath, 'dev_mode', 'package.json');
+  const corePackage = utils.readJSONFile(corePath);
 
   corePackage.jupyterlab.extensions = {};
   corePackage.jupyterlab.mimeExtensions = {};
@@ -154,11 +154,11 @@ function ensureJupyterlab(): string[] {
   corePackage.dependencies = {};
   corePackage.resolutions = {};
 
-  let singletonPackages: string[] = corePackage.jupyterlab.singletonPackages;
+  const singletonPackages: string[] = corePackage.jupyterlab.singletonPackages;
   const coreData = new Map<string, any>();
 
   utils.getCorePaths().forEach(pkgPath => {
-    let dataPath = path.join(pkgPath, 'package.json');
+    const dataPath = path.join(pkgPath, 'package.json');
     let data: any;
     try {
       data = utils.readJSONFile(dataPath);
@@ -191,7 +191,7 @@ function ensureJupyterlab(): string[] {
   });
 
   // At this point, each singleton should have a resolution. Check this.
-  let unresolvedSingletons = singletonPackages.filter(
+  const unresolvedSingletons = singletonPackages.filter(
     pkg => !(pkg in corePackage.resolutions)
   );
   if (unresolvedSingletons.length > 0) {
@@ -231,7 +231,7 @@ function ensureJupyterlab(): string[] {
   });
 
   utils.getLernaPaths().forEach(pkgPath => {
-    let dataPath = path.join(pkgPath, 'package.json');
+    const dataPath = path.join(pkgPath, 'package.json');
     let data: any;
     try {
       data = utils.readJSONFile(dataPath);
@@ -240,7 +240,7 @@ function ensureJupyterlab(): string[] {
     }
 
     // watch all src, build, and test files in the Jupyterlab project
-    let relativePath = utils.ensureUnixPathSep(
+    const relativePath = utils.ensureUnixPathSep(
       path.join('..', path.relative(basePath, pkgPath))
     );
     corePackage.jupyterlab.linkedPackages[data.name] = relativePath;
@@ -257,10 +257,10 @@ function ensureJupyterlab(): string[] {
  * Ensure the repo integrity.
  */
 export async function ensureIntegrity(): Promise<boolean> {
-  let messages: Dict<string[]> = {};
+  const messages: Dict<string[]> = {};
 
   // Pick up all the package versions.
-  let paths = utils.getLernaPaths();
+  const paths = utils.getLernaPaths();
 
   // These two are not part of the workspaces but should be kept
   // in sync.
@@ -328,7 +328,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   // Update the metapackage.
   let pkgMessages = ensureMetaPackage();
   if (pkgMessages.length > 0) {
-    let pkgName = '@jupyterlab/metapackage';
+    const pkgName = '@jupyterlab/metapackage';
     if (!messages[pkgName]) {
       messages[pkgName] = [];
     }
@@ -336,18 +336,18 @@ export async function ensureIntegrity(): Promise<boolean> {
   }
 
   // Validate each package.
-  for (let name in locals) {
+  for (const name in locals) {
     // application-top is handled elsewhere
     if (name === '@jupyterlab/application-top') {
       continue;
     }
-    let unused = UNUSED[name] || [];
+    const unused = UNUSED[name] || [];
     // Allow jest-junit to be unused in the test suite.
     if (name.indexOf('@jupyterlab/test-') === 0) {
       unused.push('jest-junit');
     }
 
-    let options: IEnsurePackageOptions = {
+    const options: IEnsurePackageOptions = {
       pkgPath: pkgPaths[name],
       data: pkgData[name],
       depCache,
@@ -362,7 +362,7 @@ export async function ensureIntegrity(): Promise<boolean> {
       options.noUnused = false;
     }
 
-    let pkgMessages = await ensurePackage(options);
+    const pkgMessages = await ensurePackage(options);
     if (pkgMessages.length > 0) {
       messages[name] = pkgMessages;
     }
@@ -371,7 +371,7 @@ export async function ensureIntegrity(): Promise<boolean> {
   // ensure the icon svg imports
   pkgMessages = await ensureUiComponents(pkgPaths['@jupyterlab/ui-components']);
   if (pkgMessages.length > 0) {
-    let pkgName = '@jupyterlab/ui-components';
+    const pkgName = '@jupyterlab/ui-components';
     if (!messages[pkgName]) {
       messages[pkgName] = [];
     }
@@ -379,8 +379,8 @@ export async function ensureIntegrity(): Promise<boolean> {
   }
 
   // Handle the top level package.
-  let corePath = path.resolve('.', 'package.json');
-  let coreData: any = utils.readJSONFile(corePath);
+  const corePath = path.resolve('.', 'package.json');
+  const coreData: any = utils.readJSONFile(corePath);
   if (utils.writePackageData(corePath, coreData)) {
     messages['top'] = ['Update package.json'];
   }
@@ -393,21 +393,21 @@ export async function ensureIntegrity(): Promise<boolean> {
 
   // Handle any messages.
   if (Object.keys(messages).length > 0) {
-    console.log(JSON.stringify(messages, null, 2));
+    console.debug(JSON.stringify(messages, null, 2));
     if (process.argv.indexOf('--force') !== -1) {
-      console.log(
+      console.debug(
         '\n\nPlease run `jlpm run integrity` locally and commit the changes'
       );
       process.exit(1);
     }
     utils.run('jlpm install');
-    console.log('\n\nMade integrity changes!');
-    console.log('Please commit the changes by running:');
-    console.log('git commit -a -m "Package integrity updates"');
+    console.debug('\n\nMade integrity changes!');
+    console.debug('Please commit the changes by running:');
+    console.debug('git commit -a -m "Package integrity updates"');
     return false;
   }
 
-  console.log('Repo integrity verified!');
+  console.debug('Repo integrity verified!');
   return true;
 }
 

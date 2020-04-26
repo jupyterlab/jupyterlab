@@ -45,10 +45,10 @@ export class NbConvertManager {
         return response.json();
       })
       .then(data => {
-        let exportList: NbConvertManager.IExportFormats = {};
-        let keys = Object.keys(data);
+        const exportList: NbConvertManager.IExportFormats = {};
+        const keys = Object.keys(data);
         keys.forEach(function(key) {
-          let mimeType: string = data[key].output_mimetype;
+          const mimeType: string = data[key].output_mimetype;
           exportList[key] = { output_mimetype: mimeType };
         });
         return exportList;

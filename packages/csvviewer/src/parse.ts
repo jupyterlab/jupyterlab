@@ -171,7 +171,7 @@ export function parseDSV(options: IParser.IOptions): IParser.IResults {
   let nrows = 0;
 
   // The row or column offsets we return.
-  let offsets = [];
+  const offsets = [];
 
   // Set up some useful local variables.
   const CH_DELIMITER = delimiter.charCodeAt(0);
@@ -500,13 +500,13 @@ export function parseDSVNoQuotes(options: IParser.IOptions): IParser.IResults {
   let ncols = options.ncols;
 
   // Set up our return variables.
-  let offsets: number[] = [];
+  const offsets: number[] = [];
   let nrows = 0;
 
   // Set up various state variables.
-  let rowDelimiterLength = rowDelimiter.length;
+  const rowDelimiterLength = rowDelimiter.length;
   let currRow = startIndex;
-  let len = data.length;
+  const len = data.length;
   let nextRow: number;
   let col: number;
   let rowString: string;

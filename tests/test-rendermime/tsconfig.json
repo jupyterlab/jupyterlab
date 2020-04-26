@@ -4,7 +4,8 @@
     "outDir": "build",
     "types": ["mocha", "node"],
     "composite": false,
-    "rootDir": "src"
+    "rootDir": "src",
+    "skipLibCheck": true
   },
   "include": ["src/*"],
   "references": [

@@ -10,8 +10,8 @@ import { URLExt } from './url';
 /**
  * Declare stubs for the node variables.
  */
-declare var process: any;
-declare var require: any;
+declare let process: any;
+declare let require: any;
 
 /**
  * The namespace for `PageConfig` functions.
@@ -65,10 +65,9 @@ export namespace PageConfig {
           fullPath = path.resolve(process.env['JUPYTER_CONFIG_DATA']);
         }
         if (fullPath) {
-          /* tslint:disable */
           // Force Webpack to ignore this require.
+          // eslint-disable-next-line
           configData = eval('require')(fullPath) as { [key: string]: string };
-          /* tslint:enable */
         }
       } catch (e) {
         console.error(e);
@@ -78,7 +77,7 @@ export namespace PageConfig {
     if (!JSONExt.isObject(configData)) {
       configData = Object.create(null);
     } else {
-      for (let key in configData) {
+      for (const key in configData) {
         // PageConfig expects strings
         if (typeof configData[key] !== 'string') {
           configData[key] = JSON.stringify(configData[key]);
@@ -201,7 +200,7 @@ export namespace PageConfig {
     if (typeof document === 'undefined' || !document.body) {
       return '';
     }
-    let val = document.body.dataset[key];
+    const val = document.body.dataset[key];
     if (typeof val === 'undefined') {
       return '';
     }

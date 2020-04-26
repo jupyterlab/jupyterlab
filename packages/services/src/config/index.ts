@@ -10,7 +10,7 @@ import { ServerConnection } from '..';
 /**
  * The url for the config service.
  */
-let SERVICE_CONFIG_URL = 'api/config';
+const SERVICE_CONFIG_URL = 'api/config';
 
 /**
  * A Configurable data section.
@@ -49,7 +49,7 @@ export namespace ConfigSection {
   export function create(
     options: ConfigSection.IOptions
   ): Promise<IConfigSection> {
-    let section = new DefaultConfigSection(options);
+    const section = new DefaultConfigSection(options);
     return section.load().then(() => {
       return section;
     });
@@ -79,7 +79,7 @@ class DefaultConfigSection implements IConfigSection {
    * Construct a new config section.
    */
   constructor(options: ConfigSection.IOptions) {
-    let settings = (this.serverSettings =
+    const settings = (this.serverSettings =
       options.serverSettings ?? ServerConnection.makeSettings());
     this._url = URLExt.join(
       settings.baseUrl,
@@ -135,7 +135,7 @@ class DefaultConfigSection implements IConfigSection {
    */
   update(newdata: JSONObject): Promise<JSONObject> {
     this._data = { ...this._data, ...newdata };
-    let init = {
+    const init = {
       method: 'PATCH',
       body: JSON.stringify(newdata)
     };
@@ -173,7 +173,7 @@ export class ConfigWithDefaults {
    * Get data from the config section or fall back to defaults.
    */
   get(key: string): JSONValue {
-    let data = this._classData();
+    const data = this._classData();
     return key in data ? data[key] : this._defaults[key];
   }
 
@@ -189,10 +189,10 @@ export class ConfigWithDefaults {
    * immediately.
    */
   set(key: string, value: JSONValue): Promise<JSONValue> {
-    let d: JSONObject = {};
+    const d: JSONObject = {};
     d[key] = value;
     if (this._className) {
-      let d2: JSONObject = {};
+      const d2: JSONObject = {};
       d2[this._className] = d;
       return this._section.update(d2);
     } else {
@@ -207,7 +207,7 @@ export class ConfigWithDefaults {
    * If we have no classname, get all of the data in the Section
    */
   private _classData(): JSONObject {
-    let data = this._section.data;
+    const data = this._section.data;
     if (this._className && this._className in data) {
       return data[this._className] as JSONObject;
     }

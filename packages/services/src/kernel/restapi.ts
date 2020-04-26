@@ -43,7 +43,7 @@ export const KERNEL_SERVICE_URL = 'api/kernels';
 export async function listRunning(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<IModel[]> {
-  let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
+  const url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
     throw new ServerConnection.ResponseError(response);
@@ -69,16 +69,16 @@ export async function startNew(
   options: IKernelOptions = {},
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<IModel> {
-  let url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
-  let init = {
+  const url = URLExt.join(settings.baseUrl, KERNEL_SERVICE_URL);
+  const init = {
     method: 'POST',
     body: JSON.stringify(options)
   };
-  let response = await ServerConnection.makeRequest(url, init, settings);
+  const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {
     throw new ServerConnection.ResponseError(response);
   }
-  let data = await response.json();
+  const data = await response.json();
   validateModel(data);
   return data;
 }
@@ -100,19 +100,19 @@ export async function restartKernel(
   id: string,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
-  let url = URLExt.join(
+  const url = URLExt.join(
     settings.baseUrl,
     KERNEL_SERVICE_URL,
     encodeURIComponent(id),
     'restart'
   );
-  let init = { method: 'POST' };
+  const init = { method: 'POST' };
 
-  let response = await ServerConnection.makeRequest(url, init, settings);
+  const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 200) {
     throw new ServerConnection.ResponseError(response);
   }
-  let data = await response.json();
+  const data = await response.json();
   validateModel(data);
 }
 
@@ -128,14 +128,14 @@ export async function interruptKernel(
   id: string,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
-  let url = URLExt.join(
+  const url = URLExt.join(
     settings.baseUrl,
     KERNEL_SERVICE_URL,
     encodeURIComponent(id),
     'interrupt'
   );
-  let init = { method: 'POST' };
-  let response = await ServerConnection.makeRequest(url, init, settings);
+  const init = { method: 'POST' };
+  const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 204) {
     throw new ServerConnection.ResponseError(response);
   }
@@ -160,15 +160,15 @@ export async function shutdownKernel(
   id: string,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
-  let url = URLExt.join(
+  const url = URLExt.join(
     settings.baseUrl,
     KERNEL_SERVICE_URL,
     encodeURIComponent(id)
   );
-  let init = { method: 'DELETE' };
-  let response = await ServerConnection.makeRequest(url, init, settings);
+  const init = { method: 'DELETE' };
+  const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status === 404) {
-    let msg = `The kernel "${id}" does not exist on the server`;
+    const msg = `The kernel "${id}" does not exist on the server`;
     console.warn(msg);
   } else if (response.status !== 204) {
     throw new ServerConnection.ResponseError(response);
@@ -187,19 +187,19 @@ export async function getKernelModel(
   id: string,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<IModel | undefined> {
-  let url = URLExt.join(
+  const url = URLExt.join(
     settings.baseUrl,
     KERNEL_SERVICE_URL,
     encodeURIComponent(id)
   );
 
-  let response = await ServerConnection.makeRequest(url, {}, settings);
+  const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status === 404) {
     return undefined;
   } else if (response.status !== 200) {
     throw new ServerConnection.ResponseError(response);
   }
-  let data = await response.json();
+  const data = await response.json();
   validateModel(data);
   return data;
 }

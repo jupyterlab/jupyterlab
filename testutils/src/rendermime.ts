@@ -25,7 +25,7 @@ namespace Private {
     mimeType = 'text/html';
 
     renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-      let source = model.data['application/json'];
+      const source = model.data['application/json'];
       model.setData({ data: { 'text/html': json2html(source) } });
       return super.renderModel(model);
     }

@@ -6,17 +6,17 @@ import { ContentsManager } from '@jupyterlab/services';
 import { log } from './log';
 
 export async function main() {
-  let contents = new ContentsManager();
+  const contents = new ContentsManager();
 
   log('Create a new directory');
-  let model = await contents.newUntitled({ path: '/', type: 'directory' });
+  const model = await contents.newUntitled({ path: '/', type: 'directory' });
   log(`Created directory ${model.path}`);
 
   log('Move the new directory to /tmp');
   await contents.rename(model.path, '/tmp');
 
   log('Create new python file');
-  let model2 = await contents.newUntitled({
+  const model2 = await contents.newUntitled({
     path: '/tmp',
     type: 'file',
     ext: 'py'
@@ -33,17 +33,17 @@ export async function main() {
   await contents.save('/tmp/bar.txt');
 
   log('Copy a file');
-  let model3 = await contents.copy('/tmp/bar.txt', '/tmp');
+  const model3 = await contents.copy('/tmp/bar.txt', '/tmp');
   log(`Copied to ${model3.path}`);
 
   log('Create a checkpoint');
-  let checkpoint = await contents.createCheckpoint('/tmp/bar.txt');
+  const checkpoint = await contents.createCheckpoint('/tmp/bar.txt');
 
   log('Restore a checkpoint');
   await contents.restoreCheckpoint('/tmp/bar.txt', checkpoint.id);
 
   log('List checkpoints for a file');
-  let models2 = await contents.listCheckpoints('/tmp/bar.txt');
+  const models2 = await contents.listCheckpoints('/tmp/bar.txt');
   log(models2[0].id);
 
   log('Delete a checkpoint');

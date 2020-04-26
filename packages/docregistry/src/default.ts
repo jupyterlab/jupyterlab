@@ -59,7 +59,7 @@ export class DocumentModel extends CodeEditor.Model
     if (newValue === this._dirty) {
       return;
     }
-    let oldValue = this._dirty;
+    const oldValue = this._dirty;
     this._dirty = newValue;
     this.triggerStateChange({ name: 'dirty', oldValue, newValue });
   }
@@ -74,7 +74,7 @@ export class DocumentModel extends CodeEditor.Model
     if (newValue === this._readOnly) {
       return;
     }
-    let oldValue = this._readOnly;
+    const oldValue = this._readOnly;
     this._readOnly = newValue;
     this.triggerStateChange({ name: 'readOnly', oldValue, newValue });
   }
@@ -227,7 +227,7 @@ export class TextModelFactory implements DocumentRegistry.CodeModelFactory {
    * Get the preferred kernel language given a file path.
    */
   preferredLanguage(path: string): string {
-    let mode = Mode.findByFileName(path);
+    const mode = Mode.findByFileName(path);
     return mode && mode.mode;
   }
 

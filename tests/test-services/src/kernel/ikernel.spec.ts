@@ -25,7 +25,7 @@ import { KernelTester, handleRequest } from '../utils';
 describe('Kernel.IKernel', () => {
   let defaultKernel: Kernel.IKernelConnection;
   let specs: KernelSpec.ISpecModels;
-  let kernelManager = new KernelManager();
+  const kernelManager = new KernelManager();
 
   beforeAll(async () => {
     jest.setTimeout(12000);
@@ -958,7 +958,7 @@ describe('Kernel.IKernel', () => {
 
   describe('#checkExecuteMetadata()', () => {
     it('should accept cell metadata as part of request', async () => {
-      let options: KernelMessage.IExecuteRequestMsg['content'] = {
+      const options: KernelMessage.IExecuteRequestMsg['content'] = {
         code: 'test',
         silent: false,
         store_history: true,
@@ -966,8 +966,8 @@ describe('Kernel.IKernel', () => {
         allow_stdin: false,
         stop_on_error: false
       };
-      let metadata = { cellId: 'test' };
-      let future = defaultKernel.requestExecute(options, false, metadata);
+      const metadata = { cellId: 'test' };
+      const future = defaultKernel.requestExecute(options, false, metadata);
       await future.done;
       expect((future.msg.metadata = metadata));
     });

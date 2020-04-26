@@ -21,7 +21,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     this._content = new Panel();
     this._content.addClass('jp-Collapse-contents');
 
-    let layout = new PanelLayout();
+    const layout = new PanelLayout();
     this.layout = layout;
     layout.addWidget(this._header);
     layout.addWidget(this._content);
@@ -37,7 +37,7 @@ export class Collapse<T extends Widget = Widget> extends Widget {
     return this._widget;
   }
   set widget(widget: T) {
-    let oldWidget = this._widget;
+    const oldWidget = this._widget;
     if (oldWidget) {
       oldWidget.title.changed.disconnect(this._onTitleChanged, this);
       oldWidget.parent = null;

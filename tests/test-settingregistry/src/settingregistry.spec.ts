@@ -432,7 +432,7 @@ describe('@jupyterlab/settingregistry', () => {
 
         connector.schemas[id] = schema;
         settings = (await registry.load(id)) as Settings;
-        let promise = signalToPromise(settings.changed);
+        const promise = signalToPromise(settings.changed);
         await settings.set('foo', 'bar');
         await promise;
       });

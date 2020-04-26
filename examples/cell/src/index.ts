@@ -146,7 +146,7 @@ function main(): void {
 
   // Start up the kernel.
   void sessionContext.initialize().then(() => {
-    console.log('Example started!');
+    console.debug('Example started!');
   });
 }
 

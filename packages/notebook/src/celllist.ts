@@ -103,8 +103,8 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * No changes.
    */
   iter(): IIterator<ICellModel> {
-    let arr: ICellModel[] = [];
-    for (let id of toArray(this._cellOrder)) {
+    const arr: ICellModel[] = [];
+    for (const id of toArray(this._cellOrder)) {
       arr.push(this._cellMap.get(id)!);
     }
     return new ArrayIterator<ICellModel>(arr);
@@ -120,7 +120,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     this._isDisposed = true;
     Signal.clearData(this);
     // Clean up the cell map and cell order objects.
-    for (let cell of this._cellMap.values()) {
+    for (const cell of this._cellMap.values()) {
       cell.dispose();
     }
     this._cellMap.dispose();
@@ -195,7 +195,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   push(cell: ICellModel): number {
     // Set the internal data structures.
     this._cellMap.set(cell.id, cell);
-    let num = this._cellOrder.push(cell.id);
+    const num = this._cellOrder.push(cell.id);
     return num;
   }
 
@@ -246,7 +246,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * Iterators pointing at the removed cell and beyond are invalidated.
    */
   removeValue(cell: ICellModel): number {
-    let index = ArrayExt.findFirstIndex(
+    const index = ArrayExt.findFirstIndex(
       toArray(this._cellOrder),
       id => this._cellMap.get(id) === cell
     );
@@ -272,9 +272,9 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * An `index` which is non-integral.
    */
   remove(index: number): ICellModel {
-    let id = this._cellOrder.get(index);
+    const id = this._cellOrder.get(index);
     this._cellOrder.remove(index);
-    let cell = this._cellMap.get(id)!;
+    const cell = this._cellMap.get(id)!;
     return cell;
   }
 
@@ -331,7 +331,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * not be called by other actors.
    */
   pushAll(cells: IterableOrArrayLike<ICellModel>): number {
-    let newValues = toArray(cells);
+    const newValues = toArray(cells);
     each(newValues, cell => {
       // Set the internal data structures.
       this._cellMap.set(cell.id, cell);
@@ -367,7 +367,7 @@ export class CellList implements IObservableUndoableList<ICellModel> {
    * not be called by other actors.
    */
   insertAll(index: number, cells: IterableOrArrayLike<ICellModel>): number {
-    let newValues = toArray(cells);
+    const newValues = toArray(cells);
     each(newValues, cell => {
       this._cellMap.set(cell.id, cell);
       this._cellOrder.beginCompoundOperation();
@@ -451,12 +451,12 @@ export class CellList implements IObservableUndoableList<ICellModel> {
   clearUndo(): void {
     // Dispose of cells not in the current
     // cell order.
-    for (let key of this._cellMap.keys()) {
+    for (const key of this._cellMap.keys()) {
       if (
         ArrayExt.findFirstIndex(toArray(this._cellOrder), id => id === key) ===
         -1
       ) {
-        let cell = this._cellMap.get(key) as ICellModel;
+        const cell = this._cellMap.get(key) as ICellModel;
         cell.dispose();
         this._cellMap.delete(key);
       }
@@ -471,8 +471,8 @@ export class CellList implements IObservableUndoableList<ICellModel> {
     if (change.type === 'add' || change.type === 'set') {
       each(change.newValues, id => {
         if (!this._cellMap.has(id)) {
-          let cellDB = this._factory.modelDB!;
-          let cellType = cellDB.createValue(id + '.type');
+          const cellDB = this._factory.modelDB!;
+          const cellType = cellDB.createValue(id + '.type');
           let cell: ICellModel;
           switch (cellType.get()) {
             case 'code':
@@ -489,8 +489,8 @@ export class CellList implements IObservableUndoableList<ICellModel> {
         }
       });
     }
-    let newValues: ICellModel[] = [];
-    let oldValues: ICellModel[] = [];
+    const newValues: ICellModel[] = [];
+    const oldValues: ICellModel[] = [];
     each(change.newValues, id => {
       newValues.push(this._cellMap.get(id)!);
     });

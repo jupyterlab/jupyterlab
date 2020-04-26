@@ -99,7 +99,7 @@ class ExtensionManager(object):
                         status = 'warning'
             extensions.append(_make_extension_entry(
                 name=name,
-                description=pkg_info['description'],
+                description=pkg_info.get('description', ''),
                 url=data['url'],
                 enabled=(name not in info['disabled']),
                 core=False,
@@ -114,7 +114,7 @@ class ExtensionManager(object):
             if data is not None:
                 extensions.append(_make_extension_entry(
                     name=name,
-                    description=data['description'],
+                    description=data.get('description', ''),
                     url=data.get('homepage', ''),
                     installed=False,
                     enabled=False,

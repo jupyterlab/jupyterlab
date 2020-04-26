@@ -38,8 +38,8 @@ export class Uploader extends ToolbarButton {
    * The 'change' handler for the input field.
    */
   private _onInputChanged = () => {
-    let files = Array.prototype.slice.call(this._input.files) as File[];
-    let pending = files.map(file => this.fileBrowserModel.upload(file));
+    const files = Array.prototype.slice.call(this._input.files) as File[];
+    const pending = files.map(file => this.fileBrowserModel.upload(file));
     void Promise.all(pending).catch(error => {
       void showErrorMessage('Upload Error', error);
     });
@@ -80,7 +80,7 @@ namespace Private {
    * Create the upload input node for a file buttons widget.
    */
   export function createUploadInput(): HTMLInputElement {
-    let input = document.createElement('input');
+    const input = document.createElement('input');
     input.type = 'file';
     input.multiple = true;
     return input;

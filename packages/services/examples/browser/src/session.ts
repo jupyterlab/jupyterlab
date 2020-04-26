@@ -12,11 +12,11 @@ import { log } from './log';
 
 export async function main() {
   log('Starting session manager');
-  let kernelManager = new KernelManager();
-  let sessionManager = new SessionManager({ kernelManager });
+  const kernelManager = new KernelManager();
+  const sessionManager = new SessionManager({ kernelManager });
 
   log('Start a new session');
-  let options: Session.ISessionOptions = {
+  const options: Session.ISessionOptions = {
     kernel: {
       name: 'python'
     },
@@ -30,7 +30,7 @@ export async function main() {
   await sessionConnection.setPath('bar.ipynb');
 
   log('Execute "a=1"');
-  let future = sessionConnection.kernel.requestExecute({ code: 'a = 1' });
+  const future = sessionConnection.kernel.requestExecute({ code: 'a = 1' });
   future.onReply = reply => {
     log(`Got execute reply with status ${reply.content.status}`);
   };
@@ -40,9 +40,9 @@ export async function main() {
   await sessionConnection.shutdown();
 
   log('Get a list of session models and connect to one if any exist');
-  let sessionModels = await SessionAPI.listRunning();
+  const sessionModels = await SessionAPI.listRunning();
   if (sessionModels.length > 0) {
-    let session = sessionManager.connectTo({ model: sessionModels[0] });
+    const session = sessionManager.connectTo({ model: sessionModels[0] });
     log(`Connected to ${session.kernel.name}`);
   }
 }

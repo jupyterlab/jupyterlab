@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -57,7 +57,7 @@ export abstract class Collapser extends ReactWidget {
    * Render the collapser with the virtual DOM.
    */
   protected render(): React.ReactElement<any> {
-    let childClass = COLLAPSER_CHILD_CLASS;
+    const childClass = COLLAPSER_CHILD_CLASS;
     return <div className={childClass} onClick={e => this.handleClick(e)} />;
   }
 
@@ -83,7 +83,7 @@ export class InputCollapser extends Collapser {
    * Is the cell's input collapsed?
    */
   get collapsed(): boolean {
-    let cell = this.parent?.parent as Cell | undefined | null;
+    const cell = this.parent?.parent as Cell | undefined | null;
     if (cell) {
       return cell.inputHidden;
     } else {
@@ -95,7 +95,7 @@ export class InputCollapser extends Collapser {
    * Handle a click event for the user to collapse the cell's input.
    */
   protected handleClick(e: React.MouseEvent<HTMLDivElement>): void {
-    let cell = this.parent?.parent as Cell | undefined | null;
+    const cell = this.parent?.parent as Cell | undefined | null;
     if (cell) {
       cell.inputHidden = !cell.inputHidden;
     }
@@ -120,7 +120,7 @@ export class OutputCollapser extends Collapser {
    * Is the cell's output collapsed?
    */
   get collapsed(): boolean {
-    let cell = this.parent?.parent as CodeCell | undefined | null;
+    const cell = this.parent?.parent as CodeCell | undefined | null;
     if (cell) {
       return cell.outputHidden;
     } else {
@@ -132,7 +132,7 @@ export class OutputCollapser extends Collapser {
    * Handle a click event for the user to collapse the cell's output.
    */
   protected handleClick(e: React.MouseEvent<HTMLDivElement>): void {
-    let cell = this.parent?.parent as CodeCell | undefined | null;
+    const cell = this.parent?.parent as CodeCell | undefined | null;
     if (cell) {
       cell.outputHidden = !cell.outputHidden;
     }

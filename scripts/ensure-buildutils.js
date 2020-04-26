@@ -1,22 +1,22 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 // uncomment to time script
 // var start = new Date();
 
-var fs = require('fs-extra');
-var glob = require('glob');
-var path = require('path');
-var childProcess = require('child_process');
+const fs = require('fs-extra');
+const glob = require('glob');
+const path = require('path');
+const childProcess = require('child_process');
 
-var basePath = path.join(path.resolve('.'), 'buildutils');
+const basePath = path.join(path.resolve('.'), 'buildutils');
 
 // Make sure that buildutils is built and current
-var current = true;
+let current = true;
 if (fs.existsSync(path.join(basePath, 'lib'))) {
-  var srcFiles = glob.sync(path.join(basePath, 'src', '*'));
-  var libFiles = glob.sync(path.join(basePath, 'lib', '*'));
+  const srcFiles = glob.sync(path.join(basePath, 'src', '*'));
+  const libFiles = glob.sync(path.join(basePath, 'lib', '*'));
   srcFiles.forEach(function(srcPath) {
     // bail early if already not current
     if (!current) {
@@ -28,20 +28,20 @@ if (fs.existsSync(path.join(basePath, 'lib'))) {
       return;
     }
 
-    var name = path.basename(srcPath);
-    var ext = path.extname(name);
+    const name = path.basename(srcPath);
+    const ext = path.extname(name);
     if (ext !== '.ts') {
       current = false;
       return;
     }
 
-    var libPath = path.join(basePath, 'lib', name.replace('.ts', '.js'));
+    const libPath = path.join(basePath, 'lib', name.replace('.ts', '.js'));
     if (libFiles.indexOf(libPath) === -1) {
       current = false;
       return;
     }
-    var srcTime = fs.statSync(srcPath).mtime;
-    var libTime = fs.statSync(libPath).mtime;
+    const srcTime = fs.statSync(srcPath).mtime;
+    const libTime = fs.statSync(libPath).mtime;
     if (libTime < srcTime) {
       current = false;
     }

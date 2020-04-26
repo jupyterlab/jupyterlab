@@ -10,7 +10,6 @@ module.exports = function(name: string, baseDir: string) {
     transform: {
       '\\.svg$': 'jest-raw-loader'
     },
-    setupFilesAfterEnv: ['@jupyterlab/testutils/lib/jest-script.js'],
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
     testPathIgnorePatterns: ['/dev_mode/', '/lib/', '/node_modules/'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
@@ -20,6 +19,7 @@ module.exports = function(name: string, baseDir: string) {
       `packages/${name}/src/**.{ts,tsx}`,
       `!packages/${name}/src/*.d.ts`
     ],
+    testTimeout: 20000,
     coverageReporters: ['json', 'lcov', 'text', 'html'],
     coverageDirectory: path.join(baseDir, 'coverage'),
     testRegex: `tests\/test-${name}\/src\/.*\.spec\.tsx?$`,

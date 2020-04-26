@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -341,7 +341,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
             transform.resolve({ type: 'overwrite', contents: saved.data });
           }
         } catch ({ message }) {
-          console.log(`Fetching workspace "${workspace}" failed.`, message);
+          console.warn(`Fetching workspace "${workspace}" failed.`, message);
 
           // If the workspace does not exist, cancel the data transformation
           // and save a workspace with the current user state data.
@@ -474,8 +474,8 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
         const commandArgs: any = args.args;
         const argList = Array.isArray(args);
         for (let i = 0; i < commands.length; i++) {
-          let cmd = commands[i];
-          let arg = argList ? commandArgs[i] : commandArgs;
+          const cmd = commands[i];
+          const arg = argList ? commandArgs[i] : commandArgs;
           if (app.commands.isEnabled(cmd, arg)) {
             return app.commands.execute(cmd, arg);
           }

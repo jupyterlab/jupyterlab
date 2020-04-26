@@ -108,7 +108,7 @@ class LogConsoleOutputArea extends OutputArea {
     }
 
     // first widget in panel is prompt of type LoggerOutputPrompt
-    let prompt = panel.widgets[0] as LogConsoleOutputPrompt;
+    const prompt = panel.widgets[0] as LogConsoleOutputPrompt;
     prompt.timestamp = model.timestamp;
     prompt.level = model.level;
     return panel;
@@ -340,7 +340,7 @@ export class LogConsolePanel extends StackedPanel {
 
   private _bindLoggerSignals() {
     const loggers = this._loggerRegistry.getLoggers();
-    for (let logger of loggers) {
+    for (const logger of loggers) {
       if (this._loggersWatched.has(logger.source)) {
         continue;
       }
@@ -412,7 +412,7 @@ export class LogConsolePanel extends StackedPanel {
     const loggerIds = new Set<string>();
     const loggers = this._loggerRegistry.getLoggers();
 
-    for (let logger of loggers) {
+    for (const logger of loggers) {
       const source = logger.source;
       const viewId = `source:${source}`;
       loggerIds.add(viewId);
@@ -428,7 +428,7 @@ export class LogConsolePanel extends StackedPanel {
 
         // Attach the output area so it is visible, so the accounting
         // functions below record the outputs actually displayed.
-        let w = new ScrollingWidget({
+        const w = new ScrollingWidget({
           content: outputArea
         });
         this.addWidget(w);
@@ -461,7 +461,7 @@ export class LogConsolePanel extends StackedPanel {
     // remove output areas that do not have corresponding loggers anymore
     const viewIds = this._outputAreas.keys();
 
-    for (let viewId of viewIds) {
+    for (const viewId of viewIds) {
       if (!loggerIds.has(viewId)) {
         const outputArea = this._outputAreas.get(viewId);
         outputArea?.dispose();

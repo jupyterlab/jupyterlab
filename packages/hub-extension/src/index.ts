@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -49,7 +49,7 @@ function activateHubExtension(
     return;
   }
 
-  console.log('hub-extension: Found configuration ', {
+  console.debug('hub-extension: Found configuration ', {
     hubHost: hubHost,
     hubPrefix: hubPrefix
   });

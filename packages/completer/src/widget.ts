@@ -169,7 +169,7 @@ export class Completer extends Widget {
    * Emit the selected signal for the current active item and reset.
    */
   selectActive(): void {
-    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+    const active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     if (!active) {
       this.reset();
       return;
@@ -225,7 +225,7 @@ export class Completer extends Widget {
       return;
     }
 
-    let items = toArray(model.items());
+    const items = toArray(model.items());
 
     // If there are no items, reset and bail.
     if (!items || !items.length) {
@@ -250,16 +250,16 @@ export class Completer extends Widget {
     }
 
     // Clear the node.
-    let node = this.node;
+    const node = this.node;
     node.textContent = '';
 
     // Compute an ordered list of all the types in the typeMap, this is computed
     // once by the model each time new data arrives for efficiency.
-    let orderedTypes = model.orderedTypes();
+    const orderedTypes = model.orderedTypes();
 
     // Populate the completer items.
-    for (let item of items) {
-      let li = this._renderer.createItemNode(
+    for (const item of items) {
+      const li = this._renderer.createItemNode(
         item!,
         model.typeMap(),
         orderedTypes
@@ -267,7 +267,7 @@ export class Completer extends Widget {
       node.appendChild(li);
     }
 
-    let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
+    const active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
 
     // If this is the first time the current completer session has loaded,
@@ -298,8 +298,8 @@ export class Completer extends Widget {
    * the first item, subsequent `up` cycles will remain on the first cycle.
    */
   private _cycle(direction: Private.scrollType): void {
-    let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
-    let index = this._activeIndex;
+    const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+    const index = this._activeIndex;
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     active.classList.remove(ACTIVE_CLASS);
 
@@ -347,11 +347,11 @@ export class Completer extends Widget {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        let model = this._model;
+        const model = this._model;
         if (!model) {
           return;
         }
-        let populated = this._populateSubset();
+        const populated = this._populateSubset();
         // If there is a common subset in the options,
         // then emit a completion signal with that subset.
         if (model.query) {
@@ -733,12 +733,12 @@ export namespace Completer {
       typeMap: TypeMap,
       orderedTypes: string[]
     ): HTMLLIElement {
-      let li = document.createElement('li');
+      const li = document.createElement('li');
       li.className = ITEM_CLASS;
       // Set the raw, un-marked up value as a data attribute.
       li.setAttribute('data-value', item.raw);
 
-      let matchNode = document.createElement('code');
+      const matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
       matchNode.innerHTML = defaultSanitizer.sanitize(item.text, {
@@ -747,14 +747,14 @@ export namespace Completer {
 
       // If there are types provided add those.
       if (!JSONExt.deepEqual(typeMap, {})) {
-        let typeNode = document.createElement('span');
-        let type = typeMap[item.raw] || '';
+        const typeNode = document.createElement('span');
+        const type = typeMap[item.raw] || '';
         typeNode.textContent = (type[0] || '').toLowerCase();
-        let colorIndex = (orderedTypes.indexOf(type) % N_COLORS) + 1;
+        const colorIndex = (orderedTypes.indexOf(type) % N_COLORS) + 1;
         typeNode.className = 'jp-Completer-type';
         typeNode.setAttribute(`data-color-index`, colorIndex.toString());
         li.title = type;
-        let typeExtendedNode = document.createElement('code');
+        const typeExtendedNode = document.createElement('code');
         typeExtendedNode.className = 'jp-Completer-typeExtended';
         typeExtendedNode.textContent = type.toLocaleLowerCase();
         li.appendChild(typeNode);
@@ -796,14 +796,14 @@ namespace Private {
    * Returns the common subset string that a list of strings shares.
    */
   export function commonSubset(values: string[]): string {
-    let len = values.length;
+    const len = values.length;
     let subset = '';
     if (len < 2) {
       return subset;
     }
-    let strlen = values[0].length;
+    const strlen = values[0].length;
     for (let i = 0; i < strlen; i++) {
-      let ch = values[0][i];
+      const ch = values[0][i];
       for (let j = 1; j < len; j++) {
         if (values[j][i] !== ch) {
           return subset;
@@ -818,7 +818,7 @@ namespace Private {
    * Returns the list of raw item values currently in the DOM.
    */
   export function itemValues(items: NodeList): string[] {
-    let values: string[] = [];
+    const values: string[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
       const attr = (items[i] as HTMLElement).getAttribute('data-value');
       if (attr) {

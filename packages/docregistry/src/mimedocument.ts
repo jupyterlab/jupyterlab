@@ -141,15 +141,15 @@ export class MimeContent extends Widget {
 
     // Set up for this rendering pass.
     this._renderRequested = false;
-    let context = this._context;
-    let model = context.model;
-    let data: PartialJSONObject = {};
+    const context = this._context;
+    const model = context.model;
+    const data: PartialJSONObject = {};
     if (this._dataType === 'string') {
       data[this.mimeType] = model.toString();
     } else {
       data[this.mimeType] = model.toJSON();
     }
-    let mimeModel = new MimeModel({
+    const mimeModel = new MimeModel({
       data,
       callback: this._changeCallback,
       metadata: { fragment: this._fragment }
@@ -183,7 +183,7 @@ export class MimeContent extends Widget {
     if (!options.data || !options.data[this.mimeType]) {
       return;
     }
-    let data = options.data[this.mimeType];
+    const data = options.data[this.mimeType];
     if (typeof data === 'string') {
       if (data !== this._context.model.toString()) {
         this._context.model.fromString(data);

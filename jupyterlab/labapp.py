@@ -414,6 +414,7 @@ class LabWorkspaceApp(JupyterApp):
 
 
 
+<<<<<<< HEAD
 class LabApp(NBClassicConfigShimMixin, LabServerApp):
     version = version
 
@@ -470,7 +471,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         {'LabApp': {'watch': True}},
         "Start the app in watch mode."
     )
-
+    flags['expose-app-in-browser'] = (
+        {'LabApp': {'expose_app_in_browser': True}},
+        "Expose the global app instance to browser via window.jupyterlab"
+    )
 
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -514,6 +518,9 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
+
+    expose_app_in_browser = Bool(False, config=True,
+        help="Whether to expose the global app instance to browser via window.jupyterlab")
 
     @default('app_settings_dir')
     def _default_app_settings_dir(self):
@@ -670,7 +677,6 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
-
 
 #-----------------------------------------------------------------------------
 # Main entry point
