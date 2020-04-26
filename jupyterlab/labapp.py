@@ -413,8 +413,6 @@ class LabWorkspaceApp(JupyterApp):
         self.exit(0)
 
 
-
-<<<<<<< HEAD
 class LabApp(NBClassicConfigShimMixin, LabServerApp):
     version = version
 
