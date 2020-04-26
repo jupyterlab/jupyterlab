@@ -1019,7 +1019,8 @@ export class DefaultKernel implements Kernel.IKernel {
     this._pendingMessages = [];
     const futuresResolved: Promise<void>[] = [];
     this._futures.forEach(future => {
-      futuresResolved.push(future.done.then(this._noOp, this._noOp));
+      future.done.catch(this._noOp);
+      futuresResolved.push(future.done.then(this._noOp));
       future.dispose();
     });
     this._comms.forEach(comm => {

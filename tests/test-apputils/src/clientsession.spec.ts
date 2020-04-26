@@ -293,6 +293,7 @@ describe('@jupyterlab/apputils', () => {
         const kernelPromise = session.changeKernel({ name });
         const results = await Promise.all([kernelPromise, initPromise]);
         expect(session.kernel).to.equal(results[0]);
+        await session.kernel.ready;
       });
 
       it('should handle multiple requests', async () => {
@@ -310,11 +311,12 @@ describe('@jupyterlab/apputils', () => {
         // We can't know which of the two was launched first, so the result
         // could be either, just make sure it isn't the original kernel.
         expect(lastKernel).to.be.oneOf([results[0], results[1]]);
+        await session.kernel.ready;
       });
 
       it('should handle an error during kernel change', async () => {
         await session.initialize();
-        await session.kernel.ready;
+
         let status = 'idle';
         session.statusChanged.connect(() => {
           status = session.status;

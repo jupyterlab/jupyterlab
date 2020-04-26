@@ -782,7 +782,12 @@ namespace Private {
     each(running.slice(), session => {
       let updated = find(sessions, sId => {
         if (session.id === sId.id) {
-          session.update(sId);
+          // Do not sync up with a pending session.
+          // This avoids a race condition while we are staring
+          // the session.
+          if (sId.type !== 'pending') {
+            session.update(sId);
+          }
           return true;
         }
         return false;
