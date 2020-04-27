@@ -128,24 +128,18 @@ class BrowserApp(LabApp):
     ip = '127.0.0.1'
     flags = test_flags
     aliases = test_aliases
-    test_browser = Bool(True)
+    test_browser = True
 
     def initialize_settings(self):
         self.settings.setdefault('page_config_data', dict())
         self.settings['page_config_data']['browserTest'] = True
         self.settings['page_config_data']['buildAvailable'] = False
-        self.serverapp.base_url = '/lab'
         super().initialize_settings()
 
     def initialize_handlers(self):
         func = run_browser if self.test_browser else lambda url: 0
-        run_test(self, func)
+        run_test(self.serverapp, func)
         super().initialize_handlers()
-
-        web_app.settings.setdefault('page_config_data', dict())
-        web_app.settings['page_config_data']['browserTest'] = True
-        web_app.settings['page_config_data']['buildAvailable'] = False
-        super().start()
 
 if __name__ == '__main__':
     skip_option = "--no-chrome-test"
@@ -160,5 +154,4 @@ if __name__ == '__main__':
             }
         ]
     sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
-    ServerApp.jpserver_extensions = Dict({__name__: True})
-    ServerApp.launch_instance()
+    BrowserApp.launch_instance()
