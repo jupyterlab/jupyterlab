@@ -18,6 +18,15 @@ export interface ILanguageServerManager {
   statusUrl: string;
 }
 
+export interface ILanguageServerConfiguration {
+  /**
+   * The config params must be nested inside the settings keyword
+   */
+  settings: {
+    [k: string]: any;
+  };
+}
+
 export namespace ILanguageServerManager {
   export const URL_NS = 'lsp';
   export interface IOptions {

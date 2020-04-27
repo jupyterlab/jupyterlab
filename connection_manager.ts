@@ -7,7 +7,11 @@ import { sleep, until_ready } from './utils';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as ConnectionModuleType from './connection';
-import { TLanguageServerId, ILanguageServerManager } from './tokens';
+import {
+  TLanguageServerId,
+  ILanguageServerManager,
+  ILanguageServerConfiguration
+} from './tokens';
 
 export interface IDocumentConnectionData {
   virtual_document: VirtualDocument;
@@ -24,15 +28,6 @@ export interface ISocketConnectionOptions {
    * Path to the document in the JupyterLab space
    */
   document_path: string;
-}
-
-export interface IServerConfigurationSettings {
-  /**
-   * The config params must be nested inside the settings keyword
-   */
-  settings: {
-    [k: string]: any;
-  };
 }
 
 /**
@@ -159,11 +154,12 @@ export class DocumentConnectionManager {
 
   public updateServerConfigurations(
     // TODO: define types for server configurations
-    allSettings: any
+    lsSettings: any
   ) {
-    console.log(this.language_server_manager);
-    for (let language_server_id in allSettings) {
-      const serverSettings = allSettings[language_server_id];
+    for (let language_server_id in lsSettings) {
+      const serverSettings: ILanguageServerConfiguration = {
+        settings: lsSettings
+      };
       Private.updateServerConfiguration(language_server_id, serverSettings);
     }
   }
@@ -396,7 +392,7 @@ namespace Private {
 
   export function updateServerConfiguration(
     language_server_id: TLanguageServerId,
-    settings: IServerConfigurationSettings
+    settings: ILanguageServerConfiguration
   ): void {
     const connection = _connections.get(language_server_id);
     if (connection) {
