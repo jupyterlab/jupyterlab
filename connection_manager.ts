@@ -26,6 +26,15 @@ export interface ISocketConnectionOptions {
   document_path: string;
 }
 
+export interface IServerConfigurationSettings {
+  /**
+   * The config params must be nested inside the settings keyword
+   */
+  settings: {
+    [k: string]: any;
+  };
+}
+
 /**
  * Each Widget with a document (whether file or a notebook) has its own DocumentConnectionManager
  * (see JupyterLabWidgetAdapter), keeping the virtual document spaces separate if a file is opened twice.
@@ -386,8 +395,8 @@ namespace Private {
   }
 
   export function updateServerConfiguration(
-    language_server_id: any,
-    settings: any
+    language_server_id: TLanguageServerId,
+    settings: IServerConfigurationSettings
   ): void {
     const connection = _connections.get(language_server_id);
     if (connection) {
