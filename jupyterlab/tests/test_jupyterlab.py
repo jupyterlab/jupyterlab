@@ -782,5 +782,6 @@ def test_load_extension(serverapp, make_lab_app):
     app = make_lab_app()
     stderr = sys.stderr
 #    sys.stderr = self.devnull
-    app.initialize(serverapp)
+    app.link_to_serverapp(serverapp)
+    app.initialize()
     sys.stderr = stderr
