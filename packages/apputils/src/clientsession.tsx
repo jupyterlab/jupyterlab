@@ -650,7 +650,7 @@ export class ClientSession implements IClientSession {
     // the kernel finishes starting.
     // We later switch to the real path below.
     // Use the correct directory so the kernel will be started in that directory.
-    // Set the type to 'temporary' to avoid a race condition in our sessions client handling code.
+    // Set the type to 'pending' to avoid a race condition in our sessions client handling code.
     const dirName = PathExt.dirname(this._path);
     const requestId = (this._pendingSessionRequest = PathExt.join(
       dirName,
