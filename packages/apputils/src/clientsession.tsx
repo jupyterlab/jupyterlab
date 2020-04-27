@@ -650,16 +650,17 @@ export class ClientSession implements IClientSession {
     // the kernel finishes starting.
     // We later switch to the real path below.
     // Use the correct directory so the kernel will be started in that directory.
+    // Set the type to 'pending' to avoid a race condition in our sessions client handling code.
     const dirName = PathExt.dirname(this._path);
     const requestId = (this._pendingSessionRequest = PathExt.join(
       dirName,
-      UUID.uuid4()
+      `${this._name}-${UUID.uuid4()}.ipynb`
     ));
     try {
       this._statusChanged.emit('starting');
       const session = await this.manager.startNew({
         path: requestId,
-        type: this._type,
+        type: 'pending',
         name: this._name,
         kernelName: model.name,
         kernelId: model.id
@@ -672,6 +673,9 @@ export class ClientSession implements IClientSession {
       }
       // Change to the real path.
       await session.setPath(this._path);
+
+      // Change to the real type
+      await session.setType(this._type);
 
       if (this._session) {
         await this._shutdownSession();
