@@ -264,7 +264,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     Private.deleteCells(notebook);
-    Private.handleState(notebook, state);
+    Private.handleState(notebook, state, true);
   }
 
   /**
