@@ -19,7 +19,7 @@ with open(os.path.join(HERE, 'package.json')) as fid:
 def _jupyter_server_extension_paths():
     return [
         {
-            'module': __name__,
+            'module': 'example',
             'app': ExampleApp
         }
     ]
