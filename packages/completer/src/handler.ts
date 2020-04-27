@@ -359,12 +359,8 @@ export class CompletionHandler implements IDisposable {
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };
 
-    if ('responseType' in this._connector) {
-      return (this._connector as IDataConnector<
-        CompletionHandler.ICompletionItemsReply,
-        void,
-        CompletionHandler.IRequest
-      >)
+    if (this._isICompletionItemsConnector(this._connector)) {
+      return this._connector
         .fetch(request)
         .then(reply => {
           this._validate(pending, request);
@@ -379,7 +375,7 @@ export class CompletionHandler implements IDisposable {
         });
     }
 
-    return this.connector
+    return this._connector
       .fetch(request)
       .then(reply => {
         this._validate(pending, request);
@@ -392,6 +388,21 @@ export class CompletionHandler implements IDisposable {
       .catch(_ => {
         this._onFailure();
       });
+  }
+
+  private _isICompletionItemsConnector(
+    connector:
+      | IDataConnector<
+          CompletionHandler.IReply,
+          void,
+          CompletionHandler.IRequest
+        >
+      | CompletionHandler.ICompletionItemsConnector
+  ): connector is CompletionHandler.ICompletionItemsConnector {
+    return (
+      (connector as CompletionHandler.ICompletionItemsConnector)
+        .responseType === CompletionHandler.ICompletionItemsResponseType
+    );
   }
 
   private _validate(pending: number, request: CompletionHandler.IRequest) {
@@ -516,13 +527,7 @@ export class CompletionHandler implements IDisposable {
 
   private _connector:
     | IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest>
-    | (IDataConnector<
-        CompletionHandler.ICompletionItemsReply,
-        void,
-        CompletionHandler.IRequest
-      > & {
-        responseType: typeof CompletionHandler.ICompletionItemsResponseType;
-      });
+    | CompletionHandler.ICompletionItemsConnector;
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
   private _pending = 0;
@@ -552,13 +557,7 @@ export namespace CompletionHandler {
      */
     connector:
       | IDataConnector<IReply, void, IRequest>
-      | (IDataConnector<
-          CompletionHandler.ICompletionItemsReply,
-          void,
-          CompletionHandler.IRequest
-        > & {
-          responseType: typeof CompletionHandler.ICompletionItemsResponseType;
-        });
+      | CompletionHandler.ICompletionItemsConnector;
   }
 
   /**
@@ -611,6 +610,13 @@ export namespace CompletionHandler {
     deprecated?: boolean;
   }
 
+  export type ICompletionItemsConnector = IDataConnector<
+    CompletionHandler.ICompletionItemsReply,
+    void,
+    CompletionHandler.IRequest
+  > &
+    CompletionHandler.CompleterConnecterResponseType;
+
   /**
    * A reply to a completion items fetch request.
    */
@@ -627,6 +633,10 @@ export namespace CompletionHandler {
      * A list of completion items.
      */
     items: CompletionHandler.ICompletionItems;
+  }
+
+  export interface CompleterConnecterResponseType {
+    responseType: typeof ICompletionItemsResponseType;
   }
 
   export const ICompletionItemsResponseType = 'ICompletionItemsReply' as const;
