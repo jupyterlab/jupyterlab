@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/terminal-extension",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "JupyterLab - Terminal Emulator Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,12 +36,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^1.2.5",
-    "@jupyterlab/apputils": "^1.2.5",
+    "@jupyterlab/application": "^1.2.6",
+    "@jupyterlab/apputils": "^1.2.6",
     "@jupyterlab/coreutils": "^3.2.0",
-    "@jupyterlab/launcher": "^1.2.5",
-    "@jupyterlab/mainmenu": "^1.2.5",
-    "@jupyterlab/terminal": "^1.2.5",
+    "@jupyterlab/launcher": "^1.2.6",
+    "@jupyterlab/mainmenu": "^1.2.6",
+    "@jupyterlab/terminal": "^1.2.6",
     "@phosphor/widgets": "^1.9.0"
   },
   "devDependencies": {
