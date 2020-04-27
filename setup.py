@@ -142,8 +142,8 @@ setup_args['install_requires'] = [
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
     'jinja2>=2.10',
     'jupyterlab_server@ git+https://github.com/datalayer-contrib/jupyterlab-server@jupyter_server',
-    'jupyter_server@ git+https://github.com/zsailer/jupyter_server.git@discover-extensionapp-config',
-    'nbclassic@ git+https://github.com/Zsailer/nbclassic@trait-shims',
+    'jupyter_server@ git+https://github.com/jupyter/jupyter_server.git@master',
+    'nbclassic@ git+https://github.com/datalayer-contrib/jupyter-notebook-classic@jupyter_server_master',
 ]
 
 
