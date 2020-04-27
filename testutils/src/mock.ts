@@ -5,6 +5,8 @@ import 'jest';
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
+import { Context, TextModelFactory } from '@jupyterlab/docregistry';
+
 import {
   Kernel,
   KernelMessage,
@@ -614,6 +616,26 @@ export const MockShellFuture = jest.fn<Kernel.IShellFuture, []>(() => {
   };
   return thisObject;
 });
+
+/**
+ * Create a context for a file.
+ */
+export function createFileContext(startKernel = false): Context {
+  const path = UUID.uuid4() + '.txt';
+  const manager = new ServiceManagerMock();
+  const factory = new TextModelFactory();
+
+  return new Context({
+    manager,
+    factory,
+    path,
+    kernelPreference: {
+      shouldStart: startKernel,
+      canStart: startKernel,
+      autoStartDefault: startKernel
+    }
+  });
+}
 
 /**
  * A namespace for module private data.

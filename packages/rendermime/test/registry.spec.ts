@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { UUID, JSONObject } from '@lumino/coreutils';
 
@@ -22,12 +21,11 @@ import {
   IRenderMime,
   RenderedText,
   RenderMimeRegistry
-} from '@jupyterlab/rendermime';
+} from '../src';
 
-import {
-  defaultRenderMime,
-  createFileContextWithKernel
-} from '@jupyterlab/testutils';
+import { defaultRenderMime } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 function createModel(data: JSONObject): IRenderMime.IMimeModel {
   return new MimeModel({ data });
@@ -44,8 +42,8 @@ describe('rendermime/registry', () => {
   let r: RenderMimeRegistry;
   let RESOLVER: IRenderMime.IResolver;
 
-  before(async () => {
-    const fileContext = await createFileContextWithKernel();
+  beforeAll(async () => {
+    const fileContext = Mock.createFileContext(true);
     await fileContext.initialize(true);
 
     // The context initialization kicks off a sessionContext initialization,
@@ -62,34 +60,34 @@ describe('rendermime/registry', () => {
   describe('RenderMimeRegistry', () => {
     describe('#constructor()', () => {
       it('should create a new rendermime instance', () => {
-        expect(r instanceof RenderMimeRegistry).to.equal(true);
+        expect(r instanceof RenderMimeRegistry).toBe(true);
       });
     });
 
     describe('#resolver', () => {
       it('should be the resolver used by the rendermime', () => {
-        expect(r.resolver).to.be.null;
+        expect(r.resolver).toBeNull();
         const clone = r.clone({ resolver: RESOLVER });
-        expect(clone.resolver).to.equal(RESOLVER);
+        expect(clone.resolver).toBe(RESOLVER);
       });
     });
 
     describe('#linkHandler', () => {
       it('should be the link handler used by the rendermime', () => {
-        expect(r.linkHandler).to.be.null;
+        expect(r.linkHandler).toBeNull();
         const handler = {
           handleLink: () => {
             /* no-op */
           }
         };
         const clone = r.clone({ linkHandler: handler });
-        expect(clone.linkHandler).to.equal(handler);
+        expect(clone.linkHandler).toBe(handler);
       });
     });
 
     describe('#latexTypesetter', () => {
       it('should be the null typesetter by default', () => {
-        expect(r.latexTypesetter).to.be.null;
+        expect(r.latexTypesetter).toBeNull();
       });
 
       it('should be clonable', () => {
@@ -99,23 +97,23 @@ describe('rendermime/registry', () => {
         };
         const typesetter1 = new MathJaxTypesetter(args);
         const clone1 = r.clone({ latexTypesetter: typesetter1 });
-        expect(clone1.latexTypesetter).to.equal(typesetter1);
+        expect(clone1.latexTypesetter).toBe(typesetter1);
         const typesetter2 = new MathJaxTypesetter(args);
         const clone2 = r.clone({ latexTypesetter: typesetter2 });
-        expect(clone2.latexTypesetter).to.equal(typesetter2);
+        expect(clone2.latexTypesetter).toBe(typesetter2);
       });
     });
 
     describe('#createRenderer()', () => {
       it('should create a mime renderer', () => {
         const w = r.createRenderer('text/plain');
-        expect(w instanceof Widget).to.equal(true);
+        expect(w instanceof Widget).toBe(true);
       });
 
       it('should raise an error for an unregistered mime type', () => {
         expect(() => {
           r.createRenderer('text/fizz');
-        }).to.throw();
+        }).toThrowError();
       });
 
       it('should render json data', async () => {
@@ -124,7 +122,7 @@ describe('rendermime/registry', () => {
         });
         const w = r.createRenderer('application/json');
         await w.renderModel(model);
-        expect(w.node.textContent).to.equal('{\n  "foo": 1\n}');
+        expect(w.node.textContent).toBe('{\n  "foo": 1\n}');
       });
 
       it('should send a url resolver', async () => {
@@ -140,16 +138,16 @@ describe('rendermime/registry', () => {
               return Promise.resolve(url);
             },
             getDownloadUrl: (url: string) => {
-              expect(called0).to.equal(true);
+              expect(called0).toBe(true);
               called1 = true;
-              expect(url).to.equal('./foo%2520');
+              expect(url).toBe('./foo%2520');
               return Promise.resolve(url);
             }
           }
         });
         const w = r.createRenderer('text/html');
         await w.renderModel(model);
-        expect(called1).to.equal(true);
+        expect(called1).toBe(true);
       });
 
       it('should send a link handler', async () => {
@@ -161,14 +159,14 @@ describe('rendermime/registry', () => {
           resolver: RESOLVER,
           linkHandler: {
             handleLink: (node: HTMLElement, url: string) => {
-              expect(url).to.equal('foo/bar.txt');
+              expect(url).toBe('foo/bar.txt');
               called = true;
             }
           }
         });
         const w = r.createRenderer('text/html');
         await w.renderModel(model);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
 
       it('should send decoded paths to link handler', async () => {
@@ -180,14 +178,14 @@ describe('rendermime/registry', () => {
           resolver: RESOLVER,
           linkHandler: {
             handleLink: (node: HTMLElement, path: string) => {
-              expect(path).to.equal('foo%20/bår.txt');
+              expect(path).toBe('foo%20/bår.txt');
               called = true;
             }
           }
         });
         const w = r.createRenderer('text/html');
         await w.renderModel(model);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
@@ -197,12 +195,12 @@ describe('rendermime/registry', () => {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         });
-        expect(r.preferredMimeType(model.data, 'any')).to.equal('text/html');
+        expect(r.preferredMimeType(model.data, 'any')).toBe('text/html');
       });
 
       it('should return `undefined` if there are no registered mimeTypes', () => {
         const model = createModel({ 'text/fizz': 'buzz' });
-        expect(r.preferredMimeType(model.data, 'any')).to.be.undefined;
+        expect(r.preferredMimeType(model.data, 'any')).toBeUndefined();
       });
 
       it('should select the mimeType that is safe', () => {
@@ -212,7 +210,7 @@ describe('rendermime/registry', () => {
           'image/png':
             'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
         });
-        expect(r.preferredMimeType(model.data)).to.equal('image/png');
+        expect(r.preferredMimeType(model.data)).toBe('image/png');
       });
 
       it('should render the mimeType that is sanitizable', () => {
@@ -220,21 +218,21 @@ describe('rendermime/registry', () => {
           'text/plain': 'foo',
           'text/html': '<h1>foo</h1>'
         });
-        expect(r.preferredMimeType(model.data)).to.equal('text/html');
+        expect(r.preferredMimeType(model.data)).toBe('text/html');
       });
 
       it('should return `undefined` if only unsafe options with default `ensure`', () => {
         const model = createModel({
           'image/svg+xml': ''
         });
-        expect(r.preferredMimeType(model.data)).to.be.undefined;
+        expect(r.preferredMimeType(model.data)).toBeUndefined();
       });
 
       it('should return `undefined` if only unsafe options with `ensure`', () => {
         const model = createModel({
           'image/svg+xml': ''
         });
-        expect(r.preferredMimeType(model.data, 'ensure')).to.be.undefined;
+        expect(r.preferredMimeType(model.data, 'ensure')).toBeUndefined();
       });
 
       it('should return safe option if called with `prefer`', () => {
@@ -242,27 +240,23 @@ describe('rendermime/registry', () => {
           'image/svg+xml': '',
           'text/plain': ''
         });
-        expect(r.preferredMimeType(model.data, 'prefer')).to.equal(
-          'text/plain'
-        );
+        expect(r.preferredMimeType(model.data, 'prefer')).toBe('text/plain');
       });
 
       it('should return unsafe option if called with `prefer`, and no safe alternative', () => {
         const model = createModel({
           'image/svg+xml': ''
         });
-        expect(r.preferredMimeType(model.data, 'prefer')).to.equal(
-          'image/svg+xml'
-        );
+        expect(r.preferredMimeType(model.data, 'prefer')).toBe('image/svg+xml');
       });
     });
 
     describe('#clone()', () => {
       it('should clone the rendermime instance with shallow copies of data', () => {
         const c = r.clone();
-        expect(toArray(c.mimeTypes)).to.deep.equal(r.mimeTypes);
+        expect(toArray(c.mimeTypes)).toEqual(r.mimeTypes);
         c.addFactory(fooFactory);
-        expect(r).to.not.equal(c);
+        expect(r).not.toBe(c);
       });
     });
 
@@ -270,15 +264,15 @@ describe('rendermime/registry', () => {
       it('should add a factory', () => {
         r.addFactory(fooFactory);
         const index = r.mimeTypes.indexOf('text/foo');
-        expect(index).to.equal(r.mimeTypes.length - 1);
+        expect(index).toBe(r.mimeTypes.length - 1);
       });
 
       it('should take an optional rank', () => {
         const len = r.mimeTypes.length;
         r.addFactory(fooFactory, 0);
         const index = r.mimeTypes.indexOf('text/foo');
-        expect(index).to.equal(0);
-        expect(r.mimeTypes.length).to.equal(len + 1);
+        expect(index).toBe(0);
+        expect(r.mimeTypes.length).toBe(len + 1);
       });
     });
 
@@ -286,7 +280,7 @@ describe('rendermime/registry', () => {
       it('should remove a factory by mimeType', () => {
         r.removeMimeType('text/html');
         const model = createModel({ 'text/html': '<h1>foo</h1>' });
-        expect(r.preferredMimeType(model.data, 'any')).to.be.undefined;
+        expect(r.preferredMimeType(model.data, 'any')).toBeUndefined();
       });
 
       it('should be a no-op if the mimeType is not registered', () => {
@@ -297,22 +291,22 @@ describe('rendermime/registry', () => {
     describe('#getFactory()', () => {
       it('should get a factory by mimeType', () => {
         const f = r.getFactory('text/plain')!;
-        expect(f.mimeTypes).to.contain('text/plain');
+        expect(f.mimeTypes).toEqual(expect.arrayContaining(['text/plain']));
       });
 
       it('should return undefined for missing mimeType', () => {
-        expect(r.getFactory('hello/world')).to.be.undefined;
+        expect(r.getFactory('hello/world')).toBeUndefined();
       });
     });
 
     describe('#mimeTypes', () => {
       it('should get the ordered list of mimeTypes', () => {
-        expect(r.mimeTypes.indexOf('text/html')).to.not.equal(-1);
+        expect(r.mimeTypes.indexOf('text/html')).not.toBe(-1);
       });
     });
 
     describe('.UrlResolver', () => {
-      let manager: ServiceManager;
+      let manager: ServiceManager.IManager;
       let resolverSession: RenderMimeRegistry.UrlResolver;
       let resolverPath: RenderMimeRegistry.UrlResolver;
       let contents: Contents.IManager;
@@ -321,8 +315,8 @@ describe('rendermime/registry', () => {
       const urlParent = encodeURI(pathParent);
       const path = pathParent + '/pr%25 ' + UUID.uuid4();
 
-      before(async () => {
-        manager = new ServiceManager({ standby: 'never' });
+      beforeAll(async () => {
+        manager = new Mock.ServiceManagerMock();
         const drive = new Drive({ name: 'extra' });
         contents = manager.contents;
         contents.addDrive(drive);
@@ -342,22 +336,20 @@ describe('rendermime/registry', () => {
         });
       });
 
-      after(() => {
+      afterAll(() => {
         return session.shutdown();
       });
 
-      context('#constructor', () => {
+      describe('#constructor', () => {
         it('should create a UrlResolver instance', () => {
-          expect(resolverSession).to.be.an.instanceof(
+          expect(resolverSession).toBeInstanceOf(
             RenderMimeRegistry.UrlResolver
           );
-          expect(resolverPath).to.be.an.instanceof(
-            RenderMimeRegistry.UrlResolver
-          );
+          expect(resolverPath).toBeInstanceOf(RenderMimeRegistry.UrlResolver);
         });
       });
 
-      context('.path', () => {
+      describe('.path', () => {
         it('should give precedence to the explicit path over the session', async () => {
           const resolver = new RenderMimeRegistry.UrlResolver({
             session: new SessionContext({
@@ -369,11 +361,11 @@ describe('rendermime/registry', () => {
             contents: manager.contents,
             path: '/some/path/file.txt'
           });
-          expect(await resolver.resolveUrl('./foo')).to.equal('some/path/foo');
+          expect(await resolver.resolveUrl('./foo')).toBe('some/path/foo');
         });
 
         it('should fall back to the session path if only the session is given', () => {
-          expect(resolverSession.path).to.equal(path);
+          expect(resolverSession.path).toBe(path);
         });
 
         it('should allow the path to be changed', async () => {
@@ -387,24 +379,22 @@ describe('rendermime/registry', () => {
             contents: manager.contents
           });
           resolver.path = '/some/path/file.txt';
-          expect(await resolver.resolveUrl('./foo')).to.equal('some/path/foo');
+          expect(await resolver.resolveUrl('./foo')).toBe('some/path/foo');
           const resolver2 = new RenderMimeRegistry.UrlResolver({
             path: '/some/path/file.txt',
             contents: manager.contents
           });
           resolver2.path = '/other/path/file.txt';
-          expect(await resolver2.resolveUrl('./foo')).to.equal(
-            'other/path/foo'
-          );
+          expect(await resolver2.resolveUrl('./foo')).toBe('other/path/foo');
         });
       });
 
-      context('#resolveUrl()', () => {
+      describe('#resolveUrl()', () => {
         it('should resolve a relative url', async () => {
-          expect(await resolverSession.resolveUrl('./foo')).to.equal(
+          expect(await resolverSession.resolveUrl('./foo')).toBe(
             urlParent + '/foo'
           );
-          expect(await resolverPath.resolveUrl('./foo')).to.equal(
+          expect(await resolverPath.resolveUrl('./foo')).toBe(
             urlParent + '/foo'
           );
         });
@@ -420,62 +410,60 @@ describe('rendermime/registry', () => {
             contents: manager.contents
           });
           const path = await resolver.resolveUrl('./foo');
-          expect(path).to.equal(urlParent + '/foo');
+          expect(path).toBe(urlParent + '/foo');
         });
 
         it('should ignore urls that have a protocol', async () => {
-          expect(await resolverSession.resolveUrl('http://foo')).to.equal(
+          expect(await resolverSession.resolveUrl('http://foo')).toBe(
             'http://foo'
           );
-          expect(await resolverPath.resolveUrl('http://foo')).to.equal(
+          expect(await resolverPath.resolveUrl('http://foo')).toBe(
             'http://foo'
           );
         });
 
         it('should resolve URLs with escapes', async () => {
-          expect(await resolverSession.resolveUrl('has%20space')).to.equal(
+          expect(await resolverSession.resolveUrl('has%20space')).toBe(
             urlParent + '/has%20space'
           );
-          expect(await resolverPath.resolveUrl('has%20space')).to.equal(
+          expect(await resolverPath.resolveUrl('has%20space')).toBe(
             urlParent + '/has%20space'
           );
         });
       });
 
-      context('#getDownloadUrl()', () => {
+      describe('#getDownloadUrl()', () => {
         it('should resolve an absolute server url to a download url', async () => {
           const contextPromise = resolverPath.getDownloadUrl('foo');
           const contentsPromise = contents.getDownloadUrl('foo');
           const values = await Promise.all([contextPromise, contentsPromise]);
-          expect(values[0]).to.equal(values[1]);
+          expect(values[0]).toBe(values[1]);
         });
 
         it('should resolve escapes correctly', async () => {
           const contextPromise = resolverPath.getDownloadUrl('foo%2520test');
           const contentsPromise = contents.getDownloadUrl('foo%20test');
           const values = await Promise.all([contextPromise, contentsPromise]);
-          expect(values[0]).to.equal(values[1]);
+          expect(values[0]).toBe(values[1]);
         });
 
         it('should ignore urls that have a protocol', async () => {
           const path = await resolverPath.getDownloadUrl('http://foo');
-          expect(path).to.equal('http://foo');
+          expect(path).toBe('http://foo');
         });
       });
 
-      context('#isLocal', () => {
+      describe('#isLocal', () => {
         it('should return true for a registered IDrive`', () => {
-          expect(resolverPath.isLocal('extra:path/to/file')).to.equal(true);
+          expect(resolverPath.isLocal('extra:path/to/file')).toBe(true);
         });
 
         it('should return false for an unrecognized Drive`', () => {
-          expect(resolverPath.isLocal('unregistered:path/to/file')).to.equal(
-            false
-          );
+          expect(resolverPath.isLocal('unregistered:path/to/file')).toBe(false);
         });
 
         it('should return true for a normal filesystem-like path`', () => {
-          expect(resolverPath.isLocal('path/to/file')).to.equal(true);
+          expect(resolverPath.isLocal('path/to/file')).toBe(true);
         });
       });
     });
