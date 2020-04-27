@@ -55,7 +55,6 @@ if [[ $GROUP == docs2 ]]; then
     changelog=./docs/source/getting_started/changelog.rst
     py.test --check-links $changlog || py.test --check-links --lf $changelog
 fi
-fi
 
 
 if [[ $GROUP == integrity ]]; then
