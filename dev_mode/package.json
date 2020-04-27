@@ -185,7 +185,7 @@
   },
   "jupyterlab": {
     "name": "JupyterLab",
-    "version": "1.2.12",
+    "version": "1.2.13",
     "extensions": {
       "@jupyterlab/application-extension": "",
       "@jupyterlab/apputils-extension": "",
