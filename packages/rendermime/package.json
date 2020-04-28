@@ -43,6 +43,7 @@
     "@jupyterlab/apputils": "^2.1.0",
     "@jupyterlab/codemirror": "^2.1.0",
     "@jupyterlab/coreutils": "^4.1.0",
+    "@jupyterlab/mathjax2": "^2.1.0",
     "@jupyterlab/nbformat": "^2.1.0",
     "@jupyterlab/observables": "^3.1.0",
     "@jupyterlab/rendermime-interfaces": "^2.1.0",
