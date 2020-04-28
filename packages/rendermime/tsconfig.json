@@ -16,9 +16,6 @@
       "path": "../coreutils"
     },
     {
-      "path": "../mathjax2"
-    },
-    {
       "path": "../nbformat"
     },
     {

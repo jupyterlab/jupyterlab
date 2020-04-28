@@ -43,7 +43,6 @@
     "@jupyterlab/apputils": "^2.1.0",
     "@jupyterlab/codemirror": "^2.1.0",
     "@jupyterlab/coreutils": "^4.1.0",
-    "@jupyterlab/mathjax2": "^2.1.0",
     "@jupyterlab/nbformat": "^2.1.0",
     "@jupyterlab/observables": "^3.1.0",
     "@jupyterlab/rendermime-interfaces": "^2.1.0",
@@ -57,6 +56,7 @@
     "marked": "^0.8.0"
   },
   "devDependencies": {
+    "@jupyterlab/mathjax2": "^2.1.0",
     "@jupyterlab/testutils": "^2.1.0",
     "@types/jest": "^24.0.23",
     "@types/lodash.escape": "^4.0.6",
