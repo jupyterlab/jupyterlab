@@ -674,7 +674,10 @@ export class ClientSession implements IClientSession {
       // Change to the real path.
       await session.setPath(this._path);
 
-      // Change to the real type
+      // Update the name in case it has changed since we launched the session.
+      await session.setName(this._name);
+
+      // Change to the real type.
       await session.setType(this._type);
 
       if (this._session) {
