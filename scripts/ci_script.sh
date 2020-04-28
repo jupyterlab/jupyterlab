@@ -79,7 +79,7 @@ if [[ $GROUP == docs2 ]]; then
 
     # Run the link check on the changelog - allow for a link to fail once (--lf means only run last failed)
     changelog=./docs/source/getting_started/changelog.rst
-    py.test --check-links $changlog || py.test --check-links --lf $changelog
+    py.test --check-links $changelog || py.test --check-links --lf $changelog
 fi
 
 
