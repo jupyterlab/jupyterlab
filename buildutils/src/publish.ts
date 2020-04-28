@@ -86,6 +86,9 @@ commander
     console.log(`git tag v${curr}`);
     console.log('twine upload dist/*');
     console.log('git push origin <BRANCH> --tags');
+
+    // Emit a system beep.
+    process.stdout.write('\x07');
   });
 
 commander.parse(process.argv);
