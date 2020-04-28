@@ -1,7 +1,8 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
+
+const sampleData = require('../../../examples/filebrowser/sample.md');
 
 import { JSONObject, JSONValue } from '@lumino/coreutils';
 
@@ -16,9 +17,9 @@ import {
   textRendererFactory,
   htmlRendererFactory,
   imageRendererFactory
-} from '@jupyterlab/rendermime';
+} from '../src';
 
-import { MimeModel, IRenderMime } from '@jupyterlab/rendermime';
+import { MimeModel, IRenderMime } from '../src';
 
 function createModel(
   mimeType: string,
@@ -46,13 +47,13 @@ describe('rendermime/factories', () => {
           'application/vnd.jupyter.stdout',
           'application/vnd.jupyter.stderr'
         ];
-        expect(textRendererFactory.mimeTypes).to.deep.equal(mimeTypes);
+        expect(textRendererFactory.mimeTypes).toEqual(mimeTypes);
       });
     });
 
     describe('#safe', () => {
       it('should be safe', () => {
-        expect(textRendererFactory.safe).to.equal(true);
+        expect(textRendererFactory.safe).toBe(true);
       });
     });
 
@@ -63,7 +64,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, 'x = 2 ** a');
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).to.equal('<pre>x = 2 ** a</pre>');
+        expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
       });
 
       it('should be re-renderable', async () => {
@@ -73,7 +74,7 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         await w.renderModel(model);
-        expect(w.node.innerHTML).to.equal('<pre>x = 2 ** a</pre>');
+        expect(w.node.innerHTML).toBe('<pre>x = 2 ** a</pre>');
       });
 
       it('should output the correct HTML with ansi colors', async () => {
@@ -83,7 +84,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).to.equal(
+        expect(w.node.innerHTML).toBe(
           '<pre>There is no text but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
         );
       });
@@ -96,7 +97,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).to.equal(
+        expect(w.node.innerHTML).toBe(
           '<pre>There is no text &lt;script&gt;window.x=1&lt;/script&gt; but <span class="ansi-green-intense-fg ansi-red-bg ansi-bold">text</span>.\nWoo.</pre>'
         );
       });
@@ -118,7 +119,7 @@ describe('rendermime/factories', () => {
             const model = createModel(mimeType, source);
             const w = f.createRenderer({ mimeType, ...defaultOptions });
             await w.renderModel(model);
-            expect(w.node.innerHTML).to.equal(
+            expect(w.node.innerHTML).toBe(
               `<pre>Here is some text with an URL such as <a href="${url}" rel="noopener" target="_blank">${url}</a> inside.</pre>`
             );
           })
@@ -130,13 +131,13 @@ describe('rendermime/factories', () => {
   describe('latexRendererFactory', () => {
     describe('#mimeTypes', () => {
       it('should have the text/latex mimeType', () => {
-        expect(latexRendererFactory.mimeTypes).to.deep.equal(['text/latex']);
+        expect(latexRendererFactory.mimeTypes).toEqual(['text/latex']);
       });
     });
 
     describe('#safe', () => {
       it('should be safe', () => {
-        expect(latexRendererFactory.safe).to.equal(true);
+        expect(latexRendererFactory.safe).toBe(true);
       });
     });
 
@@ -148,7 +149,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.textContent).to.equal(source);
+        expect(w.node.textContent).toBe(source);
       });
 
       it('should be re-renderable', async () => {
@@ -159,7 +160,7 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         await w.renderModel(model);
-        expect(w.node.textContent).to.equal(source);
+        expect(w.node.textContent).toBe(source);
       });
     });
   });
@@ -167,13 +168,13 @@ describe('rendermime/factories', () => {
   describe('svgRendererFactory', () => {
     describe('#mimeTypes', () => {
       it('should have the image/svg+xml mimeType', () => {
-        expect(svgRendererFactory.mimeTypes).to.deep.equal(['image/svg+xml']);
+        expect(svgRendererFactory.mimeTypes).toEqual(['image/svg+xml']);
       });
     });
 
     describe('#safe', () => {
       it('should not be safe', () => {
-        expect(svgRendererFactory.safe).to.equal(false);
+        expect(svgRendererFactory.safe).toBe(false);
       });
     });
 
@@ -187,8 +188,8 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         const imgEl = w.node.getElementsByTagName('img')[0];
-        expect(imgEl).to.be.ok;
-        expect(imgEl.src).to.contain(encodeURIComponent(displaySource));
+        expect(imgEl).toBeTruthy();
+        expect(imgEl.src).toContain(encodeURIComponent(displaySource));
       });
     });
   });
@@ -196,15 +197,13 @@ describe('rendermime/factories', () => {
   describe('markdownRendererFactory', () => {
     describe('#mimeTypes', () => {
       it('should have the text/markdown mimeType', function() {
-        expect(markdownRendererFactory.mimeTypes).to.deep.equal([
-          'text/markdown'
-        ]);
+        expect(markdownRendererFactory.mimeTypes).toEqual(['text/markdown']);
       });
     });
 
     describe('#safe', () => {
       it('should be safe', () => {
-        expect(markdownRendererFactory.safe).to.equal(true);
+        expect(markdownRendererFactory.safe).toBe(true);
       });
     });
 
@@ -216,7 +215,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).to.equal(source);
+        expect(w.node.innerHTML).toBe(source);
       });
 
       it('it should be re-renderable', async () => {
@@ -227,25 +226,23 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         await w.renderModel(model);
-        expect(w.node.innerHTML).to.equal(source);
+        expect(w.node.innerHTML).toBe(source);
       });
 
-      it('should add header anchors', async () => {
-        const source = require('../../../examples/filebrowser/sample.md')
-          .default as string;
+      it.only('should add header anchors', async () => {
         const f = markdownRendererFactory;
         const mimeType = 'text/markdown';
-        const model = createModel(mimeType, source);
+        const model = createModel(mimeType, sampleData);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         Widget.attach(w, document.body);
         const node = document.getElementById('Title-third-level')!;
-        expect(node.localName).to.equal('h3');
+        expect(node.localName).toBe('h3');
         const anchor = node.firstChild!.nextSibling as HTMLAnchorElement;
-        expect(anchor.href).to.contain('#Title-third-level');
-        expect(anchor.target).to.equal('_self');
-        expect(anchor.className).to.contain('jp-InternalAnchorLink');
-        expect(anchor.textContent).to.equal('¶');
+        expect(anchor.href).toContain('#Title-third-level');
+        expect(anchor.target).toBe('_self');
+        expect(anchor.className).toContain('jp-InternalAnchorLink');
+        expect(anchor.textContent).toBe('¶');
         Widget.detach(w);
       });
 
@@ -256,7 +253,9 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).to.not.contain('script');
+        expect(w.node.innerHTML).toEqual(
+          expect.not.arrayContaining(['script'])
+        );
       });
     });
   });
@@ -264,13 +263,13 @@ describe('rendermime/factories', () => {
   describe('htmlRendererFactory', () => {
     describe('#mimeTypes', () => {
       it('should have the text/html mimeType', () => {
-        expect(htmlRendererFactory.mimeTypes).to.deep.equal(['text/html']);
+        expect(htmlRendererFactory.mimeTypes).toEqual(['text/html']);
       });
     });
 
     describe('#safe', () => {
       it('should be safe', () => {
-        expect(htmlRendererFactory.safe).to.equal(true);
+        expect(htmlRendererFactory.safe).toBe(true);
       });
     });
 
@@ -282,7 +281,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).to.equal('<h1>This is great</h1>');
+        expect(w.node.innerHTML).toBe('<h1>This is great</h1>');
       });
 
       it('should be re-renderable', async () => {
@@ -293,7 +292,7 @@ describe('rendermime/factories', () => {
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         await w.renderModel(model);
-        expect(w.node.innerHTML).to.equal('<h1>This is great</h1>');
+        expect(w.node.innerHTML).toBe('<h1>This is great</h1>');
       });
 
       // TODO we are disabling script execution for now.
@@ -304,9 +303,9 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source, true);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         return w.renderModel(model).then(() => {
-          expect((window as any).y).to.be.undefined;
+          expect((window as any).y).toBeUndefined();
           Widget.attach(w, document.body);
-          expect((window as any).y).to.equal(3);
+          expect((window as any).y).toBe(3);
           w.dispose();
         });
       });
@@ -318,7 +317,7 @@ describe('rendermime/factories', () => {
         const model = createModel(mimeType, source);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
-        expect(w.node.innerHTML).to.equal('<pre></pre>');
+        expect(w.node.innerHTML).toBe('<pre></pre>');
       });
     });
 
@@ -331,14 +330,14 @@ describe('rendermime/factories', () => {
       const mimeType = 'text/html';
       const w = f.createRenderer({ mimeType, ...defaultOptions });
       await w.renderModel(model);
-      expect(w.node.innerHTML).to.equal('<h1>foo </h1>');
+      expect(w.node.innerHTML).toBe('<h1>foo </h1>');
     });
   });
 
   describe('imageRendererFactory', () => {
     describe('#mimeTypes', () => {
       it('should support multiple mimeTypes', () => {
-        expect(imageRendererFactory.mimeTypes).to.deep.equal([
+        expect(imageRendererFactory.mimeTypes).toEqual([
           'image/bmp',
           'image/png',
           'image/jpeg',
@@ -349,7 +348,7 @@ describe('rendermime/factories', () => {
 
     describe('#safe', () => {
       it('should be safe', () => {
-        expect(imageRendererFactory.safe).to.equal(true);
+        expect(imageRendererFactory.safe).toBe(true);
       });
     });
 
@@ -363,9 +362,9 @@ describe('rendermime/factories', () => {
 
         await w.renderModel(model);
         let el = w.node.firstChild as HTMLImageElement;
-        expect(el.src).to.equal('data:image/png;base64,' + source);
-        expect(el.localName).to.equal('img');
-        expect(el.innerHTML).to.equal('');
+        expect(el.src).toBe('data:image/png;base64,' + source);
+        expect(el.localName).toBe('img');
+        expect(el.innerHTML).toBe('');
 
         source = 'R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
         mimeType = 'image/gif';
@@ -373,9 +372,9 @@ describe('rendermime/factories', () => {
         w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         el = w.node.firstChild as HTMLImageElement;
-        expect(el.src).to.equal('data:image/gif;base64,' + source);
-        expect(el.localName).to.equal('img');
-        expect(el.innerHTML).to.equal('');
+        expect(el.src).toBe('data:image/gif;base64,' + source);
+        expect(el.localName).toBe('img');
+        expect(el.innerHTML).toBe('');
       });
     });
   });

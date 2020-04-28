@@ -6,10 +6,7 @@
       "path": "../apputils"
     },
     {
-      "path": "../cells"
-    },
-    {
-      "path": "../codeeditor"
+      "path": "../codemirror"
     },
     {
       "path": "../coreutils"
@@ -21,13 +18,13 @@
       "path": "../observables"
     },
     {
-      "path": "../rendermime"
+      "path": "../rendermime-interfaces"
     },
     {
       "path": "../services"
     },
     {
-      "path": "../ui-components"
+      "path": "../mathjax2"
     },
     {
       "path": "../../testutils"
@@ -36,10 +33,7 @@
       "path": "../apputils"
     },
     {
-      "path": "../cells"
-    },
-    {
-      "path": "../codeeditor"
+      "path": "../codemirror"
     },
     {
       "path": "../coreutils"
@@ -51,13 +45,10 @@
       "path": "../observables"
     },
     {
-      "path": "../rendermime"
+      "path": "../rendermime-interfaces"
     },
     {
       "path": "../services"
-    },
-    {
-      "path": "../ui-components"
     }
   ]
 }

@@ -50,6 +50,7 @@
     "jest": "^25.2.3",
     "jest-raw-loader": "^1.0.1",
     "json-to-html": "~0.1.2",
+    "markdown-loader-jest": "^0.1.1",
     "node-fetch": "^2.6.0",
     "path": "~0.12.7",
     "simulate-event": "~1.4.0",
