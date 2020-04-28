@@ -532,6 +532,12 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       });
       return Promise.resolve(files.get(path)!);
     }),
+    getDownloadUrl: jest.fn(path => {
+      return dummy.getDownloadUrl(path);
+    }),
+    addDrive: jest.fn(drive => {
+      dummy.addDrive(drive);
+    }),
     dispose: jest.fn()
   };
 

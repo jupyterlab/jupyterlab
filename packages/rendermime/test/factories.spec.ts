@@ -2,6 +2,8 @@
 
 import 'jest';
 
+const sampleData = require('../../../examples/filebrowser/sample.md');
+
 import { JSONObject, JSONValue } from '@lumino/coreutils';
 
 import { Widget } from '@lumino/widgets';
@@ -187,9 +189,7 @@ describe('rendermime/factories', () => {
         await w.renderModel(model);
         const imgEl = w.node.getElementsByTagName('img')[0];
         expect(imgEl).toBeTruthy();
-        expect(imgEl.src).toEqual(
-          expect.arrayContaining([encodeURIComponent(displaySource)])
-        );
+        expect(imgEl.src).toContain(encodeURIComponent(displaySource));
       });
     });
   });
@@ -229,25 +229,19 @@ describe('rendermime/factories', () => {
         expect(w.node.innerHTML).toBe(source);
       });
 
-      it('should add header anchors', async () => {
-        const source = require('../../../examples/filebrowser/sample.md')
-          .default as string;
+      it.only('should add header anchors', async () => {
         const f = markdownRendererFactory;
         const mimeType = 'text/markdown';
-        const model = createModel(mimeType, source);
+        const model = createModel(mimeType, sampleData);
         const w = f.createRenderer({ mimeType, ...defaultOptions });
         await w.renderModel(model);
         Widget.attach(w, document.body);
         const node = document.getElementById('Title-third-level')!;
         expect(node.localName).toBe('h3');
         const anchor = node.firstChild!.nextSibling as HTMLAnchorElement;
-        expect(anchor.href).toEqual(
-          expect.arrayContaining(['#Title-third-level'])
-        );
+        expect(anchor.href).toContain('#Title-third-level');
         expect(anchor.target).toBe('_self');
-        expect(anchor.className).toEqual(
-          expect.arrayContaining(['jp-InternalAnchorLink'])
-        );
+        expect(anchor.className).toContain('jp-InternalAnchorLink');
         expect(anchor.textContent).toBe('¶');
         Widget.detach(w);
       });

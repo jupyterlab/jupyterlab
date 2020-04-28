@@ -61,6 +61,7 @@
     "@types/lodash.escape": "^4.0.6",
     "@types/marked": "^0.7.2",
     "jest": "^25.2.3",
+    "json2html": "^0.0.8",
     "rimraf": "~3.0.0",
     "ts-jest": "^25.2.1",
     "typedoc": "^0.15.4",

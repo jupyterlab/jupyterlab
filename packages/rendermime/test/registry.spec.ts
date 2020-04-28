@@ -2,6 +2,8 @@
 
 import 'jest';
 
+import json2html = require('json-to-html');
+
 import { UUID, JSONObject } from '@lumino/coreutils';
 
 import { Contents, Drive, ServiceManager, Session } from '@jupyterlab/services';
@@ -20,12 +22,35 @@ import {
   MimeModel,
   IRenderMime,
   RenderedText,
-  RenderMimeRegistry
+  RenderMimeRegistry,
+  RenderedHTML,
+  standardRendererFactories
 } from '../src';
 
-import { defaultRenderMime } from '@jupyterlab/testutils';
-
 import * as Mock from '@jupyterlab/testutils/lib/mock';
+
+class JSONRenderer extends RenderedHTML {
+  mimeType = 'text/html';
+
+  renderModel(model: IRenderMime.IMimeModel): Promise<void> {
+    const source = model.data['application/json'];
+    model.setData({ data: { 'text/html': json2html(source) } });
+    return super.renderModel(model);
+  }
+}
+
+const jsonRendererFactory = {
+  mimeTypes: ['application/json'],
+  safe: true,
+  createRenderer(options: IRenderMime.IRendererOptions): IRenderMime.IRenderer {
+    return new JSONRenderer(options);
+  }
+};
+
+const defaultRenderMime = new RenderMimeRegistry({
+  initialFactories: standardRendererFactories
+});
+defaultRenderMime.addFactory(jsonRendererFactory, 10);
 
 function createModel(data: JSONObject): IRenderMime.IMimeModel {
   return new MimeModel({ data });
@@ -54,7 +79,7 @@ describe('rendermime/registry', () => {
   });
 
   beforeEach(() => {
-    r = defaultRenderMime();
+    r = defaultRenderMime.clone();
   });
 
   describe('RenderMimeRegistry', () => {
@@ -159,7 +184,7 @@ describe('rendermime/registry', () => {
           resolver: RESOLVER,
           linkHandler: {
             handleLink: (node: HTMLElement, url: string) => {
-              expect(url).toBe('foo/bar.txt');
+              expect(url).toContain('foo/bar.txt');
               called = true;
             }
           }
@@ -178,7 +203,7 @@ describe('rendermime/registry', () => {
           resolver: RESOLVER,
           linkHandler: {
             handleLink: (node: HTMLElement, path: string) => {
-              expect(path).toBe('foo%20/bår.txt');
+              expect(path).toContain('foo%20/bår.txt');
               called = true;
             }
           }
@@ -361,7 +386,7 @@ describe('rendermime/registry', () => {
             contents: manager.contents,
             path: '/some/path/file.txt'
           });
-          expect(await resolver.resolveUrl('./foo')).toBe('some/path/foo');
+          expect(await resolver.resolveUrl('./foo')).toContain('some/path/foo');
         });
 
         it('should fall back to the session path if only the session is given', () => {
@@ -379,22 +404,24 @@ describe('rendermime/registry', () => {
             contents: manager.contents
           });
           resolver.path = '/some/path/file.txt';
-          expect(await resolver.resolveUrl('./foo')).toBe('some/path/foo');
+          expect(await resolver.resolveUrl('./foo')).toContain('some/path/foo');
           const resolver2 = new RenderMimeRegistry.UrlResolver({
             path: '/some/path/file.txt',
             contents: manager.contents
           });
           resolver2.path = '/other/path/file.txt';
-          expect(await resolver2.resolveUrl('./foo')).toBe('other/path/foo');
+          expect(await resolver2.resolveUrl('./foo')).toContain(
+            'other/path/foo'
+          );
         });
       });
 
       describe('#resolveUrl()', () => {
         it('should resolve a relative url', async () => {
-          expect(await resolverSession.resolveUrl('./foo')).toBe(
+          expect(await resolverSession.resolveUrl('./foo')).toContain(
             urlParent + '/foo'
           );
-          expect(await resolverPath.resolveUrl('./foo')).toBe(
+          expect(await resolverPath.resolveUrl('./foo')).toContain(
             urlParent + '/foo'
           );
         });
@@ -410,23 +437,23 @@ describe('rendermime/registry', () => {
             contents: manager.contents
           });
           const path = await resolver.resolveUrl('./foo');
-          expect(path).toBe(urlParent + '/foo');
+          expect(path).toContain(urlParent + '/foo');
         });
 
         it('should ignore urls that have a protocol', async () => {
-          expect(await resolverSession.resolveUrl('http://foo')).toBe(
+          expect(await resolverSession.resolveUrl('http://foo')).toContain(
             'http://foo'
           );
-          expect(await resolverPath.resolveUrl('http://foo')).toBe(
+          expect(await resolverPath.resolveUrl('http://foo')).toContain(
             'http://foo'
           );
         });
 
         it('should resolve URLs with escapes', async () => {
-          expect(await resolverSession.resolveUrl('has%20space')).toBe(
+          expect(await resolverSession.resolveUrl('has%20space')).toContain(
             urlParent + '/has%20space'
           );
-          expect(await resolverPath.resolveUrl('has%20space')).toBe(
+          expect(await resolverPath.resolveUrl('has%20space')).toContain(
             urlParent + '/has%20space'
           );
         });
