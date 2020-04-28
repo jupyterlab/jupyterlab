@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { PageConfig } from '@jupyterlab/coreutils';
 
 const RE_PATH_ANCHOR = /^file:\/\/([^\/]+|\/[A-Z]:)/;
@@ -130,3 +131,37 @@ export function uri_to_contents_path(child: string, parent?: string) {
   }
   return null;
 }
+
+/**
+ * The docs for many language servers show settings in the
+ * VSCode format, e.g.: "pyls.plugins.pyflakes.enabled"
+ *
+ * VSCode converts that dot notation to JSON behind the scenes,
+ * as the language servers themselves don't accept that syntax.
+ */
+const vscodeStyleSettingParser = (settingString: string, value: any) => {
+  const propArr: any = settingString.split('.');
+  const obj: any = {};
+
+  let curr = obj;
+  propArr.forEach((prop: string, i: any) => {
+    curr[prop] = {};
+
+    if (i === propArr.length - 1) {
+      curr[prop] = value;
+    } else {
+      curr = curr[prop];
+    }
+  });
+
+  return obj;
+};
+
+export const vscodeStyleSettingsParser = (settingsObject: any) => {
+  const settings: any = [];
+  for (let setting in settingsObject) {
+    const parsed = vscodeStyleSettingParser(setting, settingsObject[setting]);
+    settings.push(parsed);
+  }
+  return _.merge({}, ...settings);
+};

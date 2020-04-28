@@ -3,7 +3,7 @@ import { LSPConnection } from './connection';
 
 import { Signal } from '@lumino/signaling';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { sleep, until_ready } from './utils';
+import { sleep, until_ready, vscodeStyleSettingsParser } from './utils';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as ConnectionModuleType from './connection';
@@ -157,9 +157,14 @@ export class DocumentConnectionManager {
     lsSettings: any
   ) {
     for (let language_server_id in lsSettings) {
+      const parsedSettings = vscodeStyleSettingsParser(
+        lsSettings[language_server_id]
+      );
+
       const serverSettings: ILanguageServerConfiguration = {
-        settings: lsSettings
+        settings: parsedSettings
       };
+
       Private.updateServerConfiguration(language_server_id, serverSettings);
     }
   }
@@ -394,6 +399,9 @@ namespace Private {
     language_server_id: TLanguageServerId,
     settings: ILanguageServerConfiguration
   ): void {
+    console.log('Server Update: ', language_server_id);
+    console.log('Sending settings: ', settings);
+
     const connection = _connections.get(language_server_id);
     if (connection) {
       connection.sendConfigurationChange(settings);
