@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
 import { IEditorPosition } from '../../../positioning';
@@ -161,19 +162,18 @@ class Column {
 
 function SortableTH(props: { name: string; listing: DiagnosticsListing }): any {
   const is_sort_key = props.name === props.listing.sort_key;
+  const sortIcon =
+    props.listing.sort_direction === 1 ? caretUpIcon : caretDownIcon;
   return (
     <th
       key={props.name}
       onClick={() => props.listing.sort(props.name)}
-      className={
-        is_sort_key
-          ? 'lsp-sorted ' +
-            (props.listing.sort_direction === 1 ? 'lsp-descending' : '')
-          : ''
-      }
+      className={is_sort_key ? 'lsp-sorted-header' : null}
     >
       {props.name}
-      {is_sort_key ? <span className={'lsp-caret'} /> : null}
+      {is_sort_key ? (
+        <sortIcon.react tag="span" className="lsp-sort-icon" />
+      ) : null}
     </th>
   );
 }
