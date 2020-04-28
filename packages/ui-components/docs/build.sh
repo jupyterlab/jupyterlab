@@ -24,11 +24,11 @@ pushd $SOURCE > /dev/null
 pandoc $SOURCE/labicon.rst -f rst -t rst --wrap=preserve --shift-heading-level-by=1 -o $BUILD/labicon.rst
 
 # make the README.md at package root
-pandoc $SOURCE/README.rst -f rst -t gfm -o $PKG_ROOT/README.md    #--resource-path=$SOURCE
+pandoc $SOURCE/generated_warning.rst $SOURCE/README.rst -f rst -t gfm -o $PKG_ROOT/README.md    #--resource-path=$SOURCE
 echo "built $PKG_ROOT/README.md"
 
 # make the dev docs for the monorepo's docs
-pandoc $SOURCE/ui_components.rst -f rst -t rst --wrap=preserve -o $MONOREPO_DEVDOC/ui_components.rst
+pandoc $SOURCE/generated_warning.rst $SOURCE/ui_components.rst -f rst -t rst --wrap=preserve -o $MONOREPO_DEVDOC/ui_components.rst
 echo "built $MONOREPO_DEVDOC/ui_components.rst"
 
 popd > /dev/null
