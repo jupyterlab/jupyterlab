@@ -28,7 +28,7 @@ Background
 Icon handling in Jupyterlab
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Pre jlab-2.0, most icons were created using the icons-as-css-background
+Pre JupyterLab version 2.0, most icons were created using the icons-as-css-background
 pattern:
 
 -  Set up the icon’s svg as a ``background-image`` in CSS:
