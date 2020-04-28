@@ -63,7 +63,7 @@ if [[ $GROUP == docs ]]; then
 
     # Changelog has a lot of links and is covered in a separate job.
     changelog=./docs/source/getting_started/changelog.rst
-    py.test --check-links -k .html --deselect $changelog build/html || py.test --check-links -k .html --deselect $changelog --lf build/html
+    py.test --check-links --links-ext .html -k .html --deselect $changelog build/html || py.test --check-links --links-ext .html -k .html --deselect $changelog --lf build/html
 
     popd
 fi
@@ -71,7 +71,7 @@ fi
 
 if [[ $GROUP == docs2 ]]; then
     # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
-    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+    py.test --check-links --links-ext .md -k .md . || py.test --check-links --links-ext .md -k .md --lf .
 
     # Build the API docs
     jlpm build:packages
