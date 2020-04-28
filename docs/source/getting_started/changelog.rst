@@ -6,9 +6,14 @@ JupyterLab Changelog
 `v1.2.x <https://github.com/jupyterlab/jupyterlab/milestone/54>`__
 ---------------------------------------------------------------------------
 
+v1.2.14
+^^^^^^^
+* Fix session name handling for slow starting kernels (`#8290 <https://github.com/jupyterlab/jupyterlab/pull/8290>`__)
+
 v1.2.13
 ^^^^^^^
 * Fix handling of slow starting kernel (`#8285 <https://github.com/jupyterlab/jupyterlab/pull/8285>`__)
+* Set a data attribute for the file type in the file browser (`#8274 <https://github.com/jupyterlab/jupyterlab/pull/8274>`__)
 
 v1.2.12
 ^^^^^^^
