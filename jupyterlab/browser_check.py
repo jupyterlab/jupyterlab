@@ -94,7 +94,7 @@ async def run_test_async(app, func):
 
     # Allow a synchronous function to be passed in.
     if inspect.iscoroutinefunction(func):
-        test = asyncio.create_task(func(url))
+        test = func(url)
     else:
         loop = asyncio.get_event_loop()
         executor = ThreadPoolExecutor()
