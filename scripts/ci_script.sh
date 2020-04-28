@@ -26,11 +26,14 @@ if [[ $GROUP == js* ]]; then
         here=$(pwd)
         if [[ -d "${here}/tests/test-${GROUP}" ]];then
             scope="@jupyterlab/test-${PKG}"
+            jlpm run build:test:scope --scope ${scope}
         else
+            pushd packages/${PKG}
+            jlpm run build:test
+            popd
             scope="@jupyterlab/${PKG}"
-            jlpm run build:testutils
         fi
-        jlpm run build:test:scope --scope ${scope}
+
         FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope ${scope}
     else
         jlpm build:packages
