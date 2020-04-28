@@ -16,7 +16,7 @@
     "@jupyterlab/codemirror": "^2.1.0",
     "@jupyterlab/testutils": "^2.1.0",
     "chai": "^4.2.0",
-    "codemirror": "~5.49.2",
+    "codemirror": "~5.53.2",
     "jest": "^25.2.3",
     "jest-junit": "^10.0.0",
     "simulate-event": "~1.4.0",
