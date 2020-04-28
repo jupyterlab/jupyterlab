@@ -30,7 +30,9 @@ if [[ $GROUP == js* ]]; then
         else
             pushd packages/${PKG}
             jlpm run build; true
-            jlpm run build:test; true
+            if [[ -d ${here}/packages/${PKG}/test ]]; then
+                jlpm run build:test; true
+            fi
             popd
             scope="@jupyterlab/${PKG}"
         fi
