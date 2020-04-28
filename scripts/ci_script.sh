@@ -54,7 +54,7 @@ fi
 if [[ $GROUP == docs ]]; then
     # Verify tutorial docs build
     pushd docs
-    pip install -r requirements.txt
+    pip install -r ./requirements.txt
     make html
 
     # Remove internal sphinx files and use pytest-check-links on the generated html
@@ -62,8 +62,8 @@ if [[ $GROUP == docs ]]; then
     rm build/html/search.html
 
     # Changelog has a lot of links and is covered in a separate job.
-    changelog=./docs/source/getting_started/changelog.rst
-    py.test --check-links --links-ext .html -k .html --deselect $changelog build/html || py.test --check-links --links-ext .html -k .html --deselect $changelog --lf build/html
+    changelog_html=./build/html/getting_started/changelog.html
+    py.test --check-links --links-ext .html -k .html --ignore $changelog_html build/html || py.test --check-links --links-ext .html -k .html --ignore $changelog_html --lf build/html
 
     popd
 fi
