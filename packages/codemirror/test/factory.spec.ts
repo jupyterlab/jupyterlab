@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -40,16 +39,16 @@ describe('CodeMirrorEditorFactory', () => {
   describe('#constructor()', () => {
     it('should create a CodeMirrorEditorFactory', () => {
       const factory = new CodeMirrorEditorFactory();
-      expect(factory).to.be.an.instanceof(CodeMirrorEditorFactory);
+      expect(factory).toBeInstanceOf(CodeMirrorEditorFactory);
     });
 
     it('should create a CodeMirrorEditorFactory', () => {
       const factory = new ExposeCodeMirrorEditorFactory(options);
-      expect(factory).to.be.an.instanceof(CodeMirrorEditorFactory);
-      expect(factory.inlineCodeMirrorConfig.extraKeys).to.deep.equal(
+      expect(factory).toBeInstanceOf(CodeMirrorEditorFactory);
+      expect(factory.inlineCodeMirrorConfig.extraKeys).toEqual(
         options.extraKeys
       );
-      expect(factory.documentCodeMirrorConfig.extraKeys).to.deep.equal(
+      expect(factory.documentCodeMirrorConfig.extraKeys).toEqual(
         options.extraKeys
       );
     });
@@ -59,7 +58,7 @@ describe('CodeMirrorEditorFactory', () => {
     it('should create a new editor', () => {
       const factory = new CodeMirrorEditorFactory();
       const editor = factory.newInlineEditor({ host, model });
-      expect(editor).to.be.an.instanceof(CodeMirrorEditor);
+      expect(editor).toBeInstanceOf(CodeMirrorEditor);
       editor.dispose();
     });
 
@@ -69,10 +68,10 @@ describe('CodeMirrorEditorFactory', () => {
         host,
         model
       }) as CodeMirrorEditor;
-      expect(editor).to.be.an.instanceof(CodeMirrorEditor);
+      expect(editor).toBeInstanceOf(CodeMirrorEditor);
       for (const key in Object.keys(options)) {
         const option = key as keyof CodeMirrorEditor.IConfig;
-        expect(editor.getOption(option)).to.equal(options[option]);
+        expect(editor.getOption(option)).toBe(options[option]);
       }
       editor.dispose();
     });
@@ -82,7 +81,7 @@ describe('CodeMirrorEditorFactory', () => {
     it('should create a new editor', () => {
       const factory = new CodeMirrorEditorFactory();
       const editor = factory.newDocumentEditor({ host, model });
-      expect(editor).to.be.an.instanceof(CodeMirrorEditor);
+      expect(editor).toBeInstanceOf(CodeMirrorEditor);
       editor.dispose();
     });
 
@@ -92,10 +91,10 @@ describe('CodeMirrorEditorFactory', () => {
         host,
         model
       }) as CodeMirrorEditor;
-      expect(editor).to.be.an.instanceof(CodeMirrorEditor);
+      expect(editor).toBeInstanceOf(CodeMirrorEditor);
       for (const key in Object.keys(options)) {
         const option = key as keyof CodeMirrorEditor.IConfig;
-        expect(editor.getOption(option)).to.equal(options[option]);
+        expect(editor.getOption(option)).toBe(options[option]);
       }
       editor.dispose();
     });
