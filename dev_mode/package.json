@@ -377,7 +377,6 @@
       "@jupyterlab/test-inspector": "../tests/test-inspector",
       "@jupyterlab/test-logconsole": "../tests/test-logconsole",
       "@jupyterlab/test-mainmenu": "../tests/test-mainmenu",
-      "@jupyterlab/test-nbformat": "../tests/test-nbformat",
       "@jupyterlab/test-notebook": "../tests/test-notebook",
       "@jupyterlab/test-observables": "../tests/test-observables",
       "@jupyterlab/test-outputarea": "../tests/test-outputarea",
