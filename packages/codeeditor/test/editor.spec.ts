@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
@@ -20,14 +19,14 @@ describe('CodeEditor.Model', () => {
 
   describe('#constructor()', () => {
     it('should create a CodeEditor Model', () => {
-      expect(model).to.be.an.instanceof(CodeEditor.Model);
-      expect(model.value.text).to.equal('');
+      expect(model).toBeInstanceOf(CodeEditor.Model);
+      expect(model.value.text).toBe('');
     });
 
     it('should create a CodeEditor Model with an initial value', () => {
       const other = new CodeEditor.Model({ value: 'Initial text here' });
-      expect(other).to.be.an.instanceof(CodeEditor.Model);
-      expect(other.value.text).to.equal('Initial text here');
+      expect(other).toBeInstanceOf(CodeEditor.Model);
+      expect(other.value.text).toBe('Initial text here');
       other.dispose();
     });
 
@@ -36,9 +35,9 @@ describe('CodeEditor.Model', () => {
         value: 'import this',
         mimeType: 'text/x-python'
       });
-      expect(other).to.be.an.instanceof(CodeEditor.Model);
-      expect(other.mimeType).to.equal('text/x-python');
-      expect(other.value.text).to.equal('import this');
+      expect(other).toBeInstanceOf(CodeEditor.Model);
+      expect(other.mimeType).toBe('text/x-python');
+      expect(other.value.text).toBe('import this');
       other.dispose();
     });
   });
@@ -47,13 +46,13 @@ describe('CodeEditor.Model', () => {
     it('should be emitted when the mime type changes', () => {
       let called = false;
       model.mimeTypeChanged.connect((sender, args) => {
-        expect(sender).to.equal(model);
-        expect(args.oldValue).to.equal('text/plain');
-        expect(args.newValue).to.equal('text/foo');
+        expect(sender).toBe(model);
+        expect(args.oldValue).toBe('text/plain');
+        expect(args.newValue).toBe('text/foo');
         called = true;
       });
       model.mimeType = 'text/foo';
-      expect(called).to.be.true;
+      expect(called).toBe(true);
     });
   });
 
@@ -64,14 +63,14 @@ describe('CodeEditor.Model', () => {
         sender: IObservableString,
         args: IObservableString.IChangedArgs
       ) => {
-        expect(sender).to.equal(model.value);
-        expect(args.type).to.equal('set');
-        expect(args.value).to.equal('foo');
+        expect(sender).toBe(model.value);
+        expect(args.type).toBe('set');
+        expect(args.value).toBe('foo');
         called = true;
       };
       model.value.changed.connect(handler);
       model.value.text = 'foo';
-      expect(called).to.be.true;
+      expect(called).toBe(true);
       model.value.changed.disconnect(handler);
     });
 
@@ -81,13 +80,13 @@ describe('CodeEditor.Model', () => {
         sender: IObservableString,
         args: IObservableString.IChangedArgs
       ) => {
-        expect(args.type).to.equal('insert');
-        expect(args.value).to.equal('foo');
+        expect(args.type).toBe('insert');
+        expect(args.value).toBe('foo');
         called = true;
       };
       model.value.changed.connect(handler);
       model.value.insert(0, 'foo');
-      expect(called).to.be.true;
+      expect(called).toBe(true);
       model.value.changed.disconnect(handler);
     });
 
@@ -98,42 +97,42 @@ describe('CodeEditor.Model', () => {
         sender: IObservableString,
         args: IObservableString.IChangedArgs
       ) => {
-        expect(args.type).to.equal('remove');
-        expect(args.value).to.equal('f');
+        expect(args.type).toBe('remove');
+        expect(args.value).toBe('f');
         called = true;
       };
       model.value.changed.connect(handler);
       model.value.remove(0, 1);
-      expect(called).to.be.true;
+      expect(called).toBe(true);
       model.value.changed.disconnect(handler);
     });
   });
 
   describe('#selections', () => {
     it('should be the selections associated with the model', () => {
-      expect(model.selections.keys().length).to.equal(0);
+      expect(model.selections.keys().length).toBe(0);
     });
   });
 
   describe('#mimeType', () => {
     it('should be the mime type of the model', () => {
-      expect(model.mimeType).to.equal('text/plain');
+      expect(model.mimeType).toBe('text/plain');
       model.mimeType = 'text/foo';
-      expect(model.mimeType).to.equal('text/foo');
+      expect(model.mimeType).toBe('text/foo');
     });
   });
 
   describe('#modelDB', () => {
     it('should get the modelDB object associated with the model', () => {
-      expect(model.modelDB.has('value')).to.be.true;
+      expect(model.modelDB.has('value')).toBe(true);
     });
   });
 
   describe('#isDisposed', () => {
     it('should test whether the model is disposed', () => {
-      expect(model.isDisposed).to.be.false;
+      expect(model.isDisposed).toBe(false);
       model.dispose();
-      expect(model.isDisposed).to.be.true;
+      expect(model.isDisposed).toBe(true);
     });
   });
 });
