@@ -16,7 +16,7 @@ jobs:
             python: 3.5
           - group: docs
             python: 3.5
-          - group: docs
+          - group: docs2
             python: 3.5
           - group: changelog
             python: 3.5

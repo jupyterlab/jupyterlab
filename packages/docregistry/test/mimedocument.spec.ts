@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { Message } from '@lumino/messaging';
 
@@ -17,11 +16,9 @@ import {
 
 import { RenderedText, IRenderMime } from '@jupyterlab/rendermime';
 
-import {
-  createFileContext,
-  defaultRenderMime,
-  testEmission
-} from '@jupyterlab/testutils';
+import { defaultRenderMime, testEmission } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 const RENDERMIME = defaultRenderMime();
 
@@ -56,7 +53,7 @@ describe('docregistry/mimedocument', () => {
   let dContext: Context<DocumentRegistry.IModel>;
 
   beforeEach(() => {
-    dContext = createFileContext();
+    dContext = Mock.createFileContext();
   });
 
   afterEach(() => {
@@ -72,9 +69,7 @@ describe('docregistry/mimedocument', () => {
           rendermime: RENDERMIME,
           primaryFileType: DocumentRegistry.defaultTextFileType
         });
-        expect(widgetFactory.createNew(dContext)).to.be.an.instanceof(
-          MimeDocument
-        );
+        expect(widgetFactory.createNew(dContext)).toBeInstanceOf(MimeDocument);
       });
     });
   });
@@ -90,7 +85,7 @@ describe('docregistry/mimedocument', () => {
           renderTimeout: 1000,
           dataType: 'string'
         });
-        expect(widget).to.be.an.instanceof(MimeContent);
+        expect(widget).toBeInstanceOf(MimeContent);
       });
     });
 
@@ -107,7 +102,7 @@ describe('docregistry/mimedocument', () => {
         void dContext.initialize(true);
         await widget.ready;
         const layout = widget.layout as BoxLayout;
-        expect(layout.widgets.length).to.equal(1);
+        expect(layout.widgets.length).toBe(1);
       });
     });
 
@@ -117,7 +112,7 @@ describe('docregistry/mimedocument', () => {
         await dContext.initialize(true);
         const emission = testEmission(dContext.model.contentChanged, {
           test: () => {
-            expect(dContext.model.toString()).to.equal('bar');
+            expect(dContext.model.toString()).toBe('bar');
           }
         });
         const renderer = RENDERMIME.createRenderer('text/foo');

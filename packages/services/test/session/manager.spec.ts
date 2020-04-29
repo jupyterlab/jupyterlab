@@ -2,6 +2,8 @@
 
 import 'jest';
 
+const it = require('jest-retries');
+
 import { UUID } from '@lumino/coreutils';
 
 import { toArray } from '@lumino/algorithm';
@@ -46,7 +48,7 @@ describe('session/manager', () => {
   let session: Session.ISessionConnection;
 
   beforeAll(() => {
-    jest.setTimeout(120000);
+    jest.setTimeout(20000);
     kernelManager = new KernelManager({ standby: 'never' });
   });
 

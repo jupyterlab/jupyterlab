@@ -2,6 +2,8 @@
 
 import 'jest';
 
+const it = require('jest-retries');
+
 import { toArray } from '@lumino/algorithm';
 
 import { KernelManager, Kernel, KernelAPI } from '../../src';
@@ -25,7 +27,7 @@ describe('kernel/manager', () => {
   let kernel: Kernel.IModel;
 
   beforeAll(async () => {
-    jest.setTimeout(120000);
+    jest.setTimeout(20000);
     kernel = await KernelAPI.startNew();
   });
 
@@ -95,6 +97,7 @@ describe('kernel/manager', () => {
           called = true;
         });
         await manager.shutdown(kernel.id);
+        await manager.refreshRunning();
         expect(called).toBe(true);
       });
     });

@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -26,12 +25,14 @@ import {
 } from '@jupyterlab/testutils';
 import { SessionContext } from '@jupyterlab/apputils';
 
+import * as Mock from '@jupyterlab/testutils/lib/mock';
+
 describe('docregistry/context', () => {
   let manager: ServiceManager.IManager;
   const factory = new TextModelFactory();
 
   beforeAll(() => {
-    manager = new ServiceManager({ standby: 'never' });
+    manager = new Mock.ServiceManagerMock();
     return manager.ready;
   });
 
@@ -58,7 +59,7 @@ describe('docregistry/context', () => {
           factory,
           path: UUID.uuid4() + '.txt'
         });
-        expect(context).to.be.an.instanceof(Context);
+        expect(context).toBeInstanceOf(Context);
       });
     });
 
@@ -67,13 +68,13 @@ describe('docregistry/context', () => {
         const newPath = UUID.uuid4() + '.txt';
         let called = false;
         context.pathChanged.connect((sender, args) => {
-          expect(sender).to.equal(context);
-          expect(args).to.equal(newPath);
+          expect(sender).toBe(context);
+          expect(args).toBe(newPath);
           called = true;
         });
         await context.initialize(true);
         await manager.contents.rename(context.path, newPath);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
@@ -82,12 +83,12 @@ describe('docregistry/context', () => {
         const path = context.path;
         let called = false;
         context.fileChanged.connect((sender, args) => {
-          expect(sender).to.equal(context);
-          expect(args.path).to.equal(path);
+          expect(sender).toBe(context);
+          expect(args.path).toBe(path);
           called = true;
         });
         await context.initialize(true);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
@@ -97,8 +98,8 @@ describe('docregistry/context', () => {
         let checked = false;
         context.saveState.connect((sender, args) => {
           if (!called) {
-            expect(sender).to.equal(context);
-            expect(args).to.equal('started');
+            expect(sender).toBe(context);
+            expect(args).toBe('started');
 
             checked = true;
           }
@@ -107,8 +108,8 @@ describe('docregistry/context', () => {
         });
 
         await context.initialize(true);
-        expect(called).to.be.true;
-        expect(checked).to.be.true;
+        expect(called).toBe(true);
+        expect(checked).toBe(true);
       });
 
       it("should emit 'completed' when the file ends saving", async () => {
@@ -116,8 +117,8 @@ describe('docregistry/context', () => {
         let checked = false;
         context.saveState.connect((sender, args) => {
           if (called > 0) {
-            expect(sender).to.equal(context);
-            expect(args).to.equal('completed');
+            expect(sender).toBe(context);
+            expect(args).toBe('completed');
             checked = true;
           }
 
@@ -125,22 +126,22 @@ describe('docregistry/context', () => {
         });
 
         await context.initialize(true);
-        expect(called).to.equal(2);
-        expect(checked).to.be.true;
+        expect(called).toBe(2);
+        expect(checked).toBe(true);
       });
 
       it("should emit 'failed' when the save operation fails out", async () => {
         context = new Context({
           manager,
           factory,
-          path: 'src/readonly-temp.txt'
+          path: 'readonly.txt'
         });
 
         let called = 0;
         let checked;
         context.saveState.connect((sender, args) => {
           if (called > 0) {
-            expect(sender).to.equal(context);
+            expect(sender).toBe(context);
             checked = args;
           }
 
@@ -150,13 +151,11 @@ describe('docregistry/context', () => {
         try {
           await context.initialize(true);
         } catch (err) {
-          expect(err.message).to.contain(
-            'Permission denied: src/readonly-temp.txt'
-          );
+          expect(err.message).toContain('Invalid response: 403 Forbidden');
         }
 
-        expect(called).to.equal(2);
-        expect(checked).to.equal('failed');
+        expect(called).toBe(2);
+        expect(checked).toBe('failed');
 
         await acceptDialog();
       });
@@ -164,10 +163,10 @@ describe('docregistry/context', () => {
 
     describe('#isReady', () => {
       it('should indicate whether the context is ready', async () => {
-        expect(context.isReady).to.equal(false);
+        expect(context.isReady).toBe(false);
         const func = async () => {
           await context.ready;
-          expect(context.isReady).to.equal(true);
+          expect(context.isReady).toBe(true);
         };
         const promise = func();
         await context.initialize(true);
@@ -192,26 +191,26 @@ describe('docregistry/context', () => {
       });
 
       it('should initialize the model when the file is saved for the first time', async () => {
-        const context = await initNotebookContext();
+        const context = await initNotebookContext({ manager });
         context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
-        expect(context.model.cells.canUndo).to.equal(true);
+        expect(context.model.cells.canUndo).toBe(true);
         await context.initialize(true);
         await context.ready;
-        expect(context.model.cells.canUndo).to.equal(false);
+        expect(context.model.cells.canUndo).toBe(false);
       });
 
       it('should initialize the model when the file is reverted for the first time', async () => {
-        const context = await initNotebookContext();
+        const context = await initNotebookContext({ manager });
         await manager.contents.save(context.path, {
           type: 'notebook',
           format: 'json',
           content: NBTestUtils.DEFAULT_CONTENT
         });
         context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
-        expect(context.model.cells.canUndo).to.equal(true);
+        expect(context.model.cells.canUndo).toBe(true);
         await context.initialize(false);
         await context.ready;
-        expect(context.model.cells.canUndo).to.equal(false);
+        expect(context.model.cells.canUndo).toBe(false);
       });
     });
 
@@ -219,36 +218,36 @@ describe('docregistry/context', () => {
       it('should be emitted when the context is disposed', () => {
         let called = false;
         context.disposed.connect((sender, args) => {
-          expect(sender).to.equal(context);
-          expect(args).to.be.undefined;
+          expect(sender).toBe(context);
+          expect(args).toBeUndefined();
           called = true;
         });
         context.dispose();
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
     describe('#model', () => {
       it('should be the model associated with the document', () => {
-        expect(context.model.toString()).to.equal('');
+        expect(context.model.toString()).toBe('');
       });
     });
 
     describe('#sessionContext', () => {
       it('should be a ISessionContext object', () => {
-        expect(context.sessionContext).to.be.instanceOf(SessionContext);
+        expect(context.sessionContext).toBeInstanceOf(SessionContext);
       });
     });
 
     describe('#path', () => {
       it('should be the current path for the context', () => {
-        expect(typeof context.path).to.equal('string');
+        expect(typeof context.path).toBe('string');
       });
     });
 
     describe('#contentsModel', () => {
       it('should be `null` before population', () => {
-        expect(context.contentsModel).to.be.null;
+        expect(context.contentsModel).toBeNull();
       });
 
       it('should be set after population', async () => {
@@ -256,30 +255,30 @@ describe('docregistry/context', () => {
 
         void context.initialize(true);
         await context.ready;
-        expect(context.contentsModel!.path).to.equal(path);
+        expect(context.contentsModel!.path).toBe(path);
       });
     });
 
     describe('#factoryName', () => {
       it('should be the name of the factory used by the context', () => {
-        expect(context.factoryName).to.equal(factory.name);
+        expect(context.factoryName).toBe(factory.name);
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether the context is disposed', () => {
-        expect(context.isDisposed).to.equal(false);
+        expect(context.isDisposed).toBe(false);
         context.dispose();
-        expect(context.isDisposed).to.equal(true);
+        expect(context.isDisposed).toBe(true);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the context', () => {
         context.dispose();
-        expect(context.isDisposed).to.equal(true);
+        expect(context.isDisposed).toBe(true);
         context.dispose();
-        expect(context.isDisposed).to.equal(true);
+        expect(context.isDisposed).toBe(true);
       });
     });
 
@@ -296,7 +295,7 @@ describe('docregistry/context', () => {
         };
         const model = await manager.contents.get(context.path, opts);
 
-        expect(model.content).to.equal('foo');
+        expect(model.content).toBe('foo');
       });
 
       it('should should preserve LF line endings upon save', async () => {
@@ -314,7 +313,7 @@ describe('docregistry/context', () => {
           content: true
         };
         const model = await manager.contents.get(context.path, opts);
-        expect(model.content).to.equal('foo\nbar');
+        expect(model.content).toBe('foo\nbar');
       });
 
       it('should should preserve CRLF line endings upon save', async () => {
@@ -332,7 +331,7 @@ describe('docregistry/context', () => {
           content: true
         };
         const model = await manager.contents.get(context.path, opts);
-        expect(model.content).to.equal('foo\r\nbar');
+        expect(model.content).toBe('foo\r\nbar');
       });
     });
 
@@ -356,11 +355,11 @@ describe('docregistry/context', () => {
         const oldPath = context.path;
         await context.saveAs();
         await promise;
-        expect(context.path).to.equal(newPath);
+        expect(context.path).toBe(newPath);
         // Make sure the both files are there now.
         const model = await manager.contents.get('', { content: true });
-        expect(model.content.find((x: any) => x.name === oldPath)).to.be.ok;
-        expect(model.content.find((x: any) => x.name === newPath)).to.be.ok;
+        expect(model.content.find((x: any) => x.name === oldPath)).toBeTruthy();
+        expect(model.content.find((x: any) => x.name === newPath)).toBeTruthy();
       });
 
       it('should bring up a conflict dialog', async () => {
@@ -383,7 +382,7 @@ describe('docregistry/context', () => {
         const promise = func();
         await context.saveAs();
         await promise;
-        expect(context.path).to.equal(newPath);
+        expect(context.path).toBe(newPath);
       });
 
       it('should keep the file if overwrite is aborted', async () => {
@@ -406,7 +405,7 @@ describe('docregistry/context', () => {
         const promise = func();
         await context.saveAs();
         await promise;
-        expect(context.path).to.equal(oldPath);
+        expect(context.path).toBe(oldPath);
       });
 
       it('should just save if the file name does not change', async () => {
@@ -415,7 +414,7 @@ describe('docregistry/context', () => {
         const promise = context.saveAs();
         await acceptDialog();
         await promise;
-        expect(context.path).to.equal(path);
+        expect(context.path).toBe(path);
       });
     });
 
@@ -426,7 +425,7 @@ describe('docregistry/context', () => {
         await context.save();
         context.model.fromString('bar');
         await context.revert();
-        expect(context.model.toString()).to.equal('foo');
+        expect(context.model.toString()).toBe('foo');
       });
 
       it('should normalize CRLF line endings to LF', async () => {
@@ -437,7 +436,7 @@ describe('docregistry/context', () => {
           content: 'foo\r\nbar'
         });
         await context.revert();
-        expect(context.model.toString()).to.equal('foo\nbar');
+        expect(context.model.toString()).toBe('foo\nbar');
       });
     });
 
@@ -445,8 +444,8 @@ describe('docregistry/context', () => {
       it('should create a checkpoint for the file', async () => {
         await context.initialize(true);
         const model = await context.createCheckpoint();
-        expect(model.id).to.be.ok;
-        expect(model.last_modified).to.be.ok;
+        expect(model.id).toBeTruthy();
+        expect(model.last_modified).toBeTruthy();
       });
     });
 
@@ -456,7 +455,7 @@ describe('docregistry/context', () => {
         const model = await context.createCheckpoint();
         await context.deleteCheckpoint(model.id);
         const models = await context.listCheckpoints();
-        expect(models.length).to.equal(0);
+        expect(models.length).toBe(0);
       });
     });
 
@@ -470,7 +469,7 @@ describe('docregistry/context', () => {
         await context.save();
         await context.restoreCheckpoint(id);
         await context.revert();
-        expect(context.model.toString()).to.equal('bar');
+        expect(context.model.toString()).toBe('bar');
       });
     });
 
@@ -486,13 +485,13 @@ describe('docregistry/context', () => {
             found = true;
           }
         }
-        expect(found).to.equal(true);
+        expect(found).toBe(true);
       });
     });
 
     describe('#urlResolver', () => {
       it('should be a url resolver', () => {
-        expect(context.urlResolver).to.be.an.instanceof(
+        expect(context.urlResolver).toBeInstanceOf(
           RenderMimeRegistry.UrlResolver
         );
       });
@@ -511,7 +510,7 @@ describe('docregistry/context', () => {
           opener
         });
         context.addSibling(new Widget());
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
   });

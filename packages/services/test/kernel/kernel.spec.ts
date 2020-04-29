@@ -2,6 +2,8 @@
 
 import 'jest';
 
+const it = require('jest-retries');
+
 import { UUID } from '@lumino/coreutils';
 
 import { toArray } from '@lumino/algorithm';
