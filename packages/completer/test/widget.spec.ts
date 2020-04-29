@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { MessageLoop, Message } from '@lumino/messaging';
 
@@ -71,8 +70,10 @@ describe('completer/widget', () => {
     describe('#constructor()', () => {
       it('should create a completer widget', () => {
         const widget = new Completer({ editor: null });
-        expect(widget).to.be.an.instanceof(Completer);
-        expect(Array.from(widget.node.classList)).to.contain('jp-Completer');
+        expect(widget).toBeInstanceOf(Completer);
+        expect(Array.from(widget.node.classList)).toEqual(
+          expect.arrayContaining(['jp-Completer'])
+        );
       });
 
       it('should accept options with a model', () => {
@@ -81,8 +82,8 @@ describe('completer/widget', () => {
           model: new CompleterModel()
         };
         const widget = new Completer(options);
-        expect(widget).to.be.an.instanceof(Completer);
-        expect(widget.model).to.equal(options.model);
+        expect(widget).toBeInstanceOf(Completer);
+        expect(widget.model).toBe(options.model);
       });
 
       it('should accept options with a renderer', () => {
@@ -94,12 +95,14 @@ describe('completer/widget', () => {
         options.model!.setOptions(['foo', 'bar']);
 
         const widget = new Completer(options);
-        expect(widget).to.be.an.instanceof(Completer);
+        expect(widget).toBeInstanceOf(Completer);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
 
         const items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
-        expect(items).to.have.length(2);
-        expect(Array.from(items[0].classList)).to.contain(TEST_ITEM_CLASS);
+        expect(items).toHaveLength(2);
+        expect(Array.from(items[0].classList)).toEqual(
+          expect.arrayContaining([TEST_ITEM_CLASS])
+        );
       });
     });
 
@@ -122,9 +125,9 @@ describe('completer/widget', () => {
         widget.selected.connect(listener);
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(value).to.equal('');
+        expect(value).toBe('');
         widget.selectActive();
-        expect(value).to.equal('foo');
+        expect(value).toBe('foo');
         widget.dispose();
         anchor.dispose();
       });
@@ -167,7 +170,7 @@ describe('completer/widget', () => {
 
         const widget = new Completer({ model, editor: code.editor });
         widget.hide();
-        expect(called).to.equal(false);
+        expect(called).toBe(false);
         widget.visibilityChanged.connect(() => {
           called = true;
         });
@@ -175,7 +178,7 @@ describe('completer/widget', () => {
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
 
         await framePromise();
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
         widget.dispose();
         code.dispose();
         panel.dispose();
@@ -185,14 +188,14 @@ describe('completer/widget', () => {
     describe('#model', () => {
       it('should default to null', () => {
         const widget = new Completer({ editor: null });
-        expect(widget.model).to.be.null;
+        expect(widget.model).toBeNull();
       });
 
       it('should be settable', () => {
         const widget = new Completer({ editor: null });
-        expect(widget.model).to.be.null;
+        expect(widget.model).toBeNull();
         widget.model = new CompleterModel();
-        expect(widget.model).to.be.an.instanceof(CompleterModel);
+        expect(widget.model).toBeInstanceOf(CompleterModel);
       });
 
       it('should be safe to set multiple times', () => {
@@ -200,7 +203,7 @@ describe('completer/widget', () => {
         const widget = new Completer({ editor: null });
         widget.model = model;
         widget.model = model;
-        expect(widget.model).to.equal(model);
+        expect(widget.model).toBe(model);
       });
 
       it('should be safe to reset', () => {
@@ -209,24 +212,24 @@ describe('completer/widget', () => {
           editor: null,
           model: new CompleterModel()
         });
-        expect(widget.model).not.to.equal(model);
+        expect(widget.model).not.toBe(model);
         widget.model = model;
-        expect(widget.model).to.equal(model);
+        expect(widget.model).toBe(model);
       });
     });
 
     describe('#editor', () => {
       it('should default to null', () => {
         const widget = new Completer({ editor: null });
-        expect(widget.editor).to.be.null;
+        expect(widget.editor).toBeNull();
       });
 
       it('should be settable', () => {
         const anchor = createEditorWidget();
         const widget = new Completer({ editor: null });
-        expect(widget.editor).to.be.null;
+        expect(widget.editor).toBeNull();
         widget.editor = anchor.editor;
-        expect(widget.editor).to.be.ok;
+        expect(widget.editor).toBeTruthy();
       });
     });
 
@@ -234,14 +237,14 @@ describe('completer/widget', () => {
       it('should dispose of the resources held by the widget', () => {
         const widget = new Completer({ editor: null });
         widget.dispose();
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
 
       it('should be safe to call multiple times', () => {
         const widget = new Completer({ editor: null });
         widget.dispose();
         widget.dispose();
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
     });
 
@@ -260,12 +263,12 @@ describe('completer/widget', () => {
 
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(widget.isHidden).to.equal(false);
-        expect(model.options).to.be.ok;
+        expect(widget.isHidden).toBe(false);
+        expect(model.options).toBeTruthy();
         widget.reset();
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(widget.isHidden).to.equal(true);
-        expect(model.options().next()).to.be.undefined;
+        expect(widget.isHidden).toBe(true);
+        expect(model.options().next()).toBeUndefined();
         widget.dispose();
         anchor.dispose();
       });
@@ -279,7 +282,7 @@ describe('completer/widget', () => {
         Widget.attach(widget, document.body);
         ['keydown', 'mousedown', 'scroll'].forEach(type => {
           simulate(document.body, type);
-          expect(widget.events).to.contain(type);
+          expect(widget.events).toEqual(expect.arrayContaining([type]));
         });
         widget.dispose();
         anchor.dispose();
@@ -303,12 +306,12 @@ describe('completer/widget', () => {
 
           Widget.attach(widget, document.body);
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-          expect(widget.isHidden).to.equal(false);
-          expect(model.options).to.be.ok;
+          expect(widget.isHidden).toBe(false);
+          expect(model.options).toBeTruthy();
           simulate(document.body, 'keydown', { keyCode: 70 }); // F
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-          expect(widget.isHidden).to.equal(true);
-          expect(model.options().next()).to.be.undefined;
+          expect(widget.isHidden).toBe(true);
+          expect(model.options().next()).toBeUndefined();
           widget.dispose();
           anchor.dispose();
         });
@@ -335,21 +338,45 @@ describe('completer/widget', () => {
 
           const items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
 
-          expect(Array.from(items[0].classList)).to.contain(ACTIVE_CLASS);
-          expect(Array.from(items[1].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[2].classList)).to.not.contain(ACTIVE_CLASS);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
           simulate(target, 'keydown', { keyCode: 40 }); // Down
-          expect(Array.from(items[0].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[1].classList)).to.contain(ACTIVE_CLASS);
-          expect(Array.from(items[2].classList)).to.not.contain(ACTIVE_CLASS);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
           simulate(target, 'keydown', { keyCode: 40 }); // Down
-          expect(Array.from(items[0].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[1].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[2].classList)).to.contain(ACTIVE_CLASS);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
           simulate(target, 'keydown', { keyCode: 40 }); // Down
-          expect(Array.from(items[0].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[1].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[2].classList)).to.contain(ACTIVE_CLASS);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
           widget.dispose();
           anchor.dispose();
         });
@@ -374,29 +401,65 @@ describe('completer/widget', () => {
 
           const items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
 
-          expect(Array.from(items[0].classList)).to.contain(ACTIVE_CLASS);
-          expect(Array.from(items[1].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[2].classList)).to.not.contain(ACTIVE_CLASS);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
           simulate(anchor.node, 'keydown', { keyCode: 40 }); // Down
-          expect(Array.from(items[0].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[1].classList)).to.contain(ACTIVE_CLASS);
-          expect(Array.from(items[2].classList)).to.not.contain(ACTIVE_CLASS);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
           simulate(anchor.node, 'keydown', { keyCode: 40 }); // Down
-          expect(Array.from(items[0].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[1].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[2].classList)).to.contain(ACTIVE_CLASS);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
           simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
-          expect(Array.from(items[0].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[1].classList)).to.contain(ACTIVE_CLASS);
-          expect(Array.from(items[2].classList)).to.not.contain(ACTIVE_CLASS);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
           simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
-          expect(Array.from(items[0].classList)).to.contain(ACTIVE_CLASS);
-          expect(Array.from(items[1].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[2].classList)).to.not.contain(ACTIVE_CLASS);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
           simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
-          expect(Array.from(items[0].classList)).to.contain(ACTIVE_CLASS);
-          expect(Array.from(items[1].classList)).to.not.contain(ACTIVE_CLASS);
-          expect(Array.from(items[2].classList)).to.not.contain(ACTIVE_CLASS);
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
           widget.dispose();
           anchor.dispose();
         });
@@ -425,15 +488,15 @@ describe('completer/widget', () => {
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
           await framePromise();
           const marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
-          expect(value).to.be.empty;
-          expect(marked).to.have.length(4);
-          expect(marked[0].textContent).to.equal('fo');
-          expect(marked[1].textContent).to.equal('fo');
-          expect(marked[2].textContent).to.equal('fo');
-          expect(marked[3].textContent).to.equal('fo');
+          expect(Object.keys(value)).toHaveLength(0);
+          expect(marked).toHaveLength(4);
+          expect(marked[0].textContent).toBe('fo');
+          expect(marked[1].textContent).toBe('fo');
+          expect(marked[2].textContent).toBe('fo');
+          expect(marked[3].textContent).toBe('fo');
           simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-          expect(value).to.equal('fo');
+          expect(value).toBe('fo');
           widget.dispose();
           anchor.dispose();
         });
@@ -467,9 +530,9 @@ describe('completer/widget', () => {
           const item = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`)[1];
 
           simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
-          expect(model.query).to.equal('ba');
+          expect(model.query).toBe('ba');
           simulate(item, 'mousedown');
-          expect(value).to.equal('baz');
+          expect(value).toBe('baz');
           widget.dispose();
           anchor.dispose();
         });
@@ -493,9 +556,9 @@ describe('completer/widget', () => {
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-          expect(value).to.equal('');
+          expect(value).toBe('');
           simulate(widget.node, 'mousedown', { button: 1 });
-          expect(value).to.equal('');
+          expect(value).toBe('');
           widget.dispose();
           anchor.dispose();
         });
@@ -519,9 +582,9 @@ describe('completer/widget', () => {
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-          expect(value).to.equal('');
+          expect(value).toBe('');
           simulate(widget.node, 'mousedown');
-          expect(value).to.equal('');
+          expect(value).toBe('');
           widget.dispose();
           anchor.dispose();
         });
@@ -544,10 +607,10 @@ describe('completer/widget', () => {
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-          expect(widget.isHidden).to.equal(false);
+          expect(widget.isHidden).toBe(false);
           simulate(anchor.node, 'mousedown');
           MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-          expect(widget.isHidden).to.equal(true);
+          expect(widget.isHidden).toBe(true);
           widget.dispose();
           anchor.dispose();
         });
@@ -607,7 +670,7 @@ describe('completer/widget', () => {
           await sleep(500);
           const top = parseInt(window.getComputedStyle(widget.node).top, 10);
           const bottom = Math.floor(coords.bottom);
-          expect(top + panel.node.scrollTop).to.equal(bottom);
+          expect(top + panel.node.scrollTop).toBe(bottom);
           widget.dispose();
           code.dispose();
           panel.dispose();
@@ -646,9 +709,9 @@ describe('completer/widget', () => {
         widget.selected.connect(listener);
         Widget.attach(widget, document.body);
 
-        expect(value).to.equal('');
+        expect(value).toBe('');
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(value).to.equal('foo');
+        expect(value).toBe('foo');
         widget.dispose();
         anchor.dispose();
       });
@@ -656,7 +719,9 @@ describe('completer/widget', () => {
       it('should do nothing if a model does not exist', () => {
         const widget = new LogWidget({ editor: null });
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(widget.methods).to.contain('onUpdateRequest');
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['onUpdateRequest'])
+        );
       });
 
       it('should un-hide widget if multiple options are available', () => {
@@ -683,10 +748,10 @@ describe('completer/widget', () => {
 
         const widget = new Completer(options);
         widget.hide();
-        expect(widget.isHidden).to.equal(true);
+        expect(widget.isHidden).toBe(true);
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(widget.isVisible).to.equal(true);
+        expect(widget.isVisible).toBe(true);
         widget.dispose();
         anchor.dispose();
       });
