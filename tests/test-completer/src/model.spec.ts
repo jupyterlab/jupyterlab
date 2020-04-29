@@ -205,16 +205,15 @@ describe('completer/model', () => {
 
       it('should return a marked list of items if query is set', () => {
         let model = new CompleterModel();
-        let want: CompletionHandler.ICompletionItems = [
-          { label: '<mark>f</mark>oo', insertText: 'foo' }
-        ];
+        let want = '<mark>f</mark>oo';
         model.setCompletionItems!([
           { label: 'foo' },
           { label: 'bar' },
           { label: 'baz' }
         ]);
         model.query = 'f';
-        expect(model.completionItems!()).to.deep.equal(want);
+        expect(model.completionItems!().length).to.equal(1);
+        expect(model.completionItems!()[0].label).to.equal(want);
       });
 
       it('should return { items: [] } if reset', () => {
