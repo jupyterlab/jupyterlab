@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { RestorablePool } from '@jupyterlab/statedb';
 
@@ -53,7 +52,7 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('#constructor()', () => {
       it('should create a RestorablePool', () => {
-        expect(pool).to.be.an.instanceof(RestorablePool);
+        expect(pool).toBeInstanceOf(RestorablePool);
       });
     });
 
@@ -63,30 +62,30 @@ describe('@jupyterlab/coreutils', () => {
         const promise = signalToPromise(pool.added);
         await pool.add(instance);
         const [sender, args] = await promise;
-        expect(sender).to.equal(pool);
-        expect(args).to.equal(instance);
+        expect(sender).toBe(pool);
+        expect(args).toBe(instance);
         instance.dispose();
       });
     });
     describe('#current', () => {
       it('should default to null', () => {
-        expect(pool.current).to.be.null;
+        expect(pool.current).toBeNull();
       });
 
       it('should be settable by client code', async () => {
         const instance = new ObservableDisposable();
         void pool.add(instance);
-        expect(pool.current).to.equal(null);
+        expect(pool.current).toBe(null);
         pool.current = instance;
-        expect(pool.current).to.equal(instance);
+        expect(pool.current).toBe(instance);
         instance.dispose();
       });
 
       it('should be a no-op if set to an untracked instance', async () => {
         const instance = new ObservableDisposable();
-        expect(pool.current).to.equal(null);
+        expect(pool.current).toBe(null);
         pool.current = instance;
-        expect(pool.current).to.equal(null);
+        expect(pool.current).toBe(null);
         instance.dispose();
       });
     });
@@ -104,68 +103,68 @@ describe('@jupyterlab/coreutils', () => {
 
     describe('#isDisposed', () => {
       it('should test whether the pool is disposed', () => {
-        expect(pool.isDisposed).to.equal(false);
+        expect(pool.isDisposed).toBe(false);
         pool.dispose();
-        expect(pool.isDisposed).to.equal(true);
+        expect(pool.isDisposed).toBe(true);
       });
     });
 
     describe('#add()', () => {
       it('should add an instance to the pool', async () => {
         const instance = new ObservableDisposable();
-        expect(pool.has(instance)).to.equal(false);
+        expect(pool.has(instance)).toBe(false);
         await pool.add(instance);
-        expect(pool.has(instance)).to.equal(true);
+        expect(pool.has(instance)).toBe(true);
       });
 
       it('should reject an instance that already exists', async () => {
         const instance = new ObservableDisposable();
         let failed = false;
-        expect(pool.has(instance)).to.equal(false);
+        expect(pool.has(instance)).toBe(false);
         await pool.add(instance);
-        expect(pool.has(instance)).to.equal(true);
+        expect(pool.has(instance)).toBe(true);
         try {
           await pool.add(instance);
         } catch (error) {
           failed = true;
         }
-        expect(failed).to.equal(true);
+        expect(failed).toBe(true);
       });
 
       it('should reject an instance that is disposed', async () => {
         const instance = new ObservableDisposable();
         let failed = false;
-        expect(pool.has(instance)).to.equal(false);
+        expect(pool.has(instance)).toBe(false);
         instance.dispose();
         try {
           await pool.add(instance);
         } catch (error) {
           failed = true;
         }
-        expect(failed).to.equal(true);
+        expect(failed).toBe(true);
       });
 
       it('should remove an added instance if it is disposed', async () => {
         const instance = new ObservableDisposable();
         await pool.add(instance);
-        expect(pool.has(instance)).to.equal(true);
+        expect(pool.has(instance)).toBe(true);
         instance.dispose();
-        expect(pool.has(instance)).to.equal(false);
+        expect(pool.has(instance)).toBe(false);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the pool', () => {
-        expect(pool.isDisposed).to.equal(false);
+        expect(pool.isDisposed).toBe(false);
         pool.dispose();
-        expect(pool.isDisposed).to.equal(true);
+        expect(pool.isDisposed).toBe(true);
       });
 
       it('should be safe to call multiple times', () => {
-        expect(pool.isDisposed).to.equal(false);
+        expect(pool.isDisposed).toBe(false);
         pool.dispose();
         pool.dispose();
-        expect(pool.isDisposed).to.equal(true);
+        expect(pool.isDisposed).toBe(true);
       });
     });
 
@@ -177,7 +176,7 @@ describe('@jupyterlab/coreutils', () => {
         void pool.add(instanceA);
         void pool.add(instanceB);
         void pool.add(instanceC);
-        expect(pool.find(obj => obj.id === 'B')).to.equal(instanceB);
+        expect(pool.find(obj => obj.id === 'B')).toBe(instanceB);
         instanceA.dispose();
         instanceB.dispose();
         instanceC.dispose();
@@ -190,7 +189,7 @@ describe('@jupyterlab/coreutils', () => {
         void pool.add(instanceA);
         void pool.add(instanceB);
         void pool.add(instanceC);
-        expect(pool.find(widget => widget.id === 'D')).to.not.be.ok;
+        expect(pool.find(widget => widget.id === 'D')).toBeFalsy();
         instanceA.dispose();
         instanceB.dispose();
         instanceC.dispose();
@@ -206,9 +205,9 @@ describe('@jupyterlab/coreutils', () => {
         void pool.add(instanceB);
         void pool.add(instanceC);
         const list = pool.filter(obj => obj.id.indexOf('include') !== -1);
-        expect(list.length).to.equal(2);
-        expect(list[0]).to.equal(instanceA);
-        expect(list[1]).to.equal(instanceB);
+        expect(list.length).toBe(2);
+        expect(list[0]).toBe(instanceA);
+        expect(list[1]).toBe(instanceB);
         instanceA.dispose();
         instanceB.dispose();
         instanceC.dispose();
@@ -221,7 +220,7 @@ describe('@jupyterlab/coreutils', () => {
         void pool.add(instanceA);
         void pool.add(instanceB);
         void pool.add(instanceC);
-        expect(pool.filter(widget => widget.id === 'D').length).to.equal(0);
+        expect(pool.filter(widget => widget.id === 'D').length).toBe(0);
         instanceA.dispose();
         instanceB.dispose();
         instanceC.dispose();
@@ -240,16 +239,16 @@ describe('@jupyterlab/coreutils', () => {
         pool.forEach(obj => {
           visited += obj.id;
         });
-        expect(visited).to.equal('ABC');
+        expect(visited).toBe('ABC');
       });
     });
 
     describe('#has()', () => {
       it('should return `true` if an item exists in the pool', () => {
         const instance = new ObservableDisposable();
-        expect(pool.has(instance)).to.equal(false);
+        expect(pool.has(instance)).toBe(false);
         void pool.add(instance);
-        expect(pool.has(instance)).to.equal(true);
+        expect(pool.has(instance)).toBe(true);
       });
     });
   });
