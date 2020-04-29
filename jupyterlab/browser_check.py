@@ -96,6 +96,7 @@ async def run_test_async(app, func):
     if inspect.iscoroutinefunction(func):
         test = func(url)
     else:
+        app.log.info('Using thread pool executor to run test')
         loop = asyncio.get_event_loop()
         executor = ThreadPoolExecutor()
         task = loop.run_in_executor(executor, func, url)
