@@ -152,13 +152,19 @@ export class DocumentConnectionManager {
     return connection;
   }
 
+  /**
+   * Currently only supports the settings that the language servers
+   * accept using onDidChangeConfiguration messages, under the
+   * "serverSettings" keyword in the setting registry. New keywords can
+   * be added and extra functionality implemented here when needed.
+   */
   public updateServerConfigurations(
     // TODO: define types for server configurations
     lsSettings: any
   ) {
     for (let language_server_id in lsSettings) {
       const parsedSettings = vscodeStyleSettingsParser(
-        lsSettings[language_server_id]
+        lsSettings[language_server_id].serverSettings
       );
 
       const serverSettings: ILanguageServerConfiguration = {
