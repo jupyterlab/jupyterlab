@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { Router } from '@jupyterlab/application';
 
@@ -25,19 +24,19 @@ describe('apputils', () => {
 
     describe('#constructor()', () => {
       it('should construct a new router', () => {
-        expect(router).to.be.an.instanceof(Router);
+        expect(router).toBeInstanceOf(Router);
       });
     });
 
     describe('#base', () => {
       it('should be the base URL of the application', () => {
-        expect(router.base).to.equal(base);
+        expect(router.base).toBe(base);
       });
     });
 
     describe('#commands', () => {
       it('should be the command registry used by the router', () => {
-        expect(router.commands).to.equal(commands);
+        expect(router.commands).toBe(commands);
       });
     });
 
@@ -48,7 +47,7 @@ describe('apputils', () => {
         const search = '';
         const hash = '';
 
-        expect(router.current).to.deep.equal({ hash, path, request, search });
+        expect(router.current).toEqual({ hash, path, request, search });
       });
     });
 
@@ -65,17 +64,17 @@ describe('apputils', () => {
 
         let called = false;
         router.routed.connect(() => {
-          expect(routed).to.equal(true);
+          expect(routed).toBe(true);
           called = true;
         });
         await router.route();
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
     describe('#stop', () => {
       it('should be a unique token', () => {
-        expect(router.stop).to.be.an.instanceof(Token);
+        expect(router.stop).toBeInstanceOf(Token);
       });
 
       it('should stop routing if returned by a routed command', async () => {
@@ -107,7 +106,7 @@ describe('apputils', () => {
         const promise = signalToPromise(router.routed);
         await router.route();
         await promise;
-        expect(recorded).to.deep.equal(wanted);
+        expect(recorded).toEqual(wanted);
       });
     });
 
@@ -132,11 +131,11 @@ describe('apputils', () => {
 
         let called = false;
         router.routed.connect(() => {
-          expect(recorded).to.deep.equal(wanted);
+          expect(recorded).toEqual(wanted);
           called = true;
         });
         await router.route();
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
@@ -151,19 +150,19 @@ describe('apputils', () => {
           }
         });
         router.register({ command: 'a', pattern: /#a/, rank: 10 });
-        expect(recorded.length).to.equal(0);
+        expect(recorded.length).toBe(0);
 
         // Change the hash because changing location is a security error.
         window.location.hash = 'a';
 
         let called = false;
         router.routed.connect(() => {
-          expect(recorded).to.deep.equal(wanted);
+          expect(recorded).toEqual(wanted);
           window.location.hash = '';
           called = true;
         });
         await router.route();
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
   });

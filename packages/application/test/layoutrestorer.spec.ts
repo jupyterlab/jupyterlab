@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { ILabShell, LayoutRestorer } from '@jupyterlab/application';
 
@@ -24,7 +23,7 @@ describe('apputils', () => {
           first: Promise.resolve<void>(void 0),
           registry: new CommandRegistry()
         });
-        expect(restorer).to.be.an.instanceof(LayoutRestorer);
+        expect(restorer).toBeInstanceOf(LayoutRestorer);
       });
     });
 
@@ -35,7 +34,7 @@ describe('apputils', () => {
           first: Promise.resolve<void>(void 0),
           registry: new CommandRegistry()
         });
-        expect(restorer.restored).to.be.an.instanceof(Promise);
+        expect(restorer.restored).toBeInstanceOf(Promise);
       });
 
       it('should resolve when restorer is done', async () => {
@@ -71,8 +70,8 @@ describe('apputils', () => {
         await restorer.restored;
         await restorer.save(dehydrated);
         const layout = await restorer.fetch();
-        expect(layout.mainArea?.currentWidget).to.equal(currentWidget);
-        expect(layout.mainArea?.mode).to.equal(mode);
+        expect(layout.mainArea?.currentWidget).toBe(currentWidget);
+        expect(layout.mainArea?.mode).toBe(mode);
       });
     });
 
@@ -84,7 +83,7 @@ describe('apputils', () => {
           registry: new CommandRegistry()
         });
         const layout = await restorer.fetch();
-        expect(layout).to.not.equal(null);
+        expect(layout).not.toBe(null);
       });
 
       it('should fetch saved data', async () => {
@@ -111,7 +110,7 @@ describe('apputils', () => {
         await restorer.restored;
         await restorer.save(dehydrated);
         const layout = await restorer.fetch();
-        expect(layout).to.deep.equal(dehydrated);
+        expect(layout).toEqual(dehydrated);
       });
     });
 
@@ -141,7 +140,7 @@ describe('apputils', () => {
           command: tracker.namespace
         });
         await restorer.restored;
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
@@ -162,7 +161,7 @@ describe('apputils', () => {
         try {
           await restorer.save(dehydrated);
         } catch (e) {
-          expect(e).to.equal('save() was called prematurely.');
+          expect(e).toBe('save() was called prematurely.');
         }
       });
 
@@ -190,7 +189,7 @@ describe('apputils', () => {
         await restorer.restored;
         await restorer.save(dehydrated);
         const layout = await restorer.fetch();
-        expect(layout).to.deep.equal(dehydrated);
+        expect(layout).toEqual(dehydrated);
       });
     });
   });

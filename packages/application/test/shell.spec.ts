@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { framePromise } from '@jupyterlab/testutils';
 
@@ -43,7 +42,7 @@ describe('LabShell', () => {
 
   describe('#constructor()', () => {
     it('should create a LabShell instance', () => {
-      expect(shell).to.be.an.instanceof(LabShell);
+      expect(shell).toBeInstanceOf(LabShell);
     });
   });
 
@@ -52,9 +51,9 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'left');
-      expect(shell.leftCollapsed).to.equal(true);
+      expect(shell.leftCollapsed).toBe(true);
       shell.activateById('foo');
-      expect(shell.leftCollapsed).to.equal(false);
+      expect(shell.leftCollapsed).toBe(false);
     });
   });
 
@@ -63,58 +62,58 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'right');
-      expect(shell.rightCollapsed).to.equal(true);
+      expect(shell.rightCollapsed).toBe(true);
       shell.activateById('foo');
-      expect(shell.rightCollapsed).to.equal(false);
+      expect(shell.rightCollapsed).toBe(false);
     });
   });
 
   describe('#currentWidget', () => {
     it('should be the current widget in the shell main area', () => {
-      expect(shell.currentWidget).to.equal(null);
+      expect(shell.currentWidget).toBe(null);
       const widget = new Widget();
       widget.node.tabIndex = -1;
       widget.id = 'foo';
       shell.add(widget, 'main');
-      expect(shell.currentWidget).to.equal(null);
+      expect(shell.currentWidget).toBe(null);
       simulate(widget.node, 'focus');
-      expect(shell.currentWidget).to.equal(widget);
+      expect(shell.currentWidget).toBe(widget);
       widget.parent = null;
-      expect(shell.currentWidget).to.equal(null);
+      expect(shell.currentWidget).toBe(null);
     });
   });
 
   describe('#isEmpty()', () => {
     it('should test whether the main area is empty', () => {
-      expect(shell.isEmpty('top')).to.equal(true);
+      expect(shell.isEmpty('top')).toBe(true);
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'main');
-      expect(shell.isEmpty('main')).to.equal(false);
+      expect(shell.isEmpty('main')).toBe(false);
     });
 
     it('should test whether the top area is empty', () => {
-      expect(shell.isEmpty('top')).to.equal(true);
+      expect(shell.isEmpty('top')).toBe(true);
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top');
-      expect(shell.isEmpty('top')).to.equal(false);
+      expect(shell.isEmpty('top')).toBe(false);
     });
 
     it('should test whether the left area is empty', () => {
-      expect(shell.isEmpty('left')).to.equal(true);
+      expect(shell.isEmpty('left')).toBe(true);
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'left');
-      expect(shell.isEmpty('left')).to.equal(false);
+      expect(shell.isEmpty('left')).toBe(false);
     });
 
     it('should test whether the right area is empty', () => {
-      expect(shell.isEmpty('right')).to.equal(true);
+      expect(shell.isEmpty('right')).toBe(true);
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'right');
-      expect(shell.isEmpty('right')).to.equal(false);
+      expect(shell.isEmpty('right')).toBe(false);
     });
   });
 
@@ -131,20 +130,20 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'header');
-      expect(shell.isEmpty('header')).to.equal(false);
+      expect(shell.isEmpty('header')).toBe(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'header');
-      expect(shell.isEmpty('header')).to.equal(true);
+      expect(shell.isEmpty('header')).toBe(true);
     });
 
     it('should accept options', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'header', { rank: 10 });
-      expect(shell.isEmpty('header')).to.equal(false);
+      expect(shell.isEmpty('header')).toBe(false);
     });
   });
 
@@ -153,20 +152,20 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top');
-      expect(shell.isEmpty('top')).to.equal(false);
+      expect(shell.isEmpty('top')).toBe(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'top');
-      expect(shell.isEmpty('top')).to.equal(true);
+      expect(shell.isEmpty('top')).toBe(true);
     });
 
     it('should accept options', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top', { rank: 10 });
-      expect(shell.isEmpty('top')).to.equal(false);
+      expect(shell.isEmpty('top')).toBe(false);
     });
 
     it('should add widgets according to their ranks', () => {
@@ -176,7 +175,7 @@ describe('LabShell', () => {
       bar.id = 'bar';
       shell.add(foo, 'top', { rank: 20 });
       shell.add(bar, 'top', { rank: 10 });
-      expect(toArray(shell.widgets('top'))).to.deep.equal([bar, foo]);
+      expect(toArray(shell.widgets('top'))).toEqual([bar, foo]);
     });
   });
 
@@ -185,20 +184,20 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'left');
-      expect(shell.isEmpty('left')).to.equal(false);
+      expect(shell.isEmpty('left')).toBe(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'left');
-      expect(shell.isEmpty('left')).to.equal(true);
+      expect(shell.isEmpty('left')).toBe(true);
     });
 
     it('should accept options', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'left', { rank: 10 });
-      expect(shell.isEmpty('left')).to.equal(false);
+      expect(shell.isEmpty('left')).toBe(false);
     });
   });
 
@@ -207,20 +206,20 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'right');
-      expect(shell.isEmpty('right')).to.equal(false);
+      expect(shell.isEmpty('right')).toBe(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'right');
-      expect(shell.isEmpty('right')).to.equal(true);
+      expect(shell.isEmpty('right')).toBe(true);
     });
 
     it('should accept options', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'right', { rank: 10 });
-      expect(shell.isEmpty('right')).to.equal(false);
+      expect(shell.isEmpty('right')).toBe(false);
     });
   });
 
@@ -229,13 +228,13 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'main');
-      expect(shell.isEmpty('main')).to.equal(false);
+      expect(shell.isEmpty('main')).toBe(false);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'main');
-      expect(shell.isEmpty('main')).to.equal(true);
+      expect(shell.isEmpty('main')).toBe(true);
     });
   });
 
@@ -244,34 +243,34 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'left');
-      expect(widget.isVisible).to.equal(false);
+      expect(widget.isVisible).toBe(false);
       shell.activateById('foo');
-      expect(widget.isVisible).to.equal(true);
+      expect(widget.isVisible).toBe(true);
     });
 
     it('should be a no-op if the widget is not in the left area', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      expect(widget.isVisible).to.equal(false);
+      expect(widget.isVisible).toBe(false);
       shell.activateById('foo');
-      expect(widget.isVisible).to.equal(false);
+      expect(widget.isVisible).toBe(false);
     });
 
     it('should activate a widget in the right area', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'right');
-      expect(widget.isVisible).to.equal(false);
+      expect(widget.isVisible).toBe(false);
       shell.activateById('foo');
-      expect(widget.isVisible).to.equal(true);
+      expect(widget.isVisible).toBe(true);
     });
 
     it('should be a no-op if the widget is not in the right area', () => {
       const widget = new Widget();
       widget.id = 'foo';
-      expect(widget.isVisible).to.equal(false);
+      expect(widget.isVisible).toBe(false);
       shell.activateById('foo');
-      expect(widget.isVisible).to.equal(false);
+      expect(widget.isVisible).toBe(false);
     });
 
     it('should activate a widget in the main area', async () => {
@@ -280,7 +279,7 @@ describe('LabShell', () => {
       shell.add(widget, 'main');
       shell.activateById('foo');
       await framePromise();
-      expect(widget.activated).to.equal(true);
+      expect(widget.activated).toBe(true);
     });
 
     it('should be a no-op if the widget is not in the main area', async () => {
@@ -288,7 +287,7 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.activateById('foo');
       await framePromise();
-      expect(widget.activated).to.equal(false);
+      expect(widget.activated).toBe(false);
     });
   });
 
@@ -298,9 +297,9 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'left');
       shell.activateById('foo');
-      expect(widget.isVisible).to.equal(true);
+      expect(widget.isVisible).toBe(true);
       shell.collapseLeft();
-      expect(widget.isVisible).to.equal(false);
+      expect(widget.isVisible).toBe(false);
     });
   });
 
@@ -310,9 +309,9 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'right');
       shell.activateById('foo');
-      expect(widget.isVisible).to.equal(true);
+      expect(widget.isVisible).toBe(true);
       shell.collapseRight();
-      expect(widget.isVisible).to.equal(false);
+      expect(widget.isVisible).toBe(false);
     });
   });
 
@@ -326,9 +325,9 @@ describe('LabShell', () => {
       shell.add(widget2, 'left', { rank: 1 });
       shell.activateById('foo');
       shell.collapseLeft();
-      expect(widget.isVisible).to.equal(false);
+      expect(widget.isVisible).toBe(false);
       shell.expandLeft();
-      expect(widget.isVisible).to.equal(true);
+      expect(widget.isVisible).toBe(true);
     });
 
     it('should expand the first widget if none have been activated', () => {
@@ -338,9 +337,9 @@ describe('LabShell', () => {
       widget2.id = 'bar';
       shell.add(widget, 'left', { rank: 10 });
       shell.add(widget2, 'left', { rank: 1 });
-      expect(widget2.isVisible).to.equal(false);
+      expect(widget2.isVisible).toBe(false);
       shell.expandLeft();
-      expect(widget2.isVisible).to.equal(true);
+      expect(widget2.isVisible).toBe(true);
     });
   });
 
@@ -354,9 +353,9 @@ describe('LabShell', () => {
       shell.add(widget2, 'right', { rank: 1 });
       shell.activateById('foo');
       shell.collapseRight();
-      expect(widget.isVisible).to.equal(false);
+      expect(widget.isVisible).toBe(false);
       shell.expandRight();
-      expect(widget.isVisible).to.equal(true);
+      expect(widget.isVisible).toBe(true);
     });
 
     it('should expand the first widget if none have been activated', () => {
@@ -366,9 +365,9 @@ describe('LabShell', () => {
       widget2.id = 'bar';
       shell.add(widget, 'right', { rank: 10 });
       shell.add(widget2, 'right', { rank: 1 });
-      expect(widget2.isVisible).to.equal(false);
+      expect(widget2.isVisible).toBe(false);
       shell.expandRight();
-      expect(widget2.isVisible).to.equal(true);
+      expect(widget2.isVisible).toBe(true);
     });
   });
 
@@ -381,8 +380,8 @@ describe('LabShell', () => {
       bar.id = 'bar';
       shell.add(bar, 'main');
       shell.closeAll();
-      expect(foo.parent).to.equal(null);
-      expect(bar.parent).to.equal(null);
+      expect(foo.parent).toBe(null);
+      expect(bar.parent).toBe(null);
     });
   });
 
@@ -393,8 +392,8 @@ describe('LabShell', () => {
       shell.add(foo, 'main');
       const state = shell.saveLayout();
       shell.activateById('foo');
-      expect(state.mainArea?.mode).to.equal('multiple-document');
-      expect(state.mainArea?.currentWidget).to.equal(null);
+      expect(state.mainArea?.mode).toBe('multiple-document');
+      expect(state.mainArea?.currentWidget).toBe(null);
     });
   });
 
@@ -403,7 +402,7 @@ describe('LabShell', () => {
       const state = shell.saveLayout();
       shell.mode = 'single-document';
       shell.restoreLayout(state);
-      expect(state.mainArea?.mode).to.equal('multiple-document');
+      expect(state.mainArea?.mode).toBe('multiple-document');
     });
   });
 });
