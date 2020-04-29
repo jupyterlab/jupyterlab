@@ -1,16 +1,15 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
-import { MimeModel } from '@jupyterlab/rendermime';
+import { MimeModel } from '../src';
 
 describe('rendermime/mimemodel', () => {
   describe('MimeModel', () => {
     describe('#constructor()', () => {
       it('should create a new mime model', () => {
         const model = new MimeModel();
-        expect(model).to.be.an.instanceof(MimeModel);
+        expect(model).toBeInstanceOf(MimeModel);
       });
 
       it('should accept arguments', () => {
@@ -18,7 +17,7 @@ describe('rendermime/mimemodel', () => {
           data: { foo: 1 },
           metadata: { bar: 'baz' }
         });
-        expect(model).to.be.an.instanceof(MimeModel);
+        expect(model).toBeInstanceOf(MimeModel);
       });
     });
 
@@ -27,7 +26,7 @@ describe('rendermime/mimemodel', () => {
         const model = new MimeModel({
           data: { bar: 'baz' }
         });
-        expect(model.data['bar']).to.equal('baz');
+        expect(model.data['bar']).toBe('baz');
       });
     });
 
@@ -36,7 +35,7 @@ describe('rendermime/mimemodel', () => {
         const model = new MimeModel({
           metadata: { bar: 'baz' }
         });
-        expect(model.metadata['bar']).to.equal('baz');
+        expect(model.metadata['bar']).toBe('baz');
       });
     });
   });

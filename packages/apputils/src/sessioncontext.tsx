@@ -768,6 +768,9 @@ export class SessionContext implements ISessionContext {
       // Change to the real path.
       await session.setPath(this._path);
 
+      // Update the name in case it has changed since we launched the session.
+      await session.setName(this._name);
+
       if (this._session) {
         await this._shutdownSession();
       }

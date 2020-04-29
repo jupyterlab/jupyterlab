@@ -88,6 +88,9 @@ commander
     console.debug('Run these command when ready:');
     console.debug('twine upload dist/*');
     console.debug('git push origin <BRANCH> --tags');
+
+    // Emit a system beep.
+    process.stdout.write('\x07');
   });
 
 commander.parse(process.argv);

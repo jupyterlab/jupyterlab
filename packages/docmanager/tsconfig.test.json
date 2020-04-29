@@ -19,6 +19,21 @@
     },
     {
       "path": "../../testutils"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../statusbar"
     }
   ]
 }
