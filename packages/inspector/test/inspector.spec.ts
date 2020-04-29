@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { Signal } from '@lumino/signaling';
 
@@ -38,48 +37,48 @@ describe('inspector/index', () => {
     describe('#constructor()', () => {
       it('should construct a new inspector widget', () => {
         const widget = new InspectorPanel();
-        expect(widget).to.be.an.instanceof(InspectorPanel);
+        expect(widget).toBeInstanceOf(InspectorPanel);
       });
 
       it('should add the `jp-Inspector` class', () => {
         const widget = new InspectorPanel();
-        expect(widget.hasClass('jp-Inspector')).to.equal(true);
+        expect(widget.hasClass('jp-Inspector')).toBe(true);
       });
     });
 
     describe('#source', () => {
       it('should default to `null`', () => {
         const widget = new InspectorPanel();
-        expect(widget.source).to.be.null;
+        expect(widget.source).toBeNull();
       });
 
       it('should be settable multiple times', () => {
         const widget = new InspectorPanel();
         const source = new TestInspectable();
-        expect(widget.source).to.be.null;
+        expect(widget.source).toBeNull();
         widget.source = source;
-        expect(widget.source).to.equal(source);
+        expect(widget.source).toBe(source);
         widget.source = null;
-        expect(widget.source).to.be.null;
+        expect(widget.source).toBeNull();
         widget.source = new TestInspectable();
-        expect(widget.source).to.be.an.instanceof(TestInspectable);
+        expect(widget.source).toBeInstanceOf(TestInspectable);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the inspector', () => {
         const widget = new InspectorPanel();
-        expect(widget.isDisposed).to.equal(false);
+        expect(widget.isDisposed).toBe(false);
         widget.dispose();
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
 
       it('should be a no-op if called more than once', () => {
         const widget = new InspectorPanel();
-        expect(widget.isDisposed).to.equal(false);
+        expect(widget.isDisposed).toBe(false);
         widget.dispose();
         widget.dispose();
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
     });
 
@@ -87,9 +86,13 @@ describe('inspector/index', () => {
       it('should fire when a source updates', () => {
         const widget = new TestInspectorPanel();
         widget.source = new TestInspectable();
-        expect(widget.methods).to.not.contain('onInspectorUpdate');
+        expect(widget.methods).toEqual(
+          expect.not.arrayContaining(['onInspectorUpdate'])
+        );
         (widget.source.inspected as any).emit({ content: new Widget() });
-        expect(widget.methods).to.contain('onInspectorUpdate');
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['onInspectorUpdate'])
+        );
       });
     });
   });
