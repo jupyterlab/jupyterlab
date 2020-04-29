@@ -108,17 +108,17 @@ class DefaultConfigSection implements IConfigSection {
    *
    * The promise is fulfilled on a valid response and rejected otherwise.
    */
-  load(): Promise<void> {
-    return ServerConnection.makeRequest(this._url, {}, this.serverSettings)
-      .then(response => {
-        if (response.status !== 200) {
-          throw new ServerConnection.ResponseError(response);
-        }
-        return response.json();
-      })
-      .then(data => {
-        this._data = data;
-      });
+  async load(): Promise<void> {
+    const response = await ServerConnection.makeRequest(
+      this._url,
+      {},
+      this.serverSettings
+    );
+    if (response.status !== 200) {
+      const err = await ServerConnection.ResponseError.create(response);
+      throw err;
+    }
+    this._data = await response.json();
   }
 
   /**
@@ -133,23 +133,23 @@ class DefaultConfigSection implements IConfigSection {
    * and updates the local data with the response, and fulfils the promise
    * with that data.
    */
-  update(newdata: JSONObject): Promise<JSONObject> {
+  async update(newdata: JSONObject): Promise<JSONObject> {
     this._data = { ...this._data, ...newdata };
     const init = {
       method: 'PATCH',
       body: JSON.stringify(newdata)
     };
-    return ServerConnection.makeRequest(this._url, init, this.serverSettings)
-      .then(response => {
-        if (response.status !== 200) {
-          throw new ServerConnection.ResponseError(response);
-        }
-        return response.json();
-      })
-      .then(data => {
-        this._data = data;
-        return this._data;
-      });
+    const response = await ServerConnection.makeRequest(
+      this._url,
+      init,
+      this.serverSettings
+    );
+    if (response.status !== 200) {
+      const err = await ServerConnection.ResponseError.create(response);
+      throw err;
+    }
+    this._data = await response.json();
+    return this._data;
   }
 
   private _url = 'unknown';

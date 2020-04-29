@@ -150,7 +150,9 @@ describe('docregistry/context', () => {
         try {
           await context.initialize(true);
         } catch (err) {
-          expect(err.message).to.contain('Invalid response: 403 Forbidden');
+          expect(err.message).to.contain(
+            'Permission denied: src/readonly-temp.txt'
+          );
         }
 
         expect(called).to.equal(2);

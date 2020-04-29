@@ -24,7 +24,8 @@ export async function listRunning(
   const url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
   if (!Array.isArray(data)) {
@@ -66,7 +67,8 @@ export async function shutdownSession(
       'The kernel was deleted but the session was not'
     );
   } else if (response.status !== 204) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
 }
 
@@ -80,7 +82,8 @@ export async function getSessionModel(
   const url = getSessionUrl(settings.baseUrl, id);
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
   updateLegacySessionModel(data);
@@ -103,7 +106,8 @@ export async function startSession(
   };
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
   updateLegacySessionModel(data);
@@ -125,7 +129,8 @@ export async function updateSession(
   };
   const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
   updateLegacySessionModel(data);

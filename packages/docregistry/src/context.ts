@@ -604,10 +604,6 @@ export class Context<
       .catch(async err => {
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
-        const response = await err.response.json();
-        if (err.message === 'Invalid response: 400 bad format') {
-          err = new Error(response.message);
-        }
         void this._handleError(err, `File Load Error for ${name}`);
         throw err;
       });
@@ -656,21 +652,7 @@ export class Context<
     err: Error | ServerConnection.ResponseError,
     title: string
   ): Promise<void> {
-    // Check for a more specific error message.
-    const error = { message: '' };
-    if (err instanceof ServerConnection.ResponseError) {
-      const text = await err.response.text();
-      let body = '';
-      try {
-        body = JSON.parse(text).message;
-      } catch (e) {
-        body = text;
-      }
-      error.message = body || err.message;
-    } else {
-      error.message = err.message;
-    }
-    await showErrorMessage(title, error);
+    await showErrorMessage(title, err);
     return;
   }
 
