@@ -1,4 +1,6 @@
 // Copyright (c) Jupyter Development Team.
+
+import 'jest';
 // Distributed under the terms of the Modified BSD License.
 
 // including this file in a package allows for the use of import statements

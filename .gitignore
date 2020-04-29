@@ -38,6 +38,7 @@ node_modules
 *.tsbuildinfo
 lerna-debug.log
 yarn-error.log
+storybook-static
 
 # python
 .cache
