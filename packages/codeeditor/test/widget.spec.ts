@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { Message, MessageLoop } from '@lumino/messaging';
 
@@ -82,41 +81,41 @@ describe('CodeEditorWrapper', () => {
 
   describe('#constructor()', () => {
     it('should be a CodeEditorWrapper', () => {
-      expect(widget).to.be.an.instanceof(CodeEditorWrapper);
+      expect(widget).toBeInstanceOf(CodeEditorWrapper);
     });
 
     it('should add a focus listener', () => {
       widget.node.tabIndex = -1;
       simulate(widget.node, 'focus');
       const editor = widget.editor as LogEditor;
-      expect(editor.events).to.contain('focus');
+      expect(editor.events).toEqual(expect.arrayContaining(['focus']));
     });
   });
 
   describe('#editor', () => {
     it('should be a a code editor', () => {
-      expect(widget.editor.getOption('lineNumbers')).to.be.false;
+      expect(widget.editor.getOption('lineNumbers')).toBe(false);
     });
   });
 
   describe('#dispose()', () => {
     it('should dispose of the resources used by the widget', () => {
-      expect(widget.isDisposed).to.be.false;
+      expect(widget.isDisposed).toBe(false);
       widget.dispose();
-      expect(widget.isDisposed).to.be.true;
+      expect(widget.isDisposed).toBe(true);
       widget.dispose();
-      expect(widget.isDisposed).to.be.true;
+      expect(widget.isDisposed).toBe(true);
     });
 
     it('should remove the focus listener', () => {
       const editor = widget.editor as LogEditor;
-      expect(editor.isDisposed).to.be.false;
+      expect(editor.isDisposed).toBe(false);
       widget.dispose();
-      expect(editor.isDisposed).to.be.true;
+      expect(editor.isDisposed).toBe(true);
 
       widget.node.tabIndex = -1;
       simulate(widget.node, 'focus');
-      expect(editor.events).to.not.contain('focus');
+      expect(editor.events).toEqual(expect.not.arrayContaining(['focus']));
     });
   });
 
@@ -127,7 +126,7 @@ describe('CodeEditorWrapper', () => {
         const editor = widget.editor as LogEditor;
         editor.methods = [];
         simulate(editor.editor.getInputField(), 'focus');
-        expect(editor.methods).to.eql([]);
+        expect(editor.methods).toEqual([]);
       });
 
       it('should refresh if editor was resized', () => {
@@ -136,7 +135,7 @@ describe('CodeEditorWrapper', () => {
         MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
         editor.methods = [];
         simulate(editor.editor.getInputField(), 'focus');
-        expect(editor.methods).to.deep.equal(['refresh']);
+        expect(editor.methods).toEqual(['refresh']);
       });
     });
   });
@@ -145,8 +144,10 @@ describe('CodeEditorWrapper', () => {
     it('should focus the editor', () => {
       Widget.attach(widget, document.body);
       MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-      expect(widget.methods).to.contain('onActivateRequest');
-      expect(widget.editor.hasFocus()).to.be.true;
+      expect(widget.methods).toEqual(
+        expect.arrayContaining(['onActivateRequest'])
+      );
+      expect(widget.editor.hasFocus()).toBe(true);
     });
   });
 
@@ -155,7 +156,7 @@ describe('CodeEditorWrapper', () => {
       Widget.attach(widget, document.body);
       const editor = widget.editor as LogEditor;
       await framePromise();
-      expect(editor.methods).to.contain('refresh');
+      expect(editor.methods).toEqual(expect.arrayContaining(['refresh']));
     });
   });
 
@@ -164,11 +165,11 @@ describe('CodeEditorWrapper', () => {
       widget.hide();
       Widget.attach(widget, document.body);
       const editor = widget.editor as LogEditor;
-      expect(editor.methods).to.not.contain('refresh');
+      expect(editor.methods).toEqual(expect.not.arrayContaining(['refresh']));
       widget.show();
-      expect(widget.methods).to.contain('onAfterShow');
+      expect(widget.methods).toEqual(expect.arrayContaining(['onAfterShow']));
       await framePromise();
-      expect(editor.methods).to.contain('refresh');
+      expect(editor.methods).toEqual(expect.arrayContaining(['refresh']));
     });
   });
 
@@ -177,7 +178,7 @@ describe('CodeEditorWrapper', () => {
       const msg = new Widget.ResizeMessage(10, 10);
       const editor = widget.editor as LogEditor;
       MessageLoop.sendMessage(widget, msg);
-      expect(editor.methods).to.contain('setSize');
+      expect(editor.methods).toEqual(expect.arrayContaining(['setSize']));
     });
 
     it('should refresh the editor', () => {
@@ -186,7 +187,7 @@ describe('CodeEditorWrapper', () => {
       editor.focus();
       editor.methods = [];
       MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
-      expect(editor.methods).to.contain('refresh');
+      expect(editor.methods).toEqual(expect.arrayContaining(['refresh']));
     });
 
     it('should defer the refresh until focused', () => {
@@ -194,9 +195,9 @@ describe('CodeEditorWrapper', () => {
       Widget.attach(widget, document.body);
       editor.methods = [];
       MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
-      expect(editor.methods).to.eql([]);
+      expect(editor.methods).toEqual([]);
       simulate(editor.editor.getInputField(), 'focus');
-      expect(editor.methods).to.eql(['refresh']);
+      expect(editor.methods).toEqual(['refresh']);
     });
   });
 });
