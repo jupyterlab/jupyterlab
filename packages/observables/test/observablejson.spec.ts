@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { IObservableJSON, ObservableJSON } from '@jupyterlab/observables';
 
@@ -10,14 +9,14 @@ describe('@jupyterlab/observables', () => {
     describe('#constructor()', () => {
       it('should create an observable JSON object', () => {
         const item = new ObservableJSON();
-        expect(item).to.be.an.instanceof(ObservableJSON);
+        expect(item).toBeInstanceOf(ObservableJSON);
       });
 
       it('should accept initial values', () => {
         const item = new ObservableJSON({
           values: { foo: 1, bar: 'baz' }
         });
-        expect(item).to.be.an.instanceof(ObservableJSON);
+        expect(item).toBeInstanceOf(ObservableJSON);
       });
     });
 
@@ -25,7 +24,7 @@ describe('@jupyterlab/observables', () => {
       it('should serialize the model to JSON', () => {
         const item = new ObservableJSON();
         item.set('foo', 1);
-        expect(item.toJSON()['foo']).to.equal(1);
+        expect(item.toJSON()['foo']).toBe(1);
       });
 
       it('should return a copy of the data', () => {
@@ -33,7 +32,7 @@ describe('@jupyterlab/observables', () => {
         item.set('foo', { bar: 1 });
         const value = item.toJSON();
         value['bar'] = 2;
-        expect((item.get('foo') as any)['bar']).to.equal(1);
+        expect((item.get('foo') as any)['bar']).toBe(1);
       });
     });
   });
@@ -47,7 +46,7 @@ describe('@jupyterlab/observables', () => {
           oldValue: 1,
           newValue: 2
         });
-        expect(message).to.be.an.instanceof(ObservableJSON.ChangeMessage);
+        expect(message).toBeInstanceOf(ObservableJSON.ChangeMessage);
       });
     });
 
@@ -63,7 +62,7 @@ describe('@jupyterlab/observables', () => {
           'jsonvalue-changed',
           args
         );
-        expect(message.args).to.equal(args);
+        expect(message.args).toBe(args);
       });
     });
   });

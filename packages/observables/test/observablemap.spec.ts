@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { ObservableMap } from '@jupyterlab/observables';
 
@@ -10,14 +9,14 @@ describe('@jupyterlab/observables', () => {
     describe('#constructor()', () => {
       it('should accept no arguments', () => {
         const value = new ObservableMap<number>();
-        expect(value instanceof ObservableMap).to.equal(true);
+        expect(value instanceof ObservableMap).toBe(true);
       });
     });
 
     describe('#type', () => {
       it('should return `Map`', () => {
         const value = new ObservableMap<number>();
-        expect(value.type).to.equal('Map');
+        expect(value.type).toBe('Map');
       });
     });
 
@@ -26,7 +25,7 @@ describe('@jupyterlab/observables', () => {
         const value = new ObservableMap<number>();
         value.set('one', 1);
         value.set('two', 2);
-        expect(value.size).to.equal(2);
+        expect(value.size).toBe(2);
       });
     });
 
@@ -38,31 +37,31 @@ describe('@jupyterlab/observables', () => {
           called = true;
         });
         value.set('entry', 1);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
 
       it('should have value changed args', () => {
         let called = false;
         const value = new ObservableMap<number>();
         value.changed.connect((sender, args) => {
-          expect(sender).to.equal(value);
-          expect(args.type).to.equal('add');
-          expect(args.newValue).to.equal(0);
-          expect(args.oldValue).to.be.undefined;
-          expect(args.key).to.equal('entry');
+          expect(sender).toBe(value);
+          expect(args.type).toBe('add');
+          expect(args.newValue).toBe(0);
+          expect(args.oldValue).toBeUndefined();
+          expect(args.key).toBe('entry');
           called = true;
         });
         value.set('entry', 0);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether the map is disposed', () => {
         const value = new ObservableMap<number>();
-        expect(value.isDisposed).to.equal(false);
+        expect(value.isDisposed).toBe(false);
         value.dispose();
-        expect(value.isDisposed).to.equal(true);
+        expect(value.isDisposed).toBe(true);
       });
     });
 
@@ -72,7 +71,7 @@ describe('@jupyterlab/observables', () => {
         value.set('one', 1);
         value.set('two', 2);
         value.dispose();
-        expect(value.isDisposed).to.equal(true);
+        expect(value.isDisposed).toBe(true);
       });
     });
 
@@ -80,29 +79,29 @@ describe('@jupyterlab/observables', () => {
       it('should set the item at a specific key', () => {
         const value = new ObservableMap<number>();
         value.set('one', 1);
-        expect(value.get('one')).to.equal(1);
+        expect(value.get('one')).toBe(1);
       });
 
       it('should return the old value for that key', () => {
         const value = new ObservableMap<number>();
         value.set('one', 1);
         const x = value.set('one', 1.01);
-        expect(x).to.equal(1);
+        expect(x).toBe(1);
       });
 
       it('should trigger a changed signal', () => {
         let called = false;
         const value = new ObservableMap<number>();
         value.changed.connect((sender, args) => {
-          expect(sender).to.equal(value);
-          expect(args.type).to.equal('add');
-          expect(args.newValue).to.equal(1);
-          expect(args.oldValue).to.be.undefined;
-          expect(args.key).to.equal('one');
+          expect(sender).toBe(value);
+          expect(args.type).toBe('add');
+          expect(args.newValue).toBe(1);
+          expect(args.oldValue).toBeUndefined();
+          expect(args.key).toBe('one');
           called = true;
         });
         value.set('one', 1);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
@@ -110,13 +109,13 @@ describe('@jupyterlab/observables', () => {
       it('should get the value for a key', () => {
         const value = new ObservableMap<number>();
         value.set('one', 1);
-        expect(value.get('one')).to.equal(1);
+        expect(value.get('one')).toBe(1);
       });
 
       it('should return undefined if the key does not exist', () => {
         const value = new ObservableMap<number>();
         value.set('one', 1);
-        expect(value.get('two')).to.be.undefined;
+        expect(value.get('two')).toBeUndefined();
       });
     });
 
@@ -124,8 +123,8 @@ describe('@jupyterlab/observables', () => {
       it('should whether the key exists in a map', () => {
         const value = new ObservableMap<number>();
         value.set('one', 1);
-        expect(value.has('one')).to.equal(true);
-        expect(value.has('two')).to.equal(false);
+        expect(value.has('one')).toBe(true);
+        expect(value.has('two')).toBe(false);
       });
     });
 
@@ -136,7 +135,7 @@ describe('@jupyterlab/observables', () => {
         value.set('two', 2);
         value.set('three', 3);
         const keys = value.keys();
-        expect(keys).to.deep.equal(['one', 'two', 'three']);
+        expect(keys).toEqual(['one', 'two', 'three']);
       });
     });
 
@@ -147,7 +146,7 @@ describe('@jupyterlab/observables', () => {
         value.set('two', 2);
         value.set('three', 3);
         const keys = value.values();
-        expect(keys).to.deep.equal([1, 2, 3]);
+        expect(keys).toEqual([1, 2, 3]);
       });
     });
 
@@ -157,16 +156,16 @@ describe('@jupyterlab/observables', () => {
         value.set('one', 1);
         value.set('two', 2);
         value.set('three', 3);
-        expect(value.get('two')).to.equal(2);
+        expect(value.get('two')).toBe(2);
         value.delete('two');
-        expect(value.get('two')).to.be.undefined;
+        expect(value.get('two')).toBeUndefined();
       });
 
       it('should return the value of the key it removed', () => {
         const value = new ObservableMap<number>();
         value.set('one', 1);
-        expect(value.delete('one')).to.equal(1);
-        expect(value.delete('one')).to.be.undefined;
+        expect(value.delete('one')).toBe(1);
+        expect(value.delete('one')).toBeUndefined();
       });
 
       it('should trigger a changed signal if actually removed', () => {
@@ -177,15 +176,15 @@ describe('@jupyterlab/observables', () => {
         let called = false;
 
         value.changed.connect((sender, args) => {
-          expect(sender).to.equal(value);
-          expect(args.type).to.equal('remove');
-          expect(args.key).to.equal('two');
-          expect(args.oldValue).to.equal(2);
-          expect(args.newValue).to.be.undefined;
+          expect(sender).toBe(value);
+          expect(args.type).toBe('remove');
+          expect(args.key).toBe('two');
+          expect(args.oldValue).toBe(2);
+          expect(args.newValue).toBeUndefined();
           called = true;
         });
         value.delete('two');
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
 
       it('should not trigger a changed signal if not actually removed', () => {
@@ -195,17 +194,17 @@ describe('@jupyterlab/observables', () => {
         let called = false;
 
         value.changed.connect((sender, args) => {
-          expect(sender).to.equal(value);
-          expect(args.type).to.equal('remove');
-          expect(args.key).to.equal('two');
-          expect(args.oldValue).to.equal(2);
-          expect(args.newValue).to.be.undefined;
+          expect(sender).toBe(value);
+          expect(args.type).toBe('remove');
+          expect(args.key).toBe('two');
+          expect(args.oldValue).toBe(2);
+          expect(args.newValue).toBeUndefined();
           called = true;
         });
 
         // 'two' is not in the map
         value.delete('two');
-        expect(called).to.equal(false);
+        expect(called).toBe(false);
       });
     });
 
@@ -216,9 +215,9 @@ describe('@jupyterlab/observables', () => {
         value.set('two', 2);
         value.set('three', 3);
         value.clear();
-        expect(value.size).to.equal(0);
+        expect(value.size).toBe(0);
         value.clear();
-        expect(value.size).to.equal(0);
+        expect(value.size).toBe(0);
       });
 
       it('should trigger a changed signal', () => {
@@ -226,15 +225,15 @@ describe('@jupyterlab/observables', () => {
         value.set('one', 1);
         let called = false;
         value.changed.connect((sender, args) => {
-          expect(sender).to.equal(value);
-          expect(args.type).to.equal('remove');
-          expect(args.key).to.equal('one');
-          expect(args.oldValue).to.equal(1);
-          expect(args.newValue).to.be.undefined;
+          expect(sender).toBe(value);
+          expect(args.type).toBe('remove');
+          expect(args.key).toBe('one');
+          expect(args.oldValue).toBe(1);
+          expect(args.newValue).toBeUndefined();
           called = true;
         });
         value.clear();
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
   });

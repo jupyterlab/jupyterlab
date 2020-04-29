@@ -379,7 +379,6 @@
       "@jupyterlab/test-mainmenu": "../tests/test-mainmenu",
       "@jupyterlab/test-nbformat": "../tests/test-nbformat",
       "@jupyterlab/test-notebook": "../tests/test-notebook",
-      "@jupyterlab/test-observables": "../tests/test-observables",
       "@jupyterlab/test-outputarea": "../tests/test-outputarea",
       "@jupyterlab/test-services": "../tests/test-services",
       "@jupyterlab/test-settingregistry": "../tests/test-settingregistry",
