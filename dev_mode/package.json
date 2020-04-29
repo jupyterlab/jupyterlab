@@ -369,7 +369,6 @@
       "@jupyterlab/test-cells": "../tests/test-cells",
       "@jupyterlab/test-codeeditor": "../tests/test-codeeditor",
       "@jupyterlab/test-codemirror": "../tests/test-codemirror",
-      "@jupyterlab/test-completer": "../tests/test-completer",
       "@jupyterlab/test-coreutils": "../tests/test-coreutils",
       "@jupyterlab/test-docregistry": "../tests/test-docregistry",
       "@jupyterlab/test-fileeditor": "../tests/test-fileeditor",
