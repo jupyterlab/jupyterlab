@@ -51,7 +51,7 @@ class LogErrorHandler(logging.Handler):
         # These occur when we forcibly close Websockets or
         # browser connections during the test.
         # https://github.com/tornadoweb/tornado/issues/2834
-        if hasattr(record, 'exc_info') and isinstance(record.exc_info[1], StreamClosedError):
+        if hasattr(record, 'exc_info') and not record.exc_info is None and isinstance(record.exc_info[1], StreamClosedError):
             return
         return super().filter(record)
 

@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.5
+          python-version: 3.6
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
