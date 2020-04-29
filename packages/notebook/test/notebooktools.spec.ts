@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { Message } from '@lumino/messaging';
 
@@ -23,9 +22,11 @@ import {
   NotebookPanel,
   NotebookTools,
   NotebookTracker
-} from '@jupyterlab/notebook';
+} from '../src';
 
-import { initNotebookContext, sleep, NBTestUtils } from '@jupyterlab/testutils';
+import { initNotebookContext, sleep } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+import * as utils from './utils';
 
 class LogTool extends NotebookTools.Tool {
   methods: string[] = [];
@@ -97,6 +98,17 @@ class LogKeySelector extends NotebookTools.KeySelector {
   }
 }
 
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  jest.setTimeout(20000);
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
+
 describe('@jupyterlab/notebook', () => {
   describe('notebooktools', () => {
     let notebookTools: NotebookTools;
@@ -109,11 +121,11 @@ describe('@jupyterlab/notebook', () => {
 
     beforeEach(async () => {
       context0 = await initNotebookContext();
-      panel0 = NBTestUtils.createNotebookPanel(context0);
-      NBTestUtils.populateNotebook(panel0.content);
+      panel0 = utils.createNotebookPanel(context0);
+      utils.populateNotebook(panel0.content);
       context1 = await initNotebookContext();
-      panel1 = NBTestUtils.createNotebookPanel(context1);
-      NBTestUtils.populateNotebook(panel1.content);
+      panel1 = utils.createNotebookPanel(context1);
+      utils.populateNotebook(panel1.content);
       tracker = new NotebookTracker({ namespace: 'notebook' });
       await tracker.add(panel0);
       await tracker.add(panel1);
@@ -141,40 +153,40 @@ describe('@jupyterlab/notebook', () => {
     describe('NotebookTools', () => {
       describe('#constructor()', () => {
         it('should create a notebooktools object', () => {
-          expect(notebookTools).to.be.an.instanceof(NotebookTools);
+          expect(notebookTools).toBeInstanceOf(NotebookTools);
         });
       });
 
       describe('#activeNotebookPanel', () => {
         it('should be the active notebook', () => {
-          expect(notebookTools.activeNotebookPanel).to.equal(panel1);
+          expect(notebookTools.activeNotebookPanel).toBe(panel1);
           tabpanel.currentIndex = 0;
           simulate(panel0.node, 'focus');
-          expect(notebookTools.activeNotebookPanel).to.equal(panel0);
+          expect(notebookTools.activeNotebookPanel).toBe(panel0);
         });
       });
 
       describe('#activeCell', () => {
         it('should be the active cell', () => {
-          expect(notebookTools.activeCell).to.equal(panel1.content.activeCell);
+          expect(notebookTools.activeCell).toBe(panel1.content.activeCell);
           tabpanel.currentIndex = 0;
           simulate(panel0.node, 'focus');
-          expect(notebookTools.activeCell).to.equal(panel0.content.activeCell);
+          expect(notebookTools.activeCell).toBe(panel0.content.activeCell);
         });
       });
 
       describe('#selectedCells', () => {
         it('should be the currently selected cells', () => {
-          expect(notebookTools.selectedCells).to.deep.equal([
+          expect(notebookTools.selectedCells).toEqual([
             panel1.content.activeCell
           ]);
           tabpanel.currentIndex = 0;
           simulate(panel0.node, 'focus');
-          expect(notebookTools.selectedCells).to.deep.equal([
+          expect(notebookTools.selectedCells).toEqual([
             panel0.content.activeCell
           ]);
           panel0.content.select(panel0.content.widgets[1]);
-          expect(notebookTools.selectedCells.length).to.equal(2);
+          expect(notebookTools.selectedCells.length).toBe(2);
         });
       });
 
@@ -197,7 +209,7 @@ describe('@jupyterlab/notebook', () => {
       describe('#constructor', () => {
         it('should create a new base tool', () => {
           const tool = new NotebookTools.Tool();
-          expect(tool).to.be.an.instanceof(NotebookTools.Tool);
+          expect(tool).toBeInstanceOf(NotebookTools.Tool);
         });
       });
 
@@ -205,7 +217,7 @@ describe('@jupyterlab/notebook', () => {
         it('should be the notebooktools object used by the tool', () => {
           const tool = new NotebookTools.Tool({});
           notebookTools.addItem({ tool });
-          expect(tool.notebookTools).to.equal(notebookTools);
+          expect(tool.notebookTools).toBe(notebookTools);
         });
       });
 
@@ -215,7 +227,7 @@ describe('@jupyterlab/notebook', () => {
           notebookTools.addItem({ tool });
           tool.methods = [];
           simulate(panel0.node, 'focus');
-          expect(tool.methods).to.contain('onActiveNotebookPanelChanged');
+          expect(tool.methods).toContain('onActiveNotebookPanelChanged');
         });
       });
 
@@ -225,7 +237,7 @@ describe('@jupyterlab/notebook', () => {
           notebookTools.addItem({ tool });
           tool.methods = [];
           simulate(panel0.node, 'focus');
-          expect(tool.methods).to.contain('onActiveCellChanged');
+          expect(tool.methods).toContain('onActiveCellChanged');
         });
       });
 
@@ -236,7 +248,7 @@ describe('@jupyterlab/notebook', () => {
           tool.methods = [];
           const current = tracker.currentWidget!;
           current.content.select(current.content.widgets[1]);
-          expect(tool.methods).to.contain('onSelectionChanged');
+          expect(tool.methods).toContain('onSelectionChanged');
         });
       });
 
@@ -248,7 +260,7 @@ describe('@jupyterlab/notebook', () => {
           const metadata = notebookTools.activeCell!.model.metadata;
           metadata.set('foo', 1);
           metadata.set('foo', 2);
-          expect(tool.methods).to.contain('onActiveCellMetadataChanged');
+          expect(tool.methods).toContain('onActiveCellMetadataChanged');
         });
       });
 
@@ -260,7 +272,7 @@ describe('@jupyterlab/notebook', () => {
           const metadata = notebookTools.activeNotebookPanel!.model!.metadata;
           metadata.set('foo', 1);
           metadata.set('foo', 2);
-          expect(tool.methods).to.contain(
+          expect(tool.methods).toContain(
             'onActiveNotebookPanelMetadataChanged'
           );
         });
@@ -271,7 +283,7 @@ describe('@jupyterlab/notebook', () => {
       it('should create a new active cell tool', () => {
         const tool = new NotebookTools.ActiveCellTool();
         notebookTools.addItem({ tool });
-        expect(tool).to.be.an.instanceof(NotebookTools.ActiveCellTool);
+        expect(tool).toBeInstanceOf(NotebookTools.ActiveCellTool);
       });
 
       it('should handle a change to the active cell', () => {
@@ -280,7 +292,7 @@ describe('@jupyterlab/notebook', () => {
         const widget = tracker.currentWidget!;
         widget.content.activeCellIndex++;
         widget.content.activeCell!.model.metadata.set('bar', 1);
-        expect(tool.node.querySelector('.jp-InputArea-editor')).to.be.ok;
+        expect(tool.node.querySelector('.jp-InputArea-editor')).toBeTruthy();
       });
     });
 
@@ -292,7 +304,7 @@ describe('@jupyterlab/notebook', () => {
         const tool = new NotebookTools.CellMetadataEditorTool({
           editorFactory
         });
-        expect(tool).to.be.an.instanceof(NotebookTools.CellMetadataEditorTool);
+        expect(tool).toBeInstanceOf(NotebookTools.CellMetadataEditorTool);
       });
 
       it('should handle a change to the active cell', () => {
@@ -301,11 +313,11 @@ describe('@jupyterlab/notebook', () => {
         });
         notebookTools.addItem({ tool });
         const model = tool.editor.model;
-        expect(JSON.stringify(model.value.text)).to.be.ok;
+        expect(JSON.stringify(model.value.text)).toBeTruthy();
         const widget = tracker.currentWidget!;
         widget.content.activeCellIndex++;
         widget.content.activeCell!.model.metadata.set('bar', 1);
-        expect(JSON.stringify(model.value.text)).to.contain('bar');
+        expect(JSON.stringify(model.value.text)).toContain('bar');
       });
 
       it('should handle a change to the metadata', () => {
@@ -317,7 +329,7 @@ describe('@jupyterlab/notebook', () => {
         const previous = model.value.text;
         const metadata = notebookTools.activeCell!.model.metadata;
         metadata.set('foo', 1);
-        expect(model.value.text).to.not.equal(previous);
+        expect(model.value.text).not.toBe(previous);
       });
     });
 
@@ -329,9 +341,7 @@ describe('@jupyterlab/notebook', () => {
         const tool = new NotebookTools.NotebookMetadataEditorTool({
           editorFactory
         });
-        expect(tool).to.be.an.instanceof(
-          NotebookTools.NotebookMetadataEditorTool
-        );
+        expect(tool).toBeInstanceOf(NotebookTools.NotebookMetadataEditorTool);
       });
 
       it('should handle a change to the active notebook', () => {
@@ -342,15 +352,15 @@ describe('@jupyterlab/notebook', () => {
         });
         notebookTools.addItem({ tool });
         const model = tool.editor.model;
-        expect(JSON.stringify(model.value.text)).to.be.ok;
+        expect(JSON.stringify(model.value.text)).toBeTruthy();
 
         simulate(panel0.node, 'focus');
-        expect(JSON.stringify(model.value.text)).to.contain('panel0');
-        expect(JSON.stringify(model.value.text)).to.not.contain('panel1');
+        expect(JSON.stringify(model.value.text)).toContain('panel0');
+        expect(JSON.stringify(model.value.text)).not.toContain('panel1');
 
         simulate(panel1.node, 'focus');
-        expect(JSON.stringify(model.value.text)).to.not.contain('panel0');
-        expect(JSON.stringify(model.value.text)).to.contain('panel1');
+        expect(JSON.stringify(model.value.text)).not.toContain('panel0');
+        expect(JSON.stringify(model.value.text)).toContain('panel1');
       });
 
       it('should handle a change to the metadata', () => {
@@ -360,9 +370,9 @@ describe('@jupyterlab/notebook', () => {
         notebookTools.addItem({ tool });
         const model = tool.editor.model;
         const widget = tracker.currentWidget!;
-        expect(JSON.stringify(model.value.text)).to.not.contain('newvalue');
+        expect(JSON.stringify(model.value.text)).not.toContain('newvalue');
         widget.content.model!.metadata.set('newvalue', 1);
-        expect(JSON.stringify(model.value.text)).to.contain('newvalue');
+        expect(JSON.stringify(model.value.text)).toContain('newvalue');
       });
     });
 
@@ -388,51 +398,51 @@ describe('@jupyterlab/notebook', () => {
 
       describe('#constructor()', () => {
         it('should create a new key selector', () => {
-          expect(tool).to.be.an.instanceof(NotebookTools.KeySelector);
+          expect(tool).toBeInstanceOf(NotebookTools.KeySelector);
         });
       });
 
       describe('#key', () => {
         it('should be the key used by the selector', () => {
-          expect(tool.key).to.equal('foo');
+          expect(tool.key).toBe('foo');
         });
       });
 
       describe('#selectNode', () => {
         it('should be the select node', () => {
-          expect(tool.selectNode.localName).to.equal('select');
+          expect(tool.selectNode.localName).toBe('select');
         });
       });
 
       describe('#handleEvent()', () => {
-        context('change', () => {
+        describe('change', () => {
           it('should update the metadata', () => {
             const select = tool.selectNode;
             simulate(select, 'focus');
             select.selectedIndex = 1;
             simulate(select, 'change');
-            expect(tool.events).to.contain('change');
+            expect(tool.events).toContain('change');
             const metadata = notebookTools.activeCell!.model.metadata;
-            expect(metadata.get('foo')).to.deep.equal([1, 2, 'a']);
+            expect(metadata.get('foo')).toEqual([1, 2, 'a']);
           });
         });
 
-        context('focus', () => {
+        describe('focus', () => {
           it('should add the focused class to the wrapper node', () => {
             const select = tool.selectNode;
             simulate(select, 'focus');
             const selector = '.jp-mod-focused';
-            expect(tool.node.querySelector(selector)).to.be.ok;
+            expect(tool.node.querySelector(selector)).toBeTruthy();
           });
         });
 
-        context('blur', () => {
+        describe('blur', () => {
           it('should remove the focused class from the wrapper node', () => {
             const select = tool.selectNode;
             simulate(select, 'focus');
             simulate(select, 'blur');
             const selector = '.jp-mod-focused';
-            expect(tool.node.querySelector(selector)).to.not.be.ok;
+            expect(tool.node.querySelector(selector)).toBeFalsy();
           });
         });
       });
@@ -440,12 +450,12 @@ describe('@jupyterlab/notebook', () => {
       describe('#onAfterAttach()', () => {
         it('should add event listeners', () => {
           const select = tool.selectNode;
-          expect(tool.methods).to.contain('onAfterAttach');
+          expect(tool.methods).toContain('onAfterAttach');
           simulate(select, 'focus');
           simulate(select, 'blur');
           select.selectedIndex = 0;
           simulate(select, 'change');
-          expect(tool.events).to.deep.equal(['change']);
+          expect(tool.events).toEqual(['change']);
         });
       });
 
@@ -453,11 +463,11 @@ describe('@jupyterlab/notebook', () => {
         it('should remove event listeners', () => {
           const select = tool.selectNode;
           notebookTools.dispose();
-          expect(tool.methods).to.contain('onBeforeDetach');
+          expect(tool.methods).toContain('onBeforeDetach');
           simulate(select, 'focus');
           simulate(select, 'blur');
           simulate(select, 'change');
-          expect(tool.events).to.deep.equal([]);
+          expect(tool.events).toEqual([]);
         });
       });
 
@@ -467,9 +477,9 @@ describe('@jupyterlab/notebook', () => {
           simulate(select, 'focus');
           select.selectedIndex = 1;
           simulate(select, 'change');
-          expect(tool.methods).to.contain('onValueChanged');
+          expect(tool.methods).toContain('onValueChanged');
           const metadata = notebookTools.activeCell!.model.metadata;
-          expect(metadata.get('foo')).to.deep.equal([1, 2, 'a']);
+          expect(metadata.get('foo')).toEqual([1, 2, 'a']);
         });
       });
 
@@ -478,8 +488,8 @@ describe('@jupyterlab/notebook', () => {
           const cell = panel0.content.model!.cells.get(1);
           cell.metadata.set('foo', 1);
           panel0.content.activeCellIndex = 1;
-          expect(tool.methods).to.contain('onActiveCellChanged');
-          expect(tool.selectNode.value).to.equal('1');
+          expect(tool.methods).toContain('onActiveCellChanged');
+          expect(tool.selectNode.value).toBe('1');
         });
       });
 
@@ -487,8 +497,8 @@ describe('@jupyterlab/notebook', () => {
         it('should update the select value', () => {
           const metadata = notebookTools.activeCell!.model.metadata;
           metadata.set('foo', 1);
-          expect(tool.methods).to.contain('onActiveCellMetadataChanged');
-          expect(tool.selectNode.value).to.equal('1');
+          expect(tool.methods).toContain('onActiveCellMetadataChanged');
+          expect(tool.selectNode.value).toBe('1');
         });
       });
     });
@@ -500,16 +510,16 @@ describe('@jupyterlab/notebook', () => {
         notebookTools.addItem({ tool });
         simulate(panel0.node, 'focus');
         tabpanel.currentIndex = 2;
-        expect(tool).to.be.an.instanceof(NotebookTools.KeySelector);
-        expect(tool.key).to.equal('slideshow');
+        expect(tool).toBeInstanceOf(NotebookTools.KeySelector);
+        expect(tool.key).toBe('slideshow');
         const select = tool.selectNode;
-        expect(select.value).to.equal('');
+        expect(select.value).toBe('');
         const metadata = notebookTools.activeCell!.model.metadata;
-        expect(metadata.get('slideshow')).to.be.undefined;
+        expect(metadata.get('slideshow')).toBeUndefined();
         simulate(select, 'focus');
         tool.selectNode.selectedIndex = 1;
         simulate(select, 'change');
-        expect(metadata.get('slideshow')).to.deep.equal({
+        expect(metadata.get('slideshow')).toEqual({
           slide_type: 'slide'
         });
       });
@@ -532,17 +542,17 @@ describe('@jupyterlab/notebook', () => {
         simulate(panel0.node, 'focus');
         NotebookActions.changeCellType(panel0.content, 'raw');
         tabpanel.currentIndex = 2;
-        expect(tool).to.be.an.instanceof(NotebookTools.KeySelector);
-        expect(tool.key).to.equal('raw_mimetype');
+        expect(tool).toBeInstanceOf(NotebookTools.KeySelector);
+        expect(tool.key).toBe('raw_mimetype');
         const select = tool.selectNode;
-        expect(select.value).to.equal('');
+        expect(select.value).toBe('');
 
         const metadata = notebookTools.activeCell!.model.metadata;
-        expect(metadata.get('raw_mimetype')).to.be.undefined;
+        expect(metadata.get('raw_mimetype')).toBeUndefined();
         simulate(select, 'focus');
         tool.selectNode.selectedIndex = 2;
         simulate(select, 'change');
-        expect(metadata.get('raw_mimetype')).to.equal('text/restructuredtext');
+        expect(metadata.get('raw_mimetype')).toBe('text/restructuredtext');
       });
 
       it('should have no effect on a code cell', () => {
@@ -561,11 +571,11 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.changeCellType(panel0.content, 'code');
 
         tabpanel.currentIndex = 2;
-        expect(tool).to.be.an.instanceof(NotebookTools.KeySelector);
-        expect(tool.key).to.equal('raw_mimetype');
+        expect(tool).toBeInstanceOf(NotebookTools.KeySelector);
+        expect(tool.key).toBe('raw_mimetype');
         const select = tool.selectNode;
-        expect(select.disabled).to.equal(true);
-        expect(select.value).to.equal('');
+        expect(select.disabled).toBe(true);
+        expect(select.value).toBe('');
       });
     });
   });
