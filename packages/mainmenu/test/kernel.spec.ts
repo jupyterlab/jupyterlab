@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -43,8 +42,8 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new kernel menu', () => {
-        expect(menu).to.be.an.instanceof(KernelMenu);
-        expect(menu.menu.title.label).to.equal('Kernel');
+        expect(menu).toBeInstanceOf(KernelMenu);
+        expect(menu.menu.title.label).toBe('Kernel');
       });
     });
 
@@ -76,15 +75,15 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.kernelUsers.add(user);
         void delegateExecute(wodget, menu.kernelUsers, 'interruptKernel');
-        expect(wodget.state).to.equal('interrupt');
+        expect(wodget.state).toBe('interrupt');
         void delegateExecute(wodget, menu.kernelUsers, 'restartKernel');
-        expect(wodget.state).to.equal('restart');
+        expect(wodget.state).toBe('restart');
         void delegateExecute(wodget, menu.kernelUsers, 'restartKernelAndClear');
-        expect(wodget.state).to.equal('restartAndClear');
+        expect(wodget.state).toBe('restartAndClear');
         void delegateExecute(wodget, menu.kernelUsers, 'changeKernel');
-        expect(wodget.state).to.equal('change');
+        expect(wodget.state).toBe('change');
         void delegateExecute(wodget, menu.kernelUsers, 'shutdownKernel');
-        expect(wodget.state).to.equal('shutdown');
+        expect(wodget.state).toBe('shutdown');
       });
     });
   });

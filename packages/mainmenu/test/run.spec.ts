@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -43,8 +42,8 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new run menu', () => {
-        expect(menu).to.be.an.instanceof(RunMenu);
-        expect(menu.menu.title.label).to.equal('Run');
+        expect(menu).toBeInstanceOf(RunMenu);
+        expect(menu.menu.title.label).toBe('Run');
       });
     });
 
@@ -68,11 +67,11 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.codeRunners.add(runner);
         void delegateExecute(wodget, menu.codeRunners, 'run');
-        expect(wodget.state).to.equal('run');
+        expect(wodget.state).toBe('run');
         void delegateExecute(wodget, menu.codeRunners, 'runAll');
-        expect(wodget.state).to.equal('runAll');
+        expect(wodget.state).toBe('runAll');
         void delegateExecute(wodget, menu.codeRunners, 'restartAndRunAll');
-        expect(wodget.state).to.equal('restartAndRunAll');
+        expect(wodget.state).toBe('restartAndRunAll');
       });
     });
   });

@@ -372,7 +372,6 @@
       "@jupyterlab/test-fileeditor": "../tests/test-fileeditor",
       "@jupyterlab/test-imageviewer": "../tests/test-imageviewer",
       "@jupyterlab/test-logconsole": "../tests/test-logconsole",
-      "@jupyterlab/test-mainmenu": "../tests/test-mainmenu",
       "@jupyterlab/test-notebook": "../tests/test-notebook",
       "@jupyterlab/test-outputarea": "../tests/test-outputarea",
       "@jupyterlab/test-settingregistry": "../tests/test-settingregistry",
