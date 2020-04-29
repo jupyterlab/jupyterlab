@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { JSONExt } from '@lumino/coreutils';
 
@@ -18,31 +17,31 @@ describe('@jupyterlab/observables', () => {
     describe('#constructor', () => {
       it('should accept no arguments', () => {
         const value = new ObservableValue();
-        expect(value instanceof ObservableValue).to.equal(true);
-        expect(value.get()).to.be.null;
+        expect(value instanceof ObservableValue).toBe(true);
+        expect(value.get()).toBeNull();
       });
 
       it('should accept an initial JSON value', () => {
         const value = new ObservableValue('value');
-        expect(value instanceof ObservableValue).to.equal(true);
+        expect(value instanceof ObservableValue).toBe(true);
         const value2 = new ObservableValue({ one: 'one', two: 2 });
-        expect(value2 instanceof ObservableValue).to.equal(true);
+        expect(value2 instanceof ObservableValue).toBe(true);
       });
     });
 
     describe('#type', () => {
       it('should return `Value`', () => {
         const value = new ObservableValue();
-        expect(value.type).to.equal('Value');
+        expect(value.type).toBe('Value');
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether the value is disposed', () => {
         const value = new ObservableValue();
-        expect(value.isDisposed).to.equal(false);
+        expect(value.isDisposed).toBe(false);
         value.dispose();
-        expect(value.isDisposed).to.equal(true);
+        expect(value.isDisposed).toBe(true);
       });
     });
 
@@ -54,31 +53,31 @@ describe('@jupyterlab/observables', () => {
           called = true;
         });
         value.set('set');
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
 
       it('should have value changed args', () => {
         let called = false;
         const value = new ObservableValue();
         value.changed.connect((sender, args) => {
-          expect(sender).to.equal(value);
-          expect(args.newValue).to.equal('set');
-          expect(args.oldValue).to.be.null;
+          expect(sender).toBe(value);
+          expect(args.newValue).toBe('set');
+          expect(args.oldValue).toBeNull();
           called = true;
         });
         value.set('set');
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
     describe('#get', () => {
       it('should get the value of the object', () => {
         const value = new ObservableValue('value');
-        expect(value.get()).to.equal('value');
+        expect(value.get()).toBe('value');
         const value2 = new ObservableValue({ one: 'one', two: 2 });
-        expect(
-          JSONExt.deepEqual(value2.get(), { one: 'one', two: 2 })
-        ).to.equal(true);
+        expect(JSONExt.deepEqual(value2.get(), { one: 'one', two: 2 })).toBe(
+          true
+        );
       });
     });
 
@@ -86,7 +85,7 @@ describe('@jupyterlab/observables', () => {
       it('should set the value of the object', () => {
         const value = new ObservableValue();
         value.set('value');
-        expect(value.get()).to.equal('value');
+        expect(value.get()).toBe('value');
       });
     });
   });
@@ -95,53 +94,53 @@ describe('@jupyterlab/observables', () => {
     describe('#constructor()', () => {
       it('should accept no arguments', () => {
         const db = new ModelDB();
-        expect(db instanceof ModelDB).to.equal(true);
+        expect(db instanceof ModelDB).toBe(true);
       });
 
       it('should accept a basePath', () => {
         const db = new ModelDB({ basePath: 'base' });
-        expect(db instanceof ModelDB).to.equal(true);
+        expect(db instanceof ModelDB).toBe(true);
       });
 
       it('should accept a baseDB', () => {
         const base = new ModelDB();
         const db = new ModelDB({ baseDB: base });
-        expect(db instanceof ModelDB).to.equal(true);
+        expect(db instanceof ModelDB).toBe(true);
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether it is disposed', () => {
         const db = new ModelDB();
-        expect(db.isDisposed).to.equal(false);
+        expect(db.isDisposed).toBe(false);
         db.dispose();
-        expect(db.isDisposed).to.equal(true);
+        expect(db.isDisposed).toBe(true);
       });
     });
 
     describe('#basePath', () => {
       it('should return an empty string for a model without a baseDB', () => {
         const db = new ModelDB();
-        expect(db.basePath).to.equal('');
+        expect(db.basePath).toBe('');
       });
 
       it('should return the base path', () => {
         const db = new ModelDB({ basePath: 'base' });
-        expect(db.basePath).to.equal('base');
+        expect(db.basePath).toBe('base');
       });
     });
 
     describe('#isPrepopulated', () => {
       it('should return false for an in-memory database', () => {
         const db = new ModelDB();
-        expect(db.isPrepopulated).to.equal(false);
+        expect(db.isPrepopulated).toBe(false);
       });
     });
 
     describe('#isCollaborative', () => {
       it('should return false for an in-memory database', () => {
         const db = new ModelDB();
-        expect(db.isCollaborative).to.equal(false);
+        expect(db.isCollaborative).toBe(false);
       });
     });
 
@@ -157,12 +156,12 @@ describe('@jupyterlab/observables', () => {
         const db = new ModelDB();
         const value = db.createValue('value');
         const value2 = db.get('value');
-        expect(value2).to.equal(value);
+        expect(value2).toBe(value);
       });
 
       it('should return undefined for a value that does not exist', () => {
         const db = new ModelDB();
-        expect(db.get('value')).to.be.undefined;
+        expect(db.get('value')).toBeUndefined();
       });
     });
 
@@ -170,12 +169,12 @@ describe('@jupyterlab/observables', () => {
       it('should return true if a value exists at a path', () => {
         const db = new ModelDB();
         db.createValue('value');
-        expect(db.has('value')).to.equal(true);
+        expect(db.has('value')).toBe(true);
       });
 
       it('should return false for a value that does not exist', () => {
         const db = new ModelDB();
-        expect(db.has('value')).to.equal(false);
+        expect(db.has('value')).toBe(false);
       });
     });
 
@@ -183,13 +182,13 @@ describe('@jupyterlab/observables', () => {
       it('should create an ObservableString`', () => {
         const db = new ModelDB();
         const str = db.createString('str');
-        expect(str instanceof ObservableString).to.equal(true);
+        expect(str instanceof ObservableString).toBe(true);
       });
 
       it('should be able to retrieve that string using `get`', () => {
         const db = new ModelDB();
         const str = db.createString('str');
-        expect(db.get('str')).to.equal(str);
+        expect(db.get('str')).toBe(str);
       });
     });
 
@@ -197,13 +196,13 @@ describe('@jupyterlab/observables', () => {
       it('should create an ObservableUndoableList`', () => {
         const db = new ModelDB();
         const str = db.createList('vec');
-        expect(str instanceof ObservableUndoableList).to.equal(true);
+        expect(str instanceof ObservableUndoableList).toBe(true);
       });
 
       it('should be able to retrieve that vector using `get`', () => {
         const db = new ModelDB();
         const vec = db.createList('vec');
-        expect(db.get('vec')).to.equal(vec);
+        expect(db.get('vec')).toBe(vec);
       });
     });
 
@@ -211,13 +210,13 @@ describe('@jupyterlab/observables', () => {
       it('should create an ObservableMap`', () => {
         const db = new ModelDB();
         const map = db.createMap('map');
-        expect(map instanceof ObservableJSON).to.equal(true);
+        expect(map instanceof ObservableJSON).toBe(true);
       });
 
       it('should be able to retrieve that map using `get`', () => {
         const db = new ModelDB();
         const map = db.createMap('map');
-        expect(db.get('map')).to.equal(map);
+        expect(db.get('map')).toBe(map);
       });
     });
 
@@ -225,13 +224,13 @@ describe('@jupyterlab/observables', () => {
       it('should create an ObservableValue`', () => {
         const db = new ModelDB();
         const value = db.createValue('value');
-        expect(value instanceof ObservableValue).to.equal(true);
+        expect(value instanceof ObservableValue).toBe(true);
       });
 
       it('should be able to retrieve that value using `get`', () => {
         const db = new ModelDB();
         const value = db.createString('value');
-        expect(db.get('value')).to.equal(value);
+        expect(db.get('value')).toBe(value);
       });
     });
 
@@ -240,7 +239,7 @@ describe('@jupyterlab/observables', () => {
         const db = new ModelDB();
         const value = db.createValue('value');
         db.setValue('value', 'set');
-        expect(value.get()).to.equal('set');
+        expect(value.get()).toBe('set');
       });
     });
 
@@ -249,7 +248,7 @@ describe('@jupyterlab/observables', () => {
         const db = new ModelDB();
         const value = db.createValue('value');
         value.set('set');
-        expect(db.getValue('value')).to.equal('set');
+        expect(db.getValue('value')).toBe('set');
       });
     });
 
@@ -257,14 +256,14 @@ describe('@jupyterlab/observables', () => {
       it('should should return a ModelDB', () => {
         const db = new ModelDB();
         const view = db.view('');
-        expect(view instanceof ModelDB).to.equal(true);
-        expect(view === db).to.equal(false);
+        expect(view instanceof ModelDB).toBe(true);
+        expect(view === db).toBe(false);
       });
 
       it('should set the baseDB path on the view', () => {
         const db = new ModelDB();
         const view = db.view('base');
-        expect(view.basePath).to.equal('base');
+        expect(view.basePath).toBe('base');
       });
 
       it('should return a view onto the base ModelDB', () => {
@@ -272,10 +271,10 @@ describe('@jupyterlab/observables', () => {
         const view = db.view('base');
 
         db.createString('base.str1');
-        expect(db.get('base.str1')).to.equal(view.get('str1'));
+        expect(db.get('base.str1')).toBe(view.get('str1'));
 
         view.createString('str2');
-        expect(db.get('base.str2')).to.equal(view.get('str2'));
+        expect(db.get('base.str2')).toBe(view.get('str2'));
       });
 
       it('should be stackable', () => {
@@ -283,12 +282,12 @@ describe('@jupyterlab/observables', () => {
         const view = db.view('one');
         const viewView = view.view('two');
 
-        expect(view.basePath).to.equal('one');
-        expect(viewView.basePath).to.equal('two');
+        expect(view.basePath).toBe('one');
+        expect(viewView.basePath).toBe('two');
 
         viewView.createString('str');
-        expect(viewView.get('str')).to.equal(view.get('two.str'));
-        expect(viewView.get('str')).to.equal(db.get('one.two.str'));
+        expect(viewView.get('str')).toBe(view.get('two.str'));
+        expect(viewView.get('str')).toBe(db.get('one.two.str'));
       });
     });
 
@@ -298,15 +297,15 @@ describe('@jupyterlab/observables', () => {
         const str = db.createString('str');
         const view = db.view('base');
         const str2 = view.createString('str');
-        expect(db.isDisposed).to.equal(false);
-        expect(str.isDisposed).to.equal(false);
-        expect(view.isDisposed).to.equal(false);
-        expect(str2.isDisposed).to.equal(false);
+        expect(db.isDisposed).toBe(false);
+        expect(str.isDisposed).toBe(false);
+        expect(view.isDisposed).toBe(false);
+        expect(str2.isDisposed).toBe(false);
         db.dispose();
-        expect(db.isDisposed).to.equal(true);
-        expect(str.isDisposed).to.equal(true);
-        expect(view.isDisposed).to.equal(true);
-        expect(str2.isDisposed).to.equal(true);
+        expect(db.isDisposed).toBe(true);
+        expect(str.isDisposed).toBe(true);
+        expect(view.isDisposed).toBe(true);
+        expect(str2.isDisposed).toBe(true);
       });
 
       it('should not dispose of resources in base databases', () => {
@@ -314,22 +313,22 @@ describe('@jupyterlab/observables', () => {
         const view = db.view('base');
         const str = db.createString('str');
         const str2 = view.createString('str');
-        expect(db.isDisposed).to.equal(false);
-        expect(str.isDisposed).to.equal(false);
-        expect(view.isDisposed).to.equal(false);
-        expect(str2.isDisposed).to.equal(false);
+        expect(db.isDisposed).toBe(false);
+        expect(str.isDisposed).toBe(false);
+        expect(view.isDisposed).toBe(false);
+        expect(str2.isDisposed).toBe(false);
         view.dispose();
-        expect(view.isDisposed).to.equal(true);
-        expect(str2.isDisposed).to.equal(true);
-        expect(db.isDisposed).to.equal(false);
-        expect(str.isDisposed).to.equal(false);
+        expect(view.isDisposed).toBe(true);
+        expect(str2.isDisposed).toBe(true);
+        expect(db.isDisposed).toBe(false);
+        expect(str.isDisposed).toBe(false);
       });
 
       it('should be safe to call more than once', () => {
         const db = new ModelDB();
-        expect(db.isDisposed).to.equal(false);
+        expect(db.isDisposed).toBe(false);
         db.dispose();
-        expect(db.isDisposed).to.equal(true);
+        expect(db.isDisposed).toBe(true);
       });
     });
   });
