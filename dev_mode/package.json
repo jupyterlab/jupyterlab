@@ -366,7 +366,6 @@
       "@jupyterlab/test-root": "../tests",
       "@jupyterlab/test-apputils": "../tests/test-apputils",
       "@jupyterlab/test-cells": "../tests/test-cells",
-      "@jupyterlab/test-codemirror": "../tests/test-codemirror",
       "@jupyterlab/test-coreutils": "../tests/test-coreutils",
       "@jupyterlab/test-docregistry": "../tests/test-docregistry",
       "@jupyterlab/test-fileeditor": "../tests/test-fileeditor",
