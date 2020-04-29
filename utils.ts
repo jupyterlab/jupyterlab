@@ -1,5 +1,5 @@
-import _ from 'lodash';
 import { PageConfig } from '@jupyterlab/coreutils';
+import merge from 'lodash/merge';
 
 const RE_PATH_ANCHOR = /^file:\/\/([^\/]+|\/[A-Z]:)/;
 
@@ -140,7 +140,7 @@ export function uri_to_contents_path(child: string, parent?: string) {
  * as the language servers themselves don't accept that syntax.
  */
 const vscodeStyleSettingParser = (settingString: string, value: any) => {
-  const propArr: any = settingString.split('.');
+  const propArr = settingString.split('.');
   const obj: any = {};
 
   let curr = obj;
@@ -163,5 +163,5 @@ export const vscodeStyleSettingsParser = (settingsObject: any) => {
     const parsed = vscodeStyleSettingParser(setting, settingsObject[setting]);
     settings.push(parsed);
   }
-  return _.merge({}, ...settings);
+  return merge({}, ...settings);
 };
