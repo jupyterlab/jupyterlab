@@ -93,7 +93,7 @@ async def run_test_async(app, func):
         url = app.display_url
 
     # Allow a synchronous function to be passed in.
-    if inspect.isawaitable(func):
+    if inspect.iscoroutinefunction(func):
         test = func(url)
     else:
         loop = asyncio.get_event_loop()
