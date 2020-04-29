@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { MessageLoop, Message } from '@lumino/messaging';
 
@@ -32,6 +31,8 @@ import {
 } from '@jupyterlab/fileeditor';
 
 import { framePromise } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 class LogFileEditor extends FileEditor {
   events: string[] = [];
@@ -67,7 +68,7 @@ describe('fileeditorcodewrapper', () => {
   let manager: ServiceManager.IManager;
 
   beforeAll(() => {
-    manager = new ServiceManager({ standby: 'never' });
+    manager = new Mock.ServiceManagerMock();
     return manager.ready;
   });
 
@@ -90,20 +91,20 @@ describe('fileeditorcodewrapper', () => {
 
     describe('#constructor()', () => {
       it('should create an editor wrapper widget', () => {
-        expect(widget).to.be.an.instanceof(FileEditorCodeWrapper);
+        expect(widget).toBeInstanceOf(FileEditorCodeWrapper);
       });
 
       it('should update the editor text when the model changes', async () => {
         await context.initialize(true);
         await context.ready;
         widget.context.model.fromString('foo');
-        expect(widget.editor.model.value.text).to.equal('foo');
+        expect(widget.editor.model.value.text).toBe('foo');
       });
     });
 
     describe('#context', () => {
       it('should be the context used by the widget', () => {
-        expect(widget.context).to.equal(context);
+        expect(widget.context).toBe(context);
       });
     });
   });
@@ -127,35 +128,35 @@ describe('fileeditorcodewrapper', () => {
 
     describe('#constructor()', () => {
       it('should create an editor widget', () => {
-        expect(widget).to.be.an.instanceof(FileEditor);
+        expect(widget).toBeInstanceOf(FileEditor);
       });
 
       it('should update the editor text when the model changes', async () => {
         await context.initialize(true);
         await context.ready;
         widget.context.model.fromString('foo');
-        expect(widget.editor.model.value.text).to.equal('foo');
+        expect(widget.editor.model.value.text).toBe('foo');
       });
 
       it('should set the mime type for the path', () => {
-        expect(widget.editor.model.mimeType).to.equal('text/x-python');
+        expect(widget.editor.model.mimeType).toBe('text/x-python');
       });
 
       it('should update the mime type when the path changes', async () => {
         let called = false;
         context.pathChanged.connect((sender, args) => {
-          expect(widget.editor.model.mimeType).to.equal('text/x-julia');
+          expect(widget.editor.model.mimeType).toBe('text/x-julia');
           called = true;
         });
         await context.initialize(true);
         await manager.contents.rename(context.path, UUID.uuid4() + '.jl');
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
     describe('#context', () => {
       it('should be the context used by the widget', () => {
-        expect(widget.context).to.equal(context);
+        expect(widget.context).toBe(context);
       });
     });
 
@@ -172,8 +173,8 @@ describe('fileeditorcodewrapper', () => {
       describe('mousedown', () => {
         it('should focus the editor', () => {
           simulate(widget.node, 'mousedown');
-          expect(widget.events).to.contain('mousedown');
-          expect(widget.editor.hasFocus()).to.equal(true);
+          expect(widget.events).toContain('mousedown');
+          expect(widget.editor.hasFocus()).toBe(true);
         });
       });
     });
@@ -182,9 +183,9 @@ describe('fileeditorcodewrapper', () => {
       it('should add event listeners', async () => {
         Widget.attach(widget, document.body);
         await framePromise();
-        expect(widget.methods).to.contain('onAfterAttach');
+        expect(widget.methods).toContain('onAfterAttach');
         simulate(widget.node, 'mousedown');
-        expect(widget.events).to.contain('mousedown');
+        expect(widget.events).toContain('mousedown');
       });
     });
 
@@ -193,10 +194,10 @@ describe('fileeditorcodewrapper', () => {
         Widget.attach(widget, document.body);
         await framePromise();
         Widget.detach(widget);
-        expect(widget.methods).to.contain('onBeforeDetach');
+        expect(widget.methods).toContain('onBeforeDetach');
         widget.events = [];
         simulate(widget.node, 'mousedown');
-        expect(widget.events).to.not.contain('mousedown');
+        expect(widget.events).not.toContain('mousedown');
       });
     });
 
@@ -204,9 +205,9 @@ describe('fileeditorcodewrapper', () => {
       it('should focus the node after an update', async () => {
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-        expect(widget.methods).to.contain('onActivateRequest');
+        expect(widget.methods).toContain('onActivateRequest');
         await framePromise();
-        expect(widget.editor.hasFocus()).to.equal(true);
+        expect(widget.editor.hasFocus()).toBe(true);
       });
     });
   });
@@ -226,15 +227,15 @@ describe('fileeditorcodewrapper', () => {
 
     describe('#constructor()', () => {
       it('should create an FileEditorFactory', () => {
-        expect(widgetFactory).to.be.an.instanceof(FileEditorFactory);
+        expect(widgetFactory).toBeInstanceOf(FileEditorFactory);
       });
     });
 
     describe('#createNewWidget()', () => {
       it('should create a document widget', () => {
         const d = widgetFactory.createNew(context);
-        expect(d).to.be.an.instanceof(DocumentWidget);
-        expect(d.content).to.be.an.instanceof(FileEditor);
+        expect(d).toBeInstanceOf(DocumentWidget);
+        expect(d.content).toBeInstanceOf(FileEditor);
       });
     });
   });
