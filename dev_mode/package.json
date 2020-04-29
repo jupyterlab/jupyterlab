@@ -381,8 +381,6 @@
       "@jupyterlab/test-notebook": "../tests/test-notebook",
       "@jupyterlab/test-observables": "../tests/test-observables",
       "@jupyterlab/test-outputarea": "../tests/test-outputarea",
-      "@jupyterlab/test-services": "../tests/test-services",
-      "@jupyterlab/test-rendermime": "../tests/test-rendermime",
       "@jupyterlab/test-settingregistry": "../tests/test-settingregistry",
       "@jupyterlab/test-statedb": "../tests/test-statedb",
       "@jupyterlab/test-statusbar": "../tests/test-statusbar",
