@@ -86,10 +86,13 @@ const packages = [
   'vega5-extension'
 ];
 
-const inputFiles = packages.map(p => `${__dirname}/packages/${p}/src`);
+const inputFiles = packages.flatMap(p => [
+  `${__dirname}/packages/${p}/src/index.ts*`,
+  `${__dirname}/packages/${p}/src/*.d.ts`
+]);
 
 module.exports = {
-  inputFiles,
+  // inputFiles,
   exclude: [
     // '^((?!index\.ts).)*$',
     // '^((?!index\.tsx).)*$',
