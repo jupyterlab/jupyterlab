@@ -395,12 +395,9 @@ export class CompleterModel implements Completer.IModel {
    * Highlight matching prefix by adding <mark> tags.
    */
   private _markup(query: string): CompletionHandler.ICompletionItems {
-    let items = JSONExt.deepCopy(
-      (this._completionItems as unknown) as ReadonlyPartialJSONArray
-    );
+    const items = this._completionItems;
     let results: CompletionHandler.ICompletionItem[] = [];
-    for (let i of items) {
-      const item = (i as unknown) as CompletionHandler.ICompletionItem;
+    for (let item of items) {
       // See if label matches query string
       // With ICompletionItems, the label may include parameters, so we exclude them from the matcher.
       // e.g. Given label `foo(b, a, r)` and query `bar`,
@@ -416,13 +413,16 @@ export class CompleterModel implements Completer.IModel {
           match.indices,
           Private.mark
         );
-        // If no insertText is present, preserve original label value
-        // by setting it as the insertText.
-        if (!item.insertText) {
-          item.insertText = item.label;
-        }
-        item.label = marked.join('');
-        results.push(item);
+        results.push({
+          label: marked.join(''),
+          // If no insertText is present, preserve original label value
+          // by setting it as the insertText.
+          insertText: item.insertText ? item.insertText : item.label,
+          type: item.type,
+          icon: item.icon,
+          documentation: item.documentation,
+          deprecated: item.deprecated
+        });
       }
     }
     return results;
