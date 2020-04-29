@@ -60,7 +60,7 @@ fi
 if [[ $GROUP == docs ]]; then
     # Verify tutorial docs build
     pushd docs
-    pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
+    pip install -r ./requirements.txt
     make html
 
     # Remove internal sphinx files and use pytest-check-links on the generated html
@@ -68,8 +68,8 @@ if [[ $GROUP == docs ]]; then
     rm build/html/search.html
 
     # Changelog has a lot of links and is covered in a separate job.
-    changelog=./docs/source/getting_started/changelog.rst
-    py.test --check-links -k .html --deselect $changelog build/html || py.test --check-links -k .html --deselect $changelog --lf build/html
+    changelog_html=./build/html/getting_started/changelog.html
+    py.test --check-links --links-ext .html -k .html --ignore $changelog_html build/html || py.test --check-links --links-ext .html -k .html --ignore $changelog_html --lf build/html
 
     popd
 fi
@@ -77,7 +77,7 @@ fi
 
 if [[ $GROUP == docs2 ]]; then
     # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
-    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+    py.test --check-links --links-ext .md -k .md . || py.test --check-links --links-ext .md -k .md --lf .
 
     # Build the API docs
     jlpm build:packages
@@ -85,7 +85,7 @@ if [[ $GROUP == docs2 ]]; then
 
     # Run the link check on the changelog - allow for a link to fail once (--lf means only run last failed)
     changelog=./docs/source/getting_started/changelog.rst
-    py.test --check-links $changlog || py.test --check-links --lf $changelog
+    py.test --check-links $changelog || py.test --check-links --lf $changelog
 fi
 
 

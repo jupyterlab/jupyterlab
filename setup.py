@@ -152,8 +152,9 @@ setup_args['extras_require'] = {
         'virtualenv'
     ],
     'docs': [
-        'sphinx',
+        'jsx-lexer',
         'recommonmark',
+        'sphinx',
         'sphinx_rtd_theme',
         'sphinx-copybutton'
     ],
