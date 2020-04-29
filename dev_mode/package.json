@@ -364,7 +364,6 @@
       "@jupyterlab/template": "../buildutils/template",
       "template-for-tests": "../buildutils/test-template",
       "@jupyterlab/test-root": "../tests",
-      "@jupyterlab/test-application": "../tests/test-application",
       "@jupyterlab/test-apputils": "../tests/test-apputils",
       "@jupyterlab/test-cells": "../tests/test-cells",
       "@jupyterlab/test-codeeditor": "../tests/test-codeeditor",
