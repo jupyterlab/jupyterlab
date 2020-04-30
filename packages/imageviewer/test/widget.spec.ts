@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -21,6 +20,8 @@ import {
 import { ImageViewer, ImageViewerFactory } from '@jupyterlab/imageviewer';
 
 import { createFileContext } from '@jupyterlab/testutils';
+
+import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 class LogImage extends ImageViewer {
   methods: string[] = [];
@@ -62,7 +63,7 @@ describe('ImageViewer', () => {
   let widget: LogImage;
 
   beforeAll(async () => {
-    manager = new ServiceManager({ standby: 'never' });
+    manager = new Mock.ServiceManagerMock();
     await manager.ready;
     return manager.contents.save(IMAGE.path!, IMAGE);
   });
@@ -79,26 +80,26 @@ describe('ImageViewer', () => {
 
   describe('#constructor()', () => {
     it('should create an ImageViewer', () => {
-      expect(widget).to.be.an.instanceof(ImageViewer);
+      expect(widget).toBeInstanceOf(ImageViewer);
     });
 
     it('should keep the title in sync with the file name', async () => {
       const newPath = ((IMAGE as any).path = UUID.uuid4() + '.png');
-      expect(widget.title.label).to.equal(context.path);
+      expect(widget.title.label).toBe(context.path);
       let called = false;
       context.pathChanged.connect(() => {
-        expect(widget.title.label).to.equal(newPath);
+        expect(widget.title.label).toBe(newPath);
         called = true;
       });
       await manager.contents.rename(context.path, newPath);
-      expect(called).to.equal(true);
+      expect(called).toBe(true);
     });
 
     it('should set the content after the context is ready', async () => {
       await context.ready;
       MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
       const img = widget.node.querySelector('img') as HTMLImageElement;
-      expect(img.src).to.contain(IMAGE.content);
+      expect(img.src).toContain(IMAGE.content);
     });
 
     it('should handle a change to the content', async () => {
@@ -106,34 +107,34 @@ describe('ImageViewer', () => {
       context.model.fromString(OTHER);
       MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
       const img = widget.node.querySelector('img') as HTMLImageElement;
-      expect(img.src).to.contain(OTHER);
+      expect(img.src).toContain(OTHER);
     });
   });
 
   describe('#context', () => {
     it('should be the context associated with the widget', () => {
-      expect(widget.context).to.equal(context);
+      expect(widget.context).toBe(context);
     });
   });
 
   describe('#scale', () => {
     it('should default to 1', () => {
-      expect(widget.scale).to.equal(1);
+      expect(widget.scale).toBe(1);
     });
 
     it('should be settable', () => {
       widget.scale = 0.5;
-      expect(widget.scale).to.equal(0.5);
+      expect(widget.scale).toBe(0.5);
     });
   });
 
   describe('#dispose()', () => {
     it('should dispose of the resources used by the widget', () => {
-      expect(widget.isDisposed).to.equal(false);
+      expect(widget.isDisposed).toBe(false);
       widget.dispose();
-      expect(widget.isDisposed).to.equal(true);
+      expect(widget.isDisposed).toBe(true);
       widget.dispose();
-      expect(widget.isDisposed).to.equal(true);
+      expect(widget.isDisposed).toBe(true);
     });
   });
 
@@ -142,8 +143,8 @@ describe('ImageViewer', () => {
       const img: HTMLImageElement = widget.node.querySelector('img')!;
       await widget.ready;
       MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-      expect(widget.methods).to.contain('onUpdateRequest');
-      expect(img.src).to.contain(IMAGE.content);
+      expect(widget.methods).toContain('onUpdateRequest');
+      expect(img.src).toContain(IMAGE.content);
     });
   });
 
@@ -151,8 +152,8 @@ describe('ImageViewer', () => {
     it('should focus the widget', () => {
       Widget.attach(widget, document.body);
       MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-      expect(widget.methods).to.contain('onActivateRequest');
-      expect(widget.node.contains(document.activeElement)).to.equal(true);
+      expect(widget.methods).toContain('onActivateRequest');
+      expect(widget.node.contains(document.activeElement)).toBe(true);
     });
   });
 });
@@ -166,10 +167,13 @@ describe('ImageViewerFactory', () => {
         fileTypes: ['png'],
         defaultFor: ['png']
       });
-      const context = createFileContext(IMAGE.path);
+      const context = createFileContext(
+        IMAGE.path,
+        new Mock.ServiceManagerMock()
+      );
       const d = factory.createNew(context);
-      expect(d).to.be.an.instanceof(DocumentWidget);
-      expect(d.content).to.be.an.instanceof(ImageViewer);
+      expect(d).toBeInstanceOf(DocumentWidget);
+      expect(d.content).toBeInstanceOf(ImageViewer);
     });
   });
 });
