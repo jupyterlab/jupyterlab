@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { Time } from '@jupyterlab/coreutils';
 
@@ -12,18 +11,18 @@ describe('@jupyterlab/coreutils', () => {
         const date = new Date();
         date.setSeconds(date.getSeconds() - 10);
         const value = Time.formatHuman(date);
-        expect(value).to.equal('seconds ago');
+        expect(value).toBe('seconds ago');
         date.setMinutes(date.getMinutes() - 3);
-        expect(Time.formatHuman(date.toISOString())).to.equal('3 minutes ago');
+        expect(Time.formatHuman(date.toISOString())).toBe('3 minutes ago');
       });
     });
 
     describe('.format()', () => {
       it('should convert a timestring to a date format', () => {
-        expect(Time.format(new Date()).length).to.equal(16);
+        expect(Time.format(new Date()).length).toBe(16);
         const date = new Date();
         const value = Time.format(date.toISOString(), 'MM-DD');
-        expect(value.length).to.equal(5);
+        expect(value.length).toBe(5);
       });
     });
   });
