@@ -1,5 +1,5 @@
 import { PageConfig } from '@jupyterlab/coreutils';
-import merge from 'lodash/merge';
+import mergeWith from 'lodash/mergewith';
 
 const RE_PATH_ANCHOR = /^file:\/\/([^\/]+|\/[A-Z]:)/;
 
@@ -163,5 +163,5 @@ export const vscodeStyleSettingsParser = (settingsObject: any) => {
     const parsed = vscodeStyleSettingParser(setting, settingsObject[setting]);
     settings.push(parsed);
   }
-  return merge({}, ...settings);
+  return mergeWith({}, ...settings);
 };
