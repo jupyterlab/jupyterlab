@@ -48,7 +48,8 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
     const response = await makeRequest(url, {}, serverSettings);
 
     if (response.status !== 200) {
-      throw new ResponseError(response);
+      const err = await ResponseError.create(response);
+      throw err;
     }
 
     return response.json();
@@ -68,7 +69,8 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
     const response = await makeRequest(url, {}, serverSettings);
 
     if (response.status !== 200) {
-      throw new ResponseError(response);
+      const err = await ResponseError.create(response);
+      throw err;
     }
 
     const result = await response.json();
@@ -93,7 +95,8 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
     const response = await makeRequest(url, init, serverSettings);
 
     if (response.status !== 204) {
-      throw new ResponseError(response);
+      const err = await ResponseError.create(response);
+      throw err;
     }
   }
 
@@ -116,7 +119,8 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
     const response = await makeRequest(url, init, serverSettings);
 
     if (response.status !== 204) {
-      throw new ResponseError(response);
+      const err = await ResponseError.create(response);
+      throw err;
     }
   }
 }

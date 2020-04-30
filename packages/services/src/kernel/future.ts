@@ -9,7 +9,7 @@ import * as Kernel from './kernel';
 
 import * as KernelMessage from './messages';
 
-declare var setImmediate: any;
+declare let setImmediate: any;
 
 /**
  * Implementation of a kernel future.
@@ -226,7 +226,7 @@ export abstract class KernelFutureHandler<
   }
 
   private async _handleReply(msg: REPLY): Promise<void> {
-    let reply = this._reply;
+    const reply = this._reply;
     if (reply) {
       // tslint:disable-next-line:await-promise
       await reply(msg);
@@ -239,7 +239,7 @@ export abstract class KernelFutureHandler<
   }
 
   private async _handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
-    let stdin = this._stdin;
+    const stdin = this._stdin;
     if (stdin) {
       // tslint:disable-next-line:await-promise
       await stdin(msg);
@@ -247,8 +247,8 @@ export abstract class KernelFutureHandler<
   }
 
   private async _handleIOPub(msg: KernelMessage.IIOPubMessage): Promise<void> {
-    let process = await this._hooks.process(msg);
-    let iopub = this._iopub;
+    const process = await this._hooks.process(msg);
+    const iopub = this._iopub;
     if (process && iopub) {
       // tslint:disable-next-line:await-promise
       await iopub(msg);
@@ -336,7 +336,7 @@ namespace Private {
    * https://github.com/phosphorjs/phosphor/blob/e88e4321289bb1198f3098e7bda40736501f2ed8/tests/test-messaging/src/index.spec.ts#L63
    */
   const defer = (() => {
-    let ok = typeof requestAnimationFrame === 'function';
+    const ok = typeof requestAnimationFrame === 'function';
     return ok ? requestAnimationFrame : setImmediate;
   })();
 
@@ -357,7 +357,7 @@ namespace Private {
      * @param hook - The callback to remove.
      */
     remove(hook: (msg: T) => boolean | PromiseLike<boolean>): void {
-      let index = this._hooks.indexOf(hook);
+      const index = this._hooks.indexOf(hook);
       if (index >= 0) {
         this._hooks[index] = null;
         this._scheduleCompact();
@@ -385,7 +385,7 @@ namespace Private {
       await this._processing;
 
       // Start the next process run.
-      let processing = new PromiseDelegate<void>();
+      const processing = new PromiseDelegate<void>();
       this._processing = processing.promise;
 
       let continueHandling: boolean;
@@ -394,7 +394,7 @@ namespace Private {
       // guarantees that hooks added during the processing will not be run in
       // this process run.
       for (let i = this._hooks.length - 1; i >= 0; i--) {
-        let hook = this._hooks[i];
+        const hook = this._hooks[i];
 
         // If the hook has been removed, continue to the next one.
         if (hook === null) {
@@ -448,7 +448,7 @@ namespace Private {
     private _compact(): void {
       let numNulls = 0;
       for (let i = 0, len = this._hooks.length; i < len; i++) {
-        let hook = this._hooks[i];
+        const hook = this._hooks[i];
         if (this._hooks[i] === null) {
           numNulls++;
         } else {

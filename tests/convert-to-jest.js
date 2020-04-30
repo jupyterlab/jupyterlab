@@ -13,7 +13,7 @@ if (target.indexOf('test-') !== 0) {
 }
 
 // Make sure folder exists
-let testSrc = path.join(__dirname, target);
+const testSrc = path.join(__dirname, target);
 
 console.log(testSrc); // eslint-disable-line
 if (!fs.existsSync(testSrc)) {
@@ -38,15 +38,7 @@ glob.sync(path.join(testSrc, 'src', '**', '*.ts*')).forEach(function(filePath) {
   fs.writeFileSync(filePath, src, 'utf8');
 });
 
-// Create jest.config.js.
-const jestConfig = `
-const func = require('@jupyterlab/testutils/lib/jest-config');
-module.exports = func('${name}', __dirname);
-`;
-fs.writeFileSync(path.join(testSrc, 'jest.config.js'), jestConfig, 'utf8');
-
 // Open coreutils package.json
-const coreUtils = path.resolve(__dirname, 'test-coreutils');
 const coreUtilsData = require('./test-coreutils/package.json');
 
 // Open target package.json
@@ -76,17 +68,3 @@ utils.writeJSONFile(path.join(testSrc, 'tsconfig.json'), tsData);
 ['karma-cov.conf.js', 'karma.conf.js', 'run-test.py'].forEach(fname => {
   utils.run(`git rm -f ./test-${name}/${fname} || true`);
 });
-
-// Copy common files from coreutils
-['run.py', 'babel.config.js'].forEach(fname => {
-  fs.copySync(path.join(coreUtils, fname), path.join(testSrc, fname));
-});
-
-// Add new files to git
-utils.run(`git add ./test-${name}/run.py ./test-${name}/jest.config.js`);
-
-// Update deps and build test
-utils.run('jlpm && jlpm build', { cwd: testSrc });
-
-// Test
-utils.run('jlpm test', { cwd: testSrc });

@@ -96,8 +96,8 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
       name: 'Indent with Tab'
     };
     menu.addItem({ command, args });
-    for (let size of [1, 2, 4, 8]) {
-      let args: JSONObject = {
+    for (const size of [1, 2, 4, 8]) {
+      const args: JSONObject = {
         insertSpaces: true,
         size,
         name: `Spaces: ${size} `

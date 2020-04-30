@@ -18,4 +18,7 @@ else
     git checkout $JLAB_REL_BRANCH
 
     pip install -ve .
+
+    # Emit a system beep
+    echo -e "\a"
 fi

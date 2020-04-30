@@ -34,5 +34,6 @@
     {
       "path": "../ui-components"
     }
-  ]
+  ],
+  "extends": "../../tsconfigbase"
 }

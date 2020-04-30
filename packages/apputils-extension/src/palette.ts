@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -58,7 +58,7 @@ export class Palette implements ICommandPalette {
    * @returns A disposable that will remove the item from the palette.
    */
   addItem(options: IPaletteItem): IDisposable {
-    let item = this._palette.addItem(options as CommandPalette.IItemOptions);
+    const item = this._palette.addItem(options as CommandPalette.IItemOptions);
     return new DisposableDelegate(() => {
       this._palette.removeItem(item);
     });

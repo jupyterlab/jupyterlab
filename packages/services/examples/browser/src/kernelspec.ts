@@ -7,9 +7,9 @@ import { log } from './log';
 
 export async function main() {
   log('Get the list of kernel specs');
-  let kernelSpecManager = new KernelSpecManager();
+  const kernelSpecManager = new KernelSpecManager();
   await kernelSpecManager.ready;
-  let kernelSpecs = kernelSpecManager.specs;
+  const kernelSpecs = kernelSpecManager.specs;
   log(`Default spec: ${kernelSpecs.default}`);
   log(`Available specs: ${Object.keys(kernelSpecs.kernelspecs)}`);
 }

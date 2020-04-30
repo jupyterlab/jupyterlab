@@ -26,10 +26,11 @@ const KERNELSPEC_SERVICE_URL = 'api/kernelspecs';
 export async function getSpecs(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<ISpecModels> {
-  let url = URLExt.join(settings.baseUrl, KERNELSPEC_SERVICE_URL);
+  const url = URLExt.join(settings.baseUrl, KERNELSPEC_SERVICE_URL);
   const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
   const data = await response.json();
   return validateSpecModels(data);

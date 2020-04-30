@@ -296,7 +296,7 @@ export class ObservableValue implements IObservableValue {
    * Set the current value.
    */
   set(value: JSONValue): void {
-    let oldValue = this._value;
+    const oldValue = this._value;
     if (JSONExt.deepEqual(oldValue, value)) {
       return;
     }
@@ -425,7 +425,7 @@ export class ModelDB implements IModelDB {
    * @returns the string that was created.
    */
   createString(path: string): IObservableString {
-    let str = new ObservableString();
+    const str = new ObservableString();
     this._disposables.add(str);
     this.set(path, str);
     return str;
@@ -443,7 +443,7 @@ export class ModelDB implements IModelDB {
    * JSON Objects and primitives.
    */
   createList<T extends JSONValue>(path: string): IObservableUndoableList<T> {
-    let vec = new ObservableUndoableList<T>(
+    const vec = new ObservableUndoableList<T>(
       new ObservableUndoableList.IdentitySerializer<T>()
     );
     this._disposables.add(vec);
@@ -463,7 +463,7 @@ export class ModelDB implements IModelDB {
    * JSON Objects and primitives.
    */
   createMap(path: string): IObservableJSON {
-    let map = new ObservableJSON();
+    const map = new ObservableJSON();
     this._disposables.add(map);
     this.set(path, map);
     return map;
@@ -477,7 +477,7 @@ export class ModelDB implements IModelDB {
    * @returns the value that was created.
    */
   createValue(path: string): IObservableValue {
-    let val = new ObservableValue();
+    const val = new ObservableValue();
     this._disposables.add(val);
     this.set(path, val);
     return val;
@@ -490,7 +490,7 @@ export class ModelDB implements IModelDB {
    * @param path: the path for the value.
    */
   getValue(path: string): JSONValue | undefined {
-    let val = this.get(path);
+    const val = this.get(path);
     if (!val || val.type !== 'Value') {
       throw Error('Can only call getValue for an ObservableValue');
     }
@@ -506,7 +506,7 @@ export class ModelDB implements IModelDB {
    * @param value: the new value.
    */
   setValue(path: string, value: JSONValue): void {
-    let val = this.get(path);
+    const val = this.get(path);
     if (!val || val.type !== 'Value') {
       throw Error('Can only call setValue on an ObservableValue');
     }
@@ -522,7 +522,7 @@ export class ModelDB implements IModelDB {
    *   `IModelDB`, with `basePath` prepended to all paths.
    */
   view(basePath: string): ModelDB {
-    let view = new ModelDB({ basePath, baseDB: this });
+    const view = new ModelDB({ basePath, baseDB: this });
     this._disposables.add(view);
     return view;
   }

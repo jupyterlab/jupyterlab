@@ -76,7 +76,7 @@ export abstract class ReactWidget extends Widget {
    */
   private renderDOM(): Promise<void> {
     return new Promise<void>(resolve => {
-      let vnode = this.render();
+      const vnode = this.render();
       // Split up the array/element cases so type inference chooses the right
       // signature.
       if (Array.isArray(vnode)) {

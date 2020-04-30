@@ -57,7 +57,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#currentChanged', () => {
       it('should emit for the first added widget', async () => {
         const widget = createWidget();
-        let promise = signalToPromise(tracker.currentChanged);
+        const promise = signalToPromise(tracker.currentChanged);
         void tracker.add(widget);
         await promise;
         widget.dispose();
@@ -67,7 +67,7 @@ describe('@jupyterlab/apputils', () => {
         const widget = createWidget();
         const widget2 = createWidget();
         await tracker.add(widget);
-        let promise = signalToPromise(tracker.currentChanged);
+        const promise = signalToPromise(tracker.currentChanged);
         await tracker.add(widget2);
         await promise;
         widget.dispose();
@@ -98,7 +98,7 @@ describe('@jupyterlab/apputils', () => {
         focus(widget);
         await tracker.add(widget);
         await tracker.add(widget2);
-        let promise = signalToPromise(tracker.currentChanged);
+        const promise = signalToPromise(tracker.currentChanged);
         focus(widget2);
         await promise;
         widget.dispose();
@@ -109,7 +109,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#widgetAdded', () => {
       it('should emit when a widget has been added', async () => {
         const widget = createWidget();
-        let promise = signalToPromise(tracker.widgetAdded);
+        const promise = signalToPromise(tracker.widgetAdded);
 
         await tracker.add(widget);
 
@@ -124,7 +124,7 @@ describe('@jupyterlab/apputils', () => {
         const one = createWidget();
         const two = createWidget();
         let total = 0;
-        let promise = testEmission(tracker.currentChanged, {
+        const promise = testEmission(tracker.currentChanged, {
           find: () => {
             return total === 1;
           }

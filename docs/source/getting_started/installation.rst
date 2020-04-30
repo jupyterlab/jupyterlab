@@ -52,6 +52,12 @@ For example, in the directory where ``pipenv``'s ``Pipfile`` and ``Pipfile.lock`
 
     pipenv shell
     jupyter lab
+    
+Alternatively, you can run ``jupyter lab`` inside the virtualenv with 
+
+.. code:: bash
+
+    pipenv run jupyter lab
 
 Docker
 ~~~~~~
@@ -201,3 +207,14 @@ on connectivity problems to HTTPS servers, you can disable using SSL for ``npm``
 
     # Configure npm to not use SSL
     npm set strict-ssl False
+
+Problems with Extensions and Settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Jupyterlab saves settings via `PUT` requests to the server with a JSON5-compatible payload, even though it claims the PUT request is valid JSON. `JSON5 <https://json5.org/>`__ is a superset of JSON that allows comments, etc. There may be deployment problems, manifest as 400 error return codes when saving settings, if these `PUT` requests are rejected by a routing layer that tries to validate the payload as JSON instead of JSON5.
+
+Common symptoms of this during debugging are:
+
+- The settings are selected but nothing changes, or when extension manager is enabled but the manager tab is not added.
+- JupyterLab's logs don't have the 400 return codes when `PUT` requests are issued.
+- If your JupyterLab logs are on Elastic Search, you'll see `Unexpected token / in JSON at position`. This comes from the JSON5 comments not being valid JSON.

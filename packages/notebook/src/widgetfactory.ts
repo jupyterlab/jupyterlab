@@ -90,7 +90,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     context: DocumentRegistry.IContext<INotebookModel>,
     source?: NotebookPanel
   ): NotebookPanel {
-    let nbOptions = {
+    const nbOptions = {
       rendermime: source
         ? source.content.rendermime
         : this.rendermime.clone({ resolver: context.urlResolver }),
@@ -101,7 +101,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
         ? source.content.notebookConfig
         : this._notebookConfig
     };
-    let content = this.contentFactory.createNotebook(nbOptions);
+    const content = this.contentFactory.createNotebook(nbOptions);
 
     return new NotebookPanel({ context, content });
   }

@@ -12,7 +12,7 @@ import * as React from 'react';
  * @param errorMessage Any error message giving details about the failure.
  */
 export function reportInstallError(name: string, errorMessage?: string) {
-  let entries = [];
+  const entries = [];
   entries.push(
     <p>
       An error occurred installing <code>{name}</code>.
@@ -28,7 +28,7 @@ export function reportInstallError(name: string, errorMessage?: string) {
       <pre>{errorMessage.trim()}</pre>
     );
   }
-  let body = <div className="jp-extensionmanager-dialog">{entries}</div>;
+  const body = <div className="jp-extensionmanager-dialog">{entries}</div>;
   void showDialog({
     title: 'Extension Installation Error',
     body,

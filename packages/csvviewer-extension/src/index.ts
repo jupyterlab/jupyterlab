@@ -118,7 +118,7 @@ function activateCsv(
   }
 
   app.docRegistry.addWidgetFactory(factory);
-  let ft = app.docRegistry.getFileType('csv');
+  const ft = app.docRegistry.getFileType('csv');
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
     void tracker.add(widget);
@@ -198,7 +198,7 @@ function activateTsv(
   }
 
   app.docRegistry.addWidgetFactory(factory);
-  let ft = app.docRegistry.getFileType('tsv');
+  const ft = app.docRegistry.getFileType('tsv');
   factory.widgetCreated.connect((sender, widget) => {
     // Track the widget.
     void tracker.add(widget);

@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -16,7 +16,7 @@ export function getDeps(
   lut: { [key: string]: { [key: string]: string } }
 ): Set<string> {
   const deps: Set<string> = new Set();
-  for (let name in lut) {
+  for (const name in lut) {
     if ('@jupyterlab/' + pkgName in lut[name]) {
       const otherName = name.replace('@jupyterlab/', '');
       deps.add(otherName);
@@ -94,8 +94,8 @@ commander
     }
 
     if (options.dryRun) {
-      console.log('Would run:');
-      console.log(cmd);
+      console.debug('Would run:');
+      console.debug(cmd);
       return;
     }
     utils.run(cmd);

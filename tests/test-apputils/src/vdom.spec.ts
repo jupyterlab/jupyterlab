@@ -103,7 +103,7 @@ describe('@jupyterlab/apputils', () => {
         widget.model = model;
         model.value = 'foo';
         await framePromise();
-        let span = widget.node.firstChild as HTMLElement;
+        const span = widget.node.firstChild as HTMLElement;
         expect(span.textContent).to.equal('foo');
       });
     });

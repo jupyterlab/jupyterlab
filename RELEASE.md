@@ -123,6 +123,7 @@ git push origin --tags <BRANCH>
 ```
 
 These lines:
+
 - upload to pypi with twine
 - double-check what branch you are on, then push changes to the correct upstream branch with the `--tags` option.
 

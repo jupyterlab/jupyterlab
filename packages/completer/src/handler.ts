@@ -210,10 +210,10 @@ export class CompletionHandler implements IDisposable {
       return;
     }
 
-    let editor = this._editor;
+    const editor = this._editor;
     if (editor) {
       this._makeRequest(editor.getCursorPosition()).catch(reason => {
-        console.log('Invoke request bailed', reason);
+        console.warn('Invoke request bailed', reason);
       });
     }
   }

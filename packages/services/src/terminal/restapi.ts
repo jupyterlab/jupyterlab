@@ -13,7 +13,7 @@ export const TERMINAL_SERVICE_URL = 'api/terminals';
  * Whether the terminal service is available.
  */
 export function isAvailable(): boolean {
-  let available = String(PageConfig.getOption('terminalsAvailable'));
+  const available = String(PageConfig.getOption('terminalsAvailable'));
   return available.toLowerCase() === 'true';
 }
 
@@ -38,14 +38,15 @@ export async function startNew(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<IModel> {
   Private.errorIfNotAvailable();
-  let url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
-  let init = { method: 'POST' };
+  const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
+  const init = { method: 'POST' };
 
-  let response = await ServerConnection.makeRequest(url, init, settings);
+  const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
-  let data = await response.json();
+  const data = await response.json();
   // TODO: Validate model
   return data;
 }
@@ -61,12 +62,13 @@ export async function listRunning(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<IModel[]> {
   Private.errorIfNotAvailable();
-  let url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
-  let response = await ServerConnection.makeRequest(url, {}, settings);
+  const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL);
+  const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
-  let data = await response.json();
+  const data = await response.json();
 
   if (!Array.isArray(data)) {
     throw new Error('Invalid terminal list');
@@ -90,17 +92,18 @@ export async function shutdownTerminal(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
   Private.errorIfNotAvailable();
-  let url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL, name);
-  let init = { method: 'DELETE' };
-  let response = await ServerConnection.makeRequest(url, init, settings);
+  const url = URLExt.join(settings.baseUrl, TERMINAL_SERVICE_URL, name);
+  const init = { method: 'DELETE' };
+  const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status === 404) {
-    let data = await response.json();
-    let msg =
+    const data = await response.json();
+    const msg =
       data.message ??
       `The terminal session "${name}"" does not exist on the server`;
     console.warn(msg);
   } else if (response.status !== 204) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
 }
 

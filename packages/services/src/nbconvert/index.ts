@@ -30,29 +30,27 @@ export class NbConvertManager {
   /**
    * Get whether the application should be built.
    */
-  getExportFormats(): Promise<NbConvertManager.IExportFormats> {
+  async getExportFormats(): Promise<NbConvertManager.IExportFormats> {
     const base = this.serverSettings.baseUrl;
     const url = URLExt.join(base, NBCONVERT_SETTINGS_URL);
     const { serverSettings } = this;
-    const promise = ServerConnection.makeRequest(url, {}, serverSettings);
-
-    return promise
-      .then(response => {
-        if (response.status !== 200) {
-          throw new ServerConnection.ResponseError(response);
-        }
-
-        return response.json();
-      })
-      .then(data => {
-        let exportList: NbConvertManager.IExportFormats = {};
-        let keys = Object.keys(data);
-        keys.forEach(function(key) {
-          let mimeType: string = data[key].output_mimetype;
-          exportList[key] = { output_mimetype: mimeType };
-        });
-        return exportList;
-      });
+    const response = await ServerConnection.makeRequest(
+      url,
+      {},
+      serverSettings
+    );
+    if (response.status !== 200) {
+      const err = await ServerConnection.ResponseError.create(response);
+      throw err;
+    }
+    const data = await response.json();
+    const exportList: NbConvertManager.IExportFormats = {};
+    const keys = Object.keys(data);
+    keys.forEach(function(key) {
+      const mimeType: string = data[key].output_mimetype;
+      exportList[key] = { output_mimetype: mimeType };
+    });
+    return exportList;
   }
 }
 

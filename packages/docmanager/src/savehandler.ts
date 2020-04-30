@@ -19,7 +19,7 @@ export class SaveHandler implements IDisposable {
    */
   constructor(options: SaveHandler.IOptions) {
     this._context = options.context;
-    let interval = options.saveInterval || 120;
+    const interval = options.saveInterval || 120;
     this._minInterval = interval * 1000;
     this._interval = this._minInterval;
     // Restart the timer when the contents model is updated.
@@ -99,7 +99,7 @@ export class SaveHandler implements IDisposable {
    * Handle an autosave timeout.
    */
   private _save(): void {
-    let context = this._context;
+    const context = this._context;
 
     // Trigger the next update.
     this._setTimer();
@@ -110,19 +110,19 @@ export class SaveHandler implements IDisposable {
 
     // Bail if the model is not dirty or the file is not writable, or the dialog
     // is already showing.
-    let writable = context.contentsModel && context.contentsModel.writable;
+    const writable = context.contentsModel && context.contentsModel.writable;
     if (!writable || !context.model.dirty || this._inDialog) {
       return;
     }
 
-    let start = new Date().getTime();
+    const start = new Date().getTime();
     context
       .save()
       .then(() => {
         if (this.isDisposed) {
           return;
         }
-        let duration = new Date().getTime() - start;
+        const duration = new Date().getTime() - start;
         // New save interval: higher of 10x save duration or min interval.
         this._interval = Math.max(
           this._multiplier * duration,

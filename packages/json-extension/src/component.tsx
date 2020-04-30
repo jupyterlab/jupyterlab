@@ -181,7 +181,7 @@ function filterPaths(
   }
   if (JSONExt.isObject(data)) {
     return Object.keys(data).reduce((result: JSONArray, key: string) => {
-      let item = data[key];
+      const item = data[key];
       if (
         item &&
         typeof item === 'object' &&

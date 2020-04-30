@@ -150,7 +150,9 @@ describe('docregistry/context', () => {
         try {
           await context.initialize(true);
         } catch (err) {
-          expect(err.message).to.contain('Invalid response: 403 Forbidden');
+          expect(err.message).to.contain(
+            'Permission denied: src/readonly-temp.txt'
+          );
         }
 
         expect(called).to.equal(2);
@@ -350,9 +352,15 @@ describe('docregistry/context', () => {
         };
         const promise = func();
         await initialize;
+
+        const oldPath = context.path;
         await context.saveAs();
-        expect(context.path).to.equal(newPath);
         await promise;
+        expect(context.path).to.equal(newPath);
+        // Make sure the both files are there now.
+        const model = await manager.contents.get('', { content: true });
+        expect(model.content.find((x: any) => x.name === oldPath)).to.be.ok;
+        expect(model.content.find((x: any) => x.name === newPath)).to.be.ok;
       });
 
       it('should bring up a conflict dialog', async () => {

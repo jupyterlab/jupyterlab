@@ -36,7 +36,7 @@ export class CompleterModel implements Completer.IModel {
     return this._original;
   }
   set original(newValue: Completer.ITextState | null) {
-    let unchanged =
+    const unchanged =
       this._original === newValue ||
       (this._original &&
         newValue &&
@@ -432,16 +432,16 @@ export class CompleterModel implements Completer.IModel {
    * Apply the query to the complete options list to return the matching subset.
    */
   private _filter(): IIterator<Completer.IItem> {
-    let options = this._options || [];
-    let query = this._query;
+    const options = this._options || [];
+    const query = this._query;
     if (!query) {
       return map(options, option => ({ raw: option, text: option }));
     }
-    let results: Private.IMatch[] = [];
-    for (let option of options) {
-      let match = StringExt.matchSumOfSquares(option, query);
+    const results: Private.IMatch[] = [];
+    for (const option of options) {
+      const match = StringExt.matchSumOfSquares(option, query);
       if (match) {
-        let marked = StringExt.highlight(option, match.indices, Private.mark);
+        const marked = StringExt.highlight(option, match.indices, Private.mark);
         results.push({
           raw: option,
           score: match.score,
@@ -537,7 +537,7 @@ namespace Private {
    * by locale order of the item text.
    */
   export function scoreCmp(a: IMatch, b: IMatch): number {
-    let delta = a.score - b.score;
+    const delta = a.score - b.score;
     if (delta !== 0) {
       return delta;
     }

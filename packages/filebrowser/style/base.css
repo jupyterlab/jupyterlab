@@ -236,3 +236,7 @@
 .jp-FileDialog .jp-new-name-title {
   margin-top: 12px;
 }
+
+.jp-LastModified-hidden {
+  display: none;
+}

@@ -1,0 +1,59 @@
+name: Windows Tests
+
+on: [push, pull_request]
+
+jobs:
+  windowstests:
+    name: Windows
+    strategy:
+      matrix:
+        group: [python, integrity]
+      fail-fast: false
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.5
+      - name: Set up Node
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+      - name: Cache pip on Windows
+        uses: actions/cache@v1
+        if: startsWith(runner.os, 'Windows')
+        with:
+          path: ~\AppData\Local\pip\Cache
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Cache yarn
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+      - name: Cache yarn
+        uses: actions/cache@v1
+        id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Enable long paths
+        run: powershell Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem -Name LongPathsEnabled -Value 1
+      - name: Upgrade pip
+        run: python -m pip install -U pip
+      - name: Install pip deps
+        run: pip install --upgrade -e ".[test]"
+      - name: List kernels
+        run: jupyter kernelspec list
+      - name: List jlpm versions
+        run: jlpm versions
+      - name: List jlpm config
+        run: jlpm config current
+      - name: Run test ${{ matrix.group }}
+        env:
+          NAME: ${{ matrix.group }}
+        run: cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
