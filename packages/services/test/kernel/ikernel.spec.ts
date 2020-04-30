@@ -41,7 +41,7 @@ describe('Kernel.IKernel', () => {
   let kernelManager: KernelManager;
 
   beforeAll(async () => {
-    jest.setTimeout(20000);
+    jest.setTimeout(120000);
     kernelManager = new KernelManager();
     specs = await KernelSpecAPI.getSpecs();
   });
