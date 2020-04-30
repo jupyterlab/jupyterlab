@@ -35,9 +35,14 @@
   "typings": "lib/index.d.ts",
   "scripts": {
     "build": "tsc -b",
+    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf docs && rimraf lib",
     "docs": "typedoc src",
     "prepublishOnly": "jlpm run build && webpack",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -55,10 +60,16 @@
     "ws": "^7.2.0"
   },
   "devDependencies": {
+    "@jupyterlab/testutils": "^2.1.0",
+    "@types/jest": "^24.0.23",
     "@types/node": "^12.12.17",
     "@types/text-encoding": "^0.0.35",
+    "@types/ws": "^7.2.4",
+    "jest": "^25.2.3",
+    "jest-retries": "^1.0.1",
     "rimraf": "~3.0.0",
     "text-encoding": "^0.7.0",
+    "ts-jest": "^25.2.1",
     "typedoc": "^0.15.4",
     "typescript": "~3.7.3",
     "webpack": "^4.41.2",

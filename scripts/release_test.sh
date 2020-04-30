@@ -22,7 +22,6 @@ python -m jupyterlab.browser_check
 
 jupyter labextension install @jupyterlab/fasta-extension --no-build
 jupyter labextension install @jupyterlab/geojson-extension --no-build
-jupyter labextension install @jupyterlab/plotly-extension --no-build
 jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
 jupyter labextension install bqplot --no-build
 jupyter labextension install jupyter-leaflet --no-build

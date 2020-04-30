@@ -5,19 +5,28 @@ import 'jest';
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
+import { Context, TextModelFactory } from '@jupyterlab/docregistry';
+
 import {
   Kernel,
   KernelMessage,
   KernelSpec,
   Session,
-  ServiceManager
+  ServiceManager,
+  Contents,
+  ServerConnection,
+  ContentsManager
 } from '@jupyterlab/services';
+
+import { ArrayIterator } from '@lumino/algorithm';
 
 import { AttachedProperty } from '@lumino/properties';
 
 import { UUID } from '@lumino/coreutils';
 
 import { Signal } from '@lumino/signaling';
+
+import { PathExt } from '@jupyterlab/coreutils';
 
 export const KERNELSPECS: KernelSpec.ISpecModel[] = [
   {
@@ -118,7 +127,7 @@ export function emitIopubMessage(
  */
 export function createSimpleSessionContext(
   model: Private.RecursivePartial<Session.IModel> = {}
-): SessionContext {
+): ISessionContext {
   const kernel = new KernelMock({ model: model?.kernel || {} });
   const session = new SessionConnectionMock({ model }, kernel);
   return new SessionContextMock({}, session);
@@ -157,7 +166,7 @@ export const KernelMock = jest.fn<
   };
   let executionCount = 0;
   const spec = Private.kernelSpecForKernelName(model!.name!)!;
-  const thisObject = {
+  const thisObject: Kernel.IKernelConnection = {
     ...jest.requireActual('@jupyterlab/services'),
     ...options,
     ...model,
@@ -192,7 +201,7 @@ export const KernelMock = jest.fn<
       });
       return Promise.resolve(historyReply);
     }),
-    requestExecute: jest.fn(code => {
+    requestExecute: jest.fn(options => {
       const msgId = UUID.uuid4();
       executionCount++;
       Private.lastMessageProperty.set(thisObject, msgId);
@@ -203,7 +212,7 @@ export const KernelMock = jest.fn<
         username: thisObject.username,
         msgId,
         content: {
-          code,
+          code: options.code,
           execution_count: executionCount
         }
       });
@@ -247,7 +256,7 @@ export const SessionConnectionMock = jest.fn<
     ...options.model,
     kernel: kernel!.model
   };
-  const thisObject = {
+  const thisObject: Session.ISessionConnection = {
     ...jest.requireActual('@jupyterlab/services'),
     id: UUID.uuid4(),
     ...options,
@@ -259,13 +268,22 @@ export const SessionConnectionMock = jest.fn<
       return Private.changeKernel(kernel!, partialModel!);
     }),
     selectKernel: jest.fn(),
-    shutdown: jest.fn(() => {
-      return Promise.resolve();
-    })
+    shutdown: jest.fn(() => Promise.resolve(void 0))
   };
+  const disposedSignal = new Signal<Session.ISessionConnection, undefined>(
+    thisObject
+  );
+  const propertyChangedSignal = new Signal<
+    Session.ISessionConnection,
+    'path' | 'name' | 'type'
+  >(thisObject);
   const statusChangedSignal = new Signal<
     Session.ISessionConnection,
     Kernel.Status
+  >(thisObject);
+  const connectionStatusChangedSignal = new Signal<
+    Session.ISessionConnection,
+    Kernel.ConnectionStatus
   >(thisObject);
   const kernelChangedSignal = new Signal<
     Session.ISessionConnection,
@@ -276,6 +294,11 @@ export const SessionConnectionMock = jest.fn<
     KernelMessage.IIOPubMessage
   >(thisObject);
 
+  const unhandledMessageSignal = new Signal<
+    Session.ISessionConnection,
+    KernelMessage.IMessage
+  >(thisObject);
+
   kernel!.iopubMessage.connect((_, args) => {
     iopubMessageSignal.emit(args);
   }, thisObject);
@@ -284,9 +307,13 @@ export const SessionConnectionMock = jest.fn<
     statusChangedSignal.emit(args);
   }, thisObject);
 
+  (thisObject as any).disposed = disposedSignal;
+  (thisObject as any).connectionStatusChanged = connectionStatusChangedSignal;
+  (thisObject as any).propertyChanged = propertyChangedSignal;
   (thisObject as any).statusChanged = statusChangedSignal;
   (thisObject as any).kernelChanged = kernelChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
+  (thisObject as any).unhandledMessage = unhandledMessageSignal;
   return thisObject;
 });
 
@@ -296,7 +323,7 @@ export const SessionConnectionMock = jest.fn<
  * @param session The session connection object to use
  */
 export const SessionContextMock = jest.fn<
-  SessionContext,
+  ISessionContext,
   [Partial<SessionContext.IOptions>, Session.ISessionConnection | null]
 >((options, connection) => {
   const session =
@@ -311,7 +338,7 @@ export const SessionContextMock = jest.fn<
       },
       null
     );
-  const thisObject = {
+  const thisObject: ISessionContext = {
     ...jest.requireActual('@jupyterlab/apputils'),
     ...options,
     path: session.path,
@@ -320,22 +347,18 @@ export const SessionContextMock = jest.fn<
     kernel: session.kernel,
     session,
     dispose: jest.fn(),
-    initialize: jest.fn(() => {
-      return Promise.resolve();
-    }),
-    ready: jest.fn(() => {
-      return Promise.resolve();
-    }),
+    initialize: jest.fn(() => Promise.resolve(void 0)),
+    ready: Promise.resolve(void 0),
     changeKernel: jest.fn(partialModel => {
       return Private.changeKernel(
-        session.kernel || Private.RUNNING_KERNELS_MOCKS[0],
+        session.kernel || Private.RUNNING_KERNELS[0],
         partialModel!
       );
     }),
-    shutdown: jest.fn(() => {
-      return Promise.resolve();
-    })
+    shutdown: jest.fn(() => Promise.resolve(void 0))
   };
+
+  const disposedSignal = new Signal<ISessionContext, undefined>(thisObject);
 
   const propertyChangedSignal = new Signal<
     ISessionContext,
@@ -371,30 +394,273 @@ export const SessionContextMock = jest.fn<
   (thisObject as any).kernelChanged = kernelChangedSignal;
   (thisObject as any).iopubMessage = iopubMessageSignal;
   (thisObject as any).propertyChanged = propertyChangedSignal;
+  (thisObject as any).disposed = disposedSignal;
   (thisObject as any).session = session;
 
   return thisObject;
 });
 
 /**
+ * A mock contents manager.
+ */
+export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
+  const files = new Map<string, Contents.IModel>();
+  const dummy = new ContentsManager();
+  const checkpoints = new Map<string, Contents.ICheckpointModel>();
+  const checkPointContent = new Map<string, string>();
+
+  const baseModel = Private.createFile({ type: 'directory' });
+  files.set('', { ...baseModel, path: '', name: '' });
+
+  const thisObject: Contents.IManager = {
+    ...jest.requireActual('@jupyterlab/services'),
+    ready: Promise.resolve(void 0),
+    newUntitled: jest.fn(options => {
+      const model = Private.createFile(options || {});
+      files.set(model.path, model);
+      fileChangedSignal.emit({
+        type: 'new',
+        oldValue: null,
+        newValue: model
+      });
+      return Promise.resolve(model);
+    }),
+    createCheckpoint: jest.fn(path => {
+      const lastModified = new Date().toISOString();
+      checkpoints.set(path, { id: UUID.uuid4(), last_modified: lastModified });
+      checkPointContent.set(path, files.get(path)?.content);
+      return Promise.resolve(checkpoints.get(path));
+    }),
+    listCheckpoints: jest.fn(path => {
+      if (checkpoints.get(path)) {
+        return Promise.resolve([checkpoints.get(path)]);
+      }
+      return Promise.resolve([]);
+    }),
+    deleteCheckpoint: jest.fn(path => {
+      if (!checkpoints.has(path)) {
+        return Private.makeResponseError(404);
+      }
+      checkpoints.delete(path);
+      return Promise.resolve(void 0);
+    }),
+    restoreCheckpoint: jest.fn(path => {
+      if (!checkpoints.has(path)) {
+        return Private.makeResponseError(404);
+      }
+      (files.get(path) as any).content = checkPointContent.get(path);
+      return Promise.resolve(void 0);
+    }),
+    getModelDBFactory: jest.fn(() => {
+      return null;
+    }),
+    normalize: jest.fn(path => {
+      return dummy.normalize(path);
+    }),
+    localPath: jest.fn(path => {
+      return dummy.localPath(path);
+    }),
+    get: jest.fn((path, options) => {
+      path = Private.fixSlash(path);
+      if (!files.has(path)) {
+        return Private.makeResponseError(404);
+      }
+      const model = files.get(path)!;
+      if (model.type === 'directory') {
+        if (options?.content !== false) {
+          const content: Contents.IModel[] = [];
+          files.forEach(fileModel => {
+            if (PathExt.dirname(fileModel.path) == model.path) {
+              content.push(fileModel);
+            }
+          });
+          return Promise.resolve({ ...model, content });
+        }
+        return Promise.resolve(model);
+      }
+      if (options?.content != false) {
+        return Promise.resolve(model);
+      }
+      return Promise.resolve({ ...model, content: '' });
+    }),
+    driveName: jest.fn(path => {
+      return dummy.driveName(path);
+    }),
+    rename: jest.fn((oldPath, newPath) => {
+      oldPath = Private.fixSlash(oldPath);
+      newPath = Private.fixSlash(newPath);
+      if (!files.has(oldPath)) {
+        return Private.makeResponseError(404);
+      }
+      const oldValue = files.get(oldPath)!;
+      files.delete(oldPath);
+      const name = PathExt.basename(newPath);
+      const newValue = { ...oldValue, name, path: newPath };
+      files.set(newPath, newValue);
+      fileChangedSignal.emit({
+        type: 'rename',
+        oldValue,
+        newValue
+      });
+      return Promise.resolve(newValue);
+    }),
+    delete: jest.fn(path => {
+      path = Private.fixSlash(path);
+      if (!files.has(path)) {
+        return Private.makeResponseError(404);
+      }
+      const oldValue = files.get(path)!;
+      files.delete(path);
+      fileChangedSignal.emit({
+        type: 'delete',
+        oldValue,
+        newValue: null
+      });
+      return Promise.resolve(void 0);
+    }),
+    save: jest.fn((path, options) => {
+      if (path == 'readonly.txt') {
+        return Private.makeResponseError(403);
+      }
+      path = Private.fixSlash(path);
+      const timeStamp = new Date().toISOString();
+      if (files.has(path)) {
+        files.set(path, {
+          ...files.get(path)!,
+          ...options,
+          last_modified: timeStamp
+        });
+      } else {
+        files.set(path, {
+          path,
+          name: PathExt.basename(path),
+          content: '',
+          writable: true,
+          created: timeStamp,
+          type: 'file',
+          format: 'text',
+          mimetype: 'plain/text',
+          ...options,
+          last_modified: timeStamp
+        });
+      }
+      fileChangedSignal.emit({
+        type: 'save',
+        oldValue: null,
+        newValue: files.get(path)!
+      });
+      return Promise.resolve(files.get(path)!);
+    }),
+    getDownloadUrl: jest.fn(path => {
+      return dummy.getDownloadUrl(path);
+    }),
+    addDrive: jest.fn(drive => {
+      dummy.addDrive(drive);
+    }),
+    dispose: jest.fn()
+  };
+
+  const fileChangedSignal = new Signal<
+    Contents.IManager,
+    Contents.IChangedArgs
+  >(thisObject);
+  (thisObject as any).fileChanged = fileChangedSignal;
+  return thisObject;
+});
+
+/**
+ * A mock sessions manager.
+ */
+export const SessionManagerMock = jest.fn<Session.IManager, []>(() => {
+  let sessions: Session.IModel[] = [];
+  const thisObject: Session.IManager = {
+    ...jest.requireActual('@jupyterlab/services'),
+    ready: Promise.resolve(void 0),
+    startNew: jest.fn(options => {
+      const session = new SessionConnectionMock({ model: options }, null);
+      sessions.push(session.model);
+      runningChangedSignal.emit(sessions);
+      return session;
+    }),
+    connectTo: jest.fn(options => {
+      return new SessionConnectionMock(options, null);
+    }),
+    stopIfNeeded: jest.fn(path => {
+      const length = sessions.length;
+      sessions = sessions.filter(model => model.path !== path);
+      if (sessions.length !== length) {
+        runningChangedSignal.emit(sessions);
+      }
+      return Promise.resolve(void 0);
+    }),
+    refreshRunning: jest.fn(() => Promise.resolve(void 0)),
+    running: jest.fn(() => new ArrayIterator(sessions))
+  };
+
+  const runningChangedSignal = new Signal<Session.IManager, Session.IModel[]>(
+    thisObject
+  );
+  (thisObject as any).runningChanged = runningChangedSignal;
+  return thisObject;
+});
+
+/**
+ * A mock kernel specs manager
+ */
+export const KernelSpecManagerMock = jest.fn<KernelSpec.IManager, []>(() => {
+  const thisObject: KernelSpec.IManager = {
+    ...jest.requireActual('@jupyterlab/services'),
+    specs: { default: KERNELSPECS[0].name, kernelspecs: KERNELSPECS },
+    refreshSpecs: jest.fn(() => Promise.resolve(void 0))
+  };
+  return thisObject;
+});
+
+/**
  * A mock service manager.
  */
-export const ServiceManagerMock = jest.fn<ServiceManager, []>(() => ({
-  ...jest.requireActual('@jupyterlab/services'),
-  ready: jest.fn(() => {
-    return Promise.resolve();
-  })
-}));
+export const ServiceManagerMock = jest.fn<ServiceManager.IManager, []>(() => {
+  const thisObject: ServiceManager.IManager = {
+    ...jest.requireActual('@jupyterlab/services'),
+    ready: Promise.resolve(void 0),
+    contents: new ContentsManagerMock(),
+    sessions: new SessionManagerMock(),
+    kernelspecs: new KernelSpecManagerMock(),
+    dispose: jest.fn()
+  };
+  return thisObject;
+});
 
 /**
  * A mock kernel shell future.
  */
-export const MockShellFuture = jest.fn<Kernel.IShellFuture, []>(() => ({
-  ...jest.requireActual('@jupyterlab/services'),
-  done: jest.fn(() => {
-    return Promise.resolve();
-  })
-}));
+export const MockShellFuture = jest.fn<Kernel.IShellFuture, []>(() => {
+  const thisObject: Kernel.IShellFuture = {
+    ...jest.requireActual('@jupyterlab/services'),
+    done: Promise.resolve(void 0)
+  };
+  return thisObject;
+});
+
+/**
+ * Create a context for a file.
+ */
+export function createFileContext(startKernel = false): Context {
+  const path = UUID.uuid4() + '.txt';
+  const manager = new ServiceManagerMock();
+  const factory = new TextModelFactory();
+
+  return new Context({
+    manager,
+    factory,
+    path,
+    kernelPreference: {
+      shouldStart: startKernel,
+      canStart: startKernel,
+      autoStartDefault: startKernel
+    }
+  });
+}
 
 /**
  * A namespace for module private data.
@@ -415,6 +681,55 @@ namespace Private {
   export type RecursivePartial<T> = {
     [P in keyof T]?: RecursivePartial<T[P]>;
   };
+
+  export function createFile(
+    options?: Contents.ICreateOptions
+  ): Contents.IModel {
+    options = options || {};
+    let name = UUID.uuid4();
+    switch (options.type) {
+      case 'directory':
+        name = `Untitled Folder_${name}`;
+        break;
+      case 'notebook':
+        name = `Untitled_${name}.ipynb`;
+        break;
+      default:
+        name = `untitled_${name}${options.ext || '.txt'}`;
+    }
+
+    const path = PathExt.join(options.path || '', name);
+    let content = '';
+    if (options.type === 'notebook') {
+      content = JSON.stringify({});
+    }
+    const timeStamp = new Date().toISOString();
+    return {
+      path,
+      content,
+      name,
+      last_modified: timeStamp,
+      writable: true,
+      created: timeStamp,
+      type: options.type || 'file',
+      format: 'text',
+      mimetype: 'plain/text'
+    };
+  }
+
+  export function fixSlash(path: string): string {
+    if (path.endsWith('/')) {
+      path = path.slice(0, path.length - 1);
+    }
+    return path;
+  }
+
+  export function makeResponseError(
+    status: number
+  ): Promise<ServerConnection.ResponseError> {
+    const resp = new Response(void 0, { status });
+    return Promise.reject(new ServerConnection.ResponseError(resp));
+  }
 
   export function cloneKernel(
     options: RecursivePartial<Kernel.IKernelConnection.IOptions>
@@ -438,9 +753,9 @@ namespace Private {
         return model.id === partialModel.id;
       });
       if (kernelIdx !== -1) {
-        (kernel.model as any) = RUNNING_KERNELS_MOCKS[kernelIdx].model;
+        (kernel.model as any) = RUNNING_KERNELS[kernelIdx].model;
         (kernel.id as any) = partialModel.id;
-        return Promise.resolve(RUNNING_KERNELS_MOCKS[kernelIdx]);
+        return Promise.resolve(RUNNING_KERNELS[kernelIdx]);
       } else {
         throw new Error(
           `Unable to change kernel to one with id: ${partialModel.id}`
@@ -451,9 +766,9 @@ namespace Private {
         return model.name === partialModel.name;
       });
       if (kernelIdx !== -1) {
-        (kernel.model as any) = RUNNING_KERNELS_MOCKS[kernelIdx].model;
+        (kernel.model as any) = RUNNING_KERNELS[kernelIdx].model;
         (kernel.id as any) = partialModel.id;
-        return Promise.resolve(RUNNING_KERNELS_MOCKS[kernelIdx]);
+        return Promise.resolve(RUNNING_KERNELS[kernelIdx]);
       } else {
         throw new Error(
           `Unable to change kernel to one with name: ${partialModel.name}`
@@ -465,7 +780,7 @@ namespace Private {
   }
 
   // This list of running kernels simply mirrors the KERNEL_MODELS and KERNELSPECS lists
-  export const RUNNING_KERNELS_MOCKS: Kernel.IKernelConnection[] = KERNEL_MODELS.map(
+  export const RUNNING_KERNELS: Kernel.IKernelConnection[] = KERNEL_MODELS.map(
     (model, _) => {
       return new KernelMock({ model });
     }

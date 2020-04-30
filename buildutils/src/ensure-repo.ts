@@ -33,10 +33,12 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
+  '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
   '@jupyterlab/testutils': [
     'node-fetch',
     'identity-obj-proxy',
-    'jest-raw-loader'
+    'jest-raw-loader',
+    'markdown-loader-jest'
   ],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
@@ -240,6 +242,10 @@ function ensureJupyterlab(): string[] {
     try {
       data = utils.readJSONFile(dataPath);
     } catch (e) {
+      return;
+    }
+    // Skip private packages.
+    if (data.private === true) {
       return;
     }
 

@@ -16,12 +16,38 @@ JupyterLab can be extended in four ways via:
    extend the functionality of document widgets added to the
    application, and we cover them in :ref:`documents`.
 
-See :ref:`extension_tutorial` to learn how to make a simple JupyterLab extension.
-
 A JupyterLab application is comprised of:
 
 -  A core Application object
 -  Plugins
+
+Tutorials
+~~~~~~~~~
+
+We provide a set of guides to get started writing third-party extensions for JupyterLab:
+
+- :ref:`extension_tutorial`: An in-depth tutorial to learn how to make a simple JupyterLab extension.
+- The `JupyterLab Extension Examples Repository <https://github.com/jupyterlab/extension-examples>`_: A short tutorial series
+  to learn how to develop extensions for JupyterLab, by example.
+- :ref:`developer-extension-points`: A list of the most common JupyterLab extension points.
+
+Cookiecutters
+~~~~~~~~~~~~~
+
+We provide several cookiecutters to create JupyterLab plugin extensions:
+
+- `extension-cookiecutter-ts <https://github.com/jupyterlab/extension-cookiecutter-ts>`_: Create a JupyterLab extension in TypeScript
+- `extension-cookiecutter-js <https://github.com/jupyterlab/extension-cookiecutter-js>`_: Create a JupyterLab extension in JavaScript
+- `mimerender-cookiecutter-ts <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`_: Create a MIME Renderer JupyterLab extension in TypeScript
+- `theme-cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_: Create a new theme for JupyterLab
+
+API Documentation
+~~~~~~~~~~~~~~~~~
+
+If you are looking for lower level details on the JupyterLab and Lumino API:
+
+- `JupyterLab API Documentation <https://jupyterlab.github.io/jupyterlab/>`_
+- `Lumino API Documentation <https://jupyterlab.github.io/lumino/>`_
 
 Plugins
 ~~~~~~~
@@ -37,10 +63,6 @@ A plugin adds a core functionality to the application:
    `JupyterLab.IPluginModule <https://jupyterlab.github.io/jupyterlab/application/interfaces/jupyterlab.ipluginmodule.html>`__
    interface, by exporting a plugin object or array of plugin objects as
    the default export.
-
-   We provide two cookiecutters to create JupyterLab plugin extensions in
-   `JavaScript <https://github.com/jupyterlab/extension-cookiecutter-js>`__ and
-   `TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`__.
 
 The default plugins in the JupyterLab application include:
 
@@ -745,7 +767,7 @@ extension manager.
 Listings
 ^^^^^^^^
 
-You can develop on the extension manager package and :ref:`extension_listings` with the 
+You can develop on the extension manager package and :ref:`extension_listings` with the
 example shipped in the ``packages/extensionmanager-extension/examples/listings`` folder.
 
 Follow the ``README.md`` instructions in that folder.

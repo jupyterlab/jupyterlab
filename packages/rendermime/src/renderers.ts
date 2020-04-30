@@ -475,18 +475,25 @@ export namespace renderSVG {
  * @returns The content where all URLs have been replaced with corresponding links.
  */
 function autolink(content: string): string {
-  return content.replace(
-    // Same pattern as in classic notebook with word boundaries (\b).
-    /\b((https?|ftp)(:[^'"<>\s]+))\b/g,
-    url => {
-      const a = document.createElement('a');
-      a.href = url;
-      a.textContent = url;
-      a.rel = 'noopener';
-      a.target = '_blank';
-      return a.outerHTML;
-    }
+  // Taken from Visual Studio Code:
+  // https://github.com/microsoft/vscode/blob/9f709d170b06e991502153f281ec3c012add2e42/src/vs/workbench/contrib/debug/browser/linkDetector.ts#L17-L18
+  const controlCodes = '\\u0000-\\u0020\\u007f-\\u009f';
+  const webLinkRegex = new RegExp(
+    '(?:[a-zA-Z][a-zA-Z0-9+.-]{2,}:\\/\\/|data:|www\\.)[^\\s' +
+      controlCodes +
+      '"]{2,}[^\\s' +
+      controlCodes +
+      '"\')}\\],:;.!?]',
+    'ug'
   );
+  return content.replace(webLinkRegex, url => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.textContent = url;
+    a.rel = 'noopener';
+    a.target = '_blank';
+    return a.outerHTML;
+  });
 }
 
 /**

@@ -1,6 +1,6 @@
 import path = require('path');
 
-module.exports = function(name: string, baseDir: string) {
+module.exports = function(baseDir: string) {
   return {
     preset: 'ts-jest/presets/js-with-babel',
     moduleNameMapper: {
@@ -8,7 +8,8 @@ module.exports = function(name: string, baseDir: string) {
       '\\.(gif|ttf|eot)$': '@jupyterlab/testutils/lib/jest-file-mock.js'
     },
     transform: {
-      '\\.svg$': 'jest-raw-loader'
+      '\\.svg$': 'jest-raw-loader',
+      '^.+\\.md?$': 'markdown-loader-jest'
     },
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
     testPathIgnorePatterns: ['/lib/', '/node_modules/'],

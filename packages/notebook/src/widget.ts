@@ -1578,6 +1578,29 @@ export class Notebook extends StaticNotebook {
   }
 
   /**
+   * Find the target of html mouse event and cell index containing this target.
+   *
+   * #### Notes
+   * Returned index is -1 if the cell is not found.
+   */
+  private _findEventTargetAndCell(event: MouseEvent): [HTMLElement, number] {
+    let target = event.target as HTMLElement;
+    let index = this._findCell(target);
+    if (index === -1) {
+      // `event.target` sometimes gives an orphaned node in Firefox 57, which
+      // can have `null` anywhere in its parent line. If we fail to find a cell
+      // using `event.target`, try again using a target reconstructed from the
+      // position of the click event.
+      target = document.elementFromPoint(
+        event.clientX,
+        event.clientY
+      ) as HTMLElement;
+      index = this._findCell(target);
+    }
+    return [target, index];
+  }
+
+  /**
    * Handle `contextmenu` event.
    */
   private _evtContextMenuCapture(event: PointerEvent): void {
@@ -1587,19 +1610,8 @@ export class Notebook extends StaticNotebook {
     if (event.shiftKey) {
       return;
     }
-    // `event.target` sometimes gives an orphaned node in Firefox 57, which
-    // can have `null` anywhere in its parent tree. If we fail to find a
-    // cell using `event.target`, try again using a target reconstructed from
-    // the position of the click event.
-    let target = event.target as HTMLElement;
-    let index = this._findCell(target);
-    if (index === -1) {
-      target = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      ) as HTMLElement;
-      index = this._findCell(target);
-    }
+
+    const [target, index] = this._findEventTargetAndCell(event);
     const widget = this.widgets[index];
 
     if (widget && widget.editorWidget.node.contains(target)) {
@@ -1615,19 +1627,7 @@ export class Notebook extends StaticNotebook {
   private _evtMouseDownCapture(event: MouseEvent): void {
     const { button, shiftKey } = event;
 
-    // `event.target` sometimes gives an orphaned node in Firefox 57, which
-    // can have `null` anywhere in its parent tree. If we fail to find a
-    // cell using `event.target`, try again using a target reconstructed from
-    // the position of the click event.
-    let target = event.target as HTMLElement;
-    let index = this._findCell(target);
-    if (index === -1) {
-      target = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      ) as HTMLElement;
-      index = this._findCell(target);
-    }
+    const [target, index] = this._findEventTargetAndCell(event);
     const widget = this.widgets[index];
 
     // On OS X, the context menu may be triggered with ctrl-left-click. In
@@ -1663,20 +1663,7 @@ export class Notebook extends StaticNotebook {
       return;
     }
 
-    // Find the target cell.
-    let target = event.target as HTMLElement;
-    let index = this._findCell(target);
-    if (index === -1) {
-      // `event.target` sometimes gives an orphaned node in
-      // Firefox 57, which can have `null` anywhere in its parent line. If we fail
-      // to find a cell using `event.target`, try again using a target
-      // reconstructed from the position of the click event.
-      target = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      ) as HTMLElement;
-      index = this._findCell(target);
-    }
+    const [target, index] = this._findEventTargetAndCell(event);
     const widget = this.widgets[index];
 
     let targetArea: 'input' | 'prompt' | 'cell' | 'notebook';
@@ -1722,8 +1709,8 @@ export class Notebook extends StaticNotebook {
         document.addEventListener('mouseup', this, true);
         document.addEventListener('mousemove', this, true);
       } else if (button === 0 && !shiftKey) {
-        // Prepare to start a drag if we are on the drag region. TODO: If there is no drag, we'll deselect on mouseup.
-        if (targetArea === 'prompt' && this.isSelectedOrActive(widget)) {
+        // Prepare to start a drag if we are on the drag region.
+        if (targetArea === 'prompt') {
           // Prepare for a drag start
           this._dragData = {
             pressX: event.clientX,
@@ -1736,7 +1723,9 @@ export class Notebook extends StaticNotebook {
           document.addEventListener('mouseup', this, true);
           document.addEventListener('mousemove', this, true);
           event.preventDefault();
-        } else {
+        }
+
+        if (!this.isSelectedOrActive(widget)) {
           this.deselectAll();
           this.activeCellIndex = index;
         }
@@ -1762,6 +1751,9 @@ export class Notebook extends StaticNotebook {
    * Handle the `'mouseup'` event on the document.
    */
   private _evtDocumentMouseup(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
     // Remove the event listeners we put on the document
     document.removeEventListener('mousemove', this, true);
     document.removeEventListener('mouseup', this, true);
@@ -1769,28 +1761,13 @@ export class Notebook extends StaticNotebook {
     if (this._mouseMode === 'couldDrag') {
       // We didn't end up dragging if we are here, so treat it as a click event.
 
-      // Find the target cell.
-      let target = event.target as HTMLElement;
-      let index = this._findCell(target);
-      if (index === -1) {
-        // `event.target` sometimes gives an orphaned node in
-        // Firefox 57, which can have `null` anywhere in its parent line. If we fail
-        // to find a cell using `event.target`, try again using a target
-        // reconstructed from the position of the click event.
-        target = document.elementFromPoint(
-          event.clientX,
-          event.clientY
-        ) as HTMLElement;
-        index = this._findCell(target);
-      }
+      const [, index] = this._findEventTargetAndCell(event);
 
       this.deselectAll();
       this.activeCellIndex = index;
     }
 
     this._mouseMode = null;
-    event.preventDefault();
-    event.stopPropagation();
   }
 
   /**
@@ -2056,15 +2033,14 @@ export class Notebook extends StaticNotebook {
    */
   private _evtFocusIn(event: MouseEvent): void {
     const target = event.target as HTMLElement;
-
-    const i = this._findCell(target);
-    if (i !== -1) {
-      const widget = this.widgets[i];
+    const index = this._findCell(target);
+    if (index !== -1) {
+      const widget = this.widgets[index];
       // If the editor itself does not have focus, ensure command mode.
       if (!widget.editorWidget.node.contains(target)) {
         this.mode = 'command';
       }
-      this.activeCellIndex = i;
+      this.activeCellIndex = index;
       // If the editor has focus, ensure edit mode.
       const node = widget.editorWidget.node;
       if (node.contains(target)) {
@@ -2095,9 +2071,9 @@ export class Notebook extends StaticNotebook {
 
     // Bail if the item gaining focus is another cell,
     // and we should not be entering command mode.
-    const i = this._findCell(relatedTarget);
-    if (i !== -1) {
-      const widget = this.widgets[i];
+    const index = this._findCell(relatedTarget);
+    if (index !== -1) {
+      const widget = this.widgets[index];
       if (widget.editorWidget.node.contains(relatedTarget)) {
         return;
       }
@@ -2125,26 +2101,14 @@ export class Notebook extends StaticNotebook {
     }
     this.deselectAll();
 
-    // `event.target` sometimes gives an orphaned node in Firefox 57, which
-    // can have `null` anywhere in its parent tree. If we fail to find a
-    // cell using `event.target`, try again using a target reconstructed from
-    // the position of the click event.
-    let target = event.target as HTMLElement;
-    let i = this._findCell(target);
-    if (i === -1) {
-      target = document.elementFromPoint(
-        event.clientX,
-        event.clientY
-      ) as HTMLElement;
-      i = this._findCell(target);
-    }
+    const [target, index] = this._findEventTargetAndCell(event);
 
-    if (i === -1) {
+    if (index === -1) {
       return;
     }
-    this.activeCellIndex = i;
-    if (model.cells.get(i).type === 'markdown') {
-      const widget = this.widgets[i] as MarkdownCell;
+    this.activeCellIndex = index;
+    if (model.cells.get(index).type === 'markdown') {
+      const widget = this.widgets[index] as MarkdownCell;
       widget.rendered = false;
     } else if (target.localName === 'img') {
       target.classList.toggle(UNCONFINED_CLASS);

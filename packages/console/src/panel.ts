@@ -210,7 +210,7 @@ export namespace ConsolePanel {
     /**
      * An existing session context to use.
      */
-    sessionContext?: SessionContext;
+    sessionContext?: ISessionContext;
 
     /**
      * The model factory for the console widget.

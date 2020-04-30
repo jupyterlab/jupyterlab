@@ -51,7 +51,7 @@ class LogErrorHandler(logging.Handler):
         # These occur when we forcibly close Websockets or
         # browser connections during the test.
         # https://github.com/tornadoweb/tornado/issues/2834
-        if hasattr(record, 'exc_info') and isinstance(record.exc_info[1], StreamClosedError):
+        if hasattr(record, 'exc_info') and not record.exc_info is None and isinstance(record.exc_info[1], StreamClosedError):
             return
         return super().filter(record)
 
@@ -93,9 +93,10 @@ async def run_test_async(app, func):
         url = app.display_url
 
     # Allow a synchronous function to be passed in.
-    if inspect.isawaitable(func):
+    if inspect.iscoroutinefunction(func):
         test = func(url)
     else:
+        app.log.info('Using thread pool executor to run test')
         loop = asyncio.get_event_loop()
         executor = ThreadPoolExecutor()
         task = loop.run_in_executor(executor, func, url)
@@ -144,7 +145,7 @@ async def run_browser(url):
     if not osp.exists(osp.join(target, 'node_modules')):
         os.makedirs(target)
         await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(["jlpm", "add", "puppeteer"], cwd=target)
+        await run_async_process(["jlpm", "add", "puppeteer@^2"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
     await run_async_process(["node", "chrome-test.js", url], cwd=target)
 

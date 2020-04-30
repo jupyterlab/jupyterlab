@@ -16,7 +16,8 @@ import {
   WidgetTracker,
   ICommandPalette,
   InputDialog,
-  showErrorMessage
+  showErrorMessage,
+  DOMUtils
 } from '@jupyterlab/apputils';
 
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
@@ -122,6 +123,8 @@ namespace CommandIDs {
 
   export const toggleNavigateToCurrentDirectory =
     'filebrowser:toggle-navigate-to-current-directory';
+
+  export const toggleLastModified = 'filebrowser:toggle-last-modified';
 }
 
 /**
@@ -817,6 +820,28 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.toggleLastModified, {
+    label: 'Toggle Last Modified Column',
+    execute: () => {
+      const header = DOMUtils.findElement(document.body, 'jp-id-modified');
+      const column = DOMUtils.findElements(
+        document.body,
+        'jp-DirListing-itemModified'
+      );
+      if (header.classList.contains('jp-LastModified-hidden')) {
+        header.classList.remove('jp-LastModified-hidden');
+        for (let i = 0; i < column.length; i++) {
+          column[i].classList.remove('jp-LastModified-hidden');
+        }
+      } else {
+        header.classList.add('jp-LastModified-hidden');
+        for (let i = 0; i < column.length; i++) {
+          column[i].classList.add('jp-LastModified-hidden');
+        }
+      }
+    }
+  });
+
   if (mainMenu) {
     mainMenu.settingsMenu.addGroup(
       [{ command: CommandIDs.toggleNavigateToCurrentDirectory }],
@@ -1008,6 +1033,11 @@ function addCommands(
     command: CommandIDs.copyDownloadLink,
     selector: selectorNotDir,
     rank: 13
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.toggleLastModified,
+    selector: '.jp-DirListing-header',
+    rank: 14
   });
 }
 
