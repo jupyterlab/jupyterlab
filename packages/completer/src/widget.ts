@@ -929,7 +929,7 @@ export namespace Completer {
     ): HTMLLIElement {
       // Add the icon or type monogram
       if (icon) {
-        let iconNode = icon.element({
+        const iconNode = icon.element({
           className: 'jp-Completer-type jp-Completer-icon'
         });
         li.appendChild(iconNode);
