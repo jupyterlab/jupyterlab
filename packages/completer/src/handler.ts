@@ -615,7 +615,7 @@ export namespace CompletionHandler {
     void,
     CompletionHandler.IRequest
   > &
-    CompletionHandler.CompleterConnecterResponseType;
+    CompletionHandler.ICompleterConnecterResponseType;
 
   /**
    * A reply to a completion items fetch request.
@@ -635,7 +635,7 @@ export namespace CompletionHandler {
     items: CompletionHandler.ICompletionItems;
   }
 
-  export interface CompleterConnecterResponseType {
+  export interface ICompleterConnecterResponseType {
     responseType: typeof ICompletionItemsResponseType;
   }
 
