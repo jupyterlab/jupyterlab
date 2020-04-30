@@ -371,7 +371,6 @@
       "@jupyterlab/test-notebook": "../tests/test-notebook",
       "@jupyterlab/test-outputarea": "../tests/test-outputarea",
       "@jupyterlab/test-terminal": "../tests/test-terminal",
-      "@jupyterlab/test-ui-components": "../tests/test-ui-components",
       "@jupyterlab/testutils": "../testutils",
       "@jupyterlab/mock-extension": "../jupyterlab/tests/mock_packages/extension"
     }

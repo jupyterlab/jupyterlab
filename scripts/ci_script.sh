@@ -105,6 +105,9 @@ if [[ $GROUP == integrity2 ]]; then
     # Build the packages individually.
     jlpm run build:src
 
+    # Make sure the storybooks build.
+    jlpm run build:storybook
+
     # Make sure we have CSS that can be converted with postcss
     jlpm global add postcss-cli
 
