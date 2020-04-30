@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import {
   DefaultSchemaValidator,
@@ -46,7 +45,7 @@ describe('@jupyterlab/settingregistry', () => {
       it('should create a new schema validator', () => {
         const validator = new DefaultSchemaValidator();
 
-        expect(validator).to.be.an.instanceof(DefaultSchemaValidator);
+        expect(validator).toBeInstanceOf(DefaultSchemaValidator);
       });
     });
 
@@ -68,7 +67,7 @@ describe('@jupyterlab/settingregistry', () => {
         const plugin = { id, data: { composite, user }, raw, schema, version };
         const errors = validator.validateData(plugin);
 
-        expect(errors).to.equal(null);
+        expect(errors).toBe(null);
       });
 
       it('should return errors if the data fails to validate', () => {
@@ -88,7 +87,7 @@ describe('@jupyterlab/settingregistry', () => {
         const plugin = { id, data: { composite, user }, raw, schema, version };
         const errors = validator.validateData(plugin);
 
-        expect(errors).to.not.equal(null);
+        expect(errors).not.toBe(null);
       });
 
       it('should populate the composite data', () => {
@@ -108,11 +107,9 @@ describe('@jupyterlab/settingregistry', () => {
         const plugin = { id, data: { composite, user }, raw, schema, version };
         const errors = validator.validateData(plugin);
 
-        expect(errors).to.equal(null);
-        expect(plugin.data.user.bar).to.equal(undefined);
-        expect(plugin.data.composite.bar).to.equal(
-          schema.properties!.bar.default
-        );
+        expect(errors).toBe(null);
+        expect(plugin.data.user.bar).toBeUndefined();
+        expect(plugin.data.composite.bar).toBe(schema.properties!.bar.default);
       });
     });
   });
@@ -133,7 +130,7 @@ describe('@jupyterlab/settingregistry', () => {
 
     describe('#constructor()', () => {
       it('should create a new setting registry', () => {
-        expect(registry).to.be.an.instanceof(SettingRegistry);
+        expect(registry).toBeInstanceOf(SettingRegistry);
       });
     });
 
@@ -146,12 +143,12 @@ describe('@jupyterlab/settingregistry', () => {
         connector.schemas[id] = { type: 'object' };
         let called = false;
         registry.pluginChanged.connect((sender: any, plugin: string) => {
-          expect(id).to.equal(plugin);
+          expect(id).toBe(plugin);
           called = true;
         });
         await registry.load(id);
         await registry.set(id, key, value);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
@@ -160,13 +157,13 @@ describe('@jupyterlab/settingregistry', () => {
         const one = 'foo';
         const two = 'bar';
 
-        expect(Object.keys(registry.plugins)).to.be.empty;
+        expect(Object.keys(registry.plugins)).toHaveLength(0);
         connector.schemas[one] = { type: 'object' };
         connector.schemas[two] = { type: 'object' };
         await registry.load(one);
-        expect(Object.keys(registry.plugins)).to.have.length(1);
+        expect(Object.keys(registry.plugins)).toHaveLength(1);
         await registry.load(two);
-        expect(Object.keys(registry.plugins)).to.have.length(2);
+        expect(Object.keys(registry.plugins)).toHaveLength(2);
       });
     });
 
@@ -180,7 +177,7 @@ describe('@jupyterlab/settingregistry', () => {
         await connector.save(id, JSON.stringify({ [key]: value }));
         (await registry.load(id)) as Settings;
         const saved = await registry.get(id, key);
-        expect(saved.user).to.equal(value);
+        expect(saved.user).toBe(value);
       });
 
       it('should get a setting item from a plugin that is not loaded', async () => {
@@ -191,7 +188,7 @@ describe('@jupyterlab/settingregistry', () => {
         connector.schemas[id] = { type: 'object' };
         await connector.save(id, JSON.stringify({ [key]: value }));
         const saved = await registry.get(id, key);
-        expect(saved.composite).to.equal(value);
+        expect(saved.composite).toBe(value);
       });
 
       it('should use schema default if user data not available', async () => {
@@ -209,8 +206,8 @@ describe('@jupyterlab/settingregistry', () => {
         });
 
         const saved = await registry.get(id, key);
-        expect(saved.composite).to.equal(schema.properties![key].default);
-        expect(saved.composite).to.not.equal(saved.user);
+        expect(saved.composite).toBe(schema.properties![key].default);
+        expect(saved.composite).not.toBe(saved.user);
       });
 
       it('should let user value override schema default', async () => {
@@ -229,10 +226,10 @@ describe('@jupyterlab/settingregistry', () => {
 
         await connector.save(id, JSON.stringify({ [key]: value }));
         const saved = await registry.get(id, key);
-        expect(saved.composite).to.equal(value);
-        expect(saved.user).to.equal(value);
-        expect(saved.composite).to.not.equal(schema.properties![key].default);
-        expect(saved.user).to.not.equal(schema.properties![key].default);
+        expect(saved.composite).toBe(value);
+        expect(saved.user).toBe(value);
+        expect(saved.composite).not.toBe(schema.properties![key].default);
+        expect(saved.user).not.toBe(schema.properties![key].default);
       });
 
       it('should reject if a plugin does not exist', async () => {
@@ -242,7 +239,7 @@ describe('@jupyterlab/settingregistry', () => {
         } catch (e) {
           failed = true;
         }
-        expect(failed).to.equal(true);
+        expect(failed).toBe(true);
       });
 
       it('should resolve `undefined` if a key does not exist', async () => {
@@ -252,8 +249,8 @@ describe('@jupyterlab/settingregistry', () => {
         connector.schemas[id] = { type: 'object' };
 
         const saved = await registry.get(id, key);
-        expect(saved.composite).to.equal(undefined);
-        expect(saved.user).to.equal(undefined);
+        expect(saved.composite).toBeUndefined();
+        expect(saved.user).toBeUndefined();
       });
     });
 
@@ -261,10 +258,10 @@ describe('@jupyterlab/settingregistry', () => {
       it(`should resolve a registered plugin's settings`, async () => {
         const id = 'foo';
 
-        expect(Object.keys(registry.plugins)).to.be.empty;
+        expect(Object.keys(registry.plugins)).toHaveLength(0);
         connector.schemas[id] = { type: 'object' };
         const settings = (await registry.load(id)) as Settings;
-        expect(settings.id).to.equal(id);
+        expect(settings.id).toBe(id);
       });
 
       it(`should reject if a plugin transformation times out`, async () => {
@@ -281,7 +278,7 @@ describe('@jupyterlab/settingregistry', () => {
         } catch (e) {
           failed = true;
         }
-        expect(failed).to.equal(true);
+        expect(failed).toBe(true);
       });
 
       it('should reject if a plugin does not exist', async () => {
@@ -291,7 +288,7 @@ describe('@jupyterlab/settingregistry', () => {
         } catch (e) {
           failed = true;
         }
-        expect(failed).to.equal(true);
+        expect(failed).toBe(true);
       });
     });
 
@@ -299,10 +296,10 @@ describe('@jupyterlab/settingregistry', () => {
       it(`should load a registered plugin's settings`, async () => {
         const id = 'foo';
 
-        expect(Object.keys(registry.plugins)).to.be.empty;
+        expect(Object.keys(registry.plugins)).toHaveLength(0);
         connector.schemas[id] = { type: 'object' };
         const settings = await registry.reload(id);
-        expect(settings.id).to.equal(id);
+        expect(settings.id).toBe(id);
       });
 
       it(`should replace a registered plugin's settings`, async () => {
@@ -310,14 +307,14 @@ describe('@jupyterlab/settingregistry', () => {
         const first = 'Foo';
         const second = 'Bar';
 
-        expect(Object.keys(registry.plugins)).to.be.empty;
+        expect(Object.keys(registry.plugins)).toHaveLength(0);
         connector.schemas[id] = { type: 'object', title: first };
         let settings = await registry.reload(id);
-        expect(settings.schema.title).to.equal(first);
+        expect(settings.schema.title).toBe(first);
         await Promise.resolve(undefined);
         connector.schemas[id].title = second;
         settings = await registry.reload(id);
-        expect(settings.schema.title).to.equal(second);
+        expect(settings.schema.title).toBe(second);
       });
 
       it('should reject if a plugin does not exist', async () => {
@@ -327,7 +324,7 @@ describe('@jupyterlab/settingregistry', () => {
         } catch (e) {
           failed = true;
         }
-        expect(failed).to.equal(true);
+        expect(failed).toBe(true);
       });
     });
 
@@ -336,7 +333,7 @@ describe('@jupyterlab/settingregistry', () => {
         const id = 'foo';
         const version = 'transform-test';
 
-        expect(Object.keys(registry.plugins)).to.be.empty;
+        expect(Object.keys(registry.plugins)).toHaveLength(0);
         connector.schemas[id] = {
           'jupyter.lab.transform': true,
           type: 'object'
@@ -347,14 +344,14 @@ describe('@jupyterlab/settingregistry', () => {
             return plugin;
           }
         });
-        expect((await registry.load(id)).version).to.equal(version);
+        expect((await registry.load(id)).version).toBe(version);
       });
 
       it(`should transform a plugin during the compose phase`, async () => {
         const id = 'foo';
         const composite = { a: 1 };
 
-        expect(Object.keys(registry.plugins)).to.be.empty;
+        expect(Object.keys(registry.plugins)).toHaveLength(0);
         connector.schemas[id] = {
           'jupyter.lab.transform': true,
           type: 'object'
@@ -365,14 +362,14 @@ describe('@jupyterlab/settingregistry', () => {
             return plugin;
           }
         });
-        expect((await registry.load(id)).composite).to.eql(composite);
+        expect((await registry.load(id)).composite).toEqual(composite);
       });
 
       it(`should disallow a transform that changes the plugin ID`, async () => {
         const id = 'foo';
         let failed = false;
 
-        expect(Object.keys(registry.plugins)).to.be.empty;
+        expect(Object.keys(registry.plugins)).toHaveLength(0);
         connector.schemas[id] = {
           'jupyter.lab.transform': true,
           type: 'object'
@@ -388,7 +385,7 @@ describe('@jupyterlab/settingregistry', () => {
         } catch (e) {
           failed = true;
         }
-        expect(failed).to.equal(true);
+        expect(failed).toBe(true);
       });
     });
   });
@@ -421,7 +418,7 @@ describe('@jupyterlab/settingregistry', () => {
         const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
-        expect(settings).to.be.an.instanceof(Settings);
+        expect(settings).toBeInstanceOf(Settings);
       });
     });
 
@@ -455,7 +452,7 @@ describe('@jupyterlab/settingregistry', () => {
 
         connector.schemas[id] = schema;
         settings = (await registry.load(id)) as Settings;
-        expect(settings.composite[key]).to.equal(value);
+        expect(settings.composite[key]).toBe(value);
       });
 
       it('should privilege user data', async () => {
@@ -475,7 +472,7 @@ describe('@jupyterlab/settingregistry', () => {
         connector.schemas[id] = schema;
         settings = (await registry.load(id)) as Settings;
         await settings.set(key, value);
-        expect(settings.composite[key]).to.equal(value);
+        expect(settings.composite[key]).toBe(value);
       });
     });
 
@@ -489,7 +486,7 @@ describe('@jupyterlab/settingregistry', () => {
         const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
-        expect(settings.id).to.equal(id);
+        expect(settings.id).toBe(id);
       });
     });
 
@@ -503,9 +500,9 @@ describe('@jupyterlab/settingregistry', () => {
         const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
-        expect(settings.isDisposed).to.equal(false);
+        expect(settings.isDisposed).toBe(false);
         settings.dispose();
-        expect(settings.isDisposed).to.equal(true);
+        expect(settings.isDisposed).toBe(true);
       });
     });
 
@@ -516,7 +513,7 @@ describe('@jupyterlab/settingregistry', () => {
 
         connector.schemas[id] = schema;
         settings = (await registry.load(id)) as Settings;
-        expect(settings.schema).to.deep.equal(schema);
+        expect(settings.schema).toEqual(schema);
       });
     });
 
@@ -538,7 +535,7 @@ describe('@jupyterlab/settingregistry', () => {
         connector.schemas[id] = schema;
         settings = (await registry.load(id)) as Settings;
         await settings.set(key, value);
-        expect(settings.user[key]).to.equal(value);
+        expect(settings.user[key]).toBe(value);
       });
     });
 
@@ -552,7 +549,7 @@ describe('@jupyterlab/settingregistry', () => {
         const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
-        expect(settings.registry).to.equal(registry);
+        expect(settings.registry).toBe(registry);
       });
     });
 
@@ -566,9 +563,9 @@ describe('@jupyterlab/settingregistry', () => {
         const plugin = { id, data, raw, schema, version };
 
         settings = new Settings({ plugin, registry });
-        expect(settings.isDisposed).to.equal(false);
+        expect(settings.isDisposed).toBe(false);
         settings.dispose();
-        expect(settings.isDisposed).to.equal(true);
+        expect(settings.isDisposed).toBe(true);
       });
     });
 
@@ -620,11 +617,11 @@ describe('@jupyterlab/settingregistry', () => {
           }
         };
         settings = (await registry.load(id)) as Settings;
-        expect(settings.default('nonexistent-key')).to.equal(undefined);
-        expect(settings.default('foo')).to.equal(defaults.foo);
-        expect(settings.default('bar')).to.equal(defaults.bar);
-        expect(settings.default('baz')).to.deep.equal(defaults.baz);
-        expect(settings.default('nonexistent-default')).to.equal(undefined);
+        expect(settings.default('nonexistent-key')).toBeUndefined();
+        expect(settings.default('foo')).toBe(defaults.foo);
+        expect(settings.default('bar')).toBe(defaults.bar);
+        expect(settings.default('baz')).toEqual(defaults.baz);
+        expect(settings.default('nonexistent-default')).toBeUndefined();
       });
     });
 
@@ -638,7 +635,7 @@ describe('@jupyterlab/settingregistry', () => {
         await connector.save(id, JSON.stringify({ [key]: value }));
         settings = (await registry.load(id)) as Settings;
         const saved = settings.get(key);
-        expect(saved.user).to.equal(value);
+        expect(saved.user).toBe(value);
       });
 
       it('should use schema default if user data not available', async () => {
@@ -658,8 +655,8 @@ describe('@jupyterlab/settingregistry', () => {
         settings = (await registry.load(id)) as Settings;
         const saved = settings.get(key);
 
-        expect(saved.composite).to.equal(schema.properties![key].default);
-        expect(saved.composite).to.not.equal(saved.user);
+        expect(saved.composite).toBe(schema.properties![key].default);
+        expect(saved.composite).not.toBe(saved.user);
       });
 
       it('should let user value override schema default', async () => {
@@ -679,10 +676,10 @@ describe('@jupyterlab/settingregistry', () => {
         await connector.save(id, JSON.stringify({ [key]: value }));
         settings = (await registry.load(id)) as Settings;
         const saved = settings.get(key);
-        expect(saved.composite).to.equal(value);
-        expect(saved.user).to.equal(value);
-        expect(saved.composite).to.not.equal(schema.properties![key].default);
-        expect(saved.user).to.not.equal(schema.properties![key].default);
+        expect(saved.composite).toBe(value);
+        expect(saved.user).toBe(value);
+        expect(saved.composite).not.toBe(schema.properties![key].default);
+        expect(saved.user).not.toBe(schema.properties![key].default);
       });
 
       it('should be `undefined` if a key does not exist', async () => {
@@ -693,8 +690,8 @@ describe('@jupyterlab/settingregistry', () => {
 
         settings = (await registry.load(id)) as Settings;
         const saved = settings.get(key);
-        expect(saved.composite).to.equal(undefined);
-        expect(saved.user).to.equal(undefined);
+        expect(saved.composite).toBeUndefined();
+        expect(saved.user).toBeUndefined();
       });
     });
 
@@ -708,11 +705,11 @@ describe('@jupyterlab/settingregistry', () => {
         await connector.save(id, JSON.stringify({ [key]: value }));
         settings = (await registry.load(id)) as Settings;
         let saved = settings.get(key);
-        expect(saved.user).to.equal(value);
+        expect(saved.user).toBe(value);
         await settings.remove(key);
         saved = settings.get(key);
-        expect(saved.composite).to.equal(undefined);
-        expect(saved.user).to.equal(undefined);
+        expect(saved.composite).toBeUndefined();
+        expect(saved.user).toBeUndefined();
       });
     });
 
@@ -726,13 +723,13 @@ describe('@jupyterlab/settingregistry', () => {
         settings = (await registry.load(id)) as Settings;
         await settings.save(JSON.stringify({ one, two }));
         let saved = settings.get('one');
-        expect(saved.composite).to.equal(one);
-        expect(saved.user).to.equal(one);
+        expect(saved.composite).toBe(one);
+        expect(saved.user).toBe(one);
 
         saved = settings.get('two');
 
-        expect(saved.composite).to.equal(two);
-        expect(saved.user).to.equal(two);
+        expect(saved.composite).toBe(two);
+        expect(saved.user).toBe(two);
       });
     });
 
@@ -745,8 +742,8 @@ describe('@jupyterlab/settingregistry', () => {
         settings = (await registry.load(id)) as Settings;
         await settings.set('one', one);
         const saved = settings.get('one');
-        expect(saved.composite).to.equal(one);
-        expect(saved.user).to.equal(one);
+        expect(saved.composite).toBe(one);
+        expect(saved.user).toBe(one);
       });
     });
   });
