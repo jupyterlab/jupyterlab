@@ -10630,6 +10630,11 @@ jest-resolve@^25.2.3:
     realpath-native "^2.0.0"
     resolve "^1.15.1"
 
+jest-retries@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/jest-retries/-/jest-retries-1.0.1.tgz#b60eac2c6f6ee7033fbc9a3cb6f3016a63b82822"
+  integrity sha512-tR9tCXs9+Vqw/2toQEOg+CpzOwUqReppcZH2550EnuEhw4F8TR+NbICPUJexegjN9xnuF4ABSGPgzCgAFZI0Ng==
+
 jest-runner@^25.2.3:
   version "25.2.3"
   resolved "https://registry.yarnpkg.com/jest-runner/-/jest-runner-25.2.3.tgz#88fb448a46cf4ee9194a3e3cf0adbc122e195adb"

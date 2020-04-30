@@ -267,13 +267,6 @@
       "react-dom"
     ],
     "linkedPackages": {
-      "@jupyterlab/application-top": "../dev_mode",
-      "@jupyterlab/example-app": "../examples/app",
-      "@jupyterlab/example-cell": "../examples/cell",
-      "@jupyterlab/example-console": "../examples/console",
-      "@jupyterlab/example-filebrowser": "../examples/filebrowser",
-      "@jupyterlab/example-notebook": "../examples/notebook",
-      "@jupyterlab/example-terminal": "../examples/terminal",
       "@jupyterlab/application": "../packages/application",
       "@jupyterlab/application-extension": "../packages/application-extension",
       "@jupyterlab/apputils": "../packages/apputils",
@@ -357,22 +350,9 @@
       "@jupyterlab/vdom": "../packages/vdom",
       "@jupyterlab/vdom-extension": "../packages/vdom-extension",
       "@jupyterlab/vega5-extension": "../packages/vega5-extension",
-      "node-example": "../packages/services/examples/node",
-      "@jupyterlab/example-services-browser": "../packages/services/examples/browser",
-      "@jupyterlab/example-services-outputarea": "../packages/services/examples/typescript-browser-with-output",
       "@jupyterlab/buildutils": "../buildutils",
       "@jupyterlab/template": "../buildutils/template",
-      "template-for-tests": "../buildutils/test-template",
-      "@jupyterlab/test-root": "../tests",
-      "@jupyterlab/test-apputils": "../tests/test-apputils",
-      "@jupyterlab/test-cells": "../tests/test-cells",
-      "@jupyterlab/test-docregistry": "../tests/test-docregistry",
-      "@jupyterlab/test-logconsole": "../tests/test-logconsole",
-      "@jupyterlab/test-notebook": "../tests/test-notebook",
-      "@jupyterlab/test-outputarea": "../tests/test-outputarea",
-      "@jupyterlab/test-terminal": "../tests/test-terminal",
-      "@jupyterlab/testutils": "../testutils",
-      "@jupyterlab/mock-extension": "../jupyterlab/tests/mock_packages/extension"
+      "@jupyterlab/testutils": "../testutils"
     }
   }
 }

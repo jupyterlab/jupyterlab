@@ -2,6 +2,8 @@
 
 import 'jest';
 
+const it = require('jest-retries');
+
 import { PageConfig } from '@jupyterlab/coreutils';
 
 import { UUID } from '@lumino/coreutils';
@@ -41,7 +43,7 @@ describe('Kernel.IKernel', () => {
   let kernelManager: KernelManager;
 
   beforeAll(async () => {
-    jest.setTimeout(120000);
+    jest.setTimeout(20000);
     kernelManager = new KernelManager();
     specs = await KernelSpecAPI.getSpecs();
   });
@@ -62,7 +64,8 @@ describe('Kernel.IKernel', () => {
   });
 
   describe('#disposed', () => {
-    it('should be emitted when the kernel is disposed', () => {
+    it('should be emitted when the kernel is disposed', async () => {
+      await defaultKernel.info;
       let called = false;
       defaultKernel.disposed.connect((sender, args) => {
         expect(sender).toBe(defaultKernel);
@@ -74,6 +77,7 @@ describe('Kernel.IKernel', () => {
     });
 
     it('should be emitted when the kernel is shut down', async () => {
+      await defaultKernel.info;
       let called = false;
       defaultKernel.disposed.connect((sender, args) => {
         expect(sender).toBe(defaultKernel);

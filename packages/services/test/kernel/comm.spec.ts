@@ -2,6 +2,8 @@
 
 import 'jest';
 
+const it = require('jest-retries');
+
 import { PromiseDelegate } from '@lumino/coreutils';
 
 import { KernelMessage, Kernel, KernelManager } from '../../src';

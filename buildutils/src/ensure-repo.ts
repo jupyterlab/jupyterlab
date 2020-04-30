@@ -240,6 +240,10 @@ function ensureJupyterlab(): string[] {
     } catch (e) {
       return;
     }
+    // Skip private packages.
+    if (data.private === true) {
+      return;
+    }
 
     // watch all src, build, and test files in the Jupyterlab project
     const relativePath = utils.ensureUnixPathSep(

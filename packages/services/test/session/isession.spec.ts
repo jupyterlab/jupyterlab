@@ -2,6 +2,8 @@
 
 import 'jest';
 
+const it = require('jest-retries');
+
 import { PageConfig } from '@jupyterlab/coreutils';
 
 import { UUID } from '@lumino/coreutils';
@@ -58,7 +60,7 @@ describe('session', () => {
   let defaultSession: Session.ISessionConnection;
 
   beforeAll(async () => {
-    jest.setTimeout(120000);
+    jest.setTimeout(20000);
     defaultSession = await startNew();
   });
 

@@ -406,7 +406,8 @@ export const SessionContextMock = jest.fn<
 export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
   const files = new Map<string, Contents.IModel>();
   const dummy = new ContentsManager();
-  const checkpoints: { [key: string]: Contents.ICheckpointModel } = {};
+  const checkpoints = new Map<string, Contents.ICheckpointModel>();
+  const checkPointContent = new Map<string, string>();
 
   const baseModel = Private.createFile({ type: 'directory' });
   files.set('', { ...baseModel, path: '', name: '' });
@@ -426,14 +427,29 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
     }),
     createCheckpoint: jest.fn(path => {
       const lastModified = new Date().toISOString();
-      checkpoints[path] = { id: UUID.uuid4(), last_modified: lastModified };
-      return Promise.resolve();
+      checkpoints.set(path, { id: UUID.uuid4(), last_modified: lastModified });
+      checkPointContent.set(path, files.get(path)?.content);
+      return Promise.resolve(checkpoints.get(path));
     }),
     listCheckpoints: jest.fn(path => {
-      if (checkpoints[path]) {
-        return Promise.resolve([checkpoints[path]]);
+      if (checkpoints.get(path)) {
+        return Promise.resolve([checkpoints.get(path)]);
       }
       return Promise.resolve([]);
+    }),
+    deleteCheckpoint: jest.fn(path => {
+      if (!checkpoints.has(path)) {
+        return Private.makeResponseError(404);
+      }
+      checkpoints.delete(path);
+      return Promise.resolve(void 0);
+    }),
+    restoreCheckpoint: jest.fn(path => {
+      if (!checkpoints.has(path)) {
+        return Private.makeResponseError(404);
+      }
+      (files.get(path) as any).content = checkPointContent.get(path);
+      return Promise.resolve(void 0);
     }),
     getModelDBFactory: jest.fn(() => {
       return null;
@@ -503,6 +519,9 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       return Promise.resolve(void 0);
     }),
     save: jest.fn((path, options) => {
+      if (path == 'readonly.txt') {
+        return Private.makeResponseError(403);
+      }
       path = Private.fixSlash(path);
       const timeStamp = new Date().toISOString();
       if (files.has(path)) {
