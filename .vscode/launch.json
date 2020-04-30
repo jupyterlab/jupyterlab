@@ -1,0 +1,53 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "jlab backend",
+            "type": "python",
+            "request": "launch",
+
+            "args": [
+                "--dev-mode",
+                "--notebook-dir=${env:HOME}",
+                "--no-browser",
+                "--NotebookApp.token=''",
+                "--port=9999"
+            ],
+            "module": "jupyterlab.labapp",
+
+            // can potentially run frontend using serverReadyAction instead
+            // of using compound job, currently not configurable enough
+            //
+            // "serverReadyAction": {
+            //     "pattern": "http://localhost:(\\S+)",
+            //     "uriFormat": "http://localhost:%s",
+            //     "action": "debugWithChrome",
+            //     "webRoot": "${workspaceFolder}"
+            // },
+        },
+        {
+            "name": "jlab frontend",
+            "type": "chrome",
+            "request": "launch",
+
+            "sourceMapPathOverrides": {
+                "webpack:///../*": "${webRoot}/*"
+            },
+            "timeout": 30000,
+            "url": "http://localhost:9999",
+            "webRoot": "${workspaceFolder}"
+        },
+    ],
+    "compounds": [
+        {
+            "name": "jlab all",
+            "configurations": [
+                "jlab backend",
+                "jlab frontend"
+            ]
+        }
+    ]
+}

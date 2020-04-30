@@ -68,4 +68,6 @@ MANIFEST
 # ms IDE stuff
 *.code-workspace
 .history
-.vscode
+.vscode/*
+!.vscode
+!.vscode/launch.json
