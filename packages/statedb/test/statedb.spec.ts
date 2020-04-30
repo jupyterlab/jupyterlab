@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { StateDB } from '@jupyterlab/statedb';
 
@@ -11,7 +10,7 @@ describe('StateDB', () => {
   describe('#constructor()', () => {
     it('should create a state database', () => {
       const db = new StateDB();
-      expect(db).to.be.an.instanceof(StateDB);
+      expect(db).toBeInstanceOf(StateDB);
     });
 
     it('should allow an overwrite data transformation', async () => {
@@ -20,9 +19,9 @@ describe('StateDB', () => {
       const correct = 'bar';
       const incorrect = 'baz';
 
-      expect(await connector.fetch(key)).to.be.undefined;
+      expect(await connector.fetch(key)).toBeUndefined();
       await connector.save(key, `{ "v": "${incorrect}"}`);
-      expect(JSON.parse(await connector.fetch(key)).v).to.equal(incorrect);
+      expect(JSON.parse(await connector.fetch(key)).v).toBe(incorrect);
 
       const transform = new PromiseDelegate<StateDB.DataTransform>();
       const db = new StateDB({ connector, transform: transform.promise });
@@ -33,8 +32,8 @@ describe('StateDB', () => {
 
       transform.resolve(transformation);
       await transform.promise;
-      expect(await db.fetch(key)).to.equal(correct);
-      expect(JSON.parse(await connector.fetch(key)).v).to.equal(correct);
+      expect(await db.fetch(key)).toBe(correct);
+      expect(JSON.parse(await connector.fetch(key)).v).toBe(correct);
     });
 
     it('should allow a merge data transformation', async () => {
@@ -44,10 +43,10 @@ describe('StateDB', () => {
       const k2 = 'baz';
       const v2 = 'qux';
 
-      expect(await connector.fetch(k1)).to.be.undefined;
-      expect(await connector.fetch(k2)).to.be.undefined;
+      expect(await connector.fetch(k1)).toBeUndefined();
+      expect(await connector.fetch(k2)).toBeUndefined();
       await connector.save(k1, `{ "v": "${v1}"}`);
-      expect(JSON.parse(await connector.fetch(k1)).v).to.equal(v1);
+      expect(JSON.parse(await connector.fetch(k1)).v).toBe(v1);
 
       const transform = new PromiseDelegate<StateDB.DataTransform>();
       const db = new StateDB({ connector, transform: transform.promise });
@@ -58,8 +57,8 @@ describe('StateDB', () => {
 
       transform.resolve(transformation);
       await transform.promise;
-      expect(await db.fetch(k1)).to.equal(v1);
-      expect(await db.fetch(k2)).to.equal(v2);
+      expect(await db.fetch(k1)).toBe(v1);
+      expect(await db.fetch(k2)).toBe(v2);
     });
   });
 
@@ -82,7 +81,7 @@ describe('StateDB', () => {
       await db.remove('foo');
       await db.save('bar', 1);
       await db.remove('bar');
-      expect(recorded).to.deep.equal(changes);
+      expect(recorded).toEqual(changes);
     });
   });
 
@@ -91,11 +90,11 @@ describe('StateDB', () => {
       const connector = new StateDB.Connector();
       const db = new StateDB({ connector });
 
-      expect((await connector.list()).ids).to.be.empty;
+      expect((await connector.list()).ids).toHaveLength(0);
       await db.save('foo', 'bar');
-      expect((await connector.list()).ids).not.to.be.empty;
+      expect((await connector.list()).ids).toHaveLength(1);
       await db.clear();
-      expect((await connector.list()).ids).to.be.empty;
+      expect((await connector.list()).ids).toHaveLength(0);
     });
   });
 
@@ -105,9 +104,9 @@ describe('StateDB', () => {
       const key = 'foo:bar';
       const value = { baz: 'qux' };
 
-      expect(await db.fetch(key)).to.be.undefined;
+      expect(await db.fetch(key)).toBeUndefined();
       await db.save(key, value);
-      expect(await db.fetch(key)).to.deep.equal(value);
+      expect(await db.fetch(key)).toEqual(value);
     });
   });
 
@@ -129,22 +128,22 @@ describe('StateDB', () => {
       await Promise.all(keys.map(key => db.save(key, { value: key })));
 
       let fetched = await db.list('foo');
-      expect(fetched.ids.length).to.equal(3);
-      expect(fetched.values.length).to.equal(3);
+      expect(fetched.ids.length).toBe(3);
+      expect(fetched.values.length).toBe(3);
 
       let sorted = fetched.ids.sort((a, b) => a.localeCompare(b));
-      expect(sorted[0]).to.equal(keys[0]);
-      expect(sorted[1]).to.equal(keys[1]);
-      expect(sorted[2]).to.equal(keys[2]);
+      expect(sorted[0]).toBe(keys[0]);
+      expect(sorted[1]).toBe(keys[1]);
+      expect(sorted[2]).toBe(keys[2]);
 
       fetched = await db.list('abc');
-      expect(fetched.ids.length).to.equal(3);
-      expect(fetched.values.length).to.equal(3);
+      expect(fetched.ids.length).toBe(3);
+      expect(fetched.values.length).toBe(3);
 
       sorted = fetched.ids.sort((a, b) => a.localeCompare(b));
-      expect(sorted[0]).to.equal(keys[3]);
-      expect(sorted[1]).to.equal(keys[4]);
-      expect(sorted[2]).to.equal(keys[5]);
+      expect(sorted[0]).toBe(keys[3]);
+      expect(sorted[1]).toBe(keys[4]);
+      expect(sorted[2]).toBe(keys[5]);
     });
   });
 
@@ -154,11 +153,11 @@ describe('StateDB', () => {
       const key = 'foo:bar';
       const value = { baz: 'qux' };
 
-      expect(await db.fetch(key)).to.be.undefined;
+      expect(await db.fetch(key)).toBeUndefined();
       await db.save(key, value);
-      expect(await db.fetch(key)).to.deep.equal(value);
+      expect(await db.fetch(key)).toEqual(value);
       await db.remove(key);
-      expect(await db.fetch(key)).to.be.undefined;
+      expect(await db.fetch(key)).toBeUndefined();
     });
   });
 
@@ -169,7 +168,7 @@ describe('StateDB', () => {
       const value = { baz: 'qux' };
 
       await db.save(key, value);
-      expect(await db.fetch(key)).to.deep.equal(value);
+      expect(await db.fetch(key)).toEqual(value);
     });
   });
 
@@ -189,7 +188,7 @@ describe('StateDB', () => {
         Object.keys(contents).map(key => db.save(key, contents[key]))
       );
       const serialized = await db.toJSON();
-      expect(serialized).to.deep.equal(contents);
+      expect(serialized).toEqual(contents);
     });
   });
 });
