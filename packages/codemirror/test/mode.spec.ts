@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import CodeMirror from 'codemirror';
 
@@ -24,12 +23,12 @@ describe('Mode', () => {
         return {};
       });
       const spec = (await Mode.ensure('text/foo'))!;
-      expect(spec.name).to.equal('FOO');
+      expect(spec.name).toBe('FOO');
     });
 
     it('should load a bundled spec', async () => {
       const spec = (await Mode.ensure('application/json'))!;
-      expect(spec.name).to.equal('JSON');
+      expect(spec.name).toBe('JSON');
     });
 
     it('should add a spec loader', async () => {
@@ -48,26 +47,26 @@ describe('Mode', () => {
       CodeMirror.modeInfo.push(fakeMode('bar'));
 
       let spec = await Mode.ensure('bar');
-      expect(called).to.equal(1);
-      expect(loaded).to.equal(1);
-      expect(spec!.name).to.equal('BAR');
+      expect(called).toBe(1);
+      expect(loaded).toBe(1);
+      expect(spec!.name).toBe('BAR');
 
       spec = await Mode.ensure('python');
-      expect(called).to.equal(1);
-      expect(loaded).to.equal(1);
+      expect(called).toBe(1);
+      expect(loaded).toBe(1);
 
       try {
         spec = await Mode.ensure('APL');
       } catch (err) {
         // apparently one cannot use webpack `require` in jest
       }
-      expect(called).to.equal(2);
-      expect(loaded).to.equal(1);
+      expect(called).toBe(2);
+      expect(loaded).toBe(1);
     });
 
     it('should default to plain text', async () => {
       const spec = (await Mode.ensure('this is not a mode'))!;
-      expect(spec.name).to.equal('Plain Text');
+      expect(spec.name).toBe('Plain Text');
     });
   });
 });
