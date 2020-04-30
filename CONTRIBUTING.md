@@ -133,10 +133,14 @@ Notes:
 
 - A few of the scripts will run "python". If your target python is called something else (such as "python3") then parts of the build will fail. You may wish to build in a conda environment, or make an alias.
 
+- Some of the packages used in the development environment require Python 3.0 or higher. If you encounter an `ImportError` during the installation, make sure Python 3.0+ is installed. Also, try using the Python 3.0+ version of `pip` or `pip3 install -e .` command to install JupyterLab from the forked repository.
+
 - The `jlpm` command is a JupyterLab-provided, locked version of the [yarn](https://yarnpkg.com/en/) package manager. If you have `yarn` installed
   already, you can use the `yarn` command when developing, and it will use the
   local version of `yarn` in `jupyterlab/yarn.js` when run in the repository or
   a built application directory.
+
+- If you decide to use the `jlpm` command and encounter the `jlpm: command not found` error, try adding the user-level `bin` directory to your `PATH` environment variable. You already installed `jlpm` along with JupyterLab in the previous command, but `jlpm` might not be accessible due to `PATH` environment variable related issues. If you are using a Unix derivative (FreeBSD, GNU / Linux, OS X), you can achieve this by using `export PATH="$HOME/.local/bin:$PATH"` command.
 
 - At times, it may be necessary to clean your local repo with the command `npm run clean:slate`. This will clean the repository, and re-install and
   rebuild.
