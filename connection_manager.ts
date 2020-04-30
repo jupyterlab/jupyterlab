@@ -134,7 +134,7 @@ export class DocumentConnectionManager {
     const language_server_id = this.language_server_manager.getServerId({
       language
     });
-    console.log('LS ID: ', language_server_id);
+
     // lazily load 1) the underlying library (1.5mb) and/or 2) a live WebSocket-
     // like connection: either already connected or potentiailly in the process
     // of connecting.
@@ -158,13 +158,10 @@ export class DocumentConnectionManager {
    * "serverSettings" keyword in the setting registry. New keywords can
    * be added and extra functionality implemented here when needed.
    */
-  public updateServerConfigurations(
-    // TODO: define types for server configurations
-    lsSettings: any
-  ) {
-    for (let language_server_id in lsSettings) {
+  public updateServerConfigurations(allServerSettings: any) {
+    for (let language_server_id in allServerSettings) {
       const parsedSettings = vscodeStyleSettingsParser(
-        lsSettings[language_server_id].serverSettings
+        allServerSettings[language_server_id].serverSettings
       );
 
       const serverSettings: ILanguageServerConfiguration = {
