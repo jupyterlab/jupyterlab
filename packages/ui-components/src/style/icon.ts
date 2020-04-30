@@ -388,7 +388,7 @@ export namespace LabIconStyle {
         }
       },
       element: {
-        // width no height
+        height: 'auto',
         width: '20px'
       },
       options: {
