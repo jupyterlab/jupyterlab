@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { ArrayExt } from '@lumino/algorithm';
 
@@ -44,7 +43,7 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new main menu', () => {
-        expect(menu).to.be.an.instanceof(JupyterLabMenu);
+        expect(menu).toBeInstanceOf(JupyterLabMenu);
       });
 
       it('should accept useSeparators as an option', () => {
@@ -53,8 +52,8 @@ describe('@jupyterlab/mainmenu', () => {
         menu1.addGroup([{ command: 'run1' }, { command: 'run2' }]);
         menu2.addGroup([{ command: 'run1' }, { command: 'run2' }]);
 
-        expect(menu1.menu.items.length).to.equal(2);
-        expect(menu2.menu.items.length).to.equal(4);
+        expect(menu1.menu.items.length).toBe(2);
+        expect(menu2.menu.items.length).toBe(4);
       });
     });
 
@@ -71,9 +70,9 @@ describe('@jupyterlab/mainmenu', () => {
           m => m.command === 'run2'
         );
 
-        expect(idx1 === -1).to.equal(false);
-        expect(idx2 === -1).to.equal(false);
-        expect(idx1 > idx2).to.equal(false);
+        expect(idx1 === -1).toBe(false);
+        expect(idx2 === -1).toBe(false);
+        expect(idx1 > idx2).toBe(false);
       });
 
       it('should take a rank as an option', () => {
@@ -96,9 +95,9 @@ describe('@jupyterlab/mainmenu', () => {
           menu.menu.items,
           m => m.command === 'run4'
         );
-        expect(idx3 < idx4).to.equal(true);
-        expect(idx4 < idx1).to.equal(true);
-        expect(idx1 < idx2).to.equal(true);
+        expect(idx3 < idx4).toBe(true);
+        expect(idx4 < idx1).toBe(true);
+        expect(idx1 < idx2).toBe(true);
       });
 
       it('should return a disposable that can be used to remove the group', () => {
@@ -125,10 +124,10 @@ describe('@jupyterlab/mainmenu', () => {
           m => m.command === 'run4'
         );
 
-        expect(idx1).to.equal(-1);
-        expect(idx2).to.equal(-1);
-        expect(idx3 === -1).to.equal(false);
-        expect(idx4 === -1).to.equal(false);
+        expect(idx1).toBe(-1);
+        expect(idx2).toBe(-1);
+        expect(idx3 === -1).toBe(false);
+        expect(idx4 === -1).toBe(false);
       });
     });
   });

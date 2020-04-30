@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -43,14 +42,14 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new file menu', () => {
-        expect(menu).to.be.an.instanceof(FileMenu);
-        expect(menu.menu.title.label).to.equal('File');
+        expect(menu).toBeInstanceOf(FileMenu);
+        expect(menu.menu.title.label).toBe('File');
       });
     });
 
     describe('#newMenu', () => {
       it('should be a submenu for `New...` commands', () => {
-        expect(menu.newMenu.menu.title.label).to.equal('New');
+        expect(menu.newMenu.menu.title.label).toBe('New');
       });
     });
 
@@ -67,7 +66,7 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.closeAndCleaners.add(cleaner);
         void delegateExecute(wodget, menu.closeAndCleaners, 'closeAndCleanup');
-        expect(wodget.state).to.equal('clean');
+        expect(wodget.state).toBe('clean');
       });
     });
 
@@ -83,7 +82,7 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.consoleCreators.add(creator);
         void delegateExecute(wodget, menu.consoleCreators, 'createConsole');
-        expect(wodget.state).to.equal('create');
+        expect(wodget.state).toBe('create');
       });
     });
   });

@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -43,8 +42,8 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new edit menu', () => {
-        expect(menu).to.be.an.instanceof(EditMenu);
-        expect(menu.menu.title.label).to.equal('Edit');
+        expect(menu).toBeInstanceOf(EditMenu);
+        expect(menu.menu.title.label).toBe('Edit');
       });
     });
 
@@ -63,9 +62,9 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.undoers.add(undoer);
         void delegateExecute(wodget, menu.undoers, 'undo');
-        expect(wodget.state).to.equal('undo');
+        expect(wodget.state).toBe('undo');
         void delegateExecute(wodget, menu.undoers, 'redo');
-        expect(wodget.state).to.equal('redo');
+        expect(wodget.state).toBe('redo');
       });
     });
 
@@ -85,9 +84,9 @@ describe('@jupyterlab/mainmenu', () => {
         };
         menu.clearers.add(clearer);
         void delegateExecute(wodget, menu.clearers, 'clearCurrent');
-        expect(wodget.state).to.equal('clearCurrent');
+        expect(wodget.state).toBe('clearCurrent');
         void delegateExecute(wodget, menu.clearers, 'clearAll');
-        expect(wodget.state).to.equal('clearAll');
+        expect(wodget.state).toBe('clearAll');
       });
     });
   });

@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -45,8 +44,8 @@ describe('@jupyterlab/mainmenu', () => {
 
     describe('#constructor()', () => {
       it('should construct a new view menu', () => {
-        expect(menu).to.be.an.instanceof(ViewMenu);
-        expect(menu.menu.title.label).to.equal('View');
+        expect(menu).toBeInstanceOf(ViewMenu);
+        expect(menu.menu.title.label).toBe('View');
       });
     });
 
@@ -74,13 +73,13 @@ describe('@jupyterlab/mainmenu', () => {
 
         expect(
           delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled')
-        ).to.equal(false);
+        ).toBe(false);
         expect(
           delegateToggled(wodget, menu.editorViewers, 'wordWrapToggled')
-        ).to.equal(false);
+        ).toBe(false);
         expect(
           delegateToggled(wodget, menu.editorViewers, 'lineNumbersToggled')
-        ).to.equal(false);
+        ).toBe(false);
 
         void delegateExecute(wodget, menu.editorViewers, 'toggleLineNumbers');
         void delegateExecute(wodget, menu.editorViewers, 'toggleMatchBrackets');
@@ -88,13 +87,13 @@ describe('@jupyterlab/mainmenu', () => {
 
         expect(
           delegateToggled(wodget, menu.editorViewers, 'matchBracketsToggled')
-        ).to.equal(true);
+        ).toBe(true);
         expect(
           delegateToggled(wodget, menu.editorViewers, 'wordWrapToggled')
-        ).to.equal(true);
+        ).toBe(true);
         expect(
           delegateToggled(wodget, menu.editorViewers, 'lineNumbersToggled')
-        ).to.equal(true);
+        ).toBe(true);
       });
     });
   });
