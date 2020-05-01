@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { WidgetTracker } from '@jupyterlab/apputils';
 
@@ -50,7 +49,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#constructor()', () => {
       it('should create an WidgetTracker', () => {
-        expect(tracker).to.be.an.instanceof(WidgetTracker);
+        expect(tracker).toBeInstanceOf(WidgetTracker);
       });
     });
 
@@ -85,7 +84,7 @@ describe('@jupyterlab/apputils', () => {
           called = true;
         });
         await tracker.add(widget2);
-        expect(called).to.equal(false);
+        expect(called).toBe(false);
         widget.dispose();
         widget2.dispose();
       });
@@ -115,8 +114,8 @@ describe('@jupyterlab/apputils', () => {
 
         const [sender, args] = await promise;
 
-        expect(sender).to.equal(tracker);
-        expect(args).to.equal(widget);
+        expect(sender).toBe(tracker);
+        expect(args).toBe(widget);
         widget.dispose();
       });
 
@@ -146,14 +145,14 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#currentWidget', () => {
       it('should default to null', () => {
-        expect(tracker.currentWidget).to.be.null;
+        expect(tracker.currentWidget).toBeNull();
       });
 
       it('should be updated when a widget is added', async () => {
         const widget = createWidget();
 
         await tracker.add(widget);
-        expect(tracker.currentWidget).to.equal(widget);
+        expect(tracker.currentWidget).toBe(widget);
         widget.dispose();
       });
 
@@ -167,9 +166,9 @@ describe('@jupyterlab/apputils', () => {
         panel.addWidget(widget0);
         panel.addWidget(widget1);
         Widget.attach(panel, document.body);
-        expect(tracker.currentWidget).to.equal(widget1);
+        expect(tracker.currentWidget).toBe(widget1);
         focus(widget0);
-        expect(tracker.currentWidget).to.equal(widget0);
+        expect(tracker.currentWidget).toBe(widget0);
         panel.dispose();
         widget0.dispose();
         widget1.dispose();
@@ -183,9 +182,9 @@ describe('@jupyterlab/apputils', () => {
         await tracker.add(two);
         focus(one);
         focus(two);
-        expect(tracker.currentWidget).to.equal(two);
+        expect(tracker.currentWidget).toBe(two);
         two.dispose();
-        expect(tracker.currentWidget).to.equal(one);
+        expect(tracker.currentWidget).toBe(one);
         one.dispose();
       });
 
@@ -200,15 +199,15 @@ describe('@jupyterlab/apputils', () => {
         Widget.attach(panel, document.body);
 
         focus(widgets[0]);
-        expect(tracker.currentWidget).to.equal(widgets[0]);
+        expect(tracker.currentWidget).toBe(widgets[0]);
 
         let called = false;
         tracker.currentChanged.connect(() => {
           called = true;
         });
         widgets[2].dispose();
-        expect(tracker.currentWidget).to.equal(widgets[0]);
-        expect(called).to.equal(false);
+        expect(tracker.currentWidget).toBe(widgets[0]);
+        expect(called).toBe(false);
         panel.dispose();
         widgets.forEach(widget => {
           widget.dispose();
@@ -231,8 +230,8 @@ describe('@jupyterlab/apputils', () => {
           called = true;
         });
         widgets[2].dispose();
-        expect(tracker.currentWidget).to.equal(widgets[1]);
-        expect(called).to.equal(true);
+        expect(tracker.currentWidget).toBe(widgets[1]);
+        expect(called).toBe(true);
         panel.dispose();
         widgets.forEach(widget => {
           widget.dispose();
@@ -242,71 +241,71 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#isDisposed', () => {
       it('should test whether the tracker is disposed', () => {
-        expect(tracker.isDisposed).to.equal(false);
+        expect(tracker.isDisposed).toBe(false);
         tracker.dispose();
-        expect(tracker.isDisposed).to.equal(true);
+        expect(tracker.isDisposed).toBe(true);
       });
     });
 
     describe('#add()', () => {
       it('should add a widget to the tracker', async () => {
         const widget = createWidget();
-        expect(tracker.has(widget)).to.equal(false);
+        expect(tracker.has(widget)).toBe(false);
         await tracker.add(widget);
-        expect(tracker.has(widget)).to.equal(true);
+        expect(tracker.has(widget)).toBe(true);
         widget.dispose();
       });
 
       it('should reject a widget that already exists', async () => {
         const widget = createWidget();
         let failed = false;
-        expect(tracker.has(widget)).to.equal(false);
+        expect(tracker.has(widget)).toBe(false);
         await tracker.add(widget);
-        expect(tracker.has(widget)).to.equal(true);
+        expect(tracker.has(widget)).toBe(true);
         try {
           await tracker.add(widget);
         } catch (error) {
           failed = true;
         }
-        expect(failed).to.equal(true);
+        expect(failed).toBe(true);
         widget.dispose();
       });
 
       it('should reject a widget that is disposed', async () => {
         const widget = createWidget();
         let failed = false;
-        expect(tracker.has(widget)).to.equal(false);
+        expect(tracker.has(widget)).toBe(false);
         widget.dispose();
         try {
           await tracker.add(widget);
         } catch (error) {
           failed = true;
         }
-        expect(failed).to.equal(true);
+        expect(failed).toBe(true);
         widget.dispose();
       });
 
       it('should remove an added widget if it is disposed', async () => {
         const widget = createWidget();
         await tracker.add(widget);
-        expect(tracker.has(widget)).to.equal(true);
+        expect(tracker.has(widget)).toBe(true);
         widget.dispose();
-        expect(tracker.has(widget)).to.equal(false);
+        expect(tracker.has(widget)).toBe(false);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the tracker', () => {
-        expect(tracker.isDisposed).to.equal(false);
+        expect(tracker.isDisposed).toBe(false);
         tracker.dispose();
-        expect(tracker.isDisposed).to.equal(true);
+        expect(tracker.isDisposed).toBe(true);
       });
 
       it('should be safe to call multiple times', () => {
-        expect(tracker.isDisposed).to.equal(false);
+        expect(tracker.isDisposed).toBe(false);
         tracker.dispose();
         tracker.dispose();
-        expect(tracker.isDisposed).to.equal(true);
+        expect(tracker.isDisposed).toBe(true);
       });
     });
 
@@ -321,7 +320,7 @@ describe('@jupyterlab/apputils', () => {
         void tracker.add(widgetA);
         void tracker.add(widgetB);
         void tracker.add(widgetC);
-        expect(tracker.find(widget => widget.id === 'B')).to.equal(widgetB);
+        expect(tracker.find(widget => widget.id === 'B')).toBe(widgetB);
         widgetA.dispose();
         widgetB.dispose();
         widgetC.dispose();
@@ -337,7 +336,7 @@ describe('@jupyterlab/apputils', () => {
         void tracker.add(widgetA);
         void tracker.add(widgetB);
         void tracker.add(widgetC);
-        expect(tracker.find(widget => widget.id === 'D')).to.not.be.ok;
+        expect(tracker.find(widget => widget.id === 'D')).toBeFalsy();
         widgetA.dispose();
         widgetB.dispose();
         widgetC.dispose();
@@ -358,9 +357,9 @@ describe('@jupyterlab/apputils', () => {
         const list = tracker.filter(
           widget => widget.id.indexOf('include') !== -1
         );
-        expect(list.length).to.equal(2);
-        expect(list[0]).to.equal(widgetA);
-        expect(list[1]).to.equal(widgetB);
+        expect(list.length).toBe(2);
+        expect(list[0]).toBe(widgetA);
+        expect(list[1]).toBe(widgetB);
         widgetA.dispose();
         widgetB.dispose();
         widgetC.dispose();
@@ -376,7 +375,7 @@ describe('@jupyterlab/apputils', () => {
         void tracker.add(widgetA);
         void tracker.add(widgetB);
         void tracker.add(widgetC);
-        expect(tracker.filter(widget => widget.id === 'D').length).to.equal(0);
+        expect(tracker.filter(widget => widget.id === 'D').length).toBe(0);
         widgetA.dispose();
         widgetB.dispose();
         widgetC.dispose();
@@ -398,7 +397,7 @@ describe('@jupyterlab/apputils', () => {
         tracker.forEach(widget => {
           visited += widget.id;
         });
-        expect(visited).to.equal('ABC');
+        expect(visited).toBe('ABC');
         widgetA.dispose();
         widgetB.dispose();
         widgetC.dispose();
@@ -408,9 +407,9 @@ describe('@jupyterlab/apputils', () => {
     describe('#has()', () => {
       it('should return `true` if an item exists in the tracker', () => {
         const widget = createWidget();
-        expect(tracker.has(widget)).to.equal(false);
+        expect(tracker.has(widget)).toBe(false);
         void tracker.add(widget);
-        expect(tracker.has(widget)).to.equal(true);
+        expect(tracker.has(widget)).toBe(true);
         widget.dispose();
       });
     });
@@ -418,18 +417,18 @@ describe('@jupyterlab/apputils', () => {
     describe('#inject()', () => {
       it('should inject a widget into the tracker', async () => {
         const widget = createWidget();
-        expect(tracker.has(widget)).to.equal(false);
+        expect(tracker.has(widget)).toBe(false);
         void tracker.inject(widget);
-        expect(tracker.has(widget)).to.equal(true);
+        expect(tracker.has(widget)).toBe(true);
         widget.dispose();
       });
 
       it('should remove an injected widget if it is disposed', async () => {
         const widget = createWidget();
         void tracker.inject(widget);
-        expect(tracker.has(widget)).to.equal(true);
+        expect(tracker.has(widget)).toBe(true);
         widget.dispose();
-        expect(tracker.has(widget)).to.equal(false);
+        expect(tracker.has(widget)).toBe(false);
       });
     });
 
@@ -438,7 +437,9 @@ describe('@jupyterlab/apputils', () => {
         const tracker = new TestTracker({ namespace });
         const widget = createWidget();
         await tracker.add(widget);
-        expect(tracker.methods).to.contain('onCurrentChanged');
+        expect(tracker.methods).toEqual(
+          expect.arrayContaining(['onCurrentChanged'])
+        );
         widget.dispose();
       });
     });

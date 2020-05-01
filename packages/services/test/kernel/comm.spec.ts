@@ -2,13 +2,15 @@
 
 import 'jest';
 
-const it = require('jest-retries');
-
 import { PromiseDelegate } from '@lumino/coreutils';
 
 import { KernelMessage, Kernel, KernelManager } from '../../src';
 
-import { isFulfilled, JupyterServer } from '@jupyterlab/testutils';
+import {
+  isFulfilled,
+  JupyterServer,
+  flakyIt as it
+} from '@jupyterlab/testutils';
 
 import { init } from '../utils';
 

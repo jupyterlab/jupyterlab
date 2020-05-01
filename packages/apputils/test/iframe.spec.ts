@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { IFrame } from '@jupyterlab/apputils';
 
@@ -10,21 +9,21 @@ describe('@jupyterlab/apputils', () => {
     describe('#constructor()', () => {
       it('should create a new iframe widget', () => {
         const iframe = new IFrame();
-        expect(iframe).to.be.an.instanceof(IFrame);
-        expect(iframe.hasClass('jp-IFrame')).to.equal(true);
-        expect(iframe.node.querySelector('iframe')).to.be.ok;
+        expect(iframe).toBeInstanceOf(IFrame);
+        expect(iframe.hasClass('jp-IFrame')).toBe(true);
+        expect(iframe.node.querySelector('iframe')).toBeTruthy();
       });
 
       it('should be sandboxed by default', () => {
         const iframe = new IFrame();
         const node = iframe.node.querySelector('iframe')!;
-        expect(node.getAttribute('sandbox') !== null).to.equal(true);
+        expect(node.getAttribute('sandbox') !== null).toBe(true);
       });
 
       it('should be have a no-referrer policy by default', () => {
         const iframe = new IFrame();
         const node = iframe.node.querySelector('iframe')!;
-        expect(node.getAttribute('referrerpolicy')).to.equal('no-referrer');
+        expect(node.getAttribute('referrerpolicy')).toBe('no-referrer');
       });
 
       it('should allow sandboxing exceptions to be specified in the options', () => {
@@ -32,7 +31,7 @@ describe('@jupyterlab/apputils', () => {
           sandbox: ['allow-scripts', 'allow-same-origin']
         });
         const node = iframe.node.querySelector('iframe')!;
-        expect(node.getAttribute('sandbox')).to.equal(
+        expect(node.getAttribute('sandbox')).toBe(
           'allow-scripts allow-same-origin'
         );
       });
@@ -40,16 +39,16 @@ describe('@jupyterlab/apputils', () => {
       it('should allow the referrer policy to be specified in the options', () => {
         const iframe = new IFrame({ referrerPolicy: 'unsafe-url' });
         const node = iframe.node.querySelector('iframe')!;
-        expect(node.getAttribute('referrerpolicy')).to.equal('unsafe-url');
+        expect(node.getAttribute('referrerpolicy')).toBe('unsafe-url');
       });
     });
 
     describe('#url', () => {
       it('should be the url of the iframe', () => {
         const iframe = new IFrame();
-        expect(iframe.url).to.equal('');
+        expect(iframe.url).toBe('');
         iframe.url = 'foo';
-        expect(iframe.url).to.equal('foo');
+        expect(iframe.url).toBe('foo');
       });
     });
 
@@ -57,10 +56,10 @@ describe('@jupyterlab/apputils', () => {
       it('should set the referrer policy for the iframe.', () => {
         const iframe = new IFrame({ referrerPolicy: 'unsafe-url' });
         const node = iframe.node.querySelector('iframe')!;
-        expect(iframe.referrerPolicy).to.equal('unsafe-url');
+        expect(iframe.referrerPolicy).toBe('unsafe-url');
         iframe.referrerPolicy = 'origin';
-        expect(iframe.referrerPolicy).to.equal('origin');
-        expect(node.getAttribute('referrerpolicy')).to.equal('origin');
+        expect(iframe.referrerPolicy).toBe('origin');
+        expect(node.getAttribute('referrerpolicy')).toBe('origin');
       });
     });
 
@@ -70,13 +69,10 @@ describe('@jupyterlab/apputils', () => {
           sandbox: ['allow-scripts', 'allow-same-origin']
         });
         const node = iframe.node.querySelector('iframe')!;
-        expect(iframe.sandbox).to.deep.equal([
-          'allow-scripts',
-          'allow-same-origin'
-        ]);
+        expect(iframe.sandbox).toEqual(['allow-scripts', 'allow-same-origin']);
         iframe.sandbox = ['allow-pointer-lock'];
-        expect(iframe.sandbox).to.deep.equal(['allow-pointer-lock']);
-        expect(node.getAttribute('sandbox')).to.equal('allow-pointer-lock');
+        expect(iframe.sandbox).toEqual(['allow-pointer-lock']);
+        expect(node.getAttribute('sandbox')).toBe('allow-pointer-lock');
       });
     });
   });

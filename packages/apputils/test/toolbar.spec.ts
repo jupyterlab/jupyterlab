@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import {
   Toolbar,
@@ -20,12 +19,27 @@ import { Widget } from '@lumino/widgets';
 
 import { simulate } from 'simulate-event';
 
-import { createSessionContext, framePromise } from '@jupyterlab/testutils';
+import {
+  createSessionContext,
+  framePromise,
+  JupyterServer
+} from '@jupyterlab/testutils';
+
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
 
 describe('@jupyterlab/apputils', () => {
   let widget: Toolbar<Widget>;
 
   beforeEach(async () => {
+    jest.setTimeout(20000);
     widget = new Toolbar();
   });
 
@@ -37,12 +51,12 @@ describe('@jupyterlab/apputils', () => {
     describe('#constructor()', () => {
       it('should construct a new toolbar widget', () => {
         const widget = new Toolbar();
-        expect(widget).to.be.an.instanceof(Toolbar);
+        expect(widget).toBeInstanceOf(Toolbar);
       });
 
       it('should add the `jp-Toolbar` class', () => {
         const widget = new Toolbar();
-        expect(widget.hasClass('jp-Toolbar')).to.equal(true);
+        expect(widget.hasClass('jp-Toolbar')).toBe(true);
       });
     });
 
@@ -51,26 +65,26 @@ describe('@jupyterlab/apputils', () => {
         widget.addItem('foo', new Widget());
         widget.addItem('bar', new Widget());
         widget.addItem('baz', new Widget());
-        expect(toArray(widget.names())).to.deep.equal(['foo', 'bar', 'baz']);
+        expect(toArray(widget.names())).toEqual(['foo', 'bar', 'baz']);
       });
     });
 
     describe('#addItem()', () => {
       it('should add an item to the toolbar', () => {
         const item = new Widget();
-        expect(widget.addItem('test', item)).to.equal(true);
-        expect(toArray(widget.names())).to.contain('test');
+        expect(widget.addItem('test', item)).toBe(true);
+        expect(toArray(widget.names())).toContain('test');
       });
 
       it('should add the `jp-Toolbar-item` class to the widget', () => {
         const item = new Widget();
         widget.addItem('test', item);
-        expect(item.hasClass('jp-Toolbar-item')).to.equal(true);
+        expect(item.hasClass('jp-Toolbar-item')).toBe(true);
       });
 
       it('should return false if the name is already used', () => {
         widget.addItem('test', new Widget());
-        expect(widget.addItem('test', new Widget())).to.equal(false);
+        expect(widget.addItem('test', new Widget())).toBe(false);
       });
     });
 
@@ -79,14 +93,14 @@ describe('@jupyterlab/apputils', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
-        expect(toArray(widget.names())).to.deep.equal(['a', 'c', 'b']);
+        expect(toArray(widget.names())).toEqual(['a', 'c', 'b']);
       });
 
       it('should clamp the bounds', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         widget.insertItem(10, 'c', new Widget());
-        expect(toArray(widget.names())).to.deep.equal(['a', 'b', 'c']);
+        expect(toArray(widget.names())).toEqual(['a', 'b', 'c']);
       });
     });
 
@@ -96,14 +110,14 @@ describe('@jupyterlab/apputils', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
         widget.insertAfter('c', 'd', new Widget());
-        expect(toArray(widget.names())).to.deep.equal(['a', 'c', 'd', 'b']);
+        expect(toArray(widget.names())).toEqual(['a', 'c', 'd', 'b']);
       });
 
       it('should return false if the target item does not exist', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         const value = widget.insertAfter('c', 'd', new Widget());
-        expect(value).to.be.false;
+        expect(value).toBe(false);
       });
     });
 
@@ -113,14 +127,14 @@ describe('@jupyterlab/apputils', () => {
         widget.addItem('b', new Widget());
         widget.insertItem(1, 'c', new Widget());
         widget.insertBefore('c', 'd', new Widget());
-        expect(toArray(widget.names())).to.deep.equal(['a', 'd', 'c', 'b']);
+        expect(toArray(widget.names())).toEqual(['a', 'd', 'c', 'b']);
       });
 
       it('should return false if the target item does not exist', () => {
         widget.addItem('a', new Widget());
         widget.addItem('b', new Widget());
         const value = widget.insertBefore('c', 'd', new Widget());
-        expect(value).to.be.false;
+        expect(value).toBe(false);
       });
     });
 
@@ -148,7 +162,7 @@ describe('@jupyterlab/apputils', () => {
       async function render(button: CommandToolbarButton) {
         button.update();
         await framePromise();
-        expect(button.renderPromise).to.exist;
+        expect(button.renderPromise).toBeDefined();
         await button.renderPromise;
       }
 
@@ -157,7 +171,7 @@ describe('@jupyterlab/apputils', () => {
           commands,
           id: testLogCommandId
         });
-        expect(button).to.be.an.instanceof(CommandToolbarButton);
+        expect(button).toBeInstanceOf(CommandToolbarButton);
         button.dispose();
       });
 
@@ -168,7 +182,7 @@ describe('@jupyterlab/apputils', () => {
         });
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
-        expect(buttonNode.classList.contains('test-log-class')).to.equal(true);
+        expect(buttonNode.classList.contains('test-log-class')).toBe(true);
         button.dispose();
       });
 
@@ -179,10 +193,10 @@ describe('@jupyterlab/apputils', () => {
         });
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
-        expect(buttonNode.title).to.equal('Test log command caption');
+        expect(buttonNode.title).toBe('Test log command caption');
         const wrapperNode = buttonNode.firstChild as HTMLElement;
         const iconNode = wrapperNode.firstChild as HTMLElement;
-        expect(iconNode.classList.contains('test-icon-class')).to.equal(true);
+        expect(iconNode.classList.contains('test-icon-class')).toBe(true);
         button.dispose();
       });
 
@@ -196,9 +210,9 @@ describe('@jupyterlab/apputils', () => {
         });
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
-        expect(buttonNode.disabled).to.equal(true);
-        expect(buttonNode.classList.contains('lm-mod-toggled')).to.equal(true);
-        expect(buttonNode.classList.contains('lm-mod-hidden')).to.equal(true);
+        expect(buttonNode.disabled).toBe(true);
+        expect(buttonNode.classList.contains('lm-mod-toggled')).toBe(true);
+        expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(true);
         button.dispose();
       });
 
@@ -212,15 +226,15 @@ describe('@jupyterlab/apputils', () => {
         });
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
-        expect(buttonNode.disabled).to.equal(true);
-        expect(buttonNode.classList.contains('lm-mod-toggled')).to.equal(true);
-        expect(buttonNode.classList.contains('lm-mod-hidden')).to.equal(true);
+        expect(buttonNode.disabled).toBe(true);
+        expect(buttonNode.classList.contains('lm-mod-toggled')).toBe(true);
+        expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(true);
         enabled = true;
         visible = true;
         commands.notifyCommandChanged(testLogCommandId);
-        expect(buttonNode.disabled).to.equal(false);
-        expect(buttonNode.classList.contains('lm-mod-toggled')).to.equal(true);
-        expect(buttonNode.classList.contains('lm-mod-hidden')).to.equal(false);
+        expect(buttonNode.disabled).toBe(false);
+        expect(buttonNode.classList.contains('lm-mod-toggled')).toBe(true);
+        expect(buttonNode.classList.contains('lm-mod-hidden')).toBe(false);
         enabled = false;
         visible = false;
         button.dispose();
@@ -240,7 +254,7 @@ describe('@jupyterlab/apputils', () => {
         });
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
-        expect(buttonNode.textContent).to.equal('Label-only button');
+        expect(buttonNode.textContent).toBe('Label-only button');
         cmd.dispose();
       });
 
@@ -260,15 +274,15 @@ describe('@jupyterlab/apputils', () => {
         });
         await render(button);
         const buttonNode = button.node.firstChild as HTMLButtonElement;
-        expect(buttonNode.textContent).to.equal('Label-only button');
-        expect(buttonNode.classList.contains(iconClassValue)).to.equal(false);
+        expect(buttonNode.textContent).toBe('Label-only button');
+        expect(buttonNode.classList.contains(iconClassValue)).toBe(false);
 
         iconClassValue = 'updated-icon-class';
         commands.notifyCommandChanged(id);
         await render(button);
         const wrapperNode = buttonNode.firstChild as HTMLElement;
         const iconNode = wrapperNode.firstChild as HTMLElement;
-        expect(iconNode.classList.contains(iconClassValue)).to.equal(true);
+        expect(iconNode.classList.contains(iconClassValue)).toBe(true);
         cmd.dispose();
       });
     });
@@ -289,7 +303,9 @@ describe('@jupyterlab/apputils', () => {
           const button = Toolbar.createInterruptButton(sessionContext);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon$='stop']")).to.exist;
+          expect(
+            button.node.querySelector("[data-icon$='stop']")
+          ).toBeDefined();
         });
       });
 
@@ -298,7 +314,9 @@ describe('@jupyterlab/apputils', () => {
           const button = Toolbar.createRestartButton(sessionContext);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon$='refresh']")).to.exist;
+          expect(
+            button.node.querySelector("[data-icon$='refresh']")
+          ).toBeDefined();
         });
       });
 
@@ -311,7 +329,7 @@ describe('@jupyterlab/apputils', () => {
           const node = item.node.querySelector(
             '.jp-ToolbarButtonComponent-label'
           )!;
-          expect(node.textContent).to.equal(sessionContext.kernelDisplayName);
+          expect(node.textContent).toBe(sessionContext.kernelDisplayName);
         });
       });
 
@@ -326,7 +344,9 @@ describe('@jupyterlab/apputils', () => {
           let called = false;
           sessionContext.statusChanged.connect((_, status) => {
             if (status === 'busy') {
-              expect(item.node.querySelector("[data-icon$='circle']")).to.exist;
+              expect(
+                item.node.querySelector("[data-icon$='circle']")
+              ).toBeDefined();
               called = true;
             }
           });
@@ -334,25 +354,25 @@ describe('@jupyterlab/apputils', () => {
             code: 'a = 109\na'
           })!;
           await future.done;
-          expect(called).to.equal(true);
+          expect(called).toBe(true);
         });
 
         it('should show the current status in the node title', async () => {
           const item = Toolbar.createKernelStatusItem(sessionContext);
           const status = sessionContext.session?.kernel?.status;
-          expect(item.node.title.toLowerCase()).to.contain(status);
+          expect(item.node.title.toLowerCase()).toContain(status);
           let called = false;
           const future = sessionContext.session?.kernel?.requestExecute({
             code: 'a = 1'
           })!;
           future.onIOPub = msg => {
             if (sessionContext.session?.kernel?.status === 'busy') {
-              expect(item.node.title.toLowerCase()).to.contain('busy');
+              expect(item.node.title.toLowerCase()).toContain('busy');
               called = true;
             }
           };
           await future.done;
-          expect(called).to.equal(true);
+          expect(called).toBe(true);
         });
 
         it('should handle a starting session', async () => {
@@ -361,9 +381,10 @@ describe('@jupyterlab/apputils', () => {
           sessionContext = await createSessionContext();
           await sessionContext.initialize();
           const item = Toolbar.createKernelStatusItem(sessionContext);
-          expect(item.node.title).to.equal('Kernel Connecting');
-          expect(item.node.querySelector("[data-icon$='circle-empty']")).to
-            .exist;
+          expect(item.node.title).toBe('Kernel Connecting');
+          expect(
+            item.node.querySelector("[data-icon$='circle-empty']")
+          ).toBeDefined();
           await sessionContext.initialize();
           await sessionContext.session?.kernel?.info;
         });
@@ -375,7 +396,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#constructor()', () => {
       it('should accept no arguments', () => {
         const widget = new ToolbarButton();
-        expect(widget).to.be.an.instanceof(ToolbarButton);
+        expect(widget).toBeInstanceOf(ToolbarButton);
       });
 
       it('should accept options', async () => {
@@ -390,9 +411,9 @@ describe('@jupyterlab/apputils', () => {
         Widget.attach(widget, document.body);
         await framePromise();
         const button = widget.node.firstChild as HTMLElement;
-        expect(button.classList.contains('foo')).to.equal(true);
-        expect(button.querySelector('.iconFoo')).to.exist;
-        expect(button.title).to.equal('bar');
+        expect(button.classList.contains('foo')).toBe(true);
+        expect(button.querySelector('.iconFoo')).toBeDefined();
+        expect(button.title).toBe('bar');
       });
     });
 
@@ -400,14 +421,14 @@ describe('@jupyterlab/apputils', () => {
       it('should dispose of the resources used by the widget', () => {
         const button = new ToolbarButton();
         button.dispose();
-        expect(button.isDisposed).to.equal(true);
+        expect(button.isDisposed).toBe(true);
       });
 
       it('should be safe to call more than once', () => {
         const button = new ToolbarButton();
         button.dispose();
         button.dispose();
-        expect(button.isDisposed).to.equal(true);
+        expect(button.isDisposed).toBe(true);
       });
     });
 
@@ -423,7 +444,7 @@ describe('@jupyterlab/apputils', () => {
           Widget.attach(button, document.body);
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          expect(called).to.equal(true);
+          expect(called).toBe(true);
           button.dispose();
         });
       });
@@ -440,7 +461,7 @@ describe('@jupyterlab/apputils', () => {
           simulate(button.node.firstChild as HTMLElement, 'keydown', {
             key: 'Enter'
           });
-          expect(called).to.equal(true);
+          expect(called).toBe(true);
           button.dispose();
         });
         it('Space should activate the callback', async () => {
@@ -455,7 +476,7 @@ describe('@jupyterlab/apputils', () => {
           simulate(button.node.firstChild as HTMLElement, 'keydown', {
             key: ' '
           });
-          expect(called).to.equal(true);
+          expect(called).toBe(true);
           button.dispose();
         });
       });

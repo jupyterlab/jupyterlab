@@ -1,4 +1,6 @@
 // Copyright (c) Jupyter Development Team.
+
+import 'jest';
 // Distributed under the terms of the Modified BSD License.
 
 import { InputDialog } from '@jupyterlab/apputils';
@@ -293,7 +295,7 @@ describe('@jupyterlab/apputils', () => {
         const result = await prompt;
 
         expect(result.button.accept).toBe(true);
-        expect(result.value).toBe(Number.NaN);
+        expect(result.value).toBeNaN();
         document.body.removeChild(node);
       });
     });

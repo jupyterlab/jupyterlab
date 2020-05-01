@@ -24,6 +24,10 @@ export { defaultRenderMime } from './rendermime';
 
 export { JupyterServer } from './start_jupyter_server';
 
+const jestRetries = require('jest-retries');
+
+export const flakyIt: jest.It = jestRetries;
+
 /**
  * Test a single emission from a signal.
  *

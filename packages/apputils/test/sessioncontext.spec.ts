@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import {
   SessionManager,
@@ -16,32 +15,47 @@ import {
   sessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import { UUID } from '@lumino/coreutils';
+import { UUID, PromiseDelegate } from '@lumino/coreutils';
 
 import {
   acceptDialog,
   dismissDialog,
-  testEmission
+  testEmission,
+  JupyterServer,
+  flakyIt as it
 } from '@jupyterlab/testutils';
 
 import { SessionAPI } from '@jupyterlab/services';
 
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
+
 describe('@jupyterlab/apputils', () => {
   describe('SessionContext', () => {
-    const kernelManager = new KernelManager();
-    const sessionManager = new SessionManager({ kernelManager });
-    const specsManager = new KernelSpecManager();
+    let kernelManager: KernelManager;
+    let sessionManager: SessionManager;
+    let specsManager: KernelSpecManager;
     let path = '';
     let sessionContext: SessionContext;
 
-    beforeAll(
-      async () =>
-        await Promise.all([
-          sessionManager.ready,
-          kernelManager.ready,
-          specsManager.ready
-        ])
-    );
+    beforeAll(async () => {
+      jest.setTimeout(20000);
+      kernelManager = new KernelManager();
+      sessionManager = new SessionManager({ kernelManager });
+      specsManager = new KernelSpecManager();
+      await Promise.all([
+        sessionManager.ready,
+        kernelManager.ready,
+        specsManager.ready
+      ]);
+    });
 
     beforeEach(async () => {
       Dialog.flush();
@@ -66,7 +80,7 @@ describe('@jupyterlab/apputils', () => {
 
     describe('#constructor()', () => {
       it('should create a session context', () => {
-        expect(sessionContext).to.be.an.instanceof(SessionContext);
+        expect(sessionContext).toBeInstanceOf(SessionContext);
       });
     });
 
@@ -76,12 +90,12 @@ describe('@jupyterlab/apputils', () => {
         await sessionContext.initialize();
         let called = false;
         sessionContext.disposed.connect((sender, args) => {
-          expect(sender).to.equal(sessionContext);
-          expect(args).to.be.undefined;
+          expect(sender).toBe(sessionContext);
+          expect(args).toBeUndefined();
           called = true;
         });
         sessionContext.dispose();
-        expect(called).to.be.true;
+        expect(called).toBe(true);
       });
     });
 
@@ -90,14 +104,14 @@ describe('@jupyterlab/apputils', () => {
         let called = false;
         sessionContext.kernelChanged.connect(
           (sender, { oldValue, newValue }) => {
-            expect(sender).to.equal(sessionContext);
-            expect(oldValue).to.be.null;
-            expect(newValue).to.equal(sessionContext.session?.kernel);
+            expect(sender).toBe(sessionContext);
+            expect(oldValue).toBeNull();
+            expect(newValue).toBe(sessionContext.session?.kernel);
             called = true;
           }
         );
         await sessionContext.initialize();
-        expect(called).to.be.true;
+        expect(called).toBe(true);
       });
     });
 
@@ -106,14 +120,14 @@ describe('@jupyterlab/apputils', () => {
         let called = false;
         sessionContext.sessionChanged.connect(
           (sender, { oldValue, newValue }) => {
-            expect(sender).to.equal(sessionContext);
-            expect(oldValue).to.be.null;
-            expect(newValue).to.equal(sessionContext.session);
+            expect(sender).toBe(sessionContext);
+            expect(oldValue).toBeNull();
+            expect(newValue).toBe(sessionContext.session);
             called = true;
           }
         );
         await sessionContext.initialize();
-        expect(called).to.be.true;
+        expect(called).toBe(true);
       });
     });
 
@@ -121,13 +135,13 @@ describe('@jupyterlab/apputils', () => {
       it('should be emitted when the status changes', async () => {
         let called = false;
         sessionContext.statusChanged.connect((sender, args) => {
-          expect(sender).to.equal(sessionContext);
-          expect(typeof args).to.equal('string');
+          expect(sender).toBe(sessionContext);
+          expect(typeof args).toBe('string');
           called = true;
         });
         await sessionContext.initialize();
         await sessionContext.session!.kernel!.info;
-        expect(called).to.be.true;
+        expect(called).toBe(true);
       });
     });
 
@@ -135,12 +149,12 @@ describe('@jupyterlab/apputils', () => {
       it('should be emitted for iopub kernel messages', async () => {
         let called = false;
         sessionContext.iopubMessage.connect((sender, args) => {
-          expect(sender).to.equal(sessionContext);
+          expect(sender).toBe(sessionContext);
           called = true;
         });
         await sessionContext.initialize();
         await sessionContext.session!.kernel!.info;
-        expect(called).to.be.true;
+        expect(called).toBe(true);
       });
     });
 
@@ -149,24 +163,24 @@ describe('@jupyterlab/apputils', () => {
         let called = false;
         await sessionContext.initialize();
         sessionContext.propertyChanged.connect((sender, args) => {
-          expect(sender).to.equal(sessionContext);
-          expect(args).to.equal('path');
+          expect(sender).toBe(sessionContext);
+          expect(args).toBe('path');
           called = true;
         });
         await sessionContext.session!.setPath('foo');
-        expect(called).to.be.true;
+        expect(called).toBe(true);
       });
 
       it('should be emitted when a session name changes', async () => {
         let called = false;
         await sessionContext.initialize();
         sessionContext.propertyChanged.connect((sender, args) => {
-          expect(sender).to.equal(sessionContext);
-          expect(args).to.equal('name');
+          expect(sender).toBe(sessionContext);
+          expect(args).toBe('name');
           called = true;
         });
         await sessionContext.session!.setName('foo');
-        expect(called).to.be.true;
+        expect(called).toBe(true);
       });
 
       it('should be emitted when a session type changes', async () => {
@@ -174,20 +188,20 @@ describe('@jupyterlab/apputils', () => {
 
         await sessionContext.initialize();
         sessionContext.propertyChanged.connect((sender, args) => {
-          expect(sender).to.equal(sessionContext);
-          expect(args).to.equal('type');
+          expect(sender).toBe(sessionContext);
+          expect(args).toBe('type');
           called = true;
         });
         await sessionContext.session!.setType('foo');
-        expect(called).to.be.true;
+        expect(called).toBe(true);
       });
     });
 
     describe('#kernel', () => {
       it('should be the current kernel of the the session', async () => {
-        expect(sessionContext.session?.kernel).to.not.be.ok;
+        expect(sessionContext.session?.kernel).toBeFalsy();
         await sessionContext.initialize();
-        expect(sessionContext.session?.kernel).to.be.ok;
+        expect(sessionContext.session?.kernel).toBeTruthy();
       });
     });
 
@@ -201,20 +215,20 @@ describe('@jupyterlab/apputils', () => {
           canStart: true
         };
         sessionContext.kernelPreference = preference;
-        expect(sessionContext.kernelPreference).to.equal(preference);
+        expect(sessionContext.kernelPreference).toBe(preference);
       });
     });
 
     describe('#manager', () => {
       it('should be the session manager used by the session', () => {
-        expect(sessionContext.sessionManager).to.equal(sessionManager);
+        expect(sessionContext.sessionManager).toBe(sessionManager);
       });
     });
 
     describe('#initialize()', () => {
       it('should start the default kernel', async () => {
         await sessionContext.initialize();
-        expect(sessionContext.session?.kernel?.name).to.equal(
+        expect(sessionContext.session?.kernel?.name).toBe(
           specsManager.specs!.default
         );
       });
@@ -227,8 +241,8 @@ describe('@jupyterlab/apputils', () => {
         });
 
         await sessionContext.initialize();
-        expect(other.kernel?.id).to.not.be.undefined;
-        expect(other.kernel?.id).to.equal(sessionContext.session?.kernel?.id);
+        expect(other.kernel?.id).toBeDefined();
+        expect(other.kernel?.id).toBe(sessionContext.session?.kernel?.id);
         await other.shutdown();
         other.dispose();
       });
@@ -250,8 +264,8 @@ describe('@jupyterlab/apputils', () => {
           kernelPreference
         });
         await sessionContext.initialize();
-        expect(other.kernel?.id).to.not.be.undefined;
-        expect(other.kernel?.id).to.equal(sessionContext.session?.kernel?.id);
+        expect(other.kernel?.id).toBeDefined();
+        expect(other.kernel?.id).toBe(sessionContext.session?.kernel?.id);
         // We don't call other.shutdown() here because that
         // is handled by the afterEach() handler above.
         other.dispose();
@@ -261,21 +275,21 @@ describe('@jupyterlab/apputils', () => {
         // Remove the kernel preference before initializing.
         sessionContext.kernelPreference = {};
         const result = await sessionContext.initialize();
-        expect(result).to.equal(true);
+        expect(result).toBe(true);
       });
 
       it('should be a no-op if the shouldStart kernelPreference is false', async () => {
         sessionContext.kernelPreference = { shouldStart: false };
         const result = await sessionContext.initialize();
-        expect(result).to.equal(false);
-        expect(sessionContext.session?.kernel).to.not.be.ok;
+        expect(result).toBe(false);
+        expect(sessionContext.session?.kernel).toBeFalsy();
       });
 
       it('should be a no-op if the canStart kernelPreference is false', async () => {
         sessionContext.kernelPreference = { canStart: false };
         const result = await sessionContext.initialize();
-        expect(result).to.equal(false);
-        expect(sessionContext.session?.kernel).to.not.be.ok;
+        expect(result).toBe(false);
+        expect(sessionContext.session?.kernel).toBeFalsy();
       });
     });
 
@@ -283,7 +297,7 @@ describe('@jupyterlab/apputils', () => {
       it('should be the display name of the current kernel', async () => {
         await sessionContext.initialize();
         const spec = await sessionContext.session!.kernel!.spec;
-        expect(sessionContext.kernelDisplayName).to.equal(spec!.display_name);
+        expect(sessionContext.kernelDisplayName).toBe(spec!.display_name);
       });
 
       it('should display "No Kernel" when there is no kernel', async () => {
@@ -291,7 +305,7 @@ describe('@jupyterlab/apputils', () => {
           canStart: false,
           shouldStart: false
         };
-        expect(sessionContext.kernelDisplayName).to.equal('No Kernel');
+        expect(sessionContext.kernelDisplayName).toBe('No Kernel');
       });
 
       it('should display the pending kernel name when it looks like we are starting a kernel', async () => {
@@ -300,7 +314,7 @@ describe('@jupyterlab/apputils', () => {
           canStart: true,
           shouldStart: true
         };
-        expect(sessionContext.kernelDisplayName).to.equal('Echo Kernel');
+        expect(sessionContext.kernelDisplayName).toBe('Echo Kernel');
       });
     });
 
@@ -308,7 +322,7 @@ describe('@jupyterlab/apputils', () => {
       it('should be the status of the current kernel if connected', async () => {
         await sessionContext.initialize();
         await sessionContext.session!.kernel!.info;
-        expect(sessionContext.kernelDisplayStatus).to.be.equal(
+        expect(sessionContext.kernelDisplayStatus).toBe(
           sessionContext.session?.kernel?.status
         );
       });
@@ -316,7 +330,7 @@ describe('@jupyterlab/apputils', () => {
       it('should be the connection status of the current kernel if not connected', async () => {
         await sessionContext.initialize();
         const reconnect = sessionContext.session!.kernel!.reconnect();
-        expect(sessionContext.kernelDisplayStatus).to.be.equal(
+        expect(sessionContext.kernelDisplayStatus).toBe(
           sessionContext.session?.kernel?.connectionStatus
         );
         await reconnect;
@@ -324,30 +338,30 @@ describe('@jupyterlab/apputils', () => {
 
       it('should be "initializing" if it looks like we are trying to start a kernel', async () => {
         sessionContext.kernelPreference = {};
-        expect(sessionContext.kernelDisplayStatus).to.be.equal('initializing');
+        expect(sessionContext.kernelDisplayStatus).toBe('initializing');
       });
 
       it('should be "idle" if there is no current kernel', async () => {
         await sessionContext.initialize();
         await sessionContext.shutdown();
-        expect(sessionContext.kernelDisplayStatus).to.be.equal('idle');
+        expect(sessionContext.kernelDisplayStatus).toBe('idle');
       });
     });
 
     describe('#isDisposed', () => {
       it('should test whether a client session has been disposed', () => {
-        expect(sessionContext.isDisposed).to.equal(false);
+        expect(sessionContext.isDisposed).toBe(false);
         sessionContext.dispose();
-        expect(sessionContext.isDisposed).to.equal(true);
+        expect(sessionContext.isDisposed).toBe(true);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose the resources held by the client session', () => {
         sessionContext.dispose();
-        expect(sessionContext.isDisposed).to.equal(true);
+        expect(sessionContext.isDisposed).toBe(true);
         sessionContext.dispose();
-        expect(sessionContext.isDisposed).to.equal(true);
+        expect(sessionContext.isDisposed).toBe(true);
       });
 
       it('should not shut down the session by default', async () => {
@@ -355,25 +369,27 @@ describe('@jupyterlab/apputils', () => {
         const id = sessionContext.session!.id;
         sessionContext.dispose();
         const sessions = await SessionAPI.listRunning();
-        expect(sessions.find(s => s.id === id)).to.be.ok;
+        expect(sessions.find(s => s.id === id)).toBeTruthy();
         await SessionAPI.shutdownSession(id);
       });
 
-      it('should shut down the session when shutdownOnDispose is true', async done => {
+      it('should shut down the session when shutdownOnDispose is true', async () => {
         sessionContext.kernelPreference = {
           ...sessionContext.kernelPreference,
           shutdownOnDispose: true
         };
+        const delegate = new PromiseDelegate();
         await sessionContext.initialize();
         const id = sessionContext.session!.id;
         // Wait for the session to shut down.
         sessionContext.sessionManager.runningChanged.connect((_, sessions) => {
           if (!sessions.find(s => s.id === id)) {
-            done();
+            delegate.resolve(void 0);
             return;
           }
         });
         sessionContext.dispose();
+        return delegate.promise;
       });
     });
 
@@ -385,8 +401,8 @@ describe('@jupyterlab/apputils', () => {
         const id = sessionContext.session?.kernel?.id;
         const kernel = (await sessionContext.changeKernel({ name }))!;
 
-        expect(kernel.id).to.not.equal(id);
-        expect(kernel.name).to.equal(name);
+        expect(kernel.id).not.toBe(id);
+        expect(kernel.name).toBe(name);
       });
 
       it('should still work if called before fully initialized', async () => {
@@ -401,8 +417,8 @@ describe('@jupyterlab/apputils', () => {
         const results = await Promise.all([kernelPromise, initPromise]);
         const kernel = results[0];
         const shouldSelect = results[1];
-        expect(shouldSelect).to.equal(false);
-        expect(lastKernel).to.equal(kernel);
+        expect(shouldSelect).toBe(false);
+        expect(lastKernel).toBe(kernel);
       });
 
       it('should handle multiple requests', async () => {
@@ -419,7 +435,7 @@ describe('@jupyterlab/apputils', () => {
         const results = await Promise.all([kernelPromise0, kernelPromise1]);
         // We can't know which of the two was launched first, so the result
         // could be either, just make sure it isn't the original kernel.
-        expect(lastKernel).to.be.oneOf([results[0], results[1]]);
+        expect([results[0], results[1]]).toContain(lastKernel);
       });
 
       it('should handle an error during kernel change', async () => {
@@ -436,25 +452,25 @@ describe('@jupyterlab/apputils', () => {
             caught = true;
           });
         await Promise.all([promise, acceptDialog()]);
-        expect(caught).to.equal(true);
-        expect(status).to.equal('unknown');
+        expect(caught).toBe(true);
+        expect(status).toBe('unknown');
       });
     });
 
     describe('#shutdown', () => {
       it('should kill the kernel and shut down the session', async () => {
         await sessionContext.initialize();
-        expect(sessionContext.session?.kernel).to.be.ok;
+        expect(sessionContext.session?.kernel).toBeTruthy();
         await sessionContext.shutdown();
-        expect(sessionContext.session?.kernel).to.not.be.ok;
+        expect(sessionContext.session?.kernel).toBeFalsy();
       });
 
       it('should handle a shutdown during startup', async () => {
         const initPromise = sessionContext.initialize(); // Start but don't finish init.
         const shutdownPromise = sessionContext.shutdown();
         const results = await Promise.all([initPromise, shutdownPromise]);
-        expect(results[0]).to.equal(false);
-        expect(sessionContext.session).to.equal(null);
+        expect(results[0]).toBe(false);
+        expect(sessionContext.session).toBe(null);
       });
     });
 
@@ -465,7 +481,7 @@ describe('@jupyterlab/apputils', () => {
             specs: specsManager.specs,
             preference: {}
           })
-        ).to.be.null;
+        ).toBeNull();
       });
 
       it('should return a matching name', () => {
@@ -478,7 +494,7 @@ describe('@jupyterlab/apputils', () => {
             specs: specsManager.specs,
             preference: { name: spec.name }
           })
-        ).to.equal(spec.name);
+        ).toBe(spec.name);
       });
 
       it('should return null if no match is found', () => {
@@ -487,7 +503,7 @@ describe('@jupyterlab/apputils', () => {
             specs: specsManager.specs,
             preference: { name: 'foo' }
           })
-        ).to.be.null;
+        ).toBeNull();
       });
 
       it('should return a matching language', () => {
@@ -505,7 +521,7 @@ describe('@jupyterlab/apputils', () => {
             },
             preference: { language: spec.language }
           })
-        ).to.equal(spec.name);
+        ).toBe(spec.name);
       });
 
       it('should return null if a language matches twice', () => {
@@ -524,7 +540,7 @@ describe('@jupyterlab/apputils', () => {
             },
             preference: { language: spec.language }
           })
-        ).to.be.null;
+        ).toBeNull();
       });
     });
 
@@ -540,8 +556,8 @@ describe('@jupyterlab/apputils', () => {
           await accept;
 
           const session = sessionContext?.session;
-          expect(session!.kernel!.id).to.not.equal(id);
-          expect(session!.kernel!.name).to.equal(name);
+          expect(session!.kernel!.id).not.toBe(id);
+          expect(session!.kernel!.name).toBe(name);
         });
 
         it('should keep the existing kernel if dismissed', async () => {
@@ -554,8 +570,8 @@ describe('@jupyterlab/apputils', () => {
           await dismiss;
 
           const session = sessionContext.session;
-          expect(session!.kernel!.id).to.equal(id);
-          expect(session!.kernel!.name).to.equal(name);
+          expect(session!.kernel!.id).toBe(id);
+          expect(session!.kernel!.name).toBe(name);
         });
       });
 
@@ -569,7 +585,7 @@ describe('@jupyterlab/apputils', () => {
           const restart = sessionContextDialogs.restart(sessionContext);
 
           await acceptDialog();
-          expect(await restart).to.equal(true);
+          expect(await restart).toBe(true);
           await emission;
         });
 
@@ -585,15 +601,15 @@ describe('@jupyterlab/apputils', () => {
 
           const restart = sessionContextDialogs.restart(sessionContext);
           await dismissDialog();
-          expect(await restart).to.equal(false);
-          expect(called).to.equal(false);
+          expect(await restart).toBe(false);
+          expect(called).toBe(false);
         });
 
         it('should start the same kernel as the previously started kernel', async () => {
           await sessionContext.initialize();
           await sessionContext.shutdown();
           await sessionContextDialogs.restart(sessionContext);
-          expect(sessionContext?.session?.kernel).to.be.ok;
+          expect(sessionContext?.session?.kernel).toBeTruthy();
         });
       });
     });

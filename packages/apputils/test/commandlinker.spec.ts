@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -16,7 +15,7 @@ describe('@jupyterlab/apputils', () => {
     describe('#constructor()', () => {
       it('should create a command linker', () => {
         const linker = new CommandLinker({ commands: new CommandRegistry() });
-        expect(linker).to.be.an.instanceof(CommandLinker);
+        expect(linker).toBeInstanceOf(CommandLinker);
         linker.dispose();
       });
     });
@@ -24,9 +23,9 @@ describe('@jupyterlab/apputils', () => {
     describe('#isDisposed', () => {
       it('should test whether a command linker has been disposed', () => {
         const linker = new CommandLinker({ commands: new CommandRegistry() });
-        expect(linker.isDisposed).to.equal(false);
+        expect(linker.isDisposed).toBe(false);
         linker.dispose();
-        expect(linker.isDisposed).to.equal(true);
+        expect(linker.isDisposed).toBe(true);
       });
     });
 
@@ -46,9 +45,9 @@ describe('@jupyterlab/apputils', () => {
         document.body.appendChild(node);
         linker.connectNode(node, command, undefined);
 
-        expect(called).to.equal(false);
+        expect(called).toBe(false);
         simulate(node, 'click');
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
 
         document.body.removeChild(node);
         linker.dispose();
@@ -73,18 +72,18 @@ describe('@jupyterlab/apputils', () => {
         linker.connectNode(node, command, undefined);
 
         // Make sure connection is working.
-        expect(called).to.equal(false);
+        expect(called).toBe(false);
         simulate(node, 'click');
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
 
         // Reset flag.
         called = false;
 
         // Make sure disconnection is working.
         linker.disconnectNode(node);
-        expect(called).to.equal(false);
+        expect(called).toBe(false);
         simulate(node, 'click');
-        expect(called).to.equal(false);
+        expect(called).toBe(false);
 
         document.body.removeChild(node);
         linker.dispose();
@@ -95,9 +94,9 @@ describe('@jupyterlab/apputils', () => {
     describe('#dispose()', () => {
       it('should dispose the resources held by the linker', () => {
         const linker = new CommandLinker({ commands: new CommandRegistry() });
-        expect(linker.isDisposed).to.equal(false);
+        expect(linker.isDisposed).toBe(false);
         linker.dispose();
-        expect(linker.isDisposed).to.equal(true);
+        expect(linker.isDisposed).toBe(true);
       });
     });
 
@@ -121,9 +120,9 @@ describe('@jupyterlab/apputils', () => {
         node = VirtualDOM.realize(vnode);
         document.body.appendChild(node);
 
-        expect(called).to.equal(false);
+        expect(called).toBe(false);
         simulate(node, 'click');
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
 
         document.body.removeChild(node);
         linker.dispose();

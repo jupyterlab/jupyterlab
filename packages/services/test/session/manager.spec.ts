@@ -2,8 +2,6 @@
 
 import 'jest';
 
-const it = require('jest-retries');
-
 import { UUID } from '@lumino/coreutils';
 
 import { toArray } from '@lumino/algorithm';
@@ -16,7 +14,11 @@ import {
   KernelManager
 } from '../../src';
 
-import { testEmission, JupyterServer } from '@jupyterlab/testutils';
+import {
+  testEmission,
+  JupyterServer,
+  flakyIt as it
+} from '@jupyterlab/testutils';
 
 /**
  * Start a new session on with a default name.
