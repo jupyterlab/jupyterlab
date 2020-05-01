@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { OutputModel } from '@jupyterlab/rendermime';
 
@@ -23,7 +22,7 @@ describe('outputarea/model', () => {
   describe('OutputAreaModel', () => {
     describe('#constructor()', () => {
       it('should create an output area model', () => {
-        expect(model).to.be.an.instanceof(OutputAreaModel);
+        expect(model).toBeInstanceOf(OutputAreaModel);
       });
 
       it('should accept options', () => {
@@ -33,8 +32,8 @@ describe('outputarea/model', () => {
           contentFactory,
           trusted: true
         });
-        expect(model.contentFactory).to.equal(contentFactory);
-        expect(model.trusted).to.equal(true);
+        expect(model.contentFactory).toBe(contentFactory);
+        expect(model.trusted).toBe(true);
       });
     });
 
@@ -42,15 +41,15 @@ describe('outputarea/model', () => {
       it('should be emitted when the model changes', () => {
         let called = false;
         model.changed.connect((sender, args) => {
-          expect(sender).to.equal(model);
-          expect(args.type).to.equal('add');
-          expect(args.oldIndex).to.equal(-1);
-          expect(args.newIndex).to.equal(0);
-          expect(args.oldValues.length).to.equal(0);
+          expect(sender).toBe(model);
+          expect(args.type).toBe('add');
+          expect(args.oldIndex).toBe(-1);
+          expect(args.newIndex).toBe(0);
+          expect(args.oldValues.length).toBe(0);
           called = true;
         });
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
@@ -59,27 +58,27 @@ describe('outputarea/model', () => {
         let called = false;
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         model.stateChanged.connect((sender, args) => {
-          expect(sender).to.equal(model);
-          expect(args).to.be.undefined;
+          expect(sender).toBe(model);
+          expect(args).toBeUndefined();
           called = true;
         });
         const output = model.get(0);
         output.setData({ ...output.data });
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
     describe('#length', () => {
       it('should get the length of the items in the model', () => {
-        expect(model.length).to.equal(0);
+        expect(model.length).toBe(0);
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
-        expect(model.length).to.equal(1);
+        expect(model.length).toBe(1);
       });
     });
 
     describe('#trusted', () => {
       it('should be the trusted state of the model', () => {
-        expect(model.trusted).to.equal(false);
+        expect(model.trusted).toBe(false);
       });
 
       it('should cause all of the cells to `set`', () => {
@@ -90,13 +89,13 @@ describe('outputarea/model', () => {
           called++;
         });
         model.trusted = true;
-        expect(called).to.equal(2);
+        expect(called).toBe(2);
       });
     });
 
     describe('#contentFactory', () => {
       it('should be the content factory used by the model', () => {
-        expect(model.contentFactory).to.equal(
+        expect(model.contentFactory).toBe(
           OutputAreaModel.defaultContentFactory
         );
       });
@@ -104,9 +103,9 @@ describe('outputarea/model', () => {
 
     describe('#isDisposed', () => {
       it('should test whether the model is disposed', () => {
-        expect(model.isDisposed).to.equal(false);
+        expect(model.isDisposed).toBe(false);
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
+        expect(model.isDisposed).toBe(true);
       });
     });
 
@@ -114,14 +113,14 @@ describe('outputarea/model', () => {
       it('should dispose of the resources used by the model', () => {
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
-        expect(model.length).to.equal(0);
+        expect(model.isDisposed).toBe(true);
+        expect(model.length).toBe(0);
       });
 
       it('should be safe to call more than once', () => {
         model.dispose();
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
+        expect(model.isDisposed).toBe(true);
       });
     });
 
@@ -129,29 +128,27 @@ describe('outputarea/model', () => {
       it('should get the item at the specified index', () => {
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         const output = model.get(0);
-        expect(output.type).to.equal(
-          NBTestUtils.DEFAULT_OUTPUTS[0].output_type
-        );
+        expect(output.type).toBe(NBTestUtils.DEFAULT_OUTPUTS[0].output_type);
       });
 
       it('should return `undefined` if out of range', () => {
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
-        expect(model.get(1)).to.be.undefined;
+        expect(model.get(1)).toBeUndefined();
       });
     });
 
     describe('#add()', () => {
       it('should add an output', () => {
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
-        expect(model.length).to.equal(1);
+        expect(model.length).toBe(1);
       });
 
       it('should consolidate consecutive stream outputs of the same kind', () => {
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         model.add(NBTestUtils.DEFAULT_OUTPUTS[1]);
-        expect(model.length).to.equal(2);
+        expect(model.length).toBe(2);
         model.add(NBTestUtils.DEFAULT_OUTPUTS[2]);
-        expect(model.length).to.equal(2);
+        expect(model.length).toBe(2);
       });
 
       it('should remove carriage returns and backspaces from streams', () => {
@@ -160,21 +157,19 @@ describe('outputarea/model', () => {
           output_type: 'stream',
           text: ['Jupyter\rj']
         });
-        expect(model.get(0).toJSON().text).to.equal('jupyter');
+        expect(model.get(0).toJSON().text).toBe('jupyter');
         model.add({
           name: 'stdout',
           output_type: 'stream',
           text: ['\njj\bupyter']
         });
-        expect(model.get(0).toJSON().text).to.equal('jupyter\njupyter');
+        expect(model.get(0).toJSON().text).toBe('jupyter\njupyter');
         model.add({
           name: 'stdout',
           output_type: 'stream',
           text: ['\r\r\njupyter']
         });
-        expect(model.get(0).toJSON().text).to.equal(
-          'jupyter\njupyter\njupyter'
-        );
+        expect(model.get(0).toJSON().text).toBe('jupyter\njupyter\njupyter');
       });
     });
 
@@ -184,15 +179,15 @@ describe('outputarea/model', () => {
           model.add(output);
         }
         model.clear();
-        expect(model.length).to.equal(0);
+        expect(model.length).toBe(0);
       });
 
       it('should wait for next add if requested', () => {
         model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         model.clear(true);
-        expect(model.length).to.equal(1);
+        expect(model.length).toBe(1);
         model.add(NBTestUtils.DEFAULT_OUTPUTS[1]);
-        expect(model.length).to.equal(1);
+        expect(model.length).toBe(1);
       });
     });
 
@@ -200,15 +195,15 @@ describe('outputarea/model', () => {
       it('should deserialize the model from JSON', () => {
         model.clear();
         model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
-        expect(model.toJSON().length).to.equal(5);
+        expect(model.toJSON().length).toBe(5);
       });
     });
 
     describe('#toJSON()', () => {
       it('should serialize the model to JSON', () => {
-        expect(model.toJSON()).to.deep.equal([]);
+        expect(model.toJSON()).toEqual([]);
         model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
-        expect(model.toJSON().length).to.equal(5);
+        expect(model.toJSON().length).toBe(5);
       });
     });
   });
@@ -220,14 +215,14 @@ describe('outputarea/model', () => {
         const model = factory.createOutputModel({
           value: NBTestUtils.DEFAULT_OUTPUTS[0]
         });
-        expect(model).to.be.an.instanceof(OutputModel);
+        expect(model).toBeInstanceOf(OutputModel);
       });
     });
   });
 
   describe('.defaultContentFactory', () => {
     it('should be an instance of ContentFactory', () => {
-      expect(OutputAreaModel.defaultContentFactory).to.be.an.instanceof(
+      expect(OutputAreaModel.defaultContentFactory).toBeInstanceOf(
         OutputAreaModel.ContentFactory
       );
     });
