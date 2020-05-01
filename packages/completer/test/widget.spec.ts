@@ -14,7 +14,11 @@ import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
-import { Completer, CompleterModel } from '@jupyterlab/completer';
+import {
+  Completer,
+  CompletionHandler,
+  CompleterModel
+} from '@jupyterlab/completer';
 
 import { framePromise, sleep } from '@jupyterlab/testutils';
 
@@ -33,6 +37,15 @@ function createEditorWidget(): CodeEditorWrapper {
 }
 
 class CustomRenderer extends Completer.Renderer {
+  createCompletionItemNode(
+    item: CompletionHandler.ICompletionItem,
+    orderedTypes: string[]
+  ): HTMLLIElement {
+    let li = super.createCompletionItemNode!(item, orderedTypes);
+    li.classList.add(TEST_ITEM_CLASS);
+    return li;
+  }
+
   createItemNode(
     item: Completer.IItem,
     typeMap: Completer.TypeMap,
@@ -104,6 +117,28 @@ describe('completer/widget', () => {
           expect.arrayContaining([TEST_ITEM_CLASS])
         );
       });
+
+      it('should accept completion items with a renderer', () => {
+        let options: Completer.IOptions = {
+          editor: null,
+          model: new CompleterModel(),
+          renderer: new CustomRenderer()
+        };
+        options.model!.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' }
+        ]);
+
+        let widget = new Completer(options);
+        expect(widget).toBeInstanceOf(Completer);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+        let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
+        expect(items).toHaveLength(2);
+        expect(Array.from(items[0].classList)).toEqual(
+          expect.arrayContaining([TEST_ITEM_CLASS])
+        );
+      });
     });
 
     describe('#selected', () => {
@@ -130,6 +165,64 @@ describe('completer/widget', () => {
         expect(value).toBe('foo');
         widget.dispose();
         anchor.dispose();
+      });
+
+      describe('#selected with completion items', () => {
+        it('should emit the insert text if it is present', () => {
+          let anchor = createEditorWidget();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model: new CompleterModel()
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          options.model!.setCompletionItems!([
+            { label: 'foo', insertText: 'bar' },
+            { label: 'baz' }
+          ]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
+
+          widget.selected.connect(listener);
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+          expect(value).toBe('');
+          widget.selectActive();
+          expect(value).toBe('bar');
+          widget.dispose();
+          anchor.dispose();
+        });
+
+        it('should emit the label if insert text is not present', () => {
+          let anchor = createEditorWidget();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model: new CompleterModel()
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          options.model!.setCompletionItems!([
+            { label: 'foo' },
+            { label: 'baz' }
+          ]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
+
+          widget.selected.connect(listener);
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+          expect(value).toBe('');
+          widget.selectActive();
+          expect(value).toBe('foo');
+          widget.dispose();
+          anchor.dispose();
+        });
       });
     });
 
@@ -169,6 +262,61 @@ describe('completer/widget', () => {
         model.setOptions(['abc', 'abd', 'abe', 'abi']);
 
         const widget = new Completer({ model, editor: code.editor });
+        widget.hide();
+        expect(called).toBe(false);
+        widget.visibilityChanged.connect(() => {
+          called = true;
+        });
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+        await framePromise();
+        expect(called).toBe(true);
+        widget.dispose();
+        code.dispose();
+        panel.dispose();
+      });
+
+      it('should emit a signal when completion items completer visibility changes', async () => {
+        let panel = new Panel();
+        let code = createEditorWidget();
+        let editor = code.editor;
+        let model = new CompleterModel();
+        let called = false;
+
+        editor.model.value.text = 'a';
+        panel.node.style.position = 'absolute';
+        panel.node.style.top = '0px';
+        panel.node.style.left = '0px';
+        panel.node.style.height = '1000px';
+        code.node.style.height = '900px';
+        panel.addWidget(code);
+        Widget.attach(panel, document.body);
+        panel.node.scrollTop = 0;
+        document.body.scrollTop = 0;
+
+        let position = code.editor.getPositionAt(1)!;
+
+        editor.setCursorPosition(position);
+
+        let request: Completer.ITextState = {
+          column: position.column,
+          lineHeight: editor.lineHeight,
+          charWidth: editor.charWidth,
+          line: position.line,
+          text: 'a'
+        };
+
+        model.original = request;
+        model.cursor = { start: 0, end: 1 };
+        model.setCompletionItems!([
+          { label: 'abc' },
+          { label: 'abd' },
+          { label: 'abe' },
+          { label: 'abi' }
+        ]);
+
+        let widget = new Completer({ model, editor: code.editor });
         widget.hide();
         expect(called).toBe(false);
         widget.visibilityChanged.connect(() => {
@@ -272,6 +420,33 @@ describe('completer/widget', () => {
         widget.dispose();
         anchor.dispose();
       });
+
+      it('should reset the completer widget and its completion items', () => {
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+        let options: Completer.IOptions = {
+          editor: anchor.editor,
+          model
+        };
+        model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
+        Widget.attach(anchor, document.body);
+
+        let widget = new Completer(options);
+
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(widget.isHidden).toBe(false);
+        expect(model.completionItems!()).toEqual([
+          { label: 'foo' },
+          { label: 'bar' }
+        ]);
+        widget.reset();
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(widget.isHidden).toBe(true);
+        expect(model.completionItems!()).toEqual([]);
+        widget.dispose();
+        anchor.dispose();
+      });
     });
 
     describe('#handleEvent()', () => {
@@ -316,6 +491,33 @@ describe('completer/widget', () => {
           anchor.dispose();
         });
 
+        it('should reset completion items if keydown is outside anchor', () => {
+          let model = new CompleterModel();
+          let anchor = createEditorWidget();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
+
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+          expect(widget.isHidden).toBe(false);
+          expect(model.completionItems!()).toEqual([
+            { label: 'foo' },
+            { label: 'bar' }
+          ]);
+          simulate(document.body, 'keydown', { keyCode: 70 }); // F
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+          expect(widget.isHidden).toBe(true);
+          expect(model.completionItems!()).toEqual([]);
+          widget.dispose();
+          anchor.dispose();
+        });
+
         it('should select the item below and not progress past last', () => {
           const anchor = createEditorWidget();
           const model = new CompleterModel();
@@ -338,6 +540,71 @@ describe('completer/widget', () => {
 
           const items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
 
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(target, 'keydown', { keyCode: 40 }); // Down
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(target, 'keydown', { keyCode: 40 }); // Down
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(target, 'keydown', { keyCode: 40 }); // Down
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          widget.dispose();
+          anchor.dispose();
+        });
+
+        it('should select the completion item below and not progress past last', () => {
+          let anchor = createEditorWidget();
+          let model = new CompleterModel();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          model.setCompletionItems!([
+            { label: 'foo' },
+            { label: 'bar' },
+            { label: 'baz' }
+          ]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
+          let target = document.createElement('div');
+
+          anchor.node.appendChild(target);
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+          let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
           expect(Array.from(items[0].classList)).toEqual(
             expect.arrayContaining([ACTIVE_CLASS])
           );
@@ -464,6 +731,90 @@ describe('completer/widget', () => {
           anchor.dispose();
         });
 
+        it('should select the completion item above and not progress beyond first', () => {
+          let anchor = createEditorWidget();
+          let model = new CompleterModel();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          model.setCompletionItems!([
+            { label: 'foo' },
+            { label: 'bar' },
+            { label: 'baz' }
+          ]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
+
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+          let items = widget.node.querySelectorAll(`.${ITEM_CLASS}`);
+
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 40 }); // Down
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 40 }); // Down
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          simulate(anchor.node, 'keydown', { keyCode: 38 }); // Up
+          expect(Array.from(items[0].classList)).toEqual(
+            expect.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[1].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          expect(Array.from(items[2].classList)).toEqual(
+            expect.not.arrayContaining([ACTIVE_CLASS])
+          );
+          widget.dispose();
+          anchor.dispose();
+        });
+
         it('should mark common subset on start and complete that subset on tab', async () => {
           const anchor = createEditorWidget();
           const model = new CompleterModel();
@@ -489,6 +840,45 @@ describe('completer/widget', () => {
           await framePromise();
           const marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
           expect(Object.keys(value)).toHaveLength(0);
+          expect(marked).toHaveLength(4);
+          expect(marked[0].textContent).toBe('fo');
+          expect(marked[1].textContent).toBe('fo');
+          expect(marked[2].textContent).toBe('fo');
+          expect(marked[3].textContent).toBe('fo');
+          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+          expect(value).toBe('fo');
+          widget.dispose();
+          anchor.dispose();
+        });
+
+        it('should mark common subset of completion items on start and complete that subset on tab', async () => {
+          let anchor = createEditorWidget();
+          let model = new CompleterModel();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          model.setCompletionItems!([
+            { label: 'fo' },
+            { label: 'foo' },
+            { label: 'foo' },
+            { label: 'fooo' }
+          ]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
+
+          widget.selected.connect(listener);
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+          await framePromise();
+          let marked = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`);
+          expect(value).toHaveLength(0);
           expect(marked).toHaveLength(4);
           expect(marked[0].textContent).toBe('fo');
           expect(marked[1].textContent).toBe('fo');
@@ -537,6 +927,41 @@ describe('completer/widget', () => {
           anchor.dispose();
         });
 
+        it('should trigger a selected signal on mouse down of completion item', () => {
+          let anchor = createEditorWidget();
+          let model = new CompleterModel();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          model.setCompletionItems!([
+            { label: 'foo' },
+            { label: 'bar' },
+            { label: 'baz' }
+          ]);
+          model.query = 'b';
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
+
+          widget.selected.connect(listener);
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+
+          let item = widget.node.querySelectorAll(`.${ITEM_CLASS} mark`)[1];
+
+          simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
+          expect(model.query).toBe('ba');
+          simulate(item, 'mousedown');
+          expect(value).toBe('baz');
+          widget.dispose();
+          anchor.dispose();
+        });
+
         it('should ignore nonstandard mouse clicks (e.g., right click)', () => {
           const anchor = createEditorWidget();
           const model = new CompleterModel();
@@ -552,6 +977,32 @@ describe('completer/widget', () => {
           Widget.attach(anchor, document.body);
 
           const widget = new Completer(options);
+
+          widget.selected.connect(listener);
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+          expect(value).toBe('');
+          simulate(widget.node, 'mousedown', { button: 1 });
+          expect(value).toBe('');
+          widget.dispose();
+          anchor.dispose();
+        });
+
+        it('should ignore nonstandard mouse clicks (e.g., right click) on completion item', () => {
+          let anchor = createEditorWidget();
+          let model = new CompleterModel();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -589,6 +1040,32 @@ describe('completer/widget', () => {
           anchor.dispose();
         });
 
+        it('should ignore a mouse down that misses a completion item', () => {
+          let anchor = createEditorWidget();
+          let model = new CompleterModel();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          let value = '';
+          let listener = (sender: any, selected: string) => {
+            value = selected;
+          };
+          model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
+
+          widget.selected.connect(listener);
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+          expect(value).toBe('');
+          simulate(widget.node, 'mousedown');
+          expect(value).toBe('');
+          widget.dispose();
+          anchor.dispose();
+        });
+
         it('should hide widget if mouse down misses it', () => {
           const anchor = createEditorWidget();
           const model = new CompleterModel();
@@ -603,6 +1080,32 @@ describe('completer/widget', () => {
           Widget.attach(anchor, document.body);
 
           const widget = new Completer(options);
+
+          widget.selected.connect(listener);
+          Widget.attach(widget, document.body);
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+          expect(widget.isHidden).toBe(false);
+          simulate(anchor.node, 'mousedown');
+          MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+          expect(widget.isHidden).toBe(true);
+          widget.dispose();
+          anchor.dispose();
+        });
+
+        it('should hide completion items widget if mouse down misses it', () => {
+          let anchor = createEditorWidget();
+          let model = new CompleterModel();
+          let options: Completer.IOptions = {
+            editor: anchor.editor,
+            model
+          };
+          let listener = (sender: any, selected: string) => {
+            // no op
+          };
+          model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
+          Widget.attach(anchor, document.body);
+
+          let widget = new Completer(options);
 
           widget.selected.connect(listener);
           Widget.attach(widget, document.body);
@@ -716,6 +1219,82 @@ describe('completer/widget', () => {
         anchor.dispose();
       });
 
+      it('should emit label if there is only one completion item and insert Text is not set', () => {
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+        let coords = { left: 0, right: 0, top: 100, bottom: 120 };
+        let request: Completer.ITextState = {
+          column: 0,
+          lineHeight: 0,
+          charWidth: 0,
+          line: 0,
+          coords: coords as CodeEditor.ICoordinate,
+          text: 'f'
+        };
+
+        let value = '';
+        let options: Completer.IOptions = {
+          editor: anchor.editor,
+          model
+        };
+        let listener = (sender: any, selected: string) => {
+          value = selected;
+        };
+
+        Widget.attach(anchor, document.body);
+        model.original = request;
+        model.setCompletionItems!([{ label: 'foo' }]);
+
+        let widget = new Completer(options);
+        widget.selected.connect(listener);
+        Widget.attach(widget, document.body);
+
+        expect(value).toBe('');
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(value).toBe('foo');
+
+        widget.dispose();
+        anchor.dispose();
+      });
+
+      it('should emit insert text if there is only one completion item and insert Text is set', () => {
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+        let coords = { left: 0, right: 0, top: 100, bottom: 120 };
+        let request: Completer.ITextState = {
+          column: 0,
+          lineHeight: 0,
+          charWidth: 0,
+          line: 0,
+          coords: coords as CodeEditor.ICoordinate,
+          text: 'f'
+        };
+
+        let value = '';
+        let options: Completer.IOptions = {
+          editor: anchor.editor,
+          model
+        };
+        let listener = (sender: any, selected: string) => {
+          value = selected;
+        };
+
+        Widget.attach(anchor, document.body);
+        model.original = request;
+        model.setCompletionItems!([{ label: 'foo', insertText: 'bar' }]);
+
+        let widget = new Completer(options);
+        widget.selected.connect(listener);
+        Widget.attach(widget, document.body);
+
+        expect(value).toBe('');
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(value).toBe('bar');
+
+        widget.dispose();
+        anchor.dispose();
+      });
+
       it('should do nothing if a model does not exist', () => {
         const widget = new LogWidget({ editor: null });
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
@@ -747,6 +1326,42 @@ describe('completer/widget', () => {
         model.setOptions(['foo', 'bar', 'baz']);
 
         const widget = new Completer(options);
+        widget.hide();
+        expect(widget.isHidden).toBe(true);
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        expect(widget.isVisible).toBe(true);
+        widget.dispose();
+        anchor.dispose();
+      });
+
+      it('should un-hide widget if multiple completion items are available', () => {
+        let anchor = createEditorWidget();
+        let model = new CompleterModel();
+        let coords = { left: 0, right: 0, top: 100, bottom: 120 };
+        let request: Completer.ITextState = {
+          column: 0,
+          lineHeight: 0,
+          charWidth: 0,
+          line: 0,
+          coords: coords as CodeEditor.ICoordinate,
+          text: 'f'
+        };
+
+        let options: Completer.IOptions = {
+          editor: anchor.editor,
+          model
+        };
+
+        Widget.attach(anchor, document.body);
+        model.original = request;
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' }
+        ]);
+
+        let widget = new Completer(options);
         widget.hide();
         expect(widget.isHidden).toBe(true);
         Widget.attach(widget, document.body);

@@ -18,6 +18,9 @@
       "path": "../statedb"
     },
     {
+      "path": "../ui-components"
+    },
+    {
       "path": "../../testutils"
     },
     {
@@ -34,6 +37,9 @@
     },
     {
       "path": "../statedb"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

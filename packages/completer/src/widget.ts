@@ -19,6 +19,8 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Widget } from '@lumino/widgets';
 
+import { CompletionHandler } from './handler';
+
 /**
  * The class name added to completer menu items.
  */
@@ -225,49 +227,18 @@ export class Completer extends Widget {
       return;
     }
 
-    const items = toArray(model.items());
-
-    // If there are no items, reset and bail.
-    if (!items || !items.length) {
-      this._resetFlag = true;
-      this.reset();
-      if (!this.isHidden) {
-        this.hide();
-        this._visibilityChanged.emit(undefined);
-      }
+    let node: HTMLElement | null = null;
+    let completionItemList = model.completionItems && model.completionItems();
+    if (completionItemList && completionItemList.length) {
+      node = this._createCompletionItemNode(model, completionItemList);
+    } else {
+      node = this._createIItemNode(model);
+    }
+    if (!node) {
       return;
     }
 
-    // If there is only one option, signal and bail.
-    // We don't test the filtered `items`, as that
-    // is too aggressive of completer behavior, it can
-    // lead to double typing of an option.
-    const options = toArray(model.options());
-    if (options.length === 1) {
-      this._selected.emit(options[0]);
-      this.reset();
-      return;
-    }
-
-    // Clear the node.
-    const node = this.node;
-    node.textContent = '';
-
-    // Compute an ordered list of all the types in the typeMap, this is computed
-    // once by the model each time new data arrives for efficiency.
-    const orderedTypes = model.orderedTypes();
-
-    // Populate the completer items.
-    for (const item of items) {
-      const li = this._renderer.createItemNode(
-        item!,
-        model.typeMap(),
-        orderedTypes
-      );
-      node.appendChild(li);
-    }
-
-    const active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
+    let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
 
     // If this is the first time the current completer session has loaded,
@@ -287,6 +258,95 @@ export class Completer extends Widget {
     } else {
       this._setGeometry();
     }
+  }
+
+  private _createCompletionItemNode(
+    model: Completer.IModel,
+    items: CompletionHandler.ICompletionItems
+  ): HTMLElement | null {
+    // If there are no items, reset and bail.
+    if (!items.length) {
+      this._resetFlag = true;
+      this.reset();
+      if (!this.isHidden) {
+        this.hide();
+        this._visibilityChanged.emit(undefined);
+      }
+      return null;
+    }
+
+    // If there is only one option, signal and bail.
+    // We don't test the filtered `items`, as that
+    // is too aggressive of completer behavior, it can
+    // lead to double typing of an option.
+    if (items.length === 1) {
+      this._selected.emit(items[0].insertText || items[0].label);
+      this.reset();
+      return null;
+    }
+
+    // Clear the node.
+    let node = this.node;
+    node.textContent = '';
+
+    // Compute an ordered list of all the types in the typeMap, this is computed
+    // once by the model each time new data arrives for efficiency.
+    let orderedTypes = model.orderedTypes();
+
+    // Populate the completer items.
+    for (let item of items) {
+      if (!this._renderer.createCompletionItemNode) {
+        return null;
+      }
+      let li = this._renderer.createCompletionItemNode(item, orderedTypes);
+      node.appendChild(li);
+    }
+    return node;
+  }
+
+  private _createIItemNode(model: Completer.IModel): HTMLElement | null {
+    const items = toArray(model.items());
+
+    // If there are no items, reset and bail.
+    if (!items || !items.length) {
+      this._resetFlag = true;
+      this.reset();
+      if (!this.isHidden) {
+        this.hide();
+        this._visibilityChanged.emit(undefined);
+      }
+      return null;
+    }
+
+    // If there is only one option, signal and bail.
+    // We don't test the filtered `items`, as that
+    // is too aggressive of completer behavior, it can
+    // lead to double typing of an option.
+    const options = toArray(model.options());
+    if (options.length === 1) {
+      this._selected.emit(options[0]);
+      this.reset();
+      return null;
+    }
+
+    // Clear the node.
+    const node = this.node;
+    node.textContent = '';
+
+    // Compute an ordered list of all the types in the typeMap, this is computed
+    // once by the model each time new data arrives for efficiency.
+    const orderedTypes = model.orderedTypes();
+
+    // Populate the completer items.
+    for (const item of items) {
+      const li = this._renderer.createItemNode(
+        item!,
+        model.typeMap(),
+        orderedTypes
+      );
+      node.appendChild(li);
+    }
+    return node;
   }
 
   /**
@@ -606,6 +666,16 @@ export namespace Completer {
     query: string;
 
     /**
+     * Get the list of visible CompletionItems in the completer menu.
+     */
+    completionItems?(): CompletionHandler.ICompletionItems;
+
+    /**
+     * Set the list of visible CompletionItems in the completer menu.
+     */
+    setCompletionItems?(items: CompletionHandler.ICompletionItems): void;
+
+    /**
      * Get the of visible items in the completer menu.
      */
     items(): IIterator<IItem>;
@@ -712,6 +782,15 @@ export namespace Completer {
    */
   export interface IRenderer {
     /**
+     * Create an item node (an `li` element)  from a ICompletionItem
+     * for a text completer menu.
+     */
+    createCompletionItemNode?(
+      item: CompletionHandler.ICompletionItem,
+      orderedTypes: string[]
+    ): HTMLLIElement;
+
+    /**
      * Create an item node (an `li` element) for a text completer menu.
      */
     createItemNode(
@@ -726,6 +805,22 @@ export namespace Completer {
    */
   export class Renderer implements IRenderer {
     /**
+     * Create an item node from an ICompletionItem for a text completer menu.
+     */
+    createCompletionItemNode(
+      item: CompletionHandler.ICompletionItem,
+      orderedTypes: string[]
+    ): HTMLLIElement {
+      return this._constructNode(
+        this._createBaseNode(item.insertText || item.label),
+        this._createMatchNode(item.label),
+        !!item.type,
+        item.type,
+        orderedTypes
+      );
+    }
+
+    /**
      * Create an item node for a text completer menu.
      */
     createItemNode(
@@ -733,22 +828,52 @@ export namespace Completer {
       typeMap: TypeMap,
       orderedTypes: string[]
     ): HTMLLIElement {
+      return this._constructNode(
+        this._createBaseNode(item.raw),
+        this._createMatchNode(item.text),
+        !JSONExt.deepEqual(typeMap, {}),
+        typeMap[item.raw] || '',
+        orderedTypes
+      );
+    }
+
+    /**
+     * Create base node with the value to be inserted
+     */
+    private _createBaseNode(value: string): HTMLLIElement {
       const li = document.createElement('li');
       li.className = ITEM_CLASS;
       // Set the raw, un-marked up value as a data attribute.
-      li.setAttribute('data-value', item.raw);
+      li.setAttribute('data-value', value);
+      return li;
+    }
 
+    /**
+     * Create match node to highlight potential prefix match within result.
+     */
+    private _createMatchNode(result: string): HTMLElement {
       const matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = defaultSanitizer.sanitize(item.text, {
+      matchNode.innerHTML = defaultSanitizer.sanitize(result, {
         allowedTags: ['mark']
       });
+      return matchNode;
+    }
 
+    /**
+     * Attaches type and match nodes to base node.
+     */
+    private _constructNode(
+      li: HTMLLIElement,
+      matchNode: HTMLElement,
+      typesExist: boolean,
+      type: any,
+      orderedTypes: string[]
+    ): HTMLLIElement {
       // If there are types provided add those.
-      if (!JSONExt.deepEqual(typeMap, {})) {
+      if (typesExist) {
         const typeNode = document.createElement('span');
-        const type = typeMap[item.raw] || '';
         typeNode.textContent = (type[0] || '').toLowerCase();
         const colorIndex = (orderedTypes.indexOf(type) % N_COLORS) + 1;
         typeNode.className = 'jp-Completer-type';

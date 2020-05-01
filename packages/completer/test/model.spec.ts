@@ -8,7 +8,11 @@ import { JSONExt } from '@lumino/coreutils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
-import { CompleterModel, Completer } from '@jupyterlab/completer';
+import {
+  CompleterModel,
+  Completer,
+  CompletionHandler
+} from '@jupyterlab/completer';
 
 function makeState(text: string): Completer.ITextState {
   return {
@@ -27,6 +31,7 @@ describe('completer/model', () => {
       it('should create a completer model', () => {
         const model = new CompleterModel();
         expect(model).toBeInstanceOf(CompleterModel);
+        expect(model.setCompletionItems).toBeDefined();
       });
     });
 
@@ -42,6 +47,21 @@ describe('completer/model', () => {
         model.setOptions(['foo']);
         expect(called).toBe(1);
         model.setOptions(['foo'], { foo: 'instance' });
+        expect(called).toBe(2);
+      });
+
+      it('should signal when model items have changed', () => {
+        let model = new CompleterModel();
+        let called = 0;
+        let listener = (sender: any, args: void) => {
+          called++;
+        };
+        model.stateChanged.connect(listener);
+        expect(called).toBe(0);
+        model.setCompletionItems!([{ label: 'foo' }]);
+        expect(called).toBe(1);
+        model.setCompletionItems!([{ label: 'foo' }]);
+        model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
         expect(called).toBe(2);
       });
 
@@ -61,6 +81,25 @@ describe('completer/model', () => {
         expect(called).toBe(2);
         model.setOptions([], {});
         model.setOptions([], {});
+        expect(called).toBe(3);
+      });
+
+      it('should not signal when items have not changed', () => {
+        let model = new CompleterModel();
+        let called = 0;
+        let listener = (sender: any, args: void) => {
+          called++;
+        };
+        model.stateChanged.connect(listener);
+        expect(called).toBe(0);
+        model.setCompletionItems!([{ label: 'foo' }]);
+        model.setCompletionItems!([{ label: 'foo' }]);
+        expect(called).toBe(1);
+        model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
+        model.setCompletionItems!([{ label: 'foo' }, { label: 'bar' }]);
+        expect(called).toBe(2);
+        model.setCompletionItems!([]);
+        model.setCompletionItems!([]);
         expect(called).toBe(3);
       });
 
@@ -138,6 +177,54 @@ describe('completer/model', () => {
         model.current = null;
         model.current = null;
         expect(called).toBe(3);
+      });
+    });
+
+    describe('#completionItems()', () => {
+      it('should default to { items: [] }', () => {
+        let model = new CompleterModel();
+        let want: CompletionHandler.ICompletionItems = [];
+        expect(model.completionItems!()).toEqual(want);
+      });
+
+      it('should return unmarked ICompletionItems if query is blank', () => {
+        let model = new CompleterModel();
+        let want: CompletionHandler.ICompletionItems = [
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' }
+        ];
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' }
+        ]);
+        expect(model.completionItems!()).toEqual(want);
+      });
+
+      it('should return a marked list of items if query is set', () => {
+        let model = new CompleterModel();
+        let want = '<mark>f</mark>oo';
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' }
+        ]);
+        model.query = 'f';
+        expect(model.completionItems!().length).toEqual(1);
+        expect(model.completionItems!()[0].label).toEqual(want);
+      });
+
+      it('should return { items: [] } if reset', () => {
+        let model = new CompleterModel();
+        let want: CompletionHandler.ICompletionItems = [];
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' }
+        ]);
+        model.reset();
+        expect(model.completionItems!()).toEqual(want);
       });
     });
 
