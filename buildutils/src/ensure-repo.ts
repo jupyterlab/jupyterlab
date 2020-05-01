@@ -38,7 +38,8 @@ const UNUSED: Dict<string[]> = {
     'node-fetch',
     'identity-obj-proxy',
     'jest-raw-loader',
-    'markdown-loader-jest'
+    'markdown-loader-jest',
+    'jest-junit'
   ],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
