@@ -811,8 +811,12 @@ export namespace Completer {
       item: CompletionHandler.ICompletionItem,
       orderedTypes: string[]
     ): HTMLLIElement {
+      let baseNode = this._createBaseNode(item.insertText || item.label);
+      if (item.deprecated) {
+        baseNode.classList.add('jp-Completer-deprecated');
+      }
       return this._constructNode(
-        this._createBaseNode(item.insertText || item.label),
+        baseNode,
         this._createMatchNode(item.label),
         !!item.type,
         item.type,
