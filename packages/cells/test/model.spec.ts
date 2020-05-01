@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { toArray } from '@lumino/algorithm';
 
@@ -32,7 +31,7 @@ describe('cells/model', () => {
     describe('#constructor()', () => {
       it('should create a cell model', () => {
         const model = new CellModel({});
-        expect(model).to.be.an.instanceof(CellModel);
+        expect(model).toBeInstanceOf(CellModel);
       });
 
       it('should accept a base cell argument', () => {
@@ -42,8 +41,8 @@ describe('cells/model', () => {
           metadata: { trusted: false }
         };
         const model = new CellModel({ cell });
-        expect(model).to.be.an.instanceof(CellModel);
-        expect(model.value.text).to.equal(cell.source);
+        expect(model).toBeInstanceOf(CellModel);
+        expect(model.value.text).toBe(cell.source);
       });
 
       it('should accept a base cell argument with a multiline source', () => {
@@ -53,8 +52,8 @@ describe('cells/model', () => {
           metadata: { trusted: false }
         };
         const model = new CellModel({ cell });
-        expect(model).to.be.an.instanceof(CellModel);
-        expect(model.value.text).to.equal((cell.source as string[]).join(''));
+        expect(model).toBeInstanceOf(CellModel);
+        expect(model.value.text).toBe((cell.source as string[]).join(''));
       });
     });
 
@@ -65,9 +64,9 @@ describe('cells/model', () => {
         model.contentChanged.connect(() => {
           called = true;
         });
-        expect(called).to.equal(false);
+        expect(called).toBe(false);
         model.value.text = 'foo';
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
 
@@ -76,12 +75,12 @@ describe('cells/model', () => {
         const model = new CodeCellModel({});
         let called = false;
         const listener = (sender: any, args: IChangedArgs<any>) => {
-          expect(args.newValue).to.equal(1);
+          expect(args.newValue).toBe(1);
           called = true;
         };
         model.stateChanged.connect(listener);
         model.executionCount = 1;
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
 
       it('should not signal when model state has not changed', () => {
@@ -90,30 +89,30 @@ describe('cells/model', () => {
         model.stateChanged.connect(() => {
           called++;
         });
-        expect(called).to.equal(0);
+        expect(called).toBe(0);
         model.executionCount = 1;
-        expect(called).to.equal(1);
+        expect(called).toBe(1);
         model.executionCount = 1;
-        expect(called).to.equal(1);
+        expect(called).toBe(1);
       });
     });
 
     describe('#trusted', () => {
       it('should be the trusted state of the cell', () => {
         const model = new CodeCellModel({});
-        expect(model.trusted).to.equal(false);
+        expect(model.trusted).toBe(false);
         model.trusted = true;
-        expect(model.trusted).to.equal(true);
+        expect(model.trusted).toBe(true);
         const other = new CodeCellModel({ cell: model.toJSON() });
-        expect(other.trusted).to.equal(true);
+        expect(other.trusted).toBe(true);
       });
 
       it('should update the trusted state of the output models', () => {
         const model = new CodeCellModel({});
         model.outputs.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
-        expect(model.outputs.get(0).trusted).to.equal(false);
+        expect(model.outputs.get(0).trusted).toBe(false);
         model.trusted = true;
-        expect(model.outputs.get(0).trusted).to.equal(true);
+        expect(model.outputs.get(0).trusted).toBe(true);
       });
     });
 
@@ -125,9 +124,9 @@ describe('cells/model', () => {
         };
         let value = '';
         model.metadata.changed.connect(listener);
-        expect(value).to.be.empty;
+        expect(Object.keys(value)).toHaveLength(0);
         model.metadata.set('foo', 'bar');
-        expect(value).to.equal('bar');
+        expect(value).toBe('bar');
       });
 
       it('should not signal when model metadata has not changed', () => {
@@ -136,38 +135,38 @@ describe('cells/model', () => {
         model.metadata.changed.connect(() => {
           called++;
         });
-        expect(called).to.equal(0);
+        expect(called).toBe(0);
         model.metadata.set('foo', 'bar');
-        expect(called).to.equal(1);
+        expect(called).toBe(1);
         model.metadata.set('foo', 'bar');
-        expect(called).to.equal(1);
+        expect(called).toBe(1);
       });
     });
 
     describe('#source', () => {
       it('should default to an empty string', () => {
         const model = new CellModel({});
-        expect(model.value.text).to.be.empty;
+        expect(model.value.text).toHaveLength(0);
       });
 
       it('should be settable', () => {
         const model = new CellModel({});
-        expect(model.value.text).to.be.empty;
+        expect(model.value.text).toHaveLength(0);
         model.value.text = 'foo';
-        expect(model.value.text).to.equal('foo');
+        expect(model.value.text).toBe('foo');
       });
     });
 
     describe('#isDisposed', () => {
       it('should be false by default', () => {
         const model = new CellModel({});
-        expect(model.isDisposed).to.equal(false);
+        expect(model.isDisposed).toBe(false);
       });
 
       it('should be true after model is disposed', () => {
         const model = new CellModel({});
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
+        expect(model.isDisposed).toBe(true);
       });
     });
 
@@ -175,14 +174,14 @@ describe('cells/model', () => {
       it('should dispose of the resources held by the model', () => {
         const model = new TestModel({});
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
+        expect(model.isDisposed).toBe(true);
       });
 
       it('should be safe to call multiple times', () => {
         const model = new CellModel({});
         model.dispose();
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
+        expect(model.isDisposed).toBe(true);
       });
     });
 
@@ -194,8 +193,8 @@ describe('cells/model', () => {
           metadata: { trusted: false }
         };
         const model = new TestModel({ cell });
-        expect(model.toJSON()).to.not.equal(cell);
-        expect(model.toJSON()).to.deep.equal(cell);
+        expect(model.toJSON()).not.toBe(cell);
+        expect(model.toJSON()).toEqual(cell);
       });
 
       it('should always return a string source', () => {
@@ -206,24 +205,24 @@ describe('cells/model', () => {
         };
         const model = new TestModel({ cell });
         cell.source = (cell.source as string[]).join('');
-        expect(model.toJSON()).to.not.equal(cell);
-        expect(model.toJSON()).to.deep.equal(cell);
+        expect(model.toJSON()).not.toBe(cell);
+        expect(model.toJSON()).toEqual(cell);
       });
     });
 
     describe('#metadata', () => {
       it('should handle a metadata for the cell', () => {
         const model = new CellModel({});
-        expect(model.metadata.get('foo')).to.be.undefined;
+        expect(model.metadata.get('foo')).toBeUndefined();
         model.metadata.set('foo', 1);
-        expect(model.metadata.get('foo')).to.equal(1);
+        expect(model.metadata.get('foo')).toBe(1);
       });
 
       it('should get a list of user metadata keys', () => {
         const model = new CellModel({});
-        expect(toArray(model.metadata.keys())).to.be.empty;
+        expect(toArray(model.metadata.keys())).toHaveLength(0);
         model.metadata.set('foo', 1);
-        expect(model.metadata.keys()).to.deep.equal(['foo']);
+        expect(model.metadata.keys()).toEqual(['foo']);
       });
 
       it('should trigger changed signal', () => {
@@ -233,7 +232,7 @@ describe('cells/model', () => {
           called = true;
         });
         model.metadata.set('foo', 1);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
     });
   });
@@ -242,7 +241,7 @@ describe('cells/model', () => {
     describe('#type', () => {
       it('should be set with type "raw"', () => {
         const model = new RawCellModel({});
-        expect(model.type).to.equal('raw');
+        expect(model.type).toBe('raw');
       });
     });
   });
@@ -251,7 +250,7 @@ describe('cells/model', () => {
     describe('#type', () => {
       it('should be set with type "markdown"', () => {
         const model = new MarkdownCellModel({});
-        expect(model.type).to.equal('markdown');
+        expect(model.type).toBe('markdown');
       });
     });
   });
@@ -260,7 +259,7 @@ describe('cells/model', () => {
     describe('#constructor()', () => {
       it('should create a code cell model', () => {
         const model = new CodeCellModel({});
-        expect(model).to.be.an.instanceof(CodeCellModel);
+        expect(model).toBeInstanceOf(CodeCellModel);
       });
 
       it('should accept a code cell argument', () => {
@@ -278,8 +277,8 @@ describe('cells/model', () => {
           metadata: { trusted: false }
         };
         const model = new CodeCellModel({ cell });
-        expect(model).to.be.an.instanceof(CodeCellModel);
-        expect(model.value.text).to.equal(cell.source);
+        expect(model).toBeInstanceOf(CodeCellModel);
+        expect(model.value.text).toBe(cell.source);
       });
 
       it('should connect the outputs changes to content change signal', () => {
@@ -293,9 +292,9 @@ describe('cells/model', () => {
         model.contentChanged.connect(() => {
           called = true;
         });
-        expect(called).to.equal(false);
+        expect(called).toBe(false);
         model.outputs.add(data);
-        expect(called).to.equal(true);
+        expect(called).toBe(true);
       });
 
       it('should sync collapsed and jupyter.outputs_hidden metadata on construction', () => {
@@ -306,9 +305,9 @@ describe('cells/model', () => {
         model = new CodeCellModel({
           cell: { cell_type: 'code', source: '', metadata: { collapsed: true } }
         });
-        expect(model.metadata.get('collapsed')).to.be.true;
+        expect(model.metadata.get('collapsed')).toBe(true);
         jupyter = model.metadata.get('jupyter') as JSONObject;
-        expect(jupyter.outputs_hidden).to.be.true;
+        expect(jupyter.outputs_hidden).toBe(true);
 
         // Setting `jupyter.outputs_hidden` works
         model = new CodeCellModel({
@@ -318,9 +317,9 @@ describe('cells/model', () => {
             metadata: { jupyter: { outputs_hidden: true } }
           }
         });
-        expect(model.metadata.get('collapsed')).to.be.true;
+        expect(model.metadata.get('collapsed')).toBe(true);
         jupyter = model.metadata.get('jupyter') as JSONObject;
-        expect(jupyter.outputs_hidden).to.be.true;
+        expect(jupyter.outputs_hidden).toBe(true);
 
         // `collapsed` takes precedence
         model = new CodeCellModel({
@@ -330,16 +329,16 @@ describe('cells/model', () => {
             metadata: { collapsed: false, jupyter: { outputs_hidden: true } }
           }
         });
-        expect(model.metadata.get('collapsed')).to.be.false;
+        expect(model.metadata.get('collapsed')).toBe(false);
         jupyter = model.metadata.get('jupyter') as JSONObject;
-        expect(jupyter.outputs_hidden).to.be.false;
+        expect(jupyter.outputs_hidden).toBe(false);
       });
     });
 
     describe('#type', () => {
       it('should be set with type "code"', () => {
         const model = new CodeCellModel({});
-        expect(model.type).to.equal('code');
+        expect(model.type).toBe('code');
       });
     });
 
@@ -353,14 +352,14 @@ describe('cells/model', () => {
           metadata: { trusted: false }
         };
         const model = new CodeCellModel({ cell });
-        expect(model.executionCount).to.equal(1);
+        expect(model.executionCount).toBe(1);
       });
 
       it('should be settable', () => {
         const model = new CodeCellModel({});
-        expect(model.executionCount).to.be.null;
+        expect(model.executionCount).toBeNull();
         model.executionCount = 1;
-        expect(model.executionCount).to.equal(1);
+        expect(model.executionCount).toBe(1);
       });
 
       it('should emit a state change signal when set', () => {
@@ -369,11 +368,11 @@ describe('cells/model', () => {
         model.stateChanged.connect(() => {
           called = true;
         });
-        expect(model.executionCount).to.be.null;
-        expect(called).to.equal(false);
+        expect(model.executionCount).toBeNull();
+        expect(called).toBe(false);
         model.executionCount = 1;
-        expect(model.executionCount).to.equal(1);
-        expect(called).to.equal(true);
+        expect(model.executionCount).toBe(1);
+        expect(called).toBe(true);
       });
 
       it('should not signal when state has not changed', () => {
@@ -382,36 +381,36 @@ describe('cells/model', () => {
         model.stateChanged.connect(() => {
           called++;
         });
-        expect(model.executionCount).to.be.null;
-        expect(called).to.equal(0);
+        expect(model.executionCount).toBeNull();
+        expect(called).toBe(0);
         model.executionCount = 1;
-        expect(model.executionCount).to.equal(1);
+        expect(model.executionCount).toBe(1);
         model.executionCount = 1;
-        expect(called).to.equal(1);
+        expect(called).toBe(1);
       });
     });
 
     describe('#outputs', () => {
       it('should be an output area model', () => {
         const model = new CodeCellModel({});
-        expect(model.outputs).to.be.an.instanceof(OutputAreaModel);
+        expect(model.outputs).toBeInstanceOf(OutputAreaModel);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources held by the model', () => {
         const model = new CodeCellModel({});
-        expect(model.outputs).to.be.an.instanceof(OutputAreaModel);
+        expect(model.outputs).toBeInstanceOf(OutputAreaModel);
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
-        expect(model.outputs).to.be.null;
+        expect(model.isDisposed).toBe(true);
+        expect(model.outputs).toBeNull();
       });
 
       it('should be safe to call multiple times', () => {
         const model = new CodeCellModel({});
         model.dispose();
         model.dispose();
-        expect(model.isDisposed).to.equal(true);
+        expect(model.isDisposed).toBe(true);
       });
     });
 
@@ -435,10 +434,10 @@ describe('cells/model', () => {
         };
         const model = new CodeCellModel({ cell });
         const serialized = model.toJSON();
-        expect(serialized).to.not.equal(cell);
-        expect(serialized).to.deep.equal(cell);
+        expect(serialized).not.toBe(cell);
+        expect(serialized).toEqual(cell);
         const output = serialized.outputs[0] as any;
-        expect(output.data['application/json']['bar']).to.equal(1);
+        expect(output.data['application/json']['bar']).toBe(1);
       });
     });
 
@@ -446,66 +445,66 @@ describe('cells/model', () => {
       it('should sync collapsed and jupyter.outputs_hidden metadata when changed', () => {
         const metadata = new CodeCellModel({}).metadata;
 
-        expect(metadata.get('collapsed')).to.be.undefined;
-        expect(metadata.get('jupyter')).to.be.undefined;
+        expect(metadata.get('collapsed')).toBeUndefined();
+        expect(metadata.get('jupyter')).toBeUndefined();
 
         // Setting collapsed sets jupyter.outputs_hidden
         metadata.set('collapsed', true);
-        expect(metadata.get('collapsed')).to.be.true;
-        expect(metadata.get('jupyter')).to.deep.equal({
+        expect(metadata.get('collapsed')).toBe(true);
+        expect(metadata.get('jupyter')).toEqual({
           outputs_hidden: true
         });
 
         metadata.set('collapsed', false);
-        expect(metadata.get('collapsed')).to.be.false;
-        expect(metadata.get('jupyter')).to.deep.equal({
+        expect(metadata.get('collapsed')).toBe(false);
+        expect(metadata.get('jupyter')).toEqual({
           outputs_hidden: false
         });
 
         metadata.delete('collapsed');
-        expect(metadata.get('collapsed')).to.be.undefined;
-        expect(metadata.get('jupyter')).to.be.undefined;
+        expect(metadata.get('collapsed')).toBeUndefined();
+        expect(metadata.get('jupyter')).toBeUndefined();
 
         // Setting jupyter.outputs_hidden sets collapsed
         metadata.set('jupyter', { outputs_hidden: true });
-        expect(metadata.get('collapsed')).to.be.true;
-        expect(metadata.get('jupyter')).to.deep.equal({
+        expect(metadata.get('collapsed')).toBe(true);
+        expect(metadata.get('jupyter')).toEqual({
           outputs_hidden: true
         });
 
         metadata.set('jupyter', { outputs_hidden: false });
-        expect(metadata.get('collapsed')).to.be.false;
-        expect(metadata.get('jupyter')).to.deep.equal({
+        expect(metadata.get('collapsed')).toBe(false);
+        expect(metadata.get('jupyter')).toEqual({
           outputs_hidden: false
         });
 
         metadata.delete('jupyter');
-        expect(metadata.get('collapsed')).to.be.undefined;
-        expect(metadata.get('jupyter')).to.be.undefined;
+        expect(metadata.get('collapsed')).toBeUndefined();
+        expect(metadata.get('jupyter')).toBeUndefined();
 
         // Deleting jupyter.outputs_hidden preserves other jupyter fields
         metadata.set('jupyter', { outputs_hidden: true, other: true });
-        expect(metadata.get('collapsed')).to.be.true;
-        expect(metadata.get('jupyter')).to.deep.equal({
+        expect(metadata.get('collapsed')).toBe(true);
+        expect(metadata.get('jupyter')).toEqual({
           outputs_hidden: true,
           other: true
         });
         metadata.set('jupyter', { other: true });
-        expect(metadata.get('collapsed')).to.be.undefined;
-        expect(metadata.get('jupyter')).to.deep.equal({
+        expect(metadata.get('collapsed')).toBeUndefined();
+        expect(metadata.get('jupyter')).toEqual({
           other: true
         });
 
         // Deleting collapsed preserves other jupyter fields
         metadata.set('jupyter', { outputs_hidden: true, other: true });
-        expect(metadata.get('collapsed')).to.be.true;
-        expect(metadata.get('jupyter')).to.deep.equal({
+        expect(metadata.get('collapsed')).toBe(true);
+        expect(metadata.get('jupyter')).toEqual({
           outputs_hidden: true,
           other: true
         });
         metadata.delete('collapsed');
-        expect(metadata.get('collapsed')).to.be.undefined;
-        expect(metadata.get('jupyter')).to.deep.equal({
+        expect(metadata.get('collapsed')).toBeUndefined();
+        expect(metadata.get('jupyter')).toEqual({
           other: true
         });
       });
@@ -515,23 +514,23 @@ describe('cells/model', () => {
       describe('#constructor()', () => {
         it('should create a new output area factory', () => {
           const factory = new CodeCellModel.ContentFactory();
-          expect(factory).to.be.an.instanceof(CodeCellModel.ContentFactory);
+          expect(factory).toBeInstanceOf(CodeCellModel.ContentFactory);
         });
       });
 
       describe('#createOutputArea()', () => {
         it('should create an output area model', () => {
           const factory = new CodeCellModel.ContentFactory();
-          expect(
-            factory.createOutputArea({ trusted: true })
-          ).to.be.an.instanceof(OutputAreaModel);
+          expect(factory.createOutputArea({ trusted: true })).toBeInstanceOf(
+            OutputAreaModel
+          );
         });
       });
     });
 
     describe('.defaultContentFactory', () => {
       it('should be an ContentFactory', () => {
-        expect(CodeCellModel.defaultContentFactory).to.be.an.instanceof(
+        expect(CodeCellModel.defaultContentFactory).toBeInstanceOf(
           CodeCellModel.ContentFactory
         );
       });
