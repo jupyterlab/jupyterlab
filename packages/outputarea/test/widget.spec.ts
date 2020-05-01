@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { SessionContext } from '@jupyterlab/apputils';
 
@@ -20,7 +19,8 @@ import {
 import {
   createSessionContext,
   defaultRenderMime,
-  NBTestUtils
+  NBTestUtils,
+  JupyterServer
 } from '@jupyterlab/testutils';
 
 /**
@@ -47,6 +47,16 @@ class LogOutputArea extends OutputArea {
   }
 }
 
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
+
 describe('outputarea/widget', () => {
   let widget: LogOutputArea;
   let model: OutputAreaModel;
@@ -71,48 +81,46 @@ describe('outputarea/widget', () => {
   describe('OutputArea', () => {
     describe('#constructor()', () => {
       it('should create an output area widget', () => {
-        expect(widget).to.be.an.instanceof(OutputArea);
-        expect(widget.hasClass('jp-OutputArea')).to.equal(true);
+        expect(widget).toBeInstanceOf(OutputArea);
+        expect(widget.hasClass('jp-OutputArea')).toBe(true);
       });
 
       it('should take an optional contentFactory', () => {
         const contentFactory = Object.create(OutputArea.defaultContentFactory);
         const widget = new OutputArea({ rendermime, contentFactory, model });
-        expect(widget.contentFactory).to.equal(contentFactory);
+        expect(widget.contentFactory).toBe(contentFactory);
       });
     });
 
     describe('#model', () => {
       it('should be the model used by the widget', () => {
-        expect(widget.model).to.equal(model);
+        expect(widget.model).toBe(model);
       });
     });
 
     describe('#rendermime', () => {
       it('should be the rendermime instance used by the widget', () => {
-        expect(widget.rendermime).to.equal(rendermime);
+        expect(widget.rendermime).toBe(rendermime);
       });
     });
 
     describe('#contentFactory', () => {
       it('should be the contentFactory used by the widget', () => {
-        expect(widget.contentFactory).to.equal(
-          OutputArea.defaultContentFactory
-        );
+        expect(widget.contentFactory).toBe(OutputArea.defaultContentFactory);
       });
     });
 
     describe('#widgets', () => {
       it('should get the child widget at the specified index', () => {
-        expect(widget.widgets[0]).to.be.an.instanceof(Widget);
+        expect(widget.widgets[0]).toBeInstanceOf(Widget);
       });
 
       it('should get the number of child widgets', () => {
-        expect(widget.widgets.length).to.equal(
+        expect(widget.widgets.length).toBe(
           NBTestUtils.DEFAULT_OUTPUTS.length - 1
         );
         widget.model.clear();
-        expect(widget.widgets.length).to.equal(0);
+        expect(widget.widgets.length).toBe(0);
       });
     });
 
@@ -136,9 +144,9 @@ describe('outputarea/widget', () => {
         })!;
         widget.future = future;
         const reply = await future.done;
-        expect(reply!.content.execution_count).to.be.ok;
-        expect(reply!.content.status).to.equal('ok');
-        expect(model.length).to.equal(1);
+        expect(reply!.content.execution_count).toBeTruthy();
+        expect(reply!.content.status).toBe('ok');
+        expect(model.length).toBe(1);
       });
 
       it('should clear existing outputs', async () => {
@@ -148,8 +156,8 @@ describe('outputarea/widget', () => {
         })!;
         widget.future = future;
         const reply = await future.done;
-        expect(reply!.content.execution_count).to.be.ok;
-        expect(model.length).to.equal(1);
+        expect(reply!.content.execution_count).toBeTruthy();
+        expect(model.length).toBe(1);
       });
     });
 
@@ -158,16 +166,20 @@ describe('outputarea/widget', () => {
         widget.model.clear();
         widget.methods = [];
         widget.model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
-        expect(widget.methods).to.contain('onModelChanged');
-        expect(widget.widgets.length).to.equal(1);
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['onModelChanged'])
+        );
+        expect(widget.widgets.length).toBe(1);
       });
 
       it('should handle a clear', () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
         widget.methods = [];
         widget.model.clear();
-        expect(widget.methods).to.contain('onModelChanged');
-        expect(widget.widgets.length).to.equal(0);
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['onModelChanged'])
+        );
+        expect(widget.widgets.length).toBe(0);
       });
 
       it('should handle a set', () => {
@@ -175,8 +187,10 @@ describe('outputarea/widget', () => {
         widget.model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
         widget.methods = [];
         widget.model.add(NBTestUtils.DEFAULT_OUTPUTS[0]);
-        expect(widget.methods).to.contain('onModelChanged');
-        expect(widget.widgets.length).to.equal(1);
+        expect(widget.methods).toEqual(
+          expect.arrayContaining(['onModelChanged'])
+        );
+        expect(widget.widgets.length).toBe(1);
       });
 
       it('should rerender when preferred mimetype changes', () => {
@@ -191,17 +205,13 @@ describe('outputarea/widget', () => {
           },
           metadata: {}
         });
-        expect(widget.node.innerHTML).to.contain(
-          '<img src="data:image/svg+xml'
+        expect(widget.node.innerHTML).toContain('<img src="data:image/svg+xml');
+        widget.model.trusted = !widget.model.trusted;
+        expect(widget.node.innerHTML).toEqual(
+          expect.not.arrayContaining(['<img src="data:image/svg+xml'])
         );
         widget.model.trusted = !widget.model.trusted;
-        expect(widget.node.innerHTML).to.not.contain(
-          '<img src="data:image/svg+xml'
-        );
-        widget.model.trusted = !widget.model.trusted;
-        expect(widget.node.innerHTML).to.contain(
-          '<img src="data:image/svg+xml'
-        );
+        expect(widget.node.innerHTML).toContain('<img src="data:image/svg+xml');
       });
 
       it('should rerender when isolation changes', () => {
@@ -213,7 +223,9 @@ describe('outputarea/widget', () => {
             'text/plain': 'hello, world'
           }
         });
-        expect(widget.node.innerHTML).to.not.contain('<iframe');
+        expect(widget.node.innerHTML).toEqual(
+          expect.not.arrayContaining(['<iframe'])
+        );
         widget.model.set(0, {
           output_type: 'display_data',
           data: {
@@ -223,14 +235,14 @@ describe('outputarea/widget', () => {
             isolated: true
           }
         });
-        expect(widget.node.innerHTML).to.contain('<iframe');
+        expect(widget.node.innerHTML).toContain('<iframe');
         widget.model.set(0, {
           output_type: 'display_data',
           data: {
             'text/plain': 'hello, world'
           }
         });
-        expect(widget.node.innerHTML).to.not.contain('<iframe');
+        expect(widget.node.innerHTML).not.toContain('<iframe');
       });
     });
 
@@ -250,16 +262,16 @@ describe('outputarea/widget', () => {
 
       it('should execute code on a kernel and send outputs to the model', async () => {
         const reply = await OutputArea.execute(CODE, widget, sessionContext);
-        expect(reply!.content.execution_count).to.be.ok;
-        expect(reply!.content.status).to.equal('ok');
-        expect(model.length).to.equal(1);
+        expect(reply!.content.execution_count).toBeTruthy();
+        expect(reply!.content.status).toBe('ok');
+        expect(model.length).toBe(1);
       });
 
       it('should clear existing outputs', async () => {
         widget.model.fromJSON(NBTestUtils.DEFAULT_OUTPUTS);
         const reply = await OutputArea.execute(CODE, widget, sessionContext);
-        expect(reply!.content.execution_count).to.be.ok;
-        expect(model.length).to.equal(1);
+        expect(reply!.content.execution_count).toBeTruthy();
+        expect(model.length).toBe(1);
       });
 
       it('should handle routing of display messages', async () => {
@@ -301,17 +313,17 @@ describe('outputarea/widget', () => {
         const promise0 = OutputArea.execute(code0, widget0, ipySessionContext);
         const promise1 = OutputArea.execute(code1, widget1, ipySessionContext);
         await Promise.all([promise0, promise1]);
-        expect(model1.length).to.equal(3);
-        expect(model1.toJSON()[1].data).to.deep.equal({ 'text/plain': '1' });
+        expect(model1.length).toBe(3);
+        expect(model1.toJSON()[1].data).toEqual({ 'text/plain': '1' });
         await OutputArea.execute(code2, widget2, ipySessionContext);
 
-        expect(model1.length).to.equal(3);
-        expect(model1.toJSON()[1].data).to.deep.equal({ 'text/plain': '4' });
-        expect(model2.length).to.equal(3);
+        expect(model1.length).toBe(3);
+        expect(model1.toJSON()[1].data).toEqual({ 'text/plain': '4' });
+        expect(model2.length).toBe(3);
         const outputs = model2.toJSON();
-        expect(outputs[0].data).to.deep.equal({ 'text/plain': '4' });
-        expect(outputs[1].data).to.deep.equal({ 'text/plain': '3' });
-        expect(outputs[2].data).to.deep.equal({ 'text/plain': '4' });
+        expect(outputs[0].data).toEqual({ 'text/plain': '4' });
+        expect(outputs[1].data).toEqual({ 'text/plain': '3' });
+        expect(outputs[2].data).toEqual({ 'text/plain': '4' });
         await ipySessionContext.shutdown();
       });
 
@@ -326,9 +338,9 @@ describe('outputarea/widget', () => {
         const future2 = OutputArea.execute('a=1', widget1, ipySessionContext);
         const reply = await future1;
         const reply2 = await future2;
-        expect(reply!.content.status).to.equal('error');
-        expect(reply2!.content.status).to.equal('aborted');
-        expect(model.length).to.equal(1);
+        expect(reply!.content.status).toBe('error');
+        expect(reply2!.content.status).toBe('aborted');
+        expect(model.length).toBe(1);
         widget1.dispose();
         await ipySessionContext.shutdown();
       });
@@ -350,8 +362,8 @@ describe('outputarea/widget', () => {
         const future2 = OutputArea.execute('a=1', widget1, ipySessionContext);
         const reply = await future1;
         const reply2 = await future2;
-        expect(reply!.content.status).to.equal('error');
-        expect(reply2!.content.status).to.equal('ok');
+        expect(reply!.content.status).toBe('error');
+        expect(reply2!.content.status).toBe('ok');
         widget1.dispose();
         await ipySessionContext.shutdown();
       });
@@ -361,7 +373,7 @@ describe('outputarea/widget', () => {
       describe('#createOutputPrompt()', () => {
         it('should create an output prompt', () => {
           const factory = new OutputArea.ContentFactory();
-          expect(factory.createOutputPrompt().executionCount).to.be.null;
+          expect(factory.createOutputPrompt().executionCount).toBeNull();
         });
       });
 
@@ -376,7 +388,7 @@ describe('outputarea/widget', () => {
             password: false,
             future
           };
-          expect(factory.createStdin(options)).to.be.an.instanceof(Widget);
+          expect(factory.createStdin(options)).toBeInstanceOf(Widget);
           await kernel.shutdown();
           kernel.dispose();
         });
@@ -385,7 +397,7 @@ describe('outputarea/widget', () => {
 
     describe('.defaultContentFactory', () => {
       it('should be a `contentFactory` instance', () => {
-        expect(OutputArea.defaultContentFactory).to.be.an.instanceof(
+        expect(OutputArea.defaultContentFactory).toBeInstanceOf(
           OutputArea.ContentFactory
         );
       });
