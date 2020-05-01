@@ -298,6 +298,7 @@ describe('@jupyterlab/notebook', () => {
 
       describe('#createRestartRunAllButton()', () => {
         it('should restart and run all when clicked', async () => {
+          jest.setTimeout(40000);
           const button = ToolbarItems.createRestartRunAllButton(panel);
           const widget = panel.content;
 
