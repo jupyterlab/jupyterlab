@@ -15,20 +15,37 @@
   background: var(--jp-layout-color1);
   color: var(--jp-content-font-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  /* Position the completer relative to the text editor, align the '.' */
+  margin: 4px 0 0 -30px;
+  z-index: 10001;
+}
+
+.jp-Completer-docpanel {
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
+  width: 300px;
+  overflow: scroll;
+  padding: 8px;
+  max-height: calc((10 * var(--jp-private-completer-item-height)) - 16px);
+}
+
+.jp-Completer-docpanel pre {
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  white-space: pre-wrap;
+}
+
+.jp-Completer-list {
+  margin: 0;
+  padding: 0;
   list-style-type: none;
   overflow-y: scroll;
   overflow-x: auto;
-  padding: 0;
-  /* Position the completer relative to the text editor, align the '.' */
-  margin: 4px 0 0 -30px;
-  max-height: calc(
-    (10 * var(--jp-private-completer-item-height)) +
-      (2 * var(--jp-border-width))
-  );
-  min-height: calc(
-    var(--jp-private-completer-item-height) + (2 * var(--jp-border-width))
-  );
-  z-index: 10001;
+  max-height: calc((10 * var(--jp-private-completer-item-height)));
+  min-height: calc(var(--jp-private-completer-item-height));
 }
 
 .jp-Completer-item {
@@ -64,6 +81,7 @@
   background: transparent;
   color: white;
   width: var(--jp-private-completer-item-height);
+  min-width: var(--jp-private-completer-item-height);
   font-family: var(--jp-ui-font-family);
   font-size: var(--jp-ui-font-size1);
   line-height: calc(

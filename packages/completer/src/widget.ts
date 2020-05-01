@@ -39,7 +39,7 @@ const MIN_HEIGHT = 20;
 /**
  * The maximum height of a completer widget.
  */
-const MAX_HEIGHT = 200;
+const MAX_HEIGHT = 300;
 
 /**
  * A flag to indicate that event handlers are caught in the capture phase.
@@ -66,7 +66,7 @@ export class Completer extends Widget {
    * Construct a text completer menu widget.
    */
   constructor(options: Completer.IOptions) {
-    super({ node: document.createElement('ul') });
+    super({ node: document.createElement('div') });
     this._renderer = options.renderer || Completer.defaultRenderer;
     this.model = options.model || null;
     this.editor = options.editor || null;
@@ -241,6 +241,12 @@ export class Completer extends Widget {
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
 
+    // Add the documentation panel
+    let docPanel = document.createElement('div');
+    docPanel.className = 'jp-Completer-docpanel';
+    node.appendChild(docPanel);
+    this._updateDocPanel();
+
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
     if (!model.query) {
@@ -294,13 +300,16 @@ export class Completer extends Widget {
     let orderedTypes = model.orderedTypes();
 
     // Populate the completer items.
+    let ul = document.createElement('ul');
+    ul.className = 'jp-Completer-list';
     for (let item of items) {
       if (!this._renderer.createCompletionItemNode) {
         return null;
       }
       let li = this._renderer.createCompletionItemNode(item, orderedTypes);
-      node.appendChild(li);
+      ul.appendChild(li);
     }
+    node.appendChild(ul);
     return node;
   }
 
@@ -338,14 +347,17 @@ export class Completer extends Widget {
     const orderedTypes = model.orderedTypes();
 
     // Populate the completer items.
+    let ul = document.createElement('ul');
+    ul.className = 'jp-Completer-list';
     for (const item of items) {
       const li = this._renderer.createItemNode(
         item!,
         model.typeMap(),
         orderedTypes
       );
-      node.appendChild(li);
+      ul.appendChild(li);
     }
+    node.appendChild(ul);
     return node;
   }
 
@@ -388,7 +400,11 @@ export class Completer extends Widget {
 
     active = items[this._activeIndex] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
-    ElementExt.scrollIntoViewIfNeeded(this.node, active);
+    let completionList = this.node.querySelector(
+      '.jp-Completer-list'
+    ) as Element;
+    ElementExt.scrollIntoViewIfNeeded(completionList, active);
+    this._updateDocPanel();
   }
 
   /**
@@ -564,6 +580,38 @@ export class Completer extends Widget {
       privilege: 'below',
       style: style
     });
+  }
+
+  /**
+   * Update the display-state and contents of the documentation panel
+   */
+  private _updateDocPanel(): void {
+    let docPanel = this.node.querySelector('.jp-Completer-docpanel');
+    if (!docPanel) {
+      return;
+    }
+    if (!this.model?.completionItems) {
+      return;
+    }
+    let items = this.model?.completionItems();
+    if (!items) {
+      docPanel.setAttribute('style', 'display:none');
+      return;
+    }
+    let activeItem = items[this._activeIndex];
+    if (!activeItem) {
+      docPanel.setAttribute('style', 'display:none');
+      return;
+    }
+    docPanel.textContent = '';
+    if (activeItem.documentation) {
+      let pre = document.createElement('pre');
+      pre.textContent = activeItem.documentation;
+      docPanel.appendChild(pre);
+      docPanel.setAttribute('style', '');
+    } else {
+      docPanel.setAttribute('style', 'display:none');
+    }
   }
 
   private _activeIndex = 0;
