@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { MainAreaWidget, Toolbar } from '@jupyterlab/apputils';
 
@@ -15,17 +14,17 @@ describe('@jupyterlab/apputils', () => {
       it('should create a new main area widget', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
-        expect(widget).to.be.an.instanceof(MainAreaWidget);
-        expect(widget.hasClass('jp-MainAreaWidget')).to.equal(true);
-        expect(widget.content.node.tabIndex).to.equal(-1);
-        expect(widget.title.closable).to.equal(true);
+        expect(widget).toBeInstanceOf(MainAreaWidget);
+        expect(widget.hasClass('jp-MainAreaWidget')).toBe(true);
+        expect(widget.content.node.tabIndex).toBe(-1);
+        expect(widget.title.closable).toBe(true);
       });
 
       it('should allow toolbar options', () => {
         const content = new Widget();
         const toolbar = new Toolbar();
         const widget = new MainAreaWidget({ content, toolbar });
-        expect(widget.hasClass('jp-MainAreaWidget')).to.equal(true);
+        expect(widget.hasClass('jp-MainAreaWidget')).toBe(true);
       });
     });
 
@@ -35,7 +34,7 @@ describe('@jupyterlab/apputils', () => {
         const widget = new MainAreaWidget({ content });
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.ActivateRequest);
-        expect(document.activeElement).to.equal(widget.content.node);
+        expect(document.activeElement).toBe(widget.content.node);
       });
     });
 
@@ -45,7 +44,7 @@ describe('@jupyterlab/apputils', () => {
         const widget = new MainAreaWidget({ content });
         Widget.attach(widget, document.body);
         MessageLoop.sendMessage(widget, Widget.Msg.CloseRequest);
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
     });
 
@@ -61,7 +60,7 @@ describe('@jupyterlab/apputils', () => {
         Widget.attach(widget, document.body);
         updated = false;
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(updated).to.equal(true);
+        expect(updated).toBe(true);
       });
     });
 
@@ -70,14 +69,14 @@ describe('@jupyterlab/apputils', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
         content.title.label = 'foo';
-        expect(widget.title.label).to.equal('foo');
+        expect(widget.title.label).toBe('foo');
       });
 
       it('should proxy from main to content', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
         widget.title.label = 'foo';
-        expect(content.title.label).to.equal('foo');
+        expect(content.title.label).toBe('foo');
       });
     });
 
@@ -86,7 +85,7 @@ describe('@jupyterlab/apputils', () => {
         const content = new Widget();
         const widget = new MainAreaWidget({ content });
         content.dispose();
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
     });
   });

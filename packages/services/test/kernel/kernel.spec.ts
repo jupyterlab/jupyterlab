@@ -2,8 +2,6 @@
 
 import 'jest';
 
-const it = require('jest-retries');
-
 import { UUID } from '@lumino/coreutils';
 
 import { toArray } from '@lumino/algorithm';
@@ -13,7 +11,8 @@ import { KernelAPI } from '../../src';
 import {
   expectFailure,
   testEmission,
-  JupyterServer
+  JupyterServer,
+  flakyIt as it
 } from '@jupyterlab/testutils';
 
 import {

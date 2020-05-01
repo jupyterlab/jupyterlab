@@ -2,13 +2,16 @@
 
 import 'jest';
 
-const it = require('jest-retries');
-
 import { toArray } from '@lumino/algorithm';
 
 import { KernelManager, Kernel, KernelAPI } from '../../src';
 
-import { testEmission, sleep, JupyterServer } from '@jupyterlab/testutils';
+import {
+  testEmission,
+  sleep,
+  JupyterServer,
+  flakyIt as it
+} from '@jupyterlab/testutils';
 
 import { makeSettings } from '../utils';
 

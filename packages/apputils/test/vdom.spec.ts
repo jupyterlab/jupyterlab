@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 
@@ -41,18 +40,18 @@ describe('@jupyterlab/apputils', () => {
     describe('#constructor()', () => {
       it('should create a VDomModel', () => {
         const model = new VDomModel();
-        expect(model).to.be.an.instanceof(VDomModel);
+        expect(model).toBeInstanceOf(VDomModel);
       });
 
       it('should create a TestModel', () => {
         const model = new TestModel();
-        expect(model).to.be.an.instanceof(TestModel);
+        expect(model).toBeInstanceOf(TestModel);
       });
 
       it('should be properly disposed', () => {
         const model = new TestModel();
         model.dispose();
-        expect(model.isDisposed).to.be.equal(true);
+        expect(model.isDisposed).toBe(true);
       });
     });
 
@@ -64,7 +63,7 @@ describe('@jupyterlab/apputils', () => {
           changed = true;
         });
         model.value = 'newvalue';
-        expect(changed).to.equal(true);
+        expect(changed).toBe(true);
       });
     });
   });
@@ -73,13 +72,13 @@ describe('@jupyterlab/apputils', () => {
     describe('#constructor()', () => {
       it('should create a TestWidget', () => {
         const widget = new TestWidget(new TestModel());
-        expect(widget).to.be.an.instanceof(TestWidget);
+        expect(widget).toBeInstanceOf(TestWidget);
       });
 
       it('should be properly disposed', () => {
         const widget = new TestWidget(new TestModel());
         widget.dispose();
-        expect(widget.isDisposed).to.equal(true);
+        expect(widget.isDisposed).toBe(true);
       });
     });
 
@@ -92,7 +91,7 @@ describe('@jupyterlab/apputils', () => {
           changed = true;
         });
         widget.model = model;
-        expect(changed).to.equal(true);
+        expect(changed).toBe(true);
       });
     });
 
@@ -104,7 +103,7 @@ describe('@jupyterlab/apputils', () => {
         model.value = 'foo';
         await framePromise();
         const span = widget.node.firstChild as HTMLElement;
-        expect(span.textContent).to.equal('foo');
+        expect(span.textContent).toBe('foo');
       });
     });
 
@@ -114,7 +113,7 @@ describe('@jupyterlab/apputils', () => {
         Widget.attach(widget, document.body);
         await framePromise();
         const span = widget.node.firstChild as HTMLElement;
-        expect(span.textContent).to.equal('No model!');
+        expect(span.textContent).toBe('No model!');
       });
     });
   });

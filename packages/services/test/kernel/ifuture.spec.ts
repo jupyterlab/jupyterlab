@@ -2,12 +2,10 @@
 
 import 'jest';
 
-const it = require('jest-retries');
-
 import { Kernel, KernelMessage, KernelAPI, KernelManager } from '../../src';
 
 import { KernelTester } from '../utils';
-import { JupyterServer } from '@jupyterlab/testutils';
+import { JupyterServer, flakyIt as it } from '@jupyterlab/testutils';
 
 const server = new JupyterServer();
 
