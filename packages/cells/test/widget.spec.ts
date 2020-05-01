@@ -1,4 +1,6 @@
 // Copyright (c) Jupyter Development Team.
+
+import 'jest';
 // Distributed under the terms of the Modified BSD License.
 
 import { Message, MessageLoop } from '@lumino/messaging';
@@ -29,7 +31,8 @@ import { OutputArea, OutputPrompt } from '@jupyterlab/outputarea';
 import {
   createSessionContext,
   framePromise,
-  NBTestUtils
+  NBTestUtils,
+  JupyterServer
 } from '@jupyterlab/testutils';
 
 const RENDERED_CLASS = 'jp-mod-rendered';
@@ -91,6 +94,16 @@ class LogMarkdownCell extends MarkdownCell {
     this.methods.push('onUpdateRequest');
   }
 }
+
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
 
 describe('cells/widget', () => {
   const editorFactory = NBTestUtils.editorFactory;
