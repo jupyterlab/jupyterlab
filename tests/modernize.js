@@ -88,11 +88,12 @@ console.debug('.');
 console.debug('------------------------------------');
 utils.run('jlpm jest-codemods --force', { cwd: testSrc });
 
-// Move the test files to `/packages/{name}/test`
+// Move the test config files to `/packages/{name}`
 utils.run(`git mv ${testSrc}/src ${pkgPath}/${name}/test`);
 ['tsconfig.test.json', 'babel.config.js', 'jest.config.js'].forEach(fname => {
   utils.run(`mv ${testSrc}/${fname} ${pkgPath}/${name}`);
 });
+utils.run(`git add ${pkgPath}/${name}`);
 
 // Add a vscode launch file and force it to commit.
 utils.run(`mkdir -p ${pkgPath}/${name}/.vscode`);
