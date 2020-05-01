@@ -24,7 +24,8 @@ import {
   signalToPromise,
   sleep,
   framePromise,
-  acceptDialog
+  acceptDialog,
+  flakyIt as it
 } from '@jupyterlab/testutils';
 
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
