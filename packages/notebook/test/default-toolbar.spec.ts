@@ -324,6 +324,7 @@ describe('@jupyterlab/notebook', () => {
               p.resolve(0);
             }
           });
+          await context.sessionContext.ready;
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await acceptDialog();
