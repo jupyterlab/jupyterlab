@@ -60,7 +60,6 @@
     "@jupyterlab/filebrowser-extension": "^2.1.0",
     "@jupyterlab/fileeditor": "^2.1.0",
     "@jupyterlab/fileeditor-extension": "^2.1.0",
-    "@jupyterlab/foo": "^2.1.0",
     "@jupyterlab/help-extension": "^2.1.0",
     "@jupyterlab/htmlviewer": "^2.1.0",
     "@jupyterlab/htmlviewer-extension": "^2.1.0",
