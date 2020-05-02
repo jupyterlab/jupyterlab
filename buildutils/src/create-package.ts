@@ -37,6 +37,11 @@ void inquirer.prompt(questions).then(answers => {
   data.name = name;
   data.description = description;
   utils.writePackageData(jsonPath, data);
+
+  // Add the launch file to git.
+  const launch = path.join(dest, '.vscode', 'launch.json');
+  utils.run(`git add -f ${launch}`);
+
   // Use npm here so this file can be used outside of JupyterLab.
   utils.run('npm run integrity');
 });
