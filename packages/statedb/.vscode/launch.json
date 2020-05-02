@@ -4,7 +4,11 @@
         {
             "type": "node",
             "request": "attach",
-            "name": "Attach",
+            "name": "Attach to jest",
+            // Usage:
+            // Open the parent directory in VSCode
+            // Run `jlpm test:debug:watch` in a terminal
+            // Run this debugging task
             "port": 9229
         }
     ]
