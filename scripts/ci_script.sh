@@ -37,7 +37,7 @@ if [[ $GROUP == js* ]]; then
             scope="@jupyterlab/${PKG}"
         fi
 
-        FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope ${scope}
+        FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope ${scope} ||  FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope ${scope}
     else
         jlpm build:packages
         jlpm build:test
