@@ -376,6 +376,7 @@ describe('Kernel.IKernel', () => {
     it('should get a dead status', async () => {
       const tester = new KernelTester();
       const kernel = await tester.start();
+      await kernel.info;
       const dead = testEmission(kernel.statusChanged, {
         find: () => kernel.status === 'dead'
       });

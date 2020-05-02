@@ -52,3 +52,12 @@ process.on('unhandledRejection', (error, promise) => {
   }
   promise.catch(err => console.error('promise rejected', err));
 });
+
+(window as any).getSelection = function getSelection() {
+  return {
+    selectAllChildren: () => {
+      // no-op
+    },
+    toString: () => ''
+  };
+};

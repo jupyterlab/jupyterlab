@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
@@ -9,34 +8,52 @@ import { each } from '@lumino/algorithm';
 
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
 
-import { NotebookModel } from '@jupyterlab/notebook';
+import { NotebookModel } from '../src';
 
-import { NotebookActions } from '@jupyterlab/notebook';
+import { NotebookActions } from '../src';
 
-import { Notebook } from '@jupyterlab/notebook';
+import { Notebook } from '../src';
 
 import {
   acceptDialog,
   createSessionContext,
   dismissDialog,
-  sleep,
-  NBTestUtils
+  sleep
 } from '@jupyterlab/testutils';
 import { JSONObject, JSONArray } from '@lumino/coreutils';
+
+import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
+import * as utils from './utils';
 
 const ERROR_INPUT = 'a = foo';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  jest.setTimeout(20000);
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
+
 describe('@jupyterlab/notebook', () => {
-  const rendermime = NBTestUtils.defaultRenderMime();
+  let rendermime: IRenderMimeRegistry;
 
   describe('NotebookActions', () => {
     let widget: Notebook;
     let sessionContext: ISessionContext;
     let ipySessionContext: ISessionContext;
 
-    before(async function() {
+    beforeAll(async function() {
+      jest.setTimeout(20000);
+      rendermime = utils.defaultRenderMime();
+
       async function createContext(options?: Partial<SessionContext.IOptions>) {
         const context = await createSessionContext(options);
         await context.initialize();
@@ -52,11 +69,11 @@ describe('@jupyterlab/notebook', () => {
     beforeEach(() => {
       widget = new Notebook({
         rendermime,
-        contentFactory: NBTestUtils.createNotebookFactory(),
-        mimeTypeService: NBTestUtils.mimeTypeService
+        contentFactory: utils.createNotebookFactory(),
+        mimeTypeService: utils.mimeTypeService
       });
       const model = new NotebookModel();
-      model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+      model.fromJSON(utils.DEFAULT_CONTENT);
       widget.model = model;
 
       widget.activeCellIndex = 0;
@@ -64,10 +81,10 @@ describe('@jupyterlab/notebook', () => {
 
     afterEach(() => {
       widget.dispose();
-      NBTestUtils.clipboard.clear();
+      utils.clipboard.clear();
     });
 
-    after(async () => {
+    afterAll(async () => {
       await Promise.all([
         sessionContext.shutdown(),
         ipySessionContext.shutdown()
@@ -88,8 +105,8 @@ describe('@jupyterlab/notebook', () => {
         });
 
         await NotebookActions.run(widget, sessionContext);
-        expect(emitted).to.equal(2);
-        expect(next.rendered).to.equal(true);
+        expect(emitted).toBe(2);
+        expect(next.rendered).toBe(true);
       });
     });
 
@@ -105,7 +122,7 @@ describe('@jupyterlab/notebook', () => {
         const cells = widget.model!.cells;
         const newSource =
           cells.get(index).value.text + cells.get(index + 1).value.text;
-        expect(newSource).to.equal(source);
+        expect(newSource).toBe(source);
       });
 
       it('should preserve leading white space in the second cell', () => {
@@ -115,7 +132,7 @@ describe('@jupyterlab/notebook', () => {
         const editor = cell.editor;
         editor.setCursorPosition(editor.getPositionAt(4)!);
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell!.model.value.text).to.equal('   is a test');
+        expect(widget.activeCell!.model.value.text).toBe('   is a test');
       });
 
       it('should clear the existing selection', () => {
@@ -127,43 +144,43 @@ describe('@jupyterlab/notebook', () => {
           if (i === widget.activeCellIndex) {
             continue;
           }
-          expect(widget.isSelected(widget.widgets[i])).to.equal(false);
+          expect(widget.isSelected(widget.widgets[i])).toBe(false);
         }
       });
 
       it('should activate the second cell', () => {
         NotebookActions.splitCell(widget);
-        expect(widget.activeCellIndex).to.equal(1);
+        expect(widget.activeCellIndex).toBe(1);
       });
 
       it('should preserve the types of each cell', () => {
         NotebookActions.changeCellType(widget, 'markdown');
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell).to.be.an.instanceof(MarkdownCell);
+        expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
         const prev = widget.widgets[0];
-        expect(prev).to.be.an.instanceof(MarkdownCell);
+        expect(prev).toBeInstanceOf(MarkdownCell);
       });
 
       it('should create two empty cells if there is no content', () => {
         widget.activeCell!.model.value.text = '';
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell!.model.value.text).to.equal('');
+        expect(widget.activeCell!.model.value.text).toBe('');
         const prev = widget.widgets[0];
-        expect(prev.model.value.text).to.equal('');
+        expect(prev.model.value.text).toBe('');
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.splitCell(widget);
-        expect(widget.activeCell).to.be.undefined;
+        expect(widget.activeCell).toBeUndefined();
       });
 
       it('should preserve the widget mode', () => {
         NotebookActions.splitCell(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
         widget.mode = 'edit';
         NotebookActions.splitCell(widget);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.mode).toBe('edit');
       });
 
       it('should be undo-able', () => {
@@ -171,9 +188,9 @@ describe('@jupyterlab/notebook', () => {
         const count = widget.widgets.length;
         NotebookActions.splitCell(widget);
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count);
+        expect(widget.widgets.length).toBe(count);
         const cell = widget.widgets[0];
-        expect(cell.model.value.text).to.equal(source);
+        expect(cell.model.value.text).toBe(source);
       });
     });
 
@@ -188,14 +205,14 @@ describe('@jupyterlab/notebook', () => {
         source += next.model.value.text;
         const count = widget.widgets.length;
         NotebookActions.mergeCells(widget);
-        expect(widget.widgets.length).to.equal(count - 2);
-        expect(widget.activeCell!.model.value.text).to.equal(source);
+        expect(widget.widgets.length).toBe(count - 2);
+        expect(widget.activeCell!.model.value.text).toBe(source);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.mergeCells(widget);
-        expect(widget.activeCell).to.be.undefined;
+        expect(widget.activeCell).toBeUndefined();
       });
 
       it('should select the next cell if there is only one cell selected', () => {
@@ -203,22 +220,22 @@ describe('@jupyterlab/notebook', () => {
         const next = widget.widgets[1];
         source += next.model.value.text;
         NotebookActions.mergeCells(widget);
-        expect(widget.activeCell!.model.value.text).to.equal(source);
+        expect(widget.activeCell!.model.value.text).toBe(source);
       });
 
       it('should clear the outputs of a code cell', () => {
         NotebookActions.mergeCells(widget);
         const cell = widget.activeCell as CodeCell;
-        expect(cell.model.outputs.length).to.equal(0);
+        expect(cell.model.outputs.length).toBe(0);
       });
 
       it('should preserve the widget mode', () => {
         widget.mode = 'edit';
         NotebookActions.mergeCells(widget);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.mode).toBe('edit');
         widget.mode = 'command';
         NotebookActions.mergeCells(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
       });
 
       it('should be undo-able', () => {
@@ -226,9 +243,9 @@ describe('@jupyterlab/notebook', () => {
         const count = widget.widgets.length;
         NotebookActions.mergeCells(widget);
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count);
+        expect(widget.widgets.length).toBe(count);
         const cell = widget.widgets[0];
-        expect(cell.model.value.text).to.equal(source);
+        expect(cell.model.value.text).toBe(source);
       });
 
       it('should unrender a markdown cell', () => {
@@ -237,15 +254,15 @@ describe('@jupyterlab/notebook', () => {
         cell.rendered = true;
         NotebookActions.mergeCells(widget);
         cell = widget.activeCell as MarkdownCell;
-        expect(cell.rendered).to.equal(false);
-        expect(widget.mode).to.equal('command');
+        expect(cell.rendered).toBe(false);
+        expect(widget.mode).toBe('command');
       });
 
       it('should preserve the cell type of the active cell', () => {
         NotebookActions.changeCellType(widget, 'raw');
         NotebookActions.mergeCells(widget);
-        expect(widget.activeCell).to.be.an.instanceof(RawCell);
-        expect(widget.mode).to.equal('command');
+        expect(widget.activeCell).toBeInstanceOf(RawCell);
+        expect(widget.mode).toBe('command');
       });
     });
 
@@ -255,7 +272,7 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         const count = widget.widgets.length;
         NotebookActions.deleteCells(widget);
-        expect(widget.widgets.length).to.equal(count - 2);
+        expect(widget.widgets.length).toBe(count - 2);
       });
 
       it('should increment deletedCells model when cells deleted', () => {
@@ -263,19 +280,19 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         const count = widget.model!.deletedCells.length;
         NotebookActions.deleteCells(widget);
-        expect(widget.model!.deletedCells.length).to.equal(count + 2);
+        expect(widget.model!.deletedCells.length).toBe(count + 2);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.deleteCells(widget);
-        expect(widget.activeCell).to.be.undefined;
+        expect(widget.activeCell).toBeUndefined();
       });
 
       it('should switch to command mode', () => {
         widget.mode = 'edit';
         NotebookActions.deleteCells(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
       });
 
       it('should activate the cell after the last selected cell', () => {
@@ -283,13 +300,13 @@ describe('@jupyterlab/notebook', () => {
         const prev = widget.widgets[2];
         widget.select(prev);
         NotebookActions.deleteCells(widget);
-        expect(widget.activeCellIndex).to.equal(3);
+        expect(widget.activeCellIndex).toBe(3);
       });
 
       it('should select the previous cell if the last cell is deleted', () => {
         widget.select(widget.widgets[widget.widgets.length - 1]);
         NotebookActions.deleteCells(widget);
-        expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
+        expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
       });
 
       it('should add a code cell if all cells are deleted', async () => {
@@ -298,8 +315,8 @@ describe('@jupyterlab/notebook', () => {
         }
         NotebookActions.deleteCells(widget);
         await sleep();
-        expect(widget.widgets.length).to.equal(1);
-        expect(widget.activeCell).to.be.an.instanceof(CodeCell);
+        expect(widget.widgets.length).toBe(1);
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
       });
 
       it('should be undo-able', () => {
@@ -309,9 +326,9 @@ describe('@jupyterlab/notebook', () => {
         const count = widget.widgets.length;
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count);
+        expect(widget.widgets.length).toBe(count);
         const cell = widget.widgets[0];
-        expect(cell.model.value.text).to.equal(source);
+        expect(cell.model.value.text).toBe(source);
       });
 
       it('should be undo-able if all the cells are deleted', () => {
@@ -322,8 +339,8 @@ describe('@jupyterlab/notebook', () => {
         const source = widget.widgets[1].model.value.text;
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count);
-        expect(widget.widgets[1].model.value.text).to.equal(source);
+        expect(widget.widgets.length).toBe(count);
+        expect(widget.widgets[1].model.value.text).toBe(source);
       });
     });
 
@@ -331,30 +348,30 @@ describe('@jupyterlab/notebook', () => {
       it('should insert a code cell above the active cell', () => {
         const count = widget.widgets.length;
         NotebookActions.insertAbove(widget);
-        expect(widget.activeCellIndex).to.equal(0);
-        expect(widget.widgets.length).to.equal(count + 1);
-        expect(widget.activeCell).to.be.an.instanceof(CodeCell);
+        expect(widget.activeCellIndex).toBe(0);
+        expect(widget.widgets.length).toBe(count + 1);
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.insertAbove(widget);
-        expect(widget.activeCell).to.be.undefined;
+        expect(widget.activeCell).toBeUndefined();
       });
 
       it('should widget mode should be preserved', () => {
         NotebookActions.insertAbove(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
         widget.mode = 'edit';
         NotebookActions.insertAbove(widget);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.mode).toBe('edit');
       });
 
       it('should be undo-able', () => {
         const count = widget.widgets.length;
         NotebookActions.insertAbove(widget);
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count);
+        expect(widget.widgets.length).toBe(count);
       });
 
       it('should clear the existing selection', () => {
@@ -366,13 +383,13 @@ describe('@jupyterlab/notebook', () => {
           if (i === widget.activeCellIndex) {
             continue;
           }
-          expect(widget.isSelected(widget.widgets[i])).to.equal(false);
+          expect(widget.isSelected(widget.widgets[i])).toBe(false);
         }
       });
 
       it('should be the new active cell', () => {
         NotebookActions.insertAbove(widget);
-        expect(widget.activeCell!.model.value.text).to.equal('');
+        expect(widget.activeCell!.model.value.text).toBe('');
       });
     });
 
@@ -380,30 +397,30 @@ describe('@jupyterlab/notebook', () => {
       it('should insert a code cell below the active cell', () => {
         const count = widget.widgets.length;
         NotebookActions.insertBelow(widget);
-        expect(widget.activeCellIndex).to.equal(1);
-        expect(widget.widgets.length).to.equal(count + 1);
-        expect(widget.activeCell).to.be.an.instanceof(CodeCell);
+        expect(widget.activeCellIndex).toBe(1);
+        expect(widget.widgets.length).toBe(count + 1);
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.insertBelow(widget);
-        expect(widget.activeCell).to.be.undefined;
+        expect(widget.activeCell).toBeUndefined();
       });
 
       it('should widget mode should be preserved', () => {
         NotebookActions.insertBelow(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
         widget.mode = 'edit';
         NotebookActions.insertBelow(widget);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.mode).toBe('edit');
       });
 
       it('should be undo-able', () => {
         const count = widget.widgets.length;
         NotebookActions.insertBelow(widget);
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count);
+        expect(widget.widgets.length).toBe(count);
       });
 
       it('should clear the existing selection', () => {
@@ -415,13 +432,13 @@ describe('@jupyterlab/notebook', () => {
           if (i === widget.activeCellIndex) {
             continue;
           }
-          expect(widget.isSelected(widget.widgets[i])).to.equal(false);
+          expect(widget.isSelected(widget.widgets[i])).toBe(false);
         }
       });
 
       it('should be the new active cell', () => {
         NotebookActions.insertBelow(widget);
-        expect(widget.activeCell!.model.value.text).to.equal('');
+        expect(widget.activeCell!.model.value.text).toBe('');
       });
     });
 
@@ -430,30 +447,30 @@ describe('@jupyterlab/notebook', () => {
         let next = widget.widgets[1];
         widget.select(next);
         NotebookActions.changeCellType(widget, 'raw');
-        expect(widget.activeCell).to.be.an.instanceof(RawCell);
+        expect(widget.activeCell).toBeInstanceOf(RawCell);
         next = widget.widgets[widget.activeCellIndex + 1];
-        expect(next).to.be.an.instanceof(RawCell);
+        expect(next).toBeInstanceOf(RawCell);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.changeCellType(widget, 'code');
-        expect(widget.activeCell).to.be.undefined;
+        expect(widget.activeCell).toBeUndefined();
       });
 
       it('should preserve the widget mode', () => {
         NotebookActions.changeCellType(widget, 'code');
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
         widget.mode = 'edit';
         NotebookActions.changeCellType(widget, 'raw');
-        expect(widget.mode).to.equal('edit');
+        expect(widget.mode).toBe('edit');
       });
 
       it('should be undo-able', () => {
         NotebookActions.changeCellType(widget, 'raw');
         NotebookActions.undo(widget);
         const cell = widget.widgets[0];
-        expect(cell).to.be.an.instanceof(CodeCell);
+        expect(cell).toBeInstanceOf(CodeCell);
       });
 
       it('should clear the existing selection', () => {
@@ -465,14 +482,14 @@ describe('@jupyterlab/notebook', () => {
           if (i === widget.activeCellIndex) {
             continue;
           }
-          expect(widget.isSelected(widget.widgets[i])).to.equal(false);
+          expect(widget.isSelected(widget.widgets[i])).toBe(false);
         }
       });
 
       it('should unrender markdown cells', () => {
         NotebookActions.changeCellType(widget, 'markdown');
         const cell = widget.activeCell as MarkdownCell;
-        expect(cell.rendered).to.equal(false);
+        expect(cell.rendered).toBe(false);
       });
     });
 
@@ -484,24 +501,24 @@ describe('@jupyterlab/notebook', () => {
         cell.model.outputs.clear();
         next.rendered = false;
         const result = await NotebookActions.run(widget, sessionContext);
-        expect(result).to.equal(true);
-        expect(cell.model.outputs.length).to.be.above(0);
-        expect(next.rendered).to.equal(true);
+        expect(result).toBe(true);
+        expect(cell.model.outputs.length).toBeGreaterThan(0);
+        expect(next.rendered).toBe(true);
       });
 
       it('should delete deletedCells metadata when cell run', () => {
         const cell = widget.activeCell as CodeCell;
         cell.model.outputs.clear();
         return NotebookActions.run(widget, sessionContext).then(result => {
-          expect(result).to.equal(true);
-          expect(widget.model!.deletedCells.length).to.equal(0);
+          expect(result).toBe(true);
+          expect(widget.model!.deletedCells.length).toBe(0);
         });
       });
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
         const result = await NotebookActions.run(widget, sessionContext);
-        expect(result).to.equal(false);
+        expect(result).toBe(false);
       });
 
       it('should activate the last selected cell', async () => {
@@ -509,30 +526,30 @@ describe('@jupyterlab/notebook', () => {
         widget.select(other);
         other.model.value.text = 'a = 1';
         const result = await NotebookActions.run(widget, sessionContext);
-        expect(result).to.equal(true);
-        expect(widget.activeCell).to.equal(other);
+        expect(result).toBe(true);
+        expect(widget.activeCell).toBe(other);
       });
 
       it('should clear the selection', async () => {
         const next = widget.widgets[1];
         widget.select(next);
         const result = await NotebookActions.run(widget, sessionContext);
-        expect(result).to.equal(true);
-        expect(widget.isSelected(widget.widgets[0])).to.equal(false);
+        expect(result).toBe(true);
+        expect(widget.isSelected(widget.widgets[0])).toBe(false);
       });
 
       it('should change to command mode', async () => {
         widget.mode = 'edit';
         const result = await NotebookActions.run(widget, sessionContext);
-        expect(result).to.equal(true);
-        expect(widget.mode).to.equal('command');
+        expect(result).toBe(true);
+        expect(widget.mode).toBe('command');
       });
 
       it('should handle no session', async () => {
         const result = await NotebookActions.run(widget, undefined);
-        expect(result).to.equal(true);
+        expect(result).toBe(true);
         const cell = widget.activeCell as CodeCell;
-        expect(cell.model.executionCount).to.be.null;
+        expect(cell.model.executionCount).toBeNull();
       });
 
       it('should stop executing code cells on an error', async () => {
@@ -544,8 +561,8 @@ describe('@jupyterlab/notebook', () => {
         widget.model!.cells.push(cell);
         widget.select(widget.widgets[widget.widgets.length - 1]);
         const result = await NotebookActions.run(widget, ipySessionContext);
-        expect(result).to.equal(false);
-        expect(cell.executionCount).to.be.null;
+        expect(result).toBe(false);
+        expect(cell.executionCount).toBeNull();
         await ipySessionContext.session!.kernel!.restart();
       });
 
@@ -561,8 +578,8 @@ describe('@jupyterlab/notebook', () => {
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
         await sleep(100);
-        expect(result).to.equal(false);
-        expect(child.rendered).to.equal(true);
+        expect(result).toBe(false);
+        expect(child.rendered).toBe(true);
         await ipySessionContext.session!.kernel!.restart();
       });
     });
@@ -578,9 +595,9 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(true);
-        expect(cell.model.outputs.length).to.be.above(0);
-        expect(next.rendered).to.equal(true);
+        expect(result).toBe(true);
+        expect(cell.model.outputs.length).toBeGreaterThan(0);
+        expect(next.rendered).toBe(true);
       });
 
       it('should be a no-op if there is no model', async () => {
@@ -589,7 +606,7 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(false);
+        expect(result).toBe(false);
       });
 
       it('should clear the existing selection', async () => {
@@ -599,8 +616,8 @@ describe('@jupyterlab/notebook', () => {
           widget,
           ipySessionContext
         );
-        expect(result).to.equal(false);
-        expect(widget.isSelected(widget.widgets[0])).to.equal(false);
+        expect(result).toBe(false);
+        expect(widget.isSelected(widget.widgets[0])).toBe(false);
         await ipySessionContext.session!.kernel!.restart();
       });
 
@@ -610,8 +627,8 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(true);
-        expect(widget.mode).to.equal('command');
+        expect(result).toBe(true);
+        expect(widget.mode).toBe('command');
       });
 
       it('should activate the cell after the last selected cell', async () => {
@@ -621,8 +638,8 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(true);
-        expect(widget.activeCellIndex).to.equal(4);
+        expect(result).toBe(true);
+        expect(widget.activeCellIndex).toBe(4);
       });
 
       it('should create a new code cell in edit mode if necessary', async () => {
@@ -632,10 +649,10 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(true);
-        expect(widget.widgets.length).to.equal(count + 1);
-        expect(widget.activeCell).to.be.an.instanceof(CodeCell);
-        expect(widget.mode).to.equal('edit');
+        expect(result).toBe(true);
+        expect(widget.widgets.length).toBe(count + 1);
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
+        expect(widget.mode).toBe('edit');
       });
 
       it('should allow an undo of the new cell', async () => {
@@ -645,9 +662,9 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(true);
+        expect(result).toBe(true);
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count);
+        expect(widget.widgets.length).toBe(count);
       });
 
       it('should stop executing code cells on an error', async () => {
@@ -659,8 +676,8 @@ describe('@jupyterlab/notebook', () => {
           widget,
           ipySessionContext
         );
-        expect(result).to.equal(false);
-        expect(cell.executionCount).to.be.null;
+        expect(result).toBe(false);
+        expect(cell.executionCount).toBeNull();
         await ipySessionContext.session!.kernel!.restart();
       });
 
@@ -677,9 +694,9 @@ describe('@jupyterlab/notebook', () => {
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
         await sleep(100);
-        expect(result).to.equal(false);
-        expect(cell.rendered).to.equal(true);
-        expect(widget.activeCellIndex).to.equal(2);
+        expect(result).toBe(false);
+        expect(cell.rendered).toBe(true);
+        expect(widget.activeCellIndex).toBe(2);
         await ipySessionContext.session!.kernel!.restart();
       });
     });
@@ -695,9 +712,9 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(true);
-        expect(cell.model.outputs.length).to.be.above(0);
-        expect(next.rendered).to.equal(true);
+        expect(result).toBe(true);
+        expect(cell.model.outputs.length).toBeGreaterThan(0);
+        expect(next.rendered).toBe(true);
       });
 
       it('should be a no-op if there is no model', async () => {
@@ -706,7 +723,7 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(false);
+        expect(result).toBe(false);
       });
 
       it('should clear the existing selection', async () => {
@@ -716,8 +733,8 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(true);
-        expect(widget.isSelected(widget.widgets[0])).to.equal(false);
+        expect(result).toBe(true);
+        expect(widget.isSelected(widget.widgets[0])).toBe(false);
       });
 
       it('should insert a new code cell in edit mode after the last selected cell', async () => {
@@ -729,10 +746,10 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(true);
-        expect(widget.activeCell).to.be.an.instanceof(CodeCell);
-        expect(widget.mode).to.equal('edit');
-        expect(widget.widgets.length).to.equal(count + 1);
+        expect(result).toBe(true);
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
+        expect(widget.mode).toBe('edit');
+        expect(widget.widgets.length).toBe(count + 1);
       });
 
       it('should allow an undo of the cell insert', async () => {
@@ -744,9 +761,9 @@ describe('@jupyterlab/notebook', () => {
           widget,
           sessionContext
         );
-        expect(result).to.equal(true);
+        expect(result).toBe(true);
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count);
+        expect(widget.widgets.length).toBe(count);
       });
 
       it('should stop executing code cells on an error', async () => {
@@ -758,8 +775,8 @@ describe('@jupyterlab/notebook', () => {
           widget,
           ipySessionContext
         );
-        expect(result).to.equal(false);
-        expect(cell.executionCount).to.be.null;
+        expect(result).toBe(false);
+        expect(cell.executionCount).toBeNull();
         await ipySessionContext.session!.kernel!.restart();
       });
 
@@ -776,9 +793,9 @@ describe('@jupyterlab/notebook', () => {
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
         await sleep(100);
-        expect(result).to.equal(false);
-        expect(cell.rendered).to.equal(true);
-        expect(widget.activeCellIndex).to.equal(2);
+        expect(result).toBe(false);
+        expect(cell.rendered).toBe(true);
+        expect(widget.activeCellIndex).toBe(2);
         await ipySessionContext.session!.kernel!.restart();
       });
     });
@@ -795,35 +812,35 @@ describe('@jupyterlab/notebook', () => {
         cell.model.outputs.clear();
         next.rendered = false;
         const result = await NotebookActions.runAll(widget, sessionContext);
-        expect(result).to.equal(true);
-        expect(cell.model.outputs.length).to.be.above(0);
-        expect(next.rendered).to.equal(true);
+        expect(result).toBe(true);
+        expect(cell.model.outputs.length).toBeGreaterThan(0);
+        expect(next.rendered).toBe(true);
       });
 
       it('should be a no-op if there is no model', async () => {
         widget.model = null;
         const result = await NotebookActions.runAll(widget, sessionContext);
-        expect(result).to.equal(false);
+        expect(result).toBe(false);
       });
 
       it('should change to command mode', async () => {
         widget.mode = 'edit';
         const result = await NotebookActions.runAll(widget, sessionContext);
-        expect(result).to.equal(true);
-        expect(widget.mode).to.equal('command');
+        expect(result).toBe(true);
+        expect(widget.mode).toBe('command');
       });
 
       it('should clear the existing selection', async () => {
         const next = widget.widgets[2];
         widget.select(next);
         const result = await NotebookActions.runAll(widget, sessionContext);
-        expect(result).to.equal(true);
-        expect(widget.isSelected(widget.widgets[2])).to.equal(false);
+        expect(result).toBe(true);
+        expect(widget.isSelected(widget.widgets[2])).toBe(false);
       });
 
       it('should activate the last cell', async () => {
         await NotebookActions.runAll(widget, sessionContext);
-        expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
+        expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
       });
 
       it('should stop executing code cells on an error', async () => {
@@ -831,9 +848,9 @@ describe('@jupyterlab/notebook', () => {
         const cell = widget.model!.contentFactory.createCodeCell({});
         widget.model!.cells.push(cell);
         const result = await NotebookActions.runAll(widget, ipySessionContext);
-        expect(result).to.equal(false);
-        expect(cell.executionCount).to.be.null;
-        expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
+        expect(result).toBe(false);
+        expect(cell.executionCount).toBeNull();
+        expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
         await ipySessionContext.session!.kernel!.restart();
       });
 
@@ -846,8 +863,8 @@ describe('@jupyterlab/notebook', () => {
         // provides no way to hook into that. Sleep here
         // to make sure it finishes.
         await sleep(100);
-        expect(result).to.equal(false);
-        expect(cell.rendered).to.equal(true);
+        expect(result).toBe(false);
+        expect(cell.rendered).toBe(true);
         await ipySessionContext.session!.kernel!.restart();
       });
     });
@@ -856,27 +873,27 @@ describe('@jupyterlab/notebook', () => {
       it('should select the cell above the active cell', () => {
         widget.activeCellIndex = 1;
         NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).to.equal(0);
+        expect(widget.activeCellIndex).toBe(0);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
       it('should not wrap around to the bottom', () => {
         NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).to.equal(0);
+        expect(widget.activeCellIndex).toBe(0);
       });
 
       it('should preserve the mode', () => {
         widget.activeCellIndex = 2;
         NotebookActions.selectAbove(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
         widget.mode = 'edit';
         NotebookActions.selectAbove(widget);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.mode).toBe('edit');
       });
 
       it('should skip collapsed cells in edit mode', () => {
@@ -886,7 +903,7 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets[2].inputHidden = true;
         widget.widgets[3].inputHidden = false;
         NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).to.equal(0);
+        expect(widget.activeCellIndex).toBe(0);
       });
 
       it('should not change if in edit mode and no non-collapsed cells above', () => {
@@ -894,7 +911,7 @@ describe('@jupyterlab/notebook', () => {
         widget.mode = 'edit';
         widget.widgets[0].inputHidden = true;
         NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).to.equal(1);
+        expect(widget.activeCellIndex).toBe(1);
       });
 
       it('should not skip collapsed cells and in command mode', () => {
@@ -904,35 +921,35 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets[2].inputHidden = true;
         widget.widgets[3].inputHidden = false;
         NotebookActions.selectAbove(widget);
-        expect(widget.activeCellIndex).to.equal(2);
+        expect(widget.activeCellIndex).toBe(2);
       });
     });
 
     describe('#selectBelow()', () => {
       it('should select the cell below the active cell', () => {
         NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).to.equal(1);
+        expect(widget.activeCellIndex).toBe(1);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
       it('should not wrap around to the top', () => {
         widget.activeCellIndex = widget.widgets.length - 1;
         NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).to.not.equal(0);
+        expect(widget.activeCellIndex).not.toBe(0);
       });
 
       it('should preserve the mode', () => {
         widget.activeCellIndex = 2;
         NotebookActions.selectBelow(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
         widget.mode = 'edit';
         NotebookActions.selectBelow(widget);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.mode).toBe('edit');
       });
 
       it('should skip collapsed cells in edit mode', () => {
@@ -942,7 +959,7 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets[2].inputHidden = true;
         widget.widgets[3].inputHidden = false;
         NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).to.equal(3);
+        expect(widget.activeCellIndex).toBe(3);
       });
 
       it('should not change if in edit mode and no non-collapsed cells below', () => {
@@ -950,7 +967,7 @@ describe('@jupyterlab/notebook', () => {
         widget.mode = 'edit';
         widget.widgets[widget.widgets.length - 1].inputHidden = true;
         NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).to.equal(widget.widgets.length - 2);
+        expect(widget.activeCellIndex).toBe(widget.widgets.length - 2);
       });
 
       it('should not skip collapsed cells and in command mode', () => {
@@ -960,7 +977,7 @@ describe('@jupyterlab/notebook', () => {
         widget.widgets[2].inputHidden = true;
         widget.widgets[3].inputHidden = false;
         NotebookActions.selectBelow(widget);
-        expect(widget.activeCellIndex).to.equal(1);
+        expect(widget.activeCellIndex).toBe(1);
       });
     });
 
@@ -968,37 +985,37 @@ describe('@jupyterlab/notebook', () => {
       it('should extend the selection to the cell above', () => {
         widget.activeCellIndex = 1;
         NotebookActions.extendSelectionAbove(widget);
-        expect(widget.isSelected(widget.widgets[0])).to.equal(true);
+        expect(widget.isSelected(widget.widgets[0])).toBe(true);
       });
 
       it('should extend the selection to the topmost cell', () => {
         widget.activeCellIndex = 1;
         NotebookActions.extendSelectionAbove(widget, true);
         for (let i = widget.activeCellIndex; i >= 0; i--) {
-          expect(widget.isSelected(widget.widgets[i])).to.equal(true);
+          expect(widget.isSelected(widget.widgets[i])).toBe(true);
         }
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.extendSelectionAbove(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
       it('should change to command mode if there is a selection', () => {
         widget.mode = 'edit';
         widget.activeCellIndex = 1;
         NotebookActions.extendSelectionAbove(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
       });
 
       it('should not wrap around to the bottom', () => {
         widget.mode = 'edit';
         NotebookActions.extendSelectionAbove(widget);
-        expect(widget.activeCellIndex).to.equal(0);
+        expect(widget.activeCellIndex).toBe(0);
         const last = widget.widgets[widget.widgets.length - 1];
-        expect(widget.isSelected(last)).to.equal(false);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.isSelected(last)).toBe(false);
+        expect(widget.mode).toBe('edit');
       });
 
       it('should deselect the current cell if the cell above is selected', () => {
@@ -1006,47 +1023,47 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.extendSelectionBelow(widget);
         const cell = widget.activeCell!;
         NotebookActions.extendSelectionAbove(widget);
-        expect(widget.isSelected(cell)).to.equal(false);
+        expect(widget.isSelected(cell)).toBe(false);
       });
 
       it('should select only the first cell if we move from the second to first', () => {
         NotebookActions.extendSelectionBelow(widget);
         const cell = widget.activeCell!;
         NotebookActions.extendSelectionAbove(widget);
-        expect(widget.isSelected(cell)).to.equal(false);
-        expect(widget.activeCellIndex).to.equal(0);
+        expect(widget.isSelected(cell)).toBe(false);
+        expect(widget.activeCellIndex).toBe(0);
       });
 
       it('should activate the cell', () => {
         widget.activeCellIndex = 1;
         NotebookActions.extendSelectionAbove(widget);
-        expect(widget.activeCellIndex).to.equal(0);
+        expect(widget.activeCellIndex).toBe(0);
       });
     });
 
     describe('#extendSelectionBelow()', () => {
       it('should extend the selection to the cell below', () => {
         NotebookActions.extendSelectionBelow(widget);
-        expect(widget.isSelected(widget.widgets[0])).to.equal(true);
-        expect(widget.isSelected(widget.widgets[1])).to.equal(true);
+        expect(widget.isSelected(widget.widgets[0])).toBe(true);
+        expect(widget.isSelected(widget.widgets[1])).toBe(true);
       });
 
       it('should extend the selection the bottomost cell', () => {
         NotebookActions.extendSelectionBelow(widget, true);
         for (let i = widget.activeCellIndex; i < widget.widgets.length; i++) {
-          expect(widget.isSelected(widget.widgets[i])).to.equal(true);
+          expect(widget.isSelected(widget.widgets[i])).toBe(true);
         }
       });
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.extendSelectionBelow(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
       it('should change to command mode if there is a selection', () => {
         widget.mode = 'edit';
         NotebookActions.extendSelectionBelow(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
       });
 
       it('should not wrap around to the top', () => {
@@ -1054,9 +1071,9 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = last;
         widget.mode = 'edit';
         NotebookActions.extendSelectionBelow(widget);
-        expect(widget.activeCellIndex).to.equal(last);
-        expect(widget.isSelected(widget.widgets[0])).to.equal(false);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.activeCellIndex).toBe(last);
+        expect(widget.isSelected(widget.widgets[0])).toBe(false);
+        expect(widget.mode).toBe('edit');
       });
 
       it('should deselect the current cell if the cell below is selected', () => {
@@ -1066,7 +1083,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.extendSelectionAbove(widget);
         const current = widget.activeCell!;
         NotebookActions.extendSelectionBelow(widget);
-        expect(widget.isSelected(current)).to.equal(false);
+        expect(widget.isSelected(current)).toBe(false);
       });
 
       it('should select only the last cell if we move from the second last to last', () => {
@@ -1075,13 +1092,13 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.extendSelectionAbove(widget);
         const current = widget.activeCell!;
         NotebookActions.extendSelectionBelow(widget);
-        expect(widget.isSelected(current)).to.equal(false);
-        expect(widget.activeCellIndex).to.equal(last);
+        expect(widget.isSelected(current)).toBe(false);
+        expect(widget.activeCellIndex).toBe(last);
       });
 
       it('should activate the cell', () => {
         NotebookActions.extendSelectionBelow(widget);
-        expect(widget.activeCellIndex).to.equal(1);
+        expect(widget.activeCellIndex).toBe(1);
       });
     });
 
@@ -1090,31 +1107,31 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = 2;
         NotebookActions.extendSelectionAbove(widget);
         NotebookActions.moveUp(widget);
-        expect(widget.isSelected(widget.widgets[0])).to.equal(true);
-        expect(widget.isSelected(widget.widgets[1])).to.equal(true);
-        expect(widget.isSelected(widget.widgets[2])).to.equal(false);
-        expect(widget.activeCellIndex).to.equal(0);
+        expect(widget.isSelected(widget.widgets[0])).toBe(true);
+        expect(widget.isSelected(widget.widgets[1])).toBe(true);
+        expect(widget.isSelected(widget.widgets[2])).toBe(false);
+        expect(widget.activeCellIndex).toBe(0);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.moveUp(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
       it('should not wrap around to the bottom', () => {
-        expect(widget.activeCellIndex).to.equal(0);
+        expect(widget.activeCellIndex).toBe(0);
         NotebookActions.moveUp(widget);
-        expect(widget.activeCellIndex).to.equal(0);
+        expect(widget.activeCellIndex).toBe(0);
       });
 
       it('should be undo-able', () => {
         widget.activeCellIndex++;
         const source = widget.activeCell!.model.value.text;
         NotebookActions.moveUp(widget);
-        expect(widget.model!.cells.get(0).value.text).to.equal(source);
+        expect(widget.model!.cells.get(0).value.text).toBe(source);
         NotebookActions.undo(widget);
-        expect(widget.model!.cells.get(1).value.text).to.equal(source);
+        expect(widget.model!.cells.get(1).value.text).toBe(source);
       });
     });
 
@@ -1122,55 +1139,53 @@ describe('@jupyterlab/notebook', () => {
       it('should move the selected cells down', () => {
         NotebookActions.extendSelectionBelow(widget);
         NotebookActions.moveDown(widget);
-        expect(widget.isSelected(widget.widgets[0])).to.equal(false);
-        expect(widget.isSelected(widget.widgets[1])).to.equal(true);
-        expect(widget.isSelected(widget.widgets[2])).to.equal(true);
-        expect(widget.activeCellIndex).to.equal(2);
+        expect(widget.isSelected(widget.widgets[0])).toBe(false);
+        expect(widget.isSelected(widget.widgets[1])).toBe(true);
+        expect(widget.isSelected(widget.widgets[2])).toBe(true);
+        expect(widget.activeCellIndex).toBe(2);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.moveUp(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
       it('should not wrap around to the top', () => {
         widget.activeCellIndex = widget.widgets.length - 1;
         NotebookActions.moveDown(widget);
-        expect(widget.activeCellIndex).to.equal(widget.widgets.length - 1);
+        expect(widget.activeCellIndex).toBe(widget.widgets.length - 1);
       });
 
       it('should be undo-able', () => {
         const source = widget.activeCell!.model.value.text;
         NotebookActions.moveDown(widget);
-        expect(widget.model!.cells.get(1).value.text).to.equal(source);
+        expect(widget.model!.cells.get(1).value.text).toBe(source);
         NotebookActions.undo(widget);
-        expect(widget.model!.cells.get(0).value.text).to.equal(source);
+        expect(widget.model!.cells.get(0).value.text).toBe(source);
       });
     });
 
     describe('#copy()', () => {
-      it('should copy the selected cells to a NBTestUtils.clipboard', () => {
+      it('should copy the selected cells to a utils.clipboard', () => {
         const next = widget.widgets[1];
         widget.select(next);
         NotebookActions.copy(widget);
-        expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(true);
-        const data = NBTestUtils.clipboard.getData(JUPYTER_CELL_MIME);
-        expect(data.length).to.equal(2);
+        expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
+        const data = utils.clipboard.getData(JUPYTER_CELL_MIME);
+        expect(data.length).toBe(2);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.copy(widget);
-        expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(
-          false
-        );
+        expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(false);
       });
 
       it('should change to command mode', () => {
         widget.mode = 'edit';
         NotebookActions.copy(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
       });
 
       it('should delete metadata.deletable', () => {
@@ -1178,44 +1193,41 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         next.model.metadata.set('deletable', false);
         NotebookActions.copy(widget);
-        const data = NBTestUtils.clipboard.getData(
-          JUPYTER_CELL_MIME
-        ) as JSONArray;
+        const data = utils.clipboard.getData(JUPYTER_CELL_MIME) as JSONArray;
         data.map(cell => {
-          expect(((cell as JSONObject).metadata as JSONObject).deletable).to.be
-            .undefined;
+          expect(
+            ((cell as JSONObject).metadata as JSONObject).deletable
+          ).toBeUndefined();
         });
       });
     });
 
     describe('#cut()', () => {
-      it('should cut the selected cells to a NBTestUtils.clipboard', () => {
+      it('should cut the selected cells to a utils.clipboard', () => {
         const next = widget.widgets[1];
         widget.select(next);
         const count = widget.widgets.length;
         NotebookActions.cut(widget);
-        expect(widget.widgets.length).to.equal(count - 2);
+        expect(widget.widgets.length).toBe(count - 2);
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.cut(widget);
-        expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(
-          false
-        );
+        expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(false);
       });
 
       it('should change to command mode', () => {
         widget.mode = 'edit';
         NotebookActions.cut(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
       });
 
       it('should be undo-able', () => {
         const source = widget.activeCell!.model.value.text;
         NotebookActions.cut(widget);
         NotebookActions.undo(widget);
-        expect(widget.widgets[0].model.value.text).to.equal(source);
+        expect(widget.widgets[0].model.value.text).toBe(source);
       });
 
       it('should add a new code cell if all cells were cut', async () => {
@@ -1224,13 +1236,13 @@ describe('@jupyterlab/notebook', () => {
         }
         NotebookActions.cut(widget);
         await sleep();
-        expect(widget.widgets.length).to.equal(1);
-        expect(widget.activeCell).to.be.an.instanceof(CodeCell);
+        expect(widget.widgets.length).toBe(1);
+        expect(widget.activeCell).toBeInstanceOf(CodeCell);
       });
     });
 
     describe('#paste()', () => {
-      it('should paste cells from a NBTestUtils.clipboard', () => {
+      it('should paste cells from a utils.clipboard', () => {
         const source = widget.activeCell!.model.value.text;
         const next = widget.widgets[1];
         widget.select(next);
@@ -1238,29 +1250,29 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.cut(widget);
         widget.activeCellIndex = 1;
         NotebookActions.paste(widget);
-        expect(widget.widgets.length).to.equal(count);
-        expect(widget.widgets[2].model.value.text).to.equal(source);
-        expect(widget.activeCellIndex).to.equal(3);
+        expect(widget.widgets.length).toBe(count);
+        expect(widget.widgets[2].model.value.text).toBe(source);
+        expect(widget.activeCellIndex).toBe(3);
       });
 
       it('should be a no-op if there is no model', () => {
         NotebookActions.copy(widget);
         widget.model = null;
         NotebookActions.paste(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
-      it('should be a no-op if there is no cell data on the NBTestUtils.clipboard', () => {
+      it('should be a no-op if there is no cell data on the utils.clipboard', () => {
         const count = widget.widgets.length;
         NotebookActions.paste(widget);
-        expect(widget.widgets.length).to.equal(count);
+        expect(widget.widgets.length).toBe(count);
       });
 
       it('should change to command mode', () => {
         widget.mode = 'edit';
         NotebookActions.cut(widget);
         NotebookActions.paste(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
       });
 
       it('should be undo-able', () => {
@@ -1271,7 +1283,7 @@ describe('@jupyterlab/notebook', () => {
         widget.activeCellIndex = 1;
         NotebookActions.paste(widget);
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count - 2);
+        expect(widget.widgets.length).toBe(count - 2);
       });
     });
 
@@ -1282,19 +1294,19 @@ describe('@jupyterlab/notebook', () => {
         widget.select(next);
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count);
+        expect(widget.widgets.length).toBe(count);
       });
 
       it('should switch the widget to command mode', () => {
         widget.mode = 'edit';
         NotebookActions.undo(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.undo(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
       it('should be a no-op if there are no cell actions to undo', () => {
@@ -1302,7 +1314,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.deleteCells(widget);
         widget.model!.cells.clearUndo();
         NotebookActions.undo(widget);
-        expect(widget.widgets.length).to.equal(count - 1);
+        expect(widget.widgets.length).toBe(count - 1);
       });
     });
 
@@ -1314,27 +1326,27 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.deleteCells(widget);
         NotebookActions.undo(widget);
         NotebookActions.redo(widget);
-        expect(widget.widgets.length).to.equal(count - 2);
+        expect(widget.widgets.length).toBe(count - 2);
       });
 
       it('should switch the widget to command mode', () => {
         NotebookActions.undo(widget);
         widget.mode = 'edit';
         NotebookActions.redo(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
       });
 
       it('should be a no-op if there is no model', () => {
         NotebookActions.undo(widget);
         widget.model = null;
         NotebookActions.redo(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
       it('should be a no-op if there are no cell actions to redo', () => {
         const count = widget.widgets.length;
         NotebookActions.redo(widget);
-        expect(widget.widgets.length).to.equal(count);
+        expect(widget.widgets.length).toBe(count);
       });
     });
 
@@ -1344,7 +1356,7 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
           const lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
-          expect(lineNumbers).to.equal(!state);
+          expect(lineNumbers).toBe(!state);
         }
       });
 
@@ -1356,22 +1368,22 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.toggleAllLineNumbers(widget);
         for (let i = 0; i < widget.widgets.length; i++) {
           const lineNumbers = widget.widgets[i].editor.getOption('lineNumbers');
-          expect(lineNumbers).to.equal(!state);
+          expect(lineNumbers).toBe(!state);
         }
       });
 
       it('should preserve the widget mode', () => {
         NotebookActions.toggleAllLineNumbers(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
         widget.mode = 'edit';
         NotebookActions.toggleAllLineNumbers(widget);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.mode).toBe('edit');
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.toggleAllLineNumbers(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
     });
 
@@ -1389,23 +1401,23 @@ describe('@jupyterlab/notebook', () => {
         }
         NotebookActions.clearOutputs(widget);
         let cell = widget.widgets[0] as CodeCell;
-        expect(cell.model.outputs.length).to.equal(0);
+        expect(cell.model.outputs.length).toBe(0);
         cell = widget.widgets[index] as CodeCell;
-        expect(cell.model.outputs.length).to.equal(0);
+        expect(cell.model.outputs.length).toBe(0);
       });
 
       it('should preserve the widget mode', () => {
         NotebookActions.clearOutputs(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
         widget.mode = 'edit';
         NotebookActions.clearOutputs(widget);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.mode).toBe('edit');
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.clearOutputs(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
     });
 
@@ -1417,23 +1429,23 @@ describe('@jupyterlab/notebook', () => {
         for (let i = 0; i < widget.widgets.length; i++) {
           const cell = widget.widgets[i];
           if (cell instanceof CodeCell) {
-            expect(cell.model.outputs.length).to.equal(0);
+            expect(cell.model.outputs.length).toBe(0);
           }
         }
       });
 
       it('should preserve the widget mode', () => {
         NotebookActions.clearAllOutputs(widget);
-        expect(widget.mode).to.equal('command');
+        expect(widget.mode).toBe('command');
         widget.mode = 'edit';
         NotebookActions.clearAllOutputs(widget);
-        expect(widget.mode).to.equal('edit');
+        expect(widget.mode).toBe('edit');
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.clearAllOutputs(widget);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
     });
 
@@ -1442,69 +1454,67 @@ describe('@jupyterlab/notebook', () => {
         const next = widget.widgets[1];
         widget.select(next);
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell!.model.value.text.slice(0, 3)).to.equal('## ');
-        expect(next.model.value.text.slice(0, 3)).to.equal('## ');
+        expect(widget.activeCell!.model.value.text.slice(0, 3)).toBe('## ');
+        expect(next.model.value.text.slice(0, 3)).toBe('## ');
       });
 
       it('should convert the cells to markdown type', () => {
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell).to.be.an.instanceof(MarkdownCell);
+        expect(widget.activeCell).toBeInstanceOf(MarkdownCell);
       });
 
       it('should be clamped between 1 and 6', () => {
         NotebookActions.setMarkdownHeader(widget, -1);
-        expect(widget.activeCell!.model.value.text.slice(0, 2)).to.equal('# ');
+        expect(widget.activeCell!.model.value.text.slice(0, 2)).toBe('# ');
         NotebookActions.setMarkdownHeader(widget, 10);
-        expect(widget.activeCell!.model.value.text.slice(0, 7)).to.equal(
-          '###### '
-        );
+        expect(widget.activeCell!.model.value.text.slice(0, 7)).toBe('###### ');
       });
 
       it('should be a no-op if there is no model', () => {
         widget.model = null;
         NotebookActions.setMarkdownHeader(widget, 1);
-        expect(widget.activeCellIndex).to.equal(-1);
+        expect(widget.activeCellIndex).toBe(-1);
       });
 
       it('should replace an existing header', () => {
         widget.activeCell!.model.value.text = '# foo';
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell!.model.value.text).to.equal('## foo');
+        expect(widget.activeCell!.model.value.text).toBe('## foo');
       });
 
       it('should replace leading white space', () => {
         widget.activeCell!.model.value.text = '      foo';
         NotebookActions.setMarkdownHeader(widget, 2);
-        expect(widget.activeCell!.model.value.text).to.equal('## foo');
+        expect(widget.activeCell!.model.value.text).toBe('## foo');
       });
 
       it('should unrender the cells', () => {
         NotebookActions.setMarkdownHeader(widget, 1);
-        expect((widget.activeCell as MarkdownCell).rendered).to.equal(false);
+        expect((widget.activeCell as MarkdownCell).rendered).toBe(false);
       });
     });
 
     describe('#trust()', () => {
       it('should trust the notebook cells if the user accepts', async () => {
         const model = widget.model!;
-        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        model.fromJSON(utils.DEFAULT_CONTENT);
         const cell = model.cells.get(0);
-        expect(cell.trusted).to.not.equal(true);
+        expect(cell.trusted).not.toBe(true);
         const promise = NotebookActions.trust(widget);
         await acceptDialog();
         await promise;
-        expect(cell.trusted).to.equal(true);
+        expect(cell.trusted).toBe(true);
       });
 
       it('should not trust the notebook cells if the user aborts', async () => {
         const model = widget.model!;
-        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        model.fromJSON(utils.DEFAULT_CONTENT);
         const cell = model.cells.get(0);
-        expect(cell.trusted).to.not.equal(true);
+        expect(cell.trusted).not.toBe(true);
         const promise = NotebookActions.trust(widget);
         await dismissDialog();
         await promise;
-        expect(cell.trusted).to.not.equal(true);
+        expect(cell.trusted).not.toBe(true);
       });
 
       it('should be a no-op if the model is `null`', async () => {
@@ -1514,8 +1524,8 @@ describe('@jupyterlab/notebook', () => {
 
       it('should show a dialog if all cells are trusted', async () => {
         const model = widget.model!;
-        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
-        model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        model.fromJSON(utils.DEFAULT_CONTENT);
+        model.fromJSON(utils.DEFAULT_CONTENT);
         for (let i = 0; i < model.cells.length; i++) {
           const cell = model.cells.get(i);
           cell.trusted = true;

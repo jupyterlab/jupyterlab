@@ -1,20 +1,33 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { Context } from '@jupyterlab/docregistry';
 
-import { INotebookModel, NotebookPanel, Notebook } from '@jupyterlab/notebook';
+import { INotebookModel, NotebookPanel, Notebook } from '../src';
 
 import { Toolbar } from '@jupyterlab/apputils';
 
-import { initNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
+import { initNotebookContext } from '@jupyterlab/testutils';
+import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+
+import * as utils from './utils';
 
 /**
  * Default data.
  */
-const contentFactory = NBTestUtils.createNotebookPanelFactory();
+const contentFactory = utils.createNotebookPanelFactory();
+
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  jest.setTimeout(20000);
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
 
 describe('@jupyterlab/notebook', () => {
   describe('NotebookPanel', () => {
@@ -30,54 +43,54 @@ describe('@jupyterlab/notebook', () => {
 
     describe('#constructor()', () => {
       it('should create a notebook panel', () => {
-        const content = NBTestUtils.createNotebook();
+        const content = utils.createNotebook();
         const panel = new NotebookPanel({ context, content });
-        expect(panel).to.be.an.instanceof(NotebookPanel);
+        expect(panel).toBeInstanceOf(NotebookPanel);
       });
 
       it('should change notebook to edit mode if we have a single empty code cell', async () => {
-        const panel = NBTestUtils.createNotebookPanel(context);
+        const panel = utils.createNotebookPanel(context);
         const model = panel.content.model;
-        expect(model).to.equal(context.model);
+        expect(model).toBe(context.model);
         await context.initialize(true);
         await context.ready;
-        expect(panel.content.mode).to.equal('edit');
+        expect(panel.content.mode).toBe('edit');
       });
     });
 
     describe('#toolbar', () => {
       it('should be the toolbar used by the widget', () => {
-        const panel = NBTestUtils.createNotebookPanel(context);
-        expect(panel.toolbar).to.be.an.instanceof(Toolbar);
+        const panel = utils.createNotebookPanel(context);
+        expect(panel.toolbar).toBeInstanceOf(Toolbar);
       });
     });
 
     describe('#content', () => {
       it('should be the notebook content widget', () => {
-        const panel = NBTestUtils.createNotebookPanel(context);
-        expect(panel.content).to.be.an.instanceof(Notebook);
+        const panel = utils.createNotebookPanel(context);
+        expect(panel.content).toBeInstanceOf(Notebook);
       });
     });
 
     describe('#context', () => {
       it('should get the document context for the widget', () => {
-        const panel = NBTestUtils.createNotebookPanel(context);
-        expect(panel.context).to.equal(context);
+        const panel = utils.createNotebookPanel(context);
+        expect(panel.context).toBe(context);
       });
     });
 
     describe('#dispose()', () => {
       it('should dispose of the resources used by the widget', () => {
-        const panel = NBTestUtils.createNotebookPanel(context);
+        const panel = utils.createNotebookPanel(context);
         panel.dispose();
-        expect(panel.isDisposed).to.equal(true);
+        expect(panel.isDisposed).toBe(true);
       });
 
       it('should be safe to call more than once', () => {
-        const panel = NBTestUtils.createNotebookPanel(context);
+        const panel = utils.createNotebookPanel(context);
         panel.dispose();
         panel.dispose();
-        expect(panel.isDisposed).to.equal(true);
+        expect(panel.isDisposed).toBe(true);
       });
     });
 
@@ -85,9 +98,9 @@ describe('@jupyterlab/notebook', () => {
       describe('#constructor', () => {
         it('should create a new ContentFactory', () => {
           const factory = new NotebookPanel.ContentFactory({
-            editorFactory: NBTestUtils.editorFactory
+            editorFactory: utils.editorFactory
           });
-          expect(factory).to.be.an.instanceof(NotebookPanel.ContentFactory);
+          expect(factory).toBeInstanceOf(NotebookPanel.ContentFactory);
         });
       });
 
@@ -95,10 +108,10 @@ describe('@jupyterlab/notebook', () => {
         it('should create a notebook widget', () => {
           const options = {
             contentFactory: contentFactory,
-            rendermime: NBTestUtils.defaultRenderMime(),
-            mimeTypeService: NBTestUtils.mimeTypeService
+            rendermime: utils.defaultRenderMime(),
+            mimeTypeService: utils.mimeTypeService
           };
-          expect(contentFactory.createNotebook(options)).to.be.an.instanceof(
+          expect(contentFactory.createNotebook(options)).toBeInstanceOf(
             Notebook
           );
         });

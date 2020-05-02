@@ -1,7 +1,6 @@
 // Copyright (c) Jupyter Development Team.
-// Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
+import 'jest';
 
 import { simulate } from 'simulate-event';
 
@@ -18,18 +17,33 @@ import {
   NotebookActions,
   NotebookPanel,
   ToolbarItems
-} from '@jupyterlab/notebook';
+} from '../src';
 
 import {
   initNotebookContext,
   signalToPromise,
   sleep,
-  NBTestUtils,
   framePromise,
-  acceptDialog
+  acceptDialog,
+  flakyIt as it
 } from '@jupyterlab/testutils';
 
+import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
+
+import * as utils from './utils';
+
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
+
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  jest.setTimeout(20000);
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
 
 describe('@jupyterlab/notebook', () => {
   describe('ToolbarItems', () => {
@@ -39,8 +53,8 @@ describe('@jupyterlab/notebook', () => {
 
       beforeEach(async () => {
         context = await initNotebookContext();
-        panel = NBTestUtils.createNotebookPanel(context);
-        context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        panel = utils.createNotebookPanel(context);
+        context.model.fromJSON(utils.DEFAULT_CONTENT);
       });
 
       afterEach(() => {
@@ -63,7 +77,9 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createSaveButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon$='save']")).to.exist;
+          expect(
+            button.node.querySelector("[data-icon$='save']")
+          ).toBeDefined();
         });
       });
 
@@ -73,8 +89,8 @@ describe('@jupyterlab/notebook', () => {
           Widget.attach(button, document.body);
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          expect(panel.content.activeCellIndex).to.equal(1);
-          expect(panel.content.activeCell).to.be.an.instanceof(CodeCell);
+          expect(panel.content.activeCellIndex).toBe(1);
+          expect(panel.content.activeCell).toBeInstanceOf(CodeCell);
           button.dispose();
         });
 
@@ -82,7 +98,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createInsertButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon$='add']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='add']")).toBeDefined();
           button.dispose();
         });
       });
@@ -94,10 +110,8 @@ describe('@jupyterlab/notebook', () => {
           Widget.attach(button, document.body);
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          expect(panel.content.widgets.length).to.equal(count - 1);
-          expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(
-            true
-          );
+          expect(panel.content.widgets.length).toBe(count - 1);
+          expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
           button.dispose();
         });
 
@@ -105,7 +119,7 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createCutButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon$='cut']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='cut']")).toBeDefined();
           button.dispose();
         });
       });
@@ -117,10 +131,8 @@ describe('@jupyterlab/notebook', () => {
           Widget.attach(button, document.body);
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          expect(panel.content.widgets.length).to.equal(count);
-          expect(NBTestUtils.clipboard.hasData(JUPYTER_CELL_MIME)).to.equal(
-            true
-          );
+          expect(panel.content.widgets.length).toBe(count);
+          expect(utils.clipboard.hasData(JUPYTER_CELL_MIME)).toBe(true);
           button.dispose();
         });
 
@@ -128,7 +140,9 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createCopyButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon$='copy']")).to.exist;
+          expect(
+            button.node.querySelector("[data-icon$='copy']")
+          ).toBeDefined();
           button.dispose();
         });
       });
@@ -142,7 +156,7 @@ describe('@jupyterlab/notebook', () => {
           NotebookActions.copy(panel.content);
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await sleep();
-          expect(panel.content.widgets.length).to.equal(count + 1);
+          expect(panel.content.widgets.length).toBe(count + 1);
           button.dispose();
         });
 
@@ -150,7 +164,9 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createPasteButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon$='paste']")).to.exist;
+          expect(
+            button.node.querySelector("[data-icon$='paste']")
+          ).toBeDefined();
           button.dispose();
         });
       });
@@ -163,10 +179,10 @@ describe('@jupyterlab/notebook', () => {
           const node = item.node.getElementsByTagName(
             'select'
           )[0] as HTMLSelectElement;
-          expect(node.value).to.equal('code');
+          expect(node.value).toBe('code');
           panel.content.activeCellIndex++;
           await framePromise();
-          expect(node.value).to.equal('markdown');
+          expect(node.value).toBe('markdown');
           item.dispose();
         });
 
@@ -177,10 +193,10 @@ describe('@jupyterlab/notebook', () => {
           const node = item.node.getElementsByTagName(
             'select'
           )[0] as HTMLSelectElement;
-          expect(node.value).to.equal('code');
+          expect(node.value).toBe('code');
           panel.content.select(panel.content.widgets[1]);
           await framePromise();
-          expect(node.value).to.equal('-');
+          expect(node.value).toBe('-');
           item.dispose();
         });
 
@@ -191,12 +207,12 @@ describe('@jupyterlab/notebook', () => {
           const node = item.node.getElementsByTagName(
             'select'
           )[0] as HTMLSelectElement;
-          expect(node.value).to.equal('code');
+          expect(node.value).toBe('code');
           const cell = panel.model!.contentFactory.createCodeCell({});
           panel.model!.cells.insert(1, cell);
           panel.content.select(panel.content.widgets[1]);
           await framePromise();
-          expect(node.value).to.equal('code');
+          expect(node.value).toBe('code');
           item.dispose();
         });
       });
@@ -208,7 +224,7 @@ describe('@jupyterlab/notebook', () => {
             item.widget.dispose();
             return name;
           });
-          expect(names).to.deep.equal([
+          expect(names).toEqual([
             'save',
             'insert',
             'cut',
@@ -233,8 +249,8 @@ describe('@jupyterlab/notebook', () => {
 
       beforeEach(async function() {
         context = await initNotebookContext({ startKernel: true });
-        panel = NBTestUtils.createNotebookPanel(context);
-        context.model.fromJSON(NBTestUtils.DEFAULT_CONTENT);
+        panel = utils.createNotebookPanel(context);
+        context.model.fromJSON(utils.DEFAULT_CONTENT);
       });
 
       afterEach(async () => {
@@ -261,8 +277,8 @@ describe('@jupyterlab/notebook', () => {
           context.sessionContext.statusChanged.connect((sender, status) => {
             // Find the right status idle message
             if (status === 'idle' && codeCell.model.outputs.length > 0) {
-              expect(mdCell.rendered).to.equal(true);
-              expect(widget.activeCellIndex).to.equal(2);
+              expect(mdCell.rendered).toBe(true);
+              expect(widget.activeCellIndex).toBe(2);
               button.dispose();
               p.resolve(0);
             }
@@ -276,12 +292,13 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createRunButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon$='run']")).to.exist;
+          expect(button.node.querySelector("[data-icon$='run']")).toBeDefined();
         });
       });
 
       describe('#createRestartRunAllButton()', () => {
         it('should restart and run all when clicked', async () => {
+          jest.setTimeout(40000);
           const button = ToolbarItems.createRestartRunAllButton(panel);
           const widget = panel.content;
 
@@ -301,13 +318,14 @@ describe('@jupyterlab/notebook', () => {
                   .filter(cell => cell.model.type === 'markdown')
                   .every(cell => (cell as MarkdownCell).rendered)
               );
-              expect(widget.activeCellIndex).to.equal(
+              expect(widget.activeCellIndex).toBe(
                 widget.widgets.filter(cell => cell.model.type === 'code').length
               );
               button.dispose();
               p.resolve(0);
             }
           });
+          await context.sessionContext.ready;
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await acceptDialog();
@@ -318,8 +336,9 @@ describe('@jupyterlab/notebook', () => {
           const button = ToolbarItems.createRestartRunAllButton(panel);
           Widget.attach(button, document.body);
           await framePromise();
-          expect(button.node.querySelector("[data-icon$='fast-forward']")).to
-            .exist;
+          expect(
+            button.node.querySelector("[data-icon$='fast-forward']")
+          ).toBeDefined();
         });
       });
     });

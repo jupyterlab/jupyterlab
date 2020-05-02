@@ -20,7 +20,8 @@ import {
   createSessionContext,
   defaultRenderMime,
   NBTestUtils,
-  JupyterServer
+  JupyterServer,
+  flakyIt as it
 } from '@jupyterlab/testutils';
 
 /**
@@ -50,6 +51,7 @@ class LogOutputArea extends OutputArea {
 const server = new JupyterServer();
 
 beforeAll(async () => {
+  jest.setTimeout(20000);
   await server.start();
 });
 
@@ -60,10 +62,6 @@ afterAll(async () => {
 describe('outputarea/widget', () => {
   let widget: LogOutputArea;
   let model: OutputAreaModel;
-
-  beforeAll(async () => {
-    jest.setTimeout(120000);
-  });
 
   beforeEach(() => {
     model = new OutputAreaModel({
