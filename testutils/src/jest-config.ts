@@ -14,7 +14,7 @@ module.exports = function(baseDir: string) {
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
     testPathIgnorePatterns: ['/lib/', '/node_modules/'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
-    reporters: ['default', 'jest-junit'],
+    reporters: ['default', 'jest-junit', 'jest-summary-reporter'],
     coverageReporters: ['json', 'lcov', 'text', 'html'],
     coverageDirectory: path.join(baseDir, 'coverage'),
     testRegex: '/test/.*.spec.ts[x]?$',
