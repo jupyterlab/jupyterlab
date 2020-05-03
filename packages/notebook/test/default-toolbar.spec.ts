@@ -1,10 +1,9 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 
 import { simulate } from 'simulate-event';
-
-import { PromiseDelegate } from '@lumino/coreutils';
 
 import { Widget } from '@lumino/widgets';
 
@@ -273,19 +272,11 @@ describe('@jupyterlab/notebook', () => {
           widget.select(mdCell);
 
           Widget.attach(button, document.body);
-          const p = new PromiseDelegate();
-          context.sessionContext.statusChanged.connect((sender, status) => {
-            // Find the right status idle message
-            if (status === 'idle' && codeCell.model.outputs.length > 0) {
-              expect(mdCell.rendered).toBe(true);
-              expect(widget.activeCellIndex).toBe(2);
-              button.dispose();
-              p.resolve(0);
-            }
-          });
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          await p.promise;
+          await framePromise();
+          await context.sessionContext.session!.kernel!.info;
+          button.dispose();
         });
 
         it("should add an inline svg node with the 'run' icon", async () => {
@@ -298,7 +289,6 @@ describe('@jupyterlab/notebook', () => {
 
       describe('#createRestartRunAllButton()', () => {
         it('should restart and run all when clicked', async () => {
-          jest.setTimeout(40000);
           const button = ToolbarItems.createRestartRunAllButton(panel);
           const widget = panel.content;
 
@@ -309,27 +299,13 @@ describe('@jupyterlab/notebook', () => {
           mdCell.rendered = false;
 
           Widget.attach(button, document.body);
-          const p = new PromiseDelegate();
-          context.sessionContext.statusChanged.connect((sender, status) => {
-            // Find the right status idle message
-            if (status === 'idle' && codeCell.model.outputs.length > 0) {
-              expect(
-                widget.widgets
-                  .filter(cell => cell.model.type === 'markdown')
-                  .every(cell => (cell as MarkdownCell).rendered)
-              );
-              expect(widget.activeCellIndex).toBe(
-                widget.widgets.filter(cell => cell.model.type === 'code').length
-              );
-              button.dispose();
-              p.resolve(0);
-            }
-          });
           await context.sessionContext.ready;
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await acceptDialog();
-          await p.promise;
+          await framePromise();
+          await context.sessionContext.session!.kernel!.info;
+          button.dispose();
         });
 
         it("should add an inline svg node with the 'fast-forward' icon", async () => {

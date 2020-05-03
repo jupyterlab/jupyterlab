@@ -26,7 +26,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "prepublishOnly": "npm run build",
     "watch": "tsc --watch"
   },
@@ -51,6 +51,7 @@
     "jest": "^25.2.3",
     "jest-junit": "^10.0.0",
     "jest-raw-loader": "^1.0.1",
+    "jest-summary-reporter": "^0.0.2",
     "json-to-html": "~0.1.2",
     "markdown-loader-jest": "^0.1.1",
     "node-fetch": "^2.6.0",
