@@ -5,8 +5,6 @@ import 'jest';
 
 import { simulate } from 'simulate-event';
 
-import { PromiseDelegate } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
 
 import { Context } from '@jupyterlab/docregistry';
