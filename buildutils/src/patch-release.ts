@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -29,7 +29,7 @@ commander
     if (options.force) {
       cmd += ' --yes';
     }
-    let oldVersion = utils.run(
+    const oldVersion = utils.run(
       'git rev-parse HEAD',
       {
         stdio: 'pipe',
@@ -38,7 +38,7 @@ commander
       true
     );
     utils.run(cmd);
-    let newVersion = utils.run(
+    const newVersion = utils.run(
       'git rev-parse HEAD',
       {
         stdio: 'pipe',
@@ -47,7 +47,7 @@ commander
       true
     );
     if (oldVersion === newVersion) {
-      console.log('aborting');
+      console.debug('aborting');
       // lerna didn't version anything, so we assume the user aborted
       throw new Error('Lerna aborted');
     }

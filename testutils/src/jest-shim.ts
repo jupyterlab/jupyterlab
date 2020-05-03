@@ -3,6 +3,7 @@
 const fetchMod = ((window as any).fetch = require('node-fetch')); // tslint:disable-line
 (window as any).Request = fetchMod.Request;
 (window as any).Headers = fetchMod.Headers;
+(window as any).Response = fetchMod.Response;
 
 (global as any).Image = (window as any).Image;
 (global as any).Range = function Range() {
@@ -51,3 +52,12 @@ process.on('unhandledRejection', (error, promise) => {
   }
   promise.catch(err => console.error('promise rejected', err));
 });
+
+(window as any).getSelection = function getSelection() {
+  return {
+    selectAllChildren: () => {
+      // no-op
+    },
+    toString: () => ''
+  };
+};

@@ -106,6 +106,11 @@ export namespace ITerminal {
      * This setting has no effect on macOS, where Cmd+V is available.
      */
     pasteWithCtrlV: boolean;
+
+    /**
+     * Whether to auto-fit the terminal to its host element size.
+     */
+    autoFit?: boolean;
   }
 
   /**
@@ -121,7 +126,8 @@ export namespace ITerminal {
     cursorBlink: true,
     initialCommand: '',
     screenReaderMode: false, // False by default, can cause scrollbar mouse interaction issues.
-    pasteWithCtrlV: true
+    pasteWithCtrlV: true,
+    autoFit: true
   };
 
   /**

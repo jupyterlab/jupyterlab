@@ -31,5 +31,6 @@
     {
       "path": "../notebook"
     }
-  ]
+  ],
+  "extends": "../../tsconfigbase"
 }

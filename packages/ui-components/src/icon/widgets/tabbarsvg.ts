@@ -85,7 +85,7 @@ export namespace DockPanelSvg {
      * @returns A new tab bar for a dock panel.
      */
     createTabBar(): TabBarSvg<Widget> {
-      let bar = new TabBarSvg<Widget>();
+      const bar = new TabBarSvg<Widget>();
       bar.addClass('lm-DockPanel-tabBar');
       return bar;
     }

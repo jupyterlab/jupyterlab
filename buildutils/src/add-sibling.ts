@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -20,20 +20,20 @@ import * as utils from './utils';
 
 // Make sure we have required command line arguments.
 if (process.argv.length < 3) {
-  let msg = '** Must supply a target extension';
+  const msg = '** Must supply a target extension';
   process.stderr.write(msg);
   process.exit(1);
 }
 
 // Extract the desired git repository and repository name.
-let target = process.argv[2];
-let basePath = path.resolve('.');
+const target = process.argv[2];
+const basePath = path.resolve('.');
 let packageDirName = path.basename(target);
 
 let packagePath = path.resolve(target);
 if (fs.existsSync(packagePath)) {
   // Copy the package directory contents to the sibling package.
-  let newPackagePath = path.join(basePath, 'packages', packageDirName);
+  const newPackagePath = path.join(basePath, 'packages', packageDirName);
   fs.copySync(packagePath, newPackagePath);
   packagePath = newPackagePath;
 } else {
@@ -52,16 +52,16 @@ if (fs.existsSync(path.join(packagePath, 'node_modules'))) {
 }
 
 // Make sure composite is set to true in the new package.
-let packageTsconfigPath = path.join(packagePath, 'tsconfig.json');
+const packageTsconfigPath = path.join(packagePath, 'tsconfig.json');
 if (fs.existsSync(packageTsconfigPath)) {
-  let packageTsconfig = utils.readJSONFile(packageTsconfigPath);
+  const packageTsconfig = utils.readJSONFile(packageTsconfigPath);
   packageTsconfig.compilerOptions.composite = true;
   utils.writeJSONFile(packageTsconfigPath, packageTsconfig);
 }
 
 // Get the package.json of the extension.
-let pkgJSONPath = path.join(packagePath, 'package.json');
-let data = utils.readJSONFile(pkgJSONPath);
+const pkgJSONPath = path.join(packagePath, 'package.json');
+const data = utils.readJSONFile(pkgJSONPath);
 if (data.private !== true) {
   data.publishConfig = {};
   data.publishConfig.access = 'public';
@@ -69,13 +69,13 @@ if (data.private !== true) {
 }
 
 // Add the extension path to packages/metapackage/tsconfig.json
-let tsconfigPath = path.join(
+const tsconfigPath = path.join(
   basePath,
   'packages',
   'metapackage',
   'tsconfig.json'
 );
-let tsconfig = utils.readJSONFile(tsconfigPath);
+const tsconfig = utils.readJSONFile(tsconfigPath);
 tsconfig.references.push({
   path: path.join('..', '..', packageDirName)
 });

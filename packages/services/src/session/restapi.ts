@@ -21,12 +21,13 @@ export const SESSION_SERVICE_URL = 'api/sessions';
 export async function listRunning(
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel[]> {
-  let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
-  let response = await ServerConnection.makeRequest(url, {}, settings);
+  const url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
+  const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
-  let data = await response.json();
+  const data = await response.json();
   if (!Array.isArray(data)) {
     throw new Error('Invalid Session list');
   }
@@ -51,13 +52,13 @@ export async function shutdownSession(
   id: string,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<void> {
-  let url = getSessionUrl(settings.baseUrl, id);
-  let init = { method: 'DELETE' };
-  let response = await ServerConnection.makeRequest(url, init, settings);
+  const url = getSessionUrl(settings.baseUrl, id);
+  const init = { method: 'DELETE' };
+  const response = await ServerConnection.makeRequest(url, init, settings);
 
   if (response.status === 404) {
-    let data = await response.json();
-    let msg =
+    const data = await response.json();
+    const msg =
       data.message ?? `The session "${id}"" does not exist on the server`;
     console.warn(msg);
   } else if (response.status === 410) {
@@ -66,7 +67,8 @@ export async function shutdownSession(
       'The kernel was deleted but the session was not'
     );
   } else if (response.status !== 204) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
 }
 
@@ -77,12 +79,13 @@ export async function getSessionModel(
   id: string,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
-  let url = getSessionUrl(settings.baseUrl, id);
-  let response = await ServerConnection.makeRequest(url, {}, settings);
+  const url = getSessionUrl(settings.baseUrl, id);
+  const response = await ServerConnection.makeRequest(url, {}, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
-  let data = await response.json();
+  const data = await response.json();
   updateLegacySessionModel(data);
   validateModel(data);
   return data;
@@ -96,16 +99,17 @@ export async function startSession(
   options: Session.ISessionOptions,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
-  let url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
-  let init = {
+  const url = URLExt.join(settings.baseUrl, SESSION_SERVICE_URL);
+  const init = {
     method: 'POST',
     body: JSON.stringify(options)
   };
-  let response = await ServerConnection.makeRequest(url, init, settings);
+  const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 201) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
-  let data = await response.json();
+  const data = await response.json();
   updateLegacySessionModel(data);
   validateModel(data);
   return data;
@@ -118,16 +122,17 @@ export async function updateSession(
   model: Pick<Session.IModel, 'id'> & DeepPartial<Omit<Session.IModel, 'id'>>,
   settings: ServerConnection.ISettings = ServerConnection.makeSettings()
 ): Promise<Session.IModel> {
-  let url = getSessionUrl(settings.baseUrl, model.id);
-  let init = {
+  const url = getSessionUrl(settings.baseUrl, model.id);
+  const init = {
     method: 'PATCH',
     body: JSON.stringify(model)
   };
-  let response = await ServerConnection.makeRequest(url, init, settings);
+  const response = await ServerConnection.makeRequest(url, init, settings);
   if (response.status !== 200) {
-    throw new ServerConnection.ResponseError(response);
+    const err = await ServerConnection.ResponseError.create(response);
+    throw err;
   }
-  let data = await response.json();
+  const data = await response.json();
   updateLegacySessionModel(data);
   validateModel(data);
   return data;

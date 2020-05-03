@@ -10,9 +10,9 @@ __webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 require('./build/imports.css');
 
 window.addEventListener('load', async function() {
-  var JupyterLab = require('@jupyterlab/application').JupyterLab;
+  const JupyterLab = require('@jupyterlab/application').JupyterLab;
 
-  var mods = [
+  const mods = [
     require('@jupyterlab/application-extension'),
     require('@jupyterlab/apputils-extension'),
     require('@jupyterlab/codemirror-extension'),
@@ -42,7 +42,7 @@ window.addEventListener('load', async function() {
     require('@jupyterlab/tooltip-extension'),
     require('@jupyterlab/ui-components-extension')
   ];
-  var lab = new JupyterLab();
+  const lab = new JupyterLab();
   lab.registerPluginModules(mods);
   /* eslint-disable no-console */
   console.log('Starting app');

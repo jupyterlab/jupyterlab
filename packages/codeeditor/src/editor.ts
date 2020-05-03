@@ -216,10 +216,10 @@ export namespace CodeEditor {
         this.modelDB = new ModelDB();
       }
 
-      let value = this.modelDB.createString('value');
+      const value = this.modelDB.createString('value');
       value.text = value.text || options.value || '';
 
-      let mimeType = this.modelDB.createValue('mimeType');
+      const mimeType = this.modelDB.createValue('mimeType');
       mimeType.set(options.mimeType || 'text/plain');
       mimeType.changed.connect(this._onMimeTypeChanged, this);
 
@@ -637,6 +637,11 @@ export namespace CodeEditor {
     autoClosingBrackets: boolean;
 
     /**
+     * Whether the editor should handle paste events.
+     */
+    handlePaste: boolean;
+
+    /**
      * The column where to break text line.
      */
     wordWrapColumn: number;
@@ -655,7 +660,7 @@ export namespace CodeEditor {
   /**
    * The default configuration options for an editor.
    */
-  export let defaultConfig: IConfig = {
+  export const defaultConfig: IConfig = {
     fontFamily: null,
     fontSize: null,
     lineHeight: null,
@@ -667,6 +672,7 @@ export namespace CodeEditor {
     insertSpaces: true,
     matchBrackets: true,
     autoClosingBrackets: true,
+    handlePaste: true,
     rulers: [],
     codeFolding: false
   };

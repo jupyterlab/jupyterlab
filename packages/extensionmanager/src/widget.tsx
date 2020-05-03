@@ -10,6 +10,7 @@ import {
   caretRightIcon,
   Collapse,
   InputGroup,
+  jupyterIcon,
   listingsInfoIcon,
   refreshIcon
 } from '@jupyterlab/ui-components';
@@ -19,6 +20,7 @@ import * as React from 'react';
 import ReactPaginate from 'react-paginate';
 
 import { ListModel, IEntry, Action } from './model';
+import { isJupyterOrg } from './npm';
 
 // TODO: Replace pagination with lazy loading of lower search results
 
@@ -74,7 +76,7 @@ export class SearchBar extends React.Component<
    * Handler for search input changes.
    */
   handleChange = (e: React.FormEvent<HTMLElement>) => {
-    let target = e.target as HTMLInputElement;
+    const target = e.target as HTMLInputElement;
     this.setState({
       value: target.value
     });
@@ -168,6 +170,10 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
   }
   let title = entry.name;
+  const entryIsJupyterOrg = isJupyterOrg(entry.name);
+  if (entryIsJupyterOrg) {
+    title = `${entry.name} (Developed by Project Jupyter)`;
+  }
   const githubUser = getExtensionGitHubUser(entry);
   if (
     listMode === 'black' &&
@@ -206,10 +212,10 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           <div style={{ width: `${badgeSize}px`, height: `${badgeSize}px` }} />
         )}
       </div>
-      <div style={{ flexDirection: 'column' }}>
+      <div className="jp-extensionmanager-entry-description">
         <div className="jp-extensionmanager-entry-title">
           <div className="jp-extensionmanager-entry-name">
-            <a href={entry.url} target="_blank" rel="noopener">
+            <a href={entry.url} target="_blank" rel="noopener noreferrer">
               {entry.name}
             </a>
           </div>
@@ -237,6 +243,14 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 }
               />
             )}
+          {entryIsJupyterOrg && (
+            <jupyterIcon.react
+              className="jp-extensionmanager-is-jupyter-org"
+              top="1px"
+              height="auto"
+              width="1em"
+            />
+          )}
         </div>
         <div className="jp-extensionmanager-entry-content">
           <div className="jp-extensionmanager-entry-description">
@@ -314,7 +328,7 @@ export namespace ListEntry {
     /**
      * The list mode to apply.
      */
-    listMode: 'black' | 'white' | 'default';
+    listMode: 'black' | 'white' | 'default' | 'invalid';
 
     /**
      * The requested view type.
@@ -333,7 +347,7 @@ export namespace ListEntry {
  */
 export function ListView(props: ListView.IProperties): React.ReactElement<any> {
   const entryViews = [];
-  for (let entry of props.entries) {
+  for (const entry of props.entries) {
     entryViews.push(
       <ListEntry
         entry={entry}
@@ -400,7 +414,7 @@ export namespace ListView {
     /**
      * The list mode to apply.
      */
-    listMode: 'black' | 'white' | 'default';
+    listMode: 'black' | 'white' | 'default' | 'invalid';
 
     /**
      * The requested view type.
@@ -492,7 +506,7 @@ export class CollapsibleSection extends React.Component<
     );
   }
 
-  componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
+  UNSAFE_componentWillReceiveProps(nextProps: CollapsibleSection.IProperties) {
     if (nextProps.forceOpen) {
       this.setState({
         isOpen: true
@@ -587,8 +601,30 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   protected render(): React.ReactElement<any>[] {
     const model = this.model!;
-    let pages = Math.ceil(model.totalEntries / model.pagination);
-    let elements = [
+    if (!model.listMode) {
+      return [<div key="empty"></div>];
+    }
+    if (model.listMode === 'invalid') {
+      return [
+        <div style={{ padding: 8 }} key="invalid">
+          <div>
+            The extension manager is disabled. Please contact your system
+            administrator to verify the listings configuration.
+          </div>
+          <div>
+            <a
+              href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Read more in the JupyterLab documentation.
+            </a>
+          </div>
+        </div>
+      ];
+    }
+    const pages = Math.ceil(model.totalEntries / model.pagination);
+    const elements = [
       <SearchBar
         key="searchbar"
         placeholder="SEARCH"
@@ -628,11 +664,10 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       >
         <div className="jp-extensionmanager-disclaimer">
           <div>
-            Extensions installed contain arbitrary code that can execute on your
-            machine that may contain malicious code.
-          </div>
-          <div style={{ paddingTop: 8 }}>
-            I understand extensions contain arbitrary code.
+            The JupyterLab development team is excited to have a robust
+            third-party extension community. However, we do not review
+            third-party extensions, and some extensions may introduce security
+            risks or contain malicious code that runs on your machine.
           </div>
           <div style={{ paddingTop: 8 }}>
             {ListModel.isDisclaimed() && (
@@ -700,7 +735,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     } else {
       // List installed and discovery sections
 
-      let installedContent = [];
+      const installedContent = [];
       if (model.installedError !== null) {
         installedContent.push(
           <ErrorMessage key="install-error">
@@ -747,7 +782,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         </CollapsibleSection>
       );
 
-      let searchContent = [];
+      const searchContent = [];
       if (model.searchError !== null) {
         searchContent.push(
           <ErrorMessage key="search-error">
@@ -891,9 +926,11 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    */
   protected onActivateRequest(msg: Message): void {
     if (this.isAttached) {
-      let input = this.inputNode;
-      input.focus();
-      input.select();
+      const input = this.inputNode;
+      if (input) {
+        input.focus();
+        input.select();
+      }
     }
   }
 
@@ -901,7 +938,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
    * Toggle the focused modifier based on the input node focus state.
    */
   private _toggleFocused(): void {
-    let focused = document.activeElement === this.inputNode;
+    const focused = document.activeElement === this.inputNode;
     this.toggleClass('lm-mod-focused', focused);
   }
 }

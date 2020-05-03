@@ -108,7 +108,7 @@ const main: JupyterFrontEndPlugin<void> = {
     // will short-circuit and ask the user to navigate away.
     const workspace = resolver.name;
 
-    console.log(`Starting application in workspace: "${workspace}"`);
+    console.debug(`Starting application in workspace: "${workspace}"`);
 
     // If there were errors registering plugins, tell the user.
     if (app.registerPluginErrors.length !== 0) {
@@ -547,7 +547,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
     if (!mainArea || mainArea.mode !== 'multiple-document') {
       return null;
     }
-    let area = mainArea.dock?.main;
+    const area = mainArea.dock?.main;
     if (!area) {
       return null;
     }

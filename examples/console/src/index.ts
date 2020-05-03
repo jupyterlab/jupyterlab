@@ -25,18 +25,18 @@ import {
   standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
 
-let TITLE = 'Console';
+const TITLE = 'Console';
 
 function main(): void {
-  console.log('in main');
+  console.debug('in main');
   let path = '';
-  let query: { [key: string]: string } = Object.create(null);
+  const query: { [key: string]: string } = Object.create(null);
 
   window.location.search
     .substr(1)
     .split('&')
     .forEach(item => {
-      let pair = item.split('=');
+      const pair = item.split('=');
       if (pair[0]) {
         query[pair[0]] = pair[1];
       }
@@ -46,7 +46,7 @@ function main(): void {
     path = query['path'];
   }
 
-  let manager = new ServiceManager();
+  const manager = new ServiceManager();
   void manager.ready.then(() => {
     startApp(path, manager);
   });
@@ -56,20 +56,20 @@ function main(): void {
  * Start the application.
  */
 function startApp(path: string, manager: ServiceManager.IManager) {
-  console.log('starting app');
+  console.debug('starting app');
   // Initialize the command registry with the key bindings.
-  let commands = new CommandRegistry();
+  const commands = new CommandRegistry();
 
   // Setup the keydown listener for the document.
   document.addEventListener('keydown', event => {
     commands.processKeydownEvent(event);
   });
 
-  let rendermime = new RenderMimeRegistry({ initialFactories });
+  const rendermime = new RenderMimeRegistry({ initialFactories });
 
-  let editorFactory = editorServices.factoryService.newInlineEditor;
-  let contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
-  let consolePanel = new ConsolePanel({
+  const editorFactory = editorServices.factoryService.newInlineEditor;
+  const contentFactory = new ConsolePanel.ContentFactory({ editorFactory });
+  const consolePanel = new ConsolePanel({
     rendermime,
     manager,
     path,
@@ -78,9 +78,9 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   });
   consolePanel.title.label = TITLE;
 
-  let palette = new CommandPalette({ commands });
+  const palette = new CommandPalette({ commands });
 
-  let panel = new SplitPanel();
+  const panel = new SplitPanel();
   panel.id = 'main';
   panel.orientation = 'horizontal';
   panel.spacing = 0;
@@ -97,8 +97,8 @@ function startApp(path: string, manager: ServiceManager.IManager) {
     panel.update();
   });
 
-  let selector = '.jp-ConsolePanel';
-  let category = 'Console';
+  const selector = '.jp-ConsolePanel';
+  const category = 'Console';
   let command: string;
 
   // Add the commands.
@@ -141,7 +141,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   palette.addItem({ command, category });
   commands.addKeyBinding({ command, selector, keys: ['Ctrl Enter'] });
 
-  console.log('Example started!');
+  console.debug('Example started!');
 }
 
 window.addEventListener('load', main);

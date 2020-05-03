@@ -107,12 +107,12 @@ namespace Private {
   /**
    * The window name promise.
    */
-  let delegate = new PromiseDelegate<string>();
+  const delegate = new PromiseDelegate<string>();
 
   /**
    * The known window names.
    */
-  let known: { [window: string]: null } = {};
+  const known: { [window: string]: null } = {};
 
   /**
    * The window name.

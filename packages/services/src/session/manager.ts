@@ -228,13 +228,13 @@ export class SessionManager extends BaseManager implements Session.IManager {
    * Find a session by path.
    */
   async findByPath(path: string): Promise<Session.IModel | undefined> {
-    for (let m of this._models.values()) {
+    for (const m of this._models.values()) {
       if (m.path === path) {
         return m;
       }
     }
     await this.refreshRunning();
-    for (let m of this._models.values()) {
+    for (const m of this._models.values()) {
       if (m.path === path) {
         return m;
       }

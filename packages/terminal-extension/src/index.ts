@@ -89,7 +89,7 @@ function activate(
 
   // Bail if there are no terminals available.
   if (!serviceManager.terminals.isAvailable()) {
-    console.log(
+    console.warn(
       'Disabling terminals plugin because they are not available on the server'
     );
     return tracker;
@@ -105,7 +105,7 @@ function activate(
   }
 
   // The cached terminal options from the setting editor.
-  let options: Partial<ITerminal.IOptions> = {};
+  const options: Partial<ITerminal.IOptions> = {};
 
   /**
    * Update the cached option values.
@@ -265,7 +265,7 @@ function addRunningSessionManager(
   managers: IRunningSessionManagers,
   app: JupyterFrontEnd
 ) {
-  let manager = app.serviceManager.terminals;
+  const manager = app.serviceManager.terminals;
 
   managers.add({
     name: 'Terminal',
@@ -334,7 +334,7 @@ export function addCommands(
       term.title.icon = terminalIcon;
       term.title.label = '...';
 
-      let main = new MainAreaWidget({ content: term });
+      const main = new MainAreaWidget({ content: term });
       app.shell.add(main);
       void tracker.add(main);
       app.shell.activateById(main.id);
@@ -347,7 +347,7 @@ export function addCommands(
       const name = args['name'] as string;
       // Check for a running terminal with the given name.
       const widget = tracker.find(value => {
-        let content = value.content;
+        const content = value.content;
         return content.session.name === name || false;
       });
       if (widget) {
@@ -363,7 +363,7 @@ export function addCommands(
     label: 'Refresh Terminal',
     caption: 'Refresh the current terminal session',
     execute: async () => {
-      let current = tracker.currentWidget;
+      const current = tracker.currentWidget;
       if (!current) {
         return;
       }
@@ -383,7 +383,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.increaseFont, {
     label: 'Increase Terminal Font Size',
     execute: async () => {
-      let { fontSize } = options;
+      const { fontSize } = options;
       if (fontSize && fontSize < 72) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize + 1);
@@ -397,7 +397,7 @@ export function addCommands(
   commands.addCommand(CommandIDs.decreaseFont, {
     label: 'Decrease Terminal Font Size',
     execute: async () => {
-      let { fontSize } = options;
+      const { fontSize } = options;
       if (fontSize && fontSize > 9) {
         try {
           await settingRegistry.set(plugin.id, 'fontSize', fontSize - 1);

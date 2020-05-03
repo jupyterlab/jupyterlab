@@ -103,7 +103,7 @@ const managerCommand: { [key: string]: (name: string) => string } = {
 };
 
 function getInstallCommands(info: IInstallInfo) {
-  let commands = Array<string>();
+  const commands = Array<string>();
   for (const manager of info.managers) {
     const name = info.overrides?.[manager]?.name ?? info.base.name;
     if (!name) {
@@ -128,7 +128,7 @@ export function presentCompanions(
   kernelCompanions: KernelCompanion[],
   serverCompanion: IInstallInfo | undefined
 ): Promise<boolean> {
-  let entries = [];
+  const entries = [];
   if (serverCompanion) {
     entries.push(
       <p key="server-companion">
@@ -137,7 +137,7 @@ export function presentCompanions(
         one of the following commands:
         {getInstallCommands(serverCompanion).map(command => {
           return (
-            <p>
+            <p key={command}>
               <code>{command}</code>
             </p>
           );
@@ -152,7 +152,7 @@ export function presentCompanions(
         kernel.
       </p>
     );
-    for (let [index, entry] of kernelCompanions.entries()) {
+    for (const [index, entry] of kernelCompanions.entries()) {
       entries.push(
         <p key={`companion-${index}`}>
           The package
@@ -160,8 +160,8 @@ export function presentCompanions(
           following kernels:
         </p>
       );
-      let kernelEntries = [];
-      for (let [index, kernel] of entry.kernels.entries()) {
+      const kernelEntries = [];
+      for (const [index, kernel] of entry.kernels.entries()) {
         kernelEntries.push(
           <li key={`kernels-${index}`}>
             <code>{kernel.display_name}</code>
@@ -176,7 +176,7 @@ export function presentCompanions(
           one of the following commands:
           {getInstallCommands(entry.kernelInfo).map(command => {
             return (
-              <p>
+              <p key={command}>
                 <code>{command}</code>
               </p>
             );
@@ -185,7 +185,7 @@ export function presentCompanions(
       );
     }
   }
-  let body = (
+  const body = (
     <div>
       {entries}
       <p>

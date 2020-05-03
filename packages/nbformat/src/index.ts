@@ -101,7 +101,7 @@ export function validateMimeValue(
   const jsonTest = /^application\/(.*?)+\+json$/;
   const isJSONType = type === 'application/json' || jsonTest.test(type);
 
-  let isString = (x: any) => {
+  const isString = (x: any) => {
     return Object.prototype.toString.call(x) === '[object String]';
   };
 

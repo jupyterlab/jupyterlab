@@ -53,7 +53,7 @@ export class SearchProviderRegistry implements ISearchProviderRegistry {
   ): ISearchProvider<T> | undefined {
     // iterate through all providers and ask each one if it can search on the
     // widget.
-    for (let P of providerMap.values()) {
+    for (const P of providerMap.values()) {
       if (P.canSearchOn(widget)) {
         return new P();
       }

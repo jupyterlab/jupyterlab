@@ -7,7 +7,7 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
 
-/***
+/** *
  * Information about a listed entry.
  */
 export interface IListEntry {
@@ -33,7 +33,7 @@ export interface IListEntry {
  *
  */
 export type ListResult = null | {
-  mode: 'white' | 'black' | 'default';
+  mode: 'white' | 'black' | 'default' | 'invalid';
   uris: string[];
   entries: IListEntry[];
 };
@@ -63,9 +63,12 @@ export class Lister {
           entries: []
         };
         if (data.blacklist_uris.length > 0 && data.whitelist_uris.length > 0) {
-          console.warn(
-            'Simultaneous black and white list are not allowed. Continuing with default mode.'
-          );
+          console.warn('Simultaneous black and white list are not allowed.');
+          this._listings = {
+            mode: 'invalid',
+            uris: [],
+            entries: []
+          };
         } else if (
           data.blacklist_uris.length > 0 ||
           data.whitelist_uris.length > 0

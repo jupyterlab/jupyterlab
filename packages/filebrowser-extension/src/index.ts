@@ -16,7 +16,8 @@ import {
   WidgetTracker,
   ICommandPalette,
   InputDialog,
-  showErrorMessage
+  showErrorMessage,
+  DOMUtils
 } from '@jupyterlab/apputils';
 
 import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
@@ -122,6 +123,8 @@ namespace CommandIDs {
 
   export const toggleNavigateToCurrentDirectory =
     'filebrowser:toggle-navigate-to-current-directory';
+
+  export const toggleLastModified = 'filebrowser:toggle-last-modified';
 }
 
 /**
@@ -249,7 +252,7 @@ async function activateFactory(
     const widget = new FileBrowser({ id, model, restore });
 
     // Add a launcher toolbar item.
-    let launcher = new ToolbarButton({
+    const launcher = new ToolbarButton({
       icon: addIcon,
       onClick: () => {
         return Private.createLauncher(commands, widget);
@@ -541,7 +544,7 @@ function addCommands(
         return;
       }
       try {
-        let trailingSlash = path !== '/' && path.endsWith('/');
+        const trailingSlash = path !== '/' && path.endsWith('/');
         if (trailingSlash) {
           // The normal contents service errors on paths ending in slash
           path = path.slice(0, path.length - 1);
@@ -761,7 +764,7 @@ function addCommands(
         return;
       } else {
         const areas: ILabShell.Area[] = ['left', 'right'];
-        for (let area of areas) {
+        for (const area of areas) {
           const it = labShell.widgets(area);
           let widget = it.next();
           while (widget) {
@@ -817,6 +820,28 @@ function addCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.toggleLastModified, {
+    label: 'Toggle Last Modified Column',
+    execute: () => {
+      const header = DOMUtils.findElement(document.body, 'jp-id-modified');
+      const column = DOMUtils.findElements(
+        document.body,
+        'jp-DirListing-itemModified'
+      );
+      if (header.classList.contains('jp-LastModified-hidden')) {
+        header.classList.remove('jp-LastModified-hidden');
+        for (let i = 0; i < column.length; i++) {
+          column[i].classList.remove('jp-LastModified-hidden');
+        }
+      } else {
+        header.classList.add('jp-LastModified-hidden');
+        for (let i = 0; i < column.length; i++) {
+          column[i].classList.add('jp-LastModified-hidden');
+        }
+      }
+    }
+  });
+
   if (mainMenu) {
     mainMenu.settingsMenu.addGroup(
       [{ command: CommandIDs.toggleNavigateToCurrentDirectory }],
@@ -842,7 +867,7 @@ function addCommands(
 
       // get the widget factories that could be used to open all of the items
       // in the current filebrowser selection
-      let factories = tracker.currentWidget
+      const factories = tracker.currentWidget
         ? OpenWithMenu._intersection(
             map(tracker.currentWidget.selectedItems(), i => {
               return OpenWithMenu._getFactories(i);
@@ -864,7 +889,7 @@ function addCommands(
     }
 
     static _getFactories(item: Contents.IModel): Array<string> {
-      let factories = registry
+      const factories = registry
         .preferredWidgetFactories(item.path)
         .map(f => f.name);
       const notebookFactory = registry.getWidgetFactory('notebook')?.name;
@@ -881,14 +906,14 @@ function addCommands(
 
     static _intersection<T>(iter: IIterator<Array<T>>): Set<T> | void {
       // pop the first element of iter
-      let first = iter.next();
+      const first = iter.next();
       // first will be undefined if iter is empty
       if (!first) {
         return;
       }
 
       // "initialize" the intersection from first
-      let isect = new Set(first);
+      const isect = new Set(first);
       // reduce over the remaining elements of iter
       return reduce(
         iter,
@@ -1009,6 +1034,11 @@ function addCommands(
     selector: selectorNotDir,
     rank: 13
   });
+  app.contextMenu.addItem({
+    command: CommandIDs.toggleLastModified,
+    selector: '.jp-DirListing-header',
+    rank: 14
+  });
 }
 
 /**
@@ -1047,7 +1077,7 @@ namespace Private {
     const driveName = browser.model.manager.services.contents.driveName(path);
 
     if (driveName) {
-      let browserForPath = tracker.find(
+      const browserForPath = tracker.find(
         _path => _path.model.driveName === driveName
       );
 
@@ -1081,7 +1111,7 @@ namespace Private {
     const localPath = services.contents.localPath(path);
 
     await services.ready;
-    let item = await services.contents.get(path, { content: false });
+    const item = await services.contents.get(path, { content: false });
     const { model } = browserForPath;
     await model.restored;
     if (item.type === 'directory') {

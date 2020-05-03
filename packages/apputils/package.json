@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils",
-  "version": "2.1.0-rc.0",
+  "version": "2.1.0",
   "description": "JupyterLab - Application Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -29,17 +29,22 @@
   },
   "scripts": {
     "build": "tsc -b",
+    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib",
     "docs": "typedoc src",
     "prepublishOnly": "npm run build",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^4.1.0-rc.0",
-    "@jupyterlab/services": "^5.1.0-rc.0",
-    "@jupyterlab/settingregistry": "^2.1.0-rc.0",
-    "@jupyterlab/statedb": "^2.1.0-rc.0",
-    "@jupyterlab/ui-components": "^2.1.0-rc.0",
+    "@jupyterlab/coreutils": "^4.1.0",
+    "@jupyterlab/services": "^5.1.0",
+    "@jupyterlab/settingregistry": "^2.1.0",
+    "@jupyterlab/statedb": "^2.1.0",
+    "@jupyterlab/ui-components": "^2.1.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
     "@lumino/coreutils": "^1.4.2",
@@ -56,9 +61,13 @@
     "sanitize-html": "~1.20.1"
   },
   "devDependencies": {
+    "@jupyterlab/testutils": "^2.1.0",
+    "@types/jest": "^24.0.23",
     "@types/react-dom": "~16.9.4",
     "@types/sanitize-html": "^1.20.2",
+    "jest": "^25.2.3",
     "rimraf": "~3.0.0",
+    "ts-jest": "^25.2.1",
     "typedoc": "^0.15.4",
     "typescript": "~3.7.3"
   },

@@ -9,13 +9,13 @@ export async function main() {
   log('Config');
   // The base url of the Jupyter server.
 
-  let section = await ConfigSection.create({ name: 'notebook' });
-  let config = new ConfigWithDefaults({
+  const section = await ConfigSection.create({ name: 'notebook' });
+  const config = new ConfigWithDefaults({
     section,
     defaults: { default_cell_type: 'code' },
     className: 'Notebook'
   });
   log(config.get('default_cell_type')); // 'code'
-  let data = await config.set('foo', 'bar');
+  const data = await config.set('foo', 'bar');
   log(data);
 }
