@@ -274,17 +274,10 @@ describe('@jupyterlab/notebook', () => {
           widget.select(mdCell);
 
           Widget.attach(button, document.body);
-          const p = new PromiseDelegate();
-          context.sessionContext.statusChanged.connect((sender, status) => {
-            // Find the right status idle message
-            if (status === 'idle' && codeCell.model.outputs.length > 0) {
-              button.dispose();
-              p.resolve(0);
-            }
-          });
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          await p.promise;
+          await context.sessionContext.session.kernel.info;
+          button.dispose();
         });
 
         it("should add an inline svg node with the 'run' icon", async () => {
@@ -307,19 +300,12 @@ describe('@jupyterlab/notebook', () => {
           mdCell.rendered = false;
 
           Widget.attach(button, document.body);
-          const p = new PromiseDelegate();
-          context.sessionContext.statusChanged.connect((sender, status) => {
-            // Find the right status idle message
-            if (status === 'idle' && codeCell.model.outputs.length > 0) {
-              button.dispose();
-              p.resolve(0);
-            }
-          });
           await context.sessionContext.ready;
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await acceptDialog();
-          await p.promise;
+          await context.sessionContext.session.kernel.info;
+          button.dispose();
         });
 
         it("should add an inline svg node with the 'fast-forward' icon", async () => {
