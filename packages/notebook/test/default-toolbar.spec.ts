@@ -274,7 +274,8 @@ describe('@jupyterlab/notebook', () => {
           Widget.attach(button, document.body);
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          await context.sessionContext.session.kernel.info;
+          await framePromise();
+          await context.sessionContext.session!.kernel!.info;
           button.dispose();
         });
 
@@ -302,7 +303,8 @@ describe('@jupyterlab/notebook', () => {
           await framePromise();
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await acceptDialog();
-          await context.sessionContext.session.kernel.info;
+          await framePromise();
+          await context.sessionContext.session!.kernel!.info;
           button.dispose();
         });
 
