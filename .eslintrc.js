@@ -45,7 +45,8 @@ module.exports = {
     'no-case-declarations': 'warn',
     'no-useless-escape': 'off',
     'prefer-const': 'off',
-    'jest/no-jest-import': 'off'
+    'jest/no-jest-import': 'off',
+    'jest/no-export': 'warn'
   },
   settings: {
     react: {
