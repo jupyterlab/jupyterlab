@@ -24,12 +24,14 @@ if [[ $GROUP == js* ]]; then
         export PKG="${GROUP#*-}"
         pushd packages/${PKG}
         jlpm run build:test; true
-        CMD="FORCE_COLOR=1 jlpm run test:cov"
+        CMD="jlpm run test:cov"
     else
         jlpm build:packages
         jlpm build:test
-        CMD="FORCE_COLOR=1 jlpm test:cov --loglevel success"
+        CMD="jlpm test:cov --loglevel success"
     fi
+
+    export FORCE_COLOR=1
     $CMD || $CMD || $CMD
     jlpm run clean
 fi
