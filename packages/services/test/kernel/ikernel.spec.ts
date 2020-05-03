@@ -987,7 +987,7 @@ describe('Kernel.IKernel', () => {
       const metadata = { cellId: 'test' };
       const future = defaultKernel.requestExecute(options, false, metadata);
       await future.done;
-      expect((future.msg.metadata = metadata));
+      expect(future.msg.metadata).toEqual(metadata);
     });
   });
 

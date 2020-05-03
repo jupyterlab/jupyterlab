@@ -41,6 +41,7 @@ const UNUSED: Dict<string[]> = {
     'markdown-loader-jest',
     'jest-junit',
     'jest-summary-reporter'
+    'jsdom'
   ],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],

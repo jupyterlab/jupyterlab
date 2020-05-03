@@ -342,7 +342,7 @@ describe('Logger', () => {
       s.dispose();
     });
 
-    it('emits an "append" content changed signal', () => {
+    it('emits an "append" content changed signal and log outputs', () => {
       const s = new SignalLogger(logger.contentChanged);
       logger.log({
         type: 'output',

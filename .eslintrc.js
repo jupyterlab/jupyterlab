@@ -2,7 +2,9 @@ module.exports = {
   env: {
     browser: true,
     es6: true,
-    commonjs: true
+    commonjs: true,
+    node: true,
+    'jest/globals': true
   },
   root: true,
   extends: [
@@ -10,13 +12,14 @@ module.exports = {
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'prettier/@typescript-eslint',
-    'plugin:react/recommended'
+    'plugin:react/recommended',
+    'plugin:jest/recommended'
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: 'tsconfig.eslint.json'
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'jest'],
   rules: {
     '@typescript-eslint/no-floating-promises': ['error', { ignoreVoid: true }],
     '@typescript-eslint/interface-name-prefix': [
@@ -41,7 +44,8 @@ module.exports = {
     'no-undef': 'warn',
     'no-case-declarations': 'warn',
     'no-useless-escape': 'off',
-    'prefer-const': 'off'
+    'prefer-const': 'off',
+    'jest/no-jest-import': 'off'
   },
   settings: {
     react: {

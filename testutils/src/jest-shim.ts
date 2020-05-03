@@ -10,17 +10,8 @@ const fetchMod = ((window as any).fetch = require('node-fetch')); // tslint:disa
   /* no-op */
 };
 
-const createContextualFragment = (html: string) => {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return div.children[0]; // so hokey it's not even funny
-};
-
-(global as any).Range.prototype.createContextualFragment = (html: string) =>
-  createContextualFragment(html);
-
 window.focus = () => {
-  /* no-op */
+  /* JSDOM raises "Not Implemented" */
 };
 
 // HACK: Polyfill that allows codemirror to render in a JSDOM env.
@@ -34,7 +25,7 @@ window.focus = () => {
     },
     getBoundingClientRect: () => ({ right: 0 }),
     getClientRects: (): ClientRect[] => [],
-    createContextualFragment
+    createContextualFragment: Range.prototype.createContextualFragment
   };
 };
 
@@ -52,12 +43,3 @@ process.on('unhandledRejection', (error, promise) => {
   }
   promise.catch(err => console.error('promise rejected', err));
 });
-
-(window as any).getSelection = function getSelection() {
-  return {
-    selectAllChildren: () => {
-      // no-op
-    },
-    toString: () => ''
-  };
-};
