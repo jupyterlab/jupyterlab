@@ -23,6 +23,7 @@ if [[ $GROUP == js* ]]; then
         # extract the group name
         export PKG="${GROUP#*-}"
         pushd packages/${PKG}
+        jlpm run build; true
         jlpm run build:test; true
         CMD="jlpm run test:cov"
     else
