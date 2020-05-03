@@ -278,8 +278,6 @@ describe('@jupyterlab/notebook', () => {
           context.sessionContext.statusChanged.connect((sender, status) => {
             // Find the right status idle message
             if (status === 'idle' && codeCell.model.outputs.length > 0) {
-              expect(mdCell.rendered).toBe(true);
-              expect(widget.activeCellIndex).toBe(2);
               button.dispose();
               p.resolve(0);
             }
@@ -299,7 +297,6 @@ describe('@jupyterlab/notebook', () => {
 
       describe('#createRestartRunAllButton()', () => {
         it('should restart and run all when clicked', async () => {
-          jest.setTimeout(40000);
           const button = ToolbarItems.createRestartRunAllButton(panel);
           const widget = panel.content;
 
@@ -314,14 +311,6 @@ describe('@jupyterlab/notebook', () => {
           context.sessionContext.statusChanged.connect((sender, status) => {
             // Find the right status idle message
             if (status === 'idle' && codeCell.model.outputs.length > 0) {
-              expect(
-                widget.widgets
-                  .filter(cell => cell.model.type === 'markdown')
-                  .every(cell => (cell as MarkdownCell).rendered)
-              );
-              expect(widget.activeCellIndex).toBe(
-                widget.widgets.filter(cell => cell.model.type === 'code').length
-              );
               button.dispose();
               p.resolve(0);
             }
