@@ -187,53 +187,44 @@ jlpm test
 ```
 
 You can run tests for an individual package by changing to the appropriate
-folder in tests:
+package folder:
 
 ```bash
-cd tests/test-notebook
+cd packages/notebook
+jlpm run build:test
 jlpm test
 ```
 
-Note: We are in the process of changing our test suite over to use `jest`. For folders
-that have a `jest.conf.js` file, please see the `jest` specific instructions below.
+We use `jest` for all tests, so standard `jest` workflows apply. Tests can be debugged in either
+VSCode or Chrome. It can help to add an `it.only` to a specific test when debugging. All of the
+`test*` scripts in each package accept `jest` [cli options](https://jestjs.io/docs/en/cli.html).
 
-You can also select specific test file(s) to run using a pattern:
+#### VSCode Debugging
 
-```bash
-cd tests/test-notebook
-jlpm test --pattern=src/*.spec.ts
-jlpm test --pattern=src/history.spec.ts
-```
+To debug in VSCode, open a package folder in VSCode. We provide a launch configuration in each package folder.
+In a terminal, run `jlpm test:debug:watch`. In VSCode, select "Attach to Jest" from the
+"Run" sidebar to begin debugging. See [VSCode docs on debugging](https://code.visualstudio.com/docs/editor/debugging)
+for more details.
 
-You can run `jlpm watch` from a test folder, and it will re-run the tests
-when the source file(s) change. Note that you have to launch the browser
-of your choice after it says `No captured browser`. You can put a `debugger`
-statement on a line and open the browser debugger to debug specific tests.
-`jlpm watch` also accepts the `--pattern` argument.
+#### Chrome Debugging
 
-Note that there are some helper functions in `testutils` (which is a public npm package called `@jupyterlab/testutils`) that are used by many of the tests.
+To debug in Chrome, run `jlpm test:debug:watch` in the terminal.
+Open Chrome and go to `chrome://inspect/`. Select the remote device and begin debugging.
 
-We use `karma` to run our tests in a browser, `mocha` as the test framework, and `chai` for test assertions. We use [async/await](https://mochajs.org/#using-async--await) for asynchronous tests. We have
-a helper function in `@jupyterlab/testutils` called `testEmission` to help with
-writing tests that use `Phosphor` signals, as well as a `framePromise` function
+#### Testing Utilities
+
+There are some helper functions in `testutils` (which is a public npm package called `@jupyterlab/testutils`) that are used by many of the tests.
+
+For tests that rely on `@jupyterlab/services` (starting kernels, interacting with files, etc.), there are two
+options. If a simple interaction is needed, the `Mock` namespace exposed by `testutils` has a number of
+mock implmentations (see `testutils/src/mock.ts`). If a full server interaction is required,
+use the `JupyterServer` class.
+
+We have a helper function called `testEmission` to help with
+writing tests that use `Lumino` signals, as well as a `framePromise` function
 to get a `Promise` for a `requestAnimationFrame`. We sometimes have to set
 a sentinel value inside a `Promise` and then check that the sentinel was set if
 we need a promise to run without blocking.
-
-To create a new test for a package in `packages/`, use the following
-command, where `<package-directory-name>` is the name of the folder in
-`packages/`:
-
-```bash
-jlpm create:test <package-directory-name>
-```
-
-#### Running Jest Tests
-
-For those test folders that use `jest`, they can be run as `jlpm test` to run the files
-directly. You can also use `jlpm test --testNamePattern=<regex>` to specify specific test
-suite names, and `jlpm test --testPathPattern=<regex>` to specify specific test module names. In order to watch the code, add a `debugger` line in your code and run `jlpm watch`. This will start a node V8 debugger, which can be debugged
-in Chrome by browsing to `chrome://inspect/` and launching the remote session.
 
 ## Performance Testing
 
@@ -440,7 +431,7 @@ To run a specific example, change to the examples directory (i.e.
 python main.py
 ```
 
-## Debugging
+## Debugging in the Browser
 
 All methods of building JupyterLab produce source maps. The source maps
 should be available in the source files view of your browser's development
