@@ -6,6 +6,7 @@
     "version": "0.2.0",
     "configurations": [
         {
+            // debug the jlab server without a browser
             "name": "jlab backend",
             "type": "python",
             "request": "launch",
@@ -22,18 +23,29 @@
 
             // set environment variables for jupyter/lab config
             // "envFile": "${workspaceFolder}/.vscode/jupyterlab_venv.env",
-
-            // can potentially run frontend using serverReadyAction instead
-            // of using compound job, currently not configurable enough
-            //
-            // "serverReadyAction": {
-            //     "pattern": "http://localhost:(\\S+)",
-            //     "uriFormat": "http://localhost:%s",
-            //     "action": "debugWithChrome",
-            //     "webRoot": "${workspaceFolder}"
-            // },
         },
         {
+            // debug the jlab server (in watch mode) without a browser
+            "name": "jlab backend --watch",
+            "type": "python",
+            "request": "launch",
+
+            "args": [
+                "--watch",
+                "--dev-mode",
+                "--notebook-dir=${env:HOME}",
+                "--no-browser",
+                "--NotebookApp.token=''",
+                "--port=9999"
+            ],
+            "justMyCode": false,
+            "module": "jupyterlab.labapp",
+
+            // set environment variables for jupyter/lab config
+            // "envFile": "${workspaceFolder}/.vscode/jupyterlab_venv.env",
+        },
+        {
+            // debug a browser pointed at our jlab server
             "name": "jlab frontend",
             "type": "chrome",
             "request": "launch",
@@ -47,15 +59,52 @@
 
             // debug using a specific copy of chrome/chromium
             // "runtimeExecutable": "<path-to-your-chrome-or-chromium>",
-        },
+        }
     ],
     "compounds": [
         {
-            "name": "jlab all",
+            // debug jlab server and browser together
+            "name": "jlab",
             "configurations": [
                 "jlab backend",
                 "jlab frontend"
             ]
+        },
+        {
+            // debug jlab server (in watch mode) and browser together
+            "name": "jlab --watch",
+            "configurations": [
+                "jlab backend --watch",
+                "jlab frontend"
+            ]
         }
     ]
+
+    // some extra configurations, useful for troubleshooting
+    // jupyter-related vscode debug configs
+    //
+    // "configurations": [
+    //     {
+    //         "name": "(troubleshoot) jupyter paths",
+    //         "type": "python",
+    //         "request": "launch",
+    //         "args": [
+    //             "--paths",
+    //         ],
+    //         "justMyCode": false,
+    //         "module": "jupyter_core.command",
+    //         "envFile": "${workspaceFolder}/.vscode/jupyterlab_venv.env",
+    //     },
+    //     {
+    //         "name": "(troubleshoot) jupyter serverextensions",
+    //         "type": "python",
+    //         "request": "launch",
+    //         "args": [
+    //             "list",
+    //         ],
+    //         "justMyCode": false,
+    //         "module": "notebook.serverextensions",
+    //         "envFile": "${workspaceFolder}/.vscode/jupyterlab_venv.env",
+    //     }
+    // ]
 }
