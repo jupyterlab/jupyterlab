@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-coreutils",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^4.1.0",
-    "@jupyterlab/testutils": "^2.1.1",
+    "@jupyterlab/testutils": "^2.1.2",
     "@lumino/signaling": "^1.3.5",
     "chai": "^4.2.0",
     "jest": "^24.9.0",

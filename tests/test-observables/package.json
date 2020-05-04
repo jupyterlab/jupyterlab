@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/test-observables",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "private": true,
   "scripts": {
     "build": "tsc -b",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@jupyterlab/observables": "^3.1.0",
-    "@jupyterlab/testutils": "^2.1.1",
+    "@jupyterlab/testutils": "^2.1.2",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
     "chai": "^4.2.0",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-services-outputarea",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "private": true,
   "files": [
     "style/index.css",
@@ -17,8 +17,8 @@
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^4.1.0",
-    "@jupyterlab/outputarea": "^2.1.0",
-    "@jupyterlab/rendermime": "^2.1.0",
+    "@jupyterlab/outputarea": "^2.1.1",
+    "@jupyterlab/rendermime": "^2.1.1",
     "@jupyterlab/services": "^5.1.0"
   },
   "devDependencies": {
