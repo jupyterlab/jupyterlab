@@ -8,6 +8,27 @@ export type TLanguageId = string;
 
 export type TSessionMap = Map<TLanguageServerId, SCHEMA.LanguageServerSession>;
 
+/**
+ * TODO: Should this support custom server keys?
+ */
+export type TServerKeys =
+  | 'pyls'
+  | 'bash-language-server'
+  | 'dockerfile-language-server-nodejs'
+  | 'javascript-typescript-langserver'
+  | 'unified-language-server'
+  | 'vscode-css-languageserver-bin'
+  | 'vscode-html-languageserver-bin'
+  | 'vscode-json-languageserver-bin'
+  | 'yaml-language-server'
+  | 'r-languageserver';
+
+export type TLanguageServerConfigurations = {
+  [k in TServerKeys]: {
+    serverSettings: any;
+  };
+};
+
 export interface ILanguageServerManager {
   sessionsChanged: ISignal<ILanguageServerManager, void>;
   sessions: TSessionMap;

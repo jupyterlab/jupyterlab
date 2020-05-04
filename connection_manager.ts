@@ -10,7 +10,8 @@ import * as ConnectionModuleType from './connection';
 import {
   TLanguageServerId,
   ILanguageServerManager,
-  ILanguageServerConfiguration
+  ILanguageServerConfiguration,
+  TLanguageServerConfigurations
 } from './tokens';
 
 export interface IDocumentConnectionData {
@@ -55,6 +56,7 @@ export class DocumentConnectionManager {
     Map<VirtualDocument.id_path, VirtualDocument>
   >;
   language_server_manager: ILanguageServerManager;
+  initial_configurations: TLanguageServerConfigurations;
   private ignored_languages: Set<string>;
 
   constructor(options: DocumentConnectionManager.IOptions) {
@@ -206,6 +208,9 @@ export class DocumentConnectionManager {
         // TODO: is this still neccessary, e.g. for status bar to update responsively?
         this.initialized.emit({ connection, virtual_document });
       });
+
+      // Initialize using settings stored in the SettingRegistry
+      this.updateServerConfigurations(this.initial_configurations);
     });
 
     connection.on('close', closed_manually => {
