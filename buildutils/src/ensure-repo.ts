@@ -40,8 +40,7 @@ const UNUSED: Dict<string[]> = {
     'jest-raw-loader',
     'markdown-loader-jest',
     'jest-junit',
-    'jest-summary-reporter',
-    'jsdom'
+    'jest-summary-reporter'
   ],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
