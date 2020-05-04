@@ -1,5 +1,5 @@
 import { PageConfig } from '@jupyterlab/coreutils';
-import mergeWith from 'lodash/mergewith';
+import mergeWith from 'lodash.mergewith';
 
 const RE_PATH_ANCHOR = /^file:\/\/([^\/]+|\/[A-Z]:)/;
 
