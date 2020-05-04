@@ -45,14 +45,15 @@ window.focus = () => {
 if (!window.hasOwnProperty('getSelection')) {
   // Minimal getSelection() that supports a fake selection
   (window as any).getSelection = function getSelection() {
-    let _selection = '';
     return {
+      _selection: '',
       selectAllChildren: () => {
-        _selection = 'foo';
+        this._selection = 'foo';
       },
       toString: () => {
-        _selection;
-        _selection = '';
+        const val = this._selection;
+        this._selection = '';
+        return val;
       }
     };
   };
