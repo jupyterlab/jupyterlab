@@ -266,7 +266,12 @@ export async function initNotebookContext(
   const factory = Private.notebookFactory;
   const manager = options.manager || Private.getManager();
   const path = options.path || UUID.uuid4() + '.ipynb';
-  console.debug('Initializing notebook context for', path);
+  console.debug(
+    'Initializing notebook context for',
+    path,
+    'kernel:',
+    options.startKernel
+  );
 
   const startKernel =
     options.startKernel === undefined ? false : options.startKernel;

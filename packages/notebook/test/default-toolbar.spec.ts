@@ -19,30 +19,17 @@ import {
 } from '../src';
 
 import {
-  initNotebookContext,
   signalToPromise,
   sleep,
   framePromise,
-  acceptDialog,
-  flakyIt as it
+  acceptDialog
 } from '@jupyterlab/testutils';
 
-import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-
 import * as utils from './utils';
+import { PromiseDelegate } from '@lumino/coreutils';
+import { KernelMessage } from '@jupyterlab/services';
 
 const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
-
-const server = new JupyterServer();
-
-beforeAll(async () => {
-  jest.setTimeout(20000);
-  await server.start();
-});
-
-afterAll(async () => {
-  await server.shutdown();
-});
 
 describe('@jupyterlab/notebook', () => {
   describe('ToolbarItems', () => {
@@ -51,7 +38,7 @@ describe('@jupyterlab/notebook', () => {
       let panel: NotebookPanel;
 
       beforeEach(async () => {
-        context = await initNotebookContext();
+        context = await utils.createMockContext();
         panel = utils.createNotebookPanel(context);
         context.model.fromJSON(utils.DEFAULT_CONTENT);
       });
@@ -247,7 +234,7 @@ describe('@jupyterlab/notebook', () => {
       let panel: NotebookPanel;
 
       beforeEach(async function() {
-        context = await initNotebookContext({ startKernel: true });
+        context = await utils.createMockContext(true);
         panel = utils.createNotebookPanel(context);
         context.model.fromJSON(utils.DEFAULT_CONTENT);
       });
@@ -272,10 +259,16 @@ describe('@jupyterlab/notebook', () => {
           widget.select(mdCell);
 
           Widget.attach(button, document.body);
-          await framePromise();
-          simulate(button.node.firstChild as HTMLElement, 'mousedown');
-          await framePromise();
           await context.sessionContext.session!.kernel!.info;
+
+          const delegate = new PromiseDelegate();
+          panel.sessionContext.iopubMessage.connect((_, msg) => {
+            if (KernelMessage.isExecuteInputMsg(msg)) {
+              delegate.resolve(void 0);
+            }
+          });
+          simulate(button.node.firstChild as HTMLElement, 'mousedown');
+          await delegate.promise;
           button.dispose();
         });
 
@@ -299,12 +292,16 @@ describe('@jupyterlab/notebook', () => {
           mdCell.rendered = false;
 
           Widget.attach(button, document.body);
-          await context.sessionContext.ready;
-          await framePromise();
+          await panel.sessionContext.ready;
+          const delegate = new PromiseDelegate();
+          panel.sessionContext.iopubMessage.connect((_, msg) => {
+            if (KernelMessage.isExecuteInputMsg(msg)) {
+              delegate.resolve(void 0);
+            }
+          });
           simulate(button.node.firstChild as HTMLElement, 'mousedown');
           await acceptDialog();
-          await framePromise();
-          await context.sessionContext.session!.kernel!.info;
+          await delegate.promise;
           button.dispose();
         });
 

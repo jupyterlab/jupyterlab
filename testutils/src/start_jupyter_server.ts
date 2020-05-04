@@ -107,7 +107,7 @@ export class JupyterServer {
       if (Private.child) {
         Private.child.kill(9);
       }
-    }, 1000);
+    }, 3000);
 
     return stopDelegate.promise;
   }
