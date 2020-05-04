@@ -19,9 +19,26 @@ const package_data = require('./package.json');
 const jlab = package_data.jupyterlab;
 const extensions = jlab.extensions;
 const mimeExtensions = jlab.mimeExtensions;
+const { externalExtensions } = jlab;
 const packageNames = Object.keys(mimeExtensions).concat(
-  Object.keys(extensions)
+  Object.keys(extensions),
+  Object.keys(externalExtensions)
 );
+
+// go throught each external extension
+// add to mapping of extension and mime extensions, of package name
+// to path of the extension.
+for (const key in externalExtensions) {
+  const {
+    jupyterlab: { extension, mimeExtension }
+  } = require(`${key}/package.json`);
+  if (extension !== undefined) {
+    extensions[key] = extension === true ? '' : extension;
+  }
+  if (mimeExtension !== undefined) {
+    mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
+  }
+}
 
 // Ensure a clear build directory.
 const buildDir = plib.resolve(jlab.buildDir);
