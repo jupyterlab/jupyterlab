@@ -159,9 +159,11 @@ describe('apputils', () => {
           leftArea: { currentWidget: null, collapsed: true, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
-        await expect(restorer.save(dehydrated)).rejects.toThrow(
-          'save() was called prematurely.'
-        );
+        try {
+          await restorer.save(dehydrated);
+        } catch (e) {
+          expect(e).toBe('save() was called prematurely.');
+        }
       });
 
       it('should save data', async () => {

@@ -46,7 +46,8 @@ module.exports = {
     'no-useless-escape': 'off',
     'prefer-const': 'off',
     'jest/no-jest-import': 'off',
-    'jest/no-export': 'warn'
+    'jest/no-export': 'warn',
+    'jest/no-try-expect': 'warn'
   },
   settings: {
     react: {
