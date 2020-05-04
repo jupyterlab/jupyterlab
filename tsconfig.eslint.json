@@ -16,6 +16,7 @@
     "packages/**/stories/*",
     "scripts/*",
     "jupyterlab/*",
-    "jupyterlab/staging/*"
+    "jupyterlab/staging/*",
+    "testutils/**/*"
   ]
 }
