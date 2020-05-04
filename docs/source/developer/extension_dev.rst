@@ -252,7 +252,7 @@ Another option to try out your extension with a local version of JupyterLab is t
 list of locally installed packages and to have JupyterLab register your extension when it starts up.
 
 You can do this by adding your extension to the ``jupyterlab.externalExtensions`` key
- in the ``dev_mode/package.json`` file. It should be a mapping
+in the ``dev_mode/package.json`` file. It should be a mapping
 of extension name to version, just like in ``dependencies``. Then run ``jlpm run integrity``
 and these extensions should be added automatically to the ``dependencies`` and pulled in.
 
