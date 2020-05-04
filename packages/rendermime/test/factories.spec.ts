@@ -230,7 +230,7 @@ describe('rendermime/factories', () => {
         expect(w.node.innerHTML).toBe(source);
       });
 
-      it.only('should add header anchors', async () => {
+      it('should add header anchors', async () => {
         const f = markdownRendererFactory;
         const mimeType = 'text/markdown';
         const model = createModel(mimeType, sampleData);

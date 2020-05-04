@@ -116,13 +116,13 @@ export abstract class JupyterFrontEnd<
    * event, testing each HTMLElement ancestor for a user-supplied funcion. This can
    * be used to find an HTMLElement on which to operate, given a context menu click.
    *
-   * @param test - a function that takes an `HTMLElement` and returns a
+   * @param fn - a function that takes an `HTMLElement` and returns a
    *   boolean for whether it is the element the requester is seeking.
    *
    * @returns an HTMLElement or undefined, if none is found.
    */
   contextMenuHitTest(
-    test: (node: HTMLElement) => boolean
+    fn: (node: HTMLElement) => boolean
   ): HTMLElement | undefined {
     if (
       !this._contextMenuEvent ||
@@ -132,7 +132,7 @@ export abstract class JupyterFrontEnd<
     }
     let node: Node | null = this._contextMenuEvent.target;
     do {
-      if (node instanceof HTMLElement && test(node)) {
+      if (node instanceof HTMLElement && fn(node)) {
         return node;
       }
       node = node.parentNode;

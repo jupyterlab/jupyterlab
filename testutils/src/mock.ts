@@ -186,8 +186,8 @@ export const KernelMock = jest.fn<
       });
       return newKernel;
     }),
-    info: jest.fn(Promise.resolve),
-    shutdown: jest.fn(Promise.resolve),
+    info: jest.fn(() => Promise.resolve(void 0)),
+    shutdown: jest.fn(() => Promise.resolve(void 0)),
     requestHistory: jest.fn(() => {
       const historyReply = KernelMessage.createMessage({
         channel: 'shell',
@@ -201,6 +201,7 @@ export const KernelMock = jest.fn<
       });
       return Promise.resolve(historyReply);
     }),
+    restart: jest.fn(() => Promise.resolve(void 0)),
     requestExecute: jest.fn(options => {
       const msgId = UUID.uuid4();
       executionCount++;
@@ -217,7 +218,21 @@ export const KernelMock = jest.fn<
         }
       });
       iopubMessageSignal.emit(msg);
-      return new MockShellFuture();
+      const reply = KernelMessage.createMessage<KernelMessage.IExecuteReplyMsg>(
+        {
+          channel: 'shell',
+          msgType: 'execute_reply',
+          session: thisObject.clientId,
+          username: thisObject.username,
+          msgId,
+          content: {
+            user_expressions: {},
+            execution_count: executionCount,
+            status: 'ok'
+          }
+        }
+      );
+      return new MockShellFuture(reply);
     })
   };
   // Add signals.
@@ -268,7 +283,19 @@ export const SessionConnectionMock = jest.fn<
       return Private.changeKernel(kernel!, partialModel!);
     }),
     selectKernel: jest.fn(),
-    shutdown: jest.fn(() => Promise.resolve(void 0))
+    shutdown: jest.fn(() => Promise.resolve(void 0)),
+    setPath: jest.fn(path => {
+      (thisObject as any).path = path;
+      propertyChangedSignal.emit('path');
+    }),
+    setName: jest.fn(name => {
+      (thisObject as any).name = name;
+      propertyChangedSignal.emit('name');
+    }),
+    setType: jest.fn(type => {
+      (thisObject as any).type = type;
+      propertyChangedSignal.emit('type');
+    })
   };
   const disposedSignal = new Signal<Session.ISessionConnection, undefined>(
     thisObject
@@ -634,10 +661,14 @@ export const ServiceManagerMock = jest.fn<ServiceManager.IManager, []>(() => {
 /**
  * A mock kernel shell future.
  */
-export const MockShellFuture = jest.fn<Kernel.IShellFuture, []>(() => {
+export const MockShellFuture = jest.fn<
+  Kernel.IShellFuture,
+  [KernelMessage.IShellMessage]
+>((result: KernelMessage.IShellMessage) => {
   const thisObject: Kernel.IShellFuture = {
     ...jest.requireActual('@jupyterlab/services'),
-    done: Promise.resolve(void 0)
+    dispose: jest.fn(),
+    done: Promise.resolve(result)
   };
   return thisObject;
 });

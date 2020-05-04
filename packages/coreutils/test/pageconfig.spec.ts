@@ -34,7 +34,7 @@ describe('@jupyterlab/coreutils', () => {
         expect(PageConfig.setOption('bar', 'foo')).toBe('');
       });
 
-      it('should get a known option', () => {
+      it('should get a different known option', () => {
         expect(PageConfig.getOption('bar')).toBe('foo');
       });
     });

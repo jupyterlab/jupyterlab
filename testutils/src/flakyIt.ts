@@ -29,12 +29,7 @@ async function runTest(fn: any): Promise<void> {
  * @param retries The number of retries
  * @param wait The time to wait in milliseconds between retries
  */
-export async function flakyIt(
-  name: string,
-  fn: any,
-  retries = 3,
-  wait = 1000
-): Promise<void> {
+export function flakyIt(name: string, fn: any, retries = 3, wait = 1000): void {
   test(name, async () => {
     let latestError;
     for (let tries = 0; tries < retries; tries++) {
@@ -49,3 +44,7 @@ export async function flakyIt(
     throw latestError;
   });
 }
+
+flakyIt.only = it.only;
+flakyIt.skip = it.skip;
+flakyIt.todo = it.todo;
