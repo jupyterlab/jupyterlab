@@ -364,35 +364,35 @@ This gives us a report of the relative differences between the audits in the two
    | **First Contentful Paint**
    | - -62% Δ
    | - 1.9 s -> 0.7 s
-   | - First Contentful Paint marks the time at which the first text or image is painted. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/first-contentful-paint>`_.
+   | - First Contentful Paint marks the time at which the first text or image is painted. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/first-contentful-paint>`__.
    | **First Meaningful Paint**
    | - -50% Δ
    | - 2.5 s -> 1.3 s
-   | - First Meaningful Paint measures when the primary content of a page is visible. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/first-meaningful-paint>`_.
+   | - First Meaningful Paint measures when the primary content of a page is visible. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/first-meaningful-paint>`__.
    | **Speed Index**
    | - -48% Δ
    | - 2.6 s -> 1.3 s
-   | - Speed Index shows how quickly the contents of a page are visibly populated. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/speed-index>`_.
+   | - Speed Index shows how quickly the contents of a page are visibly populated. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/speed-index>`__.
    | **Estimated Input Latency**
    | - 0% Δ
    | - 20 ms -> 20 ms
-   | - Estimated Input Latency is an estimate of how long your app takes to respond to user input, in milliseconds, during the busiest 5s window of page load. If your latency is higher than 50 ms, users may perceive your app as laggy. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/estimated-input-latency>`_.
+   | - Estimated Input Latency is an estimate of how long your app takes to respond to user input, in milliseconds, during the busiest 5s window of page load. If your latency is higher than 50 ms, users may perceive your app as laggy. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/estimated-input-latency>`__.
    | **Max Potential First Input Delay**
    | - 9% Δ
    | - 200 ms -> 210 ms
-   | - The maximum potential First Input Delay that your users could experience is the duration, in milliseconds, of the longest task. `Learn more <https://developers.google.com/web/updates/2018/05/first-input-delay>`_.
+   | - The maximum potential First Input Delay that your users could experience is the duration, in milliseconds, of the longest task. `Learn more <https://developers.google.com/web/updates/2018/05/first-input-delay>`__.
    | **First CPU Idle**
    | - -50% Δ
    | - 2.5 s -> 1.3 s
-   | - First CPU Idle marks the first time at which the page's main thread is quiet enough to handle input. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/first-interactive>`_.
+   | - First CPU Idle marks the first time at which the page's main thread is quiet enough to handle input. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/first-interactive>`__.
    | **Time to Interactive**
    | - -52% Δ
    | - 2.5 s -> 1.2 s
-   | - Time to interactive is the amount of time it takes for the page to become fully interactive. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/consistently-interactive>`_.
+   | - Time to interactive is the amount of time it takes for the page to become fully interactive. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/consistently-interactive>`__.
    | **Avoid multiple page redirects**
    | - -2% Δ
    | - Potential savings of 10 ms -> Potential savings of 10 ms
-   | - Redirects introduce additional delays before the page can be loaded. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/redirects>`_.
+   | - Redirects introduce additional delays before the page can be loaded. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/redirects>`__.
    | **Minimize main-thread work**
    | - -54% Δ
    | - 2.1 s -> 1.0 s
@@ -400,31 +400,31 @@ This gives us a report of the relative differences between the audits in the two
    | **JavaScript execution time**
    | - -49% Δ
    | - 1.1 s -> 0.6 s
-   | - Consider reducing the time spent parsing, compiling, and executing JS. You may find delivering smaller JS payloads helps with this. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/bootup>`_.
+   | - Consider reducing the time spent parsing, compiling, and executing JS. You may find delivering smaller JS payloads helps with this. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/bootup>`__.
    | **Preload key requests**
    | - -100% Δ
    | - Potential savings of 240 ms ->
-   | - Consider using <link rel=preload> to prioritize fetching resources that are currently requested later in page load. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/preload>`_.
+   | - Consider using <link rel=preload> to prioritize fetching resources that are currently requested later in page load. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/preload>`__.
    | **Uses efficient cache policy on static assets**
    | - 0% Δ
    | - 1 resource found -> 1 resource found
-   | - A long cache lifetime can speed up repeat visits to your page. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/cache-policy>`_.
+   | - A long cache lifetime can speed up repeat visits to your page. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/cache-policy>`__.
    | **Avoid enormous network payloads**
    | - -86% Δ
    | - Total size was 30,131 KB -> Total size was 4,294 KB
-   | - Large network payloads cost users real money and are highly correlated with long load times. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/network-payloads>`_.
+   | - Large network payloads cost users real money and are highly correlated with long load times. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/network-payloads>`__.
    | **Minify JavaScript**
    | - -100% Δ
    | - Potential savings of 23,041 KB ->
-   | - Minifying JavaScript files can reduce payload sizes and script parse time. `Learn more <https://developers.google.com/speed/docs/insights/MinifyResources>`_.
+   | - Minifying JavaScript files can reduce payload sizes and script parse time. `Learn more <https://developers.google.com/speed/docs/insights/MinifyResources>`__.
    | **Enable text compression**
    | - -86% Δ
    | - Potential savings of 23,088 KB -> Potential savings of 3,112 KB
-   | - Text-based resources should be served with compression (gzip, deflate or brotli) to minimize total network bytes. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/text-compression>`_.
+   | - Text-based resources should be served with compression (gzip, deflate or brotli) to minimize total network bytes. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/text-compression>`__.
    | **Avoid an excessive DOM size**
    | - 0% Δ
    | - 1,268 elements -> 1,268 elements
-   | - Browser engineers recommend pages contain fewer than ~1,500 DOM elements. The sweet spot is a tree depth < 32 elements and fewer than 60 children/parent element. A large DOM can increase memory usage, cause longer `style calculations <https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations>`_, and produce costly `layout reflows <https://developers.google.com/speed/articles/reflow>`_. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/dom-size>`_.
+   | - Browser engineers recommend pages contain fewer than ~1,500 DOM elements. The sweet spot is a tree depth < 32 elements and fewer than 60 children/parent element. A large DOM can increase memory usage, cause longer `style calculations <https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations>`___, and produce costly `layout reflows <https://developers.google.com/speed/articles/reflow>`__. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/dom-size>`__.
 
 
 Build and run the stand-alone examples
