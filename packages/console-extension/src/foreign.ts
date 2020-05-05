@@ -50,7 +50,7 @@ function activateForeign(
     });
     Private.foreignHandlerProperty.set(console, handler);
 
-    // If showAllKernelActivity is enabled, foreign handler is enabled.
+    // Property showAllKernelActivity configures foreign handler enabled on start.
     void settingRegistry
       .get('@jupyterlab/console-extension:tracker', 'showAllKernelActivity')
       .then(({ composite }) => {
