@@ -19,7 +19,7 @@ fi
 
 if [[ $GROUP == js* ]]; then
 
-    if [[ $GROUP === "js-testutils" ]]; then
+    if [[ $GROUP == "js-testutils" ]]; then
         pushd testutils
     else
         # extract the group name
