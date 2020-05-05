@@ -53,8 +53,8 @@ const fooFactory: IRenderMime.IRendererFactory = {
 describe('docregistry/mimedocument', () => {
   let dContext: Context<DocumentRegistry.IModel>;
 
-  beforeEach(() => {
-    dContext = Mock.createFileContext();
+  beforeEach(async () => {
+    dContext = await Mock.createFileContext();
   });
 
   afterEach(() => {
@@ -100,7 +100,6 @@ describe('docregistry/mimedocument', () => {
           renderTimeout: 1000,
           dataType: 'string'
         });
-        void dContext.initialize(true);
         await widget.ready;
         const layout = widget.layout as BoxLayout;
         expect(layout.widgets.length).toBe(1);
@@ -110,7 +109,6 @@ describe('docregistry/mimedocument', () => {
     describe('contents changed', () => {
       it('should change the document contents', async () => {
         RENDERMIME.addFactory(fooFactory);
-        await dContext.initialize(true);
         const emission = testEmission(dContext.model.contentChanged, {
           test: () => {
             expect(dContext.model.toString()).toBe('bar');

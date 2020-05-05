@@ -33,6 +33,9 @@
       "path": "../packages/services"
     },
     {
+      "path": "."
+    },
+    {
       "path": "../packages/apputils"
     },
     {

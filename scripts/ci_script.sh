@@ -19,20 +19,13 @@ fi
 
 if [[ $GROUP == js* ]]; then
 
-    if [[ $GROUP == js-* ]]; then
-        # extract the group name
-        export PKG="${GROUP#*-}"
-        pushd packages/${PKG}
-        jlpm run build; true
-        jlpm run build:test; true
-        CMD="jlpm run test:cov"
-    else
-        jlpm build:packages
-        jlpm build:test
-        CMD="jlpm test:cov --loglevel success"
-    fi
+    # extract the group name
+    export PKG="${GROUP#*-}"
+    pushd packages/${PKG}
+    jlpm run build:test; true
 
     export FORCE_COLOR=1
+    CMD="jlpm run test:cov"
     $CMD || $CMD || $CMD
     jlpm run clean
 fi

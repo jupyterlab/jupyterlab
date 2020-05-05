@@ -18,6 +18,9 @@
       "path": "../statusbar"
     },
     {
+      "path": "."
+    },
+    {
       "path": "../../testutils"
     },
     {

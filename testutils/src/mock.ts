@@ -679,13 +679,16 @@ export const MockShellFuture = jest.fn<
 /**
  * Create a context for a file.
  */
-export function createFileContext(startKernel = false): Context {
+export async function createFileContext(
+  startKernel = false,
+  manager?: ServiceManager.IManager
+): Promise<Context> {
   const path = UUID.uuid4() + '.txt';
-  const manager = new ServiceManagerMock();
+  manager = manager || new ServiceManagerMock();
   const factory = new TextModelFactory();
 
-  return new Context({
-    manager,
+  const context = new Context({
+    manager: manager || new ServiceManagerMock(),
     factory,
     path,
     kernelPreference: {
@@ -694,6 +697,9 @@ export function createFileContext(startKernel = false): Context {
       autoStartDefault: startKernel
     }
   });
+  await context.initialize(true);
+  await context.sessionContext.initialize();
+  return context;
 }
 
 /**
