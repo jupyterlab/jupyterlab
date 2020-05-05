@@ -424,7 +424,7 @@ This gives us a report of the relative differences between the audits in the two
    | **Avoid an excessive DOM size**
    | - 0% Δ
    | - 1,268 elements -> 1,268 elements
-   | - Browser engineers recommend pages contain fewer than ~1,500 DOM elements. The sweet spot is a tree depth < 32 elements and fewer than 60 children/parent element. A large DOM can increase memory usage, cause longer `style calculations <https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations>`___, and produce costly `layout reflows <https://developers.google.com/speed/articles/reflow>`__. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/dom-size>`__.
+   | - Browser engineers recommend pages contain fewer than ~1,500 DOM elements. The sweet spot is a tree depth < 32 elements and fewer than 60 children/parent element. A large DOM can increase memory usage, cause longer `style calculations <https://developers.google.com/web/fundamentals/performance/rendering/reduce-the-scope-and-complexity-of-style-calculations>`__, and produce costly `layout reflows <https://developers.google.com/speed/articles/reflow>`__. `Learn more <https://developers.google.com/web/tools/lighthouse/audits/dom-size>`__.
 
 
 Build and run the stand-alone examples
