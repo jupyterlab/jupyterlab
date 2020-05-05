@@ -1,4 +1,5 @@
 import { PageConfig } from '@jupyterlab/coreutils';
+import { ReadonlyJSONObject, ReadonlyJSONValue } from '@lumino/coreutils';
 import mergeWith from 'lodash.mergewith';
 
 const RE_PATH_ANCHOR = /^file:\/\/([^\/]+|\/[A-Z]:)/;
@@ -139,15 +140,17 @@ export function uri_to_contents_path(child: string, parent?: string) {
  * VSCode converts that dot notation to JSON behind the scenes,
  * as the language servers themselves don't accept that syntax.
  */
-const vscodeStyleSettingParser = (settingString: string, value: any) => {
-  const propArr = settingString.split('.');
+export const expandPath = (
+  path: string[],
+  value: ReadonlyJSONValue
+): ReadonlyJSONObject => {
   const obj: any = {};
 
   let curr = obj;
-  propArr.forEach((prop: string, i: any) => {
+  path.forEach((prop: string, i: any) => {
     curr[prop] = {};
 
-    if (i === propArr.length - 1) {
+    if (i === path.length - 1) {
       curr[prop] = value;
     } else {
       curr = curr[prop];
@@ -157,10 +160,12 @@ const vscodeStyleSettingParser = (settingString: string, value: any) => {
   return obj;
 };
 
-export const vscodeStyleSettingsParser = (settingsObject: any) => {
+export const expandDottedPaths = (
+  obj: ReadonlyJSONObject
+): ReadonlyJSONObject => {
   const settings: any = [];
-  for (let setting in settingsObject) {
-    const parsed = vscodeStyleSettingParser(setting, settingsObject[setting]);
+  for (let key in obj) {
+    const parsed = expandPath(key.split('.'), obj[key]);
     settings.push(parsed);
   }
   return mergeWith({}, ...settings);

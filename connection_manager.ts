@@ -3,7 +3,7 @@ import { LSPConnection } from './connection';
 
 import { Signal } from '@lumino/signaling';
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { sleep, until_ready, vscodeStyleSettingsParser } from './utils';
+import { sleep, until_ready, expandDottedPaths } from './utils';
 
 // Name-only import so as to not trigger inclusion in main bundle
 import * as ConnectionModuleType from './connection';
@@ -162,7 +162,7 @@ export class DocumentConnectionManager {
    */
   public updateServerConfigurations(allServerSettings: any) {
     for (let language_server_id in allServerSettings) {
-      const parsedSettings = vscodeStyleSettingsParser(
+      const parsedSettings = expandDottedPaths(
         allServerSettings[language_server_id].serverSettings
       );
 
