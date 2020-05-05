@@ -114,10 +114,10 @@ describe('mock', () => {
     });
 
     describe('.info', () => {
-      it('should resolve with undefined', async () => {
+      it('should resolve with info', async () => {
         const kernel = new Mock.KernelMock({});
         const info = await kernel.info;
-        expect(info).toBeUndefined();
+        expect(info.language_info.name).toBe(Mock.DEFAULT_NAME);
       });
     });
 

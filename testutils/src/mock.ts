@@ -187,7 +187,7 @@ export const KernelMock = jest.fn<
       });
       return newKernel;
     }),
-    info: Promise.resolve(void 0),
+    info: Promise.resolve(Private.getInfo(model!.name!)),
     shutdown: jest.fn(() => Promise.resolve(void 0)),
     requestHistory: jest.fn(() => {
       const historyReply = KernelMessage.createMessage({
@@ -776,6 +776,24 @@ namespace Private {
     return KERNELSPECS.find(val => {
       return val.name === name;
     });
+  }
+
+  // Get the kernel info for kernel name
+  export function getInfo(
+    name: string
+  ): KernelMessage.IInfoReplyMsg['content'] {
+    return {
+      protocol_version: '1',
+      implementation: 'foo',
+      implementation_version: '1',
+      language_info: {
+        version: '1',
+        name
+      },
+      banner: 'hello, world!',
+      help_links: [],
+      status: 'ok'
+    };
   }
 
   export function changeKernel(
