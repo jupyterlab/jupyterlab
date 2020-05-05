@@ -38,12 +38,11 @@
       "enum": ["notebook", "terminal"],
       "default": "notebook"
     },
-    "kernelActivity": {
+    "showAllKernelActivity": {
       "title": "Kernel activity",
-      "description": "Whether the console should show all or minimal kernel activity",
-      "type": "string",
-      "enum": ["all", "minimal"],
-      "default": "minimal"
+      "description": "Whether the console should show all kernel activity or default activity",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

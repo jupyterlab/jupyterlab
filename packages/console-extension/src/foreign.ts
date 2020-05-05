@@ -50,12 +50,12 @@ function activateForeign(
     });
     Private.foreignHandlerProperty.set(console, handler);
 
-    settingRegistry
-      .get('@jupyterlab/console-extension:tracker', 'kernelActivity')
+    // If showAllKernelActivity is enabled, foreign handler is enabled.
+    void settingRegistry
+      .get('@jupyterlab/console-extension:tracker', 'showAllKernelActivity')
       .then(({ composite }) => {
-        let kernelActivity = composite as string;
-        // if default kernel activity is all, foreign handler is enabled
-        handler.enabled = kernelActivity === 'all';
+        const showAllKernelActivity = composite as boolean;
+        handler.enabled = showAllKernelActivity;
       });
 
     console.disposed.connect(() => {
