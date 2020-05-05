@@ -940,6 +940,14 @@ export namespace Completer {
         typeNode.className = 'jp-Completer-type jp-Completer-monogram';
         typeNode.setAttribute(`data-color-index`, colorIndex.toString());
         li.appendChild(typeNode);
+      } else {
+        // Create empty span to ensure consistent list styling.
+        // Otherwise, in a list of two items,
+        // if one item has an icon, but the other has type,
+        // the icon grows out of its bounds.
+        const dummyNode = document.createElement('span');
+        dummyNode.className = 'jp-Completer-monogram';
+        li.appendChild(dummyNode);
       }
 
       li.appendChild(matchNode);
@@ -951,6 +959,13 @@ export namespace Completer {
         typeExtendedNode.className = 'jp-Completer-typeExtended';
         typeExtendedNode.textContent = type.toLocaleLowerCase();
         li.appendChild(typeExtendedNode);
+      } else {
+        // If no type is present on the right,
+        // the highlighting of the completion item
+        // doesn't cover the entire row.
+        const dummyTypeExtendedNode = document.createElement('span');
+        dummyTypeExtendedNode.className = 'jp-Completer-typeExtended';
+        li.appendChild(dummyTypeExtendedNode);
       }
       return li;
     }
