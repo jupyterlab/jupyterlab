@@ -54,6 +54,7 @@ function activateForeign(
       .get('@jupyterlab/console-extension:tracker', 'kernelActivity')
       .then(({ composite }) => {
         let kernelActivity = composite as string;
+        // if default kernel activity is all, foreign handler is enabled
         handler.enabled = kernelActivity === 'all';
       });
 
