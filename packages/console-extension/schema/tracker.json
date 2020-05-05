@@ -40,7 +40,7 @@
     },
     "showAllKernelActivity": {
       "title": "Kernel activity",
-      "description": "Whether the default behavior of console shows all kernel activity or default activity",
+      "description": "Whether the default behavior of console shows all\nkernel activity or default activity.",
       "type": "boolean",
       "default": false
     }
