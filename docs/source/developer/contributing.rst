@@ -27,6 +27,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
 .. contents:: Table of contents
     :local:
     :depth: 1
+
 General Guidlelines for Contributing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
