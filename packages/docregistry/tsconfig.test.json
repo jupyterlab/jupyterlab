@@ -30,6 +30,9 @@
       "path": "../ui-components"
     },
     {
+      "path": "."
+    },
+    {
       "path": "../../testutils"
     },
     {

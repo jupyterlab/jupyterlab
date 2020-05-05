@@ -271,6 +271,10 @@ export async function ensurePackage(
   const tsConfigTestPath = path.join(pkgPath, 'tsconfig.test.json');
   if (fs.existsSync(tsConfigTestPath)) {
     const testReferences: { [key: string]: string } = { ...references };
+
+    // Add a reference to self to build the local package as well.
+    testReferences['.'] = '.';
+
     Object.keys(devDeps).forEach(name => {
       if (!(name in locals)) {
         return;
@@ -282,17 +286,16 @@ export async function ensurePackage(
       const ref = path.relative(pkgPath, locals[name]);
       testReferences[name] = ref.split(path.sep).join('/');
     });
-    if (Object.keys(testReferences).length > 0) {
-      const tsConfigTestData = utils.readJSONFile(tsConfigTestPath);
-      tsConfigTestData.references = [];
-      Object.keys(testReferences).forEach(name => {
-        tsConfigTestData.references.push({ path: testReferences[name] });
-      });
-      Object.keys(references).forEach(name => {
-        tsConfigTestData.references.push({ path: testReferences[name] });
-      });
-      utils.writeJSONFile(tsConfigTestPath, tsConfigTestData);
-    }
+
+    const tsConfigTestData = utils.readJSONFile(tsConfigTestPath);
+    tsConfigTestData.references = [];
+    Object.keys(testReferences).forEach(name => {
+      tsConfigTestData.references.push({ path: testReferences[name] });
+    });
+    Object.keys(references).forEach(name => {
+      tsConfigTestData.references.push({ path: testReferences[name] });
+    });
+    utils.writeJSONFile(tsConfigTestPath, tsConfigTestData);
   }
 
   // Get a list of all the published files.

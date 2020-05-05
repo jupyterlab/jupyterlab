@@ -35,15 +35,15 @@ export class JupyterServer {
   /**
    * Start the server.
    *
-   * @returns A promise that resolves when the server has started
+   * @returns A promise that resolves with the url of the server
    *
    * @throws Error if another server is still running.
    */
-  async start(): Promise<void> {
+  async start(): Promise<string> {
     if (Private.child !== null) {
       throw Error('Previous server was not disposed');
     }
-    const startDelegate = new PromiseDelegate<void>();
+    const startDelegate = new PromiseDelegate<string>();
 
     const env = {
       JUPYTER_CONFIG_DIR: Private.handleConfig(),
@@ -81,7 +81,8 @@ export class JupyterServer {
       handleOutput(String(data));
     });
 
-    await startDelegate.promise;
+    const url = await startDelegate.promise;
+    return url;
   }
 
   /**
@@ -273,13 +274,13 @@ namespace Private {
    */
   export async function connect(
     baseUrl: string,
-    startDelegate: PromiseDelegate<void>
+    startDelegate: PromiseDelegate<string>
   ): Promise<void> {
     // eslint-disable-next-line
     while (true) {
       try {
         await fetch(URLExt.join(baseUrl, 'api'));
-        startDelegate.resolve(void 0);
+        startDelegate.resolve(baseUrl);
         return;
       } catch (e) {
         // spin until we can connect to the server.

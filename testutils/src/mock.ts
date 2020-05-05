@@ -28,6 +28,9 @@ import { Signal } from '@lumino/signaling';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
+// The default kernel name
+export const DEFAULT_NAME = 'python3';
+
 export const KERNELSPECS: KernelSpec.ISpecModel[] = [
   {
     argv: [
@@ -40,7 +43,7 @@ export const KERNELSPECS: KernelSpec.ISpecModel[] = [
     display_name: 'Python 3',
     language: 'python',
     metadata: {},
-    name: 'python3',
+    name: DEFAULT_NAME,
     resources: {}
   },
   {
@@ -61,7 +64,7 @@ export const KERNELSPECS: KernelSpec.ISpecModel[] = [
 
 export const KERNEL_MODELS: Kernel.IModel[] = [
   {
-    name: 'python3',
+    name: DEFAULT_NAME,
     id: UUID.uuid4()
   },
   {
@@ -69,7 +72,7 @@ export const KERNEL_MODELS: Kernel.IModel[] = [
     id: UUID.uuid4()
   },
   {
-    name: 'python3',
+    name: DEFAULT_NAME,
     id: UUID.uuid4()
   }
 ];
@@ -156,7 +159,7 @@ export const KernelMock = jest.fn<
     (model! as any).id = 'foo';
   }
   if (!model.name) {
-    (model! as any).name = KERNEL_MODELS[0].name;
+    (model! as any).name = DEFAULT_NAME;
   }
   options = {
     clientId: UUID.uuid4(),
@@ -171,9 +174,7 @@ export const KernelMock = jest.fn<
     ...options,
     ...model,
     status: 'idle',
-    spec: () => {
-      return Promise.resolve(spec);
-    },
+    spec: Promise.resolve(spec),
     dispose: jest.fn(),
     clone: jest.fn(() => {
       const newKernel = Private.cloneKernel(options);
@@ -186,7 +187,7 @@ export const KernelMock = jest.fn<
       });
       return newKernel;
     }),
-    info: jest.fn(() => Promise.resolve(void 0)),
+    info: Promise.resolve(Private.getInfo(model!.name!)),
     shutdown: jest.fn(() => Promise.resolve(void 0)),
     requestHistory: jest.fn(() => {
       const historyReply = KernelMessage.createMessage({
@@ -262,7 +263,7 @@ export const SessionConnectionMock = jest.fn<
     Kernel.IKernelConnection | null
   ]
 >((options, kernel) => {
-  const name = kernel?.name || options.model?.name || KERNEL_MODELS[0].name;
+  const name = kernel?.name || options.model?.kernel?.name || DEFAULT_NAME;
   kernel = kernel || new KernelMock({ model: { name } });
   const model = {
     path: 'foo',
@@ -282,7 +283,6 @@ export const SessionConnectionMock = jest.fn<
     changeKernel: jest.fn(partialModel => {
       return Private.changeKernel(kernel!, partialModel!);
     }),
-    selectKernel: jest.fn(),
     shutdown: jest.fn(() => Promise.resolve(void 0)),
     setPath: jest.fn(path => {
       (thisObject as any).path = path;
@@ -441,7 +441,6 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
 
   const thisObject: Contents.IManager = {
     ...jest.requireActual('@jupyterlab/services'),
-    ready: Promise.resolve(void 0),
     newUntitled: jest.fn(options => {
       const model = Private.createFile(options || {});
       files.set(model.path, model);
@@ -603,6 +602,7 @@ export const SessionManagerMock = jest.fn<Session.IManager, []>(() => {
   const thisObject: Session.IManager = {
     ...jest.requireActual('@jupyterlab/services'),
     ready: Promise.resolve(void 0),
+    isReady: true,
     startNew: jest.fn(options => {
       const session = new SessionConnectionMock({ model: options }, null);
       sessions.push(session.model);
@@ -638,6 +638,8 @@ export const KernelSpecManagerMock = jest.fn<KernelSpec.IManager, []>(() => {
   const thisObject: KernelSpec.IManager = {
     ...jest.requireActual('@jupyterlab/services'),
     specs: { default: KERNELSPECS[0].name, kernelspecs: KERNELSPECS },
+    isReady: true,
+    ready: Promise.resolve(void 0),
     refreshSpecs: jest.fn(() => Promise.resolve(void 0))
   };
   return thisObject;
@@ -650,6 +652,7 @@ export const ServiceManagerMock = jest.fn<ServiceManager.IManager, []>(() => {
   const thisObject: ServiceManager.IManager = {
     ...jest.requireActual('@jupyterlab/services'),
     ready: Promise.resolve(void 0),
+    isReady: true,
     contents: new ContentsManagerMock(),
     sessions: new SessionManagerMock(),
     kernelspecs: new KernelSpecManagerMock(),
@@ -676,13 +679,16 @@ export const MockShellFuture = jest.fn<
 /**
  * Create a context for a file.
  */
-export function createFileContext(startKernel = false): Context {
+export async function createFileContext(
+  startKernel = false,
+  manager?: ServiceManager.IManager
+): Promise<Context> {
   const path = UUID.uuid4() + '.txt';
-  const manager = new ServiceManagerMock();
+  manager = manager || new ServiceManagerMock();
   const factory = new TextModelFactory();
 
-  return new Context({
-    manager,
+  const context = new Context({
+    manager: manager || new ServiceManagerMock(),
     factory,
     path,
     kernelPreference: {
@@ -691,6 +697,9 @@ export function createFileContext(startKernel = false): Context {
       autoStartDefault: startKernel
     }
   });
+  await context.initialize(true);
+  await context.sessionContext.initialize();
+  return context;
 }
 
 /**
@@ -765,7 +774,7 @@ namespace Private {
   export function cloneKernel(
     options: RecursivePartial<Kernel.IKernelConnection.IOptions>
   ): Kernel.IKernelConnection {
-    return new KernelMock(options);
+    return new KernelMock({ ...options, clientId: UUID.uuid4() });
   }
 
   // Get the kernel spec for kernel name
@@ -773,6 +782,24 @@ namespace Private {
     return KERNELSPECS.find(val => {
       return val.name === name;
     });
+  }
+
+  // Get the kernel info for kernel name
+  export function getInfo(
+    name: string
+  ): KernelMessage.IInfoReplyMsg['content'] {
+    return {
+      protocol_version: '1',
+      implementation: 'foo',
+      implementation_version: '1',
+      language_info: {
+        version: '1',
+        name
+      },
+      banner: 'hello, world!',
+      help_links: [],
+      status: 'ok'
+    };
   }
 
   export function changeKernel(
