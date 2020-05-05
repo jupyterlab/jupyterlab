@@ -630,16 +630,12 @@ describe('mock', () => {
 
   describe('createFileContext()', () => {
     it('should create a context without a kernel', async () => {
-      const context = Mock.createFileContext();
-      await context.initialize(true);
-      await context.sessionContext.initialize();
+      const context = await Mock.createFileContext();
       expect(context.sessionContext.session).toBe(null);
     });
 
     it('should create a context with a kernel', async () => {
-      const context = Mock.createFileContext(true);
-      await context.initialize(true);
-      await context.sessionContext.initialize();
+      const context = await Mock.createFileContext(true);
       expect(context.sessionContext.session!.kernel!.name).toBe(
         Mock.DEFAULT_NAME
       );

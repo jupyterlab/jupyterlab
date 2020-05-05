@@ -19,23 +19,19 @@ fi
 
 if [[ $GROUP == js* ]]; then
 
-    # extract the group name
-    export PKG="${GROUP#*-}"
-    pushd packages/${PKG}
+    if [[ $GROUP === "js-testutils" ]]; then
+        pushd testutils
+    else
+        # extract the group name
+        export PKG="${GROUP#*-}"
+        pushd packages/${PKG}
+    fi
+
     jlpm run build:test; true
 
     export FORCE_COLOR=1
     CMD="jlpm run test:cov"
     $CMD || $CMD || $CMD
-    jlpm run clean
-fi
-
-if [[ $GROUP == jsscope ]]; then
-
-    jlpm build:packages
-    jlpm build:test
-    FORCE_COLOR=1 jlpm test:scope --loglevel success --scope $JSTESTGROUP
-
     jlpm run clean
 fi
 
