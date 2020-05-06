@@ -283,16 +283,6 @@ export class Completer extends Widget {
       return null;
     }
 
-    // If there is only one option, signal and bail.
-    // We don't test the filtered `items`, as that
-    // is too aggressive of completer behavior, it can
-    // lead to double typing of an option.
-    if (items.length === 1) {
-      this._selected.emit(items[0].insertText || items[0].label);
-      this.reset();
-      return null;
-    }
-
     // Clear the node.
     let node = this.node;
     node.textContent = '';
@@ -427,6 +417,13 @@ export class Completer extends Widget {
         event.stopImmediatePropagation();
         const model = this._model;
         if (!model) {
+          return;
+        }
+        // Autoinsert single completions on manual request (tab)
+        const items = model.completionItems && model.completionItems();
+        if (items && items.length === 1) {
+          this._selected.emit(items[0].insertText || items[0].label);
+          this.reset();
           return;
         }
         const populated = this._populateSubset();

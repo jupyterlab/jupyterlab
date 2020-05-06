@@ -893,6 +893,31 @@ describe('completer/widget', () => {
         });
       });
 
+      it('should insert single completion item on tab', async () => {
+        const anchor = createEditorWidget();
+        const model = new CompleterModel();
+        const options: Completer.IOptions = {
+          editor: anchor.editor,
+          model
+        };
+        let value = '';
+        const listener = (sender: any, selected: string) => {
+          value = selected;
+        };
+        model.setCompletionItems!([{ label: 'foo' }]);
+        Widget.attach(anchor, document.body);
+
+        const widget = new Completer(options);
+
+        widget.selected.connect(listener);
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
+        expect(value).toBe('foo');
+        widget.dispose();
+        anchor.dispose();
+      });
+
       describe('mousedown', () => {
         it('should trigger a selected signal on mouse down', () => {
           const anchor = createEditorWidget();
@@ -1216,82 +1241,6 @@ describe('completer/widget', () => {
         expect(value).toBe('');
         MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
         expect(value).toBe('foo');
-        widget.dispose();
-        anchor.dispose();
-      });
-
-      it('should emit label if there is only one completion item and insert Text is not set', () => {
-        let anchor = createEditorWidget();
-        let model = new CompleterModel();
-        let coords = { left: 0, right: 0, top: 100, bottom: 120 };
-        let request: Completer.ITextState = {
-          column: 0,
-          lineHeight: 0,
-          charWidth: 0,
-          line: 0,
-          coords: coords as CodeEditor.ICoordinate,
-          text: 'f'
-        };
-
-        let value = '';
-        let options: Completer.IOptions = {
-          editor: anchor.editor,
-          model
-        };
-        let listener = (sender: any, selected: string) => {
-          value = selected;
-        };
-
-        Widget.attach(anchor, document.body);
-        model.original = request;
-        model.setCompletionItems!([{ label: 'foo' }]);
-
-        let widget = new Completer(options);
-        widget.selected.connect(listener);
-        Widget.attach(widget, document.body);
-
-        expect(value).toBe('');
-        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(value).toBe('foo');
-
-        widget.dispose();
-        anchor.dispose();
-      });
-
-      it('should emit insert text if there is only one completion item and insert Text is set', () => {
-        let anchor = createEditorWidget();
-        let model = new CompleterModel();
-        let coords = { left: 0, right: 0, top: 100, bottom: 120 };
-        let request: Completer.ITextState = {
-          column: 0,
-          lineHeight: 0,
-          charWidth: 0,
-          line: 0,
-          coords: coords as CodeEditor.ICoordinate,
-          text: 'f'
-        };
-
-        let value = '';
-        let options: Completer.IOptions = {
-          editor: anchor.editor,
-          model
-        };
-        let listener = (sender: any, selected: string) => {
-          value = selected;
-        };
-
-        Widget.attach(anchor, document.body);
-        model.original = request;
-        model.setCompletionItems!([{ label: 'foo', insertText: 'bar' }]);
-
-        let widget = new Completer(options);
-        widget.selected.connect(listener);
-        Widget.attach(widget, document.body);
-
-        expect(value).toBe('');
-        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
-        expect(value).toBe('bar');
-
         widget.dispose();
         anchor.dispose();
       });
