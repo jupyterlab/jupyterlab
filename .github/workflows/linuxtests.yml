@@ -7,7 +7,7 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, integrity2, docs, usage, docs2, python,  nonode]
+        group: [integrity, integrity2, docs, usage, python,  nonode]
         python: [3.5, 3.8]
         exclude:
           - group: integrity
@@ -16,11 +16,8 @@ jobs:
             python: 3.5
           - group: docs
             python: 3.5
-          - group: docs2
-            python: 3.5
-          - group: changelog
-            python: 3.5
       fail-fast: false
+    timeout-minutes: 90
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -28,10 +25,12 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python }}
+
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
           node-version: '12.x'
+
       - name: Cache pip on Linux
         uses: actions/cache@v1
         if: startsWith(runner.os, 'Linux')
@@ -41,7 +40,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-${{ matrix.python }}
 
-      # Cache yarn
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -54,11 +52,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
+      - name: Cache checked links build
+        uses: actions/cache@v1
+        if: ${{ matrix.group == 'docs' }}
+        with:
+          path: ~/.cache/pytest-link-check
+          key: ${{ runner.os }}-link-check-${{ hashFiles('**/*.rst') }}
+          restore-keys: |
+            ${{ runner.os }}-link-check-
+
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
         run: |
           bash ./scripts/ci_install.sh
+
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
