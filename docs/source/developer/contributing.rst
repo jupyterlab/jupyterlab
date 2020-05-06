@@ -522,7 +522,7 @@ the two reports:
      more <https://developers.google.com/web/tools/lighthouse/audits/dom-size>`__.
 
 Build and run the stand-alone examples
-''''''''''''''''''''''''''''''''''''''
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To install and build the examples in the ``examples`` directory:
 
