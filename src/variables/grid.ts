@@ -95,7 +95,7 @@ export class VariablesGrid extends Panel {
     );
     grid.stretchLastColumn = true;
     grid.node.style.height = '100%';
-    this.node.style.height = '90%';
+    this.node.style.height = '100%';
     this._grid = grid;
     this.addWidget(grid);
   }
@@ -153,7 +153,7 @@ export class VariableDetailsGrid extends Panel {
       variables: details
     };
     this._grid.dataModel.setData([detailsScope]);
-    this.node.style.height = '90%';
+    this.node.style.height = '100%';
 
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariableDetails');
