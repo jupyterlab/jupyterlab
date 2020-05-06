@@ -398,25 +398,29 @@ the two reports:
 
 .. admonition:: Resulting Output
 
-   | normal.json -> prod.json
+   ``normal.json`` -> ``prod.json``
+
    | **First Contentful Paint**
    | - -62% Δ
    | - 1.9 s -> 0.7 s
    | - First Contentful Paint marks the time at which the first text or
      image is painted. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/first-contentful-paint>`__.
+
    | **First Meaningful Paint**
    | - -50% Δ
    | - 2.5 s -> 1.3 s
    | - First Meaningful Paint measures when the primary content of a
      page is visible. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/first-meaningful-paint>`__.
+
    | **Speed Index**
    | - -48% Δ
    | - 2.6 s -> 1.3 s
    | - Speed Index shows how quickly the contents of a page are visibly
      populated. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/speed-index>`__.
+
    | **Estimated Input Latency**
    | - 0% Δ
    | - 20 ms -> 20 ms
@@ -425,6 +429,7 @@ the two reports:
      window of page load. If your latency is higher than 50 ms, users
      may perceive your app as laggy. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/estimated-input-latency>`__.
+
    | **Max Potential First Input Delay**
    | - 9% Δ
    | - 200 ms -> 210 ms
@@ -432,29 +437,34 @@ the two reports:
      experience is the duration, in milliseconds, of the longest task.
      `Learn
      more <https://developers.google.com/web/updates/2018/05/first-input-delay>`__.
+
    | **First CPU Idle**
    | - -50% Δ
    | - 2.5 s -> 1.3 s
    | - First CPU Idle marks the first time at which the page's main
      thread is quiet enough to handle input. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/first-interactive>`__.
+
    | **Time to Interactive**
    | - -52% Δ
    | - 2.5 s -> 1.2 s
    | - Time to interactive is the amount of time it takes for the page
      to become fully interactive. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/consistently-interactive>`__.
+
    | **Avoid multiple page redirects**
    | - -2% Δ
    | - Potential savings of 10 ms -> Potential savings of 10 ms
    | - Redirects introduce additional delays before the page can be
      loaded. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/redirects>`__.
+
    | **Minimize main-thread work**
    | - -54% Δ
    | - 2.1 s -> 1.0 s
    | - Consider reducing the time spent parsing, compiling and executing
      JS. You may find delivering smaller JS payloads helps with this.
+
    | **JavaScript execution time**
    | - -49% Δ
    | - 1.1 s -> 0.6 s
@@ -462,36 +472,42 @@ the two reports:
      executing JS. You may find delivering smaller JS payloads helps
      with this. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/bootup>`__.
+
    | **Preload key requests**
    | - -100% Δ
    | - Potential savings of 240 ms ->
    | - Consider using <link rel=preload> to prioritize fetching
      resources that are currently requested later in page load. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/preload>`__.
+
    | **Uses efficient cache policy on static assets**
    | - 0% Δ
    | - 1 resource found -> 1 resource found
    | - A long cache lifetime can speed up repeat visits to your page.
      `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/cache-policy>`__.
+
    | **Avoid enormous network payloads**
    | - -86% Δ
    | - Total size was 30,131 KB -> Total size was 4,294 KB
    | - Large network payloads cost users real money and are highly
      correlated with long load times. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/network-payloads>`__.
+
    | **Minify JavaScript**
    | - -100% Δ
    | - Potential savings of 23,041 KB ->
    | - Minifying JavaScript files can reduce payload sizes and script
      parse time. `Learn
      more <https://developers.google.com/speed/docs/insights/MinifyResources>`__.
+
    | **Enable text compression**
    | - -86% Δ
    | - Potential savings of 23,088 KB -> Potential savings of 3,112 KB
    | - Text-based resources should be served with compression (gzip,
      deflate or brotli) to minimize total network bytes. `Learn
      more <https://developers.google.com/web/tools/lighthouse/audits/text-compression>`__.
+
    | **Avoid an excessive DOM size**
    | - 0% Δ
    | - 1,268 elements -> 1,268 elements
