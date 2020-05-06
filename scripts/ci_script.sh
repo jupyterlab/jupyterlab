@@ -26,34 +26,28 @@ fi
 
 
 if [[ $GROUP == docs ]]; then
-    # Verify tutorial docs build
+    # Build the tutorial docs
     pushd docs
-    pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
+    pip install -r ./requirements.txt
     make html
-
-    # Changelog has a lot of links and is covered in a separate job.
-    # Also ignore internal sphinx files
-    changelog=build/html/getting_started/changelog.html
-    genindex=build/html/genindex.html
-    search=build/html/search.html
-    deselect="--deselect $changelog --deselect $genindex --deselect $search"
-    py.test --check-links -k .html $deselect build/html || py.test --check-links -k .html $deselect --lf build/html
-
     popd
-fi
 
-
-if [[ $GROUP == docs2 ]]; then
-    # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
-    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+    # Run the link check on the built html files
+    CACHE_DIR="${HOME}/.cache/pytest-link-check"
+    mkdir -p ${CACHE_DIR}
+    echo "Existing cache:"
+    ls -ltr ${CACHE_DIR}
+    args="--check-links --check-links-cache --check-links-cache-expire-after 86400 --check-links-cache-name ${CACHE_DIR}/cache"
+    args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html ${args}"
+    py.test $args --links-ext .html -k .html docs/build/html || py.test $args --links-ext .html -k .html --lf docs/build/html
 
     # Build the API docs
     jlpm build:packages
     jlpm docs
 
-    # Run the link check on the changelog - allow for a link to fail once (--lf means only run last failed)
-    changelog=./docs/source/getting_started/changelog.rst
-    py.test --check-links $changlog || py.test --check-links --lf $changelog
+    # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
+    args="--check-links --check-links-cache --check-links-cache-expire-after 86400 --check-links-cache-name ${CACHE_DIR}/cache"
+    py.test $args --links-ext .md -k .md . || py.test $args --links-ext .md -k .md --lf .
 fi
 
 

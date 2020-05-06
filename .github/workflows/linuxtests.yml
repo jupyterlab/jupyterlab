@@ -15,7 +15,7 @@ jobs:
     name: Linux
     strategy:
       matrix:
-        group: [integrity, docs, docs2, python, usage, nonode]
+        group: [integrity, docs, python, usage, nonode]
         python: [3.5, 3.8]
         exclude:
           - group: integrity
@@ -23,6 +23,7 @@ jobs:
           - group: docs
             python: 3.5
       fail-fast: false
+    timeout-minutes: 90
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -55,6 +56,15 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
+
+      - name: Cache checked links build
+        uses: actions/cache@v1
+        if: ${{ matrix.group == 'docs' }}
+        with:
+          path: ~/.cache/pytest-link-check
+          key: ${{ runner.os }}-link-check-${{ hashFiles('**/*.rst') }}
+          restore-keys: |
+            ${{ runner.os }}-link-check-
 
       - name: Install dependencies
         env:
