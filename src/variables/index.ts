@@ -71,6 +71,9 @@ export class Variables extends Panel {
     this._table.filter = filter;
   }
 
+  /**
+   * Set the theme for the variable table.
+   */
   set theme(theme: Theme) {
     this._table.theme = theme;
   }

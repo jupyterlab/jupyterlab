@@ -7,7 +7,6 @@ import {
   BasicSelectionModel,
   DataGrid,
   DataModel,
-  SelectionModel,
   TextRenderer
 } from '@lumino/datagrid';
 
@@ -26,7 +25,7 @@ import { VariablesModel } from './model';
 import { Theme } from '.';
 
 /**
- * A Panel to show variables as Table by DataGrid.
+ * A Panel to show variables in a datagrid.
  */
 export class VariablesBodyGrid extends Panel {
   /**
@@ -35,20 +34,22 @@ export class VariablesBodyGrid extends Panel {
    */
   constructor(options: VariablesBodyGrid.IOptions) {
     super();
-    this.node.style.height = '100%';
     const { model, commands } = options;
-    this._grid = new VariableGrid({ commands });
+    this._grid = new VariablesGrid({ commands });
     this._model = model;
     const updated = (model: VariablesModel) => {
       this._grid.dataModel.setData(model.scopes);
     };
     this._model.changed.connect(updated, this);
+    this.node.style.height = '100%';
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariables-body');
   }
 
   /**
    * Set the variable filter list.
+   *
+   * @param filter The variable filter to apply.
    */
   set filter(filter: Set<string>) {
     (this._grid.dataModel as VariableDataGridModel).filter = filter;
@@ -57,35 +58,43 @@ export class VariablesBodyGrid extends Panel {
 
   /**
    * Set the theme used in JupyterLab.
+   *
+   * @param theme The theme for the datagrid.
    */
   set theme(theme: Theme) {
     this._grid.theme = theme;
   }
 
-  private _grid: VariableGrid;
+  private _grid: VariablesGrid;
   private _model: VariablesModel;
 }
 
 /**
- * A class representing variable grid in JupyterLab-Debugger.
+ * A class wrapping the underlying variables datagrid.
  */
-export class VariableGrid extends Panel {
+export class VariablesGrid extends Panel {
   /**
-   * Instantiate a new VariableGrid.
-   * @param options The instantiation options for a VariableGrid.
+   * Instantiate a new VariablesGrid.
+   * @param options The instantiation options for a VariablesGrid.
    */
-  constructor(options: VariableGrid.IOptions) {
+  constructor(options: VariablesGrid.IOptions) {
     super();
-    const grid = new DataGrid();
     const { commands } = options;
-    const dataModel = new VariableDataGridModel({ commands });
+    const dataModel = new VariableDataGridModel();
+    const grid = new DataGrid();
     grid.dataModel = dataModel;
     grid.keyHandler = new BasicKeyHandler();
     grid.mouseHandler = new BasicMouseHandler();
-    grid.selectionModel = new VariableSelection({
+    grid.selectionModel = new BasicSelectionModel({
       dataModel,
       selectionMode: 'row'
     });
+    grid.selectionModel.changed.connect(slot =>
+      commands.execute(CommandIDs.variableDetails, {
+        variableReference: dataModel.getVariableReference(slot.cursorRow),
+        title: dataModel.getVariableName(slot.cursorRow)
+      })
+    );
     grid.stretchLastColumn = true;
     grid.node.style.height = '100%';
     this.node.style.height = '90%';
@@ -95,6 +104,8 @@ export class VariableGrid extends Panel {
 
   /**
    * Set the variable filter list.
+   *
+   * @param filter The variable filter to apply.
    */
   set filter(filter: Set<string>) {
     (this._grid.dataModel as VariableDataGridModel).filter = filter;
@@ -103,6 +114,8 @@ export class VariableGrid extends Panel {
 
   /**
    * Set the theme used in JupyterLab.
+   *
+   * @param theme The theme for the datagrid.
    */
   set theme(theme: Theme) {
     const { dataStyle, textRender } =
@@ -111,6 +124,9 @@ export class VariableGrid extends Panel {
     this._grid.style = dataStyle;
   }
 
+  /**
+   * Get the data model for the data grid.
+   */
   get dataModel(): VariableDataGridModel {
     return this._grid.dataModel as VariableDataGridModel;
   }
@@ -123,23 +139,23 @@ export class VariableGrid extends Panel {
  */
 export class VariableDetailsGrid extends Panel {
   /**
-   * Instantiate a new Body for the detail dataGrid of the selected variable.
+   * Instantiate a new Body for the datagrid of the selected variable.
    * @param options The instantiation options for VariableDetailsGrid.
    */
   constructor(options: VariablesDetails.IOptions) {
     super();
     const { details, commands, model, service, title } = options;
+    model.changed.connect(this.dispose, this);
 
     this.title.icon = variableIcon;
     this.title.label = `${service.session?.connection?.name} - details of ${title}`;
-    this._grid = new VariableGrid({ commands });
+    this._grid = new VariablesGrid({ commands });
     const detailsScope = {
       name: title,
       variables: details
     };
     this._grid.dataModel.setData([detailsScope]);
     this.node.style.height = '90%';
-    model.changed.connect(this._onModelChanged, this);
 
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariableDetails');
@@ -147,16 +163,14 @@ export class VariableDetailsGrid extends Panel {
 
   /**
    * Set the theme used in JupyterLab.
+   *
+   * @param theme The theme for the datagrid.
    */
   set theme(theme: Theme) {
     this._grid.theme = theme;
   }
 
-  private _onModelChanged() {
-    this.dispose();
-  }
-
-  private _grid: VariableGrid;
+  private _grid: VariablesGrid;
 }
 
 /**
@@ -164,29 +178,37 @@ export class VariableDetailsGrid extends Panel {
  */
 export class VariableDataGridModel extends DataModel {
   /**
-   * Instantiate a new VariableDataGridModel.
-   * @param options The instantiation options for a VariableDataGridModel.
-   */
-  constructor(options: VariableDataGridModel.IOptions) {
-    super();
-    this._commands = options.commands;
-  }
-
-  /**
    * Set the variable filter list.
    */
   set filter(filter: Set<string>) {
     this._filter = filter;
   }
 
+  /**
+   * Get the row count for a particular region in the data grid.
+   *
+   * @param region The datagrid region.
+   */
   rowCount(region: DataModel.RowRegion): number {
     return region === 'body' ? this._data.name.length : 1;
   }
 
+  /**
+   * Get the column count for a particular region in the data grid.
+   *
+   * @param region The datagrid region.
+   */
   columnCount(region: DataModel.ColumnRegion): number {
     return region === 'body' ? 2 : 1;
   }
 
+  /**
+   * Get the data count for a particular region, row and column in the data grid.
+   *
+   * @param region The datagrid region.
+   * @param row The datagrid row
+   * @param column The datagrid column
+   */
   data(region: DataModel.CellRegion, row: number, column: number): any {
     if (region === 'row-header') {
       return this._data.name[row];
@@ -203,58 +225,57 @@ export class VariableDataGridModel extends DataModel {
   }
 
   /**
-   * Get from row dataGrid variable reference
-   * @param row row number of variable
+   * Get the variable reference for a given row
+   *
+   * @param row The row in the datagrid.
    */
-  async getVariableReference(row: number) {
-    const variablesReference = this._data.variablesReference[row];
-    const name = this._data.name[row];
-    if (!variablesReference) {
-      return;
-    }
+  getVariableReference(row: number) {
+    return this._data.variablesReference[row];
+  }
 
-    await this._commands.execute(CommandIDs.variableDetails, {
-      variableReference: variablesReference,
-      title: name
+  /**
+   * Get the variable name for a given row
+   *
+   * @param row The row in the datagrid.
+   */
+  getVariableName(row: number) {
+    return this._data.name[row];
+  }
+
+  /**
+   * Set the datagrid model data from the variable scopes.
+   *
+   * @param scopes The scopes.
+   */
+  setData(scopes: VariablesModel.IScope[]) {
+    this._clearData();
+    this.emitChanged({
+      type: 'model-reset',
+      region: 'body'
+    });
+    scopes.forEach(scope => {
+      const filtered = scope.variables.filter(
+        variable => !this._filter.has(variable.evaluateName)
+      );
+      filtered.forEach((variable, index) => {
+        this._data.name[index] = variable.evaluateName;
+        this._data.type[index] = variable.type;
+        this._data.value[index] = variable.value;
+        this._data.variablesReference[index] = variable.variablesReference;
+      });
+      this.emitChanged({
+        type: 'rows-inserted',
+        region: 'body',
+        index: 1,
+        span: filtered.length
+      });
     });
   }
 
   /**
-   * Set data from scopes for DataGrid Model
-   * @param scopes array of scope's variables
+   * Clear all the data in the datagrid.
    */
-  setData(scopes: VariablesModel.IScope[]) {
-    if (!scopes || scopes.length === 0) {
-      this.clearData();
-      this.emitChanged({
-        type: 'model-reset',
-        region: 'body',
-        index: 1,
-        span: 1
-      });
-      return;
-    }
-    scopes.forEach(scope => {
-      let index = 0;
-      scope.variables.forEach(variable => {
-        if (!this._filter.has(variable.evaluateName)) {
-          this._data.name[index] = variable.evaluateName;
-          this._data.type[index] = variable.type;
-          this._data.value[index] = variable.value;
-          this._data.variablesReference[index] = variable.variablesReference;
-          this.emitChanged({
-            type: 'rows-inserted',
-            region: 'body',
-            index: 1,
-            span: 1
-          });
-          ++index;
-        }
-      });
-    });
-  }
-
-  private clearData() {
+  private _clearData() {
     this._data = {
       name: [],
       type: [],
@@ -263,7 +284,6 @@ export class VariableDataGridModel extends DataModel {
     };
   }
 
-  private _commands: CommandRegistry;
   private _filter = new Set<string>();
   private _data: {
     name: string[];
@@ -276,52 +296,6 @@ export class VariableDataGridModel extends DataModel {
     value: [],
     variablesReference: []
   };
-}
-
-/**
- * A DataGrid model selection for Variables.
- */
-export class VariableSelection extends BasicSelectionModel {
-  /**
-   * Instantiate a new VariableSelection.
-   * @param options The instantiation options for a VariableSelection.
-   */
-  constructor(options: VariableSelection.IOptions) {
-    super(options);
-    this.changed.connect(slot =>
-      options.dataModel.getVariableReference(slot.cursorRow)
-    );
-  }
-}
-
-/**
- * A namespace for VariableSelection `statics`.
- */
-export namespace VariableSelection {
-  /**
-   * Instantiation options for `VariableSelection`.
-   */
-  export interface IOptions extends SelectionModel.IOptions {
-    /**
-     * The variable dataGrid model.
-     */
-    dataModel: VariableDataGridModel;
-  }
-}
-
-/**
- * A namespace for VariableDataGridModel `statics`.
- */
-export namespace VariableDataGridModel {
-  /**
-   * Instantiation options for `VariableDataGridModel`.
-   */
-  export interface IOptions extends DataGrid.IOptions {
-    /**
-     * The commands registry.
-     */
-    commands: CommandRegistry;
-  }
 }
 
 /**
@@ -377,7 +351,7 @@ namespace VariablesBodyGrid {
 /**
  * A namespace for DataGridTable `statics`.
  */
-namespace VariableGrid {
+namespace VariablesGrid {
   /**
    * Instantiation options for `DataGridTable`.
    */
@@ -389,7 +363,13 @@ namespace VariableGrid {
   }
 }
 
+/**
+ * A namespace for private data.
+ */
 namespace Private {
+  /**
+   * The dark theme for the data grid.
+   */
   export const DARK_STYLE = {
     dataStyle: {
       voidColor: '#212121',
@@ -408,6 +388,9 @@ namespace Private {
     })
   };
 
+  /**
+   * The light theme for the data grid.
+   */
   export const LIGHT_STYLE = {
     dataStyle: {
       voidColor: '#ffffff',

@@ -319,10 +319,9 @@ const variables: JupyterFrontEndPlugin<void> = {
 
         if (themeManager) {
           const updateStyle = () => {
-            const isLight =
-              themeManager && themeManager.theme
-                ? themeManager.isLight(themeManager.theme)
-                : true;
+            const isLight = themeManager?.theme
+              ? themeManager.isLight(themeManager.theme)
+              : true;
             widget.content.theme = isLight ? 'light' : 'dark';
           };
           themeManager.themeChanged.connect(updateStyle);
@@ -456,10 +455,9 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
 
     if (themeManager) {
       const updateStyle = () => {
-        const isLight =
-          themeManager && themeManager.theme
-            ? themeManager.isLight(themeManager.theme)
-            : true;
+        const isLight = themeManager?.theme
+          ? themeManager.isLight(themeManager.theme)
+          : true;
         sidebar.variables.theme = isLight ? 'light' : 'dark';
       };
       themeManager.themeChanged.connect(updateStyle);
