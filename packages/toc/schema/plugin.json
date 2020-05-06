@@ -11,7 +11,7 @@
   "properties": {
     "collapsibleNotebooks": {
       "title": "ToC Configuration",
-      "description": "A setting for specifying whether to allow collapsing notebook cells.",
+      "description": "Specifies whether to allow the ToC extension to collapse notebook cells.",
       "$ref": "#/definitions",
       "default": true
     }
