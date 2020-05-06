@@ -34,12 +34,12 @@ export class VariablesBodyGrid extends Panel {
     super();
     const { model, commands } = options;
     this._grid = new VariablesGrid({ commands });
+    this._grid.addClass('jp-DebuggerVariables-grid');
     this._model = model;
     const updated = (model: VariablesModel) => {
       this._grid.dataModel.setData(model.scopes);
     };
     this._model.changed.connect(updated, this);
-    this.node.style.height = '100%';
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariables-body');
   }
@@ -95,7 +95,6 @@ export class VariablesGrid extends Panel {
     );
     grid.stretchLastColumn = true;
     grid.node.style.height = '100%';
-    this.node.style.height = '100%';
     this._grid = grid;
     this.addWidget(grid);
   }
@@ -148,13 +147,12 @@ export class VariableDetailsGrid extends Panel {
     this.title.icon = variableIcon;
     this.title.label = `${service.session?.connection?.name} - details of ${title}`;
     this._grid = new VariablesGrid({ commands });
+    this._grid.addClass('jp-DebuggerVariables-grid');
     const detailsScope = {
       name: title,
       variables: details
     };
     this._grid.dataModel.setData([detailsScope]);
-    this.node.style.height = '100%';
-
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariableDetails');
   }

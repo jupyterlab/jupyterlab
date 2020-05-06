@@ -314,6 +314,7 @@ const variables: JupyterFrontEndPlugin<void> = {
             title
           })
         });
+        widget.addClass('jp-DebuggerVariables');
         widget.id = id;
         void tracker.add(widget);
 
