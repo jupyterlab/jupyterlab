@@ -70,7 +70,7 @@ function activateTOC(
   // Add the ToC widget to the application restorer:
   restorer.add(toc, 'juputerlab-toc');
 
-  // Load the configuration of whether to enable collapsing behavior
+  // Attempt to load plugin settings:
   settingRegistry.load('@jupyterlab/toc:plugin').then(settings => {
     const config = settings.get('tocConfig').composite as JSONObject;
     const collapsibleNotebooks = config.collapsibleNotebooks as boolean;
