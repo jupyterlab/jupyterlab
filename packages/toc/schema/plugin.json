@@ -2,22 +2,18 @@
   "title": "Table of Contents",
   "description": "Table of contents settings.",
   "definitions": {
-    "tocConfig": {
-      "properties": {
-        "collapsibleNotebooks": {
-          "type": "boolean"
-        }
+    "properties": {
+      "collapsibleNotebooks": {
+        "type": "boolean"
       }
     }
   },
   "properties": {
-    "tocConfig": {
+    "collapsibleNotebooks": {
       "title": "ToC Configuration",
-      "description": "The configuration for the table of contents.",
-      "$ref": "#/definitions/tocConfig",
-      "default": {
-        "collapsibleNotebooks": true
-      }
+      "description": "A setting for specifying whether to allow collapsing notebook cells.",
+      "$ref": "#/definitions",
+      "default": true
     }
   },
   "additionalProperties": false,

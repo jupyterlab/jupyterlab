@@ -14,8 +14,6 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { JSONObject } from '@lumino/coreutils';
-
 import { TableOfContents } from './toc';
 import {
   createLatexGenerator,
@@ -44,7 +42,7 @@ import '../style/index.css';
  * @param rendermime - rendered MIME registry
  * @returns table of contents registry
  */
-function activateTOC(
+async function activateTOC(
   app: JupyterFrontEnd,
   docmanager: IDocumentManager,
   editorTracker: IEditorTracker,
@@ -54,7 +52,7 @@ function activateTOC(
   notebookTracker: INotebookTracker,
   rendermime: IRenderMimeRegistry,
   settingRegistry: ISettingRegistry
-): ITableOfContentsRegistry {
+): Promise<ITableOfContentsRegistry> {
   // Create the ToC widget:
   const toc = new TableOfContents({ docmanager, rendermime });
 
@@ -71,19 +69,23 @@ function activateTOC(
   restorer.add(toc, 'juputerlab-toc');
 
   // Attempt to load plugin settings:
-  settingRegistry.load('@jupyterlab/toc:plugin').then(settings => {
-    const config = settings.get('tocConfig').composite as JSONObject;
-    const collapsibleNotebooks = config.collapsibleNotebooks as boolean;
-
-    // Create a notebook generator:
-    const notebookGenerator = createNotebookGenerator(
-      notebookTracker,
-      toc,
-      collapsibleNotebooks,
-      rendermime.sanitizer
+  let settings: ISettingRegistry.ISettings | undefined;
+  try {
+    settings = await settingRegistry.load('@jupyterlab/toc:plugin');
+  } catch (error) {
+    console.error(
+      'Failed to load settings for the Table of Contents extension.'
     );
-    registry.add(notebookGenerator);
-  });
+  }
+
+  // Create a notebook generator:
+  const notebookGenerator = createNotebookGenerator(
+    notebookTracker,
+    toc,
+    rendermime.sanitizer,
+    settings
+  );
+  registry.add(notebookGenerator);
 
   // Create a Markdown generator:
   const markdownGenerator = createMarkdownGenerator(
