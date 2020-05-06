@@ -333,6 +333,23 @@ export async function acceptDialog(
 }
 
 /**
+ * Click on the warning button in a dialog after it is attached
+ *
+ */
+export async function dangerDialog(
+  host: HTMLElement = document.body,
+  timeout: number = 250
+): Promise<void> {
+  await waitForDialog(host, timeout);
+
+  const node = host.getElementsByClassName('jp-mod-warn')[0];
+
+  if (node) {
+    simulate(node as HTMLElement, 'click', { button: 1 });
+  }
+}
+
+/**
  * Dismiss a dialog after it is attached.
  *
  * #### Notes

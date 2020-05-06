@@ -22,7 +22,7 @@ import { IMessageHandler, Message, MessageLoop } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
 
-import { acceptDialog, dismissDialog } from '@jupyterlab/testutils';
+import { dangerDialog, dismissDialog } from '@jupyterlab/testutils';
 
 import * as Mock from '@jupyterlab/testutils/lib/mock';
 
@@ -280,7 +280,7 @@ describe('@jupyterlab/docmanager', () => {
         const widget = manager.createWidget(widgetFactory, context);
         const closed = manager.onClose(widget);
 
-        await Promise.all([acceptDialog(), closed]);
+        await Promise.all([dangerDialog(), closed]);
 
         expect(widget.isDisposed).toBe(true);
       });
@@ -315,7 +315,7 @@ describe('@jupyterlab/docmanager', () => {
         const readonly = manager.createWidget(readOnlyFactory, context);
         const closed = manager.onClose(writable);
 
-        await acceptDialog();
+        await dangerDialog();
         await closed;
 
         expect(writable.isDisposed).toBe(true);
