@@ -552,8 +552,8 @@ The JupyterLab application is made up of two major parts:
 -  an npm package
 -  a Jupyter server extension (Python package)
 
-Each part is named ``jupyterlab``. The `developer tutorial
-documentation <https://jupyterlab.readthedocs.io/en/latest/index.html>`__
+Each part is named ``jupyterlab``. The :ref:`developer tutorial
+documentation <developer-guide>`
 provides additional architecture information.
 
 The NPM Packages
@@ -603,10 +603,6 @@ existing environment using the following command:
 
    conda env update -n <ENVIRONMENT> -f docs/environment.yml
 
-The Developer Documentation includes a
-`guide <https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html>`__
-to writing documentation including writing style, naming conventions,
-keyboard shortcuts, and screenshots.
 
 To test the docs run:
 
@@ -900,10 +896,8 @@ Notes
    you wish to run the core application in
    ``<git root>/jupyterlab/build``, run ``jupyter lab --core-mode``.
    This is the core application that will be shipped.
--  If working with extensions, see the extension documentation on
-   https://jupyterlab.readthedocs.io/en/latest/index.html.
+-  If working with extensions, see the :ref:`extension documentation <developer_extensions>`.
 -  The npm modules are fully compatible with Node/Babel/ES6/ES5. Simply
    omit the type declarations when using a language other than
    TypeScript.
--  For more information, read the
-   `documentation <http://jupyterlab.readthedocs.io/en/latest/>`__.
+
