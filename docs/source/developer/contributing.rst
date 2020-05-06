@@ -603,21 +603,11 @@ Writing Documentation
 Documentation is written in Markdown and reStructuredText. In
 particular, the documentation on our Read the Docs page is written in
 reStructuredText. To ensure that the Read the Docs page builds, you'll
-need to install the documentation dependencies with ``conda``. These
-dependencies are located in ``docs/environment.yml``. You can install
-the dependencies for building the documentation by creating a new conda
-environment:
+need to install the documentation dependencies with ``pip``:
 
 .. code:: bash
 
-   conda env create -f docs/environment.yml
-
-Alternatively, you can install the documentation dependencies in an
-existing environment using the following command:
-
-.. code:: bash
-
-   conda env update -n <ENVIRONMENT> -f docs/environment.yml
+   pip install -r docs/requirements.txt
 
 
 To test the docs run:
@@ -657,6 +647,72 @@ Writing Style
 -  Use "enable" rather than "allow" to indicate what JupyterLab makes
    possible for users. Using "allow" connotes that we are giving them
    permission, whereas "enable" connotes empowerment.
+
+User Interface Naming Conventions
+'''''''''''''''''''''''''''''''''
+
+Documents, Files, and Activities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Files are referrred to as either files or documents, depending on the
+context.
+
+Documents are more human centered. If human viewing, interpretation,
+interaction is an important part of the experience, it is a document in
+that context. For example, notebooks and markdown files will often be
+referring to as documents unless referring to the file-ness aspect of it
+(e.g., the notebook filename).
+
+Files are used in a less human-focused context. For example, we refer to
+files in relation to a file system or file name.
+
+Activities can be either a document or another UI panel that is not file
+backed, such as terminals, consoles or the inspector. An open document
+or file is an activity in that it is represented by a panel that you can
+interact with.
+
+Element Names
+^^^^^^^^^^^^^
+
+-  The generic content area of a tabbed UI is a panel, but prefer to
+   refer to the more specific name, such as “File browser.” Tab bars
+   have tabs which toggle panels.
+-  The menu bar contains menu items, which have their own submenus.
+-  The main work area can be referred to as the work area when the name
+   is unambiguous.
+-  When describing elements in the UI, colloquial names are preferred
+   (e.g., “File browser” instead of “Files panel”).
+
+The majority of names are written in lower case. These names include:
+
+-  tab
+-  panel
+-  menu bar
+-  sidebar
+-  file
+-  document
+-  activity
+-  tab bar
+-  main work area
+-  file browser
+-  command palette
+-  cell inspector
+-  code console
+
+The following sections of the user interface should be in title case,
+directly quoting a word in the UI:
+
+-  File menu
+-  Files tab
+-  Running panel
+-  Tabs panel
+-  Single-Document Mode
+
+The capitalized words match the label of the UI element the user is
+clicking on because there does not exist a good colloquial name for the
+tool, such as “file browser” or “command palette”.
+
+See :ref:`interface` for descriptions of elements in the UI.
 
 The Jupyter Server Extension
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -767,72 +823,6 @@ your copy of the ``"@lumino/messaging"`` package (in addition to
 whatever packages you actually made changes to). This is due to
 potential duplication of objects contained in the ``MessageLoop``
 namespace provided by the ``messaging`` package.
-
-User Interface Naming Conventions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Documents, Files, and Activities
-''''''''''''''''''''''''''''''''
-
-Files are referrred to as either files or documents, depending on the
-context.
-
-Documents are more human centered. If human viewing, interpretation,
-interaction is an important part of the experience, it is a document in
-that context. For example, notebooks and markdown files will often be
-referring to as documents unless referring to the file-ness aspect of it
-(e.g., the notebook filename).
-
-Files are used in a less human-focused context. For example, we refer to
-files in relation to a file system or file name.
-
-Activities can be either a document or another UI panel that is not file
-backed, such as terminals, consoles or the inspector. An open document
-or file is an activity in that it is represented by a panel that you can
-interact with.
-
-Element Names
-'''''''''''''
-
--  The generic content area of a tabbed UI is a panel, but prefer to
-   refer to the more specific name, such as “File browser.” Tab bars
-   have tabs which toggle panels.
--  The menu bar contains menu items, which have their own submenus.
--  The main work area can be referred to as the work area when the name
-   is unambiguous.
--  When describing elements in the UI, colloquial names are preferred
-   (e.g., “File browser” instead of “Files panel”).
-
-The majority of names are written in lower case. These names include:
-
--  tab
--  panel
--  menu bar
--  sidebar
--  file
--  document
--  activity
--  tab bar
--  main work area
--  file browser
--  command palette
--  cell inspector
--  code console
-
-The following sections of the user interface should be in title case,
-directly quoting a word in the UI:
-
--  File menu
--  Files tab
--  Running panel
--  Tabs panel
--  Single-Document Mode
-
-The capitalized words match the label of the UI element the user is
-clicking on because there does not exist a good colloquial name for the
-tool, such as “file browser” or “command palette”.
-
-See :ref:`interface` for descriptions of elements in the UI.
 
 Keyboard Shortcuts
 ~~~~~~~~~~~~~~~~~~
