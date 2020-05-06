@@ -359,11 +359,11 @@ export class DocumentWidgetManager implements IDisposable {
     const fileName = widget.title.label;
     const saveLabel = context.contentsModel?.writable ? 'Save' : 'Save as';
     return showDialog({
-      title: 'Confirm close',
-      body: `File "${fileName}" has unsaved changes, save before closing?`,
+      title: 'Save your work',
+      body: `Save changes in "${fileName}" before closing?`,
       buttons: [
         Dialog.cancelButton(),
-        Dialog.warnButton({ label: 'Discard changes' }),
+        Dialog.warnButton({ label: 'Discard' }),
         Dialog.okButton({ label: saveLabel })
       ]
     }).then(result => {
