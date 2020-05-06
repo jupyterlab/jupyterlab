@@ -1868,6 +1868,7 @@ export namespace DirListing {
           '\nModified: ' +
           Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss');
       }
+      hoverText += '\nWritable: ' + model.writable;
 
       node.title = hoverText;
       node.setAttribute('data-file-type', name);
