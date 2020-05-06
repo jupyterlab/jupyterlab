@@ -99,7 +99,7 @@ class OptionsManager extends Registry.IOptionsManager {
   }
 
   /**
-   * Gets ToC configuration of whether to enable collapsible cells
+   * Gets the ToC setting specifying whether to allow collapsing notebook cells.
    */
   get collapsibleNotebooks() {
     return this._collapsible;
