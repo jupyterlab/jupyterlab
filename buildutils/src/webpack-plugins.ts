@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
+import DuplicatePackageCheckerPlugin from 'duplicate-package-checker-webpack-plugin';
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 
