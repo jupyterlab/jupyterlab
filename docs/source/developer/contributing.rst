@@ -63,7 +63,7 @@ Generally, an issue should be opened describing a piece of proposed work
 and the issues it solves before a pull request is opened.
 
 Issue Management
-~~~~~~~~~~~~~~~~
+''''''''''''''''
 
 Opening an issue lets community members participate in the design
 discussion, makes others aware of work being done, and sets the stage
