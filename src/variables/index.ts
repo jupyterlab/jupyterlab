@@ -1,19 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ToolbarButton } from '@jupyterlab/apputils';
+
 import { CommandRegistry } from '@lumino/commands';
-
-import { VariablesBodyGrid } from './grid';
-
-import { IDebugger } from '../tokens';
 
 import { Panel, Widget } from '@lumino/widgets';
 
+import { VariablesBodyGrid, VariablesGrid } from './grid';
+
 import { VariablesHeader } from './header';
 
-import { ToolbarButton } from '@jupyterlab/apputils';
-
 import { VariablesModel } from './model';
+
+import { IDebugger } from '../tokens';
 
 import { VariablesBodyTree } from './tree';
 
@@ -74,7 +74,7 @@ export class Variables extends Panel {
   /**
    * Set the theme for the variable table.
    */
-  set theme(theme: Theme) {
+  set theme(theme: VariablesGrid.Theme) {
     this._table.theme = theme;
   }
 
@@ -99,8 +99,6 @@ export class Variables extends Panel {
   private _tree: VariablesBodyTree;
   private _table: VariablesBodyGrid;
 }
-
-export type Theme = 'dark' | 'light';
 
 /**
  * Convert a variable to a primitive type.

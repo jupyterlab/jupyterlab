@@ -22,8 +22,6 @@ import { variableIcon } from '../icons';
 
 import { VariablesModel } from './model';
 
-import { Theme } from '.';
-
 /**
  * A Panel to show variables in a datagrid.
  */
@@ -61,7 +59,7 @@ export class VariablesBodyGrid extends Panel {
    *
    * @param theme The theme for the datagrid.
    */
-  set theme(theme: Theme) {
+  set theme(theme: VariablesGrid.Theme) {
     this._grid.theme = theme;
   }
 
@@ -117,7 +115,7 @@ export class VariablesGrid extends Panel {
    *
    * @param theme The theme for the datagrid.
    */
-  set theme(theme: Theme) {
+  set theme(theme: VariablesGrid.Theme) {
     const { dataStyle, textRender } =
       theme === 'dark' ? Private.DARK_STYLE : Private.LIGHT_STYLE;
     this._grid.cellRenderers.update({}, textRender);
@@ -166,7 +164,7 @@ export class VariableDetailsGrid extends Panel {
    *
    * @param theme The theme for the datagrid.
    */
-  set theme(theme: Theme) {
+  set theme(theme: VariablesGrid.Theme) {
     this._grid.theme = theme;
   }
 
@@ -332,7 +330,7 @@ namespace VariablesDetails {
 /**
  * A namespace for DataGridTable `statics`.
  */
-namespace VariablesBodyGrid {
+export namespace VariablesBodyGrid {
   /**
    * Instantiation options for `DataGridTable`.
    */
@@ -351,7 +349,12 @@ namespace VariablesBodyGrid {
 /**
  * A namespace for DataGridTable `statics`.
  */
-namespace VariablesGrid {
+export namespace VariablesGrid {
+  /**
+   * The theme for the datagrid.
+   */
+  export type Theme = 'dark' | 'light';
+
   /**
    * Instantiation options for `DataGridTable`.
    */
