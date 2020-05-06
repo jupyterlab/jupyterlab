@@ -334,7 +334,6 @@ export async function acceptDialog(
 
 /**
  * Click on the warning button in a dialog after it is attached
- *
  */
 export async function dangerDialog(
   host: HTMLElement = document.body,
