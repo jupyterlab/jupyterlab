@@ -20,6 +20,7 @@
   "author": "Project Jupyter",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/*.json",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
   "main": "lib/index.js",
@@ -74,6 +75,7 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": "lib/extension.js"
+    "extension": "lib/extension.js",
+    "schemaDir": "schema"
   }
 }

@@ -31,10 +31,12 @@ import { toolbar } from './toolbar_generator';
 function createNotebookGenerator(
   tracker: INotebookTracker,
   widget: TableOfContents,
+  collapsibleNotebooks: boolean,
   sanitizer: ISanitizer
 ): Registry.IGenerator<NotebookPanel> {
   const options = new OptionsManager(widget, tracker, {
     numbering: false,
+    collapsibleNotebooks: collapsibleNotebooks,
     sanitizer: sanitizer
   });
   return {

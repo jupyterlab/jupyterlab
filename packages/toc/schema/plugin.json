@@ -1,0 +1,25 @@
+{
+  "title": "Table of Contents",
+  "description": "Table of contents settings.",
+  "definitions": {
+    "tocConfig": {
+      "properties": {
+        "collapsibleNotebooks": {
+          "type": "boolean"
+        }
+      }
+    }
+  },
+  "properties": {
+    "tocConfig": {
+      "title": "ToC Configuration",
+      "description": "The configuration for the table of contents.",
+      "$ref": "#/definitions/tocConfig",
+      "default": {
+        "collapsibleNotebooks": true
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}

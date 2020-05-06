@@ -12,6 +12,10 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { JSONObject } from '@lumino/coreutils';
+
 import { TableOfContents } from './toc';
 import {
   createLatexGenerator,
@@ -48,7 +52,8 @@ function activateTOC(
   restorer: ILayoutRestorer,
   markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
-  rendermime: IRenderMimeRegistry
+  rendermime: IRenderMimeRegistry,
+  settingRegistry: ISettingRegistry
 ): ITableOfContentsRegistry {
   // Create the ToC widget:
   const toc = new TableOfContents({ docmanager, rendermime });
@@ -65,13 +70,20 @@ function activateTOC(
   // Add the ToC widget to the application restorer:
   restorer.add(toc, 'juputerlab-toc');
 
-  // Create a notebook generator:
-  const notebookGenerator = createNotebookGenerator(
-    notebookTracker,
-    toc,
-    rendermime.sanitizer
-  );
-  registry.add(notebookGenerator);
+  // Load the configuration of whether to enable collapsing behavior
+  settingRegistry.load('@jupyterlab/toc:plugin').then(settings => {
+    const config = settings.get('tocConfig').composite as JSONObject;
+    const collapsibleNotebooks = config.collapsibleNotebooks as boolean;
+
+    // Create a notebook generator:
+    const notebookGenerator = createNotebookGenerator(
+      notebookTracker,
+      toc,
+      collapsibleNotebooks,
+      rendermime.sanitizer
+    );
+    registry.add(notebookGenerator);
+  });
 
   // Create a Markdown generator:
   const markdownGenerator = createMarkdownGenerator(
@@ -141,7 +153,8 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
     ILayoutRestorer,
     IMarkdownViewerTracker,
     INotebookTracker,
-    IRenderMimeRegistry
+    IRenderMimeRegistry,
+    ISettingRegistry
   ],
   activate: activateTOC
 };

@@ -49,19 +49,24 @@ function render(
           'toc-hr-collapsed'
         ) as boolean;
 
-        // Render the twist button:
-        let button = twistButton(item.cellRef, collapsed || false, onClick);
-
         // Update the collapsed state of the corresponding notebook cell:
         setCollapsedState(tracker, item.cellRef, collapsed);
 
-        // Render the heading item:
-        jsx = (
-          <div className="toc-entry-holder">
-            {button}
-            {jsx}
-          </div>
-        );
+        // Only render the twist button if configured to enable collapsing behavior:
+        if (options.collapsibleNotebooks) {
+          let button = twistButton(item.cellRef, collapsed || false, onClick);
+
+          // Render the heading item:
+          jsx = (
+            <div className="toc-entry-holder">
+              {button}
+              {jsx}
+            </div>
+          );
+        } else {
+          // Render the heading item without the dropdown button:
+          jsx = <div className="toc-entry-holder">{jsx}</div>;
+        }
       }
       return jsx;
     }
@@ -76,14 +81,20 @@ function render(
         let collapsed = item.cellRef!.model.metadata.get(
           'toc-hr-collapsed'
         ) as boolean;
-        let button = twistButton(item.cellRef, collapsed || false, onClick);
-        setCollapsedState(tracker, item.cellRef, collapsed);
-        jsx = (
-          <div className="toc-entry-holder">
-            {button}
-            {jsx}
-          </div>
-        );
+
+        if (options.collapsibleNotebooks) {
+          let button = twistButton(item.cellRef, collapsed || false, onClick);
+          setCollapsedState(tracker, item.cellRef, collapsed);
+          jsx = (
+            <div className="toc-entry-holder">
+              {button}
+              {jsx}
+            </div>
+          );
+        } else {
+          // Render the heading item without the dropdown button:
+          jsx = <div className="toc-entry-holder">{jsx}</div>;
+        }
       }
       return jsx;
     }
