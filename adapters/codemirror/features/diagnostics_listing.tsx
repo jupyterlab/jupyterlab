@@ -1,6 +1,6 @@
 import React, { ReactElement } from 'react';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
+import { caretDownIcon, caretUpIcon, LabIcon } from '@jupyterlab/ui-components';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
 import { IEditorPosition } from '../../../positioning';
@@ -12,6 +12,13 @@ import '../../../../style/diagnostics_listing.css';
 import { Cell } from '@jupyterlab/cells';
 import { diagnosticSeverityNames } from '../../../lsp';
 import { message_without_code } from './diagnostics';
+
+import diagnosticsSvg from '../../../../style/icons/diagnostics.svg';
+
+export const diagnosticsIcon = new LabIcon({
+  name: 'lsp:diagnostics',
+  svgstr: diagnosticsSvg
+});
 
 /**
  * Diagnostic which is localized at a specific editor (cell) within a notebook
@@ -163,17 +170,19 @@ class Column {
 function SortableTH(props: { name: string; listing: DiagnosticsListing }): any {
   const is_sort_key = props.name === props.listing.sort_key;
   const sortIcon =
-    props.listing.sort_direction === 1 ? caretUpIcon : caretDownIcon;
+    !is_sort_key || props.listing.sort_direction === 1
+      ? caretUpIcon
+      : caretDownIcon;
   return (
     <th
       key={props.name}
       onClick={() => props.listing.sort(props.name)}
       className={is_sort_key ? 'lsp-sorted-header' : null}
     >
-      {props.name}
-      {is_sort_key ? (
+      <div>
+        <label>{props.name}</label>
         <sortIcon.react tag="span" className="lsp-sort-icon" />
-      ) : null}
+      </div>
     </th>
   );
 }

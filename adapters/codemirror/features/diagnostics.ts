@@ -11,7 +11,8 @@ import {
   DIAGNOSTICS_LISTING_CLASS,
   DiagnosticsDatabase,
   DiagnosticsListing,
-  IEditorDiagnostic
+  IEditorDiagnostic,
+  diagnosticsIcon
 } from './diagnostics_listing';
 import { VirtualDocument } from '../../../virtual/document';
 import { VirtualEditor } from '../../../virtual/editor';
@@ -46,6 +47,7 @@ class DiagnosticsPanel {
     widget.id = 'lsp-diagnostics-panel';
     widget.title.label = 'Diagnostics Panel';
     widget.title.closable = true;
+    widget.title.icon = diagnosticsIcon;
     return widget;
   }
 
