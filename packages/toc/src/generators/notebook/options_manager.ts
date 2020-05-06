@@ -22,7 +22,7 @@ interface Options {
   sanitizer: ISanitizer;
 
   /**
-   * Boolean indicating whether notebook cells collapsible
+   * Boolean indicating whether notebook cells are collapsible.
    */
   collapsibleNotebooks: boolean;
 
