@@ -18,11 +18,7 @@ import { Panel } from '@lumino/widgets';
 
 import { CommandIDs } from '..';
 
-import { variableIcon } from '../icons';
-
 import { VariablesModel } from './model';
-
-import { IDebugger } from '../tokens';
 
 /**
  * A Panel to show variables in a datagrid.
@@ -34,10 +30,11 @@ export class VariablesBodyGrid extends Panel {
    */
   constructor(options: VariablesBodyGrid.IOptions) {
     super();
-    const { model, commands } = options;
+    const { model, commands, scopes } = options;
     this._grid = new VariablesGrid({ commands });
     this._grid.addClass('jp-DebuggerVariables-grid');
     this._model = model;
+    this._grid.dataModel.setData(scopes ?? []);
     const updated = (model: VariablesModel) => {
       this._grid.dataModel.setData(model.scopes);
     };
@@ -131,44 +128,6 @@ export class VariablesGrid extends Panel {
   }
 
   private _grid: DataGrid;
-}
-
-/**
- * A widget to display details for a variable.
- */
-export class VariableDetailsGrid extends Panel {
-  /**
-   * Instantiate a new Body for the datagrid of the selected variable.
-   * @param options The instantiation options for VariableDetailsGrid.
-   */
-  constructor(options: VariablesDetails.IOptions) {
-    super();
-    const { details, commands, model, service, title } = options;
-    model.changed.connect(this.dispose, this);
-
-    this.title.icon = variableIcon;
-    this.title.label = `${service.session?.connection?.name} - ${title}`;
-    this._grid = new VariablesGrid({ commands });
-    this._grid.addClass('jp-DebuggerVariables-grid');
-    const detailsScope = {
-      name: title,
-      variables: details
-    };
-    this._grid.dataModel.setData([detailsScope]);
-    this.addWidget(this._grid);
-    this.addClass('jp-DebuggerVariables-body');
-  }
-
-  /**
-   * Set the theme used in JupyterLab.
-   *
-   * @param theme The theme for the datagrid.
-   */
-  set theme(theme: VariablesGrid.Theme) {
-    this._grid.theme = theme;
-  }
-
-  private _grid: VariablesGrid;
 }
 
 /**
@@ -297,37 +256,6 @@ export class VariableDataGridModel extends DataModel {
 }
 
 /**
- * A namespace for VariablesDetails `statics`.
- */
-namespace VariablesDetails {
-  /**
-   * Instantiation options for `VariablesDetails`.
-   */
-  export interface IOptions {
-    /**
-     * The variables model.
-     */
-    model: VariablesModel;
-    /**
-     * The details of the selected variable.
-     */
-    details: VariablesModel.IVariable[];
-    /**
-     * The debugger service.
-     */
-    service: IDebugger;
-    /**
-     * The commands registry.
-     */
-    commands: CommandRegistry;
-    /**
-     * The name of the selected variable.
-     */
-    title: string;
-  }
-}
-
-/**
  * A namespace for DataGridTable `statics`.
  */
 export namespace VariablesBodyGrid {
@@ -343,6 +271,10 @@ export namespace VariablesBodyGrid {
      * The commands registry.
      */
     commands: CommandRegistry;
+    /**
+     * The optional initial scopes data.
+     */
+    scopes?: VariablesModel.IScope[];
   }
 }
 

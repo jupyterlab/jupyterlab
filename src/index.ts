@@ -34,7 +34,8 @@ import {
   stepIntoIcon,
   stepOutIcon,
   stepOverIcon,
-  terminateIcon
+  terminateIcon,
+  variableIcon
 } from './icons';
 
 import { Debugger } from './debugger';
@@ -49,7 +50,7 @@ import { IDebugger } from './tokens';
 
 import { DebuggerModel } from './model';
 
-import { VariableDetailsGrid } from './variables/grid';
+import { VariablesBodyGrid } from './variables/grid';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -278,7 +279,7 @@ const variables: JupyterFrontEndPlugin<void> = {
     themeManager: IThemeManager
   ) => {
     const { commands, shell } = app;
-    const tracker = new WidgetTracker<MainAreaWidget<VariableDetailsGrid>>({
+    const tracker = new WidgetTracker<MainAreaWidget<VariablesBodyGrid>>({
       namespace: 'variableDetails'
     });
 
@@ -295,7 +296,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         );
 
         const title = args.title as string;
-        const id = `jp-debugger-details-${title}`;
+        const id = `jp-debugger-variable-${title}`;
         if (
           !details ||
           details.length === 0 ||
@@ -305,18 +306,20 @@ const variables: JupyterFrontEndPlugin<void> = {
         }
 
         const model = (service.model as DebuggerModel).variables;
-        const widget = new MainAreaWidget<VariableDetailsGrid>({
-          content: new VariableDetailsGrid({
-            commands,
-            service,
-            details,
+        const widget = new MainAreaWidget<VariablesBodyGrid>({
+          content: new VariablesBodyGrid({
             model,
-            title
+            commands,
+            scopes: [{ name: title, variables: details }]
           })
         });
         widget.addClass('jp-DebuggerVariables');
         widget.id = id;
+        widget.title.icon = variableIcon;
+        widget.title.label = `${service.session?.connection?.name} - ${title}`;
         void tracker.add(widget);
+
+        model.changed.connect(() => widget.dispose());
 
         if (themeManager) {
           const updateStyle = () => {
