@@ -242,7 +242,7 @@ export class FileBrowserModel implements IDisposable {
    */
   async cd(newValue = '.'): Promise<void> {
     if (newValue !== '.') {
-      newValue = Private.normalizePath(
+      newValue = FileBrowserModel.normalizePath(
         this.manager.services.contents,
         this._model.path,
         newValue
@@ -677,6 +677,20 @@ export namespace FileBrowserModel {
      */
     state?: IStateDB;
   }
+
+  /**
+   * Normalize a path based on a root directory, accounting for relative paths.
+   */
+  export function normalizePath(
+    contents: Contents.IManager,
+    root: string,
+    path: string
+  ): string {
+    const driveName = contents.driveName(root);
+    const localPath = contents.localPath(root);
+    const resolved = PathExt.resolve('/', localPath, path);
+    return driveName ? `${driveName}:${resolved}` : resolved;
+  }
 }
 
 /**
@@ -719,24 +733,5 @@ export namespace FilterFileBrowserModel {
      * Filter function on file browser item model
      */
     filter?: (value: Contents.IModel) => boolean;
-  }
-}
-
-/**
- * The namespace for the file browser model private data.
- */
-namespace Private {
-  /**
-   * Normalize a path based on a root directory, accounting for relative paths.
-   */
-  export function normalizePath(
-    contents: Contents.IManager,
-    root: string,
-    path: string
-  ): string {
-    const driveName = contents.driveName(root);
-    const localPath = contents.localPath(root);
-    const resolved = PathExt.resolve('/', localPath, path);
-    return driveName ? `${driveName}:${resolved}` : resolved;
   }
 }

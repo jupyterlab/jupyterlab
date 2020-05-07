@@ -11,7 +11,12 @@ import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 
-import { Contents, ServiceManager } from '@jupyterlab/services';
+import {
+  Contents,
+  ServerConnection,
+  ServiceManager,
+  Drive
+} from '@jupyterlab/services';
 
 import { StateDB } from '@jupyterlab/statedb';
 
@@ -106,6 +111,64 @@ describe('filebrowser/model', () => {
       it('should construct a new file browser model', () => {
         model = new FileBrowserModel({ manager });
         expect(model).toBeInstanceOf(FileBrowserModel);
+      });
+    });
+
+    describe('#normalizePath', () => {
+      const drive = new Drive({
+        name: 'drive',
+        serverSettings: ServerConnection.makeSettings()
+      });
+      const contents = new Mock.ContentsManagerMock();
+      contents.addDrive(drive);
+
+      const root = 'do/re';
+      const rootEmpty = '';
+      const rootSlash = '/';
+      const rootAbs = `//////${root}`;
+      const rootDrive = `drive:${root}`;
+      const rootDriveAbs = `drive:${rootAbs}`;
+
+      const testPath = 'foo/bar/baz';
+      const testPathAbs = `/${testPath}`;
+
+      it('should not prepend root path to an absolute path', () => {
+        const result = FileBrowserModel.normalizePath(
+          contents,
+          root,
+          testPathAbs
+        );
+        expect(result).toBe(testPath);
+      });
+
+      it('should not have any affect on path relative to root', () => {
+        let result = FileBrowserModel.normalizePath(
+          contents,
+          rootEmpty,
+          testPath
+        );
+        expect(result).toBe(testPath);
+
+        result = FileBrowserModel.normalizePath(contents, rootSlash, testPath);
+        expect(result).toBe(testPath);
+      });
+
+      it('should join root drive, root path, and path', () => {
+        let result = FileBrowserModel.normalizePath(
+          contents,
+          rootDrive,
+          testPath
+        );
+        expect(result).toBe(`${rootDrive}/${testPath}`);
+      });
+
+      it('should remove all leading slashes from result path', () => {
+        let result = FileBrowserModel.normalizePath(
+          contents,
+          rootDriveAbs,
+          testPath
+        );
+        expect(result).toBe(`${rootDrive}/${testPath}`);
       });
     });
 
