@@ -326,6 +326,9 @@ const variables: JupyterFrontEndPlugin<void> = {
             widget.content.theme = isLight ? 'light' : 'dark';
           };
           themeManager.themeChanged.connect(updateStyle);
+          widget.disposed.connect(() =>
+            themeManager.themeChanged.disconnect(updateStyle)
+          );
           updateStyle();
         }
 
