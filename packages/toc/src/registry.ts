@@ -18,7 +18,7 @@ export interface ITableOfContentsRegistry extends TableOfContentsRegistry {}
  * Table of contents registry token.
  */
 export const ITableOfContentsRegistry = new Token<TableOfContentsRegistry>(
-  'jupyterlab-toc:ITableOfContentsRegistry'
+  'toc:ITableOfContentsRegistry'
 );
 /* tslint:enable */
 

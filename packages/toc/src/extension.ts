@@ -144,7 +144,7 @@ async function activateTOC(
  * @private
  */
 const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
-  id: 'jupyterlab-toc',
+  id: 'toc',
   autoStart: true,
   provides: ITableOfContentsRegistry,
   requires: [
