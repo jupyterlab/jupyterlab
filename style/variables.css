@@ -43,3 +43,7 @@
 .jp-DebuggerVariables-grid {
   flex: 1 1 auto;
 }
+
+.jp-DebuggerVariables-grid .lm-DataGrid {
+  border: none;
+}
