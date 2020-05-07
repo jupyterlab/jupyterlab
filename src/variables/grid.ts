@@ -256,11 +256,11 @@ export class VariableDataGridModel extends DataModel {
 }
 
 /**
- * A namespace for DataGridTable `statics`.
+ * A namespace for VariableBodyGrid `statics`.
  */
 export namespace VariablesBodyGrid {
   /**
-   * Instantiation options for `DataGridTable`.
+   * Instantiation options for `VariablesBodyGrid`.
    */
   export interface IOptions {
     /**
@@ -279,7 +279,7 @@ export namespace VariablesBodyGrid {
 }
 
 /**
- * A namespace for DataGridTable `statics`.
+ * A namespace for VariablesGrid `statics`.
  */
 export namespace VariablesGrid {
   /**
@@ -288,7 +288,7 @@ export namespace VariablesGrid {
   export type Theme = 'dark' | 'light';
 
   /**
-   * Instantiation options for `DataGridTable`.
+   * Instantiation options for `VariablesGrid`.
    */
   export interface IOptions {
     /**
