@@ -59,6 +59,7 @@ MANIFEST
 *.map
 *.swp
 .DS_Store
+.log/
 \#*#
 .#*
 

@@ -22,6 +22,7 @@ export {
   initNotebookContext,
   waitForDialog,
   acceptDialog,
+  dangerDialog,
   dismissDialog
 } from './common';
 
