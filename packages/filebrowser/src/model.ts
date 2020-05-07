@@ -736,7 +736,7 @@ namespace Private {
   ): string {
     const driveName = contents.driveName(root);
     const localPath = contents.localPath(root);
-    const resolved = PathExt.resolve(localPath, path);
+    const resolved = PathExt.resolve('/', localPath, path);
     return driveName ? `${driveName}:${resolved}` : resolved;
   }
 }
