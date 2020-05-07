@@ -734,12 +734,9 @@ namespace Private {
     root: string,
     path: string
   ): string {
-    if (path === '/') {
-      return '';
-    }
     const driveName = contents.driveName(root);
     const localPath = contents.localPath(root);
-    let resolved = PathExt.normalize(PathExt.join(localPath, path));
+    const resolved = PathExt.resolve(localPath, path);
     return driveName ? `${driveName}:${resolved}` : resolved;
   }
 }
