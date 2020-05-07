@@ -3,13 +3,9 @@
   "description": "Table of contents settings.",
   "properties": {
     "collapsibleNotebooks": {
-      "type": "boolean"
-    }
-  },
-  "properties": {
-    "collapsibleNotebooks": {
       "title": "ToC Configuration",
       "description": "Specifies whether to allow the ToC extension to collapse notebook cells.",
+      "type": "boolean",
       "default": true
     }
   },
