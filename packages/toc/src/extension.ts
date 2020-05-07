@@ -73,7 +73,7 @@ async function activateTOC(
     settings = await settingRegistry.load('@jupyterlab/toc:plugin');
   } catch (error) {
     console.error(
-      'Failed to load settings for the Table of Contents extension.'
+      `Failed to load settings for the Table of Contents extension.\n\n${error}`
     );
   }
 
