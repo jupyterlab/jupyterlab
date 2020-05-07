@@ -70,7 +70,7 @@ export namespace CommandIDs {
 
   export const stepOut = 'debugger:stepOut';
 
-  export const variableDetails = 'debugger:variable-details';
+  export const inspectVariable = 'debugger:inspect-variable';
 }
 
 /**
@@ -280,26 +280,26 @@ const variables: JupyterFrontEndPlugin<void> = {
   ) => {
     const { commands, shell } = app;
     const tracker = new WidgetTracker<MainAreaWidget<VariablesBodyGrid>>({
-      namespace: 'variableDetails'
+      namespace: 'debugger/inspect-variable'
     });
 
-    commands.addCommand(CommandIDs.variableDetails, {
-      label: 'Variable Details',
-      caption: 'Variable Details',
+    commands.addCommand(CommandIDs.inspectVariable, {
+      label: 'Inspect Variable',
+      caption: 'Inspect Variable',
       execute: async args => {
         const { variableReference } = args;
         if (!variableReference || variableReference === 0) {
           return;
         }
-        const details = await service.getVariableDetails(
+        const variables = await service.inspectVariable(
           variableReference as number
         );
 
         const title = args.title as string;
         const id = `jp-debugger-variable-${title}`;
         if (
-          !details ||
-          details.length === 0 ||
+          !variables ||
+          variables.length === 0 ||
           tracker.find(widget => widget.id === id)
         ) {
           return;
@@ -310,7 +310,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           content: new VariablesBodyGrid({
             model,
             commands,
-            scopes: [{ name: title, variables: details }]
+            scopes: [{ name: title, variables }]
           })
         });
         widget.addClass('jp-DebuggerVariables');

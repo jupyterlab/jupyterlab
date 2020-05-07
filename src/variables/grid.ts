@@ -81,7 +81,7 @@ export class VariablesGrid extends Panel {
     const grid = new DataGrid();
     const mouseHandler = new Private.VariablesClickHandler();
     mouseHandler.doubleClicked.connect((_, hit) =>
-      commands.execute(CommandIDs.variableDetails, {
+      commands.execute(CommandIDs.inspectVariable, {
         variableReference: dataModel.getVariableReference(hit.row),
         title: dataModel.getVariableName(hit.row)
       })

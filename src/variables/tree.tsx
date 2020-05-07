@@ -132,7 +132,7 @@ const VariableComponent = ({
 }) => {
   const [variable] = useState(data);
   const [expanded, setExpanded] = useState(null);
-  const [details, setDetails] = useState(null);
+  const [variables, setVariables] = useState(null);
   const styleName = {
     color: 'var(--jp-mirror-editor-attribute-color)'
   };
@@ -149,11 +149,11 @@ const VariableComponent = ({
       return;
     }
     e.stopPropagation();
-    const variableDetails = await service.getVariableDetails(
+    const variables = await service.inspectVariable(
       variable.variablesReference
     );
     setExpanded(!expanded);
-    setDetails(variableDetails);
+    setVariables(variables);
   };
 
   return (
@@ -167,10 +167,10 @@ const VariableComponent = ({
       <span style={styleName}>{variable.name}</span>
       <span>: </span>
       <span style={styleType}>{convertType(variable)}</span>
-      {expanded && details && (
+      {expanded && variables && (
         <VariablesComponent
           key={variable.name}
-          data={details}
+          data={variables}
           service={service}
           filter={filter}
         />
