@@ -40,14 +40,6 @@
   margin-left: auto;
 }
 
-.jp-DebuggerVariableDetails {
-  display: flex;
-  flex-direction: column;
-  color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-font-size1);
-  overflow: auto;
-}
-
 .jp-DebuggerVariables-grid {
   flex: 1 1 auto;
 }

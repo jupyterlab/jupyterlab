@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CommandRegistry } from '@lumino/commands';
+
 import {
   BasicKeyHandler,
   BasicMouseHandler,
@@ -10,17 +12,17 @@ import {
   TextRenderer
 } from '@lumino/datagrid';
 
-import { CommandIDs } from '..';
-
-import { CommandRegistry } from '@lumino/commands';
-
-import { IDebugger } from '../tokens';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { Panel } from '@lumino/widgets';
+
+import { CommandIDs } from '..';
 
 import { variableIcon } from '../icons';
 
 import { VariablesModel } from './model';
+
+import { IDebugger } from '../tokens';
 
 /**
  * A Panel to show variables in a datagrid.
@@ -80,19 +82,19 @@ export class VariablesGrid extends Panel {
     const { commands } = options;
     const dataModel = new VariableDataGridModel();
     const grid = new DataGrid();
-    grid.dataModel = dataModel;
-    grid.keyHandler = new BasicKeyHandler();
-    grid.mouseHandler = new BasicMouseHandler();
-    grid.selectionModel = new BasicSelectionModel({
-      dataModel,
-      selectionMode: 'row'
-    });
-    grid.selectionModel.changed.connect(slot =>
+    const mouseHandler = new Private.VariablesClickHandler();
+    mouseHandler.doubleClicked.connect((_, hit) =>
       commands.execute(CommandIDs.variableDetails, {
-        variableReference: dataModel.getVariableReference(slot.cursorRow),
-        title: dataModel.getVariableName(slot.cursorRow)
+        variableReference: dataModel.getVariableReference(hit.row),
+        title: dataModel.getVariableName(hit.row)
       })
     );
+    grid.dataModel = dataModel;
+    grid.keyHandler = new BasicKeyHandler();
+    grid.mouseHandler = mouseHandler;
+    grid.selectionModel = new BasicSelectionModel({
+      dataModel
+    });
     grid.stretchLastColumn = true;
     grid.node.style.height = '100%';
     this._grid = grid;
@@ -154,7 +156,7 @@ export class VariableDetailsGrid extends Panel {
     };
     this._grid.dataModel.setData([detailsScope]);
     this.addWidget(this._grid);
-    this.addClass('jp-DebuggerVariableDetails');
+    this.addClass('jp-DebuggerVariables-body');
   }
 
   /**
@@ -409,4 +411,29 @@ namespace Private {
       horizontalAlignment: 'left'
     })
   };
+
+  /**
+   * A custom click handler to handle clicks on the variables grid.
+   */
+  export class VariablesClickHandler extends BasicMouseHandler {
+    /**
+     * A signal emitted when the variables grid is double clicked.
+     */
+    get doubleClicked(): ISignal<this, DataGrid.HitTestResult> {
+      return this._doubleClicked;
+    }
+
+    /**
+     * Handle a mouse double-click event.
+     *
+     * @param grid The datagrid clicked.
+     * @param event The mouse event.
+     */
+    onMouseDoubleClick(grid: DataGrid, event: MouseEvent) {
+      const hit = grid.hitTest(event.clientX, event.clientY);
+      this._doubleClicked.emit(hit);
+    }
+
+    private _doubleClicked = new Signal<this, DataGrid.HitTestResult>(this);
+  }
 }
