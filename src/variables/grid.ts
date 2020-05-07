@@ -147,7 +147,7 @@ export class VariableDetailsGrid extends Panel {
     model.changed.connect(this.dispose, this);
 
     this.title.icon = variableIcon;
-    this.title.label = `${service.session?.connection?.name} - details of ${title}`;
+    this.title.label = `${service.session?.connection?.name} - ${title}`;
     this._grid = new VariablesGrid({ commands });
     this._grid.addClass('jp-DebuggerVariables-grid');
     const detailsScope = {
@@ -376,10 +376,11 @@ namespace Private {
   export const DARK_STYLE = {
     dataStyle: {
       voidColor: '#212121',
-      gridLineColor: '#424242',
-      backgroundColor: '#212121',
-      headerGridLineColor: '#424242',
-      headerBackgroundColor: '#616161',
+      backgroundColor: '#111111',
+      headerBackgroundColor: '#424242',
+      gridLineColor: 'rgba(235, 235, 235, 0.15)',
+      headerGridLineColor: 'rgba(235, 235, 235, 0.25)',
+      rowBackgroundColor: (i: number) => (i % 2 === 0 ? '#212121' : '#111111'),
       selectionFillColor: '#2196f32e'
     },
     textRender: new TextRenderer({
@@ -396,11 +397,12 @@ namespace Private {
    */
   export const LIGHT_STYLE = {
     dataStyle: {
-      voidColor: '#ffffff',
-      gridLineColor: '#bdbdbd',
-      backgroundColor: '#ffffff',
-      headerGridLineColor: '#bdbdbd',
-      headerBackgroundColor: '#d2d2d2',
+      voidColor: 'white',
+      backgroundColor: '#f5f5f5',
+      headerBackgroundColor: '#eeeeee',
+      gridLineColor: 'rgba(20, 20, 20, 0.15)',
+      headerGridLineColor: 'rgba(20, 20, 20, 0.25)',
+      rowBackgroundColor: (i: number) => (i % 2 === 0 ? 'white' : '#f5f5f5'),
       selectionFillColor: '#2196f32e'
     },
     textRender: new TextRenderer({
