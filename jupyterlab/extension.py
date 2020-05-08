@@ -176,7 +176,7 @@ def load_jupyter_server_extension(nbapp):
             logger.info(DEV_NOTE)
 
     # Make sure the app dir exists.
-    else:
+    elif not watch_mode:
         msgs = ensure_app(app_dir)
         if msgs:
             [logger.error(msg) for msg in msgs]

@@ -87,6 +87,32 @@ const sourceMapRes = Object.values(watched).reduce((res, name) => {
 }, []);
 
 /**
+ * Sync a local path to a linked package path if they are files and differ.
+ * This is used by `jupyter lab --watch` to synchronize linked packages
+ * and has no effect in `jupyter lab --dev-mode --watch`.
+ */
+function maybeSync(localPath, name, rest) {
+  const stats = fs.statSync(localPath);
+  if (!stats.isFile(localPath)) {
+    return;
+  }
+  const source = fs.realpathSync(plib.join(jlab.linkedPackages[name], rest));
+  if (source === fs.realpathSync(localPath)) {
+    return;
+  }
+  fs.watchFile(source, { interval: 500 }, function(curr) {
+    if (!curr || curr.nlink === 0) {
+      return;
+    }
+    try {
+      fs.copySync(source, localPath);
+    } catch (err) {
+      console.error(err);
+    }
+  });
+}
+
+/**
  * A filter function set up to exclude all files that are not
  * in a package contained by the Jupyterlab repo. Used to ignore
  * files during a `--watch` build.
@@ -109,6 +135,7 @@ function ignored(path) {
     const rest = path.slice(rootPath.length);
     if (rest.indexOf('node_modules') === -1) {
       ignore = false;
+      maybeSync(path, name, rest);
     }
     return true;
   });
