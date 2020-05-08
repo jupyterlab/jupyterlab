@@ -216,6 +216,10 @@ if [[ $GROUP == usage ]]; then
     python -m jupyterlab.browser_check
     jupyter labextension list --debug
 
+    # Make sure we can run watch mode with no built application
+    jupyter lab clean
+    python -m jupyterlab.browser_check --watch
+
     # Make sure we can non-dev install.
     virtualenv -p $(which python3) test_install
     ./test_install/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
