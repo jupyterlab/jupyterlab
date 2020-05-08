@@ -88,6 +88,8 @@ const sourceMapRes = Object.values(watched).reduce((res, name) => {
 
 /**
  * Sync a local path to a linked package path if they are files and differ.
+ * This is used by `jupyter lab --watch` to synchronize linked packages
+ * and has no effect in `jupyter lab --dev-mode --watch`.
  */
 function maybeSync(localPath, name, rest) {
   const stats = fs.statSync(localPath);
