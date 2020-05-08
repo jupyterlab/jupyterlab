@@ -31,7 +31,10 @@ test_flags['dev-mode'] = (
     {'BrowserApp': {'dev_mode': True}},
     "Start the app in dev mode."
 )
-
+test_flags['watch'] = (
+    {'BrowserApp': {'watch': True}},
+    "Start the app in watch mode."
+)
 
 test_aliases = dict(aliases)
 test_aliases['app-dir'] = 'BrowserApp.app_dir'
