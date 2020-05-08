@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/documentsearch",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "Document Search",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,13 +32,13 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.2.7",
-    "@jupyterlab/cells": "^1.2.8",
+    "@jupyterlab/apputils": "^1.2.8",
+    "@jupyterlab/cells": "^1.2.9",
     "@jupyterlab/codeeditor": "^1.2.0",
-    "@jupyterlab/codemirror": "^1.2.7",
+    "@jupyterlab/codemirror": "^1.2.8",
     "@jupyterlab/coreutils": "^3.2.0",
-    "@jupyterlab/fileeditor": "^1.2.7",
-    "@jupyterlab/notebook": "^1.2.8",
+    "@jupyterlab/fileeditor": "^1.2.8",
+    "@jupyterlab/notebook": "^1.2.9",
     "@phosphor/coreutils": "^1.3.1",
     "@phosphor/disposable": "^1.3.0",
     "@phosphor/signaling": "^1.3.0",

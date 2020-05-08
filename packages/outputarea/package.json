@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/outputarea",
-  "version": "1.2.8",
+  "version": "1.2.9",
   "description": "JupyterLab - Notebook Output Area",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,10 +35,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^1.2.7",
+    "@jupyterlab/apputils": "^1.2.8",
     "@jupyterlab/coreutils": "^3.2.0",
     "@jupyterlab/observables": "^2.4.0",
-    "@jupyterlab/rendermime": "^1.2.7",
+    "@jupyterlab/rendermime": "^1.2.8",
     "@jupyterlab/rendermime-interfaces": "^1.5.0",
     "@jupyterlab/services": "^4.2.2",
     "@phosphor/algorithm": "^1.2.0",
