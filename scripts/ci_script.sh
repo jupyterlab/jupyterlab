@@ -221,6 +221,10 @@ if [[ $GROUP == usage ]]; then
     # Make sure the deprecated `selenium_check` command still works
     python -m jupyterlab.selenium_check
 
+    # Make sure we can run watch mode with no built application
+    jupyter lab clean
+    python -m jupyterlab.browser_check --watch
+
     # Make sure we can non-dev install.
     pip install virtualenv
     virtualenv -p $(which python3) test_install
