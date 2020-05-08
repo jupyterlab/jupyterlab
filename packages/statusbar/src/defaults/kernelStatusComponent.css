@@ -1,5 +1,5 @@
 /**
-* font style for a critical kernel status
+* font style for a critical kernel status.
 */
 .kernel-status-critical {
   color: red !important;
@@ -7,7 +7,7 @@
 }
 
 /**
-* waiting dots animation
+* waiting dots animation.
 */
 .waiting-dots:after {
   content: ' .';

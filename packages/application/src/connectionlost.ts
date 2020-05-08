@@ -7,7 +7,7 @@ import { IConnectionLost } from './tokens';
 
 /**
  * A default connection lost handler, which does nothing, but
- * may be overriden by application extensions
+ * may be overriden by application extensions.
  */
 export const ConnectionLost: IConnectionLost = async function(
   manager: ServiceManager.IManager,

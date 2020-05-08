@@ -63,7 +63,7 @@ namespace KernelStatusComponent {
     status?: string;
 
     /**
-     * Style for the status line
+     * Style for the status line.
      */
     classes: string[];
   }
@@ -142,7 +142,7 @@ export namespace KernelStatus {
     }
 
     /**
-     * extra classes to style the component
+     * extra classes to style the component.
      */
     get classes(): string[] {
       let extra_classes = [];
