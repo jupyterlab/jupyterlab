@@ -65,7 +65,7 @@ async function activateTOC(
   labShell.add(toc, 'left', { rank: 700 });
 
   // Add the ToC widget to the application restorer:
-  restorer.add(toc, 'juputerlab-toc');
+  restorer.add(toc, '@jupyterlab/toc:plugin');
 
   // Attempt to load plugin settings:
   let settings: ISettingRegistry.ISettings | undefined;
@@ -144,7 +144,7 @@ async function activateTOC(
  * @private
  */
 const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
-  id: 'toc',
+  id: '@jupyterlab/toc:plugin',
   autoStart: true,
   provides: ITableOfContentsRegistry,
   requires: [

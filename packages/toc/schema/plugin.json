@@ -6,7 +6,7 @@
       "title": "ToC Configuration",
       "description": "Specifies whether to allow the ToC extension to collapse notebook cells.",
       "type": "boolean",
-      "default": true
+      "default": false
     }
   },
   "additionalProperties": false,
