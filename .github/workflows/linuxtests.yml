@@ -76,4 +76,4 @@ jobs:
         if: ${{ matrix.group == 'docs' }}
         with:
           name: pytest-links-cache-${{ github.base_ref }}
-          path: ~/.cache/pytest-link-check/cache.sqlite
+          path: ${{ env.HOME }}/.cache/pytest-link-check/cache.sqlite
