@@ -52,23 +52,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      - name: Cache checked links build
-        uses: actions/cache@v1
-        if: ${{ matrix.group == 'docs' }}
-        with:
-          path: ~/.cache/pytest-link-check
-          key: ${{ runner.os }}-link-check-${{ hashFiles('**/*.rst') }}
-          restore-keys: |
-            ${{ runner.os }}-link-check-
-
       - name: Install dependencies
         env:
           GROUP: ${{ matrix.group }}
         run: |
           bash ./scripts/ci_install.sh
 
+      - name: Download links cache
+        uses: actions/download-artifact@v1
+        if: ${{ matrix.group == 'docs' }}
+        with:
+          name: pytest-links-cache-${{ github.base_ref }}
+
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
         run: |
           bash ./scripts/ci_script.sh
+
+      - name: Upload links cache
+        uses: actions/upload-artifact@v1
+        if: ${{ matrix.group == 'docs' }}
+        with:
+          name: pytest-links-cache-${{ github.base_ref }}
+          path: ~/.cache/pytest-link-check/cache.sqlite
