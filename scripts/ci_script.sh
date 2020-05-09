@@ -44,11 +44,7 @@ if [[ $GROUP == docs ]]; then
     popd
 
     # Run the link check on the built html files
-    CACHE_DIR="${HOME}/.cache/pytest-link-check"
-    mkdir -p ${CACHE_DIR}
-    echo "Existing cache:"
-    ls -ltr ${CACHE_DIR}
-    args="--check-links --check-links-cache --check-links-cache-expire-after 86400 --check-links-cache-name ${CACHE_DIR}/cache"
+    args="--check-links --check-links-cache --check-links-cache-expire-after 86400 --check-links-cache-name link-cache"
     args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html ${args}"
     py.test $args --links-ext .html -k .html docs/build/html || py.test $args --links-ext .html -k .html --lf docs/build/html
 
@@ -57,7 +53,7 @@ if [[ $GROUP == docs ]]; then
     jlpm docs
 
     # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
-    args="--check-links --check-links-cache --check-links-cache-expire-after 86400 --check-links-cache-name ${CACHE_DIR}/cache"
+    args="--check-links --check-links-cache --check-links-cache-expire-after 86400 --check-links-cache-name link-cache"
     py.test $args --links-ext .md -k .md . || py.test $args --links-ext .md -k .md --lf .
 fi
 
