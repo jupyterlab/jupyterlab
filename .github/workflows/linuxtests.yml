@@ -61,6 +61,7 @@ jobs:
       - name: Download links cache
         uses: actions/download-artifact@v1
         if: ${{ matrix.group == 'docs' }}
+        continue-on-error: true
         with:
           name: pytest-links-cache-${{ github.base_ref }}
 
