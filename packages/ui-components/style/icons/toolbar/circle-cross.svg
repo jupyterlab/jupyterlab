@@ -1,18 +1,18 @@
-<!-- Created with Inkscape (http://www.inkscape.org/) -->
-<svg width="200mm" height="200mm" version="1.1" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" xmlns:cc="http://creativecommons.org/ns#" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
- <metadata>
-  <rdf:RDF>
-   <cc:Work rdf:about="">
-    <dc:format>image/svg+xml</dc:format>
-    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:title/>
-   </cc:Work>
-  </rdf:RDF>
- </metadata>
- <g transform="translate(0,-97)">
-  <circle cx="100" cy="197" r="100" fill="#8a0000" stroke-width=".68207"/>
-  <circle cx="100" cy="197" r="97" fill="#c00000" stroke-width=".82224"/>
-  <rect transform="rotate(45)" x="153.15" y="60.319" width="113.72" height="16.541" ry="2.5478" fill="#fff" stroke-width=".25406"/>
-  <rect transform="rotate(-45)" x="-125.45" y="201.74" width="113.72" height="16.541" ry="2.5478" fill="#fff" stroke-width=".25406"/>
- </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="16" viewBox="0 0 24 24">
+  <g class="jp-icon3">
+    <circle cx="12" cy="12" r="9"
+            fill="#C00000"
+            stroke="#A30000"
+            stroke-width="2"/>
+
+    <g transform="translate(5 11)">
+        <rect width="14" height="2" rx="0.5"
+            fill="white"
+            transform="rotate(45, 7, 1)"/>
+
+        <rect width="14" height="2" rx="0.5"
+            fill="white"
+            transform="rotate(-45, 7, 1)"/>
+    </g>
+  </g>
 </svg>

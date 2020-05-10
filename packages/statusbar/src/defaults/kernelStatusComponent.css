@@ -2,7 +2,7 @@
 * font style for a critical kernel status.
 */
 .kernel-status-critical {
-  color: red !important;
+  color: #c00000 !important;
   font-weight: bold !important;
 }
 
@@ -21,14 +21,14 @@
     text-shadow: 0.25em 0 0 rgba(0, 0, 0, 0), 0.5em 0 0 rgba(0, 0, 0, 0);
   }
   40% {
-    color: red;
+    color: #c00000;
     text-shadow: 0.25em 0 0 rgba(0, 0, 0, 0), 0.5em 0 0 rgba(0, 0, 0, 0);
   }
   60% {
-    text-shadow: 0.25em 0 0 red, 0.5em 0 0 rgba(0, 0, 0, 0);
+    text-shadow: 0.25em 0 0 #c00000, 0.5em 0 0 rgba(0, 0, 0, 0);
   }
   80%,
   100% {
-    text-shadow: 0.25em 0 0 red, 0.5em 0 0 red;
+    text-shadow: 0.25em 0 0 #c00000, 0.5em 0 0 #c00000;
   }
 }
