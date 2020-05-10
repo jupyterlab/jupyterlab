@@ -374,7 +374,7 @@ export async function ensureUiComponents(
   const iconModelDeclarations = _iconModelDeclarations.join(',\n');
 
   // generate the actual contents of the iconImports file
-  const iconImportsPath = path.join(iconSrcDir, 'iconImports.ts');
+  const iconImportsPath = path.join(iconSrcDir, 'iconimports.ts');
   const iconImportsContents = utils.fromTemplate(
     HEADER_TEMPLATE + ICON_IMPORTS_TEMPLATE,
     { funcName, iconImportStatements, iconModelDeclarations }
