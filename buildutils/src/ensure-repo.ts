@@ -335,6 +335,10 @@ export async function ensureIntegrity(): Promise<boolean> {
 
   // Validate each package.
   for (let name in locals) {
+    // application-top is handled elsewhere
+    if (name === '@jupyterlab/application-top') {
+      continue;
+    }
     let unused = UNUSED[name] || [];
     // Allow jest-junit to be unused in the test suite.
     if (name.indexOf('@jupyterlab/test-') === 0) {
@@ -381,17 +385,13 @@ export async function ensureIntegrity(): Promise<boolean> {
   // Handle the JupyterLab application top package.
   pkgMessages = ensureJupyterlab();
   if (pkgMessages.length > 0) {
-    let pkgName = '@jupyterlab/application-top';
-    if (!messages[pkgName]) {
-      messages[pkgName] = [];
-    }
-    messages[pkgName] = messages[pkgName].concat(pkgMessages);
+    messages['@application/top'] = pkgMessages;
   }
 
   // Handle any messages.
   if (Object.keys(messages).length > 0) {
     console.log(JSON.stringify(messages, null, 2));
-    if ('--force' in process.argv) {
+    if (process.argv.indexOf('--force') !== -1) {
       console.log(
         '\n\nPlease run `jlpm run integrity` locally and commit the changes'
       );

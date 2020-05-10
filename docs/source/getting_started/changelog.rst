@@ -7,7 +7,7 @@ JupyterLab Changelog
 ---------------------------------------------------------------------------
 
 v1.2.15
-~~~~~~~
+^^^^^^^
 * Fix watch mode and add CI Test (`#8396 <https://github.com/jupyterlab/jupyterlab/pull/8396>`__)
 
 v1.2.14
