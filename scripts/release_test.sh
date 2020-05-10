@@ -2,6 +2,12 @@
 
 set -ex
 
+# Make sure the docs build
+pushd docs
+pip install -r requirements.txt
+make html
+popd
+
 # Init conda
 . $(conda info --base)/etc/profile.d/conda.sh
 
