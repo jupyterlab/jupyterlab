@@ -20,9 +20,7 @@ A JupyterLab application is comprised of:
 -  A core Application object
 -  Plugins
 
-We recommend writing extensions in Typescript, but technically it doesn't matter what you write them in
-as long as they can be packaged as standard Javascript. 
-
+Extensions are distributed as JavaScript packages, so you can write extensions in JavaScript or any language that compiles to JavaScript. We recommend writing extensions in TypeScript, which is used for the JupyterLab core extensions and many popular community extensions.
 Tutorials
 ~~~~~~~~~
 
