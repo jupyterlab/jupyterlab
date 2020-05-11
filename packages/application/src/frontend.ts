@@ -15,6 +15,8 @@ import { Application, IPlugin } from '@lumino/application';
 
 import { Token } from '@lumino/coreutils';
 
+import { ISignal, Signal } from '@lumino/signaling';
+
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -97,6 +99,11 @@ export abstract class JupyterFrontEnd<
   readonly commandLinker: CommandLinker;
 
   /**
+   * The application context menu.
+   */
+  readonly contextMenu: ContextMenuSvg;
+
+  /**
    * The document registry instance used by the application.
    */
   readonly docRegistry: DocumentRegistry;
@@ -110,6 +117,20 @@ export abstract class JupyterFrontEnd<
    * The service manager used by the application.
    */
   readonly serviceManager: ServiceManager;
+
+  /**
+   * The application form factor, e.g., `desktop` or `mobile`.
+   */
+  get format(): JupyterFrontEnd.Format {
+    return this._format;
+  }
+
+  /**
+   * A signal that emits with the application form factor changes.
+   */
+  get formatChanged(): ISignal<this, JupyterFrontEnd.Format> {
+    return this._formatChanged;
+  }
 
   /**
    * Walks up the DOM hierarchy of the target of the active `contextmenu`
@@ -183,15 +204,20 @@ export abstract class JupyterFrontEnd<
     }
   }
 
-  readonly contextMenu: ContextMenuSvg;
-
   private _contextMenuEvent: MouseEvent;
+  private _format: JupyterFrontEnd.Format = 'desktop';
+  private _formatChanged = new Signal<this, JupyterFrontEnd.Format>(this);
 }
 
 /**
  * The namespace for `JupyterFrontEnd` class statics.
  */
 export namespace JupyterFrontEnd {
+  /**
+   * The application form factor, e.g., `desktop` or `mobile`.
+   */
+  export type Format = 'desktop' | 'mobile';
+
   /**
    * The options used to initialize a JupyterFrontEnd.
    */
