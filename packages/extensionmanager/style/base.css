@@ -17,6 +17,15 @@
 }
 
 /*
+  Jupyter Org
+*/
+
+.jp-extensionmanager-is-jupyter-org {
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color2);
+}
+
+/*
   List view layout and styling
 */
 
@@ -65,6 +74,12 @@
   margin: 0px 4px;
 }
 
+.jp-extensionmanager-view header .jp-extensionmanager-headerTextDisabled {
+  flex: 1 0 auto;
+  margin: 0px 4px;
+  color: var(--jp-layout-color3);
+}
+
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent {
   border: 1px solid transparent;
   background-color: var(--jp-layout-color1);
@@ -73,6 +88,17 @@
 
 .jp-extensionmanager-view header > .jp-ToolbarButtonComponent:hover {
   /* border: 1px solid var(--jp-brand-color1); */
+}
+
+/*
+  Listing messages
+*/
+.jp-extensionmanager-listingmessage {
+  background-color: var(--jp-brand-color1);
+  color: var(--jp-ui-inverse-font-color1);
+  padding: 4px 8px;
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 400;
 }
 
 /*
@@ -88,6 +114,13 @@
 
 .jp-extensionmanager-search-bar {
   padding: 4px;
+}
+
+.jp-extensionmanager-disclaimer {
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+  font-weight: normal;
+  margin: 8px 8px 8px 32px;
 }
 
 .jp-extensionmanager-search-wrapper input {
@@ -150,18 +183,19 @@
   border-bottom: solid var(--jp-border-width) var(--jp-border-color2);
 }
 
+.jp-extensionmanager-entry-description {
+  min-width: 0;
+  flex-grow: 1;
+}
+
 .jp-extensionmanager-entry-title {
   display: flex;
   flex-direction: row;
+  justify-content: space-between;
 }
 
-.jp-extensionmanager-entry-jupyter-org {
-  display: none;
-}
-
-.jp-extensionmanager-entry.jp-extensionmanager-entry-mod-whitelisted
-  .jp-extensionmanager-entry-jupyter-org {
-  display: inline;
+.jp-extensionmanager-entry.jp-extensionmanager-entry-should-be-uninstalled {
+  background-color: var(--jp-error-color3);
 }
 
 /* Precedence order update/error/warning matters! */
@@ -183,6 +217,7 @@
   font-weight: 600;
   padding: 0 8px 0 0;
   margin-bottom: 4px;
+  overflow-wrap: anywhere;
 }
 
 .jp-extensionmanager-entry-name a:link {
@@ -267,6 +302,24 @@
   to {
     left: 100%;
   }
+}
+
+/*
+  Disclaimer buttons
+*/
+
+.jp-extensionmanager-disclaimer-disable {
+  background-color: var(--jp-brand-color1) !important;
+  color: white !important;
+  border: 0;
+  background-image: none !important;
+}
+
+.jp-extensionmanager-disclaimer-enable {
+  background-color: var(--jp-error-color1) !important;
+  color: white !important;
+  border: 0;
+  background-image: none !important;
 }
 
 /*

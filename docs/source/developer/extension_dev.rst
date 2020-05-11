@@ -16,12 +16,38 @@ JupyterLab can be extended in four ways via:
    extend the functionality of document widgets added to the
    application, and we cover them in :ref:`documents`.
 
-See :ref:`extension_tutorial` to learn how to make a simple JupyterLab extension.
-
 A JupyterLab application is comprised of:
 
 -  A core Application object
 -  Plugins
+
+Tutorials
+~~~~~~~~~
+
+We provide a set of guides to get started writing third-party extensions for JupyterLab:
+
+- :ref:`extension_tutorial`: An in-depth tutorial to learn how to make a simple JupyterLab extension.
+- The `JupyterLab Extension Examples Repository <https://github.com/jupyterlab/extension-examples>`_: A short tutorial series
+  to learn how to develop extensions for JupyterLab, by example.
+- :ref:`developer-extension-points`: A list of the most common JupyterLab extension points.
+
+Cookiecutters
+~~~~~~~~~~~~~
+
+We provide several cookiecutters to create JupyterLab plugin extensions:
+
+- `extension-cookiecutter-ts <https://github.com/jupyterlab/extension-cookiecutter-ts>`_: Create a JupyterLab extension in TypeScript
+- `extension-cookiecutter-js <https://github.com/jupyterlab/extension-cookiecutter-js>`_: Create a JupyterLab extension in JavaScript
+- `mimerender-cookiecutter-ts <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`_: Create a MIME Renderer JupyterLab extension in TypeScript
+- `theme-cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_: Create a new theme for JupyterLab
+
+API Documentation
+~~~~~~~~~~~~~~~~~
+
+If you are looking for lower level details on the JupyterLab and Lumino API:
+
+- `JupyterLab API Documentation <https://jupyterlab.github.io/jupyterlab/>`_
+- `Lumino API Documentation <https://jupyterlab.github.io/lumino/>`_
 
 Plugins
 ~~~~~~~
@@ -37,10 +63,6 @@ A plugin adds a core functionality to the application:
    `JupyterLab.IPluginModule <https://jupyterlab.github.io/jupyterlab/application/interfaces/jupyterlab.ipluginmodule.html>`__
    interface, by exporting a plugin object or array of plugin objects as
    the default export.
-
-   We provide two cookiecutters to create JupyterLab plugin extensions in
-   `JavaScript <https://github.com/jupyterlab/extension-cookiecutter-js>`__ and
-   `TypeScript <https://github.com/jupyterlab/extension-cookiecutter-ts>`__.
 
 The default plugins in the JupyterLab application include:
 
@@ -229,21 +251,20 @@ not enabled in our build configuration. To build a compatible package set
 Another option to try out your extension with a local version of JupyterLab is to add it to the
 list of locally installed packages and to have JupyterLab register your extension when it starts up.
 
-You can do this by adding your extension to the `jupyterlab.externalExtensions` key
- in the `dev_mode/package.json` file. It should be a mapping
-of extension name to version, just like in `dependencies`. Then run `jlpm run integrity`
-and these extensions should be added automatically to the `dependencies` and pulled in.
+You can do this by adding your extension to the ``jupyterlab.externalExtensions`` key
+in the ``dev_mode/package.json`` file. It should be a mapping
+of extension name to version, just like in ``dependencies``. Then run ``jlpm run integrity``
+and these extensions should be added automatically to the ``dependencies`` and pulled in.
 
-When you then run `jlpm run build && jupyter lab --dev` or `jupyter lab --dev --watch` this extension
+When you then run ``jlpm run build && jupyter lab --dev`` or ``jupyter lab --dev --watch`` this extension
 will be loaded by default. For example, this is how you can add the Jupyter Widgets
 extensions:
 
 ::
-      ...
-      "externalExtensions": {
-        "@jupyter-widgets/jupyterlab-manager": "2.0.0"
-      },
-      ...
+
+    "externalExtensions": {
+      "@jupyter-widgets/jupyterlab-manager": "2.0.0"
+    },
 
 If you publish your extension on ``npm.org``, users will be able to install
 it as simply ``jupyter labextension install <foo>``, where ``<foo>`` is
@@ -509,11 +530,8 @@ Storing Extension Data
 ^^^^^^^^^^^^^^^^^^^^^^
 
 In addition to the file system that is accessed by using the
-``@jupyterlab/services`` package, JupyterLab offers two ways for
-extensions to store data: a client-side state database that is built on
-top of ``localStorage`` and a plugin settings system that provides for
-default setting values and user overrides.
-
+``@jupyterlab/services`` package, JupyterLab exposes a plugin settings
+system that can be used to provide default setting values and user overrides.
 
 Extension Settings
 ``````````````````
@@ -744,3 +762,12 @@ release process, but this could also be done manually.
 Technically, a package that contains only a JupyterLab extension could be created
 and published on ``conda-forge``, but it would not be discoverable by the JupyterLab
 extension manager.
+
+
+Listings
+^^^^^^^^
+
+You can develop on the extension manager package and :ref:`extension_listings` with the
+example shipped in the ``packages/extensionmanager-extension/examples/listings`` folder.
+
+Follow the ``README.md`` instructions in that folder.

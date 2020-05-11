@@ -45,6 +45,7 @@ import {
   NotebookTools,
   INotebookTools,
   INotebookTracker,
+  INotebookWidgetFactory,
   NotebookActions,
   NotebookModelFactory,
   NotebookPanel,
@@ -227,6 +228,8 @@ namespace CommandIDs {
   export const disableOutputScrolling = 'notebook:disable-output-scrolling';
 
   export const selectLastRunCell = 'notebook:select-last-run-cell';
+
+  export const replaceSelection = 'notebook:replace-selection';
 }
 
 /**
@@ -265,12 +268,7 @@ const FORMAT_LABEL: { [k: string]: string } = {
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
   id: '@jupyterlab/notebook-extension:tracker',
   provides: INotebookTracker,
-  requires: [
-    NotebookPanel.IContentFactory,
-    IDocumentManager,
-    IEditorServices,
-    IRenderMimeRegistry
-  ],
+  requires: [INotebookWidgetFactory, IDocumentManager],
   optional: [
     ICommandPalette,
     IFileBrowserFactory,
@@ -293,7 +291,7 @@ const factory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   requires: [IEditorServices],
   autoStart: true,
   activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
-    let editorFactory = editorServices.factoryService.newInlineEditor;
+    const editorFactory = editorServices.factoryService.newInlineEditor;
     return new NotebookPanel.ContentFactory({ editorFactory });
   }
 };
@@ -390,6 +388,21 @@ export const notebookTrustItem: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The notebook widget factory provider.
+ */
+const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory> = {
+  id: '@jupyterlab/notebook-extension:widget-factory',
+  provides: INotebookWidgetFactory,
+  requires: [
+    NotebookPanel.IContentFactory,
+    IEditorServices,
+    IRenderMimeRegistry
+  ],
+  activate: activateWidgetFactory,
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -397,7 +410,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   trackerPlugin,
   tools,
   commandEditItem,
-  notebookTrustItem
+  notebookTrustItem,
+  widgetFactoryPlugin
 ];
 export default plugins;
 
@@ -441,7 +455,7 @@ function activateNotebookTools(
     }
     return true;
   };
-  let optionsMap: { [key: string]: JSONValue } = {};
+  const optionsMap: { [key: string]: JSONValue } = {};
   optionsMap.None = null;
   void services.nbconvert.getExportFormats().then(response => {
     if (response) {
@@ -449,9 +463,9 @@ function activateNotebookTools(
       const formatList = Object.keys(response);
       formatList.forEach(function(key) {
         if (RAW_FORMAT_EXCLUDE.indexOf(key) === -1) {
-          let capCaseKey = key[0].toUpperCase() + key.substr(1);
-          let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
-          let mimeType = response[key].output_mimetype;
+          const capCaseKey = key[0].toUpperCase() + key.substr(1);
+          const labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
+          const mimeType = response[key].output_mimetype;
           optionsMap[labelStr] = mimeType;
         }
       });
@@ -490,24 +504,14 @@ function activateNotebookTools(
 }
 
 /**
- * Activate the notebook handler extension.
+ * Activate the notebook widget factory.
  */
-function activateNotebookHandler(
+function activateWidgetFactory(
   app: JupyterFrontEnd,
   contentFactory: NotebookPanel.IContentFactory,
-  docManager: IDocumentManager,
   editorServices: IEditorServices,
-  rendermime: IRenderMimeRegistry,
-  palette: ICommandPalette | null,
-  browserFactory: IFileBrowserFactory | null,
-  launcher: ILauncher | null,
-  restorer: ILayoutRestorer | null,
-  mainMenu: IMainMenu | null,
-  settingRegistry: ISettingRegistry | null,
-  sessionDialogs: ISessionContextDialogs | null
-): INotebookTracker {
-  const services = app.serviceManager;
-
+  rendermime: IRenderMimeRegistry
+): NotebookWidgetFactory.IFactory {
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
     fileTypes: ['notebook'],
@@ -521,6 +525,27 @@ function activateNotebookHandler(
     notebookConfig: StaticNotebook.defaultNotebookConfig,
     mimeTypeService: editorServices.mimeTypeService
   });
+  app.docRegistry.addWidgetFactory(factory);
+  return factory;
+}
+
+/**
+ * Activate the notebook handler extension.
+ */
+function activateNotebookHandler(
+  app: JupyterFrontEnd,
+  factory: NotebookWidgetFactory.IFactory,
+  docManager: IDocumentManager,
+  palette: ICommandPalette | null,
+  browserFactory: IFileBrowserFactory | null,
+  launcher: ILauncher | null,
+  restorer: ILayoutRestorer | null,
+  mainMenu: IMainMenu | null,
+  settingRegistry: ISettingRegistry | null,
+  sessionDialogs: ISessionContextDialogs | null
+): INotebookTracker {
+  const services = app.serviceManager;
+
   const { commands } = app;
   const tracker = new NotebookTracker({ namespace: 'notebook' });
   const clonedOutputs = new WidgetTracker<
@@ -548,9 +573,8 @@ function activateNotebookHandler(
     });
   }
 
-  let registry = app.docRegistry;
+  const registry = app.docRegistry;
   registry.addModelFactory(new NotebookModelFactory({}));
-  registry.addWidgetFactory(factory);
 
   addCommands(
     app,
@@ -566,7 +590,7 @@ function activateNotebookHandler(
 
   let id = 0; // The ID counter for notebook panels.
 
-  let ft = app.docRegistry.getFileType('notebook');
+  const ft = app.docRegistry.getFileType('notebook');
 
   factory.widgetCreated.connect((sender, widget) => {
     // If the notebook panel does not have an ID, assign it one.
@@ -598,17 +622,17 @@ function activateNotebookHandler(
    * Update the setting values.
    */
   function updateConfig(settings: ISettingRegistry.ISettings): void {
-    let code = {
+    const code = {
       ...StaticNotebook.defaultEditorConfig.code,
       ...(settings.get('codeCellConfig').composite as JSONObject)
     };
 
-    let markdown = {
+    const markdown = {
       ...StaticNotebook.defaultEditorConfig.markdown,
       ...(settings.get('markdownCellConfig').composite as JSONObject)
     };
 
-    let raw = {
+    const raw = {
       ...StaticNotebook.defaultEditorConfig.raw,
       ...(settings.get('rawCellConfig').composite as JSONObject)
     };
@@ -710,12 +734,12 @@ function activateNotebookHandler(
         disposables = new DisposableSet();
         const baseUrl = PageConfig.getBaseUrl();
 
-        for (let name in specs.kernelspecs) {
-          let rank = name === specs.default ? 0 : Infinity;
+        for (const name in specs.kernelspecs) {
+          const rank = name === specs.default ? 0 : Infinity;
           const spec = specs.kernelspecs[name]!;
           let kernelIconUrl = spec.resources['logo-64x64'];
           if (kernelIconUrl) {
-            let index = kernelIconUrl.indexOf('kernelspecs');
+            const index = kernelIconUrl.indexOf('kernelspecs');
             kernelIconUrl = URLExt.join(baseUrl, kernelIconUrl.slice(index));
           }
           disposables.add(
@@ -971,9 +995,9 @@ function addCommands(
 
       const { context, content } = current;
 
-      let cell = content.activeCell;
-      let metadata = cell?.model.metadata.toJSON();
-      let path = context.path;
+      const cell = content.activeCell;
+      const metadata = cell?.model.metadata.toJSON();
+      const path = context.path;
       // ignore action in non-code cell
       if (!cell || cell.model.type !== 'code') {
         return;
@@ -983,7 +1007,7 @@ function addCommands(
       const editor = cell.editor;
       const selection = editor.getSelection();
       const { start, end } = selection;
-      let selected = start.column !== end.column || start.line !== end.line;
+      const selected = start.column !== end.column || start.line !== end.line;
 
       if (selected) {
         // Get the selected code from the editor.
@@ -993,7 +1017,7 @@ function addCommands(
       } else {
         // no selection, find the complete statement around the current line
         const cursor = editor.getCursorPosition();
-        let srcLines = editor.model.value.text.split('\n');
+        const srcLines = editor.model.value.text.split('\n');
         let curLine = selection.start.line;
         while (
           curLine < editor.lineCount &&
@@ -1005,9 +1029,10 @@ function addCommands(
         let fromFirst = curLine > 0;
         let firstLine = 0;
         let lastLine = firstLine + 1;
+        // eslint-disable-next-line
         while (true) {
           code = srcLines.slice(firstLine, lastLine).join('\n');
-          let reply = await current.context.sessionContext.session?.kernel?.requestIsComplete(
+          const reply = await current.context.sessionContext.session?.kernel?.requestIsComplete(
             {
               // ipython needs an empty line at the end to correctly identify completeness of indented code
               code: code + '\n\n'
@@ -1671,7 +1696,7 @@ function addCommands(
       let current: NotebookPanel | undefined | null;
       // If we are given a notebook path and cell index, then
       // use that, otherwise use the current active cell.
-      let path = args.path as string | undefined | null;
+      const path = args.path as string | undefined | null;
       let index = args.index as number | undefined | null;
       if (path && index !== undefined && index !== null) {
         current = docManager.findWidget(path, FACTORY) as NotebookPanel;
@@ -1921,6 +1946,17 @@ function addCommands(
     },
     isEnabled
   });
+  commands.addCommand(CommandIDs.replaceSelection, {
+    label: 'Replace Selection in Notebook Cell',
+    execute: args => {
+      const current = getCurrent(args);
+      const text: string = (args['text'] as string) || '';
+      if (current) {
+        return NotebookActions.replaceSelection(current.content, text);
+      }
+    },
+    isEnabled
+  });
 }
 
 /**
@@ -2024,7 +2060,7 @@ function populateMenus(
   palette: ICommandPalette | null,
   sessionDialogs: ISessionContextDialogs | null
 ): void {
-  let { commands } = app;
+  const { commands } = app;
 
   sessionDialogs = sessionDialogs || sessionContextDialogs;
 
@@ -2077,16 +2113,16 @@ function populateMenus(
   } as IFileMenu.ICloseAndCleaner<NotebookPanel>);
 
   // Add a notebook group to the File menu.
-  let exportTo = new Menu({ commands });
+  const exportTo = new Menu({ commands });
   exportTo.title.label = 'Export Notebook As…';
   void services.nbconvert.getExportFormats().then(response => {
     if (response) {
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
       formatList.forEach(function(key) {
-        let capCaseKey = key[0].toUpperCase() + key.substr(1);
-        let labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
-        let args = {
+        const capCaseKey = key[0].toUpperCase() + key.substr(1);
+        const labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
+        const args = {
           format: key,
           label: labelStr,
           isPalette: true
@@ -2117,7 +2153,7 @@ function populateMenus(
   mainMenu.kernelMenu.kernelUsers.add({
     tracker,
     interruptKernel: current => {
-      let kernel = current.sessionContext.session?.kernel;
+      const kernel = current.sessionContext.session?.kernel;
       if (kernel) {
         return kernel.interrupt();
       }

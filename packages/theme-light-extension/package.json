@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/theme-light-extension",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "JupyterLab - Default Light Theme",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -27,13 +27,13 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.0.2",
-    "@jupyterlab/apputils": "^2.0.2"
+    "@jupyterlab/application": "^2.1.0",
+    "@jupyterlab/apputils": "^2.1.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

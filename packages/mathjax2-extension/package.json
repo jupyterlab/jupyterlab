@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/mathjax2-extension",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "A JupyterLab extension providing MathJax 2 Typesetting",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -27,16 +27,16 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.0.2",
-    "@jupyterlab/coreutils": "^4.0.2",
-    "@jupyterlab/mathjax2": "^2.0.1",
-    "@jupyterlab/rendermime": "^2.0.2"
+    "@jupyterlab/application": "^2.1.0",
+    "@jupyterlab/coreutils": "^4.1.0",
+    "@jupyterlab/mathjax2": "^2.1.0",
+    "@jupyterlab/rendermime": "^2.1.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

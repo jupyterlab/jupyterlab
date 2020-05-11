@@ -1,0 +1,57 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
+  "references": [
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../mathjax2"
+    },
+    {
+      "path": "../../testutils"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../services"
+    }
+  ]
+}

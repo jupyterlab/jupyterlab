@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/nbformat",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "Notebook format interfaces",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -27,16 +27,25 @@
   },
   "scripts": {
     "build": "tsc -b",
+    "build:test": "tsc --build tsconfig.test.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
     "prepublishOnly": "npm run build",
-    "watch": "tsc -b -w --listEmittedFiles"
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
+    "watch": "tsc -b --watch"
   },
   "dependencies": {
     "@lumino/coreutils": "^1.4.2"
   },
   "devDependencies": {
+    "@jupyterlab/testutils": "^2.1.0",
+    "@types/jest": "^24.0.23",
+    "jest": "^25.2.3",
     "rimraf": "~3.0.0",
+    "ts-jest": "^25.2.1",
     "typescript": "~3.7.3"
   },
   "publishConfig": {

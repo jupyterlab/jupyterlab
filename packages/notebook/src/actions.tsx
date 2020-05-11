@@ -80,7 +80,9 @@ export class NotebookActions {
    * standalone class is because at run time, the `Private.executed` variable
    * does not yet exist, so it needs to be referenced via a getter.
    */
-  private constructor() {}
+  private constructor() {
+    // Intentionally empty.
+  }
 }
 
 /**
@@ -117,13 +119,13 @@ export namespace NotebookActions {
     const selections = editor.getSelections();
     const orig = child.model.value.text;
 
-    let offsets = [0];
+    const offsets = [0];
 
     for (let i = 0; i < selections.length; i++) {
       // append start and end to handle selections
       // cursors will have same start and end
-      let start = editor.getOffsetAt(selections[i].start);
-      let end = editor.getOffsetAt(selections[i].end);
+      const start = editor.getOffsetAt(selections[i].start);
+      const end = editor.getOffsetAt(selections[i].end);
       if (start < end) {
         offsets.push(start);
         offsets.push(end);
@@ -137,9 +139,9 @@ export namespace NotebookActions {
 
     offsets.push(orig.length);
 
-    let clones: ICellModel[] = [];
+    const clones: ICellModel[] = [];
     for (let i = 0; i + 1 < offsets.length; i++) {
-      let clone = Private.cloneCell(nbModel, child.model);
+      const clone = Private.cloneCell(nbModel, child.model);
       clones.push(clone);
     }
 
@@ -264,7 +266,7 @@ export namespace NotebookActions {
     const state = Private.getState(notebook);
 
     Private.deleteCells(notebook);
-    Private.handleState(notebook, state);
+    Private.handleState(notebook, state, true);
   }
 
   /**
@@ -657,6 +659,19 @@ export namespace NotebookActions {
 
     Private.handleRunState(notebook, state, true);
     return promise;
+  }
+
+  /**
+   * Replaces the selection in the active cell of the notebook.
+   *
+   * @param notebook - The target notebook widget.
+   * @param text - The text to replace the selection.
+   */
+  export function replaceSelection(notebook: Notebook, text: string): void {
+    if (!notebook.model || !notebook.activeCell) {
+      return;
+    }
+    notebook.activeCell.editor.replaceSelection?.(text);
   }
 
   /**
@@ -1659,7 +1674,7 @@ namespace Private {
     notebook.mode = 'command';
     clipboard.clear();
 
-    let data = notebook.widgets
+    const data = notebook.widgets
       .filter(cell => notebook.isSelectedOrActive(cell))
       .map(cell => cell.model.toJSON())
       .map(cellJSON => {

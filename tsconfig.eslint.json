@@ -1,0 +1,22 @@
+{
+  "extends": "./tsconfigbase",
+  "include": [
+    "packages/**/src/**/*",
+    "packages/**/test/**/*",
+    "testutils/src/*",
+    "buildutils/**/*",
+    "tests/**/*",
+    "dev_mode/*",
+    "docs/**/*",
+    "examples/**/*",
+    "*",
+    "packages/services/examples/**/*",
+    "packages/**/*.config.js",
+    "packages/metapackage/build-doc-index.js",
+    "packages/**/stories/*",
+    "scripts/*",
+    "jupyterlab/*",
+    "jupyterlab/staging/*",
+    "testutils/**/*"
+  ]
+}

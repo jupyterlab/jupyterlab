@@ -7,7 +7,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { MenuSvg } from '@jupyterlab/ui-components';
+import { ContextMenuSvg } from '@jupyterlab/ui-components';
 
 import { IIterator } from '@lumino/algorithm';
 
@@ -40,11 +40,13 @@ export abstract class JupyterFrontEnd<
    * Construct a new JupyterFrontEnd object.
    */
   constructor(options: JupyterFrontEnd.IOptions<T>) {
-    // render context menu with inline svg icon tweaks
-    options.contextMenuRenderer =
-      options.contextMenuRenderer || MenuSvg.defaultRenderer;
-
     super(options);
+
+    // render context menu/submenus with inline svg icon tweaks
+    this.contextMenu = new ContextMenuSvg({
+      commands: this.commands,
+      renderer: options.contextMenuRenderer
+    });
 
     // The default restored promise if one does not exist in the options.
     const restored = new Promise<void>(resolve => {
@@ -114,13 +116,13 @@ export abstract class JupyterFrontEnd<
    * event, testing each HTMLElement ancestor for a user-supplied funcion. This can
    * be used to find an HTMLElement on which to operate, given a context menu click.
    *
-   * @param test - a function that takes an `HTMLElement` and returns a
+   * @param fn - a function that takes an `HTMLElement` and returns a
    *   boolean for whether it is the element the requester is seeking.
    *
    * @returns an HTMLElement or undefined, if none is found.
    */
   contextMenuHitTest(
-    test: (node: HTMLElement) => boolean
+    fn: (node: HTMLElement) => boolean
   ): HTMLElement | undefined {
     if (
       !this._contextMenuEvent ||
@@ -130,7 +132,7 @@ export abstract class JupyterFrontEnd<
     }
     let node: Node | null = this._contextMenuEvent.target;
     do {
-      if (node instanceof HTMLElement && test(node)) {
+      if (node instanceof HTMLElement && fn(node)) {
         return node;
       }
       node = node.parentNode;
@@ -156,7 +158,10 @@ export abstract class JupyterFrontEnd<
    */
   protected evtContextMenu(event: MouseEvent): void {
     this._contextMenuEvent = event;
-    if (event.shiftKey) {
+    if (
+      event.shiftKey ||
+      Private.suppressContextMenu(event.target as HTMLElement)
+    ) {
       return;
     }
     const opened = this.contextMenu.open(event);
@@ -177,6 +182,8 @@ export abstract class JupyterFrontEnd<
       event.stopPropagation();
     }
   }
+
+  readonly contextMenu: ContextMenuSvg;
 
   private _contextMenuEvent: MouseEvent;
 }
@@ -355,4 +362,11 @@ namespace Private {
    * ersatz command.
    */
   export const CONTEXT_MENU_INFO = '__internal:context-menu-info';
+
+  /**
+   * Returns whether the element is itself, or a child of, an element with the `jp-suppress-context-menu` data attribute.
+   */
+  export function suppressContextMenu(element: HTMLElement): boolean {
+    return element.closest('[data-jp-suppress-context-menu]') !== null;
+  }
 }

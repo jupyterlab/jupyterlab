@@ -1,4 +1,4 @@
-.. _jupyterlab:
+.. _jupyterhub:
 
 JupyterLab on JupyterHub
 ------------------------
@@ -25,6 +25,8 @@ In this configuration, users can still access the classic Notebook at ``/tree``,
 by either typing that URL into the browser, or by using the "Launch Classic
 Notebook" item in JupyterLab's Help menu.
 
+For this to work, you will need to enable the jupyterlab server 
+extension with ``jupyter serverextension enable jupyterlab``.
 
 Example Configuration
 ~~~~~~~~~~~~~~~~~~~~~

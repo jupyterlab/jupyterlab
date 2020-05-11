@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/extensionmanager-extension",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "JupyterLab - Extension Manager Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -17,6 +17,7 @@
     "lib/*.js.map",
     "lib/*.js",
     "schema/*.json",
+    "listing/*.json",
     "style/*.css"
   ],
   "sideEffects": [
@@ -30,18 +31,18 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.0.2",
-    "@jupyterlab/apputils": "^2.0.2",
-    "@jupyterlab/extensionmanager": "^2.0.2",
-    "@jupyterlab/mainmenu": "^2.0.2",
-    "@jupyterlab/settingregistry": "^2.0.1",
-    "@jupyterlab/ui-components": "^2.0.2"
+    "@jupyterlab/application": "^2.1.0",
+    "@jupyterlab/apputils": "^2.1.0",
+    "@jupyterlab/extensionmanager": "^2.1.0",
+    "@jupyterlab/mainmenu": "^2.1.0",
+    "@jupyterlab/settingregistry": "^2.1.0",
+    "@jupyterlab/ui-components": "^2.1.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

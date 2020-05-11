@@ -243,7 +243,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * A message handler invoked on an `'fit-request'` message.
    */
   protected onFitRequest(msg: Message): void {
-    let resize = Widget.ResizeMessage.UnknownSize;
+    const resize = Widget.ResizeMessage.UnknownSize;
     MessageLoop.sendMessage(this, resize);
   }
 
@@ -320,7 +320,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Resize the terminal based on computed geometry.
    */
   private _resizeTerminal() {
-    this._fitAddon.fit();
+    if (this._options.autoFit) {
+      this._fitAddon.fit();
+    }
     if (this._offsetWidth === -1) {
       this._offsetWidth = this.node.offsetWidth;
     }
@@ -335,7 +337,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Set the size of the terminal in the session.
    */
   private _setSessionSize(): void {
-    let content = [
+    const content = [
       this._term.rows,
       this._term.cols,
       this._offsetHeight,

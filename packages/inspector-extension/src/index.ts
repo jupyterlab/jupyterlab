@@ -145,7 +145,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
       handlers[parent.id] = handler;
 
       // Set the initial editor.
-      let cell = parent.console.promptCell;
+      const cell = parent.console.promptCell;
       handler.editor = cell && cell.editor;
 
       // Listen for prompt creation.
@@ -162,11 +162,11 @@ const consoles: JupyterFrontEndPlugin<void> = {
 
     // Keep track of console instances and set inspector source.
     labShell.currentChanged.connect((_, args) => {
-      let widget = args.newValue;
+      const widget = args.newValue;
       if (!widget || !consoles.has(widget)) {
         return;
       }
-      let source = handlers[widget.id];
+      const source = handlers[widget.id];
       if (source) {
         manager.source = source;
       }
@@ -206,7 +206,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       handlers[parent.id] = handler;
 
       // Set the initial editor.
-      let cell = parent.content.activeCell;
+      const cell = parent.content.activeCell;
       handler.editor = cell && cell.editor;
 
       // Listen for active cell changes.
@@ -223,11 +223,11 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 
     // Keep track of notebook instances and set inspector source.
     labShell.currentChanged.connect((sender, args) => {
-      let widget = args.newValue;
+      const widget = args.newValue;
       if (!widget || !notebooks.has(widget)) {
         return;
       }
-      let source = handlers[widget.id];
+      const source = handlers[widget.id];
       if (source) {
         manager.source = source;
       }

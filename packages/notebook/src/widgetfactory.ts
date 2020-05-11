@@ -90,7 +90,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
     context: DocumentRegistry.IContext<INotebookModel>,
     source?: NotebookPanel
   ): NotebookPanel {
-    let nbOptions = {
+    const nbOptions = {
       rendermime: source
         ? source.content.rendermime
         : this.rendermime.clone({ resolver: context.urlResolver }),
@@ -101,7 +101,7 @@ export class NotebookWidgetFactory extends ABCWidgetFactory<
         ? source.content.notebookConfig
         : this._notebookConfig
     };
-    let content = this.contentFactory.createNotebook(nbOptions);
+    const content = this.contentFactory.createNotebook(nbOptions);
 
     return new NotebookPanel({ context, content });
   }
@@ -158,5 +158,26 @@ export namespace NotebookWidgetFactory {
      * The session context dialogs.
      */
     sessionDialogs?: ISessionContextDialogs;
+  }
+
+  /**
+   * The interface for a notebook widget factory.
+   */
+  export interface IFactory
+    extends DocumentRegistry.IWidgetFactory<NotebookPanel, INotebookModel> {
+    /**
+     * A configuration object for cell editor settings.
+     */
+    editorConfig: StaticNotebook.IEditorConfig;
+
+    /**
+     * A configuration object for notebook settings.
+     */
+    notebookConfig: StaticNotebook.INotebookConfig;
+
+    /**
+     * Whether the kernel should be shutdown when the widget is closed.
+     */
+    shutdownOnClose: boolean;
   }
 }

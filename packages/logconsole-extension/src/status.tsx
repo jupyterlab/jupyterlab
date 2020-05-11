@@ -96,7 +96,7 @@ export class LogConsoleStatus extends VDomRenderer<LogConsoleStatus.Model> {
       return null;
     }
     this.show();
-    let {
+    const {
       flashEnabled,
       messages,
       source,
@@ -299,7 +299,7 @@ export namespace LogConsoleStatus {
 
     private _handleLogRegistryChange() {
       const loggers = this._loggerRegistry.getLoggers();
-      for (let logger of loggers) {
+      for (const logger of loggers) {
         if (!this._sourceVersion.has(logger.source)) {
           logger.contentChanged.connect(this._handleLogContentChange, this);
           this._sourceVersion.set(logger.source, {

@@ -57,8 +57,8 @@ function activateForeign(
 
   // Get the current widget and activate unless the args specify otherwise.
   function getCurrent(args: ReadonlyPartialJSONObject): ConsolePanel | null {
-    let widget = tracker.currentWidget;
-    let activate = args['activate'] !== false;
+    const widget = tracker.currentWidget;
+    const activate = args['activate'] !== false;
     if (activate && widget) {
       shell.activateById(widget.id);
     }
@@ -68,7 +68,7 @@ function activateForeign(
   commands.addCommand(toggleShowAllActivity, {
     label: args => 'Show All Kernel Activity',
     execute: args => {
-      let current = getCurrent(args);
+      const current = getCurrent(args);
       if (!current) {
         return;
       }

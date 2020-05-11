@@ -7,6 +7,8 @@ __webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/codemirror/style/index.css';
+import '@jupyterlab/completer/style/index.css';
+import '@jupyterlab/documentsearch/style/index.css';
 import '@jupyterlab/notebook/style/index.css';
 import '@jupyterlab/theme-light-extension/style/index.css';
 import '../index.css';
@@ -44,7 +46,7 @@ import {
 import { SetupCommands } from './commands';
 
 function main(): void {
-  let manager = new ServiceManager();
+  const manager = new ServiceManager();
   void manager.ready.then(() => {
     createApp(manager);
   });
@@ -52,8 +54,8 @@ function main(): void {
 
 function createApp(manager: ServiceManager.IManager): void {
   // Initialize the command registry with the bindings.
-  let commands = new CommandRegistry();
-  let useCapture = true;
+  const commands = new CommandRegistry();
+  const useCapture = true;
 
   // Setup the keydown listener for the document.
   document.addEventListener(
@@ -64,7 +66,7 @@ function createApp(manager: ServiceManager.IManager): void {
     useCapture
   );
 
-  let rendermime = new RenderMimeRegistry({
+  const rendermime = new RenderMimeRegistry({
     initialFactories: initialFactories,
     latexTypesetter: new MathJaxTypesetter({
       url: PageConfig.getOption('mathjaxUrl'),
@@ -72,23 +74,23 @@ function createApp(manager: ServiceManager.IManager): void {
     })
   });
 
-  let opener = {
+  const opener = {
     open: (widget: Widget) => {
       // Do nothing for sibling widgets for now.
     }
   };
 
-  let docRegistry = new DocumentRegistry();
-  let docManager = new DocumentManager({
+  const docRegistry = new DocumentRegistry();
+  const docManager = new DocumentManager({
     registry: docRegistry,
     manager,
     opener
   });
-  let mFactory = new NotebookModelFactory({});
-  let editorFactory = editorServices.factoryService.newInlineEditor;
-  let contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
+  const mFactory = new NotebookModelFactory({});
+  const editorFactory = editorServices.factoryService.newInlineEditor;
+  const contentFactory = new NotebookPanel.ContentFactory({ editorFactory });
 
-  let wFactory = new NotebookWidgetFactory({
+  const wFactory = new NotebookWidgetFactory({
     name: 'Notebook',
     modelName: 'notebook',
     fileTypes: ['notebook'],
@@ -102,19 +104,26 @@ function createApp(manager: ServiceManager.IManager): void {
   docRegistry.addModelFactory(mFactory);
   docRegistry.addWidgetFactory(wFactory);
 
-  let notebookPath = PageConfig.getOption('notebookPath');
-  let nbWidget = docManager.open(notebookPath) as NotebookPanel;
-  let palette = new CommandPalette({ commands });
+  const notebookPath = PageConfig.getOption('notebookPath');
+  const nbWidget = docManager.open(notebookPath) as NotebookPanel;
+  const palette = new CommandPalette({ commands });
   palette.addClass('notebookCommandPalette');
 
   const editor =
     nbWidget.content.activeCell && nbWidget.content.activeCell.editor;
   const model = new CompleterModel();
   const completer = new Completer({ editor, model });
+  const sessionContext = nbWidget.context.sessionContext;
   const connector = new KernelConnector({
-    session: nbWidget.context.sessionContext.session
+    session: sessionContext.session
   });
   const handler = new CompletionHandler({ completer, connector });
+
+  void sessionContext.ready.then(() => {
+    handler.connector = new KernelConnector({
+      session: sessionContext.session
+    });
+  });
 
   // Set the handler's editor.
   handler.editor = editor;
@@ -127,7 +136,7 @@ function createApp(manager: ServiceManager.IManager): void {
   // Hide the widget when it first loads.
   completer.hide();
 
-  let panel = new SplitPanel();
+  const panel = new SplitPanel();
   panel.id = 'main';
   panel.orientation = 'horizontal';
   panel.spacing = 0;
@@ -147,7 +156,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   SetupCommands(commands, palette, nbWidget, handler);
 
-  console.log('Example started!');
+  console.debug('Example started!');
 }
 
 window.addEventListener('load', main);

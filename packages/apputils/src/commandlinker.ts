@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -176,11 +176,11 @@ export class CommandLinker implements IDisposable {
     while (target && target.parentElement) {
       if (target.hasAttribute(`data-${COMMAND_ATTR}`)) {
         event.preventDefault();
-        let command = target.getAttribute(`data-${COMMAND_ATTR}`);
+        const command = target.getAttribute(`data-${COMMAND_ATTR}`);
         if (!command) {
           return;
         }
-        let argsValue = target.getAttribute(`data-${ARGS_ATTR}`);
+        const argsValue = target.getAttribute(`data-${ARGS_ATTR}`);
         let args = JSONExt.emptyObject;
         if (argsValue) {
           args = JSON.parse(argsValue);

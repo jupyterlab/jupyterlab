@@ -102,7 +102,7 @@ This will create a new folder for your extension in your current directory.
 
 .. code:: bash
 
-    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts --checkout v2.0
+    cookiecutter https://github.com/jupyterlab/extension-cookiecutter-ts
 
 When prompted, enter values like the following for all of the cookiecutter
 prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
@@ -113,7 +113,8 @@ are using to fetch pictures).
     author_name []: Your Name
     extension_name [myextension]: jupyterlab_apod
     project_short_description [A JupyterLab extension.]: Show a random NASA Astronomy Picture of the Day in a JupyterLab panel
-    repository [https://github.com/my_name/jupyterlab_myextension]: https://github.com/my_name/jupyterlab_apod
+    has_server_extension [n]: n
+    repository [https://github.com/my_name/myextension]: https://github.com/my_name/jupyterlab_apod
 
 Note: if not using a repository, leave the repository field blank. You can come
 back and edit the repository field in the ``package.json`` file later.
@@ -129,7 +130,7 @@ You should see a list like the following.
 
 ::
 
-    README.md     package.json  src           style         tsconfig.json
+    LICENSE  README.md  package.json  src  style  tsconfig.json
 
 Build and install the extension for development
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

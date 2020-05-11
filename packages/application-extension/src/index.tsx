@@ -108,7 +108,7 @@ const main: JupyterFrontEndPlugin<void> = {
     // will short-circuit and ask the user to navigate away.
     const workspace = resolver.name;
 
-    console.log(`Starting application in workspace: "${workspace}"`);
+    console.debug(`Starting application in workspace: "${workspace}"`);
 
     // If there were errors registering plugins, tell the user.
     if (app.registerPluginErrors.length !== 0) {
@@ -547,7 +547,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
     if (!mainArea || mainArea.mode !== 'multiple-document') {
       return null;
     }
-    let area = mainArea.dock?.main;
+    const area = mainArea.dock?.main;
     if (!area) {
       return null;
     }
@@ -822,13 +822,21 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   id: '@jupyterlab/application-extension:property-inspector',
   autoStart: true,
   requires: [ILabShell],
+  optional: [ILayoutRestorer],
   provides: IPropertyInspectorProvider,
-  activate: (app: JupyterFrontEnd, labshell: ILabShell) => {
+  activate: (
+    app: JupyterFrontEnd,
+    labshell: ILabShell,
+    restorer: ILayoutRestorer | null
+  ) => {
     const widget = new SideBarPropertyInspectorProvider(labshell);
     widget.title.icon = buildIcon;
     widget.title.caption = 'Property Inspector';
     widget.id = 'jp-property-inspector';
     labshell.add(widget, 'left');
+    if (restorer) {
+      restorer.add(widget, 'jp-property-inspector');
+    }
     return widget;
   }
 };

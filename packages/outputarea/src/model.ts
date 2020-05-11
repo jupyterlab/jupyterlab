@@ -185,10 +185,10 @@ export class OutputAreaModel implements IOutputAreaModel {
     if (value === this._trusted) {
       return;
     }
-    let trusted = (this._trusted = value);
+    const trusted = (this._trusted = value);
     for (let i = 0; i < this.list.length; i++) {
       let item = this.list.get(i);
-      let value = item.toJSON();
+      const value = item.toJSON();
       item.dispose();
       item = this._createItem({ value, trusted });
       this.list.set(i, item);
@@ -233,7 +233,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     value = JSONExt.deepCopy(value);
     // Normalize stream data.
     Private.normalize(value);
-    let item = this._createItem({ value, trusted: this._trusted });
+    const item = this._createItem({ value, trusted: this._trusted });
     this.list.set(index, item);
   }
 
@@ -297,7 +297,7 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Add a copy of the item to the list.
    */
   private _add(value: nbformat.IOutput): number {
-    let trusted = this._trusted;
+    const trusted = this._trusted;
     value = JSONExt.deepCopy(value);
 
     // Normalize the value.
@@ -319,9 +319,9 @@ export class OutputAreaModel implements IOutputAreaModel {
       this._lastStream += value.text as string;
       this._lastStream = Private.removeOverwrittenChars(this._lastStream);
       value.text = this._lastStream;
-      let item = this._createItem({ value, trusted });
-      let index = this.length - 1;
-      let prev = this.list.get(index);
+      const item = this._createItem({ value, trusted });
+      const index = this.length - 1;
+      const prev = this.list.get(index);
       prev.dispose();
       this.list.set(index, item);
       return index;
@@ -332,7 +332,7 @@ export class OutputAreaModel implements IOutputAreaModel {
     }
 
     // Create the new item.
-    let item = this._createItem({ value, trusted });
+    const item = this._createItem({ value, trusted });
 
     // Update the stream information.
     if (nbformat.isStream(value)) {
@@ -375,8 +375,8 @@ export class OutputAreaModel implements IOutputAreaModel {
    * Create an output item and hook up its signals.
    */
   private _createItem(options: IOutputModel.IOptions): IOutputModel {
-    let factory = this.contentFactory;
-    let item = factory.createOutputModel(options);
+    const factory = this.contentFactory;
+    const item = factory.createOutputModel(options);
     item.changed.connect(this._onGenericChange, this);
     return item;
   }

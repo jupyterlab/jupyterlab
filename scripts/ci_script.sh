@@ -17,31 +17,50 @@ if [[ $GROUP == python ]]; then
 fi
 
 
-if [[ $GROUP == js ]]; then
+if [[ $GROUP == js* ]]; then
 
-    jlpm build:packages
-    jlpm build:test
-    FORCE_COLOR=1 jlpm coverage --loglevel success
+    if [[ $GROUP == "js-testutils" ]]; then
+        pushd testutils
+    else
+        # extract the group name
+        export PKG="${GROUP#*-}"
+        pushd packages/${PKG}
+    fi
 
+    jlpm run build:test; true
+
+    export FORCE_COLOR=1
+    CMD="jlpm run test:cov"
+    $CMD || $CMD || $CMD
     jlpm run clean
 fi
 
 
 if [[ $GROUP == docs ]]; then
+    # Build the tutorial docs
+    pushd docs
+    pip install -r ./requirements.txt
+    make html
+    popd
 
-    # Run the link check - allow for a link to fail once
-    py.test --check-links -k .md . || py.test --check-links -k .md --lf .
+    # Run the link check on the built html files
+    CACHE_DIR="${HOME}/.cache/pytest-link-check"
+    mkdir -p ${CACHE_DIR}
+    echo "Existing cache:"
+    ls -ltr ${CACHE_DIR}
+    # Expire links after a week
+    LINKS_EXPIRE=604800
+    args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
+    args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html ${args}"
+    py.test $args --links-ext .html -k .html docs/build/html || py.test $args --links-ext .html -k .html --lf docs/build/html
 
-    # Build the docs
+    # Build the API docs
     jlpm build:packages
     jlpm docs
 
-    # Verify tutorial docs build
-    pushd docs
-    pip install sphinx sphinx-copybutton sphinx_rtd_theme recommonmark jsx-lexer
-    make linkcheck
-    make html
-    popd
+    # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
+    args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
+    py.test $args --links-ext .md -k .md . || py.test $args --links-ext .md -k .md --lf .
 fi
 
 
@@ -54,9 +73,15 @@ if [[ $GROUP == integrity ]]; then
 
     # Lint our files.
     jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
+fi
 
+
+if [[ $GROUP == integrity2 ]]; then
     # Build the packages individually.
     jlpm run build:src
+
+    # Make sure the storybooks build.
+    jlpm run build:storybook
 
     # Make sure we have CSS that can be converted with postcss
     jlpm global add postcss-cli
@@ -192,6 +217,10 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension install ./jupyterlab/tests/mock_packages/extension --debug
     python -m jupyterlab.browser_check
     jupyter labextension list --debug
+
+    # Make sure we can run watch mode with no built application
+    jupyter lab clean
+    python -m jupyterlab.browser_check --watch
 
     # Make sure we can non-dev install.
     virtualenv -p $(which python3) test_install

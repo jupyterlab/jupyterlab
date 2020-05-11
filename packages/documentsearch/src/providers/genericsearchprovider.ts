@@ -85,7 +85,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     searchTarget: Widget,
     filters = {}
   ): Promise<ISearchMatch[]> {
-    const that = this;
+    const that = this; // eslint-disable-line
     // No point in removing overlay in the middle of the search
     await this.endQuery(false);
 
@@ -152,7 +152,7 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
       const originalLength = node!.textContent!.length; // Node length will change below
       let lastNodeAdded = null;
       // Go backwards as index may change if we go forwards
-      let newMatches = [];
+      const newMatches = [];
       for (let idx = subsections.length - 1; idx >= 0; --idx) {
         const { start, end, text } = subsections[idx];
         // TODO: support tspan for svg when svg support is added

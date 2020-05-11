@@ -5,6 +5,8 @@ import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
+import { LabIcon } from '@jupyterlab/ui-components';
+
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
 
 import { JSONObject, JSONExt } from '@lumino/coreutils';
@@ -18,6 +20,8 @@ import { Message } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { Widget } from '@lumino/widgets';
+
+import { CompletionHandler } from './handler';
 
 /**
  * The class name added to completer menu items.
@@ -37,7 +41,7 @@ const MIN_HEIGHT = 20;
 /**
  * The maximum height of a completer widget.
  */
-const MAX_HEIGHT = 200;
+const MAX_HEIGHT = 300;
 
 /**
  * A flag to indicate that event handlers are caught in the capture phase.
@@ -64,7 +68,7 @@ export class Completer extends Widget {
    * Construct a text completer menu widget.
    */
   constructor(options: Completer.IOptions) {
-    super({ node: document.createElement('ul') });
+    super({ node: document.createElement('div') });
     this._renderer = options.renderer || Completer.defaultRenderer;
     this.model = options.model || null;
     this.editor = options.editor || null;
@@ -169,7 +173,7 @@ export class Completer extends Widget {
    * Emit the selected signal for the current active item and reset.
    */
   selectActive(): void {
-    let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
+    const active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     if (!active) {
       this.reset();
       return;
@@ -225,50 +229,25 @@ export class Completer extends Widget {
       return;
     }
 
-    let items = toArray(model.items());
-
-    // If there are no items, reset and bail.
-    if (!items || !items.length) {
-      this._resetFlag = true;
-      this.reset();
-      if (!this.isHidden) {
-        this.hide();
-        this._visibilityChanged.emit(undefined);
-      }
-      return;
+    let node: HTMLElement | null = null;
+    let completionItemList = model.completionItems && model.completionItems();
+    if (completionItemList && completionItemList.length) {
+      node = this._createCompletionItemNode(model, completionItemList);
+    } else {
+      node = this._createIItemNode(model);
     }
-
-    // If there is only one option, signal and bail.
-    // We don't test the filtered `items`, as that
-    // is too aggressive of completer behavior, it can
-    // lead to double typing of an option.
-    const options = toArray(model.options());
-    if (options.length === 1) {
-      this._selected.emit(options[0]);
-      this.reset();
+    if (!node) {
       return;
-    }
-
-    // Clear the node.
-    let node = this.node;
-    node.textContent = '';
-
-    // Compute an ordered list of all the types in the typeMap, this is computed
-    // once by the model each time new data arrives for efficiency.
-    let orderedTypes = model.orderedTypes();
-
-    // Populate the completer items.
-    for (let item of items) {
-      let li = this._renderer.createItemNode(
-        item!,
-        model.typeMap(),
-        orderedTypes
-      );
-      node.appendChild(li);
     }
 
     let active = node.querySelectorAll(`.${ITEM_CLASS}`)[this._activeIndex];
     active.classList.add(ACTIVE_CLASS);
+
+    // Add the documentation panel
+    let docPanel = document.createElement('div');
+    docPanel.className = 'jp-Completer-docpanel';
+    node.appendChild(docPanel);
+    this._updateDocPanel();
 
     // If this is the first time the current completer session has loaded,
     // populate any initial subset match.
@@ -289,6 +268,101 @@ export class Completer extends Widget {
     }
   }
 
+  private _createCompletionItemNode(
+    model: Completer.IModel,
+    items: CompletionHandler.ICompletionItems
+  ): HTMLElement | null {
+    // If there are no items, reset and bail.
+    if (!items.length) {
+      this._resetFlag = true;
+      this.reset();
+      if (!this.isHidden) {
+        this.hide();
+        this._visibilityChanged.emit(undefined);
+      }
+      return null;
+    }
+
+    // If there is only one option, signal and bail.
+    // We don't test the filtered `items`, as that
+    // is too aggressive of completer behavior, it can
+    // lead to double typing of an option.
+    if (items.length === 1) {
+      this._selected.emit(items[0].insertText || items[0].label);
+      this.reset();
+      return null;
+    }
+
+    // Clear the node.
+    let node = this.node;
+    node.textContent = '';
+
+    // Compute an ordered list of all the types in the typeMap, this is computed
+    // once by the model each time new data arrives for efficiency.
+    let orderedTypes = model.orderedTypes();
+
+    // Populate the completer items.
+    let ul = document.createElement('ul');
+    ul.className = 'jp-Completer-list';
+    for (let item of items) {
+      if (!this._renderer.createCompletionItemNode) {
+        return null;
+      }
+      let li = this._renderer.createCompletionItemNode(item, orderedTypes);
+      ul.appendChild(li);
+    }
+    node.appendChild(ul);
+    return node;
+  }
+
+  private _createIItemNode(model: Completer.IModel): HTMLElement | null {
+    const items = toArray(model.items());
+
+    // If there are no items, reset and bail.
+    if (!items || !items.length) {
+      this._resetFlag = true;
+      this.reset();
+      if (!this.isHidden) {
+        this.hide();
+        this._visibilityChanged.emit(undefined);
+      }
+      return null;
+    }
+
+    // If there is only one option, signal and bail.
+    // We don't test the filtered `items`, as that
+    // is too aggressive of completer behavior, it can
+    // lead to double typing of an option.
+    const options = toArray(model.options());
+    if (options.length === 1) {
+      this._selected.emit(options[0]);
+      this.reset();
+      return null;
+    }
+
+    // Clear the node.
+    const node = this.node;
+    node.textContent = '';
+
+    // Compute an ordered list of all the types in the typeMap, this is computed
+    // once by the model each time new data arrives for efficiency.
+    const orderedTypes = model.orderedTypes();
+
+    // Populate the completer items.
+    let ul = document.createElement('ul');
+    ul.className = 'jp-Completer-list';
+    for (const item of items) {
+      const li = this._renderer.createItemNode(
+        item!,
+        model.typeMap(),
+        orderedTypes
+      );
+      ul.appendChild(li);
+    }
+    node.appendChild(ul);
+    return node;
+  }
+
   /**
    * Cycle through the available completer items.
    *
@@ -298,8 +372,8 @@ export class Completer extends Widget {
    * the first item, subsequent `up` cycles will remain on the first cycle.
    */
   private _cycle(direction: Private.scrollType): void {
-    let items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
-    let index = this._activeIndex;
+    const items = this.node.querySelectorAll(`.${ITEM_CLASS}`);
+    const index = this._activeIndex;
     let active = this.node.querySelector(`.${ACTIVE_CLASS}`) as HTMLElement;
     active.classList.remove(ACTIVE_CLASS);
 
@@ -328,7 +402,11 @@ export class Completer extends Widget {
 
     active = items[this._activeIndex] as HTMLElement;
     active.classList.add(ACTIVE_CLASS);
-    ElementExt.scrollIntoViewIfNeeded(this.node, active);
+    let completionList = this.node.querySelector(
+      '.jp-Completer-list'
+    ) as Element;
+    ElementExt.scrollIntoViewIfNeeded(completionList, active);
+    this._updateDocPanel();
   }
 
   /**
@@ -347,11 +425,11 @@ export class Completer extends Widget {
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
-        let model = this._model;
+        const model = this._model;
         if (!model) {
           return;
         }
-        let populated = this._populateSubset();
+        const populated = this._populateSubset();
         // If there is a common subset in the options,
         // then emit a completion signal with that subset.
         if (model.query) {
@@ -506,6 +584,38 @@ export class Completer extends Widget {
     });
   }
 
+  /**
+   * Update the display-state and contents of the documentation panel
+   */
+  private _updateDocPanel(): void {
+    let docPanel = this.node.querySelector('.jp-Completer-docpanel');
+    if (!docPanel) {
+      return;
+    }
+    if (!this.model?.completionItems) {
+      return;
+    }
+    let items = this.model?.completionItems();
+    if (!items) {
+      docPanel.setAttribute('style', 'display:none');
+      return;
+    }
+    let activeItem = items[this._activeIndex];
+    if (!activeItem) {
+      docPanel.setAttribute('style', 'display:none');
+      return;
+    }
+    docPanel.textContent = '';
+    if (activeItem.documentation) {
+      let pre = document.createElement('pre');
+      pre.textContent = activeItem.documentation;
+      docPanel.appendChild(pre);
+      docPanel.setAttribute('style', '');
+    } else {
+      docPanel.setAttribute('style', 'display:none');
+    }
+  }
+
   private _activeIndex = 0;
   private _editor: CodeEditor.IEditor | null = null;
   private _model: Completer.IModel | null = null;
@@ -604,6 +714,16 @@ export namespace Completer {
      * The query against which items are filtered.
      */
     query: string;
+
+    /**
+     * Get the list of visible CompletionItems in the completer menu.
+     */
+    completionItems?(): CompletionHandler.ICompletionItems;
+
+    /**
+     * Set the list of visible CompletionItems in the completer menu.
+     */
+    setCompletionItems?(items: CompletionHandler.ICompletionItems): void;
 
     /**
      * Get the of visible items in the completer menu.
@@ -712,6 +832,15 @@ export namespace Completer {
    */
   export interface IRenderer {
     /**
+     * Create an item node (an `li` element)  from a ICompletionItem
+     * for a text completer menu.
+     */
+    createCompletionItemNode?(
+      item: CompletionHandler.ICompletionItem,
+      orderedTypes: string[]
+    ): HTMLLIElement;
+
+    /**
      * Create an item node (an `li` element) for a text completer menu.
      */
     createItemNode(
@@ -726,6 +855,27 @@ export namespace Completer {
    */
   export class Renderer implements IRenderer {
     /**
+     * Create an item node from an ICompletionItem for a text completer menu.
+     */
+    createCompletionItemNode(
+      item: CompletionHandler.ICompletionItem,
+      orderedTypes: string[]
+    ): HTMLLIElement {
+      let baseNode = this._createBaseNode(item.insertText || item.label);
+      if (item.deprecated) {
+        baseNode.classList.add('jp-Completer-deprecated');
+      }
+      return this._constructNode(
+        baseNode,
+        this._createMatchNode(item.label),
+        !!item.type,
+        item.type,
+        orderedTypes,
+        item.icon
+      );
+    }
+
+    /**
      * Create an item node for a text completer menu.
      */
     createItemNode(
@@ -733,35 +883,89 @@ export namespace Completer {
       typeMap: TypeMap,
       orderedTypes: string[]
     ): HTMLLIElement {
-      let li = document.createElement('li');
+      return this._constructNode(
+        this._createBaseNode(item.raw),
+        this._createMatchNode(item.text),
+        !JSONExt.deepEqual(typeMap, {}),
+        typeMap[item.raw] || '',
+        orderedTypes
+      );
+    }
+
+    /**
+     * Create base node with the value to be inserted
+     */
+    private _createBaseNode(value: string): HTMLLIElement {
+      const li = document.createElement('li');
       li.className = ITEM_CLASS;
       // Set the raw, un-marked up value as a data attribute.
-      li.setAttribute('data-value', item.raw);
+      li.setAttribute('data-value', value);
+      return li;
+    }
 
-      let matchNode = document.createElement('code');
+    /**
+     * Create match node to highlight potential prefix match within result.
+     */
+    private _createMatchNode(result: string): HTMLElement {
+      const matchNode = document.createElement('code');
       matchNode.className = 'jp-Completer-match';
       // Use innerHTML because search results include <mark> tags.
-      matchNode.innerHTML = defaultSanitizer.sanitize(item.text, {
+      matchNode.innerHTML = defaultSanitizer.sanitize(result, {
         allowedTags: ['mark']
       });
+      return matchNode;
+    }
 
-      // If there are types provided add those.
-      if (!JSONExt.deepEqual(typeMap, {})) {
-        let typeNode = document.createElement('span');
-        let type = typeMap[item.raw] || '';
+    /**
+     * Attaches type and match nodes to base node.
+     */
+    private _constructNode(
+      li: HTMLLIElement,
+      matchNode: HTMLElement,
+      typesExist: boolean,
+      type: any,
+      orderedTypes: string[],
+      icon?: LabIcon
+    ): HTMLLIElement {
+      // Add the icon or type monogram
+      if (icon) {
+        const iconNode = icon.element({
+          className: 'jp-Completer-type jp-Completer-icon'
+        });
+        li.appendChild(iconNode);
+      } else if (typesExist) {
+        const typeNode = document.createElement('span');
         typeNode.textContent = (type[0] || '').toLowerCase();
-        let colorIndex = (orderedTypes.indexOf(type) % N_COLORS) + 1;
-        typeNode.className = 'jp-Completer-type';
+        const colorIndex = (orderedTypes.indexOf(type) % N_COLORS) + 1;
+        typeNode.className = 'jp-Completer-type jp-Completer-monogram';
         typeNode.setAttribute(`data-color-index`, colorIndex.toString());
+        li.appendChild(typeNode);
+      } else {
+        // Create empty span to ensure consistent list styling.
+        // Otherwise, in a list of two items,
+        // if one item has an icon, but the other has type,
+        // the icon grows out of its bounds.
+        const dummyNode = document.createElement('span');
+        dummyNode.className = 'jp-Completer-monogram';
+        li.appendChild(dummyNode);
+      }
+
+      li.appendChild(matchNode);
+
+      // If there is a type, add the type extension and title
+      if (typesExist) {
         li.title = type;
-        let typeExtendedNode = document.createElement('code');
+        const typeExtendedNode = document.createElement('code');
         typeExtendedNode.className = 'jp-Completer-typeExtended';
         typeExtendedNode.textContent = type.toLocaleLowerCase();
-        li.appendChild(typeNode);
-        li.appendChild(matchNode);
         li.appendChild(typeExtendedNode);
       } else {
-        li.appendChild(matchNode);
+        // If no type is present on the right,
+        // the highlighting of the completion item
+        // doesn't cover the entire row.
+        const dummyTypeExtendedNode = document.createElement('span');
+        dummyTypeExtendedNode.className = 'jp-Completer-typeExtended';
+        li.appendChild(dummyTypeExtendedNode);
       }
       return li;
     }
@@ -796,14 +1000,14 @@ namespace Private {
    * Returns the common subset string that a list of strings shares.
    */
   export function commonSubset(values: string[]): string {
-    let len = values.length;
+    const len = values.length;
     let subset = '';
     if (len < 2) {
       return subset;
     }
-    let strlen = values[0].length;
+    const strlen = values[0].length;
     for (let i = 0; i < strlen; i++) {
-      let ch = values[0][i];
+      const ch = values[0][i];
       for (let j = 1; j < len; j++) {
         if (values[j][i] !== ch) {
           return subset;
@@ -818,7 +1022,7 @@ namespace Private {
    * Returns the list of raw item values currently in the DOM.
    */
   export function itemValues(items: NodeList): string[] {
-    let values: string[] = [];
+    const values: string[] = [];
     for (let i = 0, len = items.length; i < len; i++) {
       const attr = (items[i] as HTMLElement).getAttribute('data-value');
       if (attr) {

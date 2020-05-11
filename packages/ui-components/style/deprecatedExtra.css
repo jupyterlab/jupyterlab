@@ -8,7 +8,7 @@
  */
 
 :root {
-  --jp-icon-search-white: url('deprecated/search-white.svg');
+  --jp-icon-search-white: url('icons/toolbar/search.svg');
 }
 
 .jp-Icon,

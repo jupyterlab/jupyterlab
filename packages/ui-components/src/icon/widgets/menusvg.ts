@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { h, VirtualElement } from '@lumino/virtualdom';
-import { Menu } from '@lumino/widgets';
+import { Menu, ContextMenu } from '@lumino/widgets';
 
 import { caretRightIcon, checkIcon } from '../iconimports';
 import { LabIconStyle } from '../../style';
@@ -11,6 +11,26 @@ import { classes } from '../../utils';
 const submenuIcon = caretRightIcon.bindprops({
   stylesheet: 'menuItem'
 });
+
+/**
+ * An object which implements a universal context menu.
+ * Tweaked to use inline svg icons
+ */
+export class ContextMenuSvg extends ContextMenu {
+  /**
+   * Construct a new context menu.
+   *
+   * @param options - The options for initializing the menu.
+   */
+  constructor(options: ContextMenu.IOptions) {
+    super(options);
+
+    // override the vanilla .menu
+    this.menu = new MenuSvg(options);
+  }
+
+  readonly menu: MenuSvg;
+}
 
 /**
  * a widget which displays items as a canonical menu.
@@ -41,27 +61,8 @@ export class MenuSvg extends Menu {
    * The index will be clamped to the bounds of the items.
    */
   insertItem(index: number, options: Menu.IItemOptions): Menu.IItem {
-    if (options.submenu?.renderer === Menu.defaultRenderer) {
-      // create a "view" of the submenu with a different default renderer
-      const submenu = Object.create(options.submenu, {
-        renderer: {
-          configurable: true,
-          enumerable: true,
-          value: MenuSvg.defaultRenderer
-        }
-      });
-
-      // Widget.title is an AttachedProperty, and needs special handling
-      submenu.title.label = options.submenu.title.label;
-      submenu.title.mnemonic = options.submenu.title.mnemonic;
-      submenu.title.icon = options.submenu.title.icon;
-      submenu.title.iconClass = options.submenu.title.iconClass;
-      submenu.title.iconLabel = options.submenu.title.iconLabel;
-      submenu.title.caption = options.submenu.title.caption;
-      submenu.title.className = options.submenu.title.className;
-      submenu.title.dataset = options.submenu.title.dataset;
-
-      options.submenu = submenu;
+    if (options.submenu) {
+      MenuSvg.overrideDefaultRenderer(options.submenu);
     }
 
     return super.insertItem(index, options);
@@ -69,6 +70,24 @@ export class MenuSvg extends Menu {
 }
 
 export namespace MenuSvg {
+  export function overrideDefaultRenderer(menu: Menu): void {
+    // override renderer, if needed
+    if (menu.renderer === Menu.defaultRenderer) {
+      // cast away readonly on menu.renderer
+      (menu as any).renderer = MenuSvg.defaultRenderer;
+    }
+
+    // ensure correct renderer on any submenus that get added in the future
+    menu.insertItem = MenuSvg.prototype.insertItem;
+
+    // recurse through submenus
+    for (const item of (menu as any)._items as Menu.IItem[]) {
+      if (item.submenu) {
+        overrideDefaultRenderer(item.submenu);
+      }
+    }
+  }
+
   /**
    * a modified implementation of the Menu Renderer
    */

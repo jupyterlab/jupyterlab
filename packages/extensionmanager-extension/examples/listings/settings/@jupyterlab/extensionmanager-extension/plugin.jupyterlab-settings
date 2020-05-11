@@ -1,0 +1,15 @@
+{
+    // Extension Manager
+    // @jupyterlab/extensionmanager-extension:plugin
+    // Extension manager settings.
+    // *********************************************
+
+    // Disclaimed Status
+    // Whether the user understand that extensions managed through this interface run arbitrary code that may be dangerous
+    "disclaimed": true,
+
+    // Enabled Status
+    // Enables extension manager (requires Node.js/npm).
+    // WARNING: installing untrusted extensions may be unsafe.
+    "enabled": true
+}

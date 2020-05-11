@@ -72,6 +72,8 @@ After a command has been added to the application command registry
 you can add them to various places in the application user interface,
 where they will be rendered using the metadata you provided.
 
+For example, you can add a button the Notebook toolbar to run the command with the ``CommandToolbarButtonComponent``.
+
 Add a Command to the Command Palette
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -125,6 +127,22 @@ right-clicks on a DOM element matching ``.jp-Notebook`` (that is to say, a noteb
 The selector can be any valid CSS selector, and may target your own UI elements, or existing ones.
 A list of CSS selectors currently used by context menu commands is given in :ref:`css-selectors`.
 
+If you don't want JupyterLab's custom context menu to appear for your element, because you have
+your own right click behavior that you want to trigger, you can add the `data-jp-suppress-context-menu` data attribute
+to any node to have it and its children not trigger it.
+
+For example, if you are building a custom React element, it would look like this:
+
+.. code::
+
+    function MyElement(props: {}) {
+      return (
+        <div data-jp-suppress-context-menu>
+          <p>Hi</p>
+          <p onContextMenu={() => {console.log("right clicked")}}>There</p>
+        </div>
+      )
+    }
 
 .. _copy_shareable_link:
 
@@ -188,94 +206,7 @@ default plugin provided by the built-in file browser.
 Icons
 ~~~~~
 
-``LabIcon`` is the icon class used by JupyterLab, and is part of the new icon
-system introduced in JupyterLab v2.0.
-
-How JupyterLab handles icons
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The ui-components package provides icons to the rest of JupyterLab, in the
-form of a set of ``LabIcon`` instances (currently about 80). All of the icons
-in the core JupyterLab packages are rendered using one of these ``LabIcon``
-instances.
-
-Using the icons in your own code
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You can use any of JupyterLab icons in your own code via an ``import``
-statement. For example, to use ``jupyterIcon`` you would first do:
-
-.. code:: typescript
-
-  import { jupyterIcon } from "@jupyterlab/ui-components";
-
-How to render an icon into a DOM node
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Icons can be added as children to any ``div`` or ``span`` nodes using the
-`icon.element(...)` method (where ``icon`` is any instance of ``LabIcon``).
-For example, to render the Jupyter icon you could do:
-
-.. code:: typescript
-
-  jupyterIcon.element({
-    container: elem,
-    height: '16px',
-    width: '16px',
-    marginLeft: '2px'
-  });
-
-where ``elem`` is any ``HTMLElement`` with a ``div`` or ``span`` tag. As shown in
-the above example, the icon can be styled by passing CSS parameters into
-`.element(...)`. Any valid CSS parameter can be used, with one caveat:
-snake case params have to be converted to camel case. For example, instead
-of `foo-bar: '8px'`, you'd need to use `fooBar: '8px'`.
-
-How to render an icon as a React component
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Icons can also be rendered using React. The `icon.react` parameter holds a
-standard React component that will display the icon on render. Like any React
-component, `icon.react` can be used in various ways.
-
-For example, here is how you would add the Jupyter icon to the render tree of
-another React component:
-
-.. code:: jsx
-
-  public render() {
-    return (
-      <div className="outer">
-        <div className="inner">
-          <jupyterIcon.react
-            tag="span"
-            right="7px"
-            top="5px"
-          />
-          "and here's a text node"
-        </div>
-      </div>
-    );
-  }
-
-Alternatively, you can just render the icon directly into any existing DOM
-node ``elem`` by using the ``ReactDOM`` module:
-
-.. code:: typescript
-
-  ReactDOM.render(jupyterIcon.react, elem);
-
-If do you use ``ReactDOM`` to render, and if the ``elem`` node is ever removed
-from the DOM, you'll first need to clean it up:
-
-.. code:: typescript
-
-  ReactDOM.unmountComponentAtNode(elem);
-
-This cleanup step is not a special property of ``LabIcon``, but is instead
-needed for any React component that is rendered directly at the top level
-by ``ReactDOM``: failure to call `unmountComponentAtNode` can result in a
-`memory leak <https://stackoverflow.com/a/48198011/425458>`__.
+See :ref:`ui_components`
 
 
 Keyboard Shortcuts

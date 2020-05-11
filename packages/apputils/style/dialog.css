@@ -30,7 +30,7 @@
   padding-bottom: 12px;
   min-width: 300px;
   min-height: 150px;
-  max-width: 500px;
+  max-width: 1000px;
   max-height: 500px;
   box-sizing: border-box;
   box-shadow: var(--jp-elevation-z20);
@@ -40,6 +40,7 @@
    * relative to this base size */
   font-size: var(--jp-ui-font-size1);
   color: var(--jp-ui-font-color1);
+  resize: both;
 }
 
 .jp-Dialog-button {

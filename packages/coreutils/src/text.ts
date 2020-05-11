@@ -29,10 +29,10 @@ export namespace Text {
     }
     let charIdx = jsIdx;
     for (let i = 0; i + 1 < text.length && i < jsIdx; i++) {
-      let charCode = text.charCodeAt(i);
+      const charCode = text.charCodeAt(i);
       // check for surrogate pair
       if (charCode >= 0xd800 && charCode <= 0xdbff) {
-        let nextCharCode = text.charCodeAt(i + 1);
+        const nextCharCode = text.charCodeAt(i + 1);
         if (nextCharCode >= 0xdc00 && nextCharCode <= 0xdfff) {
           charIdx--;
           i++;
@@ -58,10 +58,10 @@ export namespace Text {
     }
     let jsIdx = charIdx;
     for (let i = 0; i + 1 < text.length && i < jsIdx; i++) {
-      let charCode = text.charCodeAt(i);
+      const charCode = text.charCodeAt(i);
       // check for surrogate pair
       if (charCode >= 0xd800 && charCode <= 0xdbff) {
-        let nextCharCode = text.charCodeAt(i + 1);
+        const nextCharCode = text.charCodeAt(i + 1);
         if (nextCharCode >= 0xdc00 && nextCharCode <= 0xdfff) {
           jsIdx++;
           i++;

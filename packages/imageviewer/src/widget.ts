@@ -174,12 +174,12 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
    * Render the widget content.
    */
   private _render(): void {
-    let context = this.context;
-    let cm = context.contentsModel;
+    const context = this.context;
+    const cm = context.contentsModel;
     if (!cm) {
       return;
     }
-    let content = context.model.toString();
+    const content = context.model.toString();
     this._img.src = `data:${this._mimeType}${this._format},${content}`;
   }
 
@@ -187,9 +187,9 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
    * Update the image CSS style, including the transform and filter.
    */
   private _updateStyle(): void {
-    let [a, b, c, d] = this._matrix;
-    let [tX, tY] = Private.prodVec(this._matrix, [1, 1]);
-    let transform = `matrix(${a}, ${b}, ${c}, ${d}, 0, 0) translate(${
+    const [a, b, c, d] = this._matrix;
+    const [tX, tY] = Private.prodVec(this._matrix, [1, 1]);
+    const transform = `matrix(${a}, ${b}, ${c}, ${d}, 0, 0) translate(${
       tX < 0 ? -100 : 0
     }%, ${tY < 0 ? -100 : 0}%) `;
     this._img.style.transform = `scale(${this._scale}) ${transform}`;

@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -23,7 +23,7 @@ const MATHSPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[{}$]|[{}]|(?:\n\s*)+|@
  *    (which will be a paragraph).
  */
 export function removeMath(text: string): { text: string; math: string[] } {
-  let math: string[] = []; // stores math strings for later
+  const math: string[] = []; // stores math strings for later
   let start: number | null = null;
   let end: string | null = null;
   let last: number | null = null;
@@ -35,7 +35,7 @@ export function removeMath(text: string): { text: string; math: string[] } {
   // we still have to consider them at this point; the following issue has happened several times:
   //
   //     `$foo` and `$bar` are variables.  -->  <code>$foo ` and `$bar</code> are variables.
-  let hasCodeSpans = /`/.test(text);
+  const hasCodeSpans = /`/.test(text);
   if (hasCodeSpans) {
     text = text
       .replace(/~/g, '~T')
@@ -56,7 +56,7 @@ export function removeMath(text: string): { text: string; math: string[] } {
   let blocks = text.replace(/\r\n?/g, '\n').split(MATHSPLIT);
 
   for (let i = 1, m = blocks.length; i < m; i += 2) {
-    let block = blocks[i];
+    const block = blocks[i];
     if (block.charAt(0) === '@') {
       //
       //  Things that look like our math markers will get
@@ -132,7 +132,7 @@ export function replaceMath(text: string, math: string[]): string {
    * The math delimiters "\\(", "\\[", "\\)" and "\\]" are replaced
    * removing one backslash in order to be interpreted correctly by MathJax.
    */
-  let process = (match: string, n: number): string => {
+  const process = (match: string, n: number): string => {
     let group = math[n];
     if (
       group.substr(0, 3) === '\\\\(' &&

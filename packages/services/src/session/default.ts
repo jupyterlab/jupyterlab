@@ -174,7 +174,7 @@ export class SessionConnection implements Session.ISessionConnection {
    * the server.
    */
   update(model: Session.IModel): void {
-    let oldModel = this.model;
+    const oldModel = this.model;
     this._path = model.path;
     this._name = model.name;
     this._type = model.type;
@@ -189,9 +189,9 @@ export class SessionConnection implements Session.ISessionConnection {
       if (this._kernel !== null) {
         this._kernel.dispose();
       }
-      let oldValue = this._kernel;
+      const oldValue = this._kernel;
       this.setupKernel(model.kernel);
-      let newValue = this._kernel;
+      const newValue = this._kernel;
       this._kernelChanged.emit({ name: 'kernel', oldValue, newValue });
     }
 
@@ -210,9 +210,9 @@ export class SessionConnection implements Session.ISessionConnection {
 
     if (this._kernel) {
       this._kernel.dispose();
-      let oldValue = this._kernel;
+      const oldValue = this._kernel;
       this._kernel = null;
-      let newValue = this._kernel;
+      const newValue = this._kernel;
       this._kernelChanged.emit({ name: 'kernel', oldValue, newValue });
     }
 
@@ -376,7 +376,7 @@ export class SessionConnection implements Session.ISessionConnection {
   private async _patch(
     body: DeepPartial<Session.IModel>
   ): Promise<Session.IModel> {
-    let model = await updateSession(
+    const model = await updateSession(
       { ...body, id: this._id },
       this.serverSettings
     );

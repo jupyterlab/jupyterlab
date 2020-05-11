@@ -5,7 +5,7 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-private-completer-item-height: 22px;
+  --jp-private-completer-item-height: 24px;
   /* Shift the baseline of the type character to align with the match text */
   --jp-private-completer-type-offset: 2px;
 }
@@ -15,20 +15,37 @@
   background: var(--jp-layout-color1);
   color: var(--jp-content-font-color1);
   border: var(--jp-border-width) solid var(--jp-border-color1);
+  padding: 0;
+  display: flex;
+  flex-direction: row;
+  /* Position the completer relative to the text editor, align the '.' */
+  margin: 4px 0 0 -30px;
+  z-index: 10001;
+}
+
+.jp-Completer-docpanel {
+  border-left: var(--jp-border-width) solid var(--jp-border-color1);
+  width: 300px;
+  overflow: scroll;
+  padding: 8px;
+  max-height: calc((10 * var(--jp-private-completer-item-height)) - 16px);
+}
+
+.jp-Completer-docpanel pre {
+  border: none;
+  margin: 0px;
+  padding: 0px;
+  white-space: pre-wrap;
+}
+
+.jp-Completer-list {
+  margin: 0;
+  padding: 0;
   list-style-type: none;
   overflow-y: scroll;
   overflow-x: auto;
-  padding: 0;
-  /* Position the completer relative to the text editor, align the '.' */
-  margin: 4px 0 0 -30px;
-  max-height: calc(
-    (10 * var(--jp-private-completer-item-height)) +
-      (2 * var(--jp-border-width))
-  );
-  min-height: calc(
-    var(--jp-private-completer-item-height) + (2 * var(--jp-border-width))
-  );
-  z-index: 10001;
+  max-height: calc((10 * var(--jp-private-completer-item-height)));
+  min-height: calc(var(--jp-private-completer-item-height));
 }
 
 .jp-Completer-item {
@@ -49,16 +66,34 @@
   font-family: var(--jp-code-font-family);
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
+  vertical-align: middle;
+}
+
+.jp-Completer-deprecated .jp-Completer-match {
+  text-decoration: line-through;
+  color: var(--jp-content-font-color2);
 }
 
 .jp-Completer-item .jp-Completer-type {
   display: table-cell;
   box-sizing: border-box;
   height: var(--jp-private-completer-item-height);
-  text-align: center;
   background: transparent;
+  width: var(--jp-private-completer-item-height);
+}
+
+.jp-Completer-item .jp-Completer-icon {
+  vertical-align: middle;
+  /* Normal element size from LabIconStyle.ISheetOptions */
+  height: 16px;
+  width: 16px;
+}
+
+.jp-Completer-item .jp-Completer-monogram {
+  text-align: center;
   color: white;
   width: var(--jp-private-completer-item-height);
+  min-width: var(--jp-private-completer-item-height);
   font-family: var(--jp-ui-font-family);
   font-size: var(--jp-ui-font-size1);
   line-height: calc(
@@ -79,6 +114,7 @@
   font-size: var(--jp-code-font-size);
   line-height: var(--jp-private-completer-item-height);
   padding-right: 8px;
+  vertical-align: middle;
 }
 
 .jp-Completer-item:hover {

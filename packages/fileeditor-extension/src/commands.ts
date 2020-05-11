@@ -64,6 +64,8 @@ export namespace CommandIDs {
 
   export const createConsole = 'fileeditor:create-console';
 
+  export const replaceSelection = 'fileeditor:replace-selection';
+
   export const runCode = 'fileeditor:run-code';
 
   export const runAllCode = 'fileeditor:run-all';
@@ -177,6 +179,8 @@ export namespace Commands {
     addMatchBracketsCommand(commands, settingRegistry, id, isEnabled);
 
     addAutoClosingBracketsCommand(commands, settingRegistry, id);
+
+    addReplaceSelectionCommand(commands, tracker, isEnabled);
 
     addCreateConsoleCommand(commands, tracker, isEnabled);
 
@@ -354,6 +358,28 @@ export namespace Commands {
   }
 
   /**
+   * Add the replace selection for text editor command
+   */
+  export function addReplaceSelectionCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.replaceSelection, {
+      execute: args => {
+        const text: string = (args['text'] as string) || '';
+        const widget = tracker.currentWidget;
+        if (!widget) {
+          return;
+        }
+        widget.content.editor.replaceSelection?.(text);
+      },
+      isEnabled,
+      label: 'Replace Selection in Editor'
+    });
+  }
+
+  /**
    * Add the Create Console for Editor command
    */
   export function addCreateConsoleCommand(
@@ -411,7 +437,7 @@ export namespace Commands {
           const { text } = editor.model.value;
           const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
 
-          for (let block of blocks) {
+          for (const block of blocks) {
             if (block.startLine <= start.line && start.line <= block.endLine) {
               code = block.code;
               selected = true;
@@ -425,7 +451,7 @@ export namespace Commands {
           code = editor.getLine(selection.start.line);
           const cursor = editor.getCursorPosition();
           if (cursor.line + 1 === editor.lineCount) {
-            let text = editor.model.value.text;
+            const text = editor.model.value.text;
             editor.model.value.text = text + '\n';
           }
           editor.setCursorPosition({
@@ -456,22 +482,22 @@ export namespace Commands {
   ) {
     commands.addCommand(CommandIDs.runAllCode, {
       execute: () => {
-        let widget = tracker.currentWidget?.content;
+        const widget = tracker.currentWidget?.content;
 
         if (!widget) {
           return;
         }
 
         let code = '';
-        let editor = widget.editor;
-        let text = editor.model.value.text;
-        let path = widget.context.path;
-        let extension = PathExt.extname(path);
+        const editor = widget.editor;
+        const text = editor.model.value.text;
+        const path = widget.context.path;
+        const extension = PathExt.extname(path);
 
         if (MarkdownCodeBlocks.isMarkdown(extension)) {
           // For Markdown files, run only code blocks.
           const blocks = MarkdownCodeBlocks.findMarkdownCodeBlocks(text);
-          for (let block of blocks) {
+          for (const block of blocks) {
             code += block.code;
           }
         } else {
@@ -499,11 +525,11 @@ export namespace Commands {
   ) {
     commands.addCommand(CommandIDs.markdownPreview, {
       execute: () => {
-        let widget = tracker.currentWidget;
+        const widget = tracker.currentWidget;
         if (!widget) {
           return;
         }
-        let path = widget.context.path;
+        const path = widget.context.path;
         return commands.execute('markdownviewer:open', {
           path,
           options: {
@@ -512,7 +538,7 @@ export namespace Commands {
         });
       },
       isVisible: () => {
-        let widget = tracker.currentWidget;
+        const widget = tracker.currentWidget;
         return (
           (widget && PathExt.extname(widget.context.path) === '.md') || false
         );
@@ -555,7 +581,7 @@ export namespace Commands {
       caption: 'Create a new text file',
       icon: args => (args['isPalette'] ? undefined : textEditorIcon),
       execute: args => {
-        let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
+        const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
         return createNew(commands, cwd as string);
       }
     });
@@ -574,7 +600,7 @@ export namespace Commands {
       caption: 'Create a new markdown file',
       icon: args => (args['isPalette'] ? undefined : markdownIcon),
       execute: args => {
-        let cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
+        const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
         return createNew(commands, cwd as string, 'md');
       }
     });
@@ -633,16 +659,16 @@ export namespace Commands {
    * Add commands to change the tab indentation to the File Editor palette
    */
   export function addChangeTabsCommandsToPalette(palette: ICommandPalette) {
-    let args: JSONObject = {
+    const args: JSONObject = {
       insertSpaces: false,
       size: 4,
       name: 'Indent with Tab'
     };
-    let command = 'fileeditor:change-tabs';
+    const command = 'fileeditor:change-tabs';
     palette.addItem({ command, args, category: paletteCategory });
 
-    for (let size of [1, 2, 4, 8]) {
-      let args: JSONObject = {
+    for (const size of [1, 2, 4, 8]) {
+      const args: JSONObject = {
         insertSpaces: true,
         size,
         name: `Spaces: ${size} `
@@ -679,7 +705,7 @@ export namespace Commands {
    * Add commands to change the font size to the File Editor palette
    */
   export function addChangeFontSizeCommandsToPalette(palette: ICommandPalette) {
-    let command = CommandIDs.changeFontSize;
+    const command = CommandIDs.changeFontSize;
 
     let args = { name: 'Increase Font Size', delta: 1 };
     palette.addItem({ command, args, category: paletteCategory });
@@ -736,16 +762,16 @@ export namespace Commands {
   ) {
     const tabMenu = new Menu({ commands });
     tabMenu.title.label = 'Text Editor Indentation';
-    let args: JSONObject = {
+    const args: JSONObject = {
       insertSpaces: false,
       size: 4,
       name: 'Indent with Tab'
     };
-    let command = 'fileeditor:change-tabs';
+    const command = 'fileeditor:change-tabs';
     tabMenu.addItem({ command, args });
 
-    for (let size of [1, 2, 4, 8]) {
-      let args: JSONObject = {
+    for (const size of [1, 2, 4, 8]) {
+      const args: JSONObject = {
         insertSpaces: true,
         size,
         name: `Spaces: ${size} `
@@ -844,7 +870,7 @@ export namespace Commands {
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>
   ) {
-    let createConsole: (
+    const createConsole: (
       widget: IDocumentWidget<FileEditor>
     ) => Promise<void> = getCreateConsoleFunction(commands);
     menu.fileMenu.consoleCreators.add({

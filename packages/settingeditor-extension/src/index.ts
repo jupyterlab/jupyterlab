@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -135,7 +135,7 @@ function activate(
       editor.title.icon = settingsIcon;
       editor.title.label = 'Settings';
 
-      let main = new MainAreaWidget({ content: editor });
+      const main = new MainAreaWidget({ content: editor });
       void tracker.add(main);
       shell.add(main);
     },

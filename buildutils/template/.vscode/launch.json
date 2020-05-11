@@ -1,0 +1,15 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach to jest",
+      // Usage:
+      // Open the parent directory in VSCode
+      // Run \`jlpm test:debug:watch\` in a terminal
+      // Run this debugging task
+      "port": 9229
+    }
+  ]
+}

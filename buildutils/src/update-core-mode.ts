@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
@@ -11,7 +11,7 @@ import * as utils from './utils';
 utils.run('jlpm integrity');
 
 // Get the dev mode package.json file.
-let data = utils.readJSONFile('./dev_mode/package.json');
+const data = utils.readJSONFile('./dev_mode/package.json');
 
 // Update the values that need to change and write to staging.
 data['jupyterlab']['buildDir'] = './build';
@@ -19,7 +19,7 @@ data['jupyterlab']['outputDir'] = '..';
 data['jupyterlab']['staticDir'] = '../static';
 data['jupyterlab']['linkedPackages'] = {};
 
-let staging = './jupyterlab/staging';
+const staging = './jupyterlab/staging';
 
 // Ensure a clean staging directory.
 const keep = ['yarn.js', '.yarnrc'];

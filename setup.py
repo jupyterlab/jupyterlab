@@ -37,8 +37,8 @@ data_files_spec = [
 
 package_data_spec = dict()
 package_data_spec[NAME] = [
-    'staging/*', 'staging/templates/*', 'static/**', 'tests/mock_packages/**',
-    'themes/**', 'schemas/**', '*.js'
+    'staging/*', 'staging/templates/*', 'staging/.yarnrc',
+    'static/**', 'tests/mock_packages/**', 'themes/**', 'schemas/**', '*.js'
 ]
 
 
@@ -139,7 +139,7 @@ setup_args = dict(
 setup_args['install_requires'] = [
     'notebook>=4.3.1',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
-    'jupyterlab_server~=1.0.0',
+    'jupyterlab_server>=1.1.0, <2.0',
     'jinja2>=2.10'
 ]
 
@@ -147,11 +147,14 @@ setup_args['extras_require'] = {
     'test': [
         'pytest',
         'pytest-check-links',
-        'requests'
+        'requests',
+        'wheel',
+        'virtualenv'
     ],
     'docs': [
-        'sphinx',
+        'jsx-lexer',
         'recommonmark',
+        'sphinx',
         'sphinx_rtd_theme',
         'sphinx-copybutton'
     ],

@@ -27,6 +27,7 @@ const cmdIds = {
   restart: 'notebook:restart-kernel',
   switchKernel: 'notebook:switch-kernel',
   runAndAdvance: 'notebook-cells:run-and-advance',
+  run: 'notebook:run-cell',
   deleteCell: 'notebook-cells:delete',
   selectAbove: 'notebook-cells:select-above',
   selectBelow: 'notebook-cells:select-below',
@@ -144,6 +145,15 @@ export const SetupCommands = (
       );
     }
   });
+  commands.addCommand(cmdIds.run, {
+    label: 'Run',
+    execute: () => {
+      return NotebookActions.run(
+        nbWidget.content,
+        nbWidget.context.sessionContext
+      );
+    }
+  });
   commands.addCommand(cmdIds.editMode, {
     label: 'Edit Mode',
     execute: () => {
@@ -212,6 +222,7 @@ export const SetupCommands = (
   category = 'Notebook Cell Operations';
   [
     cmdIds.runAndAdvance,
+    cmdIds.run,
     cmdIds.split,
     cmdIds.merge,
     cmdIds.selectAbove,
@@ -222,7 +233,7 @@ export const SetupCommands = (
     cmdIds.redo
   ].forEach(command => palette.addItem({ command, category }));
 
-  let bindings = [
+  const bindings = [
     {
       selector: '.jp-Notebook.jp-mod-editMode .jp-mod-completer-enabled',
       keys: ['Tab'],
@@ -232,6 +243,11 @@ export const SetupCommands = (
       selector: `.jp-mod-completer-active`,
       keys: ['Enter'],
       command: cmdIds.selectNotebook
+    },
+    {
+      selector: '.jp-Notebook',
+      keys: ['Ctrl Enter'],
+      command: cmdIds.run
     },
     {
       selector: '.jp-Notebook',

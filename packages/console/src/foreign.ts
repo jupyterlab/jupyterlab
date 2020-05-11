@@ -83,26 +83,26 @@ export class ForeignHandler implements IDisposable {
     if (!this._enabled) {
       return false;
     }
-    let kernel = this.sessionContext.session?.kernel;
+    const kernel = this.sessionContext.session?.kernel;
     if (!kernel) {
       return false;
     }
 
     // Check whether this message came from an external session.
-    let parent = this._parent;
-    let session = (msg.parent_header as KernelMessage.IHeader).session;
+    const parent = this._parent;
+    const session = (msg.parent_header as KernelMessage.IHeader).session;
     if (session === kernel.clientId) {
       return false;
     }
-    let msgType = msg.header.msg_type;
-    let parentHeader = msg.parent_header as KernelMessage.IHeader;
-    let parentMsgId = parentHeader.msg_id as string;
+    const msgType = msg.header.msg_type;
+    const parentHeader = msg.parent_header as KernelMessage.IHeader;
+    const parentMsgId = parentHeader.msg_id as string;
     let cell: CodeCell | undefined;
     switch (msgType) {
       case 'execute_input':
-        let inputMsg = msg as KernelMessage.IExecuteInputMsg;
+        const inputMsg = msg as KernelMessage.IExecuteInputMsg;
         cell = this._newCell(parentMsgId);
-        let model = cell.model;
+        const model = cell.model;
         model.executionCount = inputMsg.content.execution_count;
         model.value.text = inputMsg.content.code;
         model.trusted = true;
@@ -124,7 +124,7 @@ export class ForeignHandler implements IDisposable {
         parent.update();
         return true;
       case 'clear_output':
-        let wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
+        const wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
         cell = this._parent.getCell(parentMsgId);
         if (cell) {
           cell.model.outputs.clear(wait);
@@ -139,7 +139,7 @@ export class ForeignHandler implements IDisposable {
    * Create a new code cell for an input originated from a foreign session.
    */
   private _newCell(parentMsgId: string): CodeCell {
-    let cell = this.parent.createCodeCell();
+    const cell = this.parent.createCodeCell();
     cell.addClass(FOREIGN_CELL_CLASS);
     this._parent.addCell(cell, parentMsgId);
     return cell;

@@ -13,6 +13,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { extensionIcon } from '@jupyterlab/ui-components';
 
+const PLUGIN_ID = '@jupyterlab/extensionmanager-extension:plugin';
+
 /**
  * IDs of the commands added by this extension.
  */
@@ -24,7 +26,7 @@ namespace CommandIDs {
  * The extension manager plugin.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/extensionmanager-extension:plugin',
+  id: PLUGIN_ID,
   autoStart: true,
   requires: [ISettingRegistry],
   optional: [ILabShell, ILayoutRestorer, IMainMenu, ICommandPalette],
@@ -43,7 +45,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     let view: ExtensionView | undefined;
 
     const createView = () => {
-      const v = new ExtensionView(serviceManager);
+      const v = new ExtensionView(serviceManager, settings);
       v.id = 'extensionmanager.main-view';
       v.title.icon = extensionIcon;
       v.title.caption = 'Extension Manager';
@@ -60,26 +62,32 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     // If the extension is enabled or disabled,
     // add or remove it from the left area.
-    void app.restored.then(() => {
-      settings.changed.connect(async () => {
-        enabled = settings.composite['enabled'] === true;
-        if (enabled && (!view || (view && !view.isAttached))) {
-          const accepted = await Private.showWarning();
-          if (!accepted) {
-            void settings.set('enabled', false);
-            return;
+    Promise.all([app.restored, registry.load(PLUGIN_ID)])
+      .then(([, settings]) => {
+        settings.changed.connect(async () => {
+          enabled = settings.composite['enabled'] === true;
+          if (enabled && (!view || (view && !view.isAttached))) {
+            const accepted = await Private.showWarning();
+            if (!accepted) {
+              void settings.set('enabled', false);
+              return;
+            }
+            view = view || createView();
+            shell.add(view, 'left');
+          } else if (!enabled && view && view.isAttached) {
+            app.commands.notifyCommandChanged(CommandIDs.toggle);
+            view.close();
           }
-          view = view || createView();
-          shell.add(view, 'left');
-        } else if (!enabled && view && view.isAttached) {
-          app.commands.notifyCommandChanged(CommandIDs.toggle);
-          view.close();
-        }
+        });
+      })
+      .catch(reason => {
+        console.error(
+          `Something went wrong when reading the settings.\n${reason}`
+        );
       });
-    });
 
     commands.addCommand(CommandIDs.toggle, {
-      label: 'Enable Extension Manager (experimental)',
+      label: 'Enable Extension Manager',
       execute: () => {
         if (registry) {
           void registry.set(plugin.id, 'enabled', !enabled);

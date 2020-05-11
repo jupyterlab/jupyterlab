@@ -5,6 +5,8 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { Text } from '@jupyterlab/coreutils';
 
+import { LabIcon } from '@jupyterlab/ui-components';
+
 import { IDataConnector } from '@jupyterlab/statedb';
 
 import { ReadonlyJSONObject, JSONObject, JSONArray } from '@lumino/coreutils';
@@ -16,6 +18,7 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { Signal } from '@lumino/signaling';
 
 import { Completer } from './widget';
+import { DummyConnector } from './dummyconnector';
 
 /**
  * A class added to editors that can host a completer.
@@ -59,7 +62,14 @@ export class CompletionHandler implements IDisposable {
     void,
     CompletionHandler.IRequest
   > {
-    return this._connector;
+    if ('responseType' in this._connector) {
+      return new DummyConnector();
+    }
+    return this._connector as IDataConnector<
+      CompletionHandler.IReply,
+      void,
+      CompletionHandler.IRequest
+    >;
   }
   set connector(
     connector: IDataConnector<
@@ -200,10 +210,10 @@ export class CompletionHandler implements IDisposable {
       return;
     }
 
-    let editor = this._editor;
+    const editor = this._editor;
     if (editor) {
       this._makeRequest(editor.getCursorPosition()).catch(reason => {
-        console.log('Invoke request bailed', reason);
+        console.warn('Invoke request bailed', reason);
       });
     }
   }
@@ -349,32 +359,85 @@ export class CompletionHandler implements IDisposable {
     const state = this.getState(editor, position);
     const request: CompletionHandler.IRequest = { text, offset };
 
+    if (this._isICompletionItemsConnector(this._connector)) {
+      return this._connector
+        .fetch(request)
+        .then(reply => {
+          this._validate(pending, request);
+          if (!reply) {
+            throw new Error(`Invalid request: ${request}`);
+          }
+
+          this._onFetchItemsReply(state, reply);
+        })
+        .catch(_ => {
+          this._onFailure();
+        });
+    }
+
     return this._connector
       .fetch(request)
       .then(reply => {
-        if (this.isDisposed) {
-          throw new Error('Handler is disposed');
-        }
-
-        // If a newer completion request has created a pending request, bail.
-        if (pending !== this._pending) {
-          throw new Error('A newer completion request is pending');
-        }
-
+        this._validate(pending, request);
         if (!reply) {
           throw new Error(`Invalid request: ${request}`);
         }
 
         this._onReply(state, reply);
       })
-      .catch(reason => {
-        // Completion request failures or negative results fail silently.
-        const model = this.completer.model;
-
-        if (model) {
-          model.reset(true);
-        }
+      .catch(_ => {
+        this._onFailure();
       });
+  }
+
+  private _isICompletionItemsConnector(
+    connector:
+      | IDataConnector<
+          CompletionHandler.IReply,
+          void,
+          CompletionHandler.IRequest
+        >
+      | CompletionHandler.ICompletionItemsConnector
+  ): connector is CompletionHandler.ICompletionItemsConnector {
+    return (
+      (connector as CompletionHandler.ICompletionItemsConnector)
+        .responseType === CompletionHandler.ICompletionItemsResponseType
+    );
+  }
+
+  private _validate(pending: number, request: CompletionHandler.IRequest) {
+    if (this.isDisposed) {
+      throw new Error('Handler is disposed');
+    }
+    // If a newer completion request has created a pending request, bail.
+    if (pending !== this._pending) {
+      throw new Error('A newer completion request is pending');
+    }
+  }
+
+  /**
+   * Updates model with text state and current cursor position.
+   */
+  private _updateModel(
+    state: Completer.ITextState,
+    start: number,
+    end: number
+  ): Completer.IModel | null {
+    const model = this.completer.model;
+    const text = state.text;
+
+    if (!model) {
+      return null;
+    }
+
+    // Update the original request.
+    model.original = state;
+    // Update the cursor.
+    model.cursor = {
+      start: Text.charIndexToJsIndex(start, text),
+      end: Text.charIndexToJsIndex(end, text)
+    };
+    return model;
   }
 
   /**
@@ -388,15 +451,10 @@ export class CompletionHandler implements IDisposable {
     state: Completer.ITextState,
     reply: CompletionHandler.IReply
   ): void {
-    const model = this.completer.model;
-    const text = state.text;
-
+    const model = this._updateModel(state, reply.start, reply.end);
     if (!model) {
       return;
     }
-
-    // Update the original request.
-    model.original = state;
 
     // Dedupe the matches.
     const matches: string[] = [];
@@ -434,19 +492,42 @@ export class CompletionHandler implements IDisposable {
 
     // Update the options, including the type map.
     model.setOptions(matches, typeMap);
-
-    // Update the cursor.
-    model.cursor = {
-      start: Text.charIndexToJsIndex(reply.start, text),
-      end: Text.charIndexToJsIndex(reply.end, text)
-    };
   }
 
-  private _connector: IDataConnector<
-    CompletionHandler.IReply,
-    void,
-    CompletionHandler.IRequest
-  >;
+  /**
+   * Receive completion items from provider.
+   *
+   * @param state - The state of the editor when completion request was made.
+   *
+   * @param reply - The API response returned for a completion request.
+   */
+  private _onFetchItemsReply(
+    state: Completer.ITextState,
+    reply: CompletionHandler.ICompletionItemsReply
+  ) {
+    const model = this._updateModel(state, reply.start, reply.end);
+    if (!model) {
+      return;
+    }
+    if (model.setCompletionItems) {
+      model.setCompletionItems(reply.items);
+    }
+  }
+
+  /**
+   * If completion request fails, reset model and fail silently.
+   */
+  private _onFailure() {
+    const model = this.completer.model;
+
+    if (model) {
+      model.reset(true);
+    }
+  }
+
+  private _connector:
+    | IDataConnector<CompletionHandler.IReply, void, CompletionHandler.IRequest>
+    | CompletionHandler.ICompletionItemsConnector;
   private _editor: CodeEditor.IEditor | null = null;
   private _enabled = false;
   private _pending = 0;
@@ -468,14 +549,97 @@ export namespace CompletionHandler {
 
     /**
      * The data connector used to populate completion requests.
-     *
+     * Use the connector with ICompletionItemsReply for enhanced completions.
      * #### Notes
      * The only method of this connector that will ever be called is `fetch`, so
      * it is acceptable for the other methods to be simple functions that return
      * rejected promises.
      */
-    connector: IDataConnector<IReply, void, IRequest>;
+    connector:
+      | IDataConnector<IReply, void, IRequest>
+      | CompletionHandler.ICompletionItemsConnector;
   }
+
+  /**
+   * Type alias for ICompletionItem list.
+   * Implementers of this interface should be responsible for
+   * deduping and sorting the items in the list.
+   */
+  export type ICompletionItems = ReadonlyArray<ICompletionItem>;
+
+  /**
+   * Completion item object based off of LSP CompletionItem.
+   * Compared to the old kernel completions interface, this enhances the completions UI to support:
+   * - differentiation between inserted text and user facing text
+   * - documentation for each completion item to be displayed adjacently
+   * - deprecation styling
+   * - custom icons
+   * and other potential new features.
+   */
+  export interface ICompletionItem {
+    /**
+     * User facing completion.
+     * If insertText is not set, this will be inserted.
+     */
+    label: string;
+
+    /**
+     * Completion to be inserted.
+     */
+    insertText?: string;
+
+    /**
+     * Type of this completion item.
+     */
+    type?: string;
+
+    /**
+     * LabIcon object for icon to be rendered with completion type.
+     */
+    icon?: LabIcon;
+
+    /**
+     * A human-readable string with additional information
+     * about this item, like type or symbol information.
+     */
+    documentation?: string;
+
+    /**
+     * Indicates if the item is deprecated.
+     */
+    deprecated?: boolean;
+  }
+
+  export type ICompletionItemsConnector = IDataConnector<
+    CompletionHandler.ICompletionItemsReply,
+    void,
+    CompletionHandler.IRequest
+  > &
+    CompletionHandler.ICompleterConnecterResponseType;
+
+  /**
+   * A reply to a completion items fetch request.
+   */
+  export interface ICompletionItemsReply {
+    /**
+     * The starting index for the substring being replaced by completion.
+     */
+    start: number;
+    /**
+     * The end index for the substring being replaced by completion.
+     */
+    end: number;
+    /**
+     * A list of completion items.
+     */
+    items: CompletionHandler.ICompletionItems;
+  }
+
+  export interface ICompleterConnecterResponseType {
+    responseType: typeof ICompletionItemsResponseType;
+  }
+
+  export const ICompletionItemsResponseType = 'ICompletionItemsReply' as const;
 
   /**
    * A reply to a completion request.

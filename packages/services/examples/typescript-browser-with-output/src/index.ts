@@ -1,4 +1,4 @@
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
 | Copyright (c) 2014-2017, Jupyter Development Team.
 |
 | Distributed under the terms of the Modified BSD License.
@@ -35,7 +35,7 @@ async function main() {
   outputArea.future = kernel.requestExecute({ code });
   document.getElementById('outputarea').appendChild(outputArea.node);
   await outputArea.future.done;
-  console.log('Test complete!');
+  console.debug('Test complete!');
 }
 
 window.onload = main;

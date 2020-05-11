@@ -13,7 +13,7 @@ function evalInContext(
   document: Document,
   window: Window
 ) {
-  // tslint:disable-next-line
+  // eslint-disable-next-line
   return eval(code);
 }
 
