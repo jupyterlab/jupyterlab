@@ -167,7 +167,6 @@ const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 /** ****************************************************************************
  * Cell
  ******************************************************************************/
-
 /**
  * A base cell widget.
  */
@@ -325,6 +324,14 @@ export class Cell extends Widget {
    */
   loadEditableState() {
     this.readOnly = this.model.metadata.get('editable') === false;
+  }
+
+  checkParameters() {
+    if (this.model.metadata.has('parameters')) {
+      this.node.setAttribute('data-parameter-cell', 'true');
+    } else {
+      this.node.removeAttribute('data-parameter-cell');
+    }
   }
 
   /**
@@ -523,6 +530,9 @@ export class Cell extends Widget {
           this.loadEditableState();
         }
         break;
+      case 'tags':
+        this.checkParameters();
+        break; ////
       default:
         break;
     }
