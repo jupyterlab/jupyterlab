@@ -326,6 +326,9 @@ export class Cell extends Widget {
     this.readOnly = this.model.metadata.get('editable') === false;
   }
 
+  /**
+   * Checks if cell has the papermill 'parameters' tag, and sets a CSS attribute accordingly.
+   */
   checkParameters() {
     if (this.model.metadata.has('parameters')) {
       this.node.setAttribute('data-parameter-cell', 'true');
@@ -532,7 +535,7 @@ export class Cell extends Widget {
         break;
       case 'tags':
         this.checkParameters();
-        break; ////
+        break;
       default:
         break;
     }
