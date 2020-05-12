@@ -249,7 +249,8 @@ export namespace Contents {
 
     /**
      * Resolve a global path, starting from the root path. Behaves like
-     * posix-path.resolve, with 2 differences:
+     * posix-path.resolve, with 3 differences:
+     *  - will never prepend cwd
      *  - if root has a drive name, the result is prefixed with "<drive>:"
      *  - before adding drive name, leading slashes are removed
      *
@@ -650,7 +651,8 @@ export class ContentsManager implements Contents.IManager {
 
   /**
    * Resolve a global path, starting from the root path. Behaves like
-   * posix-path.resolve, with 2 differences:
+   * posix-path.resolve, with 3 differences:
+   *  - will never prepend cwd
    *  - if root has a drive name, the result is prefixed with "<drive>:"
    *  - before adding drive name, leading slashes are removed
    *
