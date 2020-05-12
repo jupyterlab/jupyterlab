@@ -151,7 +151,54 @@ describe('contents', () => {
     });
   });
 
-  describe('.driveName()', () => {
+  describe('#resolvePath', () => {
+    const root = 'do/re';
+    const rootEmpty = '';
+    const rootSlash = '/';
+    const rootAbs = `//////${root}`;
+    const rootDrive = `other:${root}`;
+    const rootDriveAbs = `other:${rootAbs}`;
+
+    const testPath = 'foo/bar/baz';
+    const testPathAbs = `/${testPath}`;
+
+    it('should not prepend root path to an absolute path', () => {
+      contents.addDrive(new Drive({ name: 'other' }));
+
+      let result = contents.resolvePath(root, testPathAbs);
+      expect(result).toBe(testPath);
+    });
+
+    it('should not have any affect on path relative to empty root', () => {
+      contents.addDrive(new Drive({ name: 'other' }));
+
+      let result = contents.resolvePath(rootEmpty, testPath);
+      expect(result).toBe(testPath);
+    });
+
+    it('should not have any affect on path relative to "/"', () => {
+      contents.addDrive(new Drive({ name: 'other' }));
+
+      let result = contents.resolvePath(rootSlash, testPath);
+      expect(result).toBe(testPath);
+    });
+
+    it('should join root drive, root path, and path', () => {
+      contents.addDrive(new Drive({ name: 'other' }));
+
+      let result = contents.resolvePath(rootDrive, testPath);
+      expect(result).toBe(`${rootDrive}/${testPath}`);
+    });
+
+    it('should remove all leading slashes from result path', () => {
+      contents.addDrive(new Drive({ name: 'other' }));
+
+      let result = contents.resolvePath(rootDriveAbs, testPath);
+      expect(result).toBe(`${rootDrive}/${testPath}`);
+    });
+  });
+
+  describe('#driveName()', () => {
     it('should parse the drive name a path', () => {
       contents.addDrive(new Drive({ name: 'other' }));
       contents.addDrive(new Drive({ name: 'alternative' }));

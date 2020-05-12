@@ -242,8 +242,7 @@ export class FileBrowserModel implements IDisposable {
    */
   async cd(newValue = '.'): Promise<void> {
     if (newValue !== '.') {
-      newValue = FileBrowserModel.normalizePath(
-        this.manager.services.contents,
+      newValue = this.manager.services.contents.resolvePath(
         this._model.path,
         newValue
       );
@@ -676,20 +675,6 @@ export namespace FileBrowserModel {
      * folder was last opened when it is restored.
      */
     state?: IStateDB;
-  }
-
-  /**
-   * Normalize a path based on a root directory, accounting for relative paths.
-   */
-  export function normalizePath(
-    contents: Contents.IManager,
-    root: string,
-    path: string
-  ): string {
-    const driveName = contents.driveName(root);
-    const localPath = contents.localPath(root);
-    const resolved = PathExt.resolve('/', localPath, path);
-    return driveName ? `${driveName}:${resolved}` : resolved;
   }
 }
 

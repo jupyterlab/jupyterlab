@@ -248,6 +248,18 @@ export namespace Contents {
     normalize(path: string): string;
 
     /**
+     * Resolve a global path, starting from the root path. Behaves like
+     * posix-path.resolve, with 2 differences:
+     *  - if root has a drive name, the result is prefixed with "<drive>:"
+     *  - before adding drive name, leading slashes are removed
+     *
+     * @param path: the path.
+     *
+     * @returns The normalized path.
+     */
+    resolvePath(root: string, path: string): string;
+
+    /**
      * Given a path of the form `drive:local/portion/of/it.txt`
      * get the name of the drive. If the path is missing
      * a drive portion, returns an empty string.
@@ -634,6 +646,23 @@ export class ContentsManager implements Contents.IManager {
       return PathExt.normalize(path);
     }
     return `${parts[0]}:${PathExt.normalize(parts.slice(1).join(':'))}`;
+  }
+
+  /**
+   * Resolve a global path, starting from the root path. Behaves like
+   * posix-path.resolve, with 2 differences:
+   *  - if root has a drive name, the result is prefixed with "<drive>:"
+   *  - before adding drive name, leading slashes are removed
+   *
+   * @param path: the path.
+   *
+   * @returns The normalized path.
+   */
+  resolvePath(root: string, path: string): string {
+    const driveName = this.driveName(root);
+    const localPath = this.localPath(root);
+    const resolved = PathExt.resolve('/', localPath, path);
+    return driveName ? `${driveName}:${resolved}` : resolved;
   }
 
   /**
