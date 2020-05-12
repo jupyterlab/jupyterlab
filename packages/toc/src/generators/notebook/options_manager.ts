@@ -22,6 +22,11 @@ interface Options {
   sanitizer: ISanitizer;
 
   /**
+   * Boolean indicating whether notebook cells are collapsible.
+   */
+  collapsibleNotebooks: boolean;
+
+  /**
    * Tag tool component.
    */
   tagTool?: TagsToolComponent;
@@ -50,6 +55,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._numbering = options.numbering;
     this._widget = widget;
     this._notebook = notebook;
+    this._collapsible = options.collapsibleNotebooks;
     this.sanitizer = options.sanitizer;
     this.storeTags = [];
   }
@@ -90,6 +96,13 @@ class OptionsManager extends Registry.IOptionsManager {
 
   get numbering() {
     return this._numbering;
+  }
+
+  /**
+   * Gets the ToC setting specifying whether to allow collapsing notebook cells.
+   */
+  get collapsibleNotebooks() {
+    return this._collapsible;
   }
 
   /**
@@ -195,6 +208,7 @@ class OptionsManager extends Registry.IOptionsManager {
   private _showMarkdown = false;
   private _showTags = false;
   private _notebook: INotebookTracker;
+  private _collapsible = false;
   private _widget: TableOfContents;
   private _tagTool: TagsToolComponent | null = null;
   public storeTags: string[];

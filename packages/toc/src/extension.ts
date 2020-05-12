@@ -12,6 +12,7 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TableOfContents } from './toc';
 import {
   createLatexGenerator,
@@ -40,7 +41,7 @@ import '../style/index.css';
  * @param rendermime - rendered MIME registry
  * @returns table of contents registry
  */
-function activateTOC(
+async function activateTOC(
   app: JupyterFrontEnd,
   docmanager: IDocumentManager,
   editorTracker: IEditorTracker,
@@ -48,8 +49,9 @@ function activateTOC(
   restorer: ILayoutRestorer,
   markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
-  rendermime: IRenderMimeRegistry
-): ITableOfContentsRegistry {
+  rendermime: IRenderMimeRegistry,
+  settingRegistry: ISettingRegistry
+): Promise<ITableOfContentsRegistry> {
   // Create the ToC widget:
   const toc = new TableOfContents({ docmanager, rendermime });
 
@@ -63,13 +65,24 @@ function activateTOC(
   labShell.add(toc, 'left', { rank: 700 });
 
   // Add the ToC widget to the application restorer:
-  restorer.add(toc, 'juputerlab-toc');
+  restorer.add(toc, '@jupyterlab/toc:plugin');
+
+  // Attempt to load plugin settings:
+  let settings: ISettingRegistry.ISettings | undefined;
+  try {
+    settings = await settingRegistry.load('@jupyterlab/toc:plugin');
+  } catch (error) {
+    console.error(
+      `Failed to load settings for the Table of Contents extension.\n\n${error}`
+    );
+  }
 
   // Create a notebook generator:
   const notebookGenerator = createNotebookGenerator(
     notebookTracker,
     toc,
-    rendermime.sanitizer
+    rendermime.sanitizer,
+    settings
   );
   registry.add(notebookGenerator);
 
@@ -131,7 +144,7 @@ function activateTOC(
  * @private
  */
 const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
-  id: 'jupyterlab-toc',
+  id: '@jupyterlab/toc:plugin',
   autoStart: true,
   provides: ITableOfContentsRegistry,
   requires: [
@@ -141,7 +154,8 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
     ILayoutRestorer,
     IMarkdownViewerTracker,
     INotebookTracker,
-    IRenderMimeRegistry
+    IRenderMimeRegistry,
+    ISettingRegistry
   ],
   activate: activateTOC
 };
