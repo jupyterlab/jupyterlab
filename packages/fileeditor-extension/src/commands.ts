@@ -637,17 +637,7 @@ export namespace Commands {
         }
       },
       isEnabled: () => {
-        if (!isEnabled()) {
-          return false;
-        }
-
-        const widget = tracker.currentWidget?.content;
-
-        if (!widget) {
-          return false;
-        }
-
-        return true;
+        return Boolean(isEnabled() && tracker.currentWidget?.content);
       },
       icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
       label: 'Paste'
