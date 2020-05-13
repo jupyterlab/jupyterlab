@@ -234,7 +234,25 @@ export class DebuggerService implements IDebugger, IDisposable {
         );
       });
     }
-
+    const unassociatedBreakpoints = (
+      fromServer: Map<string, IDebugger.IBreakpoint[]>,
+      fromNotebook: Map<string, IDebugger.IBreakpoint[]>
+    ) => {
+      let breakpointsOnlyOnServer: Array<string> = [];
+      for (let [key] of fromServer) {
+        if (!fromNotebook.has(key)) {
+          breakpointsOnlyOnServer.push(key);
+        }
+      }
+      return breakpointsOnlyOnServer;
+    };
+    for (const path of unassociatedBreakpoints(
+      bpMap,
+      this._model.breakpoints.breakpoints
+    )) {
+      bpMap.delete(path);
+      await this._setBreakpoints([], path);
+    }
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     this._model.stoppedThreads = stoppedThreads;
 
