@@ -736,14 +736,18 @@ namespace Private {
           container: this.node,
           title: `Kernel ${Text.titleCase(status)}`,
 
-          stylesheet: 'toolbarButton'
+          stylesheet: 'toolbarButton',
+          alignSelf: 'normal',
+          height: '24px'
         });
       } else {
         circleEmptyIcon.element({
           container: this.node,
           title: `Kernel ${Text.titleCase(status)}`,
 
-          stylesheet: 'toolbarButton'
+          stylesheet: 'toolbarButton',
+          alignSelf: 'normal',
+          height: '24px'
         });
       }
     }
