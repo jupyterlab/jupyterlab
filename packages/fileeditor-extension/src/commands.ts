@@ -7,7 +7,8 @@ import {
   ICommandPalette,
   WidgetTracker,
   ISessionContextDialogs,
-  sessionContextDialogs
+  sessionContextDialogs,
+  Clipboard
 } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -34,7 +35,12 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { markdownIcon, textEditorIcon } from '@jupyterlab/ui-components';
+import {
+  markdownIcon,
+  textEditorIcon,
+  copyIcon,
+  pasteIcon
+} from '@jupyterlab/ui-components';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -71,6 +77,10 @@ export namespace CommandIDs {
   export const runAllCode = 'fileeditor:run-all';
 
   export const markdownPreview = 'fileeditor:markdown-preview';
+
+  export const copy = 'fileeditor:copy';
+
+  export const paste = 'fileeditor:paste';
 }
 
 /**
@@ -195,6 +205,10 @@ export namespace Commands {
 
     // Add a command for creating a new Markdown file.
     addCreateNewMarkdownCommand(commands, browserFactory);
+
+    addCopyCommand(commands, tracker, isEnabled);
+
+    addPasteCommand(commands, tracker, isEnabled);
   }
 
   /**
@@ -544,6 +558,99 @@ export namespace Commands {
         );
       },
       label: 'Show Markdown Preview'
+    });
+  }
+
+  /**
+   * Add copy command
+   */
+  export function addCopyCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.copy, {
+      execute: () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        const editor = widget.editor;
+        const selectionObj = widget.editor.getSelection();
+
+        // Get the selected code from the editor.
+        const start = editor.getOffsetAt(selectionObj.start);
+        const end = editor.getOffsetAt(selectionObj.end);
+        const code = editor.model.value.text.substring(start, end);
+
+        // Copy code selection to system clipboard
+        Clipboard.copyToSystem(code);
+      },
+      isEnabled: () => {
+        if (!isEnabled()) {
+          return false;
+        }
+
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return false;
+        }
+
+        // Enable command if there is a text selection in the editor
+        const selectionObj = widget.editor.getSelection();
+        const { start, end } = selectionObj;
+        const selected = start.column !== end.column || start.line !== end.line;
+
+        return selected;
+      },
+      icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: 'Copy'
+    });
+  }
+
+  /**
+   * Add paste command
+   */
+  export function addPasteCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.paste, {
+      execute: async () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+        const editor: CodeEditor.IEditor = widget && widget.editor;
+
+        // Get data from clipboard
+        const clipboard = window.navigator.clipboard;
+        const clipboardData: string = await clipboard.readText();
+        if (clipboardData) {
+          // Paste data to editor
+          editor.replaceSelection && editor.replaceSelection(clipboardData);
+        }
+      },
+      isEnabled: () => {
+        if (!isEnabled()) {
+          return false;
+        }
+
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return false;
+        }
+
+        return true;
+      },
+      icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: 'Paste'
     });
   }
 
@@ -923,6 +1030,8 @@ export namespace Commands {
   export function addContextMenuItems(app: JupyterFrontEnd) {
     addCreateConsoleToContextMenu(app);
     addMarkdownPreviewToContextMenu(app);
+    addCopyCommandToContextMenu(app);
+    addPasteCommandToContextMenu(app);
   }
 
   /**
@@ -942,6 +1051,28 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.markdownPreview,
       selector: '.jp-FileEditor'
+    });
+  }
+
+  /**
+   * Add a Copy item to the File Editor context menu
+   */
+  export function addCopyCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.copy,
+      selector: '.jp-FileEditor',
+      rank: 1
+    });
+  }
+
+  /**
+   * Add a Paste item to the File Editor context menu
+   */
+  export function addPasteCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.paste,
+      selector: '.jp-FileEditor',
+      rank: 2
     });
   }
 }
