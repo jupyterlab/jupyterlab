@@ -21,6 +21,10 @@
   min-height: var(--jp-toolbar-micro-height);
   padding: 2px;
   z-index: 1;
+  overflow-x: hidden;
+}
+
+.jp-Toolbar:hover {
   overflow-x: auto;
 }
 
