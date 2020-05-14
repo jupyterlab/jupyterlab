@@ -9,6 +9,8 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Token } from '@lumino/coreutils';
 
+import { Debouncer } from '@lumino/polling';
+
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
 
 import { createRendermimePlugins } from './mimerenderers';
@@ -83,6 +85,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
         this.registerPlugin(plugin);
       }
     }
+
+    Private.setFormat(this);
   }
 
   /**
@@ -131,6 +135,18 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
   }
 
   /**
+   * Handle the DOM events for the application.
+   *
+   * @param event - The DOM event sent to the application.
+   */
+  handleEvent(event: Event): void {
+    if (event.type === 'resize') {
+      void this._formatter.invoke();
+    }
+    super.handleEvent(event);
+  }
+
+  /**
    * Register plugins from a plugin module.
    *
    * @param mod - The plugin module to register.
@@ -164,6 +180,9 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     });
   }
 
+  private _formatter = new Debouncer(() => {
+    Private.setFormat(this);
+  }, 250);
   private _info: JupyterLab.IInfo;
   private _paths: JupyterFrontEnd.IPaths;
 }
@@ -268,5 +287,20 @@ export namespace JupyterLab {
      * The default export.
      */
     default: JupyterFrontEndPlugin<any> | JupyterFrontEndPlugin<any>[];
+  }
+}
+
+/**
+ * A namespace for module-private functionality.
+ */
+namespace Private {
+  /**
+   * Sets the `format` of a Jupyter front-end application.
+   *
+   * @param app The front-end application whose format is set.
+   */
+  export function setFormat(app: JupyterFrontEnd): void {
+    console.log('setting the format');
+    app.format = 'desktop';
   }
 }
