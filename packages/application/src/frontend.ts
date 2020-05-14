@@ -124,6 +124,12 @@ export abstract class JupyterFrontEnd<
   get format(): JupyterFrontEnd.Format {
     return this._format;
   }
+  set format(format: JupyterFrontEnd.Format) {
+    if (this._format !== format) {
+      this._format = format;
+      this._formatChanged.emit(format);
+    }
+  }
 
   /**
    * A signal that emits with the application form factor changes.
