@@ -95,7 +95,7 @@
     "shell-quote": "^1.7.2",
     "ts-jest": "^25.5.1",
     "typedoc": "^0.15.4",
-    "typescript": "~3.7.3"
+    "typescript": "~3.9.2"
   },
   "husky": {
     "hooks": {
