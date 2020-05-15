@@ -251,16 +251,13 @@ describe('protocol', () => {
 
   describe('#continue', () => {
     it('should proceed to the next breakpoint', async () => {
-      const [first, second] = signalToPromises(
-        debugSession.eventMessage,
-        2
-      );
+      const [first, second] = signalToPromises(debugSession.eventMessage, 2);
       await debugSession.sendRequest('continue', { threadId });
 
       // wait for debug events
       const [, continued] = await first;
       expect(continued.event).toEqual('continued');
-      const [,stopped] = await second;
+      const [, stopped] = await second;
       expect(stopped.event).toEqual('stopped');
 
       const variables = await getVariables();
