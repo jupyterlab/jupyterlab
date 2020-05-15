@@ -89,7 +89,7 @@
     "tslint-config-prettier": "^1.18.0",
     "tslint-plugin-prettier": "^2.0.1",
     "typedoc": "^0.15.4",
-    "typescript": "~3.7.3"
+    "typescript": "~3.9.2"
   },
   "husky": {
     "hooks": {
