@@ -38,13 +38,14 @@
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo && rimraf tests/build",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
-    "lint": "jlpm && jlpm run prettier && jlpm run tslint",
+    "eslint": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "eslint:check": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint": "jlpm && jlpm run prettier && jlpm run eslint",
+    "lint:check": "jlpm run prettier:check && jlpm run eslint:check",
     "prepublishOnly": "npm run build",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "prettier:check": "prettier --list-different '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "test": "python tests/run-test.py",
-    "tslint": "tslint --fix -c tslint.json --project tsconfig.json '**/*{.ts,.tsx}'",
-    "tslint:check": "tslint -c tslint.json --project tsconfig.json '**/*{.ts,.tsx}'",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -72,22 +73,26 @@
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.7.6",
     "@jupyterlab/testutils": "^2.0.0",
-    "@types/chai": "^4.2.7",
     "@types/codemirror": "0.0.76",
     "@types/jest": "^24.0.17",
     "@types/murmurhash-js": "1.0.3",
-    "chai": "^4.2.0",
+    "@typescript-eslint/eslint-plugin": "^2.33.0",
+    "@typescript-eslint/parser": "^2.33.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-jest": "^23.8.2",
+    "eslint-plugin-prettier": "^3.1.1",
+    "eslint-plugin-react": "^7.19.0",
     "husky": "^3.1.0",
-    "jest": "^24.9.0",
+    "jest": "^26.0.1",
     "jest-junit": "^10.0.0",
     "jest-raw-loader": "^1.0.1",
+    "jest-summary-reporter": "^0.0.2",
     "lint-staged": "^9.5.0",
     "prettier": "^1.19.1",
     "rimraf": "~3.0.0",
-    "ts-jest": "^24",
-    "tslint": "^5.20.1",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.0.1",
+    "shell-quote": "^1.7.2",
+    "ts-jest": "^25.5.1",
     "typedoc": "^0.15.4",
     "typescript": "~3.7.3"
   },
@@ -95,16 +100,6 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
-  },
-  "lint-staged": {
-    "**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}": [
-      "jlpm run prettier",
-      "git add"
-    ],
-    "src/**/*{.ts,.tsx}": [
-      "jlpm run tslint",
-      "git add"
-    ]
   },
   "publishConfig": {
     "access": "public"
