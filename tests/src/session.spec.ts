@@ -241,7 +241,7 @@ describe('protocol', () => {
   });
 
   describe('#variablesPagination', () => {
-    it('should return only one the variable (int) by pagination pointers start and count', async () => {
+    it('should return the amount of variables requested', async () => {
       await debugSession.sendRequest('continue', { threadId });
       const variables = await getVariables(1, 1);
       const integers = variables.filter(variable => variable.type === 'int');
