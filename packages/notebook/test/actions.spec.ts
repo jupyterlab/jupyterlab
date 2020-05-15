@@ -5,15 +5,11 @@ import 'jest';
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
-import { each } from '@lumino/algorithm';
-
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
 
-import { NotebookModel } from '../src';
+import { IMimeBundle } from '@jupyterlab/nbformat';
 
-import { NotebookActions } from '../src';
-
-import { Notebook } from '../src';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import {
   acceptDialog,
@@ -21,10 +17,18 @@ import {
   dismissDialog,
   sleep
 } from '@jupyterlab/testutils';
-import { JSONObject, JSONArray } from '@lumino/coreutils';
 
 import { JupyterServer } from '@jupyterlab/testutils/lib/start_jupyter_server';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+
+import { each } from '@lumino/algorithm';
+
+import { JSONObject, JSONArray, UUID } from '@lumino/coreutils';
+
+import { NotebookModel } from '../src';
+
+import { NotebookActions } from '../src';
+
+import { Notebook } from '../src';
 
 import * as utils from './utils';
 
@@ -264,6 +268,23 @@ describe('@jupyterlab/notebook', () => {
         NotebookActions.mergeCells(widget);
         expect(widget.activeCell).toBeInstanceOf(RawCell);
         expect(widget.mode).toBe('command');
+      });
+
+      it('should merge attachments if the last selected cell is a markdown cell', () => {
+        for (let i = 0; i < 2; i++) {
+          NotebookActions.changeCellType(widget, 'markdown');
+          const markdownCell = widget.activeCell as MarkdownCell;
+          const attachment: IMimeBundle = { 'text/plain': 'test' };
+          markdownCell.model.attachments.set(UUID.uuid4(), attachment);
+          widget.select(markdownCell);
+        }
+        NotebookActions.mergeCells(widget);
+        const model = (widget.activeCell as MarkdownCell).model;
+        expect(model.attachments.length).toBe(2);
+      });
+
+      it('should drop attachments if the last selected cell is a code cell', () => {
+        // TODO
       });
     });
 

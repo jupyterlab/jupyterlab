@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { KernelMessage } from '@jupyterlab/services';
-
 import {
   ISessionContext,
   Clipboard,
@@ -15,10 +13,13 @@ import {
   ICodeCellModel,
   CodeCell,
   Cell,
-  MarkdownCell
+  MarkdownCell,
+  IMarkdownCellModel
 } from '@jupyterlab/cells';
 
 import * as nbformat from '@jupyterlab/nbformat';
+
+import { KernelMessage } from '@jupyterlab/services';
 
 import { ArrayExt, each, toArray } from '@lumino/algorithm';
 
@@ -196,6 +197,7 @@ export namespace NotebookActions {
     const cells = model.cells;
     const primary = notebook.activeCell;
     const active = notebook.activeCellIndex;
+    const attachments: nbformat.IAttachments = {};
 
     // Get the cells to merge.
     notebook.widgets.forEach((child, index) => {
@@ -203,6 +205,13 @@ export namespace NotebookActions {
         toMerge.push(child.model.value.text);
         if (index !== active) {
           toDelete.push(child.model);
+        }
+        // Merge attachments if the cell is a markdown cell
+        if (child.model.type === 'markdown') {
+          const model = (child as MarkdownCell).model;
+          for (const key of model.attachments.keys) {
+            attachments[key] = model.attachments.get(key)!.toJSON();
+          }
         }
       }
     });
@@ -229,6 +238,8 @@ export namespace NotebookActions {
     newModel.value.text = toMerge.join('\n\n');
     if (newModel.type === 'code') {
       (newModel as ICodeCellModel).outputs.clear();
+    } else if (newModel.type === 'markdown') {
+      (newModel as IMarkdownCellModel).attachments.fromJSON(attachments);
     }
 
     // Make the changes while preserving history.
