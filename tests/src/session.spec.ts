@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { expect } from 'chai';
-
 import { Session } from '@jupyterlab/services';
 
 import { createSession } from '@jupyterlab/testutils';
@@ -39,9 +37,9 @@ describe('DebugSession', () => {
       const debugSession = new DebugSession({
         connection
       });
-      expect(debugSession.isDisposed).to.equal(false);
+      expect(debugSession.isDisposed).toEqual(false);
       debugSession.dispose();
-      expect(debugSession.isDisposed).to.equal(true);
+      expect(debugSession.isDisposed).toEqual(true);
     });
   });
 
@@ -56,7 +54,7 @@ describe('DebugSession', () => {
       });
       await debugSession.start();
       await debugSession.stop();
-      expect(events).to.deep.equal(['output', 'initialized', 'process']);
+      expect(events).toEqual(['output', 'initialized', 'process']);
     });
   });
 
@@ -71,7 +69,7 @@ describe('DebugSession', () => {
         code
       });
       await debugSession.stop();
-      expect(reply.body.sourcePath).to.contain('.py');
+      expect(reply.body.sourcePath).toContain('.py');
     });
   });
 
@@ -86,8 +84,8 @@ describe('DebugSession', () => {
       });
       await debugSession.stop();
       const { success, message } = reply;
-      expect(success).to.be.false;
-      expect(message).to.contain('Unable to find thread for evaluation');
+      expect(success).toBe(false);
+      expect(message).toContain('Unable to find thread for evaluation');
     });
   });
 });
@@ -128,10 +126,11 @@ describe('protocol', () => {
     debugSession.eventMessage.connect(
       (sender: DebugSession, event: IDebugger.ISession.Event) => {
         switch (event.event) {
-          case 'thread':
+          case 'thread': {
             const msg = event as DebugProtocol.ThreadEvent;
             threadId = msg.body.threadId;
             break;
+          }
           case 'stopped':
             stoppedFuture.resolve();
             break;
@@ -168,17 +167,17 @@ describe('protocol', () => {
   describe('#debugInfo', () => {
     it('should return the state of the current debug session', async () => {
       const reply = await debugSession.sendRequest('debugInfo', {});
-      expect(reply.body.isStarted).to.be.true;
+      expect(reply.body.isStarted).toBe(true);
 
       const breakpoints = reply.body.breakpoints;
       // breakpoints are in the same file
-      expect(breakpoints.length).to.equal(1);
+      expect(breakpoints.length).toEqual(1);
 
       const breakpointsInfo = breakpoints[0];
       const breakpointLines = breakpointsInfo.breakpoints.map(bp => {
         return bp.line;
       });
-      expect(breakpointLines).to.deep.equal([3, 5]);
+      expect(breakpointLines).toEqual([3, 5]);
     });
   });
 
@@ -187,12 +186,12 @@ describe('protocol', () => {
       const reply = await debugSession.sendRequest('stackTrace', {
         threadId
       });
-      expect(reply.success).to.be.true;
+      expect(reply.success).toBe(true);
       const stackFrames = reply.body.stackFrames;
-      expect(stackFrames.length).to.equal(1);
+      expect(stackFrames.length).toEqual(1);
       const frame = stackFrames[0];
       // first breakpoint
-      expect(frame.line).to.equal(3);
+      expect(frame.line).toEqual(3);
     });
   });
 
@@ -206,8 +205,8 @@ describe('protocol', () => {
         frameId
       });
       const scopes = scopesReply.body.scopes;
-      expect(scopes.length).to.equal(1);
-      expect(scopes[0].name).to.equal('Locals');
+      expect(scopes.length).toEqual(1);
+      expect(scopes[0].name).toEqual('Locals');
     });
   });
 
@@ -232,11 +231,11 @@ describe('protocol', () => {
   describe('#variables', () => {
     it('should return the variables and their values', async () => {
       const variables = await getVariables();
-      expect(variables.length).to.be.greaterThan(0);
+      expect(variables.length).toBeGreaterThan(0);
       const i = find(variables, variable => variable.name === 'i');
-      expect(i).to.exist;
-      expect(i.type).to.equal('int');
-      expect(i.value).to.equal('1');
+      expect(i).toBeDefined();
+      expect(i.type).toEqual('int');
+      expect(i.value).toEqual('1');
     });
   });
 
@@ -245,8 +244,8 @@ describe('protocol', () => {
       await debugSession.sendRequest('continue', { threadId });
       const variables = await getVariables(1, 1);
       const integers = variables.filter(variable => variable.type === 'int');
-      expect(integers).to.exist;
-      expect(integers.length).to.equals(1);
+      expect(integers).toBeDefined();
+      expect(integers.length).toEqual(1);
     });
   });
 
@@ -266,18 +265,18 @@ describe('protocol', () => {
 
       // wait for debug events
       const debugEvents = await eventsFuture.promise;
-      expect(debugEvents).to.deep.equal(['continued', 'stopped']);
+      expect(debugEvents).toEqual(['continued', 'stopped']);
 
       const variables = await getVariables();
       const i = find(variables, variable => variable.name === 'i');
-      expect(i).to.exist;
-      expect(i.type).to.equal('int');
-      expect(i.value).to.equal('2');
+      expect(i).toBeDefined();
+      expect(i.type).toEqual('int');
+      expect(i.value).toEqual('2');
 
       const j = find(variables, variable => variable.name === 'j');
-      expect(j).to.exist;
-      expect(j.type).to.equal('int');
-      expect(j.value).to.equal('4');
+      expect(j).toBeDefined();
+      expect(j.type).toEqual('int');
+      expect(j.value).toEqual('4');
     });
   });
 
@@ -285,7 +284,7 @@ describe('protocol', () => {
     it('should *not* retrieve the list of loaded sources', async () => {
       // `loadedSources` is not supported at the moment "unknown command"
       const reply = await debugSession.sendRequest('loadedSources', {});
-      expect(reply.success).to.be.false;
+      expect(reply.success).toBe(false);
     });
   });
 
@@ -301,7 +300,7 @@ describe('protocol', () => {
         sourceReference: source.sourceReference
       });
       const sourceCode = reply.body.content;
-      expect(sourceCode).to.equal(code);
+      expect(sourceCode).toEqual(code);
     });
   });
 });
