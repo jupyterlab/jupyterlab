@@ -5,7 +5,7 @@ import { expect } from 'chai';
 
 import { Session } from '@jupyterlab/services';
 
-import { createSession } from '@jupyterlab/testutils';
+import { createSession, signalToPromises } from '@jupyterlab/testutils';
 
 import { find } from '@lumino/algorithm';
 
@@ -252,21 +252,17 @@ describe('protocol', () => {
 
   describe('#continue', () => {
     it('should proceed to the next breakpoint', async () => {
-      let events: string[] = [];
-      const eventsFuture = new PromiseDelegate<string[]>();
-      debugSession.eventMessage.connect((sender, event) => {
-        events.push(event.event);
-        // aggregate the next 2 debug events
-        if (events.length === 2) {
-          eventsFuture.resolve(events);
-        }
-      });
-
+      const [first, second] = signalToPromises(
+        debugSession.eventMessage,
+        2
+      );
       await debugSession.sendRequest('continue', { threadId });
 
       // wait for debug events
-      const debugEvents = await eventsFuture.promise;
-      expect(debugEvents).to.deep.equal(['continued', 'stopped']);
+      const [, continued] = await first;
+      expect(continued.event).to.equal('continued');
+      const [,stopped] = await second;
+      expect(stopped.event).to.equal('stopped');
 
       const variables = await getVariables();
       const i = find(variables, variable => variable.name === 'i');
