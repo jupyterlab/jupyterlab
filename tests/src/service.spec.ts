@@ -1,5 +1,3 @@
-import { expect } from 'chai';
-
 import { Session } from '@jupyterlab/services';
 
 import { createSession, signalToPromise } from '@jupyterlab/testutils';
@@ -41,12 +39,12 @@ describe('Debugging support', () => {
   describe('#isAvailable', () => {
     it('should return true for kernels that have support for debugging', async () => {
       const enabled = await service.isAvailable(xpython);
-      expect(enabled).to.be.true;
+      expect(enabled).toBe(true);
     });
 
     it('should return false for kernels that do not have support for debugging', async () => {
       const enabled = await service.isAvailable(ipykernel);
-      expect(enabled).to.be.false;
+      expect(enabled).toBe(false);
     });
   });
 });
@@ -78,7 +76,7 @@ describe('DebuggerService', () => {
 
   describe('#constructor()', () => {
     it('should create a new instance', () => {
-      expect(service).to.be.an.instanceOf(DebuggerService);
+      expect(service).toBeInstanceOf(DebuggerService);
     });
   });
 
@@ -86,15 +84,13 @@ describe('DebuggerService', () => {
     it('should start the service if the session is set', async () => {
       service.session = session;
       await service.start();
-      expect(service.isStarted).to.equal(true);
+      expect(service.isStarted).toEqual(true);
     });
 
     it('should throw an error if the session is not set', async () => {
-      try {
-        await service.start();
-      } catch (err) {
-        expect(err.message).to.contain("Cannot read property 'start' of null");
-      }
+      await expect(service.start()).rejects.toThrow(
+        "Cannot read property 'start' of null"
+      );
     });
   });
 
@@ -103,7 +99,7 @@ describe('DebuggerService', () => {
       service.session = session;
       await service.start();
       await service.stop();
-      expect(service.isStarted).to.equal(false);
+      expect(service.isStarted).toEqual(false);
     });
   });
 
@@ -114,8 +110,8 @@ describe('DebuggerService', () => {
         sessionChangedEvents.push(newSession);
       });
       service.session = session;
-      expect(sessionChangedEvents.length).to.equal(1);
-      expect(sessionChangedEvents[0]).to.eq(session);
+      expect(sessionChangedEvents.length).toEqual(1);
+      expect(sessionChangedEvents[0]).toEqual(session);
     });
   });
 
@@ -126,8 +122,8 @@ describe('DebuggerService', () => {
         modelChangedEvents.push(newModel as DebuggerModel);
       });
       service.model = model;
-      expect(modelChangedEvents.length).to.equal(1);
-      expect(modelChangedEvents[0]).to.eq(model);
+      expect(modelChangedEvents.length).toEqual(1);
+      expect(modelChangedEvents[0]).toEqual(model);
     });
   });
 
@@ -167,7 +163,7 @@ describe('DebuggerService', () => {
     describe('#updateBreakpoints', () => {
       it('should update the breakpoints', () => {
         const bpList = model.breakpoints.getBreakpoints(sourceId);
-        expect(bpList).to.deep.eq(breakpoints);
+        expect(bpList).toEqual(breakpoints);
       });
     });
 
@@ -177,10 +173,10 @@ describe('DebuggerService', () => {
           new Map<string, IDebugger.IBreakpoint[]>()
         );
         const bpList1 = model.breakpoints.getBreakpoints(sourceId);
-        expect(bpList1.length).to.equal(0);
+        expect(bpList1.length).toEqual(0);
         await service.restoreState(true);
         const bpList2 = model.breakpoints.getBreakpoints(sourceId);
-        expect(bpList2).to.deep.eq(breakpoints);
+        expect(bpList2).toEqual(breakpoints);
       });
     });
 
@@ -194,7 +190,7 @@ describe('DebuggerService', () => {
         const bpList = model.breakpoints.getBreakpoints(sourceId);
         breakpoints[0].id = 2;
         breakpoints[1].id = 3;
-        expect(bpList).to.deep.eq(breakpoints);
+        expect(bpList).toEqual(breakpoints);
       });
     });
 
@@ -202,7 +198,7 @@ describe('DebuggerService', () => {
       it('should return false if the model is null', () => {
         service.model = null;
         const hasStoppedThreads = service.hasStoppedThreads();
-        expect(hasStoppedThreads).to.be.false;
+        expect(hasStoppedThreads).toBe(false);
       });
 
       it('should return true when the execution has stopped', async () => {
@@ -215,7 +211,7 @@ describe('DebuggerService', () => {
         await variablesChanged;
 
         const hasStoppedThreads = service.hasStoppedThreads();
-        expect(hasStoppedThreads).to.be.true;
+        expect(hasStoppedThreads).toBe(true);
         await service.restart();
       });
     });

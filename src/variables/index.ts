@@ -1,19 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CommandRegistry } from '@lumino/commands';
+import { ToolbarButton } from '@jupyterlab/apputils';
 
-import { IDebugger } from '../tokens';
+import { CommandRegistry } from '@lumino/commands';
 
 import { Panel, Widget } from '@lumino/widgets';
 
-import { VariablesBodyTable } from './table';
+import { VariablesBodyGrid, VariablesGrid } from './grid';
 
 import { VariablesHeader } from './header';
 
-import { ToolbarButton } from '@jupyterlab/apputils';
-
 import { VariablesModel } from './model';
+
+import { IDebugger } from '../tokens';
 
 import { VariablesBodyTree } from './tree';
 
@@ -32,7 +32,7 @@ export class Variables extends Panel {
 
     this._header = new VariablesHeader();
     this._tree = new VariablesBodyTree({ model, service });
-    this._table = new VariablesBodyTable({ model, commands });
+    this._table = new VariablesBodyGrid({ model, commands });
     this._table.hide();
 
     const onClick = () => {
@@ -72,6 +72,13 @@ export class Variables extends Panel {
   }
 
   /**
+   * Set the theme for the variable table.
+   */
+  set theme(theme: VariablesGrid.Theme) {
+    this._table.theme = theme;
+  }
+
+  /**
    * A message handler invoked on a `'resize'` message.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
@@ -85,13 +92,12 @@ export class Variables extends Panel {
    */
   private _resizeBody(msg: Widget.ResizeMessage) {
     const height = msg.height - this._header.node.offsetHeight;
-    this._table.node.style.height = `${height}px`;
     this._tree.node.style.height = `${height}px`;
   }
 
   private _header: VariablesHeader;
   private _tree: VariablesBodyTree;
-  private _table: VariablesBodyTable;
+  private _table: VariablesBodyGrid;
 }
 
 /**

@@ -1,5 +1,3 @@
-import { expect } from 'chai';
-
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService
@@ -45,7 +43,7 @@ describe('Debugger', () => {
 
   describe('#constructor()', () => {
     it('should create a new debugger sidebar', () => {
-      expect(sidebar).to.be.an.instanceOf(Debugger.Sidebar);
+      expect(sidebar).toBeInstanceOf(Debugger.Sidebar);
     });
   });
 });

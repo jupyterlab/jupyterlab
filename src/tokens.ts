@@ -124,10 +124,11 @@ export interface IDebugger {
   clearBreakpoints(): Promise<void>;
 
   /**
-   * Request details for a variable.
-   * @param variable The variable for which to request details.
+   * Request variables for a given variable reference.
+   *
+   * @param variablesReference The variable reference to request.
    */
-  getVariableDetails(
+  inspectVariable(
     variablesReference: number
   ): Promise<DebugProtocol.Variable[]>;
 
