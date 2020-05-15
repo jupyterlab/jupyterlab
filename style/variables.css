@@ -3,7 +3,15 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-DebuggerVariables {
+  display: flex;
+  flex-direction: column;
+}
+
 .jp-DebuggerVariables-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
   min-height: 24px;
   overflow: auto;
 }
@@ -32,71 +40,10 @@
   margin-left: auto;
 }
 
-.jp-DebuggerVariableDetails {
-  color: var(--jp-ui-font-color1);
-  font-size: var(--jp-ui-font-size1);
-  overflow: auto;
+.jp-DebuggerVariables-grid {
+  flex: 1 1 auto;
 }
 
-.jp-DebuggerVariableDetails table,
-.jp-DebuggerVariables-body table {
-  width: 100%;
-  border-spacing: 0px;
-}
-
-.jp-DebuggerVariableDetails table tbody,
-.jp-DebuggerVariableDetails table thead,
-.jp-DebuggerVariables-body table tbody,
-.jp-DebuggerVariables-body table thead {
-  background: var(--jp-layout-color2);
-  text-align: left;
-}
-
-.jp-DebuggerVariableDetails table tbody tr:nth-child(2n + 1),
-.jp-DebuggerVariables-body table tbody tr:nth-child(2n + 1) {
-  background-color: var(--jp-layout-color1);
-}
-
-.jp-DebuggerVariableDetails table tbody td,
-.jp-DebuggerVariableDetails table thead th,
-.jp-DebuggerVariables-body table tbody td,
-.jp-DebuggerVariables-body table thead th {
-  padding: 5px;
-  border-right: 1px solid var(--jp-layout-color3);
-}
-
-.jp-DebuggerVariableDetails table tbody td:last-child,
-.jp-DebuggerVariableDetails table thead th:last-child,
-.jp-DebuggerVariables-body table tbody td:last-child,
-.jp-DebuggerVariables-body table thead th:last-child {
-  border-right: none;
-}
-
-.jp-DebuggerVariableDetails table tbody td.selected,
-.jp-DebuggerVariables-body table tbody td.selected {
-  color: white;
-  background: var(--jp-brand-color1);
-}
-
-.jp-detailsVariable-box {
-  position: fixed;
-  top: 30vh;
-  left: 20vw;
-  right: 0vw;
-  width: 500px;
-  z-index: 1253;
-  background-color: white;
-  text-align: center;
-  border: 1px solid #c1c1c1;
-}
-
-.jp-detailsVariable-box #header {
-  cursor: grab;
-  font-weight: bold;
-  background-color: #c1c1c1;
-}
-
-.jp-detailsVariable-box > button {
-  margin-bottom: 10px;
-  margin-top: 10px;
+.jp-DebuggerVariables-grid .lm-DataGrid {
+  border: none;
 }
