@@ -1,8 +1,8 @@
 import { Session } from '@jupyterlab/services';
 
-import { createSession } from '@jupyterlab/testutils';
+import { createSession, signalToPromise } from '@jupyterlab/testutils';
 
-import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import { UUID } from '@lumino/coreutils';
 
 import { DebuggerModel } from '../../lib/model';
 
@@ -202,16 +202,13 @@ describe('DebuggerService', () => {
       });
 
       it('should return true when the execution has stopped', async () => {
-        const variablesChanged = new PromiseDelegate<void>();
-        model.variables.changed.connect(() => {
-          variablesChanged.resolve();
-        });
+        const variablesChanged = signalToPromise(model.variables.changed);
 
         // trigger a manual execute request
         connection.kernel.requestExecute({ code });
 
         // wait for the first stopped event and variables changed
-        await variablesChanged.promise;
+        await variablesChanged;
 
         const hasStoppedThreads = service.hasStoppedThreads();
         expect(hasStoppedThreads).toBe(true);

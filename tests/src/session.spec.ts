@@ -3,7 +3,7 @@
 
 import { Session } from '@jupyterlab/services';
 
-import { createSession } from '@jupyterlab/testutils';
+import { createSession, signalToPromises } from '@jupyterlab/testutils';
 
 import { find } from '@lumino/algorithm';
 
@@ -240,7 +240,7 @@ describe('protocol', () => {
   });
 
   describe('#variablesPagination', () => {
-    it('should return only one the variable (int) by pagination pointers start and count', async () => {
+    it('should return the amount of variables requested', async () => {
       await debugSession.sendRequest('continue', { threadId });
       const variables = await getVariables(1, 1);
       const integers = variables.filter(variable => variable.type === 'int');
@@ -251,21 +251,14 @@ describe('protocol', () => {
 
   describe('#continue', () => {
     it('should proceed to the next breakpoint', async () => {
-      let events: string[] = [];
-      const eventsFuture = new PromiseDelegate<string[]>();
-      debugSession.eventMessage.connect((sender, event) => {
-        events.push(event.event);
-        // aggregate the next 2 debug events
-        if (events.length === 2) {
-          eventsFuture.resolve(events);
-        }
-      });
-
+      const [first, second] = signalToPromises(debugSession.eventMessage, 2);
       await debugSession.sendRequest('continue', { threadId });
 
       // wait for debug events
-      const debugEvents = await eventsFuture.promise;
-      expect(debugEvents).toEqual(['continued', 'stopped']);
+      const [, continued] = await first;
+      expect(continued.event).toEqual('continued');
+      const [, stopped] = await second;
+      expect(stopped.event).toEqual('stopped');
 
       const variables = await getVariables();
       const i = find(variables, variable => variable.name === 'i');
