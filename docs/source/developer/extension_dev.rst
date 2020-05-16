@@ -2,7 +2,6 @@
 
 Extension Developer Guide
 -------------------------
-
 JupyterLab can be extended in four ways via:
 
 -  **application plugins (top level):** Application plugins extend the
@@ -20,6 +19,8 @@ A JupyterLab application is comprised of:
 
 -  A core Application object
 -  Plugins
+
+Extensions are distributed as JavaScript packages, so you can write extensions in JavaScript or any language that compiles to JavaScript. We recommend writing extensions in `TypeScript <https://www.typescriptlang.org/>`_, which is used for the JupyterLab core extensions and many popular community extensions.
 
 Tutorials
 ~~~~~~~~~
