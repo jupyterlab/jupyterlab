@@ -21,6 +21,7 @@ __pycache__
 .idea/
 *.orig
 
+default.profraw
 lerna-debug.log
 yarn-error.log
 
