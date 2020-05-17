@@ -15,6 +15,8 @@ import sys
 
 from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
+from tornado.websocket import WebSocketClosedError
+
 from notebook.notebookapp import flags, aliases
 from notebook.utils import urljoin, pathname2url
 from traitlets import Bool
@@ -166,6 +168,8 @@ class BrowserApp(LabApp):
 
     def start(self):
         web_app = self.web_app
+        self.kernel_manager.shutdown_wait_time = 1
+
         web_app.settings.setdefault('page_config_data', dict())
         web_app.settings['page_config_data']['browserTest'] = True
         web_app.settings['page_config_data']['buildAvailable'] = False
