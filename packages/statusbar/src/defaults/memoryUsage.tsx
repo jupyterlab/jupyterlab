@@ -46,9 +46,15 @@ export class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
       }`;
     }
     if (!this.model.usageWarning) {
-      return <TextItem title="Current memory usage" source={text} />;
+      return <TextItem title="Current mem usage" source={text} />;
     } else {
-      return <TextItem title="Current memory usage" source={text} className={nbresuse} />;
+      return (
+        <TextItem
+          title="Current mem usage"
+          source={text}
+          className={nbresuse}
+        />
+      );
     }
   }
 }
@@ -164,7 +170,9 @@ export namespace MemoryUsage {
           ? value.limits.memory.rss
           : null;
         const [currentMemory, units] = Private.convertToLargestUnit(numBytes);
-        const usageWarning = value.limits.memory.warn;
+        const usageWarning = value.limits.memory
+          ? value.limits.memory.warn
+          : false;
 
         this._metricsAvailable = true;
         this._currentMemory = currentMemory;
@@ -290,7 +298,7 @@ namespace Private {
     limits: {
       memory?: {
         rss: number;
-        warn?: boolean;
+        warn: boolean;
       };
     };
   }
