@@ -39,8 +39,8 @@
       "default": "notebook"
     },
     "showAllKernelActivity": {
-      "title": "Kernel activity",
-      "description": "Whether the default behavior of console shows all\nkernel activity or default activity.",
+      "title": "Show All Kernel Activity",
+      "description": "Whether the console defaults to showing all\nkernel activity or just kernel activity originating from itself.",
       "type": "boolean",
       "default": false
     }
