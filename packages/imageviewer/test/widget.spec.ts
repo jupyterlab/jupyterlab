@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 
@@ -160,14 +161,14 @@ describe('ImageViewer', () => {
 
 describe('ImageViewerFactory', () => {
   describe('#createNewWidget', () => {
-    it('should create an image document widget', () => {
+    it('should create an image document widget', async () => {
       const factory = new ImageViewerFactory({
         name: 'Image',
         modelName: 'base64',
         fileTypes: ['png'],
         defaultFor: ['png']
       });
-      const context = createFileContext(
+      const context = await createFileContext(
         IMAGE.path,
         new Mock.ServiceManagerMock()
       );

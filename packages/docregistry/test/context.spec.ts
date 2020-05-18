@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 
@@ -148,12 +149,9 @@ describe('docregistry/context', () => {
           called += 1;
         });
 
-        try {
-          await context.initialize(true);
-        } catch (err) {
-          expect(err.message).toContain('Invalid response: 403 Forbidden');
-        }
-
+        await expect(context.initialize(true)).rejects.toThrowError(
+          'Invalid response: 403 Forbidden'
+        );
         expect(called).toBe(2);
         expect(checked).toBe('failed');
 

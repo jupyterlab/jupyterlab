@@ -3,9 +3,16 @@
 
 import { Context } from '@jupyterlab/docregistry';
 
-import { INotebookModel, NotebookPanel, Notebook, NotebookModel } from '../src';
+import {
+  INotebookModel,
+  NotebookPanel,
+  Notebook,
+  NotebookModel,
+  NotebookModelFactory
+} from '../src';
 
-import { NBTestUtils } from '@jupyterlab/testutils';
+import { NBTestUtils, Mock } from '@jupyterlab/testutils';
+import { UUID } from '@lumino/coreutils';
 
 /**
  * Local versions of the NBTestUtils that import from `src` instead of `lib`.
@@ -69,4 +76,29 @@ export const clipboard = NBTestUtils.clipboard;
 
 export function defaultRenderMime() {
   return NBTestUtils.defaultRenderMime();
+}
+
+/**
+ * Create a context for a file.
+ */
+export async function createMockContext(
+  startKernel = false
+): Promise<Context<INotebookModel>> {
+  const path = UUID.uuid4() + '.txt';
+  const manager = new Mock.ServiceManagerMock();
+  const factory = new NotebookModelFactory({});
+
+  const context = new Context({
+    manager,
+    factory,
+    path,
+    kernelPreference: {
+      shouldStart: startKernel,
+      canStart: startKernel,
+      autoStartDefault: startKernel
+    }
+  });
+  await context.initialize(true);
+  await context.sessionContext.initialize();
+  return context;
 }

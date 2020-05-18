@@ -43,7 +43,6 @@ describe('kernel/manager', () => {
 
   beforeEach(() => {
     manager = new KernelSpecManager({ standby: 'never' });
-    expect(manager.specs).toBeNull();
     return manager.ready;
   });
 

@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 
@@ -33,7 +34,7 @@ describe('@jupyterlab/coreutils', () => {
         expect(PageConfig.setOption('bar', 'foo')).toBe('');
       });
 
-      it('should get a known option', () => {
+      it('should get a different known option', () => {
         expect(PageConfig.getOption('bar')).toBe('foo');
       });
     });

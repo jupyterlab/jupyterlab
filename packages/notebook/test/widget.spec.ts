@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 
@@ -1194,7 +1195,7 @@ describe('@jupyter/notebook', () => {
           expect(widget.activeCell).toBe(child);
         });
 
-        it.only('should extend selection if invoked with shift', () => {
+        it('should extend selection if invoked with shift', () => {
           widget.activeCellIndex = 3;
 
           // shift click below

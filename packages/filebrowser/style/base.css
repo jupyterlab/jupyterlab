@@ -156,6 +156,10 @@
   user-select: none;
 }
 
+.jp-DirListing-item[data-is-dot] {
+  opacity: 75%;
+}
+
 .jp-DirListing-item.jp-mod-selected {
   color: white;
   background: var(--jp-brand-color1);

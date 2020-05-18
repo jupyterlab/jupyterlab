@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 // Distributed under the terms of the Modified BSD License.
@@ -793,7 +794,7 @@ describe('cells/widget', () => {
         await expect(future1).rejects.toThrow('Canceled');
         expect(widget.promptNode.textContent).toEqual('[*]:');
         const msg = await future2;
-        expect(msg).not.toBeUndefined;
+        expect(msg).not.toBeUndefined();
 
         // The `if` is a Typescript type guard so that msg.content works below.
         if (msg) {

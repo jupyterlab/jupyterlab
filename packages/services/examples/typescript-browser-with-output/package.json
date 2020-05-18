@@ -12,7 +12,7 @@
   "style": "style/index.css",
   "scripts": {
     "build": "tsc && webpack",
-    "clean": "rimraf build",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {

@@ -12,6 +12,9 @@
       "path": "../docregistry"
     },
     {
+      "path": "."
+    },
+    {
       "path": "../../testutils"
     },
     {

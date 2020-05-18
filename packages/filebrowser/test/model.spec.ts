@@ -1,23 +1,19 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 import expect from 'expect';
 
-import { PageConfig } from '@jupyterlab/coreutils';
+import 'jest';
 
-import { UUID } from '@lumino/coreutils';
+import { PageConfig } from '@jupyterlab/coreutils';
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
 
-import { StateDB } from '@jupyterlab/statedb';
-
-import { FileBrowserModel, CHUNK_SIZE, LARGE_FILE_SIZE } from '../src';
-
 import { Contents, ServiceManager } from '@jupyterlab/services';
+
+import { StateDB } from '@jupyterlab/statedb';
 
 import {
   acceptDialog,
@@ -29,6 +25,10 @@ import {
 import * as Mock from '@jupyterlab/testutils/lib/mock';
 
 import { toArray } from '@lumino/algorithm';
+
+import { UUID } from '@lumino/coreutils';
+
+import { FileBrowserModel, CHUNK_SIZE, LARGE_FILE_SIZE } from '../src';
 
 /**
  * A contents manager that delays requests by less each time it is called
@@ -60,6 +60,7 @@ describe('filebrowser/model', () => {
   let model: FileBrowserModel;
   let name: string;
   let subDir: string;
+  let subSubDir: string;
   let state: StateDB;
   const opener: DocumentManager.IWidgetOpener = {
     open: widget => {
@@ -83,10 +84,16 @@ describe('filebrowser/model', () => {
   beforeEach(async () => {
     await state.clear();
     model = new FileBrowserModel({ manager, state });
+
     let contents = await manager.newUntitled({ type: 'file' });
     name = contents.name;
+
     contents = await manager.newUntitled({ type: 'directory' });
     subDir = contents.path;
+
+    contents = await manager.newUntitled({ path: subDir, type: 'directory' });
+    subSubDir = contents.path;
+
     return model.cd();
   });
 
@@ -242,6 +249,11 @@ describe('filebrowser/model', () => {
       it('should change directory', async () => {
         await model.cd(subDir);
         expect(model.path).toBe(subDir);
+      });
+
+      it('should change to a nested directory', async () => {
+        await model.cd(subSubDir);
+        expect(model.path).toBe(subSubDir);
       });
 
       it('should accept a relative path', async () => {

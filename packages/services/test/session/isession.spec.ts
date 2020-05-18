@@ -430,13 +430,9 @@ describe('session', () => {
       it('should handle a specific error status', async () => {
         handleRequest(defaultSession, 410, {});
         const promise = defaultSession.shutdown();
-        try {
-          await promise;
-          throw Error('should not get here');
-        } catch (err) {
-          const text = 'The kernel was deleted but the session was not';
-          expect(err.message).toEqual(text);
-        }
+        await expect(promise).rejects.toThrow(
+          'The kernel was deleted but the session was not'
+        );
       });
 
       it('should fail for an error response status', async () => {

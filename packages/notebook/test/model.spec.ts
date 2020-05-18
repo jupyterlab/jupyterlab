@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 
@@ -309,8 +310,8 @@ describe('@jupyterlab/notebook', () => {
       it('should have default values', () => {
         const model = new NotebookModel();
         const metadata = model.metadata;
-        expect(metadata.has('kernelspec'));
-        expect(metadata.has('language_info'));
+        expect(metadata.has('kernelspec')).toBeTruthy();
+        expect(metadata.has('language_info')).toBeTruthy();
         expect(metadata.size).toBe(2);
       });
 
@@ -391,12 +392,12 @@ describe('@jupyterlab/notebook', () => {
           expect(cell.type).toBe('code');
         });
 
-        it('should create a new code cell', () => {
+        it('should create a new markdown cell', () => {
           const cell = factory.createCell('markdown', {});
           expect(cell.type).toBe('markdown');
         });
 
-        it('should create a new code cell', () => {
+        it('should create a new raw cell', () => {
           const cell = factory.createCell('raw', {});
           expect(cell.type).toBe('raw');
         });

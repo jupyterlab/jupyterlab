@@ -19,73 +19,48 @@ fi
 
 if [[ $GROUP == js* ]]; then
 
-    if [[ $GROUP == js-* ]]; then
+    if [[ $GROUP == "js-testutils" ]]; then
+        pushd testutils
+    else
         # extract the group name
         export PKG="${GROUP#*-}"
-        jlpm run build:packages:scope --scope "@jupyterlab/$PKG"
-        here=$(pwd)
-        if [[ -d "${here}/tests/test-${GROUP}" ]];then
-            scope="@jupyterlab/test-${PKG}"
-            jlpm run build:test:scope --scope ${scope}
-        else
-            pushd packages/${PKG}
-            jlpm run build; true
-            if [[ -d ${here}/packages/${PKG}/test ]]; then
-                jlpm run build:test; true
-            fi
-            popd
-            scope="@jupyterlab/${PKG}"
-        fi
-
-        FORCE_COLOR=1 jlpm run test:scope --loglevel success --scope ${scope}
-    else
-        jlpm build:packages
-        jlpm build:test
-        FORCE_COLOR=1 jlpm test --loglevel success
+        pushd packages/${PKG}
     fi
 
-    jlpm run clean
-fi
+    jlpm run build:test; true
 
-if [[ $GROUP == jsscope ]]; then
-
-    jlpm build:packages
-    jlpm build:test
-    FORCE_COLOR=1 jlpm test:scope --loglevel success --scope $JSTESTGROUP
-
+    export FORCE_COLOR=1
+    CMD="jlpm run test:cov"
+    $CMD || $CMD || $CMD
     jlpm run clean
 fi
 
 
 if [[ $GROUP == docs ]]; then
-    # Verify tutorial docs build
+    # Build the tutorial docs
     pushd docs
     pip install -r ./requirements.txt
     make html
-
-    # Remove internal sphinx files and use pytest-check-links on the generated html
-    rm build/html/genindex.html
-    rm build/html/search.html
-
-    # Changelog has a lot of links and is covered in a separate job.
-    changelog_html=./build/html/getting_started/changelog.html
-    py.test --check-links --links-ext .html -k .html --ignore $changelog_html build/html || py.test --check-links --links-ext .html -k .html --ignore $changelog_html --lf build/html
-
     popd
-fi
 
-
-if [[ $GROUP == docs2 ]]; then
-    # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
-    py.test --check-links --links-ext .md -k .md . || py.test --check-links --links-ext .md -k .md --lf .
+    # Run the link check on the built html files
+    CACHE_DIR="${HOME}/.cache/pytest-link-check"
+    mkdir -p ${CACHE_DIR}
+    echo "Existing cache:"
+    ls -ltr ${CACHE_DIR}
+    # Expire links after a week
+    LINKS_EXPIRE=604800
+    args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
+    args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html ${args}"
+    py.test $args --links-ext .html -k .html docs/build/html || py.test $args --links-ext .html -k .html --lf docs/build/html
 
     # Build the API docs
     jlpm build:packages
     jlpm docs
 
-    # Run the link check on the changelog - allow for a link to fail once (--lf means only run last failed)
-    changelog=./docs/source/getting_started/changelog.rst
-    py.test --check-links $changelog || py.test --check-links --lf $changelog
+    # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
+    args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
+    py.test $args --links-ext .md -k .md . || py.test $args --links-ext .md -k .md --lf .
 fi
 
 
@@ -242,6 +217,10 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension install ./jupyterlab/tests/mock_packages/extension --debug
     python -m jupyterlab.browser_check
     jupyter labextension list --debug
+
+    # Make sure we can run watch mode with no built application
+    jupyter lab clean
+    python -m jupyterlab.browser_check --watch
 
     # Make sure we can non-dev install.
     virtualenv -p $(which python3) test_install

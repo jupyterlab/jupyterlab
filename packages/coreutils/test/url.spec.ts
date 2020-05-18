@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 
@@ -19,25 +20,18 @@ describe('@jupyterlab/coreutils', () => {
       it('should handle query and hash', () => {
         const url = "http://example.com/path?that's#all, folks";
         const obj = URLExt.parse(url);
-        try {
-          expect(obj.href).toBe(
-            'http://example.com/path?that%27s#all,%20folks'
-          );
-        } catch (e) {
-          // Chrome
-          expect(obj.href).toBe('http://example.com/path?that%27s#all, folks');
-        }
+        // Chrome has a different href
+        expect([
+          'http://example.com/path?that%27s#all,%20folks',
+          'http://example.com/path?that%27s#all, folks'
+        ]).toContain(obj.href);
         expect(obj.protocol).toBe('http:');
         expect(obj.host).toBe('example.com');
         expect(obj.hostname).toBe('example.com');
         expect(obj.search).toBe('?that%27s');
         expect(obj.pathname).toBe('/path');
-        try {
-          expect(obj.hash).toBe('#all,%20folks');
-        } catch (e) {
-          // Chrome
-          expect(obj.hash).toBe('#all, folks');
-        }
+        // Chrome has a different hash
+        expect(['#all,%20folks', '#all, folks']).toContain(obj.hash);
       });
     });
 

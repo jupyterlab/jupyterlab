@@ -21,6 +21,9 @@
       "path": "../statedb"
     },
     {
+      "path": "."
+    },
+    {
       "path": "../../testutils"
     },
     {

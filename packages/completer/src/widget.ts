@@ -5,6 +5,8 @@ import { HoverBox, defaultSanitizer } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
+import { LabIcon } from '@jupyterlab/ui-components';
+
 import { IIterator, IterableOrArrayLike, toArray } from '@lumino/algorithm';
 
 import { JSONObject, JSONExt } from '@lumino/coreutils';
@@ -868,7 +870,8 @@ export namespace Completer {
         this._createMatchNode(item.label),
         !!item.type,
         item.type,
-        orderedTypes
+        orderedTypes,
+        item.icon
       );
     }
 
@@ -921,24 +924,48 @@ export namespace Completer {
       matchNode: HTMLElement,
       typesExist: boolean,
       type: any,
-      orderedTypes: string[]
+      orderedTypes: string[],
+      icon?: LabIcon
     ): HTMLLIElement {
-      // If there are types provided add those.
-      if (typesExist) {
+      // Add the icon or type monogram
+      if (icon) {
+        const iconNode = icon.element({
+          className: 'jp-Completer-type jp-Completer-icon'
+        });
+        li.appendChild(iconNode);
+      } else if (typesExist) {
         const typeNode = document.createElement('span');
         typeNode.textContent = (type[0] || '').toLowerCase();
         const colorIndex = (orderedTypes.indexOf(type) % N_COLORS) + 1;
-        typeNode.className = 'jp-Completer-type';
+        typeNode.className = 'jp-Completer-type jp-Completer-monogram';
         typeNode.setAttribute(`data-color-index`, colorIndex.toString());
+        li.appendChild(typeNode);
+      } else {
+        // Create empty span to ensure consistent list styling.
+        // Otherwise, in a list of two items,
+        // if one item has an icon, but the other has type,
+        // the icon grows out of its bounds.
+        const dummyNode = document.createElement('span');
+        dummyNode.className = 'jp-Completer-monogram';
+        li.appendChild(dummyNode);
+      }
+
+      li.appendChild(matchNode);
+
+      // If there is a type, add the type extension and title
+      if (typesExist) {
         li.title = type;
         const typeExtendedNode = document.createElement('code');
         typeExtendedNode.className = 'jp-Completer-typeExtended';
         typeExtendedNode.textContent = type.toLocaleLowerCase();
-        li.appendChild(typeNode);
-        li.appendChild(matchNode);
         li.appendChild(typeExtendedNode);
       } else {
-        li.appendChild(matchNode);
+        // If no type is present on the right,
+        // the highlighting of the completion item
+        // doesn't cover the entire row.
+        const dummyTypeExtendedNode = document.createElement('span');
+        dummyTypeExtendedNode.className = 'jp-Completer-typeExtended';
+        li.appendChild(dummyTypeExtendedNode);
       }
       return li;
     }

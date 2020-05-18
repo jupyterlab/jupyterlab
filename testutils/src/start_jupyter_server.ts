@@ -4,8 +4,9 @@ import { spawn, ChildProcess } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import { sleep } from './common';
 
 /**
  * A Jupyter Server that runs as a child process.
@@ -34,15 +35,15 @@ export class JupyterServer {
   /**
    * Start the server.
    *
-   * @returns A promise that resolves when the server has started
+   * @returns A promise that resolves with the url of the server
    *
    * @throws Error if another server is still running.
    */
-  async start(): Promise<void> {
+  async start(): Promise<string> {
     if (Private.child !== null) {
       throw Error('Previous server was not disposed');
     }
-    const startDelegate = new PromiseDelegate();
+    const startDelegate = new PromiseDelegate<string>();
 
     const env = {
       JUPYTER_CONFIG_DIR: Private.handleConfig(),
@@ -58,18 +59,19 @@ export class JupyterServer {
     let started = false;
 
     // Handle server output.
-    function handleOutput(output: string) {
+    const handleOutput = (output: string) => {
       console.debug(output);
 
       if (started) {
         return;
       }
-      if (Private.handleStartup(output)) {
+      const baseUrl = Private.handleStartup(output);
+      if (baseUrl) {
         console.debug('Jupyter Server started');
-        startDelegate.resolve(void 0);
         started = true;
+        void Private.connect(baseUrl, startDelegate);
       }
-    }
+    };
 
     child.stdout.on('data', data => {
       handleOutput(String(data));
@@ -79,7 +81,8 @@ export class JupyterServer {
       handleOutput(String(data));
     });
 
-    await startDelegate.promise;
+    const url = await startDelegate.promise;
+    return url;
   }
 
   /**
@@ -105,7 +108,7 @@ export class JupyterServer {
       if (Private.child) {
         Private.child.kill(9);
       }
-    }, 1000);
+    }, 3000);
 
     return stopDelegate.promise;
   }
@@ -214,7 +217,10 @@ namespace Private {
     const configData = {
       LabApp: { user_settings_dir, workspaces_dir, app_dir },
       NotebookApp: { token, open_browser: false, notebook_dir },
-      MultiKernelManager: { default_kernel_name: 'echo' }
+      MultiKernelManager: {
+        default_kernel_name: 'echo',
+        shutdown_wait_time: 1.0
+      }
     };
     fs.writeFileSync(configPath, JSON.stringify(configData));
     return configDir;
@@ -252,10 +258,10 @@ namespace Private {
    *
    * @param output the process output
    *
-   * @returns Whether the process has started.
+   * @returns The baseUrl of the server or `null`.
    */
-  export function handleStartup(output: string): boolean {
-    let baseUrl = '';
+  export function handleStartup(output: string): string | null {
+    let baseUrl: string | null = null;
     output.split('\n').forEach(line => {
       const baseUrlMatch = line.match(/(http:\/\/localhost:\d+\/[^?]*)/);
       if (baseUrlMatch) {
@@ -263,6 +269,27 @@ namespace Private {
         PageConfig.setOption('baseUrl', baseUrl);
       }
     });
-    return baseUrl.length > 0;
+    return baseUrl;
+  }
+
+  /**
+   * Connect to the Jupyter server.
+   */
+  export async function connect(
+    baseUrl: string,
+    startDelegate: PromiseDelegate<string>
+  ): Promise<void> {
+    // eslint-disable-next-line
+    while (true) {
+      try {
+        await fetch(URLExt.join(baseUrl, 'api'));
+        startDelegate.resolve(baseUrl);
+        return;
+      } catch (e) {
+        // spin until we can connect to the server.
+        console.warn(e);
+        await sleep(1000);
+      }
+    }
   }
 }

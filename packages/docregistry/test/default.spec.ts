@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 
@@ -21,7 +22,7 @@ import {
 
 import { ServiceManager } from '@jupyterlab/services';
 
-import { createFileContext, sleep } from '@jupyterlab/testutils';
+import { sleep } from '@jupyterlab/testutils';
 
 import * as Mock from '@jupyterlab/testutils/lib/mock';
 
@@ -178,7 +179,7 @@ describe('docregistry/default', () => {
         expect(factory.canStartKernel).toBe(true);
       });
 
-      it('should have toolbar items', () => {
+      it('should have toolbar items', async () => {
         const factory = new WidgetFactory({
           name: 'test',
           fileTypes: ['text'],
@@ -193,7 +194,7 @@ describe('docregistry/default', () => {
             }
           ]
         });
-        const context = createFileContext();
+        const context = await Mock.createFileContext();
         const widget = factory.createNew(context);
         const widget2 = factory.createNew(context);
         expect(toArray(widget.toolbar.names())).toEqual(['foo', 'bar']);
@@ -228,16 +229,16 @@ describe('docregistry/default', () => {
     });
 
     describe('#createNew()', () => {
-      it('should create a new widget given a document model and a context', () => {
+      it('should create a new widget given a document model and a context', async () => {
         const factory = createFactory();
-        const context = createFileContext();
+        const context = await Mock.createFileContext();
         const widget = factory.createNew(context);
         expect(widget).toBeInstanceOf(Widget);
       });
 
-      it('should take an optional source widget for cloning', () => {
+      it('should take an optional source widget for cloning', async () => {
         const factory = createFactory();
-        const context = createFileContext();
+        const context = await Mock.createFileContext();
         const widget = factory.createNew(context);
         const clonedWidget: IDocumentWidget = factory.createNew(
           context,
@@ -551,8 +552,8 @@ describe('docregistry/default', () => {
     let content: Widget;
     let widget: DocumentWidget;
 
-    const setup = () => {
-      context = createFileContext(undefined, manager);
+    const setup = async () => {
+      context = await Mock.createFileContext(false, manager);
       content = new Widget();
       widget = new DocumentWidget({ context, content });
     };
@@ -571,14 +572,11 @@ describe('docregistry/default', () => {
 
       it('should update the title when the path changes', async () => {
         const path = UUID.uuid4() + '.jl';
-        await context.initialize(true);
         await manager.contents.rename(context.path, path);
         expect(widget.title.label).toBe(path);
       });
 
       it('should add the dirty class when the model is dirty', async () => {
-        await context.initialize(true);
-        await context.ready;
         context.model.fromString('bar');
         expect(widget.title.className).toContain('jp-mod-dirty');
       });
@@ -592,22 +590,33 @@ describe('docregistry/default', () => {
       beforeEach(setup);
 
       it('should resolve after the reveal and context ready promises', async () => {
+        const thisContext = new Context({
+          manager,
+          factory: new TextModelFactory(),
+          path: UUID.uuid4()
+        });
         const x = Object.create(null);
         const reveal = sleep(300, x);
-        const contextReady = Promise.all([context.ready, x]);
-        const widget = new DocumentWidget({ context, content, reveal });
+        const contextReady = Promise.all([thisContext.ready, x]);
+        const widget = new DocumentWidget({
+          context: thisContext,
+          content,
+          reveal
+        });
         expect(widget.isRevealed).toBe(false);
 
         // Our promise should resolve before the widget reveal promise.
         expect(await Promise.race([widget.revealed, reveal])).toBe(x);
         // The context ready promise should also resolve first.
-        void context.initialize(true);
+        void thisContext.initialize(true);
         expect(await Promise.race([widget.revealed, contextReady])).toEqual([
           undefined,
           x
         ]);
         // The widget.revealed promise should finally resolve.
         expect(await widget.revealed).toBeUndefined();
+
+        thisContext.dispose();
       });
     });
   });

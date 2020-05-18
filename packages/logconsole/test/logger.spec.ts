@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 // Distributed under the terms of the Modified BSD License.
@@ -341,7 +342,7 @@ describe('Logger', () => {
       s.dispose();
     });
 
-    it('emits an "append" content changed signal', () => {
+    it('emits an "append" content changed signal and log outputs', () => {
       const s = new SignalLogger(logger.contentChanged);
       logger.log({
         type: 'output',

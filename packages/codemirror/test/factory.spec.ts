@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 
@@ -42,7 +43,7 @@ describe('CodeMirrorEditorFactory', () => {
       expect(factory).toBeInstanceOf(CodeMirrorEditorFactory);
     });
 
-    it('should create a CodeMirrorEditorFactory', () => {
+    it('should create a CodeMirrorEditorFactory with options', () => {
       const factory = new ExposeCodeMirrorEditorFactory(options);
       expect(factory).toBeInstanceOf(CodeMirrorEditorFactory);
       expect(factory.inlineCodeMirrorConfig.extraKeys).toEqual(
