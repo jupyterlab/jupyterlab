@@ -217,7 +217,10 @@ namespace Private {
     const configData = {
       LabApp: { user_settings_dir, workspaces_dir, app_dir },
       NotebookApp: { token, open_browser: false, notebook_dir },
-      MultiKernelManager: { default_kernel_name: 'echo' }
+      MultiKernelManager: {
+        default_kernel_name: 'echo',
+        shutdown_wait_time: 1.0
+      }
     };
     fs.writeFileSync(configPath, JSON.stringify(configData));
     return configDir;
