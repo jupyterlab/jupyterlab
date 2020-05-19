@@ -46,7 +46,7 @@
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",
     "ts-jest": "^25.2.1",
-    "typescript": "~3.7.3"
+    "typescript": "~3.9.2"
   },
   "publishConfig": {
     "access": "public"
