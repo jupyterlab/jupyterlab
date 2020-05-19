@@ -237,7 +237,8 @@ module.exports = [
           test: /\.js$/,
           include: sourceMapRes,
           use: ['source-map-loader'],
-          enforce: 'pre'
+          enforce: 'pre',
+          exclude: [plib.join(process.cwd(), 'node_modules')]
         },
         { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
         { test: /\.js.map$/, use: 'file-loader' },
