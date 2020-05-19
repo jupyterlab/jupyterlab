@@ -639,7 +639,7 @@ export namespace CodeEditor {
     /**
      * Whether the editor should handle paste events.
      */
-    handlePaste: boolean;
+    handlePaste?: boolean;
 
     /**
      * The column where to break text line.
