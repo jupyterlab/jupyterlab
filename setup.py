@@ -10,13 +10,26 @@ import sys
 
 # Our own imports
 from setupbase import (
-    create_cmdclass, ensure_python, find_packages, get_version,
+    create_cmdclass, find_packages, get_version,
     command_for_func, combine_commands, install_npm, HERE, run,
     skip_npm, which, log
 )
 
 from setuptools import setup
 from setuptools.command.develop import develop
+
+min_version = (3, 5)
+
+if sys.version_info < min_version:
+    error = """
+Python {0} or above is required, you are using Python {1}.
+
+This may be due to an out of date pip.
+
+Make sure you have pip >= 9.0.1.
+""".format('.'.join(str(n) for n in min_version),
+           '.'.join(str(n) for n in sys.version_info[:3]))
+    sys.exit(error)
 
 
 NAME = 'jupyterlab'
@@ -25,7 +38,6 @@ DESCRIPTION = 'The JupyterLab notebook server extension.'
 with open(pjoin(HERE, 'README.md')) as fid:
     LONG_DESCRIPTION = fid.read()
 
-ensure_python(['>=3.5'])
 
 data_files_spec = [
     ('share/jupyter/lab/static', '%s/static' % NAME, '**'),
