@@ -273,7 +273,7 @@ describe('@jupyterlab/notebook', () => {
       it('should merge attachments if the last selected cell is a markdown cell', () => {
         for (let i = 0; i < 2; i++) {
           NotebookActions.changeCellType(widget, 'markdown');
-          const markdownCell = widget.activeCell as MarkdownCell;
+          const markdownCell = widget.widgets[i] as MarkdownCell;
           const attachment: IMimeBundle = { 'text/plain': 'test' };
           markdownCell.model.attachments.set(UUID.uuid4(), attachment);
           widget.select(markdownCell);
@@ -284,7 +284,24 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should drop attachments if the last selected cell is a code cell', () => {
-        // TODO
+        NotebookActions.changeCellType(widget, 'markdown');
+        const markdownCell = widget.activeCell as MarkdownCell;
+        const attachment: IMimeBundle = { 'text/plain': 'test' };
+        markdownCell.model.attachments.set(UUID.uuid4(), attachment);
+
+        const codeCell = widget.widgets[1];
+        widget.select(codeCell);
+        NotebookActions.changeCellType(widget, 'code');
+        NotebookActions.deselectAll(widget);
+
+        widget.select(markdownCell);
+        widget.select(codeCell);
+
+        NotebookActions.mergeCells(widget);
+
+        const model = widget.activeCell!.model.toJSON();
+        expect(model.cell_type).toEqual('code');
+        expect(model.attachments).toBeUndefined();
       });
     });
 
