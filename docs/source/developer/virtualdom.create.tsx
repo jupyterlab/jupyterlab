@@ -8,3 +8,4 @@ function MyComponent() {
 }
 
 const myWidget: Widget = ReactWidget.create(<MyComponent />);
+Widget.attach(myWidget, document.body);
