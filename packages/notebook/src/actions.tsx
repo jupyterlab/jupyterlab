@@ -14,7 +14,10 @@ import {
   CodeCell,
   Cell,
   MarkdownCell,
-  AttachmentsCellModel
+  AttachmentsCellModel,
+  isMarkdownCellModel,
+  isRawCellModel,
+  isCodeCellModel
 } from '@jupyterlab/cells';
 
 import * as nbformat from '@jupyterlab/nbformat';
@@ -206,10 +209,9 @@ export namespace NotebookActions {
         if (index !== active) {
           toDelete.push(child.model);
         }
-        // Merge attachments if the cell is a markdown cell or a raw cell
-        const type = child.model.type;
-        if (type === 'markdown' || type === 'raw') {
-          const model = child.model as AttachmentsCellModel;
+        // Collect attachments if the cell is a markdown cell or a raw cell
+        const model = child.model;
+        if (isRawCellModel(model) || isMarkdownCellModel(model)) {
           for (const key of model.attachments.keys) {
             attachments[key] = model.attachments.get(key)!.toJSON();
           }
@@ -237,10 +239,10 @@ export namespace NotebookActions {
     const newModel = Private.cloneCell(model, primary.model);
 
     newModel.value.text = toMerge.join('\n\n');
-    if (newModel.type === 'code') {
-      (newModel as ICodeCellModel).outputs.clear();
-    } else {
-      (newModel as AttachmentsCellModel).attachments.fromJSON(attachments);
+    if (isCodeCellModel(newModel)) {
+      newModel.outputs.clear();
+    } else if (isMarkdownCellModel(newModel) || isRawCellModel(newModel)) {
+      newModel.attachments.fromJSON(attachments);
     }
 
     // Make the changes while preserving history.
