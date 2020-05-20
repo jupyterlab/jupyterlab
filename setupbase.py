@@ -87,24 +87,6 @@ def get_version(file, name='__version__'):
     return version_ns[name]
 
 
-def ensure_python(specs):
-    """Given a list of range specifiers for python, ensure compatibility.
-    """
-    if not isinstance(specs, (list, tuple)):
-        specs = [specs]
-    v = sys.version_info
-    part = '%s.%s' % (v.major, v.minor)
-    for spec in specs:
-        if part == spec:
-            return
-        try:
-            if eval(part + spec):
-                return
-        except SyntaxError:
-            pass
-    raise ValueError('Python version %s unsupported' % part)
-
-
 def find_packages(top=HERE):
     """
     Find all of the packages.
