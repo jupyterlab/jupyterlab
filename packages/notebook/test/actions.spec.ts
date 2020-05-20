@@ -7,7 +7,7 @@ import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
 
-import { IMimeBundle } from '@jupyterlab/nbformat';
+import { IMimeBundle, CellType } from '@jupyterlab/nbformat';
 
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
@@ -270,18 +270,21 @@ describe('@jupyterlab/notebook', () => {
         expect(widget.mode).toBe('command');
       });
 
-      it('should merge attachments if the last selected cell is a markdown cell', () => {
-        for (let i = 0; i < 2; i++) {
-          NotebookActions.changeCellType(widget, 'markdown');
-          const markdownCell = widget.widgets[i] as MarkdownCell;
-          const attachment: IMimeBundle = { 'text/plain': 'test' };
-          markdownCell.model.attachments.set(UUID.uuid4(), attachment);
-          widget.select(markdownCell);
+      it.each(['raw', 'markdown'])(
+        'should merge attachments if the last selected cell is a %s cell',
+        (type: CellType) => {
+          for (let i = 0; i < 2; i++) {
+            NotebookActions.changeCellType(widget, type);
+            const markdownCell = widget.widgets[i] as MarkdownCell;
+            const attachment: IMimeBundle = { 'text/plain': 'test' };
+            markdownCell.model.attachments.set(UUID.uuid4(), attachment);
+            widget.select(markdownCell);
+          }
+          NotebookActions.mergeCells(widget);
+          const model = (widget.activeCell as MarkdownCell).model;
+          expect(model.attachments.length).toBe(2);
         }
-        NotebookActions.mergeCells(widget);
-        const model = (widget.activeCell as MarkdownCell).model;
-        expect(model.attachments.length).toBe(2);
-      });
+      );
 
       it('should drop attachments if the last selected cell is a code cell', () => {
         NotebookActions.changeCellType(widget, 'markdown');
