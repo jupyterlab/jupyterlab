@@ -14,7 +14,6 @@ import {
   CodeCell,
   Cell,
   MarkdownCell,
-  AttachmentsCellModel,
   isMarkdownCellModel,
   isRawCellModel,
   isCodeCellModel
