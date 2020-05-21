@@ -121,7 +121,7 @@ Usage with private NPM registry
 
 To install extensions, you will need access to a NPM packages registry. Some companies do not allow
 reaching directly public registry and have a private registry. To use it, you need to configure ``npm``
-and ``yarn`` to point to that registry (ask you corporate IT department for the correct URL):
+**and** ``yarn`` to point to that registry (ask your corporate IT department for the correct URL):
 
 .. code::
 
