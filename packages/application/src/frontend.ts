@@ -128,8 +128,8 @@ export abstract class JupyterFrontEnd<
   }
   set format(format: JupyterFrontEnd.Format) {
     if (this._format !== format) {
-      document.body.dataset['format'] = format;
       this._format = format;
+      document.body.dataset['format'] = format;
       this._formatChanged.emit(format);
     }
   }

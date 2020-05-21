@@ -87,8 +87,12 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     }
 
     this.formatChanged.connect((_, format) => {
-      this.shell.mode =
-        format === 'mobile' ? 'single-document' : 'multiple-document';
+      if (format === 'mobile') {
+        this.shell.mode = 'single-document';
+        this.shell.collapseLeft();
+        this.shell.collapseRight();
+        return;
+      }
     }, this);
     Private.setFormat(this);
   }
