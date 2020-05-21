@@ -1779,14 +1779,15 @@ export class Notebook extends StaticNotebook {
 
     // If in select mode, update the selection
     switch (this._mouseMode) {
-      case 'select':
+      case 'select': {
         const target = event.target as HTMLElement;
         const index = this._findCell(target);
         if (index !== -1) {
           this.extendContiguousSelectionTo(index);
         }
         break;
-      case 'couldDrag':
+      }
+      case 'couldDrag': {
         // Check for a drag initialization.
         const data = this._dragData!;
         const dx = Math.abs(event.clientX - data.pressX);
@@ -1796,6 +1797,7 @@ export class Notebook extends StaticNotebook {
           this._startDrag(data.index, event.clientX, event.clientY);
         }
         break;
+      }
       default:
         break;
     }

@@ -117,7 +117,7 @@
   "devDependencies": {
     "fs-extra": "^8.1.0",
     "rimraf": "~3.0.0",
-    "typedoc": "^0.15.4",
+    "typedoc": "^0.17.7",
     "typescript": "~3.9.2"
   },
   "publishConfig": {
