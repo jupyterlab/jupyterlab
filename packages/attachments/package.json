@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "^0.15.4",
+    "typedoc": "^0.17.7",
     "typescript": "~3.9.2"
   },
   "publishConfig": {
