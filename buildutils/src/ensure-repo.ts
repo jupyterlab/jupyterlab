@@ -38,7 +38,9 @@ const UNUSED: Dict<string[]> = {
     'node-fetch',
     'identity-obj-proxy',
     'jest-raw-loader',
-    'markdown-loader-jest'
+    'markdown-loader-jest',
+    'jest-junit',
+    'jest-summary-reporter'
   ],
   '@jupyterlab/test-csvviewer': ['csv-spectrum'],
   '@jupyterlab/vega5-extension': ['vega', 'vega-lite'],
@@ -153,7 +155,11 @@ function ensureJupyterlab(): string[] {
   corePackage.jupyterlab.extensions = {};
   corePackage.jupyterlab.mimeExtensions = {};
   corePackage.jupyterlab.linkedPackages = {};
-  corePackage.dependencies = {};
+  // start with known external dependencies
+  corePackage.dependencies = Object.assign(
+    {},
+    corePackage.jupyterlab.externalExtensions
+  );
   corePackage.resolutions = {};
 
   const singletonPackages: string[] = corePackage.jupyterlab.singletonPackages;
@@ -238,6 +244,10 @@ function ensureJupyterlab(): string[] {
     try {
       data = utils.readJSONFile(dataPath);
     } catch (e) {
+      return;
+    }
+    // Skip private packages.
+    if (data.private === true) {
       return;
     }
 

@@ -55,7 +55,8 @@ export class SettingManager extends DataConnector<
     const response = await makeRequest(url, {}, serverSettings);
 
     if (response.status !== 200) {
-      throw new ResponseError(response);
+      const err = await ResponseError.create(response);
+      throw err;
     }
 
     // Assert what type the server response is returning.

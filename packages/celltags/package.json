@@ -33,7 +33,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "prepare": "npm run clean && npm run build",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
@@ -48,7 +48,7 @@
   "devDependencies": {
     "@types/node": "^12.12.17",
     "rimraf": "~3.0.0",
-    "typescript": "~3.7.3"
+    "typescript": "~3.9.2"
   },
   "publishConfig": {
     "access": "public"

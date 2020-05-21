@@ -1,4 +1,5 @@
 // Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
 
 import 'jest';
 
@@ -68,13 +69,7 @@ describe('rendermime/registry', () => {
   let RESOLVER: IRenderMime.IResolver;
 
   beforeAll(async () => {
-    const fileContext = Mock.createFileContext(true);
-    await fileContext.initialize(true);
-
-    // The context initialization kicks off a sessionContext initialization,
-    // but does not wait for it. We need to wait for it so our url resolver
-    // has access to the session.
-    await fileContext.sessionContext.initialize();
+    const fileContext = await Mock.createFileContext(true);
     RESOLVER = fileContext.urlResolver;
   });
 

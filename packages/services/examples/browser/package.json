@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
-    "clean": "rimraf build",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~3.7.3",
+    "typescript": "~3.9.2",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
   }

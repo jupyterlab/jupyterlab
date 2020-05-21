@@ -944,6 +944,7 @@ export class DirListing extends Widget {
       this._manager.openOrReveal(path);
     }
   }
+
   /**
    * Handle the `'keydown'` event for the widget.
    */
@@ -1868,10 +1869,15 @@ export namespace DirListing {
           '\nModified: ' +
           Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss');
       }
+      hoverText += '\nWritable: ' + model.writable;
 
       node.title = hoverText;
       node.setAttribute('data-file-type', name);
-
+      if (model.name.startsWith('.')) {
+        node.setAttribute('data-is-dot', 'true');
+      } else {
+        node.removeAttribute('data-is-dot');
+      }
       // If an item is being edited currently, its text node is unavailable.
       if (text && text.textContent !== model.name) {
         text.textContent = model.name;

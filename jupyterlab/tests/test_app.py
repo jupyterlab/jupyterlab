@@ -27,6 +27,7 @@ from jupyter_server.serverapp import ServerApp
 from jupyterlab_server import LabConfig
 from jupyterlab_server.process_app import ProcessApp
 import jupyterlab_server
+from jupyterlab.utils import deprecated
 
 
 HERE = osp.realpath(osp.dirname(__file__))
@@ -231,7 +232,7 @@ jest_flags['watchAll'] = (
 
 
 class JestApp(ProcessTestApp):
-    """A notebook app that runs a jest test."""
+    """DEPRECATED: A notebook app that runs a jest test."""
 
     default_url = Unicode('/lab')
     extension_url = '/lab'
@@ -257,6 +258,7 @@ class JestApp(ProcessTestApp):
 
     open_browser = False
 
+    @deprecated(removed_version=4)
     def get_command(self):
         """Get the command to run"""
         terminalsAvailable = self.settings['terminals_available']
@@ -315,7 +317,7 @@ class JestApp(ProcessTestApp):
 
 
 class KarmaTestApp(ProcessTestApp):
-    """A notebook app that runs the jupyterlab karma tests.
+    """DEPRECATED: A notebook app that runs the jupyterlab karma tests.
     """
 
     default_url = Unicode('/lab')
@@ -328,6 +330,7 @@ class KarmaTestApp(ProcessTestApp):
     karma_base_dir = Unicode('')
     karma_coverage_dir = Unicode('')
 
+    @deprecated(removed_version=4)
     def get_command(self):
         """Get the command to run."""
         terminalsAvailable = self.settings['terminals_available']
@@ -405,6 +408,7 @@ class RootedServerApp(ServerApp):
         return root_dir
 
 
+@deprecated(removed_version=4)
 def run_jest(jest_dir):
     """Run a jest test in the given base directory.
     """
@@ -422,6 +426,7 @@ def run_jest(jest_dir):
     RootedServerApp.launch_instance()
 
 
+@deprecated(removed_version=4)
 def run_karma(base_dir, coverage_dir=''):
     """Run a karma test in the given base directory.
     """

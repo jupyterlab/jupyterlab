@@ -15,6 +15,8 @@ import sys
 
 from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
+from tornado.websocket import WebSocketClosedError
+
 from notebook.notebookapp import flags, aliases
 from notebook.utils import urljoin, pathname2url
 from traitlets import Bool
@@ -33,7 +35,10 @@ test_flags['dev-mode'] = (
     {'BrowserApp': {'dev_mode': True}},
     "Start the app in dev mode."
 )
-
+test_flags['watch'] = (
+    {'BrowserApp': {'watch': True}},
+    "Start the app in watch mode."
+)
 
 test_aliases = dict(aliases)
 test_aliases['app-dir'] = 'BrowserApp.app_dir'
@@ -51,7 +56,7 @@ class LogErrorHandler(logging.Handler):
         # These occur when we forcibly close Websockets or
         # browser connections during the test.
         # https://github.com/tornadoweb/tornado/issues/2834
-        if hasattr(record, 'exc_info') and isinstance(record.exc_info[1], StreamClosedError):
+        if hasattr(record, 'exc_info') and not record.exc_info is None and isinstance(record.exc_info[1], (StreamClosedError, WebSocketClosedError)):
             return
         return super().filter(record)
 
@@ -92,6 +97,7 @@ async def run_test_async(app, func):
     if inspect.iscoroutinefunction(func):
         test = func(url)
     else:
+        app.log.info('Using thread pool executor to run test')
         loop = asyncio.get_event_loop()
         executor = ThreadPoolExecutor()
         task = loop.run_in_executor(executor, func, url)
@@ -157,6 +163,7 @@ class BrowserApp(LabApp):
     test_browser = True
 
     def initialize_settings(self):
+        self.kernel_manager.shutdown_wait_time = 1
         self.settings.setdefault('page_config_data', dict())
         self.settings['page_config_data']['browserTest'] = True
         self.settings['page_config_data']['buildAvailable'] = False

@@ -12,3 +12,4 @@ class MyWidget extends ReactWidget {
   }
 }
 const myWidget: Widget = new MyWidget();
+Widget.attach(myWidget, document.body);

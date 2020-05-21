@@ -320,7 +320,9 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * Resize the terminal based on computed geometry.
    */
   private _resizeTerminal() {
-    this._fitAddon.fit();
+    if (this._options.autoFit) {
+      this._fitAddon.fit();
+    }
     if (this._offsetWidth === -1) {
       this._offsetWidth = this.node.offsetWidth;
     }

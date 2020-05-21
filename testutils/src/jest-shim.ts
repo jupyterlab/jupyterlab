@@ -10,6 +10,7 @@ const fetchMod = ((window as any).fetch = require('node-fetch')); // tslint:disa
   /* no-op */
 };
 
+// HACK: Polyfill that allows CodeMirror to render in a JSDOM env.
 const createContextualFragment = (html: string) => {
   const div = document.createElement('div');
   div.innerHTML = html;
@@ -19,11 +20,6 @@ const createContextualFragment = (html: string) => {
 (global as any).Range.prototype.createContextualFragment = (html: string) =>
   createContextualFragment(html);
 
-window.focus = () => {
-  /* no-op */
-};
-
-// HACK: Polyfill that allows codemirror to render in a JSDOM env.
 (window as any).document.createRange = function createRange() {
   return {
     setEnd: () => {
@@ -37,9 +33,31 @@ window.focus = () => {
     createContextualFragment
   };
 };
+// end CodeMirror HACK
+
+window.focus = () => {
+  /* JSDom throws "Not Implemented" */
+};
 
 (window as any).document.elementFromPoint = (left: number, top: number) =>
   document.body;
+
+if (!window.hasOwnProperty('getSelection')) {
+  // Minimal getSelection() that supports a fake selection
+  (window as any).getSelection = function getSelection() {
+    return {
+      _selection: '',
+      selectAllChildren: () => {
+        this._selection = 'foo';
+      },
+      toString: () => {
+        const val = this._selection;
+        this._selection = '';
+        return val;
+      }
+    };
+  };
+}
 
 process.on('unhandledRejection', (error, promise) => {
   console.error('Unhandled promise rejection somewhere in tests');

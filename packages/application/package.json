@@ -29,9 +29,14 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
     "prepublishOnly": "npm run build",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -56,9 +61,13 @@
     "@lumino/widgets": "^1.11.1"
   },
   "devDependencies": {
+    "@jupyterlab/testutils": "^2.1.0",
+    "@types/jest": "^24.0.23",
+    "jest": "^25.2.3",
     "rimraf": "~3.0.0",
+    "ts-jest": "^25.2.1",
     "typedoc": "^0.15.4",
-    "typescript": "~3.7.3"
+    "typescript": "~3.9.2"
   },
   "publishConfig": {
     "access": "public"

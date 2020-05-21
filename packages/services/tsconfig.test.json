@@ -1,0 +1,42 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/**/*", "test/**/*"],
+  "references": [
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../../testutils"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../statedb"
+    }
+  ]
+}

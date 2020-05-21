@@ -1,0 +1,60 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
+  "references": [
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "../ui-components"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../../testutils"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../rendermime-interfaces"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "../ui-components"
+    }
+  ]
+}

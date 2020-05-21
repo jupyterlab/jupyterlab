@@ -26,7 +26,7 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "docs": "typedoc src",
     "prepublishOnly": "npm run build",
     "watch": "tsc -b --watch"
@@ -41,7 +41,7 @@
   "devDependencies": {
     "rimraf": "~3.0.0",
     "typedoc": "^0.15.4",
-    "typescript": "~3.7.3"
+    "typescript": "~3.9.2"
   },
   "publishConfig": {
     "access": "public"

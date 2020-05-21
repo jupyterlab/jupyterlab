@@ -30,7 +30,7 @@
     "build:packages": "cd packages/metapackage && jlpm run build",
     "build:packages:scope": "lerna run build",
     "build:src": "lerna run build --scope \"@jupyterlab/!(test-|example-|application-top)*\" --concurrency 1",
-    "build:test": "lerna run build --scope \"@jupyterlab/test-*\" --concurrency 1",
+    "build:storybook": "lerna run build:storybook --concurrency 1",
     "build:test:scope": "lerna run build --concurrency 1",
     "build:testutils": "cd testutils && jlpm run build",
     "build:utils": "cd buildutils && jlpm run build",
@@ -51,6 +51,7 @@
     "create:theme": "node buildutils/lib/create-theme.js",
     "deduplicate": "jlpm yarn-deduplicate -s fewer --fail",
     "docs": "lerna run docs",
+    "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --fix .",
     "eslint:check": "eslint --ext .js,.jsx,.ts,.tsx .",
     "get:dependency": "node buildutils/lib/get-dependency.js",
@@ -72,11 +73,7 @@
     "remove:sibling": "node buildutils/lib/remove-package.js",
     "test": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream",
     "test:all": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream --no-bail",
-    "test:chrome": "lerna run test:chrome --scope \"@jupyterlab/*\" --concurrency 1 --stream",
-    "test:chrome-headless": "lerna run test:chrome-headless --scope \"@jupyterlab/*\" --concurrency 1 --stream",
     "test:examples": "python examples/test_examples.py",
-    "test:firefox": "lerna run test:firefox --scope \"@jupyterlab/*\" --concurrency 1 --stream",
-    "test:ie": "lerna run test:ie --scope \"@jupyterlab/*\" --concurrency 1 --stream",
     "test:scope": "lerna run test --concurrency 1 --stream",
     "test:summary": "lerna run test --scope \"@jupyterlab/test-*\" --parallel --no-bail | grep -Ei '.* test.*(failed|passed|total|completed|skipped)' | sort",
     "update:dependency": "node buildutils/lib/update-dependency.js --lerna",
@@ -87,7 +84,7 @@
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
-      "pre-push": "jlpm run integrity"
+      "pre-push": "jlpm run integrity --force"
     }
   },
   "dependencies": {},
@@ -96,6 +93,7 @@
     "@typescript-eslint/parser": "^2.27.0",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.7.0",
+    "eslint-plugin-jest": "^23.8.2",
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-react": "^7.19.0",
     "husky": "^3.1.0",

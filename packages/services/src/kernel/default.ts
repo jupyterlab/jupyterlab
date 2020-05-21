@@ -547,7 +547,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
 
     if (reply.content.status !== 'ok') {
-      throw new Error('Kernel info reply errored');
+      this._info.reject('Kernel info reply errored');
+      return reply;
     }
 
     this._info.resolve(reply.content);

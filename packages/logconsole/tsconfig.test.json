@@ -1,0 +1,45 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "compilerOptions": {
+    "strictNullChecks": false
+  },
+  "include": ["src/*", "test/*"],
+  "references": [
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../outputarea"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../../testutils"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../nbformat"
+    },
+    {
+      "path": "../outputarea"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../services"
+    }
+  ]
+}
