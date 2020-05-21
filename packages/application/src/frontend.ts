@@ -135,7 +135,7 @@ export abstract class JupyterFrontEnd<
   }
 
   /**
-   * A signal that emits with the application form factor changes.
+   * A signal that emits when the application form factor changes.
    */
   get formatChanged(): ISignal<this, JupyterFrontEnd.Format> {
     return this._formatChanged;

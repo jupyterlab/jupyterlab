@@ -305,7 +305,7 @@ namespace Private {
   /**
    * Media query for mobile devices.
    */
-  const MEDIA_QUERY = 'only screen and (max-width: 760px)';
+  const MOBILE_QUERY = 'only screen and (max-width: 760px)';
 
   /**
    * Sets the `format` of a Jupyter front-end application.
@@ -313,6 +313,6 @@ namespace Private {
    * @param app The front-end application whose format is set.
    */
   export function setFormat(app: JupyterFrontEnd): void {
-    app.format = window.matchMedia(MEDIA_QUERY).matches ? 'mobile' : 'desktop';
+    app.format = window.matchMedia(MOBILE_QUERY).matches ? 'mobile' : 'desktop';
   }
 }
