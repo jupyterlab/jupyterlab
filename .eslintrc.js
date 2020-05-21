@@ -47,7 +47,8 @@ module.exports = {
     'prefer-const': 'off',
     'jest/no-jest-import': 'off',
     'jest/no-export': 'warn',
-    'jest/no-try-expect': 'warn'
+    'jest/no-try-expect': 'warn',
+    'jest/expect-expect': 'off'
   },
   settings: {
     react: {
