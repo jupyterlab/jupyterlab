@@ -106,11 +106,12 @@ export class MarkdownViewer extends Widget {
       case 'lineHeight':
         style.setProperty('line-height', value ? value.toString() : null);
         break;
-      case 'lineWidth':
+      case 'lineWidth': {
         const padding = value ? `calc(50% - ${(value as number) / 2}ch)` : null;
         style.setProperty('padding-left', padding);
         style.setProperty('padding-right', padding);
         break;
+      }
       case 'renderTimeout':
         if (this._monitor) {
           this._monitor.timeout = value as number;

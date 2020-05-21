@@ -295,7 +295,9 @@ export class Dialog<T> extends Widget {
         event.preventDefault();
         this.reject();
         break;
-      case 9: // Tab.
+      case 9: {
+        // Tab.
+
         // Handle a tab on the last button.
         const node = this._buttonNodes[this._buttons.length - 1];
         if (document.activeElement === node && !event.shiftKey) {
@@ -304,6 +306,7 @@ export class Dialog<T> extends Widget {
           this._first.focus();
         }
         break;
+      }
       case 13: // Enter.
         event.stopPropagation();
         event.preventDefault();

@@ -235,12 +235,13 @@ export class DocumentWidgetManager implements IDisposable {
       case 'close-request':
         void this.onClose(handler as Widget);
         return false;
-      case 'activate-request':
+      case 'activate-request': {
         const context = this.contextForWidget(handler as Widget);
         if (context) {
           this._activateRequested.emit(context.path);
         }
         break;
+      }
       default:
         break;
     }
