@@ -7,7 +7,8 @@ import 'jest';
 declare let define: any;
 
 if (typeof define !== 'function') {
-  const define = require('amdefine')(module); // eslint-disable-line
+  // @ts-expect-error
+  const define = require('amdefine')(module); // eslint-disable-line @typescript-eslint/no-unused-vars
 }
 
 module.exports = {
