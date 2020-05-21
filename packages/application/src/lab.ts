@@ -140,10 +140,10 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
    * @param event - The DOM event sent to the application.
    */
   handleEvent(event: Event): void {
+    super.handleEvent(event);
     if (event.type === 'resize') {
       void this._formatter.invoke();
     }
-    super.handleEvent(event);
   }
 
   /**
@@ -295,12 +295,16 @@ export namespace JupyterLab {
  */
 namespace Private {
   /**
+   * Media query for mobile devices.
+   */
+  const MEDIA_QUERY = 'only screen and (max-width: 760px)';
+
+  /**
    * Sets the `format` of a Jupyter front-end application.
    *
    * @param app The front-end application whose format is set.
    */
   export function setFormat(app: JupyterFrontEnd): void {
-    console.log('setting the format');
-    app.format = 'desktop';
+    app.format = window.matchMedia(MEDIA_QUERY).matches ? 'mobile' : 'desktop';
   }
 }

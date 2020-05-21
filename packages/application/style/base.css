@@ -47,6 +47,7 @@ body {
 @import './datagrid.css';
 @import './dockpanel.css';
 @import './menus.css';
+@import './mobile.css';
 @import './scrollbar.css';
 @import './tabs.css';
 @import './buttons.css';

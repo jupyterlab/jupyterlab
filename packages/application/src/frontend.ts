@@ -76,6 +76,8 @@ export abstract class JupyterFrontEnd<
       selector: 'body',
       rank: Infinity
     });
+
+    this.format = 'desktop';
   }
 
   /**
@@ -126,6 +128,7 @@ export abstract class JupyterFrontEnd<
   }
   set format(format: JupyterFrontEnd.Format) {
     if (this._format !== format) {
+      document.body.dataset['format'] = format;
       this._format = format;
       this._formatChanged.emit(format);
     }
@@ -211,7 +214,7 @@ export abstract class JupyterFrontEnd<
   }
 
   private _contextMenuEvent: MouseEvent;
-  private _format: JupyterFrontEnd.Format = 'desktop';
+  private _format: JupyterFrontEnd.Format;
   private _formatChanged = new Signal<this, JupyterFrontEnd.Format>(this);
 }
 
