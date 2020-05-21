@@ -58,14 +58,12 @@ const DEFAULT_RANK = 500;
 
 const ACTIVITY_CLASS = 'jp-Activity';
 
-/* tslint:disable */
 /**
  * The JupyterLab application shell token.
  */
 export const ILabShell = new Token<ILabShell>(
   '@jupyterlab/application:ILabShell'
 );
-/* tslint:enable */
 
 /**
  * The JupyterLab application shell interface.
@@ -379,7 +377,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Add any widgets created during single document mode, which have
     // subsequently been removed from the dock panel after the multiple document
     // layout has been restored. If the widget has add options cached for
-    // it (i.e., if it has been placed with respect to another widget),
+    // the widget (i.e., if it has been placed with respect to another widget),
     // then take that into account.
     widgets.forEach(widget => {
       if (!widget.parent) {

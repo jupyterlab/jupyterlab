@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-// @ts-ignore
+// eslint-disable-next-line no-undef
 __webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 import * as comm from './comm';

@@ -181,12 +181,10 @@ export namespace JupyterLab {
     paths?: Partial<JupyterFrontEnd.IPaths>;
   }
 
-  /* tslint:disable */
   /**
    * The layout restorer token.
    */
   export const IInfo = new Token<IInfo>('@jupyterlab/application:IInfo');
-  /* tslint:enable */
 
   /**
    * The information about a JupyterLab application.

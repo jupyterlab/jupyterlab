@@ -5,7 +5,7 @@
 |----------------------------------------------------------------------------*/
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-// @ts-ignore
+// eslint-disable-next-line no-undef
 __webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 // This has to be done after webpack public path is set to load the
