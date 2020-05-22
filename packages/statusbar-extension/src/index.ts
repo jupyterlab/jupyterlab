@@ -74,15 +74,6 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
       });
     }
 
-    // Hide the status bar in the mobile format.
-    app.formatChanged.connect((_, format) => {
-      if (format === 'mobile') {
-        statusBar.setHidden(true);
-      } else {
-        statusBar.setHidden(false);
-      }
-    });
-
     const category: string = 'Main Area';
     const command: string = 'statusbar:toggle';
 
@@ -108,13 +99,15 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
       mainMenu.viewMenu.addGroup([{ command }], 1);
     }
 
+    let ready: Promise<void>;
     if (settingRegistry) {
+      const loadSettings = settingRegistry.load(STATUSBAR_PLUGIN_ID);
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
         const visible = settings.get('visible').composite as boolean;
         statusBar.setHidden(!visible);
       };
 
-      Promise.all([settingRegistry.load(STATUSBAR_PLUGIN_ID), app.restored])
+      ready = Promise.all([loadSettings, app.restored])
         .then(([settings]) => {
           updateSettings(settings);
           settings.changed.connect(settings => {
@@ -124,7 +117,22 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
         .catch((reason: Error) => {
           console.error(reason.message);
         });
+    } else {
+      ready = app.restored;
     }
+
+    // Hide the status bar in the mobile format.
+    void ready.then(() => {
+      const handleFormat = () => {
+        if (app.format === 'mobile') {
+          statusBar.setHidden(true);
+        } else {
+          statusBar.setHidden(false);
+        }
+      };
+      app.formatChanged.connect(handleFormat);
+      handleFormat();
+    });
 
     return statusBar;
   },

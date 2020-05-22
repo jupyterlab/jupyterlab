@@ -86,17 +86,19 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
       }
     }
 
-    this.formatChanged.connect((_, format) => {
-      if (format === 'mobile') {
-        this.shell.mode = 'single-document';
-        this.shell.collapseLeft();
-        this.shell.collapseRight();
-        return;
-      }
-      this.shell.mode = 'multiple-document';
-      this.shell.expandLeft();
-    }, this);
-    Private.setFormat(this);
+    void this.restored.then(() => {
+      this.formatChanged.connect((_, format) => {
+        if (format === 'mobile') {
+          this.shell.mode = 'single-document';
+          this.shell.collapseLeft();
+          this.shell.collapseRight();
+          return;
+        }
+        this.shell.mode = 'multiple-document';
+        this.shell.expandLeft();
+      }, this);
+      Private.setFormat(this);
+    });
   }
 
   /**
