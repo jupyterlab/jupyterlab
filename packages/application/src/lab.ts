@@ -22,7 +22,7 @@ import { LabStatus } from './status';
 /**
  * JupyterLab is the main application class. It is instantiated once and shared.
  */
-export class JupyterLab extends JupyterFrontEnd<ILabShell, JupyterLab.Format> {
+export class JupyterLab extends JupyterFrontEnd<ILabShell> {
   /**
    * Construct a new JupyterLab object.
    */
@@ -204,11 +204,6 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell, JupyterLab.Format> {
  */
 export namespace JupyterLab {
   /**
-   * The JupyterLab application form factor, e.g., `desktop` or `mobile`.
-   */
-  export type Format = 'desktop' | 'mobile';
-
-  /**
    * The options used to initialize a JupyterLab object.
    */
   export interface IOptions
@@ -303,7 +298,9 @@ export namespace JupyterLab {
     /**
      * The default export.
      */
-    default: JupyterFrontEndPlugin<any> | JupyterFrontEndPlugin<any>[];
+    default:
+      | JupyterFrontEndPlugin<any, any, any>
+      | JupyterFrontEndPlugin<any, any, any>[];
   }
 }
 

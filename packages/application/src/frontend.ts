@@ -23,8 +23,16 @@ import { Widget } from '@lumino/widgets';
  * The type for all JupyterFrontEnd application plugins.
  *
  * @typeparam T - The type that the plugin `provides` upon being activated.
+ *
+ * @typeparam U - The type of the application shell.
+ *
+ * @typeparam V - The type that defines the application formats.
  */
-export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
+export type JupyterFrontEndPlugin<
+  T,
+  U extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell,
+  V extends string = 'desktop' | 'mobile'
+> = IPlugin<JupyterFrontEnd<U, V>, T>;
 
 /**
  * The base Jupyter front-end application class.
@@ -39,7 +47,7 @@ export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
  */
 export abstract class JupyterFrontEnd<
   T extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell,
-  U extends string = string
+  U extends string = 'desktop' | 'mobile'
 > extends Application<T> {
   /**
    * Construct a new JupyterFrontEnd object.
