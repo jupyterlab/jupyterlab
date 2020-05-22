@@ -31,12 +31,15 @@ export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
  *
  * @typeparam `T` - The `shell` type. Defaults to `JupyterFrontEnd.IShell`.
  *
+ * @typeparam `U` - The type for supported format names. Defaults to `string`.
+ *
  * #### Notes
  * This type is useful as a generic application against which front-end plugins
- * can be authored. It inherits from the phosphor `Application`.
+ * can be authored. It inherits from the Lumino `Application`.
  */
 export abstract class JupyterFrontEnd<
-  T extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell
+  T extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell,
+  U extends string = string
 > extends Application<T> {
   /**
    * Construct a new JupyterFrontEnd object.
@@ -76,8 +79,6 @@ export abstract class JupyterFrontEnd<
       selector: 'body',
       rank: Infinity
     });
-
-    this.format = 'desktop';
   }
 
   /**
@@ -123,10 +124,10 @@ export abstract class JupyterFrontEnd<
   /**
    * The application form factor, e.g., `desktop` or `mobile`.
    */
-  get format(): JupyterFrontEnd.Format {
+  get format(): U {
     return this._format;
   }
-  set format(format: JupyterFrontEnd.Format) {
+  set format(format: U) {
     if (this._format !== format) {
       this._format = format;
       document.body.dataset['format'] = format;
@@ -137,7 +138,7 @@ export abstract class JupyterFrontEnd<
   /**
    * A signal that emits when the application form factor changes.
    */
-  get formatChanged(): ISignal<this, JupyterFrontEnd.Format> {
+  get formatChanged(): ISignal<this, U> {
     return this._formatChanged;
   }
 
@@ -214,19 +215,14 @@ export abstract class JupyterFrontEnd<
   }
 
   private _contextMenuEvent: MouseEvent;
-  private _format: JupyterFrontEnd.Format;
-  private _formatChanged = new Signal<this, JupyterFrontEnd.Format>(this);
+  private _format: U;
+  private _formatChanged = new Signal<this, U>(this);
 }
 
 /**
  * The namespace for `JupyterFrontEnd` class statics.
  */
 export namespace JupyterFrontEnd {
-  /**
-   * The application form factor, e.g., `desktop` or `mobile`.
-   */
-  export type Format = 'desktop' | 'mobile';
-
   /**
    * The options used to initialize a JupyterFrontEnd.
    */
