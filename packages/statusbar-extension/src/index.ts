@@ -99,7 +99,7 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
       mainMenu.viewMenu.addGroup([{ command }], 1);
     }
 
-    let ready: Promise<void>;
+    let ready = app.restored;
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(STATUSBAR_PLUGIN_ID);
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
@@ -117,8 +117,6 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
         .catch((reason: Error) => {
           console.error(reason.message);
         });
-    } else {
-      ready = app.restored;
     }
 
     // Hide the status bar in the mobile format.
