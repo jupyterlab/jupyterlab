@@ -1,3 +1,6 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
 import {
@@ -18,6 +21,7 @@ import { IDebugger } from './tokens';
 export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   constructor(options: EditorFinder.IOptions) {
     this._shell = options.shell;
+    this._debuggerService = options.debuggerService;
     this._notebookTracker = options.notebookTracker;
     this._consoleTracker = options.consoleTracker;
     this._editorTracker = options.editorTracker;
@@ -203,6 +207,11 @@ export namespace EditorFinder {
    * The options used to initialize a EditorFinder object.
    */
   export interface IOptions {
+    /**
+     * The debugger service.
+     */
+    debuggerService: IDebugger;
+
     /**
      * The editor services.
      */

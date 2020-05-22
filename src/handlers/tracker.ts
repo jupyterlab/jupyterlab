@@ -207,7 +207,7 @@ export namespace TrackerHandler {
     /**
      * An optional editor finder
      */
-    editorFinder?: IDebuggerEditorFinder;
+    editorFinder: IDebuggerEditorFinder;
   }
 
   // TODO: move the interface and token below to token.ts?

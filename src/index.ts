@@ -243,19 +243,17 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 /**
  * A plugin that tracks notebook, console and file editors used for debugging.
  */
-const tracker: JupyterFrontEndPlugin<TrackerHandler> = {
+const tracker: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:tracker',
   autoStart: true,
-  provides: IDebuggerEditorFinder,
-  requires: [IDebugger, IEditorServices],
-  optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
+  requires: [IDebugger, IEditorServices, IDebuggerEditorFinder],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorServices: IEditorServices,
     editorFinder: IDebuggerEditorFinder
   ) => {
-    return new TrackerHandler({
+    new TrackerHandler({
       shell: app.shell,
       editorServices,
       debuggerService: debug,
@@ -267,26 +265,29 @@ const tracker: JupyterFrontEndPlugin<TrackerHandler> = {
 /**
  * A plugin that tracks editors, console and file editors used for debugging.
  */
-const finder: JupyterFrontEndPlugin<EditorFinder> = {
-  id: '@jupyterlab/debugger:tracker',
+const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
+  id: '@jupyterlab/debugger:editor-finder',
   autoStart: true,
   provides: IDebuggerEditorFinder,
-  requires: [IEditorServices],
+  requires: [IDebugger, IEditorServices],
   optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
   activate: (
     app: JupyterFrontEnd,
+    debuggerService: IDebugger,
     editorServices: IEditorServices,
-    notebookTracker: INotebookTracker,
-    consoleTracker: IConsoleTracker,
-    editorTracker: IEditorTracker
-  ) =>
-    new EditorFinder({
+    notebookTracker: INotebookTracker | null,
+    consoleTracker: IConsoleTracker | null,
+    editorTracker: IEditorTracker | null
+  ): IDebuggerEditorFinder => {
+    return new EditorFinder({
       shell: app.shell,
+      debuggerService,
       editorServices,
       notebookTracker,
       consoleTracker,
       editorTracker
-    })
+    });
+  }
 };
 /*
  * A plugin to open detailed views for variables.
