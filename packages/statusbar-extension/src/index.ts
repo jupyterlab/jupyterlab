@@ -74,6 +74,15 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
       });
     }
 
+    // Hide the status bar in the mobile format.
+    app.formatChanged.connect((_, format) => {
+      if (format === 'mobile') {
+        statusBar.setHidden(true);
+      } else {
+        statusBar.setHidden(false);
+      }
+    });
+
     const category: string = 'Main Area';
     const command: string = 'statusbar:toggle';
 
