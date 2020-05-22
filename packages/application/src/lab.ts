@@ -9,7 +9,7 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Token } from '@lumino/coreutils';
 
-import { Debouncer } from '@lumino/polling';
+import { Throttler } from '@lumino/polling';
 
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
 
@@ -93,6 +93,8 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
         this.shell.collapseRight();
         return;
       }
+      this.shell.mode = 'multiple-document';
+      this.shell.expandLeft();
     }, this);
     Private.setFormat(this);
   }
@@ -188,7 +190,7 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
     });
   }
 
-  private _formatter = new Debouncer(() => {
+  private _formatter = new Throttler(() => {
     Private.setFormat(this);
   }, 250);
   private _info: JupyterLab.IInfo;
