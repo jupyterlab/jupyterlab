@@ -6,6 +6,13 @@ JupyterLab Changelog
 `v2.1.x <https://github.com/jupyterlab/jupyterlab/milestone/55>`__
 ------------------------------------------------------------------
 
+v2.1.3
+^^^^^^
+* Fix Jupyterlab manager extension handling of missing package metadata (`#8463 <https://github.com/jupyterlab/jupyterlab/pull/8463>`__)
+* Python 3.10 compatibility (`#8446 <https://github.com/jupyterlab/jupyterlab/pull/8446>`__)
+* Fix extension compatibility checks (`#8434 <https://github.com/jupyterlab/jupyterlab/pull/8434>`__)
+
+
 v2.1.2
 ^^^^^^
 * Fix icon sidebar height for third party extensions (`#8333 <https://github.com/jupyterlab/jupyterlab/pull/8333>`__)
