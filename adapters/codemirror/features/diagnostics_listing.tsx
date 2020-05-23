@@ -239,7 +239,14 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
     new Column({
       name: 'Cell',
       render_cell: row => <td key={5}>{row.cell_number}</td>,
-      sort: (a, b) => (a.cell_number > b.cell_number ? 1 : -1),
+      sort: (a, b) =>
+        a.cell_number > b.cell_number
+          ? 1
+          : a.data.range.start.line > b.data.range.start.line
+          ? 1
+          : a.data.range.start.ch > b.data.range.start.ch
+          ? 1
+          : -1,
       is_available: context => context.editor.has_cells
     }),
     new Column({
