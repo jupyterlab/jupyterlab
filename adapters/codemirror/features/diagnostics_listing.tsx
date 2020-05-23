@@ -243,15 +243,18 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       is_available: context => context.editor.has_cells
     }),
     new Column({
-      name: 'Line',
-      render_cell: row => <td key={6}>{row.data.range.start.line}</td>,
+      name: 'Line:Ch',
+      render_cell: row => (
+        <td key={6}>
+          {row.data.range.start.line}:{row.data.range.start.ch}
+        </td>
+      ),
       sort: (a, b) =>
-        a.data.range.start.line > b.data.range.start.line ? 1 : -1
-    }),
-    new Column({
-      name: 'Ch',
-      render_cell: row => <td key={7}>{row.data.range.start.line}</td>,
-      sort: (a, b) => (a.data.range.start.ch > b.data.range.start.ch ? 1 : -1)
+        a.data.range.start.line > b.data.range.start.line
+          ? 1
+          : a.data.range.start.ch > b.data.range.start.ch
+          ? 1
+          : -1
     })
   ];
 
