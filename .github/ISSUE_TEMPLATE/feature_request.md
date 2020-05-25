@@ -11,7 +11,6 @@ Welcome! Thanks for thinking of a way to improve JupyterLab. If this solves a pr
 Before creating a new feature request please search the issues for relevant feature requests.
 -->
 
-
 ### Problem
 
 <!-- Provide a clear and concise description of what problem this feature will solve. For example:
@@ -33,4 +32,3 @@ Before creating a new feature request please search the issues for relevant feat
 
 * Another project [...] solved this by [...]
 -->
-
