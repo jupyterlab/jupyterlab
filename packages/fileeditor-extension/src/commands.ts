@@ -13,6 +13,8 @@ import {
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+
 import { IConsoleTracker } from '@jupyterlab/console';
 
 import { MarkdownCodeBlocks, PathExt } from '@jupyterlab/coreutils';
@@ -81,6 +83,8 @@ export namespace CommandIDs {
   export const copy = 'fileeditor:copy';
 
   export const paste = 'fileeditor:paste';
+
+  export const selectAll = 'fileeditor:select-all';
 }
 
 /**
@@ -209,6 +213,8 @@ export namespace Commands {
     addCopyCommand(commands, tracker, isEnabled);
 
     addPasteCommand(commands, tracker, isEnabled);
+
+    addSelectAllCommand(commands, tracker, isEnabled);
   }
 
   /**
@@ -583,10 +589,9 @@ export namespace Commands {
         // Get the selected code from the editor.
         const start = editor.getOffsetAt(selectionObj.start);
         const end = editor.getOffsetAt(selectionObj.end);
-        const code = editor.model.value.text.substring(start, end);
+        const text = editor.model.value.text.substring(start, end);
 
-        // Copy code selection to system clipboard
-        Clipboard.copyToSystem(code);
+        Clipboard.copyToSystem(text);
       },
       isEnabled: () => {
         if (!isEnabled()) {
@@ -641,6 +646,32 @@ export namespace Commands {
       },
       icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
       label: 'Paste'
+    });
+  }
+
+  /**
+   * Add select all command
+   */
+  export function addSelectAllCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.selectAll, {
+      execute: () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        const editor = widget.editor as CodeMirrorEditor;
+        editor.execCommand('selectAll');
+      },
+      isEnabled: () => {
+        return Boolean(isEnabled() && tracker.currentWidget?.content);
+      },
+      label: 'Select All'
     });
   }
 
@@ -1022,6 +1053,7 @@ export namespace Commands {
     addMarkdownPreviewToContextMenu(app);
     addCopyCommandToContextMenu(app);
     addPasteCommandToContextMenu(app);
+    addSelectAllCommandToContextMenu(app);
   }
 
   /**
@@ -1063,6 +1095,17 @@ export namespace Commands {
       command: CommandIDs.paste,
       selector: '.jp-FileEditor',
       rank: 2
+    });
+  }
+
+  /**
+   * Add a Select All item to the File Editor context menu
+   */
+  export function addSelectAllCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.selectAll,
+      selector: '.jp-FileEditor',
+      rank: 3
     });
   }
 }
