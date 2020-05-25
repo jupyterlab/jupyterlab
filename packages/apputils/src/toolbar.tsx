@@ -178,6 +178,7 @@ export class Toolbar<T extends Widget = Widget> extends Widget {
   constructor() {
     super();
     this.addClass(TOOLBAR_CLASS);
+    this.addClass('jp-scrollbar-tiny');
     this.layout = new ToolbarLayout();
   }
 
@@ -735,14 +736,18 @@ namespace Private {
           container: this.node,
           title: `Kernel ${Text.titleCase(status)}`,
 
-          stylesheet: 'toolbarButton'
+          stylesheet: 'toolbarButton',
+          alignSelf: 'normal',
+          height: '24px'
         });
       } else {
         circleEmptyIcon.element({
           container: this.node,
           title: `Kernel ${Text.titleCase(status)}`,
 
-          stylesheet: 'toolbarButton'
+          stylesheet: 'toolbarButton',
+          alignSelf: 'normal',
+          height: '24px'
         });
       }
     }
