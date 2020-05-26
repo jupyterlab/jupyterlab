@@ -21,7 +21,7 @@ import { IDebugger } from './tokens';
 export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   constructor(options: EditorFinder.IOptions) {
     this._shell = options.shell;
-    this._debuggerService = options.debuggerService;
+    this._service = options.service;
     this._notebookTracker = options.notebookTracker;
     this._consoleTracker = options.consoleTracker;
     this._editorTracker = options.editorTracker;
@@ -90,7 +90,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
         const code = cell.model.value.text;
-        const cellId = this._debuggerService.getCodeId(code);
+        const cellId = this._service.getCodeId(code);
         if (source !== cellId) {
           return;
         }
@@ -124,7 +124,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       const cells = consoleWidget.console.cells;
       each(cells, cell => {
         const code = cell.model.value.text;
-        const codeId = this._debuggerService.getCodeId(code);
+        const codeId = this._service.getCodeId(code);
         if (source !== codeId) {
           return;
         }
@@ -158,7 +158,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._debuggerService.getCodeId(code);
+      const codeId = this._service.getCodeId(code);
       if (source !== codeId) {
         return;
       }
@@ -181,7 +181,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._debuggerService.getCodeId(code);
+      const codeId = this._service.getCodeId(code);
       if (widget.title.caption !== source && source !== codeId) {
         return;
       }
@@ -190,7 +190,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
     });
     return editors;
   }
-  private _debuggerService: IDebugger;
+  private _service: IDebugger;
   private _shell: JupyterFrontEnd.IShell;
   private _readOnlyEditorTracker: WidgetTracker<
     MainAreaWidget<CodeEditorWrapper>
@@ -208,9 +208,9 @@ export namespace EditorFinder {
    */
   export interface IOptions {
     /**
-     * The debugger service.
+     * An optional editor finder for consoles.
      */
-    debuggerService: IDebugger;
+    consoleTracker?: IConsoleTracker;
 
     /**
      * The editor services.
@@ -218,9 +218,9 @@ export namespace EditorFinder {
     editorServices: IEditorServices;
 
     /**
-     * The application shell.
+     * An optional editor finder for file editors.
      */
-    shell: JupyterFrontEnd.IShell;
+    editorTracker?: IEditorTracker;
 
     /**
      * An optional editor finder for notebooks.
@@ -228,14 +228,14 @@ export namespace EditorFinder {
     notebookTracker?: INotebookTracker;
 
     /**
-     * An optional editor finder for consoles.
+     * The debugger service.
      */
-    consoleTracker?: IConsoleTracker;
+    service: IDebugger;
 
     /**
-     * An optional editor finder for file editors.
+     * The application shell.
      */
-    editorTracker?: IEditorTracker;
+    shell: JupyterFrontEnd.IShell;
   }
   /**
    * A token for a editor finder handler find method plugin

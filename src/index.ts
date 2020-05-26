@@ -202,17 +202,17 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
-    debug: IDebugger,
+    service: IDebugger,
     notebookTracker: INotebookTracker,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'notebook',
       shell: app.shell,
-      service: debug
+      service
     });
-    debug.model.disposed.connect(() => {
-      handler.disposeAll(debug);
+    service.model.disposed.connect(() => {
+      handler.disposeAll(service);
     });
     const updateHandlerAndCommands = async (widget: NotebookPanel) => {
       const { sessionContext } = widget;
@@ -262,6 +262,13 @@ const tracker: JupyterFrontEndPlugin<void> = {
   }
 };
 
+const service: JupyterFrontEndPlugin<IDebugger> = {
+  id: '@jupyterlab/debugger:service',
+  autoStart: true,
+  provides: IDebugger,
+  activate: () => new DebuggerService()
+};
+
 /**
  * A plugin that tracks editors, console and file editors used for debugging.
  */
@@ -273,7 +280,7 @@ const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
   optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
   activate: (
     app: JupyterFrontEnd,
-    debuggerService: IDebugger,
+    service: IDebugger,
     editorServices: IEditorServices,
     notebookTracker: INotebookTracker | null,
     consoleTracker: IConsoleTracker | null,
@@ -281,7 +288,7 @@ const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
   ): IDebuggerEditorFinder => {
     return new EditorFinder({
       shell: app.shell,
-      debuggerService,
+      service,
       editorServices,
       notebookTracker,
       consoleTracker,
@@ -368,25 +375,25 @@ const variables: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin providing a tracker code debuggers.
+ * The main debuger UI plugin.
  */
-const main: JupyterFrontEndPlugin<IDebugger> = {
+const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:main',
-  requires: [IEditorServices],
+  requires: [IDebugger, IEditorServices, IDebuggerEditorFinder],
   optional: [ILayoutRestorer, ICommandPalette, ISettingRegistry, IThemeManager],
-  provides: IDebugger,
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
+    service: IDebugger,
     editorServices: IEditorServices,
+    editorFinder: IDebuggerEditorFinder,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null,
     settingRegistry: ISettingRegistry | null,
     themeManager: IThemeManager | null
-  ): Promise<IDebugger> => {
+  ): Promise<void> => {
     const { commands, shell } = app;
-
-    const service = new DebuggerService();
+    console.log('editor finder', editorFinder);
 
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
@@ -521,8 +528,6 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         palette.addItem({ command, category });
       });
     }
-
-    return service;
   }
 };
 
@@ -530,6 +535,7 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  service,
   consoles,
   files,
   notebooks,
