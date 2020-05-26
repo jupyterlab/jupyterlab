@@ -11,8 +11,7 @@ import {
 import { IConsoleTracker } from '@jupyterlab/console';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { chain, each } from '@lumino/algorithm';
-import { IIterator } from '@lumino/algorithm/lib/iter';
+import { chain, each, IIterator } from '@lumino/algorithm';
 import { Token } from '@lumino/coreutils';
 import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
