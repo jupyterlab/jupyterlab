@@ -131,7 +131,8 @@ async def run_test_async(app, func):
         self.log.error(str(e))
         result = 1
     finally:
-        sys.exit(result)
+        time.sleep(2)
+        os._exit(result)
 
 
 async def run_async_process(cmd, **kwargs):
