@@ -17,7 +17,14 @@ import { IDisposable } from '@lumino/disposable';
 import { Signal } from '@lumino/signaling';
 import { IDebugger } from './tokens';
 
-export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
+/**
+  * A class to find instances of code editors across notebook, console and files widgets
+  */
+ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
+  /**
+   * Instantiate a new EditorFinder.
+   * @param options The instantiation options for a EditorFinder.
+   */
   constructor(options: EditorFinder.IOptions) {
     this._shell = options.shell;
     this._service = options.service;
