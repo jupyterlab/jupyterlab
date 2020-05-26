@@ -40,6 +40,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   markdownIcon,
   textEditorIcon,
+  cutIcon,
   copyIcon,
   pasteIcon
 } from '@jupyterlab/ui-components';
@@ -79,6 +80,8 @@ export namespace CommandIDs {
   export const runAllCode = 'fileeditor:run-all';
 
   export const markdownPreview = 'fileeditor:markdown-preview';
+
+  export const cut = 'fileeditor:cut';
 
   export const copy = 'fileeditor:copy';
 
@@ -209,6 +212,8 @@ export namespace Commands {
 
     // Add a command for creating a new Markdown file.
     addCreateNewMarkdownCommand(commands, browserFactory);
+
+    addCutCommand(commands, tracker, isEnabled);
 
     addCopyCommand(commands, tracker, isEnabled);
 
@@ -564,6 +569,56 @@ export namespace Commands {
         );
       },
       label: 'Show Markdown Preview'
+    });
+  }
+
+  /**
+   * Add cut command
+   */
+  export function addCutCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.cut, {
+      execute: () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        const editor = widget.editor;
+        const selectionObj = widget.editor.getSelection();
+
+        // Get the selected code from the editor.
+        const start = editor.getOffsetAt(selectionObj.start);
+        const end = editor.getOffsetAt(selectionObj.end);
+        const text = editor.model.value.text.substring(start, end);
+
+        Clipboard.copyToSystem(text);
+        editor.replaceSelection && editor.replaceSelection('');
+      },
+      isEnabled: () => {
+        if (!isEnabled()) {
+          return false;
+        }
+
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return false;
+        }
+
+        // Enable command if there is a text selection in the editor
+        const selectionObj = widget.editor.getSelection();
+        const { start, end } = selectionObj;
+        const selected = start.column !== end.column || start.line !== end.line;
+
+        return selected;
+      },
+      icon: cutIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: 'Cut'
     });
   }
 
@@ -1051,6 +1106,7 @@ export namespace Commands {
   export function addContextMenuItems(app: JupyterFrontEnd) {
     addCreateConsoleToContextMenu(app);
     addMarkdownPreviewToContextMenu(app);
+    addCutCommandToContextMenu(app);
     addCopyCommandToContextMenu(app);
     addPasteCommandToContextMenu(app);
     addSelectAllCommandToContextMenu(app);
@@ -1077,13 +1133,24 @@ export namespace Commands {
   }
 
   /**
+   * Add a Cut item to the File Editor context menu
+   */
+  export function addCutCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.cut,
+      selector: '.jp-FileEditor',
+      rank: 1
+    });
+  }
+
+  /**
    * Add a Copy item to the File Editor context menu
    */
   export function addCopyCommandToContextMenu(app: JupyterFrontEnd) {
     app.contextMenu.addItem({
       command: CommandIDs.copy,
       selector: '.jp-FileEditor',
-      rank: 1
+      rank: 2
     });
   }
 
@@ -1094,7 +1161,7 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.paste,
       selector: '.jp-FileEditor',
-      rank: 2
+      rank: 3
     });
   }
 
@@ -1105,7 +1172,7 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.selectAll,
       selector: '.jp-FileEditor',
-      rank: 3
+      rank: 4
     });
   }
 }
