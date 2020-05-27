@@ -57,12 +57,16 @@ module.exports = {
         }
       }
     ],
+    'jsdoc/require-description': 1,
     'jsdoc/require-param-type': 'off',
     'jsdoc/require-property-type': 'off',
     'jsdoc/require-returns-type': 'off',
     'jsdoc/require-returns': 'off'
   },
   settings: {
+    jsdoc: {
+      mode: 'typescript'
+    },
     react: {
       version: 'detect'
     }
