@@ -52,7 +52,8 @@ module.exports = {
       {
         require: {
           FunctionExpression: true,
-          ClassDeclaration: true
+          ClassDeclaration: true,
+          MethodDefinition: true
         }
       }
     ],
