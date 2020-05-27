@@ -8,3 +8,4 @@ dependencies:
 - notebook=6
 - ptvsd
 - xeus-python=0.7.1
+- xeus=0.23.14
