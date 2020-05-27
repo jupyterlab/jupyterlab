@@ -2,25 +2,35 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
+
 import { MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+
 import {
   CodeEditor,
   CodeEditorWrapper,
   IEditorServices
 } from '@jupyterlab/codeeditor';
+
 import { IConsoleTracker } from '@jupyterlab/console';
+
 import { IEditorTracker } from '@jupyterlab/fileeditor';
+
 import { INotebookTracker } from '@jupyterlab/notebook';
+
 import { chain, each, IIterator } from '@lumino/algorithm';
+
 import { Token } from '@lumino/coreutils';
+
 import { IDisposable } from '@lumino/disposable';
+
 import { Signal } from '@lumino/signaling';
+
 import { IDebugger } from './tokens';
 
 /**
-  * A class to find instances of code editors across notebook, console and files widgets
-  */
- export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
+ * A class to find instances of code editors across notebook, console and files widgets
+ */
+export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   /**
    * Instantiate a new EditorFinder.
    * @param options The instantiation options for a EditorFinder.
