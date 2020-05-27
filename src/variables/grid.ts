@@ -35,7 +35,7 @@ export class VariablesBodyGrid extends Panel {
     this._grid.addClass('jp-DebuggerVariables-grid');
     this._model = model;
     this._grid.dataModel.setData(scopes ?? []);
-    const updated = (model: VariablesModel) => {
+    const updated = (model: VariablesModel): void => {
       this._grid.dataModel.setData(model.scopes);
     };
     this._model.changed.connect(updated, this);
@@ -172,10 +172,10 @@ export class VariableDataGridModel extends DataModel {
     }
 
     if (region === 'column-header') {
-      return column === 1 ? `Value` : `Type`;
+      return column === 1 ? 'Value' : 'Type';
     }
     if (region === 'corner-header') {
-      return `Name`;
+      return 'Name';
     }
 
     return column === 1 ? this._data.value[row] : this._data.type[row];
@@ -186,7 +186,7 @@ export class VariableDataGridModel extends DataModel {
    *
    * @param row The row in the datagrid.
    */
-  getVariableReference(row: number) {
+  getVariableReference(row: number): number {
     return this._data.variablesReference[row];
   }
 
@@ -195,7 +195,7 @@ export class VariableDataGridModel extends DataModel {
    *
    * @param row The row in the datagrid.
    */
-  getVariableName(row: number) {
+  getVariableName(row: number): string {
     return this._data.name[row];
   }
 
@@ -204,7 +204,7 @@ export class VariableDataGridModel extends DataModel {
    *
    * @param scopes The scopes.
    */
-  setData(scopes: VariablesModel.IScope[]) {
+  setData(scopes: VariablesModel.IScope[]): void {
     this._clearData();
     this.emitChanged({
       type: 'model-reset',
@@ -232,7 +232,7 @@ export class VariableDataGridModel extends DataModel {
   /**
    * Clear all the data in the datagrid.
    */
-  private _clearData() {
+  private _clearData(): void {
     this._data = {
       name: [],
       type: [],
@@ -312,7 +312,8 @@ namespace Private {
       headerBackgroundColor: '#424242',
       gridLineColor: 'rgba(235, 235, 235, 0.15)',
       headerGridLineColor: 'rgba(235, 235, 235, 0.25)',
-      rowBackgroundColor: (i: number) => (i % 2 === 0 ? '#212121' : '#111111'),
+      rowBackgroundColor: (i: number): string =>
+        i % 2 === 0 ? '#212121' : '#111111',
       selectionFillColor: '#2196f32e'
     },
     textRender: new TextRenderer({
@@ -334,7 +335,8 @@ namespace Private {
       headerBackgroundColor: '#eeeeee',
       gridLineColor: 'rgba(20, 20, 20, 0.15)',
       headerGridLineColor: 'rgba(20, 20, 20, 0.25)',
-      rowBackgroundColor: (i: number) => (i % 2 === 0 ? 'white' : '#f5f5f5'),
+      rowBackgroundColor: (i: number): string =>
+        i % 2 === 0 ? 'white' : '#f5f5f5',
       selectionFillColor: '#2196f32e'
     },
     textRender: new TextRenderer({
@@ -363,7 +365,7 @@ namespace Private {
      * @param grid The datagrid clicked.
      * @param event The mouse event.
      */
-    onMouseDoubleClick(grid: DataGrid, event: MouseEvent) {
+    onMouseDoubleClick(grid: DataGrid, event: MouseEvent): void {
       const hit = grid.hitTest(event.clientX, event.clientY);
       this._doubleClicked.emit(hit);
     }

@@ -219,7 +219,7 @@ export namespace IDebugger {
   /**
    * The model of a debugger session.
    */
-  export interface IModel extends IObservableDisposable {}
+  export type IModel = IObservableDisposable;
 
   export namespace ISession {
     /**

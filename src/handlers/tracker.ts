@@ -85,7 +85,7 @@ export class TrackerHandler implements IDisposable {
   /**
    * Handle when the debug model changes.
    */
-  private _onModelChanged() {
+  private _onModelChanged(): void {
     this._debuggerModel = this._debuggerService.model as DebuggerModel;
     if (!this._debuggerModel) {
       return;
@@ -119,7 +119,7 @@ export class TrackerHandler implements IDisposable {
   private _onCurrentFrameChanged(
     _: CallstackModel,
     frame: CallstackModel.IFrame
-  ) {
+  ): void {
     const debugSessionPath = this._debuggerService.session?.connection?.path;
     const source = frame?.source.path ?? null;
     each(this._editorFinder.find(debugSessionPath, source), editor => {
@@ -134,7 +134,10 @@ export class TrackerHandler implements IDisposable {
    * @param _ The sender.
    * @param source The source to open.
    */
-  private _onCurrentSourceOpened(_: SourcesModel, source: IDebugger.ISource) {
+  private _onCurrentSourceOpened(
+    _: SourcesModel,
+    source: IDebugger.ISource
+  ): void {
     if (!source) {
       return;
     }
@@ -215,8 +218,9 @@ export namespace TrackerHandler {
   /**
    * A class that tracks read only editor widgets used for debugging.
    */
-  export interface IDebuggerReadOnlyEditorTracker
-    extends IWidgetTracker<MainAreaWidget<CodeEditorWrapper>> {}
+  export type IDebuggerReadOnlyEditorTracker = IWidgetTracker<
+    MainAreaWidget<CodeEditorWrapper>
+  >;
 
   /**
    * The Debugger Read Only Editor tracker token.

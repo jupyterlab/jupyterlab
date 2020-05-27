@@ -315,13 +315,13 @@ export class DebuggerService implements IDebugger, IDisposable {
     code: string,
     breakpoints: IDebugger.IBreakpoint[],
     path?: string
-  ) {
+  ): Promise<void> {
     if (!this.session.isStarted) {
       return;
     }
     if (!path) {
-      const dumpedCell = await this.dumpCell(code);
-      path = dumpedCell.sourcePath;
+      const dumpedCell = await this._dumpCell(code);
+      path = dumpedCell.body.sourcePath;
     }
     const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
     const reply = await this._setBreakpoints(sourceBreakpoints, path);
@@ -344,7 +344,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Clear all the breakpoints for the current session.
    */
-  async clearBreakpoints() {
+  async clearBreakpoints(): Promise<void> {
     if (!this.session.isStarted) {
       return;
     }
@@ -363,21 +363,12 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Retrieve the content of a source file.
    * @param source The source object containing the path to the file.
    */
-  async getSource(source: DebugProtocol.Source) {
+  async getSource(source: DebugProtocol.Source): Promise<IDebugger.ISource> {
     const reply = await this.session.sendRequest('source', {
       source,
       sourceReference: source.sourceReference
     });
     return { ...reply.body, path: source.path };
-  }
-
-  /**
-   * Dump the content of a cell.
-   * @param code The source code to dump.
-   */
-  async dumpCell(code: string) {
-    const reply = await this.session.sendRequest('dumpCell', { code });
-    return reply.body;
   }
 
   /**
@@ -395,9 +386,19 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Dump the content of a cell.
+   * @param code The source code to dump.
+   */
+  private async _dumpCell(
+    code: string
+  ): Promise<IDebugger.ISession.IDumpCellResponse> {
+    return this.session.sendRequest('dumpCell', { code });
+  }
+
+  /**
    * Get all the frames from the kernel.
    */
-  private async _getAllFrames() {
+  private async _getAllFrames(): Promise<void> {
     this._model.callstack.currentFrameChanged.connect(
       this._onChangeFrame,
       this
@@ -417,7 +418,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private async _onChangeFrame(
     _: CallstackModel,
     frame: CallstackModel.IFrame
-  ) {
+  ): Promise<void> {
     if (!frame) {
       return;
     }
@@ -430,7 +431,10 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Handle a variable expanded event and request variables from the kernel.
    */
-  private async _onVariableExpanded(_: any, variable: DebugProtocol.Variable) {
+  private async _onVariableExpanded(
+    _: any,
+    variable: DebugProtocol.Variable
+  ): Promise<DebugProtocol.Variable[]> {
     const reply = await this.session.sendRequest('variables', {
       variablesReference: variable.variablesReference
     });
@@ -455,7 +459,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Get all the frames for the given thread id.
    * @param threadId The thread id.
    */
-  private async _getFrames(threadId: number) {
+  private async _getFrames(
+    threadId: number
+  ): Promise<DebugProtocol.StackFrame[]> {
     const reply = await this.session.sendRequest('stackTrace', {
       threadId
     });
@@ -467,7 +473,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Get all the scopes for the given frame.
    * @param frame The frame.
    */
-  private async _getScopes(frame: DebugProtocol.StackFrame) {
+  private async _getScopes(
+    frame: DebugProtocol.StackFrame
+  ): Promise<DebugProtocol.Scope[]> {
     if (!frame) {
       return;
     }
@@ -481,7 +489,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Get the variables for a given scope.
    * @param scopes The scope.
    */
-  private async _getVariables(scope: DebugProtocol.Scope) {
+  private async _getVariables(
+    scope: DebugProtocol.Scope
+  ): Promise<DebugProtocol.Variable[]> {
     if (!scope) {
       return;
     }
@@ -499,7 +509,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private async _setBreakpoints(
     breakpoints: DebugProtocol.SourceBreakpoint[],
     path: string
-  ) {
+  ): Promise<DebugProtocol.SetBreakpointsResponse> {
     return await this.session.sendRequest('setBreakpoints', {
       breakpoints: breakpoints,
       source: { path },
@@ -532,7 +542,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Clear the current model.
    */
-  private _clearModel() {
+  private _clearModel(): void {
     this._model.callstack.frames = [];
     this._model.variables.scopes = [];
   }
@@ -540,7 +550,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Clear the signals set on the model.
    */
-  private _clearSignals() {
+  private _clearSignals(): void {
     this._model.callstack.currentFrameChanged.disconnect(
       this._onChangeFrame,
       this
@@ -564,9 +574,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param method The hash method.
    * @param seed The seed for the hash method.
    */
-  private _setHashParameters(method: string, seed: number) {
+  private _setHashParameters(method: string, seed: number): void {
     if (method === 'Murmur2') {
-      this._hashMethod = (code: string) => {
+      this._hashMethod = (code: string): string => {
         return murmur2(code, seed).toString();
       };
     } else {
@@ -579,12 +589,12 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param prefix The prefix used for the temporary files.
    * @param suffix The suffix used for the temporary files.
    */
-  private _setTmpFileParameters(prefix: string, suffix: string) {
+  private _setTmpFileParameters(prefix: string, suffix: string): void {
     this._tmpFilePrefix = prefix;
     this._tmpFileSuffix = suffix;
   }
 
-  private _isDisposed: boolean = false;
+  private _isDisposed = false;
   private _session: IDebugger.ISession;
   private _model: DebuggerModel;
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
@@ -604,7 +614,9 @@ namespace Private {
    * Convert a list of breakpoints to source breakpoints to be sent to the kernel.
    * @param breakpoints The list of breakpoints.
    */
-  export function toSourceBreakpoints(breakpoints: IDebugger.IBreakpoint[]) {
+  export function toSourceBreakpoints(
+    breakpoints: IDebugger.IBreakpoint[]
+  ): { line: number }[] {
     return breakpoints.map(breakpoint => {
       return {
         line: breakpoint.line

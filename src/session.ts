@@ -182,8 +182,8 @@ export class DebugSession implements IDebugger.ISession {
     }
     const reply = new PromiseDelegate<KernelMessage.IDebugReplyMsg>();
     const future = kernel.requestDebug(msg);
-    future.onReply = (msg: KernelMessage.IDebugReplyMsg) => {
-      return reply.resolve(msg);
+    future.onReply = (msg: KernelMessage.IDebugReplyMsg): void => {
+      reply.resolve(msg);
     };
     await future.done;
     return reply.promise;
@@ -192,7 +192,7 @@ export class DebugSession implements IDebugger.ISession {
   /**
    * A promise that resolves when the kernel is ready.
    */
-  private _ready() {
+  private _ready(): Promise<KernelMessage.IInfoReply> {
     return this._connection?.kernel?.info;
   }
 

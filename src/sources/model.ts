@@ -41,7 +41,7 @@ export class SourcesModel {
   /**
    * Return the current source.
    */
-  get currentSource() {
+  get currentSource(): IDebugger.ISource {
     return this._currentSource;
   }
 
@@ -57,7 +57,7 @@ export class SourcesModel {
   /**
    * Open a source in the main area.
    */
-  open() {
+  open(): void {
     this._currentSourceOpened.emit(this._currentSource);
   }
 

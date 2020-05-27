@@ -41,7 +41,7 @@ export class Sources extends Panel {
       'open',
       new ToolbarButton({
         icon: viewBreakpointIcon,
-        onClick: () => model.open(),
+        onClick: (): void => model.open(),
         tooltip: 'Open in the Main Area'
       })
     );

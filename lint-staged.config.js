@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 // from: https://github.com/jupyterlab/jupyterlab/blob/master/lint-staged.config.js
 
 const escape = require('shell-quote').quote;

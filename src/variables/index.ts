@@ -35,7 +35,7 @@ export class Variables extends Panel {
     this._table = new VariablesBodyGrid({ model, commands });
     this._table.hide();
 
-    const onClick = () => {
+    const onClick = (): void => {
       if (this._table.isHidden) {
         this._tree.hide();
         this._table.show();
@@ -90,7 +90,7 @@ export class Variables extends Panel {
    * Resize the body.
    * @param msg The resize message.
    */
-  private _resizeBody(msg: Widget.ResizeMessage) {
+  private _resizeBody(msg: Widget.ResizeMessage): void {
     const height = msg.height - this._header.node.offsetHeight;
     this._tree.node.style.height = `${height}px`;
   }
@@ -104,7 +104,9 @@ export class Variables extends Panel {
  * Convert a variable to a primitive type.
  * @param variable The variable.
  */
-export const convertType = (variable: VariablesModel.IVariable) => {
+export const convertType = (
+  variable: VariablesModel.IVariable
+): string | number => {
   const { type, value } = variable;
   switch (type) {
     case 'int':

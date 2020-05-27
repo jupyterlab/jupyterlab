@@ -34,7 +34,7 @@ export class Breakpoints extends Panel {
       'closeAll',
       new ToolbarButton({
         icon: closeAllIcon,
-        onClick: () => {
+        onClick: (): void => {
           void service.clearBreakpoints();
         },
         tooltip: 'Remove All Breakpoints'

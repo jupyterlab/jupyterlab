@@ -74,7 +74,7 @@ export namespace CallstackModel {
   /**
    * An interface for a frame.
    */
-  export interface IFrame extends DebugProtocol.StackFrame {}
+  export type IFrame = DebugProtocol.StackFrame;
 }
 
 /**
@@ -85,7 +85,7 @@ namespace Private {
    * Construct an id for the given frame.
    * @param frame The frame.
    */
-  export function getFrameId(frame: CallstackModel.IFrame) {
+  export function getFrameId(frame: CallstackModel.IFrame): string {
     return `${frame?.source?.path}-${frame?.id}`;
   }
 }

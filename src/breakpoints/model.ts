@@ -62,7 +62,7 @@ export class BreakpointsModel implements IDisposable {
    * @param id The code id (path).
    * @param breakpoints The list of breakpoints.
    */
-  setBreakpoints(id: string, breakpoints: IDebugger.IBreakpoint[]) {
+  setBreakpoints(id: string, breakpoints: IDebugger.IBreakpoint[]): void {
     this._breakpoints.set(id, breakpoints);
     this._changed.emit(breakpoints);
   }
@@ -79,7 +79,7 @@ export class BreakpointsModel implements IDisposable {
    * Restore a map of breakpoints.
    * @param breakpoints The map of breakpoints
    */
-  restoreBreakpoints(breakpoints: Map<string, IDebugger.IBreakpoint[]>) {
+  restoreBreakpoints(breakpoints: Map<string, IDebugger.IBreakpoint[]>): void {
     this._breakpoints = breakpoints;
     this._restored.emit();
   }

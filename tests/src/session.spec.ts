@@ -107,7 +107,7 @@ describe('protocol', () => {
 
   let connection: Session.ISessionConnection;
   let debugSession: DebugSession;
-  let threadId: number = 1;
+  let threadId = 1;
 
   beforeEach(async () => {
     const path = UUID.uuid4();
@@ -210,7 +210,10 @@ describe('protocol', () => {
     });
   });
 
-  const getVariables = async (start?: number, count?: number) => {
+  const getVariables = async (
+    start?: number,
+    count?: number
+  ): Promise<DebugProtocol.Variable[]> => {
     const stackFramesReply = await debugSession.sendRequest('stackTrace', {
       threadId
     });

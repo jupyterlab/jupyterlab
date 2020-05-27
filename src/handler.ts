@@ -44,7 +44,7 @@ import { NotebookHandler } from './handlers/notebook';
 function updateToolbar(
   widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
   onClick: () => void
-) {
+): DisposableSet {
   const icon = new ToolbarButton({
     className: 'jp-DebuggerBugButton',
     icon: bugIcon,
@@ -84,7 +84,7 @@ export class DebuggerHandler {
    * Dispose all the handlers.
    * @param debug The debug service.
    */
-  disposeAll(debug: IDebugger) {
+  disposeAll(debug: IDebugger): void {
     const handlerIds = Object.keys(this._handlers);
     if (handlerIds.length === 0) {
       return;
@@ -113,7 +113,7 @@ export class DebuggerHandler {
       return this._update(widget, connection);
     }
 
-    const kernelChanged = () => {
+    const kernelChanged = (): void => {
       void this._update(widget, connection);
     };
     const kernelChangedHandler = this._kernelChangedHandlers[widget.id];
@@ -127,7 +127,7 @@ export class DebuggerHandler {
     const statusChanged = (
       _: Session.ISessionConnection,
       status: Kernel.Status
-    ) => {
+    ): void => {
       if (status.endsWith('restarting')) {
         void this._update(widget, connection);
       }
@@ -152,7 +152,7 @@ export class DebuggerHandler {
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
     sessionContext: ISessionContext
   ): Promise<void> {
-    const connectionChanged = () => {
+    const connectionChanged = (): void => {
       const { session: connection } = sessionContext;
       void this.update(widget, connection);
     };
@@ -183,11 +183,11 @@ export class DebuggerHandler {
       return;
     }
 
-    const hasFocus = () => {
+    const hasFocus = (): boolean => {
       return this._shell.currentWidget && this._shell.currentWidget === widget;
     };
 
-    const updateAttribute = () => {
+    const updateAttribute = (): void => {
       if (!this._handlers[widget.id]) {
         widget.node.removeAttribute('data-jp-debugger');
         return;
@@ -195,7 +195,7 @@ export class DebuggerHandler {
       widget.node.setAttribute('data-jp-debugger', 'true');
     };
 
-    const createHandler = async () => {
+    const createHandler = (): void => {
       if (this._handlers[widget.id]) {
         return;
       }
@@ -225,7 +225,7 @@ export class DebuggerHandler {
       updateAttribute();
     };
 
-    const removeHandlers = () => {
+    const removeHandlers = (): void => {
       const handler = this._handlers[widget.id];
       if (!handler) {
         return;
@@ -246,7 +246,7 @@ export class DebuggerHandler {
       updateAttribute();
     };
 
-    const addToolbarButton = () => {
+    const addToolbarButton = (): void => {
       const button = this._buttons[widget.id];
       if (button) {
         return;
@@ -255,7 +255,7 @@ export class DebuggerHandler {
       this._buttons[widget.id] = newButton;
     };
 
-    const removeToolbarButton = () => {
+    const removeToolbarButton = (): void => {
       const button = this._buttons[widget.id];
       if (!button) {
         return;
@@ -264,7 +264,7 @@ export class DebuggerHandler {
       delete this._buttons[widget.id];
     };
 
-    const toggleDebugging = async () => {
+    const toggleDebugging = async (): Promise<void> => {
       // bail if the widget doesn't have focus
       if (!hasFocus()) {
         return;
@@ -314,7 +314,7 @@ export class DebuggerHandler {
     }
 
     // if the debugger is started but there is no handler, create a new one
-    await createHandler();
+    createHandler();
     this._previousConnection = connection;
 
     // listen to the disposed signals

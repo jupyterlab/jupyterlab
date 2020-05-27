@@ -36,7 +36,7 @@ export class VariablesBodyTree extends ReactWidget {
   /**
    * Render the VariablesBodyTree.
    */
-  render() {
+  render(): JSX.Element {
     return (
       <>
         {this._scopes.map(scope => (
@@ -63,7 +63,7 @@ export class VariablesBodyTree extends ReactWidget {
    * Update the scopes and the tree of variables.
    * @param model The variables model.
    */
-  private _updateScopes(model: VariablesModel) {
+  private _updateScopes(model: VariablesModel): void {
     if (ArrayExt.shallowEqual(this._scopes, model.scopes)) {
       return;
     }
@@ -90,7 +90,7 @@ const VariablesComponent = ({
   data: VariablesModel.IVariable[];
   service: IDebugger;
   filter?: Set<string>;
-}) => {
+}): JSX.Element => {
   const [variables, setVariables] = useState(data);
 
   useEffect(() => {
@@ -129,7 +129,7 @@ const VariableComponent = ({
   data: VariablesModel.IVariable;
   service: IDebugger;
   filter?: Set<string>;
-}) => {
+}): JSX.Element => {
   const [variable] = useState(data);
   const [expanded, setExpanded] = useState(null);
   const [variables, setVariables] = useState(null);
@@ -144,7 +144,7 @@ const VariableComponent = ({
   const expandable =
     variable.variablesReference !== 0 || variable.type === 'function';
 
-  const onVariableClicked = async (e: React.MouseEvent) => {
+  const onVariableClicked = async (e: React.MouseEvent): Promise<void> => {
     if (!expandable) {
       return;
     }
@@ -157,7 +157,7 @@ const VariableComponent = ({
   };
 
   return (
-    <li onClick={e => onVariableClicked(e)}>
+    <li onClick={(e): Promise<void> => onVariableClicked(e)}>
       <caretDownEmptyIcon.react
         visibility={expandable ? 'visible' : 'hidden'}
         stylesheet="menuItem"

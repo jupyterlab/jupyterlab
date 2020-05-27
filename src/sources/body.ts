@@ -77,7 +77,7 @@ export class SourcesBody extends Widget {
   /**
    * Clear the content of the source read-only editor.
    */
-  private _clearEditor() {
+  private _clearEditor(): void {
     this._model.currentSource = null;
     this._editor.hide();
   }
@@ -86,7 +86,7 @@ export class SourcesBody extends Widget {
    * Show the content of the source for the given frame.
    * @param frame The current frame.
    */
-  private async _showSource(frame: CallstackModel.IFrame) {
+  private async _showSource(frame: CallstackModel.IFrame): Promise<void> {
     const path = frame.source.path;
     const source = await this._debuggerService.getSource({
       sourceReference: 0,

@@ -116,7 +116,7 @@ export class DebuggerModel implements IDebugger.IModel {
   /**
    * Clear the model.
    */
-  clear() {
+  clear(): void {
     this._stoppedThreads.clear();
     const breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
     this.breakpoints.restoreBreakpoints(breakpoints);
