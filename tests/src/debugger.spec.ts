@@ -9,6 +9,9 @@ import { Debugger } from '../../lib/debugger';
 
 import { DebuggerService } from '../../lib/service';
 
+/**
+ * A test sidebar.
+ */
 class TestSidebar extends Debugger.Sidebar {}
 
 describe('Debugger', () => {

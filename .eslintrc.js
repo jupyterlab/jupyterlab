@@ -47,6 +47,15 @@ module.exports = {
     'jest/no-jest-import': 'off',
     'jest/no-export': 'warn',
     'jest/no-try-expect': 'warn',
+    'jsdoc/require-jsdoc': [
+      1,
+      {
+        require: {
+          FunctionExpression: true,
+          ClassDeclaration: true
+        }
+      }
+    ],
     'jsdoc/require-param-type': 'off',
     'jsdoc/require-property-type': 'off',
     'jsdoc/require-returns-type': 'off',
