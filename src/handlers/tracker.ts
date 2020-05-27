@@ -205,7 +205,7 @@ export namespace TrackerHandler {
      */
     shell: JupyterFrontEnd.IShell;
     /**
-     * An optional editor finder
+     * The editor finder.
      */
     editorFinder: IDebuggerEditorFinder;
   }

@@ -262,6 +262,9 @@ const tracker: JupyterFrontEndPlugin<void> = {
   }
 };
 
+/**
+ * A plugin that provides a debugger service.
+ */
 const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:service',
   autoStart: true,
@@ -375,7 +378,7 @@ const variables: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * The main debuger UI plugin.
+ * The main debugger UI plugin.
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:main',
