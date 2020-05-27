@@ -133,6 +133,7 @@ export class DebugSession implements IDebugger.ISession {
 
   /**
    * Send a custom debug request to the kernel.
+   *
    * @param command debug command.
    * @param args arguments for the debug command.
    */
@@ -152,6 +153,7 @@ export class DebugSession implements IDebugger.ISession {
 
   /**
    * Handle debug events sent on the 'iopub' channel.
+   *
    * @param sender - the emitter of the event.
    * @param message - the event message.
    */
@@ -169,6 +171,7 @@ export class DebugSession implements IDebugger.ISession {
 
   /**
    * Send a debug request message to the kernel.
+   *
    * @param msg debug request message to send to the kernel.
    */
   private async _sendDebugMessage(

@@ -26,8 +26,9 @@ import { SourcesModel } from './model';
  */
 export class SourcesBody extends Widget {
   /**
-   * Instantiate a new Body for the Sources Panel.
-   * @param model The model for the sources.
+   * Instantiate a new Body for the SourcesBody widget.
+   *
+   * @param options The instantiation options for a SourcesBody.
    */
   constructor(options: SourcesBody.IOptions) {
     super();
@@ -84,6 +85,7 @@ export class SourcesBody extends Widget {
 
   /**
    * Show the content of the source for the given frame.
+   *
    * @param frame The current frame.
    */
   private async _showSource(frame: CallstackModel.IFrame): Promise<void> {

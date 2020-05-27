@@ -23,6 +23,7 @@ import { VariablesBodyTree } from './tree';
 export class Variables extends Panel {
   /**
    * Instantiate a new Variables Panel.
+   *
    * @param options The instantiation options for a Variables Panel.
    */
   constructor(options: Variables.IOptions) {
@@ -80,6 +81,8 @@ export class Variables extends Panel {
 
   /**
    * A message handler invoked on a `'resize'` message.
+   *
+   * @param msg The Lumino message to process.
    */
   protected onResize(msg: Widget.ResizeMessage): void {
     super.onResize(msg);
@@ -88,6 +91,7 @@ export class Variables extends Panel {
 
   /**
    * Resize the body.
+   *
    * @param msg The resize message.
    */
   private _resizeBody(msg: Widget.ResizeMessage): void {
@@ -102,6 +106,7 @@ export class Variables extends Panel {
 
 /**
  * Convert a variable to a primitive type.
+ *
  * @param variable The variable.
  */
 export const convertType = (

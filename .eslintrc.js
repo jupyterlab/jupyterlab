@@ -12,6 +12,7 @@ module.exports = {
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'prettier/@typescript-eslint',
+    'plugin:jsdoc/recommended',
     'plugin:react/recommended',
     'plugin:jest/recommended'
   ],
@@ -45,7 +46,11 @@ module.exports = {
     'prefer-const': 'off',
     'jest/no-jest-import': 'off',
     'jest/no-export': 'warn',
-    'jest/no-try-expect': 'warn'
+    'jest/no-try-expect': 'warn',
+    'jsdoc/require-param-type': 'off',
+    'jsdoc/require-property-type': 'off',
+    'jsdoc/require-returns-type': 'off',
+    'jsdoc/require-returns': 'off'
   },
   settings: {
     react: {

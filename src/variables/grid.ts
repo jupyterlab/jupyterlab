@@ -26,6 +26,7 @@ import { VariablesModel } from './model';
 export class VariablesBodyGrid extends Panel {
   /**
    * Instantiate a new VariablesBodyGrid.
+   *
    * @param options The instantiation options for a VariablesBodyGrid.
    */
   constructor(options: VariablesBodyGrid.IOptions) {
@@ -72,6 +73,7 @@ export class VariablesBodyGrid extends Panel {
 export class VariablesGrid extends Panel {
   /**
    * Instantiate a new VariablesGrid.
+   *
    * @param options The instantiation options for a VariablesGrid.
    */
   constructor(options: VariablesGrid.IOptions) {

@@ -21,6 +21,7 @@ import { BreakpointsModel } from './model';
 export class Breakpoints extends Panel {
   /**
    * Instantiate a new Breakpoints Panel.
+   *
    * @param options The instantiation options for a Breakpoints Panel.
    */
   constructor(options: Breakpoints.IOptions) {

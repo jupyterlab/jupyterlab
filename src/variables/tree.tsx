@@ -21,6 +21,7 @@ import { VariablesModel } from './model';
 export class VariablesBodyTree extends ReactWidget {
   /**
    * Instantiate a new Body for the tree of variables.
+   *
    * @param options The instantiation options for a VariablesBodyTree.
    */
   constructor(options: VariablesBodyTree.IOptions) {
@@ -61,6 +62,7 @@ export class VariablesBodyTree extends ReactWidget {
 
   /**
    * Update the scopes and the tree of variables.
+   *
    * @param model The variables model.
    */
   private _updateScopes(model: VariablesModel): void {
@@ -78,9 +80,11 @@ export class VariablesBodyTree extends ReactWidget {
 
 /**
  * A React component to display a list of variables.
- * @param data An array of variables.
- * @param service The debugger service.
- * @param filter Optional variable filter list.
+ *
+ * @param {object} props The component props.
+ * @param props.data An array of variables.
+ * @param props.service The debugger service.
+ * @param props.filter Optional variable filter list.
  */
 const VariablesComponent = ({
   data,
@@ -118,8 +122,11 @@ const VariablesComponent = ({
 
 /**
  * A React component to display one node variable in tree.
- * @param data An array of variables.
- * @param service The debugger service.
+ *
+ * @param {object} props The component props.
+ * @param props.data An array of variables.
+ * @param props.service The debugger service.
+ * @param props.filter Optional variable filter list.
  */
 const VariableComponent = ({
   data,

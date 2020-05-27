@@ -15,6 +15,7 @@ import React from 'react';
 export class SourcesHeader extends Widget {
   /**
    * Instantiate a new SourcesHeader.
+   *
    * @param model The model for the Sources.
    */
   constructor(model: SourcesModel) {
@@ -45,7 +46,9 @@ export class SourcesHeader extends Widget {
 
 /**
  * A React component to display the path to a source.
- * @param model The model for the sources.
+ *
+ * @param {object} props The component props.
+ * @param props.model The model for the sources.
  */
 const SourcePathComponent = ({
   model

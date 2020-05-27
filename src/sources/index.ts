@@ -25,6 +25,7 @@ import { SourcesModel } from './model';
 export class Sources extends Panel {
   /**
    * Instantiate a new Sources preview Panel.
+   *
    * @param options The Sources instantiation options.
    */
   constructor(options: Sources.IOptions) {

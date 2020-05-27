@@ -83,6 +83,7 @@ export namespace CallstackModel {
 namespace Private {
   /**
    * Construct an id for the given frame.
+   *
    * @param frame The frame.
    */
   export function getFrameId(frame: CallstackModel.IFrame): string {

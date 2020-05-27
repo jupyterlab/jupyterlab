@@ -21,6 +21,7 @@ import { IDebugger } from '../tokens';
 export class NotebookHandler implements IDisposable {
   /**
    * Instantiate a new NotebookHandler.
+   *
    * @param options The instantiation options for a NotebookHandler.
    */
   constructor(options: NotebookHandler.IOptions) {
@@ -64,6 +65,7 @@ export class NotebookHandler implements IDisposable {
 
   /**
    * Add a new editor handler for the given cell.
+   *
    * @param cell The cell to add the handler to.
    */
   private _addEditorHandler(cell: Cell): void {
@@ -85,6 +87,7 @@ export class NotebookHandler implements IDisposable {
 
   /**
    * Handle a new active cell.
+   *
    * @param notebook The notebook for which the active cell has changed.
    * @param cell The new active cell.
    */

@@ -37,6 +37,7 @@ const EDITOR_CHANGED_TIMEOUT = 1000;
 export class EditorHandler implements IDisposable {
   /**
    * Instantiate a new EditorHandler.
+   *
    * @param options The instantiation options for a EditorHandler.
    */
   constructor(options: EditorHandler.IOptions) {
@@ -165,6 +166,7 @@ export class EditorHandler implements IDisposable {
 
   /**
    * Handle a click on the gutter.
+   *
    * @param editor The editor from where the click originated.
    * @param lineNumber The line corresponding to the click event.
    */
@@ -277,6 +279,7 @@ export namespace EditorHandler {
 
   /**
    * Highlight the current line of the frame in the given editor.
+   *
    * @param editor The editor to highlight.
    * @param line The line number.
    */
@@ -291,6 +294,7 @@ export namespace EditorHandler {
 
   /**
    * Remove all line highlighting indicators for the given editor.
+   *
    * @param editor The editor to cleanup.
    */
   export function clearHighlight(editor: CodeEditor.IEditor): void {
@@ -305,9 +309,9 @@ export namespace EditorHandler {
 
   /**
    * Remove line numbers and all gutters from editor.
+   *
    * @param editor The editor to cleanup.
    */
-
   export function clearGutter(editor: CodeEditor.IEditor): void {
     if (!editor) {
       return;

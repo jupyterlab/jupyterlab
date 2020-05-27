@@ -15,6 +15,7 @@ import { IDebugger } from '../tokens';
 export class ReadOnlyEditorFactory {
   /**
    * Construct a new editor widget factory.
+   *
    * @param options The instantiation options for a ReadOnlyEditorFactory.
    */
   constructor(options: ReadOnlyEditorFactory.IOptions) {
@@ -23,6 +24,7 @@ export class ReadOnlyEditorFactory {
 
   /**
    * Create a new CodeEditorWrapper given a Source.
+   *
    * @param source The source to create a new editor for.
    */
   createNewEditor(source: IDebugger.ISource): CodeEditorWrapper {

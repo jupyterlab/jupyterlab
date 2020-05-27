@@ -13,6 +13,7 @@ import { CallstackModel } from './model';
 export class CallstackBody extends ReactWidget {
   /**
    * Instantiate a new Body for the Callstack Panel.
+   *
    * @param model The model for the callstack.
    */
   constructor(model: CallstackModel) {
@@ -33,7 +34,9 @@ export class CallstackBody extends ReactWidget {
 
 /**
  * A React component to display a list of frames in a callstack.
- * @param model The model for the callstack.
+ *
+ * @param {object} props The component props.
+ * @param props.model The model for the callstack.
  */
 const FramesComponent = ({ model }: { model: CallstackModel }): JSX.Element => {
   const [frames, setFrames] = useState(model.frames);

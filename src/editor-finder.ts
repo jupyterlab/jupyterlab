@@ -33,6 +33,7 @@ import { IDebugger } from './tokens';
 export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   /**
    * Instantiate a new EditorFinder.
+   *
    * @param options The instantiation options for a EditorFinder.
    */
   constructor(options: EditorFinder.IOptions) {
@@ -68,6 +69,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
    * Find the editor for a source matching the current debug session
    * by iterating through all the widgets in each of the notebook,
    * console, file editor, and read-only file editor trackers.
+   *
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    */
@@ -85,6 +87,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
 
   /**
    * Find the editor for a source matching the current debug session
+   *
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    */
@@ -125,6 +128,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
 
   /**
    * Find the editor for a source matching the current debug session
+   *
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    */
@@ -160,6 +164,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   /**
    * Find the editor for a source matching the current debug session
    * from the editor tracker.
+   *
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    */
@@ -195,10 +200,12 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
 
   /**
    * Find an editor for a source from the read-only editor tracker.
+   *
+   * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    */
   private _findInReadOnlyEditors(
-    _: string,
+    debugSessionPath: string,
     source: string
   ): CodeEditor.IEditor[] {
     const editors: CodeEditor.IEditor[] = [];

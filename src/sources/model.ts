@@ -13,6 +13,7 @@ import { IDebugger } from '../tokens';
 export class SourcesModel {
   /**
    * Instantiate a new Sources.Model
+   *
    * @param options The Sources.Model instantiation options.
    */
   constructor(options: SourcesModel.IOptions) {
@@ -47,6 +48,7 @@ export class SourcesModel {
 
   /**
    * Set the current source.
+   *
    * @param source The source to set as the current source.
    */
   set currentSource(source: IDebugger.ISource | null) {

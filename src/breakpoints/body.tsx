@@ -15,6 +15,7 @@ import { BreakpointsModel } from './model';
 export class BreakpointsBody extends ReactWidget {
   /**
    * Instantiate a new Body for the Breakpoints Panel.
+   *
    * @param model The model for the breakpoints.
    */
   constructor(model: BreakpointsModel) {
@@ -35,7 +36,9 @@ export class BreakpointsBody extends ReactWidget {
 
 /**
  * A React component to display a list of breakpoints.
- * @param model The model for the breakpoints.
+ *
+ * @param {object} props The component props.
+ * @param props.model The model for the breakpoints.
  */
 const BreakpointsComponent = ({
   model
@@ -82,8 +85,10 @@ const BreakpointsComponent = ({
 
 /**
  * A React Component to display breakpoints grouped by source file.
- * @param breakpoints The list of breakpoints.
- * @param model The model for the breakpoints.
+ *
+ * @param {object} props The component props.
+ * @param props.breakpoints The list of breakpoints.
+ * @param props.model The model for the breakpoints.
  */
 const BreakpointCellComponent = ({
   breakpoints,
@@ -111,8 +116,10 @@ const BreakpointCellComponent = ({
 
 /**
  * A React Component to display a single breakpoint.
- * @param breakpoints The breakpoint.
- * @param model The model for the breakpoints.
+ *
+ * @param {object} props The component props.
+ * @param props.breakpoint The breakpoint.
+ * @param props.model The model for the breakpoints.
  */
 const BreakpointComponent = ({
   breakpoint,

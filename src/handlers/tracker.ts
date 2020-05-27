@@ -46,6 +46,7 @@ import { DebuggerModel } from '../model';
 export class TrackerHandler implements IDisposable {
   /**
    * Instantiate a new TrackerHandler.
+   *
    * @param options The instantiation options for a TrackerHandler.
    */
   constructor(options: TrackerHandler.IOptions) {
@@ -113,6 +114,7 @@ export class TrackerHandler implements IDisposable {
 
   /**
    * Handle a current frame changed event.
+   *
    * @param _ The sender.
    * @param frame The current frame.
    */
@@ -131,6 +133,7 @@ export class TrackerHandler implements IDisposable {
 
   /**
    * Handle a source open event.
+   *
    * @param _ The sender.
    * @param source The source to open.
    */

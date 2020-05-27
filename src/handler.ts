@@ -39,7 +39,9 @@ import { NotebookHandler } from './handlers/notebook';
 
 /**
  * Add a button to the widget toolbar to enable and disable debugging.
+ *
  * @param widget The widget to add the debug toolbar button to.
+ * @param onClick The callback when the toolbar button is clicked.
  */
 function updateToolbar(
   widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
@@ -72,7 +74,8 @@ function updateToolbar(
 export class DebuggerHandler {
   /**
    * Instantiate a new DebuggerHandler.
-   * @param type The type of the debug handler.
+   *
+   * @param options The instantiation options for a DebuggerHandler.
    */
   constructor(options: DebuggerHandler.IOptions) {
     this._type = options.type;
@@ -82,6 +85,7 @@ export class DebuggerHandler {
 
   /**
    * Dispose all the handlers.
+   *
    * @param debug The debug service.
    */
   disposeAll(debug: IDebugger): void {
@@ -100,6 +104,7 @@ export class DebuggerHandler {
   /**
    * Update a debug handler for the given widget, and
    * handle kernel changed events.
+   *
    * @param widget The widget to update.
    * @param connection The session connection.
    */
@@ -145,6 +150,7 @@ export class DebuggerHandler {
   /**
    * Update a debug handler for the given widget, and
    * handle connection kernel changed events.
+   *
    * @param widget The widget to update.
    * @param sessionContext The session context.
    */
@@ -172,6 +178,7 @@ export class DebuggerHandler {
 
   /**
    * Update a debug handler for the given widget.
+   *
    * @param widget The widget to update.
    * @param connection The session connection.
    */
