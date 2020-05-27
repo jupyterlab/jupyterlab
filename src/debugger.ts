@@ -41,7 +41,7 @@ export namespace Debugger {
 
       const { callstackCommands, editorServices, service } = options;
 
-      this.model = new DebuggerModel();
+      this.model = service.model as DebuggerModel;
       this.service = service as DebuggerService;
       this.service.model = this.model;
 

@@ -33,9 +33,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     // TODO: also checks that the notebook or console
     // runs a kernel with debugging ability
     this._session = null;
-    // The model will be set by the UI which can be built
-    // after the service.
-    this._model = null;
+    this._model = new DebuggerModel();
   }
 
   /**
@@ -234,7 +232,6 @@ export class DebuggerService implements IDebugger, IDisposable {
         );
       });
     }
-
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     this._model.stoppedThreads = stoppedThreads;
 

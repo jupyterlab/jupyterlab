@@ -29,6 +29,8 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
 
+import { EditorFinder, IDebuggerEditorFinder } from './editor-finder';
+
 import {
   continueIcon,
   stepIntoIcon,
@@ -200,17 +202,17 @@ const notebooks: JupyterFrontEndPlugin<void> = {
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
-    debug: IDebugger,
+    service: IDebugger,
     notebookTracker: INotebookTracker,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'notebook',
       shell: app.shell,
-      service: debug
+      service
     });
-    debug.model.disposed.connect(() => {
-      handler.disposeAll(debug);
+    service.model.disposed.connect(() => {
+      handler.disposeAll(service);
     });
     const updateHandlerAndCommands = async (widget: NotebookPanel) => {
       const { sessionContext } = widget;
@@ -244,27 +246,59 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 const tracker: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:tracker',
   autoStart: true,
-  requires: [IDebugger, IEditorServices],
-  optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
+  requires: [IDebugger, IEditorServices, IDebuggerEditorFinder],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorServices: IEditorServices,
-    notebookTracker: INotebookTracker,
-    consoleTracker: IConsoleTracker,
-    editorTracker: IEditorTracker
+    editorFinder: IDebuggerEditorFinder
   ) => {
     new TrackerHandler({
       shell: app.shell,
       editorServices,
       debuggerService: debug,
+      editorFinder
+    });
+  }
+};
+
+/**
+ * A plugin that provides a debugger service.
+ */
+const service: JupyterFrontEndPlugin<IDebugger> = {
+  id: '@jupyterlab/debugger:service',
+  autoStart: true,
+  provides: IDebugger,
+  activate: () => new DebuggerService()
+};
+
+/**
+ * A plugin that tracks editors, console and file editors used for debugging.
+ */
+const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
+  id: '@jupyterlab/debugger:editor-finder',
+  autoStart: true,
+  provides: IDebuggerEditorFinder,
+  requires: [IDebugger, IEditorServices],
+  optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
+  activate: (
+    app: JupyterFrontEnd,
+    service: IDebugger,
+    editorServices: IEditorServices,
+    notebookTracker: INotebookTracker | null,
+    consoleTracker: IConsoleTracker | null,
+    editorTracker: IEditorTracker | null
+  ): IDebuggerEditorFinder => {
+    return new EditorFinder({
+      shell: app.shell,
+      service,
+      editorServices,
       notebookTracker,
       consoleTracker,
       editorTracker
     });
   }
 };
-
 /*
  * A plugin to open detailed views for variables.
  */
@@ -344,25 +378,24 @@ const variables: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin providing a tracker code debuggers.
+ * The main debugger UI plugin.
  */
-const main: JupyterFrontEndPlugin<IDebugger> = {
+const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:main',
-  requires: [IEditorServices],
+  requires: [IDebugger, IEditorServices, IDebuggerEditorFinder],
   optional: [ILayoutRestorer, ICommandPalette, ISettingRegistry, IThemeManager],
-  provides: IDebugger,
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
+    service: IDebugger,
     editorServices: IEditorServices,
+    editorFinder: IDebuggerEditorFinder,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null,
     settingRegistry: ISettingRegistry | null,
     themeManager: IThemeManager | null
-  ): Promise<IDebugger> => {
+  ): Promise<void> => {
     const { commands, shell } = app;
-
-    const service = new DebuggerService();
 
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
@@ -497,22 +530,21 @@ const main: JupyterFrontEndPlugin<IDebugger> = {
         palette.addItem({ command, category });
       });
     }
-
-    return service;
   }
 };
 
 /**
  * Export the plugins as default.
  */
-
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  service,
   consoles,
   files,
   notebooks,
   tracker,
   variables,
-  main
+  main,
+  finder
 ];
 
 export default plugins;
