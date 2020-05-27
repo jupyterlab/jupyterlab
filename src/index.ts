@@ -396,7 +396,6 @@ const main: JupyterFrontEndPlugin<void> = {
     themeManager: IThemeManager | null
   ): Promise<void> => {
     const { commands, shell } = app;
-    console.log('editor finder', editorFinder);
 
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
