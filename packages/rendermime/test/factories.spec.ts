@@ -111,7 +111,8 @@ describe('rendermime/factories', () => {
           'https://example.com#anchor',
           'http://localhost:9090/app',
           'http://localhost:9090/app/',
-          'http://127.0.0.1/test?query=string'
+          'http://127.0.0.1/test?query=string',
+          'http://127.0.0.1/test?query=string&param=42'
         ];
         await Promise.all(
           urls.map(async url => {
@@ -119,9 +120,10 @@ describe('rendermime/factories', () => {
             const mimeType = 'text/plain';
             const model = createModel(mimeType, source);
             const w = f.createRenderer({ mimeType, ...defaultOptions });
+            const urlEncoded = url.replace('&', '&amp;');
             await w.renderModel(model);
             expect(w.node.innerHTML).toBe(
-              `<pre>Here is some text with an URL such as <a href="${url}" rel="noopener" target="_blank">${url}</a> inside.</pre>`
+              `<pre>Here is some text with an URL such as <a href="${urlEncoded}" rel="noopener" target="_blank">${urlEncoded}</a> inside.</pre>`
             );
           })
         );
