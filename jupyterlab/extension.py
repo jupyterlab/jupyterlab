@@ -146,7 +146,7 @@ def load_jupyter_server_extension(nbapp):
     page_config['token'] = nbapp.token
 
     # Handle quit button with support for Notebook < 5.6
-    page_config'quitButton'] = getattr(nbapp, 'quit_button', False)
+    page_config['quitButton'] = getattr(nbapp, 'quit_button', False)
 
     # Client-side code assumes notebookVersion is a JSON-encoded string
     page_config['notebookVersion'] = dumps(version_info)
