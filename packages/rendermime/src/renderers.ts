@@ -486,14 +486,10 @@ function autolink(content: string): string {
       '"\')}\\],:;.!?>]',
     'ug'
   );
-  return content.replace(webLinkRegex, url => {
-    const a = document.createElement('a');
-    a.href = url;
-    a.textContent = url;
-    a.rel = 'noopener';
-    a.target = '_blank';
-    return a.outerHTML;
-  });
+  return content.replace(
+    webLinkRegex,
+    '<a href="$&" rel="noopener" target="_blank">$&</a>'
+  );
 }
 
 /**
