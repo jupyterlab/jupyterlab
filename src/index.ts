@@ -202,18 +202,20 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:notebooks',
   autoStart: true,
-  requires: [IDebugger, INotebookTracker],
+  requires: [IDebugger, INotebookTracker, IDebuggerEditorFinder],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
+    editorFinder: IDebuggerEditorFinder,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'notebook',
       shell: app.shell,
-      service
+      service,
+      editorFinder
     });
     service.model.disposed.connect(() => {
       handler.disposeAll(service);

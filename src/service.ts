@@ -3,6 +3,8 @@
 
 import { Session } from '@jupyterlab/services';
 
+import { each } from '@lumino/algorithm';
+
 import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
@@ -18,6 +20,8 @@ import { CallstackModel } from './callstack/model';
 import { DebuggerModel } from './model';
 
 import { IDebugger } from './tokens';
+
+import { IDebuggerEditorFinder } from './editor-finder';
 
 import { VariablesModel } from './variables/model';
 
@@ -218,14 +222,17 @@ export class DebuggerService implements IDebugger, IDisposable {
    *
    * @param autoStart - when true, starts the debugger
    * if it has not been started yet.
+   * @param editorFinder - The editorFinder instance
    */
-  async restoreState(autoStart: boolean): Promise<void> {
+  async restoreState(
+    autoStart: boolean,
+    editorFinder: IDebuggerEditorFinder
+  ): Promise<void> {
     if (!this.model || !this.session) {
       return;
     }
 
     const reply = await this.session.restoreState();
-
     this._setHashParameters(reply.body.hashMethod, reply.body.hashSeed);
     this._setTmpFileParameters(
       reply.body.tmpFilePrefix,
@@ -247,27 +254,32 @@ export class DebuggerService implements IDebugger, IDisposable {
         );
       });
     }
-    //@todo remove and use editor-finder's method find
-    const unassociatedBreakpoints = (
-      fromServer: Map<string, IDebugger.IBreakpoint[]>,
-      fromNotebook: Map<string, IDebugger.IBreakpoint[]>
-    ) => {
-      let breakpointsOnlyOnServer: Array<string> = [];
-      for (let [key] of fromServer) {
-        if (!fromNotebook.has(key)) {
-          breakpointsOnlyOnServer.push(key);
-        }
+    const debugSessionPath = this._session.connection.path;
+    const associatedBreakpoints = (
+      fromServer: Map<string, IDebugger.IBreakpoint[]>
+    ): string[] => {
+      let breakpointsOnlyOnServer: string[] = [];
+      for (let [key, value] of fromServer) {
+        each(editorFinder.find(debugSessionPath, key), () => {
+          if (value.length > 0) {
+            breakpointsOnlyOnServer.push(key);
+          }
+        });
       }
       return breakpointsOnlyOnServer;
     };
 
-    for (const path of unassociatedBreakpoints(
-      bpMap,
-      this._model.breakpoints.breakpoints
-    )) {
-      bpMap.delete(path);
-      await this._setBreakpoints([], path);
-    }
+    const breakpointsForRestore = (): Map<string, IDebugger.IBreakpoint[]> => {
+      let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
+      associatedBreakpoints(bpMap).forEach(path => {
+        Array.from(bpMap.entries()).forEach(value => {
+          if (value[0] === path) {
+            bpMapForRestore.set(value[0], bpMap.get(value[0]));
+          }
+        });
+      });
+      return bpMapForRestore;
+    };
 
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     this._model.stoppedThreads = stoppedThreads;
@@ -275,12 +287,11 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (!this.isStarted && (autoStart || stoppedThreads.size !== 0)) {
       await this.start();
     }
-
     if (this.isStarted || autoStart) {
       this._model.title = this.isStarted ? this.session?.connection?.name : '-';
     }
 
-    this._model.breakpoints.restoreBreakpoints(bpMap);
+    this._model.breakpoints.restoreBreakpoints(breakpointsForRestore());
     if (stoppedThreads.size !== 0) {
       await this._getAllFrames();
     } else if (this.isStarted) {

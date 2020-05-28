@@ -5,6 +5,8 @@ import { KernelMessage, Session } from '@jupyterlab/services';
 
 import { Token } from '@lumino/coreutils';
 
+import { IDebuggerEditorFinder } from './editor-finder';
+
 import { IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal } from '@lumino/signaling';
@@ -87,8 +89,12 @@ export interface IDebugger {
    *
    * @param autoStart - when true, starts the debugger
    * if it has not been started yet.
+   * @param editorFinder - The editor finder instance
    */
-  restoreState(autoStart: boolean): Promise<void>;
+  restoreState(
+    autoStart: boolean,
+    editorFinder?: IDebuggerEditorFinder
+  ): Promise<void>;
 
   /**
    * Continues the execution of the current thread.
