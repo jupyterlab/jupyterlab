@@ -129,27 +129,27 @@ export class States {
   }
 
   /**
-   *
+   * Get temporary cell's id
    */
   get idCell(): string {
     return this._idCell;
   }
 
   /**
-   *
+   * Set temporary cell's id
    */
   set idCell(value: string) {
     this._idCell = value;
   }
   /**
-   *
+   * Get get event flag if something has been changed in cell
    */
   get codeChanged(): boolean {
     return this._codeChanged;
   }
 
   /**
-   *
+   * Set get event flag if something has been changed in cell
    */
   set codeChanged(value: boolean) {
     this._codeChanged = value;
