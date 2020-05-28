@@ -4,8 +4,6 @@ import { createSession, signalToPromise } from '@jupyterlab/testutils';
 
 import { UUID } from '@lumino/coreutils';
 
-import { IDebuggerEditorFinder } from '../../lib/editor-finder';
-
 import { DebuggerModel } from '../../lib/model';
 
 import { DebuggerService } from '../../lib/service';
@@ -56,7 +54,6 @@ describe('DebuggerService', () => {
   let model: DebuggerModel;
   let session: IDebugger.ISession;
   let service: IDebugger;
-  let editorFinder: IDebuggerEditorFinder;
 
   beforeEach(async () => {
     connection = await createSession({
@@ -146,7 +143,7 @@ describe('DebuggerService', () => {
     beforeEach(async () => {
       service.session = session;
       service.model = model;
-      await service.restoreState(true, editorFinder);
+      await service.restoreState(true);
       const breakpointLines: number[] = [3, 5];
       sourceId = service.getCodeId(code);
       breakpoints = breakpointLines.map((l: number, index: number) => {
@@ -177,7 +174,7 @@ describe('DebuggerService', () => {
         );
         const bpList1 = model.breakpoints.getBreakpoints(sourceId);
         expect(bpList1.length).toEqual(0);
-        await service.restoreState(true, editorFinder);
+        await service.restoreState(true);
         const bpList2 = model.breakpoints.getBreakpoints(sourceId);
         expect(bpList2).toEqual(breakpoints);
       });
