@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/metapackage",
-  "version": "1.2.12",
+  "version": "1.2.13",
   "description": "JupyterLab - Meta Package.  All of the packages used by the core JupyterLab application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -78,7 +78,7 @@
     "@jupyterlab/markdownviewer-extension": "^1.2.8",
     "@jupyterlab/mathjax2": "^1.2.0",
     "@jupyterlab/mathjax2-extension": "^1.2.8",
-    "@jupyterlab/nbconvert-css": "^0.3.12",
+    "@jupyterlab/nbconvert-css": "^0.3.13",
     "@jupyterlab/notebook": "^1.2.9",
     "@jupyterlab/notebook-extension": "^1.2.9",
     "@jupyterlab/observables": "^2.4.0",

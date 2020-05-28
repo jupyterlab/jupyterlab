@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-app",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -11,7 +11,7 @@
     "@jupyterlab/application": "^1.2.8",
     "@jupyterlab/application-extension": "^1.2.8",
     "@jupyterlab/apputils-extension": "^1.2.8",
-    "@jupyterlab/buildutils": "^1.2.3",
+    "@jupyterlab/buildutils": "^1.2.4",
     "@jupyterlab/codemirror-extension": "^1.2.8",
     "@jupyterlab/completer-extension": "^1.2.9",
     "@jupyterlab/console-extension": "^1.2.9",

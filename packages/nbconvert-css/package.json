@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/nbconvert-css",
-  "version": "0.3.12",
+  "version": "0.3.13",
   "description": "CSS bundle for the JupyterLab nbconvert template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
