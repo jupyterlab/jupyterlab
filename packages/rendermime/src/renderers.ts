@@ -483,7 +483,7 @@ function autolink(content: string): string {
       controlCodes +
       '"]{2,}[^\\s' +
       controlCodes +
-      '"\')}\\],:;.!?]',
+      '"\')}\\],:;.!?>]',
     'ug'
   );
   return content.replace(webLinkRegex, url => {
