@@ -11,6 +11,8 @@ import { ISignal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
+import { States } from './breakpoints/model';
+
 /**
  * An interface describing an application's visual debugger.
  */
@@ -114,12 +116,19 @@ export interface IDebugger {
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
    * @param path - Optional path to the file where to set the breakpoints.
+   * @param states - Extra state for map path before changes
    */
   updateBreakpoints(
     code: string,
     breakpoints: IDebugger.IBreakpoint[],
-    path?: string
+    path?: string,
+    states?: States
   ): Promise<void>;
+
+  /**
+   * Removed all mapped cells states after dispose notebook instance.
+   */
+  clearMappedCellsStates(): void;
 
   /**
    * Removes all the breakpoints from the current notebook or console

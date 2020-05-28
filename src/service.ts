@@ -11,6 +11,8 @@ import { murmur2 } from 'murmurhash-js';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
+import { States } from './breakpoints/model';
+
 import { CallstackModel } from './callstack/model';
 
 import { DebuggerModel } from './model';
@@ -186,6 +188,13 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Clear mapped cells states after dispose instance of notebook.
+   */
+  clearMappedCellsStates(): void {
+    this._model.breakpoints.oldPathFromCell.clear();
+  }
+
+  /**
    * Restarts the debugger.
    * Precondition: isStarted.
    */
@@ -238,6 +247,28 @@ export class DebuggerService implements IDebugger, IDisposable {
         );
       });
     }
+    //@todo remove and use editor-finder's method find
+    const unassociatedBreakpoints = (
+      fromServer: Map<string, IDebugger.IBreakpoint[]>,
+      fromNotebook: Map<string, IDebugger.IBreakpoint[]>
+    ) => {
+      let breakpointsOnlyOnServer: Array<string> = [];
+      for (let [key] of fromServer) {
+        if (!fromNotebook.has(key)) {
+          breakpointsOnlyOnServer.push(key);
+        }
+      }
+      return breakpointsOnlyOnServer;
+    };
+
+    for (const path of unassociatedBreakpoints(
+      bpMap,
+      this._model.breakpoints.breakpoints
+    )) {
+      bpMap.delete(path);
+      await this._setBreakpoints([], path);
+    }
+
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     this._model.stoppedThreads = stoppedThreads;
 
@@ -317,11 +348,13 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
    * @param path - Optional path to the file where to set the breakpoints.
+   * @param states - Extra states of cell for map previous path before changes
    */
   async updateBreakpoints(
     code: string,
     breakpoints: IDebugger.IBreakpoint[],
-    path?: string
+    path?: string,
+    states?: States
   ): Promise<void> {
     if (!this.session.isStarted) {
       return;
@@ -330,6 +363,41 @@ export class DebuggerService implements IDebugger, IDisposable {
       const dumpedCell = await this._dumpCell(code);
       path = dumpedCell.body.sourcePath;
     }
+
+    if (!states) {
+      await this.preparationToSetBreakpoint(path, breakpoints);
+      await this.session.sendRequest('configurationDone', {});
+      return;
+    }
+
+    const oldState = this._model.breakpoints.oldPathFromCell.get(states.idCell);
+
+    if (oldState === undefined) {
+      this._model.breakpoints.oldPathFromCell.set(states.idCell, path);
+    }
+
+    if (states.codeChanged === true) {
+      await this.preparationToSetBreakpoint(oldState, []);
+      await this.preparationToSetBreakpoint(path, breakpoints);
+      this._model.breakpoints.oldPathFromCell.delete(states.idCell);
+      this._model.breakpoints.oldPathFromCell.set(states.idCell, path);
+    } else {
+      await this.preparationToSetBreakpoint(path, breakpoints);
+    }
+    this._model.breakpoints.cleanBreakpointsMapAboutEmptyArray();
+    await this.session.sendRequest('configurationDone', {});
+  }
+
+  /**
+   * Preparation for setting breakpoints
+   *
+   * @param path
+   * @param breakpoints
+   */
+  async preparationToSetBreakpoint(
+    path: string,
+    breakpoints: IDebugger.IBreakpoint[]
+  ): Promise<void> {
     const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
     const reply = await this._setBreakpoints(sourceBreakpoints, path);
     let kernelBreakpoints = reply.body.breakpoints.map(breakpoint => {
@@ -338,7 +406,6 @@ export class DebuggerService implements IDebugger, IDisposable {
         active: true
       };
     });
-
     // filter breakpoints with the same line number
     kernelBreakpoints = kernelBreakpoints.filter(
       (breakpoint, i, arr) =>
