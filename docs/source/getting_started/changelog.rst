@@ -6,6 +6,10 @@ JupyterLab Changelog
 `v1.2.x <https://github.com/jupyterlab/jupyterlab/milestone/54>`__
 ---------------------------------------------------------------------------
 
+v1.2.16
+^^^^^^^
+* Handle quit_button when launched as an extension (`#8487 <https://github.com/jupyterlab/jupyterlab/pull/8487>`__)
+
 v1.2.15
 ^^^^^^^
 * Fix watch mode and add CI Test (`#8396 <https://github.com/jupyterlab/jupyterlab/pull/8396>`__)
