@@ -258,15 +258,15 @@ export class DebuggerService implements IDebugger, IDisposable {
     const associatedBreakpoints = (
       fromServer: Map<string, IDebugger.IBreakpoint[]>
     ): string[] => {
-      let breakpointsOnlyOnServer: string[] = [];
+      let associatedBreakpoints: string[] = [];
       for (let [key, value] of fromServer) {
         each(editorFinder.find(debugSessionPath, key), () => {
           if (value.length > 0) {
-            breakpointsOnlyOnServer.push(key);
+            associatedBreakpoints.push(key);
           }
         });
       }
-      return breakpointsOnlyOnServer;
+      return associatedBreakpoints;
     };
 
     const breakpointsForRestore = (): Map<string, IDebugger.IBreakpoint[]> => {
