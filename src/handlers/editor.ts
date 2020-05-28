@@ -340,6 +340,7 @@ namespace Private {
   }
 
   /**
+   * Create a new breakpoint.
    *
    * @param session The name of the session.
    * @param line The line number of the breakpoint.
