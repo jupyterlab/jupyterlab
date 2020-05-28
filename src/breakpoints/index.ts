@@ -21,6 +21,7 @@ import { BreakpointsModel } from './model';
 export class Breakpoints extends Panel {
   /**
    * Instantiate a new Breakpoints Panel.
+   *
    * @param options The instantiation options for a Breakpoints Panel.
    */
   constructor(options: Breakpoints.IOptions) {
@@ -34,7 +35,7 @@ export class Breakpoints extends Panel {
       'closeAll',
       new ToolbarButton({
         icon: closeAllIcon,
-        onClick: () => {
+        onClick: (): void => {
           void service.clearBreakpoints();
         },
         tooltip: 'Remove All Breakpoints'

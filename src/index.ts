@@ -98,7 +98,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
       handler.disposeAll(debug);
     });
 
-    const updateHandlerAndCommands = async (widget: ConsolePanel) => {
+    const updateHandlerAndCommands = async (
+      widget: ConsolePanel
+    ): Promise<void> => {
       const { sessionContext } = widget;
       await sessionContext.ready;
       await handler.updateContext(widget, sessionContext);
@@ -149,7 +151,9 @@ const files: JupyterFrontEndPlugin<void> = {
       [id: string]: Session.ISessionConnection;
     } = {};
 
-    const updateHandlerAndCommands = async (widget: DocumentWidget) => {
+    const updateHandlerAndCommands = async (
+      widget: DocumentWidget
+    ): Promise<void> => {
       const sessions = app.serviceManager.sessions;
       try {
         const model = await sessions.findByPath(widget.context.path);
@@ -214,7 +218,9 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     service.model.disposed.connect(() => {
       handler.disposeAll(service);
     });
-    const updateHandlerAndCommands = async (widget: NotebookPanel) => {
+    const updateHandlerAndCommands = async (
+      widget: NotebookPanel
+    ): Promise<void> => {
       const { sessionContext } = widget;
       await sessionContext.ready;
       await handler.updateContext(widget, sessionContext);
@@ -356,7 +362,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         model.changed.connect(() => widget.dispose());
 
         if (themeManager) {
-          const updateStyle = () => {
+          const updateStyle = (): void => {
             const isLight = themeManager?.theme
               ? themeManager.isLight(themeManager.theme)
               : true;
@@ -476,7 +482,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
     if (settingRegistry) {
       const setting = await settingRegistry.load(main.id);
-      const updateVariableSettings = () => {
+      const updateVariableSettings = (): void => {
         const filters = setting.get('variableFilters').composite as {
           [key: string]: string[];
         };
@@ -494,7 +500,7 @@ const main: JupyterFrontEndPlugin<void> = {
     }
 
     if (themeManager) {
-      const updateStyle = () => {
+      const updateStyle = (): void => {
         const isLight = themeManager?.theme
           ? themeManager.isLight(themeManager.theme)
           : true;

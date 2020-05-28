@@ -13,6 +13,7 @@ import { CallstackModel } from './model';
 export class CallstackBody extends ReactWidget {
   /**
    * Instantiate a new Body for the Callstack Panel.
+   *
    * @param model The model for the callstack.
    */
   constructor(model: CallstackModel) {
@@ -24,7 +25,7 @@ export class CallstackBody extends ReactWidget {
   /**
    * Render the FramesComponent.
    */
-  render() {
+  render(): JSX.Element {
     return <FramesComponent model={this._model} />;
   }
 
@@ -33,25 +34,27 @@ export class CallstackBody extends ReactWidget {
 
 /**
  * A React component to display a list of frames in a callstack.
- * @param model The model for the callstack.
+ *
+ * @param {object} props The component props.
+ * @param props.model The model for the callstack.
  */
-const FramesComponent = ({ model }: { model: CallstackModel }) => {
+const FramesComponent = ({ model }: { model: CallstackModel }): JSX.Element => {
   const [frames, setFrames] = useState(model.frames);
   const [selected, setSelected] = useState(model.frame);
 
-  const onSelected = (frame: any) => {
+  const onSelected = (frame: any): void => {
     setSelected(frame);
     model.frame = frame;
   };
 
   useEffect(() => {
-    const updateFrames = () => {
+    const updateFrames = (): void => {
       setSelected(model.frame);
       setFrames(model.frames);
     };
     model.framesChanged.connect(updateFrames);
 
-    return () => {
+    return (): void => {
       model.framesChanged.disconnect(updateFrames);
     };
   }, [model]);
@@ -61,7 +64,7 @@ const FramesComponent = ({ model }: { model: CallstackModel }) => {
       {frames.map(ele => (
         <li
           key={ele.id}
-          onClick={() => onSelected(ele)}
+          onClick={(): void => onSelected(ele)}
           className={selected?.id === ele.id ? 'selected' : ''}
         >
           {ele.name} at {ele.source.name}:{ele.line}

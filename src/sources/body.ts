@@ -26,8 +26,9 @@ import { SourcesModel } from './model';
  */
 export class SourcesBody extends Widget {
   /**
-   * Instantiate a new Body for the Sources Panel.
-   * @param model The model for the sources.
+   * Instantiate a new Body for the SourcesBody widget.
+   *
+   * @param options The instantiation options for a SourcesBody.
    */
   constructor(options: SourcesBody.IOptions) {
     super();
@@ -77,16 +78,17 @@ export class SourcesBody extends Widget {
   /**
    * Clear the content of the source read-only editor.
    */
-  private _clearEditor() {
+  private _clearEditor(): void {
     this._model.currentSource = null;
     this._editor.hide();
   }
 
   /**
    * Show the content of the source for the given frame.
+   *
    * @param frame The current frame.
    */
-  private async _showSource(frame: CallstackModel.IFrame) {
+  private async _showSource(frame: CallstackModel.IFrame): Promise<void> {
     const path = frame.source.path;
     const source = await this._debuggerService.getSource({
       sourceReference: 0,

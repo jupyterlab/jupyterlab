@@ -15,6 +15,7 @@ import React from 'react';
 export class SourcesHeader extends Widget {
   /**
    * Instantiate a new SourcesHeader.
+   *
    * @param model The model for the Sources.
    */
   constructor(model: SourcesModel) {
@@ -45,13 +46,19 @@ export class SourcesHeader extends Widget {
 
 /**
  * A React component to display the path to a source.
- * @param model The model for the sources.
+ *
+ * @param {object} props The component props.
+ * @param props.model The model for the sources.
  */
-const SourcePathComponent = ({ model }: { model: SourcesModel }) => {
+const SourcePathComponent = ({
+  model
+}: {
+  model: SourcesModel;
+}): JSX.Element => {
   return (
     <UseSignal signal={model.currentSourceChanged} initialSender={model}>
-      {model => (
-        <span onClick={() => model.open()}>
+      {(model): JSX.Element => (
+        <span onClick={(): void => model.open()}>
           {model.currentSource?.path ?? ''}
         </span>
       )}

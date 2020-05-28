@@ -23,6 +23,7 @@ import { IDebugger } from '../tokens';
 export class ConsoleHandler implements IDisposable {
   /**
    * Instantiate a new ConsoleHandler.
+   *
    * @param options The instantiation options for a ConsoleHandler.
    */
   constructor(options: ConsoleHandler.IOptions) {
@@ -37,7 +38,7 @@ export class ConsoleHandler implements IDisposable {
       this._addEditorHandler(cell);
     });
 
-    const addHandlers = () => {
+    const addHandlers = (): void => {
       each(codeConsole.cells, cell => this._addEditorHandler(cell));
     };
     addHandlers();
@@ -64,9 +65,10 @@ export class ConsoleHandler implements IDisposable {
 
   /**
    * Add a new editor handler for the given cell.
+   *
    * @param cell The cell to add the handler to.
    */
-  private _addEditorHandler(cell: Cell) {
+  private _addEditorHandler(cell: Cell): void {
     const modelId = cell.model.id;
     if (cell.model.type !== 'code' || this._cellMap.has(modelId)) {
       return;

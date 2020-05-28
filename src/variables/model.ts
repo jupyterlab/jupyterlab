@@ -40,9 +40,10 @@ export class VariablesModel {
 
   /**
    * Expand a variable.
+   *
    * @param variable The variable to expand.
    */
-  expandVariable(variable: VariablesModel.IVariable) {
+  expandVariable(variable: VariablesModel.IVariable): void {
     this._variableExpanded.emit(variable);
   }
 

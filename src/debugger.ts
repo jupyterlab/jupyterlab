@@ -31,6 +31,7 @@ export namespace Debugger {
   export class Sidebar extends Panel {
     /**
      * Instantiate a new Debugger.Sidebar
+     *
      * @param options The instantiation options for a Debugger.Sidebar
      */
     constructor(options: Sidebar.IOptions) {

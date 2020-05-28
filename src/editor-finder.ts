@@ -33,6 +33,7 @@ import { IDebugger } from './tokens';
 export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   /**
    * Instantiate a new EditorFinder.
+   *
    * @param options The instantiation options for a EditorFinder.
    */
   constructor(options: EditorFinder.IOptions) {
@@ -68,6 +69,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
    * Find the editor for a source matching the current debug session
    * by iterating through all the widgets in each of the notebook,
    * console, file editor, and read-only file editor trackers.
+   *
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    */
@@ -85,10 +87,14 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
 
   /**
    * Find the editor for a source matching the current debug session
+   *
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    */
-  private _findInNotebooks(debugSessionPath: string, source: string) {
+  private _findInNotebooks(
+    debugSessionPath: string,
+    source: string
+  ): CodeEditor.IEditor[] {
     if (!this._notebookTracker) {
       return [];
     }
@@ -122,10 +128,14 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
 
   /**
    * Find the editor for a source matching the current debug session
+   *
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    */
-  private _findInConsoles(debugSessionPath: string, source: string) {
+  private _findInConsoles(
+    debugSessionPath: string,
+    source: string
+  ): CodeEditor.IEditor[] {
     if (!this._consoleTracker) {
       return [];
     }
@@ -154,10 +164,14 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   /**
    * Find the editor for a source matching the current debug session
    * from the editor tracker.
+   *
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    */
-  private _findInEditors(debugSessionPath: string, source: string) {
+  private _findInEditors(
+    debugSessionPath: string,
+    source: string
+  ): CodeEditor.IEditor[] {
     if (!this._editorTracker) {
       return;
     }
@@ -186,9 +200,14 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
 
   /**
    * Find an editor for a source from the read-only editor tracker.
+   *
+   * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    */
-  private _findInReadOnlyEditors(_: string, source: string) {
+  private _findInReadOnlyEditors(
+    debugSessionPath: string,
+    source: string
+  ): CodeEditor.IEditor[] {
     const editors: CodeEditor.IEditor[] = [];
     this._readOnlyEditorTracker.forEach(widget => {
       const editor = widget.content?.editor;

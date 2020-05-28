@@ -47,6 +47,7 @@ export interface IDebugger {
 
   /**
    * Request whether debugging is available for the given session connection.
+   *
    * @param connection The session connection.
    */
   isAvailable(connection: Session.ISessionConnection): Promise<boolean>;
@@ -81,6 +82,7 @@ export interface IDebugger {
 
   /**
    * Restore the state of a debug session.
+   *
    * @param autoStart - when true, starts the debugger
    * if it has not been started yet.
    */
@@ -108,6 +110,7 @@ export interface IDebugger {
 
   /**
    * Update all breakpoints of a cell at once.
+   *
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
    * @param path - Optional path to the file where to set the breakpoints.
@@ -134,6 +137,7 @@ export interface IDebugger {
 
   /**
    * Retrieve the content of a source file.
+   *
    * @param source The source object containing the path to the file.
    */
   getSource(source: DebugProtocol.Source): Promise<IDebugger.ISource>;
@@ -219,7 +223,7 @@ export namespace IDebugger {
   /**
    * The model of a debugger session.
    */
-  export interface IModel extends IObservableDisposable {}
+  export type IModel = IObservableDisposable;
 
   export namespace ISession {
     /**

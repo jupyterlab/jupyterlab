@@ -12,6 +12,7 @@ module.exports = {
     'plugin:@typescript-eslint/eslint-recommended',
     'plugin:@typescript-eslint/recommended',
     'prettier/@typescript-eslint',
+    'plugin:jsdoc/recommended',
     'plugin:react/recommended',
     'plugin:jest/recommended'
   ],
@@ -27,17 +28,15 @@ module.exports = {
       { prefixWithI: 'always' }
     ],
     '@typescript-eslint/no-unused-vars': ['warn', { args: 'none' }],
-    '@typescript-eslint/no-use-before-define': 'off',
-    '@typescript-eslint/camelcase': 'off',
-    '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/no-non-null-assertion': 'off',
-    '@typescript-eslint/no-namespace': 'off',
-    '@typescript-eslint/explicit-function-return-type': 'off',
-    '@typescript-eslint/ban-ts-ignore': 'warn',
     '@typescript-eslint/no-var-requires': 'off',
-    '@typescript-eslint/no-empty-interface': 'off',
-    '@typescript-eslint/triple-slash-reference': 'warn',
-    '@typescript-eslint/no-inferrable-types': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    '@typescript-eslint/no-namespace': 'off',
+    '@typescript-eslint/no-use-before-define': 'off',
+    '@typescript-eslint/quotes': [
+      'error',
+      'single',
+      { avoidEscape: true, allowTemplateLiterals: false }
+    ],
     'no-inner-declarations': 'off',
     'no-prototype-builtins': 'off',
     'no-control-regex': 'warn',
@@ -47,9 +46,27 @@ module.exports = {
     'prefer-const': 'off',
     'jest/no-jest-import': 'off',
     'jest/no-export': 'warn',
-    'jest/no-try-expect': 'warn'
+    'jest/no-try-expect': 'warn',
+    'jsdoc/require-jsdoc': [
+      1,
+      {
+        require: {
+          FunctionExpression: true,
+          ClassDeclaration: true,
+          MethodDefinition: true
+        }
+      }
+    ],
+    'jsdoc/require-description': 1,
+    'jsdoc/require-param-type': 'off',
+    'jsdoc/require-property-type': 'off',
+    'jsdoc/require-returns-type': 'off',
+    'jsdoc/require-returns': 'off'
   },
   settings: {
+    jsdoc: {
+      mode: 'typescript'
+    },
     react: {
       version: 'detect'
     }

@@ -21,6 +21,7 @@ import { IDebugger } from '../tokens';
 export class NotebookHandler implements IDisposable {
   /**
    * Instantiate a new NotebookHandler.
+   *
    * @param options The instantiation options for a NotebookHandler.
    */
   constructor(options: NotebookHandler.IOptions) {
@@ -56,7 +57,7 @@ export class NotebookHandler implements IDisposable {
   /**
    * Handle a notebook cells changed event.
    */
-  private _onCellsChanged() {
+  private _onCellsChanged(): void {
     this._notebookPanel.content.widgets.forEach(cell =>
       this._addEditorHandler(cell)
     );
@@ -64,9 +65,10 @@ export class NotebookHandler implements IDisposable {
 
   /**
    * Add a new editor handler for the given cell.
+   *
    * @param cell The cell to add the handler to.
    */
-  private _addEditorHandler(cell: Cell) {
+  private _addEditorHandler(cell: Cell): void {
     const modelId = cell.model.id;
     if (cell.model.type !== 'code' || this._cellMap.has(modelId)) {
       return;
@@ -85,10 +87,11 @@ export class NotebookHandler implements IDisposable {
 
   /**
    * Handle a new active cell.
+   *
    * @param notebook The notebook for which the active cell has changed.
    * @param cell The new active cell.
    */
-  private _onActiveCellChanged(notebook: Notebook, cell: Cell) {
+  private _onActiveCellChanged(notebook: Notebook, cell: Cell): void {
     if (this._notebookPanel.content !== notebook) {
       return;
     }

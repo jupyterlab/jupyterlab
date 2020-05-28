@@ -37,6 +37,7 @@ const EDITOR_CHANGED_TIMEOUT = 1000;
 export class EditorHandler implements IDisposable {
   /**
    * Instantiate a new EditorHandler.
+   *
    * @param options The instantiation options for a EditorHandler.
    */
   constructor(options: EditorHandler.IOptions) {
@@ -81,7 +82,7 @@ export class EditorHandler implements IDisposable {
   /**
    * Handle when the debug model changes.
    */
-  private _onModelChanged() {
+  private _onModelChanged(): void {
     this._debuggerModel = this._debuggerService.model as DebuggerModel;
     if (!this._debuggerModel) {
       return;
@@ -110,7 +111,7 @@ export class EditorHandler implements IDisposable {
   /**
    * Setup the editor.
    */
-  private _setupEditor() {
+  private _setupEditor(): void {
     if (!this._editor || this._editor.isDisposed) {
       return;
     }
@@ -129,7 +130,7 @@ export class EditorHandler implements IDisposable {
   /**
    * Clear the editor by removing visual elements and handlers.
    */
-  private _clearEditor() {
+  private _clearEditor(): void {
     if (!this._editor || this._editor.isDisposed) {
       return;
     }
@@ -144,7 +145,7 @@ export class EditorHandler implements IDisposable {
   /**
    * Send the breakpoints from the editor UI via the debug service.
    */
-  private _sendEditorBreakpoints() {
+  private _sendEditorBreakpoints(): void {
     if (this._editor.isDisposed) {
       return;
     }
@@ -165,10 +166,11 @@ export class EditorHandler implements IDisposable {
 
   /**
    * Handle a click on the gutter.
+   *
    * @param editor The editor from where the click originated.
    * @param lineNumber The line corresponding to the click event.
    */
-  private _onGutterClick = (editor: Editor, lineNumber: number) => {
+  private _onGutterClick = (editor: Editor, lineNumber: number): void => {
     const info = editor.lineInfo(lineNumber);
     if (!info || this._id !== this._debuggerService.session.connection.id) {
       return;
@@ -197,7 +199,7 @@ export class EditorHandler implements IDisposable {
   /**
    * Add the breakpoints to the editor.
    */
-  private _addBreakpointsToEditor() {
+  private _addBreakpointsToEditor(): void {
     const editor = this._editor as CodeMirrorEditor;
     const breakpoints = this._getBreakpoints();
     if (this._id !== this._debuggerService.session.connection.id) {
@@ -277,10 +279,14 @@ export namespace EditorHandler {
 
   /**
    * Highlight the current line of the frame in the given editor.
+   *
    * @param editor The editor to highlight.
    * @param line The line number.
    */
-  export function showCurrentLine(editor: CodeEditor.IEditor, line: number) {
+  export function showCurrentLine(
+    editor: CodeEditor.IEditor,
+    line: number
+  ): void {
     clearHighlight(editor);
     const cmEditor = editor as CodeMirrorEditor;
     cmEditor.editor.addLineClass(line - 1, 'wrap', LINE_HIGHLIGHT_CLASS);
@@ -288,9 +294,10 @@ export namespace EditorHandler {
 
   /**
    * Remove all line highlighting indicators for the given editor.
+   *
    * @param editor The editor to cleanup.
    */
-  export function clearHighlight(editor: CodeEditor.IEditor) {
+  export function clearHighlight(editor: CodeEditor.IEditor): void {
     if (!editor || editor.isDisposed) {
       return;
     }
@@ -302,10 +309,10 @@ export namespace EditorHandler {
 
   /**
    * Remove line numbers and all gutters from editor.
+   *
    * @param editor The editor to cleanup.
    */
-
-  export function clearGutter(editor: CodeEditor.IEditor) {
+  export function clearGutter(editor: CodeEditor.IEditor): void {
     if (!editor) {
       return;
     }
@@ -325,7 +332,7 @@ namespace Private {
   /**
    * Create a marker DOM element for a breakpoint.
    */
-  export function createMarkerNode() {
+  export function createMarkerNode(): HTMLElement {
     const marker = document.createElement('div');
     marker.className = 'jp-DebuggerEditor-marker';
     marker.innerHTML = '●';
@@ -333,11 +340,15 @@ namespace Private {
   }
 
   /**
+   * Create a new breakpoint.
    *
    * @param session The name of the session.
    * @param line The line number of the breakpoint.
    */
-  export function createBreakpoint(session: string, line: number) {
+  export function createBreakpoint(
+    session: string,
+    line: number
+  ): IDebugger.IBreakpoint {
     return {
       line,
       active: true,
