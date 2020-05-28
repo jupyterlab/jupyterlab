@@ -483,15 +483,6 @@ class LabApp(NotebookApp):
     expose_app_in_browser = Bool(False, config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab")
 
-    def init_webapp(self, *args, **kwargs):
-        super().init_webapp(*args, **kwargs)
-        settings = self.web_app.settings
-        if 'page_config_data' not in settings:
-            settings['page_config_data'] = {}
-
-        # Handle quit button with support for Notebook < 5.6
-        settings['page_config_data']['quitButton'] = getattr(self, 'quit_button', False)
-
     def init_server_extensions(self):
         """Load any extensions specified by config.
 
