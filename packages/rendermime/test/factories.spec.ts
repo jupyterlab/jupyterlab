@@ -32,6 +32,13 @@ function createModel(
   return new MimeModel({ data, trusted });
 }
 
+function encodeChars(txt: string): string {
+  return txt
+    .replace('&', '&amp;')
+    .replace('<', '&lt;')
+    .replace('>', '&gt;');
+}
+
 const sanitizer = defaultSanitizer;
 const defaultOptions: any = {
   sanitizer,
@@ -106,24 +113,37 @@ describe('rendermime/factories', () => {
       it('should autolink URLs', async () => {
         const f = textRendererFactory;
         const urls = [
-          'https://example.com',
-          'https://example.com/',
-          'https://example.com#anchor',
-          'http://localhost:9090/app',
-          'http://localhost:9090/app/',
-          'http://127.0.0.1/test?query=string',
-          'http://127.0.0.1/test?query=string&param=42'
+          ['https://example.com', '', '', 'true'],
+          ['https://example-lt-gt.com', '<', '>', 'false'], // maybe this should be true
+          ['https://example-lt.com', '<', '', 'false'], // maybe this should be true
+          // ['https://example-gt.com', '', '>', 'true'], // ">" is incorporated into the link
+          ['https://example.com/', '', '', 'true'],
+          ['https://punctuation-before.com/', '.', '', 'false'], // maybe this should be true
+          // ['https://punctuation-after.com/', '', '?', 'true'], // "?" is incorporated into the link
+          ['https://example.com#anchor', '', '', 'true'],
+          ['http://localhost:9090/app', '', '', 'true'],
+          ['http://localhost:9090/app/', '', '', 'true'],
+          ['http://127.0.0.1/test?query=string', '', '', 'true'],
+          ['http://127.0.0.1/test?query=string&param=42', '', '', 'true']
         ];
         await Promise.all(
-          urls.map(async url => {
-            const source = `Here is some text with an URL such as ${url} inside.`;
+          urls.map(async u => {
+            const [url, before, after, isLinkStr] = u;
+            const isLink = isLinkStr === 'true';
+            const source = `Text with the URL ${before}${url}${after} inside.`;
             const mimeType = 'text/plain';
             const model = createModel(mimeType, source);
             const w = f.createRenderer({ mimeType, ...defaultOptions });
-            const urlEncoded = url.replace('&', '&amp;');
+            const [urlEncoded, beforeEncoded, afterEncoded] = [
+              url,
+              before,
+              after
+            ].map(encodeChars);
             await w.renderModel(model);
             expect(w.node.innerHTML).toBe(
-              `<pre>Here is some text with an URL such as <a href="${urlEncoded}" rel="noopener" target="_blank">${urlEncoded}</a> inside.</pre>`
+              isLink
+                ? `<pre>Text with the URL ${beforeEncoded}<a href="${urlEncoded}" rel="noopener" target="_blank">${urlEncoded}</a>${afterEncoded} inside.</pre>`
+                : `<pre>Text with the URL ${beforeEncoded}${urlEncoded}${afterEncoded} inside.</pre>`
             );
           })
         );
