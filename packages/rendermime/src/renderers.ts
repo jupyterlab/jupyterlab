@@ -470,25 +470,16 @@ export namespace renderSVG {
 /**
  * Replace URLs with links.
  *
- * @param content - The plain text content.
+ * @param txt - The plain text content.
  *
  * @returns The content where all URLs have been replaced with corresponding links.
  */
-function autolink(content: string): string {
-  // Taken from Visual Studio Code:
-  // https://github.com/microsoft/vscode/blob/9f709d170b06e991502153f281ec3c012add2e42/src/vs/workbench/contrib/debug/browser/linkDetector.ts#L17-L18
-  const controlCodes = '\\u0000-\\u0020\\u007f-\\u009f';
-  const webLinkRegex = new RegExp(
-    '(?:[a-zA-Z][a-zA-Z0-9+.-]{2,}:\\/\\/|data:|www\\.)[^\\s' +
-      controlCodes +
-      '"]{2,}[^\\s' +
-      controlCodes +
-      '"\')}\\],:;.!?>]',
-    'ug'
-  );
-  return content.replace(
-    webLinkRegex,
-    '<a href="$&" rel="noopener" target="_blank">$&</a>'
+function autolink(txt: string): string {
+  // Taken from the Jupyter notebook code:
+  // https://github.com/jupyter/notebook/blob/6308e979aa01a5f88cb6ce969efa7617f83687b1/notebook/static/base/js/utils.js#L506-L510
+  return txt.replace(
+    /(^|\s)(https?|ftp)(:[^'"<>\s]+)/gi,
+    '$1<a target="_blank" href="$2$3">$2$3</a>'
   );
 }
 
