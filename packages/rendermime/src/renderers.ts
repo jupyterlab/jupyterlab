@@ -479,7 +479,7 @@ function autolink(txt: string): string {
   // https://github.com/jupyter/notebook/blob/6308e979aa01a5f88cb6ce969efa7617f83687b1/notebook/static/base/js/utils.js#L506-L510
   return txt.replace(
     /(^|\s)(https?|ftp)(:[^'"<>\s]+)/gi,
-    '$1<a target="_blank" href="$2$3">$2$3</a>'
+    '$1<a href="$2$3" rel="noopener" target="_blank">$2$3</a>'
   );
 }
 
