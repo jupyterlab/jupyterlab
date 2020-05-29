@@ -407,8 +407,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Preparation for setting breakpoints
    *
-   * @param path
-   * @param breakpoints
+   * @param path - Path of cell
+   * @param breakpoints - Breakpoints for set
    */
   async preparationToSetBreakpoint(
     path: string,

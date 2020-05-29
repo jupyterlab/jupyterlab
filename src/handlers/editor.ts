@@ -199,10 +199,8 @@ export class EditorHandler implements IDisposable {
 
   /**
    * Handle event when editor has some changes.
-   *
-   * @private
    */
-  private _beforeChanges = () => {
+  private _beforeChanges = (): void => {
     this._codeChanged = true;
   };
   /**
@@ -240,10 +238,8 @@ export class EditorHandler implements IDisposable {
 
   /**
    * Remove gutters after close editor
-   *
-   * @private
    */
-  private _removeGutterAfterDelete() {
+  private _removeGutterAfterDelete(): void {
     void this._debuggerService.updateBreakpoints(
       this._editor.model.value.text,
       [],

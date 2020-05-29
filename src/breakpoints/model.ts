@@ -120,8 +120,10 @@ export class BreakpointsModel implements IDisposable {
  */
 export class States {
   /**
-   * @param idCell
-   * @param codeChanged
+   * Constructor for initialize state
+   *
+   * @param idCell - Temporary idCell
+   * @param codeChanged - Flag for event when something happen with cell
    */
   constructor(idCell?: string, codeChanged?: boolean) {
     this._idCell = idCell;
@@ -137,9 +139,11 @@ export class States {
 
   /**
    * Set temporary cell's id
+   *
+   * @param idCell
    */
-  set idCell(value: string) {
-    this._idCell = value;
+  set idCell(idCell: string) {
+    this._idCell = idCell;
   }
   /**
    * Get get event flag if something has been changed in cell
