@@ -6,6 +6,11 @@ JupyterLab Changelog
 `v2.1.x <https://github.com/jupyterlab/jupyterlab/milestone/55>`__
 ------------------------------------------------------------------
 
+v2.1.4
+^^^^^^
+* Fix watch mode on Windows by adding chokidar dependency (`#8492 <https://github.com/jupyterlab/jupyterlab/pull/8492>`__)
+
+
 v2.1.3
 ^^^^^^
 * Fix Jupyterlab manager extension handling of missing package metadata (`#8463 <https://github.com/jupyterlab/jupyterlab/pull/8463>`__)
