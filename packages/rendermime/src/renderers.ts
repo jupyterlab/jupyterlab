@@ -483,13 +483,24 @@ function autolink(content: string): string {
       controlCodes +
       '"]{2,}[^\\s' +
       controlCodes +
-      '"\'(){}\\[\\]<>,:;.!?]',
+      '"\'(){}\\[\\],:;.!?]',
     'ug'
   );
-  return content.replace(
-    webLinkRegex,
-    '<a href="$&" rel="noopener" target="_blank">$&</a>'
-  );
+  return content.replace(webLinkRegex, url => {
+    // Special case when the URL ends with ">" or "<"
+    const lastChars = url.slice(-3);
+    if (['&gt', '&lt'].indexOf(lastChars) === -1) {
+      let toAppend = '';
+      let len = url.length;
+    } else {
+      let toAppend = lastChars;
+      let len = url.length - 3;
+    }
+    return (
+      `<a href="${url.slice(0, len)}" rel="noopener" target="_blank">` +
+      `${url.slice(0, len)}</a>${toAppend}`
+    );
+  });
 }
 
 /**
