@@ -489,13 +489,9 @@ function autolink(content: string): string {
   return content.replace(webLinkRegex, url => {
     // Special case when the URL ends with ">" or "<"
     const lastChars = url.slice(-3);
-    if (['&gt', '&lt'].indexOf(lastChars) === -1) {
-      let toAppend = '';
-      let len = url.length;
-    } else {
-      let toAppend = lastChars;
-      let len = url.length - 3;
-    }
+    const endsWithGtLt = ['&gt', '&lt'].indexOf(lastChars) !== -1;
+    const toAppend = endsWithGtLt ? lastChars : '';
+    const len = endsWithGtLt ? url.length - 3 : url.length;
     return (
       `<a href="${url.slice(0, len)}" rel="noopener" target="_blank">` +
       `${url.slice(0, len)}</a>${toAppend}`
