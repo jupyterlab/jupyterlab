@@ -157,31 +157,31 @@ module.exports = [
       alias: {
         '@phosphor/algorithm$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/algorithm/lib/index.js'
+          'node_modules/@lumino/algorithm/dist/index.js'
         ),
         '@phosphor/application$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/application/lib/index.js'
+          'node_modules/@lumino/application/dist/index.js'
         ),
         '@phosphor/commands$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/commands/lib/index.js'
+          'node_modules/@lumino/commands/dist/index.js'
         ),
         '@phosphor/coreutils$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/coreutils/lib/index.js'
+          'node_modules/@lumino/coreutils/dist/index.js'
         ),
         '@phosphor/disposable$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/disposable/lib/index.js'
+          'node_modules/@lumino/disposable/dist/index.js'
         ),
         '@phosphor/domutils$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/domutils/lib/index.js'
+          'node_modules/@lumino/domutils/dist/index.js'
         ),
         '@phosphor/dragdrop$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/dragdrop/lib/index.js'
+          'node_modules/@lumino/dragdrop/dist/index.js'
         ),
         '@phosphor/dragdrop/style': plib.resolve(
           __dirname,
@@ -189,7 +189,7 @@ module.exports = [
         ),
         '@phosphor/messaging$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/messaging/lib/index.js'
+          'node_modules/@lumino/messaging/dist/index.js'
         ),
         '@phosphor/properties$': plib.resolve(
           __dirname,
@@ -197,7 +197,7 @@ module.exports = [
         ),
         '@phosphor/signaling': plib.resolve(
           __dirname,
-          'node_modules/@lumino/signaling/lib/index.js'
+          'node_modules/@lumino/signaling/dist/index.js'
         ),
         '@phosphor/widgets/style': plib.resolve(
           __dirname,
@@ -205,11 +205,11 @@ module.exports = [
         ),
         '@phosphor/virtualdom$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/virtualdom/lib/index.js'
+          'node_modules/@lumino/virtualdom/dist/index.js'
         ),
         '@phosphor/widgets$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/widgets/lib/index.js'
+          'node_modules/@lumino/widgets/dist/index.js'
         )
       }
     },
