@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application-top",
-  "version": "2.1.3",
+  "version": "2.1.4",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -60,6 +60,7 @@
   },
   "devDependencies": {
     "@jupyterlab/buildutils": "^2.1.0",
+    "chokidar": "^3.4.0",
     "css-loader": "~3.2.0",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
     "file-loader": "~5.0.2",
@@ -188,7 +189,7 @@
   },
   "jupyterlab": {
     "name": "JupyterLab",
-    "version": "2.1.3",
+    "version": "2.1.4",
     "extensions": {
       "@jupyterlab/application-extension": "",
       "@jupyterlab/apputils-extension": "",
