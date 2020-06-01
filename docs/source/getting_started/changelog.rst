@@ -9,6 +9,7 @@ JupyterLab Changelog
 v2.1.4
 ^^^^^^
 * Fix watch mode on Windows by adding chokidar dependency (`#8492 <https://github.com/jupyterlab/jupyterlab/pull/8492>`__)
+* Fix phosphor -> lumino mapping (`#8498 <https://github.com/jupyterlab/jupyterlab/pull/8498>`__)
 
 
 v2.1.3
