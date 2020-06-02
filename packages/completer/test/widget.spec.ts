@@ -918,6 +918,31 @@ describe('completer/widget', () => {
         anchor.dispose();
       });
 
+      it('should insert single completion item insertText on tab', async () => {
+        const anchor = createEditorWidget();
+        const model = new CompleterModel();
+        const options: Completer.IOptions = {
+          editor: anchor.editor,
+          model
+        };
+        let value = '';
+        const listener = (sender: any, selected: string) => {
+          value = selected;
+        };
+        model.setCompletionItems!([{ label: 'foo', insertText: 'bar' }]);
+        Widget.attach(anchor, document.body);
+
+        const widget = new Completer(options);
+
+        widget.selected.connect(listener);
+        Widget.attach(widget, document.body);
+        MessageLoop.sendMessage(widget, Widget.Msg.UpdateRequest);
+        simulate(anchor.node, 'keydown', { keyCode: 9 }); // Tab key
+        expect(value).toBe('bar');
+        widget.dispose();
+        anchor.dispose();
+      });
+
       describe('mousedown', () => {
         it('should trigger a selected signal on mouse down', () => {
           const anchor = createEditorWidget();
