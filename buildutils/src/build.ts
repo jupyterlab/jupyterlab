@@ -3,6 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+import CopyPlugin = require('copy-webpack-plugin');
 import MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 import * as webpack from 'webpack';
@@ -192,6 +193,9 @@ export namespace Build {
           ]
         },
         plugins: [
+          new CopyPlugin({
+            patterns: [packageDataPath]
+          }),
           new MiniCssExtractPlugin({
             // Options similar to the same options in webpackOptions.output
             // both options are optional

@@ -43,6 +43,7 @@
     "@yarnpkg/lockfile": "^1.1.0",
     "child_process": "~1.0.2",
     "commander": "~4.0.1",
+    "copy-webpack-plugin": "6.0.1",
     "crypto": "~1.0.1",
     "dependency-graph": "^0.8.1",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
@@ -60,6 +61,7 @@
     "which": "^2.0.2"
   },
   "devDependencies": {
+    "@types/copy-webpack-plugin": "^6.0.0",
     "@types/duplicate-package-checker-webpack-plugin": "^2.1.0",
     "@types/fs-extra": "^8.0.1",
     "@types/glob": "^7.1.1",
