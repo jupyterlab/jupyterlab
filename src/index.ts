@@ -58,10 +58,6 @@ import { VariablesBodyGrid } from './variables/grid';
  * The command IDs used by the debugger plugin.
  */
 export namespace CommandIDs {
-  export const start = 'debugger:start';
-
-  export const stop = 'debugger:stop';
-
   export const debugContinue = 'debugger:continue';
 
   export const terminate = 'debugger:terminate';
