@@ -384,14 +384,20 @@ const variables: JupyterFrontEndPlugin<void> = {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:main',
-  requires: [IDebugger, IEditorServices, IDebuggerEditorFinder],
-  optional: [ILayoutRestorer, ICommandPalette, ISettingRegistry, IThemeManager],
+  requires: [IDebugger, IEditorServices],
+  optional: [
+    ILabShell,
+    ILayoutRestorer,
+    ICommandPalette,
+    ISettingRegistry,
+    IThemeManager
+  ],
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
     service: IDebugger,
     editorServices: IEditorServices,
-    editorFinder: IDebuggerEditorFinder,
+    labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null,
     settingRegistry: ISettingRegistry | null,
@@ -506,8 +512,11 @@ const main: JupyterFrontEndPlugin<void> = {
       updateStyle();
     }
 
-    sidebar.service.eventMessage.connect(_ => {
+    sidebar.service.eventMessage.connect((_, event): void => {
       commands.notifyCommandChanged();
+      if (labShell && event.event === 'initialized') {
+        labShell.expandRight();
+      }
     });
 
     sidebar.service.sessionChanged.connect(_ => {
