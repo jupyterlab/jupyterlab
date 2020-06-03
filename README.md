@@ -146,7 +146,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
 - Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
-- Eric Charles, Datalayer, (general development, extensions)
+- Eric Charles, Datalayer, (general development, extensions).
 - Jason Grout, Bloomberg (co-creator, vision, general development).
 - Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
