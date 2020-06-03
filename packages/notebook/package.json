@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/notebook",
-  "version": "2.1.0",
+  "version": "2.2.0-alpha.0",
   "description": "JupyterLab - Notebook",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,17 +40,17 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.1.0",
-    "@jupyterlab/cells": "^2.1.0",
-    "@jupyterlab/codeeditor": "^2.1.0",
-    "@jupyterlab/coreutils": "^4.1.0",
-    "@jupyterlab/docregistry": "^2.1.0",
-    "@jupyterlab/nbformat": "^2.1.0",
-    "@jupyterlab/observables": "^3.1.0",
-    "@jupyterlab/rendermime": "^2.1.0",
-    "@jupyterlab/services": "^5.1.0",
-    "@jupyterlab/statusbar": "^2.1.0",
-    "@jupyterlab/ui-components": "^2.1.0",
+    "@jupyterlab/apputils": "^2.2.0-alpha.0",
+    "@jupyterlab/cells": "^2.2.0-alpha.0",
+    "@jupyterlab/codeeditor": "^2.2.0-alpha.0",
+    "@jupyterlab/coreutils": "^4.2.0-alpha.0",
+    "@jupyterlab/docregistry": "^2.2.0-alpha.0",
+    "@jupyterlab/nbformat": "^2.2.0-alpha.0",
+    "@jupyterlab/observables": "^3.2.0-alpha.0",
+    "@jupyterlab/rendermime": "^2.2.0-alpha.0",
+    "@jupyterlab/services": "^5.2.0-alpha.0",
+    "@jupyterlab/statusbar": "^2.2.0-alpha.0",
+    "@jupyterlab/ui-components": "^2.2.0-alpha.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
     "@lumino/domutils": "^1.1.7",
@@ -63,7 +63,7 @@
     "react": "~16.9.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.1.0",
+    "@jupyterlab/testutils": "^2.2.0-alpha.0",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",
