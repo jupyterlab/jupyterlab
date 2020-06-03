@@ -99,12 +99,13 @@ describe('Debugger', () => {
 
   describe('Breakpoints', () => {
     const path = 'path/to/file.py';
+    const lines = [3, 5];
 
     beforeEach(() => {
       const bpMap = new Map<string, IDebugger.IBreakpoint[]>();
       bpMap.set(
         path,
-        [3, 5].map((line: number, id: number) => {
+        lines.map((line: number, id: number) => {
           return {
             id,
             line,
@@ -139,6 +140,41 @@ describe('Debugger', () => {
       items.forEach(item => {
         expect(item.innerHTML).toEqual(path);
       });
+    });
+
+    it('should contain the line number', async () => {
+      const node = sidebar.breakpoints.node;
+      const items = node.querySelectorAll('.jp-DebuggerBreakpoint-line');
+      items.forEach((item, i) => {
+        const parsed = parseInt(item.innerHTML, 10);
+        expect(parsed).toEqual(lines[i]);
+      });
+    });
+
+    it('should be updated when new breakpoints are added', async () => {
+      const node = sidebar.breakpoints.node;
+      let items = node.querySelectorAll('.jp-DebuggerBreakpoint');
+      const len1 = items.length;
+
+      const bps = model.breakpoints.getBreakpoints(path);
+      bps.push({
+        id: 3,
+        line: 4,
+        active: true,
+        verified: true,
+        source: {
+          path
+        }
+      });
+
+      act(() => {
+        model.breakpoints.setBreakpoints(path, bps);
+      });
+
+      items = node.querySelectorAll('.jp-DebuggerBreakpoint');
+      const len2 = items.length;
+
+      expect(len2).toEqual(len1 + 1);
     });
   });
 });
