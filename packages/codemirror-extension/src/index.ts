@@ -167,6 +167,17 @@ function activateEditorCommands(
     }
 
     theme = (settings.get('theme').composite as string | null) || theme;
+
+    // Lazy loading of theme stylesheets
+    if (theme !== 'jupyter' && theme !== 'default') {
+      const filename =
+        theme === 'solarized light' || theme === 'solarized dark'
+          ? 'solarized'
+          : theme;
+
+      await import(`codemirror/theme/${filename}.css`);
+    }
+
     scrollPastEnd =
       (settings.get('scrollPastEnd').composite as boolean | null) ??
       scrollPastEnd;
