@@ -5,6 +5,8 @@ import {
 
 import { JupyterServer } from '@jupyterlab/testutils';
 
+import { KernelSpecManager } from '@jupyterlab/services';
+
 import { CommandRegistry } from '@lumino/commands';
 
 import { Debugger } from '../src/debugger';
@@ -28,7 +30,8 @@ afterAll(async () => {
 });
 
 describe('Debugger', () => {
-  const service = new DebuggerService();
+  const specsManager = new KernelSpecManager();
+  const service = new DebuggerService({ specsManager });
   const registry = new CommandRegistry();
   const factoryService = new CodeMirrorEditorFactory();
   const mimeTypeService = new CodeMirrorMimeTypeService();

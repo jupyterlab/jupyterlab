@@ -1,4 +1,4 @@
-import { Session } from '@jupyterlab/services';
+import { Session, KernelSpecManager } from '@jupyterlab/services';
 
 import {
   createSession,
@@ -28,7 +28,8 @@ afterAll(async () => {
 });
 
 describe('Debugging support', () => {
-  const service = new DebuggerService();
+  const specsManager = new KernelSpecManager();
+  const service = new DebuggerService({ specsManager });
   let xpython: Session.ISessionConnection;
   let ipykernel: Session.ISessionConnection;
 
@@ -65,6 +66,7 @@ describe('Debugging support', () => {
 });
 
 describe('DebuggerService', () => {
+  const specsManager = new KernelSpecManager();
   let connection: Session.ISessionConnection;
   let model: DebuggerModel;
   let session: IDebugger.ISession;
@@ -79,7 +81,7 @@ describe('DebuggerService', () => {
     await connection.changeKernel({ name: 'xpython' });
     session = new DebugSession({ connection });
     model = new DebuggerModel();
-    service = new DebuggerService();
+    service = new DebuggerService({ specsManager });
   });
 
   afterEach(async () => {
