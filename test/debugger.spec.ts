@@ -7,19 +7,15 @@ import {
   CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
 
-import { JupyterServer } from '@jupyterlab/testutils';
+import { KernelSpecManager, Session } from '@jupyterlab/services';
 
-import { KernelSpecManager } from '@jupyterlab/services';
-
-import { CommandRegistry } from '@lumino/commands';
-
-import { createSession } from '@jupyterlab/testutils';
-
-import { Session } from '@jupyterlab/services';
+import { createSession, signalToPromise, JupyterServer } from '@jupyterlab/testutils';
 
 import { toArray } from '@lumino/algorithm';
 
-import { UUID, PromiseDelegate } from '@lumino/coreutils';
+import { CommandRegistry } from '@lumino/commands';
+
+import { UUID } from '@lumino/coreutils';
 
 import { MessageLoop } from '@lumino/messaging';
 
@@ -28,6 +24,8 @@ import { Widget } from '@lumino/widgets';
 import { Debugger } from '../src/debugger';
 
 import { DebuggerService } from '../src/service';
+
+import { DebuggerModel } from '../src/model';
 
 import { DebugSession } from '../src/session';
 
@@ -122,23 +120,16 @@ describe('Debugger', () => {
       };
     });
 
-    const stoppedFuture = new PromiseDelegate<void>();
-    service.eventMessage.connect(
-      (sender: IDebugger, event: IDebugger.ISession.Event) => {
-        switch (event.event) {
-          case 'stopped':
-            stoppedFuture.resolve();
-            break;
-        }
-      }
+    const model = service.model as DebuggerModel;
+    const currentFrameChanged = signalToPromise(
+      model.callstack.currentFrameChanged
     );
 
     await act(async () => {
       await service.updateBreakpoints(code, breakpoints);
       connection.kernel.requestExecute({ code });
+      await currentFrameChanged;
     });
-
-    await stoppedFuture.promise;
   });
 
   afterAll(async () => {
@@ -151,6 +142,37 @@ describe('Debugger', () => {
   describe('#constructor()', () => {
     it('should create a new debugger sidebar', () => {
       expect(sidebar).toBeInstanceOf(Debugger.Sidebar);
+    });
+  });
+
+  describe('#callstack', () => {
+    it('should have a header and a body', () => {
+      expect(sidebar.callstack.widgets.length).toEqual(2);
+    });
+
+    it('should have the jp-DebuggerCallstack class', () => {
+      expect(sidebar.callstack.hasClass('jp-DebuggerCallstack')).toBe(true);
+    });
+
+    it('should have the debug buttons', () => {
+      const node = sidebar.callstack.node;
+      const items = node.querySelectorAll('button');
+
+      expect(items.length).toEqual(5);
+      items.forEach(item => {
+        expect(Array.from(items[0].classList)).toEqual(
+          expect.arrayContaining(['jp-ToolbarButtonComponent'])
+        );
+      });
+    });
+
+    it('should display the stack frames', () => {
+      const node = sidebar.callstack.node;
+      const items = node.querySelectorAll('.jp-DebuggerCallstack-body li');
+
+      expect(items).toHaveLength(1);
+      expect(items[0].innerHTML).toContain('module');
+      expect(items[0].innerHTML).toContain('3'); // line for the first breakpoint
     });
   });
 
