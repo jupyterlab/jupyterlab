@@ -21,7 +21,7 @@ A kernel with support for debugging is required to be able to use the debugger.
 It is generally recommended to create a new `conda` environment to install the dependencies:
 
 ```bash
-conda create -n jupyterlab-debugger -c conda-forge xeus=0.23.14 xeus-python=0.7.1 notebook=6 jupyterlab=2 ptvsd
+conda create -n jupyterlab-debugger -c conda-forge xeus=0.23.14 xeus-python=0.7.1 notebook=6 jupyterlab=2 ptvsd nodejs
 conda activate jupyterlab-debugger
 ```
 
