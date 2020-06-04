@@ -1,16 +1,30 @@
 import { Session } from '@jupyterlab/services';
 
-import { createSession, signalToPromise } from '@jupyterlab/testutils';
+import {
+  createSession,
+  signalToPromise,
+  JupyterServer
+} from '@jupyterlab/testutils';
 
 import { UUID } from '@lumino/coreutils';
 
-import { DebuggerModel } from '../../lib/model';
+import { DebuggerModel } from '../src/model';
 
-import { DebuggerService } from '../../lib/service';
+import { DebuggerService } from '../src/service';
 
-import { DebugSession } from '../../lib/session';
+import { DebugSession } from '../src/session';
 
-import { IDebugger } from '../../lib/tokens';
+import { IDebugger } from '../src/tokens';
+
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
 
 describe('Debugging support', () => {
   const service = new DebuggerService();
