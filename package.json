@@ -73,7 +73,7 @@
   "devDependencies": {
     "@babel/core": "^7.5.5",
     "@babel/preset-env": "^7.7.6",
-    "@jupyterlab/testutils": "^2.0.0",
+    "@jupyterlab/testutils": "^2.2.0-alpha.0",
     "@types/codemirror": "0.0.76",
     "@types/jest": "^24.0.17",
     "@types/murmurhash-js": "1.0.3",
