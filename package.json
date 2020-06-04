@@ -36,6 +36,7 @@
   },
   "scripts": {
     "build": "tsc -b",
+    "build:test": "tsc --build tests/tsconfig.json",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo && rimraf tests/build",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "eslint": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
@@ -45,7 +46,10 @@
     "prepublishOnly": "npm run build",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "prettier:check": "prettier --list-different '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
-    "test": "python tests/run-test.py",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
