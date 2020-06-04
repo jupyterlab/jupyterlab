@@ -334,7 +334,7 @@ read the instructions.
    :align: center
    :class: jp-screenshot
 
-   **Figure:** Whitelisted installed extension which should be removed
+   **Figure:** The second of the installed extensions was removed from the whitelist and should be removed
 
 .. _listings_conf:
 
