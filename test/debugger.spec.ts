@@ -1,5 +1,7 @@
 import { act } from 'react-dom/test-utils';
 
+import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
+
 import {
   CodeMirrorEditorFactory,
   CodeMirrorMimeTypeService
@@ -15,7 +17,9 @@ import { createSession } from '@jupyterlab/testutils';
 
 import { Session } from '@jupyterlab/services';
 
-import { UUID } from '@lumino/coreutils';
+import { toArray } from '@lumino/algorithm';
+
+import { UUID, PromiseDelegate } from '@lumino/coreutils';
 
 import { MessageLoop } from '@lumino/messaging';
 
@@ -25,9 +29,11 @@ import { Debugger } from '../src/debugger';
 
 import { DebuggerService } from '../src/service';
 
-import { DebuggerModel } from '../src/model';
-
 import { DebugSession } from '../src/session';
+
+import { SourcesBody } from '../src/sources/body';
+
+import { SourcesHeader } from '../src/sources/header';
 
 import { IDebugger } from '../src/tokens';
 
@@ -53,12 +59,23 @@ describe('Debugger', () => {
   const registry = new CommandRegistry();
   const factoryService = new CodeMirrorEditorFactory();
   const mimeTypeService = new CodeMirrorMimeTypeService();
+  const lines = [3, 5];
+  const code = [
+    'i = 0',
+    'i += 1',
+    'i += 1',
+    'j = i**2',
+    'j += 1',
+    'print(i, j)'
+  ].join('\n');
 
-  let model: DebuggerModel;
+  let breakpoints: IDebugger.IBreakpoint[];
+  let session: DebugSession;
+  let path: string;
   let connection: Session.ISessionConnection;
   let sidebar: TestSidebar;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     connection = await createSession({
       name: '',
       type: 'test',
@@ -66,9 +83,8 @@ describe('Debugger', () => {
     });
     await connection.changeKernel({ name: 'xpython' });
 
-    model = new DebuggerModel();
-    service.model = model;
-    service.session = new DebugSession({ connection });
+    session = new DebugSession({ connection });
+    service.session = session;
 
     sidebar = new TestSidebar({
       service,
@@ -85,9 +101,50 @@ describe('Debugger', () => {
         mimeTypeService
       }
     });
+
+    await act(async () => {
+      Widget.attach(sidebar, document.body);
+      MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
+      await service.restoreState(true);
+    });
+
+    path = service.getCodeId(code);
+
+    breakpoints = lines.map((line: number, id: number) => {
+      return {
+        id,
+        line,
+        active: true,
+        verified: true,
+        source: {
+          path
+        }
+      };
+    });
+
+    const stoppedFuture = new PromiseDelegate<void>();
+    service.eventMessage.connect(
+      (sender: IDebugger, event: IDebugger.ISession.Event) => {
+        switch (event.event) {
+          case 'stopped':
+            stoppedFuture.resolve();
+            break;
+        }
+      }
+    );
+
+    await act(async () => {
+      await service.updateBreakpoints(code, breakpoints);
+      connection.kernel.requestExecute({ code });
+    });
+
+    await stoppedFuture.promise;
   });
 
-  afterEach(() => {
+  afterAll(async () => {
+    await connection.shutdown();
+    connection.dispose();
+    session.dispose();
     sidebar.dispose();
   });
 
@@ -97,33 +154,7 @@ describe('Debugger', () => {
     });
   });
 
-  describe('Breakpoints', () => {
-    const path = 'path/to/file.py';
-    const lines = [3, 5];
-
-    beforeEach(() => {
-      const bpMap = new Map<string, IDebugger.IBreakpoint[]>();
-      bpMap.set(
-        path,
-        lines.map((line: number, id: number) => {
-          return {
-            id,
-            line,
-            active: true,
-            verified: true,
-            source: {
-              path
-            }
-          };
-        })
-      );
-      act(() => {
-        Widget.attach(sidebar, document.body);
-        MessageLoop.sendMessage(sidebar, Widget.Msg.UpdateRequest);
-        model.breakpoints.restoreBreakpoints(bpMap);
-      });
-    });
-
+  describe('#breakpoints', () => {
     it('should have the jp-DebuggerBreakpoints class', () => {
       expect(sidebar.breakpoints.hasClass('jp-DebuggerBreakpoints')).toBe(true);
     });
@@ -138,13 +169,18 @@ describe('Debugger', () => {
       const node = sidebar.breakpoints.node;
       const items = node.querySelectorAll('.jp-DebuggerBreakpoint-source');
       items.forEach(item => {
-        expect(item.innerHTML).toEqual(path);
+        // TODO: replace by toEqual when there is an alternative to the rtl
+        // breakpoint display
+        expect(item.innerHTML).toContain(path.slice(1));
       });
     });
 
     it('should contain the line number', async () => {
       const node = sidebar.breakpoints.node;
       const items = node.querySelectorAll('.jp-DebuggerBreakpoint-line');
+
+      await act(() => service.updateBreakpoints(code, breakpoints));
+
       items.forEach((item, i) => {
         const parsed = parseInt(item.innerHTML, 10);
         expect(parsed).toEqual(lines[i]);
@@ -156,25 +192,44 @@ describe('Debugger', () => {
       let items = node.querySelectorAll('.jp-DebuggerBreakpoint');
       const len1 = items.length;
 
-      const bps = model.breakpoints.getBreakpoints(path);
-      bps.push({
-        id: 3,
-        line: 4,
-        active: true,
-        verified: true,
-        source: {
-          path
+      const bps = breakpoints.concat([
+        {
+          id: 3,
+          line: 4,
+          active: true,
+          verified: true,
+          source: {
+            path
+          }
         }
-      });
+      ]);
 
-      act(() => {
-        model.breakpoints.setBreakpoints(path, bps);
-      });
+      await act(() => service.updateBreakpoints(code, bps));
 
       items = node.querySelectorAll('.jp-DebuggerBreakpoint');
       const len2 = items.length;
 
       expect(len2).toEqual(len1 + 1);
+    });
+  });
+
+  describe('#sources', () => {
+    it('should have a header and a body', () => {
+      expect(sidebar.sources.widgets.length).toEqual(2);
+    });
+
+    it('should display the source path in the header', () => {
+      const body = sidebar.sources.widgets[0] as SourcesHeader;
+      const children = toArray(body.children());
+      const sourcePath = children[2].node.querySelector('span');
+      expect(sourcePath.innerHTML).toEqual(path);
+    });
+
+    it('should display the source code in the body', () => {
+      const body = sidebar.sources.widgets[1] as SourcesBody;
+      const children = toArray(body.children());
+      const editor = children[0] as CodeEditorWrapper;
+      expect(editor.model.value.text).toEqual(code);
     });
   });
 });
