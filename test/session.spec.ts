@@ -22,6 +22,7 @@ import { DebugSession } from '../src/session';
 const server = new JupyterServer();
 
 beforeAll(async () => {
+  jest.setTimeout(20000);
   await server.start();
 });
 

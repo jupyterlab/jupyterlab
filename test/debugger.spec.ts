@@ -19,6 +19,7 @@ class TestSidebar extends Debugger.Sidebar {}
 const server = new JupyterServer();
 
 beforeAll(async () => {
+  jest.setTimeout(20000);
   await server.start();
 });
 
