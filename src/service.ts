@@ -255,8 +255,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Map of breakpoints for restore.
    *
-   * @param editorFinder
-   * @param breakpoints
+   * @param editorFinder - The editor finder object.
+   * @param breakpoints - Map of breakpoints.
    */
   async breakpointsForRestore(
     editorFinder: IDebuggerEditorFinder,
@@ -296,11 +296,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Response to map of breakpoints
    *
-   * @param reply
-   */
-
-  /**
-   * @param reply
+   * @param reply - Response from restore state method.
    */
   async breakpointsMapFromServer(
     reply: IDebugger.ISession.Response['debugInfo']
