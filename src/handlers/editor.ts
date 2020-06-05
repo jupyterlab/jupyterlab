@@ -297,7 +297,7 @@ export namespace EditorHandler {
     /**
      * The editor finder.
      */
-    editorFinder: IDebuggerEditorFinder;
+    editorFinder?: IDebuggerEditorFinder;
   }
 
   /**
