@@ -1,0 +1,110 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+/**
+ * Here is our jupyter theme for CodeMirror syntax highlighting
+ * This is used in our marked.js syntax highlighting and CodeMirror itself
+ * The string "jupyter" is set in ../codemirror/widget.DEFAULT_CODEMIRROR_THEME
+ * This came from the classic notebook, which came form highlight.js/GitHub
+ */
+
+:host {
+  background: var(--jp-layout-color0);
+  color: var(--jp-content-font-color1);
+}
+
+.CodeMirror {
+  background: transparent;
+}
+
+.cm-s-jupyter .CodeMirror-cursor {
+  border-left: var(--jp-code-cursor-width0) solid var(--jp-editor-cursor-color);
+}
+.cm-s-jupyter span.cm-keyword {
+  color: var(--jp-mirror-editor-keyword-color);
+  font-weight: bold;
+}
+.cm-s-jupyter span.cm-atom {
+  color: var(--jp-mirror-editor-atom-color);
+}
+.cm-s-jupyter span.cm-number {
+  color: var(--jp-mirror-editor-number-color);
+}
+.cm-s-jupyter span.cm-def {
+  color: var(--jp-mirror-editor-def-color);
+}
+.cm-s-jupyter span.cm-variable {
+  color: var(--jp-mirror-editor-variable-color);
+}
+.cm-s-jupyter span.cm-variable-2 {
+  color: var(--jp-mirror-editor-variable-2-color);
+}
+.cm-s-jupyter span.cm-variable-3 {
+  color: var(--jp-mirror-editor-variable-3-color);
+}
+.cm-s-jupyter span.cm-punctuation {
+  color: var(--jp-mirror-editor-punctuation-color);
+}
+.cm-s-jupyter span.cm-property {
+  color: var(--jp-mirror-editor-property-color);
+}
+.cm-s-jupyter span.cm-operator {
+  color: var(--jp-mirror-editor-operator-color);
+  font-weight: bold;
+}
+.cm-s-jupyter span.cm-comment {
+  color: var(--jp-mirror-editor-comment-color);
+  font-style: italic;
+}
+.cm-s-jupyter span.cm-string {
+  color: var(--jp-mirror-editor-string-color);
+}
+.cm-s-jupyter span.cm-string-2 {
+  color: var(--jp-mirror-editor-string-2-color);
+}
+.cm-s-jupyter span.cm-meta {
+  color: var(--jp-mirror-editor-meta-color);
+}
+.cm-s-jupyter span.cm-qualifier {
+  color: var(--jp-mirror-editor-qualifier-color);
+}
+.cm-s-jupyter span.cm-builtin {
+  color: var(--jp-mirror-editor-builtin-color);
+}
+.cm-s-jupyter span.cm-bracket {
+  color: var(--jp-mirror-editor-bracket-color);
+}
+.cm-s-jupyter span.cm-tag {
+  color: var(--jp-mirror-editor-tag-color);
+}
+.cm-s-jupyter span.cm-attribute {
+  color: var(--jp-mirror-editor-attribute-color);
+}
+.cm-s-jupyter span.cm-header {
+  color: var(--jp-mirror-editor-header-color);
+}
+.cm-s-jupyter span.cm-quote {
+  color: var(--jp-mirror-editor-quote-color);
+}
+.cm-s-jupyter span.cm-link {
+  color: var(--jp-mirror-editor-link-color);
+}
+.cm-s-jupyter span.cm-error {
+  color: var(--jp-mirror-editor-error-color);
+}
+.cm-s-jupyter span.cm-hr {
+  color: #999;
+}
+
+.cm-s-jupyter span.cm-tab {
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAMCAYAAAAkuj5RAAAAAXNSR0IArs4c6QAAAGFJREFUSMft1LsRQFAQheHPowAKoACx3IgEKtaEHujDjORSgWTH/ZOdnZOcM/sgk/kFFWY0qV8foQwS4MKBCS3qR6ixBJvElOobYAtivseIE120FaowJPN75GMu8j/LfMwNjh4HUpwg4LUAAAAASUVORK5CYII=);
+  background-position: right;
+  background-repeat: no-repeat;
+}
+
+.cm-s-jupyter .CodeMirror-activeline-background,
+.cm-s-jupyter .CodeMirror-gutter {
+  background-color: var(--jp-layout-color2);
+}

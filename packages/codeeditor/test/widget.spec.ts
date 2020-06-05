@@ -135,7 +135,7 @@ describe('CodeEditorWrapper', () => {
         const editor = widget.editor as LogEditor;
         MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
         editor.methods = [];
-        simulate(editor.editor.getInputField(), 'focus');
+        simulate(editor.editor.getInputField(), 'focus', { composed: true });
         expect(editor.methods).toEqual(['refresh']);
       });
     });
@@ -197,7 +197,7 @@ describe('CodeEditorWrapper', () => {
       editor.methods = [];
       MessageLoop.sendMessage(widget, Widget.ResizeMessage.UnknownSize);
       expect(editor.methods).toEqual([]);
-      simulate(editor.editor.getInputField(), 'focus');
+      simulate(editor.editor.getInputField(), 'focus', { composed: true });
       expect(editor.methods).toEqual(['refresh']);
     });
   });
