@@ -9,7 +9,11 @@ import {
 
 import { KernelSpecManager, Session } from '@jupyterlab/services';
 
-import { createSession, signalToPromise, JupyterServer } from '@jupyterlab/testutils';
+import {
+  createSession,
+  signalToPromise,
+  JupyterServer
+} from '@jupyterlab/testutils';
 
 import { toArray } from '@lumino/algorithm';
 
