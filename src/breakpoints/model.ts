@@ -12,13 +12,6 @@ import { IDebugger } from '../tokens';
  */
 export class BreakpointsModel implements IDisposable {
   /**
-   * Set extra path for save path before for ex. typing
-   */
-  get oldPathFromCell(): Map<string, string> {
-    return this._oldPathFromCell;
-  }
-
-  /**
    * Whether the model is disposed.
    */
   get isDisposed(): boolean {
@@ -65,19 +58,6 @@ export class BreakpointsModel implements IDisposable {
   }
 
   /**
-   * Remove breakpoints which are removed.
-   * That is, if path has empty array
-   *
-   */
-  cleanBreakpointsMapAboutEmptyArray(): void {
-    Array.from(this._breakpoints.entries()).forEach(value => {
-      if (value[1].length === 0) {
-        this._breakpoints.delete(value[0]);
-      }
-    });
-  }
-
-  /**
    * Set the breakpoints for a given id (path).
    *
    * @param id The code id (path).
@@ -108,57 +88,8 @@ export class BreakpointsModel implements IDisposable {
   }
 
   private _isDisposed = false;
-  private _oldPathFromCell = new Map<string, string>();
   private _breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
   private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
   private _restored = new Signal<this, void>(this);
   private _clicked = new Signal<this, IDebugger.IBreakpoint>(this);
-}
-
-/**
- * Class for map states of current cell event and temporary id of cell
- */
-export class States {
-  /**
-   * Constructor for initialize state
-   *
-   * @param idCell - Temporary idCell
-   * @param codeChanged - Flag for event when something happen with cell
-   */
-  constructor(idCell?: string, codeChanged?: boolean) {
-    this._idCell = idCell;
-    this._codeChanged = codeChanged;
-  }
-
-  /**
-   * Get temporary cell's id
-   */
-  get idCell(): string {
-    return this._idCell;
-  }
-
-  /**
-   * Set temporary cell's id
-   *
-   * @param idCell
-   */
-  set idCell(idCell: string) {
-    this._idCell = idCell;
-  }
-  /**
-   * Get get event flag if something has been changed in cell
-   */
-  get codeChanged(): boolean {
-    return this._codeChanged;
-  }
-
-  /**
-   * Set get event flag if something has been changed in cell
-   */
-  set codeChanged(value: boolean) {
-    this._codeChanged = value;
-  }
-
-  private _idCell?: string;
-  private _codeChanged?: boolean;
 }

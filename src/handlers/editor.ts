@@ -15,9 +15,11 @@ import { Signal } from '@lumino/signaling';
 
 import { Editor } from 'codemirror';
 
+import { IDebuggerEditorFinder } from '../editor-finder';
+
 import { IDebugger } from '../tokens';
 
-import { BreakpointsModel, States } from '../breakpoints/model';
+import { BreakpointsModel } from '../breakpoints/model';
 
 import { DebuggerModel } from '../model';
 
@@ -45,8 +47,8 @@ export class EditorHandler implements IDisposable {
     this._path = options.path;
     this._debuggerService = options.debuggerService;
     this._editor = options.editor;
+    this._editorFinder = options.editorFinder;
 
-    this._idCell = options.idCell;
     this._onModelChanged();
     this._debuggerService.modelChanged.connect(this._onModelChanged, this);
 
@@ -79,34 +81,6 @@ export class EditorHandler implements IDisposable {
     this._clearEditor();
     this.isDisposed = true;
     Signal.clearData(this);
-  }
-
-  /**
-   * Get when something in cell is changed
-   */
-  get codeChanged(): boolean {
-    return this._codeChanged;
-  }
-
-  /**
-   * Set when something in cell is changed
-   */
-  set codeChanged(codeChanged: boolean) {
-    this._codeChanged = codeChanged;
-  }
-
-  /**
-   * Get current idCell
-   */
-  get idCell(): string {
-    return this._idCell;
-  }
-
-  /**
-   * Set current idCell
-   */
-  set idCell(idCell: string) {
-    this._idCell = idCell;
   }
 
   /**
@@ -155,7 +129,6 @@ export class EditorHandler implements IDisposable {
       'breakpoints'
     ]);
     editor.editor.on('gutterClick', this._onGutterClick);
-    editor.editor.on('beforeChange', this._beforeChanges);
   }
 
   /**
@@ -171,7 +144,6 @@ export class EditorHandler implements IDisposable {
     editor.setOption('lineNumbers', false);
     editor.editor.setOption('gutters', []);
     editor.editor.off('gutterClick', this._onGutterClick);
-    editor.editor.off('beforeChange', this._beforeChanges);
   }
 
   /**
@@ -193,16 +165,10 @@ export class EditorHandler implements IDisposable {
       this._editor.model.value.text,
       breakpoints,
       this._path,
-      new States(this.idCell, this._codeChanged)
+      this._editorFinder
     );
   }
 
-  /**
-   * Handle event when editor has some changes.
-   */
-  private _beforeChanges = (): void => {
-    this._codeChanged = true;
-  };
   /**
    * Handle a click on the gutter.
    *
@@ -232,7 +198,7 @@ export class EditorHandler implements IDisposable {
       this._editor.model.value.text,
       breakpoints,
       this._path,
-      new States(this._idCell, false)
+      this._editorFinder
     );
   };
 
@@ -244,7 +210,7 @@ export class EditorHandler implements IDisposable {
       this._editor.model.value.text,
       [],
       this._path,
-      new States(this._idCell, false)
+      this._editorFinder
     );
   }
   /**
@@ -294,9 +260,8 @@ export class EditorHandler implements IDisposable {
 
   private _id: string;
   private _path: string;
-  private _idCell: string;
-  private _codeChanged: boolean;
   private _editor: CodeEditor.IEditor;
+  private _editorFinder: IDebuggerEditorFinder;
   private _debuggerModel: DebuggerModel;
   private _breakpointsModel: BreakpointsModel;
   private _debuggerService: IDebugger;
@@ -330,9 +295,9 @@ export namespace EditorHandler {
     path?: string;
 
     /**
-     * Temporary cell of editor for map previous path.
+     * The editor finder.
      */
-    idCell?: string;
+    editorFinder: IDebuggerEditorFinder;
   }
 
   /**

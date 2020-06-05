@@ -214,7 +214,8 @@ export class DebuggerHandler {
         case 'notebook':
           this._handlers[widget.id] = new NotebookHandler({
             debuggerService: this._service,
-            widget: widget as NotebookPanel
+            widget: widget as NotebookPanel,
+            editorFinder: this._editorFinder
           });
           break;
         case 'console':

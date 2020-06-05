@@ -11,6 +11,8 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
+import { IDebuggerEditorFinder } from '../editor-finder';
+
 import { EditorHandler } from './editor';
 
 import { IDebugger } from '../tokens';
@@ -28,6 +30,7 @@ export class NotebookHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._notebookPanel = options.widget;
     this._cellMap = new ObservableMap<EditorHandler>();
+    this._editorFinder = options.editorFinder;
 
     const notebook = this._notebookPanel.content;
     notebook.activeCellChanged.connect(this._onActiveCellChanged, this);
@@ -48,7 +51,6 @@ export class NotebookHandler implements IDisposable {
     if (this.isDisposed) {
       return;
     }
-    this._debuggerService.clearMappedCellsStates();
     this.isDisposed = true;
     this._cellMap.values().forEach(handler => handler.dispose());
     this._cellMap.dispose();
@@ -78,7 +80,7 @@ export class NotebookHandler implements IDisposable {
     const editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,
       editor: codeCell.editor,
-      idCell: cell.model.id
+      editorFinder: this._editorFinder
     });
     codeCell.disposed.connect(() => {
       this._cellMap.delete(modelId);
@@ -101,6 +103,7 @@ export class NotebookHandler implements IDisposable {
   }
 
   private _debuggerService: IDebugger;
+  private _editorFinder: IDebuggerEditorFinder;
   private _notebookPanel: NotebookPanel;
   private _cellMap: IObservableMap<EditorHandler> = null;
 }
@@ -122,5 +125,10 @@ export namespace NotebookHandler {
      * The widget to handle.
      */
     widget: NotebookPanel;
+
+    /**
+     * Editor finder object.
+     */
+    editorFinder: IDebuggerEditorFinder;
   }
 }
