@@ -36,7 +36,8 @@
   },
   "scripts": {
     "build": "tsc -b",
-    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo && rimraf tests/build",
+    "build:test": "tsc --build tsconfig.test.json",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo && rimraf tsconfig.test.tsbuildinfo && rimraf tests/build",
     "docs": "typedoc --options tdoptions.json --theme ../../typedoc-theme src",
     "eslint": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
     "eslint:check": "eslint . --ext .ts,.tsx,.js,.jsx",
@@ -45,7 +46,10 @@
     "prepublishOnly": "npm run build",
     "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "prettier:check": "prettier --list-different '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
-    "test": "python tests/run-test.py",
+    "test": "jest",
+    "test:cov": "jest --collect-coverage",
+    "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand",
+    "test:debug:watch": "node --inspect-brk node_modules/.bin/jest --runInBand --watch",
     "watch": "tsc -b --watch"
   },
   "dependencies": {
@@ -71,9 +75,9 @@
     "vscode-debugprotocol": "^1.37.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.7.6",
-    "@jupyterlab/testutils": "^2.0.0",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
+    "@jupyterlab/testutils": "^2.2.0-alpha.0",
     "@types/codemirror": "0.0.76",
     "@types/jest": "^24.0.17",
     "@types/murmurhash-js": "1.0.3",
@@ -87,7 +91,7 @@
     "eslint-plugin-prettier": "^3.1.1",
     "eslint-plugin-react": "^7.19.0",
     "husky": "^3.1.0",
-    "jest": "^26.0.1",
+    "jest": "^25",
     "jest-junit": "^10.0.0",
     "jest-raw-loader": "^1.0.1",
     "jest-summary-reporter": "^0.0.2",

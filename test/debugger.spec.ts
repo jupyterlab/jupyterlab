@@ -3,16 +3,29 @@ import {
   CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
 
+import { JupyterServer } from '@jupyterlab/testutils';
+
 import { CommandRegistry } from '@lumino/commands';
 
-import { Debugger } from '../../lib/debugger';
+import { Debugger } from '../src/debugger';
 
-import { DebuggerService } from '../../lib/service';
+import { DebuggerService } from '../src/service';
 
 /**
  * A test sidebar.
  */
 class TestSidebar extends Debugger.Sidebar {}
+
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  jest.setTimeout(20000);
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
 
 describe('Debugger', () => {
   const service = new DebuggerService();

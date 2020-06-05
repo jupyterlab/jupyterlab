@@ -1,12 +1,12 @@
 const func = require('@jupyterlab/testutils/lib/jest-config');
-const upstream = func('@jupyterlab/debugger', __dirname);
+const upstream = func(__dirname);
 
 let local = {
   preset: 'ts-jest/presets/js-with-babel',
   transformIgnorePatterns: ['/node_modules/(?!(@jupyterlab/.*)/)'],
   globals: {
     'ts-jest': {
-      tsConfig: './tsconfig.json'
+      tsConfig: './tsconfig.test.json'
     }
   },
   transform: {
@@ -15,14 +15,8 @@ let local = {
   }
 };
 
-[
-  'moduleFileExtensions',
-  'moduleNameMapper',
-  'reporters',
-  'setupFilesAfterEnv',
-  'setupFiles'
-].forEach(option => {
-  local[option] = upstream[option];
+Object.keys(local).forEach(option => {
+  upstream[option] = local[option];
 });
 
-module.exports = local;
+module.exports = upstream;

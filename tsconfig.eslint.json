@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig",
-  "include": ["src/**/*", "tests/**/*", "*.js"],
+  "include": ["src/**/*", "test/**/*", "*.js"],
   "types": ["jest"]
 }

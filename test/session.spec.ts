@@ -3,7 +3,11 @@
 
 import { Session } from '@jupyterlab/services';
 
-import { createSession, signalToPromises } from '@jupyterlab/testutils';
+import {
+  createSession,
+  signalToPromises,
+  JupyterServer
+} from '@jupyterlab/testutils';
 
 import { find } from '@lumino/algorithm';
 
@@ -11,9 +15,20 @@ import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
-import { IDebugger } from '../../lib/tokens';
+import { IDebugger } from '../src/tokens';
 
-import { DebugSession } from '../../lib/session';
+import { DebugSession } from '../src/session';
+
+const server = new JupyterServer();
+
+beforeAll(async () => {
+  jest.setTimeout(20000);
+  await server.start();
+});
+
+afterAll(async () => {
+  await server.shutdown();
+});
 
 describe('DebugSession', () => {
   let connection: Session.ISessionConnection;
