@@ -10,6 +10,7 @@ import {
   CodeCell,
   CodeCellModel,
   ICodeCellModel,
+  InputArea,
   isCodeCellModel,
   IRawCellModel,
   RawCell,
@@ -114,6 +115,8 @@ export class CodeConsole extends Widget {
     this._content = new Panel();
     this._input = new Panel();
 
+    this.editorFactory =
+      options.editorFactory || InputArea.defaultEditorFactory;
     this.modelFactory = options.modelFactory || CodeConsole.defaultModelFactory;
     this.rendermime = options.rendermime;
     this.sessionContext = options.sessionContext;
@@ -158,6 +161,8 @@ export class CodeConsole extends Widget {
    * The model factory for the console widget.
    */
   readonly modelFactory: CodeConsole.IModelFactory;
+
+  readonly editorFactory: CodeEditor.Factory;
 
   /**
    * The rendermime instance used by the console.
@@ -227,7 +232,8 @@ export class CodeConsole extends Widget {
     const model = this.modelFactory.createRawCell({});
     model.value.text = '...';
     const banner = (this._banner = new RawCell({
-      model
+      model,
+      editorFactory: this.editorFactory
     })).initializeState();
     banner.addClass(BANNER_CLASS);
     banner.readOnly = true;
@@ -720,7 +726,8 @@ export class CodeConsole extends Widget {
     const modelFactory = this.modelFactory;
     const model = modelFactory.createCodeCell({});
     const rendermime = this.rendermime;
-    return { model, rendermime };
+    const editorFactory = this.editorFactory;
+    return { model, rendermime, editorFactory };
   }
 
   /**
@@ -841,6 +848,11 @@ export namespace CodeConsole {
      * The model factory for the console widget.
      */
     modelFactory?: IModelFactory;
+
+    /**
+     * The editor factory used to create editor instances.
+     */
+    editorFactory?: CodeEditor.Factory;
 
     /**
      * The mime renderer for the console widget.

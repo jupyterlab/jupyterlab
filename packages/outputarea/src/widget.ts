@@ -342,11 +342,11 @@ export class OutputArea extends Widget {
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
     panel.addClass(OUTPUT_AREA_STDIN_ITEM_CLASS);
 
-    const prompt = new OutputPrompt();
+    const prompt = this.createOutputPrompt();
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
 
-    const input = new Stdin({
+    const input = this.createStdin({
       prompt: stdinPrompt,
       password,
       future
@@ -432,7 +432,7 @@ export class OutputArea extends Widget {
 
     panel.addClass(OUTPUT_AREA_ITEM_CLASS);
 
-    const prompt = new OutputPrompt();
+    const prompt = this.createOutputPrompt();
     prompt.executionCount = model.executionCount;
     prompt.addClass(OUTPUT_AREA_PROMPT_CLASS);
     panel.addWidget(prompt);
@@ -440,6 +440,20 @@ export class OutputArea extends Widget {
     output.addClass(OUTPUT_AREA_OUTPUT_CLASS);
     panel.addWidget(output);
     return panel;
+  }
+
+  /**
+   * Create an OutputPrompt instance.
+   */
+  protected createOutputPrompt(): IOutputPrompt {
+    return new OutputPrompt();
+  }
+
+  /**
+   * Create an Stdin widget instance.
+   */
+  protected createStdin(options: Stdin.IOptions): IStdin {
+    return new Stdin(options);
   }
 
   /**

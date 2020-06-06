@@ -98,6 +98,13 @@ class LogConsoleOutputArea extends OutputArea {
   readonly model: LoggerOutputAreaModel;
 
   /**
+   * Customize the default IOutputPrompt instance.
+   */
+  protected createOutputPrompt(): IOutputPrompt {
+    return new LogConsoleOutputPrompt();
+  }
+
+  /**
    * Create an output item with a prompt and actual output
    */
   protected createOutputItem(model: LogOutputModel): Widget | null {
