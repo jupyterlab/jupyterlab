@@ -9,6 +9,8 @@ on:
     branches:
       - master
       - 1.2.x
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
   windowstests:
