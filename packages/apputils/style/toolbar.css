@@ -103,3 +103,12 @@ button.jp-ToolbarButtonComponent .jp-ToolbarButtonComponent-label {
   padding-left: 2px;
   color: var(--jp-ui-font-color1);
 }
+
+#jp-main-dock-panel[data-mode='single-document']
+  .jp-MainAreaWidget
+  > .jp-Toolbar.jp-Toolbar-micro {
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  min-height: 0;
+}

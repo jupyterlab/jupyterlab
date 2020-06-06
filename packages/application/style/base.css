@@ -35,6 +35,10 @@ body {
   padding: 0;
 }
 
+#jp-main-dock-panel[data-mode='single-document'] .jp-MainAreaWidget {
+  border: none;
+}
+
 #jp-top-panel {
   border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
   background: var(--jp-layout-color1);
