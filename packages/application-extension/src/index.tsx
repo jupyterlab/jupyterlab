@@ -139,15 +139,36 @@ const main: JupyterFrontEndPlugin<void> = {
         .then(() => {
           return showDialog({
             title: 'Build Complete',
-            body: 'Build successfully completed, reload page?',
+            body: (
+              <div>
+                Build successfully completed, reload page?
+                <br />
+                You will lose any unsaved changes.
+              </div>
+            ),
             buttons: [
-              Dialog.cancelButton(),
-              Dialog.warnButton({ label: 'Reload' })
-            ]
+              Dialog.cancelButton({
+                label: 'Reload Without Saving',
+                reload: true
+              }),
+              Dialog.okButton({ label: 'Save and Reload' })
+            ],
+            hasClose: true
           });
         })
-        .then(result => {
-          if (result.button.accept) {
+        .then(({ button: { accept, reload } }) => {
+          if (accept) {
+            void app.commands
+              .execute('docmanager:save')
+              .then(() => {
+                router.reload();
+              })
+              .catch(err => {
+                void showErrorMessage('Save Failed', {
+                  message: <pre>{err.message}</pre>
+                });
+              });
+          } else if (reload) {
             router.reload();
           }
         })

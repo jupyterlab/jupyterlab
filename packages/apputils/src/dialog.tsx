@@ -9,6 +9,8 @@ import { Message, MessageLoop } from '@lumino/messaging';
 
 import { PanelLayout, Panel, Widget } from '@lumino/widgets';
 
+import { closeIcon } from '@jupyterlab/ui-components';
+
 import * as React from 'react';
 
 import { Styling } from './styling';
@@ -16,6 +18,7 @@ import { Styling } from './styling';
 import { ReactWidget } from './vdom';
 
 import { WidgetTracker } from './widgettracker';
+import { ToolbarButtonComponent } from './toolbar';
 
 /**
  * Create and show a dialog.
@@ -106,7 +109,11 @@ export class Dialog<T> extends Widget {
 
     this._body = normalized.body;
 
-    const header = renderer.createHeader(normalized.title);
+    const header = renderer.createHeader(
+      normalized.title,
+      () => this.reject(),
+      options
+    );
     const body = renderer.createBody(normalized.body);
     const footer = renderer.createFooter(this._buttonNodes);
     content.addWidget(header);
@@ -426,6 +433,11 @@ export namespace Dialog {
     accept: boolean;
 
     /**
+     * The dialog action to perform a reload when the button is clicked.
+     */
+    reload: boolean;
+
+    /**
      * The button display type.
      */
     displayType: 'default' | 'warn';
@@ -477,6 +489,11 @@ export namespace Dialog {
     focusNodeSelector: string;
 
     /**
+     * When "true", renders a close button for the dialog
+     */
+    hasClose: boolean;
+
+    /**
      * An optional renderer for dialog items.  Defaults to a shared
      * default renderer.
      */
@@ -494,7 +511,11 @@ export namespace Dialog {
      *
      * @returns A widget for the dialog header.
      */
-    createHeader(title: Header): Widget;
+    createHeader<T>(
+      title: Header,
+      reject: () => void,
+      options: Partial<Dialog.IOptions<T>>
+    ): Widget;
 
     /**
      * Create the body of the dialog.
@@ -544,6 +565,7 @@ export namespace Dialog {
    */
   export function createButton(value: Partial<IButton>): Readonly<IButton> {
     value.accept = value.accept !== false;
+    value.reload = Boolean(value.reload);
     const defaultLabel = value.accept ? 'OK' : 'Cancel';
     return {
       label: value.label || defaultLabel,
@@ -552,6 +574,7 @@ export namespace Dialog {
       caption: value.caption || '',
       className: value.className || '',
       accept: value.accept,
+      reload: value.reload,
       displayType: value.displayType || 'default'
     };
   }
@@ -608,11 +631,25 @@ export namespace Dialog {
      *
      * @returns A widget for the dialog header.
      */
-    createHeader(title: Header): Widget {
+    createHeader<T>(
+      title: Header,
+      reject: () => void,
+      options: Partial<Dialog.IOptions<T>> = {}
+    ): Widget {
       let header: Widget;
       if (typeof title === 'string') {
-        header = new Widget({ node: document.createElement('span') });
-        header.node.textContent = title;
+        header = ReactWidget.create(
+          <>
+            {title}
+            {options.hasClose && (
+              <ToolbarButtonComponent
+                icon={closeIcon}
+                onClick={reject}
+                tooltip="Cancel"
+              />
+            )}
+          </>
+        );
       } else {
         header = ReactWidget.create(title);
       }
@@ -801,7 +838,8 @@ namespace Private {
       buttons,
       defaultButton,
       renderer: options.renderer || Dialog.defaultRenderer,
-      focusNodeSelector: options.focusNodeSelector || ''
+      focusNodeSelector: options.focusNodeSelector || '',
+      hasClose: options.hasClose || false
     };
   }
 

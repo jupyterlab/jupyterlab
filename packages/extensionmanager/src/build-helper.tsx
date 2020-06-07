@@ -1,7 +1,9 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Dialog, showDialog } from '@jupyterlab/apputils';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+
+import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 
 import { Builder } from '@jupyterlab/services';
 
@@ -12,22 +14,46 @@ import * as React from 'react';
  *
  * @param builder the build manager
  */
-export function doBuild(builder: Builder.IManager): Promise<void> {
+export function doBuild(
+  app: JupyterFrontEnd,
+  builder: Builder.IManager
+): Promise<void> {
   if (builder.isAvailable) {
     return builder
       .build()
       .then(() => {
         return showDialog({
           title: 'Build Complete',
-          body: 'Build successfully completed, reload page?',
+          body: (
+            <div>
+              Build successfully completed, reload page?
+              <br />
+              You will lose any unsaved changes.
+            </div>
+          ),
           buttons: [
-            Dialog.cancelButton(),
-            Dialog.warnButton({ label: 'Reload' })
-          ]
+            Dialog.cancelButton({
+              label: 'Reload Without Saving',
+              reload: true
+            }),
+            Dialog.okButton({ label: 'Save and Reload' })
+          ],
+          hasClose: true
         });
       })
-      .then(result => {
-        if (result.button.accept) {
+      .then(({ button: { accept, reload } }) => {
+        if (accept) {
+          void app.commands
+            .execute('docmanager:save')
+            .then(() => {
+              location.reload();
+            })
+            .catch((err: any) => {
+              void showErrorMessage('Save Failed', {
+                message: <pre>{err.message}</pre>
+              });
+            });
+        } else if (reload) {
           location.reload();
         }
       })

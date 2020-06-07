@@ -58,6 +58,8 @@ button.jp-Dialog-button:focus::-moz-focus-inner {
 }
 
 .jp-Dialog-header {
+  display: flex;
+  justify-content: space-between;
   flex: 0 0 auto;
   padding-bottom: 12px;
   font-size: var(--jp-ui-font-size3);

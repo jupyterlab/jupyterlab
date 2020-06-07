@@ -1,6 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -578,10 +579,11 @@ export class ExtensionView extends VDomRenderer<ListModel> {
   private _settings: ISettingRegistry.ISettings;
   private _forceOpen: boolean;
   constructor(
+    app: JupyterFrontEnd,
     serviceManager: ServiceManager,
     settings: ISettingRegistry.ISettings
   ) {
-    super(new ListModel(serviceManager, settings));
+    super(new ListModel(app, serviceManager, settings));
     this._settings = settings;
     this._forceOpen = false;
     this.addClass('jp-extensionmanager-view');
