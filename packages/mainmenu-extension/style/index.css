@@ -3,4 +3,20 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+.jp-LabShell[data-shell-mode='single-document'] #jp-top-panel #jp-MainLogo {
+  animation-duration: 1s;
+  animation-name: logo-slideup;
+  animation-fill-mode: forwards;
+}
+
+@keyframes logo-slideup {
+  from {
+    top: 0;
+  }
+
+  to {
+    top: -28px;
+  }
+}
+
 @import url('~@jupyterlab/mainmenu/style/index.css');

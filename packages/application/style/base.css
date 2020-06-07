@@ -44,6 +44,7 @@ body {
   background: var(--jp-layout-color1);
   display: flex;
   min-height: var(--jp-private-menubar-height);
+  overflow: visible;
 }
 
 #jp-bottom-panel {
@@ -59,3 +60,4 @@ body {
 @import './tabs.css';
 @import './buttons.css';
 @import './sidepanel.css';
+@import './titlepanel.css';
