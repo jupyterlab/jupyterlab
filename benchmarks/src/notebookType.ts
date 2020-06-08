@@ -17,4 +17,5 @@ type NotebookType = {
   notebook: (n: number) => object;
 };
 
+// eslint-disable-next-line no-undef
 export default NotebookType;
