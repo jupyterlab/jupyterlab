@@ -114,7 +114,12 @@ async function requestAPI<T>(
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
-  const requestUrl = URLExt.join(settings.baseUrl, 'api/listings/', endPoint);
+  const requestUrl = URLExt.join(
+    settings.baseUrl,
+    settings.appUrl,
+    'api/listings/',
+    endPoint
+  );
   let response: Response;
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
