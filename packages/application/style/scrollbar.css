@@ -20,6 +20,13 @@
   scrollbar-color: rgba(var(--jp-scrollbar-thumb-color), 0.5) transparent;
 }
 
+/* tiny scrollbar */
+
+.jp-scrollbar-tiny {
+  scrollbar-color: rgba(var(--jp-scrollbar-thumb-color), 0.5) transparent;
+  scrollbar-width: thin;
+}
+
 /*
  * Webkit scrollbar styling
  */
@@ -83,6 +90,29 @@
   .CodeMirror-vscrollbar::-webkit-scrollbar-track:vertical {
   border-top: var(--jp-scrollbar-endpad) solid transparent;
   border-bottom: var(--jp-scrollbar-endpad) solid transparent;
+}
+
+/* tiny scrollbar */
+
+.jp-scrollbar-tiny::-webkit-scrollbar,
+.jp-scrollbar-tiny::-webkit-scrollbar-corner {
+  background-color: transparent;
+  height: 4px;
+  width: 4px;
+}
+
+.jp-scrollbar-tiny::-webkit-scrollbar-thumb {
+  background: rgba(var(--jp-scrollbar-thumb-color), 0.5);
+}
+
+.jp-scrollbar-tiny::-webkit-scrollbar-track:horizontal {
+  border-left: 0px solid transparent;
+  border-right: 0px solid transparent;
+}
+
+.jp-scrollbar-tiny::-webkit-scrollbar-track:vertical {
+  border-top: 0px solid transparent;
+  border-bottom: 0px solid transparent;
 }
 
 /*

@@ -48,7 +48,7 @@ class ExampleHandler(
             "appVersion": version,
             'baseUrl': self.base_url,
             'token': self.settings['token'],
-            'fullStaticUrl': ujoin(self.base_url, 'static', self.extension_name),
+            'fullStaticUrl': ujoin(self.base_url, 'static', self.name),
             'frontendUrl': ujoin(self.base_url, 'example/'),
             'terminalsAvailable': available
         }
@@ -65,7 +65,7 @@ class ExampleHandler(
 class ExampleApp(LabServerApp):
 
     extension_url = '/example'
-    extension_name = __name__
+    name = __name__
     app_name = 'JupyterLab Example Terminal'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
     app_url = '/example_app'

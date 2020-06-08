@@ -211,8 +211,8 @@ class ExtensionManager(object):
 
 class ExtensionHandler(ExtensionHandlerMixin, APIHandler):
 
-    def initialize(self, manager=None, extension_name=None):
-        super(ExtensionHandler, self).initialize(extension_name=extension_name)
+    def initialize(self, manager=None, name=None):
+        super(ExtensionHandler, self).initialize(name=name)
         self.manager = manager
 
     @web.authenticated

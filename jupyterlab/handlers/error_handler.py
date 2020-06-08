@@ -24,8 +24,8 @@ TEMPLATE = """
 
 class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
 
-    def initialize(self, messages=None, extension_name=None):
-        super(ErrorHandler, self).initialize(extension_name=extension_name)
+    def initialize(self, messages=None, name=None):
+        super(ErrorHandler, self).initialize(name=name)
         self.messages = messages
 
     @web.authenticated

@@ -42,7 +42,7 @@ def main():
         """An app that launches an example and waits for it to start up, checking for
         JS console errors, JS errors, and Python logged errors.
         """
-        extension_name = 'example'
+        name = 'example'
         extension_url = '/example'
         default_url = '/example'
         open_browser = Bool(False)        

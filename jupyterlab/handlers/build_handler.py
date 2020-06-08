@@ -111,8 +111,8 @@ class Builder(object):
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):
 
-    def initialize(self, builder=None, extension_name=None):
-        super(BuildHandler, self).initialize(extension_name=extension_name)
+    def initialize(self, builder=None, name=None):
+        super(BuildHandler, self).initialize(name=name)
         self.builder = builder
 
     @web.authenticated

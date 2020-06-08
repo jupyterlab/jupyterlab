@@ -503,10 +503,11 @@ export class OutputArea extends Widget {
         output = { ...msg.content, output_type: msgType };
         model.add(output);
         break;
-      case 'clear_output':
+      case 'clear_output': {
         const wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
         model.clear(wait);
         break;
+      }
       case 'update_display_data':
         output = { ...msg.content, output_type: 'display_data' };
         targets = this._displayIdMap.get(displayId);

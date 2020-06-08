@@ -28,21 +28,19 @@ import { ILayoutRestorer } from './layoutrestorer';
  */
 export interface IMimeDocumentTracker extends IWidgetTracker<MimeDocument> {}
 
-/* tslint:disable */
 /**
  * The mime document tracker token.
  */
 export const IMimeDocumentTracker = new Token<IMimeDocumentTracker>(
   '@jupyterlab/application:IMimeDocumentTracker'
 );
-/* tslint:enable */
 
 /**
  * Create rendermime plugins for rendermime extension modules.
  */
 export function createRendermimePlugins(
   extensions: IRenderMime.IExtensionModule[]
-): JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] {
+): JupyterFrontEndPlugin<void | IMimeDocumentTracker, any, any>[] {
   const plugins: JupyterFrontEndPlugin<void | IMimeDocumentTracker>[] = [];
 
   const namespace = 'application-mimedocuments';

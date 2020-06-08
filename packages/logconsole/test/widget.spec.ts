@@ -34,9 +34,9 @@ class SignalLogger<SENDER, ARGS> {
   args: ARGS[] = [];
 }
 
-function anyAncestor(el: Element, test: (el: Element) => boolean) {
+function anyAncestor(el: Element, testFn: (el: Element) => boolean) {
   while (el) {
-    if (test(el)) {
+    if (testFn(el)) {
       return true;
     }
     if (!el.parentElement || el === el.parentNode) {

@@ -47,7 +47,6 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
         return;
       }
       const contents = context.contentsModel!;
-      this._format = contents.format === 'base64' ? ';base64' : '';
       this._mimeType = contents.mimetype;
       this._render();
       context.model.contentChanged.connect(this.update, this);
@@ -179,8 +178,11 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     if (!cm) {
       return;
     }
-    const content = context.model.toString();
-    this._img.src = `data:${this._mimeType}${this._format},${content}`;
+    let content = context.model.toString();
+    if (cm.format !== 'base64') {
+      content = btoa(content);
+    }
+    this._img.src = `data:${this._mimeType};base64,${content}`;
   }
 
   /**
@@ -196,7 +198,6 @@ export class ImageViewer extends Widget implements Printing.IPrintable {
     this._img.style.filter = `invert(${this._colorinversion})`;
   }
 
-  private _format: string;
   private _mimeType: string;
   private _scale = 1;
   private _matrix = [1, 0, 0, 1];

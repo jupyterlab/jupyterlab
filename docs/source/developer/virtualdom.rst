@@ -46,6 +46,9 @@ The `running component <https://github.com/jupyterlab/jupyterlab/blob/f2e0cde0e7
 and the ``createSearchOverlay`` function in the `search overlay <https://github.com/jupyterlab/jupyterlab/blob/f2e0cde0e7c960dc82fd9b010fcd3dbd9e9b43d0/packages/documentsearch/src/searchoverlay.tsx#L440-L457>`__
 use both of these features and serve as a good reference for best practices.
 
+There is also a `simple example <https://github.com/jupyterlab/extension-examples/tree/71486d7b891175fb3883a8b136b8edd2cd560385/react/react-widget>`_ making
+a Lumino react widget in the JupyterLab `extension examples repository <https://github.com/jupyterlab/extension-examples>`_.
+
 We currently do not have a way of embedding Lumino widgets inside of React components. If you find yourself trying to do this, we would recommend either converting the Lumino widget to a React component or using a Lumino widget for the outer layer component.
 
 We follow the `React documentation <https://reactjs.org/docs/thinking-in-react.html>`__ and

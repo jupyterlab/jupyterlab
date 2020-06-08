@@ -9,7 +9,7 @@ import {
 
 import { ICommandPalette, WidgetTracker } from '@jupyterlab/apputils';
 
-import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { IDocumentWidget, DocumentRegistry } from '@jupyterlab/docregistry';
 
 import {
   ImageViewer,
@@ -41,12 +41,27 @@ namespace CommandIDs {
 /**
  * The list of file types for images.
  */
-const FILE_TYPES = ['png', 'gif', 'jpeg', 'svg', 'bmp', 'ico', 'xbm', 'tiff'];
+const FILE_TYPES = ['png', 'gif', 'jpeg', 'bmp', 'ico', 'tiff'];
 
 /**
  * The name of the factory that creates image widgets.
  */
 const FACTORY = 'Image';
+
+/**
+ * The name of the factory that creates image widgets.
+ */
+const TEXT_FACTORY = 'Image (Text)';
+
+/**
+ * The list of file types for images with optional text modes.
+ */
+const TEXT_FILE_TYPES = ['svg', 'xbm'];
+
+/**
+ * The test pattern for text file types in paths.
+ */
+const TEXT_FILE_REGEX = new RegExp(`\.(${TEXT_FILE_TYPES.join('|')})$`);
 
 /**
  * The image file handler extension.
@@ -73,29 +88,11 @@ function activate(
   restorer: ILayoutRestorer | null
 ): IImageTracker {
   const namespace = 'image-widget';
-  const factory = new ImageViewerFactory({
-    name: FACTORY,
-    modelName: 'base64',
-    fileTypes: FILE_TYPES,
-    defaultFor: FILE_TYPES,
-    readOnly: true
-  });
-  const tracker = new WidgetTracker<IDocumentWidget<ImageViewer>>({
-    namespace
-  });
 
-  if (restorer) {
-    // Handle state restoration.
-    void restorer.restore(tracker, {
-      command: 'docmanager:open',
-      args: widget => ({ path: widget.context.path, factory: FACTORY }),
-      name: widget => widget.context.path
-    });
-  }
-
-  app.docRegistry.addWidgetFactory(factory);
-
-  factory.widgetCreated.connect((sender, widget) => {
+  function onWidgetCreated(
+    sender: any,
+    widget: IDocumentWidget<ImageViewer, DocumentRegistry.IModel>
+  ) {
     // Notify the widget tracker if restore data needs to update.
     widget.context.pathChanged.connect(() => {
       void tracker.save(widget);
@@ -109,7 +106,46 @@ function activate(
       widget.title.iconClass = types[0].iconClass ?? '';
       widget.title.iconLabel = types[0].iconLabel ?? '';
     }
+  }
+
+  const factory = new ImageViewerFactory({
+    name: FACTORY,
+    modelName: 'base64',
+    fileTypes: [...FILE_TYPES, ...TEXT_FILE_TYPES],
+    defaultFor: FILE_TYPES,
+    readOnly: true
   });
+
+  const textFactory = new ImageViewerFactory({
+    name: TEXT_FACTORY,
+    modelName: 'text',
+    fileTypes: TEXT_FILE_TYPES,
+    defaultFor: TEXT_FILE_TYPES,
+    readOnly: true
+  });
+
+  [factory, textFactory].forEach(factory => {
+    app.docRegistry.addWidgetFactory(factory);
+    factory.widgetCreated.connect(onWidgetCreated);
+  });
+
+  const tracker = new WidgetTracker<IDocumentWidget<ImageViewer>>({
+    namespace
+  });
+
+  if (restorer) {
+    // Handle state restoration.
+    void restorer.restore(tracker, {
+      command: 'docmanager:open',
+      args: widget => ({
+        path: widget.context.path,
+        factory: TEXT_FILE_REGEX.test(widget.context.path)
+          ? TEXT_FACTORY
+          : FACTORY
+      }),
+      name: widget => widget.context.path
+    });
+  }
 
   addCommands(app, tracker);
 

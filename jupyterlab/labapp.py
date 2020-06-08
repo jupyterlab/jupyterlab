@@ -416,7 +416,7 @@ class LabWorkspaceApp(JupyterApp):
 class LabApp(NBClassicConfigShimMixin, LabServerApp):
     version = version
 
-    extension_name = "jupyterlab"
+    name = "jupyterlab"
     app_name = "JupyterLab"
 
     # Should your extension expose other server extensions when launched directly?
@@ -556,8 +556,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         if self.override_static_url:
             return self.override_static_url
         else:
-            return "/static/{extension_name}/".format(
-            extension_name=self.extension_name)
+            return "/static/{name}/".format(
+            name=self.name)
 
     @default('theme_url')
     def _default_theme_url(self):

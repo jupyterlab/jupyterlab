@@ -236,7 +236,7 @@ class JestApp(ProcessTestApp):
 
     default_url = Unicode('/lab')
     extension_url = '/lab'
-    extension_name = __name__
+    name = __name__
     app_name = 'JupyterLab Jest Application'
     app_url = '/lab'
 
@@ -322,7 +322,7 @@ class KarmaTestApp(ProcessTestApp):
 
     default_url = Unicode('/lab')
     extension_url = '/lab'
-    extension_name = __name__
+    name = __name__
     app_name = 'JupyterLab Karma Application'
     app_url = '/lab'
 

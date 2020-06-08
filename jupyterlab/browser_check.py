@@ -127,7 +127,8 @@ async def run_test_async(app, func):
         self.log.error(str(e))
         result = 1
     finally:
-        sys.exit(result)
+        time.sleep(2)
+        os._exit(result)
 
 
 async def run_async_process(cmd, **kwargs):
@@ -155,7 +156,7 @@ class BrowserApp(LabApp):
     """An app the launches JupyterLab and waits for it to start up, checking for
     JS console errors, JS errors, and Python logged errors.
     """
-    extension_name = __name__
+    name = __name__
     open_browser = Bool(False)
     ip = '127.0.0.1'
     flags = test_flags

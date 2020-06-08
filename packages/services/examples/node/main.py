@@ -20,7 +20,7 @@ def _jupyter_server_extension_paths():
 
 class NodeApp(ProcessApp):
 
-    extension_name = __name__
+    name = __name__
 
     def get_command(self):
         """Get the command and kwargs to run.

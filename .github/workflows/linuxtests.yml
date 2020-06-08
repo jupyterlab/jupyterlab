@@ -16,6 +16,8 @@ jobs:
             python: 3.5
           - group: docs
             python: 3.5
+          - group: usage
+            python: 3.5
       fail-fast: false
     timeout-minutes: 120
     runs-on: ubuntu-latest

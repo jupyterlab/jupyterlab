@@ -25,14 +25,12 @@ import { DockPanel, Widget } from '@lumino/widgets';
 
 import { ILabShell } from './shell';
 
-/* tslint:disable */
 /**
  * The layout restorer token.
  */
 export const ILayoutRestorer = new Token<ILayoutRestorer>(
   '@jupyterlab/application:ILayoutRestorer'
 );
-/* tslint:enable */
 
 /**
  * A static class that restores the widgets of the application when it reloads.

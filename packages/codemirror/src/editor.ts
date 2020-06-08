@@ -166,7 +166,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Turn off paste handling in codemirror since sometimes we want to
     // replace it with our own.
     editor.on('paste', (instance: CodeMirror.Editor, event: any) => {
-      if (!this._config['handlePaste']) {
+      const handlePaste = this._config['handlePaste'] ?? true;
+      if (!handlePaste) {
         event.codemirrorIgnore = true;
       }
     });
@@ -883,14 +884,15 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this._changeGuard = true;
     const doc = this.doc;
     switch (args.type) {
-      case 'insert':
+      case 'insert': {
         const pos = doc.posFromIndex(args.start);
         // Replace the range, including a '+input' orign,
         // which indicates that CodeMirror may merge changes
         // for undo/redo purposes.
         doc.replaceRange(args.value, pos, pos, '+input');
         break;
-      case 'remove':
+      }
+      case 'remove': {
         const from = doc.posFromIndex(args.start);
         const to = doc.posFromIndex(args.end);
         // Replace the range, including a '+input' orign,
@@ -898,6 +900,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
         // for undo/redo purposes.
         doc.replaceRange('', from, to, '+input');
         break;
+      }
       case 'set':
         doc.setValue(args.value);
         break;
@@ -1276,7 +1279,8 @@ export namespace CodeMirrorEditor {
     styleSelectedText: true,
     selectionPointer: false,
     rulers: [],
-    foldGutter: false
+    foldGutter: false,
+    handlePaste: true
   };
 
   /**
@@ -1395,18 +1399,8 @@ namespace Private {
           doc.replaceRange('', from, head);
         } else {
           // delete non-tabs
-          if (head.ch === 0) {
-            if (head.line !== 0) {
-              const from = CodeMirror.Pos(
-                head.line - 1,
-                doc.getLine(head.line - 1).length
-              );
-              doc.replaceRange('', from, head);
-            }
-          } else {
-            const from = CodeMirror.Pos(head.line, head.ch - 1);
-            doc.replaceRange('', from, head);
-          }
+          const from = cm.findPosH(head, -1, 'char', false);
+          doc.replaceRange('', from, head);
         }
       }
     }
@@ -1449,7 +1443,7 @@ namespace Private {
   ): void {
     const el = editor.getWrapperElement();
     switch (option) {
-      case 'lineWrap':
+      case 'lineWrap': {
         const lineWrapping = value === 'off' ? false : true;
         const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
         const maxWidth =
@@ -1460,7 +1454,8 @@ namespace Private {
         lines.style.setProperty('width', width);
         editor.setOption('lineWrapping', lineWrapping);
         break;
-      case 'wordWrapColumn':
+      }
+      case 'wordWrapColumn': {
         const { lineWrap } = config;
         if (lineWrap === 'wordWrapColumn' || lineWrap === 'bounded') {
           const lines = el.querySelector('.CodeMirror-lines') as HTMLDivElement;
@@ -1468,6 +1463,7 @@ namespace Private {
           lines.style[prop] = `${value}ch`;
         }
         break;
+      }
       case 'tabSize':
         editor.setOption('indentUnit', value);
         break;
@@ -1477,7 +1473,7 @@ namespace Private {
       case 'autoClosingBrackets':
         editor.setOption('autoCloseBrackets', value);
         break;
-      case 'rulers':
+      case 'rulers': {
         const rulers = value as Array<number>;
         editor.setOption(
           'rulers',
@@ -1489,6 +1485,7 @@ namespace Private {
           })
         );
         break;
+      }
       case 'readOnly':
         el.classList.toggle(READ_ONLY_CLASS, value);
         editor.setOption(option, value);

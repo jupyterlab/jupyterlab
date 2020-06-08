@@ -50,7 +50,7 @@ class ExampleHandler(
             'baseUrl': self.base_url,
             'token': self.settings['token'],
             'notebookPath': 'test.ipynb',
-            'fullStaticUrl': ujoin(self.base_url, 'static', self.extension_name),
+            'fullStaticUrl': ujoin(self.base_url, 'static', self.name),
             'frontendUrl': ujoin(self.base_url, 'example/'),
             # FIXME: Don't use a CDN here
             'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
@@ -70,7 +70,7 @@ class ExampleHandler(
 class ExampleApp(LabServerApp):
 
     extension_url = '/example'
-    extension_name = 'main'
+    name = 'main'
     app_name = 'JupyterLab Example Notebook'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
     app_url = '/example_app'

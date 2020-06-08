@@ -26,7 +26,7 @@ def _jupyter_server_extension_paths():
 
 class ExampleApp(LabServerApp):
     extension_url = '/example'
-    extension_name = __name__
+    name = __name__
     app_name = 'JupyterLab Example App'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
     app_version = version

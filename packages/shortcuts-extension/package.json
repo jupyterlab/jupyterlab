@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/shortcuts-extension",
-  "version": "2.1.0",
+  "version": "2.2.0-alpha.0",
   "description": "JupyterLab - Shortcuts Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -32,15 +32,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.1.0",
-    "@jupyterlab/settingregistry": "^2.1.0",
+    "@jupyterlab/application": "^2.2.0-alpha.0",
+    "@jupyterlab/settingregistry": "^2.2.0-alpha.0",
     "@lumino/commands": "^1.10.1",
     "@lumino/coreutils": "^1.4.2",
     "@lumino/disposable": "^1.3.5"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "^0.15.4",
+    "typedoc": "^0.17.7",
     "typescript": "~3.9.2"
   },
   "publishConfig": {

@@ -2,8 +2,10 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-// @ts-ignore
-__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
+(window as any).__webpack_public_path__ = URLExt.join(
+  PageConfig.getBaseUrl(),
+  'example/'
+);
 
 import '@jupyterlab/application/style/index.css';
 import '@jupyterlab/cells/style/index.css';
