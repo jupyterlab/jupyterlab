@@ -13,6 +13,8 @@ jplm # First install dependencies
 env 'BENCHMARK_NOTEBOOKS=["./longOutput", "./manyOutputs"]' jlpm all
 ```
 
+![](./screenshot.png)
+
 `BENCHMARK_NOTEBOOKS` should be a list strings that node can import that return a description of how to create a notebook. They should have a default export of the type `NotebookType` in [`./src/notebookType.ts`](./src/notebookType.ts).
 
 It will keep increasing the `n` until either it reaches a maximum or the time exceeds a certain budget.
