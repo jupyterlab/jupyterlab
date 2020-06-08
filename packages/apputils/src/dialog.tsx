@@ -633,7 +633,9 @@ export namespace Dialog {
      */
     createHeader<T>(
       title: Header,
-      reject: () => void,
+      reject: () => void = () => {
+        /* empty */
+      },
       options: Partial<Dialog.IOptions<T>> = {}
     ): Widget {
       let header: Widget;
