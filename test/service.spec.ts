@@ -1,4 +1,7 @@
-import { Session, KernelSpecManager } from '@jupyterlab/services';
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { Session, KernelSpecManager, KernelSpec } from '@jupyterlab/services';
 
 import {
   createSession,
@@ -6,7 +9,7 @@ import {
   JupyterServer
 } from '@jupyterlab/testutils';
 
-import { UUID } from '@lumino/coreutils';
+import { UUID, JSONExt } from '@lumino/coreutils';
 
 import { DebuggerModel } from '../src/model';
 
@@ -15,6 +18,25 @@ import { DebuggerService } from '../src/service';
 import { DebugSession } from '../src/session';
 
 import { IDebugger } from '../src/tokens';
+
+import { KERNELSPECS, handleRequest } from './utils';
+
+/**
+ * A Test class to mock a KernelSpecManager
+ */
+class TestKernelSpecManager extends KernelSpecManager {
+  intercept: KernelSpec.ISpecModels | null = null;
+
+  /**
+   * Request the kernel specs
+   */
+  protected async requestSpecs(): Promise<void> {
+    if (this.intercept) {
+      handleRequest(this, 200, this.intercept);
+    }
+    return super.requestSpecs();
+  }
+}
 
 const server = new JupyterServer();
 
@@ -28,8 +50,10 @@ afterAll(async () => {
 });
 
 describe('Debugging support', () => {
-  const specsManager = new KernelSpecManager();
-  const service = new DebuggerService({ specsManager });
+  const specs = JSONExt.deepCopy(KERNELSPECS) as KernelSpec.ISpecModels;
+
+  let specsManager: TestKernelSpecManager;
+  let service: DebuggerService;
   let xpython: Session.ISessionConnection;
   let ipykernel: Session.ISessionConnection;
 
@@ -40,16 +64,24 @@ describe('Debugging support', () => {
       path: UUID.uuid4()
     });
     await xpython.changeKernel({ name: 'xpython' });
+
     ipykernel = await createSession({
       name: '',
       type: 'test',
       path: UUID.uuid4()
     });
     await ipykernel.changeKernel({ name: 'python3' });
+
+    specsManager = new TestKernelSpecManager({ standby: 'never' });
+    specsManager.intercept = specs;
+    await specsManager.refreshSpecs();
+    service = new DebuggerService({ specsManager });
   });
 
   afterAll(async () => {
     await Promise.all([xpython.shutdown(), ipykernel.shutdown()]);
+    service.dispose();
+    specsManager.dispose();
   });
 
   describe('#isAvailable', () => {
