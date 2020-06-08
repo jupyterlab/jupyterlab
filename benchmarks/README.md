@@ -1,6 +1,24 @@
 # Benchmarks
 
-Run bunchmarks on JupyterLab
+This package contains some scripts to run benchmarks against JupyterLab.
+
+Currently it runs one type benchmark, switching between open notebooks, with a variety
+of different notebook sizes and types.
+
+To run the benchmarks against notebooks with long outputs and notebooks with many outputs, and to see how the times change as the notebooks grow:
+
+```bash
+env 'BENCHMARK_NOTEBOOKS=["./longOutput", "./manyOutputs"]' jlpm all
+```
+
+`BENCHMARK_NOTEBOOKS` should be a list strings that node can import that return a description of how to create a notebook. They should have a default export of the type `NotebookType` in [`./src/notebookType.ts`](./src/notebookType.ts).
+
+It will keep increasing the `n` until either it reaches a maximum or the time exceeds a certain budget.
+
+## Plotly
+
+We also build in support to run this against some plotly ipywidgets, to get a sense of
+how rendering time is impacted by heavier mime render types:
 
 First add the plotly and ipwydigets to the `dev_mode/package.json`:
 
@@ -22,11 +40,4 @@ Then run the build, run the benchmarks, and view the results:
 
 ```bash
 jlpm all
-```
-
-If you want to test on some custom notebooks, set the `BENCHMARK_NOTEBOOKS` env variables to a list of strings.
-These strings will be imported by node and should export a default module of the [`notebookType`](./src/notebookType.ts).
-
-```bash
-env 'BENCHMARK_NOTEBOOKS=["./longOutput", "./manyOutputs"]' jlpm all
 ```

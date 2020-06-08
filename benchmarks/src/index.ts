@@ -10,8 +10,11 @@ import NotebookType from './notebookType';
 const DATA_PATH = 'out.csv';
 
 const BROWSERS: Array<'firefox' | 'chromium'> = ['firefox', 'chromium'];
+// The maximium N
 const MAX_N = 100;
+// The number of different n's to try out
 const NUMBER_SAMPLES = 20;
+// How many times to switch between each notebook
 const SWITCHES = 5;
 
 /**
