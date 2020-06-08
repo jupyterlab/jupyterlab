@@ -7,5 +7,5 @@ dependencies:
 - nodejs
 - notebook=6
 - ptvsd
-- xeus-python=0.7.1
-- xeus=0.23.14
+- xeus-python=0.8.0
+- xeus=0.24.0
