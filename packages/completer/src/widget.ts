@@ -283,16 +283,6 @@ export class Completer extends Widget {
       return null;
     }
 
-    // If there is only one option, signal and bail.
-    // We don't test the filtered `items`, as that
-    // is too aggressive of completer behavior, it can
-    // lead to double typing of an option.
-    if (items.length === 1) {
-      this._selected.emit(items[0].insertText || items[0].label);
-      this.reset();
-      return null;
-    }
-
     // Clear the node.
     let node = this.node;
     node.textContent = '';
@@ -421,12 +411,20 @@ export class Completer extends Widget {
       return;
     }
     switch (event.keyCode) {
-      case 9: // Tab key
+      case 9: {
+        // Tab key
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
         const model = this._model;
         if (!model) {
+          return;
+        }
+        // Autoinsert single completions on manual request (tab)
+        const items = model.completionItems && model.completionItems();
+        if (items && items.length === 1) {
+          this._selected.emit(items[0].insertText || items[0].label);
+          this.reset();
           return;
         }
         const populated = this._populateSubset();
@@ -442,6 +440,7 @@ export class Completer extends Widget {
           this.update();
         }
         return;
+      }
       case 27: // Esc key
         event.preventDefault();
         event.stopPropagation();
@@ -451,13 +450,15 @@ export class Completer extends Widget {
       case 33: // PageUp
       case 34: // PageDown
       case 38: // Up arrow key
-      case 40: // Down arrow key
+      case 40: {
+        // Down arrow key
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
         const cycle = Private.keyCodeMap[event.keyCode];
         this._cycle(cycle);
         return;
+      }
       default:
         return;
     }

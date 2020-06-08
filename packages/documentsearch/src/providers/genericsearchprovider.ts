@@ -198,8 +198,8 @@ export class GenericSearchProvider implements ISearchProvider<Widget> {
     matches.forEach((match, idx) => {
       // This may be changed when this is a subprovider :/
       match.index = idx;
-      // @ts-ignore
-      match.matchesIndex = idx;
+      // TODO: matchesIndex is declared as readonly. Why are we setting it here?
+      (match as any).matchesIndex = idx;
     });
     if (!this.isSubProvider && matches.length > 0) {
       this._currentMatch = matches[0];

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-services-browser",
-  "version": "2.1.0",
+  "version": "2.2.0-alpha.0",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
@@ -8,13 +8,13 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^4.1.0",
-    "@jupyterlab/services": "^5.1.0",
+    "@jupyterlab/coreutils": "^4.2.0-alpha.0",
+    "@jupyterlab/services": "^5.2.0-alpha.0",
     "@lumino/coreutils": "^1.4.2"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typescript": "~3.7.3",
+    "typescript": "~3.9.2",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
   }

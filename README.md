@@ -103,11 +103,25 @@ See our [documentation](http://jupyterlab.readthedocs.io/en/latest/getting_start
 
 ---
 
+## Getting help
+
+We encourage you to ask questions on the [Discourse forum](https://discourse.jupyter.org/c/jupyterlab). A question answered there can become a useful resource for others.
+
+### Bug report
+
+To report a bug please read the [guidelines](https://jupyterlab.readthedocs.io/en/latest/getting_started/issue.html) and then open a [Github issue](https://github.com/jupyterlab/jupyterlab/issues/new?template=bug_report.md). To keep resolved issues self-contained, the [lock bot](https://github.com/apps/lock) will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.
+
+### Feature request
+
+We also welcome suggestions for new features as they help make the project more useful for everyone. To request a feature please use the [feature request template](https://github.com/jupyterlab/jupyterlab/issues/new?template=feature_request.md).
+
+---
+
 ## Development
 
 ### Contributing
 
-To contribute to the project, please read the [contributor documentation](CONTRIBUTING.md).
+To contribute code or documentation to the project, please read the [contributor documentation](https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html).
 
 JupyterLab follows the Jupyter [Community Guides](https://jupyter.readthedocs.io/en/latest/community/content-community.html).
 
@@ -132,6 +146,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
 - Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
+- Eric Charles, Datalayer, (general development, extensions).
 - Jason Grout, Bloomberg (co-creator, vision, general development).
 - Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
@@ -151,12 +166,6 @@ This list is provided to give the reader context on who we are and how our team 
 To be listed, please submit a pull request with your information.
 
 ---
-
-## Getting help
-
-We encourage you to ask questions on the [Discourse forum](https://discourse.jupyter.org/c/jupyterlab). A question answered there can become a useful resource for others.
-
-Please use the [GitHub issues page](https://github.com/jupyterlab/jupyterlab/issues) to provide feedback or submit a bug report. To keep resolved issues self-contained, the [lock bot](https://github.com/apps/lock) will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.
 
 ### Weekly Dev Meeting
 

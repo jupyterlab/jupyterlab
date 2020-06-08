@@ -116,6 +116,25 @@ CSS Variables, and are not directly supported at this time.
 A tool like `postcss <https://postcss.org/>`__ can be used to convert the CSS files in the
 ``jupyterlab/build`` directory manually if desired.
 
+Usage with private NPM registry
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To install extensions, you will need access to a NPM packages registry. Some companies do not allow
+reaching directly public registry and have a private registry. To use it, you need to configure ``npm``
+**and** ``yarn`` to point to that registry (ask your corporate IT department for the correct URL):
+
+.. code::
+
+    npm config set registry https://registry.company.com/
+    yarn config set registry https://registry.company.com/
+    
+JupyterLab will pick up that registry automatically.
+
+.. note::
+
+    You can check which registry URL is used by JupyterLab by running::
+    
+      python -c "from jupyterlab.commands import AppOptions; print(AppOptions().registry)"
 
 Installation problems
 ~~~~~~~~~~~~~~~~~~~~~
@@ -182,7 +201,7 @@ which means, SSL communication will not be required for downloading Python libra
 Using the tips from above, you can handle many network problems 
 related to installing Python libraries.
 
-Many Jupyter extensions require having a working ``npm`` command,
+Many Jupyter extensions require having a working ``npm`` and ``jlpm`` (alias for ``yarn``) commands,
 which is required for downloading useful Jupyter extensions or other JavaScript dependencies.
 
 Example of typical error message, when ``npm`` cannot connect to own repositories:
@@ -197,6 +216,7 @@ Example of typical error message, when ``npm`` cannot connect to own repositorie
 
     # Set default registry for NPM (optional, useful in case if common JavaScript libs cannot be found)
     npm config set registry http://registry.npmjs.org/
+    jlpm config set registry https://registry.yarnpkg.com/
 
 
 In case you can communicate via HTTP, but installation with ``npm`` fails

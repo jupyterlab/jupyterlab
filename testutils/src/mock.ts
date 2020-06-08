@@ -486,6 +486,9 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
     localPath: jest.fn(path => {
       return dummy.localPath(path);
     }),
+    resolvePath: jest.fn((root, path) => {
+      return dummy.resolvePath(root, path);
+    }),
     get: jest.fn((path, options) => {
       path = Private.fixSlash(path);
       if (!files.has(path)) {

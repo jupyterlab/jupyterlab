@@ -15,26 +15,39 @@ import { Application, IPlugin } from '@lumino/application';
 
 import { Token } from '@lumino/coreutils';
 
+import { ISignal, Signal } from '@lumino/signaling';
+
 import { Widget } from '@lumino/widgets';
 
 /**
  * The type for all JupyterFrontEnd application plugins.
  *
  * @typeparam T - The type that the plugin `provides` upon being activated.
+ *
+ * @typeparam U - The type of the application shell.
+ *
+ * @typeparam V - The type that defines the application formats.
  */
-export type JupyterFrontEndPlugin<T> = IPlugin<JupyterFrontEnd, T>;
+export type JupyterFrontEndPlugin<
+  T,
+  U extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell,
+  V extends string = 'desktop' | 'mobile'
+> = IPlugin<JupyterFrontEnd<U, V>, T>;
 
 /**
  * The base Jupyter front-end application class.
  *
  * @typeparam `T` - The `shell` type. Defaults to `JupyterFrontEnd.IShell`.
  *
+ * @typeparam `U` - The type for supported format names. Defaults to `string`.
+ *
  * #### Notes
  * This type is useful as a generic application against which front-end plugins
- * can be authored. It inherits from the phosphor `Application`.
+ * can be authored. It inherits from the Lumino `Application`.
  */
 export abstract class JupyterFrontEnd<
-  T extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell
+  T extends JupyterFrontEnd.IShell = JupyterFrontEnd.IShell,
+  U extends string = 'desktop' | 'mobile'
 > extends Application<T> {
   /**
    * Construct a new JupyterFrontEnd object.
@@ -97,6 +110,11 @@ export abstract class JupyterFrontEnd<
   readonly commandLinker: CommandLinker;
 
   /**
+   * The application context menu.
+   */
+  readonly contextMenu: ContextMenuSvg;
+
+  /**
    * The document registry instance used by the application.
    */
   readonly docRegistry: DocumentRegistry;
@@ -110,6 +128,27 @@ export abstract class JupyterFrontEnd<
    * The service manager used by the application.
    */
   readonly serviceManager: ServiceManager;
+
+  /**
+   * The application form factor, e.g., `desktop` or `mobile`.
+   */
+  get format(): U {
+    return this._format;
+  }
+  set format(format: U) {
+    if (this._format !== format) {
+      this._format = format;
+      document.body.dataset['format'] = format;
+      this._formatChanged.emit(format);
+    }
+  }
+
+  /**
+   * A signal that emits when the application form factor changes.
+   */
+  get formatChanged(): ISignal<this, U> {
+    return this._formatChanged;
+  }
 
   /**
    * Walks up the DOM hierarchy of the target of the active `contextmenu`
@@ -183,9 +222,9 @@ export abstract class JupyterFrontEnd<
     }
   }
 
-  readonly contextMenu: ContextMenuSvg;
-
   private _contextMenuEvent: MouseEvent;
+  private _format: U;
+  private _formatChanged = new Signal<this, U>(this);
 }
 
 /**

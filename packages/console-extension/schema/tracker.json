@@ -37,6 +37,12 @@
       "type": "string",
       "enum": ["notebook", "terminal"],
       "default": "notebook"
+    },
+    "showAllKernelActivity": {
+      "title": "Show All Kernel Activity",
+      "description": "Whether the console defaults to showing all\nkernel activity or just kernel activity originating from itself.",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

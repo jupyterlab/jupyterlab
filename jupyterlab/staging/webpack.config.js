@@ -20,9 +20,26 @@ const package_data = require('./package.json');
 const jlab = package_data.jupyterlab;
 const extensions = jlab.extensions;
 const mimeExtensions = jlab.mimeExtensions;
+const { externalExtensions } = jlab;
 const packageNames = Object.keys(mimeExtensions).concat(
-  Object.keys(extensions)
+  Object.keys(extensions),
+  Object.keys(externalExtensions)
 );
+
+// go throught each external extension
+// add to mapping of extension and mime extensions, of package name
+// to path of the extension.
+for (const key in externalExtensions) {
+  const {
+    jupyterlab: { extension, mimeExtension }
+  } = require(`${key}/package.json`);
+  if (extension !== undefined) {
+    extensions[key] = extension === true ? '' : extension;
+  }
+  if (mimeExtension !== undefined) {
+    mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
+  }
+}
 
 // Ensure a clear build directory.
 const buildDir = plib.resolve(jlab.buildDir);
@@ -72,6 +89,8 @@ const sourceMapRes = Object.values(watched).reduce((res, name) => {
 
 /**
  * Sync a local path to a linked package path if they are files and differ.
+ * This is used by `jupyter lab --watch` to synchronize linked packages
+ * and has no effect in `jupyter lab --dev-mode --watch`.
  */
 function maybeSync(localPath, name, rest) {
   const stats = fs.statSync(localPath);
@@ -162,31 +181,31 @@ module.exports = [
       alias: {
         '@phosphor/algorithm$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/algorithm/lib/index.js'
+          'node_modules/@lumino/algorithm/dist/index.js'
         ),
         '@phosphor/application$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/application/lib/index.js'
+          'node_modules/@lumino/application/dist/index.js'
         ),
         '@phosphor/commands$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/commands/lib/index.js'
+          'node_modules/@lumino/commands/dist/index.js'
         ),
         '@phosphor/coreutils$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/coreutils/lib/index.js'
+          'node_modules/@lumino/coreutils/dist/index.js'
         ),
         '@phosphor/disposable$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/disposable/lib/index.js'
+          'node_modules/@lumino/disposable/dist/index.js'
         ),
         '@phosphor/domutils$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/domutils/lib/index.js'
+          'node_modules/@lumino/domutils/dist/index.js'
         ),
         '@phosphor/dragdrop$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/dragdrop/lib/index.js'
+          'node_modules/@lumino/dragdrop/dist/index.js'
         ),
         '@phosphor/dragdrop/style': plib.resolve(
           __dirname,
@@ -194,7 +213,7 @@ module.exports = [
         ),
         '@phosphor/messaging$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/messaging/lib/index.js'
+          'node_modules/@lumino/messaging/dist/index.js'
         ),
         '@phosphor/properties$': plib.resolve(
           __dirname,
@@ -202,7 +221,7 @@ module.exports = [
         ),
         '@phosphor/signaling': plib.resolve(
           __dirname,
-          'node_modules/@lumino/signaling/lib/index.js'
+          'node_modules/@lumino/signaling/dist/index.js'
         ),
         '@phosphor/widgets/style': plib.resolve(
           __dirname,
@@ -210,11 +229,11 @@ module.exports = [
         ),
         '@phosphor/virtualdom$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/virtualdom/lib/index.js'
+          'node_modules/@lumino/virtualdom/dist/index.js'
         ),
         '@phosphor/widgets$': plib.resolve(
           __dirname,
-          'node_modules/@lumino/widgets/lib/index.js'
+          'node_modules/@lumino/widgets/dist/index.js'
         )
       }
     },
@@ -279,7 +298,8 @@ module.exports = [
       ]
     },
     watchOptions: {
-      poll: 333
+      poll: 500,
+      aggregateTimeout: 1000
     },
     node: {
       fs: 'empty'

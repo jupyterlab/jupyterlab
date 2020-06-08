@@ -15,6 +15,8 @@ import {
   ForeignHandler
 } from '@jupyterlab/console';
 
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import { AttachedProperty } from '@lumino/properties';
 
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
@@ -24,7 +26,7 @@ import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
  */
 export const foreign: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:foreign',
-  requires: [IConsoleTracker],
+  requires: [IConsoleTracker, ISettingRegistry],
   optional: [ICommandPalette],
   activate: activateForeign,
   autoStart: true
@@ -35,6 +37,7 @@ export default foreign;
 function activateForeign(
   app: JupyterFrontEnd,
   tracker: IConsoleTracker,
+  settingRegistry: ISettingRegistry,
   palette: ICommandPalette | null
 ) {
   const { shell } = app;
@@ -46,6 +49,15 @@ function activateForeign(
       parent: console
     });
     Private.foreignHandlerProperty.set(console, handler);
+
+    // Property showAllKernelActivity configures foreign handler enabled on start.
+    void settingRegistry
+      .get('@jupyterlab/console-extension:tracker', 'showAllKernelActivity')
+      .then(({ composite }) => {
+        const showAllKernelActivity = composite as boolean;
+        handler.enabled = showAllKernelActivity;
+      });
+
     console.disposed.connect(() => {
       handler.dispose();
     });

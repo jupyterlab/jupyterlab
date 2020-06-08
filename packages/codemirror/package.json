@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror",
-  "version": "2.1.0",
+  "version": "2.2.0-alpha.0",
   "description": "JupyterLab - CodeMirror Editor Provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,12 +38,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.1.0",
-    "@jupyterlab/codeeditor": "^2.1.0",
-    "@jupyterlab/coreutils": "^4.1.0",
-    "@jupyterlab/nbformat": "^2.1.0",
-    "@jupyterlab/observables": "^3.1.0",
-    "@jupyterlab/statusbar": "^2.1.0",
+    "@jupyterlab/apputils": "^2.2.0-alpha.0",
+    "@jupyterlab/codeeditor": "^2.2.0-alpha.0",
+    "@jupyterlab/coreutils": "^4.2.0-alpha.0",
+    "@jupyterlab/nbformat": "^2.2.0-alpha.0",
+    "@jupyterlab/observables": "^3.2.0-alpha.0",
+    "@jupyterlab/statusbar": "^2.2.0-alpha.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
     "@lumino/coreutils": "^1.4.2",
@@ -55,14 +55,14 @@
     "react": "~16.9.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.1.0",
+    "@jupyterlab/testutils": "^2.2.0-alpha.0",
     "@types/codemirror": "^0.0.76",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",
     "ts-jest": "^25.2.1",
-    "typedoc": "^0.15.4",
-    "typescript": "~3.7.3"
+    "typedoc": "^0.17.7",
+    "typescript": "~3.9.2"
   },
   "publishConfig": {
     "access": "public"
@@ -72,20 +72,7 @@
       "codemirror": [
         "lib/codemirror.css",
         "addon/dialog/dialog.css",
-        "addon/fold/foldgutter.css",
-        "theme/material.css",
-        "theme/zenburn.css",
-        "theme/abcdef.css",
-        "theme/base16-light.css",
-        "theme/base16-dark.css",
-        "theme/dracula.css",
-        "theme/hopscotch.css",
-        "theme/mbo.css",
-        "theme/mdn-like.css",
-        "theme/seti.css",
-        "theme/solarized.css",
-        "theme/the-matrix.css",
-        "theme/xq-light.css"
+        "addon/fold/foldgutter.css"
       ]
     }
   }

@@ -113,7 +113,7 @@ but can not install it (no install button is available).
    **Figure:** With Disclaimer unchecked, you can not install an extension
 
 
-To install an extensino, you first have to explicitly acknowledge the disclaimer.
+To install an extension, you first have to explicitly acknowledge the disclaimer.
 Once done, this will remain across sessions and the user does not have to 
 check it again.
 

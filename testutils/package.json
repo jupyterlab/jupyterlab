@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/testutils",
-  "version": "2.1.0",
+  "version": "2.2.0-alpha.0",
   "description": "JupyterLab - Test Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,16 +36,16 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.1.0",
-    "@jupyterlab/cells": "^2.1.0",
-    "@jupyterlab/codeeditor": "^2.1.0",
-    "@jupyterlab/codemirror": "^2.1.0",
-    "@jupyterlab/coreutils": "^4.1.0",
-    "@jupyterlab/docregistry": "^2.1.0",
-    "@jupyterlab/nbformat": "^2.1.0",
-    "@jupyterlab/notebook": "^2.1.0",
-    "@jupyterlab/rendermime": "^2.1.0",
-    "@jupyterlab/services": "^5.1.0",
+    "@jupyterlab/apputils": "^2.2.0-alpha.0",
+    "@jupyterlab/cells": "^2.2.0-alpha.0",
+    "@jupyterlab/codeeditor": "^2.2.0-alpha.0",
+    "@jupyterlab/codemirror": "^2.2.0-alpha.0",
+    "@jupyterlab/coreutils": "^4.2.0-alpha.0",
+    "@jupyterlab/docregistry": "^2.2.0-alpha.0",
+    "@jupyterlab/nbformat": "^2.2.0-alpha.0",
+    "@jupyterlab/notebook": "^2.2.0-alpha.0",
+    "@jupyterlab/rendermime": "^2.2.0-alpha.0",
+    "@jupyterlab/services": "^5.2.0-alpha.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
     "@lumino/properties": "^1.1.6",
@@ -69,7 +69,7 @@
     "@types/node-fetch": "^2.5.4",
     "jest-retries": "^1.0.1",
     "lighthouse": "5.6.0",
-    "typescript": "~3.7.3"
+    "typescript": "~3.9.2"
   },
   "publishConfig": {
     "access": "public"

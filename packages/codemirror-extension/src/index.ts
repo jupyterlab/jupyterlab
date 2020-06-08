@@ -162,11 +162,22 @@ function activateEditorCommands(
 
     // Lazy loading of vim mode
     if (keyMap === 'vim') {
-      // @ts-ignore
+      // @ts-expect-error
       await import('codemirror/keymap/vim.js');
     }
 
     theme = (settings.get('theme').composite as string | null) || theme;
+
+    // Lazy loading of theme stylesheets
+    if (theme !== 'jupyter' && theme !== 'default') {
+      const filename =
+        theme === 'solarized light' || theme === 'solarized dark'
+          ? 'solarized'
+          : theme;
+
+      await import(`codemirror/theme/${filename}.css`);
+    }
+
     scrollPastEnd =
       (settings.get('scrollPastEnd').composite as boolean | null) ??
       scrollPastEnd;
