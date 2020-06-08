@@ -600,6 +600,9 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         handlers = []
         build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir)
 
+        # TODO Move this to configurable trait once jupyterlab support it.
+        self.serverapp.open_browser = True
+
         # Set config for Jupyterlab
         page_config = self.serverapp.web_app.settings.setdefault('page_config_data', {})
         page_config.setdefault('buildAvailable', not self.core_mode and not self.dev_mode)
