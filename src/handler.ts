@@ -312,7 +312,6 @@ export class DebuggerHandler {
         : null;
       this._service.session.connection = connection;
     }
-
     await this._service.restoreState(false, this._editorFinder);
     addToolbarButton();
 

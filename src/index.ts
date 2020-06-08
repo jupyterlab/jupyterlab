@@ -81,18 +81,20 @@ export namespace CommandIDs {
 const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
-  requires: [IDebugger, IConsoleTracker],
+  requires: [IDebugger, IDebuggerEditorFinder, IConsoleTracker],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
+    editorFinder: IDebuggerEditorFinder,
     consoleTracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'console',
       shell: app.shell,
-      service: debug
+      service: debug,
+      editorFinder
     });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
@@ -130,18 +132,20 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  requires: [IDebugger, IEditorTracker],
+  requires: [IDebugger, IEditorTracker, IDebuggerEditorFinder],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorTracker: IEditorTracker,
+    editorFinder: IDebuggerEditorFinder,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'file',
       shell: app.shell,
-      service: debug
+      service: debug,
+      editorFinder
     });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);

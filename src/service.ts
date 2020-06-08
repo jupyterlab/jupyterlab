@@ -264,11 +264,12 @@ export class DebuggerService implements IDebugger, IDisposable {
   ): Promise<Map<string, IDebugger.IBreakpoint[]>> {
     const debugSessionPath = this._session.connection.path;
     const associatedBreakpoints = (
-      fromServer: Map<string, IDebugger.IBreakpoint[]>
+      fromServer: Map<string, IDebugger.IBreakpoint[]>,
+      editorFinder: IDebuggerEditorFinder
     ): string[] => {
       let associatedBreakpoints: string[] = [];
       for (let [key, value] of fromServer) {
-        each(editorFinder.find(debugSessionPath, key), () => {
+        each(editorFinder.find(debugSessionPath, key, false), () => {
           if (value.length > 0) {
             associatedBreakpoints.push(key);
           }
@@ -278,10 +279,11 @@ export class DebuggerService implements IDebugger, IDisposable {
     };
 
     const breakpointsForRestore = (
-      breakpoints: Map<string, IDebugger.IBreakpoint[]>
+      breakpoints: Map<string, IDebugger.IBreakpoint[]>,
+      editorFinder: IDebuggerEditorFinder
     ): Map<string, IDebugger.IBreakpoint[]> => {
       let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
-      associatedBreakpoints(breakpoints).forEach(path => {
+      associatedBreakpoints(breakpoints, editorFinder).forEach(path => {
         Array.from(breakpoints.entries()).forEach(value => {
           if (value[0] === path) {
             bpMapForRestore.set(value[0], breakpoints.get(value[0]));
@@ -290,7 +292,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       });
       return bpMapForRestore;
     };
-    return breakpointsForRestore(breakpoints);
+    return breakpointsForRestore(breakpoints, editorFinder);
   }
 
   /**
@@ -402,11 +404,17 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const reply = await this.session.restoreState();
     const mapFromServer = await this.breakpointsMapFromServer(reply);
-    const breakpointsForRestore = await this.breakpointsForRestore(
-      editorFinder,
-      mapFromServer
-    );
-    this._model.breakpoints.restoreBreakpoints(breakpointsForRestore);
+
+    if (editorFinder) {
+      const breakpointsForRestore = await this.breakpointsForRestore(
+        editorFinder,
+        mapFromServer
+      );
+      this._model.breakpoints.restoreBreakpoints(breakpointsForRestore);
+    } else {
+      this._model.breakpoints.restoreBreakpoints(mapFromServer);
+    }
+
     await this.preparationToSetBreakpoint(path, breakpoints);
 
     await this.session.sendRequest('configurationDone', {});
