@@ -8,6 +8,8 @@ of different notebook sizes and types.
 To run the benchmarks against notebooks with long outputs and notebooks with many outputs, and to see how the times change as the notebooks grow:
 
 ```bash
+jplm # First install dependencies
+
 env 'BENCHMARK_NOTEBOOKS=["./longOutput", "./manyOutputs"]' jlpm all
 ```
 
