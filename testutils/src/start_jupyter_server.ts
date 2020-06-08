@@ -207,7 +207,7 @@ namespace Private {
     PageConfig.setOption('terminalsAvailable', 'true');
 
     const configDir = mktempDir('config');
-    const configPath = path.join(configDir, 'jupyter_notebook_config.json');
+    const configPath = path.join(configDir, 'jupyter_server_config.json');
     const notebook_dir = createNotebookDir();
 
     const app_dir = createAppDir();
@@ -216,7 +216,7 @@ namespace Private {
 
     const configData = {
       LabApp: { user_settings_dir, workspaces_dir, app_dir },
-      NotebookApp: { token, open_browser: false, notebook_dir },
+      ServerApp: { token, open_browser: false, notebook_dir },
       MultiKernelManager: {
         default_kernel_name: 'echo',
         shutdown_wait_time: 1.0
@@ -265,7 +265,7 @@ namespace Private {
     output.split('\n').forEach(line => {
       const baseUrlMatch = line.match(/(http:\/\/localhost:\d+\/[^?]*)/);
       if (baseUrlMatch) {
-        baseUrl = baseUrlMatch[1];
+        baseUrl = baseUrlMatch[1].replace('/lab', '');
         PageConfig.setOption('baseUrl', baseUrl);
       }
     });
