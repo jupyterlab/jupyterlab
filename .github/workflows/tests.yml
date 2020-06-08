@@ -24,7 +24,7 @@ jobs:
         conda init bash
         conda info -a
     - name: Create the conda environment
-      run: conda create -n jupyterlab-debugger --yes --quiet -c conda-forge nodejs jupyterlab=2 xeus=0.24.0 xeus-python=0.8.0 ptvsd python=$PYTHON_VERSION
+      run: conda create -n jupyterlab-debugger --yes --quiet -c conda-forge nodejs jupyterlab=2 xeus-python=0.8.0 ptvsd python=$PYTHON_VERSION
       env:
         PYTHON_VERSION: '3.8'
 
