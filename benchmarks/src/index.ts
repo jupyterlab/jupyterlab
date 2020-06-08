@@ -106,8 +106,8 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
           { flag: 'w' }
         );
         await util.promisify(child_process.exec)(`jupyter trust "${path}"`);
-        await page.evaluate('lab.restored');
-        const id: string = await page.evaluate(`lab.commands.execute('docmanager:open', {
+        await page.evaluate('jupyterlab.restored');
+        const id: string = await page.evaluate(`jupyterlab.commands.execute('docmanager:open', {
           path: ${JSON.stringify(`benchmarks/${path}`)}
         }).then(widget => widget.node.id)`);
         console.log(`    id=${id}`);
@@ -127,7 +127,7 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
           await page.evaluate(`{
             performance.clearMeasures();
             performance.mark('start');
-            lab.shell.activateById(${JSON.stringify(id)});
+            jupyterlab.shell.activateById(${JSON.stringify(id)});
           }`);
           await waitForWidget(id);
           await notebooks
@@ -158,10 +158,10 @@ function writeOutput({ browser, n, type, time }: OUTPUT_TYPE): Promise<void> {
         }
       }
       console.log(`  cleaning`);
-      // dipose directly instead of using `lab.shell.closeAll()` so that
+      // dipose directly instead of using `jupyterlab.shell.closeAll()` so that
       // no dialogues will pop up if notebooks are dirty
       await page.evaluate(`{
-        const iter = lab.shell._dockPanel.widgets().iter();
+        const iter = jupyterlab.shell._dockPanel.widgets().iter();
         const widgets = [];
         for (let w = iter.next(); w; w = iter.next()) {
           widgets.push(w);
