@@ -17,6 +17,8 @@ env 'BENCHMARK_NOTEBOOKS=["./longOutput", "./manyOutputs"]' jlpm all
 
 It will keep increasing the `n` until either it reaches a maximum or the time exceeds a certain budget.
 
+It will run on both firefox and chrome.
+
 ## Plotly
 
 We also build in support to run this against some plotly ipywidgets, to get a sense of
