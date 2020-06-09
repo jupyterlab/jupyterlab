@@ -6,7 +6,10 @@
     "skipLibCheck": true,
     "noEmitOnError": true,
     "noUnusedLocals": true,
-    "lib": ["DOM", "ES6"],
+    "lib": [
+      "DOM",
+      "ES6"
+    ],
     "module": "commonjs",
     "moduleResolution": "node",
     "target": "ES6",
@@ -14,10 +17,37 @@
     "rootDir": "src",
     "jsx": "react"
   },
-  "include": ["src/**/*"],
+  "include": [
+    "src/**/*"
+  ],
   "references": [
     {
-        "path": "../toc"
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../docmanager"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../markdownviewer"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../toc"
+    },
+    {
+      "path": "../settingregistry"
     }
-  ]
+  ],
+  "extends": "../../tsconfigbase"
 }

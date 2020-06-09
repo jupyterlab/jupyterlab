@@ -15,5 +15,38 @@
     "rootDir": "src",
     "jsx": "react"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docmanager"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../markdownviewer"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../rendermime"
+    },
+    {
+      "path": "../settingregistry"
+    }
+  ],
+  "extends": "../../tsconfigbase"
 }
