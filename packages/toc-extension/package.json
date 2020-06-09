@@ -23,6 +23,9 @@
     "schema/*.json",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
   ],
+  "sideEffects": [
+    "style/*.css"
+  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "style": "style/index.css",
