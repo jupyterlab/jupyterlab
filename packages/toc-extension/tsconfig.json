@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "declaration": true,
-    "composite": true,
     "noImplicitAny": true,
     "strictNullChecks": true,
     "skipLibCheck": true,
@@ -15,5 +14,10 @@
     "rootDir": "src",
     "jsx": "react"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*"],
+  "references": [
+    {
+        "path": "../toc"
+    }
+  ]
 }
