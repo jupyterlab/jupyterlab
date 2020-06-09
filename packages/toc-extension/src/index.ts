@@ -13,19 +13,16 @@ import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { TableOfContents } from './toc';
 import {
+  TableOfContents,
+  ITableOfContentsRegistry,
+  TableOfContentsRegistry as Registry,
   createLatexGenerator,
   createNotebookGenerator,
   createMarkdownGenerator,
   createPythonGenerator,
   createRenderedMarkdownGenerator
-} from './generators';
-import {
-  ITableOfContentsRegistry,
-  TableOfContentsRegistry as Registry
-} from './registry';
-import '../style/index.css';
+} from '@jupyterlab/toc';
 
 /**
  * Activates the ToC extension.
