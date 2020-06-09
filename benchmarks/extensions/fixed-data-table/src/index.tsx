@@ -1,8 +1,8 @@
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-import {ReactWidget} from '@jupyterlab/apputils';
+import { ReactWidget } from '@jupyterlab/apputils';
 import React from 'react';
 // @ts-ignore
-import {Table, Cell, Column} from 'fixed-data-table-2';
+import { Table, Cell, Column } from 'fixed-data-table-2';
 import 'fixed-data-table-2/dist/fixed-data-table.css';
 
 /**
@@ -34,7 +34,6 @@ export class OutputWidget extends ReactWidget implements IRenderMime.IRenderer {
    * Render table into this widget's node.
    */
   renderModel(model: IRenderMime.IMimeModel): Promise<void> {
-
     let data = model.data[this._mimeType] as string;
     const rows = data.split('\n').map(row => row.split(';'));
     this.node.textContent = rows.join('|');
@@ -45,31 +44,38 @@ export class OutputWidget extends ReactWidget implements IRenderMime.IRenderer {
 
   render() {
     const colCount = this.rows.length > 0 ? this.rows[0].length : 0;
-    if(colCount === 0) {
-      return <div>No data found!</div>
+    if (colCount === 0) {
+      return <div>No data found!</div>;
     }
     const columns = [];
-    for(let i=0; i <colCount; ++i) {
-      columns.push(<Column
+    for (let i = 0; i < colCount; ++i) {
+      columns.push(
+        <Column
           header={<Cell>Col {i}</Cell>}
           columnKey={i}
-          cell={({rowIndex, columnKey, ...props}: { rowIndex: number, columnKey: number }) => (
-              <Cell {...props}>{this.rows[rowIndex][columnKey]}</Cell>
-          )}
+          cell={({
+            rowIndex,
+            columnKey,
+            ...props
+          }: {
+            rowIndex: number;
+            columnKey: number;
+          }) => <Cell {...props}>{this.rows[rowIndex][columnKey]}</Cell>}
           width={100}
-      />);
+        />
+      );
     }
 
     return (
-        <Table
-            rowHeight={50}
-            rowsCount={this.rows.length}
-            width={800}
-            height={500}
-            headerHeight={50}
-        >
-          {columns}
-        </Table>
+      <Table
+        rowHeight={50}
+        rowsCount={this.rows.length}
+        width={800}
+        height={500}
+        headerHeight={50}
+      >
+        {columns}
+      </Table>
     );
   }
 
