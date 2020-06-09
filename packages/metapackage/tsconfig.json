@@ -231,6 +231,12 @@
       "path": "../theme-light-extension"
     },
     {
+      "path": "../toc"
+    },
+    {
+      "path": "../toc-extension"
+    },
+    {
       "path": "../tooltip"
     },
     {
@@ -250,12 +256,6 @@
     },
     {
       "path": "../vega5-extension"
-    },
-    {
-      "path": "../toc"
-    },
-    {
-      "path": "../toc-extension"
     }
   ]
 }

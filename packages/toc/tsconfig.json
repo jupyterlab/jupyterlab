@@ -1,19 +1,8 @@
 {
+  "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "declaration": true,
-    "composite": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "skipLibCheck": true,
-    "noEmitOnError": true,
-    "noUnusedLocals": true,
-    "lib": ["DOM", "ES6"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "ES6",
     "outDir": "lib",
-    "rootDir": "src",
-    "jsx": "react"
+    "rootDir": "src"
   },
   "include": ["src/**/*"],
   "references": [
@@ -47,6 +36,5 @@
     {
       "path": "../settingregistry"
     }
-  ],
-  "extends": "../../tsconfigbase"
+  ]
 }

@@ -226,7 +226,7 @@
       "@jupyterlab/terminal-extension": "",
       "@jupyterlab/theme-dark-extension": "",
       "@jupyterlab/theme-light-extension": "",
-      "@jupyterlab/toc-extension": "true",
+      "@jupyterlab/toc-extension": "",
       "@jupyterlab/tooltip-extension": "",
       "@jupyterlab/ui-components-extension": "",
       "@jupyterlab/vdom-extension": ""

@@ -1,31 +1,13 @@
 {
+  "extends": "../../tsconfigbase",
   "compilerOptions": {
-    "declaration": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "skipLibCheck": true,
-    "noEmitOnError": true,
-    "noUnusedLocals": true,
-    "lib": [
-      "DOM",
-      "ES6"
-    ],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "ES6",
     "outDir": "lib",
-    "rootDir": "src",
-    "jsx": "react"
+    "rootDir": "src"
   },
-  "include": [
-    "src/**/*"
-  ],
+  "include": ["src/*"],
   "references": [
     {
       "path": "../application"
-    },
-    {
-      "path": "../apputils"
     },
     {
       "path": "../docmanager"
@@ -43,11 +25,10 @@
       "path": "../rendermime"
     },
     {
-      "path": "../toc"
+      "path": "../settingregistry"
     },
     {
-      "path": "../settingregistry"
+      "path": "../toc"
     }
-  ],
-  "extends": "../../tsconfigbase"
+  ]
 }

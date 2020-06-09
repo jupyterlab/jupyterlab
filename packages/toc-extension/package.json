@@ -25,8 +25,9 @@
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -b",
     "clean": "rimraf lib",
     "precommit": "lint-staged",
     "prepublishOnly": "npm run build",
@@ -40,12 +41,13 @@
     ]
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.0.0",
-    "@jupyterlab/docmanager": "^2.0.0",
-    "@jupyterlab/fileeditor": "^2.0.0",
-    "@jupyterlab/markdownviewer": "^2.0.0",
-    "@jupyterlab/notebook": "^2.0.0",
-    "@jupyterlab/rendermime": "^2.0.0",
+    "@jupyterlab/application": "^2.2.0-alpha.0",
+    "@jupyterlab/docmanager": "^2.2.0-alpha.0",
+    "@jupyterlab/fileeditor": "^2.2.0-alpha.0",
+    "@jupyterlab/markdownviewer": "^2.2.0-alpha.0",
+    "@jupyterlab/notebook": "^2.2.0-alpha.0",
+    "@jupyterlab/rendermime": "^2.2.0-alpha.0",
+    "@jupyterlab/settingregistry": "^2.2.0-alpha.0",
     "@jupyterlab/toc": "^4.0.0"
   },
   "devDependencies": {
@@ -62,7 +64,7 @@
     "access": "public"
   },
   "jupyterlab": {
-    "extension": "true",
+    "extension": true,
     "schemaDir": "schema"
   }
 }
