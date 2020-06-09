@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "noEmitOnError": true,
+    "noUnusedLocals": true,
+    "lib": ["DOM", "ES6"],
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "ES6",
+    "outDir": "lib",
+    "rootDir": "src",
+    "jsx": "react"
+  },
+  "include": ["src/**/*"]
+}
