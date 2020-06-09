@@ -4,7 +4,7 @@
   "private": false,
   "description": "Table of Contents extension for JupyterLab",
   "keywords": [
-    "jupyterlab",
+    "jupyterlab"
   ],
   "homepage": "https://github.com/jupyterlab/jupyterlab-toc",
   "bugs": {
