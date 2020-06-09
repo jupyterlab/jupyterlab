@@ -73,7 +73,6 @@ export class EditorHandler implements IDisposable {
    * Dispose the handler.
    */
   dispose(): void {
-    this._removeGutterAfterDelete();
     if (this.isDisposed) {
       return;
     }
@@ -202,17 +201,6 @@ export class EditorHandler implements IDisposable {
     );
   };
 
-  /**
-   * Remove gutters after close editor
-   */
-  private _removeGutterAfterDelete(): void {
-    void this._debuggerService.updateBreakpoints(
-      this._editor.model.value.text,
-      [],
-      this._path,
-      this._editorFinder
-    );
-  }
   /**
    * Add the breakpoints to the editor.
    */
