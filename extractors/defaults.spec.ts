@@ -13,7 +13,7 @@ describe('Default extractors', () => {
   function extract(code: string) {
     return document.extract_foreign_code(code, null, {
       line: 0,
-      column: 0
+      column: 0,
     });
   }
 

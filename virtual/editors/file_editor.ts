@@ -3,7 +3,7 @@ import * as CodeMirror from 'codemirror';
 import {
   IEditorPosition,
   IRootPosition,
-  IVirtualPosition
+  IVirtualPosition,
 } from '../../positioning';
 
 export class VirtualFileEditor extends VirtualEditor {
@@ -22,7 +22,7 @@ export class VirtualFileEditor extends VirtualEditor {
     super(language, file_extension, path, {}, {}, true);
     this.cm_editor = cm_editor;
     let handler = {
-      get: function(
+      get: function (
         target: VirtualFileEditor,
         prop: keyof CodeMirror.Editor,
         receiver: any
@@ -32,7 +32,7 @@ export class VirtualFileEditor extends VirtualEditor {
         } else {
           return Reflect.get(target, prop, receiver);
         }
-      }
+      },
     };
     return new Proxy(this, handler);
   }

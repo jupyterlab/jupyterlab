@@ -4,7 +4,7 @@ import { RegExpForeignCodeExtractor } from '../extractors/regexp';
 import {
   IEditorPosition,
   IRootPosition,
-  IVirtualPosition
+  IVirtualPosition,
 } from '../positioning';
 import * as CodeMirror from 'codemirror';
 import { PageConfig } from '@jupyterlab/coreutils';
@@ -51,7 +51,7 @@ describe('VirtualEditor', () => {
     pattern: '(^|\n)%R (.*)\n?',
     extract_to_foreign: '$2',
     is_standalone: false,
-    file_extension: 'R'
+    file_extension: 'R',
   });
 
   PageConfig.setOption('rootUri', '/home/username/project');
@@ -62,7 +62,7 @@ describe('VirtualEditor', () => {
 
   const LANGSERVER_MANAGER = new MockLanguageServerManager({});
   const CONNECTION_MANAGER = new DocumentConnectionManager({
-    language_server_manager: LANGSERVER_MANAGER
+    language_server_manager: LANGSERVER_MANAGER,
   });
 
   const DEBUG = false;

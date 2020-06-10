@@ -8,7 +8,7 @@ import * as CodeMirror from 'codemirror';
 import {
   IEditorPosition,
   IRootPosition,
-  IVirtualPosition
+  IVirtualPosition,
 } from '../../positioning';
 
 // @ts-ignore
@@ -81,7 +81,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
     this.code_extractors = foreign_code_extractors;
     this.language = language;
     this._proxy = new Proxy(this, {
-      get: function(
+      get: function (
         target: VirtualEditorForNotebook,
         prop: keyof CodeMirror.Editor,
         receiver: any
@@ -94,7 +94,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
         } else {
           return Reflect.get(target, prop, receiver);
         }
-      }
+      },
     });
     return this._proxy;
   }
@@ -125,7 +125,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
     }
     return {
       ...(position as CodeMirror.Position),
-      line: position.line + shift
+      line: position.line + shift,
     } as IRootPosition;
   }
 
@@ -144,7 +144,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
 
   public get_editor_index(position: IVirtualPosition): number {
     let cell = this.get_cell_at(position);
-    return this.notebook.widgets.findIndex(other_cell => {
+    return this.notebook.widgets.findIndex((other_cell) => {
       return cell === other_cell;
     });
   }
@@ -314,7 +314,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       return;
     }
 
-    this.notebook.widgets.every(cell => {
+    this.notebook.widgets.every((cell) => {
       let codemirror_editor = cell.editor as CodeMirrorEditor;
       let cm_editor = codemirror_editor.editor;
       this.cm_editor_to_cell.set(cm_editor, cell);
@@ -354,7 +354,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
   }
 
   addEventListener(type: string, listener: EventListenerOrEventListenerObject) {
-    this.forEveryBlockEditor(cm_editor => {
+    this.forEveryBlockEditor((cm_editor) => {
       cm_editor.getWrapperElement().addEventListener(type, listener);
     });
   }
@@ -399,7 +399,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       if (cell_editor === cm_editor) {
         return {
           cell_id: i,
-          cell: cell
+          cell: cell,
         };
       }
     }

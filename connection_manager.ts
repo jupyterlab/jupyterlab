@@ -128,7 +128,7 @@ export class DocumentConnectionManager {
     );
 
     const language_server_id = this.language_server_manager.getServerId({
-      language
+      language,
     });
 
     // lazily load 1) the underlying library (1.5mb) and/or 2) a live WebSocket-
@@ -154,14 +154,14 @@ export class DocumentConnectionManager {
    * singletons).
    */
   on_new_connection = (connection: LSPConnection) => {
-    connection.on('error', e => {
+    connection.on('error', (e) => {
       console.warn(e);
       // TODO invalid now
       let error: Error = e.length && e.length >= 1 ? e[0] : new Error();
       // TODO: those codes may be specific to my proxy client, need to investigate
       if (error.message.indexOf('code = 1005') !== -1) {
         console.warn(`LSP: Connection failed for ${connection}`);
-        this.forEachDocumentOfConnection(connection, virtual_document => {
+        this.forEachDocumentOfConnection(connection, (virtual_document) => {
           console.warn('LSP: disconnecting ' + virtual_document.id_path);
           this.closed.emit({ connection, virtual_document });
           this.ignored_languages.add(virtual_document.language);
@@ -177,19 +177,19 @@ export class DocumentConnectionManager {
       }
     });
 
-    connection.on('serverInitialized', capabilities => {
-      this.forEachDocumentOfConnection(connection, virtual_document => {
+    connection.on('serverInitialized', (capabilities) => {
+      this.forEachDocumentOfConnection(connection, (virtual_document) => {
         // TODO: is this still neccessary, e.g. for status bar to update responsively?
         this.initialized.emit({ connection, virtual_document });
       });
     });
 
-    connection.on('close', closed_manually => {
+    connection.on('close', (closed_manually) => {
       if (!closed_manually) {
         console.warn('LSP: Connection unexpectedly disconnected');
       } else {
         console.warn('LSP: Connection closed');
-        this.forEachDocumentOfConnection(connection, virtual_document => {
+        this.forEachDocumentOfConnection(connection, (virtual_document) => {
           this.closed.emit({ connection, virtual_document });
         });
       }
@@ -202,7 +202,7 @@ export class DocumentConnectionManager {
   ) {
     for (const [
       virtual_document_id_path,
-      a_connection
+      a_connection,
     ] of this.connections.entries()) {
       if (connection !== a_connection) {
         continue;
@@ -234,7 +234,7 @@ export class DocumentConnectionManager {
         .then(() => {
           success = true;
         })
-        .catch(e => {
+        .catch((e) => {
           console.warn(e);
         });
 
@@ -294,7 +294,7 @@ export namespace DocumentConnectionManager {
       : virtualDocumentsUri;
 
     const language_server_id = Private.getLanguageServerManager().getServerId({
-      language
+      language,
     });
 
     return {
@@ -306,7 +306,7 @@ export namespace DocumentConnectionManager {
         ILanguageServerManager.URL_NS,
         'ws',
         language_server_id
-      )
+      ),
     };
   }
 
@@ -360,7 +360,7 @@ namespace Private {
       const connection = new LSPConnection({
         languageId: language,
         serverUri: uris.server,
-        rootUri: uris.base
+        rootUri: uris.base,
       });
       // TODO: remove remaining unbounded users of connection.on
       connection.setMaxListeners(999);

@@ -2,7 +2,7 @@ import { IMagicOverride, IMagicOverrideRule, replacer } from './overrides';
 
 abstract class MagicsMap extends Map<RegExp, string | replacer> {
   protected constructor(magic_overrides: IMagicOverrideRule[]) {
-    super(magic_overrides.map(m => [new RegExp(m.pattern), m.replacement]));
+    super(magic_overrides.map((m) => [new RegExp(m.pattern), m.replacement]));
   }
 
   abstract override_for(code: string): string | null;
@@ -28,7 +28,7 @@ abstract class ReversibleMagicsMap extends MagicsMap {
   }
 
   get reverse(): MagicsMap {
-    return this.type(this.overrides.map(override => override.reverse));
+    return this.type(this.overrides.map((override) => override.reverse));
   }
 }
 
@@ -66,7 +66,7 @@ export class LineMagicsMap extends ReversibleMagicsMap {
     }
     return {
       lines: substituted_lines,
-      skip_inspect: skip_inspect
+      skip_inspect: skip_inspect,
     };
   }
 

@@ -3,7 +3,7 @@ import {
   CompletionHandler,
   ContextConnector,
   KernelConnector,
-  CompletionConnector
+  CompletionConnector,
 } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
@@ -16,7 +16,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
   IEditorPosition,
   IRootPosition,
-  IVirtualPosition
+  IVirtualPosition,
 } from '../../../positioning';
 import { LSPConnection } from '../../../connection';
 import { Session } from '@jupyterlab/services';
@@ -164,7 +164,7 @@ export class LSPConnector extends DataConnector<
               virtual_cursor,
               document,
               position_in_token
-            )
+            ),
           ]).then(([kernel, lsp]) =>
             this.merge_replies(kernel, lsp, this._editor)
           );
@@ -179,7 +179,7 @@ export class LSPConnector extends DataConnector<
         virtual_cursor,
         document,
         position_in_token
-      ).catch(e => {
+      ).catch((e) => {
         console.warn('LSP: hint failed', e);
         return this.fallback_connector.fetch(request);
       });
@@ -213,7 +213,7 @@ export class LSPConnector extends DataConnector<
       {
         start,
         end,
-        text: token.value
+        text: token.value,
       },
       document.document_info,
       false,
@@ -255,7 +255,7 @@ export class LSPConnector extends DataConnector<
       matches.push(text);
       types.push({
         text: text,
-        type: match.kind ? completionItemKindNames[match.kind] : ''
+        type: match.kind ? completionItemKindNames[match.kind] : '',
       });
     }
 
@@ -273,8 +273,8 @@ export class LSPConnector extends DataConnector<
       end: token.offset + prefix.length,
       matches: matches,
       metadata: {
-        _jupyter_types_experimental: types
-      }
+        _jupyter_types_experimental: types,
+      },
     };
   }
 
@@ -302,7 +302,7 @@ export class LSPConnector extends DataConnector<
     // Cache all the lsp matches in a memo.
     const memo = new Set<string>(matches);
     const memo_types = new Map<string, string>(
-      types.map(v => [v.text, v.type])
+      types.map((v) => [v.text, v.type])
     );
 
     let prefix = '';
@@ -332,7 +332,7 @@ export class LSPConnector extends DataConnector<
       let kernel_types = kernel.metadata._jupyter_types_experimental as Array<
         IItemType
       >;
-      kernel_types.forEach(itemType => {
+      kernel_types.forEach((itemType) => {
         let text = remove_prefix(itemType.text);
         if (!memo_types.has(text)) {
           memo_types.set(text, itemType.type);
@@ -344,7 +344,7 @@ export class LSPConnector extends DataConnector<
     }
 
     // Add each context match that is not in the memo to the result.
-    kernel.matches.forEach(match => {
+    kernel.matches.forEach((match) => {
       match = remove_prefix(match);
       if (!memo.has(match) && !priority_matches.has(match)) {
         matches.push(match);
@@ -362,8 +362,8 @@ export class LSPConnector extends DataConnector<
       ...lsp,
       matches: final_matches,
       metadata: {
-        _jupyter_types_experimental: merged_types
-      }
+        _jupyter_types_experimental: merged_types,
+      },
     };
   }
 

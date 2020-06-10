@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { ContextCommandManager, ICommandContext } from './command_manager';
 import {
   CommandEntryPoint,
-  IFeatureCommand
+  IFeatureCommand,
 } from './adapters/codemirror/feature';
 import { JupyterLabWidgetAdapter } from './adapters/jupyterlab/jl_adapter';
 
@@ -33,7 +33,7 @@ describe('ContextMenuCommandManager', () => {
     is_enabled: () => {
       return true;
     },
-    label: 'Command'
+    label: 'Command',
   } as IFeatureCommand;
 
   describe('#get_rank()', () => {
@@ -58,14 +58,14 @@ describe('ContextMenuCommandManager', () => {
     let rank = manager.get_rank({
       ...base_command,
       rank: 1,
-      is_rank_relative: false
+      is_rank_relative: false,
     });
     expect(rank).to.equal(1);
 
     rank = manager.get_rank({
       ...base_command,
       rank: 1,
-      is_rank_relative: true
+      is_rank_relative: true,
     });
     expect(rank).to.equal(1 / 5);
   });

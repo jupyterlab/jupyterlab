@@ -30,7 +30,7 @@ describe('RegExpForeignCodeExtractor', () => {
     extract_to_foreign: '$2',
     keep_in_host: true,
     is_standalone: false,
-    file_extension: 'R'
+    file_extension: 'R',
   });
 
   let r_line_extractor = new RegExpForeignCodeExtractor({
@@ -39,7 +39,7 @@ describe('RegExpForeignCodeExtractor', () => {
     extract_to_foreign: '$2',
     keep_in_host: true,
     is_standalone: false,
-    file_extension: 'R'
+    file_extension: 'R',
   });
 
   describe('#has_foreign_code()', () => {
@@ -84,7 +84,7 @@ describe('RegExpForeignCodeExtractor', () => {
         extract_to_foreign: '<$1$2>$3</$1>',
         keep_in_host: false,
         is_standalone: false,
-        file_extension: 'R'
+        file_extension: 'R',
       });
 
       let results = html_extractor.extract_foreign_code(HTML_IN_PYTHON);
@@ -121,7 +121,7 @@ describe('RegExpForeignCodeExtractor', () => {
         extract_to_foreign: '$2',
         keep_in_host: false,
         is_standalone: false,
-        file_extension: 'R'
+        file_extension: 'R',
       });
       let results = extractor.extract_foreign_code(R_CELL_MAGIC_EXISTS);
       expect(results.length).to.equal(1);
@@ -139,7 +139,7 @@ describe('RegExpForeignCodeExtractor', () => {
         extract_to_foreign: '$2',
         keep_in_host: false,
         is_standalone: false,
-        file_extension: 'R'
+        file_extension: 'R',
       });
       let results = r_line_extractor.extract_foreign_code(R_LINE_MAGICS);
 

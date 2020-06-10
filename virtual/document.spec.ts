@@ -14,11 +14,11 @@ print("plotted")
 describe('is_within_range', () => {
   let line_range: CodeEditor.IRange = {
     start: { line: 1, column: 0 },
-    end: { line: 1, column: 10 }
+    end: { line: 1, column: 10 },
   };
   let long_range: CodeEditor.IRange = {
     start: { line: 0, column: 3 },
-    end: { line: 1, column: 0 }
+    end: { line: 1, column: 0 },
   };
   it('recognizes positions within range in a single-line case', () => {
     expect(is_within_range({ line: 1, column: 0 }, line_range)).to.equal(true);
@@ -60,10 +60,10 @@ describe('VirtualDocument', () => {
     it('joins non-standalone fragments together', () => {
       let {
         cell_code_kept,
-        foreign_document_map
+        foreign_document_map,
       } = document.extract_foreign_code(R_LINE_MAGICS, null, {
         line: 0,
-        column: 0
+        column: 0,
       });
 
       // note R cell lines are kept in code (keep_in_host=true)
@@ -120,7 +120,7 @@ describe('VirtualDocument', () => {
       // The first (Python) line in the first block
       let editor_position = document.transform_virtual_to_editor({
         line: 0,
-        ch: 0
+        ch: 0,
       } as IVirtualPosition);
       expect(editor_position.line).to.equal(0);
       expect(editor_position.ch).to.equal(0);
@@ -128,7 +128,7 @@ describe('VirtualDocument', () => {
       // The first (Python) line in the second block
       editor_position = document.transform_virtual_to_editor({
         line: 4,
-        ch: 0
+        ch: 0,
       } as IVirtualPosition);
       expect(editor_position.line).to.equal(0);
       expect(editor_position.ch).to.equal(0);
@@ -138,7 +138,7 @@ describe('VirtualDocument', () => {
       init_document_with_Python_and_R();
       let foreign_document = document.document_at_source_position({
         line: 1,
-        ch: 3
+        ch: 3,
       } as ISourcePosition);
       expect(foreign_document).to.not.equal(document);
       expect(foreign_document.value).to.equal(
@@ -155,7 +155,7 @@ describe('VirtualDocument', () => {
       // targeting "s" in "1st", "1st" in "1st test line in R line magic" (first virtual line == line 0)
       let virtual_r_1_1 = {
         line: 0,
-        ch: 1
+        ch: 1,
       } as IVirtualPosition;
 
       // For future reference, the code below would be wrong:
@@ -174,7 +174,7 @@ describe('VirtualDocument', () => {
       // targeting 1 in "1st test line in R line magic 2" (4th virtual line == line 3)
       editor_position = foreign_document.transform_virtual_to_editor({
         line: 3,
-        ch: 0
+        ch: 0,
       } as IVirtualPosition);
       // 0th editor line is 'test line in Python 2\n'
       expect(editor_position.line).to.equal(1);
@@ -186,7 +186,7 @@ describe('VirtualDocument', () => {
       // targeting "s" in "1st" in "1st test line in R line magic 3" (7th virtual line == line 6)
       editor_position = foreign_document.transform_virtual_to_editor({
         line: 6,
-        ch: 36
+        ch: 36,
       } as IVirtualPosition);
       // 0th editor line is 'test line in Python 3\n'
       expect(editor_position.line).to.equal(1);
@@ -198,7 +198,7 @@ describe('VirtualDocument', () => {
       // targeting "s" in "1st" in "1st test line in R cell magic 2" (13th virtual lines == line 12)
       editor_position = foreign_document.transform_virtual_to_editor({
         line: 12,
-        ch: 36
+        ch: 36,
       } as IVirtualPosition);
       // 0th editor line is '%%R -i imported_variable\n'
       expect(editor_position.line).to.equal(1);

@@ -3,7 +3,7 @@ import { RegExpForeignCodeExtractor } from './regexp';
 import {
   extract_r_args,
   rpy2_args_pattern,
-  RPY2_MAX_ARGS
+  RPY2_MAX_ARGS,
 } from '../magics/rpy2';
 
 function rpy2_code_extractor(match: string, ...args: string[]) {
@@ -20,7 +20,7 @@ function rpy2_code_extractor(match: string, ...args: string[]) {
 function rpy2_args(match: string, ...args: string[]) {
   let r = extract_r_args(args, -3);
   // define dummy input variables using empty data frames
-  let inputs = r.inputs.map(i => i + ' <- data.frame();').join(' ');
+  let inputs = r.inputs.map((i) => i + ' <- data.frame();').join(' ');
   let code = rpy2_code_extractor(match, ...args);
   if (inputs !== '' && code) {
     inputs += ' ';
@@ -41,7 +41,7 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
       extract_to_foreign: rpy2_code_extractor,
       extract_arguments: rpy2_args,
       is_standalone: false,
-      file_extension: 'R'
+      file_extension: 'R',
     }),
     new RegExpForeignCodeExtractor({
       language: 'r',
@@ -49,7 +49,7 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
       extract_to_foreign: rpy2_code_extractor,
       extract_arguments: rpy2_args,
       is_standalone: false,
-      file_extension: 'R'
+      file_extension: 'R',
     }),
     //
     // Standalone IPython magics
@@ -60,35 +60,35 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
       pattern: '^%%(python|python2|python3|pypy)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: true,
-      file_extension: 'py'
+      file_extension: 'py',
     }),
     new RegExpForeignCodeExtractor({
       language: 'perl',
       pattern: '^%%(perl)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: true,
-      file_extension: 'pl'
+      file_extension: 'pl',
     }),
     new RegExpForeignCodeExtractor({
       language: 'ruby',
       pattern: '^%%(ruby)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: true,
-      file_extension: 'rb'
+      file_extension: 'rb',
     }),
     new RegExpForeignCodeExtractor({
       language: 'sh',
       pattern: '^%%(sh|bash)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: true,
-      file_extension: 'sh'
+      file_extension: 'sh',
     }),
     new RegExpForeignCodeExtractor({
       language: 'html',
       pattern: '^%%(html --isolated)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: true,
-      file_extension: 'html'
+      file_extension: 'html',
     }),
     //
     // IPython magics producing continuous documents (non-standalone):
@@ -98,28 +98,28 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
       pattern: '^%%(js|javascript)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: false,
-      file_extension: 'js'
+      file_extension: 'js',
     }),
     new RegExpForeignCodeExtractor({
       language: 'html',
       pattern: '^%%(html)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: false,
-      file_extension: 'html'
+      file_extension: 'html',
     }),
     new RegExpForeignCodeExtractor({
       language: 'latex',
       pattern: '^%%(latex)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: false,
-      file_extension: 'latex'
+      file_extension: 'latex',
     }),
     new RegExpForeignCodeExtractor({
       language: 'markdown',
       pattern: '^%%(markdown)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: false,
-      file_extension: 'md'
-    })
-  ]
+      file_extension: 'md',
+    }),
+  ],
 };

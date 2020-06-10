@@ -3,7 +3,7 @@ import { CodeMirrorAdapter } from './cm_adapter';
 import { LSPConnection } from '../../connection';
 import {
   IJupyterLabComponentsManager,
-  StatusMessage
+  StatusMessage,
 } from '../jupyterlab/jl_adapter';
 import { CodeMirrorLSPFeature } from './feature';
 import {
@@ -14,7 +14,7 @@ import {
   NotebookFeatureTestEnvironment,
   python_notebook_metadata,
   showAllCells,
-  synchronize_content
+  synchronize_content,
 } from './testutils';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as nbformat from '@jupyterlab/nbformat';
@@ -44,54 +44,54 @@ const js_partial_edits = [
     range: {
       start: {
         line: 0,
-        character: 9
+        character: 9,
       },
       end: {
         line: 0,
-        character: 12
-      }
+        character: 12,
+      },
     },
-    newText: 'fib2'
+    newText: 'fib2',
   },
   {
     range: {
       start: {
         line: 1,
-        character: 15
+        character: 15,
       },
       end: {
         line: 1,
-        character: 18
-      }
+        character: 18,
+      },
     },
-    newText: 'fib2'
+    newText: 'fib2',
   },
   {
     range: {
       start: {
         line: 1,
-        character: 24
+        character: 24,
       },
       end: {
         line: 1,
-        character: 27
-      }
+        character: 27,
+      },
     },
-    newText: 'fib2'
+    newText: 'fib2',
   },
   {
     range: {
       start: {
         line: 4,
-        character: 0
+        character: 0,
       },
       end: {
         line: 4,
-        character: 3
-      }
+        character: 3,
+      },
     },
-    newText: 'fib2'
-  }
+    newText: 'fib2',
+  },
 ];
 
 describe('Feature', () => {
@@ -164,12 +164,12 @@ describe('Feature', () => {
               {
                 range: {
                   start: { line: 0, character: 0 },
-                  end: { line: 1, character: 0 }
+                  end: { line: 1, character: 0 },
                 },
-                newText: 'changed bar'
-              } as lsProtocol.TextEdit
-            ]
-          }
+                newText: 'changed bar',
+              } as lsProtocol.TextEdit,
+            ],
+          },
         });
         let raw_value = environment.ce_editor.doc.getValue();
         expect(raw_value).to.be.equal('changed bar');
@@ -184,7 +184,7 @@ describe('Feature', () => {
         await adapter.updateAfterChange();
 
         let result = await feature.do_apply_edit({
-          changes: { ['file://' + environment.path()]: js_partial_edits }
+          changes: { ['file://' + environment.path()]: js_partial_edits },
         });
         let raw_value = environment.ce_editor.doc.getValue();
         expect(raw_value).to.be.equal(js_fib2_code);
@@ -231,9 +231,9 @@ describe('Feature', () => {
         let test_notebook = {
           cells: [
             code_cell(['def a_function():\n', '    pass']),
-            code_cell(['x = a_function()'])
+            code_cell(['x = a_function()']),
           ],
-          metadata: python_notebook_metadata
+          metadata: python_notebook_metadata,
         } as nbformat.INotebookContent;
 
         let notebook = environment.notebook;
@@ -257,12 +257,12 @@ describe('Feature', () => {
               {
                 range: {
                   start: { line: 0, character: 0 },
-                  end: { line: 5, character: 0 }
+                  end: { line: 5, character: 0 },
                 },
-                newText: new_virtual_source
-              } as lsProtocol.TextEdit
-            ]
-          }
+                newText: new_virtual_source,
+              } as lsProtocol.TextEdit,
+            ],
+          },
         });
 
         await synchronizeContent();
@@ -287,9 +287,9 @@ describe('Feature', () => {
         let test_notebook = {
           cells: [
             code_cell(['x = %ls\n', 'print(x)']),
-            code_cell(['%%python\n', 'y = x\n', 'print(x)'])
+            code_cell(['%%python\n', 'y = x\n', 'print(x)']),
           ],
-          metadata: python_notebook_metadata
+          metadata: python_notebook_metadata,
         } as nbformat.INotebookContent;
 
         let notebook = environment.notebook;
@@ -325,12 +325,12 @@ print(x)""")
               {
                 range: {
                   start: { line: 0, character: 0 },
-                  end: { line: 6, character: 10 }
+                  end: { line: 6, character: 10 },
                 },
-                newText: new_virtual_source
-              } as lsProtocol.TextEdit
-            ]
-          }
+                newText: new_virtual_source,
+              } as lsProtocol.TextEdit,
+            ],
+          },
         });
         await synchronizeContent();
         expect(main_document.value).to.be.equal(new_virtual_source);

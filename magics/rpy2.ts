@@ -21,7 +21,7 @@ export function extract_r_args(args: string[], content_position: number) {
     inputs: inputs,
     outputs: outputs,
     rest: args[args.length + content_position],
-    others: others
+    others: others,
   };
 }
 
@@ -42,7 +42,7 @@ export function parse_r_args(args: string[], content_position: number) {
     content: rest,
     others: others.join(' '),
     inputs: input_variables,
-    outputs: output_variables
+    outputs: output_variables,
   };
 }
 
@@ -92,7 +92,7 @@ export function rpy2_reverse_replacement(match: string, ...args: string[]) {
     input: input_variables,
     output: output_variables,
     other: other_args,
-    contents: contents
+    contents: contents,
   };
 }
 

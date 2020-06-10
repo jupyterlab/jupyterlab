@@ -6,7 +6,7 @@ import {
   IEditorPosition,
   IRootPosition,
   ISourcePosition,
-  IVirtualPosition
+  IVirtualPosition,
 } from '../positioning';
 import { until_ready } from '../utils';
 import { Signal } from '@lumino/signaling';
@@ -71,7 +71,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
     this.documents_updated.disconnect(this.on_updated, this);
 
     for (let [[eventName], wrapped_handler] of this._event_wrappers.entries()) {
-      this.forEveryBlockEditor(cm_editor => {
+      this.forEveryBlockEditor((cm_editor) => {
         cm_editor.off(eventName, wrapped_handler);
       }, false);
     }
@@ -239,7 +239,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
     };
     this._event_wrappers.set([eventName, handler], wrapped_handler);
 
-    this.forEveryBlockEditor(cm_editor => {
+    this.forEveryBlockEditor((cm_editor) => {
       cm_editor.on(eventName, wrapped_handler);
     });
   }
@@ -247,7 +247,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
   off(eventName: string, handler: CodeMirrorHandler, ...args: any[]): void {
     let wrapped_handler = this._event_wrappers.get([eventName, handler]);
 
-    this.forEveryBlockEditor(cm_editor => {
+    this.forEveryBlockEditor((cm_editor) => {
       cm_editor.off(eventName, wrapped_handler);
     });
   }

@@ -2,7 +2,7 @@ import { getModifierState } from '../../../utils';
 import {
   IRootPosition,
   is_equal,
-  IVirtualPosition
+  IVirtualPosition,
 } from '../../../positioning';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
@@ -85,12 +85,12 @@ export class Hover extends CodeMirrorLSPFeature {
       // coerce to MarkedString  object
       return {
         kind: 'plaintext',
-        value: content
+        value: content,
       };
     } else {
       return {
         kind: 'markdown',
-        value: '```' + content.language + '\n' + content.value + '```'
+        value: '```' + content.language + '\n' + content.value + '```',
       };
     }
   }
@@ -225,17 +225,17 @@ export class Hover extends CodeMirrorLSPFeature {
 
       let start_in_root = {
         line: character.line,
-        ch: token.start
+        ch: token.start,
       } as IRootPosition;
       let end_in_root = {
         line: character.line,
-        ch: token.end
+        ch: token.end,
       } as IRootPosition;
 
       return {
         start: this.virtual_editor.root_position_to_editor(start_in_root),
         end: this.virtual_editor.root_position_to_editor(end_in_root),
-        editor: cm_editor
+        editor: cm_editor,
       };
     }
   }

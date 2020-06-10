@@ -17,7 +17,7 @@ import diagnosticsSvg from '../../../../style/icons/diagnostics.svg';
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
-  svgstr: diagnosticsSvg
+  svgstr: diagnosticsSvg,
 });
 
 /**
@@ -59,7 +59,7 @@ function DocumentLocator(props: {
   let { document, editor } = props;
   let ancestry = document.ancestry;
   let target_cell: Cell = null;
-  let breadcrumbs: any = ancestry.map(document => {
+  let breadcrumbs: any = ancestry.map((document) => {
     if (!document.parent) {
       let path = document.path;
       if (
@@ -200,45 +200,45 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         </td>
       ),
       sort: (a, b) => a.document.id_path.localeCompare(b.document.id_path),
-      is_available: context => context.db.size > 1
+      is_available: (context) => context.db.size > 1,
     }),
     new Column({
       name: 'Message',
-      render_cell: row => {
+      render_cell: (row) => {
         let message = message_without_code(row.data.diagnostic);
         return <td key={1}>{message}</td>;
       },
       sort: (a, b) =>
-        a.data.diagnostic.message.localeCompare(b.data.diagnostic.message)
+        a.data.diagnostic.message.localeCompare(b.data.diagnostic.message),
     }),
     new Column({
       name: 'Code',
-      render_cell: row => <td key={2}>{row.data.diagnostic.code}</td>,
+      render_cell: (row) => <td key={2}>{row.data.diagnostic.code}</td>,
       sort: (a, b) =>
         (a.data.diagnostic.code + '').localeCompare(
           b.data.diagnostic.source + ''
-        )
+        ),
     }),
     new Column({
       name: 'Severity',
       // TODO: use default diagnostic severity
-      render_cell: row => (
+      render_cell: (row) => (
         <td key={3}>
           {diagnosticSeverityNames[row.data.diagnostic.severity || 1]}
         </td>
       ),
       sort: (a, b) =>
-        a.data.diagnostic.severity > b.data.diagnostic.severity ? 1 : -1
+        a.data.diagnostic.severity > b.data.diagnostic.severity ? 1 : -1,
     }),
     new Column({
       name: 'Source',
-      render_cell: row => <td key={4}>{row.data.diagnostic.source}</td>,
+      render_cell: (row) => <td key={4}>{row.data.diagnostic.source}</td>,
       sort: (a, b) =>
-        a.data.diagnostic.source.localeCompare(b.data.diagnostic.source)
+        a.data.diagnostic.source.localeCompare(b.data.diagnostic.source),
     }),
     new Column({
       name: 'Cell',
-      render_cell: row => <td key={5}>{row.cell_number}</td>,
+      render_cell: (row) => <td key={5}>{row.cell_number}</td>,
       sort: (a, b) =>
         a.cell_number > b.cell_number
           ? 1
@@ -247,11 +247,11 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
           : a.data.range.start.ch > b.data.range.start.ch
           ? 1
           : -1,
-      is_available: context => context.editor.has_cells
+      is_available: (context) => context.editor.has_cells,
     }),
     new Column({
       name: 'Line:Ch',
-      render_cell: row => (
+      render_cell: (row) => (
         <td key={6}>
           {row.data.range.start.line}:{row.data.range.start.ch}
         </td>
@@ -261,8 +261,8 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
           ? 1
           : a.data.range.start.ch > b.data.range.start.ch
           ? 1
-          : -1
-    })
+          : -1,
+    }),
   ];
 
   sort(key: string) {
@@ -301,7 +301,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
             key: virtual_document.uri + ',' + i,
             document: virtual_document,
             cell_number: cell_number,
-            editor: editor
+            editor: editor,
           } as IDiagnosticsRow;
         });
       }
@@ -309,24 +309,24 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
     let flattened: IDiagnosticsRow[] = [].concat.apply([], by_document);
 
     let sorted_column = this.columns.filter(
-      column => column.name === this.sort_key
+      (column) => column.name === this.sort_key
     )[0];
     let sorter = sorted_column.sort.bind(sorted_column);
     let sorted = flattened.sort((a, b) => sorter(a, b) * this.sort_direction);
 
     let context: IListingContext = {
       db: diagnostics_db,
-      editor: editor
+      editor: editor,
     };
 
     let columns_to_display = this.columns.filter(
-      column => column.is_available(context) && column.is_visible
+      (column) => column.is_available(context) && column.is_visible
     );
 
-    let elements = sorted.map(row => {
+    let elements = sorted.map((row) => {
       let cm_editor = row.data.editor;
 
-      let cells = columns_to_display.map(column =>
+      let cells = columns_to_display.map((column) =>
         column.render_cell(row, context)
       );
 
@@ -344,7 +344,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       );
     });
 
-    let columns_headers = columns_to_display.map(column =>
+    let columns_headers = columns_to_display.map((column) =>
       column.render_header(this)
     );
 

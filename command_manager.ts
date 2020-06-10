@@ -4,7 +4,7 @@ import { JupyterLabWidgetAdapter } from './adapters/jupyterlab/jl_adapter';
 import {
   CommandEntryPoint,
   IFeatureCommand,
-  ILSPFeature
+  ILSPFeature,
 } from './adapters/codemirror/feature';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { FileEditorAdapter } from './adapters/jupyterlab/file_editor';
@@ -15,7 +15,7 @@ import { LSPConnection } from './connection';
 import {
   IEditorPosition,
   IRootPosition,
-  IVirtualPosition
+  IVirtualPosition,
 } from './positioning';
 import { VirtualEditor } from './virtual/editor';
 import { PositionConverter } from './converter';
@@ -56,7 +56,7 @@ abstract class LSPCommandManager {
         execute: () => this.execute(cmd),
         isEnabled: () => this.is_enabled(cmd),
         isVisible: () => this.is_visible(cmd),
-        label: cmd.label
+        label: cmd.label,
       });
 
       if (this.should_attach(cmd)) {
@@ -103,7 +103,7 @@ export abstract class ContextCommandManager extends LSPCommandManager {
     this.app.contextMenu.addItem({
       selector: this.selector,
       command: this.create_id(command),
-      rank: this.get_rank(command)
+      rank: this.get_rank(command),
     });
   }
 
@@ -111,7 +111,7 @@ export abstract class ContextCommandManager extends LSPCommandManager {
     this.app.contextMenu.addItem({
       type: 'separator',
       selector: this.selector,
-      rank: this.rank_group + position_in_group
+      rank: this.rank_group + position_in_group,
     });
   }
 
