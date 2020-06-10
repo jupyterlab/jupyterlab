@@ -1,5 +1,6 @@
 import React, { ReactElement } from 'react';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
+import { caretDownIcon, caretUpIcon, LabIcon } from '@jupyterlab/ui-components';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
 import { IEditorPosition } from '../../../positioning';
@@ -11,6 +12,13 @@ import '../../../../style/diagnostics_listing.css';
 import { Cell } from '@jupyterlab/cells';
 import { diagnosticSeverityNames } from '../../../lsp';
 import { message_without_code } from './diagnostics';
+
+import diagnosticsSvg from '../../../../style/icons/diagnostics.svg';
+
+export const diagnosticsIcon = new LabIcon({
+  name: 'lsp:diagnostics',
+  svgstr: diagnosticsSvg
+});
 
 /**
  * Diagnostic which is localized at a specific editor (cell) within a notebook
@@ -161,19 +169,20 @@ class Column {
 
 function SortableTH(props: { name: string; listing: DiagnosticsListing }): any {
   const is_sort_key = props.name === props.listing.sort_key;
+  const sortIcon =
+    !is_sort_key || props.listing.sort_direction === 1
+      ? caretUpIcon
+      : caretDownIcon;
   return (
     <th
       key={props.name}
       onClick={() => props.listing.sort(props.name)}
-      className={
-        is_sort_key
-          ? 'lsp-sorted ' +
-            (props.listing.sort_direction === 1 ? 'lsp-descending' : '')
-          : ''
-      }
+      className={is_sort_key ? 'lsp-sorted-header' : null}
     >
-      {props.name}
-      {is_sort_key ? <span className={'lsp-caret'} /> : null}
+      <div>
+        <label>{props.name}</label>
+        <sortIcon.react tag="span" className="lsp-sort-icon" />
+      </div>
     </th>
   );
 }
@@ -230,19 +239,29 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
     new Column({
       name: 'Cell',
       render_cell: row => <td key={5}>{row.cell_number}</td>,
-      sort: (a, b) => (a.cell_number > b.cell_number ? 1 : -1),
+      sort: (a, b) =>
+        a.cell_number > b.cell_number
+          ? 1
+          : a.data.range.start.line > b.data.range.start.line
+          ? 1
+          : a.data.range.start.ch > b.data.range.start.ch
+          ? 1
+          : -1,
       is_available: context => context.editor.has_cells
     }),
     new Column({
-      name: 'Line',
-      render_cell: row => <td key={6}>{row.data.range.start.line}</td>,
+      name: 'Line:Ch',
+      render_cell: row => (
+        <td key={6}>
+          {row.data.range.start.line}:{row.data.range.start.ch}
+        </td>
+      ),
       sort: (a, b) =>
-        a.data.range.start.line > b.data.range.start.line ? 1 : -1
-    }),
-    new Column({
-      name: 'Ch',
-      render_cell: row => <td key={7}>{row.data.range.start.line}</td>,
-      sort: (a, b) => (a.data.range.start.ch > b.data.range.start.ch ? 1 : -1)
+        a.data.range.start.line > b.data.range.start.line
+          ? 1
+          : a.data.range.start.ch > b.data.range.start.ch
+          ? 1
+          : -1
     })
   ];
 
