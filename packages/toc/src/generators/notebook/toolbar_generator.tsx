@@ -68,7 +68,7 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
       };
       if (tracker.currentWidget) {
         // Read saved user settings in notebook meta data:
-        tracker.currentWidget.context.ready.then(() => {
+        void tracker.currentWidget.context.ready.then(() => {
           if (tracker.currentWidget) {
             tracker.currentWidget.content.activeCellChanged.connect(() => {
               options.updateWidget();

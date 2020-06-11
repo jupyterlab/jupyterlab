@@ -55,7 +55,7 @@ class CodeComponent extends React.Component<IProperties, IState> {
    *
    * @param props - component properties
    */
-  componentWillReceiveProps(nextProps: IProperties) {
+  UNSAFE_componentWillReceiveProps(nextProps: IProperties) {
     this.setState({ heading: nextProps.heading });
   }
 

@@ -10,7 +10,7 @@ import { TagsToolComponent } from './tagstool';
 /**
  * Interface describing constructor options.
  */
-interface Options {
+interface IOptions {
   /**
    * Boolean indicating whether items should be numbered.
    */
@@ -49,7 +49,7 @@ class OptionsManager extends Registry.IOptionsManager {
   constructor(
     widget: TableOfContents,
     notebook: INotebookTracker,
-    options: Options
+    options: IOptions
   ) {
     super();
     this._numbering = options.numbering;

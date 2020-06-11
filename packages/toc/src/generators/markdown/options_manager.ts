@@ -10,7 +10,7 @@ import { TableOfContents } from '../../toc';
  *
  * @private
  */
-interface Options {
+interface IOptions {
   /**
    * Boolean indicating whether items should be numbered.
    */
@@ -35,7 +35,7 @@ class OptionsManager extends Registry.IOptionsManager {
    * @param options - generator options
    * @returns options manager
    */
-  constructor(widget: TableOfContents, options: Options) {
+  constructor(widget: TableOfContents, options: IOptions) {
     super();
     this._numbering = options.numbering;
     this._widget = widget;

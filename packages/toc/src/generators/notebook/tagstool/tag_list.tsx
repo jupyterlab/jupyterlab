@@ -78,7 +78,7 @@ class TagListComponent extends React.Component<IProperties, IState> {
    */
   renderTagComponents = (tags: string[]) => {
     const selectedTags = this.props.selectedTags;
-    const self = this;
+    const selectedTagWithName = this.selectedTagWithName;
     return tags.map((tag, index) => {
       const tagClass =
         selectedTags.indexOf(tag) >= 0
@@ -89,7 +89,7 @@ class TagListComponent extends React.Component<IProperties, IState> {
           key={tag}
           className={tagClass}
           onClick={event => {
-            self.selectedTagWithName(tag);
+            selectedTagWithName(tag);
           }}
           tabIndex={-1}
         >

@@ -162,7 +162,7 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
   /**
    * Updates filters.
    */
-  componentWillUpdate() {
+  UNSAFE_componentWillUpdate() {
     this.updateFilters();
   }
 

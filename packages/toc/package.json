@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc",
-  "version": "4.0.0",
+  "version": "4.2.0-alpha.0",
   "description": "JupyterLab - Table of Contents widget",
   "keywords": [
     "jupyterlab"
