@@ -262,7 +262,7 @@ mode. JupyterLab will check the extensions against the defined listings.
 .. warning::
 
     Only one mode at a time is allowed. If you or your server administrator configures
-    both black and white listings, the extension manager will be disabled.
+    both black and white listings, the JupyterLab server will not start.
 
 
 .. figure:: images/listings/simultaneous_black_white_listings.png
@@ -343,12 +343,12 @@ Listing Configuration
 
 You or your administrator can use the following traits to define the listings loading.
 
-- ``blacklist_uris``: A list of comma-separated URIs to get the blacklist
-- ``whitelist_uris``: A list of comma-separated URIs to get the whitelist
+- ``blacklist_uris``: A list of comma-separated URIs to fetch a blacklist file from
+- ``whitelist_uris``: A list of comma-separated URIs to fetch a whitelist file from
 - ``listings_refresh_seconds``: The interval delay in seconds to refresh the lists
 - ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
 
-For example, to enable blacklist, launch the server with ``--LabServerApp.blacklist_uris``.
+For example, to enable blacklist, launch the server with ``--LabServerApp.blacklist_uris=http://example.com/blacklist.json`` where ``http://example.com/blacklist.json`` is a blacklist JSON file as described below.
 
 The details for the listings_request_options are listed
 on the `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__  
