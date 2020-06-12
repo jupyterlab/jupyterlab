@@ -228,14 +228,18 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     const reply = await this.session.restoreState();
-    const breakpoints = this._processBreakpoints(reply);
-
+    const { hashMethod, hashSeed, tmpFilePrefix, tmpFileSuffix } = reply.body;
+    const breakpoints = this._processBreakpoints(reply.body.breakpoints);
     const stoppedThreads = new Set(reply.body.stoppedThreads);
+
+    this._setHashParameters(hashMethod, hashSeed);
+    this._setTmpFileParameters(tmpFilePrefix, tmpFileSuffix);
     this._model.stoppedThreads = stoppedThreads;
 
     if (!this.isStarted && (autoStart || stoppedThreads.size !== 0)) {
       await this.start();
     }
+
     if (this.isStarted || autoStart) {
       this._model.title = this.isStarted ? this.session?.connection?.name : '-';
     }
@@ -375,7 +379,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     const reply = await this.session.restoreState();
-    const mapFromServer = this._processBreakpoints(reply);
+    const mapFromServer = this._processBreakpoints(reply.body.breakpoints);
 
     if (editorFinder) {
       const breakpointsForRestore = this.breakpointsForRestore(
@@ -477,37 +481,31 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Fetch the list of breakpoints from the server.
+   * Process the list of breakpoints from the server and return as a map.
    *
-   * @param reply -
+   * @param breakpoints - The list of breakpoints from the kernel.
    *
    */
   private _processBreakpoints(
-    reply: IDebugger.ISession.Response['debugInfo']
+    breakpoints: IDebugger.ISession.IDebugInfoBreakpoints[]
   ): Map<string, IDebugger.IBreakpoint[]> {
-    this._setHashParameters(reply.body.hashMethod, reply.body.hashSeed);
-    this._setTmpFileParameters(
-      reply.body.tmpFilePrefix,
-      reply.body.tmpFileSuffix
-    );
-
-    const breakpoints = reply.body.breakpoints;
-    let bpMap = new Map<string, IDebugger.IBreakpoint[]>();
-    if (breakpoints.length !== 0) {
-      breakpoints.forEach((bp: IDebugger.ISession.IDebugInfoBreakpoints) => {
-        bpMap.set(
-          bp.source,
-          bp.breakpoints.map(breakpoint => {
-            return {
-              ...breakpoint,
-              active: true
-            };
-          })
-        );
-      });
+    if (!breakpoints.length) {
+      return new Map<string, IDebugger.IBreakpoint[]>();
     }
-
-    return bpMap;
+    return breakpoints.reduce(
+      (
+        map: Map<string, IDebugger.IBreakpoint[]>,
+        val: IDebugger.ISession.IDebugInfoBreakpoints
+      ) => {
+        const { breakpoints, source } = val;
+        map.set(
+          source,
+          breakpoints.map(point => ({ ...point, active: true }))
+        );
+        return map;
+      },
+      new Map<string, IDebugger.IBreakpoint[]>()
+    );
   }
 
   /**
