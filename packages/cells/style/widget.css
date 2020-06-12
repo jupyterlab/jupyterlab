@@ -68,13 +68,6 @@
   margin-top: 5px;
 }
 
-/* Text output with the Out[] prompt needs a top padding to match the
- * alignment of the Out[] prompt itself.
- */
-.jp-OutputArea-executeResult .jp-RenderedText.jp-OutputArea-output {
-  padding-top: var(--jp-code-padding);
-}
-
 .jp-CodeCell.jp-mod-outputsScrolled .jp-Cell-outputArea {
   overflow-y: auto;
   max-height: 200px;
