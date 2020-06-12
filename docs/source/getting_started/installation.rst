@@ -180,7 +180,7 @@ These variables are automatically used by many open-source tools (like ``conda``
 In case you can communicate via HTTP, but installation with ``conda`` fails
 on connectivity problems to HTTPS servers, you can disable using SSL for ``conda``.
 
-.. warning:: Disabling SSL in communication is generally not recommended and involves potential security risk.
+.. warning:: Disabling SSL in communication is generally not recommended and involves potential security risks.
 
 .. code:: bash
 
