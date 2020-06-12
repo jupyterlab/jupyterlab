@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { Session } from '@jupyterlab/services';
+import { Session, KernelSpec } from '@jupyterlab/services';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -25,14 +25,17 @@ import { VariablesModel } from './variables/model';
 export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Instantiate a new DebuggerService.
+   *
+   * @param options The instantiation options for a DebuggerService.
    */
-  constructor() {
+  constructor(options: DebuggerService.IOptions) {
     // Avoids setting session with invalid client
     // session should be set only when a notebook or
     // a console get the focus.
     // TODO: also checks that the notebook or console
     // runs a kernel with debugging ability
     this._session = null;
+    this._specsManager = options.specsManager;
     this._model = new DebuggerModel();
   }
 
@@ -129,14 +132,15 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param connection The session connection.
    */
   async isAvailable(connection: Session.ISessionConnection): Promise<boolean> {
+    await this._specsManager.ready;
     const kernel = connection?.kernel;
     if (!kernel) {
       return false;
     }
-    const info =
-      (((await kernel.info) as unknown) as IDebugger.ISession.IInfoReply) ??
-      null;
-    return !!(info?.debugger ?? false);
+    const name = kernel.name;
+    return !!(
+      this._specsManager.specs.kernelspecs[name].metadata?.['debugger'] ?? false
+    );
   }
 
   /**
@@ -623,9 +627,26 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _modelChanged = new Signal<IDebugger, IDebugger.IModel>(this);
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
 
+  private _specsManager: KernelSpec.IManager;
+
   private _hashMethod: (code: string) => string;
   private _tmpFilePrefix: string;
   private _tmpFileSuffix: string;
+}
+
+/**
+ * A namespace for `DebuggerService` statics.
+ */
+export namespace DebuggerService {
+  /**
+   * Instantiation options for a `DebuggerService`.
+   */
+  export interface IOptions {
+    /**
+     * The kernel specs manager.
+     */
+    specsManager: KernelSpec.IManager;
+  }
 }
 
 /**

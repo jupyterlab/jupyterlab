@@ -61,6 +61,17 @@ export class DebugSession implements IDebugger.ISession {
     }
 
     this._connection.iopubMessage.connect(this._handleEvent, this);
+
+    this._ready = new PromiseDelegate<void>();
+    const future = this.connection.kernel?.requestDebug({
+      type: 'request',
+      seq: 0,
+      command: 'debugInfo'
+    });
+    future.onReply = (msg: KernelMessage.IDebugReplyMsg): void => {
+      this._ready.resolve();
+      future.dispose();
+    };
   }
 
   /**
@@ -141,7 +152,7 @@ export class DebugSession implements IDebugger.ISession {
     command: K,
     args: IDebugger.ISession.Request[K]
   ): Promise<IDebugger.ISession.Response[K]> {
-    await this._ready();
+    await this._ready.promise;
     const message = await this._sendDebugMessage({
       type: 'request',
       seq: this._seq++,
@@ -192,14 +203,8 @@ export class DebugSession implements IDebugger.ISession {
     return reply.promise;
   }
 
-  /**
-   * A promise that resolves when the kernel is ready.
-   */
-  private _ready(): Promise<KernelMessage.IInfoReply> {
-    return this._connection?.kernel?.info;
-  }
-
   private _seq = 0;
+  private _ready = new PromiseDelegate<void>();
   private _connection: Session.ISessionConnection;
   private _isDisposed = false;
   private _isStarted = false;

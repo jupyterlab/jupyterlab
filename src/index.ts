@@ -271,7 +271,8 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:service',
   autoStart: true,
   provides: IDebugger,
-  activate: () => new DebuggerService()
+  activate: (app: JupyterFrontEnd) =>
+    new DebuggerService({ specsManager: app.serviceManager.kernelspecs })
 };
 
 /**
