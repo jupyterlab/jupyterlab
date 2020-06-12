@@ -242,7 +242,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     if (editorFinder) {
       this._model.breakpoints.restoreBreakpoints(
-        await this.breakpointsForRestore(editorFinder, breakpoints)
+        this.breakpointsForRestore(editorFinder, breakpoints)
       );
     } else {
       this._model.breakpoints.restoreBreakpoints(breakpoints);
@@ -262,10 +262,10 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param editorFinder - The editor finder object.
    * @param breakpoints - Map of breakpoints.
    */
-  async breakpointsForRestore(
+  breakpointsForRestore(
     editorFinder: IDebuggerEditorFinder,
     breakpoints: Map<string, IDebugger.IBreakpoint[]>
-  ): Promise<Map<string, IDebugger.IBreakpoint[]>> {
+  ): Map<string, IDebugger.IBreakpoint[]> {
     const debugSessionPath = this._session.connection.path;
     const associatedBreakpoints = (
       fromServer: Map<string, IDebugger.IBreakpoint[]>,
@@ -378,7 +378,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     const mapFromServer = this._processBreakpoints(reply);
 
     if (editorFinder) {
-      const breakpointsForRestore = await this.breakpointsForRestore(
+      const breakpointsForRestore = this.breakpointsForRestore(
         editorFinder,
         mapFromServer
       );
