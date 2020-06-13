@@ -11,6 +11,7 @@ import {
   IVirtualPosition
 } from '../../positioning';
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 class DocDispatcher implements CodeMirror.Doc {
   virtual_editor: VirtualEditorForNotebook;
@@ -185,8 +186,10 @@ export class VirtualEditorForNotebook extends VirtualEditor {
 
   addPanel(
     node: HTMLElement,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     options?: CodeMirror.ShowPanelOptions
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
   ): CodeMirror.Panel {
     return undefined;
@@ -269,6 +272,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
 
   getDoc(): CodeMirror.Doc {
     let dummy_doc = new DocDispatcher(this);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     return dummy_doc;
   }

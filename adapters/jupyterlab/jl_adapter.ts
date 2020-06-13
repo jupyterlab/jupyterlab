@@ -506,6 +506,7 @@ export abstract class JupyterLabWidgetAdapter
 
     let { left, top } = leaf_node.getBoundingClientRect();
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     let event = this.app._contextMenuEvent;
 

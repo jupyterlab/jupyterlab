@@ -22,6 +22,7 @@ interface IFreeTooltipOptions extends Tooltip.IOptions {
 /**
  * Tooltip which can be placed  at any character, not only at the current position (derived from getCursorPosition)
  */
+// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 export class FreeTooltip extends Tooltip {
   position: CodeEditor.IPosition | null;
@@ -33,9 +34,11 @@ export class FreeTooltip extends Tooltip {
     this.movetoLineEnd = options.moveToLineEnd;
   }
 
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   private _setGeometry(): void {
     // Find the start of the current token for hover box placement.
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     const editor = this._editor as CodeEditor.IEditor;
     const cursor: CodeEditor.IPosition =

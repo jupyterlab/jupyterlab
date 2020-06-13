@@ -42,6 +42,7 @@ export namespace DocumentHighlightKind {
 export function inverse_namespace(namespace: object): Record<number, string> {
   const records: Record<number, string> = {};
   for (let key of Object.keys(namespace)) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
     records[namespace[key]] = key;
   }

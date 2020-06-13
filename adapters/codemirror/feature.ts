@@ -163,6 +163,7 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
   static readonly commands = new Array<IFeatureCommand>();
 
   /* Just a safeguard to enforce static commands in sub-classes */
+  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
   // @ts-ignore
   private commands: any;
 

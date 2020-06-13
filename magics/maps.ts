@@ -10,6 +10,7 @@ abstract class MagicsMap extends Map<RegExp, string | replacer> {
   protected _override_for(code: string): string | null {
     for (let [key, value] of this) {
       if (code.match(key)) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
         // @ts-ignore
         return code.replace(key, value);
       }
