@@ -282,7 +282,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     // Setup single-document-mode title bar
     const titleWidget = (this._titleWidget = new Widget());
-    titleWidget.id = 'jp-TitlePanel-title';
+    titleWidget.id = 'jp-title-panel-title';
     this.add(titleWidget, 'title');
     if (this._dockPanel.mode == 'multiple-document') {
       this._titleHandler.panel.hide();
