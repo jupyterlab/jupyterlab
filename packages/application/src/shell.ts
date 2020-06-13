@@ -288,11 +288,27 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._titleHandler.panel.hide();
     }
 
-    this.activeChanged.connect((sender, args) => {
-      let newValue = args.newValue as MainAreaWidget;
-      if (newValue) {
-        this._titleWidget.node.innerHTML =
-          '<h1>' + newValue.content.title.label + '</h1>';
+    // Wire up signals to update the title panel of the single document mode to
+    // follow the title of this.currentWidget
+    this.currentChanged.connect((sender, args) => {
+      let newValue = args.newValue;
+      let oldValue = args.oldValue;
+
+      // Stop watching the title of the previously current widget
+      if (oldValue && oldValue instanceof MainAreaWidget) {
+        oldValue.content.title.changed.disconnect(
+          this._updateTitlePanelTitle,
+          this
+        );
+      }
+
+      // Start watching the title of the new current widget
+      if (newValue && newValue instanceof MainAreaWidget) {
+        newValue.content.title.changed.connect(
+          this._updateTitlePanelTitle,
+          this
+        );
+        this._updateTitlePanelTitle();
       }
     });
   }
@@ -390,11 +406,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this.node.dataset.shellMode = mode;
       // Show the title panel
       this._titleHandler.panel.show();
-      const newValue = this.activeWidget as MainAreaWidget;
-      if (newValue) {
-        this._titleWidget.node.innerHTML =
-          '<h1>' + newValue.content.title.label + '</h1>';
-      }
+      this._updateTitlePanelTitle();
+
       return;
     }
 
@@ -756,6 +769,18 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.dataset.shellMode = this.mode;
+  }
+
+  /**
+   * Update the title panel title based on the title of the current widget.
+   */
+  private _updateTitlePanelTitle() {
+    let current = this.currentWidget;
+    if (current && current instanceof MainAreaWidget) {
+      console.log(current.content.title.label);
+      this._titleWidget.node.innerHTML =
+        '<h1>' + current.content.title.label + '</h1>';
+    }
   }
 
   /**
