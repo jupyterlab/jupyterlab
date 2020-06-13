@@ -194,20 +194,19 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Restarts the debugger.
-   * Precondition: isStarted.
+   * Restart the debugger.
    */
   async restart(): Promise<void> {
-    const breakpoints = this._model.breakpoints.breakpoints;
+    const { breakpoints } = this._model.breakpoints;
     await this.stop();
     await this.start();
 
-    // No need to dump the cells again, we can simply
-    // resend the breakpoints to the kernel and update
-    // the model.
-    for (const [source, bps] of breakpoints) {
-      const sourceBreakpoints = Private.toSourceBreakpoints(bps);
-      await this._setBreakpoints(sourceBreakpoints, source);
+    // Re-send the breakpoints to the kernel and update the model.
+    for (const [source, points] of breakpoints) {
+      await this._setBreakpoints(
+        points.map(({ line }) => ({ line })),
+        source
+      );
     }
     this._model.breakpoints.restoreBreakpoints(breakpoints);
   }
@@ -215,9 +214,8 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Restore the state of a debug session.
    *
-   * @param autoStart - when true, starts the debugger
-   * if it has not been started yet.
-   * @param editorFinder - The editorFinder instance
+   * @param autoStart - If true, starts the debugger if it has not been started.
+   * @param editorFinder - The editor finder instance.
    */
   async restoreState(
     autoStart: boolean,
@@ -228,24 +226,27 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     const reply = await this.session.restoreState();
-    let bpMap = await this.breakpointsMapFromServer(reply);
-
+    const { hashMethod, hashSeed, tmpFilePrefix, tmpFileSuffix } = reply.body;
+    const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
     const stoppedThreads = new Set(reply.body.stoppedThreads);
+
+    this._setHashParameters(hashMethod, hashSeed);
+    this._setTmpFileParameters(tmpFilePrefix, tmpFileSuffix);
     this._model.stoppedThreads = stoppedThreads;
 
     if (!this.isStarted && (autoStart || stoppedThreads.size !== 0)) {
       await this.start();
     }
+
     if (this.isStarted || autoStart) {
       this._model.title = this.isStarted ? this.session?.connection?.name : '-';
     }
 
     if (editorFinder) {
-      this._model.breakpoints.restoreBreakpoints(
-        await this.breakpointsForRestore(editorFinder, bpMap)
-      );
+      const filtered = this._filterBreakpoints(breakpoints, editorFinder);
+      this._model.breakpoints.restoreBreakpoints(filtered);
     } else {
-      this._model.breakpoints.restoreBreakpoints(bpMap);
+      this._model.breakpoints.restoreBreakpoints(breakpoints);
     }
 
     if (stoppedThreads.size !== 0) {
@@ -256,81 +257,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
   }
 
-  /**
-   * Map of breakpoints for restore.
-   *
-   * @param editorFinder - The editor finder object.
-   * @param breakpoints - Map of breakpoints.
-   */
-  async breakpointsForRestore(
-    editorFinder: IDebuggerEditorFinder,
-    breakpoints: Map<string, IDebugger.IBreakpoint[]>
-  ): Promise<Map<string, IDebugger.IBreakpoint[]>> {
-    const debugSessionPath = this._session.connection.path;
-    const associatedBreakpoints = (
-      fromServer: Map<string, IDebugger.IBreakpoint[]>,
-      editorFinder: IDebuggerEditorFinder
-    ): string[] => {
-      let associatedBreakpoints: string[] = [];
-      for (let [key, value] of fromServer) {
-        each(editorFinder.find(debugSessionPath, key, false), () => {
-          if (value.length > 0) {
-            associatedBreakpoints.push(key);
-          }
-        });
-      }
-      return associatedBreakpoints;
-    };
-
-    const breakpointsForRestore = (
-      breakpoints: Map<string, IDebugger.IBreakpoint[]>,
-      editorFinder: IDebuggerEditorFinder
-    ): Map<string, IDebugger.IBreakpoint[]> => {
-      let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
-      associatedBreakpoints(breakpoints, editorFinder).forEach(path => {
-        Array.from(breakpoints.entries()).forEach(value => {
-          if (value[0] === path) {
-            bpMapForRestore.set(value[0], breakpoints.get(value[0]));
-          }
-        });
-      });
-      return bpMapForRestore;
-    };
-    return breakpointsForRestore(breakpoints, editorFinder);
-  }
-
-  /**
-   * Response to map of breakpoints
-   *
-   * @param reply - Response from restore state method.
-   */
-  async breakpointsMapFromServer(
-    reply: IDebugger.ISession.Response['debugInfo']
-  ): Promise<Map<string, IDebugger.IBreakpoint[]>> {
-    this._setHashParameters(reply.body.hashMethod, reply.body.hashSeed);
-    this._setTmpFileParameters(
-      reply.body.tmpFilePrefix,
-      reply.body.tmpFileSuffix
-    );
-
-    const breakpoints = reply.body.breakpoints;
-    let bpMap = new Map<string, IDebugger.IBreakpoint[]>();
-    if (breakpoints.length !== 0) {
-      breakpoints.forEach((bp: IDebugger.ISession.IDebugInfoBreakpoints) => {
-        bpMap.set(
-          bp.source,
-          bp.breakpoints.map(breakpoint => {
-            return {
-              ...breakpoint,
-              active: true
-            };
-          })
-        );
-      });
-    }
-
-    return bpMap;
-  }
   /**
    * Continues the execution of the current thread.
    */
@@ -401,54 +327,31 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (!this.session.isStarted) {
       return;
     }
+
     if (!path) {
-      const dumpedCell = await this._dumpCell(code);
-      path = dumpedCell.body.sourcePath;
+      path = (await this._dumpCell(code)).body.sourcePath;
     }
 
-    const reply = await this.session.restoreState();
-    const mapFromServer = await this.breakpointsMapFromServer(reply);
+    const state = await this.session.restoreState();
+    const localBreakpoints = breakpoints.map(({ line }) => ({ line }));
+    const remoteBreakpoints = this._mapBreakpoints(state.body.breakpoints);
 
+    // Set the local copy of breakpoints to reflect only editors that exist.
     if (editorFinder) {
-      const breakpointsForRestore = await this.breakpointsForRestore(
-        editorFinder,
-        mapFromServer
-      );
-      this._model.breakpoints.restoreBreakpoints(breakpointsForRestore);
+      const filtered = this._filterBreakpoints(remoteBreakpoints, editorFinder);
+      this._model.breakpoints.restoreBreakpoints(filtered);
     } else {
-      this._model.breakpoints.restoreBreakpoints(mapFromServer);
+      this._model.breakpoints.restoreBreakpoints(remoteBreakpoints);
     }
 
-    await this.preparationToSetBreakpoint(path, breakpoints);
+    // Set the kernel's breakpoints for this path.
+    const reply = await this._setBreakpoints(localBreakpoints, path);
+    const updatedBreakpoints = reply.body.breakpoints
+      .map(val => ({ ...val, active: true }))
+      .filter((val, _, arr) => arr.findIndex(el => el.line === val.line) > -1);
 
-    await this.session.sendRequest('configurationDone', {});
-  }
-
-  /**
-   * Preparation for setting breakpoints
-   *
-   * @param path - Path of cell
-   * @param breakpoints - Breakpoints for set
-   */
-  async preparationToSetBreakpoint(
-    path: string,
-    breakpoints: IDebugger.IBreakpoint[]
-  ): Promise<void> {
-    const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
-    const reply = await this._setBreakpoints(sourceBreakpoints, path);
-    let kernelBreakpoints = reply.body.breakpoints.map(breakpoint => {
-      return {
-        ...breakpoint,
-        active: true
-      };
-    });
-    // filter breakpoints with the same line number
-    kernelBreakpoints = kernelBreakpoints.filter(
-      (breakpoint, i, arr) =>
-        arr.findIndex(el => el.line === breakpoint.line) === i
-    );
-
-    this._model.breakpoints.setBreakpoints(path, kernelBreakpoints);
+    // Update the local model and finish kernel configuration.
+    this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
     await this.session.sendRequest('configurationDone', {});
   }
 
@@ -506,6 +409,77 @@ export class DebuggerService implements IDebugger, IDisposable {
     code: string
   ): Promise<IDebugger.ISession.IDumpCellResponse> {
     return this.session.sendRequest('dumpCell', { code });
+  }
+  /**
+   * Filter breakpoints and only return those associated with a known editor.
+   *
+   * @param breakpoints - Map of breakpoints.
+   *
+   * @param editorFinder - The editor finder object.
+   */
+  private _filterBreakpoints(
+    breakpoints: Map<string, IDebugger.IBreakpoint[]>,
+    editorFinder: IDebuggerEditorFinder
+  ): Map<string, IDebugger.IBreakpoint[]> {
+    const path = this._session.connection.path;
+    const associatedBreakpoints = (
+      remoteBreakpoints: Map<string, IDebugger.IBreakpoint[]>,
+      editorFinder: IDebuggerEditorFinder
+    ): string[] => {
+      const associatedBreakpoints: string[] = [];
+      for (const [key, value] of remoteBreakpoints) {
+        each(editorFinder.find(path, key, false), () => {
+          if (value.length > 0) {
+            associatedBreakpoints.push(key);
+          }
+        });
+      }
+      return associatedBreakpoints;
+    };
+
+    const breakpointsForRestore = (
+      breakpoints: Map<string, IDebugger.IBreakpoint[]>,
+      editorFinder: IDebuggerEditorFinder
+    ): Map<string, IDebugger.IBreakpoint[]> => {
+      let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
+      associatedBreakpoints(breakpoints, editorFinder).forEach(path => {
+        Array.from(breakpoints.entries()).forEach(value => {
+          if (value[0] === path) {
+            bpMapForRestore.set(value[0], breakpoints.get(value[0]));
+          }
+        });
+      });
+      return bpMapForRestore;
+    };
+    return breakpointsForRestore(breakpoints, editorFinder);
+  }
+
+  /**
+   * Process the list of breakpoints from the server and return as a map.
+   *
+   * @param breakpoints - The list of breakpoints from the kernel.
+   *
+   */
+  private _mapBreakpoints(
+    breakpoints: IDebugger.ISession.IDebugInfoBreakpoints[]
+  ): Map<string, IDebugger.IBreakpoint[]> {
+    if (!breakpoints.length) {
+      return new Map<string, IDebugger.IBreakpoint[]>();
+    }
+    return breakpoints.reduce(
+      (
+        map: Map<string, IDebugger.IBreakpoint[]>,
+        val: IDebugger.ISession.IDebugInfoBreakpoints
+      ) => {
+        const { breakpoints, source } = val;
+        map.set(
+          source,
+          breakpoints.map(point => ({ ...point, active: true }))
+        );
+        return map;
+      },
+      new Map<string, IDebugger.IBreakpoint[]>()
+    );
   }
 
   /**
@@ -746,25 +720,5 @@ export namespace DebuggerService {
      * The kernel specs manager.
      */
     specsManager: KernelSpec.IManager;
-  }
-}
-
-/**
- * A namespace for module private data.
- */
-namespace Private {
-  /**
-   * Convert a list of breakpoints to source breakpoints to be sent to the kernel.
-   *
-   * @param breakpoints The list of breakpoints.
-   */
-  export function toSourceBreakpoints(
-    breakpoints: IDebugger.IBreakpoint[]
-  ): { line: number }[] {
-    return breakpoints.map(breakpoint => {
-      return {
-        line: breakpoint.line
-      };
-    });
   }
 }
