@@ -206,7 +206,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     // resend the breakpoints to the kernel and update
     // the model.
     for (const [source, bps] of breakpoints) {
-      const sourceBreakpoints = Private.toSourceBreakpoints(bps);
+      const sourceBreakpoints = bps.map(({ line }) => ({ line }));
       await this._setBreakpoints(sourceBreakpoints, source);
     }
     this._model.breakpoints.restoreBreakpoints(breakpoints);
@@ -359,7 +359,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     path: string,
     breakpoints: IDebugger.IBreakpoint[]
   ): Promise<void> {
-    const sourceBreakpoints = Private.toSourceBreakpoints(breakpoints);
+    const sourceBreakpoints = breakpoints.map(({ line }) => ({ line }));
     const reply = await this._setBreakpoints(sourceBreakpoints, path);
     let kernelBreakpoints = reply.body.breakpoints.map(breakpoint => {
       return {
@@ -742,25 +742,5 @@ export namespace DebuggerService {
      * The kernel specs manager.
      */
     specsManager: KernelSpec.IManager;
-  }
-}
-
-/**
- * A namespace for module private data.
- */
-namespace Private {
-  /**
-   * Convert a list of breakpoints to source breakpoints to be sent to the kernel.
-   *
-   * @param breakpoints The list of breakpoints.
-   */
-  export function toSourceBreakpoints(
-    breakpoints: IDebugger.IBreakpoint[]
-  ): { line: number }[] {
-    return breakpoints.map(breakpoint => {
-      return {
-        line: breakpoint.line
-      };
-    });
   }
 }
