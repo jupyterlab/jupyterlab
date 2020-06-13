@@ -229,7 +229,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const reply = await this.session.restoreState();
     const { hashMethod, hashSeed, tmpFilePrefix, tmpFileSuffix } = reply.body;
-    const breakpoints = this._processBreakpoints(reply.body.breakpoints);
+    const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
     const stoppedThreads = new Set(reply.body.stoppedThreads);
 
     this._setHashParameters(hashMethod, hashSeed);
@@ -336,7 +336,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const state = await this.session.restoreState();
     const localBreakpoints = breakpoints.map(({ line }) => ({ line }));
-    const remoteBreakpoints = this._processBreakpoints(state.body.breakpoints);
+    const remoteBreakpoints = this._mapBreakpoints(state.body.breakpoints);
 
     // Set the local copy of breakpoints to reflect only editors that exist.
     if (editorFinder) {
@@ -413,7 +413,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     return this.session.sendRequest('dumpCell', { code });
   }
   /**
-   * Map of breakpoints for restore.
+   * Filter breakpoints and only return those associated with a known editor.
    *
    * @param breakpoints - Map of breakpoints.
    *
@@ -423,14 +423,14 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: Map<string, IDebugger.IBreakpoint[]>,
     editorFinder: IDebuggerEditorFinder
   ): Map<string, IDebugger.IBreakpoint[]> {
-    const debugSessionPath = this._session.connection.path;
+    const path = this._session.connection.path;
     const associatedBreakpoints = (
-      fromServer: Map<string, IDebugger.IBreakpoint[]>,
+      remoteBreakpoints: Map<string, IDebugger.IBreakpoint[]>,
       editorFinder: IDebuggerEditorFinder
     ): string[] => {
-      let associatedBreakpoints: string[] = [];
-      for (let [key, value] of fromServer) {
-        each(editorFinder.find(debugSessionPath, key, false), () => {
+      const associatedBreakpoints: string[] = [];
+      for (const [key, value] of remoteBreakpoints) {
+        each(editorFinder.find(path, key, false), () => {
           if (value.length > 0) {
             associatedBreakpoints.push(key);
           }
@@ -462,7 +462,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param breakpoints - The list of breakpoints from the kernel.
    *
    */
-  private _processBreakpoints(
+  private _mapBreakpoints(
     breakpoints: IDebugger.ISession.IDebugInfoBreakpoints[]
   ): Map<string, IDebugger.IBreakpoint[]> {
     if (!breakpoints.length) {
