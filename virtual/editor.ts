@@ -253,4 +253,4 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
   }
 }
 
-export interface VirtualEditor extends CodeMirror.Editor {}
+export interface VirtualEditor extends CodeMirror.Editor {} // eslint-disable-line @typescript-eslint/interface-name-prefix
