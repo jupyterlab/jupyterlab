@@ -329,14 +329,16 @@ export class DebuggerService implements IDebugger, IDisposable {
     if (!this.session.isStarted) {
       return;
     }
+
     if (!path) {
-      const dumpedCell = await this._dumpCell(code);
-      path = dumpedCell.body.sourcePath;
+      path = (await this._dumpCell(code)).body.sourcePath;
     }
 
-    const reply = await this.session.restoreState();
-    const remoteBreakpoints = this._processBreakpoints(reply.body.breakpoints);
+    const state = await this.session.restoreState();
+    const localBreakpoints = breakpoints.map(({ line }) => ({ line }));
+    const remoteBreakpoints = this._processBreakpoints(state.body.breakpoints);
 
+    // Set the local copy of breakpoints to reflect only editors that exist.
     if (editorFinder) {
       const filtered = this._filterBreakpoints(remoteBreakpoints, editorFinder);
       this._model.breakpoints.restoreBreakpoints(filtered);
@@ -344,36 +346,14 @@ export class DebuggerService implements IDebugger, IDisposable {
       this._model.breakpoints.restoreBreakpoints(remoteBreakpoints);
     }
 
-    await this.preparationToSetBreakpoint(path, breakpoints);
+    // Set the kernel's breakpoints for this path.
+    const reply = await this._setBreakpoints(localBreakpoints, path);
+    const updatedBreakpoints = reply.body.breakpoints
+      .map(val => ({ ...val, active: true }))
+      .filter((val, _, arr) => arr.findIndex(el => el.line === val.line) > -1);
 
-    await this.session.sendRequest('configurationDone', {});
-  }
-
-  /**
-   * Preparation for setting breakpoints
-   *
-   * @param path - Path of cell
-   * @param breakpoints - Breakpoints for set
-   */
-  async preparationToSetBreakpoint(
-    path: string,
-    breakpoints: IDebugger.IBreakpoint[]
-  ): Promise<void> {
-    const sourceBreakpoints = breakpoints.map(({ line }) => ({ line }));
-    const reply = await this._setBreakpoints(sourceBreakpoints, path);
-    let kernelBreakpoints = reply.body.breakpoints.map(breakpoint => {
-      return {
-        ...breakpoint,
-        active: true
-      };
-    });
-    // filter breakpoints with the same line number
-    kernelBreakpoints = kernelBreakpoints.filter(
-      (breakpoint, i, arr) =>
-        arr.findIndex(el => el.line === breakpoint.line) === i
-    );
-
-    this._model.breakpoints.setBreakpoints(path, kernelBreakpoints);
+    // Update the local model and finish kernel configuration.
+    this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
     await this.session.sendRequest('configurationDone', {});
   }
 
