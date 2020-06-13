@@ -120,7 +120,7 @@ function ux_workaround_for_rope_limitation(
   let dire_python_errors = (
     diagnostics_feature.diagnostics_db.all || []
   ).filter(
-    (diagnostic) =>
+    diagnostic =>
       diagnostic.diagnostic.message.includes('invalid syntax') ||
       diagnostic.diagnostic.message.includes('SyntaxError') ||
       diagnostic.diagnostic.message.includes('IndentationError')
@@ -132,7 +132,7 @@ function ux_workaround_for_rope_limitation(
 
   let dire_errors = [
     ...new Set(
-      dire_python_errors.map((diagnostic) => {
+      dire_python_errors.map(diagnostic => {
         let message = diagnostic.diagnostic.message;
         let start = diagnostic.range.start;
         if (editor.has_cells) {

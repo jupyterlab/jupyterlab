@@ -288,7 +288,7 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
     // Specs: documentChanges are preferred over changes
     let changes = workspaceEdit.documentChanges
       ? workspaceEdit.documentChanges.map(
-          (change) => change as lsProtocol.TextDocumentEdit
+          change => change as lsProtocol.TextDocumentEdit
         )
       : toDocumentChanges(workspaceEdit.changes);
     let applied_changes = null;

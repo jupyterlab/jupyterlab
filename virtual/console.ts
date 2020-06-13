@@ -26,7 +26,7 @@ export class FloatingConsole extends EditorLogConsole {
 
   private to_string(args: any[]) {
     return args
-      .map((arg) => '<span class="lsp-code">' + JSON.stringify(arg) + '</span>')
+      .map(arg => '<span class="lsp-code">' + JSON.stringify(arg) + '</span>')
       .join(', ');
   }
 

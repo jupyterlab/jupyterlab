@@ -537,14 +537,14 @@ export class VirtualDocument {
     let cell_override = this.cell_magics_overrides.override_for(cell_code);
     if (cell_override != null) {
       lines = cell_override.split('\n');
-      skip_inspect = lines.map((l) => [this.id_path]);
+      skip_inspect = lines.map(l => [this.id_path]);
     } else {
       // otherwise, we replace line magics - if any
       let result = this.line_magics_overrides.replace_all(
         cell_code.split('\n')
       );
       lines = result.lines;
-      skip_inspect = result.skip_inspect.map((skip) =>
+      skip_inspect = result.skip_inspect.map(skip =>
         skip ? [this.id_path] : []
       );
     }

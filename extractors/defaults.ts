@@ -20,7 +20,7 @@ function rpy2_code_extractor(match: string, ...args: string[]) {
 function rpy2_args(match: string, ...args: string[]) {
   let r = extract_r_args(args, -3);
   // define dummy input variables using empty data frames
-  let inputs = r.inputs.map((i) => i + ' <- data.frame();').join(' ');
+  let inputs = r.inputs.map(i => i + ' <- data.frame();').join(' ');
   let code = rpy2_code_extractor(match, ...args);
   if (inputs !== '' && code) {
     inputs += ' ';

@@ -179,7 +179,7 @@ export class LSPConnector extends DataConnector<
         virtual_cursor,
         document,
         position_in_token
-      ).catch((e) => {
+      ).catch(e => {
         console.warn('LSP: hint failed', e);
         return this.fallback_connector.fetch(request);
       });
@@ -302,7 +302,7 @@ export class LSPConnector extends DataConnector<
     // Cache all the lsp matches in a memo.
     const memo = new Set<string>(matches);
     const memo_types = new Map<string, string>(
-      types.map((v) => [v.text, v.type])
+      types.map(v => [v.text, v.type])
     );
 
     let prefix = '';
@@ -332,7 +332,7 @@ export class LSPConnector extends DataConnector<
       let kernel_types = kernel.metadata._jupyter_types_experimental as Array<
         IItemType
       >;
-      kernel_types.forEach((itemType) => {
+      kernel_types.forEach(itemType => {
         let text = remove_prefix(itemType.text);
         if (!memo_types.has(text)) {
           memo_types.set(text, itemType.type);
@@ -344,7 +344,7 @@ export class LSPConnector extends DataConnector<
     }
 
     // Add each context match that is not in the memo to the result.
-    kernel.matches.forEach((match) => {
+    kernel.matches.forEach(match => {
       match = remove_prefix(match);
       if (!memo.has(match) && !priority_matches.has(match)) {
         matches.push(match);

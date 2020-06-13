@@ -42,7 +42,7 @@ import {
 import { DocumentConnectionManager } from './connection_manager';
 
 const lsp_commands: Array<IFeatureCommand> = [].concat(
-  ...lsp_features.map((feature) => feature.commands)
+  ...lsp_features.map(feature => feature.commands)
 );
 
 /**
@@ -246,7 +246,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     settingRegistry
       .load(plugin.id)
-      .then((settings) => {
+      .then(settings => {
         updateOptions(settings);
         settings.changed.connect(() => {
           updateOptions(settings);

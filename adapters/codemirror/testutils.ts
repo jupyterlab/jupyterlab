@@ -262,7 +262,7 @@ export function getCellsJSON(notebook: Notebook) {
   for (let i = 0; i < notebook.model.cells.length; i++) {
     cells.push(notebook.model.cells.get(i));
   }
-  return cells.map((cell) => cell.toJSON());
+  return cells.map(cell => cell.toJSON());
 }
 
 export async function synchronize_content(

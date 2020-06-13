@@ -145,7 +145,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
 
   public get_editor_index(position: IVirtualPosition): number {
     let cell = this.get_cell_at(position);
-    return this.notebook.widgets.findIndex((other_cell) => {
+    return this.notebook.widgets.findIndex(other_cell => {
       return cell === other_cell;
     });
   }
@@ -318,7 +318,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       return;
     }
 
-    this.notebook.widgets.every((cell) => {
+    this.notebook.widgets.every(cell => {
       let codemirror_editor = cell.editor as CodeMirrorEditor;
       let cm_editor = codemirror_editor.editor;
       this.cm_editor_to_cell.set(cm_editor, cell);
@@ -358,7 +358,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
   }
 
   addEventListener(type: string, listener: EventListenerOrEventListenerObject) {
-    this.forEveryBlockEditor((cm_editor) => {
+    this.forEveryBlockEditor(cm_editor => {
       cm_editor.getWrapperElement().addEventListener(type, listener);
     });
   }

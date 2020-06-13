@@ -14,7 +14,7 @@ export class Signature extends CodeMirrorLSPFeature {
   ): lsProtocol.MarkupContent {
     let signatures = new Array<string>();
 
-    response.signatures.forEach((item) => {
+    response.signatures.forEach(item => {
       let markdown = this.markdown_from_signature(item, language);
       signatures.push(markdown);
     });
@@ -142,7 +142,7 @@ export class Signature extends CodeMirrorLSPFeature {
         this.virtual_document.document_info,
         false
       )
-      .then((help) => this.handleSignature(help))
+      .then(help => this.handleSignature(help))
       .catch(console.warn);
   }
 }

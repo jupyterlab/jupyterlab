@@ -92,13 +92,13 @@ export class Diagnostics extends CodeMirrorLSPFeature {
         if (!diagnostics_panel.is_registered) {
           let columns_menu = new Menu({ commands: app.commands });
           app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
-            execute: (args) => {
+            execute: args => {
               let column = get_column(args['name'] as string);
               column.is_visible = !column.is_visible;
               panel_widget.update();
             },
-            label: (args) => args['name'] as string,
-            isToggled: (args) => {
+            label: args => args['name'] as string,
+            isToggled: args => {
               let column = get_column(args['name'] as string);
               return column.is_visible;
             }
@@ -296,7 +296,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
           }
 
           let highest_severity_code = diagnostics
-            .map((diagnostic) => diagnostic.severity || default_severity)
+            .map(diagnostic => diagnostic.severity || default_severity)
             .sort()[0];
 
           const severity = diagnosticSeverityNames[highest_severity_code];
@@ -327,7 +327,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
           // obviously, the hash would prevent recovery of info from the key.
           let diagnostic_hash = JSON.stringify({
             // diagnostics without ranges
-            diagnostics: diagnostics.map((diagnostic) => [
+            diagnostics: diagnostics.map(diagnostic => [
               diagnostic.severity,
               diagnostic.message,
               diagnostic.code,
@@ -354,7 +354,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
           if (!this.marked_diagnostics.has(diagnostic_hash)) {
             let options: CodeMirror.TextMarkerOptions = {
               title: diagnostics
-                .map((d) => d.message + (d.source ? ' (' + d.source + ')' : ''))
+                .map(d => d.message + (d.source ? ' (' + d.source + ')' : ''))
                 .join('\n'),
               className: 'cm-lsp-diagnostic cm-lsp-diagnostic-' + severity
             };

@@ -71,7 +71,7 @@ class CollapsibleList extends React.Component<
   }
 
   handleClick = () => {
-    this.setState((state) => ({
+    this.setState(state => ({
       isCollapsed: !state.isCollapsed
     }));
   };
@@ -290,7 +290,7 @@ export interface IStatus {
 function collect_languages(virtual_document: VirtualDocument): Set<string> {
   let documents = collect_documents(virtual_document);
   return new Set(
-    [...documents].map((document) => document.language.toLocaleLowerCase())
+    [...documents].map(document => document.language.toLocaleLowerCase())
   );
 }
 
@@ -358,7 +358,7 @@ export namespace LSPStatus {
       for (let document of documents.values()) {
         let language = document.language.toLocaleLowerCase();
         let servers = this.available_servers.filter(
-          (server) => server.spec.languages.indexOf(language) !== -1
+          server => server.spec.languages.indexOf(language) !== -1
         );
         if (servers.length > 1) {
           console.warn('More than one server per language for' + language);
@@ -386,7 +386,7 @@ export namespace LSPStatus {
 
     get servers_available_not_in_use(): Array<SCHEMA.LanguageServerSession> {
       return this.available_servers.filter(
-        (server) => !this.is_server_running(server)
+        server => !this.is_server_running(server)
       );
     }
 
@@ -402,8 +402,7 @@ export namespace LSPStatus {
     get missing_languages(): Array<string> {
       // TODO: false negative for r vs R?
       return [...this.detected_languages].filter(
-        (language) =>
-          !this.supported_languages.has(language.toLocaleLowerCase())
+        language => !this.supported_languages.has(language.toLocaleLowerCase())
       );
     }
 
@@ -496,7 +495,7 @@ export namespace LSPStatus {
         msg = `Fully connected, but ${uninitialized.size}/${
           status.detected_documents.size
         } virtual document${plural} stuck uninitialized: ${[...uninitialized]
-          .map((document) => document.id_path)
+          .map(document => document.id_path)
           .join(', ')}`;
       } else {
         const unconnected = new Set<VirtualDocument>(status.detected_documents);
@@ -509,7 +508,7 @@ export namespace LSPStatus {
         } virtual document${plural} connected (${
           status.open_connections.length
         } connections; waiting for: ${[...unconnected]
-          .map((document) => document.id_path)
+          .map(document => document.id_path)
           .join(', ')})`;
       }
       return msg;
