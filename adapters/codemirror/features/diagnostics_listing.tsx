@@ -17,7 +17,7 @@ import diagnosticsSvg from '../../../../style/icons/diagnostics.svg';
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
-  svgstr: diagnosticsSvg,
+  svgstr: diagnosticsSvg
 });
 
 /**
@@ -200,7 +200,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         </td>
       ),
       sort: (a, b) => a.document.id_path.localeCompare(b.document.id_path),
-      is_available: (context) => context.db.size > 1,
+      is_available: (context) => context.db.size > 1
     }),
     new Column({
       name: 'Message',
@@ -209,7 +209,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         return <td key={1}>{message}</td>;
       },
       sort: (a, b) =>
-        a.data.diagnostic.message.localeCompare(b.data.diagnostic.message),
+        a.data.diagnostic.message.localeCompare(b.data.diagnostic.message)
     }),
     new Column({
       name: 'Code',
@@ -217,7 +217,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       sort: (a, b) =>
         (a.data.diagnostic.code + '').localeCompare(
           b.data.diagnostic.source + ''
-        ),
+        )
     }),
     new Column({
       name: 'Severity',
@@ -228,13 +228,13 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         </td>
       ),
       sort: (a, b) =>
-        a.data.diagnostic.severity > b.data.diagnostic.severity ? 1 : -1,
+        a.data.diagnostic.severity > b.data.diagnostic.severity ? 1 : -1
     }),
     new Column({
       name: 'Source',
       render_cell: (row) => <td key={4}>{row.data.diagnostic.source}</td>,
       sort: (a, b) =>
-        a.data.diagnostic.source.localeCompare(b.data.diagnostic.source),
+        a.data.diagnostic.source.localeCompare(b.data.diagnostic.source)
     }),
     new Column({
       name: 'Cell',
@@ -247,7 +247,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
           : a.data.range.start.ch > b.data.range.start.ch
           ? 1
           : -1,
-      is_available: (context) => context.editor.has_cells,
+      is_available: (context) => context.editor.has_cells
     }),
     new Column({
       name: 'Line:Ch',
@@ -261,8 +261,8 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
           ? 1
           : a.data.range.start.ch > b.data.range.start.ch
           ? 1
-          : -1,
-    }),
+          : -1
+    })
   ];
 
   sort(key: string) {
@@ -301,7 +301,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
             key: virtual_document.uri + ',' + i,
             document: virtual_document,
             cell_number: cell_number,
-            editor: editor,
+            editor: editor
           } as IDiagnosticsRow;
         });
       }
@@ -316,7 +316,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
 
     let context: IListingContext = {
       db: diagnostics_db,
-      editor: editor,
+      editor: editor
     };
 
     let columns_to_display = this.columns.filter(

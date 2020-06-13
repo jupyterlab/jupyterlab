@@ -12,7 +12,7 @@ import {
   DiagnosticsDatabase,
   DiagnosticsListing,
   IEditorDiagnostic,
-  diagnosticsIcon,
+  diagnosticsIcon
 } from './diagnostics_listing';
 import { VirtualDocument } from '../../../virtual/document';
 import { VirtualEditor } from '../../../virtual/editor';
@@ -101,19 +101,19 @@ export class Diagnostics extends CodeMirrorLSPFeature {
             isToggled: (args) => {
               let column = get_column(args['name'] as string);
               return column.is_visible;
-            },
+            }
           });
           columns_menu.title.label = 'Panel columns';
           for (let column of panel_widget.content.columns) {
             columns_menu.addItem({
               command: CMD_COLUMN_VISIBILITY,
-              args: { name: column.name },
+              args: { name: column.name }
             });
           }
           app.contextMenu.addItem({
             selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' th',
             submenu: columns_menu,
-            type: 'submenu',
+            type: 'submenu'
           });
           diagnostics_panel.is_registered = true;
         }
@@ -121,15 +121,15 @@ export class Diagnostics extends CodeMirrorLSPFeature {
         if (!panel_widget.isAttached) {
           app.shell.add(panel_widget, 'main', {
             ref: adapter.widget_id,
-            mode: 'split-bottom',
+            mode: 'split-bottom'
           });
         }
         app.shell.activateById(panel_widget.id);
       },
       is_enabled: () => true,
       label: 'Show diagnostics panel',
-      rank: 10,
-    },
+      rank: 10
+    }
   ];
 
   register(): void {
@@ -316,7 +316,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
 
           let range_in_editor = {
             start: start_in_editor,
-            end: end_in_editor,
+            end: end_in_editor
           };
           // what a pity there is no hash in the standard library...
           // we could use this: https://stackoverflow.com/a/7616484 though it may not be worth it:
@@ -332,20 +332,20 @@ export class Diagnostics extends CodeMirrorLSPFeature {
               diagnostic.message,
               diagnostic.code,
               diagnostic.source,
-              diagnostic.relatedInformation,
+              diagnostic.relatedInformation
             ]),
             // the apparent marker position will change in the notebook with every line change for each marker
             // after the (inserted/removed) line - but such markers should not be invalidated,
             // i.e. the invalidation should be performed in the cell space, not in the notebook coordinate space,
             // thus we transform the coordinates and keep the cell id in the hash
             range: range_in_editor,
-            editor: this.unique_editor_ids.get(cm_editor),
+            editor: this.unique_editor_ids.get(cm_editor)
           });
           for (let diagnostic of diagnostics) {
             diagnostics_list.push({
               diagnostic,
               editor: cm_editor,
-              range: range_in_editor,
+              range: range_in_editor
             });
           }
 
@@ -356,7 +356,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
               title: diagnostics
                 .map((d) => d.message + (d.source ? ' (' + d.source + ')' : ''))
                 .join('\n'),
-              className: 'cm-lsp-diagnostic cm-lsp-diagnostic-' + severity,
+              className: 'cm-lsp-diagnostic cm-lsp-diagnostic-' + severity
             };
             let marker;
             try {

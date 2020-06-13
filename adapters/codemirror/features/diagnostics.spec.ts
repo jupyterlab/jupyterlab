@@ -3,14 +3,14 @@ import { TextMarker } from 'codemirror';
 import {
   Diagnostics,
   diagnostics_panel,
-  message_without_code,
+  message_without_code
 } from './diagnostics';
 import {
   code_cell,
   FileEditorFeatureTestEnvironment,
   NotebookFeatureTestEnvironment,
   set_notebook_content,
-  showAllCells,
+  showAllCells
 } from '../testutils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { is_equal } from '../../../positioning';
@@ -53,11 +53,11 @@ describe('Diagnostics', () => {
           {
             range: {
               start: { line: 0, character: 1 },
-              end: { line: 0, character: 4 },
+              end: { line: 0, character: 4 }
             },
-            message: 'Undefined symbol',
-          },
-        ],
+            message: 'Undefined symbol'
+          }
+        ]
       });
 
       let marks = env.ce_editor.editor.getDoc().getAllMarks();
@@ -86,7 +86,7 @@ describe('Diagnostics', () => {
     it('renders inspections across cells', async () => {
       set_notebook_content(env.notebook, [
         code_cell(['x =1\n', 'test']),
-        code_cell(['    ']),
+        code_cell(['    '])
       ]);
       showAllCells(env.notebook);
       await env.virtual_editor.update_documents();
@@ -101,51 +101,51 @@ describe('Diagnostics', () => {
             source: 'pyflakes',
             range: {
               start: { line: 1, character: 0 },
-              end: { line: 1, character: 5 },
+              end: { line: 1, character: 5 }
             },
             message: "undefined name 'test'",
-            severity: 1,
+            severity: 1
           },
           {
             source: 'pycodestyle',
             range: {
               start: { line: 0, character: 3 },
-              end: { line: 0, character: 5 },
+              end: { line: 0, character: 5 }
             },
             message: 'E225 missing whitespace around operator',
             code: 'E225',
-            severity: 2,
+            severity: 2
           },
           {
             source: 'pycodestyle',
             range: {
               start: { line: 4, character: 0 },
-              end: { line: 4, character: 5 },
+              end: { line: 4, character: 5 }
             },
             message: 'W391 blank line at end of file',
             code: 'W391',
-            severity: 2,
+            severity: 2
           },
           {
             source: 'pycodestyle',
             range: {
               start: { line: 4, character: 0 },
-              end: { line: 4, character: 5 },
+              end: { line: 4, character: 5 }
             },
             message: 'W293 blank line contains whitespace',
             code: 'W293',
-            severity: 2,
+            severity: 2
           },
           {
             source: 'mypy',
             range: {
               start: { line: 1, character: 0 },
-              end: { line: 1, character: 4 },
+              end: { line: 1, character: 4 }
             },
             message: "Name 'test' is not defined",
-            severity: 1,
-          },
-        ],
+            severity: 1
+          }
+        ]
       });
 
       let cm_editors = env.virtual_editor.notebook.widgets.map(
@@ -180,7 +180,7 @@ describe('Diagnostics', () => {
     it('Works in foreign documents', async () => {
       set_notebook_content(env.notebook, [
         code_cell(['valid = 0\n', 'code = 1', '# here']),
-        code_cell(['%%python\n', 'y = 1\n', 'x']),
+        code_cell(['%%python\n', 'y = 1\n', 'x'])
       ]);
       showAllCells(env.notebook);
       await env.virtual_editor.update_documents();
@@ -202,12 +202,12 @@ describe('Diagnostics', () => {
             source: 'pyflakes',
             range: {
               start: { line: 1, character: 0 },
-              end: { line: 1, character: 2 },
+              end: { line: 1, character: 2 }
             },
             message: "undefined name 'x'",
-            severity: 1,
-          },
-        ],
+            severity: 1
+          }
+        ]
       } as lsProtocol.PublishDiagnosticsParams;
 
       // test guards against wrongly propagated responses:
@@ -247,12 +247,12 @@ describe('Diagnostics', () => {
             source: 'pyflakes',
             range: {
               start: { line: 5, character: 0 },
-              end: { line: 5, character: 52 },
+              end: { line: 5, character: 52 }
             },
             message: "undefined name 'get_ipython'",
-            severity: 1,
-          },
-        ],
+            severity: 1
+          }
+        ]
       });
 
       expect(marks_cell_1.length).to.equal(0);
@@ -266,11 +266,11 @@ describe('message_without_code', () => {
       source: 'pycodestyle',
       range: {
         start: { line: 4, character: 0 },
-        end: { line: 4, character: 5 },
+        end: { line: 4, character: 5 }
       },
       message: 'W293 blank line contains whitespace',
       code: 'W293',
-      severity: 2,
+      severity: 2
     });
     expect(message).to.be.equal('blank line contains whitespace');
   });
@@ -280,13 +280,13 @@ describe('message_without_code', () => {
       source: 'pyflakes',
       range: {
         start: { line: 1, character: 0 },
-        end: { line: 1, character: 2 },
+        end: { line: 1, character: 2 }
       },
       // a message starting from "undefined" is particularly tricky as
       // a lazy implementation can have a coercion of undefined "code"
       // to a string "undefined" which would wrongly chop off "undefined" from message
       message: "undefined name 'x'",
-      severity: 1,
+      severity: 1
     });
     expect(message).to.be.equal("undefined name 'x'");
   });

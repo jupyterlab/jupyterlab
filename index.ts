@@ -1,7 +1,7 @@
 import {
   ILabShell,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
@@ -30,14 +30,14 @@ import {
   file_editor_adapters,
   FileEditorCommandManager,
   notebook_adapters,
-  NotebookCommandManager,
+  NotebookCommandManager
 } from './command_manager';
 import IPaths = JupyterFrontEnd.IPaths;
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './adapters/jupyterlab/components/statusbar';
 import {
   IDocumentWidget,
-  DocumentRegistry,
+  DocumentRegistry
 } from '@jupyterlab/docregistry/lib/registry';
 import { DocumentConnectionManager } from './connection_manager';
 
@@ -60,7 +60,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     IRenderMimeRegistry,
     IPaths,
     ILabShell,
-    IStatusBar,
+    IStatusBar
   ],
   activate: (
     app: JupyterFrontEnd,
@@ -77,7 +77,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
   ) => {
     const language_server_manager = new LanguageServerManager({});
     const connection_manager = new DocumentConnectionManager({
-      language_server_manager,
+      language_server_manager
     });
 
     const status_bar_item = new LSPStatus();
@@ -113,7 +113,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           labShell.currentWidget &&
           (fileEditorTracker.currentWidget || notebookTracker.currentWidget) &&
           (labShell.currentWidget === fileEditorTracker.currentWidget ||
-            labShell.currentWidget === notebookTracker.currentWidget),
+            labShell.currentWidget === notebookTracker.currentWidget)
       }
     );
 
@@ -256,7 +256,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         console.error(reason.message);
       });
   },
-  autoStart: true,
+  autoStart: true
 };
 
 /**

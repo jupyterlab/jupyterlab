@@ -1,6 +1,6 @@
 import {
   IForeignCodeExtractor,
-  IForeignCodeExtractorsRegistry,
+  IForeignCodeExtractorsRegistry
 } from '../extractors/types';
 import { CellMagicsMap, LineMagicsMap } from '../magics/maps';
 import { IOverridesRegistry } from '../magics/overrides';
@@ -11,7 +11,7 @@ import * as CodeMirror from 'codemirror';
 import {
   IEditorPosition,
   ISourcePosition,
-  IVirtualPosition,
+  IVirtualPosition
 } from '../positioning';
 import IRange = CodeEditor.IRange;
 import { IDocumentInfo } from 'lsp-ws-connection/src';
@@ -324,7 +324,7 @@ export class VirtualDocument {
     );
     const context: IForeignContext = {
       foreign_document: document,
-      parent_host: this,
+      parent_host: this
     };
     this.foreign_document_opened.emit(context);
     // pass through any future signals
@@ -345,17 +345,17 @@ export class VirtualDocument {
 
     let source_position_ce: CodeEditor.IPosition = {
       line: source_line.editor_line,
-      column: position.ch,
+      column: position.ch
     };
 
     for (let [
       range,
-      { virtual_document: document },
+      { virtual_document: document }
     ] of source_line.foreign_documents_map) {
       if (is_within_range(source_position_ce, range)) {
         let source_position_cm = {
           line: source_position_ce.line - range.start.line,
-          ch: source_position_ce.column - range.start.column,
+          ch: source_position_ce.column - range.start.column
         };
 
         return document.document_at_source_position(
@@ -372,7 +372,7 @@ export class VirtualDocument {
 
     let source_position_ce: CodeEditor.IPosition = {
       line: source_line.editor_line,
-      column: source_position.ch,
+      column: source_position.ch
     };
     for (let [range] of source_line.foreign_documents_map) {
       if (is_within_range(source_position_ce, range)) {
@@ -391,18 +391,18 @@ export class VirtualDocument {
     // position inside the cell (block)
     let source_position_ce: CodeEditor.IPosition = {
       line: source_line.editor_line,
-      column: source_position.ch,
+      column: source_position.ch
     };
 
     for (let [
       range,
-      { virtual_line, virtual_document: document },
+      { virtual_line, virtual_document: document }
     ] of source_line.foreign_documents_map) {
       if (is_within_range(source_position_ce, range)) {
         // position inside the foreign document block
         let source_position_cm = {
           line: source_position_ce.line - range.start.line,
-          ch: source_position_ce.column - range.start.column,
+          ch: source_position_ce.column - range.start.column
         };
         if (document.is_within_foreign(source_position_cm as ISourcePosition)) {
           return this.virtual_position_at_document(
@@ -418,7 +418,7 @@ export class VirtualDocument {
 
     return {
       ch: source_position.ch,
-      line: virtual_line,
+      line: virtual_line
     } as IVirtualPosition;
   }
 
@@ -477,11 +477,11 @@ export class VirtualDocument {
 
           foreign_document_map.set(result.range, {
             virtual_line: foreign_document.last_virtual_line,
-            virtual_document: foreign_document,
+            virtual_document: foreign_document
           });
           let foreign_shift = {
             line: editor_shift.line + result.range.start.line,
-            column: editor_shift.column + result.range.start.column,
+            column: editor_shift.column + result.range.start.column
           };
           foreign_document.append_code_block(
             result.foreign_code,
@@ -571,7 +571,7 @@ export class VirtualDocument {
         skip_inspect: skip_inspect[i],
         editor: cm_editor,
         // TODO this is incorrect, wont work if something was extracted
-        source_line: this.last_source_line + i,
+        source_line: this.last_source_line + i
       });
     }
     for (let i = 0; i < source_cell_lines.length; i++) {
@@ -580,13 +580,13 @@ export class VirtualDocument {
         editor_shift: {
           line: editor_shift.line - (virtual_shift?.line || 0),
           column:
-            i === 0 ? editor_shift.column - (virtual_shift?.column || 0) : 0,
+            i === 0 ? editor_shift.column - (virtual_shift?.column || 0) : 0
         },
         // TODO: move those to a new abstraction layer (DocumentBlock class)
         editor: cm_editor,
         foreign_documents_map: foreign_document_map,
         // TODO this is incorrect, wont work if something was extracted
-        virtual_line: this.last_virtual_line + i,
+        virtual_line: this.last_virtual_line + i
       });
     }
 
@@ -601,7 +601,7 @@ export class VirtualDocument {
       this.virtual_lines.set(this.last_virtual_line + i, {
         skip_inspect: [this.id_path],
         editor: cm_editor,
-        source_line: null,
+        source_line: null
       });
     }
 
@@ -633,7 +633,7 @@ export class VirtualDocument {
     console.log('LSP: closing document', document);
     this.foreign_document_closed.emit({
       foreign_document: document,
-      parent_host: this,
+      parent_host: this
     });
     // remove it from foreign documents list
     this.foreign_documents.delete(document.virtual_id);
@@ -691,7 +691,7 @@ export class VirtualDocument {
     return {
       // only shift column in the line beginning the virtual document (first list of the editor in cell magics, but might be any line of editor in line magics!)
       ch: pos.ch + (editor_line === 0 ? editor_shift.column : 0),
-      line: editor_line + editor_shift.line,
+      line: editor_line + editor_shift.line
       // TODO or:
       //  line: pos.line + editor_shift.line - this.first_line_of_the_block(editor)
     } as IEditorPosition;
@@ -707,7 +707,7 @@ export class VirtualDocument {
   transform_virtual_to_source(position: IVirtualPosition): ISourcePosition {
     return {
       ch: position.ch,
-      line: this.virtual_lines.get(position.line).source_line,
+      line: this.virtual_lines.get(position.line).source_line
     } as ISourcePosition;
   }
 

@@ -3,7 +3,7 @@ import {
   CompletionHandler,
   ContextConnector,
   KernelConnector,
-  CompletionConnector,
+  CompletionConnector
 } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { ReadonlyJSONObject } from '@lumino/coreutils';
@@ -16,7 +16,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
   IEditorPosition,
   IRootPosition,
-  IVirtualPosition,
+  IVirtualPosition
 } from '../../../positioning';
 import { LSPConnection } from '../../../connection';
 import { Session } from '@jupyterlab/services';
@@ -164,7 +164,7 @@ export class LSPConnector extends DataConnector<
               virtual_cursor,
               document,
               position_in_token
-            ),
+            )
           ]).then(([kernel, lsp]) =>
             this.merge_replies(kernel, lsp, this._editor)
           );
@@ -213,7 +213,7 @@ export class LSPConnector extends DataConnector<
       {
         start,
         end,
-        text: token.value,
+        text: token.value
       },
       document.document_info,
       false,
@@ -255,7 +255,7 @@ export class LSPConnector extends DataConnector<
       matches.push(text);
       types.push({
         text: text,
-        type: match.kind ? completionItemKindNames[match.kind] : '',
+        type: match.kind ? completionItemKindNames[match.kind] : ''
       });
     }
 
@@ -273,8 +273,8 @@ export class LSPConnector extends DataConnector<
       end: token.offset + prefix.length,
       matches: matches,
       metadata: {
-        _jupyter_types_experimental: types,
-      },
+        _jupyter_types_experimental: types
+      }
     };
   }
 
@@ -362,8 +362,8 @@ export class LSPConnector extends DataConnector<
       ...lsp,
       matches: final_matches,
       metadata: {
-        _jupyter_types_experimental: merged_types,
-      },
+        _jupyter_types_experimental: merged_types
+      }
     };
   }
 

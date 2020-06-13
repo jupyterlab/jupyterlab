@@ -2,7 +2,7 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import {
   CodeMirrorLSPFeature,
   IEditOutcome,
-  IFeatureCommand,
+  IFeatureCommand
 } from '../feature';
 import { InputDialog } from '@jupyterlab/apputils';
 import { Diagnostics } from './diagnostics';
@@ -19,7 +19,7 @@ export class Rename extends CodeMirrorLSPFeature {
         connection,
         virtual_position,
         document,
-        features,
+        features
       }) => {
         let old_value = document.getTokenAt(virtual_position).string;
         const rename_feature = features.get('Rename') as Rename;
@@ -41,7 +41,7 @@ export class Rename extends CodeMirrorLSPFeature {
         const dialog_value = await InputDialog.getText({
           title: 'Rename to',
           text: old_value,
-          okLabel: 'Rename',
+          okLabel: 'Rename'
         });
 
         try {
@@ -57,8 +57,8 @@ export class Rename extends CodeMirrorLSPFeature {
         }
       },
       is_enabled: ({ connection }) => connection.isRenameSupported(),
-      label: 'Rename symbol',
-    },
+      label: 'Rename symbol'
+    }
   ];
 
   async handleRename(workspaceEdit: lsProtocol.WorkspaceEdit) {
@@ -147,7 +147,7 @@ function ux_workaround_for_rope_limitation(
           return `${message} at line ${start.line}`;
         }
       })
-    ),
+    )
   ].join(', ');
   return `Syntax error(s) prevent rename: ${dire_errors}`;
 }

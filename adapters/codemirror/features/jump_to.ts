@@ -21,8 +21,8 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
         await jump_feature.handle_jump(targets, document.document_info.uri);
       },
       is_enabled: ({ connection }) => connection.isDefinitionSupported(),
-      label: 'Jump to definition',
-    },
+      label: 'Jump to definition'
+    }
   ];
 
   get jumper() {
@@ -53,12 +53,12 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
     if ('targetUri' in location_or_link) {
       return {
         uri: decodeURI(location_or_link.targetUri),
-        range: location_or_link.targetRange,
+        range: location_or_link.targetRange
       };
     } else if ('uri' in location_or_link) {
       return {
         uri: decodeURI(location_or_link.uri),
-        range: location_or_link.range,
+        range: location_or_link.range
       };
     }
   }
@@ -88,9 +88,9 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
       this.jumper.jump({
         token: {
           offset: this.jumper.getOffset(editor_position_ce, editor_index),
-          value: '',
+          value: ''
         },
-        index: editor_index,
+        index: editor_index
       });
     } else {
       // otherwise there is no virtual document and we expect the returned position to be source position:
@@ -111,7 +111,7 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
       let jump_data = {
         editor_index: 0,
         line: source_position_ce.line,
-        column: source_position_ce.column,
+        column: source_position_ce.column
       };
 
       // assume that we got a relative path to a file within the project
@@ -120,7 +120,7 @@ export class JumpToDefinition extends CodeMirrorLSPFeature {
 
       try {
         await this.jumper.document_manager.services.contents.get(uri, {
-          content: false,
+          content: false
         });
         this.jumper.global_jump({ uri, ...jump_data }, false);
         return;

@@ -21,7 +21,7 @@ export class Signature extends CodeMirrorLSPFeature {
 
     return {
       kind: 'markdown',
-      value: signatures.join('\n\n'),
+      value: signatures.join('\n\n')
     };
   }
 

@@ -128,7 +128,7 @@ export class DocumentConnectionManager {
     );
 
     const language_server_id = this.language_server_manager.getServerId({
-      language,
+      language
     });
 
     // lazily load 1) the underlying library (1.5mb) and/or 2) a live WebSocket-
@@ -202,7 +202,7 @@ export class DocumentConnectionManager {
   ) {
     for (const [
       virtual_document_id_path,
-      a_connection,
+      a_connection
     ] of this.connections.entries()) {
       if (connection !== a_connection) {
         continue;
@@ -294,7 +294,7 @@ export namespace DocumentConnectionManager {
       : virtualDocumentsUri;
 
     const language_server_id = Private.getLanguageServerManager().getServerId({
-      language,
+      language
     });
 
     return {
@@ -306,7 +306,7 @@ export namespace DocumentConnectionManager {
         ILanguageServerManager.URL_NS,
         'ws',
         language_server_id
-      ),
+      )
     };
   }
 
@@ -360,7 +360,7 @@ namespace Private {
       const connection = new LSPConnection({
         languageId: language,
         serverUri: uris.server,
-        rootUri: uris.base,
+        rootUri: uris.base
       });
       // TODO: remove remaining unbounded users of connection.on
       connection.setMaxListeners(999);

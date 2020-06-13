@@ -66,7 +66,7 @@ export class LineMagicsMap extends ReversibleMagicsMap {
     }
     return {
       lines: substituted_lines,
-      skip_inspect: skip_inspect,
+      skip_inspect: skip_inspect
     };
   }
 

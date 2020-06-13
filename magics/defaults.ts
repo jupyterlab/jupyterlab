@@ -4,7 +4,7 @@ import {
   rpy2_args_pattern,
   RPY2_MAX_ARGS,
   rpy2_reverse_pattern,
-  rpy2_reverse_replacement,
+  rpy2_reverse_replacement
 } from './rpy2';
 
 function escape(x: string) {
@@ -43,8 +43,8 @@ export const language_specific_overrides: IOverridesRegistry = {
         replacement: 'get_ipython().getoutput("$1$2")$3',
         reverse: {
           pattern: 'get_ipython\\(\\).getoutput\\("(.*?)"\\)(\n)?',
-          replacement: '!$1$2',
-        },
+          replacement: '!$1$2'
+        }
       },
       {
         // support up to 10 arguments
@@ -58,8 +58,8 @@ export const language_specific_overrides: IOverridesRegistry = {
           replacement: (match, ...args) => {
             let r = rpy2_reverse_replacement(match, ...args);
             return '%R' + r.input + r.output + r.other + r.contents;
-          },
-        },
+          }
+        }
       },
       {
         pattern: '%(\\S+)(.*)(\n)?',
@@ -74,9 +74,9 @@ export const language_specific_overrides: IOverridesRegistry = {
           replacement: (match, name, args) => {
             args = unescape(args);
             return `%${name}${args}`;
-          },
-        },
-      },
+          }
+        }
+      }
     ],
     // if a match for expresion in the key is found at the beginning of a cell, the entire cell is replaced with the value
     cell_magics: [
@@ -93,8 +93,8 @@ export const language_specific_overrides: IOverridesRegistry = {
           replacement: (match, ...args) => {
             let r = rpy2_reverse_replacement(match, ...args);
             return '%%R' + r.input + r.output + r.other + '\n' + r.contents;
-          },
-        },
+          }
+        }
       },
       {
         pattern: '^%%(\\S+)(.*\n)([\\s\\S]*)',
@@ -114,9 +114,9 @@ export const language_specific_overrides: IOverridesRegistry = {
             content = content.replace(/\\"\\"\\"/g, '"""');
             line = unescape(line);
             return `%%${name}${line}\n${content}`;
-          },
-        },
-      },
-    ],
-  },
+          }
+        }
+      }
+    ]
+  }
 };

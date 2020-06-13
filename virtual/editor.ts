@@ -6,7 +6,7 @@ import {
   IEditorPosition,
   IRootPosition,
   ISourcePosition,
-  IVirtualPosition,
+  IVirtualPosition
 } from '../positioning';
 import { until_ready } from '../utils';
 import { Signal } from '@lumino/signaling';

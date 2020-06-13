@@ -3,7 +3,7 @@ import * as CodeMirror from 'codemirror';
 import {
   IEditorPosition,
   IRootPosition,
-  IVirtualPosition,
+  IVirtualPosition
 } from '../../positioning';
 
 export class VirtualFileEditor extends VirtualEditor {
@@ -32,7 +32,7 @@ export class VirtualFileEditor extends VirtualEditor {
         } else {
           return Reflect.get(target, prop, receiver);
         }
-      },
+      }
     };
     return new Proxy(this, handler);
   }

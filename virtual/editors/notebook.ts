@@ -8,7 +8,7 @@ import * as CodeMirror from 'codemirror';
 import {
   IEditorPosition,
   IRootPosition,
-  IVirtualPosition,
+  IVirtualPosition
 } from '../../positioning';
 
 // @ts-ignore
@@ -94,7 +94,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
         } else {
           return Reflect.get(target, prop, receiver);
         }
-      },
+      }
     });
     return this._proxy;
   }
@@ -125,7 +125,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
     }
     return {
       ...(position as CodeMirror.Position),
-      line: position.line + shift,
+      line: position.line + shift
     } as IRootPosition;
   }
 
@@ -399,7 +399,7 @@ export class VirtualEditorForNotebook extends VirtualEditor {
       if (cell_editor === cm_editor) {
         return {
           cell_id: i,
-          cell: cell,
+          cell: cell
         };
       }
     }

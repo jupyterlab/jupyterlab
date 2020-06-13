@@ -76,7 +76,7 @@ export class FreeTooltip extends Tooltip {
       node: this.node,
       offset: { horizontal: -1 * paddingLeft },
       privilege: 'below',
-      style: style,
+      style: style
     });
   }
 }

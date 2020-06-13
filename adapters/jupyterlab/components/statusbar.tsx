@@ -14,14 +14,14 @@ import {
   interactiveItem,
   Popup,
   showPopup,
-  TextItem,
+  TextItem
 } from '@jupyterlab/statusbar';
 
 import {
   LabIcon,
   refreshIcon,
   runningIcon,
-  stopIcon,
+  stopIcon
 } from '@jupyterlab/ui-components';
 import { JupyterLabWidgetAdapter } from '../jl_adapter';
 import { collect_documents, VirtualDocument } from '../../../virtual/document';
@@ -72,7 +72,7 @@ class CollapsibleList extends React.Component<
 
   handleClick = () => {
     this.setState((state) => ({
-      isCollapsed: !state.isCollapsed,
+      isCollapsed: !state.isCollapsed
     }));
   };
 
@@ -111,7 +111,7 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
     let key = -1;
     for (let [
       session,
-      documents_by_language,
+      documents_by_language
     ] of this.model.documents_by_server.entries()) {
       key += 1;
       let documents_html = new Array<any>();
@@ -272,7 +272,7 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
     this._popup = showPopup({
       body: new LSPPopup(this.model),
       anchor: this,
-      align: 'left',
+      align: 'left'
     });
   };
 }
@@ -301,14 +301,14 @@ const iconByStatus: StatusIcon = {
   waiting: refreshIcon,
   initialized: runningIcon,
   initializing: refreshIcon,
-  connecting: refreshIcon,
+  connecting: refreshIcon
 };
 
 const shortMessageByStatus: StatusMap = {
   waiting: 'Waiting...',
   initialized: 'Fully initialized',
   initializing: 'Partially initialized',
-  connecting: 'Connecting...',
+  connecting: 'Connecting...'
 };
 
 export namespace LSPStatus {
@@ -452,7 +452,7 @@ export namespace LSPStatus {
         connected_documents,
         initialized_documents,
         detected_documents: new Set([...detected_documents.values()]),
-        status,
+        status
       };
     }
 
