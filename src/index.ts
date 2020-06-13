@@ -77,18 +77,20 @@ export namespace CommandIDs {
 const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
-  requires: [IDebugger, IConsoleTracker],
+  requires: [IDebugger, IDebuggerEditorFinder, IConsoleTracker],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
+    editorFinder: IDebuggerEditorFinder,
     consoleTracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'console',
       shell: app.shell,
-      service: debug
+      service: debug,
+      editorFinder
     });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
@@ -126,18 +128,20 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  requires: [IDebugger, IEditorTracker],
+  requires: [IDebugger, IEditorTracker, IDebuggerEditorFinder],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorTracker: IEditorTracker,
+    editorFinder: IDebuggerEditorFinder,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'file',
       shell: app.shell,
-      service: debug
+      service: debug,
+      editorFinder
     });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
@@ -198,18 +202,20 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:notebooks',
   autoStart: true,
-  requires: [IDebugger, INotebookTracker],
+  requires: [IDebugger, INotebookTracker, IDebuggerEditorFinder],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
+    editorFinder: IDebuggerEditorFinder,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'notebook',
       shell: app.shell,
-      service
+      service,
+      editorFinder
     });
     service.model.disposed.connect(() => {
       handler.disposeAll(service);
