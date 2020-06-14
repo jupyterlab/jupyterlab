@@ -293,8 +293,14 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
     const workspacePattern = new RegExp(
       `^${paths.urls.workspaces}/[^?/]+/tree/([^?]+)`
     );
+    const docTreePattern = new RegExp(`^${paths.urls.doc}([^?]+)`);
+    const docWorkspacePattern = new RegExp(
+      `^${paths.urls.docWorkspaces}/[^?/]+/tree/([^?]+)`
+    );
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
+
+    console.log(paths);
 
     set.add(
       commands.addCommand(CommandIDs.tree, {
@@ -303,13 +309,31 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
             return;
           }
 
-          const treeMatch = args.path.match(treePattern);
-          const workspaceMatch = args.path.match(workspacePattern);
+          let inDocMode = false;
+          if ( JupyterFrontEnd.inDocMode(args.path, paths) ) {
+            inDocMode = true;
+          }
+          console.log('inDocMode', inDocMode);
+      
+          let treeMatch;
+          let workspaceMatch;
+          if (inDocMode) {
+            treeMatch = args.path.match(docTreePattern);
+            workspaceMatch = args.path.match(docWorkspacePattern);
+          } else {
+            treeMatch = args.path.match(treePattern);
+            workspaceMatch = args.path.match(workspacePattern);
+          }
+          console.log('treeMatch', treeMatch);
+          console.log('workspaceMatch', workspaceMatch);
+
           const match = treeMatch || workspaceMatch;
           const file = match ? decodeURI(match[1]) : '';
           const workspace = PathExt.basename(resolver.name);
           const query = URLExt.queryStringToObject(args.search ?? '');
           const browser = query['file-browser-path'] || '';
+
+          console.log(workspace);
 
           // Remove the file browser path from the query string.
           delete query['file-browser-path'];
