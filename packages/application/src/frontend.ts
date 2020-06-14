@@ -304,6 +304,22 @@ export namespace JupyterFrontEnd {
   }
 
   /**
+   * Is JupyterLab in document mode?
+   * 
+   * @param path - Full URL of JupyterLab
+   * @param paths - The current IPaths object hydrated from PageConfig.
+   */
+  export function inDocMode(path: string, paths: IPaths) {
+    const docPattern = new RegExp(`^${paths.urls.doc}`);
+    const match = path.match(docPattern);
+    if (match) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
    * The application paths dictionary token.
    */
   export const IPaths = new Token<IPaths>('@jupyterlab/application:IPaths');
@@ -319,11 +335,14 @@ export namespace JupyterFrontEnd {
       readonly base: string;
       readonly notFound?: string;
       readonly app: string;
+      readonly doc: string;
       readonly static: string;
       readonly settings: string;
       readonly themes: string;
       readonly tree: string;
+      readonly docTree: string;
       readonly workspaces: string;
+      readonly docWorkspaces: string;
       readonly hubPrefix?: string;
       readonly hubHost?: string;
       readonly hubUser?: string;
