@@ -60,7 +60,6 @@
   "devDependencies": {
     "@types/react": "~16.9.16",
     "@types/react-dom": "~16.9.4",
-    "husky": "^2.7.0",
     "lint-staged": "^8.2.1",
     "prettier": "^1.19.1",
     "rimraf": "~3.0.0",
