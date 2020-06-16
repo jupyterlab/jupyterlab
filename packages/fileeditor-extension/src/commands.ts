@@ -542,7 +542,7 @@ export namespace Commands {
   }
 
   /**
-   * Add the command
+   * Add markdown preview command
    */
   export function addMarkdownPreviewCommand(
     commands: CommandRegistry,
@@ -588,13 +588,8 @@ export namespace Commands {
           return;
         }
 
-        const editor = widget.editor;
-        const selectionObj = widget.editor.getSelection();
-
-        // Get the selected code from the editor.
-        const start = editor.getOffsetAt(selectionObj.start);
-        const end = editor.getOffsetAt(selectionObj.end);
-        const text = editor.model.value.text.substring(start, end);
+        const editor = widget.editor as CodeMirrorEditor;
+        const text = getTextSelection(editor);
 
         Clipboard.copyToSystem(text);
         editor.replaceSelection && editor.replaceSelection('');
@@ -611,11 +606,7 @@ export namespace Commands {
         }
 
         // Enable command if there is a text selection in the editor
-        const selectionObj = widget.editor.getSelection();
-        const { start, end } = selectionObj;
-        const selected = start.column !== end.column || start.line !== end.line;
-
-        return selected;
+        return isSelected(widget.editor as CodeMirrorEditor);
       },
       icon: cutIcon.bindprops({ stylesheet: 'menuItem' }),
       label: 'Cut'
@@ -638,13 +629,8 @@ export namespace Commands {
           return;
         }
 
-        const editor = widget.editor;
-        const selectionObj = widget.editor.getSelection();
-
-        // Get the selected code from the editor.
-        const start = editor.getOffsetAt(selectionObj.start);
-        const end = editor.getOffsetAt(selectionObj.end);
-        const text = editor.model.value.text.substring(start, end);
+        const editor = widget.editor as CodeMirrorEditor;
+        const text = getTextSelection(editor);
 
         Clipboard.copyToSystem(text);
       },
@@ -660,11 +646,7 @@ export namespace Commands {
         }
 
         // Enable command if there is a text selection in the editor
-        const selectionObj = widget.editor.getSelection();
-        const { start, end } = selectionObj;
-        const selected = start.column !== end.column || start.line !== end.line;
-
-        return selected;
+        return isSelected(widget.editor as CodeMirrorEditor);
       },
       icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
       label: 'Copy'
@@ -686,13 +668,15 @@ export namespace Commands {
         if (!widget) {
           return;
         }
+
         const editor: CodeEditor.IEditor = widget && widget.editor;
 
         // Get data from clipboard
         const clipboard = window.navigator.clipboard;
         const clipboardData: string = await clipboard.readText();
+
         if (clipboardData) {
-          // Paste data to editor
+          // Paste data to the editor
           editor.replaceSelection && editor.replaceSelection(clipboardData);
         }
       },
@@ -728,6 +712,29 @@ export namespace Commands {
       },
       label: 'Select All'
     });
+  }
+
+  /**
+   * Helper function to check if there is a text selection in the editor
+   */
+  function isSelected(editor: CodeMirrorEditor) {
+    const selectionObj = editor.getSelection();
+    const { start, end } = selectionObj;
+    const selected = start.column !== end.column || start.line !== end.line;
+
+    return selected;
+  }
+
+  /**
+   * Helper function to get text selection from the editor
+   */
+  function getTextSelection(editor: CodeMirrorEditor) {
+    const selectionObj = editor.getSelection();
+    const start = editor.getOffsetAt(selectionObj.start);
+    const end = editor.getOffsetAt(selectionObj.end);
+    const text = editor.model.value.text.substring(start, end);
+
+    return text;
   }
 
   /**
