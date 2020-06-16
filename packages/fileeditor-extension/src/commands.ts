@@ -40,6 +40,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   markdownIcon,
   textEditorIcon,
+  undoIcon,
   cutIcon,
   copyIcon,
   pasteIcon
@@ -80,6 +81,8 @@ export namespace CommandIDs {
   export const runAllCode = 'fileeditor:run-all';
 
   export const markdownPreview = 'fileeditor:markdown-preview';
+
+  export const undo = 'fileeditor:undo';
 
   export const cut = 'fileeditor:cut';
 
@@ -212,6 +215,8 @@ export namespace Commands {
 
     // Add a command for creating a new Markdown file.
     addCreateNewMarkdownCommand(commands, browserFactory);
+
+    addUndoCommand(commands, tracker, isEnabled);
 
     addCutCommand(commands, tracker, isEnabled);
 
@@ -569,6 +574,42 @@ export namespace Commands {
         );
       },
       label: 'Show Markdown Preview'
+    });
+  }
+
+  /**
+   * Add undo command
+   */
+  export function addUndoCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.undo, {
+      execute: () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        widget.editor.undo();
+      },
+      isEnabled: () => {
+        if (!isEnabled()) {
+          return false;
+        }
+
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return false;
+        }
+        // TODO: Enable based if any undo events are stored
+        return true;
+      },
+      icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: 'Undo'
     });
   }
 
@@ -1113,6 +1154,7 @@ export namespace Commands {
   export function addContextMenuItems(app: JupyterFrontEnd) {
     addCreateConsoleToContextMenu(app);
     addMarkdownPreviewToContextMenu(app);
+    addUndoCommandToContextMenu(app);
     addCutCommandToContextMenu(app);
     addCopyCommandToContextMenu(app);
     addPasteCommandToContextMenu(app);
@@ -1136,6 +1178,17 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.markdownPreview,
       selector: '.jp-FileEditor'
+    });
+  }
+
+  /**
+   * Add a Undo item to the File Editor context menu
+   */
+  export function addUndoCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.undo,
+      selector: '.jp-FileEditor',
+      rank: 0
     });
   }
 
