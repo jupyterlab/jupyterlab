@@ -115,7 +115,7 @@ export namespace ITerminal {
     /**
      * Treat option as meta key on macOS.
      */
-    macOptionIsMeta: boolean;
+    macOptionIsMeta?: boolean;
   }
 
   /**
