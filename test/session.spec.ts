@@ -314,4 +314,26 @@ describe('protocol', () => {
       expect(sourceCode).toEqual(code);
     });
   });
+
+  describe('#evaluate', () => {
+    it('should evaluate the code sent to the kernel', async () => {
+      const stackFramesReply = await debugSession.sendRequest('stackTrace', {
+        threadId
+      });
+      const frameId = stackFramesReply.body.stackFrames[0].id;
+      const reply = await debugSession.sendRequest('evaluate', {
+        frameId,
+        context: 'repl',
+        expression: 'k = 123',
+        format: {}
+      });
+      expect(reply.success).toBe(true);
+
+      const variables = await getVariables();
+      const k = find(variables, variable => variable.name === 'k');
+      expect(k).toBeDefined();
+      expect(k.type).toEqual('int');
+      expect(k.value).toEqual('123');
+    });
+  });
 });
