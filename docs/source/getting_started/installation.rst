@@ -170,7 +170,7 @@ These variables are automatically used by many open-source tools (like ``conda``
 
     # For Windows
     set HTTP_PROXY=http://USER:PWD@proxy.company.com:PORT
-    set HTTPS_PROXY=https://USER:PWD@proxy.comp any.com:PORT
+    set HTTPS_PROXY=https://USER:PWD@proxy.company.com:PORT
 
     # For Linux / MacOS
     export HTTP_PROXY=http://USER:PWD@proxy.company.com:PORT
