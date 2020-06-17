@@ -1230,7 +1230,7 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.undo,
       selector: '.jp-FileEditor',
-      rank: 0
+      rank: 1
     });
   }
 
@@ -1241,7 +1241,7 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.redo,
       selector: '.jp-FileEditor',
-      rank: 0
+      rank: 2
     });
   }
 
@@ -1252,7 +1252,7 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.cut,
       selector: '.jp-FileEditor',
-      rank: 1
+      rank: 3
     });
   }
 
@@ -1263,7 +1263,7 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.copy,
       selector: '.jp-FileEditor',
-      rank: 2
+      rank: 4
     });
   }
 
@@ -1274,7 +1274,7 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.paste,
       selector: '.jp-FileEditor',
-      rank: 3
+      rank: 5
     });
   }
 
@@ -1285,7 +1285,7 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.selectAll,
       selector: '.jp-FileEditor',
-      rank: 4
+      rank: 6
     });
   }
 }
