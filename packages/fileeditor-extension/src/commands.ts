@@ -38,12 +38,13 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import {
-  markdownIcon,
-  textEditorIcon,
-  undoIcon,
   cutIcon,
   copyIcon,
-  pasteIcon
+  markdownIcon,
+  pasteIcon,
+  redoIcon,
+  textEditorIcon,
+  undoIcon
 } from '@jupyterlab/ui-components';
 
 import { CommandRegistry } from '@lumino/commands';
@@ -83,6 +84,8 @@ export namespace CommandIDs {
   export const markdownPreview = 'fileeditor:markdown-preview';
 
   export const undo = 'fileeditor:undo';
+
+  export const redo = 'fileeditor:redo';
 
   export const cut = 'fileeditor:cut';
 
@@ -217,6 +220,8 @@ export namespace Commands {
     addCreateNewMarkdownCommand(commands, browserFactory);
 
     addUndoCommand(commands, tracker, isEnabled);
+
+    addRedoCommand(commands, tracker, isEnabled);
 
     addCutCommand(commands, tracker, isEnabled);
 
@@ -610,6 +615,42 @@ export namespace Commands {
       },
       icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
       label: 'Undo'
+    });
+  }
+
+  /**
+   * Add redo command
+   */
+  export function addRedoCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.redo, {
+      execute: () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        widget.editor.redo();
+      },
+      isEnabled: () => {
+        if (!isEnabled()) {
+          return false;
+        }
+
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return false;
+        }
+        // TODO: Enable based if any undo events are stored
+        return true;
+      },
+      icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: 'Redo'
     });
   }
 
@@ -1155,6 +1196,7 @@ export namespace Commands {
     addCreateConsoleToContextMenu(app);
     addMarkdownPreviewToContextMenu(app);
     addUndoCommandToContextMenu(app);
+    addRedoCommandToContextMenu(app);
     addCutCommandToContextMenu(app);
     addCopyCommandToContextMenu(app);
     addPasteCommandToContextMenu(app);
@@ -1187,6 +1229,17 @@ export namespace Commands {
   export function addUndoCommandToContextMenu(app: JupyterFrontEnd) {
     app.contextMenu.addItem({
       command: CommandIDs.undo,
+      selector: '.jp-FileEditor',
+      rank: 0
+    });
+  }
+
+  /**
+   * Add a Redo item to the File Editor context menu
+   */
+  export function addRedoCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.redo,
       selector: '.jp-FileEditor',
       rank: 0
     });
