@@ -221,13 +221,15 @@ export class DebuggerHandler {
         case 'console':
           this._handlers[widget.id] = new ConsoleHandler({
             debuggerService: this._service,
-            widget: widget as ConsolePanel
+            widget: widget as ConsolePanel,
+            editorFinder: this._editorFinder
           });
           break;
         case 'file':
           this._handlers[widget.id] = new FileHandler({
             debuggerService: this._service,
-            widget: widget as DocumentWidget<FileEditor>
+            widget: widget as DocumentWidget<FileEditor>,
+            editorFinder: this._editorFinder
           });
           break;
         default:
@@ -396,7 +398,7 @@ export namespace DebuggerHandler {
     /**
      * The editor finder.
      */
-    editorFinder?: IDebuggerEditorFinder;
+    editorFinder: IDebuggerEditorFinder;
   }
 
   /**

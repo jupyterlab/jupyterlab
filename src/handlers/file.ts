@@ -13,6 +13,8 @@ import { EditorHandler } from '../handlers/editor';
 
 import { IDebugger } from '../tokens';
 
+import { IDebuggerEditorFinder } from '../editor-finder';
+
 /**
  * A handler for files.
  */
@@ -25,10 +27,12 @@ export class FileHandler implements IDisposable {
   constructor(options: FileHandler.IOptions) {
     this._debuggerService = options.debuggerService;
     this._fileEditor = options.widget.content;
+    this._editorFinder = options.editorFinder;
 
     this._editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,
-      editor: this._fileEditor.editor
+      editor: this._fileEditor.editor,
+      editorFinder: this._editorFinder
     });
   }
 
@@ -50,6 +54,7 @@ export class FileHandler implements IDisposable {
   }
 
   private _fileEditor: FileEditor;
+  private _editorFinder: IDebuggerEditorFinder;
   private _debuggerService: IDebugger;
   private _editorHandler: EditorHandler;
 }
@@ -71,5 +76,10 @@ export namespace FileHandler {
      * The widget to handle.
      */
     widget: DocumentWidget<FileEditor>;
+
+    /**
+     * The editor finder instance.
+     */
+    editorFinder: IDebuggerEditorFinder;
   }
 }
