@@ -1586,14 +1586,6 @@ namespace Private {
             });
             break;
           }
-          if (sessionContext.isRestarting) {
-            void showDialog({
-              title: 'Kernel Restarting',
-              body: `The kernel for ${sessionContext.session?.path} appears to be restarting. You can not run any cell for now.`,
-              buttons: [Dialog.okButton()]
-            });
-            break;
-          }
           const deletedCells = notebook.model?.deletedCells ?? [];
           return CodeCell.execute(cell as CodeCell, sessionContext, {
             deletedCells,
