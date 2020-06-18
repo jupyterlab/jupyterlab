@@ -691,6 +691,6 @@ export namespace DebuggerService {
     /**
      * The editor finder instance.
      */
-    editorFinder: IDebuggerEditorFinder;
+    editorFinder?: IDebuggerEditorFinder;
   }
 }
