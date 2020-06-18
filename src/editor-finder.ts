@@ -25,7 +25,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { IDebugger } from './tokens';
+import { murmur2 } from 'murmurhash-js';
 
 /**
  * A class to find instances of code editors across notebook, console and files widgets
@@ -38,7 +38,6 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
    */
   constructor(options: EditorFinder.IOptions) {
     this._shell = options.shell;
-    this._service = options.service;
     this._notebookTracker = options.notebookTracker;
     this._consoleTracker = options.consoleTracker;
     this._editorTracker = options.editorTracker;
@@ -63,6 +62,42 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
     }
     this.isDisposed = true;
     Signal.clearData(this);
+  }
+
+  /**
+   * Computes an id based on the given code.
+   *
+   * @param code The source code.
+   */
+  public getCodeId(code: string): string {
+    return this._tmpFilePrefix + this._hashMethod(code) + this._tmpFileSuffix;
+  }
+
+  /**
+   * Set the hash parameters for the current session.
+   *
+   * @param method The hash method.
+   * @param seed The seed for the hash method.
+   */
+  public setHashParameters(method: string, seed: number): void {
+    if (method === 'Murmur2') {
+      this._hashMethod = (code: string): string => {
+        return murmur2(code, seed).toString();
+      };
+    } else {
+      throw new Error('hash method not supported ' + method);
+    }
+  }
+
+  /**
+   * Set the parameters used for the temporary files (e.g. cells).
+   *
+   * @param prefix The prefix used for the temporary files.
+   * @param suffix The suffix used for the temporary files.
+   */
+  public setTmpFileParameters(prefix: string, suffix: string): void {
+    this._tmpFilePrefix = prefix;
+    this._tmpFileSuffix = suffix;
   }
 
   /**
@@ -119,7 +154,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
         const code = cell.model.value.text;
-        const cellId = this._service.getCodeId(code);
+        const cellId = this.getCodeId(code);
         if (source !== cellId) {
           return;
         }
@@ -161,7 +196,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       const cells = consoleWidget.console.cells;
       each(cells, cell => {
         const code = cell.model.value.text;
-        const codeId = this._service.getCodeId(code);
+        const codeId = this.getCodeId(code);
         if (source !== codeId) {
           return;
         }
@@ -203,7 +238,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._service.getCodeId(code);
+      const codeId = this.getCodeId(code);
       if (source !== codeId) {
         return;
       }
@@ -235,7 +270,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._service.getCodeId(code);
+      const codeId = this.getCodeId(code);
       if (widget.title.caption !== source && source !== codeId) {
         return;
       }
@@ -246,7 +281,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
     });
     return editors;
   }
-  private _service: IDebugger;
+  // private _service: IDebugger;
   private _shell: JupyterFrontEnd.IShell;
   private _readOnlyEditorTracker: WidgetTracker<
     MainAreaWidget<CodeEditorWrapper>
@@ -254,6 +289,10 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   private _notebookTracker: INotebookTracker | null;
   private _consoleTracker: IConsoleTracker | null;
   private _editorTracker: IEditorTracker | null;
+
+  private _hashMethod: (code: string) => string;
+  private _tmpFilePrefix: string;
+  private _tmpFileSuffix: string;
 }
 /**
  * A namespace for editor finder statics.
@@ -284,11 +323,6 @@ export namespace EditorFinder {
     notebookTracker?: INotebookTracker;
 
     /**
-     * The debugger service.
-     */
-    service: IDebugger;
-
-    /**
      * The application shell.
      */
     shell: JupyterFrontEnd.IShell;
@@ -310,4 +344,8 @@ export interface IDebuggerEditorFinder {
     source: string,
     focus: boolean
   ): IIterator<CodeEditor.IEditor>;
+
+  setHashParameters(method: string, seed: number): void;
+  setTmpFileParameters(prefix: string, suffix: string): void;
+  getCodeId(code: string): string;
 }

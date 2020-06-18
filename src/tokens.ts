@@ -5,8 +5,6 @@ import { KernelMessage, Session } from '@jupyterlab/services';
 
 import { Token } from '@lumino/coreutils';
 
-import { IDebuggerEditorFinder } from './editor-finder';
-
 import { IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal } from '@lumino/signaling';
@@ -87,12 +85,8 @@ export interface IDebugger {
    *
    * @param autoStart - when true, starts the debugger
    * if it has not been started yet.
-   * @param editorFinder - The editor finder instance
    */
-  restoreState(
-    autoStart: boolean,
-    editorFinder?: IDebuggerEditorFinder
-  ): Promise<void>;
+  restoreState(autoStart: boolean): Promise<void>;
 
   /**
    * Continues the execution of the current thread.
@@ -120,13 +114,11 @@ export interface IDebugger {
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
    * @param path - Optional path to the file where to set the breakpoints.
-   * @param editorFinder - The editor finder object.
    */
   updateBreakpoints(
     code: string,
     breakpoints: IDebugger.IBreakpoint[],
-    path?: string,
-    editorFinder?: IDebuggerEditorFinder
+    path?: string
   ): Promise<void>;
 
   /**

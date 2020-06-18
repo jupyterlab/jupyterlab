@@ -31,8 +31,6 @@ import { DebugSession } from './session';
 
 import { IDebugger } from './tokens';
 
-import { IDebuggerEditorFinder } from './editor-finder';
-
 import { ConsoleHandler } from './handlers/console';
 
 import { FileHandler } from './handlers/file';
@@ -83,7 +81,6 @@ export class DebuggerHandler {
     this._type = options.type;
     this._shell = options.shell;
     this._service = options.service;
-    this._editorFinder = options.editorFinder;
   }
 
   /**
@@ -214,22 +211,19 @@ export class DebuggerHandler {
         case 'notebook':
           this._handlers[widget.id] = new NotebookHandler({
             debuggerService: this._service,
-            widget: widget as NotebookPanel,
-            editorFinder: this._editorFinder
+            widget: widget as NotebookPanel
           });
           break;
         case 'console':
           this._handlers[widget.id] = new ConsoleHandler({
             debuggerService: this._service,
-            widget: widget as ConsolePanel,
-            editorFinder: this._editorFinder
+            widget: widget as ConsolePanel
           });
           break;
         case 'file':
           this._handlers[widget.id] = new FileHandler({
             debuggerService: this._service,
-            widget: widget as DocumentWidget<FileEditor>,
-            editorFinder: this._editorFinder
+            widget: widget as DocumentWidget<FileEditor>
           });
           break;
         default:
@@ -293,7 +287,7 @@ export class DebuggerHandler {
       } else {
         this._service.session.connection = connection;
         this._previousConnection = connection;
-        await this._service.restoreState(true, this._editorFinder);
+        await this._service.restoreState(true);
         await createHandler();
       }
     };
@@ -314,14 +308,14 @@ export class DebuggerHandler {
         : null;
       this._service.session.connection = connection;
     }
-    await this._service.restoreState(false, this._editorFinder);
+    await this._service.restoreState(false);
     addToolbarButton();
 
     // check the state of the debug session
     if (!this._service.isStarted) {
       removeHandlers();
       this._service.session.connection = this._previousConnection ?? connection;
-      await this._service.restoreState(false, this._editorFinder);
+      await this._service.restoreState(false);
       return;
     }
 
@@ -337,7 +331,6 @@ export class DebuggerHandler {
   private _type: DebuggerHandler.SessionType;
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
-  private _editorFinder: IDebuggerEditorFinder;
   private _previousConnection: Session.ISessionConnection;
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
@@ -394,11 +387,6 @@ export namespace DebuggerHandler {
      * The debugger service.
      */
     service: IDebugger;
-
-    /**
-     * The editor finder.
-     */
-    editorFinder: IDebuggerEditorFinder;
   }
 
   /**

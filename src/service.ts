@@ -9,8 +9,6 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { murmur2 } from 'murmurhash-js';
-
 import { DebugProtocol } from 'vscode-debugprotocol';
 
 import { CallstackModel } from './callstack/model';
@@ -41,6 +39,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._session = null;
     this._specsManager = options.specsManager;
     this._model = new DebuggerModel();
+    this._editorFinder = options.editorFinder;
   }
 
   /**
@@ -164,7 +163,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code The source code.
    */
   getCodeId(code: string): string {
-    return this._tmpFilePrefix + this._hashMethod(code) + this._tmpFileSuffix;
+    return this._editorFinder.getCodeId(code);
   }
 
   /**
@@ -215,12 +214,8 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Restore the state of a debug session.
    *
    * @param autoStart - If true, starts the debugger if it has not been started.
-   * @param editorFinder - The editor finder instance.
    */
-  async restoreState(
-    autoStart: boolean,
-    editorFinder?: IDebuggerEditorFinder
-  ): Promise<void> {
+  async restoreState(autoStart: boolean): Promise<void> {
     if (!this.model || !this.session) {
       return;
     }
@@ -230,8 +225,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
     const stoppedThreads = new Set(reply.body.stoppedThreads);
 
-    this._setHashParameters(hashMethod, hashSeed);
-    this._setTmpFileParameters(tmpFilePrefix, tmpFileSuffix);
+    this._editorFinder.setHashParameters(hashMethod, hashSeed);
+    this._editorFinder.setTmpFileParameters(tmpFilePrefix, tmpFileSuffix);
+
     this._model.stoppedThreads = stoppedThreads;
 
     if (!this.isStarted && (autoStart || stoppedThreads.size !== 0)) {
@@ -242,8 +238,8 @@ export class DebuggerService implements IDebugger, IDisposable {
       this._model.title = this.isStarted ? this.session?.connection?.name : '-';
     }
 
-    if (editorFinder) {
-      const filtered = this._filterBreakpoints(breakpoints, editorFinder);
+    if (this._editorFinder) {
+      const filtered = this._filterBreakpoints(breakpoints, this._editorFinder);
       this._model.breakpoints.restoreBreakpoints(filtered);
     } else {
       this._model.breakpoints.restoreBreakpoints(breakpoints);
@@ -316,13 +312,11 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
    * @param path - Optional path to the file where to set the breakpoints.
-   * @param editorFinder - The editor finder object
    */
   async updateBreakpoints(
     code: string,
     breakpoints: IDebugger.IBreakpoint[],
-    path?: string,
-    editorFinder?: IDebuggerEditorFinder
+    path?: string
   ): Promise<void> {
     if (!this.session.isStarted) {
       return;
@@ -337,8 +331,11 @@ export class DebuggerService implements IDebugger, IDisposable {
     const remoteBreakpoints = this._mapBreakpoints(state.body.breakpoints);
 
     // Set the local copy of breakpoints to reflect only editors that exist.
-    if (editorFinder) {
-      const filtered = this._filterBreakpoints(remoteBreakpoints, editorFinder);
+    if (this._editorFinder) {
+      const filtered = this._filterBreakpoints(
+        remoteBreakpoints,
+        this._editorFinder
+      );
       this._model.breakpoints.restoreBreakpoints(filtered);
     } else {
       this._model.breakpoints.restoreBreakpoints(remoteBreakpoints);
@@ -667,33 +664,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     return 1;
   }
 
-  /**
-   * Set the hash parameters for the current session.
-   *
-   * @param method The hash method.
-   * @param seed The seed for the hash method.
-   */
-  private _setHashParameters(method: string, seed: number): void {
-    if (method === 'Murmur2') {
-      this._hashMethod = (code: string): string => {
-        return murmur2(code, seed).toString();
-      };
-    } else {
-      throw new Error('hash method not supported ' + method);
-    }
-  }
-
-  /**
-   * Set the parameters used for the temporary files (e.g. cells).
-   *
-   * @param prefix The prefix used for the temporary files.
-   * @param suffix The suffix used for the temporary files.
-   */
-  private _setTmpFileParameters(prefix: string, suffix: string): void {
-    this._tmpFilePrefix = prefix;
-    this._tmpFileSuffix = suffix;
-  }
-
   private _isDisposed = false;
   private _session: IDebugger.ISession;
   private _model: DebuggerModel;
@@ -702,10 +672,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
 
   private _specsManager: KernelSpec.IManager;
-
-  private _hashMethod: (code: string) => string;
-  private _tmpFilePrefix: string;
-  private _tmpFileSuffix: string;
+  private _editorFinder: IDebuggerEditorFinder;
 }
 
 /**
@@ -720,5 +687,10 @@ export namespace DebuggerService {
      * The kernel specs manager.
      */
     specsManager: KernelSpec.IManager;
+
+    /**
+     * The editor finder instance.
+     */
+    editorFinder: IDebuggerEditorFinder;
   }
 }

@@ -89,8 +89,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
     const handler = new DebuggerHandler({
       type: 'console',
       shell: app.shell,
-      service: debug,
-      editorFinder
+      service: debug
     });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
@@ -128,20 +127,18 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  requires: [IDebugger, IEditorTracker, IDebuggerEditorFinder],
+  requires: [IDebugger, IEditorTracker],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorTracker: IEditorTracker,
-    editorFinder: IDebuggerEditorFinder,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'file',
       shell: app.shell,
-      service: debug,
-      editorFinder
+      service: debug
     });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
@@ -202,20 +199,18 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:notebooks',
   autoStart: true,
-  requires: [IDebugger, INotebookTracker, IDebuggerEditorFinder],
+  requires: [IDebugger, INotebookTracker],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
-    editorFinder: IDebuggerEditorFinder,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'notebook',
       shell: app.shell,
-      service,
-      editorFinder
+      service
     });
     service.model.disposed.connect(() => {
       handler.disposeAll(service);
@@ -277,8 +272,12 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:service',
   autoStart: true,
   provides: IDebugger,
-  activate: (app: JupyterFrontEnd) =>
-    new DebuggerService({ specsManager: app.serviceManager.kernelspecs })
+  requires: [IDebuggerEditorFinder],
+  activate: (app: JupyterFrontEnd, editorFinder: IDebuggerEditorFinder) =>
+    new DebuggerService({
+      specsManager: app.serviceManager.kernelspecs,
+      editorFinder
+    })
 };
 
 /**
@@ -288,11 +287,10 @@ const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
   id: '@jupyterlab/debugger:editor-finder',
   autoStart: true,
   provides: IDebuggerEditorFinder,
-  requires: [IDebugger, IEditorServices],
+  requires: [IEditorServices],
   optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
   activate: (
     app: JupyterFrontEnd,
-    service: IDebugger,
     editorServices: IEditorServices,
     notebookTracker: INotebookTracker | null,
     consoleTracker: IConsoleTracker | null,
@@ -300,7 +298,6 @@ const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
   ): IDebuggerEditorFinder => {
     return new EditorFinder({
       shell: app.shell,
-      service,
       editorServices,
       notebookTracker,
       consoleTracker,

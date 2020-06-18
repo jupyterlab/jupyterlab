@@ -17,8 +17,6 @@ import { EditorHandler } from '../handlers/editor';
 
 import { IDebugger } from '../tokens';
 
-import { IDebuggerEditorFinder } from '../editor-finder';
-
 /**
  * A handler for consoles.
  */
@@ -31,7 +29,6 @@ export class ConsoleHandler implements IDisposable {
   constructor(options: ConsoleHandler.IOptions) {
     this._debuggerService = options.debuggerService;
     this._consolePanel = options.widget;
-    this._editorFinder = options.editorFinder;
     this._cellMap = new ObservableMap<EditorHandler>();
 
     const codeConsole = this._consolePanel.console;
@@ -79,8 +76,7 @@ export class ConsoleHandler implements IDisposable {
     const codeCell = cell as CodeCell;
     const editorHandler = new EditorHandler({
       debuggerService: this._debuggerService,
-      editor: codeCell.editor,
-      editorFinder: this._editorFinder
+      editor: codeCell.editor
     });
     codeCell.disposed.connect(() => {
       this._cellMap.delete(modelId);
@@ -91,7 +87,6 @@ export class ConsoleHandler implements IDisposable {
 
   private _consolePanel: ConsolePanel;
   private _debuggerService: IDebugger;
-  private _editorFinder: IDebuggerEditorFinder;
   private _cellMap: IObservableMap<EditorHandler> = null;
 }
 
@@ -112,10 +107,5 @@ export namespace ConsoleHandler {
      * The widget to handle.
      */
     widget: ConsolePanel;
-
-    /**
-     * The editor finder instance.
-     */
-    editorFinder: IDebuggerEditorFinder;
   }
 }
