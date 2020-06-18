@@ -163,7 +163,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code The source code.
    */
   getCodeId(code: string): string {
-    return this._editorFinder.getCodeId(code) ?? '';
+    return this._editorFinder?.getCodeId(code) ?? '';
   }
 
   /**
@@ -674,7 +674,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
 
   private _specsManager: KernelSpec.IManager;
-  private _editorFinder: IDebuggerEditorFinder;
+  private _editorFinder: IDebuggerEditorFinder | null;
 }
 
 /**
