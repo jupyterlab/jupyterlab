@@ -163,7 +163,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code The source code.
    */
   getCodeId(code: string): string {
-    return this._editorFinder.getCodeId(code);
+    return this._editorFinder.getCodeId(code) ?? '';
   }
 
   /**
@@ -225,8 +225,10 @@ export class DebuggerService implements IDebugger, IDisposable {
     const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
     const stoppedThreads = new Set(reply.body.stoppedThreads);
 
-    this._editorFinder.setHashParameters(hashMethod, hashSeed);
-    this._editorFinder.setTmpFileParameters(tmpFilePrefix, tmpFileSuffix);
+    if (this._editorFinder) {
+      this._editorFinder.setHashParameters(hashMethod, hashSeed);
+      this._editorFinder.setTmpFileParameters(tmpFilePrefix, tmpFileSuffix);
+    }
 
     this._model.stoppedThreads = stoppedThreads;
 
