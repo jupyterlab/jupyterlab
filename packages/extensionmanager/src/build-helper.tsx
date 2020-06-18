@@ -34,14 +34,14 @@ export function doBuild(
           buttons: [
             Dialog.cancelButton({
               label: 'Reload Without Saving',
-              reload: true
+              actions: ['reload']
             }),
             Dialog.okButton({ label: 'Save and Reload' })
           ],
           hasClose: true
         });
       })
-      .then(({ button: { accept, reload } }) => {
+      .then(({ button: { accept, actions } }) => {
         if (accept) {
           void app.commands
             .execute('docmanager:save')
@@ -53,7 +53,7 @@ export function doBuild(
                 message: <pre>{err.message}</pre>
               });
             });
-        } else if (reload) {
+        } else if (actions.includes('reload')) {
           location.reload();
         }
       })

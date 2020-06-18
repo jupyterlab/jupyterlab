@@ -9,7 +9,7 @@ import { Message, MessageLoop } from '@lumino/messaging';
 
 import { PanelLayout, Panel, Widget } from '@lumino/widgets';
 
-import { closeIcon } from '@jupyterlab/ui-components';
+import { closeIcon, Button, LabIcon } from '@jupyterlab/ui-components';
 
 import * as React from 'react';
 
@@ -18,7 +18,6 @@ import { Styling } from './styling';
 import { ReactWidget } from './vdom';
 
 import { WidgetTracker } from './widgettracker';
-import { ToolbarButtonComponent } from './toolbar';
 
 /**
  * Create and show a dialog.
@@ -433,9 +432,9 @@ export namespace Dialog {
     accept: boolean;
 
     /**
-     * The dialog action to perform a reload when the button is clicked.
+     * The additional dialog actions to perform when the button is clicked.
      */
-    reload: boolean;
+    actions: Array<string>;
 
     /**
      * The button display type.
@@ -565,7 +564,6 @@ export namespace Dialog {
    */
   export function createButton(value: Partial<IButton>): Readonly<IButton> {
     value.accept = value.accept !== false;
-    value.reload = Boolean(value.reload);
     const defaultLabel = value.accept ? 'OK' : 'Cancel';
     return {
       label: value.label || defaultLabel,
@@ -574,7 +572,7 @@ export namespace Dialog {
       caption: value.caption || '',
       className: value.className || '',
       accept: value.accept,
-      reload: value.reload,
+      actions: value.actions || [],
       displayType: value.displayType || 'default'
     };
   }
@@ -639,16 +637,41 @@ export namespace Dialog {
       options: Partial<Dialog.IOptions<T>> = {}
     ): Widget {
       let header: Widget;
+
+      const handleMouseDown = (event: React.MouseEvent) => {
+        // Fire action only when left button is pressed.
+        if (event.button === 0) {
+          event.preventDefault();
+          reject();
+        }
+      };
+
+      const handleKeyDown = (event: React.KeyboardEvent) => {
+        const { key } = event;
+        if (key === 'Enter' || key === ' ') {
+          reject();
+        }
+      };
+
       if (typeof title === 'string') {
         header = ReactWidget.create(
           <>
             {title}
             {options.hasClose && (
-              <ToolbarButtonComponent
-                icon={closeIcon}
-                onClick={reject}
-                tooltip="Cancel"
-              />
+              <Button
+                className="jp-Dialog-close-button"
+                onMouseDown={handleMouseDown}
+                onKeyDown={handleKeyDown}
+                title="Cancel"
+                minimal
+              >
+                <LabIcon.resolveReact
+                  icon={closeIcon}
+                  iconClass="jp-Icon"
+                  className="jp-ToolbarButtonComponent-icon"
+                  tag="span"
+                />
+              </Button>
             )}
           </>
         );

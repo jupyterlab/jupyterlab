@@ -342,7 +342,7 @@ describe('@jupyterlab/apputils', () => {
         className: 'baz',
         accept: false,
         displayType: 'warn',
-        reload: false
+        actions: []
       };
 
       describe('#createHeader()', () => {
@@ -539,14 +539,14 @@ describe('@jupyterlab/apputils', () => {
 
       await waitForDialog();
 
-      expect(node.querySelector('.jp-ToolbarButtonComponent')).toBeFalsy();
+      expect(node.querySelector('.jp-Dialog-close-button')).toBeFalsy();
 
       await acceptDialog();
 
       const result = await prompt;
 
       expect(result.button.accept).toBe(false);
-      expect(result.button.reload).toBe(false);
+      expect(result.button.actions).toEqual([]);
       expect(result.value).toBe(null);
 
       document.body.removeChild(node);
@@ -568,14 +568,14 @@ describe('@jupyterlab/apputils', () => {
 
       await waitForDialog();
 
-      expect(node.querySelector('.jp-ToolbarButtonComponent')).toBeTruthy();
+      expect(node.querySelector('.jp-Dialog-close-button')).toBeTruthy();
 
       await acceptDialog();
 
       const result = await prompt;
 
       expect(result.button.accept).toBe(false);
-      expect(result.button.reload).toBe(false);
+      expect(result.button.actions).toEqual([]);
       expect(result.value).toBe(null);
 
       document.body.removeChild(node);
@@ -591,7 +591,10 @@ describe('@jupyterlab/apputils', () => {
         body: 'Hello',
         host: node,
         defaultButton: 0,
-        buttons: [Dialog.cancelButton({ reload: true }), Dialog.okButton()],
+        buttons: [
+          Dialog.cancelButton({ actions: ['reload'] }),
+          Dialog.okButton()
+        ],
         hasClose: true
       });
 
@@ -600,7 +603,7 @@ describe('@jupyterlab/apputils', () => {
       const result = await prompt;
 
       expect(result.button.accept).toBe(false);
-      expect(result.button.reload).toBe(true);
+      expect(result.button.actions).toEqual(['reload']);
       expect(result.value).toBe(null);
       document.body.removeChild(node);
     });
