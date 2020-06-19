@@ -54,6 +54,8 @@ import { DebuggerModel } from './model';
 
 import { VariablesBodyGrid } from './variables/grid';
 
+import { IDebuggerParametersMixer, ParametersMixer } from './parameters-mixer';
+
 /**
  * The command IDs used by the debugger plugin.
  */
@@ -272,12 +274,26 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:service',
   autoStart: true,
   provides: IDebugger,
-  requires: [IDebuggerEditorFinder],
-  activate: (app: JupyterFrontEnd, editorFinder: IDebuggerEditorFinder) =>
+  requires: [IDebuggerEditorFinder, IDebuggerParametersMixer],
+  activate: (
+    app: JupyterFrontEnd,
+    editorFinder: IDebuggerEditorFinder,
+    parametersMixer: IDebuggerParametersMixer
+  ) =>
     new DebuggerService({
       specsManager: app.serviceManager.kernelspecs,
-      editorFinder
+      editorFinder,
+      parametersMixer
     })
+};
+
+/**
+ * A plugin that provides a parameters mixer with hash method.
+ */
+const mixer: JupyterFrontEndPlugin<IDebuggerParametersMixer> = {
+  id: '@jupyterlab/debugger:parameters-mixer',
+  autoStart: true,
+  activate: () => new ParametersMixer()
 };
 
 /**
@@ -287,11 +303,12 @@ const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
   id: '@jupyterlab/debugger:editor-finder',
   autoStart: true,
   provides: IDebuggerEditorFinder,
-  requires: [IEditorServices],
+  requires: [IEditorServices, IDebuggerParametersMixer],
   optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
   activate: (
     app: JupyterFrontEnd,
     editorServices: IEditorServices,
+    parametersMixer: IDebuggerParametersMixer,
     notebookTracker: INotebookTracker | null,
     consoleTracker: IConsoleTracker | null,
     editorTracker: IEditorTracker | null
@@ -299,6 +316,7 @@ const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
     return new EditorFinder({
       shell: app.shell,
       editorServices,
+      parametersMixer,
       notebookTracker,
       consoleTracker,
       editorTracker
@@ -559,7 +577,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tracker,
   variables,
   main,
-  finder
+  finder,
+  mixer
 ];
 
 export default plugins;

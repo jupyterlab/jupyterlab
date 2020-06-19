@@ -21,6 +21,11 @@ import { IDebugger } from '../src/tokens';
 
 import { KERNELSPECS, handleRequest } from './utils';
 
+import {
+  IDebuggerParametersMixer,
+  ParametersMixer
+} from '../src/parameters-mixer';
+
 /**
  * A Test class to mock a KernelSpecManager
  */
@@ -54,6 +59,7 @@ describe('Debugging support', () => {
 
   let specsManager: TestKernelSpecManager;
   let service: DebuggerService;
+  let parametersMixer: IDebuggerParametersMixer;
   let xpython: Session.ISessionConnection;
   let ipykernel: Session.ISessionConnection;
 
@@ -75,7 +81,8 @@ describe('Debugging support', () => {
     specsManager = new TestKernelSpecManager({ standby: 'never' });
     specsManager.intercept = specs;
     await specsManager.refreshSpecs();
-    service = new DebuggerService({ specsManager });
+    parametersMixer = new ParametersMixer();
+    service = new DebuggerService({ specsManager, parametersMixer });
   });
 
   afterAll(async () => {
@@ -101,6 +108,7 @@ describe('DebuggerService', () => {
   const specsManager = new KernelSpecManager();
   let connection: Session.ISessionConnection;
   let model: DebuggerModel;
+  let parametersMixer: IDebuggerParametersMixer;
   let session: IDebugger.ISession;
   let service: IDebugger;
 
@@ -113,7 +121,8 @@ describe('DebuggerService', () => {
     await connection.changeKernel({ name: 'xpython' });
     session = new DebugSession({ connection });
     model = new DebuggerModel();
-    service = new DebuggerService({ specsManager });
+    parametersMixer = new ParametersMixer();
+    service = new DebuggerService({ specsManager, parametersMixer });
   });
 
   afterEach(async () => {
