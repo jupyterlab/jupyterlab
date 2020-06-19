@@ -13,6 +13,8 @@ import { Debugger } from '../src/debugger';
 
 import { DebuggerService } from '../src/service';
 
+import { ParametersMixer } from '../src/parameters-mixer';
+
 /**
  * A test sidebar.
  */
@@ -31,7 +33,8 @@ afterAll(async () => {
 
 describe('Debugger', () => {
   const specsManager = new KernelSpecManager();
-  const service = new DebuggerService({ specsManager });
+  const parametersMixer = new ParametersMixer();
+  const service = new DebuggerService({ specsManager, parametersMixer });
   const registry = new CommandRegistry();
   const factoryService = new CodeMirrorEditorFactory();
   const mimeTypeService = new CodeMirrorMimeTypeService();
