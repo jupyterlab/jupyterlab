@@ -610,7 +610,8 @@ export namespace Commands {
         if (!widget) {
           return false;
         }
-        // TODO: Enable based if any undo events are stored
+        // Ideally enable it when there are undo events stored
+        // Reference issue #8590: Code mirror editor could expose the history of undo/redo events
         return true;
       },
       icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
@@ -646,7 +647,8 @@ export namespace Commands {
         if (!widget) {
           return false;
         }
-        // TODO: Enable based if any undo events are stored
+        // Ideally enable it when there are redo events stored
+        // Reference issue #8590: Code mirror editor could expose the history of undo/redo events
         return true;
       },
       icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
@@ -751,7 +753,7 @@ export namespace Commands {
           return;
         }
 
-        const editor: CodeEditor.IEditor = widget && widget.editor;
+        const editor: CodeEditor.IEditor = widget.editor;
 
         // Get data from clipboard
         const clipboard = window.navigator.clipboard;
@@ -762,9 +764,7 @@ export namespace Commands {
           editor.replaceSelection && editor.replaceSelection(clipboardData);
         }
       },
-      isEnabled: () => {
-        return Boolean(isEnabled() && tracker.currentWidget?.content);
-      },
+      isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
       label: 'Paste'
     });
@@ -789,9 +789,7 @@ export namespace Commands {
         const editor = widget.editor as CodeMirrorEditor;
         editor.execCommand('selectAll');
       },
-      isEnabled: () => {
-        return Boolean(isEnabled() && tracker.currentWidget?.content);
-      },
+      isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       label: 'Select All'
     });
   }
