@@ -31,6 +31,8 @@ import * as restapi from './restapi';
 // Stub for requirejs.
 declare let requirejs: any;
 
+const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
+
 let _pendingMessages: KernelMessage.IMessage[] = [];
 
 /**
@@ -249,6 +251,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     this._updateConnectionStatus('disconnected');
     this._clearKernelState();
+    _pendingMessages = [];
     this._clearSocket();
 
     // Clear Lumino signals
@@ -381,8 +384,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
 
     // Send if the ws allows it, otherwise buffer the message.
-    if (this.connectionStatus === 'connected'
-        && this._kernelSession !== '_RESTARTING'
+    if (
+      this.connectionStatus === 'connected' &&
+      this._kernelSession !== RESTARTING_KERNEL_SESSION
     ) {
       this._ws!.send(serialize.serialize(msg));
     } else if (queue) {
@@ -434,15 +438,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
-    this._handleRestart();
-    this._kernelSession = '_RESTARTING'
+    this._clearKernelState();
+    this._updateStatus('restarting');
+    this._kernelSession = RESTARTING_KERNEL_SESSION;
     await restapi.restartKernel(this.id, this.serverSettings);
-    this._kernelSession = ''
-    this._updateStatus('idle');
-    setTimeout(() => {
-      void this.requestKernelInfo();
-    }, 0);
-    this._sendPending();
   }
 
   /**
@@ -1051,7 +1050,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // stop sending messages.
     while (
       this.connectionStatus === 'connected' &&
-      this._kernelSession !== '_RESTARTING_' &&
+      this._kernelSession !== RESTARTING_KERNEL_SESSION &&
       _pendingMessages.length > 0
     ) {
       this._sendMessage(_pendingMessages[0], false);
@@ -1066,7 +1065,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Clear the internal state.
    */
   private _clearKernelState(): void {
-//    _pendingMessages = [];
     this._kernelSession = '';
     this._futures.forEach(future => {
       future.dispose();
@@ -1272,6 +1270,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private async _handleMessage(msg: KernelMessage.IMessage): Promise<void> {
     let handled = false;
 
+    if (msg.header.msg_type === 'shutdown_reply') {
+      this._kernelSession = msg.header.session;
+      this._sendPending();
+    }
+
     // Check to see if we have a display_id we need to reroute.
     if (
       msg.parent_header &&
@@ -1323,6 +1326,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
               // 'restarting' and 'autorestarting'.
               await this._handleRestart();
               this._updateStatus('autorestarting');
+            });
+          }
+          if (executionState === 'restarting') {
+            void Promise.resolve().then(async () => {
+              await this._handleRestart();
+              this._updateStatus('restarting');
             });
           }
           this._updateStatus(executionState);
