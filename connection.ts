@@ -119,8 +119,11 @@ export class LSPConnection extends LspWsConnection {
     changeEvents: lsProtocol.TextDocumentContentChangeEvent[],
     documentInfo: IDocumentInfo
   ) {
-    if (!this.isConnected || !this.isInitialized) {
+    if (!this.isReady) {
       return;
+    }
+    if (!this.openedUris.get(documentInfo.uri)) {
+      this.sendOpen(documentInfo);
     }
     const textDocumentChange: lsProtocol.DidChangeTextDocumentParams = {
       textDocument: {
