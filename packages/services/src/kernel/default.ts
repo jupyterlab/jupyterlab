@@ -31,6 +31,8 @@ import * as restapi from './restapi';
 // Stub for requirejs.
 declare let requirejs: any;
 
+let _pendingMessages: KernelMessage.IMessage[] = [];
+
 /**
  * Implementation of the Kernel object.
  *
@@ -379,10 +381,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
 
     // Send if the ws allows it, otherwise buffer the message.
-    if (this.connectionStatus === 'connected') {
+    if (this.connectionStatus === 'connected'
+        && this._kernelSession !== '_RESTARTING'
+    ) {
       this._ws!.send(serialize.serialize(msg));
     } else if (queue) {
-      this._pendingMessages.push(msg);
+      _pendingMessages.push(msg);
     } else {
       throw new Error('Could not send message');
     }
@@ -430,8 +434,15 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
+    this._handleRestart();
+    this._kernelSession = '_RESTARTING'
     await restapi.restartKernel(this.id, this.serverSettings);
-    await this._handleRestart();
+    this._kernelSession = ''
+    this._updateStatus('idle');
+    setTimeout(() => {
+      void this.requestKernelInfo();
+    }, 0);
+    this._sendPending();
   }
 
   /**
@@ -552,6 +563,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
 
     this._info.resolve(reply.content);
+
+    this._kernelSession = reply.header.session;
+
     return reply;
   }
 
@@ -1037,13 +1051,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // stop sending messages.
     while (
       this.connectionStatus === 'connected' &&
-      this._pendingMessages.length > 0
+      this._kernelSession !== '_RESTARTING_' &&
+      _pendingMessages.length > 0
     ) {
-      this._sendMessage(this._pendingMessages[0], false);
+      this._sendMessage(_pendingMessages[0], false);
 
       // We shift the message off the queue after the message is sent so that
       // if there is an exception, the message is still pending.
-      this._pendingMessages.shift();
+      _pendingMessages.shift();
     }
   }
 
@@ -1051,7 +1066,8 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Clear the internal state.
    */
   private _clearKernelState(): void {
-    this._pendingMessages = [];
+//    _pendingMessages = [];
+    this._kernelSession = '';
     this._futures.forEach(future => {
       future.dispose();
     });
@@ -1059,7 +1075,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
       comm.dispose();
     });
     this._msgChain = Promise.resolve();
-    this._kernelSession = '';
     this._futures = new Map<
       string,
       KernelFutureHandler<
@@ -1238,7 +1253,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       if (connectionStatus === 'connected') {
         // Send pending messages, and make sure we send at least one message
         // to get kernel status back.
-        if (this._pendingMessages.length > 0) {
+        if (_pendingMessages.length > 0) {
           this._sendPending();
         } else {
           void this.requestKernelInfo();
@@ -1295,7 +1310,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
           // Updating the status is synchronous, and we call no async user code
           const executionState = (msg as KernelMessage.IStatusMsg).content
             .execution_state;
-          if (executionState === 'restarting') {
+          if (executionState === 'autorestarting') {
             // The kernel has been auto-restarted by the server. After
             // processing for this message is completely done, we want to
             // handle this restart, so we don't await, but instead schedule
@@ -1472,7 +1487,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
     ) => void;
   } = Object.create(null);
   private _info = new PromiseDelegate<KernelMessage.IInfoReply>();
-  private _pendingMessages: KernelMessage.IMessage[] = [];
   private _specPromise: Promise<KernelSpec.ISpecModel | undefined>;
   private _statusChanged = new Signal<this, KernelMessage.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
