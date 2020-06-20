@@ -33,8 +33,6 @@ declare let requirejs: any;
 
 const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
 
-let _pendingMessages: KernelMessage.IMessage[] = [];
-
 /**
  * Implementation of the Kernel object.
  *
@@ -251,7 +249,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     this._updateConnectionStatus('disconnected');
     this._clearKernelState();
-    _pendingMessages = [];
+    this._pendingMessages = [];
     this._clearSocket();
 
     // Clear Lumino signals
@@ -390,7 +388,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     ) {
       this._ws!.send(serialize.serialize(msg));
     } else if (queue) {
-      _pendingMessages.push(msg);
+      this._pendingMessages.push(msg);
     } else {
       throw new Error('Could not send message');
     }
@@ -1051,13 +1049,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
     while (
       this.connectionStatus === 'connected' &&
       this._kernelSession !== RESTARTING_KERNEL_SESSION &&
-      _pendingMessages.length > 0
+      this._pendingMessages.length > 0
     ) {
-      this._sendMessage(_pendingMessages[0], false);
+      this._sendMessage(this._pendingMessages[0], false);
 
       // We shift the message off the queue after the message is sent so that
       // if there is an exception, the message is still pending.
-      _pendingMessages.shift();
+      this._pendingMessages.shift();
     }
   }
 
@@ -1251,7 +1249,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
       if (connectionStatus === 'connected') {
         // Send pending messages, and make sure we send at least one message
         // to get kernel status back.
-        if (_pendingMessages.length > 0) {
+        if (this._pendingMessages.length > 0) {
           this._sendPending();
         } else {
           void this.requestKernelInfo();
@@ -1331,6 +1329,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
           if (executionState === 'restarting') {
             void Promise.resolve().then(async () => {
               await this._handleRestart();
+              this._kernelSession = msg.header.session;
               this._updateStatus('restarting');
             });
           }
@@ -1496,6 +1495,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     ) => void;
   } = Object.create(null);
   private _info = new PromiseDelegate<KernelMessage.IInfoReply>();
+  private _pendingMessages: KernelMessage.IMessage[] = [];
   private _specPromise: Promise<KernelSpec.ISpecModel | undefined>;
   private _statusChanged = new Signal<this, KernelMessage.Status>(this);
   private _connectionStatusChanged = new Signal<this, Kernel.ConnectionStatus>(
