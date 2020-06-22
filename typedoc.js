@@ -112,12 +112,9 @@ module.exports = {
     '**/tests/**',
     '**/testutils/**',
 
-    '**/packages/celltags/**',
-    '**/packages/logconsole/**'
+    '**/packages/celltags/**'
+    // '**/packages/logconsole/**'
     // '**/packages/settingregistry/**'
-
-    // '**/packages/celltags*/**',
-    // '**/packages/logconsole*/**',
   ],
   excludeNotExported: true,
   ignoreCompilerErrors: false,
