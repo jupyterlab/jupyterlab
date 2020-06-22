@@ -84,6 +84,7 @@
     "webpack-cli": "^3.3.10",
     "webpack-merge": "^4.2.2",
     "whatwg-fetch": "^3.0.0",
+    "worker-loader": "^2.0.0",
     "yarn-deduplicate": "^1.1.1"
   },
   "resolutions": {
