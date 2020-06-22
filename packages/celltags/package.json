@@ -43,6 +43,7 @@
     "@jupyterlab/cells": "^2.2.0-alpha.0",
     "@jupyterlab/notebook": "^2.2.0-alpha.0",
     "@jupyterlab/ui-components": "^2.2.0-alpha.0",
+    "@lumino/coreutils": "^1.4.2",
     "@lumino/widgets": "^1.11.1"
   },
   "devDependencies": {

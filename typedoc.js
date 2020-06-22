@@ -110,11 +110,7 @@ module.exports = {
     '**/node_modules/**',
     '**/test/**',
     '**/tests/**',
-    '**/testutils/**',
-
-    '**/packages/celltags/**'
-    // '**/packages/logconsole/**'
-    // '**/packages/settingregistry/**'
+    '**/testutils/**'
   ],
   excludeNotExported: true,
   ignoreCompilerErrors: false,
