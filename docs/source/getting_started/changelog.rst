@@ -6,6 +6,11 @@ JupyterLab Changelog
 `v2.1.x <https://github.com/jupyterlab/jupyterlab/milestone/55>`__
 ------------------------------------------------------------------
 
+v2.1.5
+^^^^^^
+* Fix lab build error for missing ``worker-loader`` (`#8599 <https://github.com/jupyterlab/jupyterlab/pull/8599>`__)
+
+
 v2.1.4
 ^^^^^^
 * Fix watch mode on Windows by adding chokidar dependency (`#8492 <https://github.com/jupyterlab/jupyterlab/pull/8492>`__)
