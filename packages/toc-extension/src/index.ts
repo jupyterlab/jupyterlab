@@ -12,7 +12,6 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { IMarkdownViewerTracker } from '@jupyterlab/markdownviewer';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   TableOfContents,
   ITableOfContentsRegistry,
@@ -46,8 +45,7 @@ async function activateTOC(
   restorer: ILayoutRestorer,
   markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
-  rendermime: IRenderMimeRegistry,
-  settingRegistry: ISettingRegistry
+  rendermime: IRenderMimeRegistry
 ): Promise<ITableOfContentsRegistry> {
   // Create the ToC widget:
   const toc = new TableOfContents({ docmanager, rendermime });
@@ -64,22 +62,11 @@ async function activateTOC(
   // Add the ToC widget to the application restorer:
   restorer.add(toc, '@jupyterlab/toc:plugin');
 
-  // Attempt to load plugin settings:
-  let settings: ISettingRegistry.ISettings | undefined;
-  try {
-    settings = await settingRegistry.load('@jupyterlab/toc:plugin');
-  } catch (error) {
-    console.error(
-      `Failed to load settings for the Table of Contents extension.\n\n${error}`
-    );
-  }
-
   // Create a notebook generator:
   const notebookGenerator = createNotebookGenerator(
     notebookTracker,
     toc,
-    rendermime.sanitizer,
-    settings
+    rendermime.sanitizer
   );
   registry.add(notebookGenerator);
 
@@ -151,8 +138,7 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
     ILayoutRestorer,
     IMarkdownViewerTracker,
     INotebookTracker,
-    IRenderMimeRegistry,
-    ISettingRegistry
+    IRenderMimeRegistry
   ],
   activate: activateTOC
 };

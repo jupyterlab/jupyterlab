@@ -2,7 +2,9 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
+import { Cell } from '@jupyterlab/cells';
 import { Token } from '@lumino/coreutils';
+import { ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { IHeading } from './utils/headings';
 
@@ -67,7 +69,9 @@ export namespace TableOfContentsRegistry {
   /**
    * Abstract class for managing options affecting how a table of contents is generated for a particular widget type.
    */
-  export abstract class IOptionsManager {}
+  export abstract class IOptionsManager {
+    collapseSignal?: ISignal<this, Cell>;
+  }
 
   /**
    * Interface describing a widget table of contents generator.

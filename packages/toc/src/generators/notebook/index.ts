@@ -4,7 +4,6 @@
 import { ISanitizer } from '@jupyterlab/apputils';
 import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { isMarkdown } from '../../utils/is_markdown';
@@ -32,16 +31,10 @@ import { toolbar } from './toolbar_generator';
 function createNotebookGenerator(
   tracker: INotebookTracker,
   widget: TableOfContents,
-  sanitizer: ISanitizer,
-  settings?: ISettingRegistry.ISettings
+  sanitizer: ISanitizer
 ): Registry.IGenerator<NotebookPanel> {
-  let collapsibleNotebooks = true;
-  if (settings) {
-    collapsibleNotebooks = settings.composite.collapsibleNotebooks as boolean;
-  }
   const options = new OptionsManager(widget, tracker, {
     numbering: false,
-    collapsibleNotebooks: collapsibleNotebooks,
     sanitizer: sanitizer
   });
   return {
