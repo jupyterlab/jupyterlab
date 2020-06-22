@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application-top",
-  "version": "2.1.4",
+  "version": "2.1.5",
   "private": true,
   "scripts": {
     "build": "webpack",
@@ -83,6 +83,7 @@
     "webpack-cli": "^3.3.10",
     "webpack-merge": "^4.2.2",
     "whatwg-fetch": "^3.0.0",
+    "worker-loader": "^2.0.0",
     "yarn-deduplicate": "^1.1.1"
   },
   "resolutions": {
@@ -189,7 +190,7 @@
   },
   "jupyterlab": {
     "name": "JupyterLab",
-    "version": "2.1.4",
+    "version": "2.1.5",
     "extensions": {
       "@jupyterlab/application-extension": "",
       "@jupyterlab/apputils-extension": "",
