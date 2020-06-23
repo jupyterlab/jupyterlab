@@ -4,7 +4,9 @@
   "compilerOptions": {
     "composite": false,
     "baseUrl": ".",
-    "paths": { "@jupyterlab/*": ["packages/*/src"] }
+    "paths": {
+      "@jupyterlab/*": ["packages/*/src"]
+    }
   },
   "references": [
     {
@@ -155,6 +157,12 @@
       "path": "./packages/mathjax2-extension"
     },
     {
+      "path": "./packages/metapackage"
+    },
+    {
+      "path": "./packages/nbconvert-css"
+    },
+    {
       "path": "./packages/nbformat"
     },
     {
@@ -228,6 +236,12 @@
     },
     {
       "path": "./packages/theme-light-extension"
+    },
+    {
+      "path": "./packages/toc"
+    },
+    {
+      "path": "./packages/toc-extension"
     },
     {
       "path": "./packages/tooltip"

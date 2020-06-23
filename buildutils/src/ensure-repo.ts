@@ -397,6 +397,15 @@ export async function ensureIntegrity(): Promise<boolean> {
     messages['top'] = ['Update package.json'];
   }
 
+  // Handle the refs in the top level tsconfigdoc.json
+  const tsConfigdocPath = path.resolve('.', 'tsconfigdoc.json');
+  const tsConfigdocData = utils.readJSONFile(tsConfigdocPath);
+  tsConfigdocData.references = [];
+  utils.getCorePaths().forEach(pth => {
+    tsConfigdocData.references.push({ path: './' + path.relative('.', pth) });
+  });
+  utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
+
   // Handle the JupyterLab application top package.
   pkgMessages = ensureJupyterlab();
   if (pkgMessages.length > 0) {
