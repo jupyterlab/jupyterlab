@@ -3,8 +3,8 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { Cell } from '@jupyterlab/cells';
 import { TableOfContentsRegistry as Registry } from '../../registry';
+import { IHeading } from '../../utils/headings';
 import { TableOfContents } from '../../toc';
 import { TagsToolComponent } from './tagstool';
 import { ISignal, Signal } from '@lumino/signaling';
@@ -54,7 +54,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._notebook = notebook;
     this.sanitizer = options.sanitizer;
     this.storeTags = [];
-    this._collapseSignal = new Signal<this, Cell>(this);
+    this._collapseSignal = new Signal<this, Registry.ICollapseSignalArgs>(this);
   }
 
   /**
@@ -124,7 +124,7 @@ class OptionsManager extends Registry.IOptionsManager {
   /**
    * Signal emitted when a "collapse" twist button is pressed in the ToC
    */
-  get collapseSignal(): ISignal<this, Cell> {
+  get collapseSignal(): ISignal<this, Registry.ICollapseSignalArgs> {
     return this._collapseSignal;
   }
 
@@ -179,8 +179,8 @@ class OptionsManager extends Registry.IOptionsManager {
    * to perform an action when the collapse button
    * is pressed.
    */
-  updateAndCollapse(cellRef: Cell) {
-    this._collapseSignal.emit(cellRef);
+  updateAndCollapse(heading: IHeading, state: boolean) {
+    this._collapseSignal.emit({ heading: heading, collapsedState: state });
     this._widget.update();
   }
 
@@ -217,7 +217,7 @@ class OptionsManager extends Registry.IOptionsManager {
   private _showTags = false;
   private _notebook: INotebookTracker;
   private _widget: TableOfContents;
-  private _collapseSignal: Signal<this, Cell>;
+  private _collapseSignal: Signal<this, Registry.ICollapseSignalArgs>;
   private _tagTool: TagsToolComponent | null = null;
   public storeTags: string[];
 }

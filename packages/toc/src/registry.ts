@@ -2,9 +2,8 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
-import { Cell } from '@jupyterlab/cells';
 import { Token } from '@lumino/coreutils';
-import { ISignal } from '@lumino/signaling';
+import { Signal, ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { IHeading } from './utils/headings';
 
@@ -56,9 +55,20 @@ export class TableOfContentsRegistry {
    * @param generator - table of contents generator
    */
   add(generator: TableOfContentsRegistry.IGenerator): void {
+    if (generator.collapseSignal) {
+      // If there is a collapseSignal for a given generator, propogate the arguments through the registry's signal
+      generator.collapseSignal.connect((sender: TableOfContentsRegistry.IGenerator<Widget>, args: TableOfContentsRegistry.ICollapseSignalArgs) => {
+        this._collapseSignal.emit(args);
+      });
+    }
     this._generators.push(generator);
   }
 
+  get collapseSignal(): ISignal<this, TableOfContentsRegistry.ICollapseSignalArgs> {
+    return this._collapseSignal;
+  }
+
+  private _collapseSignal: Signal<this, TableOfContentsRegistry.ICollapseSignalArgs>;
   private _generators: TableOfContentsRegistry.IGenerator[] = [];
 }
 
@@ -69,8 +79,14 @@ export namespace TableOfContentsRegistry {
   /**
    * Abstract class for managing options affecting how a table of contents is generated for a particular widget type.
    */
-  export abstract class IOptionsManager {
-    collapseSignal?: ISignal<this, Cell>;
+  export abstract class IOptionsManager { }
+
+  /**
+   * Interface for the arguments needed in the collapse signal of a generator
+   */
+  export interface ICollapseSignalArgs {
+    collapsedState: boolean;
+    heading: IHeading;
   }
 
   /**
@@ -108,6 +124,12 @@ export namespace TableOfContentsRegistry {
      * @default undefined
      */
     options?: IOptionsManager;
+
+    /**
+     * Signal to indicate that a collapse event happened to this heading
+     * within the ToC.
+     */
+    collapseSignal?: ISignal<IOptionsManager, ICollapseSignalArgs>;
 
     /**
      * Returns a JSX element for each heading.

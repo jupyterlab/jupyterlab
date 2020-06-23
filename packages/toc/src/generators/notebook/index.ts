@@ -43,7 +43,8 @@ function createNotebookGenerator(
     options: options,
     toolbarGenerator: generateToolbar,
     itemRenderer: renderItem,
-    generate: generate
+    generate: generate,
+    collapseSignal: options.collapseSignal
   };
 
   /**
@@ -66,6 +67,7 @@ function createNotebookGenerator(
   function renderItem(item: INotebookHeading) {
     return render(options, tracker, item);
   }
+
   /**
    * Generates a table of contents.
    *

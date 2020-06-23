@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { Cell } from '@jupyterlab/cells';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { INotebookHeading } from '../../utils/headings';
@@ -48,7 +47,7 @@ function render(
           'toc-hr-collapsed'
         ) as boolean;
 
-        let button = twistButton(item.cellRef, collapsed || false, onClick);
+        let button = twistButton(item, collapsed || false, onClick);
 
         // Render the heading item:
         jsx = (
@@ -72,7 +71,7 @@ function render(
           'toc-hr-collapsed'
         ) as boolean;
 
-        let button = twistButton(item.cellRef, collapsed || false, onClick);
+        let button = twistButton(item, collapsed || false, onClick);
         jsx = (
           <div className="toc-entry-holder">
             {button}
@@ -103,14 +102,17 @@ function render(
    * @private
    * @param cellRef - cell reference
    */
-  function onClick(cellRef?: Cell) {
-    if (cellRef!.model.metadata.has('toc-hr-collapsed')) {
-      cellRef!.model.metadata.delete('toc-hr-collapsed');
+  function onClick(heading?: INotebookHeading) {
+    let collapsed;
+    if (heading!.cellRef!.model.metadata.has('toc-hr-collapsed')) {
+      collapsed = heading!.cellRef!.model.metadata.get('toc-hr-collapsed') as boolean;
+      heading!.cellRef!.model.metadata.delete('toc-hr-collapsed');
     } else {
-      cellRef!.model.metadata.set('toc-hr-collapsed', true);
+      collapsed = false;
+      heading!.cellRef!.model.metadata.set('toc-hr-collapsed', true);
     }
-    if (cellRef) {
-      options.updateAndCollapse(cellRef);
+    if (heading) {
+      options.updateAndCollapse(heading, collapsed);
       // NOTE: we can imagine a future in which this extension combines with a collapsible-header/ings extension such that we can programmatically close notebook "sections" according to a public API specifically intended for collapsing notebook sections. In the meantime, we need to resort to manually "collapsing" sections...
     } else {
       options.updateWidget();

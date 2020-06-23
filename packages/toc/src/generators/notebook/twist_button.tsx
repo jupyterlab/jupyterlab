@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { Cell } from '@jupyterlab/cells';
+import { INotebookHeading } from '../../utils/headings';
 
 /**
  * Callback invoked upon encountering a "click" event.
@@ -10,7 +10,7 @@ import { Cell } from '@jupyterlab/cells';
  * @private
  * @param cellRef - cell reference
  */
-type onClick = (cellRef?: Cell) => void;
+type onClick = (heading?: INotebookHeading) => void;
 
 /**
  * Renders a twist button.
@@ -21,7 +21,7 @@ type onClick = (cellRef?: Cell) => void;
  * @param onClick - "click" handler
  * @returns rendered twist button
  */
-function twistButton(cellRef: Cell, collapsed: boolean, onClick: onClick) {
+function twistButton(heading: INotebookHeading, collapsed: boolean, onClick: onClick) {
   if (collapsed) {
     return (
       <div className="toc-collapse-button" onClick={wrapper}>
@@ -45,7 +45,7 @@ function twistButton(cellRef: Cell, collapsed: boolean, onClick: onClick) {
    */
   function wrapper(event: any) {
     event.stopPropagation();
-    onClick(cellRef);
+    onClick(heading);
   }
 }
 
