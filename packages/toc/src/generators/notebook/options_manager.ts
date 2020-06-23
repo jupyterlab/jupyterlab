@@ -180,7 +180,7 @@ class OptionsManager extends Registry.IOptionsManager {
    * is pressed.
    */
   updateAndCollapse(heading: IHeading, state: boolean) {
-    this._collapseSignal.emit({ heading: heading, collapsedState: state });
+    this._collapseSignal.emit({ heading: heading, collapsedState: state, tocType: 'notebook' });
     this._widget.update();
   }
 

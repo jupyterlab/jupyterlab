@@ -87,6 +87,7 @@ export namespace TableOfContentsRegistry {
   export interface ICollapseSignalArgs {
     collapsedState: boolean;
     heading: IHeading;
+    tocType: string;
   }
 
   /**
