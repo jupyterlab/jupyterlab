@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { INotebookHeading } from '../../utils/headings';
+import { IHeading } from '../../utils/headings';
 
 /**
  * Callback invoked upon encountering a "click" event.
@@ -10,7 +10,7 @@ import { INotebookHeading } from '../../utils/headings';
  * @private
  * @param cellRef - cell reference
  */
-type onClick = (heading?: INotebookHeading) => void;
+type onClick = (heading?: IHeading) => void;
 
 /**
  * Renders a twist button.
@@ -21,11 +21,7 @@ type onClick = (heading?: INotebookHeading) => void;
  * @param onClick - "click" handler
  * @returns rendered twist button
  */
-function twistButton(
-  heading: INotebookHeading,
-  collapsed: boolean,
-  onClick: onClick
-) {
+function twistButton(heading: IHeading, collapsed: boolean, onClick: onClick) {
   if (collapsed) {
     return (
       <div className="toc-collapse-button" onClick={wrapper}>

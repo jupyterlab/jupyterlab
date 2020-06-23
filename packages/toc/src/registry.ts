@@ -55,31 +55,31 @@ export class TableOfContentsRegistry {
    * @param generator - table of contents generator
    */
   add(generator: TableOfContentsRegistry.IGenerator): void {
-    if (generator.collapseSignal) {
-      // If there is a collapseSignal for a given generator, propogate the arguments through the registry's signal
-      generator.collapseSignal.connect(
+    if (generator.collapseChanged) {
+      // If there is a collapseChanged for a given generator, propogate the arguments through the registry's signal
+      generator.collapseChanged.connect(
         (
           sender: TableOfContentsRegistry.IGenerator<Widget>,
-          args: TableOfContentsRegistry.ICollapseSignalArgs
+          args: TableOfContentsRegistry.ICollapseChangedArgs
         ) => {
-          this._collapseSignal.emit(args);
+          this._collapseChanged.emit(args);
         }
       );
     }
     this._generators.push(generator);
   }
 
-  get collapseSignal(): ISignal<
+  get collapseChanged(): ISignal<
     this,
-    TableOfContentsRegistry.ICollapseSignalArgs
+    TableOfContentsRegistry.ICollapseChangedArgs
   > {
-    return this._collapseSignal;
+    return this._collapseChanged;
   }
 
-  private _collapseSignal: Signal<
+  private _collapseChanged: Signal<
     this,
-    TableOfContentsRegistry.ICollapseSignalArgs
-  > = new Signal<this, TableOfContentsRegistry.ICollapseSignalArgs>(this);
+    TableOfContentsRegistry.ICollapseChangedArgs
+  > = new Signal<this, TableOfContentsRegistry.ICollapseChangedArgs>(this);
   private _generators: TableOfContentsRegistry.IGenerator[] = [];
 }
 
@@ -95,7 +95,7 @@ export namespace TableOfContentsRegistry {
   /**
    * Interface for the arguments needed in the collapse signal of a generator
    */
-  export interface ICollapseSignalArgs {
+  export interface ICollapseChangedArgs {
     collapsedState: boolean;
     heading: IHeading;
     tocType: string;
@@ -141,7 +141,7 @@ export namespace TableOfContentsRegistry {
      * Signal to indicate that a collapse event happened to this heading
      * within the ToC.
      */
-    collapseSignal?: ISignal<IOptionsManager, ICollapseSignalArgs>;
+    collapseChanged?: ISignal<IOptionsManager, ICollapseChangedArgs>;
 
     /**
      * Returns a JSX element for each heading.

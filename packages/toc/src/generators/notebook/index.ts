@@ -44,7 +44,7 @@ function createNotebookGenerator(
     toolbarGenerator: generateToolbar,
     itemRenderer: renderItem,
     generate: generate,
-    collapseSignal: options.collapseSignal
+    collapseChanged: options.collapseChanged
   };
 
   /**
