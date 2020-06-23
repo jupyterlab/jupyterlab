@@ -89,10 +89,6 @@ class LogConsoleOutputPrompt extends Widget implements IOutputPrompt {
  */
 class LogConsoleOutputArea extends OutputArea {
   /**
-   * The rendermime instance used by the widget.
-   */
-  rendermime: IRenderMimeRegistry | null;
-  /**
    * Output area model used by the widget.
    */
   readonly model: LoggerOutputAreaModel;
@@ -358,7 +354,8 @@ export class LogConsolePanel extends StackedPanel {
         const outputArea = this._outputAreas.get(viewId);
         if (outputArea) {
           if (change.newValue) {
-            outputArea.rendermime = change.newValue;
+            // cast away readonly
+            (outputArea.rendermime as IRenderMimeRegistry) = change.newValue;
           } else {
             outputArea.dispose();
           }
@@ -420,7 +417,7 @@ export class LogConsolePanel extends StackedPanel {
       // add view for logger if not exist
       if (!this._outputAreas.has(viewId)) {
         const outputArea = new LogConsoleOutputArea({
-          rendermime: logger.rendermime,
+          rendermime: logger.rendermime!,
           contentFactory: new LogConsoleContentFactory(),
           model: logger.outputAreaModel
         });
