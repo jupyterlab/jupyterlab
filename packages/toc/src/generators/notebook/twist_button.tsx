@@ -21,7 +21,11 @@ type onClick = (heading?: INotebookHeading) => void;
  * @param onClick - "click" handler
  * @returns rendered twist button
  */
-function twistButton(heading: INotebookHeading, collapsed: boolean, onClick: onClick) {
+function twistButton(
+  heading: INotebookHeading,
+  collapsed: boolean,
+  onClick: onClick
+) {
   if (collapsed) {
     return (
       <div className="toc-collapse-button" onClick={wrapper}>

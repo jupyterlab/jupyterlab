@@ -57,18 +57,29 @@ export class TableOfContentsRegistry {
   add(generator: TableOfContentsRegistry.IGenerator): void {
     if (generator.collapseSignal) {
       // If there is a collapseSignal for a given generator, propogate the arguments through the registry's signal
-      generator.collapseSignal.connect((sender: TableOfContentsRegistry.IGenerator<Widget>, args: TableOfContentsRegistry.ICollapseSignalArgs) => {
-        this._collapseSignal.emit(args);
-      });
+      generator.collapseSignal.connect(
+        (
+          sender: TableOfContentsRegistry.IGenerator<Widget>,
+          args: TableOfContentsRegistry.ICollapseSignalArgs
+        ) => {
+          this._collapseSignal.emit(args);
+        }
+      );
     }
     this._generators.push(generator);
   }
 
-  get collapseSignal(): ISignal<this, TableOfContentsRegistry.ICollapseSignalArgs> {
+  get collapseSignal(): ISignal<
+    this,
+    TableOfContentsRegistry.ICollapseSignalArgs
+  > {
     return this._collapseSignal;
   }
 
-  private _collapseSignal: Signal<this, TableOfContentsRegistry.ICollapseSignalArgs>;
+  private _collapseSignal: Signal<
+    this,
+    TableOfContentsRegistry.ICollapseSignalArgs
+  >;
   private _generators: TableOfContentsRegistry.IGenerator[] = [];
 }
 
@@ -79,7 +90,7 @@ export namespace TableOfContentsRegistry {
   /**
    * Abstract class for managing options affecting how a table of contents is generated for a particular widget type.
    */
-  export abstract class IOptionsManager { }
+  export abstract class IOptionsManager {}
 
   /**
    * Interface for the arguments needed in the collapse signal of a generator

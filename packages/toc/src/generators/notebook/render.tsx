@@ -105,7 +105,9 @@ function render(
   function onClick(heading?: INotebookHeading) {
     let collapsed;
     if (heading!.cellRef!.model.metadata.has('toc-hr-collapsed')) {
-      collapsed = heading!.cellRef!.model.metadata.get('toc-hr-collapsed') as boolean;
+      collapsed = heading!.cellRef!.model.metadata.get(
+        'toc-hr-collapsed'
+      ) as boolean;
       heading!.cellRef!.model.metadata.delete('toc-hr-collapsed');
     } else {
       collapsed = false;
