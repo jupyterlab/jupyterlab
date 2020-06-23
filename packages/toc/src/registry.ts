@@ -79,7 +79,7 @@ export class TableOfContentsRegistry {
   private _collapseSignal: Signal<
     this,
     TableOfContentsRegistry.ICollapseSignalArgs
-  >;
+  > = new Signal<this, TableOfContentsRegistry.ICollapseSignalArgs>(this);
   private _generators: TableOfContentsRegistry.IGenerator[] = [];
 }
 
