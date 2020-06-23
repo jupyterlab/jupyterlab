@@ -292,6 +292,7 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
  */
 const mixer: JupyterFrontEndPlugin<IDebuggerParametersMixer> = {
   id: '@jupyterlab/debugger:parameters-mixer',
+  provides: IDebuggerParametersMixer,
   autoStart: true,
   activate: () => new ParametersMixer()
 };

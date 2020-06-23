@@ -246,7 +246,6 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
     });
     return editors;
   }
-  // private _service: IDebugger;
   private _shell: JupyterFrontEnd.IShell;
   private _readOnlyEditorTracker: WidgetTracker<
     MainAreaWidget<CodeEditorWrapper>
