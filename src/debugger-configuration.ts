@@ -10,7 +10,7 @@ import { murmur2 } from 'murmurhash-js';
 /**
  * A class to hash code.
  */
-export class ParametersMixer implements IDebuggerParametersMixer {
+export class DebuggerConfiguration implements IDebuggerConfig {
   /**
    * Whether the handler is disposed.
    */
@@ -68,13 +68,13 @@ export class ParametersMixer implements IDebuggerParametersMixer {
   private _tmpFileSuffix: string;
 }
 
-export const IDebuggerParametersMixer = new Token<IDebuggerParametersMixer>(
-  '@jupyterlab/debugger:parameters-mixer'
+export const IDebuggerConfig = new Token<IDebuggerConfig>(
+  '@jupyterlab/debugger:configuration'
 );
 /**
- * Interface for parameters mixer plugin
+ * Interface for configuration plugin
  */
-export interface IDebuggerParametersMixer {
+export interface IDebuggerConfig {
   setHashParameters(method: string, seed: number): void;
   setTmpFileParameters(prefix: string, suffix: string): void;
   getCodeId(code: string): string;

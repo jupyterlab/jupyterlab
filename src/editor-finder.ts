@@ -25,7 +25,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { IDebuggerParametersMixer } from './parameters-mixer';
+import { IDebuggerConfig } from './debugger-configuration';
 
 /**
  * A class to find instances of code editors across notebook, console and files widgets
@@ -41,7 +41,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
     this._notebookTracker = options.notebookTracker;
     this._consoleTracker = options.consoleTracker;
     this._editorTracker = options.editorTracker;
-    this._parametersMixer = options.parametersMixer;
+    this._debuggerConfiguration = options.debuggerConfiguration;
     this._readOnlyEditorTracker = new WidgetTracker<
       MainAreaWidget<CodeEditorWrapper>
     >({
@@ -119,7 +119,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
         const code = cell.model.value.text;
-        const cellId = this._parametersMixer.getCodeId(code);
+        const cellId = this._debuggerConfiguration.getCodeId(code);
         if (source !== cellId) {
           return;
         }
@@ -161,7 +161,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       const cells = consoleWidget.console.cells;
       each(cells, cell => {
         const code = cell.model.value.text;
-        const codeId = this._parametersMixer.getCodeId(code);
+        const codeId = this._debuggerConfiguration.getCodeId(code);
         if (source !== codeId) {
           return;
         }
@@ -203,7 +203,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._parametersMixer.getCodeId(code);
+      const codeId = this._debuggerConfiguration.getCodeId(code);
       if (source !== codeId) {
         return;
       }
@@ -235,7 +235,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._parametersMixer.getCodeId(code);
+      const codeId = this._debuggerConfiguration.getCodeId(code);
       if (widget.title.caption !== source && source !== codeId) {
         return;
       }
@@ -253,7 +253,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   private _notebookTracker: INotebookTracker | null;
   private _consoleTracker: IConsoleTracker | null;
   private _editorTracker: IEditorTracker | null;
-  private _parametersMixer: IDebuggerParametersMixer;
+  private _debuggerConfiguration: IDebuggerConfig;
 }
 /**
  * A namespace for editor finder statics.
@@ -289,9 +289,9 @@ export namespace EditorFinder {
     shell: JupyterFrontEnd.IShell;
 
     /**
-     * The instance of parameters mixer with hash method.
+     * The instance of configuration with hash method.
      */
-    parametersMixer: IDebuggerParametersMixer;
+    debuggerConfiguration: IDebuggerConfig;
   }
   /**
    * A token for a editor finder handler find method plugin

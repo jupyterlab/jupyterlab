@@ -54,7 +54,10 @@ import { DebuggerModel } from './model';
 
 import { VariablesBodyGrid } from './variables/grid';
 
-import { IDebuggerParametersMixer, ParametersMixer } from './parameters-mixer';
+import {
+  IDebuggerConfig,
+  DebuggerConfiguration
+} from './debugger-configuration';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -274,27 +277,27 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:service',
   autoStart: true,
   provides: IDebugger,
-  requires: [IDebuggerEditorFinder, IDebuggerParametersMixer],
+  requires: [IDebuggerEditorFinder, IDebuggerConfig],
   activate: (
     app: JupyterFrontEnd,
     editorFinder: IDebuggerEditorFinder,
-    parametersMixer: IDebuggerParametersMixer
+    debuggerConfiguration: IDebuggerConfig
   ) =>
     new DebuggerService({
       specsManager: app.serviceManager.kernelspecs,
       editorFinder,
-      parametersMixer
+      debuggerConfiguration
     })
 };
 
 /**
- * A plugin that provides a parameters mixer with hash method.
+ * A plugin that provides a configuration with hash method.
  */
-const mixer: JupyterFrontEndPlugin<IDebuggerParametersMixer> = {
-  id: '@jupyterlab/debugger:parameters-mixer',
-  provides: IDebuggerParametersMixer,
+const configuration: JupyterFrontEndPlugin<IDebuggerConfig> = {
+  id: '@jupyterlab/debugger:configuration',
+  provides: IDebuggerConfig,
   autoStart: true,
-  activate: (): IDebuggerParametersMixer => new ParametersMixer()
+  activate: (): IDebuggerConfig => new DebuggerConfiguration()
 };
 
 /**
@@ -304,12 +307,12 @@ const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
   id: '@jupyterlab/debugger:editor-finder',
   autoStart: true,
   provides: IDebuggerEditorFinder,
-  requires: [IEditorServices, IDebuggerParametersMixer],
+  requires: [IEditorServices, IDebuggerConfig],
   optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
   activate: (
     app: JupyterFrontEnd,
     editorServices: IEditorServices,
-    parametersMixer: IDebuggerParametersMixer,
+    debuggerConfiguration: IDebuggerConfig,
     notebookTracker: INotebookTracker | null,
     consoleTracker: IConsoleTracker | null,
     editorTracker: IEditorTracker | null
@@ -317,7 +320,7 @@ const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
     return new EditorFinder({
       shell: app.shell,
       editorServices,
-      parametersMixer,
+      debuggerConfiguration,
       notebookTracker,
       consoleTracker,
       editorTracker
@@ -579,7 +582,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   variables,
   main,
   finder,
-  mixer
+  configuration
 ];
 
 export default plugins;

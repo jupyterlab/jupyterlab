@@ -21,7 +21,7 @@ import { IDebuggerEditorFinder } from './editor-finder';
 
 import { VariablesModel } from './variables/model';
 
-import { IDebuggerParametersMixer } from './parameters-mixer';
+import { IDebuggerConfig } from './debugger-configuration';
 
 /**
  * A concrete implementation of IDebugger.
@@ -42,7 +42,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._specsManager = options.specsManager;
     this._model = new DebuggerModel();
     this._editorFinder = options.editorFinder;
-    this._parametersMixer = options.parametersMixer;
+    this._debuggerConfiguration = options.debuggerConfiguration;
   }
 
   /**
@@ -166,7 +166,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code The source code.
    */
   getCodeId(code: string): string {
-    return this._parametersMixer.getCodeId(code);
+    return this._debuggerConfiguration.getCodeId(code);
   }
 
   /**
@@ -228,8 +228,11 @@ export class DebuggerService implements IDebugger, IDisposable {
     const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
     const stoppedThreads = new Set(reply.body.stoppedThreads);
 
-    this._parametersMixer.setHashParameters(hashMethod, hashSeed);
-    this._parametersMixer.setTmpFileParameters(tmpFilePrefix, tmpFileSuffix);
+    this._debuggerConfiguration.setHashParameters(hashMethod, hashSeed);
+    this._debuggerConfiguration.setTmpFileParameters(
+      tmpFilePrefix,
+      tmpFileSuffix
+    );
 
     this._model.stoppedThreads = stoppedThreads;
 
@@ -676,7 +679,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
   private _specsManager: KernelSpec.IManager;
   private _editorFinder: IDebuggerEditorFinder | null;
-  private _parametersMixer: IDebuggerParametersMixer;
+  private _debuggerConfiguration: IDebuggerConfig;
 }
 
 /**
@@ -698,8 +701,8 @@ export namespace DebuggerService {
     editorFinder?: IDebuggerEditorFinder;
 
     /**
-     * The parameters mixer instance with hash method.
+     * The configuration instance with hash method.
      */
-    parametersMixer: IDebuggerParametersMixer;
+    debuggerConfiguration: IDebuggerConfig;
   }
 }
