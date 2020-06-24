@@ -96,8 +96,19 @@ export namespace TableOfContentsRegistry {
    * Interface for the arguments needed in the collapse signal of a generator
    */
   export interface ICollapseChangedArgs {
+    /**
+     * Boolean indicating whether the given heading is collapsed in ToC
+     */
     collapsedState: boolean;
+
+    /**
+     * Heading that was involved in the collapse event
+     */
     heading: IHeading;
+
+    /**
+     * Type of file that the given heading was produced from
+     */
     tocType: string;
   }
 

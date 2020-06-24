@@ -8,9 +8,29 @@ import { IHeading } from '../../utils/headings';
  * Callback invoked upon encountering a "click" event.
  *
  * @private
- * @param cellRef - cell reference
+ * @param heading - heading clicked
  */
 type onClick = (heading?: IHeading) => void;
+
+/**
+ * Interface for properties of the twist button
+ */
+interface ITwistButtonProps {
+  /**
+   * Heading that the twist button will be attached to
+   */
+  heading: IHeading;
+
+  /**
+   * Current state of the twist button
+   */
+  collapsed: boolean;
+
+  /**
+   * "Click" handler
+   */
+  onClick: onClick;
+}
 
 /**
  * Renders a twist button.
@@ -21,8 +41,8 @@ type onClick = (heading?: IHeading) => void;
  * @param onClick - "click" handler
  * @returns rendered twist button
  */
-function twistButton(heading: IHeading, collapsed: boolean, onClick: onClick) {
-  if (collapsed) {
+function twistButton(props: ITwistButtonProps) {
+  if (props.collapsed) {
     return (
       <div className="toc-collapse-button" onClick={wrapper}>
         <div className="toc-twist-placeholder">placeholder</div>
@@ -45,7 +65,7 @@ function twistButton(heading: IHeading, collapsed: boolean, onClick: onClick) {
    */
   function wrapper(event: any) {
     event.stopPropagation();
-    onClick(heading);
+    props.onClick(props.heading);
   }
 }
 

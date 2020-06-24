@@ -47,7 +47,11 @@ function render(
           'toc-hr-collapsed'
         ) as boolean;
 
-        let button = twistButton(item, collapsed || false, onClick);
+        let button = twistButton({
+          heading: item,
+          collapsed: collapsed || false,
+          onClick: onClick
+        });
 
         // Render the heading item:
         jsx = (
@@ -71,7 +75,11 @@ function render(
           'toc-hr-collapsed'
         ) as boolean;
 
-        let button = twistButton(item, collapsed || false, onClick);
+        let button = twistButton({
+          heading: item,
+          collapsed: collapsed || false,
+          onClick: onClick
+        });
         jsx = (
           <div className="toc-entry-holder">
             {button}
