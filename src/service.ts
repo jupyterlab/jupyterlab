@@ -245,7 +245,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     if (this._editorFinder) {
-      const filtered = this._filterBreakpoints(breakpoints, this._editorFinder);
+      const filtered = this._filterBreakpoints(breakpoints);
       this._model.breakpoints.restoreBreakpoints(filtered);
     } else {
       this._model.breakpoints.restoreBreakpoints(breakpoints);
@@ -338,10 +338,7 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Set the local copy of breakpoints to reflect only editors that exist.
     if (this._editorFinder) {
-      const filtered = this._filterBreakpoints(
-        remoteBreakpoints,
-        this._editorFinder
-      );
+      const filtered = this._filterBreakpoints(remoteBreakpoints);
       this._model.breakpoints.restoreBreakpoints(filtered);
     } else {
       this._model.breakpoints.restoreBreakpoints(remoteBreakpoints);
@@ -421,40 +418,21 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param editorFinder - The editor finder object.
    */
   private _filterBreakpoints(
-    breakpoints: Map<string, IDebugger.IBreakpoint[]>,
-    editorFinder: IDebuggerEditorFinder
+    breakpoints: Map<string, IDebugger.IBreakpoint[]>
   ): Map<string, IDebugger.IBreakpoint[]> {
     const path = this._session.connection.path;
-    const associatedBreakpoints = (
-      remoteBreakpoints: Map<string, IDebugger.IBreakpoint[]>,
-      editorFinder: IDebuggerEditorFinder
-    ): string[] => {
-      const associatedBreakpoints: string[] = [];
-      for (const [key, value] of remoteBreakpoints) {
-        each(editorFinder.find(path, key, false), () => {
-          if (value.length > 0) {
-            associatedBreakpoints.push(key);
-          }
-        });
-      }
-      return associatedBreakpoints;
-    };
-
-    const breakpointsForRestore = (
-      breakpoints: Map<string, IDebugger.IBreakpoint[]>,
-      editorFinder: IDebuggerEditorFinder
-    ): Map<string, IDebugger.IBreakpoint[]> => {
-      let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
-      associatedBreakpoints(breakpoints, editorFinder).forEach(path => {
-        Array.from(breakpoints.entries()).forEach(value => {
-          if (value[0] === path) {
-            bpMapForRestore.set(value[0], breakpoints.get(value[0]));
+    let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
+    for (let collection of breakpoints) {
+      const [id, list] = collection;
+      list.forEach(() => {
+        each(this._editorFinder.find(path, id, false), () => {
+          if (list.length > 0) {
+            bpMapForRestore.set(id, list);
           }
         });
       });
-      return bpMapForRestore;
-    };
-    return breakpointsForRestore(breakpoints, editorFinder);
+    }
+    return bpMapForRestore;
   }
 
   /**
