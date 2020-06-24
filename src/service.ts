@@ -415,7 +415,6 @@ export class DebuggerService implements IDebugger, IDisposable {
    *
    * @param breakpoints - Map of breakpoints.
    *
-   * @param editorFinder - The editor finder object.
    */
   private _filterBreakpoints(
     breakpoints: Map<string, IDebugger.IBreakpoint[]>
