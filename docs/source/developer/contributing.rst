@@ -93,10 +93,10 @@ something (this may take a few minutes to load):
 .. image:: https://mybinder.org/badge_logo.svg
    :target: https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/
 
-Installing Node.js and jlpm
-'''''''''''''''''''''''''''
+Installing Node.js
+''''''''''''''''''
 
-Building JupyterLab from its GitHub source code requires Node.js. The
+Building JupyterLab from its GitHub source code requires Node.js. If you already have Node.js installed, you can skip this step. The
 development version requires Node.js version 10+, as defined in the
 ``engines`` specification in
 `dev_mode/package.json <https://github.com/jupyterlab/jupyterlab/blob/master/dev_mode/package.json>`__.
@@ -157,7 +157,7 @@ following steps:
 
    git clone https://github.com/<your-github-username>/jupyterlab.git
    cd jupyterlab
-   pip install -e .
+   pip install -e .  # Be sure to include the "."
    jlpm install
    jlpm run build  # Build the dev mode assets (optional)
    jlpm run build:core  # Build the core mode assets (optional)
