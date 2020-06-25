@@ -1,0 +1,463 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>IKernelPreference | @jupyterlab</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../../index.html" class="title">JupyterLab</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="../modules/_apputils_src_index_.html">&quot;apputils/src/index&quot;</a>
+				</li>
+				<li>
+					<a href="../modules/_apputils_src_index_.isessioncontext.html">ISessionContext</a>
+				</li>
+				<li>
+					<a href="_apputils_src_index_.isessioncontext.ikernelpreference.html">IKernelPreference</a>
+				</li>
+			</ul>
+			<h1>Interface IKernelPreference</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A kernel preference.</p>
+					</div>
+					<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+						<h4>Notes</h4>
+					</a>
+					<p>Preferences for a kernel are considered in the order <code>id</code>, <code>name</code>,
+						<code>language</code>. If no matching kernels can be found and <code>autoStartDefault</code> is
+					<code>true</code>, then the default kernel for the server is preferred.</p>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">IKernelPreference</span>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#autostartdefault" class="tsd-kind-icon">auto<wbr>Start<wbr>Default</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#canstart" class="tsd-kind-icon">can<wbr>Start</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#id" class="tsd-kind-icon">id</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#language" class="tsd-kind-icon">language</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#shouldstart" class="tsd-kind-icon">should<wbr>Start</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#shutdownondispose" class="tsd-kind-icon">shutdown<wbr>OnDispose</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="autostartdefault" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> auto<wbr>Start<wbr>Default</h3>
+					<div class="tsd-signature tsd-kind-icon">auto<wbr>Start<wbr>Default<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L266">packages/apputils/src/sessioncontext.tsx:266</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Automatically start the default kernel if no other matching kernel is
+							found (default <code>true</code>).</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="canstart" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> can<wbr>Start</h3>
+					<div class="tsd-signature tsd-kind-icon">can<wbr>Start<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L255">packages/apputils/src/sessioncontext.tsx:255</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A kernel can be started (default <code>true</code>).</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="id" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> id</h3>
+					<div class="tsd-signature tsd-kind-icon">id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L245">packages/apputils/src/sessioncontext.tsx:245</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The id of an existing kernel.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="language" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> language</h3>
+					<div class="tsd-signature tsd-kind-icon">language<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L240">packages/apputils/src/sessioncontext.tsx:240</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The preferred kernel language.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="name" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> name</h3>
+					<div class="tsd-signature tsd-kind-icon">name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L235">packages/apputils/src/sessioncontext.tsx:235</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The name of the kernel.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="shouldstart" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> should<wbr>Start</h3>
+					<div class="tsd-signature tsd-kind-icon">should<wbr>Start<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L250">packages/apputils/src/sessioncontext.tsx:250</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A kernel should be started automatically (default <code>true</code>).</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="shutdownondispose" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> shutdown<wbr>OnDispose</h3>
+					<div class="tsd-signature tsd-kind-icon">shutdown<wbr>OnDispose<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">true</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L260">packages/apputils/src/sessioncontext.tsx:260</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Shut down the session when session context is disposed (default <code>false</code>).</p>
+						</div>
+					</div>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/_apputils_src_index_.html">&quot;apputils/src/index&quot;</a>
+						<ul>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.clipboard.html">Clipboard</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.commandtoolbarbuttoncomponent.html">Command<wbr>Toolbar<wbr>Button<wbr>Component</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.domutils.html">DOMUtils</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.hoverbox.html">Hover<wbr>Box</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.isanitizer.html">ISanitizer</a>
+							</li>
+							<li class="current tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.isessioncontext.html">ISession<wbr>Context</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.ithememanager.html">ITheme<wbr>Manager</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.inputdialog.html">Input<wbr>Dialog</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.printing.html">Printing</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.styling.html">Styling</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.toolbarbuttoncomponent.html">Toolbar<wbr>Button<wbr>Component</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-namespace">
+						<a href="_apputils_src_index_.isessioncontext.idialogs.html" class="tsd-kind-icon">IDialogs</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-namespace">
+						<a href="_apputils_src_index_.isessioncontext.ikernelpreference.html" class="tsd-kind-icon">IKernel<wbr>Preference</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#autostartdefault" class="tsd-kind-icon">auto<wbr>Start<wbr>Default</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#canstart" class="tsd-kind-icon">can<wbr>Start</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#id" class="tsd-kind-icon">id</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#language" class="tsd-kind-icon">language</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#name" class="tsd-kind-icon">name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#shouldstart" class="tsd-kind-icon">should<wbr>Start</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_apputils_src_index_.isessioncontext.ikernelpreference.html#shutdownondispose" class="tsd-kind-icon">shutdown<wbr>OnDispose</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-type-alias tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#kerneldisplaystatus" class="tsd-kind-icon">Kernel<wbr>Display<wbr>Status</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#connectionstatuschanged" class="tsd-kind-icon">connection<wbr>Status<wbr>Changed</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace tsd-is-inherited">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#disposed" class="tsd-kind-icon">disposed</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#iopubmessage" class="tsd-kind-icon">iopub<wbr>Message</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace tsd-is-inherited">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#isdisposed" class="tsd-kind-icon">is<wbr>Disposed</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#isready" class="tsd-kind-icon">is<wbr>Ready</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#isrestarting" class="tsd-kind-icon">is<wbr>Restarting</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#isterminating" class="tsd-kind-icon">is<wbr>Terminating</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#kernelchanged" class="tsd-kind-icon">kernel<wbr>Changed</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#kerneldisplayname" class="tsd-kind-icon">kernel<wbr>Display<wbr>Name</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#kerneldisplaystatus-1" class="tsd-kind-icon">kernel<wbr>Display<wbr>Status</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#kernelpreference" class="tsd-kind-icon">kernel<wbr>Preference</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#name" class="tsd-kind-icon">name</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#path" class="tsd-kind-icon">path</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#prevkernelname" class="tsd-kind-icon">prev<wbr>Kernel<wbr>Name</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#propertychanged" class="tsd-kind-icon">property<wbr>Changed</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#ready" class="tsd-kind-icon">ready</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#session" class="tsd-kind-icon">session</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#sessionchanged" class="tsd-kind-icon">session<wbr>Changed</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#sessionmanager" class="tsd-kind-icon">session<wbr>Manager</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#specsmanager" class="tsd-kind-icon">specs<wbr>Manager</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#statuschanged" class="tsd-kind-icon">status<wbr>Changed</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#type" class="tsd-kind-icon">type</a>
+					</li>
+					<li class=" tsd-kind-property tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#unhandledmessage" class="tsd-kind-icon">unhandled<wbr>Message</a>
+					</li>
+					<li class=" tsd-kind-method tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#changekernel" class="tsd-kind-icon">change<wbr>Kernel</a>
+					</li>
+					<li class=" tsd-kind-method tsd-parent-kind-namespace tsd-is-inherited">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#dispose" class="tsd-kind-icon">dispose</a>
+					</li>
+					<li class=" tsd-kind-method tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#initialize" class="tsd-kind-icon">initialize</a>
+					</li>
+					<li class=" tsd-kind-method tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#restartkernel" class="tsd-kind-icon">restart<wbr>Kernel</a>
+					</li>
+					<li class=" tsd-kind-method tsd-parent-kind-namespace">
+						<a href="../modules/_apputils_src_index_.isessioncontext.html#shutdown" class="tsd-kind-icon">shutdown</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

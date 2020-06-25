@@ -1,0 +1,1912 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>SessionContext | @jupyterlab</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../../index.html" class="title">JupyterLab</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="../modules/_apputils_src_index_.html">&quot;apputils/src/index&quot;</a>
+				</li>
+				<li>
+					<a href="_apputils_src_index_.sessioncontext.html">SessionContext</a>
+				</li>
+			</ul>
+			<h1>Class SessionContext</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>The default implementation for a session context object.
+						A namespace for <code>SessionContext</code> statics.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">SessionContext</span>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implements</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="../modules/_apputils_src_index_.isessioncontext.html" class="tsd-signature-type">ISessionContext</a></li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Interfaces</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-interface tsd-parent-kind-class"><a href="../interfaces/_apputils_src_index_.sessioncontext.ikernelsearch.html" class="tsd-kind-icon">IKernel<wbr>Search</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-class"><a href="../interfaces/_apputils_src_index_.sessioncontext.ioptions.html" class="tsd-kind-icon">IOptions</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_busydisposable" class="tsd-kind-icon">_busy<wbr>Disposable</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_connectionstatuschanged" class="tsd-kind-icon">_connection<wbr>Status<wbr>Changed</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_dialog" class="tsd-kind-icon">_dialog</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_disposed" class="tsd-kind-icon">_disposed</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_initpromise" class="tsd-kind-icon">_init<wbr>Promise</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_initstarted" class="tsd-kind-icon">_init<wbr>Started</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_initializing" class="tsd-kind-icon">_initializing</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_iopubmessage" class="tsd-kind-icon">_iopub<wbr>Message</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_isdisposed" class="tsd-kind-icon">_is<wbr>Disposed</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_isready" class="tsd-kind-icon">_is<wbr>Ready</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_isrestarting" class="tsd-kind-icon">_is<wbr>Restarting</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_isterminating" class="tsd-kind-icon">_is<wbr>Terminating</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_kernelchanged" class="tsd-kind-icon">_kernel<wbr>Changed</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_kernelpreference" class="tsd-kind-icon">_kernel<wbr>Preference</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_name" class="tsd-kind-icon">_name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_path" class="tsd-kind-icon">_path</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_pendingkernelname" class="tsd-kind-icon">_pending<wbr>Kernel<wbr>Name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_pendingsessionrequest" class="tsd-kind-icon">_pending<wbr>Session<wbr>Request</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_prevkernelname" class="tsd-kind-icon">_prev<wbr>Kernel<wbr>Name</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_propertychanged" class="tsd-kind-icon">_property<wbr>Changed</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_ready" class="tsd-kind-icon">_ready</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_session" class="tsd-kind-icon">_session</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_sessionchanged" class="tsd-kind-icon">_session<wbr>Changed</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_setbusy" class="tsd-kind-icon">_set<wbr>Busy</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_statuschanged" class="tsd-kind-icon">_status<wbr>Changed</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_type" class="tsd-kind-icon">_type</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_unhandledmessage" class="tsd-kind-icon">_unhandled<wbr>Message</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#sessionmanager" class="tsd-kind-icon">session<wbr>Manager</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#specsmanager" class="tsd-kind-icon">specs<wbr>Manager</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Accessors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#connectionstatuschanged" class="tsd-kind-icon">connection<wbr>Status<wbr>Changed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#disposed" class="tsd-kind-icon">disposed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#iopubmessage" class="tsd-kind-icon">iopub<wbr>Message</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#isdisposed" class="tsd-kind-icon">is<wbr>Disposed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#isready" class="tsd-kind-icon">is<wbr>Ready</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#isrestarting" class="tsd-kind-icon">is<wbr>Restarting</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#isterminating" class="tsd-kind-icon">is<wbr>Terminating</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#kernelchanged" class="tsd-kind-icon">kernel<wbr>Changed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#kerneldisplayname" class="tsd-kind-icon">kernel<wbr>Display<wbr>Name</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#kerneldisplaystatus" class="tsd-kind-icon">kernel<wbr>Display<wbr>Status</a></li>
+								<li class="tsd-kind-accessor tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#kernelpreference" class="tsd-kind-icon">kernel<wbr>Preference</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#name" class="tsd-kind-icon">name</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#path" class="tsd-kind-icon">path</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#prevkernelname" class="tsd-kind-icon">prev<wbr>Kernel<wbr>Name</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#propertychanged" class="tsd-kind-icon">property<wbr>Changed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#ready" class="tsd-kind-icon">ready</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#session" class="tsd-kind-icon">session</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#sessionchanged" class="tsd-kind-icon">session<wbr>Changed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#statuschanged" class="tsd-kind-icon">status<wbr>Changed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#type" class="tsd-kind-icon">type</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#unhandledmessage" class="tsd-kind-icon">unhandled<wbr>Message</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_changekernel" class="tsd-kind-icon">_change<wbr>Kernel</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_handlenewsession" class="tsd-kind-icon">_handle<wbr>New<wbr>Session</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_handlesessionerror" class="tsd-kind-icon">_handle<wbr>Session<wbr>Error</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#_initialize" class="tsd-kind-icon">_initialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_onconnectionstatuschanged" class="tsd-kind-icon">_on<wbr>Connection<wbr>Status<wbr>Changed</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_oniopubmessage" class="tsd-kind-icon">_on<wbr>Iopub<wbr>Message</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_onkernelchanged" class="tsd-kind-icon">_on<wbr>Kernel<wbr>Changed</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_onpropertychanged" class="tsd-kind-icon">_on<wbr>Property<wbr>Changed</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_onsessiondisposed" class="tsd-kind-icon">_on<wbr>Session<wbr>Disposed</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_onstatuschanged" class="tsd-kind-icon">_on<wbr>Status<wbr>Changed</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_onunhandledmessage" class="tsd-kind-icon">_on<wbr>Unhandled<wbr>Message</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_shutdownsession" class="tsd-kind-icon">_shutdown<wbr>Session</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_apputils_src_index_.sessioncontext.html#_startifnecessary" class="tsd-kind-icon">_start<wbr>IfNecessary</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#changekernel" class="tsd-kind-icon">change<wbr>Kernel</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#dispose" class="tsd-kind-icon">dispose</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#initialize" class="tsd-kind-icon">initialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#restartkernel" class="tsd-kind-icon">restart<wbr>Kernel</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_apputils_src_index_.sessioncontext.html#shutdown" class="tsd-kind-icon">shutdown</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_apputils_src_index_.sessioncontext.html#getdefaultkernel" class="tsd-kind-icon">get<wbr>Default<wbr>Kernel</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Session<wbr>Context<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_apputils_src_index_.sessioncontext.ioptions.html" class="tsd-signature-type">IOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_apputils_src_index_.sessioncontext.html" class="tsd-signature-type">SessionContext</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L302">packages/apputils/src/sessioncontext.tsx:302</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Construct a new session context.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>options: <a href="../interfaces/_apputils_src_index_.sessioncontext.ioptions.html" class="tsd-signature-type">IOptions</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_apputils_src_index_.sessioncontext.html" class="tsd-signature-type">SessionContext</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_busydisposable" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _busy<wbr>Disposable</h3>
+					<div class="tsd-signature tsd-kind-icon">_busy<wbr>Disposable<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">IDisposable</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1086">packages/apputils/src/sessioncontext.tsx:1086</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_connectionstatuschanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _connection<wbr>Status<wbr>Changed</h3>
+					<div class="tsd-signature tsd-kind-icon">_connection<wbr>Status<wbr>Changed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Signal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"connected"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"connecting"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"disconnected"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Signal&lt;this, Kernel.ConnectionStatus&gt;(this)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1077">packages/apputils/src/sessioncontext.tsx:1077</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_dialog" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _dialog</h3>
+					<div class="tsd-signature tsd-kind-icon">_dialog<span class="tsd-signature-symbol">:</span> <a href="_apputils_src_index_.dialog.html" class="tsd-signature-type">Dialog</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1084">packages/apputils/src/sessioncontext.tsx:1084</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_disposed" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _disposed</h3>
+					<div class="tsd-signature tsd-kind-icon">_disposed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Signal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Signal&lt;this, void&gt;(this)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1055">packages/apputils/src/sessioncontext.tsx:1055</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_initpromise" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _init<wbr>Promise</h3>
+					<div class="tsd-signature tsd-kind-icon">_init<wbr>Promise<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PromiseDelegate</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new PromiseDelegate&lt;boolean&gt;()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1060">packages/apputils/src/sessioncontext.tsx:1060</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_initstarted" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _init<wbr>Started</h3>
+					<div class="tsd-signature tsd-kind-icon">_init<wbr>Started<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PromiseDelegate</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new PromiseDelegate&lt;void&gt;()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1059">packages/apputils/src/sessioncontext.tsx:1059</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_initializing" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _initializing</h3>
+					<div class="tsd-signature tsd-kind-icon">_initializing<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1058">packages/apputils/src/sessioncontext.tsx:1058</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_iopubmessage" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _iopub<wbr>Message</h3>
+					<div class="tsd-signature tsd-kind-icon">_iopub<wbr>Message<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Signal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_services_src_index_._services_src_kernel_messages_.iiopubmessage.html" class="tsd-signature-type">IIOPubMessage</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">"clear_output"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"comm_close"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"comm_msg"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"comm_open"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"display_data"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"error"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"execute_input"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"execute_result"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"status"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"stream"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"update_display_data"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"debug_event"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Signal&lt;this, KernelMessage.IIOPubMessage&gt;(this)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1081">packages/apputils/src/sessioncontext.tsx:1081</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_isdisposed" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _is<wbr>Disposed</h3>
+					<div class="tsd-signature tsd-kind-icon">_is<wbr>Disposed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1054">packages/apputils/src/sessioncontext.tsx:1054</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_isready" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _is<wbr>Ready</h3>
+					<div class="tsd-signature tsd-kind-icon">_is<wbr>Ready<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1061">packages/apputils/src/sessioncontext.tsx:1061</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_isrestarting" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _is<wbr>Restarting</h3>
+					<div class="tsd-signature tsd-kind-icon">_is<wbr>Restarting<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1063">packages/apputils/src/sessioncontext.tsx:1063</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_isterminating" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _is<wbr>Terminating</h3>
+					<div class="tsd-signature tsd-kind-icon">_is<wbr>Terminating<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1062">packages/apputils/src/sessioncontext.tsx:1062</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_kernelchanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _kernel<wbr>Changed</h3>
+					<div class="tsd-signature tsd-kind-icon">_kernel<wbr>Changed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Signal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_coreutils_src_index_.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../modules/_services_src_index_._services_src_kernel_kernel_.ikernelconnection.html" class="tsd-signature-type">IKernelConnection</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../modules/_services_src_index_._services_src_kernel_kernel_.ikernelconnection.html" class="tsd-signature-type">IKernelConnection</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"kernel"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Signal&lt;this,Session.ISessionConnection.IKernelChangedArgs&gt;(this)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1064">packages/apputils/src/sessioncontext.tsx:1064</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_kernelpreference" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _kernel<wbr>Preference</h3>
+					<div class="tsd-signature tsd-kind-icon">_kernel<wbr>Preference<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_apputils_src_index_.isessioncontext.ikernelpreference.html" class="tsd-signature-type">IKernelPreference</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1053">packages/apputils/src/sessioncontext.tsx:1053</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_name" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _name</h3>
+					<div class="tsd-signature tsd-kind-icon">_name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1050">packages/apputils/src/sessioncontext.tsx:1050</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_path" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _path</h3>
+					<div class="tsd-signature tsd-kind-icon">_path<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1049">packages/apputils/src/sessioncontext.tsx:1049</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_pendingkernelname" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _pending<wbr>Kernel<wbr>Name</h3>
+					<div class="tsd-signature tsd-kind-icon">_pending<wbr>Kernel<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1087">packages/apputils/src/sessioncontext.tsx:1087</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_pendingsessionrequest" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _pending<wbr>Session<wbr>Request</h3>
+					<div class="tsd-signature tsd-kind-icon">_pending<wbr>Session<wbr>Request<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1088">packages/apputils/src/sessioncontext.tsx:1088</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_prevkernelname" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _prev<wbr>Kernel<wbr>Name</h3>
+					<div class="tsd-signature tsd-kind-icon">_prev<wbr>Kernel<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1052">packages/apputils/src/sessioncontext.tsx:1052</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_propertychanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _property<wbr>Changed</h3>
+					<div class="tsd-signature tsd-kind-icon">_property<wbr>Changed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Signal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"path"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"name"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"type"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Signal&lt;this, &#x27;path&#x27; | &#x27;name&#x27; | &#x27;type&#x27;&gt;(this)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1083">packages/apputils/src/sessioncontext.tsx:1083</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_ready" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _ready</h3>
+					<div class="tsd-signature tsd-kind-icon">_ready<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PromiseDelegate</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new PromiseDelegate&lt;void&gt;()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1057">packages/apputils/src/sessioncontext.tsx:1057</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_session" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _session</h3>
+					<div class="tsd-signature tsd-kind-icon">_session<span class="tsd-signature-symbol">:</span> <a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1056">packages/apputils/src/sessioncontext.tsx:1056</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_sessionchanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _session<wbr>Changed</h3>
+					<div class="tsd-signature tsd-kind-icon">_session<wbr>Changed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Signal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_coreutils_src_index_.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> | </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"session"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Signal&lt;this,IChangedArgs&lt;Session.ISessionConnection | null,Session.ISessionConnection | null,&#x27;session&#x27;&gt;&gt;(this)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1068">packages/apputils/src/sessioncontext.tsx:1068</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_setbusy" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _set<wbr>Busy</h3>
+					<div class="tsd-signature tsd-kind-icon">_set<wbr>Busy<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> =&gt; </span><span class="tsd-signature-type">IDisposable</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1085">packages/apputils/src/sessioncontext.tsx:1085</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_statuschanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _status<wbr>Changed</h3>
+					<div class="tsd-signature tsd-kind-icon">_status<wbr>Changed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Signal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"unknown"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"starting"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"idle"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"busy"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"terminating"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"restarting"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"autorestarting"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"dead"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Signal&lt;this, Kernel.Status&gt;(this)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1076">packages/apputils/src/sessioncontext.tsx:1076</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_type" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _type</h3>
+					<div class="tsd-signature tsd-kind-icon">_type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1051">packages/apputils/src/sessioncontext.tsx:1051</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_unhandledmessage" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _unhandled<wbr>Message</h3>
+					<div class="tsd-signature tsd-kind-icon">_unhandled<wbr>Message<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Signal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_services_src_index_._services_src_kernel_messages_.imessage.html" class="tsd-signature-type">IMessage</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">"clear_output"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"comm_close"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"comm_msg"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"comm_open"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"display_data"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"error"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"execute_input"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"execute_result"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"status"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"stream"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"update_display_data"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"debug_event"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"comm_info_reply"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"comm_info_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"complete_reply"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"complete_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"execute_reply"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"execute_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"history_reply"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"history_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"inspect_reply"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"inspect_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"interrupt_reply"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"interrupt_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"is_complete_reply"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"is_complete_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"kernel_info_reply"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"kernel_info_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"shutdown_reply"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"shutdown_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"debug_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"debug_reply"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"input_request"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"input_reply"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Signal&lt;this, KernelMessage.IMessage&gt;(this)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1082">packages/apputils/src/sessioncontext.tsx:1082</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="sessionmanager" class="tsd-anchor"></a>
+					<h3>session<wbr>Manager</h3>
+					<div class="tsd-signature tsd-kind-icon">session<wbr>Manager<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_services_src_index_._services_src_session_session_.imanager.html" class="tsd-signature-type">IManager</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L459">packages/apputils/src/sessioncontext.tsx:459</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The session manager used by the session.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="specsmanager" class="tsd-anchor"></a>
+					<h3>specs<wbr>Manager</h3>
+					<div class="tsd-signature tsd-kind-icon">specs<wbr>Manager<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_services_src_index_._services_src_kernelspec_kernelspec_.imanager.html" class="tsd-signature-type">IManager</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L464">packages/apputils/src/sessioncontext.tsx:464</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The kernel spec manager</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Accessors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="connectionstatuschanged" class="tsd-anchor"></a>
+					<h3>connection<wbr>Status<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> connectionStatusChanged<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Kernel.ConnectionStatus</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L390">packages/apputils/src/sessioncontext.tsx:390</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted when the kernel status changes, proxied from the kernel.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Kernel.ConnectionStatus</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="disposed" class="tsd-anchor"></a>
+					<h3>disposed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> disposed<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L570">packages/apputils/src/sessioncontext.tsx:570</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted when the poll is disposed.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="iopubmessage" class="tsd-anchor"></a>
+					<h3>iopub<wbr>Message</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> iopubMessage<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_services_src_index_._services_src_kernel_messages_.iiopubmessage.html" class="tsd-signature-type">IIOPubMessage</a><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L397">packages/apputils/src/sessioncontext.tsx:397</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted for iopub kernel messages, proxied from the kernel.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_services_src_index_._services_src_kernel_messages_.iiopubmessage.html" class="tsd-signature-type">IIOPubMessage</a><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="isdisposed" class="tsd-anchor"></a>
+					<h3>is<wbr>Disposed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isDisposed<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L563">packages/apputils/src/sessioncontext.tsx:563</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Test whether the context is disposed.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="isready" class="tsd-anchor"></a>
+					<h3>is<wbr>Ready</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isReady<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L431">packages/apputils/src/sessioncontext.tsx:431</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Whether the context is ready.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="isrestarting" class="tsd-anchor"></a>
+					<h3>is<wbr>Restarting</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isRestarting<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L452">packages/apputils/src/sessioncontext.tsx:452</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Whether the context is restarting.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="isterminating" class="tsd-anchor"></a>
+					<h3>is<wbr>Terminating</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isTerminating<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L445">packages/apputils/src/sessioncontext.tsx:445</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Whether the context is terminating.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="kernelchanged" class="tsd-anchor"></a>
+					<h3>kernel<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> kernelChanged<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Session.ISessionConnection.IKernelChangedArgs</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L359">packages/apputils/src/sessioncontext.tsx:359</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted when the kernel connection changes, proxied from the session connection.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Session.ISessionConnection.IKernelChangedArgs</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="kerneldisplayname" class="tsd-anchor"></a>
+					<h3>kernel<wbr>Display<wbr>Name</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> kernelDisplayName<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L473">packages/apputils/src/sessioncontext.tsx:473</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The display name of the current kernel, or a sensible alternative.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>This is a convenience function to have a consistent sensible name for the
+								kernel.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="kerneldisplaystatus" class="tsd-anchor"></a>
+					<h3>kernel<wbr>Display<wbr>Status</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> kernelDisplayStatus<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_apputils_src_index_.isessioncontext.html#kerneldisplaystatus" class="tsd-signature-type">KernelDisplayStatus</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L518">packages/apputils/src/sessioncontext.tsx:518</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A sensible status to display</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>This combines the status and connection status into a single status for
+								the user.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/_apputils_src_index_.isessioncontext.html#kerneldisplaystatus" class="tsd-signature-type">KernelDisplayStatus</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class">
+					<a name="kernelpreference" class="tsd-anchor"></a>
+					<h3>kernel<wbr>Preference</h3>
+					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> kernelPreference<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_apputils_src_index_.isessioncontext.ikernelpreference.html" class="tsd-signature-type">IKernelPreference</a></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> kernelPreference<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><a href="../interfaces/_apputils_src_index_.isessioncontext.ikernelpreference.html" class="tsd-signature-type">IKernelPreference</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L421">packages/apputils/src/sessioncontext.tsx:421</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The kernel preference of this client session.</p>
+								</div>
+								<p>This is used when selecting a new kernel, and should reflect the sort of
+								kernel the activity prefers.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_apputils_src_index_.isessioncontext.ikernelpreference.html" class="tsd-signature-type">IKernelPreference</a></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L424">packages/apputils/src/sessioncontext.tsx:424</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The kernel preference of this client session.</p>
+								</div>
+								<p>This is used when selecting a new kernel, and should reflect the sort of
+								kernel the activity prefers.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>value: <a href="../interfaces/_apputils_src_index_.isessioncontext.ikernelpreference.html" class="tsd-signature-type">IKernelPreference</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="name" class="tsd-anchor"></a>
+					<h3>name</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> name<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L352">packages/apputils/src/sessioncontext.tsx:352</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The session name.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>Typically <code>.session.name</code> should be used. This attribute is useful if
+								there is no current session.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="path" class="tsd-anchor"></a>
+					<h3>path</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> path<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L330">packages/apputils/src/sessioncontext.tsx:330</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The session path.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>Typically <code>.session.path</code> should be used. This attribute is useful if
+								there is no current session.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="prevkernelname" class="tsd-anchor"></a>
+					<h3>prev<wbr>Kernel<wbr>Name</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> prevKernelName<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L556">packages/apputils/src/sessioncontext.tsx:556</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The name of the previously started kernel.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="propertychanged" class="tsd-anchor"></a>
+					<h3>property<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> propertyChanged<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"path"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"name"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"type"</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L411">packages/apputils/src/sessioncontext.tsx:411</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted when a session property changes, proxied from the current session.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"path"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"name"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"type"</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="ready" class="tsd-anchor"></a>
+					<h3>ready</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> ready<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L438">packages/apputils/src/sessioncontext.tsx:438</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A promise that is fulfilled when the context is ready.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="session" class="tsd-anchor"></a>
+					<h3>session</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> session<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L319">packages/apputils/src/sessioncontext.tsx:319</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The current session connection.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="sessionchanged" class="tsd-anchor"></a>
+					<h3>session<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> sessionChanged<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_coreutils_src_index_.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">, </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"session"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L369">packages/apputils/src/sessioncontext.tsx:369</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted when the session connection changes.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_coreutils_src_index_.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">, </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">"session"</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="statuschanged" class="tsd-anchor"></a>
+					<h3>status<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> statusChanged<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Kernel.Status</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L383">packages/apputils/src/sessioncontext.tsx:383</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted when the kernel status changes, proxied from the kernel.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Kernel.Status</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="type" class="tsd-anchor"></a>
+					<h3>type</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> type<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L341">packages/apputils/src/sessioncontext.tsx:341</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The session type.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>Typically <code>.session.type</code> should be used. This attribute is useful if
+								there is no current session.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="unhandledmessage" class="tsd-anchor"></a>
+					<h3>unhandled<wbr>Message</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> unhandledMessage<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_services_src_index_._services_src_kernel_messages_.imessage.html" class="tsd-signature-type">IMessage</a><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L404">packages/apputils/src/sessioncontext.tsx:404</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted for an unhandled kernel message, proxied from the kernel.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_services_src_index_._services_src_kernel_messages_.imessage.html" class="tsd-signature-type">IMessage</a><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_changekernel" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _change<wbr>Kernel</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_change<wbr>Kernel<span class="tsd-signature-symbol">(</span>model<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_services_src_index_._services_src_kernel_kernel_.imodel.html" class="tsd-signature-type">IModel</a><span class="tsd-signature-symbol">&gt;</span>, isInit<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_services_src_index_._services_src_kernel_kernel_.ikernelconnection.html" class="tsd-signature-type">IKernelConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L785">packages/apputils/src/sessioncontext.tsx:785</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Change the kernel.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> model: <span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_services_src_index_._services_src_kernel_kernel_.imodel.html" class="tsd-signature-type">IModel</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = {}</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> isInit: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_services_src_index_._services_src_kernel_kernel_.ikernelconnection.html" class="tsd-signature-type">IKernelConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_handlenewsession" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _handle<wbr>New<wbr>Session</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_handle<wbr>New<wbr>Session<span class="tsd-signature-symbol">(</span>session<span class="tsd-signature-symbol">: </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_services_src_index_._services_src_kernel_kernel_.ikernelconnection.html" class="tsd-signature-type">IKernelConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L852">packages/apputils/src/sessioncontext.tsx:852</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle a new session object.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>session: <a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/_services_src_index_._services_src_kernel_kernel_.ikernelconnection.html" class="tsd-signature-type">IKernelConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_handlesessionerror" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _handle<wbr>Session<wbr>Error</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_handle<wbr>Session<wbr>Error<span class="tsd-signature-symbol">(</span>err<span class="tsd-signature-symbol">: </span><a href="_services_src_index_.serverconnection.responseerror.html" class="tsd-signature-type">ResponseError</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L913">packages/apputils/src/sessioncontext.tsx:913</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle an error in session startup.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>err: <a href="_services_src_index_.serverconnection.responseerror.html" class="tsd-signature-type">ResponseError</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="_initialize" class="tsd-anchor"></a>
+					<h3>_initialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">_initialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L692">packages/apputils/src/sessioncontext.tsx:692</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Inner initialize function that doesn&#39;t handle promises.
+									This makes it easier to consolidate promise handling logic.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_onconnectionstatuschanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _on<wbr>Connection<wbr>Status<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_on<wbr>Connection<wbr>Status<wbr>Changed<span class="tsd-signature-symbol">(</span>sender<span class="tsd-signature-symbol">: </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a>, status<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Kernel.ConnectionStatus</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1021">packages/apputils/src/sessioncontext.tsx:1021</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle a change to the session status.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>sender: <a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a></h5>
+								</li>
+								<li>
+									<h5>status: <span class="tsd-signature-type">Kernel.ConnectionStatus</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_oniopubmessage" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _on<wbr>Iopub<wbr>Message</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_on<wbr>Iopub<wbr>Message<span class="tsd-signature-symbol">(</span>sender<span class="tsd-signature-symbol">: </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a>, message<span class="tsd-signature-symbol">: </span><a href="../interfaces/_services_src_index_._services_src_kernel_messages_.iiopubmessage.html" class="tsd-signature-type">IIOPubMessage</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1032">packages/apputils/src/sessioncontext.tsx:1032</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle an iopub message.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>sender: <a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a></h5>
+								</li>
+								<li>
+									<h5>message: <a href="../interfaces/_services_src_index_._services_src_kernel_messages_.iiopubmessage.html" class="tsd-signature-type">IIOPubMessage</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_onkernelchanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _on<wbr>Kernel<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_on<wbr>Kernel<wbr>Changed<span class="tsd-signature-symbol">(</span>sender<span class="tsd-signature-symbol">: </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a>, args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Session.ISessionConnection.IKernelChangedArgs</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L984">packages/apputils/src/sessioncontext.tsx:984</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle a change to the kernel.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>sender: <a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a></h5>
+								</li>
+								<li>
+									<h5>args: <span class="tsd-signature-type">Session.ISessionConnection.IKernelChangedArgs</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_onpropertychanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _on<wbr>Property<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_on<wbr>Property<wbr>Changed<span class="tsd-signature-symbol">(</span>sender<span class="tsd-signature-symbol">: </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a>, property<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"path"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"name"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"type"</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L961">packages/apputils/src/sessioncontext.tsx:961</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle a change to a session property.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>sender: <a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a></h5>
+								</li>
+								<li>
+									<h5>property: <span class="tsd-signature-type">"path"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"name"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"type"</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_onsessiondisposed" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _on<wbr>Session<wbr>Disposed</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_on<wbr>Session<wbr>Disposed<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L949">packages/apputils/src/sessioncontext.tsx:949</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle a session termination.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_onstatuschanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _on<wbr>Status<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_on<wbr>Status<wbr>Changed<span class="tsd-signature-symbol">(</span>sender<span class="tsd-signature-symbol">: </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a>, status<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Kernel.Status</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L994">packages/apputils/src/sessioncontext.tsx:994</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle a change to the session status.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>sender: <a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a></h5>
+								</li>
+								<li>
+									<h5>status: <span class="tsd-signature-type">Kernel.Status</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_onunhandledmessage" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _on<wbr>Unhandled<wbr>Message</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_on<wbr>Unhandled<wbr>Message<span class="tsd-signature-symbol">(</span>sender<span class="tsd-signature-symbol">: </span><a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a>, message<span class="tsd-signature-symbol">: </span><a href="../interfaces/_services_src_index_._services_src_kernel_messages_.imessage.html" class="tsd-signature-type">IMessage</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1042">packages/apputils/src/sessioncontext.tsx:1042</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle an unhandled message.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>sender: <a href="../modules/_services_src_index_._services_src_session_session_.isessionconnection.html" class="tsd-signature-type">ISessionConnection</a></h5>
+								</li>
+								<li>
+									<h5>message: <a href="../interfaces/_services_src_index_._services_src_kernel_messages_.imessage.html" class="tsd-signature-type">IMessage</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_shutdownsession" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _shutdown<wbr>Session</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_shutdown<wbr>Session<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L715">packages/apputils/src/sessioncontext.tsx:715</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Shut down the current session.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_startifnecessary" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _start<wbr>IfNecessary</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_start<wbr>IfNecessary<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L743">packages/apputils/src/sessioncontext.tsx:743</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Start the session if necessary.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>Whether to ask the user to pick a kernel.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="changekernel" class="tsd-anchor"></a>
+					<h3>change<wbr>Kernel</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">change<wbr>Kernel<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_services_src_index_._services_src_kernel_kernel_.imodel.html" class="tsd-signature-type">IModel</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_services_src_index_._services_src_kernel_kernel_.ikernelconnection.html" class="tsd-signature-type">IKernelConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L630">packages/apputils/src/sessioncontext.tsx:630</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Change the current kernel associated with the session.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <span class="tsd-signature-type">Partial</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_services_src_index_._services_src_kernel_kernel_.imodel.html" class="tsd-signature-type">IModel</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = {}</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_services_src_index_._services_src_kernel_kernel_.ikernelconnection.html" class="tsd-signature-type">IKernelConnection</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="dispose" class="tsd-anchor"></a>
+					<h3>dispose</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">dispose<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L577">packages/apputils/src/sessioncontext.tsx:577</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Dispose of the resources held by the context.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="initialize" class="tsd-anchor"></a>
+					<h3>initialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">initialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L671">packages/apputils/src/sessioncontext.tsx:671</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Initialize the session context</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A promise that resolves with whether to ask the user to select a kernel.</p>
+							<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+								<h4>Notes</h4>
+							</a>
+							<p>If a server session exists on the current path, we will connect to it.
+								If preferences include disabling <code>canStart</code> or <code>shouldStart</code>, no
+								server session will be started.
+								If a kernel id is given, we attempt to start a session with that id.
+								If a default kernel is available, we connect to it.
+							Otherwise we ask the user to select a kernel.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="restartkernel" class="tsd-anchor"></a>
+					<h3>restart<wbr>Kernel</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">restart<wbr>Kernel<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L611">packages/apputils/src/sessioncontext.tsx:611</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Restart the current Kernel.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A promise that resolves when the kernel is restarted.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="shutdown" class="tsd-anchor"></a>
+					<h3>shutdown</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">shutdown<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L648">packages/apputils/src/sessioncontext.tsx:648</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Kill the kernel and shutdown the session.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A promise that resolves when the session is shut down.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="getdefaultkernel" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> get<wbr>Default<wbr>Kernel</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Default<wbr>Kernel<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_apputils_src_index_.sessioncontext.ikernelsearch.html" class="tsd-signature-type">IKernelSearch</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/apputils/src/sessioncontext.tsx#L1158">packages/apputils/src/sessioncontext.tsx:1158</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the default kernel name given select options.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>options: <a href="../interfaces/_apputils_src_index_.sessioncontext.ikernelsearch.html" class="tsd-signature-type">IKernelSearch</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/_apputils_src_index_.html">&quot;apputils/src/index&quot;</a>
+						<ul>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.clipboard.html">Clipboard</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.commandtoolbarbuttoncomponent.html">Command<wbr>Toolbar<wbr>Button<wbr>Component</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.domutils.html">DOMUtils</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.hoverbox.html">Hover<wbr>Box</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.isanitizer.html">ISanitizer</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.isessioncontext.html">ISession<wbr>Context</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.ithememanager.html">ITheme<wbr>Manager</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.inputdialog.html">Input<wbr>Dialog</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.printing.html">Printing</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.styling.html">Styling</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_apputils_src_index_.toolbarbuttoncomponent.html">Toolbar<wbr>Button<wbr>Component</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="_apputils_src_index_.sessioncontext.html" class="tsd-kind-icon">Session<wbr>Context</a>
+						<ul>
+							<li class=" tsd-kind-interface tsd-parent-kind-class">
+								<a href="../interfaces/_apputils_src_index_.sessioncontext.ikernelsearch.html" class="tsd-kind-icon">IKernel<wbr>Search</a>
+							</li>
+							<li class=" tsd-kind-interface tsd-parent-kind-class">
+								<a href="../interfaces/_apputils_src_index_.sessioncontext.ioptions.html" class="tsd-kind-icon">IOptions</a>
+							</li>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_busydisposable" class="tsd-kind-icon">_busy<wbr>Disposable</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_connectionstatuschanged" class="tsd-kind-icon">_connection<wbr>Status<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_dialog" class="tsd-kind-icon">_dialog</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_disposed" class="tsd-kind-icon">_disposed</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_initpromise" class="tsd-kind-icon">_init<wbr>Promise</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_initstarted" class="tsd-kind-icon">_init<wbr>Started</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_initializing" class="tsd-kind-icon">_initializing</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_iopubmessage" class="tsd-kind-icon">_iopub<wbr>Message</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_isdisposed" class="tsd-kind-icon">_is<wbr>Disposed</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_isready" class="tsd-kind-icon">_is<wbr>Ready</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_isrestarting" class="tsd-kind-icon">_is<wbr>Restarting</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_isterminating" class="tsd-kind-icon">_is<wbr>Terminating</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_kernelchanged" class="tsd-kind-icon">_kernel<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_kernelpreference" class="tsd-kind-icon">_kernel<wbr>Preference</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_name" class="tsd-kind-icon">_name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_path" class="tsd-kind-icon">_path</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_pendingkernelname" class="tsd-kind-icon">_pending<wbr>Kernel<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_pendingsessionrequest" class="tsd-kind-icon">_pending<wbr>Session<wbr>Request</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_prevkernelname" class="tsd-kind-icon">_prev<wbr>Kernel<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_propertychanged" class="tsd-kind-icon">_property<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_ready" class="tsd-kind-icon">_ready</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_session" class="tsd-kind-icon">_session</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_sessionchanged" class="tsd-kind-icon">_session<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_setbusy" class="tsd-kind-icon">_set<wbr>Busy</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_statuschanged" class="tsd-kind-icon">_status<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_type" class="tsd-kind-icon">_type</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_unhandledmessage" class="tsd-kind-icon">_unhandled<wbr>Message</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#sessionmanager" class="tsd-kind-icon">session<wbr>Manager</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#specsmanager" class="tsd-kind-icon">specs<wbr>Manager</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#connectionstatuschanged" class="tsd-kind-icon">connection<wbr>Status<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#disposed" class="tsd-kind-icon">disposed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#iopubmessage" class="tsd-kind-icon">iopub<wbr>Message</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#isdisposed" class="tsd-kind-icon">is<wbr>Disposed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#isready" class="tsd-kind-icon">is<wbr>Ready</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#isrestarting" class="tsd-kind-icon">is<wbr>Restarting</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#isterminating" class="tsd-kind-icon">is<wbr>Terminating</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#kernelchanged" class="tsd-kind-icon">kernel<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#kerneldisplayname" class="tsd-kind-icon">kernel<wbr>Display<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#kerneldisplaystatus" class="tsd-kind-icon">kernel<wbr>Display<wbr>Status</a>
+							</li>
+							<li class=" tsd-kind-accessor tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#kernelpreference" class="tsd-kind-icon">kernel<wbr>Preference</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#name" class="tsd-kind-icon">name</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#path" class="tsd-kind-icon">path</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#prevkernelname" class="tsd-kind-icon">prev<wbr>Kernel<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#propertychanged" class="tsd-kind-icon">property<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#ready" class="tsd-kind-icon">ready</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#session" class="tsd-kind-icon">session</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#sessionchanged" class="tsd-kind-icon">session<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#statuschanged" class="tsd-kind-icon">status<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#type" class="tsd-kind-icon">type</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#unhandledmessage" class="tsd-kind-icon">unhandled<wbr>Message</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_changekernel" class="tsd-kind-icon">_change<wbr>Kernel</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_handlenewsession" class="tsd-kind-icon">_handle<wbr>New<wbr>Session</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_handlesessionerror" class="tsd-kind-icon">_handle<wbr>Session<wbr>Error</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#_initialize" class="tsd-kind-icon">_initialize</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_onconnectionstatuschanged" class="tsd-kind-icon">_on<wbr>Connection<wbr>Status<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_oniopubmessage" class="tsd-kind-icon">_on<wbr>Iopub<wbr>Message</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_onkernelchanged" class="tsd-kind-icon">_on<wbr>Kernel<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_onpropertychanged" class="tsd-kind-icon">_on<wbr>Property<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_onsessiondisposed" class="tsd-kind-icon">_on<wbr>Session<wbr>Disposed</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_onstatuschanged" class="tsd-kind-icon">_on<wbr>Status<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_onunhandledmessage" class="tsd-kind-icon">_on<wbr>Unhandled<wbr>Message</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_shutdownsession" class="tsd-kind-icon">_shutdown<wbr>Session</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_apputils_src_index_.sessioncontext.html#_startifnecessary" class="tsd-kind-icon">_start<wbr>IfNecessary</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#changekernel" class="tsd-kind-icon">change<wbr>Kernel</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#dispose" class="tsd-kind-icon">dispose</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#initialize" class="tsd-kind-icon">initialize</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#restartkernel" class="tsd-kind-icon">restart<wbr>Kernel</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_apputils_src_index_.sessioncontext.html#shutdown" class="tsd-kind-icon">shutdown</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="_apputils_src_index_.sessioncontext.html#getdefaultkernel" class="tsd-kind-icon">get<wbr>Default<wbr>Kernel</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

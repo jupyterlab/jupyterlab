@@ -1,0 +1,1268 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>NotebookModel | @jupyterlab</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../../index.html" class="title">JupyterLab</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="../modules/_notebook_src_index_.html">&quot;notebook/src/index&quot;</a>
+				</li>
+				<li>
+					<a href="_notebook_src_index_.notebookmodel.html">NotebookModel</a>
+				</li>
+			</ul>
+			<h1>Class NotebookModel</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>An implementation of a notebook Model.
+						The namespace for the <code>NotebookModel</code> class statics.</p>
+					</div>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<a href="_docregistry_src_index_.documentmodel.html" class="tsd-signature-type">DocumentModel</a>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">NotebookModel</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implements</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="../interfaces/_codeeditor_src_index_.codeeditor.imodel.html" class="tsd-signature-type">IModel</a></li>
+					<li><a href="../interfaces/_docregistry_src_index_.documentregistry.icodemodel.html" class="tsd-signature-type">ICodeModel</a></li>
+					<li><a href="../interfaces/_notebook_src_index_.inotebookmodel.html" class="tsd-signature-type">INotebookModel</a></li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Classes</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-class tsd-parent-kind-class"><a href="_notebook_src_index_.notebookmodel.contentfactory.html" class="tsd-kind-icon">Content<wbr>Factory</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Interfaces</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-interface tsd-parent-kind-class"><a href="../interfaces/_notebook_src_index_.notebookmodel.icontentfactory.html" class="tsd-kind-icon">IContent<wbr>Factory</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-class"><a href="../interfaces/_notebook_src_index_.notebookmodel.ioptions.html" class="tsd-kind-icon">IOptions</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite"><a href="_notebook_src_index_.notebookmodel.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_notebook_src_index_.notebookmodel.html#_cells" class="tsd-kind-icon">_cells</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_notebook_src_index_.notebookmodel.html#_deletedcells" class="tsd-kind-icon">_deleted<wbr>Cells</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_notebook_src_index_.notebookmodel.html#_nbformat" class="tsd-kind-icon">_nbformat</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_notebook_src_index_.notebookmodel.html#_nbformatminor" class="tsd-kind-icon">_nbformat<wbr>Minor</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_notebook_src_index_.notebookmodel.html#contentfactory-1" class="tsd-kind-icon">content<wbr>Factory</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_notebook_src_index_.notebookmodel.html#modeldb" class="tsd-kind-icon">modelDB</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="_notebook_src_index_.notebookmodel.html#defaultcontentfactory" class="tsd-kind-icon">default<wbr>Content<wbr>Factory</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Accessors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_notebook_src_index_.notebookmodel.html#cells" class="tsd-kind-icon">cells</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="_notebook_src_index_.notebookmodel.html#contentchanged" class="tsd-kind-icon">content<wbr>Changed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite"><a href="_notebook_src_index_.notebookmodel.html#defaultkernellanguage" class="tsd-kind-icon">default<wbr>Kernel<wbr>Language</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite"><a href="_notebook_src_index_.notebookmodel.html#defaultkernelname" class="tsd-kind-icon">default<wbr>Kernel<wbr>Name</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_notebook_src_index_.notebookmodel.html#deletedcells" class="tsd-kind-icon">deleted<wbr>Cells</a></li>
+								<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><a href="_notebook_src_index_.notebookmodel.html#dirty" class="tsd-kind-icon">dirty</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="_notebook_src_index_.notebookmodel.html#isdisposed" class="tsd-kind-icon">is<wbr>Disposed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_notebook_src_index_.notebookmodel.html#metadata" class="tsd-kind-icon">metadata</a></li>
+								<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><a href="_notebook_src_index_.notebookmodel.html#mimetype" class="tsd-kind-icon">mime<wbr>Type</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="_notebook_src_index_.notebookmodel.html#mimetypechanged" class="tsd-kind-icon">mime<wbr>Type<wbr>Changed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_notebook_src_index_.notebookmodel.html#nbformat" class="tsd-kind-icon">nbformat</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_notebook_src_index_.notebookmodel.html#nbformatminor" class="tsd-kind-icon">nbformat<wbr>Minor</a></li>
+								<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><a href="_notebook_src_index_.notebookmodel.html#readonly" class="tsd-kind-icon">read<wbr>Only</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="_notebook_src_index_.notebookmodel.html#selections" class="tsd-kind-icon">selections</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="_notebook_src_index_.notebookmodel.html#statechanged" class="tsd-kind-icon">state<wbr>Changed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited"><a href="_notebook_src_index_.notebookmodel.html#value" class="tsd-kind-icon">value</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_notebook_src_index_.notebookmodel.html#_ensuremetadata" class="tsd-kind-icon">_ensure<wbr>Metadata</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_notebook_src_index_.notebookmodel.html#_oncellschanged" class="tsd-kind-icon">_on<wbr>Cells<wbr>Changed</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_notebook_src_index_.notebookmodel.html#dispose" class="tsd-kind-icon">dispose</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_notebook_src_index_.notebookmodel.html#fromjson" class="tsd-kind-icon">fromJSON</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_notebook_src_index_.notebookmodel.html#fromstring" class="tsd-kind-icon">from<wbr>String</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_notebook_src_index_.notebookmodel.html#initialize" class="tsd-kind-icon">initialize</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_notebook_src_index_.notebookmodel.html#tojson" class="tsd-kind-icon">toJSON</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_notebook_src_index_.notebookmodel.html#tostring" class="tsd-kind-icon">to<wbr>String</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="_notebook_src_index_.notebookmodel.html#triggercontentchange" class="tsd-kind-icon">trigger<wbr>Content<wbr>Change</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="_notebook_src_index_.notebookmodel.html#triggerstatechange" class="tsd-kind-icon">trigger<wbr>State<wbr>Change</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Notebook<wbr>Model<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_notebook_src_index_.notebookmodel.ioptions.html" class="tsd-signature-type">IOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_notebook_src_index_.notebookmodel.html" class="tsd-signature-type">NotebookModel</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#constructor">constructor</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L69">packages/notebook/src/model.ts:69</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Construct a new notebook model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> options: <a href="../interfaces/_notebook_src_index_.notebookmodel.ioptions.html" class="tsd-signature-type">IOptions</a><span class="tsd-signature-symbol"> = {}</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_notebook_src_index_.notebookmodel.html" class="tsd-signature-type">NotebookModel</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_cells" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _cells</h3>
+					<div class="tsd-signature tsd-kind-icon">_cells<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">CellList</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L341">packages/notebook/src/model.ts:341</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_deletedcells" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _deleted<wbr>Cells</h3>
+					<div class="tsd-signature tsd-kind-icon">_deleted<wbr>Cells<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L344">packages/notebook/src/model.ts:344</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_nbformat" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _nbformat</h3>
+					<div class="tsd-signature tsd-kind-icon">_nbformat<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = nbformat.MAJOR_VERSION</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L342">packages/notebook/src/model.ts:342</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_nbformatminor" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _nbformat<wbr>Minor</h3>
+					<div class="tsd-signature tsd-kind-icon">_nbformat<wbr>Minor<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = nbformat.MINOR_VERSION</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L343">packages/notebook/src/model.ts:343</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="contentfactory-1" class="tsd-anchor"></a>
+					<h3>content<wbr>Factory</h3>
+					<div class="tsd-signature tsd-kind-icon">content<wbr>Factory<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_notebook_src_index_.notebookmodel.icontentfactory.html" class="tsd-signature-type">IContentFactory</a></div>
+					<aside class="tsd-sources">
+						<p>Implementation of <a href="../interfaces/_notebook_src_index_.inotebookmodel.html">INotebookModel</a>.<a href="../interfaces/_notebook_src_index_.inotebookmodel.html#contentfactory">contentFactory</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L95">packages/notebook/src/model.ts:95</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The cell model factory for the notebook.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="modeldb" class="tsd-anchor"></a>
+					<h3>modelDB</h3>
+					<div class="tsd-signature tsd-kind-icon">modelDB<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_observables_src_index_.imodeldb.html" class="tsd-signature-type">IModelDB</a></div>
+					<aside class="tsd-sources">
+						<p>Implementation of <a href="../interfaces/_notebook_src_index_.inotebookmodel.html">INotebookModel</a>.<a href="../interfaces/_notebook_src_index_.inotebookmodel.html#modeldb">modelDB</a></p>
+						<p>Inherited from <a href="_cells_src_index_.cellmodel.html">CellModel</a>.<a href="_cells_src_index_.cellmodel.html#modeldb">modelDB</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/codeeditor/src/editor.ts#L233">packages/codeeditor/src/editor.ts:233</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The underlying <code>IModelDB</code> instance in which model
+							data is stored.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
+					<a name="defaultcontentfactory" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> default<wbr>Content<wbr>Factory</h3>
+					<div class="tsd-signature tsd-kind-icon">default<wbr>Content<wbr>Factory<span class="tsd-signature-symbol">:</span> <a href="_notebook_src_index_.notebookmodel.contentfactory.html" class="tsd-signature-type">ContentFactory</a><span class="tsd-signature-symbol"> = new ContentFactory({})</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L575">packages/notebook/src/model.ts:575</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The default <code>ContentFactory</code> instance.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Accessors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="cells" class="tsd-anchor"></a>
+					<h3>cells</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> cells<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_observables_src_index_.iobservableundoablelist.html" class="tsd-signature-type">IObservableUndoableList</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_cells_src_index_.icellmodel.html" class="tsd-signature-type">ICellModel</a><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L107">packages/notebook/src/model.ts:107</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the observable list of notebook cells.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_observables_src_index_.iobservableundoablelist.html" class="tsd-signature-type">IObservableUndoableList</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_cells_src_index_.icellmodel.html" class="tsd-signature-type">ICellModel</a><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+					<a name="contentchanged" class="tsd-anchor"></a>
+					<h3>content<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> contentChanged<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#contentchanged">contentChanged</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/docregistry/src/default.ts#L41">packages/docregistry/src/default.ts:41</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted when the document content changes.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite">
+					<a name="defaultkernellanguage" class="tsd-anchor"></a>
+					<h3>default<wbr>Kernel<wbr>Language</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> defaultKernelLanguage<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#defaultkernellanguage">defaultKernelLanguage</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L145">packages/notebook/src/model.ts:145</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The default kernel language of the document.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite">
+					<a name="defaultkernelname" class="tsd-anchor"></a>
+					<h3>default<wbr>Kernel<wbr>Name</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> defaultKernelName<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#defaultkernelname">defaultKernelName</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L128">packages/notebook/src/model.ts:128</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The default kernel name of the document.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="deletedcells" class="tsd-anchor"></a>
+					<h3>deleted<wbr>Cells</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> deletedCells<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L138">packages/notebook/src/model.ts:138</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A list of deleted cells for the notebook..</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+					<a name="dirty" class="tsd-anchor"></a>
+					<h3>dirty</h3>
+					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> dirty<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> dirty<span class="tsd-signature-symbol">(</span>newValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#dirty">dirty</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/docregistry/src/default.ts#L55">packages/docregistry/src/default.ts:55</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The dirty state of the document.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#dirty">dirty</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/docregistry/src/default.ts#L58">packages/docregistry/src/default.ts:58</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The dirty state of the document.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>newValue: <span class="tsd-signature-type">boolean</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+					<a name="isdisposed" class="tsd-anchor"></a>
+					<h3>is<wbr>Disposed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isDisposed<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_cells_src_index_.cellmodel.html">CellModel</a>.<a href="_cells_src_index_.cellmodel.html#isdisposed">isDisposed</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/codeeditor/src/editor.ts#L273">packages/codeeditor/src/editor.ts:273</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Whether the model is disposed.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="metadata" class="tsd-anchor"></a>
+					<h3>metadata</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> metadata<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_observables_src_index_.iobservablejson.html" class="tsd-signature-type">IObservableJSON</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L100">packages/notebook/src/model.ts:100</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The metadata associated with the notebook.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/_observables_src_index_.iobservablejson.html" class="tsd-signature-type">IObservableJSON</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+					<a name="mimetype" class="tsd-anchor"></a>
+					<h3>mime<wbr>Type</h3>
+					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> mimeType<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> mimeType<span class="tsd-signature-symbol">(</span>newValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_cells_src_index_.cellmodel.html">CellModel</a>.<a href="_cells_src_index_.cellmodel.html#mimetype">mimeType</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/codeeditor/src/editor.ts#L259">packages/codeeditor/src/editor.ts:259</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A mime type of the model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_cells_src_index_.cellmodel.html">CellModel</a>.<a href="_cells_src_index_.cellmodel.html#mimetype">mimeType</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/codeeditor/src/editor.ts#L262">packages/codeeditor/src/editor.ts:262</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A mime type of the model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>newValue: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+					<a name="mimetypechanged" class="tsd-anchor"></a>
+					<h3>mime<wbr>Type<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> mimeTypeChanged<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_coreutils_src_index_.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_cells_src_index_.cellmodel.html">CellModel</a>.<a href="_cells_src_index_.cellmodel.html#mimetypechanged">mimeTypeChanged</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/codeeditor/src/editor.ts#L238">packages/codeeditor/src/editor.ts:238</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted when a mimetype changes.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_coreutils_src_index_.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="nbformat" class="tsd-anchor"></a>
+					<h3>nbformat</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> nbformat<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L114">packages/notebook/src/model.ts:114</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The major version number of the nbformat.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="nbformatminor" class="tsd-anchor"></a>
+					<h3>nbformat<wbr>Minor</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> nbformatMinor<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L121">packages/notebook/src/model.ts:121</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The minor version number of the nbformat.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+					<a name="readonly" class="tsd-anchor"></a>
+					<h3>read<wbr>Only</h3>
+					<ul class="tsd-signatures tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> readOnly<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">set</span> readOnly<span class="tsd-signature-symbol">(</span>newValue<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#readonly">readOnly</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/docregistry/src/default.ts#L70">packages/docregistry/src/default.ts:70</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The read only state of the document.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#readonly">readOnly</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/docregistry/src/default.ts#L73">packages/docregistry/src/default.ts:73</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The read only state of the document.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>newValue: <span class="tsd-signature-type">boolean</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+					<a name="selections" class="tsd-anchor"></a>
+					<h3>selections</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> selections<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_observables_src_index_.iobservablemap.html" class="tsd-signature-type">IObservableMap</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_codeeditor_src_index_.codeeditor.itextselection.html" class="tsd-signature-type">ITextSelection</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_cells_src_index_.cellmodel.html">CellModel</a>.<a href="_cells_src_index_.cellmodel.html#selections">selections</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/codeeditor/src/editor.ts#L252">packages/codeeditor/src/editor.ts:252</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the selections for the model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/_observables_src_index_.iobservablemap.html" class="tsd-signature-type">IObservableMap</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_codeeditor_src_index_.codeeditor.itextselection.html" class="tsd-signature-type">ITextSelection</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+					<a name="statechanged" class="tsd-anchor"></a>
+					<h3>state<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> stateChanged<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_coreutils_src_index_.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#statechanged">stateChanged</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/docregistry/src/default.ts#L48">packages/docregistry/src/default.ts:48</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A signal emitted when the document state changes.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><a href="../interfaces/_coreutils_src_index_.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+					<a name="value" class="tsd-anchor"></a>
+					<h3>value</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> value<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../modules/_observables_src_index_.iobservablestring.html" class="tsd-signature-type">IObservableString</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_cells_src_index_.cellmodel.html">CellModel</a>.<a href="_cells_src_index_.cellmodel.html#value">value</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/codeeditor/src/editor.ts#L245">packages/codeeditor/src/editor.ts:245</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the value of the model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../modules/_observables_src_index_.iobservablestring.html" class="tsd-signature-type">IObservableString</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_ensuremetadata" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _ensure<wbr>Metadata</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_ensure<wbr>Metadata<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L331">packages/notebook/src/model.ts:331</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Make sure we have the required metadata fields.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_oncellschanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _on<wbr>Cells<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_on<wbr>Cells<wbr>Changed<span class="tsd-signature-symbol">(</span>list<span class="tsd-signature-symbol">: </span><a href="../modules/_observables_src_index_.iobservablelist.html" class="tsd-signature-type">IObservableList</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_cells_src_index_.icellmodel.html" class="tsd-signature-type">ICellModel</a><span class="tsd-signature-symbol">&gt;</span>, change<span class="tsd-signature-symbol">: </span><a href="../interfaces/_observables_src_index_.iobservablelist.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_cells_src_index_.icellmodel.html" class="tsd-signature-type">ICellModel</a><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L305">packages/notebook/src/model.ts:305</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle a change in the cells list.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>list: <a href="../modules/_observables_src_index_.iobservablelist.html" class="tsd-signature-type">IObservableList</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_cells_src_index_.icellmodel.html" class="tsd-signature-type">ICellModel</a><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+								<li>
+									<h5>change: <a href="../interfaces/_observables_src_index_.iobservablelist.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_cells_src_index_.icellmodel.html" class="tsd-signature-type">ICellModel</a><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="dispose" class="tsd-anchor"></a>
+					<h3>dispose</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">dispose<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_notebook_src_index_.inotebookmodel.html">INotebookModel</a>.<a href="../interfaces/_notebook_src_index_.inotebookmodel.html#dispose">dispose</a></p>
+								<p>Overrides <a href="_cells_src_index_.cellmodel.html">CellModel</a>.<a href="_cells_src_index_.cellmodel.html#dispose">dispose</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L155">packages/notebook/src/model.ts:155</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Dispose of the resources held by the model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="fromjson" class="tsd-anchor"></a>
+					<h3>fromJSON</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">fromJSON<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><a href="../interfaces/_nbformat_src_index_.inotebookcontent.html" class="tsd-signature-type">INotebookContent</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_notebook_src_index_.inotebookmodel.html">INotebookModel</a>.<a href="../interfaces/_notebook_src_index_.inotebookmodel.html#fromjson">fromJSON</a></p>
+								<p>Overrides <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#fromjson">fromJSON</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L211">packages/notebook/src/model.ts:211</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Deserialize the model from JSON.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>Should emit a [contentChanged] signal.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>value: <a href="../interfaces/_nbformat_src_index_.inotebookcontent.html" class="tsd-signature-type">INotebookContent</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="fromstring" class="tsd-anchor"></a>
+					<h3>from<wbr>String</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">from<wbr>String<span class="tsd-signature-symbol">(</span>value<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_notebook_src_index_.inotebookmodel.html">INotebookModel</a>.<a href="../interfaces/_notebook_src_index_.inotebookmodel.html#fromstring">fromString</a></p>
+								<p>Overrides <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#fromstring">fromString</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L179">packages/notebook/src/model.ts:179</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Deserialize the model from a string.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>Should emit a [contentChanged] signal.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>value: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="initialize" class="tsd-anchor"></a>
+					<h3>initialize</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">initialize<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_notebook_src_index_.inotebookmodel.html">INotebookModel</a>.<a href="../interfaces/_notebook_src_index_.inotebookmodel.html#initialize">initialize</a></p>
+								<p>Overrides <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#initialize">initialize</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L293">packages/notebook/src/model.ts:293</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Initialize the model with its current state.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h1>Notes</h1>
+								</a>
+								<p>Adds an empty code cell if the model is empty
+								and clears undo state.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="tojson" class="tsd-anchor"></a>
+					<h3>toJSON</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">toJSON<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_nbformat_src_index_.inotebookcontent.html" class="tsd-signature-type">INotebookContent</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_notebook_src_index_.inotebookmodel.html">INotebookModel</a>.<a href="../interfaces/_notebook_src_index_.inotebookmodel.html#tojson">toJSON</a></p>
+								<p>Overrides <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#tojson">toJSON</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L186">packages/notebook/src/model.ts:186</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Serialize the model to JSON.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_nbformat_src_index_.inotebookcontent.html" class="tsd-signature-type">INotebookContent</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="tostring" class="tsd-anchor"></a>
+					<h3>to<wbr>String</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">to<wbr>String<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_notebook_src_index_.inotebookmodel.html">INotebookModel</a>.<a href="../interfaces/_notebook_src_index_.inotebookmodel.html#tostring">toString</a></p>
+								<p>Overrides <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#tostring">toString</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/notebook/src/model.ts#L169">packages/notebook/src/model.ts:169</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Serialize the model to a string.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+					<a name="triggercontentchange" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> trigger<wbr>Content<wbr>Change</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">trigger<wbr>Content<wbr>Change<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#triggercontentchange">triggerContentChange</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/docregistry/src/default.ts#L153">packages/docregistry/src/default.ts:153</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Trigger a content changed signal.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+					<a name="triggerstatechange" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> trigger<wbr>State<wbr>Change</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">trigger<wbr>State<wbr>Change<span class="tsd-signature-symbol">(</span>args<span class="tsd-signature-symbol">: </span><a href="../interfaces/_coreutils_src_index_.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_docregistry_src_index_.documentmodel.html">DocumentModel</a>.<a href="_docregistry_src_index_.documentmodel.html#triggerstatechange">triggerStateChange</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/docregistry/src/default.ts#L146">packages/docregistry/src/default.ts:146</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Trigger a state change signal.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>args: <a href="../interfaces/_coreutils_src_index_.ichangedargs.html" class="tsd-signature-type">IChangedArgs</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/_notebook_src_index_.html">&quot;notebook/src/index&quot;</a>
+						<ul>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_notebook_src_index_.inotebooktools.html">INotebook<wbr>Tools</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_notebook_src_index_.toolbaritems.html">Toolbar<wbr>Items</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.celltypeswitcher.html" class="tsd-kind-icon">Cell<wbr>Type<wbr>Switcher</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.commandeditstatus.html" class="tsd-kind-icon">Command<wbr>Edit<wbr>Status</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.notebook.html" class="tsd-kind-icon">Notebook</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.notebookactions.html" class="tsd-kind-icon">Notebook<wbr>Actions</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.notebookmodel.html" class="tsd-kind-icon">Notebook<wbr>Model</a>
+						<ul>
+							<li class=" tsd-kind-class tsd-parent-kind-class">
+								<a href="_notebook_src_index_.notebookmodel.contentfactory.html" class="tsd-kind-icon">Content<wbr>Factory</a>
+							</li>
+							<li class=" tsd-kind-interface tsd-parent-kind-class">
+								<a href="../interfaces/_notebook_src_index_.notebookmodel.icontentfactory.html" class="tsd-kind-icon">IContent<wbr>Factory</a>
+							</li>
+							<li class=" tsd-kind-interface tsd-parent-kind-class">
+								<a href="../interfaces/_notebook_src_index_.notebookmodel.ioptions.html" class="tsd-kind-icon">IOptions</a>
+							</li>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_notebook_src_index_.notebookmodel.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_notebook_src_index_.notebookmodel.html#_cells" class="tsd-kind-icon">_cells</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_notebook_src_index_.notebookmodel.html#_deletedcells" class="tsd-kind-icon">_deleted<wbr>Cells</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_notebook_src_index_.notebookmodel.html#_nbformat" class="tsd-kind-icon">_nbformat</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_notebook_src_index_.notebookmodel.html#_nbformatminor" class="tsd-kind-icon">_nbformat<wbr>Minor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_notebook_src_index_.notebookmodel.html#contentfactory-1" class="tsd-kind-icon">content<wbr>Factory</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="_notebook_src_index_.notebookmodel.html#modeldb" class="tsd-kind-icon">modelDB</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
+								<a href="_notebook_src_index_.notebookmodel.html#defaultcontentfactory" class="tsd-kind-icon">default<wbr>Content<wbr>Factory</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_notebook_src_index_.notebookmodel.html#cells" class="tsd-kind-icon">cells</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+								<a href="_notebook_src_index_.notebookmodel.html#contentchanged" class="tsd-kind-icon">content<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_notebook_src_index_.notebookmodel.html#defaultkernellanguage" class="tsd-kind-icon">default<wbr>Kernel<wbr>Language</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_notebook_src_index_.notebookmodel.html#defaultkernelname" class="tsd-kind-icon">default<wbr>Kernel<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_notebook_src_index_.notebookmodel.html#deletedcells" class="tsd-kind-icon">deleted<wbr>Cells</a>
+							</li>
+							<li class=" tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+								<a href="_notebook_src_index_.notebookmodel.html#dirty" class="tsd-kind-icon">dirty</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+								<a href="_notebook_src_index_.notebookmodel.html#isdisposed" class="tsd-kind-icon">is<wbr>Disposed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_notebook_src_index_.notebookmodel.html#metadata" class="tsd-kind-icon">metadata</a>
+							</li>
+							<li class=" tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+								<a href="_notebook_src_index_.notebookmodel.html#mimetype" class="tsd-kind-icon">mime<wbr>Type</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+								<a href="_notebook_src_index_.notebookmodel.html#mimetypechanged" class="tsd-kind-icon">mime<wbr>Type<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_notebook_src_index_.notebookmodel.html#nbformat" class="tsd-kind-icon">nbformat</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_notebook_src_index_.notebookmodel.html#nbformatminor" class="tsd-kind-icon">nbformat<wbr>Minor</a>
+							</li>
+							<li class=" tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited">
+								<a href="_notebook_src_index_.notebookmodel.html#readonly" class="tsd-kind-icon">read<wbr>Only</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+								<a href="_notebook_src_index_.notebookmodel.html#selections" class="tsd-kind-icon">selections</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+								<a href="_notebook_src_index_.notebookmodel.html#statechanged" class="tsd-kind-icon">state<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class tsd-is-inherited">
+								<a href="_notebook_src_index_.notebookmodel.html#value" class="tsd-kind-icon">value</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_notebook_src_index_.notebookmodel.html#_ensuremetadata" class="tsd-kind-icon">_ensure<wbr>Metadata</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_notebook_src_index_.notebookmodel.html#_oncellschanged" class="tsd-kind-icon">_on<wbr>Cells<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_notebook_src_index_.notebookmodel.html#dispose" class="tsd-kind-icon">dispose</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_notebook_src_index_.notebookmodel.html#fromjson" class="tsd-kind-icon">fromJSON</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_notebook_src_index_.notebookmodel.html#fromstring" class="tsd-kind-icon">from<wbr>String</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_notebook_src_index_.notebookmodel.html#initialize" class="tsd-kind-icon">initialize</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_notebook_src_index_.notebookmodel.html#tojson" class="tsd-kind-icon">toJSON</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_notebook_src_index_.notebookmodel.html#tostring" class="tsd-kind-icon">to<wbr>String</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="_notebook_src_index_.notebookmodel.html#triggercontentchange" class="tsd-kind-icon">trigger<wbr>Content<wbr>Change</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="_notebook_src_index_.notebookmodel.html#triggerstatechange" class="tsd-kind-icon">trigger<wbr>State<wbr>Change</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.notebookmodelfactory.html" class="tsd-kind-icon">Notebook<wbr>Model<wbr>Factory</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.notebookpanel.html" class="tsd-kind-icon">Notebook<wbr>Panel</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.notebooktools.html" class="tsd-kind-icon">Notebook<wbr>Tools</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.notebooktracker.html" class="tsd-kind-icon">Notebook<wbr>Tracker</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.notebooktruststatus.html" class="tsd-kind-icon">Notebook<wbr>Trust<wbr>Status</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.notebookwidgetfactory.html" class="tsd-kind-icon">Notebook<wbr>Widget<wbr>Factory</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_notebook_src_index_.staticnotebook.html" class="tsd-kind-icon">Static<wbr>Notebook</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_notebook_src_index_.inotebookmodel.html" class="tsd-kind-icon">INotebook<wbr>Model</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_notebook_src_index_.inotebooktracker.html" class="tsd-kind-icon">INotebook<wbr>Tracker</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/_notebook_src_index_.html#notebookmode" class="tsd-kind-icon">Notebook<wbr>Mode</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_notebook_src_index_.html#inotebooktools-1" class="tsd-kind-icon">INotebook<wbr>Tools</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_notebook_src_index_.html#inotebooktracker-1" class="tsd-kind-icon">INotebook<wbr>Tracker</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_notebook_src_index_.html#inotebookwidgetfactory" class="tsd-kind-icon">INotebook<wbr>Widget<wbr>Factory</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

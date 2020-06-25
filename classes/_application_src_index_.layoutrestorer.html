@@ -1,0 +1,832 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>LayoutRestorer | @jupyterlab</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../../index.html" class="title">JupyterLab</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="../modules/_application_src_index_.html">&quot;application/src/index&quot;</a>
+				</li>
+				<li>
+					<a href="_application_src_index_.layoutrestorer.html">LayoutRestorer</a>
+				</li>
+			</ul>
+			<h1>Class LayoutRestorer</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>The default implementation of a layout restorer.
+						A namespace for <code>LayoutRestorer</code> statics.</p>
+					</div>
+					<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+						<h4>Notes</h4>
+					</a>
+					<p>The lifecycle for state restoration is subtle. The sequence of events is:</p>
+					<ol>
+						<li><p>The layout restorer plugin is instantiated and makes a <code>fetch</code> call to
+								the data connector that stores the layout restoration data. The <code>fetch</code>
+							call returns a promise that resolves in step 6, below.</p>
+						</li>
+						<li><p>Other plugins that care about state restoration require the layout
+							restorer as a dependency.</p>
+						</li>
+						<li><p>As each load-time plugin initializes (which happens before the front-end
+								application has <code>started</code>), it instructs the layout restorer whether
+								the restorer ought to <code>restore</code> its widgets by passing in its widget
+								tracker.
+								Alternatively, a plugin that does not require its own widget tracker
+								(because perhaps it only creates a single widget, like a command palette),
+								can simply <code>add</code> its widget along with a persistent unique name to the
+								layout restorer so that its layout state can be restored when the lab
+							application restores.</p>
+						</li>
+						<li><p>After all the load-time plugins have finished initializing, the front-end
+								application <code>started</code> promise will resolve. This is the <code>first</code>
+								promise that the layout restorer waits for. By this point, all of the
+								plugins that care about restoration will have instructed the layout
+							restorer to <code>restore</code> their widget trackers.</p>
+						</li>
+						<li><p>The layout restorer will then instruct each plugin&#39;s widget tracker
+								to restore its state and reinstantiate whichever widgets it wants. The
+								tracker returns a promise to the layout restorer that resolves when it
+							has completed restoring the tracked widgets it cares about.</p>
+						</li>
+						<li><p>As each widget tracker finishes restoring the widget instances it cares
+								about, it resolves the promise that was returned to the layout restorer
+								(in step 5). After all of the promises that the restorer is awaiting have
+								settled, the restorer then resolves the outstanding <code>fetch</code> promise
+								(from step 1) and hands off a layout state object to the application
+							shell&#39;s <code>restoreLayout</code> method for restoration.</p>
+						</li>
+						<li><p>Once the application shell has finished restoring the layout, the
+							JupyterLab application&#39;s <code>restored</code> promise is resolved.</p>
+						</li>
+					</ol>
+					<p>Of particular note are steps 5 and 6: since data restoration of plugins
+						is accomplished by executing commands, the command that is used to restore
+						the data of each plugin must return a promise that only resolves when the
+					widget has been created and added to the plugin&#39;s widget tracker.</p>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">LayoutRestorer</span>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implements</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="../modules/_application_src_index_.html#ilayoutrestorer-1" class="tsd-signature-type">ILayoutRestorer</a></li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Interfaces</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-interface tsd-parent-kind-class"><a href="../interfaces/_application_src_index_.layoutrestorer.ioptions.html" class="tsd-kind-icon">IOptions</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_application_src_index_.layoutrestorer.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section tsd-is-private tsd-is-private-protected">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_connector" class="tsd-kind-icon">_connector</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_first" class="tsd-kind-icon">_first</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_firstdone" class="tsd-kind-icon">_first<wbr>Done</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_promises" class="tsd-kind-icon">_promises</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_promisesdone" class="tsd-kind-icon">_promises<wbr>Done</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_registry" class="tsd-kind-icon">_registry</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_restored" class="tsd-kind-icon">_restored</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_trackers" class="tsd-kind-icon">_trackers</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_widgets" class="tsd-kind-icon">_widgets</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Accessors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_application_src_index_.layoutrestorer.html#restored" class="tsd-kind-icon">restored</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_dehydratemainarea" class="tsd-kind-icon">_dehydrate<wbr>Main<wbr>Area</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_dehydratesidearea" class="tsd-kind-icon">_dehydrate<wbr>Side<wbr>Area</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_onwidgetdisposed" class="tsd-kind-icon">_on<wbr>Widget<wbr>Disposed</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_rehydratemainarea" class="tsd-kind-icon">_rehydrate<wbr>Main<wbr>Area</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_application_src_index_.layoutrestorer.html#_rehydratesidearea" class="tsd-kind-icon">_rehydrate<wbr>Side<wbr>Area</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_application_src_index_.layoutrestorer.html#add" class="tsd-kind-icon">add</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_application_src_index_.layoutrestorer.html#fetch" class="tsd-kind-icon">fetch</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_application_src_index_.layoutrestorer.html#restore" class="tsd-kind-icon">restore</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_application_src_index_.layoutrestorer.html#save" class="tsd-kind-icon">save</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Layout<wbr>Restorer<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_application_src_index_.layoutrestorer.ioptions.html" class="tsd-signature-type">IOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_application_src_index_.layoutrestorer.html" class="tsd-signature-type">LayoutRestorer</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L116">packages/application/src/layoutrestorer.ts:116</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Create a layout restorer.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>options: <a href="../interfaces/_application_src_index_.layoutrestorer.ioptions.html" class="tsd-signature-type">IOptions</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_application_src_index_.layoutrestorer.html" class="tsd-signature-type">LayoutRestorer</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group tsd-is-private tsd-is-private-protected">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_connector" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _connector</h3>
+					<div class="tsd-signature tsd-kind-icon">_connector<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_statedb_src_index_.idataconnector.html" class="tsd-signature-type">IDataConnector</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReadonlyPartialJSONValue</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L386">packages/application/src/layoutrestorer.ts:386</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_first" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _first</h3>
+					<div class="tsd-signature tsd-kind-icon">_first<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L387">packages/application/src/layoutrestorer.ts:387</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_firstdone" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _first<wbr>Done</h3>
+					<div class="tsd-signature tsd-kind-icon">_first<wbr>Done<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L388">packages/application/src/layoutrestorer.ts:388</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_promises" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _promises</h3>
+					<div class="tsd-signature tsd-kind-icon">_promises<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L390">packages/application/src/layoutrestorer.ts:390</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_promisesdone" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _promises<wbr>Done</h3>
+					<div class="tsd-signature tsd-kind-icon">_promises<wbr>Done<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L389">packages/application/src/layoutrestorer.ts:389</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_registry" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _registry</h3>
+					<div class="tsd-signature tsd-kind-icon">_registry<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">CommandRegistry</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L392">packages/application/src/layoutrestorer.ts:392</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_restored" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _restored</h3>
+					<div class="tsd-signature tsd-kind-icon">_restored<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PromiseDelegate</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new PromiseDelegate&lt;void&gt;()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L391">packages/application/src/layoutrestorer.ts:391</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_trackers" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _trackers</h3>
+					<div class="tsd-signature tsd-kind-icon">_trackers<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Set</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Set&lt;string&gt;()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L393">packages/application/src/layoutrestorer.ts:393</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_widgets" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _widgets</h3>
+					<div class="tsd-signature tsd-kind-icon">_widgets<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Map</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">Widget</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Map&lt;string, Widget&gt;()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L394">packages/application/src/layoutrestorer.ts:394</a></li>
+						</ul>
+					</aside>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Accessors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="restored" class="tsd-anchor"></a>
+					<h3>restored</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> restored<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L144">packages/application/src/layoutrestorer.ts:144</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A promise resolved when the layout restorer is ready to receive signals.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_dehydratemainarea" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _dehydrate<wbr>Main<wbr>Area</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_dehydrate<wbr>Main<wbr>Area<span class="tsd-signature-symbol">(</span>area<span class="tsd-signature-symbol">: </span><a href="../interfaces/_application_src_index_.ilabshell.imainarea.html" class="tsd-signature-type">IMainArea</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IMainArea</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L294">packages/application/src/layoutrestorer.ts:294</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Dehydrate a main area description into a serializable object.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>area: <a href="../interfaces/_application_src_index_.ilabshell.imainarea.html" class="tsd-signature-type">IMainArea</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">IMainArea</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_dehydratesidearea" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _dehydrate<wbr>Side<wbr>Area</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_dehydrate<wbr>Side<wbr>Area<span class="tsd-signature-symbol">(</span>area<span class="tsd-signature-symbol">?: </span><a href="../interfaces/_application_src_index_.ilabshell.isidearea.html" class="tsd-signature-type">ISideArea</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISideArea</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L322">packages/application/src/layoutrestorer.ts:322</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Dehydrate a side area description into a serializable object.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> area: <a href="../interfaces/_application_src_index_.ilabshell.isidearea.html" class="tsd-signature-type">ISideArea</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISideArea</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_onwidgetdisposed" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _on<wbr>Widget<wbr>Disposed</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_on<wbr>Widget<wbr>Disposed<span class="tsd-signature-symbol">(</span>widget<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Widget</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L381">packages/application/src/layoutrestorer.ts:381</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Handle a widget disposal.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>widget: <span class="tsd-signature-type">Widget</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_rehydratemainarea" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _rehydrate<wbr>Main<wbr>Area</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_rehydrate<wbr>Main<wbr>Area<span class="tsd-signature-symbol">(</span>area<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">IMainArea</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_application_src_index_.ilabshell.imainarea.html" class="tsd-signature-type">IMainArea</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L310">packages/application/src/layoutrestorer.ts:310</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Reydrate a serialized main area description object.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>This function consumes data that can become corrupted, so it uses type
+								coercion to guarantee the dehydrated object is safely processed.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> area: <span class="tsd-signature-type">IMainArea</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_application_src_index_.ilabshell.imainarea.html" class="tsd-signature-type">IMainArea</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_rehydratesidearea" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _rehydrate<wbr>Side<wbr>Area</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_rehydrate<wbr>Side<wbr>Area<span class="tsd-signature-symbol">(</span>area<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">ISideArea</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_application_src_index_.ilabshell.isidearea.html" class="tsd-signature-type">ISideArea</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L350">packages/application/src/layoutrestorer.ts:350</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Reydrate a serialized side area description object.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>This function consumes data that can become corrupted, so it uses type
+								coercion to guarantee the dehydrated object is safely processed.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagOptional">Optional</span> area: <span class="tsd-signature-type">ISideArea</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_application_src_index_.ilabshell.isidearea.html" class="tsd-signature-type">ISideArea</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="add" class="tsd-anchor"></a>
+					<h3>add</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">add<span class="tsd-signature-symbol">(</span>widget<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Widget</span>, name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L151">packages/application/src/layoutrestorer.ts:151</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Add a widget to be tracked by the layout restorer.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>widget: <span class="tsd-signature-type">Widget</span></h5>
+								</li>
+								<li>
+									<h5>name: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="fetch" class="tsd-anchor"></a>
+					<h3>fetch</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">fetch<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_application_src_index_.ilabshell.ilayout.html" class="tsd-signature-type">ILayout</a><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L164">packages/application/src/layoutrestorer.ts:164</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Fetch the layout state for the application.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>Fetching the layout relies on all widget restoration to be complete, so
+								calls to <code>fetch</code> are guaranteed to return after restoration is complete.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_application_src_index_.ilabshell.ilayout.html" class="tsd-signature-type">ILayout</a><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="restore" class="tsd-anchor"></a>
+					<h3>restore</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">restore<span class="tsd-signature-symbol">(</span>tracker<span class="tsd-signature-symbol">: </span><a href="_apputils_src_index_.widgettracker.html" class="tsd-signature-type">WidgetTracker</a>, options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_application_src_index_.ilayoutrestorer.ioptions.html" class="tsd-signature-type">IOptions</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Widget</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L207">packages/application/src/layoutrestorer.ts:207</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Restore the widgets of a particular widget tracker.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>tracker: <a href="_apputils_src_index_.widgettracker.html" class="tsd-signature-type">WidgetTracker</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The widget tracker whose widgets will be restored.</p>
+									</div>
+								</li>
+								<li>
+									<h5>options: <a href="../interfaces/_application_src_index_.ilayoutrestorer.ioptions.html" class="tsd-signature-type">IOptions</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Widget</span><span class="tsd-signature-symbol">&gt;</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The restoration options.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="save" class="tsd-anchor"></a>
+					<h3>save</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">save<span class="tsd-signature-symbol">(</span>data<span class="tsd-signature-symbol">: </span><a href="../interfaces/_application_src_index_.ilabshell.ilayout.html" class="tsd-signature-type">ILayout</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/application/src/layoutrestorer.ts#L269">packages/application/src/layoutrestorer.ts:269</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Save the layout state for the application.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>data: <a href="../interfaces/_application_src_index_.ilabshell.ilayout.html" class="tsd-signature-type">ILayout</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/_application_src_index_.html">&quot;application/src/index&quot;</a>
+						<ul>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_application_src_index_.ilabshell.html">ILab<wbr>Shell</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_application_src_index_.irouter.html">IRouter</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_application_src_index_.jupyterfrontend.html" class="tsd-kind-icon">Jupyter<wbr>Front<wbr>End</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_application_src_index_.jupyterlab.html" class="tsd-kind-icon">Jupyter<wbr>Lab</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_application_src_index_.labshell.html" class="tsd-kind-icon">Lab<wbr>Shell</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="_application_src_index_.layoutrestorer.html" class="tsd-kind-icon">Layout<wbr>Restorer</a>
+						<ul>
+							<li class=" tsd-kind-interface tsd-parent-kind-class">
+								<a href="../interfaces/_application_src_index_.layoutrestorer.ioptions.html" class="tsd-kind-icon">IOptions</a>
+							</li>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="_application_src_index_.layoutrestorer.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_connector" class="tsd-kind-icon">_connector</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_first" class="tsd-kind-icon">_first</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_firstdone" class="tsd-kind-icon">_first<wbr>Done</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_promises" class="tsd-kind-icon">_promises</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_promisesdone" class="tsd-kind-icon">_promises<wbr>Done</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_registry" class="tsd-kind-icon">_registry</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_restored" class="tsd-kind-icon">_restored</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_trackers" class="tsd-kind-icon">_trackers</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_widgets" class="tsd-kind-icon">_widgets</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_application_src_index_.layoutrestorer.html#restored" class="tsd-kind-icon">restored</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_dehydratemainarea" class="tsd-kind-icon">_dehydrate<wbr>Main<wbr>Area</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_dehydratesidearea" class="tsd-kind-icon">_dehydrate<wbr>Side<wbr>Area</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_onwidgetdisposed" class="tsd-kind-icon">_on<wbr>Widget<wbr>Disposed</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_rehydratemainarea" class="tsd-kind-icon">_rehydrate<wbr>Main<wbr>Area</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_application_src_index_.layoutrestorer.html#_rehydratesidearea" class="tsd-kind-icon">_rehydrate<wbr>Side<wbr>Area</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_application_src_index_.layoutrestorer.html#add" class="tsd-kind-icon">add</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_application_src_index_.layoutrestorer.html#fetch" class="tsd-kind-icon">fetch</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_application_src_index_.layoutrestorer.html#restore" class="tsd-kind-icon">restore</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_application_src_index_.layoutrestorer.html#save" class="tsd-kind-icon">save</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_application_src_index_.router.html" class="tsd-kind-icon">Router</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_application_src_index_.ilabstatus.html" class="tsd-kind-icon">ILab<wbr>Status</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../interfaces/_application_src_index_.ilayoutrestorer.html" class="tsd-kind-icon">ILayout<wbr>Restorer</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_application_src_index_.imimedocumenttracker.html" class="tsd-kind-icon">IMime<wbr>Document<wbr>Tracker</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/_application_src_index_.html#iconnectionlost" class="tsd-kind-icon">IConnection<wbr>Lost</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../modules/_application_src_index_.html#jupyterfrontendplugin" class="tsd-kind-icon">Jupyter<wbr>Front<wbr>End<wbr>Plugin</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_application_src_index_.html#iconnectionlost-1" class="tsd-kind-icon">IConnection<wbr>Lost</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_application_src_index_.html#ilabshell-1" class="tsd-kind-icon">ILab<wbr>Shell</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_application_src_index_.html#ilabstatus-1" class="tsd-kind-icon">ILab<wbr>Status</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_application_src_index_.html#ilayoutrestorer-1" class="tsd-kind-icon">ILayout<wbr>Restorer</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_application_src_index_.html#imimedocumenttracker-1" class="tsd-kind-icon">IMime<wbr>Document<wbr>Tracker</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_application_src_index_.html#irouter-1" class="tsd-kind-icon">IRouter</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/_application_src_index_.html#connectionlost" class="tsd-kind-icon">Connection<wbr>Lost</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

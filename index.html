@@ -1,0 +1,546 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>@jupyterlab</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.js" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../index.html" class="title">JupyterLab</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>@jupyterlab</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<p><strong><a href="#installation">Installation</a></strong> |
+					<strong><a href="http://jupyterlab.readthedocs.io">Documentation</a></strong> |
+					<strong><a href="#contributing">Contributing</a></strong> |
+					<strong><a href="#license">License</a></strong> |
+					<strong><a href="#team">Team</a></strong> |
+				<strong><a href="#getting-help">Getting help</a></strong> |</p>
+				<a href="#a-hrefhttpjupyterlabgithubiojupyterlabjupyterlaba" id="a-hrefhttpjupyterlabgithubiojupyterlabjupyterlaba" style="color: inherit; text-decoration: none;">
+					<h1><a href="http://jupyterlab.github.io/jupyterlab/">JupyterLab</a></h1>
+				</a>
+				<p><a href="https://badge.fury.io/py/jupyterlab"><img src="https://badge.fury.io/py/jupyterlab.svg" alt="PyPI version"></a>
+					<a href="https://pepy.tech/project/jupyterlab/month"><img src="https://pepy.tech/badge/jupyterlab/month" alt="Downloads"></a>
+					<a href="https://github.com/jupyterlab/jupyterlab/actions?query=workflow%3A%22Linux+Tests%22"><img src="https://github.com/jupyterlab/jupyterlab/workflows/Linux%20Tests/badge.svg" alt="Build Status"></a>
+					<a href="https://github.com/jupyterlab/jupyterlab/actions?query=workflow%3A%22Windows+Tests%22"><img src="https://github.com/jupyterlab/jupyterlab/workflows/Windows%20Tests/badge.svg" alt="Build Status"></a>
+					<a href="http://jupyterlab.readthedocs.io/en/stable/"><img src="https://readthedocs.org/projects/jupyterlab/badge/?version=stable" alt="Documentation Status"></a>
+					<a href="https://github.com/jupyterlab/jupyterlab/issues"><img src="https://img.shields.io/badge/issue_tracking-github-blue.svg" alt="GitHub"></a>
+					<a href="https://discourse.jupyter.org/c/jupyterlab"><img src="https://img.shields.io/badge/help_forum-discourse-blue.svg" alt="Discourse"></a>
+				<a href="https://gitter.im/jupyterlab/jupyterlab"><img src="https://img.shields.io/badge/social_chat-gitter-blue.svg" alt="Gitter"></a></p>
+				<p><a href="https://mybinder.org/v2/gh/jupyterlab/jupyterlab-demo/master?urlpath=lab/tree/demo"><img src="https://mybinder.org/badge_logo.svg" alt="Binder"></a></p>
+				<p>An extensible environment for interactive and reproducible computing, based on the
+				Jupyter Notebook and Architecture. <a href="https://blog.jupyter.org/jupyterlab-is-ready-for-users-5a6f039b8906">Currently ready for users.</a></p>
+				<p><a href="http://jupyterlab.readthedocs.io/en/stable/">JupyterLab</a> is the next-generation user interface for <a href="https://jupyter.org">Project Jupyter</a> offering
+					all the familiar building blocks of the classic Jupyter Notebook (notebook,
+					terminal, text editor, file browser, rich outputs, etc.) in a flexible and
+					powerful user interface.
+				JupyterLab will eventually replace the classic Jupyter Notebook.</p>
+				<p>JupyterLab can be extended using <a href="https://www.npmjs.com/">npm</a> packages
+				that use our public APIs. To find JupyterLab extensions, search for the npm keyword <a href="https://www.npmjs.com/search?q=keywords:jupyterlab-extension">jupyterlab-extension</a> or the GitHub topic <a href="https://github.com/topics/jupyterlab-extension">jupyterlab-extension</a>. To learn more about extensions, see the <a href="https://jupyterlab.readthedocs.io/en/latest/user/extensions.html">user documentation</a>.</p>
+				<p>The current JupyterLab releases are suitable for general
+					usage, and the extension APIs will continue to
+				evolve for JupyterLab extension developers.</p>
+				<p>Read the latest version&#39;s documentation on <a href="http://jupyterlab.readthedocs.io/en/latest/">ReadTheDocs</a>.</p>
+				<hr>
+				<a href="#getting-started" id="getting-started" style="color: inherit; text-decoration: none;">
+					<h2>Getting started</h2>
+				</a>
+				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
+					<h3>Installation</h3>
+				</a>
+				<p>JupyterLab can be installed using <code>conda</code> or <code>pip</code>. For more detailed instructions, consult the <a href="http://jupyterlab.readthedocs.io/en/stable/getting_started/installation.html">installation guide</a>.</p>
+				<p>Project installation instructions from the git sources are available in the <a href="CONTRIBUTING.md">contributor documentation</a>.</p>
+				<a href="#conda" id="conda" style="color: inherit; text-decoration: none;">
+					<h3>conda</h3>
+				</a>
+				<p>If you use <code>conda</code>, you can install it with:</p>
+				<pre><code class="language-shell">conda install -c conda-forge jupyterlab</code></pre>
+				<a href="#pip" id="pip" style="color: inherit; text-decoration: none;">
+					<h3>pip</h3>
+				</a>
+				<p>If you use <code>pip</code>, you can install it with:</p>
+				<pre><code class="language-shell">pip install jupyterlab</code></pre>
+				<p>If installing using <code>pip install --user</code>, you must add the user-level <code>bin</code> directory to your <code>PATH</code> environment variable in order to launch <code>jupyter lab</code>. If you are using a Unix derivative (FreeBSD, GNU / Linux, OS X), you can achieve this by using <code>export PATH=&quot;$HOME/.local/bin:$PATH&quot;</code> command.</p>
+				<a href="#installing-with-previous-versions-of-jupyter-notebook" id="installing-with-previous-versions-of-jupyter-notebook" style="color: inherit; text-decoration: none;">
+					<h4>Installing with Previous Versions of Jupyter Notebook</h4>
+				</a>
+				<p>When using a version of Jupyter Notebook earlier than 5.3, the following command must be run
+				after installation to enable the JupyterLab server extension:</p>
+				<pre><code class="language-bash">jupyter serverextension <span class="hljs-built_in">enable</span> --py jupyterlab --sys-prefix</code></pre>
+				<a href="#running" id="running" style="color: inherit; text-decoration: none;">
+					<h3>Running</h3>
+				</a>
+				<p>Start up JupyterLab using:</p>
+				<pre><code class="language-bash">jupyter lab</code></pre>
+				<p>JupyterLab will open automatically in the browser. See the <a href="http://jupyterlab.readthedocs.io/en/stable/getting_started/starting.html">documentation</a> for additional details.</p>
+				<p>If you encounter an error like &quot;Command &#39;jupyter&#39; not found&quot;, please make sure <code>PATH</code> environment variable is set correctly. Alternatively, you can start up JupyterLab using <code>~/.local/bin/jupyter lab</code> without changing the <code>PATH</code> environment variable.</p>
+				<a href="#prerequisites-and-supported-browsers" id="prerequisites-and-supported-browsers" style="color: inherit; text-decoration: none;">
+					<h3>Prerequisites and Supported Browsers</h3>
+				</a>
+				<p>Jupyter notebook version 4.3 or later is required. To check the notebook version, run the command:</p>
+				<pre><code class="language-bash">jupyter notebook --version</code></pre>
+				<p>The latest versions of the following browsers are currently <em>known to work</em>:</p>
+				<ul>
+					<li>Firefox</li>
+					<li>Chrome</li>
+					<li>Safari</li>
+				</ul>
+				<p>See our <a href="http://jupyterlab.readthedocs.io/en/latest/getting_started/installation.html">documentation</a> for additional details.</p>
+				<hr>
+				<a href="#getting-help" id="getting-help" style="color: inherit; text-decoration: none;">
+					<h2>Getting help</h2>
+				</a>
+				<p>We encourage you to ask questions on the <a href="https://discourse.jupyter.org/c/jupyterlab">Discourse forum</a>. A question answered there can become a useful resource for others.</p>
+				<a href="#bug-report" id="bug-report" style="color: inherit; text-decoration: none;">
+					<h3>Bug report</h3>
+				</a>
+				<p>To report a bug please read the <a href="https://jupyterlab.readthedocs.io/en/latest/getting_started/issue.html">guidelines</a> and then open a <a href="https://github.com/jupyterlab/jupyterlab/issues/new?template=bug_report.md">Github issue</a>. To keep resolved issues self-contained, the <a href="https://github.com/apps/lock">lock bot</a> will lock closed issues as resolved after a period of inactivity. If related discussion is still needed after an issue is locked, please open a new issue and reference the old issue.</p>
+				<a href="#feature-request" id="feature-request" style="color: inherit; text-decoration: none;">
+					<h3>Feature request</h3>
+				</a>
+				<p>We also welcome suggestions for new features as they help make the project more useful for everyone. To request a feature please use the <a href="https://github.com/jupyterlab/jupyterlab/issues/new?template=feature_request.md">feature request template</a>.</p>
+				<hr>
+				<a href="#development" id="development" style="color: inherit; text-decoration: none;">
+					<h2>Development</h2>
+				</a>
+				<a href="#contributing" id="contributing" style="color: inherit; text-decoration: none;">
+					<h3>Contributing</h3>
+				</a>
+				<p>To contribute code or documentation to the project, please read the <a href="https://jupyterlab.readthedocs.io/en/latest/developer/contributing.html">contributor documentation</a>.</p>
+				<p>JupyterLab follows the Jupyter <a href="https://jupyter.readthedocs.io/en/latest/community/content-community.html">Community Guides</a>.</p>
+				<a href="#extending-jupyterlab" id="extending-jupyterlab" style="color: inherit; text-decoration: none;">
+					<h3>Extending JupyterLab</h3>
+				</a>
+				<p>To start developing an extension, see the <a href="https://jupyterlab.readthedocs.io/en/latest/developer/extension_dev.html">developer documentation</a> and the <a href="http://jupyterlab.github.io/jupyterlab/index.html">API docs</a>.</p>
+				<a href="#license" id="license" style="color: inherit; text-decoration: none;">
+					<h3>License</h3>
+				</a>
+				<p>JupyterLab uses a shared copyright model that enables all contributors to maintain the
+				copyright on their contributions. All code is licensed under the terms of the revised <a href="https://github.com/jupyterlab/jupyterlab/blob/master/LICENSE">BSD license</a>.</p>
+				<a href="#team" id="team" style="color: inherit; text-decoration: none;">
+					<h3>Team</h3>
+				</a>
+				<p>JupyterLab is part of <a href="http://jupyter.org/">Project Jupyter</a> and is developed by an open community. The maintenance team is assisted by a much larger group of contributors to JupyterLab and Project Jupyter as a whole.</p>
+				<p>JupyterLab&#39;s current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:</p>
+				<ul>
+					<li>Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
+					prolific contributions throughout the code base).</li>
+					<li>Vidar T. Fauske, JPMorgan Chase (general development, extensions).</li>
+					<li>Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)</li>
+					<li>Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
+					architecture).</li>
+					<li>Eric Charles, Datalayer, (general development, extensions).</li>
+					<li>Jason Grout, Bloomberg (co-creator, vision, general development).</li>
+					<li>Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).</li>
+					<li>Fernando Perez, UC Berkeley (co-creator, vision).</li>
+					<li>Ian Rose, Quansight/City of LA (general core development, extensions).</li>
+					<li>Saul Shanabrook, Quansight (general development, extensions)</li>
+					<li>Steven Silvester, AWS (co-creator, release management, packaging,
+					prolific contributions throughout the code base).</li>
+				</ul>
+				<p>Maintainer emeritus:</p>
+				<ul>
+					<li>Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
+					technical leadership, vision, PhosphorJS)</li>
+					<li>Cameron Oelsen, Cal Poly (UI/UX design).</li>
+					<li>Jessica Forde, Project Jupyter (demo, documentation)</li>
+				</ul>
+				<p>This list is provided to give the reader context on who we are and how our team functions.
+				To be listed, please submit a pull request with your information.</p>
+				<hr>
+				<a href="#weekly-dev-meeting" id="weekly-dev-meeting" style="color: inherit; text-decoration: none;">
+					<h3>Weekly Dev Meeting</h3>
+				</a>
+				<p>We have videoconference meetings every week where we discuss what we have been working on and get feedback from one another.</p>
+				<p>Anyone is welcome to attend, if they would like to discuss a topic or just to listen in.</p>
+				<ul>
+					<li>When: Wednesdays <a href="https://www.thetimezoneconverter.com/?t=9%3A00%20am&amp;tz=San%20Francisco&amp;">9AM Pacific Time</a></li>
+					<li>Where: <a href="https://zoom.us/my/jovyan"><code>jovyan</code> Zoom</a></li>
+					<li>What: <a href="https://hackmd.io/Uscrk0N1RhCtX-p6ZHUuWQ?both">Meeting notes</a></li>
+				</ul>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_application_extension_src_index_.html">&quot;application-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_application_src_index_.html">&quot;application/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_apputils_extension_src_index_.html">&quot;apputils-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_apputils_src_index_.html">&quot;apputils/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_attachments_src_index_.html">&quot;attachments/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_cells_src_index_.html">&quot;cells/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_celltags_extension_src_index_.html">&quot;celltags-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_celltags_src_index_.html">&quot;celltags/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_codeeditor_src_index_.html">&quot;codeeditor/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_codemirror_extension_src_index_.html">&quot;codemirror-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_codemirror_src_index_.html">&quot;codemirror/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_completer_extension_src_index_.html">&quot;completer-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_completer_src_index_.html">&quot;completer/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_console_extension_src_index_.html">&quot;console-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_console_src_index_.html">&quot;console/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_coreutils_src_index_.html">&quot;coreutils/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_csvviewer_extension_src_index_.html">&quot;csvviewer-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_csvviewer_src_index_.html">&quot;csvviewer/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_docmanager_extension_src_index_.html">&quot;docmanager-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_docmanager_src_index_.html">&quot;docmanager/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_docregistry_src_index_.html">&quot;docregistry/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_documentsearch_extension_src_index_.html">&quot;documentsearch-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_documentsearch_src_index_.html">&quot;documentsearch/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_extensionmanager_extension_src_index_.html">&quot;extensionmanager-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_extensionmanager_src_index_.html">&quot;extensionmanager/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_filebrowser_extension_src_index_.html">&quot;filebrowser-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_filebrowser_src_index_.html">&quot;filebrowser/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_fileeditor_extension_src_index_.html">&quot;fileeditor-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_fileeditor_src_index_.html">&quot;fileeditor/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_help_extension_src_index_.html">&quot;help-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_htmlviewer_extension_src_index_.html">&quot;htmlviewer-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_htmlviewer_src_index_.html">&quot;htmlviewer/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_hub_extension_src_index_.html">&quot;hub-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_imageviewer_extension_src_index_.html">&quot;imageviewer-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_imageviewer_src_index_.html">&quot;imageviewer/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_inspector_extension_src_index_.html">&quot;inspector-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_inspector_src_index_.html">&quot;inspector/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_javascript_extension_src_index_.html">&quot;javascript-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_json_extension_src_index_.html">&quot;json-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_launcher_extension_src_index_.html">&quot;launcher-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_launcher_src_index_.html">&quot;launcher/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_logconsole_extension_src_index_.html">&quot;logconsole-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_logconsole_src_index_.html">&quot;logconsole/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_mainmenu_extension_src_index_.html">&quot;mainmenu-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_mainmenu_src_index_.html">&quot;mainmenu/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_markdownviewer_extension_src_index_.html">&quot;markdownviewer-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_markdownviewer_src_index_.html">&quot;markdownviewer/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_mathjax2_extension_src_index_.html">&quot;mathjax2-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_mathjax2_src_index_.html">&quot;mathjax2/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_nbformat_src_index_.html">&quot;nbformat/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_notebook_extension_src_index_.html">&quot;notebook-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_notebook_src_index_.html">&quot;notebook/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_observables_src_index_.html">&quot;observables/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_outputarea_src_index_.html">&quot;outputarea/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_pdf_extension_src_index_.html">&quot;pdf-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_property_inspector_src_index_.html">&quot;property-<wbr>inspector/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_rendermime_extension_src_index_.html">&quot;rendermime-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_rendermime_interfaces_src_index_.html">&quot;rendermime-<wbr>interfaces/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_rendermime_src_index_.html">&quot;rendermime/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_running_extension_src_index_.html">&quot;running-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_running_src_index_.html">&quot;running/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_services_src_index_.html">&quot;services/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_settingeditor_extension_src_index_.html">&quot;settingeditor-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_settingeditor_src_index_.html">&quot;settingeditor/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_settingregistry_src_index_.html">&quot;settingregistry/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_shortcuts_extension_src_index_.html">&quot;shortcuts-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_statedb_src_index_.html">&quot;statedb/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_statusbar_extension_src_index_.html">&quot;statusbar-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_statusbar_src_index_.html">&quot;statusbar/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_tabmanager_extension_src_index_.html">&quot;tabmanager-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_terminal_extension_src_index_.html">&quot;terminal-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_terminal_src_index_.html">&quot;terminal/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_theme_dark_extension_src_index_.html">&quot;theme-<wbr>dark-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_theme_light_extension_src_index_.html">&quot;theme-<wbr>light-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_toc_extension_src_index_.html">&quot;toc-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_toc_src_index_.html">&quot;toc/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_tooltip_extension_src_index_.html">&quot;tooltip-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_tooltip_src_index_.html">&quot;tooltip/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_ui_components_extension_src_index_.html">&quot;ui-<wbr>components-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_ui_components_src_index_.html">&quot;ui-<wbr>components/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_vdom_extension_src_index_.html">&quot;vdom-<wbr>extension/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_vdom_src_index_.html">&quot;vdom/src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_vega5_extension_src_index_.html">&quot;vega5-<wbr>extension/src/index&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

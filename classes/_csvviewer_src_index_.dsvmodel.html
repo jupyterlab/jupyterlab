@@ -1,0 +1,1630 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>DSVModel | @jupyterlab</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../../index.html" class="title">JupyterLab</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="../modules/_csvviewer_src_index_.html">&quot;csvviewer/src/index&quot;</a>
+				</li>
+				<li>
+					<a href="_csvviewer_src_index_.dsvmodel.html">DSVModel</a>
+				</li>
+			</ul>
+			<h1>Class DSVModel</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-comment">
+				<div class="tsd-comment tsd-typography">
+					<div class="lead">
+						<p>A data model implementation for in-memory delimiter-separated data.
+						The namespace for the <code>DSVModel</code> class statics.</p>
+					</div>
+					<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+						<h4>Notes</h4>
+					</a>
+					<p>This model handles data with up to 2**32 characters.</p>
+				</div>
+			</section>
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="tsd-signature-type">DataModel</span>
+						<ul class="tsd-hierarchy">
+							<li>
+								<span class="target">DSVModel</span>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implements</h3>
+				<ul class="tsd-hierarchy">
+					<li><span class="tsd-signature-type">IDisposable</span></li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Interfaces</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-interface tsd-parent-kind-class"><a href="../interfaces/_csvviewer_src_index_.dsvmodel.ioptions.html" class="tsd-kind-icon">IOptions</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Type aliases</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#cellregion" class="tsd-kind-icon">Cell<wbr>Region</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#cellschangedargs" class="tsd-kind-icon">Cells<wbr>Changed<wbr>Args</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#changedargs" class="tsd-kind-icon">Changed<wbr>Args</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#columnregion" class="tsd-kind-icon">Column<wbr>Region</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#columnschangedargs" class="tsd-kind-icon">Columns<wbr>Changed<wbr>Args</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#columnsmovedargs" class="tsd-kind-icon">Columns<wbr>Moved<wbr>Args</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#metadata" class="tsd-kind-icon">Metadata</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#modelresetargs" class="tsd-kind-icon">Model<wbr>Reset<wbr>Args</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#rowregion" class="tsd-kind-icon">Row<wbr>Region</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#rowschangedargs" class="tsd-kind-icon">Rows<wbr>Changed<wbr>Args</a></li>
+								<li class="tsd-kind-type-alias tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#rowsmovedargs" class="tsd-kind-icon">Rows<wbr>Moved<wbr>Args</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="_csvviewer_src_index_.dsvmodel.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_columncount" class="tsd-kind-icon">_column<wbr>Count</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_columnoffsets" class="tsd-kind-icon">_column<wbr>Offsets</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_columnoffsetsstartingrow" class="tsd-kind-icon">_column<wbr>Offsets<wbr>Starting<wbr>Row</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_data" class="tsd-kind-icon">_data</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_delayedparse" class="tsd-kind-icon">_delayed<wbr>Parse</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_delimiter" class="tsd-kind-icon">_delimiter</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_doneparsing" class="tsd-kind-icon">_done<wbr>Parsing</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_header" class="tsd-kind-icon">_header</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_initialrows" class="tsd-kind-icon">_initial<wbr>Rows</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_isdisposed" class="tsd-kind-icon">_is<wbr>Disposed</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_maxcacheget" class="tsd-kind-icon">_max<wbr>Cache<wbr>Get</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_parser" class="tsd-kind-icon">_parser</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_quote" class="tsd-kind-icon">_quote</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_quoteescaped" class="tsd-kind-icon">_quote<wbr>Escaped</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_ready" class="tsd-kind-icon">_ready</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_rowcount" class="tsd-kind-icon">_row<wbr>Count</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_rowdelimiter" class="tsd-kind-icon">_row<wbr>Delimiter</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_rowoffsets" class="tsd-kind-icon">_row<wbr>Offsets</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_startedparsing" class="tsd-kind-icon">_started<wbr>Parsing</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><a href="_csvviewer_src_index_.dsvmodel.html#changed" class="tsd-kind-icon">changed</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><a href="_csvviewer_src_index_.dsvmodel.html#emptymetadata" class="tsd-kind-icon">empty<wbr>Metadata</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Accessors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_csvviewer_src_index_.dsvmodel.html#isdisposed" class="tsd-kind-icon">is<wbr>Disposed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_csvviewer_src_index_.dsvmodel.html#ready" class="tsd-kind-icon">ready</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_computerowoffsets" class="tsd-kind-icon">_compute<wbr>Row<wbr>Offsets</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_getfield" class="tsd-kind-icon">_get<wbr>Field</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_getoffsetindex" class="tsd-kind-icon">_get<wbr>Offset<wbr>Index</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_parseasync" class="tsd-kind-icon">_parse<wbr>Async</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_csvviewer_src_index_.dsvmodel.html#_resetparser" class="tsd-kind-icon">_reset<wbr>Parser</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_csvviewer_src_index_.dsvmodel.html#columncount" class="tsd-kind-icon">column<wbr>Count</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_csvviewer_src_index_.dsvmodel.html#data" class="tsd-kind-icon">data</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_csvviewer_src_index_.dsvmodel.html#dispose" class="tsd-kind-icon">dispose</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected"><a href="_csvviewer_src_index_.dsvmodel.html#emitchanged" class="tsd-kind-icon">emit<wbr>Changed</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><a href="_csvviewer_src_index_.dsvmodel.html#metadata-1" class="tsd-kind-icon">metadata</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-overwrite"><a href="_csvviewer_src_index_.dsvmodel.html#rowcount" class="tsd-kind-icon">row<wbr>Count</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Type aliases</h2>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="cellregion" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Cell<wbr>Region</h3>
+					<div class="tsd-signature tsd-kind-icon">Cell<wbr>Region<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"body"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"row-header"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"column-header"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"corner-header"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:119</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A type alias for the data model cell regions.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="cellschangedargs" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Cells<wbr>Changed<wbr>Args</h3>
+					<div class="tsd-signature tsd-kind-icon">Cells<wbr>Changed<wbr>Args<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>column<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>columnSpan<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#cellregion" class="tsd-signature-type">CellRegion</a><span class="tsd-signature-symbol">; </span>row<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>rowSpan<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"cells-changed"</span><span class="tsd-signature-symbol"> }</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:245</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>An arguments object for the <code>changed</code> signal.</p>
+						</div>
+						<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+							<h4>Notes</h4>
+						</a>
+						<p>Data models should emit the <code>changed</code> signal with this args object
+						type when cells are changed in-place.</p>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>column<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The column index of the first modified cell.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>column<wbr>Span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The number of columns in the modified cell range.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#cellregion" class="tsd-signature-type">CellRegion</a></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The region which contains the modified cells.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>row<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The row index of the first modified cell.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>row<wbr>Span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The number of rows in the modified cell range.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"cells-changed"</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The discriminated type of the args object.</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="changedargs" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Changed<wbr>Args</h3>
+					<div class="tsd-signature tsd-kind-icon">Changed<wbr>Args<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#rowregion" class="tsd-signature-type">RowRegion</a><span class="tsd-signature-symbol">; </span>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"rows-inserted"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"rows-removed"</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#columnregion" class="tsd-signature-type">ColumnRegion</a><span class="tsd-signature-symbol">; </span>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"columns-inserted"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"columns-removed"</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>destination<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#rowregion" class="tsd-signature-type">RowRegion</a><span class="tsd-signature-symbol">; </span>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"rows-moved"</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>destination<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#columnregion" class="tsd-signature-type">ColumnRegion</a><span class="tsd-signature-symbol">; </span>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"columns-moved"</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>column<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>columnSpan<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#cellregion" class="tsd-signature-type">CellRegion</a><span class="tsd-signature-symbol">; </span>row<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>rowSpan<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"cells-changed"</span><span class="tsd-signature-symbol"> }</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-symbol">{ </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"model-reset"</span><span class="tsd-signature-symbol"> }</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:292</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A type alias for the args objects of the <code>changed</code> signal.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="columnregion" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Column<wbr>Region</h3>
+					<div class="tsd-signature tsd-kind-icon">Column<wbr>Region<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"body"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"row-header"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:115</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A type alias for the data model column regions.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="columnschangedargs" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Columns<wbr>Changed<wbr>Args</h3>
+					<div class="tsd-signature tsd-kind-icon">Columns<wbr>Changed<wbr>Args<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#columnregion" class="tsd-signature-type">ColumnRegion</a><span class="tsd-signature-symbol">; </span>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"columns-inserted"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"columns-removed"</span><span class="tsd-signature-symbol"> }</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:162</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>An arguments object for the <code>changed</code> signal.</p>
+						</div>
+						<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+							<h4>Notes</h4>
+						</a>
+						<p>Data models should emit the <code>changed</code> signal with this args object
+						type when columns are inserted or removed.</p>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The index of the first modified column.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#columnregion" class="tsd-signature-type">ColumnRegion</a></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The region which contains the modified columns.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The number of modified columns.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"columns-inserted"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"columns-removed"</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The discriminated type of the args object.</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="columnsmovedargs" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Columns<wbr>Moved<wbr>Args</h3>
+					<div class="tsd-signature tsd-kind-icon">Columns<wbr>Moved<wbr>Args<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>destination<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#columnregion" class="tsd-signature-type">ColumnRegion</a><span class="tsd-signature-symbol">; </span>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"columns-moved"</span><span class="tsd-signature-symbol"> }</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:216</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>An arguments object for the <code>changed</code> signal.</p>
+						</div>
+						<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+							<h4>Notes</h4>
+						</a>
+						<p>Data models should emit the <code>changed</code> signal with this args object
+						type when columns are moved.</p>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>destination<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The ending index of the first modified column.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The starting index of the first modified column.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#columnregion" class="tsd-signature-type">ColumnRegion</a></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The region which contains the modified columns.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The number of modified columns.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"columns-moved"</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The discriminated type of the args object.</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="metadata" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Metadata</h3>
+					<div class="tsd-signature tsd-kind-icon">Metadata<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{}</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:123</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The metadata for a column in a data model.</p>
+						</div>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter-index-signature">
+								<h5><span class="tsd-signature-symbol">[</span>key: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><span class="tsd-signature-type">any</span></h5>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="modelresetargs" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Model<wbr>Reset<wbr>Args</h3>
+					<div class="tsd-signature tsd-kind-icon">Model<wbr>Reset<wbr>Args<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"model-reset"</span><span class="tsd-signature-symbol"> }</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:283</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>An arguments object for the <code>changed</code> signal.</p>
+						</div>
+						<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+							<h4>Notes</h4>
+						</a>
+						<p>Data models should emit the <code>changed</code> signal with this args object
+							type when the model has changed in a fashion that cannot be easily
+						expressed by the other args object types.</p>
+						<p>This is the &quot;big hammer&quot; approach, and will cause any associated
+							data grid to perform a full reset. The other changed args types
+						should be used whenever possible.</p>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"model-reset"</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The discriminated type of the args object.</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="rowregion" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Row<wbr>Region</h3>
+					<div class="tsd-signature tsd-kind-icon">Row<wbr>Region<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"body"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"column-header"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:111</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A type alias for the data model row regions.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="rowschangedargs" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Rows<wbr>Changed<wbr>Args</h3>
+					<div class="tsd-signature tsd-kind-icon">Rows<wbr>Changed<wbr>Args<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#rowregion" class="tsd-signature-type">RowRegion</a><span class="tsd-signature-symbol">; </span>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"rows-inserted"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"rows-removed"</span><span class="tsd-signature-symbol"> }</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:137</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>An arguments object for the <code>changed</code> signal.</p>
+						</div>
+						<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+							<h4>Notes</h4>
+						</a>
+						<p>Data models should emit the <code>changed</code> signal with this args object
+						type when rows are inserted or removed.</p>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The index of the first modified row.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#rowregion" class="tsd-signature-type">RowRegion</a></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The region which contains the modified rows.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The number of modified rows.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"rows-inserted"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"rows-removed"</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The discriminated type of the args object.</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+					<a name="rowsmovedargs" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> Rows<wbr>Moved<wbr>Args</h3>
+					<div class="tsd-signature tsd-kind-icon">Rows<wbr>Moved<wbr>Args<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-symbol">{ </span>destination<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#rowregion" class="tsd-signature-type">RowRegion</a><span class="tsd-signature-symbol">; </span>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">; </span>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"rows-moved"</span><span class="tsd-signature-symbol"> }</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:187</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>An arguments object for the <code>changed</code> signal.</p>
+						</div>
+						<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+							<h4>Notes</h4>
+						</a>
+						<p>Data models should emit the <code>changed</code> signal with this args object
+						type when rows are moved.</p>
+					</div>
+					<div class="tsd-type-declaration">
+						<h4>Type declaration</h4>
+						<ul class="tsd-parameters">
+							<li class="tsd-parameter">
+								<h5>destination<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The ending index of the first modified row.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>index<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The starting index of the first modified row.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>region<span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html#rowregion" class="tsd-signature-type">RowRegion</a></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The region which contains the modified rows.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>span<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The number of modified rows.</p>
+									</div>
+								</div>
+							</li>
+							<li class="tsd-parameter">
+								<h5>type<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">"rows-moved"</span></h5>
+								<div class="tsd-comment tsd-typography">
+									<div class="lead">
+										<p>The discriminated type of the args object.</p>
+									</div>
+								</div>
+							</li>
+						</ul>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new DSVModel<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_csvviewer_src_index_.dsvmodel.ioptions.html" class="tsd-signature-type">IOptions</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_csvviewer_src_index_.dsvmodel.html" class="tsd-signature-type">DSVModel</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L39">packages/csvviewer/src/model.ts:39</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Create a data model with static CSV data.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>options: <a href="../interfaces/_csvviewer_src_index_.dsvmodel.ioptions.html" class="tsd-signature-type">IOptions</a></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>The options for initializing the data model.</p>
+										</div>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="_csvviewer_src_index_.dsvmodel.html" class="tsd-signature-type">DSVModel</a></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_columncount" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _column<wbr>Count</h3>
+					<div class="tsd-signature tsd-kind-icon">_column<wbr>Count<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L581">packages/csvviewer/src/model.ts:581</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_columnoffsets" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _column<wbr>Offsets</h3>
+					<div class="tsd-signature tsd-kind-icon">_column<wbr>Offsets<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Uint32Array</span><span class="tsd-signature-symbol"> = new Uint32Array(0)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L595">packages/csvviewer/src/model.ts:595</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The column offset cache, starting with row _columnOffsetsStartingRow</p>
+						</div>
+						<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+							<h4>Notes</h4>
+						</a>
+						<p>The index of the first character in the data string for row r, column c is
+						_columnOffsets[(r-this._columnOffsetsStartingRow)*numColumns+c]</p>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_columnoffsetsstartingrow" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _column<wbr>Offsets<wbr>Starting<wbr>Row</h3>
+					<div class="tsd-signature tsd-kind-icon">_column<wbr>Offsets<wbr>Starting<wbr>Row<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 0</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L599">packages/csvviewer/src/model.ts:599</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The row that _columnOffsets[0] represents.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_data" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _data</h3>
+					<div class="tsd-signature tsd-kind-icon">_data<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L579">packages/csvviewer/src/model.ts:579</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_delayedparse" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _delayed<wbr>Parse</h3>
+					<div class="tsd-signature tsd-kind-icon">_delayed<wbr>Parse<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span><span class="tsd-signature-symbol"> = null</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L615">packages/csvviewer/src/model.ts:615</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_delimiter" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _delimiter</h3>
+					<div class="tsd-signature tsd-kind-icon">_delimiter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L572">packages/csvviewer/src/model.ts:572</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_doneparsing" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _done<wbr>Parsing</h3>
+					<div class="tsd-signature tsd-kind-icon">_done<wbr>Parsing<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L617">packages/csvviewer/src/model.ts:617</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_header" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _header</h3>
+					<div class="tsd-signature tsd-kind-icon">_header<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol"> = []</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L587">packages/csvviewer/src/model.ts:587</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The header strings.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_initialrows" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _initial<wbr>Rows</h3>
+					<div class="tsd-signature tsd-kind-icon">_initial<wbr>Rows<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L612">packages/csvviewer/src/model.ts:612</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The number of rows to parse initially before doing a delayed parse of the
+							entire data.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_isdisposed" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _is<wbr>Disposed</h3>
+					<div class="tsd-signature tsd-kind-icon">_is<wbr>Disposed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L618">packages/csvviewer/src/model.ts:618</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_maxcacheget" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _max<wbr>Cache<wbr>Get</h3>
+					<div class="tsd-signature tsd-kind-icon">_max<wbr>Cache<wbr>Get<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 1000</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L603">packages/csvviewer/src/model.ts:603</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The maximum number of rows to parse when there is a cache miss.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_parser" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _parser</h3>
+					<div class="tsd-signature tsd-kind-icon">_parser<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"quotes"</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"noquotes"</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L575">packages/csvviewer/src/model.ts:575</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_quote" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _quote</h3>
+					<div class="tsd-signature tsd-kind-icon">_quote<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L573">packages/csvviewer/src/model.ts:573</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_quoteescaped" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _quote<wbr>Escaped</h3>
+					<div class="tsd-signature tsd-kind-icon">_quote<wbr>Escaped<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RegExp</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L574">packages/csvviewer/src/model.ts:574</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_ready" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _ready</h3>
+					<div class="tsd-signature tsd-kind-icon">_ready<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">PromiseDelegate</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new PromiseDelegate&lt;void&gt;()</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L619">packages/csvviewer/src/model.ts:619</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_rowcount" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _row<wbr>Count</h3>
+					<div class="tsd-signature tsd-kind-icon">_row<wbr>Count<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> = 1</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L580">packages/csvviewer/src/model.ts:580</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_rowdelimiter" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _row<wbr>Delimiter</h3>
+					<div class="tsd-signature tsd-kind-icon">_row<wbr>Delimiter<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L576">packages/csvviewer/src/model.ts:576</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_rowoffsets" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _row<wbr>Offsets</h3>
+					<div class="tsd-signature tsd-kind-icon">_row<wbr>Offsets<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Uint32Array</span><span class="tsd-signature-symbol"> = new Uint32Array(1)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L607">packages/csvviewer/src/model.ts:607</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>The index for the start of each row.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_startedparsing" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _started<wbr>Parsing</h3>
+					<div class="tsd-signature tsd-kind-icon">_started<wbr>Parsing<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L616">packages/csvviewer/src/model.ts:616</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+					<a name="changed" class="tsd-anchor"></a>
+					<h3>changed</h3>
+					<div class="tsd-signature tsd-kind-icon">changed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">DataModel.ChangedArgs</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<p>Inherited from <a href="_csvviewer_src_index_.dsvmodel.html">DSVModel</a>.<a href="_csvviewer_src_index_.dsvmodel.html#changed">changed</a></p>
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:13</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A signal emitted when the data model has changed.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-static">
+					<a name="emptymetadata" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> empty<wbr>Metadata</h3>
+					<div class="tsd-signature tsd-kind-icon">empty<wbr>Metadata<span class="tsd-signature-symbol">:</span> <a href="_csvviewer_src_index_.dsvmodel.html#metadata" class="tsd-signature-type">Metadata</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:129</li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>A singleton empty metadata object.</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Accessors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="isdisposed" class="tsd-anchor"></a>
+					<h3>is<wbr>Disposed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> isDisposed<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L98">packages/csvviewer/src/model.ts:98</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Whether this model has been disposed.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="ready" class="tsd-anchor"></a>
+					<h3>ready</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> ready<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L105">packages/csvviewer/src/model.ts:105</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>A promise that resolves when the model has parsed all of its data.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_computerowoffsets" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _compute<wbr>Row<wbr>Offsets</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_compute<wbr>Row<wbr>Offsets<span class="tsd-signature-symbol">(</span>endRow<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L226">packages/csvviewer/src/model.ts:226</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Compute the row offsets and initialize the column offset cache.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> endRow: <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> = 4294967295</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The last row to parse, from the start of the data (first
+										row is row 1).</p>
+										<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+											<h4>Notes</h4>
+										</a>
+										<p>This method supports parsing the data incrementally by calling it with
+											incrementally higher endRow. Rows that have already been parsed will not be
+										parsed again.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_getfield" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _get<wbr>Field</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_get<wbr>Field<span class="tsd-signature-symbol">(</span>row<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, column<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L344">packages/csvviewer/src/model.ts:344</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the parsed string field for a row and column.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>row: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The row number of the data item.</p>
+									</div>
+								</li>
+								<li>
+									<h5>column: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The column number of the data item.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+							<p>The parsed string for the data item.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_getoffsetindex" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _get<wbr>Offset<wbr>Index</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_get<wbr>Offset<wbr>Index<span class="tsd-signature-symbol">(</span>row<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, column<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L418">packages/csvviewer/src/model.ts:418</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the index in the data string for the first character of a row and
+									column.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>row: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The row of the data item.</p>
+									</div>
+								</li>
+								<li>
+									<h5>column: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The column of the data item.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+							<ul>
+								<li>The index into the data string where the data item starts.</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_parseasync" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _parse<wbr>Async</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_parse<wbr>Async<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L473">packages/csvviewer/src/model.ts:473</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Parse the data string asynchronously.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>It can take several seconds to parse a several hundred megabyte string, so
+									we parse the first 500 rows to get something up on the screen, then we
+								parse the full data string asynchronously.</p>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_resetparser" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _reset<wbr>Parser</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_reset<wbr>Parser<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L542">packages/csvviewer/src/model.ts:542</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Reset the parser state.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="columncount" class="tsd-anchor"></a>
+					<h3>column<wbr>Count</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">column<wbr>Count<span class="tsd-signature-symbol">(</span>region<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DataModel.ColumnRegion</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides DataModel.columnCount</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L134">packages/csvviewer/src/model.ts:134</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the column count for a region in the data model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>region: <span class="tsd-signature-type">DataModel.ColumnRegion</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The column region of interest.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+							<ul>
+								<li>The column count for the region.</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="data" class="tsd-anchor"></a>
+					<h3>data</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">data<span class="tsd-signature-symbol">(</span>region<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DataModel.CellRegion</span>, row<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, column<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides DataModel.data</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L152">packages/csvviewer/src/model.ts:152</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the data value for a cell in the data model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>region: <span class="tsd-signature-type">DataModel.CellRegion</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The cell region of interest.</p>
+									</div>
+								</li>
+								<li>
+									<h5>row: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The row index of the cell of interest.</p>
+									</div>
+								</li>
+								<li>
+									<h5>column: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The column index of the cell of interest.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="dispose" class="tsd-anchor"></a>
+					<h3>dispose</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">dispose<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L188">packages/csvviewer/src/model.ts:188</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Dispose the resources held by this model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+					<a name="emitchanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagProtected">Protected</span> emit<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+						<li class="tsd-signature tsd-kind-icon">emit<wbr>Changed<span class="tsd-signature-symbol">(</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DataModel.ChangedArgs</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_csvviewer_src_index_.dsvmodel.html">DSVModel</a>.<a href="_csvviewer_src_index_.dsvmodel.html#emitchanged">emitChanged</a></p>
+								<ul>
+									<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:79</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Emit the <code>changed</code> signal for the data model.</p>
+								</div>
+								<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+									<h4>Notes</h4>
+								</a>
+								<p>Subclasses should call this method whenever the data model has
+								changed so that attached data grids can update themselves.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>args: <span class="tsd-signature-type">DataModel.ChangedArgs</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+					<a name="metadata-1" class="tsd-anchor"></a>
+					<h3>metadata</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+						<li class="tsd-signature tsd-kind-icon">metadata<span class="tsd-signature-symbol">(</span>region<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DataModel.CellRegion</span>, row<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span>, column<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DataModel.Metadata</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Inherited from <a href="_csvviewer_src_index_.dsvmodel.html">DSVModel</a>.<a href="_csvviewer_src_index_.dsvmodel.html#metadata-1">metadata</a></p>
+								<ul>
+									<li>Defined in node_modules/@lumino/datagrid/lib/datamodel.d.ts:71</li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the metadata for a cell in the data model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>region: <span class="tsd-signature-type">DataModel.CellRegion</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The cell region of interest.</p>
+									</div>
+								</li>
+								<li>
+									<h5>row: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The row index of the cell of interest.</p>
+									</div>
+								</li>
+								<li>
+									<h5>column: <span class="tsd-signature-type">number</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The column index of the cell of interest.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">DataModel.Metadata</span></h4>
+							<p>The metadata for the specified cell.</p>
+							<a href="#notes" id="notes" style="color: inherit; text-decoration: none;">
+								<h4>Notes</h4>
+							</a>
+							<p>The returned metadata should be treated as immutable.</p>
+							<p>This method is called often, and so should be efficient.</p>
+							<p>The default implementation returns <code>{}</code>.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+					<a name="rowcount" class="tsd-anchor"></a>
+					<h3>row<wbr>Count</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+						<li class="tsd-signature tsd-kind-icon">row<wbr>Count<span class="tsd-signature-symbol">(</span>region<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">DataModel.RowRegion</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Overrides DataModel.rowCount</p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/csvviewer/src/model.ts#L116">packages/csvviewer/src/model.ts:116</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get the row count for a region in the data model.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>region: <span class="tsd-signature-type">DataModel.RowRegion</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The row region of interest.</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span></h4>
+							<ul>
+								<li>The row count for the region.</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/_csvviewer_src_index_.html">&quot;csvviewer/src/index&quot;</a>
+						<ul>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_csvviewer_src_index_.csvtoolbar.html">CSVToolbar</a>
+							</li>
+							<li class=" tsd-kind-namespace tsd-parent-kind-module">
+								<a href="../modules/_csvviewer_src_index_.iparser.html">IParser</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_csvviewer_src_index_.csvdelimiter.html" class="tsd-kind-icon">CSVDelimiter</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_csvviewer_src_index_.csvdocumentwidget.html" class="tsd-kind-icon">CSVDocument<wbr>Widget</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_csvviewer_src_index_.csvviewer.html" class="tsd-kind-icon">CSVViewer</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_csvviewer_src_index_.csvviewerfactory.html" class="tsd-kind-icon">CSVViewer<wbr>Factory</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="_csvviewer_src_index_.dsvmodel.html" class="tsd-kind-icon">DSVModel</a>
+						<ul>
+							<li class=" tsd-kind-interface tsd-parent-kind-class">
+								<a href="../interfaces/_csvviewer_src_index_.dsvmodel.ioptions.html" class="tsd-kind-icon">IOptions</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#cellregion" class="tsd-kind-icon">Cell<wbr>Region</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#cellschangedargs" class="tsd-kind-icon">Cells<wbr>Changed<wbr>Args</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#changedargs" class="tsd-kind-icon">Changed<wbr>Args</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#columnregion" class="tsd-kind-icon">Column<wbr>Region</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#columnschangedargs" class="tsd-kind-icon">Columns<wbr>Changed<wbr>Args</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#columnsmovedargs" class="tsd-kind-icon">Columns<wbr>Moved<wbr>Args</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#metadata" class="tsd-kind-icon">Metadata</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#modelresetargs" class="tsd-kind-icon">Model<wbr>Reset<wbr>Args</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#rowregion" class="tsd-kind-icon">Row<wbr>Region</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#rowschangedargs" class="tsd-kind-icon">Rows<wbr>Changed<wbr>Args</a>
+							</li>
+							<li class=" tsd-kind-type-alias tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#rowsmovedargs" class="tsd-kind-icon">Rows<wbr>Moved<wbr>Args</a>
+							</li>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="_csvviewer_src_index_.dsvmodel.html#constructor" class="tsd-kind-icon">constructor</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_columncount" class="tsd-kind-icon">_column<wbr>Count</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_columnoffsets" class="tsd-kind-icon">_column<wbr>Offsets</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_columnoffsetsstartingrow" class="tsd-kind-icon">_column<wbr>Offsets<wbr>Starting<wbr>Row</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_data" class="tsd-kind-icon">_data</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_delayedparse" class="tsd-kind-icon">_delayed<wbr>Parse</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_delimiter" class="tsd-kind-icon">_delimiter</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_doneparsing" class="tsd-kind-icon">_done<wbr>Parsing</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_header" class="tsd-kind-icon">_header</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_initialrows" class="tsd-kind-icon">_initial<wbr>Rows</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_isdisposed" class="tsd-kind-icon">_is<wbr>Disposed</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_maxcacheget" class="tsd-kind-icon">_max<wbr>Cache<wbr>Get</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_parser" class="tsd-kind-icon">_parser</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_quote" class="tsd-kind-icon">_quote</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_quoteescaped" class="tsd-kind-icon">_quote<wbr>Escaped</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_ready" class="tsd-kind-icon">_ready</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_rowcount" class="tsd-kind-icon">_row<wbr>Count</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_rowdelimiter" class="tsd-kind-icon">_row<wbr>Delimiter</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_rowoffsets" class="tsd-kind-icon">_row<wbr>Offsets</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_startedparsing" class="tsd-kind-icon">_started<wbr>Parsing</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-inherited">
+								<a href="_csvviewer_src_index_.dsvmodel.html#changed" class="tsd-kind-icon">changed</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-static">
+								<a href="_csvviewer_src_index_.dsvmodel.html#emptymetadata" class="tsd-kind-icon">empty<wbr>Metadata</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_csvviewer_src_index_.dsvmodel.html#isdisposed" class="tsd-kind-icon">is<wbr>Disposed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_csvviewer_src_index_.dsvmodel.html#ready" class="tsd-kind-icon">ready</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_computerowoffsets" class="tsd-kind-icon">_compute<wbr>Row<wbr>Offsets</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_getfield" class="tsd-kind-icon">_get<wbr>Field</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_getoffsetindex" class="tsd-kind-icon">_get<wbr>Offset<wbr>Index</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_parseasync" class="tsd-kind-icon">_parse<wbr>Async</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_csvviewer_src_index_.dsvmodel.html#_resetparser" class="tsd-kind-icon">_reset<wbr>Parser</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_csvviewer_src_index_.dsvmodel.html#columncount" class="tsd-kind-icon">column<wbr>Count</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_csvviewer_src_index_.dsvmodel.html#data" class="tsd-kind-icon">data</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_csvviewer_src_index_.dsvmodel.html#dispose" class="tsd-kind-icon">dispose</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited tsd-is-protected">
+								<a href="_csvviewer_src_index_.dsvmodel.html#emitchanged" class="tsd-kind-icon">emit<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-inherited">
+								<a href="_csvviewer_src_index_.dsvmodel.html#metadata-1" class="tsd-kind-icon">metadata</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-overwrite">
+								<a href="_csvviewer_src_index_.dsvmodel.html#rowcount" class="tsd-kind-icon">row<wbr>Count</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_csvviewer_src_index_.gridsearchservice.html" class="tsd-kind-icon">Grid<wbr>Search<wbr>Service</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="_csvviewer_src_index_.tsvviewerfactory.html" class="tsd-kind-icon">TSVViewer<wbr>Factory</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_csvviewer_src_index_.textrenderconfig.html" class="tsd-kind-icon">Text<wbr>Render<wbr>Config</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/_csvviewer_src_index_.html#parsedsv" class="tsd-kind-icon">parseDSV</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-module">
+						<a href="../modules/_csvviewer_src_index_.html#parsedsvnoquotes" class="tsd-kind-icon">parseDSVNo<wbr>Quotes</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>

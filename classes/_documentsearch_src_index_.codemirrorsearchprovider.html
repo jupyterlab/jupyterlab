@@ -1,0 +1,1148 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>CodeMirrorSearchProvider | @jupyterlab</title>
+	<meta name="description" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="../assets/js/search.js" data-base="..">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="../../index.html" class="title">JupyterLab</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-externals" checked />
+							<label class="tsd-widget" for="tsd-filter-externals">Externals</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="../globals.html">Globals</a>
+				</li>
+				<li>
+					<a href="../modules/_documentsearch_src_index_.html">&quot;documentsearch/src/index&quot;</a>
+				</li>
+				<li>
+					<a href="_documentsearch_src_index_.codemirrorsearchprovider.html">CodeMirrorSearchProvider</a>
+				</li>
+			</ul>
+			<h1>Class CodeMirrorSearchProvider</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">CodeMirrorSearchProvider</span>
+					</li>
+				</ul>
+			</section>
+			<section class="tsd-panel">
+				<h3>Implements</h3>
+				<ul class="tsd-hierarchy">
+					<li><a href="../interfaces/_documentsearch_src_index_.isearchprovider.html" class="tsd-signature-type">ISearchProvider</a><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_documentsearch_src_index_.html#cmmainareawidget" class="tsd-signature-type">CMMainAreaWidget</a><span class="tsd-signature-symbol">&gt;</span></li>
+				</ul>
+			</section>
+			<section class="tsd-panel-group tsd-index-group">
+				<h2>Index</h2>
+				<section class="tsd-panel tsd-index-panel">
+					<div class="tsd-index-content">
+						<section class="tsd-index-section ">
+							<h3>Properties</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_changed" class="tsd-kind-icon">_changed</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_cm" class="tsd-kind-icon">_cm</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_currentmatch" class="tsd-kind-icon">_current<wbr>Match</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_matchstate" class="tsd-kind-icon">_match<wbr>State</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_overlay" class="tsd-kind-icon">_overlay</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_query" class="tsd-kind-icon">_query</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#isreadonly" class="tsd-kind-icon">is<wbr>Read<wbr>Only</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#issubprovider" class="tsd-kind-icon">is<wbr>Sub<wbr>Provider</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Accessors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#changed" class="tsd-kind-icon">changed</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#currentmatch" class="tsd-kind-icon">current<wbr>Match</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#currentmatchindex" class="tsd-kind-icon">current<wbr>Match<wbr>Index</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#editor" class="tsd-kind-icon">editor</a></li>
+								<li class="tsd-kind-get-signature tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#matches" class="tsd-kind-icon">matches</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
+							<h3>Methods</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_currentmatchisselected" class="tsd-kind-icon">_current<wbr>Match<wbr>IsSelected</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_findnext" class="tsd-kind-icon">_find<wbr>Next</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_getsearchoverlay" class="tsd-kind-icon">_get<wbr>Search<wbr>Overlay</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_ondocchanged" class="tsd-kind-icon">_on<wbr>Doc<wbr>Changed</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_parsematchesfromstate" class="tsd-kind-icon">_parse<wbr>Matches<wbr>From<wbr>State</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_refreshoverlay" class="tsd-kind-icon">_refresh<wbr>Overlay</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_setinitialmatches" class="tsd-kind-icon">_set<wbr>Initial<wbr>Matches</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_startquery" class="tsd-kind-icon">_start<wbr>Query</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_toeditorpos" class="tsd-kind-icon">_to<wbr>Editor<wbr>Pos</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#clearselection" class="tsd-kind-icon">clear<wbr>Selection</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#endquery" class="tsd-kind-icon">end<wbr>Query</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#endsearch" class="tsd-kind-icon">end<wbr>Search</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#getinitialquery" class="tsd-kind-icon">get<wbr>Initial<wbr>Query</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#highlightnext" class="tsd-kind-icon">highlight<wbr>Next</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#highlightprevious" class="tsd-kind-icon">highlight<wbr>Previous</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#refreshoverlay" class="tsd-kind-icon">refresh<wbr>Overlay</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#replaceallmatches" class="tsd-kind-icon">replace<wbr>All<wbr>Matches</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#replacecurrentmatch" class="tsd-kind-icon">replace<wbr>Current<wbr>Match</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#startquery" class="tsd-kind-icon">start<wbr>Query</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#startquerycodemirror" class="tsd-kind-icon">start<wbr>Query<wbr>Code<wbr>Mirror</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-static"><a href="_documentsearch_src_index_.codemirrorsearchprovider.html#cansearchon" class="tsd-kind-icon">can<wbr>Search<wbr>On</a></li>
+							</ul>
+						</section>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_changed" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _changed</h3>
+					<div class="tsd-signature tsd-kind-icon">_changed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Signal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> = new Signal&lt;this, void&gt;(this)</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L560">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:560</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_cm" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _cm</h3>
+					<div class="tsd-signature tsd-kind-icon">_cm<span class="tsd-signature-symbol">:</span> <a href="_codemirror_src_index_.codemirroreditor.html" class="tsd-signature-type">CodeMirrorEditor</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L557">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:557</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_currentmatch" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _current<wbr>Match</h3>
+					<div class="tsd-signature tsd-kind-icon">_current<wbr>Match<span class="tsd-signature-symbol">:</span> <a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L558">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:558</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_matchstate" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _match<wbr>State</h3>
+					<div class="tsd-signature tsd-kind-icon">_match<wbr>State<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">MatchMap</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L559">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:559</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_overlay" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _overlay</h3>
+					<div class="tsd-signature tsd-kind-icon">_overlay<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L561">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:561</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="_query" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _query</h3>
+					<div class="tsd-signature tsd-kind-icon">_query<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">RegExp</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L556">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:556</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="isreadonly" class="tsd-anchor"></a>
+					<h3>is<wbr>Read<wbr>Only</h3>
+					<div class="tsd-signature tsd-kind-icon">is<wbr>Read<wbr>Only<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">false</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<p>Implementation of <a href="../interfaces/_documentsearch_src_index_.isearchprovider.html">ISearchProvider</a>.<a href="../interfaces/_documentsearch_src_index_.isearchprovider.html#isreadonly">isReadOnly</a></p>
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L297">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:297</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Set to true if the widget under search is read-only, false
+								if it is editable.  Will be used to determine whether to show
+							the replace option.</p>
+						</div>
+					</div>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
+					<a name="issubprovider" class="tsd-anchor"></a>
+					<h3>is<wbr>Sub<wbr>Provider</h3>
+					<div class="tsd-signature tsd-kind-icon">is<wbr>Sub<wbr>Provider<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = false</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L310">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:310</a></li>
+						</ul>
+					</aside>
+					<div class="tsd-comment tsd-typography">
+						<div class="lead">
+							<p>Set whether or not the CodemirrorSearchProvider will wrap to the beginning
+							or end of the document on invocations of highlightNext or highlightPrevious, respectively</p>
+						</div>
+					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Accessors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="changed" class="tsd-anchor"></a>
+					<h3>changed</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> changed<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L278">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:278</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Signal indicating that something in the search has changed, so the UI should update</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ISignal</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">this</span><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="currentmatch" class="tsd-anchor"></a>
+					<h3>current<wbr>Match</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> currentMatch<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L271">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:271</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="currentmatchindex" class="tsd-anchor"></a>
+					<h3>current<wbr>Match<wbr>Index</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> currentMatchIndex<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L285">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:285</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The current index of the selected match.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="editor" class="tsd-anchor"></a>
+					<h3>editor</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> editor<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="_codemirror_src_index_.codemirroreditor.html" class="tsd-signature-type">CodeMirrorEditor</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L303">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:303</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="_codemirror_src_index_.codemirroreditor.html" class="tsd-signature-type">CodeMirrorEditor</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-get-signature tsd-parent-kind-class">
+					<a name="matches" class="tsd-anchor"></a>
+					<h3>matches</h3>
+					<ul class="tsd-signatures tsd-kind-get-signature tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon"><span class="tsd-signature-symbol">get</span> matches<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L267">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:267</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>The same list of matches provided by the startQuery promise resolution</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_currentmatchisselected" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _current<wbr>Match<wbr>IsSelected</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_current<wbr>Match<wbr>IsSelected<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L539">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:539</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_findnext" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _find<wbr>Next</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_find<wbr>Next<span class="tsd-signature-symbol">(</span>reverse<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ICodeMirrorMatch</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L436">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:436</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>reverse: <span class="tsd-signature-type">boolean</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ICodeMirrorMatch</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_getsearchoverlay" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _get<wbr>Search<wbr>Overlay</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_get<wbr>Search<wbr>Overlay<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">{ </span>token<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> }</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L373">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:373</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">{ </span>token<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> }</span></h4>
+							<ul class="tsd-parameters">
+								<li class="tsd-parameter">
+									<h5>token<span class="tsd-signature-symbol">: </span>function</h5>
+									<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-type-literal">
+										<li class="tsd-signature tsd-kind-icon">token<span class="tsd-signature-symbol">(</span>stream<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">StringStream</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"searching"</span></li>
+									</ul>
+									<ul class="tsd-descriptions">
+										<li class="tsd-description">
+											<aside class="tsd-sources">
+												<ul>
+													<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L385">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:385</a></li>
+												</ul>
+											</aside>
+											<div class="tsd-comment tsd-typography">
+												<div class="lead">
+													<p>Token function is called when a line needs to be processed -
+														when the overlay is initially created, it&#39;s called on all lines;
+														when a line is modified and needs to be re-evaluated, it&#39;s called
+													on just that line.</p>
+												</div>
+												<p>This implementation of the token function both constructs/maintains
+													the overlay and keeps track of the match state as the document is
+												updated while a search is active.</p>
+											</div>
+											<h4 class="tsd-parameters-title">Parameters</h4>
+											<ul class="tsd-parameters">
+												<li>
+													<h5>stream: <span class="tsd-signature-type">StringStream</span></h5>
+												</li>
+											</ul>
+											<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">"searching"</span></h4>
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_ondocchanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _on<wbr>Doc<wbr>Changed</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_on<wbr>Doc<wbr>Changed<span class="tsd-signature-symbol">(</span>_<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, changeObj<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">EditorChange</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L312">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:312</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>_: <span class="tsd-signature-type">any</span></h5>
+								</li>
+								<li>
+									<h5>changeObj: <span class="tsd-signature-type">EditorChange</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_parsematchesfromstate" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _parse<wbr>Matches<wbr>From<wbr>State</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_parse<wbr>Matches<wbr>From<wbr>State<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol">[]</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L509">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:509</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol">[]</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_refreshoverlay" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _refresh<wbr>Overlay</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_refresh<wbr>Overlay<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L321">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:321</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_setinitialmatches" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _set<wbr>Initial<wbr>Matches</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_set<wbr>Initial<wbr>Matches<span class="tsd-signature-symbol">(</span>query<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">RegExp</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L344">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:344</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Do a full search on the entire document.</p>
+								</div>
+								<p>This manually constructs the initial match state across the whole
+									document. This must be done manually because the codemirror overlay
+									is lazy-loaded, so it will only tokenize lines that are in or near
+									the viewport.  This is sufficient for efficiently maintaining the
+									state when changes are made to the document, as changes occur in or
+									near the viewport, but to scan the whole document, a manual search
+								across the entire content is required.</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>query: <span class="tsd-signature-type">RegExp</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The search term</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_startquery" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _start<wbr>Query</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_start<wbr>Query<span class="tsd-signature-symbol">(</span>query<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">RegExp</span>, refreshOverlay<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L105">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:105</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>query: <span class="tsd-signature-type">RegExp</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> refreshOverlay: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="_toeditorpos" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> _to<wbr>Editor<wbr>Pos</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">_to<wbr>Editor<wbr>Pos<span class="tsd-signature-symbol">(</span>posIn<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Position</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/_codeeditor_src_index_.codeeditor.iposition.html" class="tsd-signature-type">IPosition</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L532">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:532</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>posIn: <span class="tsd-signature-type">Position</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../interfaces/_codeeditor_src_index_.codeeditor.iposition.html" class="tsd-signature-type">IPosition</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="clearselection" class="tsd-anchor"></a>
+					<h3>clear<wbr>Selection</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">clear<wbr>Selection<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L299">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:299</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="endquery" class="tsd-anchor"></a>
+					<h3>end<wbr>Query</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">end<wbr>Query<span class="tsd-signature-symbol">(</span>removeOverlay<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L141">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:141</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Clears state of a search provider to prepare for startQuery to be called
+									in order to start a new query or refresh an existing one.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> removeOverlay: <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> = true</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A promise that resolves when the search provider is ready to
+							begin a new search.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="endsearch" class="tsd-anchor"></a>
+					<h3>end<wbr>Search</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">end<wbr>Search<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_documentsearch_src_index_.isearchprovider.html">ISearchProvider</a>.<a href="../interfaces/_documentsearch_src_index_.isearchprovider.html#endsearch">endSearch</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L166">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:166</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Resets UI state, removes all matches.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A promise that resolves when all state has been cleaned up.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="getinitialquery" class="tsd-anchor"></a>
+					<h3>get<wbr>Initial<wbr>Query</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Initial<wbr>Query<span class="tsd-signature-symbol">(</span>searchTarget<span class="tsd-signature-symbol">: </span><a href="../modules/_documentsearch_src_index_.html#cmmainareawidget" class="tsd-signature-type">CMMainAreaWidget</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L59">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:59</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get an initial query value if applicable so that it can be entered
+									into the search box as an initial query</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>searchTarget: <a href="../modules/_documentsearch_src_index_.html#cmmainareawidget" class="tsd-signature-type">CMMainAreaWidget</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+							<p>Initial value used to populate the search box.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="highlightnext" class="tsd-anchor"></a>
+					<h3>highlight<wbr>Next</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">highlight<wbr>Next<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_documentsearch_src_index_.isearchprovider.html">ISearchProvider</a>.<a href="../interfaces/_documentsearch_src_index_.isearchprovider.html#highlightnext">highlightNext</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L178">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:178</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Move the current match indicator to the next match.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A promise that resolves once the action has completed.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="highlightprevious" class="tsd-anchor"></a>
+					<h3>highlight<wbr>Previous</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">highlight<wbr>Previous<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_documentsearch_src_index_.isearchprovider.html">ISearchProvider</a>.<a href="../interfaces/_documentsearch_src_index_.isearchprovider.html#highlightprevious">highlightPrevious</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L193">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:193</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Move the current match indicator to the previous match.</p>
+								</div>
+							</div>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A promise that resolves once the action has completed.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="refreshoverlay" class="tsd-anchor"></a>
+					<h3>refresh<wbr>Overlay</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">refresh<wbr>Overlay<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">void</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L101">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:101</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="replaceallmatches" class="tsd-anchor"></a>
+					<h3>replace<wbr>All<wbr>Matches</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">replace<wbr>All<wbr>Matches<span class="tsd-signature-symbol">(</span>newText<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_documentsearch_src_index_.isearchprovider.html">ISearchProvider</a>.<a href="../interfaces/_documentsearch_src_index_.isearchprovider.html#replaceallmatches">replaceAllMatches</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L233">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:233</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Replace all matches in the notebook with the provided text</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>newText: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A promise that resolves with a boolean indicating whether a replace occurred.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="replacecurrentmatch" class="tsd-anchor"></a>
+					<h3>replace<wbr>Current<wbr>Match</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">replace<wbr>Current<wbr>Match<span class="tsd-signature-symbol">(</span>newText<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<p>Implementation of <a href="../interfaces/_documentsearch_src_index_.isearchprovider.html">ISearchProvider</a>.<a href="../interfaces/_documentsearch_src_index_.isearchprovider.html#replacecurrentmatch">replaceCurrentMatch</a></p>
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L208">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:208</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Replace the currently selected match with the provided text</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>newText: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A promise that resolves with a boolean indicating whether a replace occurred.</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="startquery" class="tsd-anchor"></a>
+					<h3>start<wbr>Query</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">start<wbr>Query<span class="tsd-signature-symbol">(</span>query<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">RegExp</span>, searchTarget<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Widget</span>, filters<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L76">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:76</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Initialize the search using the provided options.  Should update the UI
+									to highlight all matches and &quot;select&quot; whatever the first match should be.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>query: <span class="tsd-signature-type">RegExp</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>A RegExp to be use to perform the search</p>
+									</div>
+								</li>
+								<li>
+									<h5>searchTarget: <span class="tsd-signature-type">Widget</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>The widget to be searched</p>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> filters: <span class="tsd-signature-symbol">{}</span><span class="tsd-signature-symbol"> = {}</span></h5>
+									<ul class="tsd-parameters">
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<p>A promise that resolves with a list of all matches</p>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
+					<a name="startquerycodemirror" class="tsd-anchor"></a>
+					<h3>start<wbr>Query<wbr>Code<wbr>Mirror</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">start<wbr>Query<wbr>Code<wbr>Mirror<span class="tsd-signature-symbol">(</span>query<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">RegExp</span>, searchTarget<span class="tsd-signature-symbol">: </span><a href="_codemirror_src_index_.codemirroreditor.html" class="tsd-signature-type">CodeMirrorEditor</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L93">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:93</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Initialize the search using a CodeMirrorEditor object.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>query: <span class="tsd-signature-type">RegExp</span></h5>
+								</li>
+								<li>
+									<h5>searchTarget: <a href="_codemirror_src_index_.codemirroreditor.html" class="tsd-signature-type">CodeMirrorEditor</a></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-signature-type">ISearchMatch</a><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-static">
+					<a name="cansearchon" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagStatic">Static</span> can<wbr>Search<wbr>On</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-static">
+						<li class="tsd-signature tsd-kind-icon">can<wbr>Search<wbr>On<span class="tsd-signature-symbol">(</span>domain<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Widget</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">domain</span><span class="tsd-signature-symbol"> is </span><span class="tsd-signature-type">CMMainAreaWidget</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/blink1073/jupyterlab/blob/7f317d6da/packages/documentsearch/src/providers/codemirrorsearchprovider.ts#L256">packages/documentsearch/src/providers/codemirrorsearchprovider.ts:256</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Report whether or not this provider has the ability to search on the given object</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>domain: <span class="tsd-signature-type">Widget</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">domain</span><span class="tsd-signature-symbol"> is </span><span class="tsd-signature-type">CMMainAreaWidget</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="../globals.html"><em>Globals</em></a>
+					</li>
+					<li class="current tsd-kind-module">
+						<a href="../modules/_documentsearch_src_index_.html">&quot;documentsearch/src/index&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-class tsd-parent-kind-module">
+						<a href="_documentsearch_src_index_.codemirrorsearchprovider.html" class="tsd-kind-icon">Code<wbr>Mirror<wbr>Search<wbr>Provider</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_changed" class="tsd-kind-icon">_changed</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_cm" class="tsd-kind-icon">_cm</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_currentmatch" class="tsd-kind-icon">_current<wbr>Match</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_matchstate" class="tsd-kind-icon">_match<wbr>State</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_overlay" class="tsd-kind-icon">_overlay</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_query" class="tsd-kind-icon">_query</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#isreadonly" class="tsd-kind-icon">is<wbr>Read<wbr>Only</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#issubprovider" class="tsd-kind-icon">is<wbr>Sub<wbr>Provider</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#changed" class="tsd-kind-icon">changed</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#currentmatch" class="tsd-kind-icon">current<wbr>Match</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#currentmatchindex" class="tsd-kind-icon">current<wbr>Match<wbr>Index</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#editor" class="tsd-kind-icon">editor</a>
+							</li>
+							<li class=" tsd-kind-get-signature tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#matches" class="tsd-kind-icon">matches</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_currentmatchisselected" class="tsd-kind-icon">_current<wbr>Match<wbr>IsSelected</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_findnext" class="tsd-kind-icon">_find<wbr>Next</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_getsearchoverlay" class="tsd-kind-icon">_get<wbr>Search<wbr>Overlay</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_ondocchanged" class="tsd-kind-icon">_on<wbr>Doc<wbr>Changed</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_parsematchesfromstate" class="tsd-kind-icon">_parse<wbr>Matches<wbr>From<wbr>State</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_refreshoverlay" class="tsd-kind-icon">_refresh<wbr>Overlay</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_setinitialmatches" class="tsd-kind-icon">_set<wbr>Initial<wbr>Matches</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_startquery" class="tsd-kind-icon">_start<wbr>Query</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#_toeditorpos" class="tsd-kind-icon">_to<wbr>Editor<wbr>Pos</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#clearselection" class="tsd-kind-icon">clear<wbr>Selection</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#endquery" class="tsd-kind-icon">end<wbr>Query</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#endsearch" class="tsd-kind-icon">end<wbr>Search</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#getinitialquery" class="tsd-kind-icon">get<wbr>Initial<wbr>Query</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#highlightnext" class="tsd-kind-icon">highlight<wbr>Next</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#highlightprevious" class="tsd-kind-icon">highlight<wbr>Previous</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#refreshoverlay" class="tsd-kind-icon">refresh<wbr>Overlay</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#replaceallmatches" class="tsd-kind-icon">replace<wbr>All<wbr>Matches</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#replacecurrentmatch" class="tsd-kind-icon">replace<wbr>Current<wbr>Match</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#startquery" class="tsd-kind-icon">start<wbr>Query</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#startquerycodemirror" class="tsd-kind-icon">start<wbr>Query<wbr>Code<wbr>Mirror</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-static">
+								<a href="_documentsearch_src_index_.codemirrorsearchprovider.html#cansearchon" class="tsd-kind-icon">can<wbr>Search<wbr>On</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_documentsearch_src_index_.notebooksearchprovider.html" class="tsd-kind-icon">Notebook<wbr>Search<wbr>Provider</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_documentsearch_src_index_.searchinstance.html" class="tsd-kind-icon">Search<wbr>Instance</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_documentsearch_src_index_.searchproviderregistry.html" class="tsd-kind-icon">Search<wbr>Provider<wbr>Registry</a>
+					</li>
+					<li class=" tsd-kind-class tsd-parent-kind-module">
+						<a href="_documentsearch_src_index_.searchstate.html" class="tsd-kind-icon">Search<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_documentsearch_src_index_.idisplaystate.html" class="tsd-kind-icon">IDisplay<wbr>State</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_documentsearch_src_index_.ifilterstype.html" class="tsd-kind-icon">IFilters<wbr>Type</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_documentsearch_src_index_.inotebookfilters.html" class="tsd-kind-icon">INotebook<wbr>Filters</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_documentsearch_src_index_.isearchmatch.html" class="tsd-kind-icon">ISearch<wbr>Match</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../interfaces/_documentsearch_src_index_.isearchprovider.html" class="tsd-kind-icon">ISearch<wbr>Provider</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module tsd-has-type-parameter">
+						<a href="../interfaces/_documentsearch_src_index_.isearchproviderconstructor.html" class="tsd-kind-icon">ISearch<wbr>Provider<wbr>Constructor</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-module">
+						<a href="../interfaces/_documentsearch_src_index_.isearchproviderregistry.html" class="tsd-kind-icon">ISearch<wbr>Provider<wbr>Registry</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-module">
+						<a href="../modules/_documentsearch_src_index_.html#cmmainareawidget" class="tsd-kind-icon">CMMain<wbr>Area<wbr>Widget</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-module">
+						<a href="../modules/_documentsearch_src_index_.html#isearchproviderregistry-1" class="tsd-kind-icon">ISearch<wbr>Provider<wbr>Registry</a>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-module"><span class="tsd-kind-icon">Module</span></li>
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+				<li class="tsd-kind-function tsd-has-type-parameter"><span class="tsd-kind-icon">Function with type parameter</span></li>
+				<li class="tsd-kind-index-signature"><span class="tsd-kind-icon">Index signature</span></li>
+				<li class="tsd-kind-type-alias"><span class="tsd-kind-icon">Type alias</span></li>
+				<li class="tsd-kind-type-alias tsd-has-type-parameter"><span class="tsd-kind-icon">Type alias with type parameter</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-enum"><span class="tsd-kind-icon">Enumeration</span></li>
+				<li class="tsd-kind-enum-member"><span class="tsd-kind-icon">Enumeration member</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-enum"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-enum"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+				<li class="tsd-kind-interface tsd-has-type-parameter"><span class="tsd-kind-icon">Interface with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-interface"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-interface"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-interface"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-class tsd-has-type-parameter"><span class="tsd-kind-icon">Class with type parameter</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class"><span class="tsd-kind-icon">Accessor</span></li>
+				<li class="tsd-kind-index-signature tsd-parent-kind-class"><span class="tsd-kind-icon">Index signature</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-constructor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited constructor</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-inherited"><span class="tsd-kind-icon">Inherited accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-protected"><span class="tsd-kind-icon">Protected accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
+				<li class="tsd-kind-accessor tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private accessor</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static property</span></li>
+				<li class="tsd-kind-call-signature tsd-parent-kind-class tsd-is-static"><span class="tsd-kind-icon">Static method</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="../assets/js/main.js"></script>
+<script>if (location.protocol == 'file:') document.write('<script src="../assets/js/search.js"><' + '/script>');</script>
+</body>
+</html>
