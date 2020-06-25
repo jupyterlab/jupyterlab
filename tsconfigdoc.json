@@ -238,12 +238,6 @@
       "path": "./packages/theme-light-extension"
     },
     {
-      "path": "./packages/toc"
-    },
-    {
-      "path": "./packages/toc-extension"
-    },
-    {
       "path": "./packages/tooltip"
     },
     {

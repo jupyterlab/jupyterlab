@@ -106,8 +106,6 @@
     "@jupyterlab/terminal-extension": "^2.2.0-alpha.0",
     "@jupyterlab/theme-dark-extension": "^2.2.0-alpha.0",
     "@jupyterlab/theme-light-extension": "^2.2.0-alpha.0",
-    "@jupyterlab/toc": "^4.2.0-alpha.0",
-    "@jupyterlab/toc-extension": "^4.2.0-alpha.0",
     "@jupyterlab/tooltip": "^2.2.0-alpha.0",
     "@jupyterlab/tooltip-extension": "^2.2.0-alpha.0",
     "@jupyterlab/ui-components": "^2.2.0-alpha.0",
