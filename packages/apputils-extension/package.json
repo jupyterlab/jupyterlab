@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils-extension",
-  "version": "2.2.0-alpha.1",
+  "version": "2.2.0-alpha.2",
   "description": "JupyterLab - Application Utilities Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,13 +37,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.2.0-alpha.1",
-    "@jupyterlab/apputils": "^2.2.0-alpha.1",
-    "@jupyterlab/coreutils": "^4.2.0-alpha.1",
-    "@jupyterlab/mainmenu": "^2.2.0-alpha.1",
-    "@jupyterlab/settingregistry": "^2.2.0-alpha.1",
-    "@jupyterlab/statedb": "^2.2.0-alpha.1",
-    "@jupyterlab/ui-components": "^2.2.0-alpha.1",
+    "@jupyterlab/application": "^2.2.0-alpha.2",
+    "@jupyterlab/apputils": "^2.2.0-alpha.2",
+    "@jupyterlab/coreutils": "^4.2.0-alpha.2",
+    "@jupyterlab/mainmenu": "^2.2.0-alpha.2",
+    "@jupyterlab/settingregistry": "^2.2.0-alpha.2",
+    "@jupyterlab/statedb": "^2.2.0-alpha.2",
+    "@jupyterlab/ui-components": "^2.2.0-alpha.2",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
     "@lumino/coreutils": "^1.4.2",

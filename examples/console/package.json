@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-console",
-  "version": "2.2.0-alpha.1",
+  "version": "2.2.0-alpha.2",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,11 +8,11 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/codemirror": "^2.2.0-alpha.1",
-    "@jupyterlab/console": "^2.2.0-alpha.1",
-    "@jupyterlab/rendermime": "^2.2.0-alpha.1",
-    "@jupyterlab/services": "^5.2.0-alpha.1",
-    "@jupyterlab/theme-light-extension": "^2.2.0-alpha.1",
+    "@jupyterlab/codemirror": "^2.2.0-alpha.2",
+    "@jupyterlab/console": "^2.2.0-alpha.2",
+    "@jupyterlab/rendermime": "^2.2.0-alpha.2",
+    "@jupyterlab/services": "^5.2.0-alpha.2",
+    "@jupyterlab/theme-light-extension": "^2.2.0-alpha.2",
     "@lumino/commands": "^1.10.1",
     "@lumino/widgets": "^1.11.1",
     "es6-promise": "~4.2.8"
