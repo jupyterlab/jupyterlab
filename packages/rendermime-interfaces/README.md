@@ -8,7 +8,7 @@ The interfaces in this package are meant to give an easier way for extension aut
 to provide a plugin that renders mime bundles and documents of a specific mime type.
 
 When using these interfaces, extensions only need to provide some metadata about
-wht kind of mime bundle they are able to render, and a `Widget` with
+what kind of mime bundle they are able to render, and a `Widget` with
 a `renderModel` method that renders the mime bundle.
 
 Examples can be found in [@jupyterlab/vega5-extension](../vega5-extension) and [@jupyterlab/pdf-extension](../pdf-extension).
