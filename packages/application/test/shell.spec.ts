@@ -406,16 +406,4 @@ describe('LabShell', () => {
       expect(state.mainArea?.mode).toBe('multiple-document');
     });
   });
-
-  describe('#titlePanel', () => {
-    it('should be hidden in multiple document mode and visible in single document mode', () => {
-      const widget = new Widget();
-      widget.id = 'foo';
-      shell.add(widget, 'right', { rank: 10 });
-      shell.mode = 'multiple-document';
-      expect(widget.isVisible).toBe(false);
-      shell.mode = 'single-document';
-      expect(widget.isVisible).toBe(false);
-    });
-  });
 });

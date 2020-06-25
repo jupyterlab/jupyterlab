@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
-
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { classes, DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
@@ -79,14 +77,7 @@ export namespace ILabShell {
   /**
    * The areas of the application shell where widgets can reside.
    */
-  export type Area =
-    | 'main'
-    | 'header'
-    | 'top'
-    | 'title'
-    | 'left'
-    | 'right'
-    | 'bottom';
+  export type Area = 'main' | 'header' | 'top' | 'left' | 'right' | 'bottom';
 
   /**
    * The restorable description of an area within the main dock panel.
@@ -183,7 +174,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this.id = 'main';
 
     const headerPanel = (this._headerPanel = new BoxPanel());
-    const titleHandler = (this._titleHandler = new Private.PanelHandler());
     const topHandler = (this._topHandler = new Private.PanelHandler());
     const bottomPanel = (this._bottomPanel = new BoxPanel());
     const hboxPanel = new BoxPanel();
@@ -196,7 +186,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const rootLayout = new BoxLayout();
 
     headerPanel.id = 'jp-header-panel';
-    titleHandler.panel.id = 'jp-title-panel';
     topHandler.panel.id = 'jp-top-panel';
     bottomPanel.id = 'jp-bottom-panel';
     hboxPanel.id = 'jp-main-content-panel';
@@ -244,21 +233,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
     BoxLayout.setStretch(headerPanel, 0);
-    BoxLayout.setStretch(titleHandler.panel, 0);
     BoxLayout.setStretch(topHandler.panel, 0);
     BoxLayout.setStretch(hboxPanel, 1);
     BoxLayout.setStretch(bottomPanel, 0);
 
     rootLayout.addWidget(headerPanel);
-    rootLayout.addWidget(titleHandler.panel);
     rootLayout.addWidget(topHandler.panel);
     rootLayout.addWidget(hboxPanel);
     rootLayout.addWidget(bottomPanel);
 
-    // initially hiding header and bottom panel when no elements inside,
-    // and the title panel as we only show that in single document mode.
+    // initially hiding header and bottom panel when no elements inside
     this._headerPanel.hide();
-    this._titleHandler.panel.hide();
     this._bottomPanel.hide();
 
     this.layout = rootLayout;
@@ -279,38 +264,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._onLayoutModified,
       this
     );
-
-    // Setup single-document-mode title bar
-    const titleWidget = (this._titleWidget = new Widget());
-    titleWidget.id = 'jp-title-panel-title';
-    this.add(titleWidget, 'title');
-    if (this._dockPanel.mode == 'multiple-document') {
-      this._titleHandler.panel.hide();
-    }
-
-    // Wire up signals to update the title panel of the single document mode to
-    // follow the title of this.currentWidget
-    this.currentChanged.connect((sender, args) => {
-      let newValue = args.newValue;
-      let oldValue = args.oldValue;
-
-      // Stop watching the title of the previously current widget
-      if (oldValue && oldValue instanceof MainAreaWidget) {
-        oldValue.content.title.changed.disconnect(
-          this._updateTitlePanelTitle,
-          this
-        );
-      }
-
-      // Start watching the title of the new current widget
-      if (newValue && newValue instanceof MainAreaWidget) {
-        newValue.content.title.changed.connect(
-          this._updateTitlePanelTitle,
-          this
-        );
-        this._updateTitlePanelTitle();
-      }
-    });
   }
 
   /**
@@ -404,10 +357,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
       // Set the mode data attribute on the application shell node.
       this.node.dataset.shellMode = mode;
-      // Show the title panel
-      this._titleHandler.panel.show();
-      this._updateTitlePanelTitle();
-
       return;
     }
 
@@ -448,8 +397,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     // Set the mode data attribute on the applications shell node.
     this.node.dataset.shellMode = mode;
-    // Hide the title panel
-    this._titleHandler.panel.hide();
   }
 
   /**
@@ -589,8 +536,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._addToHeaderArea(widget, options);
       case 'top':
         return this._addToTopArea(widget, options);
-      case 'title':
-        return this._addToTitleArea(widget, options);
       case 'bottom':
         return this._addToBottomArea(widget, options);
       default:
@@ -622,7 +567,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       return;
     }
     this._layoutDebouncer.dispose();
-    this._titleWidget.dispose();
     super.dispose();
   }
 
@@ -772,18 +716,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
 
   /**
-   * Update the title panel title based on the title of the current widget.
-   */
-  private _updateTitlePanelTitle() {
-    let current = this.currentWidget;
-    if (current && current instanceof MainAreaWidget) {
-      console.log(current.content.title.label);
-      this._titleWidget.node.innerHTML =
-        '<h1>' + current.content.title.label + '</h1>';
-    }
-  }
-
-  /**
    * Add a widget to the left content area.
    *
    * #### Notes
@@ -907,29 +839,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this._onLayoutModified();
     if (this._topHandler.panel.isHidden) {
       this._topHandler.panel.show();
-    }
-  }
-
-  /**
-   * Add a widget to the title content area.
-   *
-   * #### Notes
-   * Widgets must have a unique `id` property, which will be used as the DOM id.
-   */
-  private _addToTitleArea(
-    widget: Widget,
-    options?: DocumentRegistry.IOpenOptions
-  ): void {
-    if (!widget.id) {
-      console.error('Widgets added to app shell must have unique id property.');
-      return;
-    }
-    options = options || {};
-    const rank = options.rank ?? DEFAULT_RANK;
-    this._titleHandler.addWidget(widget, rank);
-    this._onLayoutModified();
-    if (this._titleHandler.panel.isHidden) {
-      this._titleHandler.panel.show();
     }
   }
 
@@ -1100,8 +1009,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _tracker = new FocusTracker<Widget>();
   private _headerPanel: Panel;
   private _topHandler: Private.PanelHandler;
-  private _titleHandler: Private.PanelHandler;
-  private _titleWidget: Widget;
   private _bottomPanel: Panel;
   private _mainOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
   private _sideOptionsCache = new Map<Widget, DocumentRegistry.IOpenOptions>();
