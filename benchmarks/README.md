@@ -21,21 +21,6 @@ It will keep increasing the `n` until either it reaches a maximum or the time ex
 
 It will run on both firefox and chrome.
 
-## React Fixed Data Tables
-
-We add support for testing against [`fixed-data-table-2`](https://github.com/schrodinger/fixed-data-table-2) which
-is an example of a mime renderer that takes a while to render:
-
-```json
-    "externalExtensions": {
-      "../benchmarks/extensions/fixed-data-table": "*"
-    },
-```
-
-```bash
-env 'BENCHMARK_NOTEBOOKS=["./fixedDataTable"]' jlpm all
-```
-
 ## Plotly
 
 We also build in support to run this against some plotly ipywidgets, to get a sense of
@@ -61,4 +46,19 @@ Then run the build, run the benchmarks, and view the results:
 
 ```bash
 env 'BENCHMARK_NOTEBOOKS=["./largePlotly", "./manyPlotly"]' jlpm all
+```
+
+## React Fixed Data Tables
+
+We add support for testing against [`fixed-data-table-2`](https://github.com/schrodinger/fixed-data-table-2) which
+is an example of a mime renderer that takes a while to render:
+
+```json
+    "externalExtensions": {
+      "../benchmarks/extensions/fixed-data-table": "*"
+    },
+```
+
+```bash
+env 'BENCHMARK_NOTEBOOKS=["./fixedDataTable"]' jlpm all
 ```
