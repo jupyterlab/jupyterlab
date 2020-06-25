@@ -49,7 +49,7 @@
   "devDependencies": {
     "@types/node": "^12.12.17",
     "rimraf": "~3.0.0",
-    "typescript": "~3.9.2"
+    "typescript": "~3.7.3"
   },
   "publishConfig": {
     "access": "public"

@@ -47,7 +47,7 @@
     "mini-css-extract-plugin": "~0.8.0",
     "null-loader": "^3.0.0",
     "rimraf": "~3.0.0",
-    "typescript": "~3.9.2",
+    "typescript": "~3.7.3",
     "url-loader": "~3.0.0",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"
