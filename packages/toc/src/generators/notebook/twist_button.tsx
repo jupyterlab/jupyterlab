@@ -2,15 +2,35 @@
 // Distributed under the terms of the Modified BSD License.
 
 import * as React from 'react';
-import { Cell } from '@jupyterlab/cells';
+import { IHeading } from '../../utils/headings';
 
 /**
  * Callback invoked upon encountering a "click" event.
  *
  * @private
- * @param cellRef - cell reference
+ * @param heading - heading clicked
  */
-type onClick = (cellRef?: Cell) => void;
+type onClick = (heading?: IHeading) => void;
+
+/**
+ * Interface for properties of the twist button
+ */
+interface ITwistButtonProps {
+  /**
+   * Heading that the twist button will be attached to
+   */
+  heading: IHeading;
+
+  /**
+   * Current state of the twist button
+   */
+  collapsed: boolean;
+
+  /**
+   * "Click" handler
+   */
+  onClick: onClick;
+}
 
 /**
  * Renders a twist button.
@@ -21,8 +41,8 @@ type onClick = (cellRef?: Cell) => void;
  * @param onClick - "click" handler
  * @returns rendered twist button
  */
-function twistButton(cellRef: Cell, collapsed: boolean, onClick: onClick) {
-  if (collapsed) {
+function twistButton(props: ITwistButtonProps) {
+  if (props.collapsed) {
     return (
       <div className="toc-collapse-button" onClick={wrapper}>
         <div className="toc-twist-placeholder">placeholder</div>
@@ -45,7 +65,7 @@ function twistButton(cellRef: Cell, collapsed: boolean, onClick: onClick) {
    */
   function wrapper(event: any) {
     event.stopPropagation();
-    onClick(cellRef);
+    props.onClick(props.heading);
   }
 }
 

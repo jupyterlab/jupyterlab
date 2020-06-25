@@ -32,9 +32,6 @@
     },
     {
       "path": "../rendermime"
-    },
-    {
-      "path": "../settingregistry"
     }
   ]
 }

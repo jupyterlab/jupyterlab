@@ -3,6 +3,7 @@
 
 import { IWidgetTracker } from '@jupyterlab/apputils';
 import { Token } from '@lumino/coreutils';
+import { Signal, ISignal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 import { IHeading } from './utils/headings';
 
@@ -54,9 +55,31 @@ export class TableOfContentsRegistry {
    * @param generator - table of contents generator
    */
   add(generator: TableOfContentsRegistry.IGenerator): void {
+    if (generator.collapseChanged) {
+      // If there is a collapseChanged for a given generator, propogate the arguments through the registry's signal
+      generator.collapseChanged.connect(
+        (
+          sender: TableOfContentsRegistry.IGenerator<Widget>,
+          args: TableOfContentsRegistry.ICollapseChangedArgs
+        ) => {
+          this._collapseChanged.emit(args);
+        }
+      );
+    }
     this._generators.push(generator);
   }
 
+  get collapseChanged(): ISignal<
+    this,
+    TableOfContentsRegistry.ICollapseChangedArgs
+  > {
+    return this._collapseChanged;
+  }
+
+  private _collapseChanged: Signal<
+    this,
+    TableOfContentsRegistry.ICollapseChangedArgs
+  > = new Signal<this, TableOfContentsRegistry.ICollapseChangedArgs>(this);
   private _generators: TableOfContentsRegistry.IGenerator[] = [];
 }
 
@@ -68,6 +91,26 @@ export namespace TableOfContentsRegistry {
    * Abstract class for managing options affecting how a table of contents is generated for a particular widget type.
    */
   export abstract class IOptionsManager {}
+
+  /**
+   * Interface for the arguments needed in the collapse signal of a generator
+   */
+  export interface ICollapseChangedArgs {
+    /**
+     * Boolean indicating whether the given heading is collapsed in ToC
+     */
+    collapsedState: boolean;
+
+    /**
+     * Heading that was involved in the collapse event
+     */
+    heading: IHeading;
+
+    /**
+     * Type of file that the given heading was produced from
+     */
+    tocType: string;
+  }
 
   /**
    * Interface describing a widget table of contents generator.
@@ -104,6 +147,12 @@ export namespace TableOfContentsRegistry {
      * @default undefined
      */
     options?: IOptionsManager;
+
+    /**
+     * Signal to indicate that a collapse event happened to this heading
+     * within the ToC.
+     */
+    collapseChanged?: ISignal<IOptionsManager, ICollapseChangedArgs>;
 
     /**
      * Returns a JSX element for each heading.

@@ -6,6 +6,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { TagsToolComponent } from './tagstool';
+import { ISignal, Signal } from '@lumino/signaling';
 
 /**
  * Interface describing constructor options.
@@ -20,11 +21,6 @@ interface IOptions {
    * HTML sanitizer.
    */
   sanitizer: ISanitizer;
-
-  /**
-   * Boolean indicating whether notebook cells are collapsible.
-   */
-  collapsibleNotebooks: boolean;
 
   /**
    * Tag tool component.
@@ -55,9 +51,11 @@ class OptionsManager extends Registry.IOptionsManager {
     this._numbering = options.numbering;
     this._widget = widget;
     this._notebook = notebook;
-    this._collapsible = options.collapsibleNotebooks;
     this.sanitizer = options.sanitizer;
     this.storeTags = [];
+    this._collapseChanged = new Signal<this, Registry.ICollapseChangedArgs>(
+      this
+    );
   }
 
   /**
@@ -99,13 +97,6 @@ class OptionsManager extends Registry.IOptionsManager {
   }
 
   /**
-   * Gets the ToC setting specifying whether to allow collapsing notebook cells.
-   */
-  get collapsibleNotebooks() {
-    return this._collapsible;
-  }
-
-  /**
    * Toggles whether to show code previews in the table of contents.
    */
   set showCode(value: boolean) {
@@ -129,6 +120,13 @@ class OptionsManager extends Registry.IOptionsManager {
 
   get showMarkdown() {
     return this._showMarkdown;
+  }
+
+  /**
+   * Signal emitted when a "collapse" twist button is pressed in the ToC
+   */
+  get collapseChanged(): ISignal<this, Registry.ICollapseChangedArgs> {
+    return this._collapseChanged;
   }
 
   /**
@@ -177,6 +175,17 @@ class OptionsManager extends Registry.IOptionsManager {
   }
 
   /**
+   * Updates a table of contents widget and
+   * emits a signal in case an extension wants
+   * to perform an action when the collapse button
+   * is pressed.
+   */
+  updateAndCollapse(args: Registry.ICollapseChangedArgs) {
+    this._collapseChanged.emit(args);
+    this._widget.update();
+  }
+
+  /**
    * Initializes options.
    *
    * ## Notes
@@ -208,8 +217,8 @@ class OptionsManager extends Registry.IOptionsManager {
   private _showMarkdown = false;
   private _showTags = false;
   private _notebook: INotebookTracker;
-  private _collapsible = false;
   private _widget: TableOfContents;
+  private _collapseChanged: Signal<this, Registry.ICollapseChangedArgs>;
   private _tagTool: TagsToolComponent | null = null;
   public storeTags: string[];
 }
