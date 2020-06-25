@@ -1,13 +1,22 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { showErrorMessage, Toolbar, ToolbarButton } from '@jupyterlab/apputils';
+import {
+  showErrorMessage,
+  Toolbar,
+  ToolbarButton,
+  ReactWidget
+} from '@jupyterlab/apputils';
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { Contents, ServerConnection } from '@jupyterlab/services';
 
-import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
+import {
+  newFolderIcon,
+  refreshIcon,
+  searchIcon
+} from '@jupyterlab/ui-components';
 
 import { IIterator } from '@lumino/algorithm';
 
@@ -17,9 +26,11 @@ import { BreadCrumbs } from './crumbs';
 
 import { DirListing } from './listing';
 
-import { FileBrowserModel } from './model';
+import { FilterFileBrowserModel } from './model';
 
 import { Uploader } from './upload';
+
+import { FilenameSearcher } from './search';
 
 /**
  * The class name added to file browsers.
@@ -76,6 +87,15 @@ export class FileBrowser extends Widget {
       tooltip: 'New Folder'
     });
     const uploader = new Uploader({ model });
+
+    const searcher = new ToolbarButton({
+      icon: searchIcon,
+      onClick: () => {
+        this._toggleBrowserLayout();
+      },
+      tooltip: 'Search on File Names'
+    });
+
     const refresher = new ToolbarButton({
       icon: refreshIcon,
       onClick: () => {
@@ -86,20 +106,23 @@ export class FileBrowser extends Widget {
 
     this.toolbar.addItem('newFolder', newFolder);
     this.toolbar.addItem('upload', uploader);
+    this.toolbar.addItem('search', searcher);
     this.toolbar.addItem('refresher', refresher);
 
     this._listing = new DirListing({ model, renderer });
 
+    this._filenameSearcher = FilenameSearcher({
+      listing: this._listing,
+      placeholder: 'Search on filename'
+    });
+
     this._crumbs.addClass(CRUMBS_CLASS);
     this.toolbar.addClass(TOOLBAR_CLASS);
     this._listing.addClass(LISTING_CLASS);
+    this._filenameSearcher.addClass(CRUMBS_CLASS);
 
-    const layout = new PanelLayout();
-
-    layout.addWidget(this.toolbar);
-    layout.addWidget(this._crumbs);
-    layout.addWidget(this._listing);
-    this.layout = layout;
+    this.layout = new PanelLayout();
+    this._showBrowserLayout();
 
     if (options.restore !== false) {
       void model.restore(this.id);
@@ -109,7 +132,7 @@ export class FileBrowser extends Widget {
   /**
    * The model used by the file browser.
    */
-  readonly model: FileBrowserModel;
+  readonly model: FilterFileBrowserModel;
 
   /**
    * The toolbar used by the file browser.
@@ -256,10 +279,38 @@ export class FileBrowser extends Widget {
     return this._listing.modelForClick(event);
   }
 
+  private _toggleBrowserLayout(): void {
+    if (this._layoutMode === 'search') {
+      this._layoutMode = 'tree';
+    } else {
+      this._layoutMode = 'search';
+    }
+    this._showBrowserLayout();
+    void this.model.refresh();
+  }
+
+  private _showBrowserLayout(): void {
+    if (this._layoutMode === 'tree') {
+      this.layout.removeWidget(this._filenameSearcher);
+      this.layout.addWidget(this.toolbar);
+      this.layout.addWidget(this._crumbs);
+      this.layout.addWidget(this._listing);
+    } else {
+      this.layout.removeWidget(this._crumbs);
+      this.layout.removeWidget(this._listing);
+      this.layout.addWidget(this.toolbar);
+      this.layout.addWidget(this._filenameSearcher);
+      this.layout.addWidget(this._listing);
+    }
+  }
+
   /**
    * Handle a connection lost signal from the model.
    */
-  private _onConnectionFailure(sender: FileBrowserModel, args: Error): void {
+  private _onConnectionFailure(
+    sender: FilterFileBrowserModel,
+    args: Error
+  ): void {
     if (
       args instanceof ServerConnection.ResponseError &&
       args.response.status === 404
@@ -281,8 +332,13 @@ export class FileBrowser extends Widget {
     this._navigateToCurrentDirectory = value;
   }
 
+  // Override Widget.layout with a more specific PanelLayout type.
+  layout: PanelLayout;
+
+  private _layoutMode: 'tree' | 'search' = 'tree';
   private _crumbs: BreadCrumbs;
   private _listing: DirListing;
+  private _filenameSearcher: ReactWidget;
   private _manager: IDocumentManager;
   private _directoryPending: boolean;
   private _navigateToCurrentDirectory: boolean;
@@ -304,7 +360,7 @@ export namespace FileBrowser {
     /**
      * A file browser model instance.
      */
-    model: FileBrowserModel;
+    model: FilterFileBrowserModel;
 
     /**
      * An optional renderer for the directory listing area.

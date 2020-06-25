@@ -10,6 +10,8 @@ import {
 
 import { PathExt, Time } from '@jupyterlab/coreutils';
 
+import {} from '@jupyterlab/apputils';
+
 import {
   IDocumentManager,
   isValidFileName,
@@ -50,7 +52,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Widget } from '@lumino/widgets';
 
-import { FileBrowserModel } from './model';
+import { FilterFileBrowserModel } from './model';
 
 /**
  * The class name added to DirListing widget.
@@ -228,7 +230,7 @@ export class DirListing extends Widget {
   /**
    * Get the model used by the listing.
    */
-  get model(): FileBrowserModel {
+  get model(): FilterFileBrowserModel {
     return this._model;
   }
 
@@ -788,15 +790,18 @@ export class DirListing extends Widget {
     each(this._model.sessions(), session => {
       const index = ArrayExt.firstIndexOf(paths, session.path);
       const node = nodes[index];
-      let name = session.kernel?.name;
-      const specs = this._model.specs;
+      // Node may have been filtered out.
+      if (node) {
+        let name = session.kernel?.name;
+        const specs = this._model.specs;
 
-      node.classList.add(RUNNING_CLASS);
-      if (specs && name) {
-        const spec = specs.kernelspecs[name];
-        name = spec ? spec.display_name : 'unknown';
+        node.classList.add(RUNNING_CLASS);
+        if (specs && name) {
+          const spec = specs.kernelspecs[name];
+          name = spec ? spec.display_name : 'unknown';
+        }
+        node.title = `${node.title}\nKernel: ${name}`;
       }
-      node.title = `${node.title}\nKernel: ${name}`;
     });
 
     this._prevPath = this._model.path;
@@ -1489,7 +1494,7 @@ export class DirListing extends Widget {
    * Handle a `fileChanged` signal from the model.
    */
   private _onFileChanged(
-    sender: FileBrowserModel,
+    sender: FilterFileBrowserModel,
     args: Contents.IChangedArgs
   ) {
     const newValue = args.newValue;
@@ -1527,7 +1532,7 @@ export class DirListing extends Widget {
     });
   }
 
-  private _model: FileBrowserModel;
+  private _model: FilterFileBrowserModel;
   private _editNode: HTMLInputElement;
   private _items: HTMLElement[] = [];
   private _sortedItems: Contents.IModel[] = [];
@@ -1567,7 +1572,7 @@ export namespace DirListing {
     /**
      * A file browser model instance.
      */
-    model: FileBrowserModel;
+    model: FilterFileBrowserModel;
 
     /**
      * A renderer for file items.

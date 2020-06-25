@@ -7,5 +7,6 @@ export * from './tokens';
 export * from './listing';
 export * from './model';
 export * from './opendialog';
+export * from './search';
 export * from './upload';
 export * from './uploadstatus';

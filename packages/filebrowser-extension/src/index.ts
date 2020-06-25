@@ -25,7 +25,7 @@ import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import {
-  FileBrowserModel,
+  FilterFileBrowserModel,
   FileBrowser,
   FileUploadStatus,
   IFileBrowserFactory
@@ -125,6 +125,8 @@ namespace CommandIDs {
     'filebrowser:toggle-navigate-to-current-directory';
 
   export const toggleLastModified = 'filebrowser:toggle-last-modified';
+
+  export const search = 'filebrowser:search';
 }
 
 /**
@@ -240,7 +242,7 @@ async function activateFactory(
     id: string,
     options: IFileBrowserFactory.IOptions = {}
   ) => {
-    const model = new FileBrowserModel({
+    const model = new FilterFileBrowserModel({
       auto: options.auto ?? true,
       manager: docManager,
       driveName: options.driveName || '',
@@ -840,6 +842,11 @@ function addCommands(
         }
       }
     }
+  });
+
+  commands.addCommand(CommandIDs.search, {
+    label: 'Search on File Names',
+    execute: () => alert('search')
   });
 
   if (mainMenu) {

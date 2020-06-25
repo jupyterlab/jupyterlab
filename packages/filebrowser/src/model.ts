@@ -231,6 +231,7 @@ export class FileBrowserModel implements IDisposable {
   async refresh(): Promise<void> {
     await this._poll.refresh();
     await this._poll.tick;
+    this._refreshed.emit(void 0);
   }
 
   /**
@@ -701,6 +702,11 @@ export class FilterFileBrowserModel extends FileBrowserModel {
         return this._filter(value);
       }
     });
+  }
+
+  setFilter(filter: (value: Contents.IModel) => boolean) {
+    this._filter = filter;
+    void this.refresh();
   }
 
   private _filter: (value: Contents.IModel) => boolean;
