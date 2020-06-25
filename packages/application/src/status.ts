@@ -25,12 +25,12 @@ export interface ILabStatus {
   /**
    * A signal for when application changes its busy status.
    */
-  readonly busySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
+  readonly busySignal: ISignal<JupyterFrontEnd, boolean>;
 
   /**
    * A signal for when application changes its dirty status.
    */
-  readonly dirtySignal: ISignal<JupyterFrontEnd<any, any>, boolean>;
+  readonly dirtySignal: ISignal<JupyterFrontEnd, boolean>;
 
   /**
    * Whether the application is busy.
@@ -64,7 +64,7 @@ export class LabStatus implements ILabStatus {
   /**
    * Construct a new  status object.
    */
-  constructor(app: JupyterFrontEnd<any, any>) {
+  constructor(app: JupyterFrontEnd) {
     this._busySignal = new Signal(app);
     this._dirtySignal = new Signal(app);
   }
