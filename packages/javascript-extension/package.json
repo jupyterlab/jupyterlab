@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/javascript-extension",
-  "version": "2.2.0-alpha.0",
+  "version": "3.0.0-alpha.0",
   "description": "JupyterLab - Javascript Renderer",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,8 +34,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/rendermime": "^2.2.0-alpha.0",
-    "@jupyterlab/rendermime-interfaces": "^2.2.0-alpha.0"
+    "@jupyterlab/rendermime": "^3.0.0-alpha.0",
+    "@jupyterlab/rendermime-interfaces": "^3.0.0-alpha.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
