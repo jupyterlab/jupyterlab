@@ -1307,7 +1307,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
     if (msg.channel === 'iopub') {
       switch (msg.header.msg_type) {
-        case 'status': {
+        case 'status':
           // Updating the status is synchronous, and we call no async user code
           const executionState = (msg as KernelMessage.IStatusMsg).content
             .execution_state;
@@ -1335,7 +1335,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
           }
           this._updateStatus(executionState);
           break;
-        }
         case 'comm_open':
           if (this.handleComms) {
             await this._handleCommOpen(msg as KernelMessage.ICommOpenMsg);

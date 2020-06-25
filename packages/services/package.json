@@ -69,7 +69,7 @@
     "rimraf": "~3.0.0",
     "text-encoding": "^0.7.0",
     "ts-jest": "^25.2.1",
-    "typedoc": "^0.17.7",
+    "typedoc": "^0.15.4",
     "typescript": "~3.9.2",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10"

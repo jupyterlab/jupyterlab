@@ -5,10 +5,8 @@
 |----------------------------------------------------------------------------*/
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-(window as any).__webpack_public_path__ = URLExt.join(
-  PageConfig.getBaseUrl(),
-  'example/'
-);
+// @ts-ignore
+__webpack_public_path__ = URLExt.join(PageConfig.getBaseUrl(), 'example/');
 
 // This has to be done after webpack public path is set to load the
 // fonts.

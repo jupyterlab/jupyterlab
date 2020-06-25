@@ -411,8 +411,7 @@ export class Completer extends Widget {
       return;
     }
     switch (event.keyCode) {
-      case 9: {
-        // Tab key
+      case 9: // Tab key
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
@@ -440,7 +439,6 @@ export class Completer extends Widget {
           this.update();
         }
         return;
-      }
       case 27: // Esc key
         event.preventDefault();
         event.stopPropagation();
@@ -450,15 +448,13 @@ export class Completer extends Widget {
       case 33: // PageUp
       case 34: // PageDown
       case 38: // Up arrow key
-      case 40: {
-        // Down arrow key
+      case 40: // Down arrow key
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
         const cycle = Private.keyCodeMap[event.keyCode];
         this._cycle(cycle);
         return;
-      }
       default:
         return;
     }

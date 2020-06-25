@@ -99,7 +99,7 @@ export class ForeignHandler implements IDisposable {
     const parentMsgId = parentHeader.msg_id as string;
     let cell: CodeCell | undefined;
     switch (msgType) {
-      case 'execute_input': {
+      case 'execute_input':
         const inputMsg = msg as KernelMessage.IExecuteInputMsg;
         cell = this._newCell(parentMsgId);
         const model = cell.model;
@@ -108,11 +108,10 @@ export class ForeignHandler implements IDisposable {
         model.trusted = true;
         parent.update();
         return true;
-      }
       case 'execute_result':
       case 'display_data':
       case 'stream':
-      case 'error': {
+      case 'error':
         cell = this._parent.getCell(parentMsgId);
         if (!cell) {
           return false;
@@ -124,15 +123,13 @@ export class ForeignHandler implements IDisposable {
         cell.model.outputs.add(output);
         parent.update();
         return true;
-      }
-      case 'clear_output': {
+      case 'clear_output':
         const wait = (msg as KernelMessage.IClearOutputMsg).content.wait;
         cell = this._parent.getCell(parentMsgId);
         if (cell) {
           cell.model.outputs.clear(wait);
         }
         return true;
-      }
       default:
         return false;
     }

@@ -28,12 +28,14 @@ import { ILayoutRestorer } from './layoutrestorer';
  */
 export interface IMimeDocumentTracker extends IWidgetTracker<MimeDocument> {}
 
+/* tslint:disable */
 /**
  * The mime document tracker token.
  */
 export const IMimeDocumentTracker = new Token<IMimeDocumentTracker>(
   '@jupyterlab/application:IMimeDocumentTracker'
 );
+/* tslint:enable */
 
 /**
  * Create rendermime plugins for rendermime extension modules.

@@ -988,7 +988,7 @@ namespace Private {
    * This is supposed to have the same behavior as nbconvert.filters.ansi2html()
    */
   export function ansiSpan(str: string): string {
-    const ansiRe = /\x1b\[(.*?)([@-~])/g; // eslint-disable-line no-control-regex
+    const ansiRe = /\x1b\[(.*?)([@-~])/g;
     let fg: number | Array<number> = [];
     let bg: number | Array<number> = [];
     let bold = false;

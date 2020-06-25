@@ -65,7 +65,7 @@
     "json2html": "^0.0.8",
     "rimraf": "~3.0.0",
     "ts-jest": "^25.2.1",
-    "typedoc": "^0.17.7",
+    "typedoc": "^0.15.4",
     "typescript": "~3.9.2"
   },
   "publishConfig": {

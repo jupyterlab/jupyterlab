@@ -950,8 +950,7 @@ export class DirListing extends Widget {
    */
   private _evtKeydown(event: KeyboardEvent): void {
     switch (event.keyCode) {
-      case 13: {
-        // Enter
+      case 13: // Enter
         // Do nothing if any modifier keys are pressed.
         if (event.ctrlKey || event.shiftKey || event.altKey || event.metaKey) {
           return;
@@ -970,7 +969,6 @@ export class DirListing extends Widget {
         const item = this._sortedItems[i];
         this._handleOpen(item);
         break;
-      }
       case 38: // Up arrow
         this.selectPrevious(event.shiftKey);
         event.stopPropagation();

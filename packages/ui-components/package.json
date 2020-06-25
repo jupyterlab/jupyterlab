@@ -69,7 +69,7 @@
     "rimraf": "~3.0.0",
     "svgo": "^1.3.2",
     "ts-jest": "^25.2.1",
-    "typedoc": "^0.17.7",
+    "typedoc": "^0.15.4",
     "typescript": "~3.9.2"
   },
   "peerDependencies": {

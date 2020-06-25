@@ -162,7 +162,7 @@ function activateEditorCommands(
 
     // Lazy loading of vim mode
     if (keyMap === 'vim') {
-      // @ts-expect-error
+      // @ts-ignore
       await import('codemirror/keymap/vim.js');
     }
 

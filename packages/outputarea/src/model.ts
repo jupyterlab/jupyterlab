@@ -451,7 +451,7 @@ namespace Private {
     do {
       txt = tmp;
       // Cancel out anything-but-newline followed by backspace
-      tmp = txt.replace(/[^\n]\x08/gm, ''); // eslint-disable-line no-control-regex
+      tmp = txt.replace(/[^\n]\x08/gm, '');
     } while (tmp.length < txt.length);
     return txt;
   }

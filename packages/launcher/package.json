@@ -48,7 +48,7 @@
   "devDependencies": {
     "@types/react": "~16.9.16",
     "rimraf": "~3.0.0",
-    "typedoc": "^0.17.7",
+    "typedoc": "^0.15.4",
     "typescript": "~3.9.2"
   },
   "publishConfig": {

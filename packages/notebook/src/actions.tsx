@@ -941,7 +941,7 @@ export namespace NotebookActions {
       case 'above':
         index = notebook.activeCellIndex - 1;
         break;
-      case 'replace': {
+      case 'replace':
         // Find the cells to delete.
         const toDelete: number[] = [];
 
@@ -962,7 +962,6 @@ export namespace NotebookActions {
         }
         index = toDelete[0];
         break;
-      }
       default:
         break;
     }
