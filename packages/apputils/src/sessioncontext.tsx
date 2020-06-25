@@ -61,6 +61,16 @@ export interface ISessionContext extends IObservableDisposable {
   readonly isReady: boolean;
 
   /**
+   * Whether the session context is terminating.
+   */
+  readonly isTerminating: boolean;
+
+  /**
+   * Whether the session context is restarting.
+   */
+  readonly isRestarting: boolean;
+
+  /**
    * A promise that is fulfilled when the session context is ready.
    */
   readonly ready: Promise<void>;
@@ -179,6 +189,13 @@ export interface ISessionContext extends IObservableDisposable {
    * The kernel spec manager
    */
   readonly specsManager: KernelSpec.IManager;
+
+  /**
+   * Restart the current Kernel.
+   *
+   * @returns A promise that resolves when the kernel is restarted.
+   */
+  restartKernel(): Promise<void>;
 
   /**
    * Kill the kernel and shutdown the session.
@@ -423,6 +440,20 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
+   * Whether the context is terminating.
+   */
+  get isTerminating(): boolean {
+    return this._isTerminating;
+  }
+
+  /**
+   * Whether the context is restarting.
+   */
+  get isRestarting(): boolean {
+    return this._isRestarting;
+  }
+
+  /**
    * The session manager used by the session.
    */
   readonly sessionManager: Session.IManager;
@@ -486,6 +517,15 @@ export class SessionContext implements ISessionContext {
    */
   get kernelDisplayStatus(): ISessionContext.KernelDisplayStatus {
     const kernel = this.session?.kernel;
+
+    if (this._isTerminating) {
+      return 'terminating';
+    }
+
+    if (this._isRestarting) {
+      return 'restarting';
+    }
+
     if (this._pendingKernelName === Private.NO_KERNEL) {
       return 'idle';
     }
@@ -561,6 +601,27 @@ export class SessionContext implements ISessionContext {
       this._busyDisposable = null;
     }
     Signal.clearData(this);
+  }
+
+  /**
+   * Restart the current Kernel.
+   *
+   * @returns A promise that resolves when the kernel is restarted.
+   */
+  async restartKernel(): Promise<void> {
+    const kernel = this.session?.kernel || null;
+    this._isRestarting = true;
+    this._isReady = false;
+    this._statusChanged.emit('restarting');
+    await this.session?.kernel?.restart();
+    this._isRestarting = false;
+    this._isReady = true;
+    this._statusChanged.emit(this.session?.kernel?.status || 'unknown');
+    this._kernelChanged.emit({
+      name: 'kernel',
+      oldValue: kernel,
+      newValue: this.session?.kernel || null
+    });
   }
 
   /**
@@ -653,16 +714,20 @@ export class SessionContext implements ISessionContext {
    */
   private async _shutdownSession(): Promise<void> {
     const session = this._session;
+    this._isTerminating = true;
+    this._isReady = false;
+    this._statusChanged.emit('terminating');
+    await session?.shutdown();
+    this._isTerminating = false;
+    session?.dispose();
     this._session = null;
     const kernel = session?.kernel || null;
+    this._statusChanged.emit('unknown');
     this._kernelChanged.emit({
       name: 'kernel',
       oldValue: kernel,
       newValue: null
     });
-    this._statusChanged.emit('unknown');
-    await session?.shutdown();
-    session?.dispose();
     this._sessionChanged.emit({
       name: 'session',
       oldValue: session,
@@ -994,6 +1059,8 @@ export class SessionContext implements ISessionContext {
   private _initStarted = new PromiseDelegate<void>();
   private _initPromise = new PromiseDelegate<boolean>();
   private _isReady = false;
+  private _isTerminating = false;
+  private _isRestarting = false;
   private _kernelChanged = new Signal<
     this,
     Session.ISessionConnection.IKernelChangedArgs
@@ -1177,7 +1244,7 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
       return false;
     }
     if (result.button.accept) {
-      await kernel.restart();
+      await sessionContext.restartKernel();
       return true;
     }
     return false;

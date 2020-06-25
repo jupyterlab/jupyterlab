@@ -535,6 +535,7 @@ export type Status =
   | 'starting'
   | 'idle'
   | 'busy'
+  | 'terminating'
   | 'restarting'
   | 'autorestarting'
   | 'dead';

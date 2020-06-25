@@ -31,6 +31,8 @@ import * as restapi from './restapi';
 // Stub for requirejs.
 declare let requirejs: any;
 
+const RESTARTING_KERNEL_SESSION = '_RESTARTING_';
+
 /**
  * Implementation of the Kernel object.
  *
@@ -247,6 +249,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     this._updateConnectionStatus('disconnected');
     this._clearKernelState();
+    this._pendingMessages = [];
     this._clearSocket();
 
     // Clear Lumino signals
@@ -379,7 +382,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
 
     // Send if the ws allows it, otherwise buffer the message.
-    if (this.connectionStatus === 'connected') {
+    if (
+      this.connectionStatus === 'connected' &&
+      this._kernelSession !== RESTARTING_KERNEL_SESSION
+    ) {
       this._ws!.send(serialize.serialize(msg));
     } else if (queue) {
       this._pendingMessages.push(msg);
@@ -430,8 +436,10 @@ export class KernelConnection implements Kernel.IKernelConnection {
     if (this.status === 'dead') {
       throw new Error('Kernel is dead');
     }
+    this._clearKernelState();
+    this._updateStatus('restarting');
+    this._kernelSession = RESTARTING_KERNEL_SESSION;
     await restapi.restartKernel(this.id, this.serverSettings);
-    await this._handleRestart();
   }
 
   /**
@@ -552,6 +560,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
 
     this._info.resolve(reply.content);
+
+    this._kernelSession = reply.header.session;
+
     return reply;
   }
 
@@ -1037,6 +1048,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
     // stop sending messages.
     while (
       this.connectionStatus === 'connected' &&
+      this._kernelSession !== RESTARTING_KERNEL_SESSION &&
       this._pendingMessages.length > 0
     ) {
       this._sendMessage(this._pendingMessages[0], false);
@@ -1051,7 +1063,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
    * Clear the internal state.
    */
   private _clearKernelState(): void {
-    this._pendingMessages = [];
+    this._kernelSession = '';
     this._futures.forEach(future => {
       future.dispose();
     });
@@ -1059,7 +1071,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
       comm.dispose();
     });
     this._msgChain = Promise.resolve();
-    this._kernelSession = '';
     this._futures = new Map<
       string,
       KernelFutureHandler<
@@ -1257,6 +1268,11 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private async _handleMessage(msg: KernelMessage.IMessage): Promise<void> {
     let handled = false;
 
+    if (msg.header.msg_type === 'shutdown_reply') {
+      this._kernelSession = msg.header.session;
+      this._sendPending();
+    }
+
     // Check to see if we have a display_id we need to reroute.
     if (
       msg.parent_header &&
@@ -1295,7 +1311,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
           // Updating the status is synchronous, and we call no async user code
           const executionState = (msg as KernelMessage.IStatusMsg).content
             .execution_state;
-          if (executionState === 'restarting') {
+          if (executionState === 'autorestarting') {
             // The kernel has been auto-restarted by the server. After
             // processing for this message is completely done, we want to
             // handle this restart, so we don't await, but instead schedule
@@ -1308,6 +1324,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
               // 'restarting' and 'autorestarting'.
               await this._handleRestart();
               this._updateStatus('autorestarting');
+            });
+          }
+          if (executionState === 'restarting') {
+            void Promise.resolve().then(async () => {
+              await this._handleRestart();
+              this._kernelSession = msg.header.session;
+              this._updateStatus('restarting');
             });
           }
           this._updateStatus(executionState);

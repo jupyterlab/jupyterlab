@@ -761,6 +761,7 @@ namespace Private {
       return (
         status === 'busy' ||
         status === 'starting' ||
+        status === 'terminating' ||
         status === 'restarting' ||
         status === 'initializing'
       );
