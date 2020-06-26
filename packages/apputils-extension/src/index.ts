@@ -376,7 +376,6 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
       execute: async () => {
         await db.clear();
         await save.invoke();
-        router.reload();
       }
     });
 
