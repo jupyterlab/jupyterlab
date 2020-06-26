@@ -24,6 +24,9 @@
     },
     "pasteWithCtrlV": {
       "type": "boolean"
+    },
+    "macOptionIsMeta": {
+      "type": "boolean"
     }
   },
   "properties": {
@@ -74,6 +77,12 @@
       "description": "Enable pasting with Ctrl+V.  This can be disabled to use Ctrl+V in the vi editor, for instance.  This setting has no effect on macOS, where Cmd+V is available",
       "type": "boolean",
       "default": true
+    },
+    "macOptionIsMeta": {
+      "title": "Treat option as meta key on macOS",
+      "description": "Option key on macOS can be used as meta key. This enables to use shortcuts such as option + f to move cursor forward one word",
+      "type": "boolean",
+      "default": false
     }
   },
   "additionalProperties": false,

@@ -1,3 +1,5 @@
+import { ReadonlyPartialJSONArray } from '@lumino/coreutils';
+
 import { PanelLayout } from '@lumino/widgets';
 
 import { NotebookTools, INotebookTracker } from '@jupyterlab/notebook';
@@ -67,6 +69,11 @@ export class TagTool extends NotebookTools.Tool {
    */
   addTag(name: string) {
     const cell = this.tracker.activeCell;
+    if (!cell) {
+      // bail
+      return;
+    }
+
     let tags = cell.model.metadata.get('tags') as string[];
     const newTags = name.split(/[,\s]+/);
     if (tags === undefined) {
@@ -89,6 +96,11 @@ export class TagTool extends NotebookTools.Tool {
    */
   removeTag(name: string) {
     const cell = this.tracker.activeCell;
+    if (!cell) {
+      // bail
+      return;
+    }
+
     const tags = cell.model.metadata.get('tags') as string[];
     const idx = tags.indexOf(name);
     if (idx > -1) {
@@ -120,11 +132,11 @@ export class TagTool extends NotebookTools.Tool {
   pullTags() {
     const notebook = this.tracker.currentWidget;
     if (this.tracker && this.tracker.currentWidget) {
-      const cells = notebook.model.cells;
+      const cells = notebook?.model?.cells;
       const allTags: string[] = [];
-      for (let i = 0; i < cells.length; i++) {
-        const metadata = cells.get(i).metadata;
-        const tags = metadata.get('tags') as string[];
+      for (let i = 0; i < (cells?.length || 0); i++) {
+        const metadata = cells?.get(i).metadata;
+        const tags = metadata?.get('tags') as ReadonlyPartialJSONArray;
         if (tags) {
           for (let j = 0; j < tags.length; j++) {
             const name = tags[j] as string;
@@ -213,7 +225,7 @@ export class TagTool extends NotebookTools.Tool {
       const header = document.createElement('header');
       header.textContent = 'Tags in Notebook';
       header.className = 'tag-header';
-      this.parent.node.insertBefore(header, this.node);
+      this.parent!.node.insertBefore(header, this.node);
       this.header = true;
     }
     if (this.tracker.currentWidget) {
@@ -221,7 +233,7 @@ export class TagTool extends NotebookTools.Tool {
         this.refreshTags();
         this.loadActiveTags();
       });
-      this.tracker.currentWidget.model.cells.changed.connect(() => {
+      this.tracker.currentWidget.model!.cells.changed.connect(() => {
         this.refreshTags();
         this.loadActiveTags();
       });
@@ -236,7 +248,7 @@ export class TagTool extends NotebookTools.Tool {
    * Handle a change to active cell metadata.
    */
   protected onActiveCellMetadataChanged(): void {
-    const tags = this.tracker.activeCell.model.metadata.get('tags');
+    const tags = this.tracker.activeCell!.model.metadata.get('tags');
     let taglist: string[] = [];
     if (tags === undefined) {
       return;
@@ -246,10 +258,10 @@ export class TagTool extends NotebookTools.Tool {
     } else {
       taglist = tags as string[];
     }
-    this.validateTags(this.tracker.activeCell, taglist);
+    this.validateTags(this.tracker.activeCell!, taglist);
   }
 
-  public tracker: INotebookTracker = null;
+  public tracker: INotebookTracker;
   private tagList: string[] = [];
   private header: boolean = false;
 }

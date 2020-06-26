@@ -170,7 +170,7 @@ These variables are automatically used by many open-source tools (like ``conda``
 
     # For Windows
     set HTTP_PROXY=http://USER:PWD@proxy.company.com:PORT
-    set HTTPS_PROXY=https://USER:PWD@proxy.comp any.com:PORT
+    set HTTPS_PROXY=https://USER:PWD@proxy.company.com:PORT
 
     # For Linux / MacOS
     export HTTP_PROXY=http://USER:PWD@proxy.company.com:PORT
@@ -180,7 +180,7 @@ These variables are automatically used by many open-source tools (like ``conda``
 In case you can communicate via HTTP, but installation with ``conda`` fails
 on connectivity problems to HTTPS servers, you can disable using SSL for ``conda``.
 
-.. warning:: Disabling SSL in communication is generally not recommended and involves potential security risk.
+.. warning:: Disabling SSL in communication is generally not recommended and involves potential security risks.
 
 .. code:: bash
 

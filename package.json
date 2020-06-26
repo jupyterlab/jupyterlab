@@ -50,7 +50,7 @@
     "create:test": "node buildutils/lib/create-test-package.js",
     "create:theme": "node buildutils/lib/create-theme.js",
     "deduplicate": "jlpm yarn-deduplicate -s fewer --fail",
-    "docs": "lerna run docs",
+    "docs": "typedoc --options typedoc.js packages/*/src/index.ts* packages/*/src/*.d.ts",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --fix .",
     "eslint:check": "eslint --ext .js,.jsx,.ts,.tsx .",
@@ -100,7 +100,9 @@
     "lerna": "^3.19.0",
     "lint-staged": "^9.5.0",
     "prettier": "^1.19.1",
+    "react-docgen-typescript-loader": "^3.7.2",
     "shell-quote": "^1.7.2",
+    "typedoc": "next",
     "yarn": "1.21.1"
   }
 }

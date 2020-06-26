@@ -70,8 +70,10 @@ class ToolbarLayout extends PanelLayout {
       // accommodate them.
       if (some(this.widgets, w => !w.isHidden)) {
         this.parent!.node.style.minHeight = 'var(--jp-private-toolbar-height)';
+        this.parent!.removeClass('jp-Toolbar-micro');
       } else {
         this.parent!.node.style.minHeight = '';
+        this.parent!.addClass('jp-Toolbar-micro');
       }
     }
 
@@ -759,6 +761,7 @@ namespace Private {
       return (
         status === 'busy' ||
         status === 'starting' ||
+        status === 'terminating' ||
         status === 'restarting' ||
         status === 'initializing'
       );

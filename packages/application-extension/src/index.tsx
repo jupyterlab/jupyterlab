@@ -604,11 +604,14 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
 
   commands.addCommand(CommandIDs.close, {
     label: () => 'Close Tab',
-    isEnabled: () =>
-      !!shell.currentWidget && shell.currentWidget.title.closable,
+    isEnabled: () => {
+      const widget = contextMenuWidget();
+      return !!widget && widget.title.closable;
+    },
     execute: () => {
-      if (shell.currentWidget) {
-        shell.currentWidget.close();
+      const widget = contextMenuWidget();
+      if (widget) {
+        widget.close();
       }
     }
   });

@@ -1578,6 +1578,14 @@ namespace Private {
         break;
       case 'code':
         if (sessionContext) {
+          if (sessionContext.isTerminating) {
+            void showDialog({
+              title: 'Kernel Terminating',
+              body: `The kernel for ${sessionContext.session?.path} appears to be terminating. You can not run any cell for now.`,
+              buttons: [Dialog.okButton()]
+            });
+            break;
+          }
           const deletedCells = notebook.model?.deletedCells ?? [];
           return CodeCell.execute(cell as CodeCell, sessionContext, {
             deletedCells,

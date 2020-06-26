@@ -22,7 +22,7 @@ export class AddWidget extends Widget {
    * Create input box with icon and attach to this.node.
    */
   buildTag() {
-    const text = document.createElement('input');
+    const text = this.input || document.createElement('input');
     text.value = 'Add Tag';
     text.contentEditable = 'true';
     text.className = 'add-tag';
@@ -156,7 +156,7 @@ export class AddWidget extends Widget {
     }
   }
 
-  public parent: TagTool;
+  public parent: TagTool | null = null;
   private editing: boolean;
-  private input: HTMLInputElement;
+  private input: HTMLInputElement = document.createElement('input');
 }

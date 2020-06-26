@@ -95,7 +95,7 @@ export class TagWidget extends Widget {
    * Handle `update-request` messages. Check if applied to current active cell.
    */
   onUpdateRequest() {
-    const applied = this.parent.checkApplied(this.name);
+    const applied = this.parent?.checkApplied(this.name);
     if (applied !== this.applied) {
       this.toggleApplied();
     }
@@ -107,12 +107,12 @@ export class TagWidget extends Widget {
   toggleApplied() {
     if (this.applied) {
       this.removeClass('applied-tag');
-      (this.node.firstChild.lastChild as HTMLSpanElement).style.display =
+      (this.node.firstChild?.lastChild as HTMLSpanElement).style.display =
         'none';
       this.addClass('unapplied-tag');
     } else {
       this.removeClass('unapplied-tag');
-      (this.node.firstChild.lastChild as HTMLSpanElement).style.display =
+      (this.node.firstChild?.lastChild as HTMLSpanElement).style.display =
         'inline-block';
       this.addClass('applied-tag');
     }
@@ -124,9 +124,9 @@ export class TagWidget extends Widget {
    */
   private _evtClick() {
     if (this.applied) {
-      this.parent.removeTag(this.name);
+      this.parent?.removeTag(this.name);
     } else {
-      this.parent.addTag(this.name);
+      this.parent?.addTag(this.name);
     }
     this.toggleApplied();
   }
@@ -147,5 +147,5 @@ export class TagWidget extends Widget {
 
   public name: string;
   private applied: boolean;
-  public parent: TagTool;
+  public parent: TagTool | null = null;
 }
