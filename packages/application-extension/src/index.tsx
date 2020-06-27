@@ -43,7 +43,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
 
-import { Widget, DockLayout } from '@lumino/widgets';
+import { Widget, DockLayout, DockPanel } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -228,14 +228,14 @@ const main: JupyterFrontEndPlugin<void> = {
  */
 const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
-  requires: [IStateDB, ILabShell],
-  activate: (app: JupyterFrontEnd, state: IStateDB, labShell: ILabShell) => {
+  requires: [IStateDB, ILabShell, JupyterLab.IInfo],
+  activate: (app: JupyterFrontEnd, state: IStateDB, labShell: ILabShell, info: JupyterLab.IInfo) => {
     const first = app.started;
     const registry = app.commands;
     const restorer = new LayoutRestorer({ connector: state, first, registry });
 
     void restorer.fetch().then(saved => {
-      labShell.restoreLayout(saved);
+      labShell.restoreLayout(info.mode as DockPanel.Mode, saved);
       labShell.layoutModified.connect(() => {
         void restorer.save(labShell.saveLayout());
       });
@@ -339,15 +339,15 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
           delete query['file-browser-path'];
 
           // Remove the tree portion of the URL.
-          const url =
-            (workspaceMatch
-              ? URLExt.join(paths.urls.workspaces, workspace)
-              : paths.urls.app) +
-            URLExt.objectToQueryString(query) +
-            args.hash;
+          // const url =
+          //   (workspaceMatch
+          //     ? URLExt.join(paths.urls.workspaces, workspace)
+          //     : paths.urls.app) +
+          //   URLExt.objectToQueryString(query) +
+          //   args.hash;
 
           // Route to the cleaned URL.
-          router.navigate(url);
+          // router.navigate(url);
 
           // Clean up artifacts immediately upon routing.
           set.dispose();
@@ -457,7 +457,8 @@ const sidebar: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    labShell: ILabShell
+    labShell: ILabShell,
+    info: JupyterLab.IInfo
   ) => {
     type overrideMap = { [id: string]: 'left' | 'right' };
     let overrides: overrideMap = {};
@@ -591,7 +592,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   // Find the tab area for a widget within the main dock area.
   const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
     const { mainArea } = shell.saveLayout();
-    if (!mainArea || mainArea.mode !== 'multiple-document') {
+    if (!mainArea || app.info.mode !== 'multiple-document') {
       return null;
     }
     const area = mainArea.dock?.main;
