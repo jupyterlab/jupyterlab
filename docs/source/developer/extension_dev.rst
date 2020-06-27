@@ -208,7 +208,7 @@ specific patch release of one of the core JupyterLab packages you can
 temporarily pin that requirement to a specific version in your own
 dependencies.
 
-If you must install a extension into a development branch of JupyterLab, you have to graft it into the source tree of JupyterLab itself. This may be done using the command
+If you must install an extension into a development branch of JupyterLab, you have to graft it into the source tree of JupyterLab itself. This may be done using the command
 
 ::
 
