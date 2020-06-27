@@ -61,7 +61,7 @@ A plugin adds a core functionality to the application:
 -  Plugins require and provide ``Token`` objects, which are used to
    provide a typed value to the plugin's ``activate()`` method.
 -  The module providing plugin(s) must meet the
-   `JupyterLab.IPluginModule <https://jupyterlab.github.io/jupyterlab/application/interfaces/jupyterlab.ipluginmodule.html>`__
+   `JupyterLab.IPluginModule <https://jupyterlab.github.io/jupyterlab/interfaces/_application_src_index_.jupyterlab.ipluginmodule.html>`__
    interface, by exporting a plugin object or array of plugin objects as
    the default export.
 
@@ -113,7 +113,7 @@ Jupyter Front-End Shell
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 The Jupyter front-end
-`shell <https://jupyterlab.github.io/jupyterlab/application/interfaces/jupyterfrontend.ishell.html>`__
+`shell <https://jupyterlab.github.io/jupyterlab/interfaces/_application_src_index_.jupyterfrontend.ishell.html>`__
 is used to add and interact with content in the application. The ``IShell``
 interface provides an ``add()`` method for adding widgets to the application.
 In JupyterLab, the application shell consists of:
@@ -345,7 +345,7 @@ Mime renderer extensions are more declarative than standard extensions.
 The extension is treated the same from the command line perspective
 (``jupyter labextension install`` ), but it does not directly create
 JupyterLab plugins. Instead it exports an interface given in the
-`rendermime-interfaces <https://jupyterlab.github.io/jupyterlab/rendermime-interfaces/interfaces/irendermime.iextension.html>`__
+`rendermime-interfaces <https://jupyterlab.github.io/jupyterlab/interfaces/_rendermime_interfaces_src_index_.irendermime.iextension.html>`__
 package.
 
 The JupyterLab repo has an example mime renderer extension for

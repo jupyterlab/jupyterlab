@@ -8,7 +8,7 @@ then run "jlpm docs:init" to refresh the built docs
 # @jupyterlab/ui-components
 
 The
-[@jupyterlab/ui-components](http://jupyterlab.github.io/jupyterlab/ui-components/index.html)
+[@jupyterlab/ui-components](https://jupyterlab.github.io/jupyterlab/modules/_ui_components_src_index_.html)
 package provides UI elements that are widely used in JupyterLab core,
 and that can be reused in your own extensions.
 
