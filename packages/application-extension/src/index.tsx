@@ -24,7 +24,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { PathExt, URLExt } from '@jupyterlab/coreutils';
+import { PathExt, URLExt, PageConfig } from '@jupyterlab/coreutils';
 
 import {
   IPropertyInspectorProvider,
@@ -125,6 +125,24 @@ const main: JupyterFrontEndPlugin<void> = {
     // trigger a refresh of the commands.
     app.shell.layoutModified.connect(() => {
       app.commands.notifyCommandChanged();
+    });
+
+    // Watch the mode and update the page URL to /lab or /doc to reflect the
+    // change.
+    app.shell.modeChanged.connect((_, args: DockPanel.Mode) => {
+      const path = PageConfig.getUrl({ mode: (args as string) });
+      router.navigate(path, { skipRouting: true });
+      // Persist this mode change to PageConfig as it is used elsewhere at runtime.
+      PageConfig.setOption('mode', (args as string));
+    })
+
+    // Watch the path of the current widget in the main area and update the page
+    // URL to reflect the change.
+    app.shell.currentPathChanged.connect((sender, args) => {
+      const path = PageConfig.getUrl( {treePath: (args.newValue as string)});
+      router.navigate(path, { skipRouting: true });
+      // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
+      PageConfig.setOption('treePath', args.newValue);
     });
 
     // If the connection to the server is lost, handle it with the
@@ -228,14 +246,14 @@ const main: JupyterFrontEndPlugin<void> = {
  */
 const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
-  requires: [IStateDB, ILabShell, JupyterLab.IInfo],
+  requires: [IStateDB, ILabShell],
   activate: (app: JupyterFrontEnd, state: IStateDB, labShell: ILabShell, info: JupyterLab.IInfo) => {
     const first = app.started;
     const registry = app.commands;
     const restorer = new LayoutRestorer({ connector: state, first, registry });
 
     void restorer.fetch().then(saved => {
-      labShell.restoreLayout(info.mode as DockPanel.Mode, saved);
+      labShell.restoreLayout(PageConfig.getOption('mode') as DockPanel.Mode, saved);
       labShell.layoutModified.connect(() => {
         void restorer.save(labShell.saveLayout());
       });
@@ -592,7 +610,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   // Find the tab area for a widget within the main dock area.
   const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
     const { mainArea } = shell.saveLayout();
-    if (!mainArea || app.info.mode !== 'multiple-document') {
+    if (!mainArea || PageConfig.getOption('mode') !== 'multiple-document') {
       return null;
     }
     const area = mainArea.dock?.main;
