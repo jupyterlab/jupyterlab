@@ -146,7 +146,7 @@ export namespace ILabShell {
     /**
      * The document mode (i.e., multiple/single) of the main dock panel.
      */
-    readonly mode: DockPanel.Mode | null;
+    // readonly mode: DockPanel.Mode | null;
   }
 
   /**
@@ -386,6 +386,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
   set mode(mode: DockPanel.Mode) {
     const dock = this._dockPanel;
+    console.log('set mode:', this.mode, mode);
     if (mode === dock.mode) {
       return;
     }
@@ -393,6 +394,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const applicationCurrentWidget = this.currentWidget;
 
     if (mode === 'single-document') {
+      console.log('siwtchign to single doc mode')
       this._cachedLayout = dock.saveLayout();
       dock.mode = mode;
 
@@ -685,12 +687,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Restore the layout state for the application shell.
    */
-  restoreLayout(layout: ILabShell.ILayout): void {
+  restoreLayout(mode: DockPanel.Mode, layout: ILabShell.ILayout): void {
     const { mainArea, leftArea, rightArea } = layout;
-
+    console.log('mode', mode);
     // Rehydrate the main area.
     if (mainArea) {
-      const { currentWidget, dock, mode } = mainArea;
+      const { currentWidget, dock } = mainArea;
 
       if (dock) {
         this._dockPanel.restoreLayout(dock);
@@ -735,7 +737,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           this.mode === 'single-document'
             ? this._cachedLayout || this._dockPanel.saveLayout()
             : this._dockPanel.saveLayout(),
-        mode: this._dockPanel.mode
+        // mode: this._dockPanel.mode
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
