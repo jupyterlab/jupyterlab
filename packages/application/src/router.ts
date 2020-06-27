@@ -88,11 +88,13 @@ export class Router implements IRouter {
       return this.reload();
     }
 
-    // Because a `route()` call may still be in the stack after having received
-    // a `stop` token, wait for the next stack frame before calling `route()`.
-    requestAnimationFrame(() => {
-      void this.route();
-    });
+    if (!options.skipRouting) {
+      // Because a `route()` call may still be in the stack after having received
+      // a `stop` token, wait for the next stack frame before calling `route()`.
+      requestAnimationFrame(() => {
+        void this.route();
+      });
+    }
   }
 
   /**
