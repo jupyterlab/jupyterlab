@@ -373,9 +373,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.reset, {
       label: 'Reset Application State',
-      execute: async () => {
+      execute: async ({ reload }: { reload: boolean }) => {
         await db.clear();
         await save.invoke();
+        if (reload) {
+          router.reload();
+        }
       }
     });
 

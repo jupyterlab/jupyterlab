@@ -390,7 +390,11 @@ function activate(
     RESOURCES.forEach(args => {
       palette.addItem({ args, command: CommandIDs.open, category });
     });
-    palette.addItem({ command: 'apputils:reset', category });
+    palette.addItem({
+      args: { reload: true },
+      command: 'apputils:reset',
+      category
+    });
     palette.addItem({ command: CommandIDs.launchClassic, category });
   }
 }
