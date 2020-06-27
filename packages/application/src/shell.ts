@@ -3,7 +3,7 @@
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 
 import { classes, DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
 
@@ -97,6 +97,21 @@ export namespace ILabShell {
    * An arguments object for the changed signals.
    */
   export type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
+
+  /**
+   * The args for the current path change signal.
+   */
+  export interface ICurrentPathChangedArgs {
+    /**
+     * The new value of the tree path, not including '/tree'.
+     */
+    oldValue: string;
+
+    /** 
+     * The old value of the tree path, not including '/tree'.
+     */
+    newValue: string;
+  }
 
   /**
    * A description of the application's user interface layout.
@@ -310,6 +325,15 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         );
         this._updateTitlePanelTitle();
       }
+
+      if (newValue && newValue instanceof DocumentWidget) {
+        newValue.context.pathChanged.connect(
+          this._updateCurrentPath,
+          this
+        );
+      }
+      this._updateCurrentPath();
+
     });
   }
 
@@ -332,6 +356,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   get currentChanged(): ISignal<this, ILabShell.IChangedArgs> {
     return this._currentChanged;
+  }
+
+  /**
+   * A signal emitted when the shell/dock panel change modes (single/mutiple document).
+   */
+  get modeChanged(): ISignal<this, DockPanel.Mode> {
+    return this._modeChanged;
+  }
+
+  /**
+   * A signal emitted when the path of the current document changes.
+   * 
+   * This also fires when the current document itself changes.
+   */
+  get currentPathChanged(): ISignal<this, ILabShell.ICurrentPathChangedArgs> {
+    return this._currentPathChanged;
   }
 
   /**
@@ -394,7 +434,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const applicationCurrentWidget = this.currentWidget;
 
     if (mode === 'single-document') {
-      console.log('siwtchign to single doc mode')
+      console.log('switchign to single doc mode')
       this._cachedLayout = dock.saveLayout();
       dock.mode = mode;
 
@@ -410,6 +450,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._titleHandler.panel.show();
       this._updateTitlePanelTitle();
 
+      this._modeChanged.emit(mode);
       return;
     }
 
@@ -452,6 +493,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this.node.dataset.shellMode = mode;
     // Hide the title panel
     this._titleHandler.panel.hide();
+    // Emit the mode changed signal
+    this._modeChanged.emit(mode);
   }
 
   /**
@@ -737,7 +780,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
           this.mode === 'single-document'
             ? this._cachedLayout || this._dockPanel.saveLayout()
             : this._dockPanel.saveLayout(),
-        // mode: this._dockPanel.mode
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
@@ -782,6 +824,19 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._titleWidget.node.innerHTML =
         '<h1>' + current.content.title.label + '</h1>';
     }
+  }
+
+  /**
+   * The path of the current widget changed, fire the _currentPathChanged signal.
+   */
+  private _updateCurrentPath() {
+    let current = this.currentWidget;
+    let newValue = '';
+    if (current && current instanceof DocumentWidget) {
+      newValue = current.context.path;
+    }
+    this._currentPathChanged.emit({newValue: newValue, oldValue: this._currentPath});
+    this._currentPath = newValue;
   }
 
   /**
@@ -1089,6 +1144,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _activeChanged = new Signal<this, ILabShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
   private _currentChanged = new Signal<this, ILabShell.IChangedArgs>(this);
+  private _currentPath = '';
+  private _currentPathChanged = new Signal<this, ILabShell.ICurrentPathChangedArgs>(this);
+  private _modeChanged = new Signal<this, DockPanel.Mode>(this);
   private _dockPanel: DockPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
