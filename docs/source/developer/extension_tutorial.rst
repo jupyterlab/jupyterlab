@@ -819,8 +819,9 @@ Finally, rewrite the ``activate`` function so that it:
       app.commands.addCommand(command, {
         label: 'Random Astronomy Picture',
         execute: () => {
-          if (!widget) {
+          if (!widget || widget.isDisposed) {
             // Create a new widget if one does not exist
+            // or if the previous one was disposed after closing the panel
             const content = new APODWidget();
             widget = new MainAreaWidget({content});
             widget.id = 'apod-jupyterlab';
