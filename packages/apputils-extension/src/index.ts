@@ -22,7 +22,7 @@ import {
   sessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import { URLExt } from '@jupyterlab/coreutils';
+import { URLExt, PageConfig } from '@jupyterlab/coreutils';
 
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 
@@ -106,8 +106,8 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
     const query = URLExt.queryStringToObject(search || '');
     const solver = new WindowResolver();
     const workspace = info.workspace;
-    const treePath = info.treePath;
-    const mode = info.mode;
+    const treePath = PageConfig.getOption('treePath');
+    const mode = PageConfig.getOption('mode');
     // This is used as a key in local storage to refer to workspaces, either the name
     // of the workspace or the string 'default'. Both lab and doc modes share the same workspace.
     const candidate = workspace ? workspace : 'default';
