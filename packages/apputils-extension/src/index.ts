@@ -7,7 +7,8 @@ import {
   ILayoutRestorer,
   IRouter,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  JupyterLab
 } from '@jupyterlab/application';
 
 import {
@@ -94,22 +95,26 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
   id: '@jupyterlab/apputils-extension:resolver',
   autoStart: true,
   provides: IWindowResolver,
-  requires: [JupyterFrontEnd.IPaths, IRouter],
+  requires: [JupyterFrontEnd.IPaths, JupyterLab.IInfo, IRouter],
   activate: async (
-    _: JupyterFrontEnd,
+    app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
+    info: JupyterLab.IInfo,
     router: IRouter
   ) => {
-    const { hash, path, search } = router.current;
+    const { hash, search } = router.current;
     const query = URLExt.queryStringToObject(search || '');
     const solver = new WindowResolver();
-    const { urls } = paths;
-    const match = path.match(new RegExp(`^${urls.workspaces}\/([^?\/]+)`));
-    const workspace = (match && decodeURIComponent(match[1])) || '';
-    const candidate = Private.candidate(paths, workspace);
-    const rest = workspace
-      ? path.replace(new RegExp(`^${urls.workspaces}\/${workspace}`), '')
-      : path.replace(new RegExp(`^${urls.app}\/?`), '');
+    const workspace = info.workspace;
+    const treePath = info.treePath;
+    const mode = info.mode;
+    // This is used as a key in local storage to refer to workspaces, either the name
+    // of the workspace or the string 'default'. Both lab and doc modes share the same workspace.
+    const candidate = workspace ? workspace : 'default';
+    console.log('workspace:', workspace);
+    console.log('candidate:', candidate);
+    const rest = treePath ? URLExt.join('tree', treePath) : '';
+    console.log("rest:", rest);
     try {
       await solver.resolve(candidate);
       return solver;
@@ -118,16 +123,18 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
       // that never resolves to prevent the application from loading plugins
       // that rely on `IWindowResolver`.
       return new Promise<IWindowResolver>(() => {
-        const { base, workspaces } = paths.urls;
+        const { base } = paths.urls;
         const pool =
           'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         const random = pool[Math.floor(Math.random() * pool.length)];
-        const path = URLExt.join(base, workspaces, `auto-${random}`, rest);
+        let path = URLExt.join(base, mode, 'workspaces', `auto-${random}`);
+        path = rest ? URLExt.join(path, rest) : path
 
-        // Clone the originally requested workspace after redirecting.
-        query['clone'] = workspace;
+        // Reset the workspace on load.
+        query['reset'] = '';
 
         const url = path + URLExt.objectToQueryString(query) + (hash || '');
+        console.log('new url', url);
         router.navigate(url, { hard: true });
       });
     }
@@ -507,24 +514,3 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   workspacesPlugin
 ];
 export default plugins;
-
-/**
- * The namespace for module private data.
- */
-namespace Private {
-  /**
-   * Generate a workspace name candidate.
-   *
-   * @param workspace - A potential workspace name parsed from the URL.
-   *
-   * @returns A workspace name candidate.
-   */
-  export function candidate(
-    { urls }: JupyterFrontEnd.IPaths,
-    workspace = ''
-  ): string {
-    return workspace
-      ? URLExt.join(urls.workspaces, workspace)
-      : URLExt.join(urls.app);
-  }
-}
