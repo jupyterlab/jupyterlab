@@ -331,7 +331,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           typeof query['clone'] === 'string'
             ? query['clone'] === ''
               ? URLExt.join(urls.base, urls.app)
-              : URLExt.join(urls.base, urls.workspaces, query['clone'])
+              : URLExt.join(urls.base, urls.app, 'workspaces', query['clone'])
             : null;
         const source = clone || workspace || null;
 
