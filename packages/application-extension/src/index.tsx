@@ -24,7 +24,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { PathExt, URLExt, PageConfig } from '@jupyterlab/coreutils';
+import { URLExt, PageConfig } from '@jupyterlab/coreutils';
 
 import {
   IPropertyInspectorProvider,
@@ -307,18 +307,10 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
     resolver: IWindowResolver
   ): JupyterFrontEnd.ITreeResolver => {
     const { commands } = app;
-    const treePattern = new RegExp(`^${paths.urls.tree}([^?]+)`);
-    const workspacePattern = new RegExp(
-      `^${paths.urls.workspaces}/[^?/]+/tree/([^?]+)`
-    );
-    const docTreePattern = new RegExp(`^${paths.urls.doc}([^?]+)`);
-    const docWorkspacePattern = new RegExp(
-      `^${paths.urls.docWorkspaces}/[^?/]+/tree/([^?]+)`
-    );
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
 
-    console.log(paths);
+    const treePattern = new RegExp('/(lab|doc)(/workspaces/[a-zA-Z0-9\-\_]+)?(/tree/.*)?');
 
     set.add(
       commands.addCommand(CommandIDs.tree, {
@@ -327,58 +319,21 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
             return;
           }
 
-          let inDocMode = false;
-          if ( JupyterFrontEnd.inDocMode(args.path, paths) ) {
-            inDocMode = true;
-          }
-          console.log('inDocMode', inDocMode);
-      
-          let treeMatch;
-          let workspaceMatch;
-          if (inDocMode) {
-            treeMatch = args.path.match(docTreePattern);
-            workspaceMatch = args.path.match(docWorkspacePattern);
-          } else {
-            treeMatch = args.path.match(treePattern);
-            workspaceMatch = args.path.match(workspacePattern);
-          }
-          console.log('treeMatch', treeMatch);
-          console.log('workspaceMatch', workspaceMatch);
-
-          const match = treeMatch || workspaceMatch;
-          const file = match ? decodeURI(match[1]) : '';
-          const workspace = PathExt.basename(resolver.name);
           const query = URLExt.queryStringToObject(args.search ?? '');
           const browser = query['file-browser-path'] || '';
-
-          console.log(workspace);
 
           // Remove the file browser path from the query string.
           delete query['file-browser-path'];
 
-          // Remove the tree portion of the URL.
-          // const url =
-          //   (workspaceMatch
-          //     ? URLExt.join(paths.urls.workspaces, workspace)
-          //     : paths.urls.app) +
-          //   URLExt.objectToQueryString(query) +
-          //   args.hash;
-
-          // Route to the cleaned URL.
-          // router.navigate(url);
-
           // Clean up artifacts immediately upon routing.
           set.dispose();
 
-          delegate.resolve({ browser, file });
+          delegate.resolve({ browser, file: PageConfig.getOption('treePath') });
         }
       })
     );
     set.add(
       router.register({ command: CommandIDs.tree, pattern: treePattern })
-    );
-    set.add(
-      router.register({ command: CommandIDs.tree, pattern: workspacePattern })
     );
 
     // If a route is handled by the router without the tree command being
