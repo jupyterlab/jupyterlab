@@ -73,17 +73,19 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    * @param focus - Set to true to focus on the relevant cell. Default to false.
+   * @param kernelName The kernel name of current session.
    */
   find(
     debugSessionPath: string,
     source: string,
-    focus: boolean
+    focus: boolean,
+    kernelName: string
   ): IIterator<CodeEditor.IEditor> {
     return chain(
-      this._findInNotebooks(debugSessionPath, source, focus),
-      this._findInConsoles(debugSessionPath, source, focus),
-      this._findInEditors(debugSessionPath, source, focus),
-      this._findInReadOnlyEditors(debugSessionPath, source, focus)
+      this._findInNotebooks(debugSessionPath, source, focus, kernelName),
+      this._findInConsoles(debugSessionPath, source, focus, kernelName),
+      this._findInEditors(debugSessionPath, source, focus, kernelName),
+      this._findInReadOnlyEditors(debugSessionPath, source, focus, kernelName)
     );
   }
 
@@ -93,11 +95,13 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    * @param focus - Set to true to focus on the relevant cell. Default to false.
+   * @param kernelName The kernel name from current session.
    */
   private _findInNotebooks(
     debugSessionPath: string,
     source: string,
-    focus: boolean
+    focus: boolean,
+    kernelName: string
   ): CodeEditor.IEditor[] {
     if (!this._notebookTracker) {
       return [];
@@ -119,7 +123,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
         const code = cell.model.value.text;
-        const cellId = this._debuggerConfiguration.getCodeId(code);
+        const cellId = this._debuggerConfiguration.getCodeId(code, kernelName);
         if (source !== cellId) {
           return;
         }
@@ -141,11 +145,13 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    * @param focus - Set to true to focus on the relevant cell. Default to false.
+   * @param kernelName The kernel name from current session.
    */
   private _findInConsoles(
     debugSessionPath: string,
     source: string,
-    focus: boolean
+    focus: boolean,
+    kernelName: string
   ): CodeEditor.IEditor[] {
     if (!this._consoleTracker) {
       return [];
@@ -161,7 +167,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       const cells = consoleWidget.console.cells;
       each(cells, cell => {
         const code = cell.model.value.text;
-        const codeId = this._debuggerConfiguration.getCodeId(code);
+        const codeId = this._debuggerConfiguration.getCodeId(code, kernelName);
         if (source !== codeId) {
           return;
         }
@@ -181,11 +187,13 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    * @param focus - Set to true to focus on the relevant cell. Default to false.
+   * @param kernelName The kernel name from current session.
    */
   private _findInEditors(
     debugSessionPath: string,
     source: string,
-    focus: boolean
+    focus: boolean,
+    kernelName: string
   ): CodeEditor.IEditor[] {
     if (!this._editorTracker) {
       return;
@@ -203,7 +211,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._debuggerConfiguration.getCodeId(code);
+      const codeId = this._debuggerConfiguration.getCodeId(code, kernelName);
       if (source !== codeId) {
         return;
       }
@@ -221,11 +229,13 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
    * @param debugSessionPath The path for the current debug session.
    * @param source The source to find.
    * @param focus Set to true to focus on the relevant cell. Default to false.
+   * @param kernelName The kernel name from current session.
    */
   private _findInReadOnlyEditors(
     debugSessionPath: string,
     source: string,
-    focus: boolean
+    focus: boolean,
+    kernelName: string
   ): CodeEditor.IEditor[] {
     const editors: CodeEditor.IEditor[] = [];
     this._readOnlyEditorTracker.forEach(widget => {
@@ -235,7 +245,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._debuggerConfiguration.getCodeId(code);
+      const codeId = this._debuggerConfiguration.getCodeId(code, kernelName);
       if (widget.title.caption !== source && source !== codeId) {
         return;
       }
@@ -308,6 +318,7 @@ export interface IDebuggerEditorFinder {
   find(
     debugSessionPath: string,
     source: string,
-    focus: boolean
+    focus: boolean,
+    kernelName: string
   ): IIterator<CodeEditor.IEditor>;
 }

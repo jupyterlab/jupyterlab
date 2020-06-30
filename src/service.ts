@@ -166,7 +166,10 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code The source code.
    */
   getCodeId(code: string): string {
-    return this._debuggerConfiguration.getCodeId(code);
+    return this._debuggerConfiguration.getCodeId(
+      code,
+      this.session.connection.kernel.name
+    );
   }
 
   /**
@@ -227,11 +230,13 @@ export class DebuggerService implements IDebugger, IDisposable {
     const { hashMethod, hashSeed, tmpFilePrefix, tmpFileSuffix } = reply.body;
     const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
     const stoppedThreads = new Set(reply.body.stoppedThreads);
+    const kernelName = this.session.connection.kernel.name;
 
     this._debuggerConfiguration.setHashParameters(hashMethod, hashSeed);
     this._debuggerConfiguration.setTmpFileParameters(
       tmpFilePrefix,
-      tmpFileSuffix
+      tmpFileSuffix,
+      kernelName
     );
 
     this._model.stoppedThreads = stoppedThreads;
@@ -424,11 +429,19 @@ export class DebuggerService implements IDebugger, IDisposable {
     for (let collection of breakpoints) {
       const [id, list] = collection;
       list.forEach(() => {
-        each(this._editorFinder.find(path, id, false), () => {
-          if (list.length > 0) {
-            bpMapForRestore.set(id, list);
+        each(
+          this._editorFinder.find(
+            path,
+            id,
+            false,
+            this.session.connection.kernel.name
+          ),
+          () => {
+            if (list.length > 0) {
+              bpMapForRestore.set(id, list);
+            }
           }
-        });
+        );
       });
     }
     return bpMapForRestore;

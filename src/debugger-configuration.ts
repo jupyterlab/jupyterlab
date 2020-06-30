@@ -31,9 +31,14 @@ export class DebuggerConfiguration implements IDebuggerConfig {
    * Computes an id based on the given code.
    *
    * @param code The source code.
+   * @param kernelName The kernel name from current session.
    */
-  public getCodeId(code: string): string {
-    return this._tmpFilePrefix + this._hashMethod(code) + this._tmpFileSuffix;
+  public getCodeId(code: string, kernelName: string): string {
+    return (
+      this._tmpFileAssociatedWithKernel.get(kernelName)[0] +
+      this._hashMethod(code) +
+      this._tmpFileAssociatedWithKernel.get(kernelName)[1]
+    );
   }
 
   /**
@@ -57,15 +62,18 @@ export class DebuggerConfiguration implements IDebuggerConfig {
    *
    * @param prefix The prefix used for the temporary files.
    * @param suffix The suffix used for the temporary files.
+   * @param kernelName The kernel name from current session.
    */
-  public setTmpFileParameters(prefix: string, suffix: string): void {
-    this._tmpFilePrefix = prefix;
-    this._tmpFileSuffix = suffix;
+  public setTmpFileParameters(
+    prefix: string,
+    suffix: string,
+    kernelName: string
+  ): void {
+    this._tmpFileAssociatedWithKernel.set(kernelName, [prefix, suffix]);
   }
 
   private _hashMethod: (code: string) => string;
-  private _tmpFilePrefix: string;
-  private _tmpFileSuffix: string;
+  private _tmpFileAssociatedWithKernel = new Map<string, [string, string]>();
 }
 
 export const IDebuggerConfig = new Token<IDebuggerConfig>(
@@ -76,6 +84,10 @@ export const IDebuggerConfig = new Token<IDebuggerConfig>(
  */
 export interface IDebuggerConfig {
   setHashParameters(method: string, seed: number): void;
-  setTmpFileParameters(prefix: string, suffix: string): void;
-  getCodeId(code: string): string;
+  setTmpFileParameters(
+    prefix: string,
+    suffix: string,
+    kernelName: string
+  ): void;
+  getCodeId(code: string, kernelName: string): string;
 }
