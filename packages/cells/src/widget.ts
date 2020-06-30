@@ -51,7 +51,7 @@ import { Message } from '@lumino/messaging';
 
 import { PanelLayout, Panel, Widget } from '@lumino/widgets';
 
-import { InputCollapser, OutputCollapser } from './collapser';
+import { InputCollapser, OutputCollapser, TagIndicator } from './collapser';
 
 import {
   CellHeader,
@@ -529,15 +529,31 @@ export class Cell extends Widget {
   }
 
   /**
-   * Update background color of cell according to tags.
+   * Update colored bars showing tags next to each cell.
    */
-  updateBackgroundColor() {
-    let tags = this.model.metadata.get('tags');
-    if (tags && Array.isArray(tags)) {
+  updateTagIndicators() {
+    const inputWrapper = this._inputWrapper as Panel;
+    const n_widgets = inputWrapper.widgets.length;
+    for (let i = 0; i < n_widgets - 2; i++) {
+      let widget = inputWrapper.widgets[
+        inputWrapper.widgets.length - 1
+      ] as Widget;
+      widget.hide();
+      widget.dispose();
+    }
+
+    let tags = this.model.metadata.get('tags') as string[];
+    if (tags) {
+      tags.sort((a, b) => a.localeCompare(b));
       for (let i = 0; i < tags.length; i++) {
-        let tag = tags[i].split(';');
-        if (Array.isArray(tag) && tag.length == 2) {
-          this.node.style.backgroundColor = tag[1];
+        let tag = tags[i].split(';') as string[];
+        if (tag.length == 2) {
+          let tagBar = new TagIndicator();
+          tagBar.node.style.background = tag[1];
+          if (i == 0) {
+            tagBar.node.style.marginLeft = '10px';
+          }
+          inputWrapper.addWidget(tagBar);
         }
       }
     } else {
