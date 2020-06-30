@@ -28,7 +28,7 @@ key <https://raw.githubusercontent.com/jupyter/notebook/master/docs/source/ipyth
     :local:
     :depth: 1
 
-General Guidlelines for Contributing
+General Guidelines for Contributing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For general documentation about contributing to Jupyter projects, see
@@ -237,7 +237,7 @@ Build and Run the Tests
 
 .. code:: bash
 
-   jlpm run build:test
+   jlpm run build:testutils
    jlpm test
 
 You can run tests for an individual package by changing to the

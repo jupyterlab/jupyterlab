@@ -57,7 +57,16 @@ button.jp-Dialog-button:focus::-moz-focus-inner {
   border: 0;
 }
 
+button.jp-Dialog-close-button {
+  padding: 0;
+  height: 100%;
+  min-width: unset;
+  min-height: unset;
+}
+
 .jp-Dialog-header {
+  display: flex;
+  justify-content: space-between;
   flex: 0 0 auto;
   padding-bottom: 12px;
   font-size: var(--jp-ui-font-size3);

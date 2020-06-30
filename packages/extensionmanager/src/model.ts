@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { JupyterFrontEnd } from '@jupyterlab/application';
+
 import { VDomModel } from '@jupyterlab/apputils';
 
 import {
@@ -152,10 +154,12 @@ export type Action = 'install' | 'uninstall' | 'enable' | 'disable';
  */
 export class ListModel extends VDomModel {
   constructor(
+    app: JupyterFrontEnd,
     serviceManager: ServiceManager,
     settings: ISettingRegistry.ISettings
   ) {
     super();
+    this._app = app;
     this._installed = [];
     this._searchResult = [];
     this.serviceManager = serviceManager;
@@ -416,7 +420,7 @@ export class ListModel extends VDomModel {
         if (response.status === 'building') {
           // Piggy-back onto existing build
           // TODO: Can this cause dialog collision on build completion?
-          return doBuild(builder);
+          return doBuild(this._app, builder);
         }
         if (response.status !== 'needed') {
           return;
@@ -438,7 +442,7 @@ export class ListModel extends VDomModel {
       this.promptBuild = false;
       this.stateChanged.emit(undefined);
     }
-    const completed = doBuild(this.serviceManager.builder);
+    const completed = doBuild(this._app, this.serviceManager.builder);
     this._addPendingAction(completed);
   }
 
@@ -795,6 +799,7 @@ export class ListModel extends VDomModel {
    */
   protected serviceManager: ServiceManager;
 
+  private _app: JupyterFrontEnd;
   private _query: string | null = null;
   private _page: number = 0;
   private _pagination: number = 250;

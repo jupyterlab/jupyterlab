@@ -56,7 +56,7 @@ Next create a conda environment that includes:
 4. `git <https://git-scm.com>`__, a version control system you'll use to
    take snapshots of your work as you progress through this tutorial
 
-It's best practice to leave the root conda environment (i.e., the environment created
+It's a best practice to leave the root conda environment (i.e., the environment created
 by the miniconda installer) untouched and install your project-specific
 dependencies in a named conda environment. Run this command to create a
 new environment named ``jupyterlab-ext``.
@@ -239,7 +239,7 @@ definition so that it reads like so:
      * Initialization data for the jupyterlab_apod extension.
      */
     const extension: JupyterFrontEndPlugin<void> = {
-      id: 'jupyterlab_apod',
+      id: 'jupyterlab-apod',
       autoStart: true,
       requires: [ICommandPalette],
       activate: (app: JupyterFrontEnd, palette: ICommandPalette) => {
@@ -684,7 +684,7 @@ function.
 Next move the remaining logic in ``activate`` to a new, top-level
 function just below the ``APODWidget`` class definition. Modify the code
 to create a widget when one does not exist in the main JupyterLab area
-or to refresh the image in the exist widget when the command runs again.
+or to refresh the image in the existing widget when the command runs again.
 The code for the ``activate`` function should read as follows after
 these changes:
 
