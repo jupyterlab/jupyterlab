@@ -1407,23 +1407,10 @@ export class Notebook extends StaticNotebook {
     }
     if (activeCell) {
       activeCell.addClass(ACTIVE_CLASS);
-      activeCell.addClass('alert-warning');
     }
 
     let count = 0;
     each(this.widgets, widget => {
-      let tags = widget.model.metadata.get('tags');
-      if (tags && Array.isArray(tags)) {
-        let backgroundColor = '';
-        for (let i = 0; i < tags.length; i++) {
-          let tag = tags[i].split(';');
-          if (Array.isArray(tag) && tag.length == 2) {
-            backgroundColor = tag[1];
-          }
-        }
-        widget.node.style.backgroundColor = backgroundColor;
-      }
-
       if (widget !== activeCell) {
         widget.removeClass(ACTIVE_CLASS);
       }
