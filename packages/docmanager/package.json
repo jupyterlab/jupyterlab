@@ -46,7 +46,7 @@
     "@jupyterlab/services": "^6.0.0-alpha.0",
     "@jupyterlab/statusbar": "^3.0.0-alpha.0",
     "@lumino/algorithm": "^1.2.3",
-    "@lumino/coreutils": "^1.4.2",
+    "@lumino/coreutils": "^1.4.3",
     "@lumino/disposable": "^1.3.5",
     "@lumino/messaging": "^1.3.3",
     "@lumino/properties": "^1.1.6",

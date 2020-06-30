@@ -37,7 +37,7 @@
   "dependencies": {
     "@jupyterlab/apputils": "^3.0.0-alpha.0",
     "@jupyterlab/ui-components": "^3.0.0-alpha.0",
-    "@lumino/coreutils": "^1.4.2",
+    "@lumino/coreutils": "^1.4.3",
     "@lumino/disposable": "^1.3.5",
     "@lumino/signaling": "^1.3.5",
     "react": "~16.9.0"

@@ -37,7 +37,7 @@
   },
   "dependencies": {
     "@lumino/commands": "^1.10.1",
-    "@lumino/coreutils": "^1.4.2",
+    "@lumino/coreutils": "^1.4.3",
     "@lumino/disposable": "^1.3.5",
     "@lumino/properties": "^1.1.6",
     "@lumino/signaling": "^1.3.5"
