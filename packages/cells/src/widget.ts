@@ -528,6 +528,24 @@ export class Cell extends Widget {
     }
   }
 
+  /**
+   * Update background color of cell according to tags.
+   */
+  updateBackgroundColor() {
+    let tags = this.model.metadata.get('tags');
+    if (tags && Array.isArray(tags)) {
+      for (let i = 0; i < tags.length; i++) {
+        let tag = tags[i].split(';');
+        if (Array.isArray(tag) && tag.length == 2) {
+          this.node.style.backgroundColor = tag[1];
+        }
+      }
+    } else {
+      this.node.style.backgroundColor = '';
+    }
+    return;
+  }
+
   private _readOnly = false;
   private _model: ICellModel;
   private _inputHidden = false;
@@ -719,6 +737,7 @@ export class CodeCell extends Cell {
       this.outputHidden = !this.outputHidden;
     });
     model.stateChanged.connect(this.onStateChanged, this);
+    this.updateBackgroundColor();
   }
 
   /**

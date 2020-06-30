@@ -87,6 +87,7 @@ export class TagTool extends NotebookTools.Tool {
     cell.model.metadata.set('tags', tags);
     this.refreshTags();
     this.loadActiveTags();
+    cell.updateBackgroundColor();
   }
 
   /**
@@ -112,6 +113,7 @@ export class TagTool extends NotebookTools.Tool {
     }
     this.refreshTags();
     this.loadActiveTags();
+    cell.updateBackgroundColor();
   }
 
   /**
