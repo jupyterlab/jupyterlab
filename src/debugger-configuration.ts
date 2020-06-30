@@ -35,9 +35,9 @@ export class DebuggerConfiguration implements IDebuggerConfig {
    */
   public getCodeId(code: string, kernelName: string): string {
     return (
-      this._tmpFileAssociatedWithKernel.get(kernelName)[0] +
+      this._tmpFileAssociatedWithKernel.get(kernelName || 'no_kernel')[0] +
       this._hashMethod(code) +
-      this._tmpFileAssociatedWithKernel.get(kernelName)[1]
+      this._tmpFileAssociatedWithKernel.get(kernelName || 'no_kernel')[1]
     );
   }
 
@@ -69,7 +69,10 @@ export class DebuggerConfiguration implements IDebuggerConfig {
     suffix: string,
     kernelName: string
   ): void {
-    this._tmpFileAssociatedWithKernel.set(kernelName, [prefix, suffix]);
+    this._tmpFileAssociatedWithKernel.set(kernelName || 'no_kernel', [
+      prefix,
+      suffix
+    ]);
   }
 
   private _hashMethod: (code: string) => string;
