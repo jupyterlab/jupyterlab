@@ -753,7 +753,7 @@ export class CodeCell extends Cell {
       this.outputHidden = !this.outputHidden;
     });
     model.stateChanged.connect(this.onStateChanged, this);
-    this.updateBackgroundColor();
+    this.updateTagIndicators();
   }
 
   /**

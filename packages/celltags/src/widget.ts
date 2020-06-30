@@ -44,6 +44,13 @@ export class TagWidget extends Widget {
       iconContainer.style.display = 'none';
     }
     tag.appendChild(iconContainer);
+
+    let split = this.name.split(';') as string[];
+    if (split && split.length == 2) {
+      this.node.style.border = '2px solid';
+      this.node.style.borderColor = split[1];
+    }
+
     this.node.appendChild(tag);
   }
 
