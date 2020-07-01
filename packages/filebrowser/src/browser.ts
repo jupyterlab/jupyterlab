@@ -12,11 +12,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { Contents, ServerConnection } from '@jupyterlab/services';
 
-import {
-  newFolderIcon,
-  refreshIcon,
-  searchIcon
-} from '@jupyterlab/ui-components';
+import { newFolderIcon, refreshIcon } from '@jupyterlab/ui-components';
 
 import { IIterator } from '@lumino/algorithm';
 
@@ -88,14 +84,6 @@ export class FileBrowser extends Widget {
     });
     const uploader = new Uploader({ model });
 
-    const searcher = new ToolbarButton({
-      icon: searchIcon,
-      onClick: () => {
-        this._toggleBrowserLayout();
-      },
-      tooltip: 'Filter files by name'
-    });
-
     const refresher = new ToolbarButton({
       icon: refreshIcon,
       onClick: () => {
@@ -106,7 +94,6 @@ export class FileBrowser extends Widget {
 
     this.toolbar.addItem('newFolder', newFolder);
     this.toolbar.addItem('upload', uploader);
-    this.toolbar.addItem('search', searcher);
     this.toolbar.addItem('refresher', refresher);
 
     this._listing = new DirListing({ model, renderer });
@@ -122,7 +109,10 @@ export class FileBrowser extends Widget {
     this._filenameSearcher.addClass(CRUMBS_CLASS);
 
     this.layout = new PanelLayout();
-    this._showBrowserLayout();
+    this.layout.addWidget(this.toolbar);
+    this.layout.addWidget(this._crumbs);
+    this.layout.addWidget(this._filenameSearcher);
+    this.layout.addWidget(this._listing);
 
     if (options.restore !== false) {
       void model.restore(this.id);
@@ -279,31 +269,6 @@ export class FileBrowser extends Widget {
     return this._listing.modelForClick(event);
   }
 
-  private _toggleBrowserLayout(): void {
-    if (this._layoutMode === 'search') {
-      this._layoutMode = 'tree';
-    } else {
-      this._layoutMode = 'search';
-    }
-    this._showBrowserLayout();
-    void this.model.refresh();
-  }
-
-  private _showBrowserLayout(): void {
-    if (this._layoutMode === 'tree') {
-      this.layout.removeWidget(this._filenameSearcher);
-      this.layout.addWidget(this.toolbar);
-      this.layout.addWidget(this._crumbs);
-      this.layout.addWidget(this._listing);
-    } else {
-      this.layout.removeWidget(this._crumbs);
-      this.layout.removeWidget(this._listing);
-      this.layout.addWidget(this.toolbar);
-      this.layout.addWidget(this._filenameSearcher);
-      this.layout.addWidget(this._listing);
-    }
-  }
-
   /**
    * Handle a connection lost signal from the model.
    */
@@ -335,7 +300,6 @@ export class FileBrowser extends Widget {
   // Override Widget.layout with a more specific PanelLayout type.
   layout: PanelLayout;
 
-  private _layoutMode: 'tree' | 'search' = 'tree';
   private _crumbs: BreadCrumbs;
   private _listing: DirListing;
   private _filenameSearcher: ReactWidget;
