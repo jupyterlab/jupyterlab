@@ -416,7 +416,7 @@ class LabWorkspaceApp(JupyterApp):
 class LabApp(NBClassicConfigShimMixin, LabServerApp):
     version = version
 
-    name = "jupyterlab"
+    name = "lab"
     app_name = "JupyterLab"
 
     # Should your extension expose other server extensions when launched directly?
