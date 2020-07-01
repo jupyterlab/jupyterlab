@@ -93,7 +93,7 @@ export class FileBrowser extends Widget {
       onClick: () => {
         this._toggleBrowserLayout();
       },
-      tooltip: 'Search on File Names'
+      tooltip: 'Filter files by name'
     });
 
     const refresher = new ToolbarButton({
