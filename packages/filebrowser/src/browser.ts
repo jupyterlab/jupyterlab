@@ -110,13 +110,13 @@ export class FileBrowser extends Widget {
 
     this._crumbs.addClass(CRUMBS_CLASS);
     this.toolbar.addClass(TOOLBAR_CLASS);
-    this._listing.addClass(LISTING_CLASS);
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
+    this._listing.addClass(LISTING_CLASS);
 
     this.layout = new PanelLayout();
     this.layout.addWidget(this.toolbar);
-    this.layout.addWidget(this._crumbs);
     this.layout.addWidget(this._filenameSearcher);
+    this.layout.addWidget(this._crumbs);
     this.layout.addWidget(this._listing);
 
     if (options.restore !== false) {
