@@ -39,6 +39,11 @@ const FILE_BROWSER_CLASS = 'jp-FileBrowser';
 const CRUMBS_CLASS = 'jp-FileBrowser-crumbs';
 
 /**
+ * The class name added to the filebrowser filterbox node.
+ */
+const FILTERBOX_CLASS = 'jp-FileBrowser-filterBox';
+
+/**
  * The class name added to the filebrowser toolbar node.
  */
 const TOOLBAR_CLASS = 'jp-FileBrowser-toolbar';
@@ -106,7 +111,7 @@ export class FileBrowser extends Widget {
     this._crumbs.addClass(CRUMBS_CLASS);
     this.toolbar.addClass(TOOLBAR_CLASS);
     this._listing.addClass(LISTING_CLASS);
-    this._filenameSearcher.addClass(CRUMBS_CLASS);
+    this._filenameSearcher.addClass(FILTERBOX_CLASS);
 
     this.layout = new PanelLayout();
     this.layout.addWidget(this.toolbar);

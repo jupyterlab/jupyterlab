@@ -244,3 +244,7 @@
 .jp-LastModified-hidden {
   display: none;
 }
+
+.jp-FileBrowser-filterBox {
+  padding: 4px;
+}

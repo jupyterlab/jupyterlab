@@ -36,7 +36,7 @@ const FilterBox = (props: IFilterBoxProps) => {
   return (
     <InputGroup
       type="text"
-      rightIcon="search"
+      rightIcon="ui-components:search"
       placeholder={props.placeholder}
       onChange={handleChange}
       value={filter}
