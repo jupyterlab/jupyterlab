@@ -52,10 +52,12 @@ function fuzzySearch(item: Contents.IModel, query: string): IScore | null {
   let indices: number[] | null = null;
 
   // The regex for search word boundaries
-  let rgx = /\b\w/g;
+  const rgx = /\b\w/g;
+
+  let continueSearch = true;
 
   // Search the source by word boundary.
-  while (true) {
+  while (continueSearch) {
     // Find the next word boundary in the source.
     let rgxMatch = rgx.exec(source);
 
