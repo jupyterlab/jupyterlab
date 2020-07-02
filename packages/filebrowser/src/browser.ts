@@ -105,7 +105,7 @@ export class FileBrowser extends Widget {
 
     this._filenameSearcher = FilenameSearcher({
       listing: this._listing,
-      placeholder: 'Search on filename'
+      placeholder: 'Filter files by name'
     });
 
     this._crumbs.addClass(CRUMBS_CLASS);
