@@ -30,6 +30,9 @@ interface IScore {
    */
   score: number;
 
+  /**
+   * The indices of the text matches.
+   */
   indices: number[] | null;
 
   /**
