@@ -991,7 +991,7 @@ export namespace Commands {
     menu: IMainMenu,
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    consoleTracker: IConsoleTracker,
+    consoleTracker: IConsoleTracker | null,
     sessionDialogs: ISessionContextDialogs | null
   ) {
     // Add the editing commands to the settings menu.
@@ -1013,13 +1013,15 @@ export namespace Commands {
     addConsoleCreatorToFileMenu(menu, commands, tracker);
 
     // Add a code runner to the run menu.
-    addCodeRunnersToRunMenu(
-      menu,
-      commands,
-      tracker,
-      consoleTracker,
-      sessionDialogs
-    );
+    if (consoleTracker) {
+      addCodeRunnersToRunMenu(
+        menu,
+        commands,
+        tracker,
+        consoleTracker,
+        sessionDialogs
+      );
+    }
   }
 
   /**

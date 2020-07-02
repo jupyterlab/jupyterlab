@@ -50,13 +50,9 @@ export { Commands } from './commands';
 const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
-  requires: [
-    IConsoleTracker,
-    IEditorServices,
-    IFileBrowserFactory,
-    ISettingRegistry
-  ],
+  requires: [IEditorServices, IFileBrowserFactory, ISettingRegistry],
   optional: [
+    IConsoleTracker,
     ICommandPalette,
     ILauncher,
     IMainMenu,
@@ -151,10 +147,10 @@ export default plugins;
  */
 function activate(
   app: JupyterFrontEnd,
-  consoleTracker: IConsoleTracker,
   editorServices: IEditorServices,
   browserFactory: IFileBrowserFactory,
   settingRegistry: ISettingRegistry,
+  consoleTracker: IConsoleTracker | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
   menu: IMainMenu | null,

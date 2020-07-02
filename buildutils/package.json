@@ -39,7 +39,7 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@lumino/coreutils": "^1.4.2",
+    "@lumino/coreutils": "^1.4.3",
     "@yarnpkg/lockfile": "^1.1.0",
     "child_process": "~1.0.2",
     "commander": "~4.0.1",
@@ -49,22 +49,20 @@
     "fs-extra": "^8.1.0",
     "glob": "~7.1.6",
     "inquirer": "^7.0.0",
-    "mini-css-extract-plugin": "~0.8.0",
+    "mini-css-extract-plugin": "~0.9.0",
     "package-json": "^6.5.0",
     "path": "~0.12.7",
     "prettier": "^1.19.1",
     "semver": "^6.3.0",
     "sort-package-json": "~1.31.0",
     "typescript": "~3.9.2",
-    "webpack": "^4.41.2",
+    "webpack": "5.0.0-beta.18",
     "which": "^2.0.2"
   },
   "devDependencies": {
-    "@types/duplicate-package-checker-webpack-plugin": "^2.1.0",
     "@types/fs-extra": "^8.0.1",
     "@types/glob": "^7.1.1",
     "@types/inquirer": "^6.5.0",
-    "@types/mini-css-extract-plugin": "^0.8.0",
     "@types/node": "^12.12.17",
     "@types/prettier": "^1.19.0",
     "@types/webpack": "^4.41.0",

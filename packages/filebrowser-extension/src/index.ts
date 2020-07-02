@@ -255,7 +255,9 @@ async function activateFactory(
     const launcher = new ToolbarButton({
       icon: addIcon,
       onClick: () => {
-        return Private.createLauncher(commands, widget);
+        if (commands.hasCommand('launcher:create')) {
+          return Private.createLauncher(commands, widget);
+        }
       },
       tooltip: 'New Launcher'
     });
@@ -341,7 +343,7 @@ function activateBrowser(
   void Promise.all([app.restored, browser.model.restored]).then(() => {
     function maybeCreate() {
       // Create a launcher if there are no open items.
-      if (labShell.isEmpty('main')) {
+      if (labShell.isEmpty('main') && commands.hasCommand('launcher:create')) {
         void Private.createLauncher(commands, browser);
       }
     }

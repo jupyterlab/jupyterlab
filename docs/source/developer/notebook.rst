@@ -172,7 +172,7 @@ Copy the following to ``src/index.ts``:
 .. code:: typescript
 
     import {
-      IDisposable, DisposableDelegate
+      IDisposable, 
     } from '@lumino/disposable';
 
     import {
