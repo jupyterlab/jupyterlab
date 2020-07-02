@@ -101,6 +101,11 @@ export namespace Contents {
      * The size of then file in bytes.
      */
     readonly size?: number;
+
+    /**
+     * The indices of the matched characters in the name.
+     */
+    indices?: ReadonlyArray<number> | null;
   }
 
   /**

@@ -32,6 +32,7 @@ import {
 import {
   ArrayExt,
   ArrayIterator,
+  StringExt,
   each,
   filter,
   find,
@@ -51,6 +52,8 @@ import { Message, MessageLoop } from '@lumino/messaging';
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { Widget } from '@lumino/widgets';
+
+import { VirtualDOM, h } from '@lumino/virtualdom';
 
 import { FilterFileBrowserModel } from './model';
 
@@ -1886,8 +1889,10 @@ export namespace DirListing {
         node.removeAttribute('data-is-dot');
       }
       // If an item is being edited currently, its text node is unavailable.
-      if (text && text.textContent !== model.name) {
-        text.textContent = model.name;
+      if (text) {
+        const indices = !model.indices ? [] : model.indices;
+        let highlightedName = StringExt.highlight(model.name, indices, h.mark);
+        VirtualDOM.render(h.div(highlightedName), text);
       }
 
       let modText = '';
