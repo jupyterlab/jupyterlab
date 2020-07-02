@@ -10,20 +10,6 @@
 @import './sidebar.css';
 @import './sources.css';
 
-/* font awesome */
-
-.fa {
-  display: inline-block;
-  font: normal normal normal 14px/1 FontAwesome;
-  font-size: inherit;
-  text-rendering: auto;
-  -webkit-font-smoothing: antialiased;
-}
-
-.fa-caret-down:before {
-  content: '\F0D7';
-}
-
 .jp-Document .jp-Toolbar {
   justify-content: flex-end;
 }
