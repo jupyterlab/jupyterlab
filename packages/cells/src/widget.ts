@@ -550,7 +550,17 @@ export class Cell extends Widget {
     const inputWrapper = this._inputWrapper as Panel;
     let tagBar = new TagIndicator(name);
     tagBar.node.style.background = Cell.getTagColor(name);
-    inputWrapper.addWidget(tagBar);
+    let pos = inputWrapper.widgets.length;
+    for (let i = 0; i < inputWrapper.widgets.length; i++) {
+      let widget = inputWrapper.widgets[i];
+      if (widget && widget instanceof TagIndicator) {
+        if (widget.name.localeCompare(name) >= 0) {
+          pos = i;
+          break;
+        }
+      }
+    }
+    inputWrapper.insertWidget(pos, tagBar);
   }
 
   removeTagIndicator(name: string) {
