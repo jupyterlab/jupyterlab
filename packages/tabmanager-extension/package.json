@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/tabmanager-extension",
-  "version": "2.2.0-beta.0",
+  "version": "2.2.0-rc.0",
   "description": "JupyterLab - Tab Manager Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,8 +35,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.2.0-beta.0",
-    "@jupyterlab/ui-components": "^2.2.0-beta.0",
+    "@jupyterlab/application": "^2.2.0-rc.0",
+    "@jupyterlab/ui-components": "^2.2.0-rc.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/widgets": "^1.11.1"
   },
