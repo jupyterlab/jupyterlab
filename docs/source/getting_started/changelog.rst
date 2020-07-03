@@ -16,38 +16,71 @@ milestone on GitHub for the full list of pull requests and issues closed.
 
 July 2020
 ^^^^^^^^^^
-* Add eric charles to core team (`#8513 <https://github.com/jupyterlab/jupyterlab/pull/8513>`__)
 
+We are very excited to add Eric Charles to the core team this month! (`#8513 <https://github.com/jupyterlab/jupyterlab/pull/8513>`__)
 
 
 User-facing changes
 ^^^^^^^^^^^^^^^^^^^
 
-* Slow terminating kernels (`#8562 <https://github.com/jupyterlab/jupyterlab/pull/8562>`__, `#8477 <https://github.com/jupyterlab/jupyterlab/issues/8477>`__)
-* Dim dot files in filebrowser (`#8393 <https://github.com/jupyterlab/jupyterlab/pull/8393>`__)
-* Enable horizontal scrolling for toolbars (`#8417 <https://github.com/jupyterlab/jupyterlab/pull/8417>`__)
-* File editor right-click (`#8425 <https://github.com/jupyterlab/jupyterlab/pull/8425>`__)
+* Cells can no longer be executed while kernels are terminating or restarting. There is a new status for these events on the Kernel Indicator (`#8562 <https://github.com/jupyterlab/jupyterlab/pull/8562>`__, `#8477 <https://github.com/jupyterlab/jupyterlab/issues/8477>`__)
+
+.. image:: https://user-images.githubusercontent.com/226720/84566070-966daf80-ad6e-11ea-815b-5f48136b524b.gif
+   :align: center
+   :class: jp-screenshot
+
+* Adds a visual clue for distinguishing hidden files and folders in the file browser window (`#8393 <https://github.com/jupyterlab/jupyterlab/pull/8393>`__)
+
+.. image:: https://user-images.githubusercontent.com/13181907/81358007-3b77d700-90a3-11ea-885c-31628c55744b.png
+   :align: center
+   :class: jp-screenshot
+
+* Enable horizontal scrolling for toolbars to improve mobile experience (`#8417 <https://github.com/jupyterlab/jupyterlab/pull/8417>`__)
+
+.. image:: https://user-images.githubusercontent.com/591645/81733090-bb31e700-9491-11ea-96ab-a4b1695b8e3c.gif
+   :align: center
+   :class: jp-screenshot
+
+
+* Improves the right-click context menu for the file editor (`#8425 <https://github.com/jupyterlab/jupyterlab/pull/8425>`__)
+
+.. image:: https://user-images.githubusercontent.com/25207344/84947222-d8bd2680-b0b7-11ea-98da-e4907f9131ba.png
+   :align: center
+   :class: jp-screenshot
+
+
 * Merge cell attachments when merging cells (`#8427 <https://github.com/jupyterlab/jupyterlab/pull/8427>`__, `#8414 <https://github.com/jupyterlab/jupyterlab/issues/8414>`__)
-* Change default return (`#8430 <https://github.com/jupyterlab/jupyterlab/pull/8430>`__)
-* Adding memory usage warning with nbresuse (`#8437 <https://github.com/jupyterlab/jupyterlab/pull/8437>`__)
-* Mnt: python 3.10 compatibility (`#8445 <https://github.com/jupyterlab/jupyterlab/pull/8445>`__)
-* Updated the installation documentation on read the docs to match the readme file on the repo (`#8386 <https://github.com/jupyterlab/jupyterlab/pull/8386>`__)
-* Handle quit_button when launched as an extension (`#8486 <https://github.com/jupyterlab/jupyterlab/pull/8486>`__, `#8483 <https://github.com/jupyterlab/jupyterlab/issues/8483>`__)
-* Add text-based image viewer for svg, fix token doc (`#8495 <https://github.com/jupyterlab/jupyterlab/pull/8495>`__, `#8494 <https://github.com/jupyterlab/jupyterlab/issues/8494>`__)
+
+.. image:: https://user-images.githubusercontent.com/591645/82072833-97acad80-96d8-11ea-957c-ce006731219b.gif
+   :align: center
+   :class: jp-screenshot
+
+* Add styling for high memory usage warning in status bar with nbresuse (`#8437 <https://github.com/jupyterlab/jupyterlab/pull/8437>`__)
+
+.. image:: https://user-images.githubusercontent.com/7725109/82213619-1b150b80-9932-11ea-9a53-570bd82d3d2a.png
+   :align: center
+   :class: jp-screenshot
+
+
+* Adds support for Python version 3.10 (`#8445 <https://github.com/jupyterlab/jupyterlab/pull/8445>`__)
+* Support live editing of SVG with updating rendering (`#8495 <https://github.com/jupyterlab/jupyterlab/pull/8495>`__, `#8494 <https://github.com/jupyterlab/jupyterlab/issues/8494>`__)
+
+.. image:: https://user-images.githubusercontent.com/45380/83218329-c8123400-a13b-11ea-9137-6b91a29dbc08.png
+   :align: center
+   :class: jp-screenshot
+
+
 
 For developers
 ^^^^^^^^^^^^^^
-
-
-* Add worker-loader (`#8593 <https://github.com/jupyterlab/jupyterlab/pull/8593>`__, `#8587 <https://github.com/jupyterlab/jupyterlab/issues/8587>`__)
-* Update documentation of whitelist/blacklist (`#8540 <https://github.com/jupyterlab/jupyterlab/pull/8540>`__)
-* Improve whitelist figure description in documentation (`#8517 <https://github.com/jupyterlab/jupyterlab/pull/8517>`__)
+* Specify that we recommend typescript over javascript for extensions (`#8411 <https://github.com/jupyterlab/jupyterlab/pull/8411>`__)
 * Lazy load codemirror theme stylesheets. (`#8506 <https://github.com/jupyterlab/jupyterlab/pull/8506>`__)
 * Increase the link expiry to one week (`#8402 <https://github.com/jupyterlab/jupyterlab/pull/8402>`__)
-* Specify that we recomend typescript over js for extensions (`#8411 <https://github.com/jupyterlab/jupyterlab/pull/8411>`__)
 * Add documentation on private npm registry usage (`#8455 <https://github.com/jupyterlab/jupyterlab/pull/8455>`__, `#7827 <https://github.com/jupyterlab/jupyterlab/issues/7827>`__, `#7660 <https://github.com/jupyterlab/jupyterlab/issues/7660>`__)
 * Add feature request template + slight reorg in readme (`#8467 <https://github.com/jupyterlab/jupyterlab/pull/8467>`__)
 * Add link to react example in extension-examples repo (`#8474 <https://github.com/jupyterlab/jupyterlab/pull/8474>`__)
+* Update documentation of whitelist/blacklist (`#8540 <https://github.com/jupyterlab/jupyterlab/pull/8540>`__)
+* Improve whitelist figure description in documentation (`#8517 <https://github.com/jupyterlab/jupyterlab/pull/8517>`__)
 
 Bugfixes
 ^^^^^^^^
@@ -66,6 +99,10 @@ Bugfixes
 * Add chokidar to dev_mode/package.json (`#8481 <https://github.com/jupyterlab/jupyterlab/pull/8481>`__)
 * Fix autolink (`#8496 <https://github.com/jupyterlab/jupyterlab/pull/8496>`__)
 * Update phosphor aliases (`#8498 <https://github.com/jupyterlab/jupyterlab/pull/8498>`__)
+* Fix default return in Python when extension has no version metadata (`#8430 <https://github.com/jupyterlab/jupyterlab/pull/8430>`__)
+* Updated the installation documentation on read the docs to match the readme file on the repo (`#8386 <https://github.com/jupyterlab/jupyterlab/pull/8386>`__)
+* Handle quit_button when launched as an extension (`#8486 <https://github.com/jupyterlab/jupyterlab/pull/8486>`__, `#8483 <https://github.com/jupyterlab/jupyterlab/issues/8483>`__)
+* Add worker-loader (`#8593 <https://github.com/jupyterlab/jupyterlab/pull/8593>`__, `#8587 <https://github.com/jupyterlab/jupyterlab/issues/8587>`__)
 
 `v2.1.x <https://github.com/jupyterlab/jupyterlab/milestone/55>`__
 ------------------------------------------------------------------
