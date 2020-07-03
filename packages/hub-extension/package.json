@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/hub-extension",
-  "version": "2.2.0-alpha.2",
+  "version": "2.2.0-beta.0",
   "description": "JupyterLab integration for JupyterHub",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,11 +33,11 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.2.0-alpha.2",
-    "@jupyterlab/apputils": "^2.2.0-alpha.2",
-    "@jupyterlab/coreutils": "^4.2.0-alpha.2",
-    "@jupyterlab/mainmenu": "^2.2.0-alpha.2",
-    "@jupyterlab/services": "^5.2.0-alpha.2"
+    "@jupyterlab/application": "^2.2.0-beta.0",
+    "@jupyterlab/apputils": "^2.2.0-beta.0",
+    "@jupyterlab/coreutils": "^4.2.0-beta.0",
+    "@jupyterlab/mainmenu": "^2.2.0-beta.0",
+    "@jupyterlab/services": "^5.2.0-beta.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
