@@ -164,6 +164,15 @@ const RENDER_TIMEOUT = 1000;
  */
 const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 
+/**
+ * The palette of colors a tag can be assigned.
+ */
+const TAG_INDICATOR_COLORS = [
+  'var(--jp-inverse-layout-color1)',
+  'var(--jp-brand-color0)',
+  'var(--jp-accent-color0)'
+];
+
 /** ****************************************************************************
  * Cell
  ******************************************************************************/
@@ -528,10 +537,19 @@ export class Cell extends Widget {
     }
   }
 
+  getTagColor(name: string) {
+    let asciiValue = 0;
+    for (let i = 0; i < name.length; i++) {
+      asciiValue += name.charCodeAt(i);
+    }
+    let choice = asciiValue % TAG_INDICATOR_COLORS.length;
+    return TAG_INDICATOR_COLORS[choice];
+  }
+
   addTagIndicator(name: string) {
     const inputWrapper = this._inputWrapper as Panel;
     let tagBar = new TagIndicator(name);
-    tagBar.node.style.background = 'red';
+    tagBar.node.style.background = this.getTagColor(name);
     inputWrapper.addWidget(tagBar);
   }
 
