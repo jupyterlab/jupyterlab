@@ -528,38 +528,22 @@ export class Cell extends Widget {
     }
   }
 
-  /**
-   * Update colored bars showing tags next to each cell.
-   */
-  updateTagIndicators() {
+  addTagIndicator(name: string) {
     const inputWrapper = this._inputWrapper as Panel;
-    const n_widgets = inputWrapper.widgets.length;
-    for (let i = 0; i < n_widgets - 2; i++) {
-      let widget = inputWrapper.widgets[
-        inputWrapper.widgets.length - 1
-      ] as Widget;
-      widget.hide();
-      widget.dispose();
-    }
+    let tagBar = new TagIndicator(name);
+    tagBar.node.style.background = 'red';
+    inputWrapper.addWidget(tagBar);
+  }
 
-    let tags = this.model.metadata.get('tags') as string[];
-    if (tags) {
-      tags.sort((a, b) => a.localeCompare(b));
-      for (let i = 0; i < tags.length; i++) {
-        let tag = tags[i].split(';') as string[];
-        if (tag.length == 2) {
-          let tagBar = new TagIndicator();
-          tagBar.node.style.background = tag[1];
-          if (i == 0) {
-            tagBar.node.style.marginLeft = '10px';
-          }
-          inputWrapper.addWidget(tagBar);
-        }
+  removeTagIndicator(name: string) {
+    const inputWrapper = this._inputWrapper as Panel;
+    for (let i = 0; i < inputWrapper.widgets.length; i++) {
+      let widget = inputWrapper.widgets[i];
+      if (widget instanceof TagIndicator && widget.name == name) {
+        widget.dispose();
+        return;
       }
-    } else {
-      this.node.style.backgroundColor = '';
     }
-    return;
   }
 
   private _readOnly = false;
@@ -753,7 +737,13 @@ export class CodeCell extends Cell {
       this.outputHidden = !this.outputHidden;
     });
     model.stateChanged.connect(this.onStateChanged, this);
-    this.updateTagIndicators();
+
+    let tags = this.model.metadata.get('tags') as string[];
+    if (tags) {
+      for (let i = 0; i < tags.length; i++) {
+        this.addTagIndicator(tags[i]);
+      }
+    }
   }
 
   /**

@@ -86,7 +86,7 @@
 /* tagbar indicator always shown*/
 .jp-Notebook .jp-TagIndicator {
   background: var(--jp-brand-color1);
-  margin-right: 5px;
+  margin-left: 5px;
 }
 
 /* cell is active */

@@ -73,14 +73,16 @@ export abstract class Collapser extends ReactWidget {
 }
 
 export class TagIndicator extends Collapser {
-  constructor() {
+  constructor(name: string) {
     super();
     //this.removeClass(COLLAPSER_CLASS);
     this.addClass(TAG_INDICATOR_CLASS);
+    this.name = name;
   }
   protected handleClick(e: React.MouseEvent<HTMLDivElement>) {
     return;
   }
+  public name: string;
 }
 
 /**
