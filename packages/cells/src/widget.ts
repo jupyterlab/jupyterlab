@@ -537,7 +537,7 @@ export class Cell extends Widget {
     }
   }
 
-  getTagColor(name: string) {
+  static getTagColor(name: string) {
     let asciiValue = 0;
     for (let i = 0; i < name.length; i++) {
       asciiValue += name.charCodeAt(i);
@@ -549,7 +549,7 @@ export class Cell extends Widget {
   addTagIndicator(name: string) {
     const inputWrapper = this._inputWrapper as Panel;
     let tagBar = new TagIndicator(name);
-    tagBar.node.style.background = this.getTagColor(name);
+    tagBar.node.style.background = Cell.getTagColor(name);
     inputWrapper.addWidget(tagBar);
   }
 
