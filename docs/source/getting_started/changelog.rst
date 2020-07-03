@@ -3,6 +3,70 @@
 JupyterLab Changelog
 ====================
 
+
+`v2.2.x <https://github.com/jupyterlab/jupyterlab/milestone/53>`__
+------------------------------------------------------------------
+
+`v2.2.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v2.2.0>`__
+---------------------------------------------------------------------------
+
+See the `JupyterLab
+2.2 <https://github.com/jupyterlab/jupyterlab/milestone/53?closed=1>`__
+milestone on GitHub for the full list of pull requests and issues closed.
+
+July 2020
+^^^^^^^^^^
+* Add eric charles to core team (`#8513 <https://github.com/jupyterlab/jupyterlab/pull/8513>`__)
+
+
+
+User-facing changes
+^^^^^^^^^^^^^^^^^^^
+
+* Slow terminating kernels (`#8562 <https://github.com/jupyterlab/jupyterlab/pull/8562>`__, `#8477 <https://github.com/jupyterlab/jupyterlab/issues/8477>`__)
+* Dim dot files in filebrowser (`#8393 <https://github.com/jupyterlab/jupyterlab/pull/8393>`__)
+* Enable horizontal scrolling for toolbars (`#8417 <https://github.com/jupyterlab/jupyterlab/pull/8417>`__)
+* File editor right-click (`#8425 <https://github.com/jupyterlab/jupyterlab/pull/8425>`__)
+* Merge cell attachments when merging cells (`#8427 <https://github.com/jupyterlab/jupyterlab/pull/8427>`__, `#8414 <https://github.com/jupyterlab/jupyterlab/issues/8414>`__)
+* Change default return (`#8430 <https://github.com/jupyterlab/jupyterlab/pull/8430>`__)
+* Adding memory usage warning with nbresuse (`#8437 <https://github.com/jupyterlab/jupyterlab/pull/8437>`__)
+* Mnt: python 3.10 compatibility (`#8445 <https://github.com/jupyterlab/jupyterlab/pull/8445>`__)
+* Updated the installation documentation on read the docs to match the readme file on the repo (`#8386 <https://github.com/jupyterlab/jupyterlab/pull/8386>`__)
+* Handle quit_button when launched as an extension (`#8486 <https://github.com/jupyterlab/jupyterlab/pull/8486>`__, `#8483 <https://github.com/jupyterlab/jupyterlab/issues/8483>`__)
+* Add text-based image viewer for svg, fix token doc (`#8495 <https://github.com/jupyterlab/jupyterlab/pull/8495>`__, `#8494 <https://github.com/jupyterlab/jupyterlab/issues/8494>`__)
+
+For developers
+^^^^^^^^^^^^^^
+
+
+* Add worker-loader (`#8593 <https://github.com/jupyterlab/jupyterlab/pull/8593>`__, `#8587 <https://github.com/jupyterlab/jupyterlab/issues/8587>`__)
+* Update documentation of whitelist/blacklist (`#8540 <https://github.com/jupyterlab/jupyterlab/pull/8540>`__)
+* Improve whitelist figure description in documentation (`#8517 <https://github.com/jupyterlab/jupyterlab/pull/8517>`__)
+* Lazy load codemirror theme stylesheets. (`#8506 <https://github.com/jupyterlab/jupyterlab/pull/8506>`__)
+* Increase the link expiry to one week (`#8402 <https://github.com/jupyterlab/jupyterlab/pull/8402>`__)
+* Specify that we recomend typescript over js for extensions (`#8411 <https://github.com/jupyterlab/jupyterlab/pull/8411>`__)
+* Add documentation on private npm registry usage (`#8455 <https://github.com/jupyterlab/jupyterlab/pull/8455>`__, `#7827 <https://github.com/jupyterlab/jupyterlab/issues/7827>`__, `#7660 <https://github.com/jupyterlab/jupyterlab/issues/7660>`__)
+* Add feature request template + slight reorg in readme (`#8467 <https://github.com/jupyterlab/jupyterlab/pull/8467>`__)
+* Add link to react example in extension-examples repo (`#8474 <https://github.com/jupyterlab/jupyterlab/pull/8474>`__)
+
+Bugfixes
+^^^^^^^^
+* Typo: fix extensino to extension (`#8512 <https://github.com/jupyterlab/jupyterlab/pull/8512>`__)
+* Close correct tab with close tab (`#8529 <https://github.com/jupyterlab/jupyterlab/pull/8529>`__)
+* Remove unused css rules (`#8547 <https://github.com/jupyterlab/jupyterlab/pull/8547>`__, `#8537 <https://github.com/jupyterlab/jupyterlab/issues/8537>`__)
+* ✏ fix small typo in getting started docs, proxy (`#8549 <https://github.com/jupyterlab/jupyterlab/pull/8549>`__)
+* Ci badges link to tests not svg (`#8603 <https://github.com/jupyterlab/jupyterlab/pull/8603>`__)
+* Simplified multicursor backspace code (`#8523 <https://github.com/jupyterlab/jupyterlab/pull/8523>`__)
+* Fix recent breaking changes to normalizepath in filebrowser (`#8383 <https://github.com/jupyterlab/jupyterlab/pull/8383>`__, `#8382 <https://github.com/jupyterlab/jupyterlab/issues/8382>`__)
+* Fix watch mode and add ci test (`#8394 <https://github.com/jupyterlab/jupyterlab/pull/8394>`__)
+* Address ci failures (`#8433 <https://github.com/jupyterlab/jupyterlab/pull/8433>`__)
+* Fix lint errors in dependency graph script (`#8451 <https://github.com/jupyterlab/jupyterlab/pull/8451>`__)
+* Fix lint complaints coming up from github actions (`#8452 <https://github.com/jupyterlab/jupyterlab/pull/8452>`__)
+* Address ci usage test timeout (`#8464 <https://github.com/jupyterlab/jupyterlab/pull/8464>`__)
+* Add chokidar to dev_mode/package.json (`#8481 <https://github.com/jupyterlab/jupyterlab/pull/8481>`__)
+* Fix autolink (`#8496 <https://github.com/jupyterlab/jupyterlab/pull/8496>`__)
+* Update phosphor aliases (`#8498 <https://github.com/jupyterlab/jupyterlab/pull/8498>`__)
+
 `v2.1.x <https://github.com/jupyterlab/jupyterlab/milestone/55>`__
 ------------------------------------------------------------------
 
