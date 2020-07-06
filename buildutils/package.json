@@ -56,7 +56,7 @@
     "semver": "^6.3.0",
     "sort-package-json": "~1.31.0",
     "typescript": "~3.9.2",
-    "webpack": "5.0.0-beta.18",
+    "webpack": "5.0.0-beta.21",
     "which": "^2.0.2"
   },
   "devDependencies": {
