@@ -126,7 +126,7 @@ if [[ $GROUP == integrity2 ]]; then
 fi
 
 
-if [[ $GROUP == usage ]]; then
+if [[ $GROUP == examples ]]; then
     # Build the examples.
     jlpm run build:packages
     jlpm run build:examples
@@ -134,6 +134,7 @@ if [[ $GROUP == usage ]]; then
     # Test the examples
     jlpm run test:examples
 
+if [[ $GROUP == usage ]]; then
     # Test the cli apps.
     jupyter lab clean --debug
     jupyter lab build --debug

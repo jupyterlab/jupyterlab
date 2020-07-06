@@ -1,3 +1,5 @@
+const webpack = require('webpack');
+
 module.exports = {
   entry: ['whatwg-fetch', './build/index.js'],
   output: {
@@ -36,5 +38,11 @@ module.exports = {
         use: [{ loader: 'url-loader', options: { limit: 10000 } }]
       }
     ]
-  }
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': '{}',
+      process: {}
+    })
+  ]
 };

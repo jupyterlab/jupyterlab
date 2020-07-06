@@ -162,7 +162,11 @@ const plugins = [
   // custom plugin for ignoring files during a `--watch` build
   new WPPlugin.FilterWatchIgnorePlugin(ignored),
   // custom plugin that copies the assets to the static directory
-  new WPPlugin.FrontEndPlugin(buildDir, jlab.staticDir)
+  new WPPlugin.FrontEndPlugin(buildDir, jlab.staticDir),
+  new webpack.DefinePlugin({
+    'process.env': '{}',
+    process: {}
+  })
 ];
 
 if (process.argv.includes('--analyze')) {
