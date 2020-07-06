@@ -4,6 +4,7 @@
     "packages": [
       "dev_mode",
       "examples/*",
+      "examples/federated/*",
       "packages/*",
       "packages/services/examples/node",
       "packages/services/examples/browser",

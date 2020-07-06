@@ -9,11 +9,11 @@
     "watch": "npm run clean && webpack --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.1.0",
-    "@jupyterlab/markdownviewer-extension": "^2.1.0"
+    "@jupyterlab/application": "^3.0.0-alpha.0",
+    "@jupyterlab/markdownviewer-extension": "^3.0.0-alpha.0"
   },
   "devDependencies": {
-    "@jupyterlab/buildutils": "^2.1.0",
+    "@jupyterlab/buildutils": "^3.0.0-alpha.0",
     "copy-webpack-plugin": "^6.0.1",
     "css-loader": "~3.2.0",
     "file-loader": "~5.0.2",

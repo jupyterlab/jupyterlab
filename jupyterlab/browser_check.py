@@ -12,6 +12,7 @@ from os import path as osp
 import os
 import shutil
 import sys
+import time
 
 from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
@@ -128,7 +129,7 @@ async def run_test_async(app, func):
         app.io_loop.stop()
         env_patch.stop()
     except Exception as e:
-        self.log.error(str(e))
+        app.log.error(str(e))
         result = 1
     finally:
         time.sleep(2)

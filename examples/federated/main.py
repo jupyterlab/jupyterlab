@@ -17,7 +17,7 @@ os.environ["JUPYTER_NO_CONFIG"]="1"
 with open(os.path.join(HERE, 'package.json')) as fid:
     version = json.load(fid)['version']
 
-class ExampleFederatedApp(LabServerApp):
+class ExampleApp(LabServerApp):
     base_url = '/foo'
     default_url = Unicode('/example',
                           help='The default URL to redirect to from `/`')
@@ -35,11 +35,8 @@ class ExampleFederatedApp(LabServerApp):
         workspaces_dir = os.path.join(HERE, 'core_package', 'build', 'workspaces'),
     )
 
-    def start(self):
-        settings = self.web_app.settings
-
-        # By default, make terminals available.
-        settings.setdefault('terminals_available', True)
+    def init_webapp(self):
+        super().init_webapp()
 
         # Handle md ext assets
         web_app = self.web_app
@@ -50,7 +47,13 @@ class ExampleFederatedApp(LabServerApp):
             'path': static_dir,
         })])
 
+    def start(self):
+        settings = self.web_app.settings
+
+        # By default, make terminals available.
+        settings.setdefault('terminals_available', True)
+
         super().start()
 
 if __name__ == '__main__':
-    ExampleFederatedApp.launch_instance()
+    ExampleApp.launch_instance()
