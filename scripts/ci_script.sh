@@ -133,6 +133,8 @@ if [[ $GROUP == examples ]]; then
 
     # Test the examples
     jlpm run test:examples
+fi
+
 
 if [[ $GROUP == usage ]]; then
     # Test the cli apps.
