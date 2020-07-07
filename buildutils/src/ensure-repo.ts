@@ -29,7 +29,8 @@ const MISSING: Dict<string[]> = {
 };
 
 const UNUSED: Dict<string[]> = {
-  '@jupyterlab/apputils': ['@types/react'],
+  // url is a polyfill for sanitize-html
+  '@jupyterlab/apputils': ['@types/react', 'url'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/services': ['node-fetch', 'ws'],

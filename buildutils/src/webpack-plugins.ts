@@ -84,6 +84,9 @@ export namespace WPPlugin {
       callback: any,
       callbackUndelayed: any
     ) {
+      files = Array.from(files);
+      dirs = Array.from(dirs);
+
       const notIgnored = (path: string) => !this.ignored(path);
 
       const ignoredFiles = files.filter(this.ignored);
