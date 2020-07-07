@@ -232,7 +232,11 @@ export class DebuggerService implements IDebugger, IDisposable {
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     const kernelName = this.session.connection.kernel.name;
 
-    this._debuggerConfiguration.setHashParameters(hashMethod, hashSeed);
+    this._debuggerConfiguration.setHashParameters(
+      hashMethod,
+      hashSeed,
+      kernelName
+    );
     this._debuggerConfiguration.setTmpFileParameters(
       tmpFilePrefix,
       tmpFileSuffix,

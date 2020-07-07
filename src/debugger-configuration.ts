@@ -46,14 +46,23 @@ export class DebuggerConfiguration implements IDebuggerConfig {
    *
    * @param method The hash method.
    * @param seed The seed for the hash method.
+   * @param kernelName Kernel name for algorithm selection
    */
-  public setHashParameters(method: string, seed: number): void {
-    if (method === 'Murmur2') {
-      this._hashMethod = (code: string): string => {
-        return murmur2(code, seed).toString();
-      };
+  public setHashParameters(
+    method: string,
+    seed: number,
+    kernelName: string
+  ): void {
+    if (kernelName === 'xpython') {
+      if (method === 'Murmur2') {
+        this._hashMethod = (code: string): string => {
+          return murmur2(code, seed).toString();
+        };
+      } else {
+        throw new Error('hash method not supported ' + method);
+      }
     } else {
-      throw new Error('hash method not supported ' + method);
+      throw new Error('Kernel not supported ' + kernelName);
     }
   }
 
@@ -83,7 +92,7 @@ export const IDebuggerConfig = new Token<IDebuggerConfig>(
  * Interface for configuration plugin
  */
 export interface IDebuggerConfig {
-  setHashParameters(method: string, seed: number): void;
+  setHashParameters(method: string, seed: number, kernelName: string): void;
   setTmpFileParameters(
     prefix: string,
     suffix: string,
