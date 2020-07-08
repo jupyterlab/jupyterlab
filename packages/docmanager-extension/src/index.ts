@@ -62,6 +62,8 @@ namespace CommandIDs {
 
   export const rename = 'docmanager:rename';
 
+  export const del = 'docmanager:delete';
+
   export const restoreCheckpoint = 'docmanager:restore-checkpoint';
 
   export const save = 'docmanager:save';
@@ -759,6 +761,34 @@ function addLabCommands(
     }
   });
 
+  commands.addCommand(CommandIDs.del, {
+    label: () => `Delete ${fileType(contextMenuWidget(), docManager)}`,
+    isEnabled,
+    execute: async () => {
+      // Implies contextMenuWidget() !== null
+      if (isEnabled()) {
+        const context = docManager.contextForWidget(contextMenuWidget()!);
+        if (!context) {
+          return;
+        }
+        const result = await showDialog({
+          title: 'Delete',
+          body: `Are you sure you want to delete ${context.path}?`,
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.warnButton({ label: 'Delete' })
+          ]
+        });
+
+        if (result.button.accept) {
+          await app.commands.execute('docmanager:delete-file', {
+            path: context.path
+          });
+        }
+      }
+    }
+  });
+
   commands.addCommand(CommandIDs.showInFileBrowser, {
     label: () => `Show in File Browser`,
     isEnabled,
@@ -781,14 +811,19 @@ function addLabCommands(
     rank: 1
   });
   app.contextMenu.addItem({
-    command: CommandIDs.clone,
+    command: CommandIDs.del,
     selector: '[data-type="document-title"]',
     rank: 2
   });
   app.contextMenu.addItem({
-    command: CommandIDs.showInFileBrowser,
+    command: CommandIDs.clone,
     selector: '[data-type="document-title"]',
     rank: 3
+  });
+  app.contextMenu.addItem({
+    command: CommandIDs.showInFileBrowser,
+    selector: '[data-type="document-title"]',
+    rank: 4
   });
 }
 
