@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils",
-  "version": "3.0.0-alpha.2",
+  "version": "3.0.0-alpha.3",
   "description": "JupyterLab - Application Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,11 +40,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^5.0.0-alpha.2",
-    "@jupyterlab/services": "^6.0.0-alpha.2",
-    "@jupyterlab/settingregistry": "^3.0.0-alpha.2",
-    "@jupyterlab/statedb": "^3.0.0-alpha.2",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.2",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.3",
+    "@jupyterlab/services": "^6.0.0-alpha.3",
+    "@jupyterlab/settingregistry": "^3.0.0-alpha.3",
+    "@jupyterlab/statedb": "^3.0.0-alpha.3",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.3",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
     "@lumino/coreutils": "^1.4.3",
@@ -63,7 +63,7 @@
     "url": "^0.11.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-alpha.2",
+    "@jupyterlab/testutils": "^3.0.0-alpha.3",
     "@types/jest": "^24.0.23",
     "@types/react-dom": "~16.9.4",
     "@types/sanitize-html": "^1.23.3",
