@@ -80,6 +80,9 @@ if [[ $GROUP == integrity2 ]]; then
     # Build the packages individually.
     jlpm run build:src
 
+    # Make sure we can build for release
+    jlpm run build:dev:prod:release
+
     # Make sure the storybooks build.
     jlpm run build:storybook
 

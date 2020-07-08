@@ -2810,18 +2810,6 @@
   resolved "https://registry.yarnpkg.com/@types/dom4/-/dom4-2.0.1.tgz#506d5781b9bcab81bd9a878b198aec7dee2a6033"
   integrity sha512-kSkVAvWmMZiCYtvqjqQEwOmvKwcH+V4uiv3qPQ8pAh1Xl39xggGEo8gHUqV4waYGHezdFw0rKBR8Jt0CrQSDZA==
 
-"@types/domhandler@*":
-  version "2.4.1"
-  resolved "https://registry.yarnpkg.com/@types/domhandler/-/domhandler-2.4.1.tgz#7b3b347f7762180fbcb1ece1ce3dd0ebbb8c64cf"
-  integrity sha512-cfBw6q6tT5sa1gSPFSRKzF/xxYrrmeiut7E0TxNBObiLSBTuFEHibcfEe3waQPEDbqBsq+ql/TOniw65EyDFMA==
-
-"@types/domutils@*":
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/@types/domutils/-/domutils-1.7.2.tgz#89422e579c165994ad5c09ce90325da596cc105d"
-  integrity sha512-Nnwy1Ztwq42SSNSZSh9EXBJGrOZPR+PQ2sRT4VZy8hnsFXfCil7YlKO2hd2360HyrtFz2qwnKQ13ENrgXNxJbw==
-  dependencies:
-    "@types/domhandler" "*"
-
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/eslint-visitor-keys/-/eslint-visitor-keys-1.0.0.tgz#1ee30d79544ca84d68d4b3cdb0af4f205663dd2d"
@@ -2872,15 +2860,6 @@
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/@types/html-minifier-terser/-/html-minifier-terser-5.1.0.tgz#551a4589b6ee2cc9c1dff08056128aec29b94880"
   integrity sha512-iYCgjm1dGPRuo12+BStjd1HiVQqhlRhWDOQigNxn023HcjnhsiFz9pc6CzJj4HwDCSQca9bxTL4PxJDbkdm3PA==
-
-"@types/htmlparser2@*":
-  version "3.10.1"
-  resolved "https://registry.yarnpkg.com/@types/htmlparser2/-/htmlparser2-3.10.1.tgz#1e65ba81401d53f425c1e2ba5a3d05c90ab742c7"
-  integrity sha512-fCxmHS4ryCUCfV9+CJZY1UjkbR+6Al/EQdX5Jh03qBj9gdlPG5q+7uNoDgE/ZNXb3XNWSAQgqKIWnbRCbOyyWA==
-  dependencies:
-    "@types/domhandler" "*"
-    "@types/domutils" "*"
-    "@types/node" "*"
 
 "@types/inquirer@^6.5.0":
   version "6.5.0"
@@ -3059,12 +3038,12 @@
     "@types/prop-types" "*"
     csstype "^2.2.0"
 
-"@types/sanitize-html@^1.20.2":
-  version "1.20.2"
-  resolved "https://registry.yarnpkg.com/@types/sanitize-html/-/sanitize-html-1.20.2.tgz#59777f79f015321334e3a9f28882f58c0a0d42b8"
-  integrity sha512-SrefiiBebGIhxEFkpbbYOwO1S6+zQLWAC4s4tipchlHq1aO9bp0xiapM7Zm0ml20MF+3OePWYdksB1xtneKPxg==
+"@types/sanitize-html@^1.23.3":
+  version "1.23.3"
+  resolved "https://registry.yarnpkg.com/@types/sanitize-html/-/sanitize-html-1.23.3.tgz#26527783aba3bf195ad8a3c3e51bd3713526fc0d"
+  integrity sha512-Isg8N0ifKdDq6/kaNlIcWfapDXxxquMSk2XC5THsOICRyOIhQGds95XH75/PL/g9mExi4bL8otIqJM/Wo96WxA==
   dependencies:
-    "@types/htmlparser2" "*"
+    htmlparser2 "^4.1.0"
 
 "@types/semver@^6.2.0":
   version "6.2.0"
@@ -6508,7 +6487,7 @@ dom-helpers@^3.4.0:
   dependencies:
     "@babel/runtime" "^7.1.2"
 
-dom-serializer@0:
+dom-serializer@0, dom-serializer@^0.2.1:
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/dom-serializer/-/dom-serializer-0.2.2.tgz#1afb81f533717175d478655debc5e332d9f9bb51"
   integrity sha512-2/xPb3ORsQ42nHYiSunXkDjPLBaEj/xTwUO4B7XCZQTRk7EBtTOPaygh10YAAh2OI1Qrp6NWfpAhzswj0ydt9g==
@@ -6555,6 +6534,13 @@ domhandler@^2.3.0:
   dependencies:
     domelementtype "1"
 
+domhandler@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/domhandler/-/domhandler-3.0.0.tgz#51cd13efca31da95bbb0c5bee3a48300e333b3e9"
+  integrity sha512-eKLdI5v9m67kbXQbJSNn1zjh0SDzvzWVWtX+qEI3eMjZw8daH9k8rlj1FZY9memPwjiskQFbe7vHVVJIAqoEhw==
+  dependencies:
+    domelementtype "^2.0.1"
+
 domutils@1.5.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/domutils/-/domutils-1.5.1.tgz#dcd8488a26f563d61079e48c9f7b7e32373682cf"
@@ -6570,6 +6556,15 @@ domutils@^1.5.1, domutils@^1.7.0:
   dependencies:
     dom-serializer "0"
     domelementtype "1"
+
+domutils@^2.0.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/domutils/-/domutils-2.1.0.tgz#7ade3201af43703fde154952e3a868eb4b635f16"
+  integrity sha512-CD9M0Dm1iaHfQ1R/TI+z3/JWp/pgub0j4jIQKH89ARR4ATAV2nbaOQS5XxU9maJP5jHaPdDDQSEHuE2UmpUTKg==
+  dependencies:
+    dom-serializer "^0.2.1"
+    domelementtype "^2.0.1"
+    domhandler "^3.0.0"
 
 dot-prop@^3.0.0:
   version "3.0.0"
@@ -8498,6 +8493,16 @@ htmlparser2@^3.10.0, htmlparser2@^3.3.0:
     entities "^1.1.1"
     inherits "^2.0.1"
     readable-stream "^3.1.1"
+
+htmlparser2@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/htmlparser2/-/htmlparser2-4.1.0.tgz#9a4ef161f2e4625ebf7dfbe6c0a2f52d18a59e78"
+  integrity sha512-4zDq1a1zhE4gQso/c5LP1OtrhYTncXNSpvJYtWJBtXAETPlMfi3IFNjGuQbYLuVY4ZR0QMqRVvo4Pdy9KLyP8Q==
+  dependencies:
+    domelementtype "^2.0.1"
+    domhandler "^3.0.0"
+    domutils "^2.0.0"
+    entities "^2.0.0"
 
 http-cache-semantics@^3.8.1:
   version "3.8.1"

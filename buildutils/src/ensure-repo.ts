@@ -30,7 +30,7 @@ const MISSING: Dict<string[]> = {
 
 const UNUSED: Dict<string[]> = {
   // url is a polyfill for sanitize-html
-  '@jupyterlab/apputils': ['@types/react', 'url'],
+  '@jupyterlab/apputils': ['@types/react', 'htmlparser2', 'url'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
