@@ -42,7 +42,7 @@ const notice =
 
 [
   'index.js',
-  'webpack.config.js',
+  //'webpack.config.js',   # removing as part of https://github.com/jupyterlab/jupyterlab/issues/8655
   'webpack.prod.config.js',
   'webpack.prod.minimize.config.js',
   'webpack.prod.release.config.js',
