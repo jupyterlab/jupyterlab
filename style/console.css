@@ -1,7 +1,0 @@
-.jp-ConsolePanel::before {
-  content: none;
-}
-
-.jp-ConsolePanel .jp-Toolbar {
-  justify-content: flex-end;
-}
