@@ -29,8 +29,6 @@ junit.xml
 
 *.tsbuildinfo
 
-yarn.lock
-
 # xeus-python debug logs
 xpython_debug_logs
 xeus.log
