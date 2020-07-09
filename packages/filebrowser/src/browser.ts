@@ -105,6 +105,7 @@ export class FileBrowser extends Widget {
 
     this._filenameSearcher = FilenameSearcher({
       listing: this._listing,
+      useFuzzyFilter: this._useFuzzyFilter,
       placeholder: 'Filter files by name'
     });
 
@@ -302,6 +303,28 @@ export class FileBrowser extends Widget {
     this._navigateToCurrentDirectory = value;
   }
 
+  /**
+   * Whether to use fuzzy filtering on file names.
+   */
+  set useFuzzyFilter(value: boolean) {
+    this._useFuzzyFilter = value;
+
+    this._filenameSearcher = FilenameSearcher({
+      listing: this._listing,
+      useFuzzyFilter: this._useFuzzyFilter,
+      placeholder: 'Filter files by name'
+    });
+    this._filenameSearcher.addClass(FILTERBOX_CLASS);
+
+    this.layout.removeWidget(this._filenameSearcher);
+    this.layout.removeWidget(this._crumbs);
+    this.layout.removeWidget(this._listing);
+
+    this.layout.addWidget(this._filenameSearcher);
+    this.layout.addWidget(this._crumbs);
+    this.layout.addWidget(this._listing);
+  }
+
   // Override Widget.layout with a more specific PanelLayout type.
   layout: PanelLayout;
 
@@ -311,6 +334,7 @@ export class FileBrowser extends Widget {
   private _manager: IDocumentManager;
   private _directoryPending: boolean;
   private _navigateToCurrentDirectory: boolean;
+  private _useFuzzyFilter: boolean = true;
 }
 
 /**

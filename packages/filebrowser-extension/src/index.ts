@@ -354,6 +354,7 @@ function activateBrowser(
     });
 
     let navigateToCurrentDirectory: boolean = false;
+    let useFuzzyFilter: boolean = true;
 
     void settingRegistry
       .load('@jupyterlab/filebrowser-extension:browser')
@@ -367,6 +368,12 @@ function activateBrowser(
         navigateToCurrentDirectory = settings.get('navigateToCurrentDirectory')
           .composite as boolean;
         browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
+        settings.changed.connect(settings => {
+          useFuzzyFilter = settings.get('useFuzzyFilter').composite as boolean;
+          browser.useFuzzyFilter = useFuzzyFilter;
+        });
+        useFuzzyFilter = settings.get('useFuzzyFilter').composite as boolean;
+        browser.useFuzzyFilter = useFuzzyFilter;
       });
 
     // Whether to automatically navigate to a document's current directory

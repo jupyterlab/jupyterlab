@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { StringExt } from '@lumino/algorithm';
 
@@ -18,6 +18,7 @@ import { DirListing } from './listing';
  */
 export interface IFilterBoxProps {
   listing: DirListing;
+  useFuzzyFilter: boolean;
   placeholder?: string;
 }
 
@@ -97,6 +98,12 @@ function fuzzySearch(item: Contents.IModel, query: string): IScore | null {
 const FilterBox = (props: IFilterBoxProps) => {
   const [filter, setFilter] = useState('');
 
+  useEffect(() => {
+    props.listing.model.setFilter((item: Contents.IModel) => {
+      return true;
+    });
+  }, []);
+
   /**
    * Handler for search input changes.
    */
@@ -104,14 +111,24 @@ const FilterBox = (props: IFilterBoxProps) => {
     const target = e.target as HTMLInputElement;
     setFilter(target.value);
     props.listing.model.setFilter((item: Contents.IModel) => {
-      // Run the fuzzy search for the item and query.
-      let score = fuzzySearch(item, target.value);
-      // Ignore the item if it is not a match.
-      if (!score) {
+      if (props.useFuzzyFilter) {
+        // Run the fuzzy search for the item and query.
+        let score = fuzzySearch(item, target.value);
+        // Ignore the item if it is not a match.
+        if (!score) {
+          item.indices = [];
+          return false;
+        }
+        item.indices = score.indices;
+        return true;
+      }
+      const i = item.name.indexOf(target.value);
+      if (i === -1) {
         item.indices = [];
         return false;
       }
-      item.indices = score.indices;
+      const indices = [...Array(target.value.length).keys()].slice(i);
+      item.indices = indices;
       return true;
     });
   };
@@ -132,6 +149,10 @@ const FilterBox = (props: IFilterBoxProps) => {
  */
 export const FilenameSearcher = (props: IFilterBoxProps) => {
   return ReactWidget.create(
-    <FilterBox listing={props.listing} placeholder={props.placeholder} />
+    <FilterBox
+      listing={props.listing}
+      useFuzzyFilter={props.useFuzzyFilter}
+      placeholder={props.placeholder}
+    />
   );
 };
