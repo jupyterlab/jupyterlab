@@ -127,8 +127,7 @@ const FilterBox = (props: IFilterBoxProps) => {
         item.indices = [];
         return false;
       }
-      const indices = [...Array(target.value.length).keys()].slice(i);
-      item.indices = indices;
+      item.indices = [...Array(target.value.length).keys()].map(x => x + i);
       return true;
     });
   };
