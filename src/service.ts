@@ -231,17 +231,16 @@ export class DebuggerService implements IDebugger, IDisposable {
     const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     const kernelName = this.session.connection.kernel.name;
-
-    this._debuggerConfiguration.setHashParameters(
+    this._debuggerConfiguration.setHashParameters({
       hashMethod,
       hashSeed,
       kernelName
-    );
-    this._debuggerConfiguration.setTmpFileParameters(
+    });
+    this._debuggerConfiguration.setTmpFileParameters({
       tmpFilePrefix,
       tmpFileSuffix,
       kernelName
-    );
+    });
 
     this._model.stoppedThreads = stoppedThreads;
 
@@ -428,18 +427,19 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _filterBreakpoints(
     breakpoints: Map<string, IDebugger.IBreakpoint[]>
   ): Map<string, IDebugger.IBreakpoint[]> {
-    const path = this._session.connection.path;
+    const debugSessionPath = this._session.connection.path;
+    const kernelName = this.session.connection.kernel.name;
     let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
     for (let collection of breakpoints) {
       const [id, list] = collection;
       list.forEach(() => {
         each(
-          this._editorFinder.find(
-            path,
-            id,
-            false,
-            this.session.connection.kernel.name
-          ),
+          this._editorFinder.find({
+            debugSessionPath,
+            source: id,
+            focus: false,
+            kernelName
+          }),
           () => {
             if (list.length > 0) {
               bpMapForRestore.set(id, list);

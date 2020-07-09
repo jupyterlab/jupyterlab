@@ -8,7 +8,7 @@ import { Signal } from '@lumino/signaling';
 import { murmur2 } from 'murmurhash-js';
 
 /**
- * A class to hash code.
+ * A class that holds debugger configuration for a kernel.
  */
 export class DebuggerConfiguration implements IDebuggerConfig {
   /**
@@ -35,31 +35,26 @@ export class DebuggerConfiguration implements IDebuggerConfig {
    */
   public getCodeId(code: string, kernelName: string): string {
     return (
-      this._tmpFileAssociatedWithKernel.get(kernelName)[0] +
+      this._tmpFileAssociatedWithKernel.get(kernelName).tmpFilePrefix +
       this._hashMethod(code) +
-      this._tmpFileAssociatedWithKernel.get(kernelName)[1]
+      this._tmpFileAssociatedWithKernel.get(kernelName).tmpFileSuffix
     );
   }
 
   /**
    * Set the hash parameters for the current session.
    *
-   * @param method The hash method.
-   * @param seed The seed for the hash method.
-   * @param kernelName Kernel name for algorithm selection
+   * @param hashParams - Unified parameters for hash method
    */
-  public setHashParameters(
-    method: string,
-    seed: number,
-    kernelName: string
-  ): void {
+  public setHashParameters(hashParams: IHashParameters): void {
+    const { kernelName, hashMethod, hashSeed } = hashParams;
     if (kernelName === 'xpython') {
-      if (method === 'Murmur2') {
+      if (hashMethod === 'Murmur2') {
         this._hashMethod = (code: string): string => {
-          return murmur2(code, seed).toString();
+          return murmur2(code, hashSeed).toString();
         };
       } else {
-        throw new Error('hash method not supported ' + method);
+        throw new Error('hash method not supported ' + hashMethod);
       }
     } else {
       throw new Error('Kernel not supported ' + kernelName);
@@ -69,20 +64,64 @@ export class DebuggerConfiguration implements IDebuggerConfig {
   /**
    * Set the parameters used for the temporary files (e.g. cells).
    *
-   * @param prefix The prefix used for the temporary files.
-   * @param suffix The suffix used for the temporary files.
-   * @param kernelName The kernel name from current session.
+   * @param fileParams - Unified parameters for mapping
    */
-  public setTmpFileParameters(
-    prefix: string,
-    suffix: string,
-    kernelName: string
-  ): void {
-    this._tmpFileAssociatedWithKernel.set(kernelName, [prefix, suffix]);
+  public setTmpFileParameters(fileParams: ITmpFileParameters): void {
+    const { kernelName, tmpFilePrefix, tmpFileSuffix } = fileParams;
+    this._tmpFileAssociatedWithKernel.set(kernelName, {
+      tmpFilePrefix,
+      tmpFileSuffix
+    });
   }
 
   private _hashMethod: (code: string) => string;
-  private _tmpFileAssociatedWithKernel = new Map<string, [string, string]>();
+  private _tmpFileAssociatedWithKernel = new Map<string, IFileParameters>();
+}
+
+/**
+ * Interface with unified parameters of method for mapping temporary file.
+ *
+ */
+interface ITmpFileParameters extends IFileParameters {
+  /**
+   * Name of current kernel.
+   */
+  kernelName: string;
+}
+
+/**
+ * Interface with prefix and suffix for map.
+ */
+interface IFileParameters {
+  /**
+   * Prefix of temporary file.
+   */
+  tmpFilePrefix: string;
+
+  /**
+   * Suffix of temporary file.
+   */
+  tmpFileSuffix: string;
+}
+
+/**
+ * Interface with unified parameters of hashing method.
+ */
+interface IHashParameters {
+  /**
+   * Type of hash method.
+   */
+  hashMethod: string;
+
+  /**
+   * Hash seed
+   */
+  hashSeed: number;
+
+  /**
+   * Name of current kernel.
+   */
+  kernelName: string;
 }
 
 export const IDebuggerConfig = new Token<IDebuggerConfig>(
@@ -92,11 +131,7 @@ export const IDebuggerConfig = new Token<IDebuggerConfig>(
  * Interface for configuration plugin
  */
 export interface IDebuggerConfig {
-  setHashParameters(method: string, seed: number, kernelName: string): void;
-  setTmpFileParameters(
-    prefix: string,
-    suffix: string,
-    kernelName: string
-  ): void;
+  setHashParameters(hashParams: IHashParameters): void;
+  setTmpFileParameters(fileParams: ITmpFileParameters): void;
   getCodeId(code: string, kernelName: string): string;
 }

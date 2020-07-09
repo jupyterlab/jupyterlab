@@ -126,7 +126,12 @@ export class TrackerHandler implements IDisposable {
     const source = frame?.source.path ?? null;
     const kernelName = this._debuggerService.session.connection.kernel.name;
     each(
-      this._editorFinder.find(debugSessionPath, source, true, kernelName),
+      this._editorFinder.find({
+        debugSessionPath,
+        source,
+        focus: true,
+        kernelName
+      }),
       editor => {
         requestAnimationFrame(() => {
           EditorHandler.showCurrentLine(editor, frame.line);
@@ -151,12 +156,12 @@ export class TrackerHandler implements IDisposable {
     const debugSessionPath = this._debuggerService.session.connection.path;
     const { content, mimeType, path } = source;
     const kernelName = this._debuggerService.session.connection.kernel.name;
-    const results = this._editorFinder.find(
+    const results = this._editorFinder.find({
       debugSessionPath,
-      path,
-      false,
+      source: path,
+      focus: false,
       kernelName
-    );
+    });
     if (results.next()) {
       return;
     }

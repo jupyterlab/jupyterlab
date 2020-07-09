@@ -70,42 +70,28 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
    * by iterating through all the widgets in each of the notebook,
    * console, file editor, and read-only file editor trackers.
    *
-   * @param debugSessionPath The path for the current debug session.
-   * @param source The source to find.
-   * @param focus - Set to true to focus on the relevant cell. Default to false.
-   * @param kernelName The kernel name of current session.
+   * @param findParams - Unified parameters for a source matching
    */
-  find(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean,
-    kernelName: string
-  ): IIterator<CodeEditor.IEditor> {
+  find(findParams: IFindParameters): IIterator<CodeEditor.IEditor> {
     return chain(
-      this._findInNotebooks(debugSessionPath, source, focus, kernelName),
-      this._findInConsoles(debugSessionPath, source, focus, kernelName),
-      this._findInEditors(debugSessionPath, source, focus, kernelName),
-      this._findInReadOnlyEditors(debugSessionPath, source, focus, kernelName)
+      this._findInNotebooks(findParams),
+      this._findInConsoles(findParams),
+      this._findInEditors(findParams),
+      this._findInReadOnlyEditors(findParams)
     );
   }
 
   /**
    * Find the editor for a source matching the current debug session
    *
-   * @param debugSessionPath The path for the current debug session.
-   * @param source The source to find.
-   * @param focus - Set to true to focus on the relevant cell. Default to false.
-   * @param kernelName The kernel name from current session.
+   * @param findParams - Unified parameters for a source matching
    */
-  private _findInNotebooks(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean,
-    kernelName: string
-  ): CodeEditor.IEditor[] {
+  private _findInNotebooks(findParams: IFindParameters): CodeEditor.IEditor[] {
     if (!this._notebookTracker) {
       return [];
     }
+    const { debugSessionPath, source, focus, kernelName } = findParams;
+
     const editors: CodeEditor.IEditor[] = [];
     this._notebookTracker.forEach(notebookPanel => {
       const sessionContext = notebookPanel.sessionContext;
@@ -142,20 +128,14 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   /**
    * Find the editor for a source matching the current debug session
    *
-   * @param debugSessionPath The path for the current debug session.
-   * @param source The source to find.
-   * @param focus - Set to true to focus on the relevant cell. Default to false.
-   * @param kernelName The kernel name from current session.
+   * @param findParams - Unified parameters for a source matching
    */
-  private _findInConsoles(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean,
-    kernelName: string
-  ): CodeEditor.IEditor[] {
+  private _findInConsoles(findParams: IFindParameters): CodeEditor.IEditor[] {
     if (!this._consoleTracker) {
       return [];
     }
+    const { debugSessionPath, source, focus, kernelName } = findParams;
+
     const editors: CodeEditor.IEditor[] = [];
     this._consoleTracker.forEach(consoleWidget => {
       const sessionContext = consoleWidget.sessionContext;
@@ -184,20 +164,14 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
    * Find the editor for a source matching the current debug session
    * from the editor tracker.
    *
-   * @param debugSessionPath The path for the current debug session.
-   * @param source The source to find.
-   * @param focus - Set to true to focus on the relevant cell. Default to false.
-   * @param kernelName The kernel name from current session.
+   * @param findParams - Unified parameters for a source matching
    */
-  private _findInEditors(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean,
-    kernelName: string
-  ): CodeEditor.IEditor[] {
+  private _findInEditors(findParams: IFindParameters): CodeEditor.IEditor[] {
     if (!this._editorTracker) {
       return;
     }
+    const { debugSessionPath, source, focus, kernelName } = findParams;
+
     const editors: CodeEditor.IEditor[] = [];
     this._editorTracker.forEach(doc => {
       const fileEditor = doc.content;
@@ -226,17 +200,13 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   /**
    * Find an editor for a source from the read-only editor tracker.
    *
-   * @param debugSessionPath The path for the current debug session.
-   * @param source The source to find.
-   * @param focus Set to true to focus on the relevant cell. Default to false.
-   * @param kernelName The kernel name from current session.
+   * @param findParams - Unified parameters for a source matching
    */
   private _findInReadOnlyEditors(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean,
-    kernelName: string
+    findParams: IFindParameters
   ): CodeEditor.IEditor[] {
+    const { source, focus, kernelName } = findParams;
+
     const editors: CodeEditor.IEditor[] = [];
     this._readOnlyEditorTracker.forEach(widget => {
       const editor = widget.content?.editor;
@@ -303,22 +273,44 @@ export namespace EditorFinder {
      */
     debuggerConfiguration: IDebuggerConfig;
   }
-  /**
-   * A token for a editor finder handler find method plugin
-   *
-   */
 }
+
+/**
+ * Unified parameters for find method
+ */
+interface IFindParameters {
+  /**
+   * Path of session connection.
+   */
+  debugSessionPath: string;
+
+  /**
+   * Source path
+   */
+  source: string;
+
+  /**
+   * Extra flag prevent disable focus.
+   */
+  focus: boolean;
+
+  /**
+   * Name of current kernel.
+   */
+  kernelName: string;
+}
+
+/**
+ * A token for a editor finder handler find method plugin
+ *
+ */
 export const IDebuggerEditorFinder = new Token<IDebuggerEditorFinder>(
   '@jupyterlab/debugger:editor-finder'
 );
+
 /**
  * Interface for separated find method from editor finder plugin
  */
 export interface IDebuggerEditorFinder {
-  find(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean,
-    kernelName: string
-  ): IIterator<CodeEditor.IEditor>;
+  find(findParams: IFindParameters): IIterator<CodeEditor.IEditor>;
 }
