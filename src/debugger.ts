@@ -5,7 +5,11 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { bugIcon } from '@jupyterlab/ui-components';
 
+import { Signal } from '@lumino/signaling';
+
 import { Panel, SplitPanel, Widget } from '@lumino/widgets';
+
+import { murmur2 } from 'murmurhash-js';
 
 import { Breakpoints } from './breakpoints';
 
@@ -25,6 +29,71 @@ import { Variables } from './variables';
  * A namespace for `Debugger` statics.
  */
 export namespace Debugger {
+  /**
+   * A class that holds debugger configuration for a kernel.
+   */
+  export class Config implements IDebugger.IConfig {
+    /**
+     * Whether the handler is disposed.
+     */
+    isDisposed: boolean;
+
+    /**
+     * Dispose the objects.
+     */
+    dispose(): void {
+      if (this.isDisposed) {
+        return;
+      }
+      this.isDisposed = true;
+      Signal.clearData(this);
+    }
+
+    /**
+     * Computes an id based on the given code.
+     *
+     * @param code The source code.
+     * @param kernel The kernel name from current session.
+     */
+    getCodeId(code: string, kernel: string): string {
+      const { prefix, suffix } = this._fileParams.get(kernel);
+      return `${prefix}${this._hashMethod(code)}${suffix}`;
+    }
+
+    /**
+     * Set the hash parameters for a kernel.
+     *
+     * @param params - Hashing parameters for a kernel.
+     */
+    public setHashParams(params: IDebugger.IConfig.HashParams): void {
+      const { kernel, method, seed } = params;
+      if (kernel === 'xpython') {
+        if (method === 'Murmur2') {
+          this._hashMethod = (code: string): string => {
+            return murmur2(code, seed).toString();
+          };
+        } else {
+          throw new Error('hash method not supported ' + method);
+        }
+      } else {
+        throw new Error('Kernel not supported ' + kernel);
+      }
+    }
+
+    /**
+     * Set the parameters used for the temporary files (e.g. cells).
+     *
+     * @param params - Temporary file prefix and suffix for a kernel.
+     */
+    public setTmpFileParams(params: IDebugger.IConfig.FileParams): void {
+      const { kernel, prefix, suffix } = params;
+      this._fileParams.set(kernel, { kernel, prefix, suffix });
+    }
+
+    private _fileParams = new Map<string, IDebugger.IConfig.FileParams>();
+    private _hashMethod: (code: string) => string;
+  }
+
   /**
    * A debugger sidebar.
    */

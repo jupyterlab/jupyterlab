@@ -64,10 +64,8 @@ export interface IDebugger {
 
   /**
    * Starts a debugger.
-   * Precondition: !isStarted
-   */
-  start(): Promise<void>;
-
+   * Precondition: !  start(): Promise<void>;
+   
   /**
    * Stops the debugger.
    * Precondition: isStarted
@@ -198,6 +196,56 @@ export namespace IDebugger {
    */
   export interface IBreakpoint extends DebugProtocol.Breakpoint {
     active: boolean;
+  }
+  /**
+   * Interface for debugger file and hashing configuration.
+   */
+  export interface IConfig {
+    getCodeId(code: string, kernelName: string): string;
+    setHashParams(params: IConfig.HashParams): void;
+    setTmpFileParams(params: IConfig.FileParams): void;
+  }
+
+  export namespace IConfig {
+    /**
+     * Temporary file prefix and suffix for a kernel.
+     */
+    export type FileParams = {
+      /**
+       * The kernel name.
+       */
+      kernel: string;
+
+      /**
+       * Prefix added to temporary files created by the kernel per cell.
+       */
+      prefix: string;
+
+      /**
+       * Suffix added temporary files created by the kernel per cell.
+       */
+      suffix: string;
+    };
+
+    /**
+     * Hashing parameters for a kernel.
+     */
+    export type HashParams = {
+      /**
+       * The kernel name.
+       */
+      kernel: string;
+
+      /**
+       * The hash method.
+       */
+      method: string;
+
+      /**
+       * The hash seed.
+       */
+      seed: number;
+    };
   }
 
   /**
@@ -376,3 +424,10 @@ export namespace IDebugger {
  * A token for a tracker for an application's visual debugger instances.
  */
 export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger');
+
+/**
+ * The debugger configuration token.
+ */
+export const IDebuggerConfig = new Token<IDebugger.IConfig>(
+  '@jupyterlab/debugger:config'
+);

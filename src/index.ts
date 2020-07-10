@@ -19,8 +19,6 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
@@ -28,6 +26,8 @@ import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { EditorFinder, IDebuggerEditorFinder } from './editor-finder';
 
@@ -48,16 +48,11 @@ import { DebuggerService } from './service';
 
 import { DebuggerHandler } from './handler';
 
-import { IDebugger } from './tokens';
+import { IDebugger, IDebuggerConfig } from './tokens';
 
 import { DebuggerModel } from './model';
 
 import { VariablesBodyGrid } from './variables/grid';
-
-import {
-  IDebuggerConfig,
-  DebuggerConfiguration
-} from './debugger-configuration';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -277,27 +272,27 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:service',
   autoStart: true,
   provides: IDebugger,
-  requires: [IDebuggerEditorFinder, IDebuggerConfig],
+  requires: [IDebuggerConfig, IDebuggerEditorFinder],
   activate: (
     app: JupyterFrontEnd,
-    editorFinder: IDebuggerEditorFinder,
-    debuggerConfiguration: IDebuggerConfig
+    config: IDebugger.IConfig,
+    editorFinder: IDebuggerEditorFinder
   ) =>
     new DebuggerService({
-      specsManager: app.serviceManager.kernelspecs,
+      config,
       editorFinder,
-      debuggerConfiguration
+      specsManager: app.serviceManager.kernelspecs
     })
 };
 
 /**
  * A plugin that provides a configuration with hash method.
  */
-const configuration: JupyterFrontEndPlugin<IDebuggerConfig> = {
-  id: '@jupyterlab/debugger:configuration',
+const configuration: JupyterFrontEndPlugin<IDebugger.IConfig> = {
+  id: '@jupyterlab/debugger:config',
   provides: IDebuggerConfig,
   autoStart: true,
-  activate: (): IDebuggerConfig => new DebuggerConfiguration()
+  activate: () => new Debugger.Config()
 };
 
 /**
@@ -307,20 +302,20 @@ const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
   id: '@jupyterlab/debugger:editor-finder',
   autoStart: true,
   provides: IDebuggerEditorFinder,
-  requires: [IEditorServices, IDebuggerConfig],
+  requires: [IDebuggerConfig, IEditorServices],
   optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
   activate: (
     app: JupyterFrontEnd,
+    config: IDebugger.IConfig,
     editorServices: IEditorServices,
-    debuggerConfiguration: IDebuggerConfig,
     notebookTracker: INotebookTracker | null,
     consoleTracker: IConsoleTracker | null,
     editorTracker: IEditorTracker | null
   ): IDebuggerEditorFinder => {
     return new EditorFinder({
+      config,
       shell: app.shell,
       editorServices,
-      debuggerConfiguration,
       notebookTracker,
       consoleTracker,
       editorTracker

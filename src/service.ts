@@ -13,15 +13,13 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 
 import { CallstackModel } from './callstack/model';
 
+import { IDebuggerEditorFinder } from './editor-finder';
+
 import { DebuggerModel } from './model';
 
 import { IDebugger } from './tokens';
 
-import { IDebuggerEditorFinder } from './editor-finder';
-
 import { VariablesModel } from './variables/model';
-
-import { IDebuggerConfig } from './debugger-configuration';
 
 /**
  * A concrete implementation of IDebugger.
@@ -33,6 +31,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param options The instantiation options for a DebuggerService.
    */
   constructor(options: DebuggerService.IOptions) {
+    this._config = options.config;
     // Avoids setting session with invalid client
     // session should be set only when a notebook or
     // a console get the focus.
@@ -42,7 +41,6 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._specsManager = options.specsManager;
     this._model = new DebuggerModel();
     this._editorFinder = options.editorFinder;
-    this._debuggerConfiguration = options.debuggerConfiguration;
   }
 
   /**
@@ -166,10 +164,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code The source code.
    */
   getCodeId(code: string): string {
-    return this._debuggerConfiguration.getCodeId(
-      code,
-      this.session.connection.kernel.name
-    );
+    return this._config.getCodeId(code, this.session.connection.kernel.name);
   }
 
   /**
@@ -231,15 +226,15 @@ export class DebuggerService implements IDebugger, IDisposable {
     const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
     const stoppedThreads = new Set(reply.body.stoppedThreads);
     const kernelName = this.session.connection.kernel.name;
-    this._debuggerConfiguration.setHashParameters({
-      hashMethod,
-      hashSeed,
-      kernelName
+    this._config.setHashParams({
+      kernel: kernelName,
+      method: hashMethod,
+      seed: hashSeed
     });
-    this._debuggerConfiguration.setTmpFileParameters({
-      tmpFilePrefix,
-      tmpFileSuffix,
-      kernelName
+    this._config.setTmpFileParams({
+      kernel: kernelName,
+      prefix: tmpFilePrefix,
+      suffix: tmpFileSuffix
     });
 
     this._model.stoppedThreads = stoppedThreads;
@@ -664,16 +659,15 @@ export class DebuggerService implements IDebugger, IDisposable {
     return 1;
   }
 
-  private _isDisposed = false;
-  private _session: IDebugger.ISession;
-  private _model: DebuggerModel;
-  private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
-  private _modelChanged = new Signal<IDebugger, IDebugger.IModel>(this);
-  private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
-
-  private _specsManager: KernelSpec.IManager;
+  private _config: IDebugger.IConfig;
   private _editorFinder: IDebuggerEditorFinder | null;
-  private _debuggerConfiguration: IDebuggerConfig;
+  private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
+  private _isDisposed = false;
+  private _model: DebuggerModel;
+  private _modelChanged = new Signal<IDebugger, IDebugger.IModel>(this);
+  private _session: IDebugger.ISession;
+  private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
+  private _specsManager: KernelSpec.IManager;
 }
 
 /**
@@ -697,6 +691,6 @@ export namespace DebuggerService {
     /**
      * The configuration instance with hash method.
      */
-    debuggerConfiguration: IDebuggerConfig;
+    config: IDebugger.IConfig;
   }
 }
