@@ -19,16 +19,12 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { chain, each, IIterator } from '@lumino/algorithm';
 
-import { IDisposable } from '@lumino/disposable';
-
-import { Signal } from '@lumino/signaling';
-
 import { IDebugger } from './tokens';
 
 /**
  * A class to find instances of code editors across notebook, console and files widgets
  */
-export class EditorFinder implements IDisposable, IDebugger.IEditorFinder {
+export class EditorFinder implements IDebugger.IEditorFinder {
   /**
    * Instantiate a new EditorFinder.
    *
@@ -43,22 +39,6 @@ export class EditorFinder implements IDisposable, IDebugger.IEditorFinder {
     this._readOnlyEditorTracker = new WidgetTracker<
       MainAreaWidget<CodeEditorWrapper>
     >({ namespace: '@jupyterlab/debugger' });
-  }
-
-  /**
-   * Whether the handler is disposed.
-   */
-  isDisposed: boolean;
-
-  /**
-   * Dispose the handler.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this.isDisposed = true;
-    Signal.clearData(this);
   }
 
   /**

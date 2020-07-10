@@ -103,6 +103,9 @@
     "typedoc": "^0.15.4",
     "typescript": "~3.9.2"
   },
+  "resolutions": {
+    "@types/react": "~16.9.16"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
