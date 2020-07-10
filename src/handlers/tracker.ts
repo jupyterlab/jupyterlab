@@ -26,8 +26,6 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { IDebuggerEditorFinder } from '../editor-finder';
-
 import { EditorHandler } from './editor';
 
 import { CallstackModel } from '../callstack/model';
@@ -122,13 +120,19 @@ export class TrackerHandler implements IDisposable {
     _: CallstackModel,
     frame: CallstackModel.IFrame
   ): void {
-    const debugSessionPath = this._debuggerService.session?.connection?.path;
-    const source = frame?.source.path ?? null;
-    each(this._editorFinder.find(debugSessionPath, source, true), editor => {
-      requestAnimationFrame(() => {
-        EditorHandler.showCurrentLine(editor, frame.line);
-      });
-    });
+    each(
+      this._editorFinder.find({
+        focus: true,
+        kernel: this._debuggerService.session.connection.kernel.name,
+        path: this._debuggerService.session?.connection?.path,
+        source: frame?.source.path ?? null
+      }),
+      editor => {
+        requestAnimationFrame(() => {
+          EditorHandler.showCurrentLine(editor, frame.line);
+        });
+      }
+    );
   }
 
   /**
@@ -144,9 +148,13 @@ export class TrackerHandler implements IDisposable {
     if (!source) {
       return;
     }
-    const debugSessionPath = this._debuggerService.session.connection.path;
     const { content, mimeType, path } = source;
-    const results = this._editorFinder.find(debugSessionPath, path, false);
+    const results = this._editorFinder.find({
+      focus: false,
+      kernel: this._debuggerService.session.connection.kernel.name,
+      path: this._debuggerService.session.connection.path,
+      source: path
+    });
     if (results.next()) {
       return;
     }
@@ -178,14 +186,15 @@ export class TrackerHandler implements IDisposable {
       EditorHandler.showCurrentLine(editor, frame.line);
     }
   }
-  private _debuggerService: IDebugger;
+
   private _debuggerModel: DebuggerModel;
-  private _shell: JupyterFrontEnd.IShell;
+  private _debuggerService: IDebugger;
+  private _editorFinder: IDebugger.IEditorFinder | null;
   private _readOnlyEditorFactory: ReadOnlyEditorFactory;
   private _readOnlyEditorTracker: WidgetTracker<
     MainAreaWidget<CodeEditorWrapper>
   >;
-  private _editorFinder: IDebuggerEditorFinder | null;
+  private _shell: JupyterFrontEnd.IShell;
 }
 
 /**
@@ -202,6 +211,11 @@ export namespace TrackerHandler {
     debuggerService: IDebugger;
 
     /**
+     * The editor finder.
+     */
+    editorFinder: IDebugger.IEditorFinder;
+
+    /**
      * The editor services.
      */
     editorServices: IEditorServices;
@@ -210,10 +224,6 @@ export namespace TrackerHandler {
      * The application shell.
      */
     shell: JupyterFrontEnd.IShell;
-    /**
-     * The editor finder.
-     */
-    editorFinder: IDebuggerEditorFinder;
   }
 
   // TODO: move the interface and token below to token.ts?

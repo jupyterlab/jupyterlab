@@ -57,7 +57,8 @@ afterAll(async () => {
 
 describe('Debugger', () => {
   const specsManager = new KernelSpecManager();
-  const service = new DebuggerService({ specsManager });
+  const config = new Debugger.Config();
+  const service = new DebuggerService({ specsManager, config });
   const registry = new CommandRegistry();
   const factoryService = new CodeMirrorEditorFactory();
   const mimeTypeService = new CodeMirrorMimeTypeService();

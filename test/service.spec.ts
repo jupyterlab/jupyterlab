@@ -21,6 +21,8 @@ import { IDebugger } from '../src/tokens';
 
 import { KERNELSPECS, handleRequest } from './utils';
 
+import { Debugger } from '../src/debugger';
+
 /**
  * A Test class to mock a KernelSpecManager
  */
@@ -54,6 +56,7 @@ describe('Debugging support', () => {
 
   let specsManager: TestKernelSpecManager;
   let service: DebuggerService;
+  let config: IDebugger.IConfig;
   let xpython: Session.ISessionConnection;
   let ipykernel: Session.ISessionConnection;
 
@@ -75,7 +78,8 @@ describe('Debugging support', () => {
     specsManager = new TestKernelSpecManager({ standby: 'never' });
     specsManager.intercept = specs;
     await specsManager.refreshSpecs();
-    service = new DebuggerService({ specsManager });
+    config = new Debugger.Config();
+    service = new DebuggerService({ specsManager, config });
   });
 
   afterAll(async () => {
@@ -101,6 +105,7 @@ describe('DebuggerService', () => {
   const specsManager = new KernelSpecManager();
   let connection: Session.ISessionConnection;
   let model: DebuggerModel;
+  let config: IDebugger.IConfig;
   let session: IDebugger.ISession;
   let service: IDebugger;
 
@@ -113,7 +118,8 @@ describe('DebuggerService', () => {
     await connection.changeKernel({ name: 'xpython' });
     session = new DebugSession({ connection });
     model = new DebuggerModel();
-    service = new DebuggerService({ specsManager });
+    config = new Debugger.Config();
+    service = new DebuggerService({ specsManager, config });
   });
 
   afterEach(async () => {

@@ -19,94 +19,62 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { chain, each, IIterator } from '@lumino/algorithm';
 
-import { Token } from '@lumino/coreutils';
-
-import { IDisposable } from '@lumino/disposable';
-
-import { Signal } from '@lumino/signaling';
-
 import { IDebugger } from './tokens';
 
 /**
  * A class to find instances of code editors across notebook, console and files widgets
  */
-export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
+export class EditorFinder implements IDebugger.IEditorFinder {
   /**
    * Instantiate a new EditorFinder.
    *
    * @param options The instantiation options for a EditorFinder.
    */
   constructor(options: EditorFinder.IOptions) {
+    this._config = options.config;
     this._shell = options.shell;
-    this._service = options.service;
     this._notebookTracker = options.notebookTracker;
     this._consoleTracker = options.consoleTracker;
     this._editorTracker = options.editorTracker;
     this._readOnlyEditorTracker = new WidgetTracker<
       MainAreaWidget<CodeEditorWrapper>
-    >({
-      namespace: '@jupyterlab/debugger'
-    });
+    >({ namespace: '@jupyterlab/debugger' });
   }
 
   /**
-   * Whether the handler is disposed.
-   */
-  isDisposed: boolean;
-
-  /**
-   * Dispose the handler.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this.isDisposed = true;
-    Signal.clearData(this);
-  }
-
-  /**
-   * Find the editor for a source matching the current debug session
-   * by iterating through all the widgets in each of the notebook,
-   * console, file editor, and read-only file editor trackers.
+   * Returns an iterator of editors for a source matching the current debug
+   * session by iterating through all the widgets in each of the supported
+   * debugger types (i.e., consoles, files, notebooks).
    *
-   * @param debugSessionPath The path for the current debug session.
-   * @param source The source to find.
-   * @param focus - Set to true to focus on the relevant cell. Default to false.
+   * @param params - The editor search parameters.
    */
-  find(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean
-  ): IIterator<CodeEditor.IEditor> {
+  find(params: IDebugger.IEditorFinder.Params): IIterator<CodeEditor.IEditor> {
     return chain(
-      this._findInNotebooks(debugSessionPath, source, focus),
-      this._findInConsoles(debugSessionPath, source, focus),
-      this._findInEditors(debugSessionPath, source, focus),
-      this._findInReadOnlyEditors(debugSessionPath, source, focus)
+      this._findInConsoles(params),
+      this._findInEditors(params),
+      this._findInNotebooks(params),
+      this._findInReadOnlyEditors(params)
     );
   }
 
   /**
-   * Find the editor for a source matching the current debug session
+   * Find relevant editors matching the search params in the notebook tracker.
    *
-   * @param debugSessionPath The path for the current debug session.
-   * @param source The source to find.
-   * @param focus - Set to true to focus on the relevant cell. Default to false.
+   * @param params - The editor search parameters.
    */
   private _findInNotebooks(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean
+    params: IDebugger.IEditorFinder.Params
   ): CodeEditor.IEditor[] {
     if (!this._notebookTracker) {
       return [];
     }
+    const { focus, kernel, path, source } = params;
+
     const editors: CodeEditor.IEditor[] = [];
     this._notebookTracker.forEach(notebookPanel => {
       const sessionContext = notebookPanel.sessionContext;
 
-      if (sessionContext.path !== debugSessionPath) {
+      if (path !== sessionContext.path) {
         return;
       }
 
@@ -119,13 +87,14 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
         const code = cell.model.value.text;
-        const cellId = this._service.getCodeId(code);
+        const cellId = this._config.getCodeId(code, kernel);
         if (source !== cellId) {
           return;
         }
         if (focus) {
           notebook.activeCellIndex = i;
-          const rect = notebook.activeCell.inputArea.node.getBoundingClientRect();
+          const { node } = notebook.activeCell.inputArea;
+          const rect = node.getBoundingClientRect();
           notebook.scrollToPosition(rect.bottom, 45);
           this._shell.activateById(notebookPanel.id);
         }
@@ -136,32 +105,30 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   }
 
   /**
-   * Find the editor for a source matching the current debug session
+   * Find relevant editors matching the search params in the console tracker.
    *
-   * @param debugSessionPath The path for the current debug session.
-   * @param source The source to find.
-   * @param focus - Set to true to focus on the relevant cell. Default to false.
+   * @param params - The editor search parameters.
    */
   private _findInConsoles(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean
+    params: IDebugger.IEditorFinder.Params
   ): CodeEditor.IEditor[] {
     if (!this._consoleTracker) {
       return [];
     }
+    const { focus, kernel, path, source } = params;
+
     const editors: CodeEditor.IEditor[] = [];
     this._consoleTracker.forEach(consoleWidget => {
       const sessionContext = consoleWidget.sessionContext;
 
-      if (sessionContext.path !== debugSessionPath) {
+      if (path !== sessionContext.path) {
         return;
       }
 
       const cells = consoleWidget.console.cells;
       each(cells, cell => {
         const code = cell.model.value.text;
-        const codeId = this._service.getCodeId(code);
+        const codeId = this._config.getCodeId(code, kernel);
         if (source !== codeId) {
           return;
         }
@@ -175,25 +142,22 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   }
 
   /**
-   * Find the editor for a source matching the current debug session
-   * from the editor tracker.
+   * Find relevant editors matching the search params in the editor tracker.
    *
-   * @param debugSessionPath The path for the current debug session.
-   * @param source The source to find.
-   * @param focus - Set to true to focus on the relevant cell. Default to false.
+   * @param params - The editor search parameters.
    */
   private _findInEditors(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean
+    params: IDebugger.IEditorFinder.Params
   ): CodeEditor.IEditor[] {
     if (!this._editorTracker) {
       return;
     }
+    const { focus, kernel, path, source } = params;
+
     const editors: CodeEditor.IEditor[] = [];
     this._editorTracker.forEach(doc => {
       const fileEditor = doc.content;
-      if (debugSessionPath !== fileEditor.context.path) {
+      if (path !== fileEditor.context.path) {
         return;
       }
 
@@ -203,7 +167,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._service.getCodeId(code);
+      const codeId = this._config.getCodeId(code, kernel);
       if (source !== codeId) {
         return;
       }
@@ -216,17 +180,15 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   }
 
   /**
-   * Find an editor for a source from the read-only editor tracker.
+   * Find relevant editors matching the search params in the read-only tracker.
    *
-   * @param debugSessionPath The path for the current debug session.
-   * @param source The source to find.
-   * @param focus Set to true to focus on the relevant cell. Default to false.
+   * @param params - The editor search parameters.
    */
   private _findInReadOnlyEditors(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean
+    params: IDebugger.IEditorFinder.Params
   ): CodeEditor.IEditor[] {
+    const { focus, kernel, source } = params;
+
     const editors: CodeEditor.IEditor[] = [];
     this._readOnlyEditorTracker.forEach(widget => {
       const editor = widget.content?.editor;
@@ -235,7 +197,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._service.getCodeId(code);
+      const codeId = this._config.getCodeId(code, kernel);
       if (widget.title.caption !== source && source !== codeId) {
         return;
       }
@@ -246,11 +208,12 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
     });
     return editors;
   }
-  private _service: IDebugger;
   private _shell: JupyterFrontEnd.IShell;
   private _readOnlyEditorTracker: WidgetTracker<
     MainAreaWidget<CodeEditorWrapper>
   >;
+
+  private _config: IDebugger.IConfig;
   private _notebookTracker: INotebookTracker | null;
   private _consoleTracker: IConsoleTracker | null;
   private _editorTracker: IEditorTracker | null;
@@ -263,6 +226,11 @@ export namespace EditorFinder {
    * The options used to initialize a EditorFinder object.
    */
   export interface IOptions {
+    /**
+     * The instance of configuration with hash method.
+     */
+    config: IDebugger.IConfig;
+
     /**
      * An optional editor finder for consoles.
      */
@@ -284,30 +252,8 @@ export namespace EditorFinder {
     notebookTracker?: INotebookTracker;
 
     /**
-     * The debugger service.
-     */
-    service: IDebugger;
-
-    /**
      * The application shell.
      */
     shell: JupyterFrontEnd.IShell;
   }
-  /**
-   * A token for a editor finder handler find method plugin
-   *
-   */
-}
-export const IDebuggerEditorFinder = new Token<IDebuggerEditorFinder>(
-  '@jupyterlab/debugger:editor-finder'
-);
-/**
- * Interface for separated find method from editor finder plugin
- */
-export interface IDebuggerEditorFinder {
-  find(
-    debugSessionPath: string,
-    source: string,
-    focus: boolean
-  ): IIterator<CodeEditor.IEditor>;
 }

@@ -1,11 +1,13 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { Token } from '@lumino/coreutils';
+import { IIterator } from '@lumino/algorithm';
 
-import { IDebuggerEditorFinder } from './editor-finder';
+import { Token } from '@lumino/coreutils';
 
 import { IObservableDisposable } from '@lumino/disposable';
 
@@ -87,12 +89,8 @@ export interface IDebugger {
    *
    * @param autoStart - when true, starts the debugger
    * if it has not been started yet.
-   * @param editorFinder - The editor finder instance
    */
-  restoreState(
-    autoStart: boolean,
-    editorFinder?: IDebuggerEditorFinder
-  ): Promise<void>;
+  restoreState(autoStart: boolean): Promise<void>;
 
   /**
    * Continues the execution of the current thread.
@@ -120,13 +118,11 @@ export interface IDebugger {
    * @param code - The code in the cell where the breakpoints are set.
    * @param breakpoints - The list of breakpoints to set.
    * @param path - Optional path to the file where to set the breakpoints.
-   * @param editorFinder - The editor finder object.
    */
   updateBreakpoints(
     code: string,
     breakpoints: IDebugger.IBreakpoint[],
-    path?: string,
-    editorFinder?: IDebuggerEditorFinder
+    path?: string
   ): Promise<void>;
 
   /**
@@ -206,6 +202,121 @@ export namespace IDebugger {
    */
   export interface IBreakpoint extends DebugProtocol.Breakpoint {
     active: boolean;
+  }
+  /**
+   * Debugger file and hashing configuration.
+   */
+  export interface IConfig {
+    /**
+     * Returns an id based on the given code.
+     *
+     * @param code The source code.
+     * @param kernel The kernel name from current session.
+     */
+    getCodeId(code: string, kernel: string): string;
+
+    /**
+     * Sets the hash parameters for a kernel.
+     *
+     * @param params - Hashing parameters for a kernel.
+     */
+    setHashParams(params: IConfig.HashParams): void;
+
+    /**
+     * Sets the parameters used for the temp files (e.g. cells) for a kernel.
+     *
+     * @param params - Temporary file prefix and suffix for a kernel.
+     */
+    setTmpFileParams(params: IConfig.FileParams): void;
+  }
+
+  /**
+   * Debugger file and hashing configuration.
+   */
+  export namespace IConfig {
+    /**
+     * Temporary file prefix and suffix for a kernel.
+     */
+    export type FileParams = {
+      /**
+       * The kernel name.
+       */
+      kernel: string;
+
+      /**
+       * Prefix added to temporary files created by the kernel per cell.
+       */
+      prefix: string;
+
+      /**
+       * Suffix added temporary files created by the kernel per cell.
+       */
+      suffix: string;
+    };
+
+    /**
+     * Hashing parameters for a kernel.
+     */
+    export type HashParams = {
+      /**
+       * The kernel name.
+       */
+      kernel: string;
+
+      /**
+       * The hashing method.
+       */
+      method: string;
+
+      /**
+       * An optional hashing seed provided by the kernel.
+       */
+      seed?: any;
+    };
+  }
+
+  /**
+   * A utility to find text editors used by the debugger.
+   */
+  export interface IEditorFinder {
+    /**
+     * Returns an iterator of editors for a source matching the current debug
+     * session by iterating through all the widgets in each of the supported
+     * debugger types (i.e., consoles, files, notebooks).
+     *
+     * @param params - The editor search parameters.
+     */
+    find(params: IEditorFinder.Params): IIterator<CodeEditor.IEditor>;
+  }
+
+  /**
+   * A utility to find text editors used by the debugger.
+   */
+  export namespace IEditorFinder {
+    /**
+     * Unified parameters for find method
+     */
+    export type Params = {
+      /**
+       * Extra flag prevent disable focus.
+       */
+      focus: boolean;
+
+      /**
+       * Name of current kernel.
+       */
+      kernel: string;
+
+      /**
+       * Path of session connection.
+       */
+      path: string;
+
+      /**
+       * Source path
+       */
+      source: string;
+    };
   }
 
   /**
@@ -381,6 +492,20 @@ export namespace IDebugger {
 }
 
 /**
- * A token for a tracker for an application's visual debugger instances.
+ * The visual debugger token.
  */
 export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger');
+
+/**
+ * The debugger configuration token.
+ */
+export const IDebuggerConfig = new Token<IDebugger.IConfig>(
+  '@jupyterlab/debugger:config'
+);
+
+/**
+ * The debugger editor finder utility token.
+ */
+export const IDebuggerEditorFinder = new Token<IDebugger.IEditorFinder>(
+  '@jupyterlab/debugger:editor-finder'
+);

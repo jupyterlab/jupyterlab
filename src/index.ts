@@ -19,8 +19,6 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
@@ -29,7 +27,9 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
 import { Session } from '@jupyterlab/services';
 
-import { EditorFinder, IDebuggerEditorFinder } from './editor-finder';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { EditorFinder } from './editor-finder';
 
 import {
   continueIcon,
@@ -48,9 +48,9 @@ import { DebuggerService } from './service';
 
 import { DebuggerHandler } from './handler';
 
-import { IDebugger } from './tokens';
-
 import { DebuggerModel } from './model';
+
+import { IDebugger, IDebuggerConfig, IDebuggerEditorFinder } from './tokens';
 
 import { VariablesBodyGrid } from './variables/grid';
 
@@ -82,15 +82,14 @@ const consoles: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
-    editorFinder: IDebuggerEditorFinder,
+    editorFinder: IDebugger.IEditorFinder,
     consoleTracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'console',
       shell: app.shell,
-      service: debug,
-      editorFinder
+      service: debug
     });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
@@ -128,20 +127,18 @@ const consoles: JupyterFrontEndPlugin<void> = {
 const files: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:files',
   autoStart: true,
-  requires: [IDebugger, IEditorTracker, IDebuggerEditorFinder],
+  requires: [IDebugger, IEditorTracker],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorTracker: IEditorTracker,
-    editorFinder: IDebuggerEditorFinder,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'file',
       shell: app.shell,
-      service: debug,
-      editorFinder
+      service: debug
     });
     debug.model.disposed.connect(() => {
       handler.disposeAll(debug);
@@ -202,20 +199,18 @@ const files: JupyterFrontEndPlugin<void> = {
 const notebooks: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:notebooks',
   autoStart: true,
-  requires: [IDebugger, INotebookTracker, IDebuggerEditorFinder],
+  requires: [IDebugger, INotebookTracker],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
-    editorFinder: IDebuggerEditorFinder,
     labShell: ILabShell
   ) => {
     const handler = new DebuggerHandler({
       type: 'notebook',
       shell: app.shell,
-      service,
-      editorFinder
+      service
     });
     service.model.disposed.connect(() => {
       handler.disposeAll(service);
@@ -259,7 +254,7 @@ const tracker: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorServices: IEditorServices,
-    editorFinder: IDebuggerEditorFinder
+    editorFinder: IDebugger.IEditorFinder
   ) => {
     new TrackerHandler({
       shell: app.shell,
@@ -277,30 +272,49 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:service',
   autoStart: true,
   provides: IDebugger,
-  activate: (app: JupyterFrontEnd) =>
-    new DebuggerService({ specsManager: app.serviceManager.kernelspecs })
+  requires: [IDebuggerConfig, IDebuggerEditorFinder],
+  activate: (
+    app: JupyterFrontEnd,
+    config: IDebugger.IConfig,
+    editorFinder: IDebugger.IEditorFinder
+  ) =>
+    new DebuggerService({
+      config,
+      editorFinder,
+      specsManager: app.serviceManager.kernelspecs
+    })
+};
+
+/**
+ * A plugin that provides a configuration with hash method.
+ */
+const configuration: JupyterFrontEndPlugin<IDebugger.IConfig> = {
+  id: '@jupyterlab/debugger:config',
+  provides: IDebuggerConfig,
+  autoStart: true,
+  activate: () => new Debugger.Config()
 };
 
 /**
  * A plugin that tracks editors, console and file editors used for debugging.
  */
-const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
+const finder: JupyterFrontEndPlugin<IDebugger.IEditorFinder> = {
   id: '@jupyterlab/debugger:editor-finder',
   autoStart: true,
   provides: IDebuggerEditorFinder,
-  requires: [IDebugger, IEditorServices],
+  requires: [IDebuggerConfig, IEditorServices],
   optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
   activate: (
     app: JupyterFrontEnd,
-    service: IDebugger,
+    config: IDebugger.IConfig,
     editorServices: IEditorServices,
     notebookTracker: INotebookTracker | null,
     consoleTracker: IConsoleTracker | null,
     editorTracker: IEditorTracker | null
-  ): IDebuggerEditorFinder => {
+  ): IDebugger.IEditorFinder => {
     return new EditorFinder({
+      config,
       shell: app.shell,
-      service,
       editorServices,
       notebookTracker,
       consoleTracker,
@@ -491,21 +505,19 @@ const main: JupyterFrontEndPlugin<void> = {
 
     if (settingRegistry) {
       const setting = await settingRegistry.load(main.id);
-      const updateVariableSettings = (): void => {
+      const updateSettings = (): void => {
         const filters = setting.get('variableFilters').composite as {
           [key: string]: string[];
         };
-        const kernelName = service.session?.connection?.kernel?.name;
-        const list = filters[kernelName];
-        if (!list) {
-          return;
+        const list = filters[service.session?.connection?.kernel?.name];
+        if (list) {
+          sidebar.variables.filter = new Set<string>(list);
         }
-        sidebar.variables.filter = new Set<string>(list);
       };
 
-      updateVariableSettings();
-      setting.changed.connect(updateVariableSettings);
-      sidebar.service.sessionChanged.connect(updateVariableSettings);
+      updateSettings();
+      setting.changed.connect(updateSettings);
+      sidebar.service.sessionChanged.connect(updateSettings);
     }
 
     if (themeManager) {
@@ -562,7 +574,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tracker,
   variables,
   main,
-  finder
+  finder,
+  configuration
 ];
 
 export default plugins;

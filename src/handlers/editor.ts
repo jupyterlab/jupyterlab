@@ -15,8 +15,6 @@ import { Signal } from '@lumino/signaling';
 
 import { Editor } from 'codemirror';
 
-import { IDebuggerEditorFinder } from '../editor-finder';
-
 import { IDebugger } from '../tokens';
 
 import { BreakpointsModel } from '../breakpoints/model';
@@ -47,7 +45,6 @@ export class EditorHandler implements IDisposable {
     this._path = options.path;
     this._debuggerService = options.debuggerService;
     this._editor = options.editor;
-    this._editorFinder = options.editorFinder;
 
     this._onModelChanged();
     this._debuggerService.modelChanged.connect(this._onModelChanged, this);
@@ -163,8 +160,7 @@ export class EditorHandler implements IDisposable {
     void this._debuggerService.updateBreakpoints(
       this._editor.model.value.text,
       breakpoints,
-      this._path,
-      this._editorFinder
+      this._path
     );
   }
 
@@ -196,8 +192,7 @@ export class EditorHandler implements IDisposable {
     void this._debuggerService.updateBreakpoints(
       this._editor.model.value.text,
       breakpoints,
-      this._path,
-      this._editorFinder
+      this._path
     );
   };
 
@@ -249,7 +244,6 @@ export class EditorHandler implements IDisposable {
   private _id: string;
   private _path: string;
   private _editor: CodeEditor.IEditor;
-  private _editorFinder: IDebuggerEditorFinder;
   private _debuggerModel: DebuggerModel;
   private _breakpointsModel: BreakpointsModel;
   private _debuggerService: IDebugger;
@@ -281,11 +275,6 @@ export namespace EditorHandler {
      * An optional path to a source file.
      */
     path?: string;
-
-    /**
-     * The editor finder.
-     */
-    editorFinder?: IDebuggerEditorFinder;
   }
 
   /**
