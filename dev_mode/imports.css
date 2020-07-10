@@ -35,6 +35,7 @@
 @import url('~@jupyterlab/terminal-extension/style/index.css');
 @import url('~@jupyterlab/toc-extension/style/index.css');
 @import url('~@jupyterlab/tooltip-extension/style/index.css');
+@import url('~@jupyterlab/translation-extension/style/index.css');
 @import url('~@jupyterlab/ui-components-extension/style/index.css');
 @import url('~@jupyterlab/vdom-extension/style/index.css');
 @import url('~@jupyterlab/vega5-extension/style/index.css');

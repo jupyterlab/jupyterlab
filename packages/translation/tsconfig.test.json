@@ -1,0 +1,30 @@
+{
+  "extends": "../../tsconfigbase.test",
+  "include": ["src/*", "test/*"],
+  "references": [
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../statedb"
+    },
+    {
+      "path": "."
+    },
+    {
+      "path": "../../testutils"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../statedb"
+    }
+  ]
+}

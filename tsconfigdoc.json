@@ -258,6 +258,12 @@
       "path": "./packages/tooltip-extension"
     },
     {
+      "path": "./packages/translation"
+    },
+    {
+      "path": "./packages/translation-extension"
+    },
+    {
       "path": "./packages/ui-components"
     },
     {
