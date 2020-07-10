@@ -81,6 +81,7 @@
     "@types/codemirror": "0.0.76",
     "@types/jest": "^24.0.17",
     "@types/murmurhash-js": "1.0.3",
+    "@types/react-dom": "^16.9.8",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
     "canvas": "^2.6.1",
