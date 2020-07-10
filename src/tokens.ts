@@ -64,8 +64,10 @@ export interface IDebugger {
 
   /**
    * Starts a debugger.
-   * Precondition: !  start(): Promise<void>;
-   
+   * Precondition: !isStarted
+   */
+  start(): Promise<void>;
+
   /**
    * Stops the debugger.
    * Precondition: isStarted
