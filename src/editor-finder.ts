@@ -19,8 +19,6 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 
 import { chain, each, IIterator } from '@lumino/algorithm';
 
-import { Token } from '@lumino/coreutils';
-
 import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
@@ -30,7 +28,7 @@ import { IDebugger } from './tokens';
 /**
  * A class to find instances of code editors across notebook, console and files widgets
  */
-export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
+export class EditorFinder implements IDisposable, IDebugger.IEditorFinder {
   /**
    * Instantiate a new EditorFinder.
    *
@@ -64,31 +62,33 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   }
 
   /**
-   * Find the editor for a source matching the current debug session
-   * by iterating through all the widgets in each of the notebook,
-   * console, file editor, and read-only file editor trackers.
+   * Returns an iterator of editors for a source matching the current debug
+   * session by iterating through all the widgets in each of the supported
+   * debugger types (i.e., consoles, files, notebooks).
    *
-   * @param findParams - Unified parameters for a source matching
+   * @param params - The editor search parameters.
    */
-  find(findParams: IFindParameters): IIterator<CodeEditor.IEditor> {
+  find(params: IDebugger.IEditorFinder.Params): IIterator<CodeEditor.IEditor> {
     return chain(
-      this._findInNotebooks(findParams),
-      this._findInConsoles(findParams),
-      this._findInEditors(findParams),
-      this._findInReadOnlyEditors(findParams)
+      this._findInConsoles(params),
+      this._findInEditors(params),
+      this._findInNotebooks(params),
+      this._findInReadOnlyEditors(params)
     );
   }
 
   /**
-   * Find the editor for a source matching the current debug session
+   * Find relevant editors matching the search params in the notebook tracker.
    *
-   * @param findParams - Unified parameters for a source matching
+   * @param params - The editor search parameters.
    */
-  private _findInNotebooks(findParams: IFindParameters): CodeEditor.IEditor[] {
+  private _findInNotebooks(
+    params: IDebugger.IEditorFinder.Params
+  ): CodeEditor.IEditor[] {
     if (!this._notebookTracker) {
       return [];
     }
-    const { focus, kernel, path, source } = findParams;
+    const { focus, kernel, path, source } = params;
 
     const editors: CodeEditor.IEditor[] = [];
     this._notebookTracker.forEach(notebookPanel => {
@@ -113,7 +113,8 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
         }
         if (focus) {
           notebook.activeCellIndex = i;
-          const rect = notebook.activeCell.inputArea.node.getBoundingClientRect();
+          const { node } = notebook.activeCell.inputArea;
+          const rect = node.getBoundingClientRect();
           notebook.scrollToPosition(rect.bottom, 45);
           this._shell.activateById(notebookPanel.id);
         }
@@ -124,15 +125,17 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   }
 
   /**
-   * Find the editor for a source matching the current debug session
+   * Find relevant editors matching the search params in the console tracker.
    *
-   * @param findParams - Unified parameters for a source matching
+   * @param params - The editor search parameters.
    */
-  private _findInConsoles(findParams: IFindParameters): CodeEditor.IEditor[] {
+  private _findInConsoles(
+    params: IDebugger.IEditorFinder.Params
+  ): CodeEditor.IEditor[] {
     if (!this._consoleTracker) {
       return [];
     }
-    const { focus, kernel, path, source } = findParams;
+    const { focus, kernel, path, source } = params;
 
     const editors: CodeEditor.IEditor[] = [];
     this._consoleTracker.forEach(consoleWidget => {
@@ -159,16 +162,17 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   }
 
   /**
-   * Find the editor for a source matching the current debug session
-   * from the editor tracker.
+   * Find relevant editors matching the search params in the editor tracker.
    *
-   * @param findParams - Unified parameters for a source matching
+   * @param params - The editor search parameters.
    */
-  private _findInEditors(findParams: IFindParameters): CodeEditor.IEditor[] {
+  private _findInEditors(
+    params: IDebugger.IEditorFinder.Params
+  ): CodeEditor.IEditor[] {
     if (!this._editorTracker) {
       return;
     }
-    const { focus, kernel, path, source } = findParams;
+    const { focus, kernel, path, source } = params;
 
     const editors: CodeEditor.IEditor[] = [];
     this._editorTracker.forEach(doc => {
@@ -196,14 +200,14 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   }
 
   /**
-   * Find an editor for a source from the read-only editor tracker.
+   * Find relevant editors matching the search params in the read-only tracker.
    *
-   * @param findParams - Unified parameters for a source matching
+   * @param params - The editor search parameters.
    */
   private _findInReadOnlyEditors(
-    findParams: IFindParameters
+    params: IDebugger.IEditorFinder.Params
   ): CodeEditor.IEditor[] {
-    const { focus, kernel, source } = findParams;
+    const { focus, kernel, source } = params;
 
     const editors: CodeEditor.IEditor[] = [];
     this._readOnlyEditorTracker.forEach(widget => {
@@ -272,44 +276,4 @@ export namespace EditorFinder {
      */
     shell: JupyterFrontEnd.IShell;
   }
-}
-
-/**
- * Unified parameters for find method
- */
-interface IFindParameters {
-  /**
-   * Extra flag prevent disable focus.
-   */
-  focus: boolean;
-
-  /**
-   * Name of current kernel.
-   */
-  kernel: string;
-
-  /**
-   * Path of session connection.
-   */
-  path: string;
-
-  /**
-   * Source path
-   */
-  source: string;
-}
-
-/**
- * A token for a editor finder handler find method plugin
- *
- */
-export const IDebuggerEditorFinder = new Token<IDebuggerEditorFinder>(
-  '@jupyterlab/debugger:editor-finder'
-);
-
-/**
- * Interface for separated find method from editor finder plugin
- */
-export interface IDebuggerEditorFinder {
-  find(findParams: IFindParameters): IIterator<CodeEditor.IEditor>;
 }

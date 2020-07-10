@@ -13,8 +13,6 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 
 import { CallstackModel } from './callstack/model';
 
-import { IDebuggerEditorFinder } from './editor-finder';
-
 import { DebuggerModel } from './model';
 
 import { IDebugger } from './tokens';
@@ -658,7 +656,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   private _config: IDebugger.IConfig;
-  private _editorFinder: IDebuggerEditorFinder | null;
+  private _editorFinder: IDebugger.IEditorFinder | null;
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _isDisposed = false;
   private _model: DebuggerModel;
@@ -677,18 +675,18 @@ export namespace DebuggerService {
    */
   export interface IOptions {
     /**
-     * The kernel specs manager.
+     * The configuration instance with hash method.
      */
-    specsManager: KernelSpec.IManager;
+    config: IDebugger.IConfig;
 
     /**
      * The editor finder instance.
      */
-    editorFinder?: IDebuggerEditorFinder;
+    editorFinder?: IDebugger.IEditorFinder;
 
     /**
-     * The configuration instance with hash method.
+     * The kernel specs manager.
      */
-    config: IDebugger.IConfig;
+    specsManager: KernelSpec.IManager;
   }
 }

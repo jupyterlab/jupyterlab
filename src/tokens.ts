@@ -1,7 +1,11 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { CodeEditor } from '@jupyterlab/codeeditor';
+
 import { KernelMessage, Session } from '@jupyterlab/services';
+
+import { IIterator } from '@lumino/algorithm';
 
 import { Token } from '@lumino/coreutils';
 
@@ -272,6 +276,50 @@ export namespace IDebugger {
   }
 
   /**
+   * A utility to find text editors used by the debugger.
+   */
+  export interface IEditorFinder {
+    /**
+     * Returns an iterator of editors for a source matching the current debug
+     * session by iterating through all the widgets in each of the supported
+     * debugger types (i.e., consoles, files, notebooks).
+     *
+     * @param params - The editor search parameters.
+     */
+    find(params: IEditorFinder.Params): IIterator<CodeEditor.IEditor>;
+  }
+
+  /**
+   * A utility to find text editors used by the debugger.
+   */
+  export namespace IEditorFinder {
+    /**
+     * Unified parameters for find method
+     */
+    export type Params = {
+      /**
+       * Extra flag prevent disable focus.
+       */
+      focus: boolean;
+
+      /**
+       * Name of current kernel.
+       */
+      kernel: string;
+
+      /**
+       * Path of session connection.
+       */
+      path: string;
+
+      /**
+       * Source path
+       */
+      source: string;
+    };
+  }
+
+  /**
    * The interface for a source file.
    */
   export interface ISource {
@@ -453,4 +501,11 @@ export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger');
  */
 export const IDebuggerConfig = new Token<IDebugger.IConfig>(
   '@jupyterlab/debugger:config'
+);
+
+/**
+ * The debugger editor finder utility token.
+ */
+export const IDebuggerEditorFinder = new Token<IDebugger.IEditorFinder>(
+  '@jupyterlab/debugger:editor-finder'
 );

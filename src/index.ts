@@ -29,7 +29,7 @@ import { Session } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { EditorFinder, IDebuggerEditorFinder } from './editor-finder';
+import { EditorFinder } from './editor-finder';
 
 import {
   continueIcon,
@@ -48,9 +48,9 @@ import { DebuggerService } from './service';
 
 import { DebuggerHandler } from './handler';
 
-import { IDebugger, IDebuggerConfig } from './tokens';
-
 import { DebuggerModel } from './model';
+
+import { IDebugger, IDebuggerConfig, IDebuggerEditorFinder } from './tokens';
 
 import { VariablesBodyGrid } from './variables/grid';
 
@@ -82,7 +82,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
-    editorFinder: IDebuggerEditorFinder,
+    editorFinder: IDebugger.IEditorFinder,
     consoleTracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
@@ -254,7 +254,7 @@ const tracker: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorServices: IEditorServices,
-    editorFinder: IDebuggerEditorFinder
+    editorFinder: IDebugger.IEditorFinder
   ) => {
     new TrackerHandler({
       shell: app.shell,
@@ -276,7 +276,7 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
-    editorFinder: IDebuggerEditorFinder
+    editorFinder: IDebugger.IEditorFinder
   ) =>
     new DebuggerService({
       config,
@@ -298,7 +298,7 @@ const configuration: JupyterFrontEndPlugin<IDebugger.IConfig> = {
 /**
  * A plugin that tracks editors, console and file editors used for debugging.
  */
-const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
+const finder: JupyterFrontEndPlugin<IDebugger.IEditorFinder> = {
   id: '@jupyterlab/debugger:editor-finder',
   autoStart: true,
   provides: IDebuggerEditorFinder,
@@ -311,7 +311,7 @@ const finder: JupyterFrontEndPlugin<IDebuggerEditorFinder> = {
     notebookTracker: INotebookTracker | null,
     consoleTracker: IConsoleTracker | null,
     editorTracker: IEditorTracker | null
-  ): IDebuggerEditorFinder => {
+  ): IDebugger.IEditorFinder => {
     return new EditorFinder({
       config,
       shell: app.shell,

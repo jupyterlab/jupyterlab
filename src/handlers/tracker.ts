@@ -26,8 +26,6 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { IDebuggerEditorFinder } from '../editor-finder';
-
 import { EditorHandler } from './editor';
 
 import { CallstackModel } from '../callstack/model';
@@ -188,14 +186,15 @@ export class TrackerHandler implements IDisposable {
       EditorHandler.showCurrentLine(editor, frame.line);
     }
   }
-  private _debuggerService: IDebugger;
+
   private _debuggerModel: DebuggerModel;
-  private _shell: JupyterFrontEnd.IShell;
+  private _debuggerService: IDebugger;
+  private _editorFinder: IDebugger.IEditorFinder | null;
   private _readOnlyEditorFactory: ReadOnlyEditorFactory;
   private _readOnlyEditorTracker: WidgetTracker<
     MainAreaWidget<CodeEditorWrapper>
   >;
-  private _editorFinder: IDebuggerEditorFinder | null;
+  private _shell: JupyterFrontEnd.IShell;
 }
 
 /**
@@ -212,6 +211,11 @@ export namespace TrackerHandler {
     debuggerService: IDebugger;
 
     /**
+     * The editor finder.
+     */
+    editorFinder: IDebugger.IEditorFinder;
+
+    /**
      * The editor services.
      */
     editorServices: IEditorServices;
@@ -220,10 +224,6 @@ export namespace TrackerHandler {
      * The application shell.
      */
     shell: JupyterFrontEnd.IShell;
-    /**
-     * The editor finder.
-     */
-    editorFinder: IDebuggerEditorFinder;
   }
 
   // TODO: move the interface and token below to token.ts?
