@@ -264,14 +264,14 @@ export namespace IDebugger {
       kernel: string;
 
       /**
-       * The hash method.
+       * The hashing method.
        */
       method: string;
 
       /**
-       * The hash seed.
+       * An optional hashing seed provided by the kernel.
        */
-      seed: number;
+      seed?: any;
     };
   }
 

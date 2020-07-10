@@ -5,8 +5,6 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { bugIcon } from '@jupyterlab/ui-components';
 
-import { Signal } from '@lumino/signaling';
-
 import { Panel, SplitPanel, Widget } from '@lumino/widgets';
 
 import { murmur2 } from 'murmurhash-js';
@@ -33,22 +31,6 @@ export namespace Debugger {
    * A class that holds debugger configuration for a kernel.
    */
   export class Config implements IDebugger.IConfig {
-    /**
-     * Whether the handler is disposed.
-     */
-    isDisposed: boolean;
-
-    /**
-     * Dispose the objects.
-     */
-    dispose(): void {
-      if (this.isDisposed) {
-        return;
-      }
-      this.isDisposed = true;
-      Signal.clearData(this);
-    }
-
     /**
      * Returns an id based on the given code.
      *
@@ -83,7 +65,7 @@ export namespace Debugger {
     }
 
     /**
-     * Sets the parameters used for the temp files (e.g. cells) for a kernel.
+     * Sets the parameters used by the kernel to create temp files (e.g. cells).
      *
      * @param params - Temporary file prefix and suffix for a kernel.
      */
