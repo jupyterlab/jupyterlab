@@ -57,7 +57,13 @@ export namespace Debugger {
      */
     getCodeId(code: string, kernel: string): string {
       const { prefix, suffix } = this._fileParams.get(kernel);
-      return `${prefix}${this._hashMethod(code)}${suffix}`;
+      const hash = this._hashMethods.get(kernel);
+
+      if (!hash) {
+        throw new Error(`Kernel (${kernel}) has no hashing params.`);
+      }
+
+      return `${prefix}${hash(code)}${suffix}`;
     }
 
     /**
@@ -67,16 +73,12 @@ export namespace Debugger {
      */
     setHashParams(params: IDebugger.IConfig.HashParams): void {
       const { kernel, method, seed } = params;
-      if (kernel === 'xpython') {
-        if (method === 'Murmur2') {
-          this._hashMethod = (code: string): string => {
-            return murmur2(code, seed).toString();
-          };
-        } else {
-          throw new Error('hash method not supported ' + method);
-        }
-      } else {
-        throw new Error('Kernel not supported ' + kernel);
+      switch (method) {
+        case 'Murmur2':
+          this._hashMethods.set(kernel, code => murmur2(code, seed).toString());
+          break;
+        default:
+          throw new Error(`Hash method (${method}) is not supported.`);
       }
     }
 
@@ -91,7 +93,7 @@ export namespace Debugger {
     }
 
     private _fileParams = new Map<string, IDebugger.IConfig.FileParams>();
-    private _hashMethod: (code: string) => string;
+    private _hashMethods = new Map<string, (code: string) => string>();
   }
 
   /**
