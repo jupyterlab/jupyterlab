@@ -122,15 +122,12 @@ export class TrackerHandler implements IDisposable {
     _: CallstackModel,
     frame: CallstackModel.IFrame
   ): void {
-    const debugSessionPath = this._debuggerService.session?.connection?.path;
-    const source = frame?.source.path ?? null;
-    const kernelName = this._debuggerService.session.connection.kernel.name;
     each(
       this._editorFinder.find({
-        debugSessionPath,
-        source,
         focus: true,
-        kernelName
+        kernel: this._debuggerService.session.connection.kernel.name,
+        path: this._debuggerService.session?.connection?.path,
+        source: frame?.source.path ?? null
       }),
       editor => {
         requestAnimationFrame(() => {
@@ -153,14 +150,12 @@ export class TrackerHandler implements IDisposable {
     if (!source) {
       return;
     }
-    const debugSessionPath = this._debuggerService.session.connection.path;
     const { content, mimeType, path } = source;
-    const kernelName = this._debuggerService.session.connection.kernel.name;
     const results = this._editorFinder.find({
-      debugSessionPath,
-      source: path,
       focus: false,
-      kernelName
+      kernel: this._debuggerService.session.connection.kernel.name,
+      path: this._debuggerService.session.connection.path,
+      source: path
     });
     if (results.next()) {
       return;

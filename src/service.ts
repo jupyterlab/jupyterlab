@@ -222,19 +222,19 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     const reply = await this.session.restoreState();
-    const { hashMethod, hashSeed, tmpFilePrefix, tmpFileSuffix } = reply.body;
+    const { body } = reply;
     const breakpoints = this._mapBreakpoints(reply.body.breakpoints);
     const stoppedThreads = new Set(reply.body.stoppedThreads);
-    const kernelName = this.session.connection.kernel.name;
+
     this._config.setHashParams({
-      kernel: kernelName,
-      method: hashMethod,
-      seed: hashSeed
+      kernel: this.session.connection.kernel.name,
+      method: body.hashMethod,
+      seed: body.hashSeed
     });
     this._config.setTmpFileParams({
-      kernel: kernelName,
-      prefix: tmpFilePrefix,
-      suffix: tmpFileSuffix
+      kernel: this.session.connection.kernel.name,
+      prefix: body.tmpFilePrefix,
+      suffix: body.tmpFileSuffix
     });
 
     this._model.stoppedThreads = stoppedThreads;
@@ -422,18 +422,16 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _filterBreakpoints(
     breakpoints: Map<string, IDebugger.IBreakpoint[]>
   ): Map<string, IDebugger.IBreakpoint[]> {
-    const debugSessionPath = this._session.connection.path;
-    const kernelName = this.session.connection.kernel.name;
     let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
     for (let collection of breakpoints) {
       const [id, list] = collection;
       list.forEach(() => {
         each(
           this._editorFinder.find({
-            debugSessionPath,
-            source: id,
             focus: false,
-            kernelName
+            kernel: this.session.connection.kernel.name,
+            path: this._session.connection.path,
+            source: id
           }),
           () => {
             if (list.length > 0) {

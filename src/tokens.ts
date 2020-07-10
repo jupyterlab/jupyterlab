@@ -209,7 +209,7 @@ export namespace IDebugger {
      * @param code The source code.
      * @param kernel The kernel name from current session.
      */
-    getCodeId(code: string, kernelName: string): string;
+    getCodeId(code: string, kernel: string): string;
 
     /**
      * Sets the hash parameters for a kernel.

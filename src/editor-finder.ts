@@ -88,13 +88,13 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
     if (!this._notebookTracker) {
       return [];
     }
-    const { debugSessionPath, source, focus, kernelName } = findParams;
+    const { focus, kernel, path, source } = findParams;
 
     const editors: CodeEditor.IEditor[] = [];
     this._notebookTracker.forEach(notebookPanel => {
       const sessionContext = notebookPanel.sessionContext;
 
-      if (sessionContext.path !== debugSessionPath) {
+      if (path !== sessionContext.path) {
         return;
       }
 
@@ -107,7 +107,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
         const code = cell.model.value.text;
-        const cellId = this._config.getCodeId(code, kernelName);
+        const cellId = this._config.getCodeId(code, kernel);
         if (source !== cellId) {
           return;
         }
@@ -132,20 +132,20 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
     if (!this._consoleTracker) {
       return [];
     }
-    const { debugSessionPath, source, focus, kernelName } = findParams;
+    const { focus, kernel, path, source } = findParams;
 
     const editors: CodeEditor.IEditor[] = [];
     this._consoleTracker.forEach(consoleWidget => {
       const sessionContext = consoleWidget.sessionContext;
 
-      if (sessionContext.path !== debugSessionPath) {
+      if (path !== sessionContext.path) {
         return;
       }
 
       const cells = consoleWidget.console.cells;
       each(cells, cell => {
         const code = cell.model.value.text;
-        const codeId = this._config.getCodeId(code, kernelName);
+        const codeId = this._config.getCodeId(code, kernel);
         if (source !== codeId) {
           return;
         }
@@ -168,12 +168,12 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
     if (!this._editorTracker) {
       return;
     }
-    const { debugSessionPath, source, focus, kernelName } = findParams;
+    const { focus, kernel, path, source } = findParams;
 
     const editors: CodeEditor.IEditor[] = [];
     this._editorTracker.forEach(doc => {
       const fileEditor = doc.content;
-      if (debugSessionPath !== fileEditor.context.path) {
+      if (path !== fileEditor.context.path) {
         return;
       }
 
@@ -183,7 +183,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._config.getCodeId(code, kernelName);
+      const codeId = this._config.getCodeId(code, kernel);
       if (source !== codeId) {
         return;
       }
@@ -203,7 +203,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
   private _findInReadOnlyEditors(
     findParams: IFindParameters
   ): CodeEditor.IEditor[] {
-    const { source, focus, kernelName } = findParams;
+    const { focus, kernel, source } = findParams;
 
     const editors: CodeEditor.IEditor[] = [];
     this._readOnlyEditorTracker.forEach(widget => {
@@ -213,7 +213,7 @@ export class EditorFinder implements IDisposable, IDebuggerEditorFinder {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._config.getCodeId(code, kernelName);
+      const codeId = this._config.getCodeId(code, kernel);
       if (widget.title.caption !== source && source !== codeId) {
         return;
       }
@@ -279,16 +279,6 @@ export namespace EditorFinder {
  */
 interface IFindParameters {
   /**
-   * Path of session connection.
-   */
-  debugSessionPath: string;
-
-  /**
-   * Source path
-   */
-  source: string;
-
-  /**
    * Extra flag prevent disable focus.
    */
   focus: boolean;
@@ -296,7 +286,17 @@ interface IFindParameters {
   /**
    * Name of current kernel.
    */
-  kernelName: string;
+  kernel: string;
+
+  /**
+   * Path of session connection.
+   */
+  path: string;
+
+  /**
+   * Source path
+   */
+  source: string;
 }
 
 /**

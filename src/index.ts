@@ -505,21 +505,19 @@ const main: JupyterFrontEndPlugin<void> = {
 
     if (settingRegistry) {
       const setting = await settingRegistry.load(main.id);
-      const updateVariableSettings = (): void => {
+      const updateSettings = (): void => {
         const filters = setting.get('variableFilters').composite as {
           [key: string]: string[];
         };
-        const kernelName = service.session?.connection?.kernel?.name;
-        const list = filters[kernelName];
-        if (!list) {
-          return;
+        const list = filters[service.session?.connection?.kernel?.name];
+        if (list) {
+          sidebar.variables.filter = new Set<string>(list);
         }
-        sidebar.variables.filter = new Set<string>(list);
       };
 
-      updateVariableSettings();
-      setting.changed.connect(updateVariableSettings);
-      sidebar.service.sessionChanged.connect(updateVariableSettings);
+      updateSettings();
+      setting.changed.connect(updateSettings);
+      sidebar.service.sessionChanged.connect(updateSettings);
     }
 
     if (themeManager) {
