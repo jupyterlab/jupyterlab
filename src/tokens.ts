@@ -198,14 +198,35 @@ export namespace IDebugger {
     active: boolean;
   }
   /**
-   * Interface for debugger file and hashing configuration.
+   * Debugger file and hashing configuration.
    */
   export interface IConfig {
+    /**
+     * Returns an id based on the given code.
+     *
+     * @param code The source code.
+     * @param kernel The kernel name from current session.
+     */
     getCodeId(code: string, kernelName: string): string;
+
+    /**
+     * Sets the hash parameters for a kernel.
+     *
+     * @param params - Hashing parameters for a kernel.
+     */
     setHashParams(params: IConfig.HashParams): void;
+
+    /**
+     * Sets the parameters used for the temp files (e.g. cells) for a kernel.
+     *
+     * @param params - Temporary file prefix and suffix for a kernel.
+     */
     setTmpFileParams(params: IConfig.FileParams): void;
   }
 
+  /**
+   * Debugger file and hashing configuration.
+   */
   export namespace IConfig {
     /**
      * Temporary file prefix and suffix for a kernel.
@@ -421,7 +442,7 @@ export namespace IDebugger {
 }
 
 /**
- * A token for a tracker for an application's visual debugger instances.
+ * The visual debugger token.
  */
 export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger');
 

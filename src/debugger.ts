@@ -50,7 +50,7 @@ export namespace Debugger {
     }
 
     /**
-     * Computes an id based on the given code.
+     * Returns an id based on the given code.
      *
      * @param code The source code.
      * @param kernel The kernel name from current session.
@@ -61,11 +61,11 @@ export namespace Debugger {
     }
 
     /**
-     * Set the hash parameters for a kernel.
+     * Sets the hash parameters for a kernel.
      *
      * @param params - Hashing parameters for a kernel.
      */
-    public setHashParams(params: IDebugger.IConfig.HashParams): void {
+    setHashParams(params: IDebugger.IConfig.HashParams): void {
       const { kernel, method, seed } = params;
       if (kernel === 'xpython') {
         if (method === 'Murmur2') {
@@ -81,11 +81,11 @@ export namespace Debugger {
     }
 
     /**
-     * Set the parameters used for the temporary files (e.g. cells).
+     * Sets the parameters used for the temp files (e.g. cells) for a kernel.
      *
      * @param params - Temporary file prefix and suffix for a kernel.
      */
-    public setTmpFileParams(params: IDebugger.IConfig.FileParams): void {
+    setTmpFileParams(params: IDebugger.IConfig.FileParams): void {
       const { kernel, prefix, suffix } = params;
       this._fileParams.set(kernel, { kernel, prefix, suffix });
     }
