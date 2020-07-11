@@ -32,7 +32,7 @@ import { DocumentManager } from '@jupyterlab/docmanager';
 
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 
-import { FileBrowser, FileBrowserModel } from '@jupyterlab/filebrowser';
+import { FileBrowser, FilterFileBrowserModel } from '@jupyterlab/filebrowser';
 
 import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
@@ -89,7 +89,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   const commands = new CommandRegistry();
 
-  const fbModel = new FileBrowserModel({
+  const fbModel = new FilterFileBrowserModel({
     manager: docManager
   });
   const fbWidget = new FileBrowser({

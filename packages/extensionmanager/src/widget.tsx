@@ -66,7 +66,7 @@ export class SearchBar extends React.Component<
           placeholder={this.props.placeholder}
           onChange={this.handleChange}
           value={this.state.value}
-          rightIcon="search"
+          rightIcon="ui-components:search"
           disabled={this.props.disabled}
         />
       </div>

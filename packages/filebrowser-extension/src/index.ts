@@ -25,7 +25,7 @@ import { PageConfig, PathExt, URLExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import {
-  FileBrowserModel,
+  FilterFileBrowserModel,
   FileBrowser,
   FileUploadStatus,
   IFileBrowserFactory
@@ -125,6 +125,8 @@ namespace CommandIDs {
     'filebrowser:toggle-navigate-to-current-directory';
 
   export const toggleLastModified = 'filebrowser:toggle-last-modified';
+
+  export const search = 'filebrowser:search';
 }
 
 /**
@@ -240,7 +242,7 @@ async function activateFactory(
     id: string,
     options: IFileBrowserFactory.IOptions = {}
   ) => {
-    const model = new FileBrowserModel({
+    const model = new FilterFileBrowserModel({
       auto: options.auto ?? true,
       manager: docManager,
       driveName: options.driveName || '',
@@ -354,6 +356,7 @@ function activateBrowser(
     });
 
     let navigateToCurrentDirectory: boolean = false;
+    let useFuzzyFilter: boolean = true;
 
     void settingRegistry
       .load('@jupyterlab/filebrowser-extension:browser')
@@ -367,6 +370,12 @@ function activateBrowser(
         navigateToCurrentDirectory = settings.get('navigateToCurrentDirectory')
           .composite as boolean;
         browser.navigateToCurrentDirectory = navigateToCurrentDirectory;
+        settings.changed.connect(settings => {
+          useFuzzyFilter = settings.get('useFuzzyFilter').composite as boolean;
+          browser.useFuzzyFilter = useFuzzyFilter;
+        });
+        useFuzzyFilter = settings.get('useFuzzyFilter').composite as boolean;
+        browser.useFuzzyFilter = useFuzzyFilter;
       });
 
     // Whether to automatically navigate to a document's current directory
@@ -842,6 +851,11 @@ function addCommands(
         }
       }
     }
+  });
+
+  commands.addCommand(CommandIDs.search, {
+    label: 'Search on File Names',
+    execute: () => alert('search')
   });
 
   if (mainMenu) {

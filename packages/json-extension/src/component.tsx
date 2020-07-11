@@ -58,7 +58,7 @@ export class Component extends React.Component<IProps, IState> {
           placeholder="Filter..."
           onChange={this.handleChange}
           value={this.state.value}
-          rightIcon="search"
+          rightIcon="ui-components:search"
         />
         <JSONTree
           data={data}

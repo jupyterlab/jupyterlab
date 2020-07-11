@@ -139,6 +139,12 @@
   background-color: var(--jp-layout-color1);
 }
 
+.jp-DirListing-content mark {
+  color: var(--jp-ui-font-color0);
+  background-color: transparent;
+  font-weight: bold;
+}
+
 /* Style the directory listing content when a user drops a file to upload */
 .jp-DirListing.jp-mod-native-drop .jp-DirListing-content {
   outline: 5px dashed rgba(128, 128, 128, 0.5);
@@ -243,4 +249,8 @@
 
 .jp-LastModified-hidden {
   display: none;
+}
+
+.jp-FileBrowser-filterBox {
+  padding: 4px;
 }
