@@ -312,7 +312,8 @@ export class FileBrowser extends Widget {
     this._filenameSearcher = FilenameSearcher({
       listing: this._listing,
       useFuzzyFilter: this._useFuzzyFilter,
-      placeholder: 'Filter files by name'
+      placeholder: 'Filter files by name',
+      forceRefresh: true
     });
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
 

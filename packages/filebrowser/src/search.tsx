@@ -20,6 +20,7 @@ export interface IFilterBoxProps {
   listing: DirListing;
   useFuzzyFilter: boolean;
   placeholder?: string;
+  forceRefresh?: boolean;
 }
 
 /**
@@ -98,11 +99,13 @@ function fuzzySearch(item: Contents.IModel, query: string): IScore | null {
 const FilterBox = (props: IFilterBoxProps) => {
   const [filter, setFilter] = useState('');
 
-  useEffect(() => {
-    props.listing.model.setFilter((item: Contents.IModel) => {
-      return true;
-    });
-  }, []);
+  if (props.forceRefresh) {
+    useEffect(() => {
+      props.listing.model.setFilter((item: Contents.IModel) => {
+        return true;
+      });
+    }, []);
+  }
 
   /**
    * Handler for search input changes.
@@ -152,6 +155,7 @@ export const FilenameSearcher = (props: IFilterBoxProps) => {
       listing={props.listing}
       useFuzzyFilter={props.useFuzzyFilter}
       placeholder={props.placeholder}
+      forceRefresh={props.forceRefresh}
     />
   );
 };
