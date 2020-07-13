@@ -1560,10 +1560,10 @@
   resolved "https://registry.yarnpkg.com/@lumino/coreutils/-/coreutils-1.5.2.tgz#9ac5becae4a42b3260284e6af378a85fb67a8dd6"
   integrity sha512-yLk507d5gONDjGLvU+bWHVisssDEigbZ1UmbCzaSaQ8DaK0WktscwqPbODh68cK8cobClx11xM7SPonqQtjX/Q==
 
-"@lumino/datagrid@^0.5.3":
-  version "0.5.3"
-  resolved "https://registry.yarnpkg.com/@lumino/datagrid/-/datagrid-0.5.3.tgz#62ac692a199e033d811cc2229fa979b01c058889"
-  integrity sha512-5W86WnbZKrX/P+WkXMPRkToM0yISjmKu2ewJ2CtyKw+OsGsBcgshM147k4wxDskAtIv/+wsgdth7sIdzx6OW+A==
+"@lumino/datagrid@^0.6.0":
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/@lumino/datagrid/-/datagrid-0.6.0.tgz#8272fe4cf8bb27f3ec9cc8fee279329c35695d19"
+  integrity sha512-TkpCm4AbCAVwGg3pC5618YnjfHSyzhWxRaM1FQ7RKWS+mZoKhMWVbN0I2o2OLpdaBjvf7sV9JUp08rsouHRqOQ==
   dependencies:
     "@lumino/algorithm" "^1.2.3"
     "@lumino/coreutils" "^1.4.2"
