@@ -17,7 +17,7 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
-import { chain, each, IIterator } from '@lumino/algorithm';
+import { each } from '@lumino/algorithm';
 
 import { IDebugger } from './tokens';
 
@@ -42,19 +42,19 @@ export class EditorFinder implements IDebugger.IEditorFinder {
   }
 
   /**
-   * Returns an iterator of editors for a source matching the current debug
+   * Returns an array of editors for a source matching the current debug
    * session by iterating through all the widgets in each of the supported
    * debugger types (i.e., consoles, files, notebooks).
    *
    * @param params - The editor search parameters.
    */
-  find(params: IDebugger.IEditorFinder.Params): IIterator<CodeEditor.IEditor> {
-    return chain(
-      this._findInConsoles(params),
-      this._findInEditors(params),
-      this._findInNotebooks(params),
-      this._findInReadOnlyEditors(params)
-    );
+  find(params: IDebugger.IEditorFinder.Params): CodeEditor.IEditor[] {
+    return [
+      ...this._findInConsoles(params),
+      ...this._findInEditors(params),
+      ...this._findInNotebooks(params),
+      ...this._findInReadOnlyEditors(params)
+    ];
   }
 
   /**

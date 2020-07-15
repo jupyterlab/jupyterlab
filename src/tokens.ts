@@ -5,8 +5,6 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
-import { IIterator } from '@lumino/algorithm';
-
 import { Token } from '@lumino/coreutils';
 
 import { IObservableDisposable } from '@lumino/disposable';
@@ -280,13 +278,13 @@ export namespace IDebugger {
    */
   export interface IEditorFinder {
     /**
-     * Returns an iterator of editors for a source matching the current debug
+     * Returns an array of editors for a source matching the current debug
      * session by iterating through all the widgets in each of the supported
      * debugger types (i.e., consoles, files, notebooks).
      *
      * @param params - The editor search parameters.
      */
-    find(params: IEditorFinder.Params): IIterator<CodeEditor.IEditor>;
+    find(params: IEditorFinder.Params): CodeEditor.IEditor[];
   }
 
   /**
