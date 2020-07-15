@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/tooltip-extension",
-  "version": "2.2.0-rc.1",
+  "version": "2.2.0",
   "description": "JupyterLab - Tooltip Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,15 +36,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.2.0-rc.1",
-    "@jupyterlab/codeeditor": "^2.2.0-rc.1",
-    "@jupyterlab/console": "^2.2.0-rc.1",
-    "@jupyterlab/coreutils": "^4.2.0-rc.1",
-    "@jupyterlab/fileeditor": "^2.2.0-rc.1",
-    "@jupyterlab/notebook": "^2.2.0-rc.1",
-    "@jupyterlab/rendermime": "^2.2.0-rc.1",
-    "@jupyterlab/services": "^5.2.0-rc.1",
-    "@jupyterlab/tooltip": "^2.2.0-rc.1",
+    "@jupyterlab/application": "^2.2.0",
+    "@jupyterlab/codeeditor": "^2.2.0",
+    "@jupyterlab/console": "^2.2.0",
+    "@jupyterlab/coreutils": "^4.2.0",
+    "@jupyterlab/fileeditor": "^2.2.0",
+    "@jupyterlab/notebook": "^2.2.0",
+    "@jupyterlab/rendermime": "^2.2.0",
+    "@jupyterlab/services": "^5.2.0",
+    "@jupyterlab/tooltip": "^2.2.0",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
     "@lumino/widgets": "^1.11.1"
