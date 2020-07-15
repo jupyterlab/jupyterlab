@@ -155,7 +155,7 @@ export class TrackerHandler implements IDisposable {
       path: this._debuggerService.session.connection.path,
       source: path
     });
-    if (results.next()) {
+    if (results.length > 0) {
       return;
     }
     const editorWrapper = this._readOnlyEditorFactory.createNewEditor({
