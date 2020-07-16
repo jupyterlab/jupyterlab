@@ -5,7 +5,9 @@
     "composite": false,
     "baseUrl": ".",
     "paths": {
-      "@jupyterlab/*": ["packages/*/src"]
+      "@jupyterlab/*": [
+        "packages/*/src"
+      ]
     }
   },
   "references": [
