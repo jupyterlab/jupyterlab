@@ -46,13 +46,13 @@ function twistButton(props: ITwistButtonProps) {
   if (props.collapsed) {
     return (
       <div className="toc-collapse-button" onClick={wrapper}>
-        <caretRightIcon.react width='25px' />
+        <caretRightIcon.react width="25px" />
       </div>
     );
   }
   return (
     <div className="toc-collapse-button" onClick={wrapper}>
-      <caretDownIcon.react width='25px' />
+      <caretDownIcon.react width="25px" />
     </div>
   );
 

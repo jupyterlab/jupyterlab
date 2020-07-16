@@ -61,9 +61,11 @@ function toolbar(options: OptionsManager) {
           role="text"
           aria-label="Toggle Auto-Numbering"
           title="Toggle Auto-Numbering"
-          className={ this.state.numbering
-                      ? "toc-toolbar-icon-selected"
-                      : "toc-toolbar-icon" }
+          className={
+            this.state.numbering
+              ? 'toc-toolbar-icon-selected'
+              : 'toc-toolbar-icon'
+          }
         >
           <numberingIcon.react />
         </div>

@@ -3,7 +3,12 @@
 
 import * as React from 'react';
 import { INotebookTracker } from '@jupyterlab/notebook';
-import { codeIcon, markdownIcon, numberingIcon, tagIcon } from '@jupyterlab/ui-components';
+import {
+  codeIcon,
+  markdownIcon,
+  numberingIcon,
+  tagIcon
+} from '@jupyterlab/ui-components';
 
 import { JSONValue } from '@lumino/coreutils';
 import { OptionsManager } from './options_manager';
@@ -172,25 +177,29 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
           role="text"
           aria-label="Toggle Code Cells"
           title="Toggle Code Cells"
-          className={ this.state.showCode
-                      ? "toc-toolbar-code-icon toc-toolbar-icon-selected"
-                      : "toc-toolbar-code-icon toc-toolbar-icon" }
+          className={
+            this.state.showCode
+              ? 'toc-toolbar-code-icon toc-toolbar-icon-selected'
+              : 'toc-toolbar-code-icon toc-toolbar-icon'
+          }
         >
-          <codeIcon.react/>
+          <codeIcon.react />
         </div>
       );
 
       const markdownToggleIcon = (
         <div
-            onClick={event => this.toggleMarkdown()}
-            role="text"
-            aria-label="Toggle Markdown Text Cells"
-            title="Toggle Markdown Text Cells"
-            className={ this.state.showMarkdown
-                          ? "toc-toolbar-icon-selected"
-                          : "toc-toolbar-icon" }
+          onClick={event => this.toggleMarkdown()}
+          role="text"
+          aria-label="Toggle Markdown Text Cells"
+          title="Toggle Markdown Text Cells"
+          className={
+            this.state.showMarkdown
+              ? 'toc-toolbar-icon-selected'
+              : 'toc-toolbar-icon'
+          }
         >
-          <markdownIcon.react/>
+          <markdownIcon.react />
         </div>
       );
 
@@ -200,11 +209,13 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
           role="text"
           aria-label="Toggle Auto-Numbering"
           title="Toggle Auto-Numbering"
-          className={ this.state.numbering
-                        ? "toc-toolbar-icon-selected"
-                        : "toc-toolbar-icon" }
+          className={
+            this.state.numbering
+              ? 'toc-toolbar-icon-selected'
+              : 'toc-toolbar-icon'
+          }
         >
-          <numberingIcon.react/>
+          <numberingIcon.react />
         </div>
       );
 
@@ -214,11 +225,13 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
           role="text"
           aria-label="Show Tags Menu"
           title="Show Tags Menu"
-          className={ this.state.showTags
-                        ? "toc-toolbar-icon-selected"
-                        : "toc-toolbar-icon" }
+          className={
+            this.state.showTags
+              ? 'toc-toolbar-icon-selected'
+              : 'toc-toolbar-icon'
+          }
         >
-          <tagIcon.react/>
+          <tagIcon.react />
         </div>
       );
       if (this.state.showTags) {
