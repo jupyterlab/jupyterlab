@@ -21,6 +21,10 @@ import {
   sessionContextDialogs
 } from '@jupyterlab/apputils';
 
+import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+
+import { IMainMenu } from '@jupyterlab/mainmenu';
+
 import { URLExt } from '@jupyterlab/coreutils';
 
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
@@ -38,6 +42,8 @@ import { Palette } from './palette';
 import { settingsPlugin } from './settingsplugin';
 
 import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
+
+import { WorkspaceUI } from './workspace-ui';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -488,6 +494,16 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * The workspace UI extension.
+ */
+const workspaceUI: JupyterFrontEndPlugin<void> = {
+  activate: WorkspaceUI.activate,
+  id: '@jupyterlab/apputils-extension:workspace-ui',
+  autoStart: true,
+  requires: [IMainMenu, IFileBrowserFactory, IWindowResolver, IStateDB, IRouter]
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -501,7 +517,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sessionDialogs,
   themesPlugin,
   themesPaletteMenuPlugin,
-  utilityCommands
+  utilityCommands,
+  workspaceUI
 ];
 export default plugins;
 

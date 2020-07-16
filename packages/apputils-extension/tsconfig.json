@@ -16,6 +16,9 @@
       "path": "../coreutils"
     },
     {
+      "path": "../filebrowser"
+    },
+    {
       "path": "../mainmenu"
     },
     {
