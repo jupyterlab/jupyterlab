@@ -5,7 +5,9 @@
     "composite": false,
     "baseUrl": ".",
     "paths": {
-      "@jupyterlab/*": ["packages/*/src"]
+      "@jupyterlab/*": [
+        "packages/*/src"
+      ]
     }
   },
   "references": [
@@ -83,6 +85,9 @@
     },
     {
       "path": "./packages/extensionmanager-extension"
+    },
+    {
+      "path": "./packages/faq-extension"
     },
     {
       "path": "./packages/filebrowser"
