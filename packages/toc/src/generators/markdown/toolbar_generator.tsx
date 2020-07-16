@@ -3,6 +3,7 @@
 
 import * as React from 'react';
 import { OptionsManager } from './options_manager';
+import { numberingIcon } from '@jupyterlab/ui-components';
 
 /**
  * Interface describing toolbar properties.
@@ -54,36 +55,19 @@ function toolbar(options: OptionsManager) {
         options.numbering = !options.numbering;
         this.setState({ numbering: options.numbering });
       };
-      let icon;
-      if (this.state.numbering) {
-        icon = (
-          <div
-            className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-            onClick={event => toggleNumbering()}
-          >
-            <div
-              role="text"
-              aria-label="Toggle Auto-Numbering"
-              title="Toggle Auto-Numbering"
-              className="toc-toolbar-auto-numbering-icon toc-toolbar-icon-selected"
-            />
-          </div>
-        );
-      } else {
-        icon = (
-          <div
-            className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-            onClick={event => toggleNumbering()}
-          >
-            <div
-              role="text"
-              aria-label="Toggle Auto-Numbering"
-              title="Toggle Auto-Numbering"
-              className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
-            />
-          </div>
-        );
-      }
+      const icon = (
+        <div
+          onClick={event => toggleNumbering()}
+          role="text"
+          aria-label="Toggle Auto-Numbering"
+          title="Toggle Auto-Numbering"
+          className={ this.state.numbering
+                      ? "toc-toolbar-icon-selected"
+                      : "toc-toolbar-icon" }
+        >
+          <numberingIcon.react />
+        </div>
+      );
       return (
         <div>
           <div className={'toc-toolbar'}>{icon}</div>

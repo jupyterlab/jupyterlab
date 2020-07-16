@@ -3,6 +3,8 @@
 
 import * as React from 'react';
 import { INotebookTracker } from '@jupyterlab/notebook';
+import { codeIcon, markdownIcon, numberingIcon, tagIcon } from '@jupyterlab/ui-components';
+
 import { JSONValue } from '@lumino/coreutils';
 import { OptionsManager } from './options_manager';
 import { TagsToolComponent } from './tagstool';
@@ -164,93 +166,59 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
      * @returns rendered toolbar
      */
     render() {
-      const codeIcon = this.state.showCode ? (
+      const codeToggleIcon = (
         <div
-          className="toc-toolbar-code-button toc-toolbar-button"
           onClick={event => this.toggleCode()}
+          role="text"
+          aria-label="Toggle Code Cells"
+          title="Toggle Code Cells"
+          className={ this.state.showCode
+                      ? "toc-toolbar-code-icon toc-toolbar-icon-selected"
+                      : "toc-toolbar-code-icon toc-toolbar-icon" }
         >
-          <div
-            role="text"
-            aria-label="Toggle Code Cells"
-            title="Toggle Code Cells"
-            className="toc-toolbar-code-icon toc-toolbar-icon-selected"
-          />
-        </div>
-      ) : (
-        <div
-          className="toc-toolbar-code-button toc-toolbar-button"
-          onClick={event => this.toggleCode()}
-        >
-          <div
-            role="text"
-            aria-label="Toggle Code Cells"
-            title="Toggle Code Cells"
-            className="toc-toolbar-code-icon toc-toolbar-icon"
-          />
+          <codeIcon.react/>
         </div>
       );
 
-      const markdownIcon = this.state.showMarkdown ? (
+      const markdownToggleIcon = (
         <div
-          className="toc-toolbar-markdown-button toc-toolbar-button"
-          onClick={event => this.toggleMarkdown()}
-        >
-          <div
+            onClick={event => this.toggleMarkdown()}
             role="text"
             aria-label="Toggle Markdown Text Cells"
             title="Toggle Markdown Text Cells"
-            className="toc-toolbar-markdown-icon toc-toolbar-icon-selected"
-          />
-        </div>
-      ) : (
-        <div
-          className="toc-toolbar-markdown-button toc-toolbar-button"
-          onClick={event => this.toggleMarkdown()}
+            className={ this.state.showMarkdown
+                          ? "toc-toolbar-icon-selected"
+                          : "toc-toolbar-icon" }
         >
-          <div
-            role="text"
-            aria-label="Toggle Markdown Text Cells"
-            title="Toggle Markdown Text Cells"
-            className="toc-toolbar-markdown-icon toc-toolbar-icon"
-          />
+          <markdownIcon.react/>
         </div>
       );
 
-      const numberingIcon = this.state.numbering ? (
+      const numberingToggleIcon = (
         <div
-          className="toc-toolbar-auto-numbering-button toc-toolbar-button"
           onClick={event => this.toggleNumbering()}
+          role="text"
+          aria-label="Toggle Auto-Numbering"
+          title="Toggle Auto-Numbering"
+          className={ this.state.numbering
+                        ? "toc-toolbar-icon-selected"
+                        : "toc-toolbar-icon" }
         >
-          <div
-            role="text"
-            aria-label="Toggle Auto-Numbering"
-            title="Toggle Auto-Numbering"
-            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon-selected"
-          />
-        </div>
-      ) : (
-        <div
-          className="toc-toolbar-auto-numbering-button toc-toolbar-button"
-          onClick={event => this.toggleNumbering()}
-        >
-          <div
-            role="text"
-            aria-label="Toggle Auto-Numbering"
-            title="Toggle Auto-Numbering"
-            className="toc-toolbar-auto-numbering-icon toc-toolbar-icon"
-          />
+          <numberingIcon.react/>
         </div>
       );
 
       let tagDropdown = <div />;
-      let tagIcon = (
-        <div className="toc-toolbar-button">
-          <div
-            role="text"
-            aria-label="Show Tags Menu"
-            title="Show Tags Menu"
-            className="toc-toolbar-tag-icon toc-toolbar-icon"
-          />
+      let tagToggleIcon = (
+        <div
+          role="text"
+          aria-label="Show Tags Menu"
+          title="Show Tags Menu"
+          className={ this.state.showTags
+                        ? "toc-toolbar-icon-selected"
+                        : "toc-toolbar-icon" }
+        >
+          <tagIcon.react/>
         </div>
       );
       if (this.state.showTags) {
@@ -266,27 +234,19 @@ function toolbar(options: OptionsManager, tracker: INotebookTracker) {
         );
         options.tagTool = this.tagTool;
         tagDropdown = <div className={'toc-tag-dropdown'}> {tagTool} </div>;
-        tagIcon = (
-          <div
-            role="text"
-            aria-label="Hide Tags Menu"
-            title="Hide Tags Menu"
-            className="toc-toolbar-tag-icon toc-toolbar-icon-selected"
-          />
-        );
       }
 
       return (
         <div>
           <div className={'toc-toolbar'}>
-            {codeIcon}
-            {markdownIcon}
-            {numberingIcon}
+            {codeToggleIcon}
+            {markdownToggleIcon}
+            {numberingToggleIcon}
             <div
               className={'toc-tag-dropdown-button'}
               onClick={event => this.toggleTagDropdown()}
             >
-              {tagIcon}
+              {tagToggleIcon}
             </div>
           </div>
           {tagDropdown}
