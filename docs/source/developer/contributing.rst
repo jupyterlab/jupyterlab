@@ -33,7 +33,7 @@ General Guidelines for Contributing
 
 For general documentation about contributing to Jupyter projects, see
 the `Project Jupyter Contributor
-Documentation <https://jupyter.readthedocs.io/en/latest/contributor/content-contributor.html>`__
+Documentation <https://jupyter.readthedocs.io/en/latest/contributing/content-contributor.html>`__
 and `Code of
 Conduct <https://github.com/jupyter/governance/blob/master/conduct/code_of_conduct.md>`__.
 
