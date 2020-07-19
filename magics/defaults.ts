@@ -39,11 +39,11 @@ export const language_specific_overrides: IOverridesRegistry = {
 
       // note magics do not have to start with the new line, for example x = !ls or x = %ls are both valid.
       // x =%ls is also valid. However, percent may also appear in strings, e.g. ls('%').
-      // Hence: (^|\s|=) for shell commands (!) and line magics (%); see issue #281.
+      // Hence: (^|\\s|=) for shell commands (!) and line magics (%); see issue #281.
       // This does not solve all issues, for example `list(" %ls")` still leads to:
       // `list(" get_ipython().run_line_magic("ls")", "")`.
       {
-        pattern: '(^|\s|=)!(\\S+)(.*)(\n)?',
+        pattern: '(^|\\s|=)!(\\S+)(.*)(\n)?',
         replacement: '$1get_ipython().getoutput("$2$3")$4',
         reverse: {
           pattern: 'get_ipython\\(\\).getoutput\\("(.*?)"\\)(\n)?',

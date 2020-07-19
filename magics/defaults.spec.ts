@@ -108,9 +108,7 @@ describe('Default IPython overrides', () => {
       // this is a corner-case as described in
       // https://github.com/krassowski/jupyterlab-lsp/issues/281#issuecomment-645286076
       let override = line_magics_map.override_for('x =%ls');
-      expect(override).to.equal(
-        'x =get_ipython().run_line_magic("ls", "")'
-      );
+      expect(override).to.equal('x =get_ipython().run_line_magic("ls", "")');
     });
 
     it('does not override line-magic-like constructs', () => {
