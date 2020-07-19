@@ -46,13 +46,16 @@ const ICON_NAME = 'jp-JupyterIcon';
  */
 export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:workspaces',
+  autoStart: true,
+  requires: [IMainMenu, IFileBrowserFactory, IWindowResolver, IStateDB],
+  optional: [IRouter],
   activate: (
     app: JupyterFrontEnd,
     menu: IMainMenu,
     fbf: IFileBrowserFactory,
     resolver: IWindowResolver,
     state: IStateDB,
-    router: IRouter
+    router: IRouter | null
   ): void => {
     const ft: DocumentRegistry.IFileType = {
       name: WORKSPACE_NAME,
@@ -107,9 +110,7 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
       ],
       40
     );
-  },
-  autoStart: true,
-  requires: [IMainMenu, IFileBrowserFactory, IWindowResolver, IStateDB, IRouter]
+  }
 };
 
 namespace Private {
@@ -177,19 +178,15 @@ namespace Private {
    * This widget factory is used to handle double click on workspace
    */
   export class WorkspaceFactory extends ABCWidgetFactory<IDocumentWidget> {
-    workspaces: WorkspaceManager;
-    router: IRouter;
-    state: IStateDB;
-
     /**
      * Construct a widget factory that will upload workspace into lab and jump to it
-     * @param workspaces Used to upload the opened workspace into lab
-     * @param router Used to navigate into the opened workspace
-     * @param state Used to save the current workspace file name
+     * @param workspaces - Used to upload the opened workspace into lab
+     * @param router - Used to navigate into the opened workspace
+     * @param state - Used to save the current workspace file name
      */
     constructor(
       workspaces: WorkspaceManager,
-      router: IRouter,
+      router: IRouter | null,
       state: IStateDB
     ) {
       super({
@@ -202,6 +199,21 @@ namespace Private {
       this.router = router;
       this.state = state;
     }
+
+    /**
+     * The workspaces API service manager.
+     */
+    readonly workspaces: WorkspaceManager;
+
+    /**
+     * An optional application URL router.
+     */
+    readonly router: IRouter | null;
+
+    /**
+     * The application state database.
+     */
+    readonly state: IStateDB;
 
     /**
      * Loads the workspace into load, and jump to it
@@ -220,7 +232,11 @@ namespace Private {
         await this.workspaces.save(workspaceId, workspaceDesc);
         // Save last save location, for save button to work
         await this.state.save(LAST_SAVE_ID, path);
-        this.router.navigate(workspaceId, { hard: true });
+        if (this.router) {
+          this.router.navigate(workspaceId, { hard: true });
+        } else {
+          document.location.href = workspaceId;
+        }
       });
       return dummyWidget(context);
     }
