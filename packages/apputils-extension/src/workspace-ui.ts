@@ -42,6 +42,12 @@ class WorkspaceFactory extends ABCWidgetFactory<IDocumentWidget> {
   router: IRouter;
   state: IStateDB;
 
+  /**
+   * Construct a widget factory that will upload workspace into lab and jump to it
+   * @param workspaces Used to upload the opened workspace into lab
+   * @param router Used to navigate into the opened workspace
+   * @param state Used to save the current workspace file name
+   */
   constructor(workspaces: WorkspaceManager, router: IRouter, state: IStateDB) {
     super({
       name: 'Workspace loader',
@@ -54,6 +60,10 @@ class WorkspaceFactory extends ABCWidgetFactory<IDocumentWidget> {
     this.state = state;
   }
 
+  /**
+   * Loads the workspace into load, and jump to it
+   * @param context This is used queried to query the workspace content
+   */
   protected createNewWidget(
     context: DocumentRegistry.Context
   ): IDocumentWidget {
@@ -95,10 +105,17 @@ async function getSavePath(defaultPath: string): Promise<string | null> {
  * A widget that gets a file path from a user.
  */
 class SaveWidget extends Widget {
+  /**
+   * Gets a modal node for getting save location. Will have a default to the current opened directory
+   * @param path Default location
+   */
   constructor(path: string) {
     super({ node: createSaveNode(path) });
   }
 
+  /**
+   * Gets the save path entered by the user
+   */
   getValue(): string {
     return (this.node as HTMLInputElement).value;
   }
