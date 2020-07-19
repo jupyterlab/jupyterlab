@@ -1,14 +1,10 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
 import { JupyterFrontEnd, IRouter } from '@jupyterlab/application';
-import { IMainMenu } from '@jupyterlab/mainmenu';
+
 import { showDialog, Dialog, IWindowResolver } from '@jupyterlab/apputils';
-import { IFileBrowserFactory, FileBrowser } from '@jupyterlab/filebrowser';
-import {
-  ContentsManager,
-  Workspace,
-  WorkspaceManager
-} from '@jupyterlab/services';
-import { IStateDB } from '@jupyterlab/statedb';
-import { Widget } from '@lumino/widgets';
+
 import {
   DocumentRegistry,
   ABCWidgetFactory,
@@ -16,9 +12,24 @@ import {
   DocumentWidget
 } from '@jupyterlab/docregistry';
 
+import { IFileBrowserFactory, FileBrowser } from '@jupyterlab/filebrowser';
+
+import { IMainMenu } from '@jupyterlab/mainmenu';
+
+import {
+  ContentsManager,
+  Workspace,
+  WorkspaceManager
+} from '@jupyterlab/services';
+
+import { IStateDB } from '@jupyterlab/statedb';
+
+import { Widget } from '@lumino/widgets';
+
 namespace CommandIDs {
-  export const saveWorkspaceAsCommandId = 'workspace-ui:save-as';
-  export const saveWorkspaceCommandId = 'workspace-ui:save';
+  export const saveWorkspace = 'workspace-ui:save';
+
+  export const saveWorkspaceAs = 'workspace-ui:save-as';
 }
 
 const WORKSPACE_NAME = 'jupyterlab-workspace';
@@ -141,7 +152,7 @@ async function save(
 ): Promise<void> {
   let name = userPath.split('/').pop();
 
-  // Add extension if it was not proovided, or remove extention from name if it was
+  // Add extension if not provided or remove extension from name if it was.
   if (name !== undefined && name.includes('.')) {
     name = name.split('.')[0];
   } else {
@@ -152,7 +163,7 @@ async function save(
   await state.save(LAST_SAVE_ID, userPath);
 
   const resolvedData = await data;
-  resolvedData.metadata.id = '/lab/workspaces/' + name;
+  resolvedData.metadata.id = `/lab/workspaces/${name}`;
   await contents.save(userPath, {
     type: 'file',
     format: 'text',
@@ -161,7 +172,8 @@ async function save(
 }
 
 /**
- * Ask user for location, and save workspace. Default location is the directory opened in the file browser
+ * Ask user for location, and save workspace.
+ * Default location is the current directory in the file browser
  */
 async function saveAs(
   browser: FileBrowser,
@@ -213,7 +225,7 @@ export namespace WorkspaceUI {
     };
     app.docRegistry.addFileType(ft);
 
-    // The workspace factory create dummy widgets for the purpose to load the new workspace.
+    // The workspace factory creates dummy widgets to load a new workspace.
     const factory = new WorkspaceFactory(
       app.serviceManager.workspaces,
       router,
@@ -221,7 +233,7 @@ export namespace WorkspaceUI {
     );
     app.docRegistry.addWidgetFactory(factory);
 
-    app.commands.addCommand(CommandIDs.saveWorkspaceAsCommandId, {
+    app.commands.addCommand(CommandIDs.saveWorkspaceAs, {
       label: 'Save Current Workspace As...',
       execute: async () => {
         const data = app.serviceManager.workspaces.fetch(resolver.name);
@@ -234,11 +246,11 @@ export namespace WorkspaceUI {
       }
     });
 
-    app.commands.addCommand(CommandIDs.saveWorkspaceCommandId, {
+    app.commands.addCommand(CommandIDs.saveWorkspace, {
       label: 'Save Current Workspace',
       execute: async () => {
         const data = app.serviceManager.workspaces.fetch(resolver.name);
-        const lastSave = await state.fetch('workspace-ui:lastSave');
+        const lastSave = (await state.fetch(LAST_SAVE_ID)) as string;
         if (lastSave === undefined) {
           await saveAs(
             fbf.defaultBrowser,
@@ -247,24 +259,15 @@ export namespace WorkspaceUI {
             state
           );
         } else {
-          await save(
-            lastSave as string,
-            app.serviceManager.contents,
-            data,
-            state
-          );
+          await save(lastSave, app.serviceManager.contents, data, state);
         }
       }
     });
 
     menu.fileMenu.addGroup(
       [
-        {
-          command: CommandIDs.saveWorkspaceAsCommandId
-        },
-        {
-          command: CommandIDs.saveWorkspaceCommandId
-        }
+        { command: CommandIDs.saveWorkspaceAs },
+        { command: CommandIDs.saveWorkspace }
       ],
       40
     );
