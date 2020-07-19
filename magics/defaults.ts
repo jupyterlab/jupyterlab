@@ -38,9 +38,13 @@ export const language_specific_overrides: IOverridesRegistry = {
       //  keep the content, keep magic/command name and new line at the end
 
       // note magics do not have to start with the new line, for example x = !ls or x = %ls are both valid.
+      // x =%ls is also valid. However, percent may also appear in strings, e.g. ls('%').
+      // Hence: (^|\s|=) for shell commands (!) and line magics (%); see issue #281.
+      // This does not solve all issues, for example `list(" %ls")` still leads to:
+      // `list(" get_ipython().run_line_magic("ls")", "")`.
       {
-        pattern: '!(\\S+)(.*)(\n)?',
-        replacement: 'get_ipython().getoutput("$1$2")$3',
+        pattern: '(^|\s|=)!(\\S+)(.*)(\n)?',
+        replacement: '$1get_ipython().getoutput("$2$3")$4',
         reverse: {
           pattern: 'get_ipython\\(\\).getoutput\\("(.*?)"\\)(\n)?',
           replacement: '!$1$2'
@@ -62,11 +66,11 @@ export const language_specific_overrides: IOverridesRegistry = {
         }
       },
       {
-        pattern: '%(\\S+)(.*)(\n)?',
-        replacement: (match, name, args, line_break) => {
+        pattern: '(^|\\s|=)%(\\S+)(.*)(\n)?',
+        replacement: (match, prefix, name, args, line_break) => {
           args = empty_or_escaped(args);
           line_break = line_break || '';
-          return `get_ipython().run_line_magic("${name}", "${args}")${line_break}`;
+          return `${prefix}get_ipython().run_line_magic("${name}", "${args}")${line_break}`;
         },
         reverse: {
           pattern:

@@ -104,6 +104,20 @@ describe('Default IPython overrides', () => {
       expect(reverse).to.equal(LINE_MAGIC_WITH_SPACE);
     });
 
+    it('overrides x =%ls', () => {
+      // this is a corner-case as described in
+      // https://github.com/krassowski/jupyterlab-lsp/issues/281#issuecomment-645286076
+      let override = line_magics_map.override_for('x =%ls');
+      expect(override).to.equal(
+        'x =get_ipython().run_line_magic("ls", "")'
+      );
+    });
+
+    it('does not override line-magic-like constructs', () => {
+      let override = line_magics_map.override_for('list("%")');
+      expect(override).to.equal(null);
+    });
+
     it('escapes arguments', () => {
       const line_magic_with_args = '%MAGIC "arg"';
       let override = line_magics_map.override_for(line_magic_with_args);
@@ -121,6 +135,11 @@ describe('Default IPython overrides', () => {
 
       let reverse = line_magics_map.reverse.override_for(override);
       expect(reverse).to.equal('!ls -o');
+    });
+
+    it('does not override shell-like constructs', () => {
+      let override = line_magics_map.override_for('"!ls"');
+      expect(override).to.equal(null);
     });
   });
 });
