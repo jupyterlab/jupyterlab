@@ -3,24 +3,11 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
-
-import {
-  DOMUtils,
-  IWidgetTracker,
-  MainAreaWidget,
-  WidgetTracker
-} from '@jupyterlab/apputils';
-
-import { CodeEditorWrapper, IEditorServices } from '@jupyterlab/codeeditor';
+import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { textEditorIcon } from '@jupyterlab/ui-components';
-
 import { each } from '@lumino/algorithm';
-
-import { Token } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
@@ -49,15 +36,8 @@ export class TrackerHandler implements IDisposable {
    */
   constructor(options: TrackerHandler.IOptions) {
     this._debuggerService = options.debuggerService;
-    this._shell = options.shell;
     this._readOnlyEditorFactory = new ReadOnlyEditorFactory({
       editorServices: options.editorServices
-    });
-
-    this._readOnlyEditorTracker = new WidgetTracker<
-      MainAreaWidget<CodeEditorWrapper>
-    >({
-      namespace: '@jupyterlab/debugger'
     });
 
     this._editorFinder = options.editorFinder;
@@ -150,7 +130,7 @@ export class TrackerHandler implements IDisposable {
     }
     const { content, mimeType, path } = source;
     const results = this._editorFinder.find({
-      focus: false,
+      focus: true,
       kernel: this._debuggerService.session.connection.kernel.name,
       path: this._debuggerService.session.connection.path,
       source: path
@@ -169,17 +149,13 @@ export class TrackerHandler implements IDisposable {
       editor,
       path
     });
-    const widget = new MainAreaWidget<CodeEditorWrapper>({
-      content: editorWrapper
+    editorWrapper.disposed.connect(() => editorHandler.dispose());
+
+    this._editorFinder.open({
+      label: PathExt.basename(path),
+      caption: path,
+      editorWrapper
     });
-    widget.id = DOMUtils.createDomID();
-    widget.title.label = PathExt.basename(path);
-    widget.title.closable = true;
-    widget.title.caption = path;
-    widget.title.icon = textEditorIcon;
-    widget.disposed.connect(() => editorHandler.dispose());
-    this._shell.add(widget, 'main');
-    void this._readOnlyEditorTracker.add(widget);
 
     const frame = this._debuggerModel?.callstack.frame;
     if (frame) {
@@ -191,10 +167,6 @@ export class TrackerHandler implements IDisposable {
   private _debuggerService: IDebugger;
   private _editorFinder: IDebugger.IEditorFinder | null;
   private _readOnlyEditorFactory: ReadOnlyEditorFactory;
-  private _readOnlyEditorTracker: WidgetTracker<
-    MainAreaWidget<CodeEditorWrapper>
-  >;
-  private _shell: JupyterFrontEnd.IShell;
 }
 
 /**
@@ -219,27 +191,5 @@ export namespace TrackerHandler {
      * The editor services.
      */
     editorServices: IEditorServices;
-
-    /**
-     * The application shell.
-     */
-    shell: JupyterFrontEnd.IShell;
   }
-
-  // TODO: move the interface and token below to token.ts?
-
-  /**
-   * A class that tracks read only editor widgets used for debugging.
-   */
-  export type IDebuggerReadOnlyEditorTracker = IWidgetTracker<
-    MainAreaWidget<CodeEditorWrapper>
-  >;
-
-  /**
-   * The Debugger Read Only Editor tracker token.
-   * TODO: provide the token for the tracker in the plugin?
-   */
-  export const IDebuggerReadOnlyEditorTracker = new Token<
-    IDebuggerReadOnlyEditorTracker
-  >('@jupyterlab/debugger:IDebuggerReadOnlyEditorTracker');
 }

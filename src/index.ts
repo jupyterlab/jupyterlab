@@ -257,7 +257,6 @@ const tracker: JupyterFrontEndPlugin<void> = {
     editorFinder: IDebugger.IEditorFinder
   ) => {
     new TrackerHandler({
-      shell: app.shell,
       editorServices,
       debuggerService: debug,
       editorFinder

@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
@@ -282,9 +282,16 @@ export namespace IDebugger {
      * session by iterating through all the widgets in each of the supported
      * debugger types (i.e., consoles, files, notebooks).
      *
-     * @param params - The editor search parameters.
+     * @param params - The editor find parameters.
      */
-    find(params: IEditorFinder.Params): CodeEditor.IEditor[];
+    find(params: IEditorFinder.FindParams): CodeEditor.IEditor[];
+
+    /**
+     * Open a read-only editor in the main area.
+     *
+     * @param params - The editor open parameters.
+     */
+    open(params: IEditorFinder.OpenParams): void;
   }
 
   /**
@@ -292,11 +299,11 @@ export namespace IDebugger {
    */
   export namespace IEditorFinder {
     /**
-     * Unified parameters for find method
+     * Unified parameters for the find method
      */
-    export type Params = {
+    export type FindParams = {
       /**
-       * Extra flag prevent disable focus.
+       * Extra flag to focus on the parent widget of the editor.
        */
       focus: boolean;
 
@@ -314,6 +321,26 @@ export namespace IDebugger {
        * Source path
        */
       source: string;
+    };
+
+    /**
+     * Unified parameters for the open method
+     */
+    export type OpenParams = {
+      /**
+       * The label for the read-only editor.
+       */
+      label: string;
+
+      /**
+       * The caption for the read-only editor.
+       */
+      caption: string;
+
+      /**
+       * The code editor wrapper to add to the main area.
+       */
+      editorWrapper: CodeEditorWrapper;
     };
   }
 

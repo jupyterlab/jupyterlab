@@ -3,7 +3,7 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+import { MainAreaWidget, WidgetTracker, DOMUtils } from '@jupyterlab/apputils';
 
 import {
   CodeEditor,
@@ -16,6 +16,8 @@ import { IConsoleTracker } from '@jupyterlab/console';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
+
+import { textEditorIcon } from '@jupyterlab/ui-components';
 
 import { each } from '@lumino/algorithm';
 
@@ -48,7 +50,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    *
    * @param params - The editor search parameters.
    */
-  find(params: IDebugger.IEditorFinder.Params): CodeEditor.IEditor[] {
+  find(params: IDebugger.IEditorFinder.FindParams): CodeEditor.IEditor[] {
     return [
       ...this._findInConsoles(params),
       ...this._findInEditors(params),
@@ -58,12 +60,31 @@ export class EditorFinder implements IDebugger.IEditorFinder {
   }
 
   /**
+   * Open a read-only editor in the main area.
+   *
+   * @param params The editor open parameters.
+   */
+  open(params: IDebugger.IEditorFinder.OpenParams): void {
+    const { editorWrapper, label, caption } = params;
+    const widget = new MainAreaWidget<CodeEditorWrapper>({
+      content: editorWrapper
+    });
+    widget.id = DOMUtils.createDomID();
+    widget.title.label = label;
+    widget.title.closable = true;
+    widget.title.caption = caption;
+    widget.title.icon = textEditorIcon;
+    this._shell.add(widget, 'main');
+    void this._readOnlyEditorTracker.add(widget);
+  }
+
+  /**
    * Find relevant editors matching the search params in the notebook tracker.
    *
    * @param params - The editor search parameters.
    */
   private _findInNotebooks(
-    params: IDebugger.IEditorFinder.Params
+    params: IDebugger.IEditorFinder.FindParams
   ): CodeEditor.IEditor[] {
     if (!this._notebookTracker) {
       return [];
@@ -110,7 +131,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    * @param params - The editor search parameters.
    */
   private _findInConsoles(
-    params: IDebugger.IEditorFinder.Params
+    params: IDebugger.IEditorFinder.FindParams
   ): CodeEditor.IEditor[] {
     if (!this._consoleTracker) {
       return [];
@@ -147,7 +168,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    * @param params - The editor search parameters.
    */
   private _findInEditors(
-    params: IDebugger.IEditorFinder.Params
+    params: IDebugger.IEditorFinder.FindParams
   ): CodeEditor.IEditor[] {
     if (!this._editorTracker) {
       return;
@@ -185,7 +206,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    * @param params - The editor search parameters.
    */
   private _findInReadOnlyEditors(
-    params: IDebugger.IEditorFinder.Params
+    params: IDebugger.IEditorFinder.FindParams
   ): CodeEditor.IEditor[] {
     const { focus, kernel, source } = params;
 
