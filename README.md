@@ -108,11 +108,7 @@ jupyter labextension install jupyterlab-kernelspy
 
 ### Debug Protocol Overview
 
-Adding a quick overview of the debug protocol, so it's easier to visualize the types of messages sent between the JupyterLab extension and the kernel.
-
-It only shows a subset of the messages for now, but can be extended to also include the calls to `continue`, `stepIn` and `disconnect`.
-
-This also show new messages that are not part of the Debug Adapter Protocol (DAP), such as `dumpCell`.
+The following diagram illustrates the types of messages sent between the JupyterLab extension and the kernel.
 
 #### Diagram
 
