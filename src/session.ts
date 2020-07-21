@@ -12,13 +12,13 @@ import { IDebugger } from './tokens';
 /**
  * A concrete implementation of IDebugger.ISession.
  */
-export class DebugSession implements IDebugger.ISession {
+export class DebuggerSession implements IDebugger.ISession {
   /**
    * Instantiate a new debug session
    *
    * @param options - The debug session instantiation options.
    */
-  constructor(options: DebugSession.IOptions) {
+  constructor(options: DebuggerSession.IOptions) {
     this.connection = options.connection;
   }
 
@@ -216,11 +216,11 @@ export class DebugSession implements IDebugger.ISession {
 }
 
 /**
- * A namespace for `DebugSession` statics.
+ * A namespace for `DebuggerSession` statics.
  */
-export namespace DebugSession {
+export namespace DebuggerSession {
   /**
-   * Instantiation options for a `DebugSession`.
+   * Instantiation options for a `DebuggerSession`.
    */
   export interface IOptions {
     /**

@@ -11,13 +11,11 @@ import {
 
 import { UUID, JSONExt } from '@lumino/coreutils';
 
-import { DebugSession } from '../src/session';
+import { Debugger } from '../src/debugger';
 
 import { IDebugger } from '../src/tokens';
 
 import { KERNELSPECS, handleRequest } from './utils';
-
-import { Debugger } from '../src/debugger';
 
 /**
  * A Test class to mock a KernelSpecManager
@@ -112,7 +110,7 @@ describe('DebuggerService', () => {
       path: UUID.uuid4()
     });
     await connection.changeKernel({ name: 'xpython' });
-    session = new DebugSession({ connection });
+    session = new Debugger.Session({ connection });
     model = new Debugger.Model();
     config = new Debugger.Config();
     service = new Debugger.Service({ specsManager, config });

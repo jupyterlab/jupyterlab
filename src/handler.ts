@@ -27,8 +27,6 @@ import { DisposableSet } from '@lumino/disposable';
 
 import { Debugger } from './debugger';
 
-import { DebugSession } from './session';
-
 import { IDebugger } from './tokens';
 
 import { ConsoleHandler } from './handlers/console';
@@ -301,7 +299,7 @@ export class DebuggerHandler {
 
     // update the active debug session
     if (!this._service.session) {
-      this._service.session = new DebugSession({ connection });
+      this._service.session = new Debugger.Session({ connection });
     } else {
       this._previousConnection = this._service.session.connection.kernel
         ? this._service.session.connection

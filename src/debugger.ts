@@ -21,6 +21,8 @@ import { Variables as VariablesPanel } from './panels/variables';
 
 import { DebuggerService } from './service';
 
+import { DebuggerSession } from './session';
+
 import { DebuggerSources } from './sources';
 
 import { IDebugger } from './tokens';
@@ -43,6 +45,11 @@ export namespace Debugger {
    * The main IDebugger implementation.
    */
   export class Service extends DebuggerService {}
+
+  /**
+   * A concrete implementation of IDebugger.ISession.
+   */
+  export class Session extends DebuggerSession {}
 
   /**
    * A debugger sidebar.

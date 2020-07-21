@@ -31,8 +31,6 @@ import { DebuggerService } from '../src/service';
 
 import { DebuggerModel } from '../src/model';
 
-import { DebugSession } from '../src/session';
-
 import { SourcesBody } from '../src/panels/sources/body';
 
 import { SourcesHeader } from '../src/panels/sources/header';
@@ -73,7 +71,7 @@ describe('Debugger', () => {
   ].join('\n');
 
   let breakpoints: IDebugger.IBreakpoint[];
-  let session: DebugSession;
+  let session: Debugger.Session;
   let path: string;
   let connection: Session.ISessionConnection;
   let sidebar: TestSidebar;
@@ -86,7 +84,7 @@ describe('Debugger', () => {
     });
     await connection.changeKernel({ name: 'xpython' });
 
-    session = new DebugSession({ connection });
+    session = new Debugger.Session({ connection });
     service.session = session;
 
     sidebar = new TestSidebar({
