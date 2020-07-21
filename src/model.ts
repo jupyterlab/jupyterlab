@@ -16,7 +16,7 @@ import { VariablesModel } from './panels/variables/model';
 /**
  * A model for a debugger.
  */
-export class DebuggerModel implements IDebugger.IModel {
+export class DebuggerModel {
   /**
    * Instantiate a new DebuggerModel
    */

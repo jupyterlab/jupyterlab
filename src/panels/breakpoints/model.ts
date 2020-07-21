@@ -28,7 +28,7 @@ export class BreakpointsModel implements IDisposable {
   /**
    * Signal emitted when the breakpoints are restored.
    */
-  get restored(): Signal<this, void> {
+  get restored(): ISignal<this, void> {
     return this._restored;
   }
 

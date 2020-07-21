@@ -85,9 +85,6 @@ const consoles: JupyterFrontEndPlugin<void> = {
       shell: app.shell,
       service: debug
     });
-    debug.model.disposed.connect(() => {
-      handler.disposeAll(debug);
-    });
 
     const updateHandlerAndCommands = async (
       widget: ConsolePanel
@@ -133,9 +130,6 @@ const files: JupyterFrontEndPlugin<void> = {
       type: 'file',
       shell: app.shell,
       service: debug
-    });
-    debug.model.disposed.connect(() => {
-      handler.disposeAll(debug);
     });
 
     const activeSessions: {
@@ -205,9 +199,6 @@ const notebooks: JupyterFrontEndPlugin<void> = {
       type: 'notebook',
       shell: app.shell,
       service
-    });
-    service.model.disposed.connect(() => {
-      handler.disposeAll(service);
     });
     const updateHandlerAndCommands = async (
       widget: NotebookPanel
@@ -289,10 +280,10 @@ const configuration: JupyterFrontEndPlugin<IDebugger.IConfig> = {
 };
 
 /**
- * A plugin that tracks editors, console and file editors used for debugging.
+ * A plugin that provides source/editor functionality for debugging.
  */
-const finder: JupyterFrontEndPlugin<IDebugger.ISources> = {
-  id: '@jupyterlab/debugger:editor-finder',
+const sources: JupyterFrontEndPlugin<IDebugger.ISources> = {
+  id: '@jupyterlab/debugger:sources',
   autoStart: true,
   provides: IDebuggerSources,
   requires: [IDebuggerConfig, IEditorServices],
@@ -567,7 +558,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tracker,
   variables,
   main,
-  finder,
+  sources,
   configuration
 ];
 

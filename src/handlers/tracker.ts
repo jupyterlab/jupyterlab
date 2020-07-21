@@ -41,35 +41,6 @@ export class TrackerHandler implements IDisposable {
     });
 
     this._editorFinder = options.editorFinder;
-    this._onModelChanged();
-    this._debuggerService.modelChanged.connect(this._onModelChanged, this);
-  }
-
-  /**
-   * Whether the handler is disposed.
-   */
-  isDisposed: boolean;
-
-  /**
-   * Dispose the handler.
-   */
-  dispose(): void {
-    if (this.isDisposed) {
-      return;
-    }
-    this.isDisposed = true;
-    Signal.clearData(this);
-  }
-
-  /**
-   * Handle when the debug model changes.
-   */
-  private _onModelChanged(): void {
-    this._debuggerModel = this._debuggerService.model as Debugger.Model;
-    if (!this._debuggerModel) {
-      return;
-    }
-
     this._debuggerModel.callstack.currentFrameChanged.connect(
       this._onCurrentFrameChanged,
       this
@@ -88,6 +59,22 @@ export class TrackerHandler implements IDisposable {
       });
       this._onCurrentSourceOpened(null, source);
     });
+  }
+
+  /**
+   * Whether the handler is disposed.
+   */
+  isDisposed: boolean;
+
+  /**
+   * Dispose the handler.
+   */
+  dispose(): void {
+    if (this.isDisposed) {
+      return;
+    }
+    this.isDisposed = true;
+    Signal.clearData(this);
   }
 
   /**

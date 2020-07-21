@@ -98,27 +98,10 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Sets the debugger model to the given parameter.
-   *
-   * @param model - The new debugger model.
-   */
-  set model(model: IDebugger.IModel) {
-    this._model = model as Debugger.Model;
-    this._modelChanged.emit(model);
-  }
-
-  /**
    * Signal emitted upon session changed.
    */
   get sessionChanged(): ISignal<IDebugger, IDebugger.ISession> {
     return this._sessionChanged;
-  }
-
-  /**
-   * Signal emitted upon model changed.
-   */
-  get modelChanged(): ISignal<IDebugger, IDebugger.IModel> {
-    return this._modelChanged;
   }
 
   /**
@@ -659,8 +642,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _editorFinder: IDebugger.ISources | null;
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _isDisposed = false;
-  private _model: Debugger.Model;
-  private _modelChanged = new Signal<IDebugger, IDebugger.IModel>(this);
+  private _model: IDebugger.IModel;
   private _session: IDebugger.ISession;
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
   private _specsManager: KernelSpec.IManager;

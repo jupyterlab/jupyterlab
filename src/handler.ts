@@ -82,24 +82,6 @@ export class DebuggerHandler {
   }
 
   /**
-   * Dispose all the handlers.
-   *
-   * @param debug The debug service.
-   */
-  disposeAll(debug: IDebugger): void {
-    const handlerIds = Object.keys(this._handlers);
-    if (handlerIds.length === 0) {
-      return;
-    }
-    debug.session.dispose();
-    debug.session = null;
-    handlerIds.forEach(id => {
-      this._handlers[id].dispose();
-    });
-    this._handlers = {};
-  }
-
-  /**
    * Update a debug handler for the given widget, and
    * handle kernel changed events.
    *
@@ -323,7 +305,6 @@ export class DebuggerHandler {
 
     // listen to the disposed signals
     widget.disposed.connect(removeHandlers);
-    this._service.model.disposed.connect(removeHandlers);
   }
 
   private _type: DebuggerHandler.SessionType;

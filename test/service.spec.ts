@@ -98,7 +98,6 @@ describe('Debugging support', () => {
 describe('DebuggerService', () => {
   const specsManager = new KernelSpecManager();
   let connection: Session.ISessionConnection;
-  let model: Debugger.Model;
   let config: IDebugger.IConfig;
   let session: IDebugger.ISession;
   let service: IDebugger;
@@ -111,7 +110,6 @@ describe('DebuggerService', () => {
     });
     await connection.changeKernel({ name: 'xpython' });
     session = new Debugger.Session({ connection });
-    model = new Debugger.Model();
     config = new Debugger.Config();
     service = new Debugger.Service({ specsManager, config });
   });
@@ -164,18 +162,6 @@ describe('DebuggerService', () => {
     });
   });
 
-  describe('#model', () => {
-    it('should emit the modelChanged signal when setting the model', () => {
-      const modelChangedEvents: Debugger.Model[] = [];
-      service.modelChanged.connect((_, newModel) => {
-        modelChangedEvents.push(newModel as Debugger.Model);
-      });
-      service.model = model;
-      expect(modelChangedEvents.length).toEqual(1);
-      expect(modelChangedEvents[0]).toEqual(model);
-    });
-  });
-
   describe('protocol', () => {
     const code = [
       'i = 0',
@@ -191,7 +177,6 @@ describe('DebuggerService', () => {
 
     beforeEach(async () => {
       service.session = session;
-      service.model = model;
       await service.restoreState(true);
       const breakpointLines: number[] = [3, 5];
       sourceId = service.getCodeId(code);
@@ -211,6 +196,7 @@ describe('DebuggerService', () => {
 
     describe('#updateBreakpoints', () => {
       it('should update the breakpoints', () => {
+        const { model } = service;
         const bpList = model.breakpoints.getBreakpoints(sourceId);
         expect(bpList).toEqual(breakpoints);
       });
@@ -218,6 +204,7 @@ describe('DebuggerService', () => {
 
     describe('#restoreState', () => {
       it('should restore the breakpoints', async () => {
+        const { model } = service;
         model.breakpoints.restoreBreakpoints(
           new Map<string, IDebugger.IBreakpoint[]>()
         );
@@ -232,6 +219,7 @@ describe('DebuggerService', () => {
     describe('#restart', () => {
       it('should restart the debugger and send the breakpoints again', async () => {
         await service.restart();
+        const { model } = service;
         model.breakpoints.restoreBreakpoints(
           new Map<string, IDebugger.IBreakpoint[]>()
         );
@@ -245,12 +233,12 @@ describe('DebuggerService', () => {
 
     describe('#hasStoppedThreads', () => {
       it('should return false if the model is null', () => {
-        service.model = null;
         const hasStoppedThreads = service.hasStoppedThreads();
         expect(hasStoppedThreads).toBe(false);
       });
 
       it('should return true when the execution has stopped', async () => {
+        const { model } = service;
         const variablesChanged = signalToPromise(model.variables.changed);
 
         // trigger a manual execute request

@@ -3,6 +3,8 @@
 
 import { ToolbarButton } from '@jupyterlab/apputils';
 
+import { Signal } from '@lumino/signaling';
+
 import { Panel } from '@lumino/widgets';
 
 import { closeAllIcon } from '../../icons';
@@ -47,6 +49,8 @@ export class Breakpoints extends Panel {
 
     this.addClass('jp-DebuggerBreakpoints');
   }
+
+  readonly clicked = new Signal<this, IDebugger.IBreakpoint>(this);
 }
 
 /**

@@ -15,11 +15,7 @@ import { Signal } from '@lumino/signaling';
 
 import { Editor } from 'codemirror';
 
-import { BreakpointsModel } from '../panels/breakpoints/model';
-
 import { IDebugger } from '../tokens';
-
-import { Debugger } from '../debugger';
 
 /**
  * The class name added to the current line.
@@ -46,17 +42,31 @@ export class EditorHandler implements IDisposable {
     this._debuggerService = options.debuggerService;
     this._editor = options.editor;
 
-    this._onModelChanged();
-    this._debuggerService.modelChanged.connect(this._onModelChanged, this);
-
     this._editorMonitor = new ActivityMonitor({
       signal: this._editor.model.value.changed,
       timeout: EDITOR_CHANGED_TIMEOUT
     });
-
     this._editorMonitor.activityStopped.connect(() => {
       this._sendEditorBreakpoints();
     }, this);
+
+    this._debuggerService.model.breakpoints.changed.connect(async () => {
+      if (!this._editor || this._editor.isDisposed) {
+        return;
+      }
+      this._addBreakpointsToEditor();
+    });
+
+    this._debuggerService.model.breakpoints.restored.connect(async () => {
+      if (!this._editor || this._editor.isDisposed) {
+        return;
+      }
+      this._addBreakpointsToEditor();
+    });
+
+    this._debuggerService.model.callstack.currentFrameChanged.connect(() => {
+      EditorHandler.clearHighlight(this._editor);
+    });
 
     this._setupEditor();
   }
@@ -77,35 +87,6 @@ export class EditorHandler implements IDisposable {
     this._clearEditor();
     this.isDisposed = true;
     Signal.clearData(this);
-  }
-
-  /**
-   * Handle when the debug model changes.
-   */
-  private _onModelChanged(): void {
-    this._debuggerModel = this._debuggerService.model as Debugger.Model;
-    if (!this._debuggerModel) {
-      return;
-    }
-    this._breakpointsModel = this._debuggerModel.breakpoints;
-
-    this._debuggerModel.callstack.currentFrameChanged.connect(() => {
-      EditorHandler.clearHighlight(this._editor);
-    });
-
-    this._breakpointsModel.changed.connect(async () => {
-      if (!this._editor || this._editor.isDisposed) {
-        return;
-      }
-      this._addBreakpointsToEditor();
-    });
-
-    this._breakpointsModel.restored.connect(async () => {
-      if (!this._editor || this._editor.isDisposed) {
-        return;
-      }
-      this._addBreakpointsToEditor();
-    });
   }
 
   /**
@@ -236,7 +217,7 @@ export class EditorHandler implements IDisposable {
    */
   private _getBreakpoints(): IDebugger.IBreakpoint[] {
     const code = this._editor.model.value.text;
-    return this._debuggerModel.breakpoints.getBreakpoints(
+    return this._debuggerService.model.breakpoints.getBreakpoints(
       this._path ?? this._debuggerService.getCodeId(code)
     );
   }
@@ -244,8 +225,6 @@ export class EditorHandler implements IDisposable {
   private _id: string;
   private _path: string;
   private _editor: CodeEditor.IEditor;
-  private _debuggerModel: Debugger.Model;
-  private _breakpointsModel: BreakpointsModel;
   private _debuggerService: IDebugger;
   private _editorMonitor: ActivityMonitor<
     IObservableString,

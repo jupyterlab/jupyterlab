@@ -23,7 +23,7 @@ export class SourcesModel {
   /**
    * Signal emitted when the current frame changes.
    */
-  currentFrameChanged: ISignal<CallstackModel, CallstackModel.IFrame>;
+  readonly currentFrameChanged: ISignal<CallstackModel, CallstackModel.IFrame>;
 
   /**
    * Signal emitted when a source should be open in the main area.

@@ -13,6 +13,12 @@ import { ISignal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
+import { CallstackModel } from './panels/callstack/model';
+
+import { SourcesModel } from './panels/sources/model';
+
+import { VariablesModel } from './panels/variables/model';
+
 /**
  * An interface describing an application's visual debugger.
  */
@@ -25,7 +31,7 @@ export interface IDebugger {
   /**
    * The model of the debugger.
    */
-  model: IDebugger.IModel;
+  readonly model: IDebugger.IModel;
 
   /**
    * Whether the current debugger is started.
@@ -36,11 +42,6 @@ export interface IDebugger {
    * Signal emitted upon session changed.
    */
   readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession>;
-
-  /**
-   * Signal emitted upon model changed.
-   */
-  readonly modelChanged: ISignal<IDebugger, IDebugger.IModel>;
 
   /**
    * Signal emitted for debug event messages.
@@ -150,6 +151,73 @@ export interface IDebugger {
  */
 export namespace IDebugger {
   /**
+   * A namespace for UI interface definitions.
+   */
+  export namespace UI {
+    /**
+     * The breakpoints UI model.
+     */
+    export interface IBreakpoints {
+      /**
+       * Signal emitted when the model changes.
+       */
+      readonly changed: ISignal<this, IDebugger.IBreakpoint[]>;
+
+      /**
+       * Signal emitted when the breakpoints are restored.
+       */
+      readonly restored: ISignal<this, void>;
+
+      /**
+       * Signal emitted when a breakpoint is clicked.
+       */
+      readonly clicked: ISignal<this, IDebugger.IBreakpoint>;
+
+      /**
+       * Get all the breakpoints.
+       */
+      readonly breakpoints: Map<string, IDebugger.IBreakpoint[]>;
+
+      /**
+       * Set the breakpoints for a given id (path).
+       *
+       * @param id The code id (path).
+       * @param breakpoints The list of breakpoints.
+       */
+      setBreakpoints(id: string, breakpoints: IBreakpoint[]): void;
+
+      /**
+       * Get the breakpoints for a given id (path).
+       *
+       * @param id The code id (path).
+       */
+      getBreakpoints(id: string): IBreakpoint[];
+
+      /**
+       * Restore a map of breakpoints.
+       *
+       * @param breakpoints The map of breakpoints
+       */
+      restoreBreakpoints(breakpoints: Map<string, IBreakpoint[]>): void;
+    }
+
+    /**
+     * The callstack UI model.
+     */
+    export type ICallstack = CallstackModel;
+
+    /**
+     * The variables UI model.
+     */
+    export type IVariables = VariablesModel;
+
+    /**
+     * The sources UI model.
+     */
+    export type ISources = SourcesModel;
+  }
+
+  /**
    * The type for a source file.
    */
   export type Source = {
@@ -168,6 +236,51 @@ export namespace IDebugger {
      */
     mimeType?: string;
   };
+
+  /**
+   * The data model for the debugger.
+   */
+  export interface IModel {
+    /**
+     * The breakpoints UI model.
+     */
+    readonly breakpoints: UI.IBreakpoints;
+
+    /**
+     * The callstack UI model.
+     */
+    readonly callstack: UI.ICallstack;
+
+    /**
+     * The variables UI model.
+     */
+    readonly variables: UI.IVariables;
+
+    /**
+     * The sources UI model.
+     */
+    readonly sources: UI.ISources;
+
+    /**
+     * The set of threads in stopped state.
+     */
+    stoppedThreads: Set<number>;
+
+    /**
+     * The current debugger title.
+     */
+    title: string;
+
+    /**
+     * A signal emitted when the title changes.
+     */
+    titleChanged: ISignal<this, string>;
+
+    /**
+     * Clear the model.
+     */
+    clear(): void;
+  }
 
   /**
    * A visual debugger session.
@@ -221,6 +334,7 @@ export namespace IDebugger {
   export interface IBreakpoint extends DebugProtocol.Breakpoint {
     active: boolean;
   }
+
   /**
    * Debugger file and hashing configuration.
    */
@@ -363,11 +477,6 @@ export namespace IDebugger {
       editorWrapper: CodeEditorWrapper;
     };
   }
-
-  /**
-   * The model of a debugger session.
-   */
-  export type IModel = IObservableDisposable;
 
   export namespace ISession {
     /**
