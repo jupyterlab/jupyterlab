@@ -5,10 +5,12 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
+import { IDebugger } from '../../tokens';
+
 /**
  * A model for a callstack.
  */
-export class CallstackModel {
+export class CallstackModel implements IDebugger.UI.ICallstack {
   /**
    * Get all the frames.
    */

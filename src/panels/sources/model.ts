@@ -10,7 +10,7 @@ import { CallstackModel } from '../callstack/model';
 /**
  * The model to keep track of the current source being displayed.
  */
-export class SourcesModel {
+export class SourcesModel implements IDebugger.UI.ISources {
   /**
    * Instantiate a new Sources.Model
    *

@@ -5,10 +5,12 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
+import { IDebugger } from '../../tokens';
+
 /**
  * A model for a variable explorer.
  */
-export class VariablesModel {
+export class VariablesModel implements IDebugger.UI.IVariables {
   /**
    * Get all the scopes.
    */
