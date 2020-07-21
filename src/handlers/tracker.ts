@@ -170,7 +170,7 @@ export namespace TrackerHandler {
     debuggerService: IDebugger;
 
     /**
-     * The editor finder.
+     * The debugger sources.
      */
     debuggerSources: IDebugger.ISources;
 

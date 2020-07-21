@@ -708,7 +708,7 @@ export const IDebuggerConfig = new Token<IDebugger.IConfig>(
 );
 
 /**
- * The debugger editor finder utility token.
+ * The debugger sources utility token.
  */
 export const IDebuggerSources = new Token<IDebugger.ISources>(
   '@jupyterlab/debugger:sources'

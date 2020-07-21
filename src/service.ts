@@ -662,7 +662,7 @@ export namespace DebuggerService {
     config: IDebugger.IConfig;
 
     /**
-     * The editor finder instance.
+     * The debugger sources instance.
      */
     debuggerSources?: IDebugger.ISources;
 

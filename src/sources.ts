@@ -253,28 +253,28 @@ export namespace DebuggerSources {
     config: IDebugger.IConfig;
 
     /**
-     * An optional editor finder for consoles.
-     */
-    consoleTracker?: IConsoleTracker;
-
-    /**
      * The editor services.
      */
     editorServices: IEditorServices;
 
     /**
-     * An optional editor finder for file editors.
+     * The application shell.
+     */
+    shell: JupyterFrontEnd.IShell;
+
+    /**
+     * An optional console tracker.
+     */
+    consoleTracker?: IConsoleTracker;
+
+    /**
+     * An optional file editor tracker.
      */
     editorTracker?: IEditorTracker;
 
     /**
-     * An optional editor finder for notebooks.
+     * An optional notebook tracker.
      */
     notebookTracker?: INotebookTracker;
-
-    /**
-     * The application shell.
-     */
-    shell: JupyterFrontEnd.IShell;
   }
 }
