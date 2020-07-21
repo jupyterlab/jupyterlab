@@ -15,8 +15,6 @@ import { Callstack } from './callstack';
 
 import { DebuggerModel } from './model';
 
-import { DebuggerService } from './service';
-
 import { Sources } from './sources';
 
 import { IDebugger } from './tokens';
@@ -95,28 +93,26 @@ export namespace Debugger {
 
       const { callstackCommands, editorServices, service } = options;
 
-      this.model = service.model as DebuggerModel;
-      this.service = service as DebuggerService;
-      this.service.model = this.model;
+      const model = service.model as DebuggerModel;
 
       this.variables = new Variables({
-        model: this.model.variables,
+        model: model.variables,
         commands: callstackCommands.registry,
         service
       });
 
       this.callstack = new Callstack({
         commands: callstackCommands,
-        model: this.model.callstack
+        model: model.callstack
       });
 
       this.breakpoints = new Breakpoints({
         service,
-        model: this.model.breakpoints
+        model: model.breakpoints
       });
 
       this.sources = new Sources({
-        model: this.model.sources,
+        model: model.sources,
         service,
         editorServices
       });
@@ -124,7 +120,7 @@ export namespace Debugger {
       const header = new Sidebar.Header();
 
       this.addWidget(header);
-      this.model.titleChanged.connect((_, title) => {
+      model.titleChanged.connect((_, title) => {
         header.title.label = title;
       });
 
@@ -152,20 +148,8 @@ export namespace Debugger {
       if (this.isDisposed) {
         return;
       }
-      this.model.dispose();
-      this.service.model = null;
       super.dispose();
     }
-
-    /**
-     * The debugger model.
-     */
-    readonly model: DebuggerModel;
-
-    /**
-     * The debugger service.
-     */
-    readonly service: DebuggerService;
 
     /**
      * The variables widget.

@@ -517,7 +517,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
       updateSettings();
       setting.changed.connect(updateSettings);
-      sidebar.service.sessionChanged.connect(updateSettings);
+      service.sessionChanged.connect(updateSettings);
     }
 
     if (themeManager) {
@@ -531,14 +531,14 @@ const main: JupyterFrontEndPlugin<void> = {
       updateStyle();
     }
 
-    sidebar.service.eventMessage.connect((_, event): void => {
+    service.eventMessage.connect((_, event): void => {
       commands.notifyCommandChanged();
       if (labShell && event.event === 'initialized') {
         labShell.expandRight();
       }
     });
 
-    sidebar.service.sessionChanged.connect(_ => {
+    service.sessionChanged.connect(_ => {
       commands.notifyCommandChanged();
     });
 
