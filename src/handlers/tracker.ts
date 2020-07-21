@@ -13,8 +13,6 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { Debugger } from '../debugger';
-
 import { CallstackModel } from '../panels/callstack/model';
 
 import { ReadOnlyEditorFactory } from '../panels/sources/factory';
@@ -41,17 +39,20 @@ export class TrackerHandler implements IDisposable {
     });
 
     this._editorFinder = options.editorFinder;
-    this._debuggerModel.callstack.currentFrameChanged.connect(
+
+    const { model } = this._debuggerService;
+
+    model.callstack.currentFrameChanged.connect(
       this._onCurrentFrameChanged,
       this
     );
 
-    this._debuggerModel.sources.currentSourceOpened.connect(
+    model.sources.currentSourceOpened.connect(
       this._onCurrentSourceOpened,
       this
     );
 
-    this._debuggerModel.breakpoints.clicked.connect(async (_, breakpoint) => {
+    model.breakpoints.clicked.connect(async (_, breakpoint) => {
       const path = breakpoint.source.path;
       const source = await this._debuggerService.getSource({
         sourceReference: 0,
@@ -144,13 +145,12 @@ export class TrackerHandler implements IDisposable {
       editorWrapper
     });
 
-    const frame = this._debuggerModel?.callstack.frame;
+    const frame = this._debuggerService.model.callstack.frame;
     if (frame) {
       EditorHandler.showCurrentLine(editor, frame.line);
     }
   }
 
-  private _debuggerModel: Debugger.Model;
   private _debuggerService: IDebugger;
   private _editorFinder: IDebugger.ISources | null;
   private _readOnlyEditorFactory: ReadOnlyEditorFactory;
