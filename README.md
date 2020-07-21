@@ -116,7 +116,7 @@ This also show new messages that are not part of the Debug Adapter Protocol (DAP
 
 #### Diagram
 
-![debug-protocol](https://user-images.githubusercontent.com/591645/71578708-926c0f00-2af9-11ea-81cf-dab838f3dc76.png)
+![debug-protocol](https://user-images.githubusercontent.com/591645/88048217-3cbd8980-cb53-11ea-8778-b8015014a230.png)
 
 #### References
 
@@ -132,11 +132,7 @@ Generated using: https://bramp.github.io/js-sequence-diagrams/
 <pre>
 user->JupyterLab: open notebook
 
-JupyterLab->kernel: kernel_info_request
-
-kernel->JupyterLab: kernel_info_reply
-
-JupyterLab->JupyterLab: check 'debugger' key
+JupyterLab->JupyterLab: check 'debugger' key\nin the kernel spec
 
 JupyterLab->user: show toggle button\nif 'debugger'
 
@@ -222,7 +218,7 @@ Note right of kernel: debugger stopped
 
 kernel->JupyterLab: disconnect response
 
-JupyterLab->JupyterLab: clear debugging UI for\nthe notebook
+JupyterLab->JupyterLab: clear debugger UI for\nthe notebook
 </pre>
 </details>
 
