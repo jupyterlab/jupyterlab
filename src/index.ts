@@ -345,7 +345,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           return;
         }
 
-        const model = (service.model as Debugger.Model).variables;
+        const model = service.model.variables;
         const widget = new MainAreaWidget<VariablesBodyGrid>({
           content: new VariablesBodyGrid({
             model,

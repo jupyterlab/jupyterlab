@@ -17,8 +17,6 @@ import { SourcesBody } from './body';
 
 import { SourcesHeader } from './header';
 
-import { SourcesModel } from './model';
-
 /**
  * A Panel that shows a preview of the source code while debugging.
  */
@@ -67,7 +65,7 @@ export namespace Sources {
     /**
      * The model for the sources.
      */
-    model: SourcesModel;
+    model: IDebugger.UI.ISources;
 
     /**
      * The editor services used to create new read-only editors.

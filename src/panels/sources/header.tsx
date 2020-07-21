@@ -5,7 +5,7 @@ import { ReactWidget, Toolbar, UseSignal } from '@jupyterlab/apputils';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
-import { SourcesModel } from './model';
+import { IDebugger } from '../../tokens';
 
 import React from 'react';
 
@@ -18,7 +18,7 @@ export class SourcesHeader extends Widget {
    *
    * @param model The model for the Sources.
    */
-  constructor(model: SourcesModel) {
+  constructor(model: IDebugger.UI.ISources) {
     super({ node: document.createElement('header') });
 
     const layout = new PanelLayout();
@@ -53,7 +53,7 @@ export class SourcesHeader extends Widget {
 const SourcePathComponent = ({
   model
 }: {
-  model: SourcesModel;
+  model: IDebugger.UI.ISources;
 }): JSX.Element => {
   return (
     <UseSignal signal={model.currentSourceChanged} initialSender={model}>

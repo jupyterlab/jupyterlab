@@ -15,8 +15,6 @@ import { BreakpointsBody } from './body';
 
 import { BreakpointsHeader } from './header';
 
-import { BreakpointsModel } from './model';
-
 /**
  * A Panel to show a list of breakpoints.
  */
@@ -64,7 +62,7 @@ export namespace Breakpoints {
     /**
      * The breakpoints model.
      */
-    model: BreakpointsModel;
+    model: IDebugger.UI.IBreakpoints;
 
     /**
      * The debugger service.

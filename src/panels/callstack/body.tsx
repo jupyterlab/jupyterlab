@@ -5,7 +5,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import React, { useEffect, useState } from 'react';
 
-import { CallstackModel } from './model';
+import { IDebugger } from '../../tokens';
 
 /**
  * The body for a Callstack Panel.
@@ -16,7 +16,7 @@ export class CallstackBody extends ReactWidget {
    *
    * @param model The model for the callstack.
    */
-  constructor(model: CallstackModel) {
+  constructor(model: IDebugger.UI.ICallstack) {
     super();
     this._model = model;
     this.addClass('jp-DebuggerCallstack-body');
@@ -29,7 +29,7 @@ export class CallstackBody extends ReactWidget {
     return <FramesComponent model={this._model} />;
   }
 
-  private _model: CallstackModel;
+  private _model: IDebugger.UI.ICallstack;
 }
 
 /**
@@ -38,7 +38,11 @@ export class CallstackBody extends ReactWidget {
  * @param {object} props The component props.
  * @param props.model The model for the callstack.
  */
-const FramesComponent = ({ model }: { model: CallstackModel }): JSX.Element => {
+const FramesComponent = ({
+  model
+}: {
+  model: IDebugger.UI.ICallstack;
+}): JSX.Element => {
   const [frames, setFrames] = useState(model.frames);
   const [selected, setSelected] = useState(model.frame);
 

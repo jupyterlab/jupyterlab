@@ -19,8 +19,6 @@ import { IDebugger } from '../../tokens';
 
 import { ReadOnlyEditorFactory } from './factory';
 
-import { SourcesModel } from './model';
-
 /**
  * The body for a Sources Panel.
  */
@@ -130,7 +128,7 @@ export class SourcesBody extends Widget {
     this._editor.show();
   }
 
-  private _model: SourcesModel;
+  private _model: IDebugger.UI.ISources;
   private _editor: CodeEditorWrapper;
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
@@ -153,7 +151,7 @@ export namespace SourcesBody {
     /**
      * The sources model.
      */
-    model: SourcesModel;
+    model: IDebugger.UI.ISources;
 
     /**
      * The editor services used to create new read-only editors.

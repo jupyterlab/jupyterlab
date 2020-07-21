@@ -9,7 +9,7 @@ import { Token } from '@lumino/coreutils';
 
 import { IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
@@ -171,7 +171,7 @@ export namespace IDebugger {
       /**
        * Signal emitted when a breakpoint is clicked.
        */
-      readonly clicked: ISignal<this, IDebugger.IBreakpoint>;
+      readonly clicked: Signal<this, IDebugger.IBreakpoint>;
 
       /**
        * Get all the breakpoints.

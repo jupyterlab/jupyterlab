@@ -68,7 +68,7 @@ export namespace Debugger {
 
       const { callstackCommands, editorServices, service } = options;
 
-      const model = service.model as Debugger.Model;
+      const model = service.model;
 
       this.variables = new VariablesPanel({
         model: model.variables,

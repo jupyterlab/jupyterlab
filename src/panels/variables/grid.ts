@@ -18,6 +18,8 @@ import { Panel } from '@lumino/widgets';
 
 import { CommandIDs } from '../../';
 
+import { IDebugger } from '../../tokens';
+
 import { VariablesModel } from './model';
 
 /**
@@ -64,7 +66,7 @@ export class VariablesBodyGrid extends Panel {
   }
 
   private _grid: VariablesGrid;
-  private _model: VariablesModel;
+  private _model: IDebugger.UI.IVariables;
 }
 
 /**
@@ -268,7 +270,7 @@ export namespace VariablesBodyGrid {
     /**
      * The variables model.
      */
-    model: VariablesModel;
+    model: IDebugger.UI.IVariables;
     /**
      * The commands registry.
      */
