@@ -5,7 +5,7 @@ import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { IDebugger } from '../tokens';
+import { IDebugger } from '../../tokens';
 
 /**
  * A model for a list of breakpoints.

@@ -24,15 +24,15 @@ import { each } from '@lumino/algorithm';
 import { IDebugger } from './tokens';
 
 /**
- * A class to find instances of code editors across notebook, console and files widgets
+ * The source and editor manager for a debugger instance.
  */
-export class EditorFinder implements IDebugger.IEditorFinder {
+export class DebuggerSources implements IDebugger.ISources {
   /**
-   * Instantiate a new EditorFinder.
+   * Create a new DebuggerSources instance.
    *
-   * @param options The instantiation options for a EditorFinder.
+   * @param options The instantiation options for a DebuggerSources instance.
    */
-  constructor(options: EditorFinder.IOptions) {
+  constructor(options: DebuggerSources.IOptions) {
     this._config = options.config;
     this._shell = options.shell;
     this._notebookTracker = options.notebookTracker;
@@ -50,7 +50,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    *
    * @param params - The editor search parameters.
    */
-  find(params: IDebugger.IEditorFinder.FindParams): CodeEditor.IEditor[] {
+  find(params: IDebugger.ISources.FindParams): CodeEditor.IEditor[] {
     return [
       ...this._findInConsoles(params),
       ...this._findInEditors(params),
@@ -64,7 +64,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    *
    * @param params The editor open parameters.
    */
-  open(params: IDebugger.IEditorFinder.OpenParams): void {
+  open(params: IDebugger.ISources.OpenParams): void {
     const { editorWrapper, label, caption } = params;
     const widget = new MainAreaWidget<CodeEditorWrapper>({
       content: editorWrapper
@@ -84,7 +84,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    * @param params - The editor search parameters.
    */
   private _findInNotebooks(
-    params: IDebugger.IEditorFinder.FindParams
+    params: IDebugger.ISources.FindParams
   ): CodeEditor.IEditor[] {
     if (!this._notebookTracker) {
       return [];
@@ -131,7 +131,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    * @param params - The editor search parameters.
    */
   private _findInConsoles(
-    params: IDebugger.IEditorFinder.FindParams
+    params: IDebugger.ISources.FindParams
   ): CodeEditor.IEditor[] {
     if (!this._consoleTracker) {
       return [];
@@ -168,7 +168,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    * @param params - The editor search parameters.
    */
   private _findInEditors(
-    params: IDebugger.IEditorFinder.FindParams
+    params: IDebugger.ISources.FindParams
   ): CodeEditor.IEditor[] {
     if (!this._editorTracker) {
       return;
@@ -206,7 +206,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    * @param params - The editor search parameters.
    */
   private _findInReadOnlyEditors(
-    params: IDebugger.IEditorFinder.FindParams
+    params: IDebugger.ISources.FindParams
   ): CodeEditor.IEditor[] {
     const { focus, kernel, source } = params;
 
@@ -240,11 +240,11 @@ export class EditorFinder implements IDebugger.IEditorFinder {
   private _editorTracker: IEditorTracker | null;
 }
 /**
- * A namespace for editor finder statics.
+ * A namespace for `DebuggerSources` statics.
  */
-export namespace EditorFinder {
+export namespace DebuggerSources {
   /**
-   * The options used to initialize a EditorFinder object.
+   * The options used to initialize a DebuggerSources object.
    */
   export interface IOptions {
     /**

@@ -11,16 +11,16 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
-import { CallstackModel } from './callstack/model';
+import { Debugger } from './debugger';
 
-import { DebuggerModel } from './model';
+import { CallstackModel } from './panels/callstack/model';
+
+import { VariablesModel } from './panels/variables/model';
 
 import { IDebugger } from './tokens';
 
-import { VariablesModel } from './variables/model';
-
 /**
- * A concrete implementation of IDebugger.
+ * A concrete implementation of the IDebugger interface.
  */
 export class DebuggerService implements IDebugger, IDisposable {
   /**
@@ -37,7 +37,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     // runs a kernel with debugging ability
     this._session = null;
     this._specsManager = options.specsManager;
-    this._model = new DebuggerModel();
+    this._model = new Debugger.Model();
     this._editorFinder = options.editorFinder;
   }
 
@@ -103,7 +103,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param model - The new debugger model.
    */
   set model(model: IDebugger.IModel) {
-    this._model = model as DebuggerModel;
+    this._model = model as Debugger.Model;
     this._modelChanged.emit(model);
   }
 
@@ -379,7 +379,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    *
    * @param source The source object containing the path to the file.
    */
-  async getSource(source: DebugProtocol.Source): Promise<IDebugger.ISource> {
+  async getSource(source: DebugProtocol.Source): Promise<IDebugger.Source> {
     const reply = await this.session.sendRequest('source', {
       source,
       sourceReference: source.sourceReference
@@ -656,10 +656,10 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   private _config: IDebugger.IConfig;
-  private _editorFinder: IDebugger.IEditorFinder | null;
+  private _editorFinder: IDebugger.ISources | null;
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _isDisposed = false;
-  private _model: DebuggerModel;
+  private _model: Debugger.Model;
   private _modelChanged = new Signal<IDebugger, IDebugger.IModel>(this);
   private _session: IDebugger.ISession;
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
@@ -682,7 +682,7 @@ export namespace DebuggerService {
     /**
      * The editor finder instance.
      */
-    editorFinder?: IDebugger.IEditorFinder;
+    editorFinder?: IDebugger.ISources;
 
     /**
      * The kernel specs manager.

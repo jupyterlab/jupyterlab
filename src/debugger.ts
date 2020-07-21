@@ -9,17 +9,21 @@ import { Panel, SplitPanel, Widget } from '@lumino/widgets';
 
 import { murmur2 } from 'murmurhash-js';
 
-import { Breakpoints } from './breakpoints';
-
-import { Callstack } from './callstack';
-
 import { DebuggerModel } from './model';
 
-import { Sources } from './sources';
+import { Breakpoints as BreakpointsPanel } from './panels/breakpoints';
+
+import { Callstack as CallstackPanel } from './panels/callstack';
+
+import { Sources as SourcesPanel } from './panels/sources';
+
+import { Variables as VariablesPanel } from './panels/variables';
+
+import { DebuggerService } from './service';
+
+import { DebuggerSources } from './sources';
 
 import { IDebugger } from './tokens';
-
-import { Variables } from './variables';
 
 /**
  * A namespace for `Debugger` statics.
@@ -77,6 +81,16 @@ export namespace Debugger {
   }
 
   /**
+   * A model for a debugger.
+   */
+  export class Model extends DebuggerModel {}
+
+  /**
+   * The main IDebugger implementation.
+   */
+  export class Service extends DebuggerService {}
+
+  /**
    * A debugger sidebar.
    */
   export class Sidebar extends Panel {
@@ -93,25 +107,25 @@ export namespace Debugger {
 
       const { callstackCommands, editorServices, service } = options;
 
-      const model = service.model as DebuggerModel;
+      const model = service.model as Debugger.Model;
 
-      this.variables = new Variables({
+      this.variables = new VariablesPanel({
         model: model.variables,
         commands: callstackCommands.registry,
         service
       });
 
-      this.callstack = new Callstack({
+      this.callstack = new CallstackPanel({
         commands: callstackCommands,
         model: model.callstack
       });
 
-      this.breakpoints = new Breakpoints({
+      this.breakpoints = new BreakpointsPanel({
         service,
         model: model.breakpoints
       });
 
-      this.sources = new Sources({
+      this.sources = new SourcesPanel({
         model: model.sources,
         service,
         editorServices
@@ -154,22 +168,22 @@ export namespace Debugger {
     /**
      * The variables widget.
      */
-    readonly variables: Variables;
+    readonly variables: VariablesPanel;
 
     /**
      * The callstack widget.
      */
-    readonly callstack: Callstack;
+    readonly callstack: CallstackPanel;
 
     /**
      * The breakpoints widget.
      */
-    readonly breakpoints: Breakpoints;
+    readonly breakpoints: BreakpointsPanel;
 
     /**
      * The sources widget.
      */
-    readonly sources: Sources;
+    readonly sources: SourcesPanel;
   }
 
   /**
@@ -188,7 +202,7 @@ export namespace Debugger {
       /**
        * The callstack toolbar commands.
        */
-      callstackCommands: Callstack.ICommands;
+      callstackCommands: CallstackPanel.ICommands;
       /**
        * The editor services.
        */
@@ -210,6 +224,11 @@ export namespace Debugger {
       }
     }
   }
+
+  /**
+   * The source and editor manager for a debugger instance.
+   */
+  export class Sources extends DebuggerSources {}
 }
 
 /**

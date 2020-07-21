@@ -29,8 +29,6 @@ import { Session } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { EditorFinder } from './editor-finder';
-
 import {
   continueIcon,
   stepIntoIcon,
@@ -44,15 +42,11 @@ import { Debugger } from './debugger';
 
 import { TrackerHandler } from './handlers/tracker';
 
-import { DebuggerService } from './service';
-
 import { DebuggerHandler } from './handler';
 
-import { DebuggerModel } from './model';
+import { IDebugger, IDebuggerConfig, IDebuggerSources } from './tokens';
 
-import { IDebugger, IDebuggerConfig, IDebuggerEditorFinder } from './tokens';
-
-import { VariablesBodyGrid } from './variables/grid';
+import { VariablesBodyGrid } from './panels/variables/grid';
 
 /**
  * The command IDs used by the debugger plugin.
@@ -77,12 +71,12 @@ export namespace CommandIDs {
 const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
-  requires: [IDebugger, IDebuggerEditorFinder, IConsoleTracker],
+  requires: [IDebugger, IDebuggerSources, IConsoleTracker],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
-    editorFinder: IDebugger.IEditorFinder,
+    editorFinder: IDebugger.ISources,
     consoleTracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
@@ -249,12 +243,12 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 const tracker: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:tracker',
   autoStart: true,
-  requires: [IDebugger, IEditorServices, IDebuggerEditorFinder],
+  requires: [IDebugger, IEditorServices, IDebuggerSources],
   activate: (
-    app: JupyterFrontEnd,
+    _,
     debug: IDebugger,
     editorServices: IEditorServices,
-    editorFinder: IDebugger.IEditorFinder
+    editorFinder: IDebugger.ISources
   ) => {
     new TrackerHandler({
       editorServices,
@@ -271,13 +265,13 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:service',
   autoStart: true,
   provides: IDebugger,
-  requires: [IDebuggerConfig, IDebuggerEditorFinder],
+  requires: [IDebuggerConfig, IDebuggerSources],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
-    editorFinder: IDebugger.IEditorFinder
+    editorFinder: IDebugger.ISources
   ) =>
-    new DebuggerService({
+    new Debugger.Service({
       config,
       editorFinder,
       specsManager: app.serviceManager.kernelspecs
@@ -297,10 +291,10 @@ const configuration: JupyterFrontEndPlugin<IDebugger.IConfig> = {
 /**
  * A plugin that tracks editors, console and file editors used for debugging.
  */
-const finder: JupyterFrontEndPlugin<IDebugger.IEditorFinder> = {
+const finder: JupyterFrontEndPlugin<IDebugger.ISources> = {
   id: '@jupyterlab/debugger:editor-finder',
   autoStart: true,
-  provides: IDebuggerEditorFinder,
+  provides: IDebuggerSources,
   requires: [IDebuggerConfig, IEditorServices],
   optional: [INotebookTracker, IConsoleTracker, IEditorTracker],
   activate: (
@@ -310,8 +304,8 @@ const finder: JupyterFrontEndPlugin<IDebugger.IEditorFinder> = {
     notebookTracker: INotebookTracker | null,
     consoleTracker: IConsoleTracker | null,
     editorTracker: IEditorTracker | null
-  ): IDebugger.IEditorFinder => {
-    return new EditorFinder({
+  ): IDebugger.ISources => {
+    return new Debugger.Sources({
       config,
       shell: app.shell,
       editorServices,
@@ -361,7 +355,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           return;
         }
 
-        const model = (service.model as DebuggerModel).variables;
+        const model = (service.model as Debugger.Model).variables;
         const widget = new MainAreaWidget<VariablesBodyGrid>({
           content: new VariablesBodyGrid({
             model,

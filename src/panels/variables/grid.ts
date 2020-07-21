@@ -16,7 +16,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Panel } from '@lumino/widgets';
 
-import { CommandIDs } from '..';
+import { CommandIDs } from '../../';
 
 import { VariablesModel } from './model';
 

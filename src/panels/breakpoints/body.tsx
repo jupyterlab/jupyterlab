@@ -5,7 +5,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import React, { useEffect, useState } from 'react';
 
-import { IDebugger } from '../tokens';
+import { IDebugger } from '../../tokens';
 
 import { BreakpointsModel } from './model';
 

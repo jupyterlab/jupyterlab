@@ -9,13 +9,13 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { Panel } from '@lumino/widgets';
 
-import { IDebugger } from '../tokens';
+import { viewBreakpointIcon } from '../../icons';
+
+import { IDebugger } from '../../tokens';
 
 import { SourcesBody } from './body';
 
 import { SourcesHeader } from './header';
-
-import { viewBreakpointIcon } from '../icons';
 
 import { SourcesModel } from './model';
 

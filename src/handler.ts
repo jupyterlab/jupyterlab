@@ -25,7 +25,7 @@ import { bugIcon } from '@jupyterlab/ui-components';
 
 import { DisposableSet } from '@lumino/disposable';
 
-import { DebuggerModel } from './model';
+import { Debugger } from './debugger';
 
 import { DebugSession } from './session';
 
@@ -246,7 +246,7 @@ export class DebuggerHandler {
       // clear the model if the handler being removed corresponds
       // to the current active debug session
       if (this._service.session?.connection?.path === connection?.path) {
-        const model = this._service.model as DebuggerModel;
+        const model = this._service.model as Debugger.Model;
         model.clear();
       }
 

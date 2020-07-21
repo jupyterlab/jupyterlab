@@ -142,13 +142,33 @@ export interface IDebugger {
    *
    * @param source The source object containing the path to the file.
    */
-  getSource(source: DebugProtocol.Source): Promise<IDebugger.ISource>;
+  getSource(source: DebugProtocol.Source): Promise<IDebugger.Source>;
 }
 
 /**
  * A namespace for visual debugger types.
  */
 export namespace IDebugger {
+  /**
+   * The type for a source file.
+   */
+  export type Source = {
+    /**
+     * The path of the source.
+     */
+    path: string;
+
+    /**
+     * The content of the source.
+     */
+    content: string;
+
+    /**
+     * The mimeType of the source.
+     */
+    mimeType?: string;
+  };
+
   /**
    * A visual debugger session.
    */
@@ -276,7 +296,7 @@ export namespace IDebugger {
   /**
    * A utility to find text editors used by the debugger.
    */
-  export interface IEditorFinder {
+  export interface ISources {
     /**
      * Returns an array of editors for a source matching the current debug
      * session by iterating through all the widgets in each of the supported
@@ -284,20 +304,20 @@ export namespace IDebugger {
      *
      * @param params - The editor find parameters.
      */
-    find(params: IEditorFinder.FindParams): CodeEditor.IEditor[];
+    find(params: ISources.FindParams): CodeEditor.IEditor[];
 
     /**
      * Open a read-only editor in the main area.
      *
      * @param params - The editor open parameters.
      */
-    open(params: IEditorFinder.OpenParams): void;
+    open(params: ISources.OpenParams): void;
   }
 
   /**
    * A utility to find text editors used by the debugger.
    */
-  export namespace IEditorFinder {
+  export namespace ISources {
     /**
      * Unified parameters for the find method
      */
@@ -342,26 +362,6 @@ export namespace IDebugger {
        */
       editorWrapper: CodeEditorWrapper;
     };
-  }
-
-  /**
-   * The interface for a source file.
-   */
-  export interface ISource {
-    /**
-     * The path of the source.
-     */
-    path: string;
-
-    /**
-     * The content of the source.
-     */
-    content: string;
-
-    /**
-     * The mimeType of the source.
-     */
-    mimeType?: string;
   }
 
   /**
@@ -531,6 +531,6 @@ export const IDebuggerConfig = new Token<IDebugger.IConfig>(
 /**
  * The debugger editor finder utility token.
  */
-export const IDebuggerEditorFinder = new Token<IDebugger.IEditorFinder>(
-  '@jupyterlab/debugger:editor-finder'
+export const IDebuggerSources = new Token<IDebugger.ISources>(
+  '@jupyterlab/debugger:sources'
 );

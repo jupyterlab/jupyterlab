@@ -11,11 +11,11 @@ import { Signal } from '@lumino/signaling';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
-import { CallstackModel } from '../callstack/model';
+import { EditorHandler } from '../../handlers/editor';
 
-import { EditorHandler } from '../handlers/editor';
+import { CallstackModel } from '../../panels/callstack/model';
 
-import { IDebugger } from '../tokens';
+import { IDebugger } from '../../tokens';
 
 import { ReadOnlyEditorFactory } from './factory';
 

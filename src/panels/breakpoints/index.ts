@@ -5,13 +5,13 @@ import { ToolbarButton } from '@jupyterlab/apputils';
 
 import { Panel } from '@lumino/widgets';
 
-import { IDebugger } from '../tokens';
+import { closeAllIcon } from '../../icons';
+
+import { IDebugger } from '../../tokens';
 
 import { BreakpointsBody } from './body';
 
 import { BreakpointsHeader } from './header';
-
-import { closeAllIcon } from '../icons';
 
 import { BreakpointsModel } from './model';
 

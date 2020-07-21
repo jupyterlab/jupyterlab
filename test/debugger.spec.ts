@@ -33,9 +33,9 @@ import { DebuggerModel } from '../src/model';
 
 import { DebugSession } from '../src/session';
 
-import { SourcesBody } from '../src/sources/body';
+import { SourcesBody } from '../src/panels/sources/body';
 
-import { SourcesHeader } from '../src/sources/header';
+import { SourcesHeader } from '../src/panels/sources/header';
 
 import { IDebugger } from '../src/tokens';
 

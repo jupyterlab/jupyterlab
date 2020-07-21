@@ -15,11 +15,11 @@ import { Signal } from '@lumino/signaling';
 
 import { Editor } from 'codemirror';
 
+import { BreakpointsModel } from '../panels/breakpoints/model';
+
 import { IDebugger } from '../tokens';
 
-import { BreakpointsModel } from '../breakpoints/model';
-
-import { DebuggerModel } from '../model';
+import { Debugger } from '../debugger';
 
 /**
  * The class name added to the current line.
@@ -83,7 +83,7 @@ export class EditorHandler implements IDisposable {
    * Handle when the debug model changes.
    */
   private _onModelChanged(): void {
-    this._debuggerModel = this._debuggerService.model as DebuggerModel;
+    this._debuggerModel = this._debuggerService.model as Debugger.Model;
     if (!this._debuggerModel) {
       return;
     }
@@ -244,7 +244,7 @@ export class EditorHandler implements IDisposable {
   private _id: string;
   private _path: string;
   private _editor: CodeEditor.IEditor;
-  private _debuggerModel: DebuggerModel;
+  private _debuggerModel: Debugger.Model;
   private _breakpointsModel: BreakpointsModel;
   private _debuggerService: IDebugger;
   private _editorMonitor: ActivityMonitor<

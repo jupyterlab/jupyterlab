@@ -13,17 +13,17 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { EditorHandler } from './editor';
+import { Debugger } from '../debugger';
 
-import { CallstackModel } from '../callstack/model';
+import { CallstackModel } from '../panels/callstack/model';
 
-import { ReadOnlyEditorFactory } from '../sources/factory';
+import { ReadOnlyEditorFactory } from '../panels/sources/factory';
 
-import { SourcesModel } from '../sources/model';
+import { SourcesModel } from '../panels/sources/model';
 
 import { IDebugger } from '../tokens';
 
-import { DebuggerModel } from '../model';
+import { EditorHandler } from './editor';
 
 /**
  * A class which handles notebook, console and editor trackers.
@@ -65,7 +65,7 @@ export class TrackerHandler implements IDisposable {
    * Handle when the debug model changes.
    */
   private _onModelChanged(): void {
-    this._debuggerModel = this._debuggerService.model as DebuggerModel;
+    this._debuggerModel = this._debuggerService.model as Debugger.Model;
     if (!this._debuggerModel) {
       return;
     }
@@ -123,7 +123,7 @@ export class TrackerHandler implements IDisposable {
    */
   private _onCurrentSourceOpened(
     _: SourcesModel,
-    source: IDebugger.ISource
+    source: IDebugger.Source
   ): void {
     if (!source) {
       return;
@@ -163,9 +163,9 @@ export class TrackerHandler implements IDisposable {
     }
   }
 
-  private _debuggerModel: DebuggerModel;
+  private _debuggerModel: Debugger.Model;
   private _debuggerService: IDebugger;
-  private _editorFinder: IDebugger.IEditorFinder | null;
+  private _editorFinder: IDebugger.ISources | null;
   private _readOnlyEditorFactory: ReadOnlyEditorFactory;
 }
 
@@ -185,7 +185,7 @@ export namespace TrackerHandler {
     /**
      * The editor finder.
      */
-    editorFinder: IDebugger.IEditorFinder;
+    editorFinder: IDebugger.ISources;
 
     /**
      * The editor services.

@@ -9,9 +9,9 @@ import { ArrayExt } from '@lumino/algorithm';
 
 import React, { useEffect, useState } from 'react';
 
-import { convertType } from '.';
+import { IDebugger } from '../../tokens';
 
-import { IDebugger } from '../tokens';
+import { convertType } from '.';
 
 import { VariablesModel } from './model';
 

@@ -11,10 +11,6 @@ import {
 
 import { UUID, JSONExt } from '@lumino/coreutils';
 
-import { DebuggerModel } from '../src/model';
-
-import { DebuggerService } from '../src/service';
-
 import { DebugSession } from '../src/session';
 
 import { IDebugger } from '../src/tokens';
@@ -55,7 +51,7 @@ describe('Debugging support', () => {
   const specs = JSONExt.deepCopy(KERNELSPECS) as KernelSpec.ISpecModels;
 
   let specsManager: TestKernelSpecManager;
-  let service: DebuggerService;
+  let service: Debugger.Service;
   let config: IDebugger.IConfig;
   let xpython: Session.ISessionConnection;
   let ipykernel: Session.ISessionConnection;
@@ -79,7 +75,7 @@ describe('Debugging support', () => {
     specsManager.intercept = specs;
     await specsManager.refreshSpecs();
     config = new Debugger.Config();
-    service = new DebuggerService({ specsManager, config });
+    service = new Debugger.Service({ specsManager, config });
   });
 
   afterAll(async () => {
@@ -104,7 +100,7 @@ describe('Debugging support', () => {
 describe('DebuggerService', () => {
   const specsManager = new KernelSpecManager();
   let connection: Session.ISessionConnection;
-  let model: DebuggerModel;
+  let model: Debugger.Model;
   let config: IDebugger.IConfig;
   let session: IDebugger.ISession;
   let service: IDebugger;
@@ -117,21 +113,21 @@ describe('DebuggerService', () => {
     });
     await connection.changeKernel({ name: 'xpython' });
     session = new DebugSession({ connection });
-    model = new DebuggerModel();
+    model = new Debugger.Model();
     config = new Debugger.Config();
-    service = new DebuggerService({ specsManager, config });
+    service = new Debugger.Service({ specsManager, config });
   });
 
   afterEach(async () => {
     await connection.shutdown();
     connection.dispose();
     session.dispose();
-    (service as DebuggerService).dispose();
+    (service as Debugger.Service).dispose();
   });
 
   describe('#constructor()', () => {
     it('should create a new instance', () => {
-      expect(service).toBeInstanceOf(DebuggerService);
+      expect(service).toBeInstanceOf(Debugger.Service);
     });
   });
 
@@ -172,9 +168,9 @@ describe('DebuggerService', () => {
 
   describe('#model', () => {
     it('should emit the modelChanged signal when setting the model', () => {
-      const modelChangedEvents: DebuggerModel[] = [];
+      const modelChangedEvents: Debugger.Model[] = [];
       service.modelChanged.connect((_, newModel) => {
-        modelChangedEvents.push(newModel as DebuggerModel);
+        modelChangedEvents.push(newModel as Debugger.Model);
       });
       service.model = model;
       expect(modelChangedEvents.length).toEqual(1);
