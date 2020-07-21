@@ -204,7 +204,27 @@ export namespace IDebugger {
     /**
      * The callstack UI model.
      */
-    export type ICallstack = CallstackModel;
+    export interface ICallstack {
+      /**
+       * Signal emitted when the frames have changed.
+       */
+      readonly framesChanged: ISignal<this, CallstackModel.IFrame[]>;
+
+      /**
+       * Signal emitted when the current frame has changed.
+       */
+      readonly currentFrameChanged: ISignal<this, CallstackModel.IFrame>;
+
+      /**
+       * The frames for the callstack.
+       */
+      frames: CallstackModel.IFrame[];
+
+      /**
+       * The current frame.
+       */
+      frame: CallstackModel.IFrame;
+    }
 
     /**
      * The variables UI model.
