@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IDisposable } from '@lumino/disposable';
-
 import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDebugger } from '../../tokens';
@@ -10,14 +8,7 @@ import { IDebugger } from '../../tokens';
 /**
  * A model for a list of breakpoints.
  */
-export class BreakpointsModel implements IDisposable {
-  /**
-   * Whether the model is disposed.
-   */
-  get isDisposed(): boolean {
-    return this._isDisposed;
-  }
-
+export class BreakpointsModel {
   /**
    * Signal emitted when the model changes.
    */
@@ -44,17 +35,6 @@ export class BreakpointsModel implements IDisposable {
    */
   get breakpoints(): Map<string, IDebugger.IBreakpoint[]> {
     return this._breakpoints;
-  }
-
-  /**
-   * Dispose the model.
-   */
-  dispose(): void {
-    if (this._isDisposed) {
-      return;
-    }
-    this._isDisposed = true;
-    Signal.clearData(this);
   }
 
   /**
@@ -87,7 +67,6 @@ export class BreakpointsModel implements IDisposable {
     this._restored.emit();
   }
 
-  private _isDisposed = false;
   private _breakpoints = new Map<string, IDebugger.IBreakpoint[]>();
   private _changed = new Signal<this, IDebugger.IBreakpoint[]>(this);
   private _restored = new Signal<this, void>(this);

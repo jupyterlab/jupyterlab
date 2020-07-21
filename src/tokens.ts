@@ -229,12 +229,62 @@ export namespace IDebugger {
     /**
      * The variables UI model.
      */
-    export type IVariables = VariablesModel;
+    export interface IVariables {
+      /**
+       * Signal emitted when the current variable has changed.
+       */
+      readonly changed: ISignal<this, void>;
+
+      /**
+       * Signal emitted when the current variable has been expanded.
+       */
+      readonly variableExpanded: ISignal<this, VariablesModel.IVariable>;
+
+      /**
+       * The variable scopes.
+       */
+      scopes: VariablesModel.IScope[];
+
+      /**
+       * Expand a variable.
+       *
+       * @param variable The variable to expand.
+       */
+      expandVariable(variable: VariablesModel.IVariable): void;
+    }
 
     /**
      * The sources UI model.
      */
-    export type ISources = SourcesModel;
+    export interface ISources {
+      /**
+       * Signal emitted when the current frame changes.
+       */
+      readonly currentFrameChanged: ISignal<
+        CallstackModel,
+        CallstackModel.IFrame
+      >;
+
+      /**
+       * Signal emitted when a source should be open in the main area.
+       */
+      readonly currentSourceOpened: ISignal<SourcesModel, IDebugger.Source>;
+
+      /**
+       * Signal emitted when the current source changes.
+       */
+      readonly currentSourceChanged: ISignal<SourcesModel, IDebugger.Source>;
+
+      /**
+       * Return the current source.
+       */
+      currentSource: IDebugger.Source;
+
+      /**
+       * Open a source in the main area.
+       */
+      open(): void;
+    }
   }
 
   /**
