@@ -38,7 +38,7 @@ export class TrackerHandler implements IDisposable {
       editorServices: options.editorServices
     });
 
-    this._editorFinder = options.editorFinder;
+    this._debuggerSources = options.debuggerSources;
 
     const { model } = this._debuggerService;
 
@@ -89,7 +89,7 @@ export class TrackerHandler implements IDisposable {
     frame: CallstackModel.IFrame
   ): void {
     each(
-      this._editorFinder.find({
+      this._debuggerSources.find({
         focus: true,
         kernel: this._debuggerService.session.connection.kernel.name,
         path: this._debuggerService.session?.connection?.path,
@@ -117,7 +117,7 @@ export class TrackerHandler implements IDisposable {
       return;
     }
     const { content, mimeType, path } = source;
-    const results = this._editorFinder.find({
+    const results = this._debuggerSources.find({
       focus: true,
       kernel: this._debuggerService.session.connection.kernel.name,
       path: this._debuggerService.session.connection.path,
@@ -139,7 +139,7 @@ export class TrackerHandler implements IDisposable {
     });
     editorWrapper.disposed.connect(() => editorHandler.dispose());
 
-    this._editorFinder.open({
+    this._debuggerSources.open({
       label: PathExt.basename(path),
       caption: path,
       editorWrapper
@@ -152,7 +152,7 @@ export class TrackerHandler implements IDisposable {
   }
 
   private _debuggerService: IDebugger;
-  private _editorFinder: IDebugger.ISources | null;
+  private _debuggerSources: IDebugger.ISources | null;
   private _readOnlyEditorFactory: ReadOnlyEditorFactory;
 }
 
@@ -172,7 +172,7 @@ export namespace TrackerHandler {
     /**
      * The editor finder.
      */
-    editorFinder: IDebugger.ISources;
+    debuggerSources: IDebugger.ISources;
 
     /**
      * The editor services.

@@ -76,7 +76,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
-    editorFinder: IDebugger.ISources,
+    debuggerSources: IDebugger.ISources,
     consoleTracker: IConsoleTracker,
     labShell: ILabShell
   ) => {
@@ -239,12 +239,12 @@ const tracker: JupyterFrontEndPlugin<void> = {
     _,
     debug: IDebugger,
     editorServices: IEditorServices,
-    editorFinder: IDebugger.ISources
+    debuggerSources: IDebugger.ISources
   ) => {
     new TrackerHandler({
       editorServices,
       debuggerService: debug,
-      editorFinder
+      debuggerSources
     });
   }
 };
@@ -260,11 +260,11 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
-    editorFinder: IDebugger.ISources
+    debuggerSources: IDebugger.ISources
   ) =>
     new Debugger.Service({
       config,
-      editorFinder,
+      debuggerSources,
       specsManager: app.serviceManager.kernelspecs
     })
 };

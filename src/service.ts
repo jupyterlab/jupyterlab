@@ -38,7 +38,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     this._session = null;
     this._specsManager = options.specsManager;
     this._model = new Debugger.Model();
-    this._editorFinder = options.editorFinder;
+    this._debuggerSources = options.debuggerSources;
   }
 
   /**
@@ -228,7 +228,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       this._model.title = this.isStarted ? this.session?.connection?.name : '-';
     }
 
-    if (this._editorFinder) {
+    if (this._debuggerSources) {
       const filtered = this._filterBreakpoints(breakpoints);
       this._model.breakpoints.restoreBreakpoints(filtered);
     } else {
@@ -321,7 +321,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     const remoteBreakpoints = this._mapBreakpoints(state.body.breakpoints);
 
     // Set the local copy of breakpoints to reflect only editors that exist.
-    if (this._editorFinder) {
+    if (this._debuggerSources) {
       const filtered = this._filterBreakpoints(remoteBreakpoints);
       this._model.breakpoints.restoreBreakpoints(filtered);
     } else {
@@ -408,7 +408,7 @@ export class DebuggerService implements IDebugger, IDisposable {
       const [id, list] = collection;
       list.forEach(() => {
         each(
-          this._editorFinder.find({
+          this._debuggerSources.find({
             focus: false,
             kernel: this.session.connection.kernel.name,
             path: this._session.connection.path,
@@ -639,7 +639,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   private _config: IDebugger.IConfig;
-  private _editorFinder: IDebugger.ISources | null;
+  private _debuggerSources: IDebugger.ISources | null;
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _isDisposed = false;
   private _model: IDebugger.IModel;
@@ -664,7 +664,7 @@ export namespace DebuggerService {
     /**
      * The editor finder instance.
      */
-    editorFinder?: IDebugger.ISources;
+    debuggerSources?: IDebugger.ISources;
 
     /**
      * The kernel specs manager.
