@@ -71,14 +71,13 @@ export namespace CommandIDs {
 const consoles: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger:consoles',
   autoStart: true,
-  requires: [IDebugger, IDebuggerSources, IConsoleTracker],
+  requires: [IDebugger, IConsoleTracker],
   optional: [ILabShell],
   activate: (
     app: JupyterFrontEnd,
     debug: IDebugger,
-    debuggerSources: IDebugger.ISources,
     consoleTracker: IConsoleTracker,
-    labShell: ILabShell
+    labShell: ILabShell | null
   ) => {
     const handler = new DebuggerHandler({
       type: 'console',
@@ -124,7 +123,7 @@ const files: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     debug: IDebugger,
     editorTracker: IEditorTracker,
-    labShell: ILabShell
+    labShell: ILabShell | null
   ) => {
     const handler = new DebuggerHandler({
       type: 'file',
@@ -193,7 +192,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     service: IDebugger,
     notebookTracker: INotebookTracker,
-    labShell: ILabShell
+    labShell: ILabShell | null
   ) => {
     const handler = new DebuggerHandler({
       type: 'notebook',
@@ -317,7 +316,7 @@ const variables: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
-    themeManager: IThemeManager
+    themeManager: IThemeManager | null
   ) => {
     const { commands, shell } = app;
     const tracker = new WidgetTracker<MainAreaWidget<VariablesBodyGrid>>({
