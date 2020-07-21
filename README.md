@@ -215,6 +215,7 @@ Note right of kernel: debugger stopped
 kernel->JupyterLab: disconnect response
 
 JupyterLab->JupyterLab: clear debugger UI for\nthe notebook
+
 </pre>
 </details>
 
@@ -230,17 +231,17 @@ The first step is to create a test file and a debug configuration:
 
 ```json
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python: Current File",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "env": {"DEBUGPY_LOG_DIR": "/path/to/logs/folder"}
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "env": { "DEBUGPY_LOG_DIR": "/path/to/logs/folder" }
+    }
+  ]
 }
 ```
 
