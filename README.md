@@ -105,3 +105,184 @@ To install it:
 ```bash
 jupyter labextension install jupyterlab-kernelspy
 ```
+
+### Debug Protocol Overview
+
+The following diagram illustrates the types of messages sent between the JupyterLab extension and the kernel.
+
+#### Diagram
+
+![debug-protocol](https://user-images.githubusercontent.com/591645/88048217-3cbd8980-cb53-11ea-8778-b8015014a230.png)
+
+#### References
+
+- Dump cell and state restoration: https://github.com/jupyterlab/debugger/issues/52
+- Protocol Overview: https://microsoft.github.io/debug-adapter-protocol/overview
+- Specification: https://microsoft.github.io/debug-adapter-protocol/specification
+
+### Source
+
+Generated using: https://bramp.github.io/js-sequence-diagrams/
+
+<details><summary>Diagram source</summary>
+<pre>
+user->JupyterLab: open notebook
+
+JupyterLab->JupyterLab: check 'debugger' key\nin the kernel spec
+
+JupyterLab->user: show toggle button\nif 'debugger'
+
+user->JupyterLab: enable debugging
+
+JupyterLab->kernel: debugInfo request
+
+kernel->JupyterLab: debugInfo response
+
+user->JupyterLab: start debugger
+
+JupyterLab->kernel: initialize request
+
+kernel->JupyterLab: initialize response
+
+JupyterLab->kernel: attach request
+
+kernel->JupyterLab: attach response
+
+Note right of kernel: debugger started
+
+user->JupyterLab: add breakpoints\n(click on gutters)
+
+JupyterLab->kernel: dumpCell request
+
+kernel->JupyterLab: dumpCell response
+
+JupyterLab->kernel: setBreakpoints request
+
+kernel->JupyterLab: breakpoints response
+
+JupyterLab->kernel: configurationDone request
+
+kernel->JupyterLab: configurationDone response
+
+user->JupyterLab: execute cell\n(Ctrl-Enter)
+
+JupyterLab->kernel: requestExecute
+
+kernel->kernel: execute code
+
+kernel->kernel: hit breakpoint
+
+kernel-->JupyterLab: stopped event
+
+JupyterLab->kernel: stackTrace request
+
+kernel->JupyterLab: stackTrace response
+
+JupyterLab->user: show current line
+
+JupyterLab->kernel: scopes request
+
+kernel->JupyterLab: scopes response
+
+JupyterLab->kernel: variables request
+
+kernel->JupyterLab: variables response
+
+JupyterLab->user: show variables
+
+user->JupyterLab: step in deleted cell code
+
+JupyterLab->kernel: stepIn request
+
+kernel-->JupyterLab: stopped event
+
+JupyterLab->JupyterLab: search for code matching\nsource path
+
+JupyterLab->kernel: source request
+
+kernel->JupyterLab: source response
+
+JupyterLab->user: show source for current path
+
+Note right of kernel: debug session
+
+user->JupyterLab: disable debugging
+
+JupyterLab->kernel: disconnect request
+
+Note right of kernel: debugger stopped
+
+kernel->JupyterLab: disconnect response
+
+JupyterLab->JupyterLab: clear debugger UI for\nthe notebook
+
+</pre>
+</details>
+
+### Inspecting Debug Messages in VS Code
+
+Inspecting the debug messages in VS Code can be useful to understand when debug requests are made (for example triggered by a UI action), and to compare the behavior of the JupyterLab debugger with the Python debugger in VS Code.
+
+#### Create launch.json
+
+The first step is to create a test file and a debug configuration:
+
+![image](https://user-images.githubusercontent.com/591645/67576994-eb0cdd80-f73f-11e9-991f-ebea35669664.png)
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Current File",
+      "type": "python",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "env": { "DEBUGPY_LOG_DIR": "/path/to/logs/folder" }
+    }
+  ]
+}
+```
+
+#### Start the debugger
+
+![image](https://user-images.githubusercontent.com/591645/67576928-d3355980-f73f-11e9-84e7-6d23c2cc365c.png)
+
+#### Open the logs
+
+The content of the log file look like this:
+
+```
+...
+
+D00000.032: IDE --> {
+                "command": "initialize",
+                "arguments": {
+                    "clientID": "vscode",
+                    "clientName": "Visual Studio Code",
+                    "adapterID": "python",
+                    "pathFormat": "path",
+                    "linesStartAt1": true,
+                    "columnsStartAt1": true,
+                    "supportsVariableType": true,
+                    "supportsVariablePaging": true,
+                    "supportsRunInTerminalRequest": true,
+                    "locale": "en-us"
+                },
+                "type": "request",
+                "seq": 1
+            }
+
+...
+```
+
+With:
+
+- `IDE` = VS Code
+- `PYD` = pydev debugger
+- Messages follow the DAP: https://microsoft.github.io/debug-adapter-protocol/specification
+
+#### Overview
+
+![vscode-debug-logs](https://user-images.githubusercontent.com/591645/67577219-61a9db00-f740-11e9-8240-2332599c0058.gif)
