@@ -25,9 +25,7 @@ import { bugIcon } from '@jupyterlab/ui-components';
 
 import { DisposableSet } from '@lumino/disposable';
 
-import { DebuggerModel } from './model';
-
-import { DebugSession } from './session';
+import { Debugger } from './debugger';
 
 import { IDebugger } from './tokens';
 
@@ -81,24 +79,6 @@ export class DebuggerHandler {
     this._type = options.type;
     this._shell = options.shell;
     this._service = options.service;
-  }
-
-  /**
-   * Dispose all the handlers.
-   *
-   * @param debug The debug service.
-   */
-  disposeAll(debug: IDebugger): void {
-    const handlerIds = Object.keys(this._handlers);
-    if (handlerIds.length === 0) {
-      return;
-    }
-    debug.session.dispose();
-    debug.session = null;
-    handlerIds.forEach(id => {
-      this._handlers[id].dispose();
-    });
-    this._handlers = {};
   }
 
   /**
@@ -246,7 +226,7 @@ export class DebuggerHandler {
       // clear the model if the handler being removed corresponds
       // to the current active debug session
       if (this._service.session?.connection?.path === connection?.path) {
-        const model = this._service.model as DebuggerModel;
+        const model = this._service.model;
         model.clear();
       }
 
@@ -288,7 +268,7 @@ export class DebuggerHandler {
         this._service.session.connection = connection;
         this._previousConnection = connection;
         await this._service.restoreState(true);
-        await createHandler();
+        createHandler();
       }
     };
 
@@ -301,7 +281,7 @@ export class DebuggerHandler {
 
     // update the active debug session
     if (!this._service.session) {
-      this._service.session = new DebugSession({ connection });
+      this._service.session = new Debugger.Session({ connection });
     } else {
       this._previousConnection = this._service.session.connection.kernel
         ? this._service.session.connection
@@ -325,7 +305,6 @@ export class DebuggerHandler {
 
     // listen to the disposed signals
     widget.disposed.connect(removeHandlers);
-    this._service.model.disposed.connect(removeHandlers);
   }
 
   private _type: DebuggerHandler.SessionType;

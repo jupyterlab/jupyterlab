@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeEditor, CodeEditorWrapper } from '@jupyterlab/codeeditor';
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
@@ -9,23 +9,24 @@ import { Token } from '@lumino/coreutils';
 
 import { IObservableDisposable } from '@lumino/disposable';
 
-import { ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
+
+import { CallstackModel } from './panels/callstack/model';
+
+import { SourcesModel } from './panels/sources/model';
+
+import { VariablesModel } from './panels/variables/model';
 
 /**
  * An interface describing an application's visual debugger.
  */
 export interface IDebugger {
   /**
-   * The current debugger session.
+   * Signal emitted for debug event messages.
    */
-  session: IDebugger.ISession;
-
-  /**
-   * The model of the debugger.
-   */
-  model: IDebugger.IModel;
+  readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
 
   /**
    * Whether the current debugger is started.
@@ -33,19 +34,55 @@ export interface IDebugger {
   readonly isStarted: boolean;
 
   /**
+   * The debugger service's model.
+   */
+  readonly model: IDebugger.Model.IService;
+
+  /**
+   * The current debugger session.
+   */
+  session: IDebugger.ISession;
+
+  /**
    * Signal emitted upon session changed.
    */
   readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession>;
 
   /**
-   * Signal emitted upon model changed.
+   * Removes all the breakpoints from the current notebook or console
    */
-  readonly modelChanged: ISignal<IDebugger, IDebugger.IModel>;
+  clearBreakpoints(): Promise<void>;
 
   /**
-   * Signal emitted for debug event messages.
+   * Continues the execution of the current thread.
    */
-  readonly eventMessage: ISignal<IDebugger, IDebugger.ISession.Event>;
+  continue(): Promise<void>;
+
+  /**
+   * Computes an id based on the given code.
+   */
+  getCodeId(code: string): string;
+
+  /**
+   * Retrieve the content of a source file.
+   *
+   * @param source The source object containing the path to the file.
+   */
+  getSource(source: DebugProtocol.Source): Promise<IDebugger.Source>;
+
+  /**
+   * Whether there exist a thread in stopped state.
+   */
+  hasStoppedThreads(): boolean;
+
+  /**
+   * Request variables for a given variable reference.
+   *
+   * @param variablesReference The variable reference to request.
+   */
+  inspectVariable(
+    variablesReference: number
+  ): Promise<DebugProtocol.Variable[]>;
 
   /**
    * Request whether debugging is available for the given session connection.
@@ -55,26 +92,9 @@ export interface IDebugger {
   isAvailable(connection: Session.ISessionConnection): Promise<boolean>;
 
   /**
-   * Computes an id based on the given code.
+   * Makes the current thread run again for one step.
    */
-  getCodeId(code: string): string;
-
-  /**
-   * Whether there exist a thread in stopped state.
-   */
-  hasStoppedThreads(): boolean;
-
-  /**
-   * Starts a debugger.
-   * Precondition: !isStarted
-   */
-  start(): Promise<void>;
-
-  /**
-   * Stops the debugger.
-   * Precondition: isStarted
-   */
-  stop(): Promise<void>;
+  next(): Promise<void>;
 
   /**
    * Restart the debugger.
@@ -91,14 +111,10 @@ export interface IDebugger {
   restoreState(autoStart: boolean): Promise<void>;
 
   /**
-   * Continues the execution of the current thread.
+   * Starts a debugger.
+   * Precondition: !isStarted
    */
-  continue(): Promise<void>;
-
-  /**
-   * Makes the current thread run again for one step.
-   */
-  next(): Promise<void>;
+  start(): Promise<void>;
 
   /**
    * Makes the current thread step in a function / method if possible.
@@ -109,6 +125,12 @@ export interface IDebugger {
    * Makes the current thread step out a function / method if possible.
    */
   stepOut(): Promise<void>;
+
+  /**
+   * Stops the debugger.
+   * Precondition: isStarted
+   */
+  stop(): Promise<void>;
 
   /**
    * Update all breakpoints of a cell at once.
@@ -122,33 +144,66 @@ export interface IDebugger {
     breakpoints: IDebugger.IBreakpoint[],
     path?: string
   ): Promise<void>;
-
-  /**
-   * Removes all the breakpoints from the current notebook or console
-   */
-  clearBreakpoints(): Promise<void>;
-
-  /**
-   * Request variables for a given variable reference.
-   *
-   * @param variablesReference The variable reference to request.
-   */
-  inspectVariable(
-    variablesReference: number
-  ): Promise<DebugProtocol.Variable[]>;
-
-  /**
-   * Retrieve the content of a source file.
-   *
-   * @param source The source object containing the path to the file.
-   */
-  getSource(source: DebugProtocol.Source): Promise<IDebugger.ISource>;
 }
 
 /**
  * A namespace for visual debugger types.
  */
 export namespace IDebugger {
+  /**
+   * The type for a source file.
+   */
+  export type Source = {
+    /**
+     * The content of the source.
+     */
+    content: string;
+
+    /**
+     * The mimeType of the source.
+     */
+    mimeType?: string;
+
+    /**
+     * The path of the source.
+     */
+    path: string;
+  };
+
+  /**
+   * Single breakpoint in an editor.
+   */
+  export interface IBreakpoint extends DebugProtocol.Breakpoint {
+    active: boolean;
+  }
+
+  /**
+   * Debugger file and hashing configuration.
+   */
+  export interface IConfig {
+    /**
+     * Returns an id based on the given code.
+     *
+     * @param code The source code.
+     * @param kernel The kernel name from current session.
+     */
+    getCodeId(code: string, kernel: string): string;
+
+    /**
+     * Sets the hash parameters for a kernel.
+     *
+     * @param params - Hashing parameters for a kernel.
+     */
+    setHashParams(params: IConfig.HashParams): void;
+
+    /**
+     * Sets the parameters used for the temp files (e.g. cells) for a kernel.
+     *
+     * @param params - Temporary file prefix and suffix for a kernel.
+     */
+    setTmpFileParams(params: IConfig.FileParams): void;
+  }
+
   /**
    * A visual debugger session.
    */
@@ -196,36 +251,24 @@ export namespace IDebugger {
   }
 
   /**
-   * Single breakpoint in an editor.
+   * A utility to find text editors used by the debugger.
    */
-  export interface IBreakpoint extends DebugProtocol.Breakpoint {
-    active: boolean;
-  }
-  /**
-   * Debugger file and hashing configuration.
-   */
-  export interface IConfig {
+  export interface ISources {
     /**
-     * Returns an id based on the given code.
+     * Returns an array of editors for a source matching the current debug
+     * session by iterating through all the widgets in each of the supported
+     * debugger types (i.e., consoles, files, notebooks).
      *
-     * @param code The source code.
-     * @param kernel The kernel name from current session.
+     * @param params - The editor find parameters.
      */
-    getCodeId(code: string, kernel: string): string;
+    find(params: ISources.FindParams): CodeEditor.IEditor[];
 
     /**
-     * Sets the hash parameters for a kernel.
+     * Open a read-only editor in the main area.
      *
-     * @param params - Hashing parameters for a kernel.
+     * @param params - The editor open parameters.
      */
-    setHashParams(params: IConfig.HashParams): void;
-
-    /**
-     * Sets the parameters used for the temp files (e.g. cells) for a kernel.
-     *
-     * @param params - Temporary file prefix and suffix for a kernel.
-     */
-    setTmpFileParams(params: IConfig.FileParams): void;
+    open(params: ISources.OpenParams): void;
   }
 
   /**
@@ -272,75 +315,6 @@ export namespace IDebugger {
       seed?: any;
     };
   }
-
-  /**
-   * A utility to find text editors used by the debugger.
-   */
-  export interface IEditorFinder {
-    /**
-     * Returns an array of editors for a source matching the current debug
-     * session by iterating through all the widgets in each of the supported
-     * debugger types (i.e., consoles, files, notebooks).
-     *
-     * @param params - The editor search parameters.
-     */
-    find(params: IEditorFinder.Params): CodeEditor.IEditor[];
-  }
-
-  /**
-   * A utility to find text editors used by the debugger.
-   */
-  export namespace IEditorFinder {
-    /**
-     * Unified parameters for find method
-     */
-    export type Params = {
-      /**
-       * Extra flag prevent disable focus.
-       */
-      focus: boolean;
-
-      /**
-       * Name of current kernel.
-       */
-      kernel: string;
-
-      /**
-       * Path of session connection.
-       */
-      path: string;
-
-      /**
-       * Source path
-       */
-      source: string;
-    };
-  }
-
-  /**
-   * The interface for a source file.
-   */
-  export interface ISource {
-    /**
-     * The path of the source.
-     */
-    path: string;
-
-    /**
-     * The content of the source.
-     */
-    content: string;
-
-    /**
-     * The mimeType of the source.
-     */
-    mimeType?: string;
-  }
-
-  /**
-   * The model of a debugger session.
-   */
-  export type IModel = IObservableDisposable;
 
   export namespace ISession {
     /**
@@ -487,6 +461,238 @@ export namespace IDebugger {
      */
     export type Event = DebugProtocol.Event;
   }
+
+  /**
+   * A utility to find text editors used by the debugger.
+   */
+  export namespace ISources {
+    /**
+     * Unified parameters for the find method
+     */
+    export type FindParams = {
+      /**
+       * Extra flag to focus on the parent widget of the editor.
+       */
+      focus: boolean;
+
+      /**
+       * Name of current kernel.
+       */
+      kernel: string;
+
+      /**
+       * Path of session connection.
+       */
+      path: string;
+
+      /**
+       * Source path
+       */
+      source: string;
+    };
+
+    /**
+     * Unified parameters for the open method
+     */
+    export type OpenParams = {
+      /**
+       * The label for the read-only editor.
+       */
+      label: string;
+
+      /**
+       * The caption for the read-only editor.
+       */
+      caption: string;
+
+      /**
+       * The code editor wrapper to add to the main area.
+       */
+      editorWrapper: CodeEditorWrapper;
+    };
+  }
+
+  /**
+   * A namespace for UI model definitions.
+   */
+  export namespace Model {
+    /**
+     * The breakpoints UI model.
+     */
+    export interface IBreakpoints {
+      /**
+       * Get all the breakpoints.
+       */
+      readonly breakpoints: Map<string, IDebugger.IBreakpoint[]>;
+
+      /**
+       * Signal emitted when the model changes.
+       */
+      readonly changed: ISignal<this, IDebugger.IBreakpoint[]>;
+
+      /**
+       * Signal emitted when a breakpoint is clicked.
+       */
+      readonly clicked: Signal<this, IDebugger.IBreakpoint>;
+
+      /**
+       * Signal emitted when the breakpoints are restored.
+       */
+      readonly restored: ISignal<this, void>;
+
+      /**
+       * Get the breakpoints for a given id (path).
+       *
+       * @param id The code id (path).
+       */
+      getBreakpoints(id: string): IBreakpoint[];
+
+      /**
+       * Restore a map of breakpoints.
+       *
+       * @param breakpoints The map of breakpoints
+       */
+      restoreBreakpoints(breakpoints: Map<string, IBreakpoint[]>): void;
+
+      /**
+       * Set the breakpoints for a given id (path).
+       *
+       * @param id The code id (path).
+       * @param breakpoints The list of breakpoints.
+       */
+      setBreakpoints(id: string, breakpoints: IBreakpoint[]): void;
+    }
+
+    /**
+     * The callstack UI model.
+     */
+    export interface ICallstack {
+      /**
+       * Signal emitted when the current frame has changed.
+       */
+      readonly currentFrameChanged: ISignal<this, CallstackModel.IFrame>;
+
+      /**
+       * The current frame.
+       */
+      frame: CallstackModel.IFrame;
+
+      /**
+       * The frames for the callstack.
+       */
+      frames: CallstackModel.IFrame[];
+
+      /**
+       * Signal emitted when the frames have changed.
+       */
+      readonly framesChanged: ISignal<this, CallstackModel.IFrame[]>;
+    }
+
+    /**
+     * The data model for the debugger service.
+     */
+    export interface IService {
+      /**
+       * The breakpoints UI model.
+       */
+      readonly breakpoints: IBreakpoints;
+
+      /**
+       * The callstack UI model.
+       */
+      readonly callstack: ICallstack;
+
+      /**
+       * The variables UI model.
+       */
+      readonly variables: IVariables;
+
+      /**
+       * The sources UI model.
+       */
+      readonly sources: ISources;
+
+      /**
+       * The set of threads in stopped state.
+       */
+      stoppedThreads: Set<number>;
+
+      /**
+       * The current debugger title.
+       */
+      title: string;
+
+      /**
+       * A signal emitted when the title changes.
+       */
+      titleChanged: ISignal<this, string>;
+
+      /**
+       * Clear the model.
+       */
+      clear(): void;
+    }
+
+    /**
+     * The sources UI model.
+     */
+    export interface ISources {
+      /**
+       * Signal emitted when the current frame changes.
+       */
+      readonly currentFrameChanged: ISignal<
+        CallstackModel,
+        CallstackModel.IFrame
+      >;
+
+      /**
+       * Return the current source.
+       */
+      currentSource: IDebugger.Source;
+
+      /**
+       * Signal emitted when the current source changes.
+       */
+      readonly currentSourceChanged: ISignal<SourcesModel, IDebugger.Source>;
+
+      /**
+       * Signal emitted when a source should be open in the main area.
+       */
+      readonly currentSourceOpened: ISignal<SourcesModel, IDebugger.Source>;
+
+      /**
+       * Open a source in the main area.
+       */
+      open(): void;
+    }
+
+    /**
+     * The variables UI model.
+     */
+    export interface IVariables {
+      /**
+       * Signal emitted when the current variable has changed.
+       */
+      readonly changed: ISignal<this, void>;
+
+      /**
+       * The variable scopes.
+       */
+      scopes: VariablesModel.IScope[];
+
+      /**
+       * Signal emitted when the current variable has been expanded.
+       */
+      readonly variableExpanded: ISignal<this, VariablesModel.IVariable>;
+
+      /**
+       * Expand a variable.
+       *
+       * @param variable The variable to expand.
+       */
+      expandVariable(variable: VariablesModel.IVariable): void;
+    }
+  }
 }
 
 /**
@@ -502,8 +708,8 @@ export const IDebuggerConfig = new Token<IDebugger.IConfig>(
 );
 
 /**
- * The debugger editor finder utility token.
+ * The debugger sources utility token.
  */
-export const IDebuggerEditorFinder = new Token<IDebugger.IEditorFinder>(
-  '@jupyterlab/debugger:editor-finder'
+export const IDebuggerSources = new Token<IDebugger.ISources>(
+  '@jupyterlab/debugger:sources'
 );

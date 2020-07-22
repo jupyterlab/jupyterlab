@@ -9,15 +9,13 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { Panel } from '@lumino/widgets';
 
-import { IDebugger } from '../tokens';
+import { viewBreakpointIcon } from '../../icons';
+
+import { IDebugger } from '../../tokens';
 
 import { SourcesBody } from './body';
 
 import { SourcesHeader } from './header';
-
-import { viewBreakpointIcon } from '../icons';
-
-import { SourcesModel } from './model';
 
 /**
  * A Panel that shows a preview of the source code while debugging.
@@ -67,7 +65,7 @@ export namespace Sources {
     /**
      * The model for the sources.
      */
-    model: SourcesModel;
+    model: IDebugger.Model.ISources;
 
     /**
      * The editor services used to create new read-only editors.

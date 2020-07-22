@@ -11,17 +11,11 @@ import {
 
 import { UUID, JSONExt } from '@lumino/coreutils';
 
-import { DebuggerModel } from '../src/model';
-
-import { DebuggerService } from '../src/service';
-
-import { DebugSession } from '../src/session';
+import { Debugger } from '../src/debugger';
 
 import { IDebugger } from '../src/tokens';
 
 import { KERNELSPECS, handleRequest } from './utils';
-
-import { Debugger } from '../src/debugger';
 
 /**
  * A Test class to mock a KernelSpecManager
@@ -55,7 +49,7 @@ describe('Debugging support', () => {
   const specs = JSONExt.deepCopy(KERNELSPECS) as KernelSpec.ISpecModels;
 
   let specsManager: TestKernelSpecManager;
-  let service: DebuggerService;
+  let service: Debugger.Service;
   let config: IDebugger.IConfig;
   let xpython: Session.ISessionConnection;
   let ipykernel: Session.ISessionConnection;
@@ -79,7 +73,7 @@ describe('Debugging support', () => {
     specsManager.intercept = specs;
     await specsManager.refreshSpecs();
     config = new Debugger.Config();
-    service = new DebuggerService({ specsManager, config });
+    service = new Debugger.Service({ specsManager, config });
   });
 
   afterAll(async () => {
@@ -104,7 +98,6 @@ describe('Debugging support', () => {
 describe('DebuggerService', () => {
   const specsManager = new KernelSpecManager();
   let connection: Session.ISessionConnection;
-  let model: DebuggerModel;
   let config: IDebugger.IConfig;
   let session: IDebugger.ISession;
   let service: IDebugger;
@@ -116,22 +109,21 @@ describe('DebuggerService', () => {
       path: UUID.uuid4()
     });
     await connection.changeKernel({ name: 'xpython' });
-    session = new DebugSession({ connection });
-    model = new DebuggerModel();
+    session = new Debugger.Session({ connection });
     config = new Debugger.Config();
-    service = new DebuggerService({ specsManager, config });
+    service = new Debugger.Service({ specsManager, config });
   });
 
   afterEach(async () => {
     await connection.shutdown();
     connection.dispose();
     session.dispose();
-    (service as DebuggerService).dispose();
+    (service as Debugger.Service).dispose();
   });
 
   describe('#constructor()', () => {
     it('should create a new instance', () => {
-      expect(service).toBeInstanceOf(DebuggerService);
+      expect(service).toBeInstanceOf(Debugger.Service);
     });
   });
 
@@ -143,7 +135,7 @@ describe('DebuggerService', () => {
     });
 
     it('should throw an error if the session is not set', async () => {
-      await expect(service.start()).rejects.toThrow(
+      await expect(async () => await service.start()).rejects.toThrow(
         "Cannot read property 'start' of null"
       );
     });
@@ -170,18 +162,6 @@ describe('DebuggerService', () => {
     });
   });
 
-  describe('#model', () => {
-    it('should emit the modelChanged signal when setting the model', () => {
-      const modelChangedEvents: DebuggerModel[] = [];
-      service.modelChanged.connect((_, newModel) => {
-        modelChangedEvents.push(newModel as DebuggerModel);
-      });
-      service.model = model;
-      expect(modelChangedEvents.length).toEqual(1);
-      expect(modelChangedEvents[0]).toEqual(model);
-    });
-  });
-
   describe('protocol', () => {
     const code = [
       'i = 0',
@@ -197,7 +177,6 @@ describe('DebuggerService', () => {
 
     beforeEach(async () => {
       service.session = session;
-      service.model = model;
       await service.restoreState(true);
       const breakpointLines: number[] = [3, 5];
       sourceId = service.getCodeId(code);
@@ -217,6 +196,7 @@ describe('DebuggerService', () => {
 
     describe('#updateBreakpoints', () => {
       it('should update the breakpoints', () => {
+        const { model } = service;
         const bpList = model.breakpoints.getBreakpoints(sourceId);
         expect(bpList).toEqual(breakpoints);
       });
@@ -224,6 +204,7 @@ describe('DebuggerService', () => {
 
     describe('#restoreState', () => {
       it('should restore the breakpoints', async () => {
+        const { model } = service;
         model.breakpoints.restoreBreakpoints(
           new Map<string, IDebugger.IBreakpoint[]>()
         );
@@ -238,6 +219,7 @@ describe('DebuggerService', () => {
     describe('#restart', () => {
       it('should restart the debugger and send the breakpoints again', async () => {
         await service.restart();
+        const { model } = service;
         model.breakpoints.restoreBreakpoints(
           new Map<string, IDebugger.IBreakpoint[]>()
         );
@@ -251,12 +233,12 @@ describe('DebuggerService', () => {
 
     describe('#hasStoppedThreads', () => {
       it('should return false if the model is null', () => {
-        service.model = null;
         const hasStoppedThreads = service.hasStoppedThreads();
         expect(hasStoppedThreads).toBe(false);
       });
 
       it('should return true when the execution has stopped', async () => {
+        const { model } = service;
         const variablesChanged = signalToPromise(model.variables.changed);
 
         // trigger a manual execute request

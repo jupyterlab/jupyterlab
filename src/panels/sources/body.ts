@@ -11,15 +11,13 @@ import { Signal } from '@lumino/signaling';
 
 import { PanelLayout, Widget } from '@lumino/widgets';
 
-import { CallstackModel } from '../callstack/model';
+import { EditorHandler } from '../../handlers/editor';
 
-import { EditorHandler } from '../handlers/editor';
+import { CallstackModel } from '../../panels/callstack/model';
 
-import { IDebugger } from '../tokens';
+import { IDebugger } from '../../tokens';
 
 import { ReadOnlyEditorFactory } from './factory';
-
-import { SourcesModel } from './model';
 
 /**
  * The body for a Sources Panel.
@@ -130,7 +128,7 @@ export class SourcesBody extends Widget {
     this._editor.show();
   }
 
-  private _model: SourcesModel;
+  private _model: IDebugger.Model.ISources;
   private _editor: CodeEditorWrapper;
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
@@ -153,7 +151,7 @@ export namespace SourcesBody {
     /**
      * The sources model.
      */
-    model: SourcesModel;
+    model: IDebugger.Model.ISources;
 
     /**
      * The editor services used to create new read-only editors.

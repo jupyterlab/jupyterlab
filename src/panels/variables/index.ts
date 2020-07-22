@@ -7,13 +7,13 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { Panel, Widget } from '@lumino/widgets';
 
+import { IDebugger } from '../../tokens';
+
 import { VariablesBodyGrid, VariablesGrid } from './grid';
 
 import { VariablesHeader } from './header';
 
 import { VariablesModel } from './model';
-
-import { IDebugger } from '../tokens';
 
 import { VariablesBodyTree } from './tree';
 
@@ -138,7 +138,7 @@ export namespace Variables {
     /**
      * The variables model.
      */
-    model: VariablesModel;
+    model: IDebugger.Model.IVariables;
     /**
      * The debugger service.
      */

@@ -5,9 +5,7 @@ import { ReactWidget } from '@jupyterlab/apputils';
 
 import React, { useEffect, useState } from 'react';
 
-import { IDebugger } from '../tokens';
-
-import { BreakpointsModel } from './model';
+import { IDebugger } from '../../tokens';
 
 /**
  * The body for a Breakpoints Panel.
@@ -18,7 +16,7 @@ export class BreakpointsBody extends ReactWidget {
    *
    * @param model The model for the breakpoints.
    */
-  constructor(model: BreakpointsModel) {
+  constructor(model: IDebugger.Model.IBreakpoints) {
     super();
     this._model = model;
     this.addClass('jp-DebuggerBreakpoints-body');
@@ -31,7 +29,7 @@ export class BreakpointsBody extends ReactWidget {
     return <BreakpointsComponent model={this._model} />;
   }
 
-  private _model: BreakpointsModel;
+  private _model: IDebugger.Model.IBreakpoints;
 }
 
 /**
@@ -43,7 +41,7 @@ export class BreakpointsBody extends ReactWidget {
 const BreakpointsComponent = ({
   model
 }: {
-  model: BreakpointsModel;
+  model: IDebugger.Model.IBreakpoints;
 }): JSX.Element => {
   const [breakpoints, setBreakpoints] = useState(
     Array.from(model.breakpoints.entries())
@@ -51,13 +49,13 @@ const BreakpointsComponent = ({
 
   useEffect(() => {
     const updateBreakpoints = (
-      _: BreakpointsModel,
+      _: IDebugger.Model.IBreakpoints,
       updates: IDebugger.IBreakpoint[]
     ): void => {
       setBreakpoints(Array.from(model.breakpoints.entries()));
     };
 
-    const restoreBreakpoints = (_: BreakpointsModel): void => {
+    const restoreBreakpoints = (_: IDebugger.Model.IBreakpoints): void => {
       setBreakpoints(Array.from(model.breakpoints.entries()));
     };
 
@@ -95,7 +93,7 @@ const BreakpointCellComponent = ({
   model
 }: {
   breakpoints: IDebugger.IBreakpoint[];
-  model: BreakpointsModel;
+  model: IDebugger.Model.IBreakpoints;
 }): JSX.Element => {
   return (
     <>
@@ -126,7 +124,7 @@ const BreakpointComponent = ({
   model
 }: {
   breakpoint: IDebugger.IBreakpoint;
-  model: BreakpointsModel;
+  model: IDebugger.Model.IBreakpoints;
 }): JSX.Element => {
   const moveToEndFirstCharIfSlash = (breakpointSourcePath: string): string => {
     return breakpointSourcePath[0] === '/'

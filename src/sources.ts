@@ -3,7 +3,7 @@
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
-import { MainAreaWidget, WidgetTracker } from '@jupyterlab/apputils';
+import { MainAreaWidget, WidgetTracker, DOMUtils } from '@jupyterlab/apputils';
 
 import {
   CodeEditor,
@@ -17,20 +17,22 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 
 import { INotebookTracker } from '@jupyterlab/notebook';
 
+import { textEditorIcon } from '@jupyterlab/ui-components';
+
 import { each } from '@lumino/algorithm';
 
 import { IDebugger } from './tokens';
 
 /**
- * A class to find instances of code editors across notebook, console and files widgets
+ * The source and editor manager for a debugger instance.
  */
-export class EditorFinder implements IDebugger.IEditorFinder {
+export class DebuggerSources implements IDebugger.ISources {
   /**
-   * Instantiate a new EditorFinder.
+   * Create a new DebuggerSources instance.
    *
-   * @param options The instantiation options for a EditorFinder.
+   * @param options The instantiation options for a DebuggerSources instance.
    */
-  constructor(options: EditorFinder.IOptions) {
+  constructor(options: DebuggerSources.IOptions) {
     this._config = options.config;
     this._shell = options.shell;
     this._notebookTracker = options.notebookTracker;
@@ -48,7 +50,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    *
    * @param params - The editor search parameters.
    */
-  find(params: IDebugger.IEditorFinder.Params): CodeEditor.IEditor[] {
+  find(params: IDebugger.ISources.FindParams): CodeEditor.IEditor[] {
     return [
       ...this._findInConsoles(params),
       ...this._findInEditors(params),
@@ -58,12 +60,31 @@ export class EditorFinder implements IDebugger.IEditorFinder {
   }
 
   /**
+   * Open a read-only editor in the main area.
+   *
+   * @param params The editor open parameters.
+   */
+  open(params: IDebugger.ISources.OpenParams): void {
+    const { editorWrapper, label, caption } = params;
+    const widget = new MainAreaWidget<CodeEditorWrapper>({
+      content: editorWrapper
+    });
+    widget.id = DOMUtils.createDomID();
+    widget.title.label = label;
+    widget.title.closable = true;
+    widget.title.caption = caption;
+    widget.title.icon = textEditorIcon;
+    this._shell.add(widget, 'main');
+    void this._readOnlyEditorTracker.add(widget);
+  }
+
+  /**
    * Find relevant editors matching the search params in the notebook tracker.
    *
    * @param params - The editor search parameters.
    */
   private _findInNotebooks(
-    params: IDebugger.IEditorFinder.Params
+    params: IDebugger.ISources.FindParams
   ): CodeEditor.IEditor[] {
     if (!this._notebookTracker) {
       return [];
@@ -110,7 +131,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    * @param params - The editor search parameters.
    */
   private _findInConsoles(
-    params: IDebugger.IEditorFinder.Params
+    params: IDebugger.ISources.FindParams
   ): CodeEditor.IEditor[] {
     if (!this._consoleTracker) {
       return [];
@@ -147,7 +168,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    * @param params - The editor search parameters.
    */
   private _findInEditors(
-    params: IDebugger.IEditorFinder.Params
+    params: IDebugger.ISources.FindParams
   ): CodeEditor.IEditor[] {
     if (!this._editorTracker) {
       return;
@@ -185,7 +206,7 @@ export class EditorFinder implements IDebugger.IEditorFinder {
    * @param params - The editor search parameters.
    */
   private _findInReadOnlyEditors(
-    params: IDebugger.IEditorFinder.Params
+    params: IDebugger.ISources.FindParams
   ): CodeEditor.IEditor[] {
     const { focus, kernel, source } = params;
 
@@ -219,11 +240,11 @@ export class EditorFinder implements IDebugger.IEditorFinder {
   private _editorTracker: IEditorTracker | null;
 }
 /**
- * A namespace for editor finder statics.
+ * A namespace for `DebuggerSources` statics.
  */
-export namespace EditorFinder {
+export namespace DebuggerSources {
   /**
-   * The options used to initialize a EditorFinder object.
+   * The options used to initialize a DebuggerSources object.
    */
   export interface IOptions {
     /**
@@ -232,28 +253,28 @@ export namespace EditorFinder {
     config: IDebugger.IConfig;
 
     /**
-     * An optional editor finder for consoles.
-     */
-    consoleTracker?: IConsoleTracker;
-
-    /**
      * The editor services.
      */
     editorServices: IEditorServices;
 
     /**
-     * An optional editor finder for file editors.
+     * The application shell.
+     */
+    shell: JupyterFrontEnd.IShell;
+
+    /**
+     * An optional console tracker.
+     */
+    consoleTracker?: IConsoleTracker;
+
+    /**
+     * An optional file editor tracker.
      */
     editorTracker?: IEditorTracker;
 
     /**
-     * An optional editor finder for notebooks.
+     * An optional notebook tracker.
      */
     notebookTracker?: INotebookTracker;
-
-    /**
-     * The application shell.
-     */
-    shell: JupyterFrontEnd.IShell;
   }
 }

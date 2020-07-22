@@ -3,17 +3,17 @@
 
 import { ToolbarButton } from '@jupyterlab/apputils';
 
+import { Signal } from '@lumino/signaling';
+
 import { Panel } from '@lumino/widgets';
 
-import { IDebugger } from '../tokens';
+import { closeAllIcon } from '../../icons';
+
+import { IDebugger } from '../../tokens';
 
 import { BreakpointsBody } from './body';
 
 import { BreakpointsHeader } from './header';
-
-import { closeAllIcon } from '../icons';
-
-import { BreakpointsModel } from './model';
 
 /**
  * A Panel to show a list of breakpoints.
@@ -47,6 +47,8 @@ export class Breakpoints extends Panel {
 
     this.addClass('jp-DebuggerBreakpoints');
   }
+
+  readonly clicked = new Signal<this, IDebugger.IBreakpoint>(this);
 }
 
 /**
@@ -60,7 +62,7 @@ export namespace Breakpoints {
     /**
      * The breakpoints model.
      */
-    model: BreakpointsModel;
+    model: IDebugger.Model.IBreakpoints;
 
     /**
      * The debugger service.

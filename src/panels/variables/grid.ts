@@ -16,7 +16,9 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Panel } from '@lumino/widgets';
 
-import { CommandIDs } from '..';
+import { CommandIDs } from '../../';
+
+import { IDebugger } from '../../tokens';
 
 import { VariablesModel } from './model';
 
@@ -64,7 +66,7 @@ export class VariablesBodyGrid extends Panel {
   }
 
   private _grid: VariablesGrid;
-  private _model: VariablesModel;
+  private _model: IDebugger.Model.IVariables;
 }
 
 /**
@@ -268,7 +270,7 @@ export namespace VariablesBodyGrid {
     /**
      * The variables model.
      */
-    model: VariablesModel;
+    model: IDebugger.Model.IVariables;
     /**
      * The commands registry.
      */

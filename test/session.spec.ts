@@ -15,9 +15,9 @@ import { PromiseDelegate, UUID } from '@lumino/coreutils';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
-import { IDebugger } from '../src/tokens';
+import { Debugger } from '../src/debugger';
 
-import { DebugSession } from '../src/session';
+import { IDebugger } from '../src/tokens';
 
 const server = new JupyterServer();
 
@@ -30,7 +30,7 @@ afterAll(async () => {
   await server.shutdown();
 });
 
-describe('DebugSession', () => {
+describe('Debugger.Session', () => {
   let connection: Session.ISessionConnection;
 
   beforeEach(async () => {
@@ -49,7 +49,7 @@ describe('DebugSession', () => {
 
   describe('#isDisposed', () => {
     it('should return whether the object is disposed', () => {
-      const debugSession = new DebugSession({
+      const debugSession = new Debugger.Session({
         connection
       });
       expect(debugSession.isDisposed).toEqual(false);
@@ -60,7 +60,7 @@ describe('DebugSession', () => {
 
   describe('#eventMessage', () => {
     it('should be emitted when sending debug messages', async () => {
-      const debugSession = new DebugSession({
+      const debugSession = new Debugger.Session({
         connection
       });
       let events: string[] = [];
@@ -75,7 +75,7 @@ describe('DebugSession', () => {
 
   describe('#sendRequest success', () => {
     it('should send debug messages to the kernel', async () => {
-      const debugSession = new DebugSession({
+      const debugSession = new Debugger.Session({
         connection
       });
       await debugSession.start();
@@ -90,7 +90,7 @@ describe('DebugSession', () => {
 
   describe('#sendRequest failure', () => {
     it('should handle replies with success false', async () => {
-      const debugSession = new DebugSession({
+      const debugSession = new Debugger.Session({
         connection
       });
       await debugSession.start();
@@ -121,7 +121,7 @@ describe('protocol', () => {
   ];
 
   let connection: Session.ISessionConnection;
-  let debugSession: DebugSession;
+  let debugSession: Debugger.Session;
   let threadId = 1;
 
   beforeEach(async () => {
@@ -132,14 +132,14 @@ describe('protocol', () => {
       path
     });
     await connection.changeKernel({ name: 'xpython' });
-    debugSession = new DebugSession({
+    debugSession = new Debugger.Session({
       connection
     });
     await debugSession.start();
 
     const stoppedFuture = new PromiseDelegate<void>();
     debugSession.eventMessage.connect(
-      (sender: DebugSession, event: IDebugger.ISession.Event) => {
+      (sender: Debugger.Session, event: IDebugger.ISession.Event) => {
         switch (event.event) {
           case 'thread': {
             const msg = event as DebugProtocol.ThreadEvent;

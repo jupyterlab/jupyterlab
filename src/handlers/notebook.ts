@@ -11,9 +11,9 @@ import { IDisposable } from '@lumino/disposable';
 
 import { Signal } from '@lumino/signaling';
 
-import { EditorHandler } from './editor';
-
 import { IDebugger } from '../tokens';
+
+import { EditorHandler } from './editor';
 
 /**
  * A handler for notebooks.

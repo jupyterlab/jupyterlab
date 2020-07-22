@@ -5,18 +5,18 @@ import { IDebugger } from './tokens';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { BreakpointsModel } from './breakpoints/model';
+import { BreakpointsModel } from './panels/breakpoints/model';
 
-import { CallstackModel } from './callstack/model';
+import { CallstackModel } from './panels/callstack/model';
 
-import { SourcesModel } from './sources/model';
+import { SourcesModel } from './panels/sources/model';
 
-import { VariablesModel } from './variables/model';
+import { VariablesModel } from './panels/variables/model';
 
 /**
  * A model for a debugger.
  */
-export class DebuggerModel implements IDebugger.IModel {
+export class DebuggerModel {
   /**
    * Instantiate a new DebuggerModel
    */

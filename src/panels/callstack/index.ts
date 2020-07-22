@@ -11,7 +11,7 @@ import { CallstackBody } from './body';
 
 import { CallstackHeader } from './header';
 
-import { CallstackModel } from './model';
+import { IDebugger } from '../../tokens';
 
 /**
  * A Panel to show a callstack.
@@ -127,6 +127,6 @@ export namespace Callstack {
     /**
      * The model for the callstack.
      */
-    model: CallstackModel;
+    model: IDebugger.Model.ICallstack;
   }
 }

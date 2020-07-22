@@ -3,14 +3,14 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { CallstackModel } from '../callstack/model';
+import { IDebugger } from '../../tokens';
 
-import { IDebugger } from '../tokens';
+import { CallstackModel } from '../callstack/model';
 
 /**
  * The model to keep track of the current source being displayed.
  */
-export class SourcesModel {
+export class SourcesModel implements IDebugger.Model.ISources {
   /**
    * Instantiate a new Sources.Model
    *
@@ -23,26 +23,26 @@ export class SourcesModel {
   /**
    * Signal emitted when the current frame changes.
    */
-  currentFrameChanged: ISignal<CallstackModel, CallstackModel.IFrame>;
+  readonly currentFrameChanged: ISignal<CallstackModel, CallstackModel.IFrame>;
 
   /**
    * Signal emitted when a source should be open in the main area.
    */
-  get currentSourceOpened(): ISignal<SourcesModel, IDebugger.ISource> {
+  get currentSourceOpened(): ISignal<SourcesModel, IDebugger.Source> {
     return this._currentSourceOpened;
   }
 
   /**
    * Signal emitted when the current source changes.
    */
-  get currentSourceChanged(): ISignal<SourcesModel, IDebugger.ISource> {
+  get currentSourceChanged(): ISignal<SourcesModel, IDebugger.Source> {
     return this._currentSourceChanged;
   }
 
   /**
    * Return the current source.
    */
-  get currentSource(): IDebugger.ISource {
+  get currentSource(): IDebugger.Source {
     return this._currentSource;
   }
 
@@ -51,7 +51,7 @@ export class SourcesModel {
    *
    * @param source The source to set as the current source.
    */
-  set currentSource(source: IDebugger.ISource | null) {
+  set currentSource(source: IDebugger.Source | null) {
     this._currentSource = source;
     this._currentSourceChanged.emit(source);
   }
@@ -63,11 +63,11 @@ export class SourcesModel {
     this._currentSourceOpened.emit(this._currentSource);
   }
 
-  private _currentSource: IDebugger.ISource | null;
-  private _currentSourceOpened = new Signal<SourcesModel, IDebugger.ISource>(
+  private _currentSource: IDebugger.Source | null;
+  private _currentSourceOpened = new Signal<SourcesModel, IDebugger.Source>(
     this
   );
-  private _currentSourceChanged = new Signal<SourcesModel, IDebugger.ISource>(
+  private _currentSourceChanged = new Signal<SourcesModel, IDebugger.Source>(
     this
   );
 }
