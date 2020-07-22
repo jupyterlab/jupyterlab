@@ -8,7 +8,7 @@ import { IDebugger } from '../../tokens';
 /**
  * A model for a list of breakpoints.
  */
-export class BreakpointsModel implements IDebugger.UI.IBreakpoints {
+export class BreakpointsModel implements IDebugger.Model.IBreakpoints {
   /**
    * Signal emitted when the model changes.
    */

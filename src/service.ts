@@ -63,9 +63,9 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Returns the debugger model.
+   * Returns the debugger service's model.
    */
-  get model(): IDebugger.IModel {
+  get model(): IDebugger.Model.IService {
     return this._model;
   }
 
@@ -643,7 +643,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _debuggerSources: IDebugger.ISources | null;
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _isDisposed = false;
-  private _model: IDebugger.IModel;
+  private _model: IDebugger.Model.IService;
   private _session: IDebugger.ISession;
   private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
   private _specsManager: KernelSpec.IManager;

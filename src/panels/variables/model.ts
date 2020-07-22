@@ -10,7 +10,7 @@ import { IDebugger } from '../../tokens';
 /**
  * A model for a variable explorer.
  */
-export class VariablesModel implements IDebugger.UI.IVariables {
+export class VariablesModel implements IDebugger.Model.IVariables {
   /**
    * Get all the scopes.
    */

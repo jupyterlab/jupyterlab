@@ -138,7 +138,7 @@ export namespace Variables {
     /**
      * The variables model.
      */
-    model: IDebugger.UI.IVariables;
+    model: IDebugger.Model.IVariables;
     /**
      * The debugger service.
      */

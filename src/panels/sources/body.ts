@@ -128,7 +128,7 @@ export class SourcesBody extends Widget {
     this._editor.show();
   }
 
-  private _model: IDebugger.UI.ISources;
+  private _model: IDebugger.Model.ISources;
   private _editor: CodeEditorWrapper;
   private _editorHandler: EditorHandler;
   private _debuggerService: IDebugger;
@@ -151,7 +151,7 @@ export namespace SourcesBody {
     /**
      * The sources model.
      */
-    model: IDebugger.UI.ISources;
+    model: IDebugger.Model.ISources;
 
     /**
      * The editor services used to create new read-only editors.

@@ -127,6 +127,6 @@ export namespace Callstack {
     /**
      * The model for the callstack.
      */
-    model: IDebugger.UI.ICallstack;
+    model: IDebugger.Model.ICallstack;
   }
 }

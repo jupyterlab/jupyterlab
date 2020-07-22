@@ -16,7 +16,7 @@ export class CallstackBody extends ReactWidget {
    *
    * @param model The model for the callstack.
    */
-  constructor(model: IDebugger.UI.ICallstack) {
+  constructor(model: IDebugger.Model.ICallstack) {
     super();
     this._model = model;
     this.addClass('jp-DebuggerCallstack-body');
@@ -29,7 +29,7 @@ export class CallstackBody extends ReactWidget {
     return <FramesComponent model={this._model} />;
   }
 
-  private _model: IDebugger.UI.ICallstack;
+  private _model: IDebugger.Model.ICallstack;
 }
 
 /**
@@ -41,7 +41,7 @@ export class CallstackBody extends ReactWidget {
 const FramesComponent = ({
   model
 }: {
-  model: IDebugger.UI.ICallstack;
+  model: IDebugger.Model.ICallstack;
 }): JSX.Element => {
   const [frames, setFrames] = useState(model.frames);
   const [selected, setSelected] = useState(model.frame);

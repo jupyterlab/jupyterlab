@@ -18,7 +18,7 @@ export class SourcesHeader extends Widget {
    *
    * @param model The model for the Sources.
    */
-  constructor(model: IDebugger.UI.ISources) {
+  constructor(model: IDebugger.Model.ISources) {
     super({ node: document.createElement('header') });
 
     const layout = new PanelLayout();
@@ -53,7 +53,7 @@ export class SourcesHeader extends Widget {
 const SourcePathComponent = ({
   model
 }: {
-  model: IDebugger.UI.ISources;
+  model: IDebugger.Model.ISources;
 }): JSX.Element => {
   return (
     <UseSignal signal={model.currentSourceChanged} initialSender={model}>

@@ -65,7 +65,7 @@ export namespace Sources {
     /**
      * The model for the sources.
      */
-    model: IDebugger.UI.ISources;
+    model: IDebugger.Model.ISources;
 
     /**
      * The editor services used to create new read-only editors.

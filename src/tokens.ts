@@ -34,9 +34,9 @@ export interface IDebugger {
   readonly isStarted: boolean;
 
   /**
-   * The model of the debugger.
+   * The debugger service's model.
    */
-  readonly model: IDebugger.IModel;
+  readonly model: IDebugger.Model.IService;
 
   /**
    * The current debugger session.
@@ -202,51 +202,6 @@ export namespace IDebugger {
      * @param params - Temporary file prefix and suffix for a kernel.
      */
     setTmpFileParams(params: IConfig.FileParams): void;
-  }
-
-  /**
-   * The data model for the debugger.
-   */
-  export interface IModel {
-    /**
-     * The breakpoints UI model.
-     */
-    readonly breakpoints: UI.IBreakpoints;
-
-    /**
-     * The callstack UI model.
-     */
-    readonly callstack: UI.ICallstack;
-
-    /**
-     * The variables UI model.
-     */
-    readonly variables: UI.IVariables;
-
-    /**
-     * The sources UI model.
-     */
-    readonly sources: UI.ISources;
-
-    /**
-     * The set of threads in stopped state.
-     */
-    stoppedThreads: Set<number>;
-
-    /**
-     * The current debugger title.
-     */
-    title: string;
-
-    /**
-     * A signal emitted when the title changes.
-     */
-    titleChanged: ISignal<this, string>;
-
-    /**
-     * Clear the model.
-     */
-    clear(): void;
   }
 
   /**
@@ -558,9 +513,9 @@ export namespace IDebugger {
   }
 
   /**
-   * A namespace for UI interface definitions.
+   * A namespace for UI model definitions.
    */
-  export namespace UI {
+  export namespace Model {
     /**
      * The breakpoints UI model.
      */
@@ -631,6 +586,51 @@ export namespace IDebugger {
        * Signal emitted when the frames have changed.
        */
       readonly framesChanged: ISignal<this, CallstackModel.IFrame[]>;
+    }
+
+    /**
+     * The data model for the debugger service.
+     */
+    export interface IService {
+      /**
+       * The breakpoints UI model.
+       */
+      readonly breakpoints: IBreakpoints;
+
+      /**
+       * The callstack UI model.
+       */
+      readonly callstack: ICallstack;
+
+      /**
+       * The variables UI model.
+       */
+      readonly variables: IVariables;
+
+      /**
+       * The sources UI model.
+       */
+      readonly sources: ISources;
+
+      /**
+       * The set of threads in stopped state.
+       */
+      stoppedThreads: Set<number>;
+
+      /**
+       * The current debugger title.
+       */
+      title: string;
+
+      /**
+       * A signal emitted when the title changes.
+       */
+      titleChanged: ISignal<this, string>;
+
+      /**
+       * Clear the model.
+       */
+      clear(): void;
     }
 
     /**

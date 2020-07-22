@@ -10,7 +10,7 @@ import { IDebugger } from '../../tokens';
 /**
  * A model for a callstack.
  */
-export class CallstackModel implements IDebugger.UI.ICallstack {
+export class CallstackModel implements IDebugger.Model.ICallstack {
   /**
    * Get all the frames.
    */

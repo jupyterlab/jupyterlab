@@ -62,7 +62,7 @@ export namespace Breakpoints {
     /**
      * The breakpoints model.
      */
-    model: IDebugger.UI.IBreakpoints;
+    model: IDebugger.Model.IBreakpoints;
 
     /**
      * The debugger service.

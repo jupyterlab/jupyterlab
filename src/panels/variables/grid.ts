@@ -66,7 +66,7 @@ export class VariablesBodyGrid extends Panel {
   }
 
   private _grid: VariablesGrid;
-  private _model: IDebugger.UI.IVariables;
+  private _model: IDebugger.Model.IVariables;
 }
 
 /**
@@ -270,7 +270,7 @@ export namespace VariablesBodyGrid {
     /**
      * The variables model.
      */
-    model: IDebugger.UI.IVariables;
+    model: IDebugger.Model.IVariables;
     /**
      * The commands registry.
      */
