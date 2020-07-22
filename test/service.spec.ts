@@ -135,7 +135,7 @@ describe('DebuggerService', () => {
     });
 
     it('should throw an error if the session is not set', async () => {
-      await expect(service.start()).rejects.toThrow(
+      await expect(async () => await service.start()).rejects.toThrow(
         "Cannot read property 'start' of null"
       );
     });
