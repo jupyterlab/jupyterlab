@@ -268,7 +268,7 @@ export class DebuggerHandler {
         this._service.session.connection = connection;
         this._previousConnection = connection;
         await this._service.restoreState(true);
-        await createHandler();
+        createHandler();
       }
     };
 
