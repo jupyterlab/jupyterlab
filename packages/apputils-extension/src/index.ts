@@ -37,7 +37,9 @@ import { Palette } from './palette';
 
 import { settingsPlugin } from './settingsplugin';
 
-import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
+import { themesPlugin, themesPaletteMenuPlugin } from './themesplugins';
+
+import { workspacesPlugin } from './workspacesplugin';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -501,7 +503,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sessionDialogs,
   themesPlugin,
   themesPaletteMenuPlugin,
-  utilityCommands
+  utilityCommands,
+  workspacesPlugin
 ];
 export default plugins;
 

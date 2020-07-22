@@ -35,7 +35,7 @@ export class WorkspaceManager extends DataConnector<Workspace.IWorkspace> {
   /**
    * Fetch a workspace.
    *
-   * @param id - The workspaces's ID.
+   * @param id - The workspace's ID.
    *
    * @returns A promise that resolves if successful.
    */
