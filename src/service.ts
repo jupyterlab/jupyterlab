@@ -42,6 +42,13 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Signal emitted for debug event messages.
+   */
+  get eventMessage(): ISignal<IDebugger, IDebugger.ISession.Event> {
+    return this._eventMessage;
+  }
+
+  /**
    * Whether the debug service is disposed.
    */
   get isDisposed(): boolean {
@@ -53,6 +60,13 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   get isStarted(): boolean {
     return this._session?.isStarted ?? false;
+  }
+
+  /**
+   * Returns the debugger model.
+   */
+  get model(): IDebugger.IModel {
+    return this._model;
   }
 
   /**
@@ -91,41 +105,10 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Returns the debugger model.
-   */
-  get model(): IDebugger.IModel {
-    return this._model;
-  }
-
-  /**
    * Signal emitted upon session changed.
    */
   get sessionChanged(): ISignal<IDebugger, IDebugger.ISession> {
     return this._sessionChanged;
-  }
-
-  /**
-   * Signal emitted for debug event messages.
-   */
-  get eventMessage(): ISignal<IDebugger, IDebugger.ISession.Event> {
-    return this._eventMessage;
-  }
-
-  /**
-   * Request whether debugging is available for the session connection.
-   *
-   * @param connection The session connection.
-   */
-  async isAvailable(connection: Session.ISessionConnection): Promise<boolean> {
-    await this._specsManager.ready;
-    const kernel = connection?.kernel;
-    if (!kernel) {
-      return false;
-    }
-    const name = kernel.name;
-    return !!(
-      this._specsManager.specs.kernelspecs[name].metadata?.['debugger'] ?? false
-    );
   }
 
   /**
@@ -156,22 +139,92 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Starts a debugger.
-   * Precondition: !isStarted
+   * Request whether debugging is available for the session connection.
+   *
+   * @param connection The session connection.
    */
-  async start(): Promise<void> {
-    await this.session.start();
+  async isAvailable(connection: Session.ISessionConnection): Promise<boolean> {
+    await this._specsManager.ready;
+    const kernel = connection?.kernel;
+    if (!kernel) {
+      return false;
+    }
+    const name = kernel.name;
+    return !!(
+      this._specsManager.specs.kernelspecs[name].metadata?.['debugger'] ?? false
+    );
   }
 
   /**
-   * Stops the debugger.
-   * Precondition: isStarted
+   * Clear all the breakpoints for the current session.
    */
-  async stop(): Promise<void> {
-    await this.session.stop();
-    if (this._model) {
-      this._model.clear();
+  async clearBreakpoints(): Promise<void> {
+    if (!this.session.isStarted) {
+      return;
     }
+
+    this._model.breakpoints.breakpoints.forEach(
+      async (breakpoints, path, _) => {
+        await this._setBreakpoints([], path);
+      }
+    );
+
+    let bpMap = new Map<string, IDebugger.IBreakpoint[]>();
+    this._model.breakpoints.restoreBreakpoints(bpMap);
+  }
+
+  /**
+   * Continues the execution of the current thread.
+   */
+  async continue(): Promise<void> {
+    try {
+      await this.session.sendRequest('continue', {
+        threadId: this._currentThread()
+      });
+      this._model.stoppedThreads.delete(this._currentThread());
+    } catch (err) {
+      console.error('Error:', err.message);
+    }
+  }
+
+  /**
+   * Retrieve the content of a source file.
+   *
+   * @param source The source object containing the path to the file.
+   */
+  async getSource(source: DebugProtocol.Source): Promise<IDebugger.Source> {
+    const reply = await this.session.sendRequest('source', {
+      source,
+      sourceReference: source.sourceReference
+    });
+    return { ...reply.body, path: source.path };
+  }
+
+  /**
+   * Makes the current thread run again for one step.
+   */
+  async next(): Promise<void> {
+    try {
+      await this.session.sendRequest('next', {
+        threadId: this._currentThread()
+      });
+    } catch (err) {
+      console.error('Error:', err.message);
+    }
+  }
+
+  /**
+   * Request variables for a given variable reference.
+   *
+   * @param variablesReference The variable reference to request.
+   */
+  async inspectVariable(
+    variablesReference: number
+  ): Promise<DebugProtocol.Variable[]> {
+    const reply = await this.session.sendRequest('variables', {
+      variablesReference
+    });
+    return reply.body.variables;
   }
 
   /**
@@ -244,30 +297,11 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Continues the execution of the current thread.
+   * Starts a debugger.
+   * Precondition: !isStarted
    */
-  async continue(): Promise<void> {
-    try {
-      await this.session.sendRequest('continue', {
-        threadId: this._currentThread()
-      });
-      this._model.stoppedThreads.delete(this._currentThread());
-    } catch (err) {
-      console.error('Error:', err.message);
-    }
-  }
-
-  /**
-   * Makes the current thread run again for one step.
-   */
-  async next(): Promise<void> {
-    try {
-      await this.session.sendRequest('next', {
-        threadId: this._currentThread()
-      });
-    } catch (err) {
-      console.error('Error:', err.message);
-    }
+  start(): Promise<void> {
+    return this.session.start();
   }
 
   /**
@@ -293,6 +327,17 @@ export class DebuggerService implements IDebugger, IDisposable {
       });
     } catch (err) {
       console.error('Error:', err.message);
+    }
+  }
+
+  /**
+   * Stops the debugger.
+   * Precondition: isStarted
+   */
+  async stop(): Promise<void> {
+    await this.session.stop();
+    if (this._model) {
+      this._model.clear();
     }
   }
 
@@ -340,48 +385,56 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Clear all the breakpoints for the current session.
+   * Clear the current model.
    */
-  async clearBreakpoints(): Promise<void> {
-    if (!this.session.isStarted) {
+  private _clearModel(): void {
+    this._model.callstack.frames = [];
+    this._model.variables.scopes = [];
+  }
+
+  /**
+   * Clear the signals set on the model.
+   */
+  private _clearSignals(): void {
+    this._model.callstack.currentFrameChanged.disconnect(
+      this._onCurrentFrameChanged,
+      this
+    );
+    this._model.variables.variableExpanded.disconnect(
+      this._onVariableExpanded,
+      this
+    );
+  }
+
+  /**
+   * Map a list of scopes to a list of variables.
+   *
+   * @param scopes The list of scopes.
+   * @param variables The list of variables.
+   */
+  private _convertScopes(
+    scopes: DebugProtocol.Scope[],
+    variables: DebugProtocol.Variable[]
+  ): VariablesModel.IScope[] {
+    if (!variables || !scopes) {
       return;
     }
-
-    this._model.breakpoints.breakpoints.forEach(
-      async (breakpoints, path, _) => {
-        await this._setBreakpoints([], path);
-      }
-    );
-
-    let bpMap = new Map<string, IDebugger.IBreakpoint[]>();
-    this._model.breakpoints.restoreBreakpoints(bpMap);
+    return scopes.map(scope => {
+      return {
+        name: scope.name,
+        variables: variables.map(variable => {
+          return { ...variable };
+        })
+      };
+    });
   }
 
   /**
-   * Retrieve the content of a source file.
-   *
-   * @param source The source object containing the path to the file.
+   * Get the current thread from the model.
    */
-  async getSource(source: DebugProtocol.Source): Promise<IDebugger.Source> {
-    const reply = await this.session.sendRequest('source', {
-      source,
-      sourceReference: source.sourceReference
-    });
-    return { ...reply.body, path: source.path };
-  }
-
-  /**
-   * Request variables for a given variable reference.
-   *
-   * @param variablesReference The variable reference to request.
-   */
-  async inspectVariable(
-    variablesReference: number
-  ): Promise<DebugProtocol.Variable[]> {
-    const reply = await this.session.sendRequest('variables', {
-      variablesReference
-    });
-    return reply.body.variables;
+  private _currentThread(): number {
+    // TODO: ask the model for the current thread ID
+    return 1;
   }
 
   /**
@@ -394,6 +447,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   ): Promise<IDebugger.ISession.IDumpCellResponse> {
     return this.session.sendRequest('dumpCell', { code });
   }
+
   /**
    * Filter breakpoints and only return those associated with a known editor.
    *
@@ -404,7 +458,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: Map<string, IDebugger.IBreakpoint[]>
   ): Map<string, IDebugger.IBreakpoint[]> {
     let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
-    for (let collection of breakpoints) {
+    for (const collection of breakpoints) {
       const [id, list] = collection;
       list.forEach(() => {
         each(
@@ -426,39 +480,11 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
-   * Process the list of breakpoints from the server and return as a map.
-   *
-   * @param breakpoints - The list of breakpoints from the kernel.
-   *
-   */
-  private _mapBreakpoints(
-    breakpoints: IDebugger.ISession.IDebugInfoBreakpoints[]
-  ): Map<string, IDebugger.IBreakpoint[]> {
-    if (!breakpoints.length) {
-      return new Map<string, IDebugger.IBreakpoint[]>();
-    }
-    return breakpoints.reduce(
-      (
-        map: Map<string, IDebugger.IBreakpoint[]>,
-        val: IDebugger.ISession.IDebugInfoBreakpoints
-      ) => {
-        const { breakpoints, source } = val;
-        map.set(
-          source,
-          breakpoints.map(point => ({ ...point, active: true }))
-        );
-        return map;
-      },
-      new Map<string, IDebugger.IBreakpoint[]>()
-    );
-  }
-
-  /**
    * Get all the frames from the kernel.
    */
   private async _getAllFrames(): Promise<void> {
     this._model.callstack.currentFrameChanged.connect(
-      this._onChangeFrame,
+      this._onCurrentFrameChanged,
       this
     );
     this._model.variables.variableExpanded.connect(
@@ -468,55 +494,6 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     const stackFrames = await this._getFrames(this._currentThread());
     this._model.callstack.frames = stackFrames;
-  }
-
-  /**
-   * Handle a change of the current active frame.
-   *
-   * @param _ The callstack model
-   * @param frame The frame.
-   */
-  private async _onChangeFrame(
-    _: CallstackModel,
-    frame: CallstackModel.IFrame
-  ): Promise<void> {
-    if (!frame) {
-      return;
-    }
-    const scopes = await this._getScopes(frame);
-    const variables = await this._getVariables(scopes[0]);
-    const variableScopes = this._convertScopes(scopes, variables);
-    this._model.variables.scopes = variableScopes;
-  }
-
-  /**
-   * Handle a variable expanded event and request variables from the kernel.
-   *
-   * @param _ The variables model.
-   * @param variable The expanded variable.
-   */
-  private async _onVariableExpanded(
-    _: VariablesModel,
-    variable: DebugProtocol.Variable
-  ): Promise<DebugProtocol.Variable[]> {
-    const reply = await this.session.sendRequest('variables', {
-      variablesReference: variable.variablesReference
-    });
-    let newVariable = { ...variable, expanded: true };
-
-    reply.body.variables.forEach((variable: DebugProtocol.Variable) => {
-      newVariable = { [variable.name]: variable, ...newVariable };
-    });
-    const newScopes = this._model.variables.scopes.map(scope => {
-      const findIndex = scope.variables.findIndex(
-        ele => ele.variablesReference === variable.variablesReference
-      );
-      scope.variables[findIndex] = newVariable;
-      return { ...scope };
-    });
-
-    this._model.variables.scopes = [...newScopes];
-    return reply.body.variables;
   }
 
   /**
@@ -569,6 +546,83 @@ export class DebuggerService implements IDebugger, IDisposable {
   }
 
   /**
+   * Process the list of breakpoints from the server and return as a map.
+   *
+   * @param breakpoints - The list of breakpoints from the kernel.
+   *
+   */
+  private _mapBreakpoints(
+    breakpoints: IDebugger.ISession.IDebugInfoBreakpoints[]
+  ): Map<string, IDebugger.IBreakpoint[]> {
+    if (!breakpoints.length) {
+      return new Map<string, IDebugger.IBreakpoint[]>();
+    }
+    return breakpoints.reduce(
+      (
+        map: Map<string, IDebugger.IBreakpoint[]>,
+        val: IDebugger.ISession.IDebugInfoBreakpoints
+      ) => {
+        const { breakpoints, source } = val;
+        map.set(
+          source,
+          breakpoints.map(point => ({ ...point, active: true }))
+        );
+        return map;
+      },
+      new Map<string, IDebugger.IBreakpoint[]>()
+    );
+  }
+
+  /**
+   * Handle a change of the current active frame.
+   *
+   * @param _ The callstack model
+   * @param frame The frame.
+   */
+  private async _onCurrentFrameChanged(
+    _: CallstackModel,
+    frame: CallstackModel.IFrame
+  ): Promise<void> {
+    if (!frame) {
+      return;
+    }
+    const scopes = await this._getScopes(frame);
+    const variables = await this._getVariables(scopes[0]);
+    const variableScopes = this._convertScopes(scopes, variables);
+    this._model.variables.scopes = variableScopes;
+  }
+
+  /**
+   * Handle a variable expanded event and request variables from the kernel.
+   *
+   * @param _ The variables model.
+   * @param variable The expanded variable.
+   */
+  private async _onVariableExpanded(
+    _: VariablesModel,
+    variable: DebugProtocol.Variable
+  ): Promise<DebugProtocol.Variable[]> {
+    const reply = await this.session.sendRequest('variables', {
+      variablesReference: variable.variablesReference
+    });
+    let newVariable = { ...variable, expanded: true };
+
+    reply.body.variables.forEach((variable: DebugProtocol.Variable) => {
+      newVariable = { [variable.name]: variable, ...newVariable };
+    });
+    const newScopes = this._model.variables.scopes.map(scope => {
+      const findIndex = scope.variables.findIndex(
+        ele => ele.variablesReference === variable.variablesReference
+      );
+      scope.variables[findIndex] = newVariable;
+      return { ...scope };
+    });
+
+    this._model.variables.scopes = [...newScopes];
+    return reply.body.variables;
+  }
+
+  /**
    * Set the breakpoints for a given file.
    *
    * @param breakpoints The list of breakpoints to set.
@@ -583,59 +637,6 @@ export class DebuggerService implements IDebugger, IDisposable {
       source: { path },
       sourceModified: false
     });
-  }
-
-  /**
-   * Map a list of scopes to a list of variables.
-   *
-   * @param scopes The list of scopes.
-   * @param variables The list of variables.
-   */
-  private _convertScopes(
-    scopes: DebugProtocol.Scope[],
-    variables: DebugProtocol.Variable[]
-  ): VariablesModel.IScope[] {
-    if (!variables || !scopes) {
-      return;
-    }
-    return scopes.map(scope => {
-      return {
-        name: scope.name,
-        variables: variables.map(variable => {
-          return { ...variable };
-        })
-      };
-    });
-  }
-
-  /**
-   * Clear the current model.
-   */
-  private _clearModel(): void {
-    this._model.callstack.frames = [];
-    this._model.variables.scopes = [];
-  }
-
-  /**
-   * Clear the signals set on the model.
-   */
-  private _clearSignals(): void {
-    this._model.callstack.currentFrameChanged.disconnect(
-      this._onChangeFrame,
-      this
-    );
-    this._model.variables.variableExpanded.disconnect(
-      this._onVariableExpanded,
-      this
-    );
-  }
-
-  /**
-   * Get the current thread from the model.
-   */
-  private _currentThread(): number {
-    // TODO: ask the model for the current thread ID
-    return 1;
   }
 
   private _config: IDebugger.IConfig;
