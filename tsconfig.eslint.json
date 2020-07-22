@@ -8,6 +8,7 @@
     "tests/**/*",
     "dev_mode/*",
     "docs/**/*",
+    ".eslintrc.js",
     "examples/**/*",
     "*",
     "packages/services/examples/**/*",
