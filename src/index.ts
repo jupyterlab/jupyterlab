@@ -407,7 +407,18 @@ const main: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     themeManager: IThemeManager | null
   ): Promise<void> => {
-    const { commands, shell } = app;
+    const { commands, shell, serviceManager } = app;
+    const { kernelspecs } = serviceManager;
+
+    // hide the debugger sidebar if no kernel with support for debugging is available
+    await kernelspecs.ready;
+    const specs = kernelspecs.specs.kernelspecs;
+    const enabled = Object.keys(specs).some(
+      name => !!(specs[name].metadata?.['debugger'] ?? false)
+    );
+    if (!enabled) {
+      return;
+    }
 
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
