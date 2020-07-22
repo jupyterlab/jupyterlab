@@ -112,7 +112,11 @@ describe('protocol', () => {
     'i += 1',
     'j = i**2',
     'j += 1',
-    'print(i, j)'
+    'print(i, j)',
+    'for i in range(10):',
+    '    j = i ** 2',
+    '    print(j)',
+    'print(j)'
   ].join('\n');
 
   const breakpoints: DebugProtocol.SourceBreakpoint[] = [
@@ -334,6 +338,28 @@ describe('protocol', () => {
       expect(k).toBeDefined();
       expect(k.type).toEqual('int');
       expect(k.value).toEqual('123');
+    });
+  });
+
+  describe('#setBreakpoints with condition', () => {
+    it('should be hit when the condition is true', async () => {
+      const reply = await debugSession.sendRequest('dumpCell', {
+        code
+      });
+      await debugSession.sendRequest('setBreakpoints', {
+        breakpoints: [{ line: 9, condition: 'i == 5' }],
+        source: { path: reply.body.sourcePath },
+        sourceModified: false
+      });
+      await debugSession.sendRequest('configurationDone', {});
+
+      // advance to the conditional breakpoint
+      await debugSession.sendRequest('continue', { threadId });
+
+      const variables = await getVariables();
+      const j = find(variables, variable => variable.name === 'j');
+      expect(j).toBeDefined();
+      expect(j.value).toEqual('25');
     });
   });
 });
