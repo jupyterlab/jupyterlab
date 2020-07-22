@@ -12,6 +12,7 @@
  * Manage the metapackage meta package.
  */
 import * as path from 'path';
+import * as fs from 'fs-extra';
 import * as utils from './utils';
 import {
   ensurePackage,
@@ -175,7 +176,18 @@ function ensureJupyterlab(): string[] {
       return;
     }
     coreData.set(data.name, data);
+
+    // If the package has a tokens.ts file, make sure it is noted as a singleton
+    if (
+      fs.existsSync(path.join(pkgPath, 'src', 'tokens.ts')) &&
+      !singletonPackages.includes(data.name)
+    ) {
+      singletonPackages.push(data.name);
+    }
   });
+
+  // These are not sorted when writing out by default
+  singletonPackages.sort();
 
   // Populate the yarn resolutions. First we make sure direct packages have
   // resolutions.
