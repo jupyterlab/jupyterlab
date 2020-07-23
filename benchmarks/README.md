@@ -26,7 +26,7 @@ It will run on both firefox and chrome.
 We also build in support to run this against some plotly ipywidgets, to get a sense of
 how rendering time is impacted by heavier mime render types:
 
-First add the plotly and ipwydigets to the `dev_mode/package.json`:
+First add the plotly and ipywidgets to the `dev_mode/package.json`:
 
 ```json
     "externalExtensions": {
@@ -50,12 +50,12 @@ env 'BENCHMARK_NOTEBOOKS=["./largePlotly", "./manyPlotly"]' jlpm all
 
 ## React Fixed Data Tables
 
-We add support for testing against [`fixed-data-table-2`](https://github.com/schrodinger/fixed-data-table-2) which
-is an example of a mime renderer that takes a while to render:
+We add support for testing against a mime render of [`fixed-data-table-2`](https://github.com/schrodinger/fixed-data-table-2) which
+is an example of a cell output that takes a while to render:
 
 ```json
     "externalExtensions": {
-      "../benchmarks/extensions/fixed-data-table": "*"
+      "fdtmime": "file:../benchmarks/extensions/fixed-data-table"
     },
 ```
 

@@ -21,6 +21,7 @@
   "scripts": {
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
     "build": "tsc",
+    "preinstall": "tsc",
     "prepare": "npm run clean && npm run build",
     "watch": "tsc -w",
     "extension:install": "jupyter labextension install fdtmime",
