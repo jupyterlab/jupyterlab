@@ -11,8 +11,6 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 
 import { Debugger } from './debugger';
 
-import { CallstackModel } from './panels/callstack/model';
-
 import { VariablesModel } from './panels/variables/model';
 
 import { IDebugger } from './tokens';
@@ -577,8 +575,8 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param frame The frame.
    */
   private async _onCurrentFrameChanged(
-    _: CallstackModel,
-    frame: CallstackModel.IFrame
+    _: IDebugger.Model.ICallstack,
+    frame: IDebugger.IStackFrame
   ): Promise<void> {
     if (!frame) {
       return;

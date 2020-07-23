@@ -3,8 +3,6 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { DebugProtocol } from 'vscode-debugprotocol';
-
 import { IDebugger } from '../../tokens';
 
 /**
@@ -14,14 +12,14 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
   /**
    * Get all the frames.
    */
-  get frames(): CallstackModel.IFrame[] {
+  get frames(): IDebugger.IStackFrame[] {
     return this._state;
   }
 
   /**
    * Set the frames.
    */
-  set frames(newFrames: CallstackModel.IFrame[]) {
+  set frames(newFrames: IDebugger.IStackFrame[]) {
     this._state = newFrames;
     const frame = newFrames.find(
       frame => Private.getFrameId(frame) === Private.getFrameId(this.frame)
@@ -37,14 +35,14 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
   /**
    * Get the current frame.
    */
-  get frame(): CallstackModel.IFrame {
+  get frame(): IDebugger.IStackFrame {
     return this._currentFrame;
   }
 
   /**
    * Set the current frame.
    */
-  set frame(frame: CallstackModel.IFrame) {
+  set frame(frame: IDebugger.IStackFrame) {
     this._currentFrame = frame;
     this._currentFrameChanged.emit(frame);
   }
@@ -52,31 +50,21 @@ export class CallstackModel implements IDebugger.Model.ICallstack {
   /**
    * Signal emitted when the frames have changed.
    */
-  get framesChanged(): ISignal<this, CallstackModel.IFrame[]> {
+  get framesChanged(): ISignal<this, IDebugger.IStackFrame[]> {
     return this._framesChanged;
   }
 
   /**
    * Signal emitted when the current frame has changed.
    */
-  get currentFrameChanged(): ISignal<this, CallstackModel.IFrame> {
+  get currentFrameChanged(): ISignal<this, IDebugger.IStackFrame> {
     return this._currentFrameChanged;
   }
 
-  private _state: CallstackModel.IFrame[] = [];
-  private _currentFrame: CallstackModel.IFrame;
-  private _framesChanged = new Signal<this, CallstackModel.IFrame[]>(this);
-  private _currentFrameChanged = new Signal<this, CallstackModel.IFrame>(this);
-}
-
-/**
- * A namespace for CallstackModel `statics`.
- */
-export namespace CallstackModel {
-  /**
-   * An interface for a frame.
-   */
-  export type IFrame = DebugProtocol.StackFrame;
+  private _state: IDebugger.IStackFrame[] = [];
+  private _currentFrame: IDebugger.IStackFrame;
+  private _framesChanged = new Signal<this, IDebugger.IStackFrame[]>(this);
+  private _currentFrameChanged = new Signal<this, IDebugger.IStackFrame>(this);
 }
 
 /**
@@ -88,7 +76,7 @@ namespace Private {
    *
    * @param frame The frame.
    */
-  export function getFrameId(frame: CallstackModel.IFrame): string {
+  export function getFrameId(frame: IDebugger.IStackFrame): string {
     return `${frame?.source?.path}-${frame?.id}`;
   }
 }

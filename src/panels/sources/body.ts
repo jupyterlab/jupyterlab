@@ -13,8 +13,6 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { EditorHandler } from '../../handlers/editor';
 
-import { CallstackModel } from '../../panels/callstack/model';
-
 import { IDebugger } from '../../tokens';
 
 import { ReadOnlyEditorFactory } from './factory';
@@ -86,7 +84,7 @@ export class SourcesBody extends Widget {
    *
    * @param frame The current frame.
    */
-  private async _showSource(frame: CallstackModel.IFrame): Promise<void> {
+  private async _showSource(frame: IDebugger.IStackFrame): Promise<void> {
     const path = frame.source.path;
     const source = await this._debuggerService.getSource({
       sourceReference: 0,

@@ -5,8 +5,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { IDebugger } from '../../tokens';
 
-import { CallstackModel } from '../callstack/model';
-
 /**
  * The model to keep track of the current source being displayed.
  */
@@ -23,7 +21,10 @@ export class SourcesModel implements IDebugger.Model.ISources {
   /**
    * Signal emitted when the current frame changes.
    */
-  readonly currentFrameChanged: ISignal<CallstackModel, CallstackModel.IFrame>;
+  readonly currentFrameChanged: ISignal<
+    IDebugger.Model.ICallstack,
+    IDebugger.IStackFrame
+  >;
 
   /**
    * Signal emitted when a source should be open in the main area.
@@ -83,6 +84,9 @@ export namespace SourcesModel {
     /**
      * Signal emitted when the current frame changes.
      */
-    currentFrameChanged: ISignal<CallstackModel, CallstackModel.IFrame>;
+    currentFrameChanged: ISignal<
+      IDebugger.Model.ICallstack,
+      IDebugger.IStackFrame
+    >;
   }
 }

@@ -13,8 +13,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
-import { CallstackModel } from './panels/callstack/model';
-
 import { SourcesModel } from './panels/sources/model';
 
 import { VariablesModel } from './panels/variables/model';
@@ -169,6 +167,11 @@ export namespace IDebugger {
      */
     path: string;
   };
+
+  /**
+   * The type for a stack frame
+   */
+  export type IStackFrame = DebugProtocol.StackFrame;
 
   /**
    * Single breakpoint in an editor.
@@ -570,22 +573,22 @@ export namespace IDebugger {
       /**
        * Signal emitted when the current frame has changed.
        */
-      readonly currentFrameChanged: ISignal<this, CallstackModel.IFrame>;
+      readonly currentFrameChanged: ISignal<this, IDebugger.IStackFrame>;
 
       /**
        * The current frame.
        */
-      frame: CallstackModel.IFrame;
+      frame: IDebugger.IStackFrame;
 
       /**
        * The frames for the callstack.
        */
-      frames: CallstackModel.IFrame[];
+      frames: IDebugger.IStackFrame[];
 
       /**
        * Signal emitted when the frames have changed.
        */
-      readonly framesChanged: ISignal<this, CallstackModel.IFrame[]>;
+      readonly framesChanged: ISignal<this, IDebugger.IStackFrame[]>;
     }
 
     /**
@@ -641,8 +644,8 @@ export namespace IDebugger {
        * Signal emitted when the current frame changes.
        */
       readonly currentFrameChanged: ISignal<
-        CallstackModel,
-        CallstackModel.IFrame
+        IDebugger.Model.ICallstack,
+        IDebugger.IStackFrame
       >;
 
       /**
