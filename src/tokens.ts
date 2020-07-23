@@ -165,40 +165,10 @@ export namespace IDebugger {
   };
 
   /**
-   * The type for a stack frame
-   */
-  export interface IStackFrame extends DebugProtocol.StackFrame {}
-
-  /**
    * Single breakpoint in an editor.
    */
   export interface IBreakpoint extends DebugProtocol.Breakpoint {
     active: boolean;
-  }
-
-  /**
-   * An interface for a variable.
-   */
-  export interface IVariable extends DebugProtocol.Variable {
-    /**
-     * Whether the variable is expanded.
-     */
-    expanded?: boolean;
-  }
-
-  /**
-   * An interface for a scope.
-   */
-  export interface IScope {
-    /**
-     * The name of the scope.
-     */
-    name: string;
-
-    /**
-     * The list of variables.
-     */
-    variables: IVariable[];
   }
 
   /**
@@ -229,6 +199,21 @@ export namespace IDebugger {
   }
 
   /**
+   * An interface for a scope.
+   */
+  export interface IScope {
+    /**
+     * The name of the scope.
+     */
+    name: string;
+
+    /**
+     * The list of variables.
+     */
+    variables: IVariable[];
+  }
+
+  /**
    * A visual debugger session.
    */
   export interface ISession extends IObservableDisposable {
@@ -251,16 +236,6 @@ export namespace IDebugger {
     >;
 
     /**
-     * Start a new debug session.
-     */
-    start(): Promise<void>;
-
-    /**
-     * Stop a running debug session.
-     */
-    stop(): Promise<void>;
-
-    /**
      * Restore the state of a debug session.
      */
     restoreState(): Promise<IDebugger.ISession.Response['debugInfo']>;
@@ -272,6 +247,16 @@ export namespace IDebugger {
       command: K,
       args: IDebugger.ISession.Request[K]
     ): Promise<IDebugger.ISession.Response[K]>;
+
+    /**
+     * Start a new debug session.
+     */
+    start(): Promise<void>;
+
+    /**
+     * Stop a running debug session.
+     */
+    stop(): Promise<void>;
   }
 
   /**
@@ -293,6 +278,21 @@ export namespace IDebugger {
      * @param params - The editor open parameters.
      */
     open(params: ISources.OpenParams): void;
+  }
+
+  /**
+   * The type for a stack frame
+   */
+  export interface IStackFrame extends DebugProtocol.StackFrame {}
+
+  /**
+   * An interface for a variable.
+   */
+  export interface IVariable extends DebugProtocol.Variable {
+    /**
+     * Whether the variable is expanded.
+     */
+    expanded?: boolean;
   }
 
   /**
@@ -342,59 +342,9 @@ export namespace IDebugger {
 
   export namespace ISession {
     /**
-     * Response to the 'kernel_info_request' request.
-     * This interface extends the IInfoReply by adding the `debugger` key
-     * that isn't part of the protocol yet.
-     * See this pull request for more info: https://github.com/jupyter/jupyter_client/pull/486
+     * A generic debug event.
      */
-    export interface IInfoReply extends KernelMessage.IInfoReply {
-      debugger: boolean;
-    }
-
-    /**
-     * Arguments for 'dumpCell' request.
-     * This is an addition to the Debug Adapter Protocol to support
-     * setting breakpoints for cells.
-     */
-    export interface IDumpCellArguments {
-      code: string;
-    }
-
-    /**
-     * Response to 'dumpCell' request.
-     * This is an addition to the Debug Adapter Protocol to support
-     * setting breakpoints for cells.
-     */
-    export interface IDumpCellResponse extends DebugProtocol.Response {
-      body: {
-        sourcePath: string;
-      };
-    }
-
-    /**
-     * List of breakpoints in a source file.
-     */
-    export interface IDebugInfoBreakpoints {
-      source: string;
-      breakpoints: DebugProtocol.Breakpoint[];
-    }
-
-    /**
-     * Response to 'debugInfo' request.
-     * This is an addition to the Debug Adapter Protocol to be able
-     * to retrieve the debugger state when restoring a session.
-     */
-    export interface IDebugInfoResponse extends DebugProtocol.Response {
-      body: {
-        isStarted: boolean;
-        hashMethod: string;
-        hashSeed: number;
-        breakpoints: IDebugInfoBreakpoints[];
-        tmpFilePrefix: string;
-        tmpFileSuffix: string;
-        stoppedThreads: number[];
-      };
-    }
+    export type Event = DebugProtocol.Event;
 
     /**
      * Expose all the debug requests types.
@@ -481,9 +431,59 @@ export namespace IDebugger {
     };
 
     /**
-     * A generic debug event.
+     * List of breakpoints in a source file.
      */
-    export type Event = DebugProtocol.Event;
+    export interface IDebugInfoBreakpoints {
+      source: string;
+      breakpoints: DebugProtocol.Breakpoint[];
+    }
+
+    /**
+     * Response to 'debugInfo' request.
+     * This is an addition to the Debug Adapter Protocol to be able
+     * to retrieve the debugger state when restoring a session.
+     */
+    export interface IDebugInfoResponse extends DebugProtocol.Response {
+      body: {
+        isStarted: boolean;
+        hashMethod: string;
+        hashSeed: number;
+        breakpoints: IDebugInfoBreakpoints[];
+        tmpFilePrefix: string;
+        tmpFileSuffix: string;
+        stoppedThreads: number[];
+      };
+    }
+
+    /**
+     * Arguments for 'dumpCell' request.
+     * This is an addition to the Debug Adapter Protocol to support
+     * setting breakpoints for cells.
+     */
+    export interface IDumpCellArguments {
+      code: string;
+    }
+
+    /**
+     * Response to 'dumpCell' request.
+     * This is an addition to the Debug Adapter Protocol to support
+     * setting breakpoints for cells.
+     */
+    export interface IDumpCellResponse extends DebugProtocol.Response {
+      body: {
+        sourcePath: string;
+      };
+    }
+
+    /**
+     * Response to the 'kernel_info_request' request.
+     * This interface extends the IInfoReply by adding the `debugger` key
+     * that isn't part of the protocol yet.
+     * See this pull request for more info: https://github.com/jupyter/jupyter_client/pull/486
+     */
+    export interface IInfoReply extends KernelMessage.IInfoReply {
+      debugger: boolean;
+    }
   }
 
   /**
@@ -520,11 +520,6 @@ export namespace IDebugger {
      */
     export type OpenParams = {
       /**
-       * The label for the read-only editor.
-       */
-      label: string;
-
-      /**
        * The caption for the read-only editor.
        */
       caption: string;
@@ -533,6 +528,11 @@ export namespace IDebugger {
        * The code editor wrapper to add to the main area.
        */
       editorWrapper: CodeEditorWrapper;
+
+      /**
+       * The label for the read-only editor.
+       */
+      label: string;
     };
   }
 
