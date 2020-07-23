@@ -663,13 +663,13 @@ export namespace DebuggerService {
     config: IDebugger.IConfig;
 
     /**
-     * The debugger sources instance.
-     */
-    debuggerSources?: IDebugger.ISources;
-
-    /**
      * The kernel specs manager.
      */
     specsManager: KernelSpec.IManager;
+
+    /**
+     * The debugger sources instance.
+     */
+    debuggerSources?: IDebugger.ISources;
   }
 }

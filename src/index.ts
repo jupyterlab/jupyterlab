@@ -19,6 +19,8 @@ import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
+import { PathExt } from '@jupyterlab/coreutils';
+
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
@@ -28,6 +30,8 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { Session } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
+import { each } from '@lumino/algorithm';
 
 import {
   continueIcon,
@@ -40,11 +44,15 @@ import {
 
 import { Debugger } from './debugger';
 
-import { TrackerHandler } from './handlers/tracker';
-
 import { DebuggerHandler } from './handler';
 
+import { EditorHandler } from './handlers/editor';
+
 import { IDebugger, IDebuggerConfig, IDebuggerSources } from './tokens';
+
+import { CallstackModel } from './panels/callstack/model';
+
+import { ReadOnlyEditorFactory } from './panels/sources/factory';
 
 import { VariablesBodyGrid } from './panels/variables/grid';
 
@@ -228,38 +236,18 @@ const notebooks: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * A plugin that tracks notebook, console and file editors used for debugging.
- */
-const tracker: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger:tracker',
-  autoStart: true,
-  requires: [IDebugger, IEditorServices, IDebuggerSources],
-  activate: (
-    _,
-    debug: IDebugger,
-    editorServices: IEditorServices,
-    debuggerSources: IDebugger.ISources
-  ) => {
-    new TrackerHandler({
-      editorServices,
-      debuggerService: debug,
-      debuggerSources
-    });
-  }
-};
-
-/**
  * A plugin that provides a debugger service.
  */
 const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:service',
   autoStart: true,
   provides: IDebugger,
-  requires: [IDebuggerConfig, IDebuggerSources],
+  requires: [IDebuggerConfig],
+  optional: [IDebuggerSources],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
-    debuggerSources: IDebugger.ISources
+    debuggerSources: IDebugger.ISources | null
   ) =>
     new Debugger.Service({
       config,
@@ -394,7 +382,8 @@ const main: JupyterFrontEndPlugin<void> = {
     ILayoutRestorer,
     ICommandPalette,
     ISettingRegistry,
-    IThemeManager
+    IThemeManager,
+    IDebuggerSources
   ],
   autoStart: true,
   activate: async (
@@ -405,7 +394,8 @@ const main: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null,
     settingRegistry: ISettingRegistry | null,
-    themeManager: IThemeManager | null
+    themeManager: IThemeManager | null,
+    debuggerSources: IDebugger.ISources | null
   ): Promise<void> => {
     const { commands, shell, serviceManager } = app;
     const { kernelspecs } = serviceManager;
@@ -554,6 +544,85 @@ const main: JupyterFrontEndPlugin<void> = {
         palette.addItem({ command, category });
       });
     }
+
+    if (debuggerSources) {
+      const { model } = service;
+      const readOnlyEditorFactory = new ReadOnlyEditorFactory({
+        editorServices
+      });
+
+      const onCurrentFrameChanged = (
+        _: IDebugger.Model.ICallstack,
+        frame: CallstackModel.IFrame
+      ): void => {
+        each(
+          debuggerSources.find({
+            focus: true,
+            kernel: service.session.connection.kernel.name,
+            path: service.session?.connection?.path,
+            source: frame?.source.path ?? null
+          }),
+          editor => {
+            requestAnimationFrame(() => {
+              EditorHandler.showCurrentLine(editor, frame.line);
+            });
+          }
+        );
+      };
+
+      const onCurrentSourceOpened = (
+        _: IDebugger.Model.ISources,
+        source: IDebugger.Source
+      ): void => {
+        if (!source) {
+          return;
+        }
+        const { content, mimeType, path } = source;
+        const results = debuggerSources.find({
+          focus: true,
+          kernel: service.session.connection.kernel.name,
+          path: service.session.connection.path,
+          source: path
+        });
+        if (results.length > 0) {
+          return;
+        }
+        const editorWrapper = readOnlyEditorFactory.createNewEditor({
+          content,
+          mimeType,
+          path
+        });
+        const editor = editorWrapper.editor;
+        const editorHandler = new EditorHandler({
+          debuggerService: service,
+          editor,
+          path
+        });
+        editorWrapper.disposed.connect(() => editorHandler.dispose());
+
+        debuggerSources.open({
+          label: PathExt.basename(path),
+          caption: path,
+          editorWrapper
+        });
+
+        const frame = service.model.callstack.frame;
+        if (frame) {
+          EditorHandler.showCurrentLine(editor, frame.line);
+        }
+      };
+
+      model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
+      model.sources.currentSourceOpened.connect(onCurrentSourceOpened);
+      model.breakpoints.clicked.connect(async (_, breakpoint) => {
+        const path = breakpoint.source.path;
+        const source = await service.getSource({
+          sourceReference: 0,
+          path
+        });
+        onCurrentSourceOpened(null, source);
+      });
+    }
   }
 };
 
@@ -565,7 +634,6 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   consoles,
   files,
   notebooks,
-  tracker,
   variables,
   main,
   sources,
