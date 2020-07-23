@@ -13,10 +13,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
-import { SourcesModel } from './panels/sources/model';
-
-import { VariablesModel } from './panels/variables/model';
-
 /**
  * An interface describing an application's visual debugger.
  */
@@ -178,6 +174,31 @@ export namespace IDebugger {
    */
   export interface IBreakpoint extends DebugProtocol.Breakpoint {
     active: boolean;
+  }
+
+  /**
+   * An interface for a variable.
+   */
+  export interface IVariable extends DebugProtocol.Variable {
+    /**
+     * Whether the variable is expanded.
+     */
+    expanded?: boolean;
+  }
+
+  /**
+   * An interface for a scope.
+   */
+  export interface IScope {
+    /**
+     * The name of the scope.
+     */
+    name: string;
+
+    /**
+     * The list of variables.
+     */
+    variables: IVariable[];
   }
 
   /**
@@ -656,12 +677,18 @@ export namespace IDebugger {
       /**
        * Signal emitted when the current source changes.
        */
-      readonly currentSourceChanged: ISignal<SourcesModel, IDebugger.Source>;
+      readonly currentSourceChanged: ISignal<
+        IDebugger.Model.ISources,
+        IDebugger.Source
+      >;
 
       /**
        * Signal emitted when a source should be open in the main area.
        */
-      readonly currentSourceOpened: ISignal<SourcesModel, IDebugger.Source>;
+      readonly currentSourceOpened: ISignal<
+        IDebugger.Model.ISources,
+        IDebugger.Source
+      >;
 
       /**
        * Open a source in the main area.
@@ -681,19 +708,19 @@ export namespace IDebugger {
       /**
        * The variable scopes.
        */
-      scopes: VariablesModel.IScope[];
+      scopes: IDebugger.IScope[];
 
       /**
        * Signal emitted when the current variable has been expanded.
        */
-      readonly variableExpanded: ISignal<this, VariablesModel.IVariable>;
+      readonly variableExpanded: ISignal<this, IDebugger.IVariable>;
 
       /**
        * Expand a variable.
        *
        * @param variable The variable to expand.
        */
-      expandVariable(variable: VariablesModel.IVariable): void;
+      expandVariable(variable: IDebugger.IVariable): void;
     }
   }
 }

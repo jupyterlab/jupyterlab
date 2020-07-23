@@ -13,8 +13,6 @@ import { VariablesBodyGrid, VariablesGrid } from './grid';
 
 import { VariablesHeader } from './header';
 
-import { VariablesModel } from './model';
-
 import { VariablesBodyTree } from './tree';
 
 /**
@@ -109,9 +107,7 @@ export class Variables extends Panel {
  *
  * @param variable The variable.
  */
-export const convertType = (
-  variable: VariablesModel.IVariable
-): string | number => {
+export const convertType = (variable: IDebugger.IVariable): string | number => {
   const { type, value } = variable;
   switch (type) {
     case 'int':

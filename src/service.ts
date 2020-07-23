@@ -411,7 +411,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _convertScopes(
     scopes: DebugProtocol.Scope[],
     variables: DebugProtocol.Variable[]
-  ): VariablesModel.IScope[] {
+  ): IDebugger.IScope[] {
     if (!variables || !scopes) {
       return;
     }

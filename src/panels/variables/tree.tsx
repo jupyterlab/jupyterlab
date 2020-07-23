@@ -73,7 +73,7 @@ export class VariablesBodyTree extends ReactWidget {
     this.update();
   }
 
-  private _scopes: VariablesModel.IScope[] = [];
+  private _scopes: IDebugger.IScope[] = [];
   private _filter = new Set<string>();
   private _service: IDebugger;
 }
@@ -91,7 +91,7 @@ const VariablesComponent = ({
   service,
   filter
 }: {
-  data: VariablesModel.IVariable[];
+  data: IDebugger.IVariable[];
   service: IDebugger;
   filter?: Set<string>;
 }): JSX.Element => {
@@ -133,7 +133,7 @@ const VariableComponent = ({
   service,
   filter
 }: {
-  data: VariablesModel.IVariable;
+  data: IDebugger.IVariable;
   service: IDebugger;
   filter?: Set<string>;
 }): JSX.Element => {

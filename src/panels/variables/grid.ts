@@ -208,7 +208,7 @@ export class VariableDataGridModel extends DataModel {
    *
    * @param scopes The scopes.
    */
-  setData(scopes: VariablesModel.IScope[]): void {
+  setData(scopes: IDebugger.IScope[]): void {
     this._clearData();
     this.emitChanged({
       type: 'model-reset',
@@ -278,7 +278,7 @@ export namespace VariablesBodyGrid {
     /**
      * The optional initial scopes data.
      */
-    scopes?: VariablesModel.IScope[];
+    scopes?: IDebugger.IScope[];
   }
 }
 
