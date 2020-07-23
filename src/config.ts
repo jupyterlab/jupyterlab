@@ -16,13 +16,19 @@ export class DebuggerConfig implements IDebugger.IConfig {
    * @param kernel The kernel name from current session.
    */
   getCodeId(code: string, kernel: string): string {
-    const { prefix, suffix } = this._fileParams.get(kernel);
+    const fileParams = this._fileParams.get(kernel);
+
+    if (!fileParams) {
+      throw new Error(`Kernel (${kernel}) has no tmp file params.`);
+    }
+
     const hash = this._hashMethods.get(kernel);
 
     if (!hash) {
       throw new Error(`Kernel (${kernel}) has no hashing params.`);
     }
 
+    const { prefix, suffix } = fileParams;
     return `${prefix}${hash(code)}${suffix}`;
   }
 
