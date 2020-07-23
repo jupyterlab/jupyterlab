@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/debugger",
-  "version": "0.3.0-beta.5",
+  "version": "0.3.0-beta.6",
   "description": "JupyterLab - Debugger Extension",
   "keywords": [
     "jupyter",
