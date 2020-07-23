@@ -3,8 +3,6 @@
 
 import { Session, KernelSpec } from '@jupyterlab/services';
 
-import { each } from '@lumino/algorithm';
-
 import { IDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
@@ -461,19 +459,18 @@ export class DebuggerService implements IDebugger, IDisposable {
     for (const collection of breakpoints) {
       const [id, list] = collection;
       list.forEach(() => {
-        each(
-          this._debuggerSources.find({
+        this._debuggerSources
+          .find({
             focus: false,
             kernel: this.session.connection.kernel.name,
             path: this._session.connection.path,
             source: id
-          }),
-          () => {
+          })
+          .forEach(() => {
             if (list.length > 0) {
               bpMapForRestore.set(id, list);
             }
-          }
-        );
+          });
       });
     }
     return bpMapForRestore;
