@@ -31,8 +31,6 @@ import { Session } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { each } from '@lumino/algorithm';
-
 import {
   continueIcon,
   stepIntoIcon,
@@ -555,19 +553,18 @@ const main: JupyterFrontEndPlugin<void> = {
         _: IDebugger.Model.ICallstack,
         frame: CallstackModel.IFrame
       ): void => {
-        each(
-          debuggerSources.find({
+        debuggerSources
+          .find({
             focus: true,
             kernel: service.session.connection.kernel.name,
             path: service.session?.connection?.path,
             source: frame?.source.path ?? null
-          }),
-          editor => {
+          })
+          .forEach(editor => {
             requestAnimationFrame(() => {
               EditorHandler.showCurrentLine(editor, frame.line);
             });
-          }
-        );
+          });
       };
 
       const onCurrentSourceOpened = (
