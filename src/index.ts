@@ -242,11 +242,12 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
   id: '@jupyterlab/debugger:service',
   autoStart: true,
   provides: IDebugger,
-  requires: [IDebuggerConfig, IDebuggerSources],
+  requires: [IDebuggerConfig],
+  optional: [IDebuggerSources],
   activate: (
     app: JupyterFrontEnd,
     config: IDebugger.IConfig,
-    debuggerSources: IDebugger.ISources
+    debuggerSources: IDebugger.ISources | null
   ) =>
     new Debugger.Service({
       config,
