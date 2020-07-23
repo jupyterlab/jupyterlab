@@ -3,8 +3,6 @@
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { DebugProtocol } from 'vscode-debugprotocol';
-
 import { IDebugger } from '../../tokens';
 
 /**
@@ -14,14 +12,14 @@ export class VariablesModel implements IDebugger.Model.IVariables {
   /**
    * Get all the scopes.
    */
-  get scopes(): VariablesModel.IScope[] {
+  get scopes(): IDebugger.IScope[] {
     return this._state;
   }
 
   /**
    * Set the scopes.
    */
-  set scopes(scopes: VariablesModel.IScope[]) {
+  set scopes(scopes: IDebugger.IScope[]) {
     this._state = scopes;
     this._changed.emit();
   }
@@ -36,7 +34,7 @@ export class VariablesModel implements IDebugger.Model.IVariables {
   /**
    * Signal emitted when the current variable has been expanded.
    */
-  get variableExpanded(): ISignal<this, VariablesModel.IVariable> {
+  get variableExpanded(): ISignal<this, IDebugger.IVariable> {
     return this._variableExpanded;
   }
 
@@ -45,41 +43,11 @@ export class VariablesModel implements IDebugger.Model.IVariables {
    *
    * @param variable The variable to expand.
    */
-  expandVariable(variable: VariablesModel.IVariable): void {
+  expandVariable(variable: IDebugger.IVariable): void {
     this._variableExpanded.emit(variable);
   }
 
-  private _state: VariablesModel.IScope[] = [];
-  private _variableExpanded = new Signal<this, VariablesModel.IVariable>(this);
+  private _state: IDebugger.IScope[] = [];
+  private _variableExpanded = new Signal<this, IDebugger.IVariable>(this);
   private _changed = new Signal<this, void>(this);
-}
-
-/**
- * A namespace for VariablesModel `statics`.
- */
-export namespace VariablesModel {
-  /**
-   * An interface for a variable.
-   */
-  export interface IVariable extends DebugProtocol.Variable {
-    /**
-     * Whether the variable is expanded.
-     */
-    expanded?: boolean;
-  }
-
-  /**
-   * An interface for a scope.
-   */
-  export interface IScope {
-    /**
-     * The name of the scope.
-     */
-    name: string;
-
-    /**
-     * The list of variables.
-     */
-    variables: IVariable[];
-  }
 }

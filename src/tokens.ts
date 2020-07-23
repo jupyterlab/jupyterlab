@@ -13,12 +13,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
-import { CallstackModel } from './panels/callstack/model';
-
-import { SourcesModel } from './panels/sources/model';
-
-import { VariablesModel } from './panels/variables/model';
-
 /**
  * An interface describing an application's visual debugger.
  */
@@ -205,6 +199,21 @@ export namespace IDebugger {
   }
 
   /**
+   * An interface for a scope.
+   */
+  export interface IScope {
+    /**
+     * The name of the scope.
+     */
+    name: string;
+
+    /**
+     * The list of variables.
+     */
+    variables: IVariable[];
+  }
+
+  /**
    * A visual debugger session.
    */
   export interface ISession extends IObservableDisposable {
@@ -227,16 +236,6 @@ export namespace IDebugger {
     >;
 
     /**
-     * Start a new debug session.
-     */
-    start(): Promise<void>;
-
-    /**
-     * Stop a running debug session.
-     */
-    stop(): Promise<void>;
-
-    /**
      * Restore the state of a debug session.
      */
     restoreState(): Promise<IDebugger.ISession.Response['debugInfo']>;
@@ -248,6 +247,16 @@ export namespace IDebugger {
       command: K,
       args: IDebugger.ISession.Request[K]
     ): Promise<IDebugger.ISession.Response[K]>;
+
+    /**
+     * Start a new debug session.
+     */
+    start(): Promise<void>;
+
+    /**
+     * Stop a running debug session.
+     */
+    stop(): Promise<void>;
   }
 
   /**
@@ -269,6 +278,21 @@ export namespace IDebugger {
      * @param params - The editor open parameters.
      */
     open(params: ISources.OpenParams): void;
+  }
+
+  /**
+   * The type for a stack frame
+   */
+  export interface IStackFrame extends DebugProtocol.StackFrame {}
+
+  /**
+   * An interface for a variable.
+   */
+  export interface IVariable extends DebugProtocol.Variable {
+    /**
+     * Whether the variable is expanded.
+     */
+    expanded?: boolean;
   }
 
   /**
@@ -318,59 +342,9 @@ export namespace IDebugger {
 
   export namespace ISession {
     /**
-     * Response to the 'kernel_info_request' request.
-     * This interface extends the IInfoReply by adding the `debugger` key
-     * that isn't part of the protocol yet.
-     * See this pull request for more info: https://github.com/jupyter/jupyter_client/pull/486
+     * A generic debug event.
      */
-    export interface IInfoReply extends KernelMessage.IInfoReply {
-      debugger: boolean;
-    }
-
-    /**
-     * Arguments for 'dumpCell' request.
-     * This is an addition to the Debug Adapter Protocol to support
-     * setting breakpoints for cells.
-     */
-    export interface IDumpCellArguments {
-      code: string;
-    }
-
-    /**
-     * Response to 'dumpCell' request.
-     * This is an addition to the Debug Adapter Protocol to support
-     * setting breakpoints for cells.
-     */
-    export interface IDumpCellResponse extends DebugProtocol.Response {
-      body: {
-        sourcePath: string;
-      };
-    }
-
-    /**
-     * List of breakpoints in a source file.
-     */
-    export interface IDebugInfoBreakpoints {
-      source: string;
-      breakpoints: DebugProtocol.Breakpoint[];
-    }
-
-    /**
-     * Response to 'debugInfo' request.
-     * This is an addition to the Debug Adapter Protocol to be able
-     * to retrieve the debugger state when restoring a session.
-     */
-    export interface IDebugInfoResponse extends DebugProtocol.Response {
-      body: {
-        isStarted: boolean;
-        hashMethod: string;
-        hashSeed: number;
-        breakpoints: IDebugInfoBreakpoints[];
-        tmpFilePrefix: string;
-        tmpFileSuffix: string;
-        stoppedThreads: number[];
-      };
-    }
+    export type Event = DebugProtocol.Event;
 
     /**
      * Expose all the debug requests types.
@@ -457,9 +431,59 @@ export namespace IDebugger {
     };
 
     /**
-     * A generic debug event.
+     * List of breakpoints in a source file.
      */
-    export type Event = DebugProtocol.Event;
+    export interface IDebugInfoBreakpoints {
+      source: string;
+      breakpoints: DebugProtocol.Breakpoint[];
+    }
+
+    /**
+     * Response to 'debugInfo' request.
+     * This is an addition to the Debug Adapter Protocol to be able
+     * to retrieve the debugger state when restoring a session.
+     */
+    export interface IDebugInfoResponse extends DebugProtocol.Response {
+      body: {
+        isStarted: boolean;
+        hashMethod: string;
+        hashSeed: number;
+        breakpoints: IDebugInfoBreakpoints[];
+        tmpFilePrefix: string;
+        tmpFileSuffix: string;
+        stoppedThreads: number[];
+      };
+    }
+
+    /**
+     * Arguments for 'dumpCell' request.
+     * This is an addition to the Debug Adapter Protocol to support
+     * setting breakpoints for cells.
+     */
+    export interface IDumpCellArguments {
+      code: string;
+    }
+
+    /**
+     * Response to 'dumpCell' request.
+     * This is an addition to the Debug Adapter Protocol to support
+     * setting breakpoints for cells.
+     */
+    export interface IDumpCellResponse extends DebugProtocol.Response {
+      body: {
+        sourcePath: string;
+      };
+    }
+
+    /**
+     * Response to the 'kernel_info_request' request.
+     * This interface extends the IInfoReply by adding the `debugger` key
+     * that isn't part of the protocol yet.
+     * See this pull request for more info: https://github.com/jupyter/jupyter_client/pull/486
+     */
+    export interface IInfoReply extends KernelMessage.IInfoReply {
+      debugger: boolean;
+    }
   }
 
   /**
@@ -496,11 +520,6 @@ export namespace IDebugger {
      */
     export type OpenParams = {
       /**
-       * The label for the read-only editor.
-       */
-      label: string;
-
-      /**
        * The caption for the read-only editor.
        */
       caption: string;
@@ -509,6 +528,11 @@ export namespace IDebugger {
        * The code editor wrapper to add to the main area.
        */
       editorWrapper: CodeEditorWrapper;
+
+      /**
+       * The label for the read-only editor.
+       */
+      label: string;
     };
   }
 
@@ -570,22 +594,22 @@ export namespace IDebugger {
       /**
        * Signal emitted when the current frame has changed.
        */
-      readonly currentFrameChanged: ISignal<this, CallstackModel.IFrame>;
+      readonly currentFrameChanged: ISignal<this, IDebugger.IStackFrame>;
 
       /**
        * The current frame.
        */
-      frame: CallstackModel.IFrame;
+      frame: IDebugger.IStackFrame;
 
       /**
        * The frames for the callstack.
        */
-      frames: CallstackModel.IFrame[];
+      frames: IDebugger.IStackFrame[];
 
       /**
        * Signal emitted when the frames have changed.
        */
-      readonly framesChanged: ISignal<this, CallstackModel.IFrame[]>;
+      readonly framesChanged: ISignal<this, IDebugger.IStackFrame[]>;
     }
 
     /**
@@ -641,8 +665,8 @@ export namespace IDebugger {
        * Signal emitted when the current frame changes.
        */
       readonly currentFrameChanged: ISignal<
-        CallstackModel,
-        CallstackModel.IFrame
+        IDebugger.Model.ICallstack,
+        IDebugger.IStackFrame
       >;
 
       /**
@@ -653,12 +677,18 @@ export namespace IDebugger {
       /**
        * Signal emitted when the current source changes.
        */
-      readonly currentSourceChanged: ISignal<SourcesModel, IDebugger.Source>;
+      readonly currentSourceChanged: ISignal<
+        IDebugger.Model.ISources,
+        IDebugger.Source
+      >;
 
       /**
        * Signal emitted when a source should be open in the main area.
        */
-      readonly currentSourceOpened: ISignal<SourcesModel, IDebugger.Source>;
+      readonly currentSourceOpened: ISignal<
+        IDebugger.Model.ISources,
+        IDebugger.Source
+      >;
 
       /**
        * Open a source in the main area.
@@ -678,19 +708,19 @@ export namespace IDebugger {
       /**
        * The variable scopes.
        */
-      scopes: VariablesModel.IScope[];
+      scopes: IDebugger.IScope[];
 
       /**
        * Signal emitted when the current variable has been expanded.
        */
-      readonly variableExpanded: ISignal<this, VariablesModel.IVariable>;
+      readonly variableExpanded: ISignal<this, IDebugger.IVariable>;
 
       /**
        * Expand a variable.
        *
        * @param variable The variable to expand.
        */
-      expandVariable(variable: VariablesModel.IVariable): void;
+      expandVariable(variable: IDebugger.IVariable): void;
     }
   }
 }

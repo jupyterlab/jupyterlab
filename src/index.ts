@@ -48,8 +48,6 @@ import { EditorHandler } from './handlers/editor';
 
 import { IDebugger, IDebuggerConfig, IDebuggerSources } from './tokens';
 
-import { CallstackModel } from './panels/callstack/model';
-
 import { ReadOnlyEditorFactory } from './panels/sources/factory';
 
 import { VariablesBodyGrid } from './panels/variables/grid';
@@ -551,7 +549,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
       const onCurrentFrameChanged = (
         _: IDebugger.Model.ICallstack,
-        frame: CallstackModel.IFrame
+        frame: IDebugger.IStackFrame
       ): void => {
         debuggerSources
           .find({
