@@ -167,7 +167,7 @@ export namespace IDebugger {
   /**
    * The type for a stack frame
    */
-  export type IStackFrame = DebugProtocol.StackFrame;
+  export interface IStackFrame extends DebugProtocol.StackFrame {}
 
   /**
    * Single breakpoint in an editor.
