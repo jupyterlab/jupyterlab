@@ -31,8 +31,10 @@ export default {
         outputs: [
           {
             data: {
-              'text/csv': Array.from({ length: ROWS }, () =>
-                Array.from({ length: COLUMNS }, (_, i) => i).join(';')
+              'text/csv': Array.from(
+                { length: ROWS },
+                () =>
+                  Array.from({ length: COLUMNS }, (_, i) => i).join(';') + '\n'
               )
             },
             metadata: {},
