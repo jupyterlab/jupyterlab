@@ -330,7 +330,6 @@ namespace Private {
   ): IDebugger.IBreakpoint {
     return {
       line,
-      active: true,
       verified: true,
       source: {
         name: session
