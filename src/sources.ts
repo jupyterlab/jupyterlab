@@ -250,11 +250,11 @@ export class DebuggerSources implements IDebugger.ISources {
    * @param code The source code.
    * @param kernel The name of the kernel.
    */
-  private _getCodeId(code: string, kernel: string): string | undefined {
+  private _getCodeId(code: string, kernel: string): string {
     try {
       return this._config.getCodeId(code, kernel);
     } catch {
-      return undefined;
+      return '';
     }
   }
 
