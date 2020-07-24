@@ -140,17 +140,19 @@ JupyterLab is part of [Project Jupyter](http://jupyter.org/) and is developed by
 
 JupyterLab's current maintainers are listed in alphabetical order, with affiliation, and main areas of contribution:
 
+- Mehmet Bektas, Bloomberg (general development, extensions).
+- Eric Charles, Datalayer, (general development, extensions).
 - Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
 - Tim George, Cal Poly (UI/UX design, strategy, management, user needs analysis)
 - Brian Granger, AWS (co-creator, strategy, vision, management, UI/UX design,
   architecture).
-- Eric Charles, Datalayer, (general development, extensions).
 - Jason Grout, Bloomberg (co-creator, vision, general development).
 - Max Klein, JPMorgan Chase (UI Package, build system, general development, extensions).
 - Fernando Perez, UC Berkeley (co-creator, vision).
 - Ian Rose, Quansight/City of LA (general core development, extensions).
+- Andrew Schlaepfer, Bloomberg (general development, extensions).
 - Saul Shanabrook, Quansight (general development, extensions)
 - Steven Silvester, AWS (co-creator, release management, packaging,
   prolific contributions throughout the code base).
@@ -159,8 +161,8 @@ Maintainer emeritus:
 
 - Chris Colbert, Project Jupyter (co-creator, application/low-level architecture,
   technical leadership, vision, PhosphorJS)
-- Cameron Oelsen, Cal Poly (UI/UX design).
 - Jessica Forde, Project Jupyter (demo, documentation)
+- Cameron Oelsen, Cal Poly (UI/UX design).
 
 This list is provided to give the reader context on who we are and how our team functions.
 To be listed, please submit a pull request with your information.
