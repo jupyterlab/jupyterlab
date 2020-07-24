@@ -124,7 +124,14 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code The source code.
    */
   getCodeId(code: string): string {
-    return this._config.getCodeId(code, this.session.connection.kernel.name);
+    try {
+      return this._config.getCodeId(
+        code,
+        this.session?.connection?.kernel?.name
+      );
+    } catch {
+      return '';
+    }
   }
 
   /**
@@ -558,7 +565,10 @@ export class DebuggerService implements IDebugger, IDisposable {
         val: IDebugger.ISession.IDebugInfoBreakpoints
       ) => {
         const { breakpoints, source } = val;
-        map.set(source, breakpoints);
+        map.set(
+          source,
+          breakpoints.map(point => ({ ...point, verified: true }))
+        );
         return map;
       },
       new Map<string, IDebugger.IBreakpoint[]>()

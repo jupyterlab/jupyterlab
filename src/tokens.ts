@@ -433,7 +433,7 @@ export namespace IDebugger {
      */
     export interface IDebugInfoBreakpoints {
       source: string;
-      breakpoints: DebugProtocol.Breakpoint[];
+      breakpoints: DebugProtocol.SourceBreakpoint[];
     }
 
     /**

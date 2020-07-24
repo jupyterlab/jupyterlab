@@ -223,9 +223,13 @@ export class DebuggerHandler {
       delete this._statusChangedHandlers[widget.id];
       delete this._contextKernelChangedHandlers[widget.id];
 
-      // clear the model if the handler being removed corresponds
-      // to the current active debug session
-      if (this._service.session?.connection?.path === connection?.path) {
+      // Clear the model if the handler being removed corresponds
+      // to the current active debug session, or if the connection
+      // does not have a kernel.
+      if (
+        this._service.session?.connection?.path === connection?.path ||
+        !this._service.session?.connection?.kernel
+      ) {
         const model = this._service.model;
         model.clear();
       }
