@@ -3,12 +3,10 @@
     "url": "./out.csv"
   },
   "mark": {
-    "type": "boxplot",
-    "extent": "min-max",
-    "clip": true
+    "type": "point"
   },
   "encoding": {
-    "size": { "value": 5 },
+    "size": { "value": 10 },
     "x": {
       "field": "n",
       "type": "quantitative",
@@ -16,12 +14,13 @@
     },
     "y": {
       "field": "time",
-      "type": "quantitative",
-      "scale": {
-        "domain": [0, 2000]
-      }
+      "type": "quantitative"
     },
     "row": {
+      "field": "mode",
+      "type": "nominal"
+    },
+    "color": {
       "field": "browser",
       "type": "nominal"
     },
