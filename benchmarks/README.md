@@ -60,5 +60,5 @@ is an example of a cell output that takes a while to render:
 ```
 
 ```bash
-env 'BENCHMARK_NOTEBOOKS=["./fixedDataTable"]' jlpm all
+env 'BENCHMARK_NOTEBOOKS=["./fixedDataTable", "./manyOutputs"]' jlpm all
 ```
