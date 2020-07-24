@@ -554,7 +554,7 @@ const main: JupyterFrontEndPlugin<void> = {
         debuggerSources
           .find({
             focus: true,
-            kernel: service.session.connection.kernel.name,
+            kernel: service.session?.connection?.kernel?.name,
             path: service.session?.connection?.path,
             source: frame?.source.path ?? null
           })
@@ -575,8 +575,8 @@ const main: JupyterFrontEndPlugin<void> = {
         const { content, mimeType, path } = source;
         const results = debuggerSources.find({
           focus: true,
-          kernel: service.session.connection.kernel.name,
-          path: service.session.connection.path,
+          kernel: service.session?.connection?.kernel.name,
+          path: service.session?.connection?.path,
           source: path
         });
         if (results.length > 0) {

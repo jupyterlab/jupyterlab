@@ -124,7 +124,14 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param code The source code.
    */
   getCodeId(code: string): string {
-    return this._config.getCodeId(code, this.session.connection.kernel.name);
+    try {
+      return this._config.getCodeId(
+        code,
+        this.session?.connection?.kernel?.name
+      );
+    } catch {
+      return '';
+    }
   }
 
   /**
