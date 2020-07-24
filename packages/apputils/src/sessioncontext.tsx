@@ -117,6 +117,11 @@ export interface ISessionContext extends IObservableDisposable {
   readonly connectionStatusChanged: ISignal<this, Kernel.ConnectionStatus>;
 
   /**
+   * A flag indicating if session is has pending input, proxied from the session connection.
+   */
+  readonly pendingInput: boolean;
+
+  /**
    * A signal emitted for a kernel messages, proxied from the session connection.
    */
   readonly iopubMessage: ISignal<this, KernelMessage.IMessage>;
@@ -402,6 +407,13 @@ export class SessionContext implements ISessionContext {
    */
   get connectionStatusChanged(): ISignal<this, Kernel.ConnectionStatus> {
     return this._connectionStatusChanged;
+  }
+
+  /**
+   * A flag indicating if the session phas ending input, proxied from the kernel.
+   */
+  get pendingInput(): boolean {
+    return this._pendingInput;
   }
 
   /**
@@ -891,6 +903,10 @@ export class SessionContext implements ISessionContext {
         this._onConnectionStatusChanged,
         this
       );
+      session.pendingInput.connect(
+        this._onPendingInput,
+        this
+      );
       session.iopubMessage.connect(this._onIopubMessage, this);
       session.unhandledMessage.connect(this._onUnhandledMessage, this);
 
@@ -1042,6 +1058,17 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
+   * Handle a change to the pending input.
+   */
+  private _onPendingInput(
+    sender: Session.ISessionConnection,
+    value: boolean
+  ): void {
+    // Set the signal value
+    this._pendingInput = value;
+  }
+
+  /**
    * Handle an iopub message.
    */
   private _onIopubMessage(
@@ -1095,6 +1122,9 @@ export class SessionContext implements ISessionContext {
 
   private translator: ITranslator;
   private _trans: TranslationBundle;
+
+  private _pendingInput = false;
+
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _propertyChanged = new Signal<this, 'path' | 'name' | 'type'>(this);

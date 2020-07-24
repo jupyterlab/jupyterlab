@@ -145,6 +145,13 @@ export class KernelConnection implements Kernel.IKernelConnection {
   }
 
   /**
+   * A signal emitted when a kernel has pending inputs from the user.
+   */
+  get pendingInput(): ISignal<this, boolean> {
+    return this._pendingInput;
+  }
+
+  /**
    * The id of the server-side kernel.
    */
   get id(): string {
@@ -816,6 +823,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
 
     this._sendMessage(msg);
     this._anyMessage.emit({ msg, direction: 'send' });
+
+    this.hasPendingInput = false;
+
   }
 
   /**
@@ -1502,6 +1512,14 @@ export class KernelConnection implements Kernel.IKernelConnection {
     }
   };
 
+  get hasPendingInput(): boolean {
+    return this._hasPendingInput;
+  }
+  set hasPendingInput(value: boolean) {
+    this._hasPendingInput = value;
+    this._pendingInput.emit(value);
+  }
+
   private _id = '';
   private _name = '';
   private _status: KernelMessage.Status = 'unknown';
@@ -1542,10 +1560,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
   private _disposed = new Signal<this, void>(this);
   private _iopubMessage = new Signal<this, KernelMessage.IIOPubMessage>(this);
   private _anyMessage = new Signal<this, Kernel.IAnyMessageArgs>(this);
+  private _pendingInput = new Signal<this, boolean>(this);
   private _unhandledMessage = new Signal<this, KernelMessage.IMessage>(this);
   private _displayIdToParentIds = new Map<string, string[]>();
   private _msgIdToDisplayIds = new Map<string, string[]>();
   private _msgChain: Promise<void> = Promise.resolve();
+  private _hasPendingInput = false;
   private _noOp = () => {
     /* no-op */
   };

@@ -241,6 +241,7 @@ export abstract class KernelFutureHandler<
   }
 
   private async _handleStdin(msg: KernelMessage.IStdinMessage): Promise<void> {
+    this._kernel.hasPendingInput = true;
     const stdin = this._stdin;
     if (stdin) {
       // tslint:disable-next-line:await-promise

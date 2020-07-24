@@ -1635,6 +1635,14 @@ namespace Private {
             });
             break;
           }
+          if (sessionContext.pendingInput) {
+            void showDialog({
+              title: 'Waiting on User Input',
+              body: `Please submit your input before running this cell`,
+              buttons: [Dialog.okButton()]
+            });
+            return Promise.resolve(false);
+          }
           const deletedCells = notebook.model?.deletedCells ?? [];
           return CodeCell.execute(cell as CodeCell, sessionContext, {
             deletedCells,

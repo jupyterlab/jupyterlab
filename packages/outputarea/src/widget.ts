@@ -217,7 +217,6 @@ export class OutputArea extends Widget {
     // Handle stdin.
     value.onStdin = msg => {
       if (KernelMessage.isInputRequestMsg(msg)) {
-        this.hasPendingInput = true;
         this.onInputRequest(msg, value);
       }
     };
@@ -385,7 +384,6 @@ export class OutputArea extends Widget {
     panel.addWidget(prompt);
 
     const input = factory.createStdin({
-      outputArea: this,
       prompt: stdinPrompt,
       password,
       future
@@ -646,20 +644,12 @@ export class OutputArea extends Widget {
     model.add(output);
   };
 
-  get hasPendingInput(): boolean {
-    return this._hasPendingInput;
-  }
-  set hasPendingInput(value: boolean) {
-    this._hasPendingInput = value;
-  }
-
   private _minHeightTimeout: number | null = null;
   private _future: Kernel.IShellFuture<
     KernelMessage.IExecuteRequestMsg,
     KernelMessage.IExecuteReplyMsg
   >;
   private _displayIdMap = new Map<string, number[]>();
-  private _hasPendingInput = false;
 }
 
 export class SimplifiedOutputArea extends OutputArea {
@@ -875,7 +865,6 @@ export class Stdin extends Widget implements IStdin {
     this.addClass(STDIN_CLASS);
     this._input = this.node.getElementsByTagName('input')[0];
     this._input.focus();
-    this._outputArea = options.outputArea;
     this._future = options.future;
     this._value = options.prompt + ' ';
   }
@@ -901,7 +890,6 @@ export class Stdin extends Widget implements IStdin {
     const input = this._input;
     if (event.type === 'keydown') {
       if ((event as KeyboardEvent).keyCode === 13) {
-        this._outputArea.hasPendingInput = false;
         // Enter
         this._future.sendInputReply({
           status: 'ok',
@@ -939,7 +927,6 @@ export class Stdin extends Widget implements IStdin {
     this._input.removeEventListener('keydown', this);
   }
 
-  private _outputArea: OutputArea;
   private _future: Kernel.IShellFuture;
   private _input: HTMLInputElement;
   private _value: string;
@@ -951,11 +938,6 @@ export namespace Stdin {
    * The options to create a stdin widget.
    */
   export interface IOptions {
-    /**
-     * The outputArea hosting the Stdin widget.
-     */
-    outputArea: OutputArea;
-
     /**
      * The prompt text.
      */
