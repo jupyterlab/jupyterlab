@@ -111,6 +111,14 @@ export interface IKernelConnection extends IObservableDisposable {
   handleComms: boolean;
 
   /**
+   * Whether the kernel connection has pending input.
+   *
+   * #### Notes
+   * TODO(@echarles)
+   */
+  hasPendingInput: boolean;
+
+  /**
    * Send a shell message to the kernel.
    *
    * @param msg - The fully-formed shell message to send.
@@ -485,6 +493,11 @@ export interface IKernelConnection extends IObservableDisposable {
    * message should be treated as read-only.
    */
   anyMessage: ISignal<this, IAnyMessageArgs>;
+
+  /**
+   * A signal emitted when a kernel has pending inputs from the user.
+   */
+  pendingInput: ISignal<this, boolean>;
 
   /**
    * The server settings for the kernel.
