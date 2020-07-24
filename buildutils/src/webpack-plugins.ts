@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import DuplicatePackageCheckerPlugin = require('duplicate-package-checker-webpack-plugin');
+import DuplicatePackageCheckerPlugin from 'duplicate-package-checker-webpack-plugin';
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 
@@ -84,6 +84,9 @@ export namespace WPPlugin {
       callback: any,
       callbackUndelayed: any
     ) {
+      files = Array.from(files);
+      dirs = Array.from(dirs);
+
       const notIgnored = (path: string) => !this.ignored(path);
 
       const ignoredFiles = files.filter(this.ignored);

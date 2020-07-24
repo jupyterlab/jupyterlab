@@ -1,3 +1,10 @@
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+import { Widget } from '@lumino/widgets';
+
+import { ServerConnection } from '@jupyterlab/services';
+
 /**
  * Any object is "printable" if it implements the `IPrintable` interface.
  *
@@ -9,9 +16,6 @@
  *
  * Another way to print is to use the `printURL` function, which takes a URL and prints that page.
  */
-
-import { Widget } from '@lumino/widgets';
-import { ServerConnection } from '@jupyterlab/services';
 
 export namespace Printing {
   /**

@@ -75,7 +75,8 @@ describe('@jupyterlab/apputils', () => {
         const dialog = new TestDialog({
           title: 'foo',
           body: 'Hello',
-          buttons: [Dialog.okButton()]
+          buttons: [Dialog.okButton()],
+          hasClose: false
         });
 
         expect(dialog).toBeInstanceOf(Dialog);
@@ -340,7 +341,8 @@ describe('@jupyterlab/apputils', () => {
         caption: 'hello',
         className: 'baz',
         accept: false,
-        displayType: 'warn'
+        displayType: 'warn',
+        actions: []
       };
 
       describe('#createHeader()', () => {
@@ -520,6 +522,90 @@ describe('@jupyterlab/apputils', () => {
 
       expect(result.button.accept).toBe(true);
       expect(result.value).toBe('foo');
+    });
+
+    it('should not create a close button by default', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      const prompt = showDialog({
+        title: 'foo',
+        body: 'Hello',
+        host: node,
+        defaultButton: 0,
+        buttons: [Dialog.cancelButton(), Dialog.okButton()]
+      });
+
+      await waitForDialog();
+
+      expect(node.querySelector('.jp-Dialog-close-button')).toBeFalsy();
+
+      await acceptDialog();
+
+      const result = await prompt;
+
+      expect(result.button.accept).toBe(false);
+      expect(result.button.actions).toEqual([]);
+      expect(result.value).toBe(null);
+
+      document.body.removeChild(node);
+    });
+
+    it('should create a close button', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      const prompt = showDialog({
+        title: 'foo',
+        body: 'Hello',
+        host: node,
+        defaultButton: 0,
+        buttons: [Dialog.cancelButton(), Dialog.okButton()],
+        hasClose: true
+      });
+
+      await waitForDialog();
+
+      expect(node.querySelector('.jp-Dialog-close-button')).toBeTruthy();
+
+      await acceptDialog();
+
+      const result = await prompt;
+
+      expect(result.button.accept).toBe(false);
+      expect(result.button.actions).toEqual([]);
+      expect(result.value).toBe(null);
+
+      document.body.removeChild(node);
+    });
+
+    it('should accept the dialog reload options', async () => {
+      const node = document.createElement('div');
+
+      document.body.appendChild(node);
+
+      const prompt = showDialog({
+        title: 'foo',
+        body: 'Hello',
+        host: node,
+        defaultButton: 0,
+        buttons: [
+          Dialog.cancelButton({ actions: ['reload'] }),
+          Dialog.okButton()
+        ],
+        hasClose: true
+      });
+
+      await acceptDialog();
+
+      const result = await prompt;
+
+      expect(result.button.accept).toBe(false);
+      expect(result.button.actions).toEqual(['reload']);
+      expect(result.value).toBe(null);
+      document.body.removeChild(node);
     });
   });
 });

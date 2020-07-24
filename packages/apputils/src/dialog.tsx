@@ -9,6 +9,8 @@ import { Message, MessageLoop } from '@lumino/messaging';
 
 import { PanelLayout, Panel, Widget } from '@lumino/widgets';
 
+import { closeIcon, Button, LabIcon } from '@jupyterlab/ui-components';
+
 import * as React from 'react';
 
 import { Styling } from './styling';
@@ -106,7 +108,11 @@ export class Dialog<T> extends Widget {
 
     this._body = normalized.body;
 
-    const header = renderer.createHeader(normalized.title);
+    const header = renderer.createHeader(
+      normalized.title,
+      () => this.reject(),
+      options
+    );
     const body = renderer.createBody(normalized.body);
     const footer = renderer.createFooter(this._buttonNodes);
     content.addWidget(header);
@@ -426,6 +432,11 @@ export namespace Dialog {
     accept: boolean;
 
     /**
+     * The additional dialog actions to perform when the button is clicked.
+     */
+    actions: Array<string>;
+
+    /**
      * The button display type.
      */
     displayType: 'default' | 'warn';
@@ -477,6 +488,11 @@ export namespace Dialog {
     focusNodeSelector: string;
 
     /**
+     * When "true", renders a close button for the dialog
+     */
+    hasClose: boolean;
+
+    /**
      * An optional renderer for dialog items.  Defaults to a shared
      * default renderer.
      */
@@ -494,7 +510,11 @@ export namespace Dialog {
      *
      * @returns A widget for the dialog header.
      */
-    createHeader(title: Header): Widget;
+    createHeader<T>(
+      title: Header,
+      reject: () => void,
+      options: Partial<Dialog.IOptions<T>>
+    ): Widget;
 
     /**
      * Create the body of the dialog.
@@ -552,6 +572,7 @@ export namespace Dialog {
       caption: value.caption || '',
       className: value.className || '',
       accept: value.accept,
+      actions: value.actions || [],
       displayType: value.displayType || 'default'
     };
   }
@@ -608,11 +629,52 @@ export namespace Dialog {
      *
      * @returns A widget for the dialog header.
      */
-    createHeader(title: Header): Widget {
+    createHeader<T>(
+      title: Header,
+      reject: () => void = () => {
+        /* empty */
+      },
+      options: Partial<Dialog.IOptions<T>> = {}
+    ): Widget {
       let header: Widget;
+
+      const handleMouseDown = (event: React.MouseEvent) => {
+        // Fire action only when left button is pressed.
+        if (event.button === 0) {
+          event.preventDefault();
+          reject();
+        }
+      };
+
+      const handleKeyDown = (event: React.KeyboardEvent) => {
+        const { key } = event;
+        if (key === 'Enter' || key === ' ') {
+          reject();
+        }
+      };
+
       if (typeof title === 'string') {
-        header = new Widget({ node: document.createElement('span') });
-        header.node.textContent = title;
+        header = ReactWidget.create(
+          <>
+            {title}
+            {options.hasClose && (
+              <Button
+                className="jp-Dialog-close-button"
+                onMouseDown={handleMouseDown}
+                onKeyDown={handleKeyDown}
+                title="Cancel"
+                minimal
+              >
+                <LabIcon.resolveReact
+                  icon={closeIcon}
+                  iconClass="jp-Icon"
+                  className="jp-ToolbarButtonComponent-icon"
+                  tag="span"
+                />
+              </Button>
+            )}
+          </>
+        );
       } else {
         header = ReactWidget.create(title);
       }
@@ -801,7 +863,8 @@ namespace Private {
       buttons,
       defaultButton,
       renderer: options.renderer || Dialog.defaultRenderer,
-      focusNodeSelector: options.focusNodeSelector || ''
+      focusNodeSelector: options.focusNodeSelector || '',
+      hasClose: options.hasClose || false
     };
   }
 

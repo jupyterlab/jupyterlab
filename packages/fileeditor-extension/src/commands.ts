@@ -7,10 +7,13 @@ import {
   ICommandPalette,
   WidgetTracker,
   ISessionContextDialogs,
-  sessionContextDialogs
+  sessionContextDialogs,
+  Clipboard
 } from '@jupyterlab/apputils';
 
 import { CodeEditor } from '@jupyterlab/codeeditor';
+
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
@@ -34,7 +37,15 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { markdownIcon, textEditorIcon } from '@jupyterlab/ui-components';
+import {
+  cutIcon,
+  copyIcon,
+  markdownIcon,
+  pasteIcon,
+  redoIcon,
+  textEditorIcon,
+  undoIcon
+} from '@jupyterlab/ui-components';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -71,6 +82,18 @@ export namespace CommandIDs {
   export const runAllCode = 'fileeditor:run-all';
 
   export const markdownPreview = 'fileeditor:markdown-preview';
+
+  export const undo = 'fileeditor:undo';
+
+  export const redo = 'fileeditor:redo';
+
+  export const cut = 'fileeditor:cut';
+
+  export const copy = 'fileeditor:copy';
+
+  export const paste = 'fileeditor:paste';
+
+  export const selectAll = 'fileeditor:select-all';
 }
 
 /**
@@ -195,6 +218,18 @@ export namespace Commands {
 
     // Add a command for creating a new Markdown file.
     addCreateNewMarkdownCommand(commands, browserFactory);
+
+    addUndoCommand(commands, tracker, isEnabled);
+
+    addRedoCommand(commands, tracker, isEnabled);
+
+    addCutCommand(commands, tracker, isEnabled);
+
+    addCopyCommand(commands, tracker, isEnabled);
+
+    addPasteCommand(commands, tracker, isEnabled);
+
+    addSelectAllCommand(commands, tracker, isEnabled);
   }
 
   /**
@@ -517,7 +552,7 @@ export namespace Commands {
   }
 
   /**
-   * Add the command
+   * Add markdown preview command
    */
   export function addMarkdownPreviewCommand(
     commands: CommandRegistry,
@@ -545,6 +580,241 @@ export namespace Commands {
       },
       label: 'Show Markdown Preview'
     });
+  }
+
+  /**
+   * Add undo command
+   */
+  export function addUndoCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.undo, {
+      execute: () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        widget.editor.undo();
+      },
+      isEnabled: () => {
+        if (!isEnabled()) {
+          return false;
+        }
+
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return false;
+        }
+        // Ideally enable it when there are undo events stored
+        // Reference issue #8590: Code mirror editor could expose the history of undo/redo events
+        return true;
+      },
+      icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: 'Undo'
+    });
+  }
+
+  /**
+   * Add redo command
+   */
+  export function addRedoCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.redo, {
+      execute: () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        widget.editor.redo();
+      },
+      isEnabled: () => {
+        if (!isEnabled()) {
+          return false;
+        }
+
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return false;
+        }
+        // Ideally enable it when there are redo events stored
+        // Reference issue #8590: Code mirror editor could expose the history of undo/redo events
+        return true;
+      },
+      icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: 'Redo'
+    });
+  }
+
+  /**
+   * Add cut command
+   */
+  export function addCutCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.cut, {
+      execute: () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        const editor = widget.editor as CodeMirrorEditor;
+        const text = getTextSelection(editor);
+
+        Clipboard.copyToSystem(text);
+        editor.replaceSelection && editor.replaceSelection('');
+      },
+      isEnabled: () => {
+        if (!isEnabled()) {
+          return false;
+        }
+
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return false;
+        }
+
+        // Enable command if there is a text selection in the editor
+        return isSelected(widget.editor as CodeMirrorEditor);
+      },
+      icon: cutIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: 'Cut'
+    });
+  }
+
+  /**
+   * Add copy command
+   */
+  export function addCopyCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.copy, {
+      execute: () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        const editor = widget.editor as CodeMirrorEditor;
+        const text = getTextSelection(editor);
+
+        Clipboard.copyToSystem(text);
+      },
+      isEnabled: () => {
+        if (!isEnabled()) {
+          return false;
+        }
+
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return false;
+        }
+
+        // Enable command if there is a text selection in the editor
+        return isSelected(widget.editor as CodeMirrorEditor);
+      },
+      icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: 'Copy'
+    });
+  }
+
+  /**
+   * Add paste command
+   */
+  export function addPasteCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.paste, {
+      execute: async () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        const editor: CodeEditor.IEditor = widget.editor;
+
+        // Get data from clipboard
+        const clipboard = window.navigator.clipboard;
+        const clipboardData: string = await clipboard.readText();
+
+        if (clipboardData) {
+          // Paste data to the editor
+          editor.replaceSelection && editor.replaceSelection(clipboardData);
+        }
+      },
+      isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
+      icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
+      label: 'Paste'
+    });
+  }
+
+  /**
+   * Add select all command
+   */
+  export function addSelectAllCommand(
+    commands: CommandRegistry,
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    isEnabled: () => boolean
+  ) {
+    commands.addCommand(CommandIDs.selectAll, {
+      execute: () => {
+        const widget = tracker.currentWidget?.content;
+
+        if (!widget) {
+          return;
+        }
+
+        const editor = widget.editor as CodeMirrorEditor;
+        editor.execCommand('selectAll');
+      },
+      isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
+      label: 'Select All'
+    });
+  }
+
+  /**
+   * Helper function to check if there is a text selection in the editor
+   */
+  function isSelected(editor: CodeMirrorEditor) {
+    const selectionObj = editor.getSelection();
+    const { start, end } = selectionObj;
+    const selected = start.column !== end.column || start.line !== end.line;
+
+    return selected;
+  }
+
+  /**
+   * Helper function to get text selection from the editor
+   */
+  function getTextSelection(editor: CodeMirrorEditor) {
+    const selectionObj = editor.getSelection();
+    const start = editor.getOffsetAt(selectionObj.start);
+    const end = editor.getOffsetAt(selectionObj.end);
+    const text = editor.model.value.text.substring(start, end);
+
+    return text;
   }
 
   /**
@@ -721,7 +991,7 @@ export namespace Commands {
     menu: IMainMenu,
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
-    consoleTracker: IConsoleTracker,
+    consoleTracker: IConsoleTracker | null,
     sessionDialogs: ISessionContextDialogs | null
   ) {
     // Add the editing commands to the settings menu.
@@ -743,13 +1013,15 @@ export namespace Commands {
     addConsoleCreatorToFileMenu(menu, commands, tracker);
 
     // Add a code runner to the run menu.
-    addCodeRunnersToRunMenu(
-      menu,
-      commands,
-      tracker,
-      consoleTracker,
-      sessionDialogs
-    );
+    if (consoleTracker) {
+      addCodeRunnersToRunMenu(
+        menu,
+        commands,
+        tracker,
+        consoleTracker,
+        sessionDialogs
+      );
+    }
   }
 
   /**
@@ -923,6 +1195,12 @@ export namespace Commands {
   export function addContextMenuItems(app: JupyterFrontEnd) {
     addCreateConsoleToContextMenu(app);
     addMarkdownPreviewToContextMenu(app);
+    addUndoCommandToContextMenu(app);
+    addRedoCommandToContextMenu(app);
+    addCutCommandToContextMenu(app);
+    addCopyCommandToContextMenu(app);
+    addPasteCommandToContextMenu(app);
+    addSelectAllCommandToContextMenu(app);
   }
 
   /**
@@ -942,6 +1220,72 @@ export namespace Commands {
     app.contextMenu.addItem({
       command: CommandIDs.markdownPreview,
       selector: '.jp-FileEditor'
+    });
+  }
+
+  /**
+   * Add a Undo item to the File Editor context menu
+   */
+  export function addUndoCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.undo,
+      selector: '.jp-FileEditor',
+      rank: 1
+    });
+  }
+
+  /**
+   * Add a Redo item to the File Editor context menu
+   */
+  export function addRedoCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.redo,
+      selector: '.jp-FileEditor',
+      rank: 2
+    });
+  }
+
+  /**
+   * Add a Cut item to the File Editor context menu
+   */
+  export function addCutCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.cut,
+      selector: '.jp-FileEditor',
+      rank: 3
+    });
+  }
+
+  /**
+   * Add a Copy item to the File Editor context menu
+   */
+  export function addCopyCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.copy,
+      selector: '.jp-FileEditor',
+      rank: 4
+    });
+  }
+
+  /**
+   * Add a Paste item to the File Editor context menu
+   */
+  export function addPasteCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.paste,
+      selector: '.jp-FileEditor',
+      rank: 5
+    });
+  }
+
+  /**
+   * Add a Select All item to the File Editor context menu
+   */
+  export function addSelectAllCommandToContextMenu(app: JupyterFrontEnd) {
+    app.contextMenu.addItem({
+      command: CommandIDs.selectAll,
+      selector: '.jp-FileEditor',
+      rank: 6
     });
   }
 }

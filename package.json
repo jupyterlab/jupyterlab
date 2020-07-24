@@ -4,6 +4,7 @@
     "packages": [
       "dev_mode",
       "examples/*",
+      "examples/federated/*",
       "packages/*",
       "packages/services/examples/node",
       "packages/services/examples/browser",
@@ -26,6 +27,7 @@
     "build:core": "cd jupyterlab/staging && jlpm && (jlpm deduplicate || jlpm) && jlpm run build",
     "build:dev": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build",
     "build:dev:prod": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build:prod",
+    "build:dev:prod:release": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build:prod:release",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
     "build:packages": "cd packages/metapackage && jlpm run build",
     "build:packages:scope": "lerna run build",
@@ -50,7 +52,7 @@
     "create:test": "node buildutils/lib/create-test-package.js",
     "create:theme": "node buildutils/lib/create-theme.js",
     "deduplicate": "jlpm yarn-deduplicate -s fewer --fail",
-    "docs": "lerna run docs",
+    "docs": "typedoc --options typedoc.js packages/*/src/index.ts* packages/*/src/*.d.ts",
     "docs:init": "lerna run docs:init",
     "eslint": "eslint --ext .js,.jsx,.ts,.tsx --fix .",
     "eslint:check": "eslint --ext .js,.jsx,.ts,.tsx .",
@@ -100,7 +102,9 @@
     "lerna": "^3.19.0",
     "lint-staged": "^9.5.0",
     "prettier": "^1.19.1",
+    "react-docgen-typescript-loader": "^3.7.2",
     "shell-quote": "^1.7.2",
+    "typedoc": "next",
     "yarn": "1.21.1"
   }
 }

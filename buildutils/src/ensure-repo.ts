@@ -12,6 +12,7 @@
  * Manage the metapackage meta package.
  */
 import * as path from 'path';
+import * as fs from 'fs-extra';
 import * as utils from './utils';
 import {
   ensurePackage,
@@ -29,7 +30,8 @@ const MISSING: Dict<string[]> = {
 };
 
 const UNUSED: Dict<string[]> = {
-  '@jupyterlab/apputils': ['@types/react'],
+  // url is a polyfill for sanitize-html
+  '@jupyterlab/apputils': ['@types/react', 'buffer', 'url'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/services': ['node-fetch', 'ws'],
@@ -174,7 +176,18 @@ function ensureJupyterlab(): string[] {
       return;
     }
     coreData.set(data.name, data);
+
+    // If the package has a tokens.ts file, make sure it is noted as a singleton
+    if (
+      fs.existsSync(path.join(pkgPath, 'src', 'tokens.ts')) &&
+      !singletonPackages.includes(data.name)
+    ) {
+      singletonPackages.push(data.name);
+    }
   });
+
+  // These are not sorted when writing out by default
+  singletonPackages.sort();
 
   // Populate the yarn resolutions. First we make sure direct packages have
   // resolutions.
@@ -396,6 +409,15 @@ export async function ensureIntegrity(): Promise<boolean> {
   if (utils.writePackageData(corePath, coreData)) {
     messages['top'] = ['Update package.json'];
   }
+
+  // Handle the refs in the top level tsconfigdoc.json
+  const tsConfigdocPath = path.resolve('.', 'tsconfigdoc.json');
+  const tsConfigdocData = utils.readJSONFile(tsConfigdocPath);
+  tsConfigdocData.references = [];
+  utils.getCorePaths().forEach(pth => {
+    tsConfigdocData.references.push({ path: './' + path.relative('.', pth) });
+  });
+  utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
 
   // Handle the JupyterLab application top package.
   pkgMessages = ensureJupyterlab();

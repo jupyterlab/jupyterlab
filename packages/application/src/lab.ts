@@ -94,8 +94,11 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
           this.shell.collapseRight();
           return;
         }
-        this.shell.mode = 'multiple-document';
-        this.shell.expandLeft();
+        if (this.shell.mode === 'single-document') {
+          this.shell.collapseLeft();
+        } else {
+          this.shell.expandLeft();
+        }
       }, this);
       Private.setFormat(this);
     });

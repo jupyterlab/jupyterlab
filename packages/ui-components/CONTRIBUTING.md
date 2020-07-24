@@ -23,7 +23,7 @@ Design goals for JLIcon (already implemented):
   - where an icon is defined should not matter; all icons defined in core and extensions are reusable in any other extension
 - replacable
   - all icons can be customized by replacing their svg dynamically during runtime
-  - replacability does not depend on dynamic lookup (you can assign to the `.svgstr` property of any `LabIcon` instance to trigger replacement)
+  - replaceability does not depend on dynamic lookup (you can assign to the `.svgstr` property of any `LabIcon` instance to trigger replacement)
   - whenever its svg is replaced, all visible copies of an icon should immediately rerender
     - implementation, which depends on the method used to render the icon:
       - `LabIcon.element` method
@@ -50,7 +50,7 @@ Possible design patterns for JLIcon:
 2. each icon is a function with methods (ie a callable instance). The icon is used by calling the appropriate method
 3. each icon is an instance of a well-defined `class`. The icon is used by calling the appropriate instance method
 
-Patterns 1) and 2) were both initially investigated (see [jupyterlab/jupyterlab#7299](https://github.com/jupyterlab/jupyterlab/pull/7299)). Pattern 3) was found to be easiest to reason about, and had a desirable set of tradeoffs relating to features like dynamic lookup and replacability (eg you can replace the svg of an icon by just setting the `svgstr` field of the icon instance).
+Patterns 1) and 2) were both initially investigated (see [jupyterlab/jupyterlab#7299](https://github.com/jupyterlab/jupyterlab/pull/7299)). Pattern 3) was found to be easiest to reason about, and had a desirable set of tradeoffs relating to features like dynamic lookup and replaceability (eg you can replace the svg of an icon by just setting the `svgstr` field of the icon instance).
 
 ## How icon resolution works
 

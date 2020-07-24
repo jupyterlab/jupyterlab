@@ -262,7 +262,7 @@ mode. JupyterLab will check the extensions against the defined listings.
 .. warning::
 
     Only one mode at a time is allowed. If you or your server administrator configures
-    both black and white listings, the extension manager will be disabled.
+    both black and white listings, the JupyterLab server will not start.
 
 
 .. figure:: images/listings/simultaneous_black_white_listings.png
@@ -324,7 +324,7 @@ If you, or your administrator, has enabled the whitelist mode
 JupyterLab will use the whitelist and only show extensions present
 in the withelist. The other extensions will not be show in the search result.
 
-If you have installed an whitelisted extension and at some point
+If you have installed a whitelisted extension and at some point
 in time that extension is removed from the whitelist, the extension entry 
 in the installed list will be highlighted in red. It is recommended that 
 you uninstall it. You can move your mouse on the question mark icon to
@@ -334,7 +334,7 @@ read the instructions.
    :align: center
    :class: jp-screenshot
 
-   **Figure:** Whitelisted installed extension which should be removed
+   **Figure:** The second of the installed extensions was removed from the whitelist and should be removed
 
 .. _listings_conf:
 
@@ -343,21 +343,21 @@ Listing Configuration
 
 You or your administrator can use the following traits to define the listings loading.
 
-- ``blacklist_uris``: A list of comma-separated URIs to get the blacklist
-- ``whitelist_uris``: A list of comma-separated URIs to get the whitelist
+- ``blacklist_uris``: A list of comma-separated URIs to fetch a blacklist file from
+- ``whitelist_uris``: A list of comma-separated URIs to fetch a whitelist file from
 - ``listings_refresh_seconds``: The interval delay in seconds to refresh the lists
 - ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
 
-For example, to enable blacklist, launch the server with ``--LabServerApp.blacklist_uris``.
+For example, to enable blacklist, launch the server with ``--LabServerApp.blacklist_uris=http://example.com/blacklist.json`` where ``http://example.com/blacklist.json`` is a blacklist JSON file as described below.
 
 The details for the listings_request_options are listed
-on the `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__  
+on `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__  
 (for example, you could pass ``{'timeout': 10}`` to change the HTTP request timeout value).
 
 The listings are json files hosted on the URIs you have given.
 
 For each entry, you have to define the `name` of the extension as published in the NPM registry.
-The ``name`` attribute support regular expressions.
+The ``name`` attribute supports regular expressions.
 
 Optionally, you can also add some more fields for your records (``type``, ``reason``, ``creation_date``,
 ``last_update_date``). These optional fields are not used in the user interface.

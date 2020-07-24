@@ -111,6 +111,11 @@ export namespace ITerminal {
      * Whether to auto-fit the terminal to its host element size.
      */
     autoFit?: boolean;
+
+    /**
+     * Treat option as meta key on macOS.
+     */
+    macOptionIsMeta?: boolean;
   }
 
   /**
@@ -127,7 +132,8 @@ export namespace ITerminal {
     initialCommand: '',
     screenReaderMode: false, // False by default, can cause scrollbar mouse interaction issues.
     pasteWithCtrlV: true,
-    autoFit: true
+    autoFit: true,
+    macOptionIsMeta: false
   };
 
   /**

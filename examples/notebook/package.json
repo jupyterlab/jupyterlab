@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-notebook",
-  "version": "2.2.0-alpha.0",
+  "version": "3.0.0-alpha.4",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,16 +8,16 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/codemirror": "^2.2.0-alpha.0",
-    "@jupyterlab/completer": "^2.2.0-alpha.0",
-    "@jupyterlab/docmanager": "^2.2.0-alpha.0",
-    "@jupyterlab/docregistry": "^2.2.0-alpha.0",
-    "@jupyterlab/documentsearch": "^2.2.0-alpha.0",
-    "@jupyterlab/mathjax2": "^2.2.0-alpha.0",
-    "@jupyterlab/notebook": "^2.2.0-alpha.0",
-    "@jupyterlab/rendermime": "^2.2.0-alpha.0",
-    "@jupyterlab/services": "^5.2.0-alpha.0",
-    "@jupyterlab/theme-light-extension": "^2.2.0-alpha.0",
+    "@jupyterlab/codemirror": "^3.0.0-alpha.4",
+    "@jupyterlab/completer": "^3.0.0-alpha.4",
+    "@jupyterlab/docmanager": "^3.0.0-alpha.4",
+    "@jupyterlab/docregistry": "^3.0.0-alpha.4",
+    "@jupyterlab/documentsearch": "^3.0.0-alpha.4",
+    "@jupyterlab/mathjax2": "^3.0.0-alpha.4",
+    "@jupyterlab/notebook": "^3.0.0-alpha.4",
+    "@jupyterlab/rendermime": "^3.0.0-alpha.4",
+    "@jupyterlab/services": "^6.0.0-alpha.4",
+    "@jupyterlab/theme-light-extension": "^3.0.0-alpha.4",
     "@lumino/commands": "^1.10.1",
     "@lumino/widgets": "^1.11.1",
     "es6-promise": "~4.2.8"
@@ -26,7 +26,7 @@
     "@types/codemirror": "^0.0.76",
     "css-loader": "~3.2.0",
     "file-loader": "~5.0.2",
-    "mini-css-extract-plugin": "~0.8.0",
+    "mini-css-extract-plugin": "~0.9.0",
     "raw-loader": "~4.0.0",
     "rimraf": "~3.0.0",
     "style-loader": "~1.0.1",
@@ -34,7 +34,7 @@
     "typescript": "~3.9.2",
     "url-loader": "~3.0.0",
     "watch": "~1.0.2",
-    "webpack": "^4.41.2",
+    "webpack": "5.0.0-beta.21",
     "webpack-cli": "^3.3.10",
     "whatwg-fetch": "^3.0.0"
   }
