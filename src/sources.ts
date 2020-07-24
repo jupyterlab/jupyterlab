@@ -108,8 +108,11 @@ export class DebuggerSources implements IDebugger.ISources {
       cells.forEach((cell, i) => {
         // check the event is for the correct cell
         const code = cell.model.value.text;
-        const cellId = this._config.getCodeId(code, kernel);
-        if (source !== cellId) {
+        const codeId = this._getCodeId(code, kernel);
+        if (!codeId) {
+          return;
+        }
+        if (source !== codeId) {
           return;
         }
         if (focus) {
@@ -149,7 +152,10 @@ export class DebuggerSources implements IDebugger.ISources {
       const cells = consoleWidget.console.cells;
       each(cells, cell => {
         const code = cell.model.value.text;
-        const codeId = this._config.getCodeId(code, kernel);
+        const codeId = this._getCodeId(code, kernel);
+        if (!codeId) {
+          return;
+        }
         if (source !== codeId) {
           return;
         }
@@ -188,7 +194,10 @@ export class DebuggerSources implements IDebugger.ISources {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._config.getCodeId(code, kernel);
+      const codeId = this._getCodeId(code, kernel);
+      if (!codeId) {
+        return;
+      }
       if (source !== codeId) {
         return;
       }
@@ -218,7 +227,11 @@ export class DebuggerSources implements IDebugger.ISources {
       }
 
       const code = editor.model.value.text;
-      const codeId = this._config.getCodeId(code, kernel);
+      const codeId = this._getCodeId(code, kernel);
+      if (!codeId) {
+        return;
+      }
+
       if (widget.title.caption !== source && source !== codeId) {
         return;
       }
@@ -229,6 +242,22 @@ export class DebuggerSources implements IDebugger.ISources {
     });
     return editors;
   }
+
+  /**
+   * Get the code id for a given source and kernel,
+   * and handle the case of a kernel without parameters.
+   *
+   * @param code The source code.
+   * @param kernel The name of the kernel.
+   */
+  private _getCodeId(code: string, kernel: string): string | undefined {
+    try {
+      return this._config.getCodeId(code, kernel);
+    } catch {
+      return undefined;
+    }
+  }
+
   private _shell: JupyterFrontEnd.IShell;
   private _readOnlyEditorTracker: WidgetTracker<
     MainAreaWidget<CodeEditorWrapper>
