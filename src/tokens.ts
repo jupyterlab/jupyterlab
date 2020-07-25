@@ -167,9 +167,7 @@ export namespace IDebugger {
   /**
    * Single breakpoint in an editor.
    */
-  export interface IBreakpoint extends DebugProtocol.Breakpoint {
-    active: boolean;
-  }
+  export interface IBreakpoint extends DebugProtocol.Breakpoint {}
 
   /**
    * Debugger file and hashing configuration.

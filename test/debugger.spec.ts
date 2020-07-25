@@ -115,7 +115,6 @@ describe('Debugger', () => {
       return {
         id,
         line,
-        active: true,
         verified: true,
         source: {
           path
@@ -221,7 +220,6 @@ describe('Debugger', () => {
         {
           id: 3,
           line: 4,
-          active: true,
           verified: true,
           source: {
             path

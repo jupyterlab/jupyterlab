@@ -378,9 +378,9 @@ export class DebuggerService implements IDebugger, IDisposable {
 
     // Set the kernel's breakpoints for this path.
     const reply = await this._setBreakpoints(localBreakpoints, path);
-    const updatedBreakpoints = reply.body.breakpoints
-      .map(val => ({ ...val, active: true }))
-      .filter((val, _, arr) => arr.findIndex(el => el.line === val.line) > -1);
+    const updatedBreakpoints = reply.body.breakpoints.filter(
+      (val, _, arr) => arr.findIndex(el => el.line === val.line) > -1
+    );
 
     // Update the local model and finish kernel configuration.
     this._model.breakpoints.setBreakpoints(path, updatedBreakpoints);
@@ -567,7 +567,7 @@ export class DebuggerService implements IDebugger, IDisposable {
         const { breakpoints, source } = val;
         map.set(
           source,
-          breakpoints.map(point => ({ ...point, verified: true, active: true }))
+          breakpoints.map(point => ({ ...point, verified: true }))
         );
         return map;
       },

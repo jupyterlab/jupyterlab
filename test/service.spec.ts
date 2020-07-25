@@ -184,7 +184,6 @@ describe('DebuggerService', () => {
         return {
           id: index,
           line: l,
-          active: true,
           verified: true,
           source: {
             path: sourceId
