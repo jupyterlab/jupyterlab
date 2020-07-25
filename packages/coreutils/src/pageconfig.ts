@@ -144,9 +144,10 @@ export namespace PageConfig {
   export function getUrl(options: IGetUrlOptions): string {
     let path = getOption('baseUrl') || '/';
     const mode = options.mode ?? getOption('mode');
+    const workspace = options.workspace ?? getOption('workspace')
     const labOrDoc = mode === 'multiple-document' ? 'lab' : 'doc';
     path = URLExt.join(path, labOrDoc);
-    if (getOption('workspace') !== 'default') {
+    if (workspace !== 'default') {
       path = URLExt.join(path, 'workspaces', getOption('workspace'));
     }
     const treePath = options.treePath ?? getOption('treePath');
@@ -158,7 +159,7 @@ export namespace PageConfig {
 
   /**
    * Options for getUrl
-   */
+   */ 
   export interface IGetUrlOptions {
 
     /**
@@ -168,11 +169,18 @@ export namespace PageConfig {
     mode?: string;
 
     /**
+     * The optional workspace as a string. If this argument is missing, the default
+     * workspace will be used, and no /workspaces/<name> URL segment will be included.
+     */
+    workspace?: string;
+
+    /**
      * The optional tree path as as string. If treePath is not provided it will be 
      * provided from the PageConfig. If an empty string, the resulting path will not
      * contain a tree portion.
      */
     treePath?: string;
+
   }
 
   /**
