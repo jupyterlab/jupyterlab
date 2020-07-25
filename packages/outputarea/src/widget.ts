@@ -3,6 +3,8 @@
 
 import ResizeObserver from 'resize-observer-polyfill';
 
+import { Dialog } from '@jupyterlab/apputils';
+
 import {
   JSONObject,
   PromiseDelegate,
@@ -393,6 +395,40 @@ export class OutputArea extends Widget {
 
     const layout = this.layout as PanelLayout;
     layout.addWidget(panel);
+
+    const buttons = [
+      Dialog.cancelButton({ label: 'Cancel' }),
+      Dialog.okButton({ label: 'Select' })
+    ];
+
+    const modalInput = factory.createStdin({
+      prompt: stdinPrompt,
+      password,
+      future
+    });
+
+    const dialog = new Dialog<Promise<string>>({
+      title: 'We need your input',
+      body: modalInput,
+      buttons
+    });
+
+    void dialog.launch().then(result => {
+      if (result.button.accept) {
+        const value = result.value;
+        if (value) {
+          void value.then(v => {
+            // Use stdin as the stream so it does not get combined with stdout.
+            this.model.add({
+              output_type: 'stream',
+              name: 'stdin',
+              text: v + '\n'
+            });
+            panel.dispose();
+          });
+        }
+      }
+    });
 
     /**
      * Wait for the stdin to complete, add it to the model (so it persists)
@@ -872,8 +908,13 @@ export class Stdin extends Widget implements IStdin {
   /**
    * The value of the widget.
    */
-  get value() {
+  get value(): Promise<string> {
     return this._promise.promise.then(() => this._value);
+  }
+
+  getValue(): Promise<string> {
+    this.submit();
+    return this.value;
   }
 
   /**
@@ -887,22 +928,26 @@ export class Stdin extends Widget implements IStdin {
    * not be called directly by user code.
    */
   handleEvent(event: Event): void {
-    const input = this._input;
     if (event.type === 'keydown') {
       if ((event as KeyboardEvent).keyCode === 13) {
         // Enter
-        this._future.sendInputReply({
-          status: 'ok',
-          value: input.value
-        });
-        if (input.type === 'password') {
-          this._value += Array(input.value.length + 1).join('·');
-        } else {
-          this._value += input.value;
-        }
-        this._promise.resolve(void 0);
+        this.submit();
       }
     }
+  }
+
+  submit() {
+    const input = this._input;
+    this._future.sendInputReply({
+      status: 'ok',
+      value: input.value
+    });
+    if (input.type === 'password') {
+      this._value += Array(input.value.length + 1).join('·');
+    } else {
+      this._value += input.value;
+    }
+    this._promise.resolve(void 0);
   }
 
   /**

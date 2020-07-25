@@ -1638,7 +1638,7 @@ namespace Private {
           if (sessionContext.pendingInput) {
             void showDialog({
               title: 'Waiting on User Input',
-              body: `Please submit your input before running this cell`,
+              body: `Did not run selected cell because there is a cell waiting on input! Submit your input and try again.`,
               buttons: [Dialog.okButton()]
             });
             return Promise.resolve(false);
