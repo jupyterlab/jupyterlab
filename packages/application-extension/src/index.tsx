@@ -7,6 +7,7 @@ import {
   ILabStatus,
   ILayoutRestorer,
   IRouter,
+  ITreePathUpdater,
   ConnectionLost,
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
@@ -88,9 +89,10 @@ namespace CommandIDs {
 /**
  * The main extension.
  */
-const main: JupyterFrontEndPlugin<void> = {
+const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
   id: '@jupyterlab/application-extension:main',
   requires: [IRouter, IWindowResolver],
+  provides: ITreePathUpdater,
   optional: [ICommandPalette, IConnectionLost],
   activate: (
     app: JupyterFrontEnd,
@@ -101,6 +103,22 @@ const main: JupyterFrontEndPlugin<void> = {
   ) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${main.id} must be activated in JupyterLab.`);
+    }
+
+    // These two internal state variables are used to manage the two source
+    // of the tree part of the URL being updated: 1) path of the active document, 
+    // 2) path of the default browser if the active main area widget isn't a document.
+    let _docTreePath = '';
+    let _defaultBrowserTreePath = '';
+
+    function updateTreePath(treePath: string) {
+      _defaultBrowserTreePath = treePath;
+      if (!_docTreePath) {
+        const path = PageConfig.getUrl( { treePath });
+        router.navigate(path, { skipRouting: true });
+        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
+        PageConfig.setOption('treePath', treePath );
+      }
     }
 
     // Requiring the window resolver guarantees that the application extension
@@ -138,11 +156,14 @@ const main: JupyterFrontEndPlugin<void> = {
 
     // Watch the path of the current widget in the main area and update the page
     // URL to reflect the change.
-    app.shell.currentPathChanged.connect((sender, args) => {
-      const path = PageConfig.getUrl( {treePath: (args.newValue as string)});
+    app.shell.currentPathChanged.connect((_, args) => {
+      const maybeTreePath = args.newValue as string;
+      const treePath = maybeTreePath || _defaultBrowserTreePath;
+      const path = PageConfig.getUrl( {treePath: treePath});
       router.navigate(path, { skipRouting: true });
       // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-      PageConfig.setOption('treePath', args.newValue);
+      PageConfig.setOption('treePath', treePath);
+      _docTreePath = maybeTreePath;
     });
 
     // If the connection to the server is lost, handle it with the
@@ -237,6 +258,7 @@ const main: JupyterFrontEndPlugin<void> = {
         return ((event as any).returnValue = message);
       }
     });
+    return updateTreePath
   },
   autoStart: true
 };
