@@ -107,14 +107,11 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
     const solver = new WindowResolver();
     const workspace = info.workspace;
     const treePath = PageConfig.getOption('treePath');
-    const mode = PageConfig.getOption('mode');
+    const mode = PageConfig.getOption('mode') === 'multiple-document' ? 'lab' : 'doc';
     // This is used as a key in local storage to refer to workspaces, either the name
     // of the workspace or the string 'default'. Both lab and doc modes share the same workspace.
     const candidate = workspace ? workspace : 'default';
-    console.log('workspace:', workspace);
-    console.log('candidate:', candidate);
     const rest = treePath ? URLExt.join('tree', treePath) : '';
-    console.log("rest:", rest);
     try {
       await solver.resolve(candidate);
       return solver;
@@ -134,7 +131,6 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
         query['reset'] = '';
 
         const url = path + URLExt.objectToQueryString(query) + (hash || '');
-        console.log('new url', url);
         router.navigate(url, { hard: true });
       });
     }
@@ -423,8 +419,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         const url = path + URLExt.objectToQueryString(query) + hash;
         const cleared = db
           .clear()
-          .then(() => save.invoke())
-          .then(() => router.stop);
+          .then(() => save.invoke());
 
         // After the state has been reset, navigate to the URL.
         if (clone) {
