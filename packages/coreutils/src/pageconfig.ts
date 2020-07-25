@@ -148,11 +148,11 @@ export namespace PageConfig {
     const labOrDoc = mode === 'multiple-document' ? 'lab' : 'doc';
     path = URLExt.join(path, labOrDoc);
     if (workspace !== 'default') {
-      path = URLExt.join(path, 'workspaces', getOption('workspace'));
+      path = URLExt.join(path, 'workspaces', encodeURIComponent(getOption('workspace')));
     }
     const treePath = options.treePath ?? getOption('treePath');
     if (treePath) {
-      path = URLExt.join(path, 'tree', treePath)
+      path = URLExt.join(path, 'tree', URLExt.encodeParts(treePath));
     }
     return path;
   }

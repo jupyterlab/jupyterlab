@@ -125,7 +125,7 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
           'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         const random = pool[Math.floor(Math.random() * pool.length)];
         let path = URLExt.join(base, mode, 'workspaces', `auto-${random}`);
-        path = rest ? URLExt.join(path, rest) : path
+        path = rest ? URLExt.join(path, URLExt.encodeParts(rest)) : path
 
         // Reset the workspace on load.
         query['reset'] = '';

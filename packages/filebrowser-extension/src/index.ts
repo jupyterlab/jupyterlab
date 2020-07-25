@@ -530,9 +530,10 @@ function addCommands(
   commands.addCommand(CommandIDs.goToPath, {
     execute: async args => {
       const path = (args.path as string) || '';
+      const showBrowser = !(args?.dontShowBrowser ?? false);
       try {
         const item = await Private.navigateToPath(path, factory);
-        if (item.type !== 'directory') {
+        if (item.type !== 'directory' && showBrowser) {
           const browserForPath = Private.getBrowserForPath(path, factory);
           if (browserForPath) {
             browserForPath.clearSelectedItems();
@@ -546,7 +547,6 @@ function addCommands(
       } catch (reason) {
         console.warn(`${CommandIDs.goToPath} failed to go to: ${path}`, reason);
       }
-      const showBrowser = !(args?.dontShowBrowser ?? false);
       if (showBrowser) {
         return commands.execute(CommandIDs.showBrowser, { path });
       }
