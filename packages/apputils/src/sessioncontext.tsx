@@ -490,14 +490,16 @@ export class SessionContext implements ISessionContext {
         }) ||
         '';
       if (name) {
-        name = this.specsManager.specs!.kernelspecs[name]!.display_name;
+        name = this.specsManager.specs?.kernelspecs[name]?.display_name ?? name;
         return name;
       }
       return Private.NO_KERNEL;
     }
     if (this._pendingKernelName) {
-      return this.specsManager.specs!.kernelspecs[this._pendingKernelName]!
-        .display_name;
+      return (
+        this.specsManager.specs?.kernelspecs[this._pendingKernelName]
+          ?.display_name ?? this._pendingKernelName
+      );
     }
     if (!kernel) {
       return Private.NO_KERNEL;
