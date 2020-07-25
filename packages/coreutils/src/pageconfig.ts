@@ -169,8 +169,9 @@ export namespace PageConfig {
     mode?: string;
 
     /**
-     * The optional workspace as a string. If this argument is missing, the default
-     * workspace will be used, and no /workspaces/<name> URL segment will be included.
+     * The optional workspace as a string. If this argument is missing, the value will
+     * be pulled from PageConfig. To use the default workspace (no /workspaces/<name>
+     * URL segment will be included) pass the string 'default'.
      */
     workspace?: string;
 
