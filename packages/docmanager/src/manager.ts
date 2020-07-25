@@ -3,7 +3,7 @@
 
 import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
 
-import { PathExt } from '@jupyterlab/coreutils';
+import { PathExt, PageConfig } from '@jupyterlab/coreutils';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -76,6 +76,14 @@ export class DocumentManager implements IDocumentManager {
    */
   get activateRequested(): ISignal<this, string> {
     return this._activateRequested;
+  }
+
+  get mode(): string {
+    return this._mode;
+  }
+
+  set mode(value: string) {
+    this._mode = value;
   }
 
   /**
@@ -372,12 +380,16 @@ export class DocumentManager implements IDocumentManager {
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined {
-    const widget = this.findWidget(path, widgetName);
-    if (widget) {
-      this._opener.open(widget, options || {});
-      return widget;
+    if (this.mode == 'single-document' && options?.maybeNewWorkspace) {
+      this._openInNewWorkspace(path);
+    } else {
+      const widget = this.findWidget(path, widgetName);
+      if (widget) {
+        this._opener.open(widget, options || {});
+        return widget;
+      }
+      return this.open(path, widgetName, kernel, options || {});
     }
-    return this.open(path, widgetName, kernel, options || {});
   }
 
   /**
@@ -519,6 +531,13 @@ export class DocumentManager implements IDocumentManager {
     return registry.getWidgetFactory(widgetName);
   }
 
+  private _openInNewWorkspace(
+    path: string
+  ) {
+    const newUrl = PageConfig.getUrl({ mode: this.mode, workspace: 'default', treePath: path});
+    window.open(newUrl);
+  }
+
   /**
    * Creates a new document, or loads one from disk, depending on the `which` argument.
    * If `which==='create'`, then it creates a new document. If `which==='open'`,
@@ -600,6 +619,7 @@ export class DocumentManager implements IDocumentManager {
   private _isDisposed = false;
   private _autosave = true;
   private _autosaveInterval = 120;
+  private _mode = '';
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;

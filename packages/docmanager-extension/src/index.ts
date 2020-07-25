@@ -87,7 +87,7 @@ const pluginId = '@jupyterlab/docmanager-extension:plugin';
 const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
   id: pluginId,
   provides: IDocumentManager,
-  requires: [ISettingRegistry],
+  requires: [ISettingRegistry, ILabShell],
   optional: [
     ILabStatus,
     ICommandPalette,
@@ -98,13 +98,13 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
+    shell: ILabShell,
     status: ILabStatus | null,
     palette: ICommandPalette | null,
     labShell: ILabShell | null,
     mainMenu: IMainMenu | null,
     sessionDialogs: ISessionContextDialogs | null
   ): IDocumentManager => {
-    const { shell } = app;
     const manager = app.serviceManager;
     const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
@@ -247,6 +247,11 @@ ${fileTypes}`;
     // If the document registry gains or loses a factory or file type,
     // regenerate the settings description with the available options.
     registry.changed.connect(() => settingRegistry.reload(pluginId));
+
+    docManager.mode = shell.mode;
+    shell.modeChanged.connect((_, args) => {
+      docManager.mode = (args as string);
+    })
 
     return docManager;
   }

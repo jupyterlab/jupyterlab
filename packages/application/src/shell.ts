@@ -426,7 +426,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   }
   set mode(mode: DockPanel.Mode) {
     const dock = this._dockPanel;
-    console.log('set mode:', this.mode, mode);
     if (mode === dock.mode) {
       return;
     }
@@ -434,7 +433,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const applicationCurrentWidget = this.currentWidget;
 
     if (mode === 'single-document') {
-      console.log('switchign to single doc mode')
       this._cachedLayout = dock.saveLayout();
       dock.mode = mode;
 
@@ -732,7 +730,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   restoreLayout(mode: DockPanel.Mode, layout: ILabShell.ILayout): void {
     const { mainArea, leftArea, rightArea } = layout;
-    console.log('mode', mode);
     // Rehydrate the main area.
     if (mainArea) {
       const { currentWidget, dock } = mainArea;
@@ -746,16 +743,29 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       if (currentWidget) {
         this.activateById(currentWidget.id);
       }
+    } else {
+      // This is needed when loading in an empty workspace in single doc mode
+      if (mode) {
+        this.mode = mode;
+      }
     }
 
     // Rehydrate the left area.
     if (leftArea) {
       this._leftHandler.rehydrate(leftArea);
+    } else {
+      if (mode === 'single-document') {
+        this.collapseLeft();
+      }
     }
 
     // Rehydrate the right area.
     if (rightArea) {
       this._rightHandler.rehydrate(rightArea);
+    } else {
+      if (mode === 'single-document') {
+        this.collapseRight();
+      }
     }
 
     if (!this._isRestored) {
@@ -773,7 +783,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   saveLayout(): ILabShell.ILayout {
     // If the application is in single document mode, use the cached layout if
     // available. Otherwise, default to querying the dock panel for layout.
-    return {
+    const layout = {
       mainArea: {
         currentWidget: this._tracker.currentWidget,
         dock:
@@ -784,6 +794,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
     };
+    return layout
   }
 
   /**
@@ -1365,7 +1376,8 @@ namespace Private {
     rehydrate(data: ILabShell.ISideArea): void {
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
-      } else if (data.collapsed) {
+      }
+      if (data.collapsed) {
         this.collapse();
       }
     }
