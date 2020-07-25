@@ -17,4 +17,6 @@ export { ILabShell, LabShell } from './shell';
 
 export { ILabStatus } from './status';
 
+export { ITreePathUpdater } from './treepathupdater';
+
 export * from './tokens';
