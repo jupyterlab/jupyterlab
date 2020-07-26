@@ -60,7 +60,9 @@
     "@jupyterlab/vega5-extension": "~3.0.0-alpha.4"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.10.4",
     "@jupyterlab/buildutils": "^3.0.0-alpha.4",
+    "babel-loader": "^8.1.0",
     "chokidar": "^3.4.0",
     "css-loader": "~3.2.0",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
