@@ -305,7 +305,7 @@ export namespace JupyterFrontEnd {
 
   /**
    * Is JupyterLab in document mode?
-   * 
+   *
    * @param path - Full URL of JupyterLab
    * @param paths - The current IPaths object hydrated from PageConfig.
    */

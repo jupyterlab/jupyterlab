@@ -16,6 +16,5 @@ export const ITreePathUpdater = new Token<ITreePathUpdater>(
  * A function to call to update the tree path.
  */
 export interface ITreePathUpdater {
-
-    (treePath: string): void;
+  (treePath: string): void;
 }

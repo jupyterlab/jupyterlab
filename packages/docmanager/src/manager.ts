@@ -531,10 +531,12 @@ export class DocumentManager implements IDocumentManager {
     return registry.getWidgetFactory(widgetName);
   }
 
-  private _openInNewWorkspace(
-    path: string
-  ) {
-    const newUrl = PageConfig.getUrl({ mode: this.mode, workspace: 'default', treePath: path});
+  private _openInNewWorkspace(path: string) {
+    const newUrl = PageConfig.getUrl({
+      mode: this.mode,
+      workspace: 'default',
+      treePath: path
+    });
     window.open(newUrl);
   }
 

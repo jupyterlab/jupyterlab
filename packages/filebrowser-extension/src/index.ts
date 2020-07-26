@@ -260,11 +260,18 @@ async function activateFactory(
     const launcher = new ToolbarButton({
       icon: addIcon,
       onClick: () => {
-        if (labShell.mode === 'multiple-document' && commands.hasCommand('launcher:create')) {
+        if (
+          labShell.mode === 'multiple-document' &&
+          commands.hasCommand('launcher:create')
+        ) {
           return Private.createLauncher(commands, widget);
         } else {
           // TODO: Debug focus and popup blocker issues here.
-          const newUrl = PageConfig.getUrl({mode: labShell.mode, workspace: 'default', treePath: model.path});
+          const newUrl = PageConfig.getUrl({
+            mode: labShell.mode,
+            workspace: 'default',
+            treePath: model.path
+          });
           window.open(newUrl, '_blank');
         }
       },
@@ -300,8 +307,7 @@ function activateBrowser(
   settingRegistry: ISettingRegistry,
   treePathUpdater: ITreePathUpdater,
   commandPalette: ICommandPalette | null,
-  mainMenu: IMainMenu | null,
-
+  mainMenu: IMainMenu | null
 ): void {
   const browser = factory.defaultBrowser;
   const { commands } = app;
@@ -347,7 +353,7 @@ function activateBrowser(
   // If the layout is a fresh session without saved data and not in single document
   // mode, open file browser.
   void labShell.restored.then(layout => {
-    if (layout.fresh && (labShell.mode !== 'single-document')) {
+    if (layout.fresh && labShell.mode !== 'single-document') {
       void commands.execute(CommandIDs.showBrowser, void 0);
     }
   });
@@ -556,10 +562,10 @@ function addCommands(
   commands.addCommand(CommandIDs.openPath, {
     label: args => (args.path ? `Open ${args.path}` : 'Open from Path…'),
     caption: args => (args.path ? `Open ${args.path}` : 'Open from path'),
-    execute: async (args) => {
+    execute: async args => {
       let path: string | undefined;
       if (args?.path) {
-        path = (args.path as string);
+        path = args.path as string;
       } else {
         path =
           (
@@ -588,7 +594,10 @@ function addCommands(
         if (trailingSlash && item.type !== 'directory') {
           throw new Error(`Path ${path}/ is not a directory`);
         }
-        await commands.execute(CommandIDs.goToPath, { path, dontShowBrowser: args.dontShowBrowser });
+        await commands.execute(CommandIDs.goToPath, {
+          path,
+          dontShowBrowser: args.dontShowBrowser
+        });
         if (item.type === 'directory') {
           return;
         }
@@ -1186,10 +1195,16 @@ namespace Private {
         // Restore the model without populating it.
         await browser.model.restore(browser.id, false);
         if (paths.file) {
-          await commands.execute(CommandIDs.openPath, { path: paths.file, dontShowBrowser: true });
+          await commands.execute(CommandIDs.openPath, {
+            path: paths.file,
+            dontShowBrowser: true
+          });
         }
         if (paths.browser) {
-          await commands.execute(CommandIDs.openPath, { path: paths.browser, dontShowBrowser: true });
+          await commands.execute(CommandIDs.openPath, {
+            path: paths.browser,
+            dontShowBrowser: true
+          });
         }
       } else {
         await browser.model.restore(browser.id);

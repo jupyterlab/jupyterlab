@@ -250,8 +250,8 @@ ${fileTypes}`;
 
     docManager.mode = shell.mode;
     shell.modeChanged.connect((_, args) => {
-      docManager.mode = (args as string);
-    })
+      docManager.mode = args as string;
+    });
 
     return docManager;
   }

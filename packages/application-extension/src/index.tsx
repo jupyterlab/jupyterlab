@@ -106,7 +106,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     }
 
     // These two internal state variables are used to manage the two source
-    // of the tree part of the URL being updated: 1) path of the active document, 
+    // of the tree part of the URL being updated: 1) path of the active document,
     // 2) path of the default browser if the active main area widget isn't a document.
     let _docTreePath = '';
     let _defaultBrowserTreePath = '';
@@ -114,10 +114,10 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     function updateTreePath(treePath: string) {
       _defaultBrowserTreePath = treePath;
       if (!_docTreePath) {
-        const path = PageConfig.getUrl( { treePath });
+        const path = PageConfig.getUrl({ treePath });
         router.navigate(path, { skipRouting: true });
         // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
-        PageConfig.setOption('treePath', treePath );
+        PageConfig.setOption('treePath', treePath);
       }
     }
 
@@ -148,18 +148,18 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // Watch the mode and update the page URL to /lab or /doc to reflect the
     // change.
     app.shell.modeChanged.connect((_, args: DockPanel.Mode) => {
-      const path = PageConfig.getUrl({ mode: (args as string) });
+      const path = PageConfig.getUrl({ mode: args as string });
       router.navigate(path, { skipRouting: true });
       // Persist this mode change to PageConfig as it is used elsewhere at runtime.
-      PageConfig.setOption('mode', (args as string));
-    })
+      PageConfig.setOption('mode', args as string);
+    });
 
     // Watch the path of the current widget in the main area and update the page
     // URL to reflect the change.
     app.shell.currentPathChanged.connect((_, args) => {
       const maybeTreePath = args.newValue as string;
       const treePath = maybeTreePath || _defaultBrowserTreePath;
-      const path = PageConfig.getUrl( {treePath: treePath});
+      const path = PageConfig.getUrl({ treePath: treePath });
       router.navigate(path, { skipRouting: true });
       // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
       PageConfig.setOption('treePath', treePath);
@@ -258,7 +258,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         return ((event as any).returnValue = message);
       }
     });
-    return updateTreePath
+    return updateTreePath;
   },
   autoStart: true
 };
@@ -269,13 +269,21 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
 const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
   requires: [IStateDB, ILabShell],
-  activate: (app: JupyterFrontEnd, state: IStateDB, labShell: ILabShell, info: JupyterLab.IInfo) => {
+  activate: (
+    app: JupyterFrontEnd,
+    state: IStateDB,
+    labShell: ILabShell,
+    info: JupyterLab.IInfo
+  ) => {
     const first = app.started;
     const registry = app.commands;
     const restorer = new LayoutRestorer({ connector: state, first, registry });
 
     void restorer.fetch().then(saved => {
-      labShell.restoreLayout(PageConfig.getOption('mode') as DockPanel.Mode, saved);
+      labShell.restoreLayout(
+        PageConfig.getOption('mode') as DockPanel.Mode,
+        saved
+      );
       labShell.layoutModified.connect(() => {
         void restorer.save(labShell.saveLayout());
       });
@@ -332,7 +340,9 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
 
-    const treePattern = new RegExp('/(lab|doc)(/workspaces/[a-zA-Z0-9\-\_]+)?(/tree/.*)?');
+    const treePattern = new RegExp(
+      '/(lab|doc)(/workspaces/[a-zA-Z0-9-_]+)?(/tree/.*)?'
+    );
 
     set.add(
       commands.addCommand(CommandIDs.tree, {

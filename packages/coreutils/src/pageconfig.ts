@@ -134,21 +134,25 @@ export namespace PageConfig {
 
   /**
    * Create a new URL given an optional mode and tree path.
-   * 
+   *
    * This is used to create URLS when the mode or tree path change as the user
    * changes mode or the current document in the main area. If fields in
    * options are omitted, the value in PageConfig will be used.
-   * 
+   *
    * @param options - IGetUrlOptions for the new path.
    */
   export function getUrl(options: IGetUrlOptions): string {
     let path = getOption('baseUrl') || '/';
     const mode = options.mode ?? getOption('mode');
-    const workspace = options.workspace ?? getOption('workspace')
+    const workspace = options.workspace ?? getOption('workspace');
     const labOrDoc = mode === 'multiple-document' ? 'lab' : 'doc';
     path = URLExt.join(path, labOrDoc);
     if (workspace !== 'default') {
-      path = URLExt.join(path, 'workspaces', encodeURIComponent(getOption('workspace')));
+      path = URLExt.join(
+        path,
+        'workspaces',
+        encodeURIComponent(getOption('workspace'))
+      );
     }
     const treePath = options.treePath ?? getOption('treePath');
     if (treePath) {
@@ -159,9 +163,9 @@ export namespace PageConfig {
 
   /**
    * Options for getUrl
-   */ 
-  export interface IGetUrlOptions {
+   */
 
+  export interface IGetUrlOptions {
     /**
      * The optional mode as a string 'single-document' or 'multiple-document'. If
      * the mode argument is missing, it will be provided from the PageConfig.
@@ -176,12 +180,11 @@ export namespace PageConfig {
     workspace?: string;
 
     /**
-     * The optional tree path as as string. If treePath is not provided it will be 
+     * The optional tree path as as string. If treePath is not provided it will be
      * provided from the PageConfig. If an empty string, the resulting path will not
      * contain a tree portion.
      */
     treePath?: string;
-
   }
 
   /**

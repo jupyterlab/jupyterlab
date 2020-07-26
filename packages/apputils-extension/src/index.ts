@@ -107,7 +107,8 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
     const solver = new WindowResolver();
     const workspace = info.workspace;
     const treePath = PageConfig.getOption('treePath');
-    const mode = PageConfig.getOption('mode') === 'multiple-document' ? 'lab' : 'doc';
+    const mode =
+      PageConfig.getOption('mode') === 'multiple-document' ? 'lab' : 'doc';
     // This is used as a key in local storage to refer to workspaces, either the name
     // of the workspace or the string 'default'. Both lab and doc modes share the same workspace.
     const candidate = workspace ? workspace : 'default';
@@ -125,7 +126,7 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
           'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         const random = pool[Math.floor(Math.random() * pool.length)];
         let path = URLExt.join(base, mode, 'workspaces', `auto-${random}`);
-        path = rest ? URLExt.join(path, URLExt.encodeParts(rest)) : path
+        path = rest ? URLExt.join(path, URLExt.encodeParts(rest)) : path;
 
         // Reset the workspace on load.
         query['reset'] = '';
@@ -417,9 +418,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         delete query['reset'];
 
         const url = path + URLExt.objectToQueryString(query) + hash;
-        const cleared = db
-          .clear()
-          .then(() => save.invoke());
+        const cleared = db.clear().then(() => save.invoke());
 
         // After the state has been reset, navigate to the URL.
         if (clone) {

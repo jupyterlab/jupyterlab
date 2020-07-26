@@ -107,7 +107,7 @@ export namespace ILabShell {
      */
     oldValue: string;
 
-    /** 
+    /**
      * The old value of the tree path, not including '/tree'.
      */
     newValue: string;
@@ -327,13 +327,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       }
 
       if (newValue && newValue instanceof DocumentWidget) {
-        newValue.context.pathChanged.connect(
-          this._updateCurrentPath,
-          this
-        );
+        newValue.context.pathChanged.connect(this._updateCurrentPath, this);
       }
       this._updateCurrentPath();
-
     });
   }
 
@@ -367,7 +363,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
   /**
    * A signal emitted when the path of the current document changes.
-   * 
+   *
    * This also fires when the current document itself changes.
    */
   get currentPathChanged(): ISignal<this, ILabShell.ICurrentPathChangedArgs> {
@@ -789,12 +785,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         dock:
           this.mode === 'single-document'
             ? this._cachedLayout || this._dockPanel.saveLayout()
-            : this._dockPanel.saveLayout(),
+            : this._dockPanel.saveLayout()
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
     };
-    return layout
+    return layout;
   }
 
   /**
@@ -846,7 +842,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     if (current && current instanceof DocumentWidget) {
       newValue = current.context.path;
     }
-    this._currentPathChanged.emit({newValue: newValue, oldValue: this._currentPath});
+    this._currentPathChanged.emit({
+      newValue: newValue,
+      oldValue: this._currentPath
+    });
     this._currentPath = newValue;
   }
 
@@ -1156,7 +1155,10 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
   private _currentChanged = new Signal<this, ILabShell.IChangedArgs>(this);
   private _currentPath = '';
-  private _currentPathChanged = new Signal<this, ILabShell.ICurrentPathChangedArgs>(this);
+  private _currentPathChanged = new Signal<
+    this,
+    ILabShell.ICurrentPathChangedArgs
+  >(this);
   private _modeChanged = new Signal<this, DockPanel.Mode>(this);
   private _dockPanel: DockPanel;
   private _isRestored = false;
