@@ -4,6 +4,8 @@ module.exports = function(baseDir: string) {
   return {
     preset: 'ts-jest/presets/js-with-babel',
     moduleNameMapper: {
+      '^!!to-string-loader!css-loader!.+\\.css':
+        '@jupyterlab/testutils/lib/jest-style-mock.js',
       '\\.(css|less|sass|scss)$': 'identity-obj-proxy',
       '\\.(gif|ttf|eot)$': '@jupyterlab/testutils/lib/jest-file-mock.js'
     },
