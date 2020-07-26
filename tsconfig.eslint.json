@@ -18,6 +18,6 @@
     "jupyterlab/*",
     "jupyterlab/staging/*",
     "testutils/**/*",
-    "benchmarks/src/**/*"
+    "benchmarks/**/*"
   ]
 }
