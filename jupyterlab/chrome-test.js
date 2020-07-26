@@ -38,6 +38,15 @@ async function main() {
     console.error(`Parsed an error from text content: ${error.message}`, error);
   }
 
+  await page.evaluate(async () => {
+    const jlab = window.jupyterlab;
+    const w1 = await jlab.commands.execute('fileeditor:create-new');
+    const w2 = await jlab.commands.execute('fileeditor:create-new');
+    await jlab.shell.activateById(w1.id);
+  });
+
+  console.log(page.url());
+
   await browser.close();
 
   if (testError) {
