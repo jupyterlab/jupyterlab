@@ -1,4 +1,4 @@
-import { getModifierState } from '../../../utils';
+import { getModifierState, uris_equal } from '../../../utils';
 import {
   IRootPosition,
   is_equal,
@@ -96,7 +96,7 @@ export class Hover extends CodeMirrorLSPFeature {
   }
 
   public handleHover = (response: lsProtocol.Hover, documentUri: string) => {
-    if (documentUri !== this.virtual_document.document_info.uri) {
+    if (!uris_equal(documentUri, this.virtual_document.document_info.uri)) {
       return;
     }
     this.hide_hover();

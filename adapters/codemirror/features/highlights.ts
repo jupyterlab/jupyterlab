@@ -4,6 +4,7 @@ import { documentHighlightKindNames } from '../../../lsp';
 import { VirtualDocument } from '../../../virtual/document';
 import { IRootPosition } from '../../../positioning';
 import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
+import { uris_equal } from '../../../utils';
 
 export class Highlights extends CodeMirrorLSPFeature {
   name = 'Highlights';
@@ -49,7 +50,7 @@ export class Highlights extends CodeMirrorLSPFeature {
     items: lsProtocol.DocumentHighlight[],
     documentUri: string
   ) => {
-    if (documentUri !== this.virtual_document.document_info.uri) {
+    if (!uris_equal(documentUri, this.virtual_document.document_info.uri)) {
       return;
     }
     this.clear_markers();

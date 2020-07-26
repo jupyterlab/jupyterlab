@@ -97,15 +97,16 @@ export function server_root_uri() {
 /**
  * compare two URIs, discounting:
  * - drive capitalization
+ * - uri encoding
  * TODO: probably use vscode-uri
  */
 export function uris_equal(a: string, b: string) {
   const win_paths = is_win_path(a) && is_win_path(b);
   if (win_paths) {
-    return normalize_win_path(a) === normalize_win_path(b);
-  } else {
-    return a === b;
+    a = normalize_win_path(a);
+    b = normalize_win_path(b);
   }
+  return a === b || decodeURI(a) === decodeURI(b);
 }
 
 /**
