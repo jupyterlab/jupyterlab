@@ -63,6 +63,28 @@ MANIFEST
 \#*#
 .#*
 
+*.swp
+*.map
+
+coverage/
+tests/**/coverage
+tests/**/.cache-loader
+docs/_build
+docs/api
+docs/source/_build
+packages/services/examples/node/config.json
+examples/app/build
+examples/app/themes
+examples/app/schemas
+iframe_figures/
+
+lerna-debug.log
+yarn-error.log
+
+junit.xml
+
+*.tsbuildinfo
+
 # jetbrains IDE stuff
 *.iml
 .idea/
