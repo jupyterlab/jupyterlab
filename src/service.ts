@@ -156,6 +156,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       return false;
     }
     const name = kernel.name;
+    if (!this._specsManager.specs.kernelspecs[name]) {
+      return true;
+    }
     return !!(
       this._specsManager.specs.kernelspecs[name].metadata?.['debugger'] ?? false
     );
