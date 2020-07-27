@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/markdownviewer",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "JupyterLab - Markdown viewer Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,7 +35,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.2.0",
+    "@jupyterlab/apputils": "^2.2.1",
     "@jupyterlab/coreutils": "^4.2.0",
     "@jupyterlab/docregistry": "^2.2.0",
     "@jupyterlab/rendermime": "^2.2.0",

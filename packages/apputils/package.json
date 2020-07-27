@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/apputils",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "JupyterLab - Application Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -61,7 +61,7 @@
     "sanitize-html": "~1.20.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.0",
+    "@jupyterlab/testutils": "^2.2.1",
     "@types/jest": "^24.0.23",
     "@types/react-dom": "~16.9.4",
     "@types/sanitize-html": "^1.20.2",
