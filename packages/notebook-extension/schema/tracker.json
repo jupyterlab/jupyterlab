@@ -48,6 +48,21 @@
       "selector": ".jp-Notebook:focus"
     },
     {
+      "command": "notebook:move-cell-down",
+      "keys": ["Ctrl J"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:move-cell-up",
+      "keys": ["Ctrl K"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:copy-cell",
+      "keys": ["C"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
       "command": "notebook:copy-cell",
       "keys": ["C"],
       "selector": ".jp-Notebook:focus"
