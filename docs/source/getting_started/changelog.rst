@@ -5,7 +5,12 @@ JupyterLab Changelog
 
 
 `v2.2.x <https://github.com/jupyterlab/jupyterlab/milestone/53>`__
-------------------------------------------------------------------
+-
+
+v2.2.1
+^^^^^^
+* Properly handle errors in async browser_check  (`#8721 <https://github.com/jupyterlab/jupyterlab/pull/8721>`__)
+
 
 `v2.2.0 <https://github.com/jupyterlab/jupyterlab/releases/tag/v2.2.0>`__
 ---------------------------------------------------------------------------
