@@ -201,7 +201,7 @@ export class Hover extends CodeMirrorLSPFeature {
           e.message === "Cannot read property 'string' of undefined"
         )
       ) {
-        throw e;
+        console.warn(e);
       }
     }
   };

@@ -118,11 +118,12 @@ export class VirtualEditorForNotebook extends VirtualEditor {
   transform_from_notebook_to_root(
     cell: Cell,
     position: IEditorPosition
-  ): IRootPosition {
+  ): IRootPosition | null {
     // TODO: if cell is not known, refresh
     let shift = this.cell_to_corresponding_source_line.get(cell);
-    if (shift === undefined) {
-      throw Error('Cell not found in cell_line_map');
+    if (shift == null) {
+      console.warn('Cell not found in cell_line_map');
+      return null;
     }
     return {
       ...(position as CodeMirror.Position),

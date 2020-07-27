@@ -53,7 +53,8 @@ export class LanguageServerManager implements ILanguageServerManager {
     );
 
     if (!response.ok) {
-      throw new Error(response.statusText);
+      console.error('Could not fetch sessions', response);
+      return;
     }
 
     let sessions: SCHEMA.Sessions;

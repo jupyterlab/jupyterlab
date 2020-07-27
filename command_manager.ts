@@ -201,7 +201,7 @@ export class NotebookCommandManager extends ContextCommandManager {
     return notebook_adapters.get(notebook.id);
   }
 
-  context_from_active_document(): ICommandContext {
+  context_from_active_document(): ICommandContext | null {
     if (!this.is_widget_current) {
       return null;
     }
@@ -213,7 +213,7 @@ export class NotebookCommandManager extends ContextCommandManager {
 
     let virtual_editor = this.current_adapter?.virtual_editor;
 
-    if (!virtual_editor) {
+    if (virtual_editor == null) {
       return null;
     }
 
@@ -221,6 +221,11 @@ export class NotebookCommandManager extends ContextCommandManager {
       cell,
       cm_cursor
     );
+
+    if (root_position == null) {
+      console.warn('Could not retrieve current context', virtual_editor);
+      return null;
+    }
 
     return this.current_adapter?.get_context(root_position);
   }
