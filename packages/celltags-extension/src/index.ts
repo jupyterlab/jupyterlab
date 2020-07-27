@@ -11,7 +11,7 @@ import { TagTool } from '@jupyterlab/celltags';
  * Initialization data for the celltags extension.
  */
 const celltags: JupyterFrontEndPlugin<void> = {
-  id: 'celltags',
+  id: '@jupyterlab/celltags',
   autoStart: true,
   requires: [INotebookTools, INotebookTracker],
   activate: (
