@@ -10,6 +10,9 @@
       "path": "../application"
     },
     {
+      "path": "../cells"
+    },
+    {
       "path": "../codeeditor"
     },
     {
@@ -25,6 +28,9 @@
       "path": "../mainmenu"
     },
     {
+      "path": "../notebook"
+    },
+    {
       "path": "../settingregistry"
     },
     {
@@ -32,6 +38,9 @@
     },
     {
       "path": "../translation"
+    },
+    {
+      "path": "../cells"
     }
   ]
 }
