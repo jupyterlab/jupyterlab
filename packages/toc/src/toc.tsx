@@ -53,8 +53,12 @@ export class TableOfContents extends Widget {
     }
     this._current = value;
 
-    if (this.generator && this.generator.toolbarGenerator) {
-      this._toolbar = this.generator.toolbarGenerator();
+    if (this.generator) {
+      if (this.generator.toolbarGenerator) {
+        this._toolbar = this.generator.toolbarGenerator();
+      } else {
+        this._toolbar = null;
+      }
     }
     // Dispose an old activity monitor if one existed...
     if (this._monitor) {

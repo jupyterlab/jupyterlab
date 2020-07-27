@@ -26,6 +26,9 @@
     },
     {
       "path": "../toc"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }
