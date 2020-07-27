@@ -40,7 +40,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.2.0",
+    "@jupyterlab/apputils": "^2.2.1",
     "@jupyterlab/coreutils": "^4.2.0",
     "@jupyterlab/docregistry": "^2.2.0",
     "@lumino/coreutils": "^1.4.2",
@@ -48,7 +48,7 @@
     "@lumino/widgets": "^1.11.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.0",
+    "@jupyterlab/testutils": "^2.2.1",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",
