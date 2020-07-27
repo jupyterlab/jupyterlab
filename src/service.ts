@@ -147,6 +147,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param connection The session connection.
    */
   async isAvailable(connection: Session.ISessionConnection): Promise<boolean> {
+    if (!this._specsManager) {
+      return true;
+    }
     await this._specsManager.ready;
     const kernel = connection?.kernel;
     if (!kernel) {
@@ -665,13 +668,13 @@ export namespace DebuggerService {
     config: IDebugger.IConfig;
 
     /**
-     * The kernel specs manager.
-     */
-    specsManager: KernelSpec.IManager;
-
-    /**
-     * The debugger sources instance.
+     * The optional debugger sources instance.
      */
     debuggerSources?: IDebugger.ISources;
+
+    /**
+     * The optional kernel specs manager.
+     */
+    specsManager?: KernelSpec.IManager;
   }
 }
