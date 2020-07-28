@@ -4,7 +4,7 @@ import { Menu } from '@lumino/widgets';
 import { PositionConverter } from '../../../converter';
 import { IVirtualPosition, IEditorPosition } from '../../../positioning';
 import { diagnosticSeverityNames } from '../../../lsp';
-import { DefaultMap } from '../../../utils';
+import { DefaultMap, uris_equal } from '../../../utils';
 import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import {
@@ -217,7 +217,7 @@ export class Diagnostics extends CodeMirrorLSPFeature {
   }
 
   public handleDiagnostic = (response: lsProtocol.PublishDiagnosticsParams) => {
-    if (response.uri !== this.virtual_document.document_info.uri) {
+    if (!uris_equal(response.uri, this.virtual_document.document_info.uri)) {
       return;
     }
 

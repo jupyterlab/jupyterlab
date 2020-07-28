@@ -112,7 +112,7 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
       pattern: '^%%(latex)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: false,
-      file_extension: 'latex'
+      file_extension: 'tex'
     }),
     new RegExpForeignCodeExtractor({
       language: 'markdown',
