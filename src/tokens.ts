@@ -726,18 +726,18 @@ export namespace IDebugger {
 /**
  * The visual debugger token.
  */
-export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger');
+export const IDebugger = new Token<IDebugger>('@jupyterlab/debugger:IDebugger');
 
 /**
  * The debugger configuration token.
  */
 export const IDebuggerConfig = new Token<IDebugger.IConfig>(
-  '@jupyterlab/debugger:config'
+  '@jupyterlab/debugger:IDebuggerConfig'
 );
 
 /**
  * The debugger sources utility token.
  */
 export const IDebuggerSources = new Token<IDebugger.ISources>(
-  '@jupyterlab/debugger:sources'
+  '@jupyterlab/debugger:IDebuggerSources'
 );
