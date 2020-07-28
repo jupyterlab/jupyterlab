@@ -6,7 +6,7 @@ import {
   CompletionConnector
 } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ReadonlyJSONObject } from '@lumino/coreutils';
+import { JSONArray, JSONObject } from '@lumino/coreutils';
 import { completionItemKindNames, CompletionTriggerKind } from '../../../lsp';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../../../converter';
@@ -156,7 +156,7 @@ export class LSPConnector extends DataConnector<
         if (document.language === kernelLanguage) {
           return Promise.all([
             this._kernel_connector.fetch(request),
-            this.hint(
+            this.fetch_lsp(
               token,
               typed_character,
               virtual_start,
@@ -166,12 +166,12 @@ export class LSPConnector extends DataConnector<
               position_in_token
             )
           ]).then(([kernel, lsp]) =>
-            this.merge_replies(kernel, lsp, this._editor)
+            this.merge_replies(this.transform_reply(kernel), lsp, this._editor)
           );
         }
       }
 
-      return this.hint(
+      return this.fetch_lsp(
         token,
         typed_character,
         virtual_start,
@@ -189,7 +189,7 @@ export class LSPConnector extends DataConnector<
     }
   }
 
-  async hint(
+  async fetch_lsp(
     token: CodeEditor.IToken,
     typed_character: string,
     start: IVirtualPosition,
@@ -200,15 +200,10 @@ export class LSPConnector extends DataConnector<
   ): Promise<CompletionHandler.IReply> {
     let connection = this._connections.get(document.id_path);
 
-    // nope - do not do this; we need to get the signature (yes)
-    // but only in order to bump the priority of the parameters!
-    // unfortunately there is no abstraction of scores exposed
-    // to the matches...
-    // Suggested in https://github.com/jupyterlab/jupyterlab/issues/7044, TODO PR
-
+    console.log('[LSP][Completer] Fetching and Transforming');
     console.log('[LSP][Completer] Token:', token);
 
-    let completion_items = ((await connection.getCompletion(
+    let lspCompletionItems = ((await connection.getCompletion(
       cursor,
       {
         start,
@@ -222,22 +217,23 @@ export class LSPConnector extends DataConnector<
     )) || []) as lsProtocol.CompletionItem[];
 
     let prefix = token.value.slice(0, position_in_token + 1);
-
-    let matches: Array<string> = [];
-    const types: Array<IItemType> = [];
     let all_non_prefixed = true;
-    for (let match of completion_items) {
-      // there are more interesting things to be extracted and passed to the metadata:
-      // detail: "__main__"
-      // documentation: "mean(data)↵↵Return the sample arithmetic mean of data.↵↵>>> mean([1, 2, 3, 4, 4])↵2.8↵↵>>> from fractions import Fraction as F↵>>> mean([F(3, 7), F(1, 21), F(5, 3), F(1, 3)])↵Fraction(13, 21)↵↵>>> from decimal import Decimal as D↵>>> mean([D("0.5"), D("0.75"), D("0.625"), D("0.375")])↵Decimal('0.5625')↵↵If ``data`` is empty, StatisticsError will be raised."
-      // insertText: "mean"
-      // kind: 3
-      // label: "mean(data)"
-      // sortText: "amean"
+    let items: CompletionHandler.ICompletionItem[] = [];
+    lspCompletionItems.forEach(match => {
+      let completionItem = {
+        label: match.label,
+        insertText: match.insertText,
+        type: match.kind ? completionItemKindNames[match.kind] : '',
+        documentation: lsProtocol.MarkupContent.is(match.documentation)
+          ? match.documentation.value
+          : match.documentation,
+        filterText: match.filterText,
+        deprecated: match.deprecated,
+        data: { ...match }
+      };
 
-      // TODO: add support for match.textEdit
+      // Update prefix values
       let text = match.insertText ? match.insertText : match.label;
-
       if (text.toLowerCase().startsWith(prefix.toLowerCase())) {
         all_non_prefixed = false;
         if (prefix !== token.value) {
@@ -252,12 +248,8 @@ export class LSPConnector extends DataConnector<
         }
       }
 
-      matches.push(text);
-      types.push({
-        text: text,
-        type: match.kind ? completionItemKindNames[match.kind] : ''
-      });
-    }
+      items.push(completionItem);
+    });
 
     return {
       // note in the ContextCompleter it was:
@@ -271,101 +263,160 @@ export class LSPConnector extends DataConnector<
       // but it did not work for "from statistics <tab>" and lead to "from statisticsimport" (no space)
       start: token.offset + (all_non_prefixed ? 1 : 0),
       end: token.offset + prefix.length,
-      matches: matches,
-      metadata: {
-        _jupyter_types_experimental: types
-      }
+      matches: [],
+      metadata: {},
+      items
     };
+  }
+
+  private transform_reply(
+    reply: CompletionHandler.IReply
+  ): CompletionHandler.IReply {
+    console.log('[LSP][Completer] Transforming kernel reply:', reply);
+    const items = new Array<CompletionHandler.ICompletionItem>();
+    const metadata = reply.metadata || {};
+    const types = metadata._jupyter_types_experimental as JSONArray;
+
+    if (types) {
+      types.forEach((item: JSONObject) => {
+        // For some reason the _jupyter_types_experimental list has two entries
+        // for each match, with one having a type of "<unknown>". Discard those
+        // and use undefined to indicate an unknown type.
+        const text = item.text as string;
+        const type = item.type as string;
+        items.push({ label: text, type });
+      });
+    } else {
+      const matches = reply.matches;
+      matches.forEach(match => {
+        items.push({ label: match });
+      });
+    }
+    return { ...reply, items };
   }
 
   private merge_replies(
     kernel: CompletionHandler.IReply,
     lsp: CompletionHandler.IReply,
     editor: CodeEditor.IEditor
-  ) {
-    // This is based on https://github.com/jupyterlab/jupyterlab/blob/f1bc02ced61881df94c49929837c49c022f5b115/packages/completer/src/connector.ts#L78
-    // Copyright (c) Jupyter Development Team.
-    // Distributed under the terms of the Modified BSD License.
-
-    // If one is empty, return the other.
-    if (kernel.matches.length === 0) {
+  ): CompletionHandler.IReply {
+    console.log('[LSP][Completer] Merging completions:', lsp, kernel);
+    if (!kernel.items.length) {
       return lsp;
-    } else if (lsp.matches.length === 0) {
+    }
+    if (!lsp.items.length) {
       return kernel;
     }
-    console.log('[LSP][Completer] Merging completions:', lsp, kernel);
-
-    // Populate the result with a copy of the lsp matches.
-    const matches = lsp.matches.slice();
-    const types = lsp.metadata._jupyter_types_experimental as Array<IItemType>;
-
-    // Cache all the lsp matches in a memo.
-    const memo = new Set<string>(matches);
-    const memo_types = new Map<string, string>(
-      types.map(v => [v.text, v.type])
-    );
-
-    let prefix = '';
-
-    // if the kernel used a wider range, get the previous characters to strip the prefix off,
-    // so that both use the same range
-    if (lsp.start > kernel.start) {
-      const cursor = editor.getCursorPosition();
-      const line = editor.getLine(cursor.line);
-      prefix = line.substring(kernel.start, lsp.start);
-      console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
-    } else if (lsp.start < kernel.start) {
-      console.warn('[LSP][Completer] Kernel start > LSP start');
-    }
-
-    let remove_prefix = (value: string) => {
-      if (value.startsWith(prefix)) {
-        return value.substr(prefix.length);
+    // Combine ICompletionItems across multiple IReply objects
+    const aggregatedItems = lsp.items.concat(kernel.items);
+    // De-dupe and filter items
+    const labelSet = new Set<String>();
+    const processedItems = new Array<CompletionHandler.ICompletionItem>();
+    // TODO: Integrate prefix stripping?
+    aggregatedItems.forEach(item => {
+      if (
+        labelSet.has(item.label) ||
+        (item.type && item.type === '<unknown>')
+      ) {
+        return;
       }
-      return value;
-    };
-
-    // TODO push the CompletionItem suggestion with proper sorting, this is a mess
-    let priority_matches = new Set<string>();
-
-    if (kernel.metadata._jupyter_types_experimental == null) {
-      let kernel_types = kernel.metadata._jupyter_types_experimental as Array<
-        IItemType
-      >;
-      kernel_types.forEach(itemType => {
-        let text = remove_prefix(itemType.text);
-        if (!memo_types.has(text)) {
-          memo_types.set(text, itemType.type);
-          if (itemType.type !== '<unknown>') {
-            priority_matches.add(text);
-          }
-        }
-      });
-    }
-
-    // Add each context match that is not in the memo to the result.
-    kernel.matches.forEach(match => {
-      match = remove_prefix(match);
-      if (!memo.has(match) && !priority_matches.has(match)) {
-        matches.push(match);
-      }
+      labelSet.add(item.label);
+      processedItems.push(item);
     });
-
-    let final_matches: Array<string> = Array.from(priority_matches).concat(
-      matches
-    );
-    let merged_types: Array<IItemType> = Array.from(
-      memo_types.entries()
-    ).map(([key, value]) => ({ text: key, type: value }));
-
-    return {
-      ...lsp,
-      matches: final_matches,
-      metadata: {
-        _jupyter_types_experimental: merged_types
-      }
-    };
+    // TODO: Sort items
+    // Return reply with processed items.
+    return { ...lsp, items: processedItems };
   }
+
+  // TODO: Remove this
+  // private merge_replies_old(
+  //   kernel: CompletionHandler.IReply,
+  //   lsp: CompletionHandler.IReply,
+  //   editor: CodeEditor.IEditor
+  // ) {
+  //   // This is based on https://github.com/jupyterlab/jupyterlab/blob/f1bc02ced61881df94c49929837c49c022f5b115/packages/completer/src/connector.ts#L78
+  //   // Copyright (c) Jupyter Development Team.
+  //   // Distributed under the terms of the Modified BSD License.
+
+  //   // If one is empty, return the other.
+  //   if (kernel.matches.length === 0) {
+  //     return lsp;
+  //   } else if (lsp.matches.length === 0) {
+  //     return kernel;
+  //   }
+  //   console.log('[LSP][Completer] Merging completions:', lsp, kernel);
+
+  //   // Populate the result with a copy of the lsp matches.
+  //   const matches = lsp.matches.slice();
+  //   const types = lsp.metadata._jupyter_types_experimental as Array<IItemType>;
+
+  //   // Cache all the lsp matches in a memo.
+  //   const memo = new Set<string>(matches);
+  //   const memo_types = new Map<string, string>(
+  //     types.map(v => [v.text, v.type])
+  //   );
+
+  //   let prefix = '';
+
+  //   // if the kernel used a wider range, get the previous characters to strip the prefix off,
+  //   // so that both use the same range
+  //   if (lsp.start > kernel.start) {
+  //     const cursor = editor.getCursorPosition();
+  //     const line = editor.getLine(cursor.line);
+  //     prefix = line.substring(kernel.start, lsp.start);
+  //     console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
+  //   } else if (lsp.start < kernel.start) {
+  //     console.warn('[LSP][Completer] Kernel start > LSP start');
+  //   }
+
+  //   let remove_prefix = (value: string) => {
+  //     if (value.startsWith(prefix)) {
+  //       return value.substr(prefix.length);
+  //     }
+  //     return value;
+  //   };
+
+  //   // TODO push the CompletionItem suggestion with proper sorting, this is a mess
+  //   let priority_matches = new Set<string>();
+
+  //   if (kernel.metadata._jupyter_types_experimental == null) {
+  //     let kernel_types = kernel.metadata._jupyter_types_experimental as Array<
+  //       IItemType
+  //     >;
+  //     kernel_types.forEach(itemType => {
+  //       let text = remove_prefix(itemType.text);
+  //       if (!memo_types.has(text)) {
+  //         memo_types.set(text, itemType.type);
+  //         if (itemType.type !== '<unknown>') {
+  //           priority_matches.add(text);
+  //         }
+  //       }
+  //     });
+  //   }
+
+  //   // Add each context match that is not in the memo to the result.
+  //   kernel.matches.forEach(match => {
+  //     match = remove_prefix(match);
+  //     if (!memo.has(match) && !priority_matches.has(match)) {
+  //       matches.push(match);
+  //     }
+  //   });
+
+  //   let final_matches: Array<string> = Array.from(priority_matches).concat(
+  //     matches
+  //   );
+  //   let merged_types: Array<IItemType> = Array.from(
+  //     memo_types.entries()
+  //   ).map(([key, value]) => ({ text: key, type: value }));
+
+  //   return {
+  //     ...lsp,
+  //     matches: final_matches,
+  //     metadata: {
+  //       _jupyter_types_experimental: merged_types
+  //     }
+  //   };
+  // }
 
   with_trigger_kind(kind: CompletionTriggerKind, fn: Function) {
     try {
@@ -398,11 +449,4 @@ export namespace LSPConnector {
 
     session?: Session.ISessionConnection;
   }
-}
-
-interface IItemType extends ReadonlyJSONObject {
-  // the item value
-  text: string;
-  // the item type
-  type: string;
 }
