@@ -13,6 +13,8 @@ import {
 
 import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 
+import { Cell } from '@jupyterlab/cells';
+
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import {
@@ -197,10 +199,25 @@ function activateEditorCommands(
     if (keyMap === 'vim') {
       // @ts-expect-error
       await import('codemirror/keymap/vim.js');
+      commands.addKeyBinding({
+        selector: '.jp-Notebook.jp-mod-editMode',
+        keys: ['Escape'],
+        command: 'codemirror:leave-vim-insert-mode'
+      });
+      commands.addKeyBinding({
+        selector: '.jp-Notebook.jp-mod-editMode',
+        keys: ['Shift Escape'],
+        command: 'notebook:enter-command-mode'
+      });
+    } else {
+      commands.addKeyBinding({
+        selector: '.jp-Notebook.jp-mod-editMode',
+        keys: ['Escape'],
+        command: 'notebook:enter-command-mode'
+      });
     }
 
     theme = (settings.get('theme').composite as string | null) || theme;
-
     // Lazy loading of theme stylesheets
     if (theme !== 'jupyter' && theme !== 'default') {
       const filename =
@@ -317,6 +334,43 @@ function activateEditorCommands(
       }
     });
   });
+
+  notebookTracker.activeCellChanged.connect(onActiveCellChanged, this);
+
+  let activeCell: Cell | null = null;
+
+  commands.addCommand('codemirror:leave-vim-insert-mode', {
+    label: 'Leave VIM Insert Mode',
+    execute: args => {
+      if (activeCell) {
+        let editor = activeCell.editor as CodeMirrorEditor;
+        (CodeMirror as any).Vim.handleKey(editor.editor, '<Esc>');
+      }
+    },
+    isEnabled
+  });
+
+  function onActiveCellChanged(): void {
+    if (keyMap === 'vim') {
+      activeCell = notebookTracker.activeCell;
+      if (activeCell) {
+        // From https://github.com/axelfahy/jupyterlab-vim/blob/c4e43f940ef4be4c961608b6192412d2f3a33d1f/src/index.ts
+        CodeMirror.prototype.save = () => {
+          void commands.execute('docmanager:save');
+        };
+        const lvim = (CodeMirror as any).Vim as any;
+        if (lvim) {
+          lvim.defineEx('quit', 'q', function(cm: any) {
+            void commands.execute('notebook:enter-command-mode');
+          });
+          lvim.defineAction('splitCell', (cm: any, actionArgs: any) => {
+            void commands.execute('notebook:split-cell-at-cursor');
+          });
+          lvim.mapCommand('-', 'action', 'splitCell', {}, { extra: 'normal' });
+        }
+      }
+    }
+  }
 
   /**
    * A test for whether the tracker has an active widget.
