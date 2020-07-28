@@ -82,6 +82,7 @@ export class TagTool extends NotebookTools.Tool {
     for (let i = 0; i < newTags.length; i++) {
       if (newTags[i] !== '' && tags.indexOf(newTags[i]) < 0) {
         tags.push(newTags[i]);
+        cell.addTagIndicator(newTags[i]);
       }
     }
     cell.model.metadata.set('tags', tags);
@@ -105,6 +106,7 @@ export class TagTool extends NotebookTools.Tool {
     const idx = tags.indexOf(name);
     if (idx > -1) {
       tags.splice(idx, 1);
+      cell.removeTagIndicator(name);
     }
     cell.model.metadata.set('tags', tags);
     if (tags.length === 0) {

@@ -51,7 +51,7 @@ import { Message } from '@lumino/messaging';
 
 import { PanelLayout, Panel, Widget } from '@lumino/widgets';
 
-import { InputCollapser, OutputCollapser } from './collapser';
+import { InputCollapser, OutputCollapser, TagIndicator } from './collapser';
 
 import {
   CellHeader,
@@ -163,6 +163,15 @@ const RENDER_TIMEOUT = 1000;
  * The mime type for a rich contents drag object.
  */
 const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
+
+/**
+ * The palette of colors a tag can be assigned.
+ */
+const TAG_INDICATOR_COLORS = [
+  'var(--jp-inverse-layout-color1)',
+  'var(--jp-brand-color0)',
+  'var(--jp-accent-color0)'
+];
 
 /** ****************************************************************************
  * Cell
@@ -528,6 +537,43 @@ export class Cell extends Widget {
     }
   }
 
+  static getTagColor(name: string) {
+    let asciiValue = 0;
+    for (let i = 0; i < name.length; i++) {
+      asciiValue += name.charCodeAt(i);
+    }
+    let choice = asciiValue % TAG_INDICATOR_COLORS.length;
+    return TAG_INDICATOR_COLORS[choice];
+  }
+
+  addTagIndicator(name: string) {
+    const inputWrapper = this._inputWrapper as Panel;
+    let tagBar = new TagIndicator(name);
+    tagBar.node.style.background = Cell.getTagColor(name);
+    let pos = inputWrapper.widgets.length;
+    for (let i = 0; i < inputWrapper.widgets.length; i++) {
+      let widget = inputWrapper.widgets[i];
+      if (widget && widget instanceof TagIndicator) {
+        if (widget.name.localeCompare(name) >= 0) {
+          pos = i;
+          break;
+        }
+      }
+    }
+    inputWrapper.insertWidget(pos, tagBar);
+  }
+
+  removeTagIndicator(name: string) {
+    const inputWrapper = this._inputWrapper as Panel;
+    for (let i = 0; i < inputWrapper.widgets.length; i++) {
+      let widget = inputWrapper.widgets[i];
+      if (widget instanceof TagIndicator && widget.name == name) {
+        widget.dispose();
+        return;
+      }
+    }
+  }
+
   private _readOnly = false;
   private _model: ICellModel;
   private _inputHidden = false;
@@ -719,6 +765,13 @@ export class CodeCell extends Cell {
       this.outputHidden = !this.outputHidden;
     });
     model.stateChanged.connect(this.onStateChanged, this);
+
+    let tags = this.model.metadata.get('tags') as string[];
+    if (tags) {
+      for (let i = 0; i < tags.length; i++) {
+        this.addTagIndicator(tags[i]);
+      }
+    }
   }
 
   /**

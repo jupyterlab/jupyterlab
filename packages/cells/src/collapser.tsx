@@ -30,6 +30,11 @@ const INPUT_COLLAPSER = 'jp-InputCollapser';
 const OUTPUT_COLLAPSER = 'jp-OutputCollapser';
 
 /**
+ * The CSS class added to tag indicators.
+ */
+const TAG_INDICATOR_CLASS = 'jp-TagIndicator';
+
+/**
  * Abstract collapser base class.
  *
  * ### Notes
@@ -65,6 +70,19 @@ export abstract class Collapser extends ReactWidget {
    * Handle the click event.
    */
   protected abstract handleClick(e: React.MouseEvent<HTMLDivElement>): void;
+}
+
+export class TagIndicator extends Collapser {
+  constructor(name: string) {
+    super();
+    //this.removeClass(COLLAPSER_CLASS);
+    this.addClass(TAG_INDICATOR_CLASS);
+    this.name = name;
+  }
+  protected handleClick(e: React.MouseEvent<HTMLDivElement>) {
+    return;
+  }
+  public name: string;
 }
 
 /**

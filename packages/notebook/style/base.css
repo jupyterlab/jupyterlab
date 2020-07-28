@@ -83,6 +83,12 @@
   color: var(--jp-cell-prompt-not-active-font-color);
 }
 
+/* tagbar indicator always shown*/
+.jp-Notebook .jp-TagIndicator {
+  background: var(--jp-brand-color1);
+  margin-left: 5px;
+}
+
 /* cell is active */
 .jp-Notebook .jp-Cell.jp-mod-active .jp-Collapser {
   background: var(--jp-brand-color1);

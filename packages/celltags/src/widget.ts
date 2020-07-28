@@ -4,6 +4,8 @@ import { checkIcon } from '@jupyterlab/ui-components';
 
 import { TagTool } from './tool';
 
+import { Cell } from '@jupyterlab/cells';
+
 /**
  * A widget which hosts a cell tags area.
  */
@@ -44,6 +46,10 @@ export class TagWidget extends Widget {
       iconContainer.style.display = 'none';
     }
     tag.appendChild(iconContainer);
+
+    this.node.style.border = '2px solid';
+    this.node.style.borderColor = Cell.getTagColor(this.name);
+
     this.node.appendChild(tag);
   }
 
