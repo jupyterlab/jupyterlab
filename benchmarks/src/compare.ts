@@ -21,14 +21,19 @@ void main();
 
 async function main() {
   console.log(`Writing output to ${OUTPUT_FILE}`);
-  await writeLine('mode,browser,n,mean,confidenceInterval');
+  await writeLine('mode,browser,n,type,mean,confidenceInterval');
 
-  for await (const { mode, browser, n, mean, confidenceInterval } of compare(
-    OLD_FILE,
-    NEW_FILE,
-    0.95
-  )) {
-    await writeLine([mode, browser, n, mean, confidenceInterval].join(','));
+  for await (const {
+    mode,
+    browser,
+    n,
+    mean,
+    type,
+    confidenceInterval
+  } of compare(OLD_FILE, NEW_FILE, 0.95)) {
+    await writeLine(
+      [mode, browser, n, type, mean, confidenceInterval].join(',')
+    );
   }
 }
 
