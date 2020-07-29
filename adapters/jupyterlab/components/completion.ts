@@ -20,7 +20,7 @@ import {
 import { LSPConnection } from '../../../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
-
+import { kernelIcon } from '@jupyterlab/ui-components';
 
 /**
  * A LSP connector for completion handlers.
@@ -268,23 +268,29 @@ export class LSPConnector
     reply: CompletionHandler.IReply
   ): CompletionHandler.ICompletionItemsReply {
     console.log('[LSP][Completer] Transforming kernel reply:', reply);
-    const items = new Array<CompletionHandler.ICompletionItem>();
+    let items: CompletionHandler.ICompletionItem[];
     const metadata = reply.metadata || {};
     const types = metadata._jupyter_types_experimental as JSONArray;
 
     if (types) {
-      types.forEach((item: JSONObject) => {
-        const text = item.text as string;
-        const type = item.type as string;
-        items.push({ label: text, type });
+      items = types.map((item: JSONObject) => {
+        return {
+          label: item.text as string,
+          insertText: item.text as string,
+          type: item.type as string,
+          icon: typeof item.type === 'undefined' ? kernelIcon : undefined
+        };
       });
     } else {
-      const matches = reply.matches;
-      matches.forEach(match => {
-        items.push({ label: match });
+      items = reply.matches.map(match => {
+        return {
+          label: match,
+          insertText: match,
+          icon: kernelIcon
+        };
       });
     }
-    return { ...reply, items };
+    return { start: reply.start, end: reply.end, items };
   }
 
   private merge_replies(
@@ -293,6 +299,7 @@ export class LSPConnector
     editor: CodeEditor.IEditor
   ): CompletionHandler.ICompletionItemsReply {
     console.log('[LSP][Completer] Merging completions:', lsp, kernel);
+
     if (!kernel.items.length) {
       return lsp;
     }
@@ -300,27 +307,52 @@ export class LSPConnector
       return kernel;
     }
 
-    // combine completions, de-duping by label; LSP completions will show up first, kernel second.
-    const aggregatedItems = lsp.items.concat(kernel.items);
-    const labelSet = new Set<string>();
+    let prefix = '';
+
+    // if the kernel used a wider range, get the previous characters to strip the prefix off,
+    // so that both use the same range
+    if (lsp.start > kernel.start) {
+      const cursor = editor.getCursorPosition();
+      const line = editor.getLine(cursor.line);
+      prefix = line.substring(kernel.start, lsp.start);
+      console.log('[LSP][Completer] Removing kernel prefix: ', prefix);
+    } else if (lsp.start < kernel.start) {
+      console.warn('[LSP][Completer] Kernel start > LSP start');
+    }
+
+    // combine completions, de-duping by insertText; LSP completions will show up first, kernel second.
+    const aggregatedItems = lsp.items.concat(
+      kernel.items.map(item => {
+        return {
+          ...item,
+          label: item.label.startsWith(prefix)
+            ? item.label.substr(prefix.length)
+            : item.label,
+          insertText: item.insertText.startsWith(prefix)
+            ? item.insertText.substr(prefix.length)
+            : item.insertText
+        };
+      })
+    );
+    const insertTextSet = new Set<string>();
     const processedItems = new Array<CompletionHandler.ICompletionItem>();
 
-    // TODO: Integrate prefix stripping?
     aggregatedItems.forEach(item => {
       if (
         // For some reason the _jupyter_types_experimental list has two entries
         // for each match, with one having a type of "<unknown>". Discard those
         // and use undefined to indicate an unknown type.
-        labelSet.has(item.label) ||
+        insertTextSet.has(item.insertText) ||
         (item.type && item.type === '<unknown>')
       ) {
         return;
       }
-      labelSet.add(item.label);
+      insertTextSet.add(item.insertText);
       processedItems.push(item);
     });
     // TODO: Sort items
     // Return reply with processed items.
+    console.log('[LSP][Completer] Merged: ', { ...lsp, items: processedItems });
     return { ...lsp, items: processedItems };
   }
 
