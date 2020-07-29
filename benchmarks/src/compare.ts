@@ -1,5 +1,4 @@
 import * as quantile from '@stdlib/stats/base/dists/t/quantile';
-import * as absdiff from '@stdlib/math/base/utils/absolute-difference';
 import * as meanpw from '@stdlib/stats/base/meanpw';
 import * as variancepn from '@stdlib/stats/base/variancepn';
 import * as neatCSV from 'neat-csv';
@@ -224,7 +223,7 @@ function assertResultsEqual(
 }
 
 function assertAboutEqual(x: number, y: number, msg: string): void {
-  console.assert(absdiff(x, y) <= 0.005, `${msg}: ${x} != ${y}`);
+  console.assert(Math.abs(x - y) <= 0.005, `${msg}: ${x} != ${y}`);
 }
 
 function sq(x: number): number {
