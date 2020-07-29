@@ -1,4 +1,5 @@
 import * as quantile from '@stdlib/stats/base/dists/t/quantile';
+import * as absdiff from '@stdlib/math/base/utils/absolute-difference';
 import * as meanpw from '@stdlib/stats/base/meanpw';
 import * as variancepn from '@stdlib/stats/base/variancepn';
 import * as neatCSV from 'neat-csv';
@@ -129,15 +130,14 @@ export function performanceChange(
   confidenceInterval: number = 0.95
 ): { mean: number; confidenceInterval: number } {
   const dof = n - 1;
-  const α = confidenceInterval - 1;
-  const t = quantile(1 - α / 2, dof);
-
-  const oldFactor = sq(y_o - (t * s_o) / n);
-  const newFactor = sq(y_n) - (t * s_n) / n;
+  const t = quantile(1 - (1 - confidenceInterval) / 2, dof);
+  const oldFactor = sq(y_o) - (sq(t) * s_o) / n;
+  const newFactor = sq(y_n) - (sq(t) * s_n) / n;
+  const meanNum = y_o * y_n;
+  const ciNum = Math.sqrt(sq(y_o * y_n) - newFactor * oldFactor);
   return {
-    mean: (y_o * y_n) / oldFactor,
-    confidenceInterval:
-      Math.sqrt(sq(y_o * y_n) - newFactor * oldFactor) / oldFactor
+    mean: meanNum / oldFactor,
+    confidenceInterval: ciNum / oldFactor
   };
 }
 
@@ -171,39 +171,60 @@ function formatChange({
   mean: number;
   confidenceInterval: number;
 }): string {
-  return `${mean.toFixed(2)}∓${confidenceInterval.toFixed(2)}`;
+  return `${mean.toFixed(1)}∓${confidenceInterval.toFixed(1)}`;
 }
 
 /**
  * Reproduce examples from paper, and verify we have implemented things correctly.
  */
 export function tests() {
-  console.assert(quantile(1 - (0.05 / 2), 2).toFixed(1) == '4.3');
+  assertAboutEqual(quantile(1 - 0.05 / 2, 2), 4.3, 'quantile');
 
-  const paperResult = formatChange({
+  const paperResult = {
     mean: 68.3 / 74.5,
     confidenceInterval: 60.2 / 70.2
-  });
-  console.assert(
-    formatChange(
-      performanceChange(
-        { variance: 5.8, mean: 10.5 },
-        { variance: 4.6, mean: 10.5 },
-        3,
-        0.95
-      )
-    ) == paperResult
+  };
+  assertResultsEqual(
+    performanceChange(
+      { variance: 5.8, mean: 10.5 },
+      { variance: 4.6, mean: 6.5 },
+      3,
+      0.95
+    ),
+    paperResult,
+    'performanceChange'
   );
+
   //   Data from table V, uses means of top level
-  console.assert(
-    formatChange(
-      performanceChangeFromData(
-        [mean(9, 11, 5, 5), mean(16, 13, 12, 8), mean(15, 7, 10, 14)],
-        [mean(10, 12, 6, 7), mean(9, 1, 11, 4), mean(8, 5, 3, 2)],
-        0.95
-      )
-    ) == paperResult
+  assertResultsEqual(
+    performanceChangeFromData(
+      [mean(9, 11, 5, 6), mean(16, 13, 12, 8), mean(15, 7, 10, 14)],
+      [mean(10, 12, 6, 7), mean(9, 1, 11, 4), mean(8, 5, 3, 2)],
+      0.95
+    ),
+    paperResult,
+    'performanceChangeFromData'
   );
+}
+
+function assertResultsEqual(
+  l: {
+    mean: number;
+    confidenceInterval: number;
+  },
+  r: { mean: number; confidenceInterval: number },
+  message: string
+) {
+  assertAboutEqual(l.mean, r.mean, `${message}: means`);
+  assertAboutEqual(
+    r.confidenceInterval,
+    r.confidenceInterval,
+    `${message}: confidence interval`
+  );
+}
+
+function assertAboutEqual(x: number, y: number, msg: string): void {
+  console.assert(absdiff(x, y) <= 0.005, `${msg}: ${x} != ${y}`);
 }
 
 function sq(x: number): number {
