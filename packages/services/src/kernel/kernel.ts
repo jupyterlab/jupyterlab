@@ -114,7 +114,10 @@ export interface IKernelConnection extends IObservableDisposable {
    * Whether the kernel connection has pending input.
    *
    * #### Notes
-   * TODO(@echarles)
+   * This is a guard to avoid deadlock is the user asks input
+   * as second time before submitting his first input
+   *
+   * See https://github.com/jupyterlab/jupyterlab/issues/8632
    */
   hasPendingInput: boolean;
 

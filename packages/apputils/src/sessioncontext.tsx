@@ -400,7 +400,7 @@ export class SessionContext implements ISessionContext {
   }
 
   /**
-   * A flag indicating if the session phas ending input, proxied from the kernel.
+   * A flag indicating if the session has ending input, proxied from the kernel.
    */
   get pendingInput(): boolean {
     return this._pendingInput;
@@ -893,10 +893,7 @@ export class SessionContext implements ISessionContext {
         this._onConnectionStatusChanged,
         this
       );
-      session.pendingInput.connect(
-        this._onPendingInput,
-        this
-      );
+      session.pendingInput.connect(this._onPendingInput, this);
       session.iopubMessage.connect(this._onIopubMessage, this);
       session.unhandledMessage.connect(this._onUnhandledMessage, this);
 
