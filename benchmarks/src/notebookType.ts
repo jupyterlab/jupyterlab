@@ -1,4 +1,4 @@
-import playwright from 'playwright';
+import * as playwright from 'playwright';
 
 type NotebookType = {
   label: string;

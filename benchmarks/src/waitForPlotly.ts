@@ -1,4 +1,4 @@
-import playwright from 'playwright';
+import * as playwright from 'playwright';
 
 /**
  * Wait for width to be changed to greater than the default of 700px which happens after rendering is done.
