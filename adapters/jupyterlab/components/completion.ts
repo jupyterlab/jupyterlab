@@ -7,7 +7,7 @@ import {
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { JSONArray, JSONObject } from '@lumino/coreutils';
 import { completionItemKindNames, CompletionTriggerKind } from '../../../lsp';
-import * as lsProtocol from 'vscode-languageserver-protocol';
+import * as lsProtocol from 'vscode-languageserver-types';
 import { PositionConverter } from '../../../converter';
 import { VirtualDocument } from '../../../virtual/document';
 import { VirtualEditor } from '../../../virtual/editor';
