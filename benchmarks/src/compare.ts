@@ -130,7 +130,7 @@ export function performanceChange(
 ): { mean: number; confidenceInterval: number } {
   const dof = n - 1;
   const α = confidenceInterval - 1;
-  const t = quantile(α / 2, dof);
+  const t = quantile(1 - α / 2, dof);
 
   const oldFactor = sq(y_o - (t * s_o) / n);
   const newFactor = sq(y_n) - (t * s_n) / n;
@@ -178,8 +178,7 @@ function formatChange({
  * Reproduce examples from paper, and verify we have implemented things correctly.
  */
 export function tests() {
-  console.log(quantile(0.05 / 2, 2).toFixed(1))
-  console.assert(quantile(0.05 / 2, 2).toFixed(1) == '18.5');
+  console.assert(quantile(1 - (0.05 / 2), 2).toFixed(1) == '4.3');
 
   const paperResult = formatChange({
     mean: 68.3 / 74.5,
