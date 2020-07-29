@@ -21,11 +21,11 @@ import { LSPConnection } from '../../../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 
-
 /**
  * A LSP connector for completion handlers.
  */
-export class LSPConnector implements CompletionHandler.ICompletionItemsConnector {
+export class LSPConnector
+  implements CompletionHandler.ICompletionItemsConnector {
   isDisposed = false;
   private _editor: CodeEditor.IEditor;
   private _connections: Map<VirtualDocument.id_path, LSPConnection>;
@@ -172,7 +172,9 @@ export class LSPConnector implements CompletionHandler.ICompletionItemsConnector
         position_in_token
       ).catch(e => {
         console.warn('LSP: hint failed', e);
-        return this.fallback_connector.fetch(request).then(this.transform_reply);
+        return this.fallback_connector
+          .fetch(request)
+          .then(this.transform_reply);
       });
     } catch (e) {
       console.warn('LSP: kernel completions failed', e);
@@ -254,7 +256,7 @@ export class LSPConnector implements CompletionHandler.ICompletionItemsConnector
       // but it did not work for "from statistics <tab>" and lead to "from statisticsimport" (no space)
       start: token.offset + (all_non_prefixed ? 1 : 0),
       end: token.offset + prefix.length,
-      items: items,
+      items: items
     };
   }
 
@@ -305,7 +307,7 @@ export class LSPConnector implements CompletionHandler.ICompletionItemsConnector
         // For some reason the _jupyter_types_experimental list has two entries
         // for each match, with one having a type of "<unknown>". Discard those
         // and use undefined to indicate an unknown type.
-        labelSet.has(item.label)// ||
+        labelSet.has(item.label) // ||
         // (item.type && item.type === '<unknown>')
       ) {
         return;
@@ -318,9 +320,11 @@ export class LSPConnector implements CompletionHandler.ICompletionItemsConnector
     return { ...lsp, items: processedItems };
   }
 
-  list(query: string | undefined): Promise<{
+  list(
+    query: string | undefined
+  ): Promise<{
     ids: CompletionHandler.IRequest[];
-    values: CompletionHandler.ICompletionItemsReply[]
+    values: CompletionHandler.ICompletionItemsReply[];
   }> {
     return Promise.resolve(undefined);
   }
@@ -334,7 +338,6 @@ export class LSPConnector implements CompletionHandler.ICompletionItemsConnector
   save(id: CompletionHandler.IRequest, value: void): Promise<any> {
     return Promise.resolve(undefined);
   }
-
 }
 
 /**
