@@ -21,6 +21,7 @@ import { LSPConnection } from '../../../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 
+
 /**
  * A LSP connector for completion handlers.
  */
@@ -33,6 +34,9 @@ export class LSPConnector
   private _kernel_connector: KernelConnector;
   private _kernel_and_context_connector: CompletionConnector;
   protected options: LSPConnector.IOptions;
+
+  // signal that this is the new type connector (providing completion items)
+  responseType = ICompletionItemsResponseType;
 
   virtual_editor: VirtualEditor;
   private trigger_kind: CompletionTriggerKind;
@@ -307,8 +311,8 @@ export class LSPConnector
         // For some reason the _jupyter_types_experimental list has two entries
         // for each match, with one having a type of "<unknown>". Discard those
         // and use undefined to indicate an unknown type.
-        labelSet.has(item.label) // ||
-        // (item.type && item.type === '<unknown>')
+        labelSet.has(item.label) ||
+        (item.type && item.type === '<unknown>')
       ) {
         return;
       }
@@ -332,8 +336,6 @@ export class LSPConnector
   remove(id: CompletionHandler.IRequest): Promise<any> {
     return Promise.resolve(undefined);
   }
-
-  responseType: typeof ICompletionItemsResponseType;
 
   save(id: CompletionHandler.IRequest, value: void): Promise<any> {
     return Promise.resolve(undefined);
