@@ -198,7 +198,7 @@ export class LSPConnector
     let connection = this._connections.get(document.id_path);
 
     console.log('[LSP][Completer] Fetching and Transforming');
-    console.log('[LSP][Completer] Token:', token);
+    console.log('[LSP][Completer] Token:', token, start, end);
 
     let lspCompletionItems = ((await connection.getCompletion(
       cursor,
@@ -278,7 +278,10 @@ export class LSPConnector
           label: item.text as string,
           insertText: item.text as string,
           type: item.type as string,
-          icon: typeof item.type === 'undefined' ? kernelIcon : undefined
+          icon:
+            typeof item.type === 'undefined' || item.type == '<unknown>'
+              ? kernelIcon
+              : undefined
         };
       });
     } else {
@@ -325,9 +328,6 @@ export class LSPConnector
       kernel.items.map(item => {
         return {
           ...item,
-          label: item.label.startsWith(prefix)
-            ? item.label.substr(prefix.length)
-            : item.label,
           insertText: item.insertText.startsWith(prefix)
             ? item.insertText.substr(prefix.length)
             : item.insertText
@@ -338,13 +338,7 @@ export class LSPConnector
     const processedItems = new Array<CompletionHandler.ICompletionItem>();
 
     aggregatedItems.forEach(item => {
-      if (
-        // For some reason the _jupyter_types_experimental list has two entries
-        // for each match, with one having a type of "<unknown>". Discard those
-        // and use undefined to indicate an unknown type.
-        insertTextSet.has(item.insertText) ||
-        (item.type && item.type === '<unknown>')
-      ) {
+      if (insertTextSet.has(item.insertText)) {
         return;
       }
       insertTextSet.add(item.insertText);
