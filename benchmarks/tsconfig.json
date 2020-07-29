@@ -8,7 +8,7 @@
     "rootDir": "./src",
     "strict": true,
     "lib": ["ES2019", "DOM"],
-    "module": "ESNEXT",
+    "module": "CommonJS",
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true

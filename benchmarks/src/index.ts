@@ -7,7 +7,7 @@ import playwright from 'playwright';
 import util from 'util';
 import NotebookType from './notebookType';
 
-const DATA_PATH = 'out.csv';
+const DATA_PATH = process.env['BENCHMARK_OUTPUT'] || 'out.csv';
 
 const BROWSERS: Array<'firefox' | 'chromium'> = ['firefox', 'chromium'];
 // The maximium N
