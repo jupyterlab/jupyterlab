@@ -62,3 +62,17 @@ is an example of a cell output that takes a while to render:
 ```bash
 env 'BENCHMARK_NOTEBOOKS=["./fixedDataTable", "./manyOutputs"]' jlpm all
 ```
+
+## Comparing Benchmarks
+
+We also support comparing two runs of benchmarks to give a sense of the relative changes:
+
+```bash
+# Create `old.csv` and `new.csv` files
+env 'BENCHMARK_NOTEBOOKS=["./manyOutputs", "./longOutput"]' BENCHMARK_OUTPUT=old.csv jlpm start:benchmark
+env 'BENCHMARK_NOTEBOOKS=["./manyOutputs", "./longOutput"]' BENCHMARK_OUTPUT=new.csv jlpm start:benchmark
+# Create comparison csv file
+jlpm run start:compare
+# Create and open graph to view results
+jlpm run start:compare-graph
+```
