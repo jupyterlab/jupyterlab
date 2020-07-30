@@ -270,11 +270,12 @@ class GridModel extends DataModel {
     });
     scopes.forEach(scope => {
       const filtered = scope.variables.filter(
-        variable => !this._filter.has(variable.evaluateName)
+        variable =>
+          variable.evaluateName && !this._filter.has(variable.evaluateName)
       );
       filtered.forEach((variable, index) => {
-        this._data.name[index] = variable.evaluateName;
-        this._data.type[index] = variable.type;
+        this._data.name[index] = variable.evaluateName!;
+        this._data.type[index] = variable.type || '';
         this._data.value[index] = variable.value;
         this._data.variablesReference[index] = variable.variablesReference;
       });
@@ -344,21 +345,21 @@ namespace Private {
   } {
     const palette = createPalette();
     document.body.appendChild(palette);
-    let node: HTMLDivElement;
+    let node: HTMLDivElement | null;
     node = palette.querySelector('.jp-mod-void');
-    const voidColor = getComputedStyle(node).color;
+    const voidColor = getComputedStyle(node!).color;
     node = palette.querySelector('.jp-mod-background');
-    const backgroundColor = getComputedStyle(node).color;
+    const backgroundColor = getComputedStyle(node!).color;
     node = palette.querySelector('.jp-mod-header-background');
-    const headerBackgroundColor = getComputedStyle(node).color;
+    const headerBackgroundColor = getComputedStyle(node!).color;
     node = palette.querySelector('.jp-mod-grid-line');
-    const gridLineColor = getComputedStyle(node).color;
+    const gridLineColor = getComputedStyle(node!).color;
     node = palette.querySelector('.jp-mod-header-grid-line');
-    const headerGridLineColor = getComputedStyle(node).color;
+    const headerGridLineColor = getComputedStyle(node!).color;
     node = palette.querySelector('.jp-mod-selection');
-    const selectionFillColor = getComputedStyle(node).color;
+    const selectionFillColor = getComputedStyle(node!).color;
     node = palette.querySelector('.jp-mod-text');
-    const textColor = getComputedStyle(node).color;
+    const textColor = getComputedStyle(node!).color;
     document.body.removeChild(palette);
     return {
       style: {

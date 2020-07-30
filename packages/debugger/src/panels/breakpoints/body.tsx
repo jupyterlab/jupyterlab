@@ -99,11 +99,11 @@ const BreakpointCellComponent = ({
     <>
       {breakpoints
         .sort((a, b) => {
-          return a.line - b.line;
+          return (a.line ?? 0) - (b.line ?? 0);
         })
         .map((breakpoint: IDebugger.IBreakpoint, index) => (
           <BreakpointComponent
-            key={breakpoint.source.path + index}
+            key={(breakpoint.source?.path ?? '') + index}
             breakpoint={breakpoint}
             model={model}
           />
@@ -135,11 +135,11 @@ const BreakpointComponent = ({
     <div
       className={'jp-DebuggerBreakpoint'}
       onClick={(): void => model.clicked.emit(breakpoint)}
-      title={breakpoint.source.path}
+      title={breakpoint.source?.path}
     >
       <span className={'jp-DebuggerBreakpoint-marker'}>●</span>
       <span className={'jp-DebuggerBreakpoint-source jp-left-truncated'}>
-        {moveToEndFirstCharIfSlash(breakpoint.source.path)}
+        {moveToEndFirstCharIfSlash(breakpoint.source?.path ?? '')}
       </span>
       <span className={'jp-DebuggerBreakpoint-line'}>{breakpoint.line}</span>
     </div>

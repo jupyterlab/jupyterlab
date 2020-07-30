@@ -32,9 +32,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     // TODO: also checks that the notebook or console
     // runs a kernel with debugging ability
     this._session = null;
-    this._specsManager = options.specsManager;
+    this._specsManager = options.specsManager ?? null;
     this._model = new Debugger.Model();
-    this._debuggerSources = options.debuggerSources;
+    this._debuggerSources = options.debuggerSources ?? null;
   }
 
   /**
@@ -68,7 +68,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Returns the current debug session.
    */
-  get session(): IDebugger.ISession {
+  get session(): IDebugger.ISession | null {
     return this._session;
   }
 
@@ -77,7 +77,7 @@ export class DebuggerService implements IDebugger, IDisposable {
    *
    * @param session - the new debugger session.
    */
-  set session(session: IDebugger.ISession) {
+  set session(session: IDebugger.ISession | null) {
     if (this._session === session) {
       return;
     }
@@ -103,7 +103,7 @@ export class DebuggerService implements IDebugger, IDisposable {
   /**
    * Signal emitted upon session changed.
    */
-  get sessionChanged(): ISignal<IDebugger, IDebugger.ISession> {
+  get sessionChanged(): ISignal<IDebugger, IDebugger.ISession | null> {
     return this._sessionChanged;
   }
 
@@ -127,7 +127,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     try {
       return this._config.getCodeId(
         code,
-        this.session?.connection?.kernel?.name
+        this.session?.connection?.kernel?.name ?? ''
       );
     } catch {
       return '';
@@ -156,11 +156,12 @@ export class DebuggerService implements IDebugger, IDisposable {
       return false;
     }
     const name = kernel.name;
-    if (!this._specsManager.specs.kernelspecs[name]) {
+    if (!this._specsManager.specs?.kernelspecs[name]) {
       return true;
     }
     return !!(
-      this._specsManager.specs.kernelspecs[name].metadata?.['debugger'] ?? false
+      this._specsManager.specs.kernelspecs[name]?.metadata?.['debugger'] ??
+      false
     );
   }
 
@@ -168,15 +169,13 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Clear all the breakpoints for the current session.
    */
   async clearBreakpoints(): Promise<void> {
-    if (!this.session.isStarted) {
+    if (this.session?.isStarted !== true) {
       return;
     }
 
-    this._model.breakpoints.breakpoints.forEach(
-      async (breakpoints, path, _) => {
-        await this._setBreakpoints([], path);
-      }
-    );
+    this._model.breakpoints.breakpoints.forEach((_, path, map) => {
+      void this._setBreakpoints([], path);
+    });
 
     let bpMap = new Map<string, IDebugger.IBreakpoint[]>();
     this._model.breakpoints.restoreBreakpoints(bpMap);
@@ -187,6 +186,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   async continue(): Promise<void> {
     try {
+      if (!this.session) {
+        throw new Error('No active debugger session');
+      }
       await this.session.sendRequest('continue', {
         threadId: this._currentThread()
       });
@@ -202,11 +204,14 @@ export class DebuggerService implements IDebugger, IDisposable {
    * @param source The source object containing the path to the file.
    */
   async getSource(source: DebugProtocol.Source): Promise<IDebugger.Source> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
     const reply = await this.session.sendRequest('source', {
       source,
-      sourceReference: source.sourceReference
+      sourceReference: source.sourceReference ?? 0
     });
-    return { ...reply.body, path: source.path };
+    return { ...reply.body, path: source.path ?? '' };
   }
 
   /**
@@ -214,6 +219,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   async next(): Promise<void> {
     try {
+      if (!this.session) {
+        throw new Error('No active debugger session');
+      }
       await this.session.sendRequest('next', {
         threadId: this._currentThread()
       });
@@ -230,6 +238,9 @@ export class DebuggerService implements IDebugger, IDisposable {
   async inspectVariable(
     variablesReference: number
   ): Promise<DebugProtocol.Variable[]> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
     const reply = await this.session.sendRequest('variables', {
       variablesReference
     });
@@ -247,7 +258,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     // Re-send the breakpoints to the kernel and update the model.
     for (const [source, points] of breakpoints) {
       await this._setBreakpoints(
-        points.map(({ line }) => ({ line })),
+        points
+          .filter(({ line }) => typeof line === 'number')
+          .map(({ line }) => ({ line: line! })),
         source
       );
     }
@@ -270,12 +283,12 @@ export class DebuggerService implements IDebugger, IDisposable {
     const stoppedThreads = new Set(reply.body.stoppedThreads);
 
     this._config.setHashParams({
-      kernel: this.session.connection.kernel.name,
+      kernel: this.session?.connection?.kernel?.name ?? '',
       method: body.hashMethod,
       seed: body.hashSeed
     });
     this._config.setTmpFileParams({
-      kernel: this.session.connection.kernel.name,
+      kernel: this.session?.connection?.kernel?.name ?? '',
       prefix: body.tmpFilePrefix,
       suffix: body.tmpFileSuffix
     });
@@ -287,7 +300,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     if (this.isStarted || autoStart) {
-      this._model.title = this.isStarted ? this.session?.connection?.name : '-';
+      this._model.title = this.isStarted
+        ? this.session?.connection?.name || '-'
+        : '-';
     }
 
     if (this._debuggerSources) {
@@ -310,6 +325,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Precondition: !isStarted
    */
   start(): Promise<void> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
     return this.session.start();
   }
 
@@ -318,6 +336,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   async stepIn(): Promise<void> {
     try {
+      if (!this.session) {
+        throw new Error('No active debugger session');
+      }
       await this.session.sendRequest('stepIn', {
         threadId: this._currentThread()
       });
@@ -331,6 +352,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   async stepOut(): Promise<void> {
     try {
+      if (!this.session) {
+        throw new Error('No active debugger session');
+      }
       await this.session.sendRequest('stepOut', {
         threadId: this._currentThread()
       });
@@ -344,6 +368,9 @@ export class DebuggerService implements IDebugger, IDisposable {
    * Precondition: isStarted
    */
   async stop(): Promise<void> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
     await this.session.stop();
     if (this._model) {
       this._model.clear();
@@ -362,7 +389,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: IDebugger.IBreakpoint[],
     path?: string
   ): Promise<void> {
-    if (!this.session.isStarted) {
+    if (!this.session?.isStarted) {
       return;
     }
 
@@ -371,7 +398,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     }
 
     const state = await this.session.restoreState();
-    const localBreakpoints = breakpoints.map(({ line }) => ({ line }));
+    const localBreakpoints = breakpoints
+      .filter(({ line }) => typeof line === 'number')
+      .map(({ line }) => ({ line: line! }));
     const remoteBreakpoints = this._mapBreakpoints(state.body.breakpoints);
 
     // Set the local copy of breakpoints to reflect only editors that exist.
@@ -426,7 +455,7 @@ export class DebuggerService implements IDebugger, IDisposable {
     variables: DebugProtocol.Variable[]
   ): IDebugger.IScope[] {
     if (!variables || !scopes) {
-      return;
+      return [];
     }
     return scopes.map(scope => {
       return {
@@ -454,6 +483,9 @@ export class DebuggerService implements IDebugger, IDisposable {
   private async _dumpCell(
     code: string
   ): Promise<IDebugger.ISession.IDumpCellResponse> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
     return this.session.sendRequest('dumpCell', { code });
   }
 
@@ -466,22 +498,23 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _filterBreakpoints(
     breakpoints: Map<string, IDebugger.IBreakpoint[]>
   ): Map<string, IDebugger.IBreakpoint[]> {
+    if (!this._debuggerSources) {
+      return breakpoints;
+    }
     let bpMapForRestore = new Map<string, IDebugger.IBreakpoint[]>();
     for (const collection of breakpoints) {
       const [id, list] = collection;
       list.forEach(() => {
-        this._debuggerSources
-          .find({
-            focus: false,
-            kernel: this.session.connection.kernel.name,
-            path: this._session.connection.path,
-            source: id
-          })
-          .forEach(() => {
-            if (list.length > 0) {
-              bpMapForRestore.set(id, list);
-            }
-          });
+        this._debuggerSources!.find({
+          focus: false,
+          kernel: this.session?.connection?.kernel?.name ?? '',
+          path: this._session?.connection?.path ?? '',
+          source: id
+        }).forEach(() => {
+          if (list.length > 0) {
+            bpMapForRestore.set(id, list);
+          }
+        });
       });
     }
     return bpMapForRestore;
@@ -512,6 +545,9 @@ export class DebuggerService implements IDebugger, IDisposable {
   private async _getFrames(
     threadId: number
   ): Promise<DebugProtocol.StackFrame[]> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
     const reply = await this.session.sendRequest('stackTrace', {
       threadId
     });
@@ -527,8 +563,11 @@ export class DebuggerService implements IDebugger, IDisposable {
   private async _getScopes(
     frame: DebugProtocol.StackFrame
   ): Promise<DebugProtocol.Scope[]> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
     if (!frame) {
-      return;
+      return [];
     }
     const reply = await this.session.sendRequest('scopes', {
       frameId: frame.id
@@ -544,8 +583,11 @@ export class DebuggerService implements IDebugger, IDisposable {
   private async _getVariables(
     scope: DebugProtocol.Scope
   ): Promise<DebugProtocol.Variable[]> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
     if (!scope) {
-      return;
+      return [];
     }
     const reply = await this.session.sendRequest('variables', {
       variablesReference: scope.variablesReference
@@ -610,6 +652,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     _: VariablesModel,
     variable: DebugProtocol.Variable
   ): Promise<DebugProtocol.Variable[]> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
     const reply = await this.session.sendRequest('variables', {
       variablesReference: variable.variablesReference
     });
@@ -640,6 +685,9 @@ export class DebuggerService implements IDebugger, IDisposable {
     breakpoints: DebugProtocol.SourceBreakpoint[],
     path: string
   ): Promise<DebugProtocol.SetBreakpointsResponse> {
+    if (!this.session) {
+      throw new Error('No active debugger session');
+    }
     return await this.session.sendRequest('setBreakpoints', {
       breakpoints: breakpoints,
       source: { path },
@@ -652,9 +700,11 @@ export class DebuggerService implements IDebugger, IDisposable {
   private _eventMessage = new Signal<IDebugger, IDebugger.ISession.Event>(this);
   private _isDisposed = false;
   private _model: IDebugger.Model.IService;
-  private _session: IDebugger.ISession;
-  private _sessionChanged = new Signal<IDebugger, IDebugger.ISession>(this);
-  private _specsManager: KernelSpec.IManager;
+  private _session: IDebugger.ISession | null;
+  private _sessionChanged = new Signal<IDebugger, IDebugger.ISession | null>(
+    this
+  );
+  private _specsManager: KernelSpec.IManager | null;
 }
 
 /**
@@ -673,11 +723,11 @@ export namespace DebuggerService {
     /**
      * The optional debugger sources instance.
      */
-    debuggerSources?: IDebugger.ISources;
+    debuggerSources?: IDebugger.ISources | null;
 
     /**
      * The optional kernel specs manager.
      */
-    specsManager?: KernelSpec.IManager;
+    specsManager?: KernelSpec.IManager | null;
   }
 }

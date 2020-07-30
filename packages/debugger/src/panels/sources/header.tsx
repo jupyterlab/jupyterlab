@@ -58,8 +58,8 @@ const SourcePathComponent = ({
   return (
     <UseSignal signal={model.currentSourceChanged} initialSender={model}>
       {(model): JSX.Element => (
-        <span onClick={(): void => model.open()}>
-          {model.currentSource?.path ?? ''}
+        <span onClick={(): void => model?.open()}>
+          {model?.currentSource?.path ?? ''}
         </span>
       )}
     </UseSignal>

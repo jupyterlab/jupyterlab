@@ -39,7 +39,7 @@ export class DebuggerSession implements IDebugger.ISession {
   /**
    * Returns the API session connection to connect to a debugger.
    */
-  get connection(): Session.ISessionConnection {
+  get connection(): Session.ISessionConnection | null {
     return this._connection;
   }
 
@@ -63,15 +63,17 @@ export class DebuggerSession implements IDebugger.ISession {
     this._connection.iopubMessage.connect(this._handleEvent, this);
 
     this._ready = new PromiseDelegate<void>();
-    const future = this.connection.kernel?.requestDebug({
+    const future = this.connection?.kernel?.requestDebug({
       type: 'request',
       seq: 0,
       command: 'debugInfo'
     });
-    future.onReply = (msg: KernelMessage.IDebugReplyMsg): void => {
-      this._ready.resolve();
-      future.dispose();
-    };
+    if (future) {
+      future.onReply = (msg: KernelMessage.IDebugReplyMsg): void => {
+        this._ready.resolve();
+        future.dispose();
+      };
+    }
   }
 
   /**
@@ -107,7 +109,7 @@ export class DebuggerSession implements IDebugger.ISession {
     await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
-      adapterID: this.connection.kernel?.name ?? '',
+      adapterID: this.connection?.kernel?.name ?? '',
       pathFormat: 'path',
       linesStartAt1: true,
       columnsStartAt1: true,
@@ -188,7 +190,7 @@ export class DebuggerSession implements IDebugger.ISession {
   private async _sendDebugMessage(
     msg: KernelMessage.IDebugRequestMsg['content']
   ): Promise<KernelMessage.IDebugReplyMsg> {
-    const kernel = this.connection.kernel;
+    const kernel = this.connection?.kernel;
     if (!kernel) {
       return Promise.reject(
         new Error('A kernel is required to send debug messages.')
@@ -205,7 +207,7 @@ export class DebuggerSession implements IDebugger.ISession {
 
   private _seq = 0;
   private _ready = new PromiseDelegate<void>();
-  private _connection: Session.ISessionConnection;
+  private _connection: Session.ISessionConnection | null;
   private _isDisposed = false;
   private _isStarted = false;
   private _disposed = new Signal<this, void>(this);

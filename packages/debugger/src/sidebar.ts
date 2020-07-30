@@ -159,7 +159,7 @@ export namespace DebuggerSidebar {
     constructor() {
       super({ node: Private.createHeader() });
       this.title.changed.connect(_ => {
-        this.node.querySelector('h2').textContent = this.title.label;
+        this.node!.querySelector('h2')!.textContent = this.title.label;
       });
     }
   }

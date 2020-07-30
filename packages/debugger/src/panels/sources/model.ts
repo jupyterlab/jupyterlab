@@ -29,21 +29,21 @@ export class SourcesModel implements IDebugger.Model.ISources {
   /**
    * Signal emitted when a source should be open in the main area.
    */
-  get currentSourceOpened(): ISignal<SourcesModel, IDebugger.Source> {
+  get currentSourceOpened(): ISignal<SourcesModel, IDebugger.Source | null> {
     return this._currentSourceOpened;
   }
 
   /**
    * Signal emitted when the current source changes.
    */
-  get currentSourceChanged(): ISignal<SourcesModel, IDebugger.Source> {
+  get currentSourceChanged(): ISignal<SourcesModel, IDebugger.Source | null> {
     return this._currentSourceChanged;
   }
 
   /**
    * Return the current source.
    */
-  get currentSource(): IDebugger.Source {
+  get currentSource(): IDebugger.Source | null {
     return this._currentSource;
   }
 
@@ -65,12 +65,14 @@ export class SourcesModel implements IDebugger.Model.ISources {
   }
 
   private _currentSource: IDebugger.Source | null;
-  private _currentSourceOpened = new Signal<SourcesModel, IDebugger.Source>(
-    this
-  );
-  private _currentSourceChanged = new Signal<SourcesModel, IDebugger.Source>(
-    this
-  );
+  private _currentSourceOpened = new Signal<
+    SourcesModel,
+    IDebugger.Source | null
+  >(this);
+  private _currentSourceChanged = new Signal<
+    SourcesModel,
+    IDebugger.Source | null
+  >(this);
 }
 
 /**

@@ -35,12 +35,12 @@ export interface IDebugger {
   /**
    * The current debugger session.
    */
-  session: IDebugger.ISession;
+  session: IDebugger.ISession | null;
 
   /**
    * Signal emitted upon session changed.
    */
-  readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession>;
+  readonly sessionChanged: ISignal<IDebugger, IDebugger.ISession | null>;
 
   /**
    * Removes all the breakpoints from the current notebook or console
@@ -218,7 +218,7 @@ export namespace IDebugger {
     /**
      * The API session connection to connect to a debugger.
      */
-    connection: Session.ISessionConnection;
+    connection: Session.ISessionConnection | null;
 
     /**
      * Whether the debug session is started
@@ -670,14 +670,14 @@ export namespace IDebugger {
       /**
        * Return the current source.
        */
-      currentSource: IDebugger.Source;
+      currentSource: IDebugger.Source | null;
 
       /**
        * Signal emitted when the current source changes.
        */
       readonly currentSourceChanged: ISignal<
         IDebugger.Model.ISources,
-        IDebugger.Source
+        IDebugger.Source | null
       >;
 
       /**
@@ -685,7 +685,7 @@ export namespace IDebugger {
        */
       readonly currentSourceOpened: ISignal<
         IDebugger.Model.ISources,
-        IDebugger.Source
+        IDebugger.Source | null
       >;
 
       /**

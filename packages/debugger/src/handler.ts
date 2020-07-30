@@ -90,7 +90,7 @@ export class DebuggerHandler {
    */
   async update(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
-    connection: Session.ISessionConnection
+    connection: Session.ISessionConnection | null
   ): Promise<void> {
     if (!connection) {
       delete this._kernelChangedHandlers[widget.id];
@@ -164,14 +164,14 @@ export class DebuggerHandler {
    */
   private async _update(
     widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
-    connection: Session.ISessionConnection
+    connection: Session.ISessionConnection | null
   ): Promise<void> {
-    if (!this._service.model) {
+    if (!this._service.model || !connection) {
       return;
     }
 
     const hasFocus = (): boolean => {
-      return this._shell.currentWidget && this._shell.currentWidget === widget;
+      return this._shell.currentWidget === widget;
     };
 
     const updateAttribute = (): void => {
@@ -263,13 +263,13 @@ export class DebuggerHandler {
 
       if (
         this._service.isStarted &&
-        this._previousConnection.id === connection.id
+        this._previousConnection?.id === connection?.id
       ) {
-        this._service.session.connection = connection;
+        this._service.session!.connection = connection;
         await this._service.stop();
         removeHandlers();
       } else {
-        this._service.session.connection = connection;
+        this._service.session!.connection = connection;
         this._previousConnection = connection;
         await this._service.restoreState(true);
         createHandler();
@@ -287,7 +287,7 @@ export class DebuggerHandler {
     if (!this._service.session) {
       this._service.session = new Debugger.Session({ connection });
     } else {
-      this._previousConnection = this._service.session.connection.kernel
+      this._previousConnection = this._service.session!.connection?.kernel
         ? this._service.session.connection
         : null;
       this._service.session.connection = connection;
@@ -314,7 +314,7 @@ export class DebuggerHandler {
   private _type: DebuggerHandler.SessionType;
   private _shell: JupyterFrontEnd.IShell;
   private _service: IDebugger;
-  private _previousConnection: Session.ISessionConnection;
+  private _previousConnection: Session.ISessionConnection | null;
   private _handlers: {
     [id: string]: DebuggerHandler.SessionHandler[DebuggerHandler.SessionType];
   } = {};

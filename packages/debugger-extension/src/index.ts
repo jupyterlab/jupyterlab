@@ -79,7 +79,9 @@ const consoles: JupyterFrontEndPlugin<void> = {
     }
 
     consoleTracker.currentChanged.connect(async (_, consolePanel) => {
-      await updateHandlerAndCommands(consolePanel);
+      if (consolePanel) {
+        void updateHandlerAndCommands(consolePanel);
+      }
     });
   }
 };
@@ -114,6 +116,9 @@ const files: JupyterFrontEndPlugin<void> = {
       const sessions = app.serviceManager.sessions;
       try {
         const model = await sessions.findByPath(widget.context.path);
+        if (!model) {
+          return;
+        }
         let session = activeSessions[model.id];
         if (!session) {
           // Use `connectTo` only if the session does not exist.
@@ -354,9 +359,12 @@ const main: JupyterFrontEndPlugin<void> = {
 
     // hide the debugger sidebar if no kernel with support for debugging is available
     await kernelspecs.ready;
-    const specs = kernelspecs.specs.kernelspecs;
+    const specs = kernelspecs.specs?.kernelspecs;
+    if (!specs) {
+      return;
+    }
     const enabled = Object.keys(specs).some(
-      name => !!(specs[name].metadata?.['debugger'] ?? false)
+      name => !!(specs[name]?.metadata?.['debugger'] ?? false)
     );
     if (!enabled) {
       return;
@@ -446,9 +454,9 @@ const main: JupyterFrontEndPlugin<void> = {
         const filters = setting.get('variableFilters').composite as {
           [key: string]: string[];
         };
-        const list = filters[service.session?.connection?.kernel?.name];
-        if (list) {
-          sidebar.variables.filter = new Set<string>(list);
+        const kernel = service.session?.connection?.kernel?.name ?? '';
+        if (kernel && filters[kernel]) {
+          sidebar.variables.filter = new Set<string>(filters[kernel]);
         }
       };
 
@@ -500,9 +508,9 @@ const main: JupyterFrontEndPlugin<void> = {
         debuggerSources
           .find({
             focus: true,
-            kernel: service.session?.connection?.kernel?.name,
-            path: service.session?.connection?.path,
-            source: frame?.source.path ?? null
+            kernel: service.session?.connection?.kernel?.name ?? '',
+            path: service.session?.connection?.path ?? '',
+            source: frame?.source?.path ?? ''
           })
           .forEach(editor => {
             requestAnimationFrame(() => {
@@ -512,7 +520,7 @@ const main: JupyterFrontEndPlugin<void> = {
       };
 
       const onCurrentSourceOpened = (
-        _: IDebugger.Model.ISources,
+        _: IDebugger.Model.ISources | null,
         source: IDebugger.Source
       ): void => {
         if (!source) {
@@ -521,8 +529,8 @@ const main: JupyterFrontEndPlugin<void> = {
         const { content, mimeType, path } = source;
         const results = debuggerSources.find({
           focus: true,
-          kernel: service.session?.connection?.kernel.name,
-          path: service.session?.connection?.path,
+          kernel: service.session?.connection?.kernel?.name ?? '',
+          path: service.session?.connection?.path ?? '',
           source: path
         });
         if (results.length > 0) {
@@ -556,7 +564,7 @@ const main: JupyterFrontEndPlugin<void> = {
       model.callstack.currentFrameChanged.connect(onCurrentFrameChanged);
       model.sources.currentSourceOpened.connect(onCurrentSourceOpened);
       model.breakpoints.clicked.connect(async (_, breakpoint) => {
-        const path = breakpoint.source.path;
+        const path = breakpoint.source?.path;
         const source = await service.getSource({
           sourceReference: 0,
           path

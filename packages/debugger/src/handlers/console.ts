@@ -33,7 +33,9 @@ export class ConsoleHandler implements IDisposable {
 
     const codeConsole = this._consolePanel.console;
 
-    this._addEditorHandler(codeConsole.promptCell);
+    if (codeConsole.promptCell) {
+      this._addEditorHandler(codeConsole.promptCell);
+    }
     codeConsole.promptCellCreated.connect((_: CodeConsole, cell: CodeCell) => {
       this._addEditorHandler(cell);
     });
@@ -87,7 +89,7 @@ export class ConsoleHandler implements IDisposable {
 
   private _consolePanel: ConsolePanel;
   private _debuggerService: IDebugger;
-  private _cellMap: IObservableMap<EditorHandler> = null;
+  private _cellMap: IObservableMap<EditorHandler>;
 }
 
 /**

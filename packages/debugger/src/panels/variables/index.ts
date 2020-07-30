@@ -112,7 +112,7 @@ export const convertType = (variable: IDebugger.IVariable): string | number => {
     case 'str':
       return value.slice(1, value.length - 1);
     default:
-      return type;
+      return type ?? '';
   }
 };
 

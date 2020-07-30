@@ -39,6 +39,9 @@ export class DebuggerConfig implements IDebugger.IConfig {
    */
   setHashParams(params: IDebugger.IConfig.HashParams): void {
     const { kernel, method, seed } = params;
+    if (!kernel) {
+      throw new TypeError(`Kernel name is not defined.`);
+    }
     switch (method) {
       case 'Murmur2':
         this._hashMethods.set(kernel, code => murmur2(code, seed).toString());
@@ -55,6 +58,9 @@ export class DebuggerConfig implements IDebugger.IConfig {
    */
   setTmpFileParams(params: IDebugger.IConfig.FileParams): void {
     const { kernel, prefix, suffix } = params;
+    if (!kernel) {
+      throw new TypeError(`Kernel name is not defined.`);
+    }
     this._fileParams.set(kernel, { kernel, prefix, suffix });
   }
 

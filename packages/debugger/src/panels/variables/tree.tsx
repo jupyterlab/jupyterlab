@@ -14,6 +14,7 @@ import { IDebugger } from '../../tokens';
 import { convertType } from '.';
 
 import { VariablesModel } from './model';
+import { DebugProtocol } from 'vscode-debugprotocol';
 
 /**
  * The body for tree of variables.
@@ -104,7 +105,9 @@ const VariablesComponent = ({
   return (
     <ul>
       {variables
-        ?.filter(variable => !filter.has(variable.evaluateName))
+        ?.filter(
+          variable => !(filter || new Set()).has(variable.evaluateName || '')
+        )
         .map(variable => {
           const key = `${variable.evaluateName}-${variable.type}-${variable.value}`;
           return (
@@ -138,8 +141,8 @@ const VariableComponent = ({
   filter?: Set<string>;
 }): JSX.Element => {
   const [variable] = useState(data);
-  const [expanded, setExpanded] = useState(null);
-  const [variables, setVariables] = useState(null);
+  const [expanded, setExpanded] = useState<boolean>();
+  const [variables, setVariables] = useState<DebugProtocol.Variable[]>();
   const styleName = {
     color: 'var(--jp-mirror-editor-attribute-color)'
   };

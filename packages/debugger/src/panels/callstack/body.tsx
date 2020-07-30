@@ -71,7 +71,7 @@ const FramesComponent = ({
           onClick={(): void => onSelected(ele)}
           className={selected?.id === ele.id ? 'selected' : ''}
         >
-          {ele.name} at {ele.source.name}:{ele.line}
+          {ele.name} at {ele.source?.name}:{ele.line}
         </li>
       ))}
     </ul>

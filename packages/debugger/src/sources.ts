@@ -35,9 +35,9 @@ export class DebuggerSources implements IDebugger.ISources {
   constructor(options: DebuggerSources.IOptions) {
     this._config = options.config;
     this._shell = options.shell;
-    this._notebookTracker = options.notebookTracker;
-    this._consoleTracker = options.consoleTracker;
-    this._editorTracker = options.editorTracker;
+    this._notebookTracker = options.notebookTracker ?? null;
+    this._consoleTracker = options.consoleTracker ?? null;
+    this._editorTracker = options.editorTracker ?? null;
     this._readOnlyEditorTracker = new WidgetTracker<
       MainAreaWidget<CodeEditorWrapper>
     >({ namespace: '@jupyterlab/debugger' });
@@ -117,9 +117,11 @@ export class DebuggerSources implements IDebugger.ISources {
         }
         if (focus) {
           notebook.activeCellIndex = i;
-          const { node } = notebook.activeCell.inputArea;
-          const rect = node.getBoundingClientRect();
-          notebook.scrollToPosition(rect.bottom, 45);
+          if (notebook.activeCell) {
+            const node = notebook.activeCell.inputArea.node;
+            const rect = node.getBoundingClientRect();
+            notebook.scrollToPosition(rect.bottom, 45);
+          }
           this._shell.activateById(notebookPanel.id);
         }
         editors.push(cell.editor);
@@ -177,7 +179,7 @@ export class DebuggerSources implements IDebugger.ISources {
     params: IDebugger.ISources.FindParams
   ): CodeEditor.IEditor[] {
     if (!this._editorTracker) {
-      return;
+      return [];
     }
     const { focus, kernel, path, source } = params;
 
@@ -294,16 +296,16 @@ export namespace DebuggerSources {
     /**
      * An optional console tracker.
      */
-    consoleTracker?: IConsoleTracker;
+    consoleTracker?: IConsoleTracker | null;
 
     /**
      * An optional file editor tracker.
      */
-    editorTracker?: IEditorTracker;
+    editorTracker?: IEditorTracker | null;
 
     /**
      * An optional notebook tracker.
      */
-    notebookTracker?: INotebookTracker;
+    notebookTracker?: INotebookTracker | null;
   }
 }
