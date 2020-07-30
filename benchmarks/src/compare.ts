@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 import * as quantile from '@stdlib/stats/base/dists/t/quantile';
 import * as meanpw from '@stdlib/stats/base/meanpw';
 import * as variancepn from '@stdlib/stats/base/variancepn';

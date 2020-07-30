@@ -1,4 +1,6 @@
 /**
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
  * Runs a number of benchmarks and saves the results to the
  */
 import * as child_process from 'child_process';
