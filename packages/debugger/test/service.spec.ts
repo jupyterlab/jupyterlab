@@ -152,7 +152,7 @@ describe('DebuggerService', () => {
 
   describe('#session', () => {
     it('should emit the sessionChanged signal when setting the session', () => {
-      const sessionChangedEvents: IDebugger.ISession[] = [];
+      const sessionChangedEvents: (IDebugger.ISession | null)[] = [];
       service.sessionChanged.connect((_, newSession) => {
         sessionChangedEvents.push(newSession);
       });
@@ -241,7 +241,7 @@ describe('DebuggerService', () => {
         const variablesChanged = signalToPromise(model.variables.changed);
 
         // trigger a manual execute request
-        connection.kernel.requestExecute({ code });
+        connection!.kernel!.requestExecute({ code });
 
         // wait for the first stopped event and variables changed
         await variablesChanged;

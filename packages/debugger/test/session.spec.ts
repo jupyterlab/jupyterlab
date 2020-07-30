@@ -170,7 +170,7 @@ describe('protocol', () => {
     await debugSession.sendRequest('configurationDone', {});
 
     // trigger an execute_request
-    connection.kernel.requestExecute({ code });
+    connection!.kernel!.requestExecute({ code });
 
     // wait for the first stopped event
     await stoppedFuture.promise;
@@ -256,8 +256,8 @@ describe('protocol', () => {
       expect(variables.length).toBeGreaterThan(0);
       const i = find(variables, variable => variable.name === 'i');
       expect(i).toBeDefined();
-      expect(i.type).toEqual('int');
-      expect(i.value).toEqual('1');
+      expect(i!.type).toEqual('int');
+      expect(i!.value).toEqual('1');
     });
   });
 
@@ -285,13 +285,13 @@ describe('protocol', () => {
       const variables = await getVariables();
       const i = find(variables, variable => variable.name === 'i');
       expect(i).toBeDefined();
-      expect(i.type).toEqual('int');
-      expect(i.value).toEqual('2');
+      expect(i!.type).toEqual('int');
+      expect(i!.value).toEqual('2');
 
       const j = find(variables, variable => variable.name === 'j');
       expect(j).toBeDefined();
-      expect(j.type).toEqual('int');
-      expect(j.value).toEqual('4');
+      expect(j!.type).toEqual('int');
+      expect(j!.value).toEqual('4');
     });
   });
 
@@ -311,8 +311,8 @@ describe('protocol', () => {
       const frame = stackFramesReply.body.stackFrames[0];
       const source = frame.source;
       const reply = await debugSession.sendRequest('source', {
-        source: { path: source.path },
-        sourceReference: source.sourceReference
+        source: { path: source!.path! },
+        sourceReference: source!.sourceReference!
       });
       const sourceCode = reply.body.content;
       expect(sourceCode).toEqual(code);
@@ -336,8 +336,8 @@ describe('protocol', () => {
       const variables = await getVariables();
       const k = find(variables, variable => variable.name === 'k');
       expect(k).toBeDefined();
-      expect(k.type).toEqual('int');
-      expect(k.value).toEqual('123');
+      expect(k!.type).toEqual('int');
+      expect(k!.value).toEqual('123');
     });
   });
 
@@ -359,7 +359,7 @@ describe('protocol', () => {
       const variables = await getVariables();
       const j = find(variables, variable => variable.name === 'j');
       expect(j).toBeDefined();
-      expect(j.value).toEqual('25');
+      expect(j!.value).toEqual('25');
     });
   });
 });
