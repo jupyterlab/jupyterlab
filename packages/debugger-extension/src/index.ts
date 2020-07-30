@@ -21,7 +21,12 @@ import { ConsolePanel, IConsoleTracker } from '@jupyterlab/console';
 
 import { PathExt } from '@jupyterlab/coreutils';
 
-import { Debugger } from '@jupyterlab/debugger';
+import {
+  Debugger,
+  IDebugger,
+  IDebuggerConfig,
+  IDebuggerSources
+} from '@jupyterlab/debugger';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
@@ -33,13 +38,7 @@ import { Session } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { DebuggerHandler } from './handler';
-
 import { EditorHandler } from './handlers/editor';
-
-import { IDebugger, IDebuggerConfig, IDebuggerSources } from './tokens';
-
-import { ReadOnlyEditorFactory } from './panels/sources/factory';
 
 import { VariablesBodyGrid } from './panels/variables/grid';
 
@@ -74,7 +73,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
     consoleTracker: IConsoleTracker,
     labShell: ILabShell | null
   ) => {
-    const handler = new DebuggerHandler({
+    const handler = new Debugger.Handler({
       type: 'console',
       shell: app.shell,
       service: debug
@@ -120,7 +119,7 @@ const files: JupyterFrontEndPlugin<void> = {
     editorTracker: IEditorTracker,
     labShell: ILabShell | null
   ) => {
-    const handler = new DebuggerHandler({
+    const handler = new Debugger.Handler({
       type: 'file',
       shell: app.shell,
       service: debug
@@ -189,7 +188,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
     notebookTracker: INotebookTracker,
     labShell: ILabShell | null
   ) => {
-    const handler = new DebuggerHandler({
+    const handler = new Debugger.Handler({
       type: 'notebook',
       shell: app.shell,
       service
@@ -509,7 +508,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
     if (debuggerSources) {
       const { model } = service;
-      const readOnlyEditorFactory = new ReadOnlyEditorFactory({
+      const readOnlyEditorFactory = new Debugger.ReadOnlyEditorFactory({
         editorServices
       });
 

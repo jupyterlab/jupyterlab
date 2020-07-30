@@ -5,6 +5,10 @@ import { runIcon, stopIcon } from '@jupyterlab/ui-components';
 
 import { DebuggerConfig } from './config';
 
+import { ReadOnlyEditorFactory as EditorFactory } from './factory';
+
+import { DebuggerHandler } from './handler';
+
 import {
   closeAllIcon as closeAll,
   stepIntoIcon as stepInto,
@@ -34,11 +38,21 @@ export namespace Debugger {
   export class Config extends DebuggerConfig {}
 
   /**
+   * A handler for debugging a widget.
+   */
+  export class Handler extends DebuggerHandler {}
+
+  /**
    * A model for a debugger.
    */
   export class Model extends DebuggerModel {}
 
   /**
+   * A widget factory for read only editors.
+   */
+  export class ReadOnlyEditorFactory extends EditorFactory {}
+
+   /**
    * The main IDebugger implementation.
    */
   export class Service extends DebuggerService {}
