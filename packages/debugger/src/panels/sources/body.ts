@@ -17,7 +17,6 @@ import { EditorHandler } from '../../handlers/editor';
 
 import { IDebugger } from '../../tokens';
 
-
 /**
  * The body for a Sources Panel.
  */

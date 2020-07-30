@@ -52,7 +52,7 @@ export namespace Debugger {
    */
   export class ReadOnlyEditorFactory extends EditorFactory {}
 
-   /**
+  /**
    * The main IDebugger implementation.
    */
   export class Service extends DebuggerService {}
