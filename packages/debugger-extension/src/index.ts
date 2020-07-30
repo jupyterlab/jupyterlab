@@ -38,8 +38,6 @@ import { Session } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { EditorHandler } from './handlers/editor';
-
 import { VariablesBodyGrid } from './panels/variables/grid';
 
 /**
@@ -330,7 +328,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         });
         widget.addClass('jp-DebuggerVariables');
         widget.id = id;
-        widget.title.icon = variableIcon;
+        widget.title.icon = Debugger.Icons.variableIcon;
         widget.title.label = `${service.session?.connection?.name} - ${title}`;
         void tracker.add(widget);
         model.changed.connect(() => widget.dispose());
@@ -384,7 +382,7 @@ const main: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.debugContinue, {
       label: 'Continue',
       caption: 'Continue',
-      icon: continueIcon,
+      icon: Debugger.Icons.continueIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -397,7 +395,7 @@ const main: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.terminate, {
       label: 'Terminate',
       caption: 'Terminate',
-      icon: terminateIcon,
+      icon: Debugger.Icons.terminateIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -410,7 +408,7 @@ const main: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.next, {
       label: 'Next',
       caption: 'Next',
-      icon: stepOverIcon,
+      icon: Debugger.Icons.stepOverIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -422,7 +420,7 @@ const main: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.stepIn, {
       label: 'StepIn',
       caption: 'Step In',
-      icon: stepIntoIcon,
+      icon: Debugger.Icons.stepIntoIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -434,7 +432,7 @@ const main: JupyterFrontEndPlugin<void> = {
     commands.addCommand(CommandIDs.stepOut, {
       label: 'StepOut',
       caption: 'Step Out',
-      icon: stepOutIcon,
+      icon: Debugger.Icons.stepOutIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
       },
@@ -525,7 +523,7 @@ const main: JupyterFrontEndPlugin<void> = {
           })
           .forEach(editor => {
             requestAnimationFrame(() => {
-              EditorHandler.showCurrentLine(editor, frame.line);
+              Debugger.EditorHandler.showCurrentLine(editor, frame.line);
             });
           });
       };
@@ -553,7 +551,7 @@ const main: JupyterFrontEndPlugin<void> = {
           path
         });
         const editor = editorWrapper.editor;
-        const editorHandler = new EditorHandler({
+        const editorHandler = new Debugger.EditorHandler({
           debuggerService: service,
           editor,
           path
@@ -568,7 +566,7 @@ const main: JupyterFrontEndPlugin<void> = {
 
         const frame = service.model.callstack.frame;
         if (frame) {
-          EditorHandler.showCurrentLine(editor, frame.line);
+          Debugger.EditorHandler.showCurrentLine(editor, frame.line);
         }
       };
 

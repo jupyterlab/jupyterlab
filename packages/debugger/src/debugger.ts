@@ -3,6 +3,8 @@
 
 import { runIcon, stopIcon } from '@jupyterlab/ui-components';
 
+import { EditorHandler as DebuggerEditorHandler } from './handlers/editor';
+
 import { DebuggerConfig } from './config';
 
 import { ReadOnlyEditorFactory as EditorFactory } from './factory';
@@ -38,6 +40,11 @@ export namespace Debugger {
   export class Config extends DebuggerConfig {}
 
   /**
+   * A handler for a CodeEditor.IEditor.
+   */
+  export class EditorHandler extends DebuggerEditorHandler {}
+
+   /**
    * A handler for debugging a widget.
    */
   export class Handler extends DebuggerHandler {}
