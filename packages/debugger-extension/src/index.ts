@@ -42,7 +42,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
  * A plugin that provides visual debugging support for consoles.
  */
 const consoles: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger:consoles',
+  id: '@jupyterlab/debugger-extension:consoles',
   autoStart: true,
   requires: [IDebugger, IConsoleTracker],
   optional: [ILabShell],
@@ -90,7 +90,7 @@ const consoles: JupyterFrontEndPlugin<void> = {
  * A plugin that provides visual debugging support for file editors.
  */
 const files: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger:files',
+  id: '@jupyterlab/debugger-extension:files',
   autoStart: true,
   requires: [IDebugger, IEditorTracker],
   optional: [ILabShell],
@@ -162,7 +162,7 @@ const files: JupyterFrontEndPlugin<void> = {
  * A plugin that provides visual debugging support for notebooks.
  */
 const notebooks: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger:notebooks',
+  id: '@jupyterlab/debugger-extension:notebooks',
   autoStart: true,
   requires: [IDebugger, INotebookTracker],
   optional: [ILabShell],
@@ -209,7 +209,7 @@ const notebooks: JupyterFrontEndPlugin<void> = {
  * A plugin that provides a debugger service.
  */
 const service: JupyterFrontEndPlugin<IDebugger> = {
-  id: '@jupyterlab/debugger:service',
+  id: '@jupyterlab/debugger-extension:service',
   autoStart: true,
   provides: IDebugger,
   requires: [IDebuggerConfig],
@@ -230,7 +230,7 @@ const service: JupyterFrontEndPlugin<IDebugger> = {
  * A plugin that provides a configuration with hash method.
  */
 const configuration: JupyterFrontEndPlugin<IDebugger.IConfig> = {
-  id: '@jupyterlab/debugger:config',
+  id: '@jupyterlab/debugger-extension:config',
   provides: IDebuggerConfig,
   autoStart: true,
   activate: () => new Debugger.Config()
@@ -240,7 +240,7 @@ const configuration: JupyterFrontEndPlugin<IDebugger.IConfig> = {
  * A plugin that provides source/editor functionality for debugging.
  */
 const sources: JupyterFrontEndPlugin<IDebugger.ISources> = {
-  id: '@jupyterlab/debugger:sources',
+  id: '@jupyterlab/debugger-extension:sources',
   autoStart: true,
   provides: IDebuggerSources,
   requires: [IDebuggerConfig, IEditorServices],
@@ -267,7 +267,7 @@ const sources: JupyterFrontEndPlugin<IDebugger.ISources> = {
  * A plugin to open detailed views for variables.
  */
 const variables: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger:variables',
+  id: '@jupyterlab/debugger-extension:variables',
   autoStart: true,
   requires: [IDebugger],
   optional: [IThemeManager],
@@ -331,7 +331,7 @@ const variables: JupyterFrontEndPlugin<void> = {
  * The main debugger UI plugin.
  */
 const main: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger:main',
+  id: '@jupyterlab/debugger-extension:main',
   requires: [IDebugger, IEditorServices],
   optional: [
     ILabShell,
