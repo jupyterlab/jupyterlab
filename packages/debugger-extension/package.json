@@ -1,5 +1,5 @@
 {
-  "name": "@jupyterlab/debugger",
+  "name": "@jupyterlab/debugger-extension",
   "version": "3.0.0-alpha.4",
   "description": "JupyterLab - Debugger Extension",
   "keywords": [
@@ -64,7 +64,7 @@
     "@jupyterlab/launcher": "^3.0.0-alpha.4",
     "@jupyterlab/notebook": "^3.0.0-alpha.4",
     "@jupyterlab/services": "^6.0.0-alpha.4",
-    "@jupyterlab/settingregistry": "^3.0.0-alpha.4",
+    "@jupyterlab/settingregistry": "^3.0.0-alpha.4"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
