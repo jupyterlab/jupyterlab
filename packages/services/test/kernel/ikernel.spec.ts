@@ -98,6 +98,27 @@ describe('Kernel.IKernel', () => {
     });
   });
 
+  describe('#pendingInput', () => {
+    it('should be a signal following input request', async () => {
+      let called = false;
+      defaultKernel.pendingInput.connect((sender, args) => {
+        if (!called) {
+          called = true;
+          defaultKernel.sendInputReply({ status: 'ok', value: 'foo' });
+        }
+      });
+      const code = `input("Input something")`;
+      await defaultKernel.requestExecute(
+        {
+          code: code,
+          allow_stdin: true
+        },
+        true
+      ).done;
+      expect(called).toBe(true);
+    });
+  });
+
   describe('#iopubMessage', () => {
     it('should be emitted for an iopub message', async () => {
       let called = false;

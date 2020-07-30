@@ -22,6 +22,13 @@ class EchoKernel(Kernel):
         if not silent:
             stream_content = {'name': 'stdout', 'text': code}
             self.send_response(self.iopub_socket, 'stream', stream_content)
+            # Send a input_request if code contains input command.
+            if code.index('input(') != -1:
+                self._input_request('Echo Prompt',
+                    self._parent_ident,
+                    self._parent_header,
+                    password=False,
+                )
 
         return {'status': 'ok',
                 # The base class increments the execution count
