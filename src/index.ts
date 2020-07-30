@@ -334,7 +334,8 @@ const variables: JupyterFrontEndPlugin<void> = {
           content: new VariablesBodyGrid({
             model,
             commands,
-            scopes: [{ name: title, variables }]
+            scopes: [{ name: title, variables }],
+            themeManager
           })
         });
         widget.addClass('jp-DebuggerVariables');
@@ -342,23 +343,7 @@ const variables: JupyterFrontEndPlugin<void> = {
         widget.title.icon = variableIcon;
         widget.title.label = `${service.session?.connection?.name} - ${title}`;
         void tracker.add(widget);
-
         model.changed.connect(() => widget.dispose());
-
-        if (themeManager) {
-          const updateStyle = (): void => {
-            const isLight = themeManager?.theme
-              ? themeManager.isLight(themeManager.theme)
-              : true;
-            widget.content.theme = isLight ? 'light' : 'dark';
-          };
-          themeManager.themeChanged.connect(updateStyle);
-          widget.disposed.connect(() =>
-            themeManager.themeChanged.disconnect(updateStyle)
-          );
-          updateStyle();
-        }
-
         shell.add(widget, 'main', {
           mode: tracker.currentWidget ? 'split-right' : 'split-bottom'
         });
@@ -480,7 +465,8 @@ const main: JupyterFrontEndPlugin<void> = {
     const sidebar = new Debugger.Sidebar({
       service,
       callstackCommands,
-      editorServices
+      editorServices,
+      themeManager
     });
 
     if (settingRegistry) {
@@ -498,17 +484,6 @@ const main: JupyterFrontEndPlugin<void> = {
       updateSettings();
       setting.changed.connect(updateSettings);
       service.sessionChanged.connect(updateSettings);
-    }
-
-    if (themeManager) {
-      const updateStyle = (): void => {
-        const isLight = themeManager?.theme
-          ? themeManager.isLight(themeManager.theme)
-          : true;
-        sidebar.variables.theme = isLight ? 'light' : 'dark';
-      };
-      themeManager.themeChanged.connect(updateStyle);
-      updateStyle();
     }
 
     service.eventMessage.connect((_, event): void => {

@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IThemeManager } from '@jupyterlab/apputils';
+
 import { CommandRegistry } from '@lumino/commands';
 
 import {
@@ -33,15 +35,14 @@ export class VariablesBodyGrid extends Panel {
    */
   constructor(options: VariablesBodyGrid.IOptions) {
     super();
-    const { model, commands, scopes } = options;
-    this._grid = new VariablesGrid({ commands });
+    const { model, commands, scopes, themeManager } = options;
+    this._grid = new Grid({ commands, themeManager });
     this._grid.addClass('jp-DebuggerVariables-grid');
     this._model = model;
-    this._grid.dataModel.setData(scopes ?? []);
-    const updated = (model: VariablesModel): void => {
+    this._model.changed.connect((model: VariablesModel): void => {
       this._grid.dataModel.setData(model.scopes);
-    };
-    this._model.changed.connect(updated, this);
+    }, this);
+    this._grid.dataModel.setData(scopes ?? []);
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariables-body');
   }
@@ -52,38 +53,59 @@ export class VariablesBodyGrid extends Panel {
    * @param filter The variable filter to apply.
    */
   set filter(filter: Set<string>) {
-    (this._grid.dataModel as VariableDataGridModel).filter = filter;
+    (this._grid.dataModel as GridModel).filter = filter;
     this._grid.dataModel.setData(this._model.scopes);
   }
 
-  /**
-   * Set the theme used in JupyterLab.
-   *
-   * @param theme The theme for the datagrid.
-   */
-  set theme(theme: VariablesGrid.Theme) {
-    this._grid.theme = theme;
-  }
-
-  private _grid: VariablesGrid;
+  private _grid: Grid;
   private _model: IDebugger.Model.IVariables;
+}
+
+/**
+ * A namespace for VariableBodyGrid `statics`.
+ */
+export namespace VariablesBodyGrid {
+  /**
+   * Instantiation options for `VariablesBodyGrid`.
+   */
+  export interface IOptions {
+    /**
+     * The variables model.
+     */
+    model: IDebugger.Model.IVariables;
+
+    /**
+     * The commands registry.
+     */
+    commands: CommandRegistry;
+
+    /**
+     * The optional initial scopes data.
+     */
+    scopes?: IDebugger.IScope[];
+
+    /**
+     * An optional application theme manager to detect theme changes.
+     */
+    themeManager?: IThemeManager | null;
+  }
 }
 
 /**
  * A class wrapping the underlying variables datagrid.
  */
-export class VariablesGrid extends Panel {
+class Grid extends Panel {
   /**
    * Instantiate a new VariablesGrid.
    *
    * @param options The instantiation options for a VariablesGrid.
    */
-  constructor(options: VariablesGrid.IOptions) {
+  constructor(options: Grid.IOptions) {
     super();
-    const { commands } = options;
-    const dataModel = new VariableDataGridModel();
+    const { commands, themeManager } = options;
+    const dataModel = new GridModel();
     const grid = new DataGrid();
-    const mouseHandler = new Private.VariablesClickHandler();
+    const mouseHandler = new Private.MouseHandler();
     mouseHandler.doubleClicked.connect((_, hit) =>
       commands.execute(CommandIDs.inspectVariable, {
         variableReference: dataModel.getVariableReference(hit.row),
@@ -99,6 +121,11 @@ export class VariablesGrid extends Panel {
     grid.stretchLastColumn = true;
     grid.node.style.height = '100%';
     this._grid = grid;
+
+    // Compute the grid's styles based on the current theme.
+    if (themeManager) {
+      themeManager.themeChanged.connect(this._updateStyles, this);
+    }
     this.addWidget(grid);
   }
 
@@ -108,36 +135,63 @@ export class VariablesGrid extends Panel {
    * @param filter The variable filter to apply.
    */
   set filter(filter: Set<string>) {
-    (this._grid.dataModel as VariableDataGridModel).filter = filter;
+    (this._grid.dataModel as GridModel).filter = filter;
     this.update();
-  }
-
-  /**
-   * Set the theme used in JupyterLab.
-   *
-   * @param theme The theme for the datagrid.
-   */
-  set theme(theme: VariablesGrid.Theme) {
-    const { dataStyle, textRender } =
-      theme === 'dark' ? Private.DARK_STYLE : Private.LIGHT_STYLE;
-    this._grid.cellRenderers.update({}, textRender);
-    this._grid.style = dataStyle;
   }
 
   /**
    * Get the data model for the data grid.
    */
-  get dataModel(): VariableDataGridModel {
-    return this._grid.dataModel as VariableDataGridModel;
+  get dataModel(): GridModel {
+    return this._grid.dataModel as GridModel;
+  }
+
+  /**
+   * Handle `after-attach` messages.
+   *
+   * @param message - The `after-attach` message.
+   */
+  protected onAfterAttach(message: any): void {
+    super.onAfterAttach(message);
+    this._updateStyles();
+  }
+
+  /**
+   * Update the computed style for the data grid on theme change.
+   */
+  private _updateStyles(): void {
+    const { style, textRenderer } = Private.computeStyle();
+    this._grid.cellRenderers.update({}, textRenderer);
+    this._grid.style = style;
   }
 
   private _grid: DataGrid;
 }
 
 /**
- * A DataGrid model for Variables.
+ * A namespace for VariablesGrid `statics`.
  */
-export class VariableDataGridModel extends DataModel {
+namespace Grid {
+  /**
+   * Instantiation options for `VariablesGrid`.
+   */
+  export interface IOptions {
+    /**
+     * The commands registry.
+     */
+    commands: CommandRegistry;
+
+    /**
+     * An optional application theme manager to detect theme changes.
+     */
+    themeManager?: IThemeManager | null;
+  }
+}
+
+/**
+ * A data grid model for variables.
+ */
+class GridModel extends DataModel {
   /**
    * Set the variable filter list.
    */
@@ -260,102 +314,101 @@ export class VariableDataGridModel extends DataModel {
 }
 
 /**
- * A namespace for VariableBodyGrid `statics`.
- */
-export namespace VariablesBodyGrid {
-  /**
-   * Instantiation options for `VariablesBodyGrid`.
-   */
-  export interface IOptions {
-    /**
-     * The variables model.
-     */
-    model: IDebugger.Model.IVariables;
-    /**
-     * The commands registry.
-     */
-    commands: CommandRegistry;
-    /**
-     * The optional initial scopes data.
-     */
-    scopes?: IDebugger.IScope[];
-  }
-}
-
-/**
- * A namespace for VariablesGrid `statics`.
- */
-export namespace VariablesGrid {
-  /**
-   * The theme for the datagrid.
-   */
-  export type Theme = 'dark' | 'light';
-
-  /**
-   * Instantiation options for `VariablesGrid`.
-   */
-  export interface IOptions {
-    /**
-     * The commands registry.
-     */
-    commands: CommandRegistry;
-  }
-}
-
-/**
  * A namespace for private data.
  */
 namespace Private {
   /**
-   * The dark theme for the data grid.
+   * Create a color palette element.
    */
-  export const DARK_STYLE = {
-    dataStyle: {
-      voidColor: '#212121',
-      backgroundColor: '#111111',
-      headerBackgroundColor: '#424242',
-      gridLineColor: 'rgba(235, 235, 235, 0.15)',
-      headerGridLineColor: 'rgba(235, 235, 235, 0.25)',
-      rowBackgroundColor: (i: number): string =>
-        i % 2 === 0 ? '#212121' : '#111111',
-      selectionFillColor: '#2196f32e'
-    },
-    textRender: new TextRenderer({
-      font: '12px sans-serif',
-      textColor: '#ffffff',
-      backgroundColor: '',
-      verticalAlignment: 'center',
-      horizontalAlignment: 'left'
-    })
-  };
+  function createPalette(): HTMLDivElement {
+    const div = document.createElement('div');
+    div.className = 'jp-DebuggerVariables-colorPalette';
+    div.innerHTML = `
+      <div class="jp-mod-void"></div>
+      <div class="jp-mod-background"></div>
+      <div class="jp-mod-header-background"></div>
+      <div class="jp-mod-grid-line"></div>
+      <div class="jp-mod-header-grid-line"></div>
+      <div class="jp-mod-selection"></div>
+      <div class="jp-mod-text"></div>
+    `;
+    return div;
+  }
 
   /**
-   * The light theme for the data grid.
+   * The dark theme for the data grid.
    */
-  export const LIGHT_STYLE = {
-    dataStyle: {
-      voidColor: 'white',
-      backgroundColor: '#f5f5f5',
-      headerBackgroundColor: '#eeeeee',
-      gridLineColor: 'rgba(20, 20, 20, 0.15)',
-      headerGridLineColor: 'rgba(20, 20, 20, 0.25)',
-      rowBackgroundColor: (i: number): string =>
-        i % 2 === 0 ? 'white' : '#f5f5f5',
-      selectionFillColor: '#2196f32e'
-    },
-    textRender: new TextRenderer({
-      font: '12px sans-serif',
-      textColor: '#000000',
-      backgroundColor: '',
-      verticalAlignment: 'center',
-      horizontalAlignment: 'left'
-    })
-  };
+  export function computeStyle(): {
+    style: DataGrid.Style;
+    textRenderer: TextRenderer;
+  } {
+    const palette = createPalette();
+    document.body.appendChild(palette);
+    let node: HTMLDivElement;
+    node = palette.querySelector('.jp-mod-void');
+    const voidColor = getComputedStyle(node).color;
+    node = palette.querySelector('.jp-mod-background');
+    const backgroundColor = getComputedStyle(node).color;
+    node = palette.querySelector('.jp-mod-header-background');
+    const headerBackgroundColor = getComputedStyle(node).color;
+    node = palette.querySelector('.jp-mod-grid-line');
+    const gridLineColor = getComputedStyle(node).color;
+    node = palette.querySelector('.jp-mod-header-grid-line');
+    const headerGridLineColor = getComputedStyle(node).color;
+    node = palette.querySelector('.jp-mod-selection');
+    const selectionFillColor = getComputedStyle(node).color;
+    console.log('selectionFillColor', selectionFillColor);
+    node = palette.querySelector('.jp-mod-text');
+    const textColor = getComputedStyle(node).color;
+    document.body.removeChild(palette);
+    return {
+      style: {
+        voidColor,
+        backgroundColor,
+        headerBackgroundColor,
+        gridLineColor,
+        headerGridLineColor,
+        rowBackgroundColor: (i: number): string =>
+          i % 2 === 0 ? voidColor : backgroundColor,
+        selectionFillColor
+      },
+      textRenderer: new TextRenderer({
+        font: '12px sans-serif',
+        textColor,
+        backgroundColor: '',
+        verticalAlignment: 'center',
+        horizontalAlignment: 'left'
+      })
+    };
+  }
+
+  // /**
+  //  * The light theme for the data grid.
+  //  */
+  // const LIGHT_STYLE = {
+  //   dataStyle: {
+  //     voidColor: 'white',
+  //     backgroundColor: '#f5f5f5',
+  //     headerBackgroundColor: '#eeeeee',
+  //     gridLineColor: 'rgba(20, 20, 20, 0.15)',
+  //     headerGridLineColor: 'rgba(20, 20, 20, 0.25)',
+  //     rowBackgroundColor: (i: number): string =>
+  //       i % 2 === 0 ? 'white' : '#f5f5f5',
+  //     selectionFillColor: '#2196f3'
+  //   },
+  //   textRender: new TextRenderer({
+  //     font: '12px sans-serif',
+  //     textColor: '#000000',
+  //     backgroundColor: '',
+  //     verticalAlignment: 'center',
+  //     horizontalAlignment: 'left'
+  //   })
+  // };
 
   /**
    * A custom click handler to handle clicks on the variables grid.
    */
-  export class VariablesClickHandler extends BasicMouseHandler {
+  export class MouseHandler extends BasicMouseHandler {
     /**
      * A signal emitted when the variables grid is double clicked.
      */
