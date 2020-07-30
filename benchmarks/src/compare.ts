@@ -114,6 +114,15 @@ async function* compare(
       });
       continue;
     }
+    if (old.length <= 2) {
+      console.warn('Skipping because not enough runs', {
+        mode,
+        browser,
+        type,
+        n
+      });
+      continue;
+    }
     yield {
       mode,
       browser,
