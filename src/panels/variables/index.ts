@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { ToolbarButton } from '@jupyterlab/apputils';
+import { IThemeManager, ToolbarButton } from '@jupyterlab/apputils';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -9,7 +9,7 @@ import { Panel, Widget } from '@lumino/widgets';
 
 import { IDebugger } from '../../tokens';
 
-import { VariablesBodyGrid, VariablesGrid } from './grid';
+import { VariablesBodyGrid } from './grid';
 
 import { VariablesHeader } from './header';
 
@@ -27,11 +27,11 @@ export class Variables extends Panel {
   constructor(options: Variables.IOptions) {
     super();
 
-    const { model, service, commands } = options;
+    const { model, service, commands, themeManager } = options;
 
     this._header = new VariablesHeader();
     this._tree = new VariablesBodyTree({ model, service });
-    this._table = new VariablesBodyGrid({ model, commands });
+    this._table = new VariablesBodyGrid({ model, commands, themeManager });
     this._table.hide();
 
     const onClick = (): void => {
@@ -68,13 +68,6 @@ export class Variables extends Panel {
   set filter(filter: Set<string>) {
     this._tree.filter = filter;
     this._table.filter = filter;
-  }
-
-  /**
-   * Set the theme for the variable table.
-   */
-  set theme(theme: VariablesGrid.Theme) {
-    this._table.theme = theme;
   }
 
   /**
@@ -143,5 +136,10 @@ export namespace Variables {
      * The commands registry.
      */
     commands: CommandRegistry;
+
+    /**
+     * An optional application theme manager to detect theme changes.
+     */
+    themeManager?: IThemeManager | null;
   }
 }

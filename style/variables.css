@@ -47,3 +47,40 @@
 .jp-DebuggerVariables-grid .lm-DataGrid {
   border: none;
 }
+
+.jp-DebuggerVariables-colorPalette {
+  visibility: hidden;
+  z-index: -999;
+  position: absolute;
+  left: -999;
+  top: -999;
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-void {
+  color: var(--jp-layout-color1);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-background {
+  color: var(--jp-rendermime-table-row-background);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-header-background {
+  color: var(--jp-layout-color2);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-grid-line {
+  color: var(--jp-border-color3);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-header-grid-line {
+  color: var(--jp-border-color3);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-selection {
+  /* TODO: Fix JupyterLab light theme (alpha) so this can be a variable. */
+  color: rgba(3, 169, 244, 0.2);
+}
+
+.jp-DebuggerVariables-colorPalette .jp-mod-text {
+  color: var(--jp-content-font-color0);
+}

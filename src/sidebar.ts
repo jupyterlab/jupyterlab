@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { IThemeManager } from '@jupyterlab/apputils';
+
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { bugIcon } from '@jupyterlab/ui-components';
@@ -32,14 +34,20 @@ export class DebuggerSidebar extends Panel {
     this.title.iconRenderer = bugIcon;
     this.addClass('jp-DebuggerSidebar');
 
-    const { callstackCommands, editorServices, service } = options;
+    const {
+      callstackCommands,
+      editorServices,
+      service,
+      themeManager
+    } = options;
 
     const model = service.model;
 
     this.variables = new VariablesPanel({
       model: model.variables,
       commands: callstackCommands.registry,
-      service
+      service,
+      themeManager
     });
 
     this.callstack = new CallstackPanel({
@@ -134,6 +142,11 @@ export namespace DebuggerSidebar {
      * The editor services.
      */
     editorServices: IEditorServices;
+
+    /**
+     * An optional application theme manager to detect theme changes.
+     */
+    themeManager?: IThemeManager | null;
   }
 
   /**
