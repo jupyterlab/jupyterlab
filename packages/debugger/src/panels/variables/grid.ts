@@ -18,14 +18,14 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { Panel } from '@lumino/widgets';
 
-import { CommandIDs } from '../../';
+import { Debugger } from '../../';
 
 import { IDebugger } from '../../tokens';
 
 import { VariablesModel } from './model';
 
 /**
- * A Panel to show variables in a datagrid.
+ * A data grid that displays variables in a debugger session.
  */
 export class VariablesBodyGrid extends Panel {
   /**
@@ -62,7 +62,7 @@ export class VariablesBodyGrid extends Panel {
 }
 
 /**
- * A namespace for VariableBodyGrid `statics`.
+ * A namespace for `VariablesBodyGrid` statics.
  */
 export namespace VariablesBodyGrid {
   /**
@@ -107,7 +107,7 @@ class Grid extends Panel {
     const grid = new DataGrid();
     const mouseHandler = new Private.MouseHandler();
     mouseHandler.doubleClicked.connect((_, hit) =>
-      commands.execute(CommandIDs.inspectVariable, {
+      commands.execute(Debugger.CommandIDs.inspectVariable, {
         variableReference: dataModel.getVariableReference(hit.row),
         title: dataModel.getVariableName(hit.row)
       })

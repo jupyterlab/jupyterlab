@@ -38,25 +38,6 @@ import { Session } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { VariablesBodyGrid } from './panels/variables/grid';
-
-/**
- * The command IDs used by the debugger plugin.
- */
-export namespace CommandIDs {
-  export const debugContinue = 'debugger:continue';
-
-  export const terminate = 'debugger:terminate';
-
-  export const next = 'debugger:next';
-
-  export const stepIn = 'debugger:stepIn';
-
-  export const stepOut = 'debugger:stepOut';
-
-  export const inspectVariable = 'debugger:inspect-variable';
-}
-
 /**
  * A plugin that provides visual debugging support for consoles.
  */
@@ -291,9 +272,10 @@ const variables: JupyterFrontEndPlugin<void> = {
     themeManager: IThemeManager | null
   ) => {
     const { commands, shell } = app;
-    const tracker = new WidgetTracker<MainAreaWidget<VariablesBodyGrid>>({
+    const tracker = new WidgetTracker<MainAreaWidget<Debugger.VariablesGrid>>({
       namespace: 'debugger/inspect-variable'
     });
+    const CommandIDs = Debugger.CommandIDs;
 
     commands.addCommand(CommandIDs.inspectVariable, {
       label: 'Inspect Variable',
@@ -318,8 +300,8 @@ const variables: JupyterFrontEndPlugin<void> = {
         }
 
         const model = service.model.variables;
-        const widget = new MainAreaWidget<VariablesBodyGrid>({
-          content: new VariablesBodyGrid({
+        const widget = new MainAreaWidget<Debugger.VariablesGrid>({
+          content: new Debugger.VariablesGrid({
             model,
             commands,
             scopes: [{ name: title, variables }],
@@ -368,6 +350,7 @@ const main: JupyterFrontEndPlugin<void> = {
   ): Promise<void> => {
     const { commands, shell, serviceManager } = app;
     const { kernelspecs } = serviceManager;
+    const CommandIDs = Debugger.CommandIDs;
 
     // hide the debugger sidebar if no kernel with support for debugging is available
     await kernelspecs.ready;

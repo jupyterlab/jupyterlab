@@ -22,6 +22,8 @@ import {
 
 import { DebuggerModel } from './model';
 
+import { VariablesBodyGrid } from './panels/variables/grid';
+
 import { DebuggerService } from './service';
 
 import { DebuggerSession } from './session';
@@ -44,7 +46,7 @@ export namespace Debugger {
    */
   export class EditorHandler extends DebuggerEditorHandler {}
 
-   /**
+  /**
    * A handler for debugging a widget.
    */
   export class Handler extends DebuggerHandler {}
@@ -78,6 +80,28 @@ export namespace Debugger {
    * The source and editor manager for a debugger instance.
    */
   export class Sources extends DebuggerSources {}
+
+  /**
+   * A data grid that displays variables in a debugger session.
+   */
+  export class VariablesGrid extends VariablesBodyGrid {}
+
+  /**
+   * The command IDs used by the debugger plugin.
+   */
+  export namespace CommandIDs {
+    export const debugContinue = 'debugger:continue';
+
+    export const terminate = 'debugger:terminate';
+
+    export const next = 'debugger:next';
+
+    export const stepIn = 'debugger:stepIn';
+
+    export const stepOut = 'debugger:stepOut';
+
+    export const inspectVariable = 'debugger:inspect-variable';
+  }
 
   /**
    * The debugger user interface icons.
