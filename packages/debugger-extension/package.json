@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/debugger",
-  "version": "0.3.0",
+  "version": "3.0.0-alpha.4",
   "description": "JupyterLab - Debugger Extension",
   "keywords": [
     "jupyter",
@@ -53,26 +53,18 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^2.2.0",
-    "@jupyterlab/apputils": "^2.2.0",
-    "@jupyterlab/codeeditor": "^2.2.0",
-    "@jupyterlab/console": "^2.2.0",
-    "@jupyterlab/coreutils": "^4.2.0",
-    "@jupyterlab/docregistry": "^2.2.0",
-    "@jupyterlab/fileeditor": "^2.2.0",
-    "@jupyterlab/launcher": "^2.2.0",
-    "@jupyterlab/notebook": "^2.2.0",
-    "@jupyterlab/observables": "^3.2.0",
-    "@jupyterlab/services": "^5.2.0",
-    "@jupyterlab/settingregistry": "^2.2.0",
-    "@jupyterlab/ui-components": "^2.2.0",
-    "@lumino/algorithm": "^1.2.0",
-    "@lumino/coreutils": "^1.3.1",
-    "@lumino/datagrid": "^0.6.0",
-    "@lumino/disposable": "^1.2.0",
-    "@lumino/widgets": "^1.8.0",
-    "murmurhash-js": "^1.0.0",
-    "vscode-debugprotocol": "^1.37.0"
+    "@jupyterlab/application": "^3.0.0-alpha.4",
+    "@jupyterlab/apputils": "^3.0.0-alpha.4",
+    "@jupyterlab/codeeditor": "^3.0.0-alpha.4",
+    "@jupyterlab/console": "^3.0.0-alpha.4",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.4",
+    "@jupyterlab/debugger": "^3.0.0-alpha.4",
+    "@jupyterlab/docregistry": "^3.0.0-alpha.4",
+    "@jupyterlab/fileeditor": "^3.0.0-alpha.4",
+    "@jupyterlab/launcher": "^3.0.0-alpha.4",
+    "@jupyterlab/notebook": "^3.0.0-alpha.4",
+    "@jupyterlab/services": "^6.0.0-alpha.4",
+    "@jupyterlab/settingregistry": "^3.0.0-alpha.4",
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
@@ -80,11 +72,9 @@
     "@jupyterlab/testutils": "^2.2.0",
     "@types/codemirror": "0.0.76",
     "@types/jest": "^24.0.17",
-    "@types/murmurhash-js": "1.0.3",
     "@types/react-dom": "^16.9.8",
     "@typescript-eslint/eslint-plugin": "^2.33.0",
     "@typescript-eslint/parser": "^2.33.0",
-    "canvas": "^2.6.1",
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-jest": "^23.8.2",
@@ -103,11 +93,6 @@
     "ts-jest": "^25.5.1",
     "typedoc": "^0.15.4",
     "typescript": "~3.9.2"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
   },
   "publishConfig": {
     "access": "public"
