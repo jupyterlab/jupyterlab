@@ -129,7 +129,7 @@ describe('Debugger', () => {
 
     await act(async () => {
       await service.updateBreakpoints(code, breakpoints);
-      connection.kernel.requestExecute({ code });
+      connection!.kernel!.requestExecute({ code });
       await currentFrameChanged;
     });
   });
@@ -245,7 +245,7 @@ describe('Debugger', () => {
       const body = sidebar.sources.widgets[0] as SourcesHeader;
       const children = toArray(body.children());
       const sourcePath = children[2].node.querySelector('span');
-      expect(sourcePath.innerHTML).toEqual(path);
+      expect(sourcePath!.innerHTML).toEqual(path);
     });
 
     it('should display the source code in the body', () => {
