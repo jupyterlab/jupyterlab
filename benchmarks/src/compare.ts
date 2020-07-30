@@ -23,6 +23,10 @@ tests();
 
 void main();
 
+const MODE_LABEL = {
+  open: 'opening a notebook',
+  switch: 'switching to a notebook'
+};
 async function main() {
   console.log(`Writing output to ${OUTPUT_FILE}`);
   await writeLine('mode,browser,n,type,mean,confidenceInterval');
@@ -35,6 +39,14 @@ async function main() {
     type,
     confidenceInterval
   } of compare(OLD_FILE, NEW_FILE, 0.95)) {
+    console.log(
+      `In ${browser} ${
+        MODE_LABEL[mode as keyof typeof MODE_LABEL]
+      } with ${type} where n=${n} is ${formatChange({
+        mean,
+        confidenceInterval
+      })} with 95% confidence.`
+    );
     await writeLine(
       [mode, browser, n, type, mean, confidenceInterval].join(',')
     );
@@ -170,7 +182,7 @@ export function performanceChangeFromData(
 }
 
 /**
- * Format a performance changes like `10∓0.3`
+ * Format a performance changes like `between 20.1% slower and 30.3% faster`
  */
 function formatChange({
   mean,
@@ -179,7 +191,16 @@ function formatChange({
   mean: number;
   confidenceInterval: number;
 }): string {
-  return `${mean.toFixed(1)}∓${confidenceInterval.toFixed(1)}`;
+  return `between ${formatPercent(
+    mean + confidenceInterval
+  )} and ${formatPercent(mean - confidenceInterval)}`;
+}
+
+function formatPercent(percent: number): string {
+  if (percent < 1) {
+    return `${((1 - percent) * 100).toFixed(1)}% faster`;
+  }
+  return `${((percent - 1) * 100).toFixed(1)}% slower`;
 }
 
 /**

@@ -65,7 +65,14 @@ env 'BENCHMARK_NOTEBOOKS=["./fixedDataTable", "./manyOutputs"]' jlpm all
 
 ## Comparing Benchmarks
 
-We also support comparing two runs of benchmarks to give a sense of the relative changes:
+We also support comparing two runs of benchmarks to give a sense of the relative changes. This is meant to answer the question "How much did these code changes affect
+the time it takes to open a notebook?"
+
+To do this, it uses the technique from Tomas Kalibera and Richard Jones in their paper
+["Quantifying Performance Changes with Effect Size Confidence Intervals."](https://www.google.com/url?sa=t&rct=j&q=&esrc=s&source=web&cd=&cad=rja&uact=8&ved=2ahUKEwjEq7u9ovXqAhXYs54KHf3QCM0QFjACegQIBRAB&url=https%3A%2F%2Farxiv.org%2Fabs%2F2007.10899&usg=AOvVaw0ihkJJIaT6v95zlAtGtI2o) From their abstract:
+
+> Inspired by statistical methods used in other fields of science, and building on results in statistics that did not make it to introductory textbooks, we present a statistical model that allows us both to quantify uncertainty in the ratio of (execution time) means and to design experiments with a rigorous treatment of those multiple sources of non-determinism that might impact measured performance. Better still, under our framework summaries can be as simple as “system A is faster than system B by 5.5% ± 2.5%, with 95% confidence”, a more natural statement than those derived from typical current practice, which are often misinterpreted.
+
 
 ```bash
 # Create `old.csv` and `new.csv` files
@@ -76,3 +83,19 @@ jlpm run start:compare
 # Create and open graph to view results
 jlpm run start:compare-graph
 ```
+
+
+When creating the comparison file, it will also print out a textual form of the analysis, like this:
+
+```bash
+$ node lib/compare.js
+Writing output to diff.csv
+Parsing data { path: 'old.csv', version: 'old' }
+Parsing data { path: 'old.csv', version: 'new_' }
+In firefox opening a notebook with 100 n outputs each of a div where n=0 is between 36.4% slower and 26.7% faster with 95% confidence.
+In firefox opening a notebook with one output with 100 n divs where n=0 is between 1615.4% slower and 94.2% faster with 95% confidence.
+...
+✨  Done in 1.08s.
+```
+
+That's the same information as in the graph, but expressed as English.
