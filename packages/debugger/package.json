@@ -104,6 +104,5 @@
   },
   "publishConfig": {
     "access": "public"
-  },
-  "private": false
+  }
 }

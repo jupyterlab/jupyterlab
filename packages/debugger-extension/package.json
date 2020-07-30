@@ -95,7 +95,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "private": false,
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"
