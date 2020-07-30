@@ -1,0 +1,10 @@
+name: jupyterlab-debugger
+channels:
+- conda-forge
+- conda-forge/label/prerelease-jupyterlab
+dependencies:
+- jupyterlab=2
+- nodejs
+- notebook=6
+- ptvsd
+- xeus-python=0.8.0

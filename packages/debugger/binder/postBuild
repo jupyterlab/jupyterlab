@@ -1,0 +1,1 @@
+jupyter labextension install @jupyterlab/debugger@0.3.0 --debug

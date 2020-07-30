@@ -1,0 +1,63 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-DebuggerBreakpoints {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-DebuggerBreakpoints-body {
+  padding: 10px;
+  overflow: auto;
+}
+
+.jp-DebuggerBreakpoint {
+  display: flex;
+  align-items: center;
+}
+
+.jp-DebuggerBreakpoint:hover {
+  background: var(--jp-layout-color2);
+  cursor: pointer;
+}
+
+.jp-DebuggerBreakpoint-marker {
+  font-size: 20px;
+  padding-right: 5px;
+  content: '●';
+  color: var(--jp-error-color1);
+}
+
+.jp-DebuggerBreakpoint-source {
+  white-space: nowrap;
+  margin-right: 5px;
+}
+
+.jp-DebuggerBreakpoint-line {
+  margin-left: auto;
+}
+
+[data-jp-debugger='true'] .CodeMirror-gutter-wrapper::after {
+  content: '●';
+  color: var(--jp-error-color1);
+  opacity: 0;
+  position: absolute;
+  left: 3px;
+  top: -1px;
+}
+
+[data-jp-debugger='true'].jp-Editor .CodeMirror-gutter-wrapper:hover::after,
+[data-jp-debugger='true']
+  .jp-Notebook
+  .jp-CodeCell.jp-mod-selected
+  .CodeMirror-gutter-wrapper:hover::after,
+[data-jp-debugger='true'] .jp-Editor .CodeMirror-gutter-wrapper:hover::after {
+  opacity: 0.5;
+}
+
+[data-jp-debugger='true'].jp-DebuggerEditors
+  .CodeMirror-gutter-wrapper:hover::after {
+  opacity: 0.5;
+}
