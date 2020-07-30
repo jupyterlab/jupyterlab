@@ -8,6 +8,7 @@
     "tests/**/*",
     "dev_mode/*",
     "docs/**/*",
+    ".eslintrc.js",
     "examples/**/*",
     "*",
     "packages/services/examples/**/*",
@@ -17,6 +18,7 @@
     "scripts/*",
     "jupyterlab/*",
     "jupyterlab/staging/*",
-    "testutils/**/*"
+    "testutils/**/*",
+    "benchmarks/**/*"
   ]
 }

@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   entry: ['./build/index.js'],
@@ -44,5 +45,11 @@ module.exports = {
       }
     ]
   },
-  bail: true
+  bail: true,
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env': '{}',
+      process: {}
+    })
+  ]
 };

@@ -1,0 +1,8 @@
+{
+  "name": "@jupyterlab/example-federated",
+  "version": "2.1.1-alpha.3",
+  "private": true,
+  "scripts": {
+    "build": "cd core_package && npm run build && cd ../md_package && npm run build"
+  }
+}

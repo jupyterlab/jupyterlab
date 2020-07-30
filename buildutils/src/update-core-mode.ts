@@ -13,6 +13,9 @@ utils.run('jlpm integrity');
 // Get the dev mode package.json file.
 const data = utils.readJSONFile('./dev_mode/package.json');
 
+// Use a fixed webpack version for now.  See https://github.com/jupyterlab/jupyterlab/issues/8655
+data['devDependencies']['webpack'] = '~4.43.0';
+
 // Update the values that need to change and write to staging.
 data['jupyterlab']['buildDir'] = './build';
 data['jupyterlab']['outputDir'] = '..';
@@ -22,7 +25,7 @@ data['jupyterlab']['linkedPackages'] = {};
 const staging = './jupyterlab/staging';
 
 // Ensure a clean staging directory.
-const keep = ['yarn.js', '.yarnrc'];
+const keep = ['yarn.js', '.yarnrc', 'webpack.config.js'];
 fs.readdirSync(staging).forEach(name => {
   if (keep.indexOf(name) === -1) {
     fs.removeSync(path.join(staging, name));
@@ -39,7 +42,7 @@ const notice =
 
 [
   'index.js',
-  'webpack.config.js',
+  //'webpack.config.js',   # removing as part of https://github.com/jupyterlab/jupyterlab/issues/8655
   'webpack.prod.config.js',
   'webpack.prod.minimize.config.js',
   'webpack.prod.release.config.js',

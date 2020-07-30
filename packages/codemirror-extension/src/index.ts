@@ -188,16 +188,6 @@ function activateEditorCommands(
     }
 
     theme = (settings.get('theme').composite as string | null) || theme;
-    // Lazy loading of theme stylesheets
-    if (theme !== 'jupyter' && theme !== 'default') {
-      const filename =
-        theme === 'solarized light' || theme === 'solarized dark'
-          ? 'solarized'
-          : theme;
-
-      await import(`codemirror/theme/${filename}.css`);
-    }
-
     scrollPastEnd =
       (settings.get('scrollPastEnd').composite as boolean | null) ??
       scrollPastEnd;
@@ -221,14 +211,14 @@ function activateEditorCommands(
   function updateFileEditorTracker(): void {
     fileEditorTracker.forEach(widget => {
       if (widget.content.editor instanceof CodeMirrorEditor) {
-        const cm = widget.content.editor.editor;
-        cm.setOption('keyMap', keyMap);
-        cm.setOption('theme', theme);
-        cm.setOption('scrollPastEnd', scrollPastEnd);
-        cm.setOption('styleActiveLine', styleActiveLine);
-        cm.setOption('styleSelectedText', styleSelectedText);
-        cm.setOption('selectionPointer', selectionPointer);
-        cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
+        const { editor } = widget.content;
+        editor.setOption('keyMap', keyMap);
+        editor.setOption('lineWiseCopyCut', lineWiseCopyCut);
+        editor.setOption('scrollPastEnd', scrollPastEnd);
+        editor.setOption('selectionPointer', selectionPointer);
+        editor.setOption('styleActiveLine', styleActiveLine);
+        editor.setOption('styleSelectedText', styleSelectedText);
+        editor.setOption('theme', theme);
       }
     });
   }
@@ -276,14 +266,14 @@ function activateEditorCommands(
    */
   fileEditorTracker.widgetAdded.connect((sender, widget) => {
     if (widget.content.editor instanceof CodeMirrorEditor) {
-      const cm = widget.content.editor.editor;
-      cm.setOption('keyMap', keyMap);
-      cm.setOption('theme', theme);
-      cm.setOption('scrollPastEnd', scrollPastEnd);
-      cm.setOption('styleActiveLine', styleActiveLine);
-      cm.setOption('styleSelectedText', styleSelectedText);
-      cm.setOption('selectionPointer', selectionPointer);
-      cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
+      const { editor } = widget.content;
+      editor.setOption('keyMap', keyMap);
+      editor.setOption('lineWiseCopyCut', lineWiseCopyCut);
+      editor.setOption('selectionPointer', selectionPointer);
+      editor.setOption('scrollPastEnd', scrollPastEnd);
+      editor.setOption('styleActiveLine', styleActiveLine);
+      editor.setOption('styleSelectedText', styleSelectedText);
+      editor.setOption('theme', theme);
     }
   });
 

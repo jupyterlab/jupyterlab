@@ -38,7 +38,7 @@ module.exports = ({ config }) => {
   config.module.rules.push({
     // in css files, svg is loaded as a url formatted string
     test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-    issuer: { test: /\.css$/ },
+    issuer: /\.css$/,
     use: {
       loader: 'svg-url-loader',
       options: { encoding: 'none', limit: 10000 }

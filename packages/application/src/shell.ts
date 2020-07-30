@@ -777,7 +777,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
     if (current && current instanceof MainAreaWidget) {
-      console.log(current.content.title.label);
       this._titleWidget.node.innerHTML =
         '<h1>' + current.content.title.label + '</h1>';
     }

@@ -189,6 +189,9 @@ export class Launcher extends VDomRenderer<LauncherModel> {
 
     // Now create the sections for each category
     orderedCategories.forEach(cat => {
+      if (!categories[cat]) {
+        return;
+      }
       const item = categories[cat][0] as ILauncher.IItemOptions;
       const args = { ...item.args, cwd: this.cwd };
       const kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
