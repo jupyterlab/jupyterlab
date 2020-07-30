@@ -336,7 +336,7 @@ namespace Private {
   }
 
   /**
-   * The dark theme for the data grid.
+   * Compute the style and renderer for a data grid.
    */
   export function computeStyle(): {
     style: DataGrid.Style;
@@ -357,7 +357,6 @@ namespace Private {
     const headerGridLineColor = getComputedStyle(node).color;
     node = palette.querySelector('.jp-mod-selection');
     const selectionFillColor = getComputedStyle(node).color;
-    console.log('selectionFillColor', selectionFillColor);
     node = palette.querySelector('.jp-mod-text');
     const textColor = getComputedStyle(node).color;
     document.body.removeChild(palette);
@@ -381,29 +380,6 @@ namespace Private {
       })
     };
   }
-
-  // /**
-  //  * The light theme for the data grid.
-  //  */
-  // const LIGHT_STYLE = {
-  //   dataStyle: {
-  //     voidColor: 'white',
-  //     backgroundColor: '#f5f5f5',
-  //     headerBackgroundColor: '#eeeeee',
-  //     gridLineColor: 'rgba(20, 20, 20, 0.15)',
-  //     headerGridLineColor: 'rgba(20, 20, 20, 0.25)',
-  //     rowBackgroundColor: (i: number): string =>
-  //       i % 2 === 0 ? 'white' : '#f5f5f5',
-  //     selectionFillColor: '#2196f3'
-  //   },
-  //   textRender: new TextRenderer({
-  //     font: '12px sans-serif',
-  //     textColor: '#000000',
-  //     backgroundColor: '',
-  //     verticalAlignment: 'center',
-  //     horizontalAlignment: 'left'
-  //   })
-  // };
 
   /**
    * A custom click handler to handle clicks on the variables grid.

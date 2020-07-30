@@ -48,11 +48,6 @@
   border: none;
 }
 
-:root {
-  /* --md-light-blue-50 decomposed */
-  --jp-rendermime-table-row-hover-background: rgba(3, 169, 244, 0.2);
-}
-
 .jp-DebuggerVariables-colorPalette {
   visibility: hidden;
   z-index: -999;
