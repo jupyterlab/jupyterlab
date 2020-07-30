@@ -73,7 +73,6 @@ To do this, it uses the technique from Tomas Kalibera and Richard Jones in their
 
 > Inspired by statistical methods used in other fields of science, and building on results in statistics that did not make it to introductory textbooks, we present a statistical model that allows us both to quantify uncertainty in the ratio of (execution time) means and to design experiments with a rigorous treatment of those multiple sources of non-determinism that might impact measured performance. Better still, under our framework summaries can be as simple as “system A is faster than system B by 5.5% ± 2.5%, with 95% confidence”, a more natural statement than those derived from typical current practice, which are often misinterpreted.
 
-
 ```bash
 # Create `old.csv` and `new.csv` files
 env 'BENCHMARK_NOTEBOOKS=["./manyOutputs", "./longOutput"]' BENCHMARK_OUTPUT=old.csv jlpm start:benchmark
@@ -83,7 +82,6 @@ jlpm run start:compare
 # Create and open graph to view results
 jlpm run start:compare-graph
 ```
-
 
 When creating the comparison file, it will also print out a textual form of the analysis, like this:
 
