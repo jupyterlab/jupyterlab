@@ -1,3 +1,8 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
 [data-jp-debugger='true'].jp-Editor .jp-mod-readOnly {
   background: var(--jp-layout-color2);
   height: 100%;
