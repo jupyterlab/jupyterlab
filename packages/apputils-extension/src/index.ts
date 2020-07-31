@@ -37,7 +37,9 @@ import { Palette } from './palette';
 
 import { settingsPlugin } from './settingsplugin';
 
-import { themesPlugin, themesPaletteMenuPlugin } from './themeplugins';
+import { themesPlugin, themesPaletteMenuPlugin } from './themesplugins';
+
+import { workspacesPlugin } from './workspacesplugin';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -373,10 +375,12 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     commands.addCommand(CommandIDs.reset, {
       label: 'Reset Application State',
-      execute: async () => {
+      execute: async ({ reload }: { reload: boolean }) => {
         await db.clear();
         await save.invoke();
-        router.reload();
+        if (reload) {
+          router.reload();
+        }
       }
     });
 
@@ -499,7 +503,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   sessionDialogs,
   themesPlugin,
   themesPaletteMenuPlugin,
-  utilityCommands
+  utilityCommands,
+  workspacesPlugin
 ];
 export default plugins;
 

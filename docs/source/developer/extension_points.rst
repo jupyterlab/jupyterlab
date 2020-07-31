@@ -72,7 +72,7 @@ After a command has been added to the application command registry
 you can add them to various places in the application user interface,
 where they will be rendered using the metadata you provided.
 
-For example, you can add a button the Notebook toolbar to run the command with the ``CommandToolbarButtonComponent``.
+For example, you can add a button to the Notebook toolbar to run the command with the ``CommandToolbarButtonComponent``.
 
 Add a Command to the Command Palette
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -85,7 +85,7 @@ Here is an example showing how to add a command to the command palette (given by
 
     palette.addItem({
       command: commandID,
-      category: 'my-category'
+      category: 'my-category',
       args: {}
     });
 

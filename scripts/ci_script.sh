@@ -82,6 +82,10 @@ if [[ $GROUP == integrity2 ]]; then
     # Build the packages individually.
     jlpm run build:src
 
+    # Make sure we can build for release
+    # disabled for now pending https://github.com/jupyterlab/jupyterlab/issues/8655
+    #jlpm run build:dev:prod:release
+
     # Make sure the storybooks build.
     jlpm run build:storybook
 
@@ -128,14 +132,17 @@ if [[ $GROUP == integrity2 ]]; then
 fi
 
 
-if [[ $GROUP == usage ]]; then
+if [[ $GROUP == examples ]]; then
     # Build the examples.
     jlpm run build:packages
     jlpm run build:examples
 
     # Test the examples
     jlpm run test:examples
+fi
 
+
+if [[ $GROUP == usage ]]; then
     # Test the cli apps.
     jupyter lab clean --debug
     jupyter lab build --debug

@@ -12,6 +12,7 @@ from os import path as osp
 import os
 import shutil
 import sys
+import time
 
 from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
@@ -124,7 +125,7 @@ async def run_test_async(app, func):
         app.io_loop.stop()
         env_patch.stop()
     except Exception as e:
-        self.log.error(str(e))
+        app.log.error(str(e))
         result = 1
     finally:
         time.sleep(2)
@@ -136,8 +137,10 @@ async def run_async_process(cmd, **kwargs):
     proc = await asyncio.create_subprocess_exec(
             *cmd,
             **kwargs)
-
-    return await proc.communicate()
+    stdout, stderr = await proc.communicate()
+    if proc.returncode != 0:
+        raise RuntimeError(cmd + ' exited with ' + str(proc.returncode))
+    return stdout, stderr
 
 
 async def run_browser(url):
@@ -147,7 +150,7 @@ async def run_browser(url):
     if not osp.exists(osp.join(target, 'node_modules')):
         os.makedirs(target)
         await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(["jlpm", "add", "puppeteer@^2"], cwd=target)
+        await run_async_process(["jlpm", "add", "puppeteer@^4"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
     await run_async_process(["node", "chrome-test.js", url], cwd=target)
 

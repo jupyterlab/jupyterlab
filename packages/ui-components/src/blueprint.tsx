@@ -7,10 +7,6 @@ import {
   IButtonProps as IBPButtonProps
 } from '@blueprintjs/core/lib/cjs/components/button/buttons';
 import {
-  Icon as BPIcon,
-  IIconProps
-} from '@blueprintjs/core/lib/cjs/components/icon/icon';
-import {
   Collapse as BPCollapse,
   ICollapseProps
 } from '@blueprintjs/core/lib/cjs/components/collapse/collapse';
@@ -26,6 +22,7 @@ import {
   Checkbox as BPCheckbox,
   ICheckboxProps
 } from '@blueprintjs/core/lib/cjs/components/forms/controls';
+import { LabIcon } from './icon';
 export { Intent } from '@blueprintjs/core/lib/cjs/common/intent';
 
 import { classes } from './utils';
@@ -36,7 +33,7 @@ interface IButtonProps extends IBPButtonProps {
 }
 
 interface IInputGroupProps extends IBPInputGroupProps {
-  rightIcon?: IIconProps['icon'];
+  rightIcon?: string;
 }
 
 type CommonProps<T> = React.DOMAttributes<T>;
@@ -60,7 +57,7 @@ export const InputGroup = (props: IInputGroupProps & CommonProps<any>) => {
         className={classes(props.className, 'jp-InputGroup')}
         rightElement={
           <div className="jp-InputGroupAction">
-            <BPIcon className={'jp-BPIcon'} icon={props.rightIcon} />
+            <LabIcon.resolveReact icon={props.rightIcon} />
           </div>
         }
       />

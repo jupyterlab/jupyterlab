@@ -3,7 +3,7 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-import MiniCssExtractPlugin = require('mini-css-extract-plugin');
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 import * as webpack from 'webpack';
 import * as fs from 'fs-extra';
@@ -186,7 +186,7 @@ export namespace Build {
               use: [{ loader: 'svg-url-loader', options: { encoding: 'none' } }]
             },
             {
-              test: /\.(png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
+              test: /\.(cur|png|jpg|gif|ttf|woff|woff2|eot)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
               use: [{ loader: 'url-loader', options: { limit: 10000 } }]
             }
           ]

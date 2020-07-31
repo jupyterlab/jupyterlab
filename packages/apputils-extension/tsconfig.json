@@ -16,7 +16,16 @@
       "path": "../coreutils"
     },
     {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../filebrowser"
+    },
+    {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../services"
     },
     {
       "path": "../settingregistry"

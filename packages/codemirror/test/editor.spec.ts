@@ -280,16 +280,16 @@ describe('CodeMirrorEditor', () => {
   describe('#handleEvent', () => {
     describe('focus', () => {
       it('should add the focus class to the host', () => {
-        simulate(editor.editor.getInputField(), 'focus');
+        simulate(editor.editor.getInputField(), 'focus', { composed: true });
         expect(host.classList.contains('jp-mod-focused')).toBe(true);
       });
     });
 
     describe('blur', () => {
       it('should remove the focus class from the host', () => {
-        simulate(editor.editor.getInputField(), 'focus');
+        simulate(editor.editor.getInputField(), 'focus', { composed: true });
         expect(host.classList.contains('jp-mod-focused')).toBe(true);
-        simulate(editor.editor.getInputField(), 'blur');
+        simulate(editor.editor.getInputField(), 'blur', { composed: true });
         expect(host.classList.contains('jp-mod-focused')).toBe(false);
       });
     });

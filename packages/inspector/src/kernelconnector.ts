@@ -44,7 +44,7 @@ export class KernelConnector extends DataConnector<
     const contents: KernelMessage.IInspectRequestMsg['content'] = {
       code: request.text,
       cursor_pos: request.offset,
-      detail_level: 0
+      detail_level: 1
     };
 
     return kernel.requestInspect(contents).then(msg => {

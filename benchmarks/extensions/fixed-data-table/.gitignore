@@ -1,0 +1,6 @@
+*.bundle.*
+lib/
+node_modules/
+*.egg-info/
+tsconfig.tsbuildinfo
+.idea
