@@ -1,0 +1,55 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-DebuggerSidebar {
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-DebuggerSidebar .p-SplitPanel-child {
+  z-index: auto;
+}
+
+.jp-DebuggerSidebar .jp-DebuggerSidebar-body {
+  height: 100%;
+}
+
+.jp-DebuggerSidebar header {
+  border-bottom: solid var(--jp-border-width) var(--jp-border-color1);
+  box-shadow: var(--jp-toolbar-box-shadow);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-height: 24px;
+  height: 24px;
+}
+
+.jp-DebuggerSidebar > header {
+  background-color: var(--jp-layout-color1);
+}
+
+.jp-DebuggerSidebar header h2 {
+  text-transform: uppercase;
+  font-weight: 600;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color1);
+  padding-left: 8px;
+  padding-right: 4px;
+}
+
+.jp-DebuggerSidebar-body header {
+  border-top: solid var(--jp-border-width) var(--jp-border-color1);
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-DebuggerSidebar-body .jp-DebuggerVariables header {
+  border-top: none;
+}
+
+.jp-DebuggerSidebar-body .jp-Toolbar {
+  background: var(--jp-layout-color2);
+  box-shadow: none;
+}
