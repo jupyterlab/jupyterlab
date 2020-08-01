@@ -259,8 +259,8 @@ class LabWorkspaceExportApp(JupyterApp):
     """
     def start(self):
         app = LabApp(config=self.config)
+        # TODO(@echarles) Fix this...
 #        base_url = app.serverapp.base_url
-        # TODO(@echarles) Fix this.
         base_url = '/'
         directory = app.workspaces_dir
         app_url = app.app_url
@@ -310,7 +310,7 @@ class LabWorkspaceImportApp(JupyterApp):
     def start(self):
         app = LabApp(config=self.config)
 #        base_url = app.serverapp.base_url
-        # TODO(@echarles) Fix this.
+        # TODO(@echarles) Fix this...
         base_url = '/'
         directory = app.workspaces_dir
         app_url = app.app_url
@@ -566,6 +566,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         return ''
 
     def initialize_templates(self):
+        super().initialize_templates()
         # Determine which model to run JupyterLab
         if self.core_mode or self.app_dir.startswith(HERE):
             self.core_mode = True
@@ -597,6 +598,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             self.template_paths = [self.templates_dir]
 
     def initialize_settings(self):
+        super().initialize_settings()
+
+    def initialize_handlers(self):
+        super().initialize_handlers()
         handlers = []
         build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir)
 
