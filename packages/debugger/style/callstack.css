@@ -1,0 +1,36 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+
+.jp-DebuggerCallstack {
+  display: flex;
+  flex-direction: column;
+}
+
+.jp-DebuggerCallstack-body {
+  overflow: auto;
+}
+
+.jp-DebuggerCallstack-body ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  font-size: var(--jp-ui-font-size1);
+}
+
+.jp-DebuggerCallstack-body ul li {
+  padding: 5px;
+  padding-left: 8px;
+}
+
+.jp-DebuggerCallstack-body ul li.selected {
+  color: white;
+  background: var(--jp-brand-color1);
+}
+
+.jp-DebuggerCallstack .jp-ToolbarButtonComponent-label {
+  display: none;
+}

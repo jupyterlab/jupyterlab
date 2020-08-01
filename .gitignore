@@ -48,6 +48,10 @@ __pycache__
 *.egg-info
 .ipynb_checkpoints
 
+# xeus-python debug logs
+xpython_debug_logs
+xeus.log
+
 build
 dist
 

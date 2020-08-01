@@ -61,6 +61,12 @@
       "path": "../csvviewer-extension"
     },
     {
+      "path": "../debugger"
+    },
+    {
+      "path": "../debugger-extension"
+    },
+    {
       "path": "../docmanager"
     },
     {
