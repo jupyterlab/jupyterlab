@@ -1,15 +1,9 @@
-import { ReadonlyPartialJSONArray } from '@lumino/coreutils';
-
+import { reduce } from '@lumino/algorithm';
 import { PanelLayout } from '@lumino/widgets';
-
 import { NotebookTools, INotebookTracker } from '@jupyterlab/notebook';
-
 import { Cell } from '@jupyterlab/cells';
-
 import { JupyterFrontEnd } from '@jupyterlab/application';
-
 import { TagWidget } from './widget';
-
 import { AddWidget } from './addwidget';
 
 /**
@@ -47,16 +41,11 @@ export class TagTool extends NotebookTools.Tool {
    * @returns A boolean representing whether it is applied.
    */
   checkApplied(name: string): boolean {
-    if (this.tracker.activeCell) {
-      const tags = this.tracker.activeCell.model.metadata.get(
-        'tags'
-      ) as string[];
+    const activeCell = this.tracker?.activeCell;
+    if (activeCell) {
+      const tags = activeCell.model.metadata.get('tags') as string[];
       if (tags) {
-        for (let i = 0; i < tags.length; i++) {
-          if (tags[i] === name) {
-            return true;
-          }
-        }
+        return tags.includes(name);
       }
     }
     return false;
@@ -68,18 +57,15 @@ export class TagTool extends NotebookTools.Tool {
    * @param name - The name of the tag.
    */
   addTag(name: string) {
-    const cell = this.tracker.activeCell;
-    if (!cell) {
-      // bail
-      return;
+    const cell = this.tracker?.activeCell;
+    if (cell) {
+      const oldTags = (cell.model.metadata.get('tags') as string[]) || [];
+      let tagsToAdd = name.split(/[,\s]+/);
+      tagsToAdd = tagsToAdd.filter(tag => tag !== '' && !oldTags.includes(tag));
+      cell.model.metadata.set('tags', oldTags.concat(tagsToAdd));
+      this.refreshTags();
+      this.loadActiveTags();
     }
-
-    const oldTags = (cell.model.metadata.get('tags') as string[]) || [];
-    let tagsToAdd = name.split(/[,\s]+/);
-    tagsToAdd = tagsToAdd.filter(tag => tag !== '' && !oldTags.includes(tag));
-    cell.model.metadata.set('tags', oldTags.concat(tagsToAdd));
-    this.refreshTags();
-    this.loadActiveTags();
   }
 
   /**
@@ -88,20 +74,17 @@ export class TagTool extends NotebookTools.Tool {
    * @param name - The name of the tag.
    */
   removeTag(name: string) {
-    const cell = this.tracker.activeCell;
-    if (!cell) {
-      // bail
-      return;
+    const cell = this.tracker?.activeCell;
+    if (cell) {
+      const oldTags = cell.model.metadata.get('tags') as string[];
+      let tags = oldTags.filter(tag => tag !== name);
+      cell.model.metadata.set('tags', tags);
+      if (tags.length === 0) {
+        cell.model.metadata.delete('tags');
+      }
+      this.refreshTags();
+      this.loadActiveTags();
     }
-
-    const oldTags = cell.model.metadata.get('tags') as string[];
-    let tags = oldTags.filter(tag => tag !== name);
-    cell.model.metadata.set('tags', tags);
-    if (tags.length === 0) {
-      cell.model.metadata.delete('tags');
-    }
-    this.refreshTags();
-    this.loadActiveTags();
   }
 
   /**
@@ -110,8 +93,8 @@ export class TagTool extends NotebookTools.Tool {
    */
   loadActiveTags() {
     const layout = this.layout as PanelLayout;
-    for (let i = 0; i < layout.widgets.length; i++) {
-      layout.widgets[i].update();
+    for (const widget of layout.widgets) {
+      widget.update();
     }
   }
 
@@ -120,26 +103,17 @@ export class TagTool extends NotebookTools.Tool {
    * stored tag list.
    */
   pullTags() {
-    const notebook = this.tracker.currentWidget;
-    if (this.tracker && this.tracker.currentWidget) {
-      const cells = notebook?.model?.cells;
-      const allTags: string[] = [];
-      for (let i = 0; i < (cells?.length || 0); i++) {
-        const metadata = cells?.get(i).metadata;
-        const tags = metadata?.get('tags') as ReadonlyPartialJSONArray;
-        if (tags) {
-          for (let j = 0; j < tags.length; j++) {
-            const name = tags[j] as string;
-            if (name !== '') {
-              if (allTags.indexOf(name) < 0) {
-                allTags.push(name);
-              }
-            }
-          }
-        }
-      }
-      this.tagList = allTags;
-    }
+    const notebook = this.tracker?.currentWidget;
+    const cells = notebook?.model?.cells || [];
+    const allTags = reduce(
+      cells,
+      (allTags: string[], cell) => {
+        const tags = (cell.metadata.get('tags') as string[]) || [];
+        return [...allTags, ...tags];
+      },
+      []
+    );
+    this.tagList = [...new Set(allTags)].filter(tag => tag !== '');
   }
 
   /**
@@ -149,44 +123,36 @@ export class TagTool extends NotebookTools.Tool {
   refreshTags() {
     this.pullTags();
     const layout = this.layout as PanelLayout;
-    const tags: string[] = this.tagList;
-    const toDispose: TagWidget[] = [];
-    const nWidgets = layout.widgets.length;
-    for (let i = 0; i < nWidgets; i++) {
-      const idx = tags.indexOf((layout.widgets[i] as TagWidget).name);
-      if (idx < 0 && layout.widgets[i].id !== 'add-tag') {
-        toDispose.push(layout.widgets[i] as TagWidget);
-      } else if (layout.widgets[i].id !== 'add-tag') {
-        tags.splice(idx, 1);
+    const tagWidgets = layout.widgets.filter(w => w.id !== 'add-tag');
+    tagWidgets.forEach(widget => {
+      if (!this.tagList.includes((widget as TagWidget).name)) {
+        widget.dispose();
       }
-    }
-    for (let i = 0; i < toDispose.length; i++) {
-      toDispose[i].dispose();
-    }
-    for (let i = 0; i < tags.length; i++) {
-      const widget = new TagWidget(tags[i]);
-      const idx = layout.widgets.length - 1;
-      layout.insertWidget(idx, widget);
-    }
+    });
+    const tagWidgetNames = tagWidgets.map(w => (w as TagWidget).name);
+    this.tagList.forEach(tag => {
+      if (!tagWidgetNames.includes(tag)) {
+        const idx = layout.widgets.length - 1;
+        layout.insertWidget(idx, new TagWidget(tag));
+      }
+    });
   }
 
   /**
    * Validate the 'tags' of cell metadata, ensuring it is a list of strings and
    * that each string doesn't include spaces.
    */
-  validateTags(cell: Cell, taglist: string[]) {
-    const results: string[] = [];
-    for (let i = 0; i < taglist.length; i++) {
-      if (taglist[i] !== '' && typeof taglist[i] === 'string') {
-        const spl = taglist[i].split(/[,\s]+/);
-        for (let j = 0; j < spl.length; j++) {
-          if (spl[j] !== '' && results.indexOf(spl[j]) < 0) {
-            results.push(spl[j]);
-          }
-        }
-      }
-    }
-    cell.model.metadata.set('tags', results);
+  validateTags(cell: Cell, tags: string[]) {
+    tags = tags.filter(tag => typeof tag === 'string');
+    tags = reduce(
+      tags,
+      (allTags: string[], tag) => {
+        return [...allTags, ...tag.split(/[,\s]+/)];
+      },
+      []
+    );
+    const validTags = [...new Set(tags)].filter(tag => tag !== '');
+    cell.model.metadata.set('tags', validTags);
     this.refreshTags();
     this.loadActiveTags();
   }
