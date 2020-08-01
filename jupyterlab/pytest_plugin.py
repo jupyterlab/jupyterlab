@@ -85,7 +85,7 @@ def make_lab_app(root_dir, template_dir, app_settings_dir, user_settings_dir, sc
 @pytest.fixture
 def labapp(serverapp, make_lab_app):
     app = make_lab_app()
-    app.link_to_serverapp(serverapp)
+    app._link_jupyter_server_extension(serverapp)
     app.initialize()
     return app
 

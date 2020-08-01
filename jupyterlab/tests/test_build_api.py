@@ -7,7 +7,6 @@ import pytest
 import json
 import tornado
 
-from jupyterlab.labapp import LabApp
 from jupyterlab_server.tests.utils import expected_http_error
 
 
@@ -21,8 +20,8 @@ class BuildAPITester():
     url = 'lab/api/build'
 
     def __init__(self, labapp, fetch_long):
-        self.fetch = fetch_long
         self.labapp = labapp
+        self.fetch = fetch_long
 
     async def _req(self, verb, path, body=None):
         return await self.fetch(self.url + path,
@@ -84,9 +83,10 @@ class TestBuildAPI:
         loop = asyncio.get_event_loop()
         asyncio.ensure_future(build_api_tester.build(), loop=loop)
 
-        while 1:
+        while True:
             r = await build_api_tester.getStatus()
             res = r.body.decode()
+            print(res)
             resp = json.loads(res)
             if resp['status'] == 'building':
                 break

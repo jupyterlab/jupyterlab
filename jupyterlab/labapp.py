@@ -566,7 +566,6 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         return ''
 
     def initialize_templates(self):
-        super().initialize_templates()
         # Determine which model to run JupyterLab
         if self.core_mode or self.app_dir.startswith(HERE):
             self.core_mode = True
@@ -597,15 +596,16 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
+        super().initialize_templates()
+
     def initialize_settings(self):
         super().initialize_settings()
 
     def initialize_handlers(self):
-        super().initialize_handlers()
-        handlers = []
-        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir)
 
-        # TODO Move this to configurable trait once jupyterlab support it.
+        handlers = []
+
+        # TODO(@echarles) Move this to configurable trait once jupyter_server supports it.
         self.serverapp.open_browser = True
 
         # Set config for Jupyterlab
@@ -627,6 +627,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         self.log.info('JupyterLab extension loaded from %s' % HERE)
         self.log.info('JupyterLab application directory is %s' % self.app_dir)
 
+        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir)
         builder = Builder(self.core_mode, app_options=build_handler_options)
         build_handler = (build_path, BuildHandler, {'builder': builder})
         handlers.append(build_handler)
@@ -683,6 +684,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
         # Extend Server handlers with jupyterlab handlers.
         self.handlers.extend(handlers)
+        super().initialize_handlers()
 
 #-----------------------------------------------------------------------------
 # Main entry point
