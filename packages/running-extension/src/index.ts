@@ -3,8 +3,11 @@
 
 import { toArray } from '@lumino/algorithm';
 
+import { Widget } from '@lumino/widget';
+
 import {
   ILayoutRestorer,
+  ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
@@ -21,8 +24,11 @@ import {
   consoleIcon,
   fileIcon,
   notebookIcon,
-  runningIcon
+  runningIcon,
+  LabIcon
 } from '@jupyterlab/ui-components';
+
+import { DocumentWidget } from '@jupyterlab/docregistry';
 
 /**
  * The default running sessions extension.
@@ -63,11 +69,64 @@ function activate(
     restorer.add(running, 'running-sessions');
   }
   addKernelRunningSessionManager(runningSessionManagers, translator, app);
+  addOpenTabs(runningSessionManagers, app);
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.add(running, 'left', { rank: 200 });
 
   return runningSessionManagers;
+}
+
+function addOpenTabs(managers: IRunningSessionManagers, app: JupyterFrontEnd) {
+  managers.add({
+    name: 'Open Tabs',
+    running: () => {
+      return toArray(app.shell.widgets('main')).map(
+        widget => new OpenTab(widget)
+      );
+    },
+    shutdownAll: () => {
+      return void 0;
+    },
+    refreshRunning: () => {
+      return void 0;
+    },
+    runningChanged: app.shell.layoutModified
+  });
+
+  class OpenTab implements IRunningSessions.IRunningItem {
+    constructor(widget: Widget) {
+      this._widget = widget;
+    }
+    open() {
+      app.shell.activateById(this._widget.id);
+    }
+    shutdown() {
+      this._widget.close();
+    }
+    icon() {
+      const icon = this._widget.icon;
+      let labIcon: LabIcon;
+      if (icon instanceof string) {
+        labIcon = new LabIcon();
+      }
+      return labIcon;
+    }
+    label() {
+      return this._widget.title.label;
+    }
+    labelTitle() {
+      let labelTitle: string;
+      if (this._widget instanceof DocumentWidget) {
+        labelTitle = this._widget.context.path;
+      } else {
+        labelTitle = this._widget.title.label;
+      }
+      return labelTitle;
+    }
+
+    private _widget: Widget;
+  }
 }
 
 /**
