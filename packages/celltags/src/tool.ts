@@ -74,17 +74,10 @@ export class TagTool extends NotebookTools.Tool {
       return;
     }
 
-    let tags = cell.model.metadata.get('tags') as string[];
-    const newTags = name.split(/[,\s]+/);
-    if (tags === undefined) {
-      tags = [];
-    }
-    for (let i = 0; i < newTags.length; i++) {
-      if (newTags[i] !== '' && tags.indexOf(newTags[i]) < 0) {
-        tags.push(newTags[i]);
-      }
-    }
-    cell.model.metadata.set('tags', tags);
+    const oldTags = (cell.model.metadata.get('tags') as string[]) || [];
+    let tagsToAdd = name.split(/[,\s]+/);
+    tagsToAdd = tagsToAdd.filter(tag => tag !== '' && !oldTags.includes(tag));
+    cell.model.metadata.set('tags', oldTags.concat(tagsToAdd));
     this.refreshTags();
     this.loadActiveTags();
   }
@@ -101,11 +94,8 @@ export class TagTool extends NotebookTools.Tool {
       return;
     }
 
-    const tags = cell.model.metadata.get('tags') as string[];
-    const idx = tags.indexOf(name);
-    if (idx > -1) {
-      tags.splice(idx, 1);
-    }
+    const oldTags = cell.model.metadata.get('tags') as string[];
+    let tags = oldTags.filter(tag => tag !== name);
     cell.model.metadata.set('tags', tags);
     if (tags.length === 0) {
       cell.model.metadata.delete('tags');
