@@ -17,7 +17,7 @@ HERE = osp.dirname(__file__)
 def _jupyter_server_extension_paths():
     return [
         {
-            'module': 'main',
+            'module': __name__,
             'app': ExampleApp
         }
     ]
