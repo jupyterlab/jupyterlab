@@ -65,7 +65,6 @@
     "@jupyterlab/notebook": "^3.0.0-alpha.4",
     "@jupyterlab/observables": "^4.0.0-alpha.4",
     "@jupyterlab/services": "^6.0.0-alpha.4",
-    "@jupyterlab/settingregistry": "^3.0.0-alpha.4",
     "@jupyterlab/ui-components": "^3.0.0-alpha.4",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
