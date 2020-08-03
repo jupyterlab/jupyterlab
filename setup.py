@@ -160,6 +160,7 @@ setup_args['extras_require'] = {
         'pytest',
         'pytest-check-links',
         'requests',
+        'requests_unixsocket',
         'wheel',
         'virtualenv'
     ],
