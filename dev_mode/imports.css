@@ -7,6 +7,7 @@
 @import url('~@jupyterlab/completer-extension/style/index.css');
 @import url('~@jupyterlab/console-extension/style/index.css');
 @import url('~@jupyterlab/csvviewer-extension/style/index.css');
+@import url('~@jupyterlab/debugger-extension/style/index.css');
 @import url('~@jupyterlab/docmanager-extension/style/index.css');
 @import url('~@jupyterlab/documentsearch-extension/style/index.css');
 @import url('~@jupyterlab/extensionmanager-extension/style/index.css');

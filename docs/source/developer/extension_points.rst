@@ -85,7 +85,7 @@ Here is an example showing how to add a command to the command palette (given by
 
     palette.addItem({
       command: commandID,
-      category: 'my-category'
+      category: 'my-category',
       args: {}
     });
 
