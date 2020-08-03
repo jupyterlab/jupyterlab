@@ -13,10 +13,21 @@ import { DocumentManager } from '@jupyterlab/docmanager';
 import * as ToC from '@jupyterlab/toc';
 import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ServiceManager } from '@jupyterlab/services';
-import { DocumentRegistry, TextModelFactory } from '@jupyterlab/docregistry';
+import {
+  DocumentRegistry,
+  TextModelFactory,
+  IDocumentWidget,
+  DocumentWidget
+} from '@jupyterlab/docregistry';
 import { UUID } from '@lumino/coreutils';
+import {
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService
+} from '@jupyterlab/codemirror';
 
 import { NBTestUtils, Mock, defaultRenderMime } from '@jupyterlab/testutils';
+import { WidgetTracker } from '@jupyterlab/apputils';
+import { FileEditor, FileEditorFactory } from '@jupyterlab/fileeditor';
 
 let manager: DocumentManager;
 let widget: ToC.TableOfContents;
@@ -46,6 +57,19 @@ beforeAll(async () => {
       rendermime: defaultRenderMime(),
       mimeTypeService: NBTestUtils.mimeTypeService,
       name: 'notebook'
+    })
+  );
+  registry.addWidgetFactory(
+    new FileEditorFactory({
+      editorServices: {
+        factoryService: new CodeMirrorEditorFactory(),
+        mimeTypeService: new CodeMirrorMimeTypeService()
+      },
+      factoryOptions: {
+        name: 'editor',
+        fileTypes: ['*'],
+        defaultFor: ['*']
+      }
     })
   );
   services = new Mock.ServiceManagerMock();
@@ -110,6 +134,46 @@ describe('@jupyterlab/toc', () => {
         widget.current = {
           widget: notebookWidget,
           generator: notebookGenerator
+        };
+      });
+    });
+
+    describe('IGenerator<IDocumentWidget<FileEditor>>', () => {
+      let markdownTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
+      let markdownGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+        FileEditor
+      >>;
+      let markdownWidget: IDocumentWidget<FileEditor>;
+
+      it('should create a markdown generator', () => {
+        markdownTracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
+          namespace: 'markdown'
+        });
+        markdownGenerator = ToC.createMarkdownGenerator(
+          markdownTracker,
+          widget,
+          NBTestUtils.defaultRenderMime().sanitizer
+        );
+      });
+
+      it('should add a markdown generator to the registry', () => {
+        registry.add(markdownGenerator);
+      });
+
+      it('should find the markdown generator', async () => {
+        const path = UUID.uuid4() + '.md';
+        const newMarkdownWidget = manager.createNew(path);
+        expect(newMarkdownWidget).toBeInstanceOf(DocumentWidget);
+        markdownWidget = newMarkdownWidget as IDocumentWidget<FileEditor>;
+        await markdownTracker.add(markdownWidget);
+        const foundNotebookGenerator = registry.find(markdownWidget);
+        expect(foundNotebookGenerator).toBeDefined();
+      });
+
+      it('should change current', async () => {
+        widget.current = {
+          widget: markdownWidget,
+          generator: markdownGenerator
         };
       });
     });
