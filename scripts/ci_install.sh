@@ -20,7 +20,7 @@ git clone https://github.com/Zsailer/nbclassic.git --depth 1 && \
   pip install -e .[test] && \
   cd ..
 git clone https://github.com/datalayer-contrib/jupyterlab-server.git --branch jupyter_server --depth 1 && \
-  cd nbclassic && \
+  cd jupyterlab-server && \
   pip install -e .[test] && \
   cd ..
 
