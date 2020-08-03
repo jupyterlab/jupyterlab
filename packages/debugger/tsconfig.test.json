@@ -3,16 +3,100 @@
   "include": ["src/*", "test/*"],
   "references": [
     {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../cells"
+    },
+    {
       "path": "../codeeditor"
     },
     {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../console"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../launcher"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../observables"
+    },
+    {
       "path": "../services"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../ui-components"
     },
     {
       "path": "."
     },
     {
       "path": "../../testutils"
+    },
+    {
+      "path": "../application"
+    },
+    {
+      "path": "../apputils"
+    },
+    {
+      "path": "../cells"
+    },
+    {
+      "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
+    },
+    {
+      "path": "../console"
+    },
+    {
+      "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
+    },
+    {
+      "path": "../fileeditor"
+    },
+    {
+      "path": "../launcher"
+    },
+    {
+      "path": "../notebook"
+    },
+    {
+      "path": "../observables"
+    },
+    {
+      "path": "../services"
+    },
+    {
+      "path": "../settingregistry"
+    },
+    {
+      "path": "../ui-components"
     }
   ]
 }

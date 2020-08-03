@@ -13,7 +13,13 @@
       "path": "../apputils"
     },
     {
+      "path": "../cells"
+    },
+    {
       "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
     },
     {
       "path": "../console"
