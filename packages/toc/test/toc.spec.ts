@@ -28,6 +28,10 @@ import {
 import { NBTestUtils, Mock, defaultRenderMime } from '@jupyterlab/testutils';
 import { WidgetTracker } from '@jupyterlab/apputils';
 import { FileEditor, FileEditorFactory } from '@jupyterlab/fileeditor';
+import {
+  MarkdownViewerFactory,
+  MarkdownDocument
+} from '@jupyterlab/markdownviewer';
 
 let manager: DocumentManager;
 let widget: ToC.TableOfContents;
@@ -72,6 +76,15 @@ beforeAll(async () => {
       }
     })
   );
+  registry.addWidgetFactory(
+    new MarkdownViewerFactory({
+      rendermime: defaultRenderMime(),
+      name: 'Markdown Preview',
+      primaryFileType: registry.getFileType('markdown'),
+      fileTypes: ['markdown'],
+      defaultRendered: []
+    })
+  );
   services = new Mock.ServiceManagerMock();
   manager = new DocumentManager({
     registry,
@@ -100,7 +113,7 @@ describe('@jupyterlab/toc', () => {
       registry = new ToC.TableOfContentsRegistry();
     });
 
-    describe('IGenerator<NotebookPanel>', () => {
+    describe('Notebook Generator: IGenerator<NotebookPanel>', () => {
       let notebookTracker: NotebookTracker;
       let notebookGenerator: ToC.TableOfContentsRegistry.IGenerator<NotebookPanel>;
       let notebookWidget: NotebookPanel;
@@ -138,7 +151,7 @@ describe('@jupyterlab/toc', () => {
       });
     });
 
-    describe('IGenerator<IDocumentWidget<FileEditor>>', () => {
+    describe('Markdown Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
       let markdownTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
       let markdownGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
         FileEditor
@@ -165,6 +178,44 @@ describe('@jupyterlab/toc', () => {
         const newMarkdownWidget = manager.createNew(path);
         expect(newMarkdownWidget).toBeInstanceOf(DocumentWidget);
         markdownWidget = newMarkdownWidget as IDocumentWidget<FileEditor>;
+        await markdownTracker.add(markdownWidget);
+        const foundNotebookGenerator = registry.find(markdownWidget);
+        expect(foundNotebookGenerator).toBeDefined();
+      });
+
+      it('should change current', async () => {
+        widget.current = {
+          widget: markdownWidget,
+          generator: markdownGenerator
+        };
+      });
+    });
+
+    describe('Rendered Markdown Generator: IGenerator<MarkdownDocument>', () => {
+      let markdownTracker: WidgetTracker<MarkdownDocument>;
+      let markdownGenerator: ToC.TableOfContentsRegistry.IGenerator<MarkdownDocument>;
+      let markdownWidget: MarkdownDocument;
+
+      it('should create a markdown generator', () => {
+        markdownTracker = new WidgetTracker<MarkdownDocument>({
+          namespace: 'markdownviewer-widget'
+        });
+        markdownGenerator = ToC.createRenderedMarkdownGenerator(
+          markdownTracker,
+          widget,
+          NBTestUtils.defaultRenderMime().sanitizer
+        );
+      });
+
+      it('should add a markdown generator to the registry', () => {
+        registry.add(markdownGenerator);
+      });
+
+      it('should find the markdown generator', async () => {
+        const path = UUID.uuid4() + '.md';
+        const newMarkdownWidget = manager.createNew(path, 'Markdown Preview');
+        expect(newMarkdownWidget).toBeInstanceOf(MarkdownDocument);
+        markdownWidget = newMarkdownWidget as MarkdownDocument;
         await markdownTracker.add(markdownWidget);
         const foundNotebookGenerator = registry.find(markdownWidget);
         expect(foundNotebookGenerator).toBeDefined();
