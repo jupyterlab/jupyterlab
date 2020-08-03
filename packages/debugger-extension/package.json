@@ -61,7 +61,6 @@
     "@jupyterlab/debugger": "^3.0.0-alpha.4",
     "@jupyterlab/docregistry": "^3.0.0-alpha.4",
     "@jupyterlab/fileeditor": "^3.0.0-alpha.4",
-    "@jupyterlab/launcher": "^3.0.0-alpha.4",
     "@jupyterlab/notebook": "^3.0.0-alpha.4",
     "@jupyterlab/services": "^6.0.0-alpha.4",
     "@jupyterlab/settingregistry": "^3.0.0-alpha.4"
