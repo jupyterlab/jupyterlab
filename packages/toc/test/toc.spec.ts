@@ -34,7 +34,7 @@ import {
 } from '@jupyterlab/markdownviewer';
 
 let manager: DocumentManager;
-let widget: ToC.TableOfContents;
+let tocWidget: ToC.TableOfContents;
 let registry: DocumentRegistry;
 let services: ServiceManager.IManager;
 let factory: TextModelFactory;
@@ -97,11 +97,11 @@ describe('@jupyterlab/toc', () => {
   describe('TableOfContents', () => {
     describe('#constructor', () => {
       it('should construct a new ToC widget', () => {
-        widget = new ToC.TableOfContents({
+        tocWidget = new ToC.TableOfContents({
           docmanager: manager,
           rendermime: new RenderMimeRegistry()
         });
-        expect(widget).toBeInstanceOf(ToC.TableOfContents);
+        expect(tocWidget).toBeInstanceOf(ToC.TableOfContents);
       });
     });
   });
@@ -124,7 +124,7 @@ describe('@jupyterlab/toc', () => {
         });
         notebookGenerator = ToC.createNotebookGenerator(
           notebookTracker,
-          widget,
+          tocWidget,
           NBTestUtils.defaultRenderMime().sanitizer
         );
       });
@@ -144,10 +144,11 @@ describe('@jupyterlab/toc', () => {
       });
 
       it('should change current', async () => {
-        widget.current = {
+        tocWidget.current = {
           widget: notebookWidget,
           generator: notebookGenerator
         };
+        expect(tocWidget.current.widget).toBeInstanceOf(NotebookPanel);
       });
     });
 
@@ -164,7 +165,7 @@ describe('@jupyterlab/toc', () => {
         });
         markdownGenerator = ToC.createMarkdownGenerator(
           markdownTracker,
-          widget,
+          tocWidget,
           NBTestUtils.defaultRenderMime().sanitizer
         );
       });
@@ -184,10 +185,11 @@ describe('@jupyterlab/toc', () => {
       });
 
       it('should change current', async () => {
-        widget.current = {
+        tocWidget.current = {
           widget: markdownWidget,
           generator: markdownGenerator
         };
+        expect(tocWidget.current.widget).toBeInstanceOf(DocumentWidget);
       });
     });
 
@@ -202,7 +204,7 @@ describe('@jupyterlab/toc', () => {
         });
         markdownGenerator = ToC.createRenderedMarkdownGenerator(
           markdownTracker,
-          widget,
+          tocWidget,
           NBTestUtils.defaultRenderMime().sanitizer
         );
       });
@@ -222,10 +224,11 @@ describe('@jupyterlab/toc', () => {
       });
 
       it('should change current', async () => {
-        widget.current = {
+        tocWidget.current = {
           widget: markdownWidget,
           generator: markdownGenerator
         };
+        expect(tocWidget.current.widget).toBeInstanceOf(MarkdownDocument);
       });
     });
 
@@ -258,10 +261,11 @@ describe('@jupyterlab/toc', () => {
       });
 
       it('should change current', async () => {
-        widget.current = {
+        tocWidget.current = {
           widget: latexWidget,
           generator: latexGenerator
         };
+        expect(tocWidget.current.widget).toBeInstanceOf(DocumentWidget);
       });
     });
 
@@ -294,10 +298,11 @@ describe('@jupyterlab/toc', () => {
       });
 
       it('should change current', async () => {
-        widget.current = {
+        tocWidget.current = {
           widget: pythonWidget,
           generator: pythonGenerator
         };
+        expect(tocWidget.current.widget).toBeInstanceOf(DocumentWidget);
       });
     });
   });
