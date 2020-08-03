@@ -228,5 +228,41 @@ describe('@jupyterlab/toc', () => {
         };
       });
     });
+
+    describe('Latex Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
+      let latexTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
+      let latexGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+        FileEditor
+      >>;
+      let latexWidget: IDocumentWidget<FileEditor>;
+
+      it('should create a latex generator', () => {
+        latexTracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
+          namespace: 'latex'
+        });
+        latexGenerator = ToC.createLatexGenerator(latexTracker);
+      });
+
+      it('should add a latex generator to the registry', () => {
+        registry.add(latexGenerator);
+      });
+
+      it('should find the latex generator', async () => {
+        const path = UUID.uuid4() + '.tex';
+        const newLatexWidget = manager.createNew(path);
+        expect(newLatexWidget).toBeInstanceOf(DocumentWidget);
+        latexWidget = newLatexWidget as IDocumentWidget<FileEditor>;
+        await latexTracker.add(latexWidget);
+        const foundNotebookGenerator = registry.find(latexWidget);
+        expect(foundNotebookGenerator).toBeDefined();
+      });
+
+      it('should change current', async () => {
+        widget.current = {
+          widget: latexWidget,
+          generator: latexGenerator
+        };
+      });
+    });
   });
 });
