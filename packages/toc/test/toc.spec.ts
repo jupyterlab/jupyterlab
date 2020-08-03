@@ -179,8 +179,8 @@ describe('@jupyterlab/toc', () => {
         expect(newMarkdownWidget).toBeInstanceOf(DocumentWidget);
         markdownWidget = newMarkdownWidget as IDocumentWidget<FileEditor>;
         await markdownTracker.add(markdownWidget);
-        const foundNotebookGenerator = registry.find(markdownWidget);
-        expect(foundNotebookGenerator).toBeDefined();
+        const foundMarkdownGenerator = registry.find(markdownWidget);
+        expect(foundMarkdownGenerator).toBeDefined();
       });
 
       it('should change current', async () => {
@@ -217,8 +217,8 @@ describe('@jupyterlab/toc', () => {
         expect(newMarkdownWidget).toBeInstanceOf(MarkdownDocument);
         markdownWidget = newMarkdownWidget as MarkdownDocument;
         await markdownTracker.add(markdownWidget);
-        const foundNotebookGenerator = registry.find(markdownWidget);
-        expect(foundNotebookGenerator).toBeDefined();
+        const foundMarkdownGenerator = registry.find(markdownWidget);
+        expect(foundMarkdownGenerator).toBeDefined();
       });
 
       it('should change current', async () => {
@@ -253,14 +253,50 @@ describe('@jupyterlab/toc', () => {
         expect(newLatexWidget).toBeInstanceOf(DocumentWidget);
         latexWidget = newLatexWidget as IDocumentWidget<FileEditor>;
         await latexTracker.add(latexWidget);
-        const foundNotebookGenerator = registry.find(latexWidget);
-        expect(foundNotebookGenerator).toBeDefined();
+        const foundLatexGenerator = registry.find(latexWidget);
+        expect(foundLatexGenerator).toBeDefined();
       });
 
       it('should change current', async () => {
         widget.current = {
           widget: latexWidget,
           generator: latexGenerator
+        };
+      });
+    });
+
+    describe('Python Generator: IGenerator<IDocumentWidget<FileEditor>>', () => {
+      let pythonTracker: WidgetTracker<IDocumentWidget<FileEditor>>;
+      let pythonGenerator: ToC.TableOfContentsRegistry.IGenerator<IDocumentWidget<
+        FileEditor
+      >>;
+      let pythonWidget: IDocumentWidget<FileEditor>;
+
+      it('should create a python generator', () => {
+        pythonTracker = new WidgetTracker<IDocumentWidget<FileEditor>>({
+          namespace: 'python'
+        });
+        pythonGenerator = ToC.createPythonGenerator(pythonTracker);
+      });
+
+      it('should add a python generator to the registry', () => {
+        registry.add(pythonGenerator);
+      });
+
+      it('should find the python generator', async () => {
+        const path = UUID.uuid4() + '.py';
+        const newPythonWidget = manager.createNew(path);
+        expect(newPythonWidget).toBeInstanceOf(DocumentWidget);
+        pythonWidget = newPythonWidget as IDocumentWidget<FileEditor>;
+        await pythonTracker.add(pythonWidget);
+        const foundPythonGenerator = registry.find(pythonWidget);
+        expect(foundPythonGenerator).toBeDefined();
+      });
+
+      it('should change current', async () => {
+        widget.current = {
+          widget: pythonWidget,
+          generator: pythonGenerator
         };
       });
     });
