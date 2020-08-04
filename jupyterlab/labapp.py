@@ -596,10 +596,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
 
-        super().initialize_templates()
 
     def initialize_settings(self):
         super().initialize_settings()
+
 
     def initialize_handlers(self):
 
