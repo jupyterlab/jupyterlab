@@ -314,7 +314,7 @@ class LabWorkspaceImportApp(JupyterApp):
         base_url = '/'
         directory = app.workspaces_dir
         app_url = app.app_url
-        workspaces_url = app.workspaces_url
+        workspaces_url = ujoin(app.app_url, 'workspaces')
 
         if len(self.extra_args) != 1:
             print('One argument is required for workspace import.')
