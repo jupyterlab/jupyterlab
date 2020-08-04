@@ -33,7 +33,7 @@ Make sure you have pip >= 9.0.1.
 
 
 NAME = 'jupyterlab'
-DESCRIPTION = 'The JupyterLab notebook server extension.'
+DESCRIPTION = 'The JupyterLab server extension.'
 
 with open(pjoin(HERE, 'README.md')) as fid:
     LONG_DESCRIPTION = fid.read()
@@ -43,8 +43,8 @@ data_files_spec = [
     ('share/jupyter/lab/static', '%s/static' % NAME, '**'),
     ('share/jupyter/lab/schemas', '%s/schemas' % NAME, '**'),
     ('share/jupyter/lab/themes', '%s/themes' % NAME, '**'),
-    ('etc/jupyter/jupyter_notebook_config.d',
-     'jupyter-config/jupyter_notebook_config.d', 'jupyterlab.json'),
+    ('etc/jupyter/jupyter_server_config.d',
+     'jupyter-config/jupyter_server_config.d', 'jupyterlab.json'),
 ]
 
 package_data_spec = dict()
@@ -149,20 +149,27 @@ setup_args = dict(
 
 
 setup_args['install_requires'] = [
-    'notebook>=4.3.1',
+    'ipython',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
-    'jupyterlab_server>=1.1.5, <2.0',
+    'jupyterlab_server>=2.0.0a1',
+    'jupyter_server>=1.0.0rc4',
+    'nbclassic>=0.2.0rc3',
     'jinja2>=2.10'
 ]
 
+
 setup_args['extras_require'] = {
     'test': [
-        'pytest',
+        'pytest==5.3.2', 
+        'pytest-cov', 
+        'pytest-tornasync', 
+        'pytest-console-scripts',
         'pytest-check-links',
         'requests',
         'wheel',
         'virtualenv'
     ],
+    'test:sys_platform == "win32"': ['nose-exclude'],
     'docs': [
         'jsx-lexer',
         'recommonmark',
@@ -184,7 +191,10 @@ setup_args['entry_points'] = {
         'jupyter-lab = jupyterlab.labapp:main',
         'jupyter-labextension = jupyterlab.labextensions:main',
         'jlpm = jupyterlab.jlpmapp:main',
-    ]
+    ],
+    'pytest11': [
+        'pytest_jupyterlab = jupyterlab.pytest_plugin'
+    ],
 }
 
 

@@ -17,12 +17,14 @@ import tempfile
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-
-from traitlets import Bool, Dict, Unicode
+from traitlets import Bool, Dict, Unicode, default
 from ipykernel.kernelspec import write_kernel_spec
 import jupyter_core
 from jupyter_core.application import base_aliases, base_flags
 
+from jupyter_server.serverapp import ServerApp
+
+from jupyterlab_server import LabConfig
 from jupyterlab_server.process_app import ProcessApp
 import jupyterlab_server
 from jupyterlab.utils import deprecated
@@ -31,20 +33,37 @@ from jupyterlab.utils import deprecated
 HERE = osp.realpath(osp.dirname(__file__))
 
 
-def _create_notebook_dir():
-    """Create a temporary directory with some file structure."""
-    root_dir = tempfile.mkdtemp(prefix='mock_contents')
-    os.mkdir(osp.join(root_dir, 'src'))
-    with open(osp.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
-        fid.write('hello')
+def _create_template_dir():
+    template_dir = tempfile.mkdtemp(prefix='mock_static')
+    index_filepath = osp.join(template_dir, 'index.html')
+    with open(index_filepath, 'w') as fid:
+        fid.write("""
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Jupyter Lab Test{% endblock %}</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% block meta %}
+    {% endblock %}
+</head>
+<body>
+  <h1>JupyterLab Test Application</h1>
+  <div id="site">
+    {% block site %}
+    {% endblock site %}
+  </div>
+  {% block after_site %}
+  {% endblock after_site %}
+</body>
+</html>""")
+    return template_dir
 
-    readonly_filepath = osp.join(root_dir, 'src', 'readonly-temp.txt')
-    with open(readonly_filepath, 'w') as fid:
-        fid.write('hello from a readonly file')
 
-    os.chmod(readonly_filepath, S_IRUSR | S_IRGRP | S_IROTH)
-    atexit.register(lambda: shutil.rmtree(root_dir, True))
-    return root_dir
+def _create_static_dir():
+    static_dir = tempfile.mkdtemp(prefix='mock_static')
+    return static_dir
 
 
 def _create_schemas_dir():
@@ -121,30 +140,32 @@ class TestEnv(object):
 class ProcessTestApp(ProcessApp):
     """A process app for running tests, includes a mock contents directory.
     """
-    allow_origin = Unicode('*')
-    notebook_dir = Unicode(_create_notebook_dir())
-    schemas_dir = Unicode(_create_schemas_dir())
-    user_settings_dir = Unicode(_create_user_settings_dir())
-    workspaces_dir = Unicode(_create_workspaces_dir())
+    allow_origin = '*'
 
-    def __init__(self):
+    def initialize_templates(self):
+        self.static_paths = [_create_static_dir()]
+        self.template_paths = [_create_template_dir()]
+
+    def initialize_settings(self):
+
         self.env_patch = TestEnv()
         self.env_patch.start()
         ProcessApp.__init__(self)
 
-    def init_server_extensions(self):
-        """Disable server extensions"""
-        pass
+        self.settings['allow_origin'] = ProcessTestApp.allow_origin
 
-    def start(self):
+        self.static_dir = self.static_paths[0]
+        self.template_dir = self.template_paths[0]
+        self.schemas_dir = _create_schemas_dir()
+        self.user_settings_dir = _create_user_settings_dir()
+        self.workspaces_dir = _create_workspaces_dir()
+
         self._install_default_kernels()
-        self.kernel_manager.default_kernel_name = 'echo'
-        self.lab_config.schemas_dir = self.schemas_dir
-        self.lab_config.user_settings_dir = self.user_settings_dir
-        self.lab_config.workspaces_dir = self.workspaces_dir
-        ProcessApp.start(self)
+        self.settings['kernel_manager'].default_kernel_name = 'echo'
 
-    def install_kernel(self, kernel_name, kernel_spec):
+        super().initialize_settings()
+
+    def _install_kernel(self, kernel_name, kernel_spec):
         """Install a kernel spec to the data directory.
 
         Parameters
@@ -162,7 +183,7 @@ class ProcessTestApp(ProcessApp):
 
     def _install_default_kernels(self):
         # Install echo and ipython kernels - should be done after env patch
-        self.install_kernel(
+        self._install_kernel(
             kernel_name="echo",
             kernel_spec={
                 'argv': [
@@ -180,8 +201,8 @@ class ProcessTestApp(ProcessApp):
         write_kernel_spec(ipykernel_dir)
 
     def _process_finished(self, future):
-        self.http_server.stop()
-        self.io_loop.stop()
+        self.serverapp.http_server.stop()
+        self.serverapp.io_loop.stop()
         self.env_patch.stop()
         try:
             os._exit(future.result())
@@ -213,6 +234,12 @@ jest_flags['watchAll'] = (
 class JestApp(ProcessTestApp):
     """DEPRECATED: A notebook app that runs a jest test."""
 
+    default_url = Unicode('/lab')
+    extension_url = '/lab'
+    name = __name__
+    app_name = 'JupyterLab Jest Application'
+    app_url = '/lab'
+
     coverage = Bool(False, help='Whether to run coverage').tag(config=True)
 
     testPathPattern = Unicode('').tag(config=True)
@@ -234,7 +261,7 @@ class JestApp(ProcessTestApp):
     @deprecated(removed_version=4)
     def get_command(self):
         """Get the command to run"""
-        terminalsAvailable = self.web_app.settings['terminals_available']
+        terminalsAvailable = self.settings['terminals_available']
         debug = self.log.level == logging.DEBUG
 
         # find jest
@@ -272,9 +299,9 @@ class JestApp(ProcessTestApp):
         if self.log_level > logging.INFO:
             cmd += ['--silent']
 
-        config = dict(baseUrl=self.connection_url,
+        config = dict(baseUrl=self.serverapp.connection_url,
                       terminalsAvailable=str(terminalsAvailable),
-                      token=self.token)
+                      token=self.settings['token'])
         config.update(**self.test_config)
 
         td = tempfile.mkdtemp()
@@ -292,6 +319,13 @@ class JestApp(ProcessTestApp):
 class KarmaTestApp(ProcessTestApp):
     """DEPRECATED: A notebook app that runs the jupyterlab karma tests.
     """
+
+    default_url = Unicode('/lab')
+    extension_url = '/lab'
+    name = __name__
+    app_name = 'JupyterLab Karma Application'
+    app_url = '/lab'
+
     karma_pattern = Unicode('src/*.spec.ts*')
     karma_base_dir = Unicode('')
     karma_coverage_dir = Unicode('')
@@ -299,10 +333,9 @@ class KarmaTestApp(ProcessTestApp):
     @deprecated(removed_version=4)
     def get_command(self):
         """Get the command to run."""
-        terminalsAvailable = self.web_app.settings['terminals_available']
-        # Compatibility with Notebook 4.2.
-        token = getattr(self, 'token', '')
-        config = dict(baseUrl=self.connection_url, token=token,
+        terminalsAvailable = self.settings['terminals_available']
+        token = self.settings['token']
+        config = dict(baseUrl=self.serverapp.connection_url, token=token,
                       terminalsAvailable=str(terminalsAvailable),
                       foo='bar')
 
@@ -356,14 +389,41 @@ class KarmaTestApp(ProcessTestApp):
         return cmd, dict(env=env, cwd=cwd)
 
 
+class RootedServerApp(ServerApp):
+
+    @default('root_dir')
+    def _default_root_dir(self):
+        """Create a temporary directory with some file structure."""
+        root_dir = tempfile.mkdtemp(prefix='mock_root')
+        os.mkdir(osp.join(root_dir, 'src'))
+        with open(osp.join(root_dir, 'src', 'temp.txt'), 'w') as fid:
+            fid.write('hello')
+
+        readonly_filepath = osp.join(root_dir, 'src', 'readonly-temp.txt')
+        with open(readonly_filepath, 'w') as fid:
+            fid.write('hello from a readonly file')
+
+        os.chmod(readonly_filepath, S_IRUSR | S_IRGRP | S_IROTH)
+        atexit.register(lambda: shutil.rmtree(root_dir, True))
+        return root_dir
+
+
 @deprecated(removed_version=4)
 def run_jest(jest_dir):
     """Run a jest test in the given base directory.
     """
-    app = JestApp.instance()
-    app.jest_dir = jest_dir
-    app.initialize()
-    app.start()
+    def _jupyter_server_extension_points():
+        return [
+            {
+                'module': __name__,
+                'app': JestApp
+            }
+        ]
+    sys.modules[__name__]._jupyter_server_extension_points = _jupyter_server_extension_points
+    JestApp.jest_dir = jest_dir
+    RootedServerApp.jpserver_extensions = Dict({__name__: True})
+    RootedServerApp.flags = jest_flags
+    RootedServerApp.launch_instance()
 
 
 @deprecated(removed_version=4)
@@ -371,8 +431,15 @@ def run_karma(base_dir, coverage_dir=''):
     """Run a karma test in the given base directory.
     """
     logging.disable(logging.WARNING)
-    app = KarmaTestApp.instance()
-    app.karma_base_dir = base_dir
-    app.karma_coverage_dir = coverage_dir
-    app.initialize([])
-    app.start()
+    def _jupyter_server_extension_points():
+        return [
+            {
+                'module': __name__,
+                'app': KarmaTestApp
+            }
+        ]
+    sys.modules[__name__]._jupyter_server_extension_points = _jupyter_server_extension_points
+    KarmaTestApp.karma_base_dir = base_dir
+    KarmaTestApp.karma_coverage_dir = coverage_dir
+    RootedServerApp.jpserver_extensions = Dict({__name__: True})
+    RootedServerApp.launch_instance(argv=[])

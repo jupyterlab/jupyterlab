@@ -9,22 +9,49 @@ import os
 import os.path as osp
 from os.path import join as pjoin
 import sys
+from jinja2 import Environment, FileSystemLoader
 
 from jupyter_core.application import JupyterApp, base_aliases, base_flags
+from jupyter_core.application import NoStart
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
-from notebook.notebookapp import NotebookApp, aliases, flags
-from notebook.utils import url_path_join as ujoin
-from traitlets import Bool, Instance, Unicode
+from jupyter_server.serverapp import aliases, flags
+from jupyter_server.utils import url_path_join as ujoin
+from jupyter_server._version import version_info as jpserver_version_info
+from traitlets import Bool, Instance, Unicode, default
+
+from nbclassic.shim import NBClassicConfigShimMixin
+from jupyterlab_server import LabServerApp
 
 from ._version import __version__
 from .debuglog import DebugLogFileMixin
-from .extension import load_config, load_jupyter_server_extension
 from .commands import (
+    DEV_DIR, HERE,
     build, clean, get_app_dir, get_app_version, get_user_settings_dir,
-    get_workspaces_dir, AppOptions,
+    get_workspaces_dir, AppOptions, pjoin, get_app_info,
+    ensure_core, ensure_dev, watch, watch_dev, ensure_app
 )
 from .coreconfig import CoreConfig
+from .handlers.build_handler import build_path, Builder, BuildHandler
+from .handlers.extension_manager_handler import (
+    extensions_handler_path, ExtensionManager, ExtensionHandler
+)
+from .handlers.error_handler import ErrorHandler
 
+
+DEV_NOTE = """You're running JupyterLab from source.
+If you're working on the TypeScript sources of JupyterLab, try running
+
+    jupyter lab --dev-mode --watch
+
+
+to have the system incrementally watch and build JupyterLab for you, as you
+make changes.
+"""
+
+
+CORE_NOTE = """
+Running the core application with no additional extensions or settings
+"""
 
 build_aliases = dict(base_aliases)
 build_aliases['app-dir'] = 'LabBuildApp.app_dir'
@@ -232,17 +259,19 @@ class LabWorkspaceExportApp(JupyterApp):
     """
     def start(self):
         app = LabApp(config=self.config)
-        base_url = app.base_url
-        config = load_config(app)
-        directory = config.workspaces_dir
-        app_url = config.app_url
+        # TODO(@echarles) Fix this...
+#        base_url = app.serverapp.base_url
+        base_url = '/'
+        directory = app.workspaces_dir
+        app_url = app.app_url
 
         if len(self.extra_args) > 1:
             print('Too many arguments were provided for workspace export.')
             self.exit(1)
 
+        workspaces_url = ujoin(app_url, 'workspaces')
         raw = (app_url if not self.extra_args
-               else ujoin(config.workspaces_url, self.extra_args[0]))
+               else ujoin(workspaces_url, self.extra_args[0]))
         slug = slugify(raw, base_url)
         workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
 
@@ -281,11 +310,12 @@ class LabWorkspaceImportApp(JupyterApp):
 
     def start(self):
         app = LabApp(config=self.config)
-        base_url = app.base_url
-        config = load_config(app)
-        directory = config.workspaces_dir
-        app_url = config.app_url
-        workspaces_url = config.workspaces_url
+#        base_url = app.serverapp.base_url
+        # TODO(@echarles) Fix this...
+        base_url = '/'
+        directory = app.workspaces_dir
+        app_url = app.app_url
+        workspaces_url = ujoin(app.app_url, 'workspaces')
 
         if len(self.extra_args) != 1:
             print('One argument is required for workspace import.')
@@ -375,35 +405,23 @@ class LabWorkspaceApp(JupyterApp):
     )
 
     def start(self):
-        super().start()
-        print('Either `export` or `import` must be specified.')
-        self.exit(1)
+        try:
+            super().start()
+            print('Either `export` or `import` must be specified.')
+            self.exit(1)
+        except NoStart:
+            pass
+        self.exit(0)
 
 
-lab_aliases = dict(aliases)
-lab_aliases['app-dir'] = 'LabApp.app_dir'
-
-lab_flags = dict(flags)
-lab_flags['core-mode'] = (
-    {'LabApp': {'core_mode': True}},
-    "Start the app in core mode."
-)
-lab_flags['dev-mode'] = (
-    {'LabApp': {'dev_mode': True}},
-    "Start the app in dev mode for running from source."
-)
-lab_flags['watch'] = (
-    {'LabApp': {'watch': True}},
-    "Start the app in watch mode."
-)
-lab_flags['expose-app-in-browser'] = (
-    {'LabApp': {'expose_app_in_browser': True}},
-    "Expose the global app instance to browser via window.jupyterlab"
-)
-
-
-class LabApp(NotebookApp):
+class LabApp(NBClassicConfigShimMixin, LabServerApp):
     version = version
+
+    name = "lab"
+    app_name = "JupyterLab"
+
+    # Should your extension expose other server extensions when launched directly?
+    load_other_extensions = True
 
     description = """
     JupyterLab - An extensible computational environment for Jupyter.
@@ -434,8 +452,28 @@ class LabApp(NotebookApp):
         jupyter lab --certfile=mycert.pem # use SSL/TLS certificate
     """
 
-    aliases = lab_aliases
-    flags = lab_flags
+    aliases['app-dir'] = 'LabApp.app_dir'
+    aliases.update({
+        'watch': 'LabApp.watch',
+    })
+
+
+    flags['core-mode'] = (
+        {'LabApp': {'core_mode': True}},
+        "Start the app in core mode."
+    )
+    flags['dev-mode'] = (
+        {'LabApp': {'dev_mode': True}},
+        "Start the app in dev mode for running from source."
+    )
+    flags['watch'] = (
+        {'LabApp': {'watch': True}},
+        "Start the app in watch mode."
+    )
+    flags['expose-app-in-browser'] = (
+        {'LabApp': {'expose_app_in_browser': True}},
+        "Expose the global app instance to browser via window.jupyterlab"
+    )
 
     subcommands = dict(
         build=(LabBuildApp, LabBuildApp.description.splitlines()[0]),
@@ -449,11 +487,11 @@ class LabApp(NotebookApp):
     default_url = Unicode('/lab', config=True,
         help="The default URL to redirect to from `/`")
 
-    override_static_url = Unicode('', config=True, help=('The override url for static lab assets, typically a CDN.'))
+    override_static_url = Unicode(config=True, help=('The override url for static lab assets, typically a CDN.'))
 
-    override_theme_url = Unicode('', config=True, help=('The override url for static lab theme assets, typically a CDN.'))
+    override_theme_url = Unicode(config=True, help=('The override url for static lab theme assets, typically a CDN.'))
 
-    app_dir = Unicode(get_app_dir(), config=True,
+    app_dir = Unicode(None, config=True,
         help="The app directory to launch JupyterLab from.")
 
     user_settings_dir = Unicode(get_user_settings_dir(), config=True,
@@ -483,23 +521,182 @@ class LabApp(NotebookApp):
     expose_app_in_browser = Bool(False, config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab")
 
-    def init_server_extensions(self):
-        """Load any extensions specified by config.
+    @default('app_dir')
+    def _default_app_dir(self):
+        app_dir = get_app_dir()
+        if self.core_mode:
+            app_dir = HERE 
+            self.log.info('Running JupyterLab in core mode')
+        elif self.dev_mode:
+            app_dir = DEV_DIR
+            self.log.info('Running JupyterLab in dev mode')
+        return app_dir
 
-        Import the module, then call the load_jupyter_server_extension function,
-        if one exists.
+    @default('app_settings_dir')
+    def _default_app_settings_dir(self):
+        return pjoin(self.app_dir, 'settings')
 
-        If the JupyterLab server extension is not enabled, it will
-        be manually loaded with a warning.
+    @default('app_version')
+    def _default_app_version(self):
+        info = get_app_info(app_options=AppOptions(app_dir=self.app_dir))
+        return info['version']
 
-        The extension API is experimental, and may change in future releases.
-        """
-        super(LabApp, self).init_server_extensions()
-        msg = 'JupyterLab server extension not enabled, manually loading...'
-        if not self.nbserver_extensions.get('jupyterlab', False):
-            self.log.warning(msg)
-            load_jupyter_server_extension(self)
+    @default('cache_files')
+    def _default_cache_files(self):
+        return False
 
+    @default('schemas_dir')
+    def _default_schemas_dir(self):
+        return pjoin(self.app_dir, 'schemas')
+
+    @default('templates_dir')
+    def _default_templates_dir(self):
+        return pjoin(self.app_dir, 'static')
+
+    @default('themes_dir')
+    def _default_themes_dir(self):
+        if self.override_theme_url:
+            return ''
+        return pjoin(self.app_dir, 'themes')
+
+    @default('static_dir')
+    def _default_static_dir(self):
+        return pjoin(self.app_dir, 'static')
+
+    @property
+    def static_url_prefix(self):
+        if self.override_static_url:
+            return self.override_static_url
+        else:
+            return "/static/{name}/".format(
+            name=self.name)
+
+    @default('theme_url')
+    def _default_theme_url(self):
+        if self.override_theme_url:
+            return self.override_theme_url
+        return ''
+
+    def initialize_templates(self):
+        # Determine which model to run JupyterLab
+        if self.core_mode or self.app_dir.startswith(HERE):
+            self.core_mode = True
+            self.log.info('Running JupyterLab in dev mode')
+
+        if self.dev_mode or self.app_dir.startswith(DEV_DIR):
+            self.dev_mode = True
+            self.log.info('Running JupyterLab in dev mode')
+
+        if self.watch and self.core_mode:
+            self.log.warn('Cannot watch in core mode, did you mean --dev-mode?')
+            self.watch = False
+
+        if self.core_mode and self.dev_mode:
+            self.log.warn('Conflicting modes, choosing dev_mode over core_mode')
+            self.core_mode = False
+
+        # Set the paths based on JupyterLab's mode.
+        if self.dev_mode:
+            dev_static_dir = ujoin(DEV_DIR, 'static')
+            self.static_paths = [dev_static_dir]
+            self.template_paths = [dev_static_dir]
+        elif self.core_mode:
+            dev_static_dir = ujoin(HERE, 'static')
+            self.static_paths = [dev_static_dir]
+            self.template_paths = [dev_static_dir]
+        else:
+            self.static_paths = [self.static_dir]
+            self.template_paths = [self.templates_dir]
+
+
+    def initialize_settings(self):
+        super().initialize_settings()
+
+
+    def initialize_handlers(self):
+
+        handlers = []
+
+        # TODO(@echarles) Move this to configurable trait once jupyter_server supports it.
+        self.serverapp.open_browser = True
+
+        # Set config for Jupyterlab
+        page_config = self.serverapp.web_app.settings.setdefault('page_config_data', {})
+        page_config.setdefault('buildAvailable', not self.core_mode and not self.dev_mode)
+        page_config.setdefault('buildCheck', not self.core_mode and not self.dev_mode)
+        page_config['devMode'] = self.dev_mode
+        page_config['token'] = self.serverapp.token
+
+        # Client-side code assumes notebookVersion is a JSON-encoded string
+        page_config['notebookVersion'] = json.dumps(jpserver_version_info)
+
+        if self.serverapp.file_to_run:
+            relpath = os.path.relpath(self.serverapp.file_to_run, self.serverapp.root_dir)
+            uri = url_escape(ujoin('{}/tree'.format(self.app_url), *relpath.split(os.sep)))
+            self.default_url = uri
+            self.serverapp.file_to_run = ''
+
+        self.log.info('JupyterLab extension loaded from %s' % HERE)
+        self.log.info('JupyterLab application directory is %s' % self.app_dir)
+
+        build_handler_options = AppOptions(logger=self.log, app_dir=self.app_dir)
+        builder = Builder(self.core_mode, app_options=build_handler_options)
+        build_handler = (build_path, BuildHandler, {'builder': builder})
+        handlers.append(build_handler)
+
+        errored = False
+
+        if self.core_mode:
+            self.log.info(CORE_NOTE.strip())
+            ensure_core(self.log)
+        elif self.dev_mode:
+            if not self.watch:
+                ensure_dev(self.log)
+                self.log.info(DEV_NOTE)
+        else:
+            msgs = ensure_app(self.app_dir)
+            if msgs:
+                [self.log.error(msg) for msg in msgs]
+                handler = (self.app_url, ErrorHandler, { 'messages': msgs })
+                handlers.append(handler)
+                errored = True
+
+        if self.watch:
+            self.log.info('Starting JupyterLab watch mode...')
+            if self.dev_mode:
+                watch_dev(self.log)
+            else:
+                watch(app_options=build_handler_options)
+                page_config['buildAvailable'] = False
+            self.cache_files = False
+
+        if not self.core_mode and not errored:
+            ext_manager = ExtensionManager(app_options=build_handler_options)
+            ext_handler = (
+                extensions_handler_path,
+                ExtensionHandler,
+                {'manager': ext_manager}
+            )
+            handlers.append(ext_handler)
+
+        # If running under JupyterHub, add more metadata.
+        if hasattr(self, 'hub_prefix'):
+            page_config['hubPrefix'] = self.hub_prefix
+            page_config['hubHost'] = self.hub_host
+            page_config['hubUser'] = self.user
+            page_config['shareUrl'] = ujoin(self.hub_prefix, 'user-redirect')
+            # Assume the server_name property indicates running JupyterHub 1.0.
+            if hasattr(labapp, 'server_name'):
+                page_config['hubServerName'] = self.server_name
+            api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
+            page_config['token'] = api_token
+
+        # Update Jupyter Server's webapp settings with jupyterlab settings.
+        self.serverapp.web_app.settings['page_config_data'] = page_config
+
+        # Extend Server handlers with jupyterlab handlers.
+        self.handlers.extend(handlers)
+        super().initialize_handlers()
 
 #-----------------------------------------------------------------------------
 # Main entry point

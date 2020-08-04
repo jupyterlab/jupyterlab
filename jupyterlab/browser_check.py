@@ -68,9 +68,7 @@ class LogErrorHandler(logging.Handler):
 
 def run_test(app, func):
     """Synchronous entry point to run a test function.
-
     func is a function that accepts an app url as a parameter and returns a result.
-
     func can be synchronous or asynchronous.  If it is synchronous, it will be run
     in a thread, so asynchronous is preferred.
     """
@@ -79,9 +77,7 @@ def run_test(app, func):
 
 async def run_test_async(app, func):
     """Run a test against the application.
-
     func is a function that accepts an app url as a parameter and returns a result.
-
     func can be synchronous or asynchronous.  If it is synchronous, it will be run
     in a thread, so asynchronous is preferred.
     """
@@ -163,26 +159,35 @@ class BrowserApp(LabApp):
     """An app the launches JupyterLab and waits for it to start up, checking for
     JS console errors, JS errors, and Python logged errors.
     """
+    name = __name__
     open_browser = Bool(False)
-    base_url = '/foo/'
     ip = '127.0.0.1'
     flags = test_flags
     aliases = test_aliases
-    test_browser = Bool(True)
+    test_browser = True
 
-    def start(self):
-        web_app = self.web_app
-        web_app.settings.setdefault('page_config_data', dict())
-        web_app.settings['page_config_data']['browserTest'] = True
-        web_app.settings['page_config_data']['buildAvailable'] = False
+    def initialize_settings(self):
+        self.settings.setdefault('page_config_data', dict())
+        self.settings['page_config_data']['browserTest'] = True
+        self.settings['page_config_data']['buildAvailable'] = False
+        super().initialize_settings()
+
+    def initialize_handlers(self):
         func = run_browser if self.test_browser else lambda url: 0
-        run_test(self, func)
-        super().start()
-
+        run_test(self.serverapp, func)
+        super().initialize_handlers()
 
 if __name__ == '__main__':
     skip_option = "--no-chrome-test"
     if skip_option in sys.argv:
         BrowserApp.test_browser = False
         sys.argv.remove(skip_option)
+    def _jupyter_server_extension_points():
+        return [
+            {
+                'module': __name__,
+                'app': BrowserApp
+            }
+        ]
+    sys.modules[__name__]._jupyter_server_extension_points = _jupyter_server_extension_points
     BrowserApp.launch_instance()

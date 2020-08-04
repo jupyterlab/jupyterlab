@@ -6,6 +6,7 @@
 
 from tornado import web
 from jupyterlab_server.server import JupyterHandler
+from jupyter_server.extension.handler import ExtensionHandlerMixin
 
 
 TEMPLATE = """
@@ -21,9 +22,10 @@ TEMPLATE = """
 </body>
 """
 
-class ErrorHandler(JupyterHandler):
+class ErrorHandler(ExtensionHandlerMixin, JupyterHandler):
 
-    def initialize(self, messages):
+    def initialize(self, messages=None, name=None):
+        super(ErrorHandler, self).initialize(name=name)
         self.messages = messages
 
     @web.authenticated

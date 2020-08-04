@@ -6,7 +6,8 @@ from concurrent.futures import ThreadPoolExecutor
 import json
 from threading import Event
 
-from notebook.base.handlers import APIHandler
+from jupyter_server.base.handlers import APIHandler
+from jupyter_server.extension.handler import ExtensionHandlerMixin
 from tornado import gen, web
 from tornado.concurrent import run_on_executor
 
@@ -108,9 +109,10 @@ class Builder(object):
             return build(command='build', app_options=app_options)
 
 
-class BuildHandler(APIHandler):
+class BuildHandler(ExtensionHandlerMixin, APIHandler):
 
-    def initialize(self, builder):
+    def initialize(self, builder=None, name=None):
+        super(BuildHandler, self).initialize(name=name)
         self.builder = builder
 
     @web.authenticated

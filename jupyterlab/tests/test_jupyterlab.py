@@ -19,11 +19,9 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import pytest
-from notebook.notebookapp import NotebookApp
 from jupyter_core import paths
 
 from jupyterlab import commands
-from jupyterlab.extension import load_jupyter_server_extension
 from jupyterlab.commands import (
     install_extension, uninstall_extension, list_extensions,
     build, link_package, unlink_package, build_check,
@@ -51,6 +49,12 @@ def touch(file, mtime=None):
         os.utime(file, (atime, mtime))
     return os.stat(file).st_mtime
 
+
+# @pytest.fixture()
+# def resource():
+#     print("setup")
+#     yield "resource"
+#    print("teardown")
 
 class AppHandlerTest(TestCase):
 
@@ -515,14 +519,6 @@ class TestExtension(AppHandlerTest):
             if pkg.startswith('@jupyterlab/'):
                 assert pkg in singletons
 
-    def test_load_extension(self):
-        app = NotebookApp()
-        stderr = sys.stderr
-        sys.stderr = self.devnull
-        app.initialize(argv=[])
-        sys.stderr = stderr
-        load_jupyter_server_extension(app)
-
     def test_disable_extension(self):
         options = AppOptions(app_dir=self.tempdir())
         assert install_extension(self.mock_extension, app_options=options) is True
@@ -780,3 +776,12 @@ class TestExtension(AppHandlerTest):
         with p1, p2:
             assert update_extension(None, all_=True) is True
         assert sorted(updated) == [self.pkg_names['extension'], self.pkg_names['mimeextension']]
+
+
+def test_load_extension(serverapp, make_lab_app):
+    app = make_lab_app()
+    stderr = sys.stderr
+#    sys.stderr = self.devnull
+    app._link_jupyter_server_extension(serverapp)
+    app.initialize()
+    sys.stderr = stderr
