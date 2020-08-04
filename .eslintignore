@@ -24,6 +24,7 @@ packages/extensionmanager-extension/examples/listings
 packages/ui-components/src/icon/iconimports.ts
 jupyterlab/staging/yarn.js
 jupyterlab/staging/index.js
+tsconfigdoc.json
 
 # jetbrains IDE stuff
 .idea/

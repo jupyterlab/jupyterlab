@@ -5,5 +5,6 @@
     "rootDir": "src",
     "module": "commonjs"
   },
-  "include": ["src/*"]
+  "include": ["src/*"],
+  "references": []
 }

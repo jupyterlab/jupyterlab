@@ -54,8 +54,8 @@
     "typestyle": "^2.0.4"
   },
   "devDependencies": {
-    "@babel/core": "^7.5.0",
-    "@babel/preset-env": "^7.7.6",
+    "@babel/core": "^7.10.2",
+    "@babel/preset-env": "^7.10.2",
     "@jupyterlab/testutils": "^3.0.0-alpha.4",
     "@storybook/addon-actions": "^5.2.5",
     "@storybook/react": "^5.2.5",

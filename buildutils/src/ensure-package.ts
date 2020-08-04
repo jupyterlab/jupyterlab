@@ -140,7 +140,10 @@ export async function ensurePackage(
   });
 
   // Make sure we are not importing CSS in a core package.
-  if (data.name.indexOf('example') === -1) {
+  if (
+    data.name.indexOf('example') === -1 &&
+    data.name !== '@jupyterlab/codemirror'
+  ) {
     imports.forEach(importStr => {
       if (importStr.indexOf('.css') !== -1) {
         messages.push('CSS imports are not allowed source files');
@@ -153,6 +156,9 @@ export async function ensurePackage(
     const parts = name.split('/');
     if (name.indexOf('@') === 0) {
       return parts[0] + '/' + parts[1];
+    }
+    if (parts[0].indexOf('!') !== -1) {
+      parts[0] = parts[0].slice(parts[0].lastIndexOf('!') + 1);
     }
     return parts[0];
   });
@@ -257,6 +263,10 @@ export async function ensurePackage(
   // Inherit from the base tsconfig.
   if (fs.existsSync(tsConfigPath)) {
     const tsConfigData = utils.readJSONFile(tsConfigPath);
+    tsConfigData.references = [];
+    Object.keys(references).forEach(name => {
+      tsConfigData.references.push({ path: references[name] });
+    });
     let prefix = '';
     let dirName = pkgPath;
     while (!fs.existsSync(path.join(dirName, 'tsconfigbase.json'))) {

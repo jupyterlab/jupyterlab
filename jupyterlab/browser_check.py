@@ -167,7 +167,6 @@ class BrowserApp(LabApp):
     test_browser = True
 
     def initialize_settings(self):
-        self.serverapp.kernel_manager.shutdown_wait_time = 1
         self.settings.setdefault('page_config_data', dict())
         self.settings['page_config_data']['browserTest'] = True
         self.settings['page_config_data']['buildAvailable'] = False

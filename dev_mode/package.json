@@ -253,6 +253,7 @@
       "@jupyterlab/completer",
       "@jupyterlab/console",
       "@jupyterlab/coreutils",
+      "@jupyterlab/debugger",
       "@jupyterlab/docmanager",
       "@jupyterlab/documentsearch",
       "@jupyterlab/extensionmanager",
