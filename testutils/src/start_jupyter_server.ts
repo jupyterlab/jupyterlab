@@ -218,7 +218,9 @@ namespace Private {
       LabApp: { user_settings_dir, workspaces_dir, app_dir },
       NotebookApp: { token, open_browser: false, notebook_dir },
       MultiKernelManager: {
-        default_kernel_name: 'echo',
+        default_kernel_name: 'echo'
+      },
+      KernelManager: {
         shutdown_wait_time: 1.0
       }
     };

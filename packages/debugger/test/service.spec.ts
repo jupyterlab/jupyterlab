@@ -133,12 +133,6 @@ describe('DebuggerService', () => {
       await service.start();
       expect(service.isStarted).toEqual(true);
     });
-
-    it('should throw an error if the session is not set', async () => {
-      await expect(async () => await service.start()).rejects.toThrow(
-        'No active debugger session'
-      );
-    });
   });
 
   describe('#stop()', () => {

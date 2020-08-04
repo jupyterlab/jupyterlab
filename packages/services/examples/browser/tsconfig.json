@@ -10,10 +10,7 @@
   "include": ["src/**/*"],
   "references": [
     {
-      "path": "../../../outputarea"
-    },
-    {
-      "path": "../../../rendermime"
+      "path": "../../../coreutils"
     },
     {
       "path": "../.."

@@ -13,7 +13,13 @@
       "path": "../apputils"
     },
     {
+      "path": "../cells"
+    },
+    {
       "path": "../codeeditor"
+    },
+    {
+      "path": "../codemirror"
     },
     {
       "path": "../console"
@@ -28,9 +34,6 @@
       "path": "../fileeditor"
     },
     {
-      "path": "../launcher"
-    },
-    {
       "path": "../notebook"
     },
     {
@@ -38,9 +41,6 @@
     },
     {
       "path": "../services"
-    },
-    {
-      "path": "../settingregistry"
     },
     {
       "path": "../ui-components"
