@@ -10,7 +10,7 @@ from jupyterlab_server.process_app import ProcessApp
 HERE = osp.dirname(osp.realpath(__file__))
 
 
-def _jupyter_server_extension_paths():
+def _jupyter_server_extension_points():
     return [
         {
             'module': __name__,

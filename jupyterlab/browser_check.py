@@ -183,12 +183,12 @@ if __name__ == '__main__':
     if skip_option in sys.argv:
         BrowserApp.test_browser = False
         sys.argv.remove(skip_option)
-    def _jupyter_server_extension_paths():
+    def _jupyter_server_extension_points():
         return [
             {
                 'module': __name__,
                 'app': BrowserApp
             }
         ]
-    sys.modules[__name__]._jupyter_server_extension_paths = _jupyter_server_extension_paths
+    sys.modules[__name__]._jupyter_server_extension_points = _jupyter_server_extension_points
     BrowserApp.launch_instance()

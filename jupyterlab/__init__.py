@@ -6,7 +6,7 @@
 from ._version import __version__
 from .labapp import LabApp
 
-def _jupyter_server_extension_paths():
+def _jupyter_server_extension_points():
     return [
         {
             'module': 'jupyterlab',

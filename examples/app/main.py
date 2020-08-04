@@ -16,7 +16,7 @@ os.environ["JUPYTER_NO_CONFIG"]="1"
 with open(os.path.join(HERE, 'package.json')) as fid:
     version = json.load(fid)['version']
 
-def _jupyter_server_extension_paths():
+def _jupyter_server_extension_points():
     return [
         {
             'module': __name__,

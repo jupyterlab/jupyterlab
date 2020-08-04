@@ -14,7 +14,7 @@ from traitlets import Unicode
 
 HERE = osp.dirname(__file__)
 
-def _jupyter_server_extension_paths():
+def _jupyter_server_extension_points():
     return [
         {
             'module': __name__,

@@ -53,7 +53,7 @@ def main():
             run_test(self.serverapp, run_browser)
             super().initialize_settings()
 
-        def _jupyter_server_extension_paths():
+        def _jupyter_server_extension_points():
             return [
                 {
                     'module': __name__,
@@ -61,7 +61,7 @@ def main():
                 }
             ]
 
-        mod._jupyter_server_extension_paths = _jupyter_server_extension_paths
+        mod._jupyter_server_extension_points = _jupyter_server_extension_points
 
     App.__name__ = osp.basename(example_dir).capitalize() + 'Test'
     App.launch_instance()
