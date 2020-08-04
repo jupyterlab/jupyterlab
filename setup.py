@@ -33,7 +33,7 @@ Make sure you have pip >= 9.0.1.
 
 
 NAME = 'jupyterlab'
-DESCRIPTION = 'The JupyterLab notebook server extension.'
+DESCRIPTION = 'The JupyterLab server extension.'
 
 with open(pjoin(HERE, 'README.md')) as fid:
     LONG_DESCRIPTION = fid.read()
@@ -43,8 +43,8 @@ data_files_spec = [
     ('share/jupyter/lab/static', '%s/static' % NAME, '**'),
     ('share/jupyter/lab/schemas', '%s/schemas' % NAME, '**'),
     ('share/jupyter/lab/themes', '%s/themes' % NAME, '**'),
-    ('etc/jupyter/jupyter_notebook_config.d',
-     'jupyter-config/jupyter_notebook_config.d', 'jupyterlab.json'),
+    ('etc/jupyter/jupyter_server_config.d',
+     'jupyter-config/jupyter_server_config.d', 'jupyterlab.json'),
 ]
 
 package_data_spec = dict()
