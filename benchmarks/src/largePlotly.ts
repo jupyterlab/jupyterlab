@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
 import makeNotebook from './makeNotebook';
 import waitForPlotly from './waitForPlotly';
 import NotebookType from './notebookType';

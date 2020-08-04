@@ -1,4 +1,8 @@
-import playwright from 'playwright';
+/**
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
+ */
+import * as playwright from 'playwright';
 
 /**
  * Wait for width to be changed to greater than the default of 700px which happens after rendering is done.

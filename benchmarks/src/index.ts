@@ -1,13 +1,15 @@
 /**
+ * Copyright (c) Jupyter Development Team.
+ * Distributed under the terms of the Modified BSD License.
  * Runs a number of benchmarks and saves the results to the
  */
-import child_process from 'child_process';
-import fs from 'fs';
-import playwright from 'playwright';
-import util from 'util';
+import * as child_process from 'child_process';
+import * as fs from 'fs';
+import * as playwright from 'playwright';
+import * as util from 'util';
 import NotebookType from './notebookType';
 
-const DATA_PATH = 'out.csv';
+const DATA_PATH = process.env['BENCHMARK_OUTPUT'] || 'out.csv';
 
 const BROWSERS: Array<'firefox' | 'chromium'> = ['firefox', 'chromium'];
 // The maximium N
@@ -15,7 +17,7 @@ const MAX_N = 100;
 // The number of different n's to try out
 const NUMBER_SAMPLES = 20;
 // How many times to switch between each notebook
-const SWITCHES = 5;
+const SWITCHES = 10;
 
 /**
  * Max time to stop testing if mean of previous sample was > this.
