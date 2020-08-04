@@ -148,13 +148,12 @@ setup_args = dict(
 )
 
 
-# TODO(@echarles) Pin to released versions once available.
 setup_args['install_requires'] = [
-    'notebook>=4.3.1',
+    'ipython',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
-    'jupyterlab_server@ git+https://github.com/datalayer-contrib/jupyterlab-server@jupyter_server',
-    'jupyter_server@ git+https://github.com/jupyter/jupyter_server.git@master',
-    'nbclassic@ git+https://github.com/Zsailer/nbclassic@master',
+    'jupyterlab_server>=2.0.0a1',
+    'jupyter_server>=1.0.0rc3',
+    'nbclassic>=0.2.0rc3',
     'jinja2>=2.10'
 ]
 

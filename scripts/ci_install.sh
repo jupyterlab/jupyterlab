@@ -10,20 +10,6 @@ set -o pipefail
 sudo rm -rf $(which yarn)
 ! yarn
 
-## TOD(@echarles) Remove this once deps are released
-git clone https://github.com/jupyter/jupyter_server.git --depth 1 && \
-  cd jupyter_server && \
-  pip install -e .[test] && \
-  cd ..
-git clone https://github.com/Zsailer/nbclassic.git --depth 1 && \
-  cd nbclassic && \
-  pip install -e .[test] && \
-  cd ..
-git clone https://github.com/datalayer-contrib/jupyterlab-server.git --branch jupyter_server --depth 1 && \
-  cd jupyterlab-server && \
-  pip install -e .[test] && \
-  cd ..
-
 # create jupyter base dir (needed for config retrieval)
 mkdir ~/.jupyter
 
