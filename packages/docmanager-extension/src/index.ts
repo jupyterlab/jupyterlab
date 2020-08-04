@@ -87,7 +87,7 @@ const pluginId = '@jupyterlab/docmanager-extension:plugin';
 const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
   id: pluginId,
   provides: IDocumentManager,
-  requires: [ISettingRegistry, ILabShell],
+  requires: [ISettingRegistry],
   optional: [
     ILabStatus,
     ICommandPalette,
@@ -98,7 +98,6 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    shell: ILabShell,
     status: ILabStatus | null,
     palette: ICommandPalette | null,
     labShell: ILabShell | null,
@@ -117,9 +116,9 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
           ...widget.title.dataset
         };
         if (!widget.isAttached) {
-          shell.add(widget, 'main', options || {});
+          app.shell.add(widget, 'main', options || {});
         }
-        shell.activateById(widget.id);
+        app.shell.activateById(widget.id);
 
         // Handle dirty state for open documents.
         const context = docManager.contextForWidget(widget);
@@ -248,8 +247,8 @@ ${fileTypes}`;
     // regenerate the settings description with the available options.
     registry.changed.connect(() => settingRegistry.reload(pluginId));
 
-    docManager.mode = shell.mode;
-    shell.modeChanged.connect((_, args) => {
+    docManager.mode = labShell!.mode;
+    labShell!.modeChanged.connect((_, args) => {
       docManager.mode = args as string;
     });
 
