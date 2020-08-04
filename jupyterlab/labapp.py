@@ -269,8 +269,9 @@ class LabWorkspaceExportApp(JupyterApp):
             print('Too many arguments were provided for workspace export.')
             self.exit(1)
 
+        workspaces_url = ujoin(app_url, 'workspaces')
         raw = (app_url if not self.extra_args
-               else ujoin(app.workspaces_url, self.extra_args[0]))
+               else ujoin(workspaces_url, self.extra_args[0]))
         slug = slugify(raw, base_url)
         workspace_path = pjoin(directory, slug + WORKSPACE_EXTENSION)
 
