@@ -491,7 +491,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
     override_theme_url = Unicode(config=True, help=('The override url for static lab theme assets, typically a CDN.'))
 
-    app_dir = Unicode(get_app_dir(), config=True,
+    app_dir = Unicode(None, config=True,
         help="The app directory to launch JupyterLab from.")
 
     user_settings_dir = Unicode(get_user_settings_dir(), config=True,
@@ -520,6 +520,17 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
     expose_app_in_browser = Bool(False, config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab")
+
+    @default('app_dir')
+    def _default_app_dir(self):
+        app_dir = get_app_dir()
+        if self.core_mode:
+            app_dir = HERE 
+            self.log.info('Running JupyterLab in core mode')
+        elif self.dev_mode:
+            app_dir = DEV_DIR
+            self.log.info('Running JupyterLab in dev mode')
+        return app_dir
 
     @default('app_settings_dir')
     def _default_app_settings_dir(self):
@@ -584,7 +595,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             self.log.warn('Conflicting modes, choosing dev_mode over core_mode')
             self.core_mode = False
 
-        # Set the paths based on jupyterlab's mode.
+        # Set the paths based on JupyterLab's mode.
         if self.dev_mode:
             dev_static_dir = ujoin(DEV_DIR, 'static')
             self.static_paths = [dev_static_dir]
