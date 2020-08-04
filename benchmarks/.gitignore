@@ -1,3 +1,5 @@
 yarn.lock
 data/
 out.*
+*.csv
+*.png
