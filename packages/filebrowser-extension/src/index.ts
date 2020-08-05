@@ -266,7 +266,6 @@ async function activateFactory(
         ) {
           return Private.createLauncher(commands, widget);
         } else {
-          // TODO: Debug focus and popup blocker issues here.
           const newUrl = PageConfig.getUrl({
             mode: labShell.mode,
             workspace: 'default',
