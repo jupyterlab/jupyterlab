@@ -275,7 +275,8 @@ async function activateFactory(
           window.open(newUrl, '_blank');
         }
       },
-      tooltip: 'New Launcher'
+      tooltip: 'New Launcher',
+      actualOnClick: true
     });
     widget.toolbar.insertItem(0, 'launch', launcher);
 
