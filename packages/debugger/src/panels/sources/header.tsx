@@ -3,6 +3,8 @@
 
 import { ReactWidget, Toolbar, UseSignal } from '@jupyterlab/apputils';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { IDebugger } from '../../tokens';
@@ -18,14 +20,16 @@ export class SourcesHeader extends Widget {
    *
    * @param model The model for the Sources.
    */
-  constructor(model: IDebugger.Model.ISources) {
+  constructor(model: IDebugger.Model.ISources, translator?: ITranslator) {
     super({ node: document.createElement('header') });
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
 
     const layout = new PanelLayout();
     this.layout = layout;
 
     const title = new Widget({ node: document.createElement('h2') });
-    title.node.textContent = 'Source';
+    title.node.textContent = trans.__('Source');
 
     const sourcePath = ReactWidget.create(
       <SourcePathComponent model={model} />

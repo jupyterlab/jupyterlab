@@ -3,6 +3,7 @@
 
 import { ISanitizer } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { TagsToolComponent } from './tagstool';
@@ -26,6 +27,11 @@ interface IOptions {
    * Tag tool component.
    */
   tagTool?: TagsToolComponent;
+
+  /**
+   * The application language translator.
+   */
+  translator?: ITranslator;
 }
 
 /**
@@ -53,6 +59,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._notebook = notebook;
     this.sanitizer = options.sanitizer;
     this.storeTags = [];
+    this.translator = options.translator || nullTranslator;
     this._collapseChanged = new Signal<this, Registry.ICollapseChangedArgs>(
       this
     );
@@ -220,6 +227,7 @@ class OptionsManager extends Registry.IOptionsManager {
   private _widget: TableOfContents;
   private _collapseChanged: Signal<this, Registry.ICollapseChangedArgs>;
   private _tagTool: TagsToolComponent | null = null;
+  translator: ITranslator; // FIXME-TRANS:
   public storeTags: string[];
 }
 

@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { ITranslator } from '@jupyterlab/translation';
+
 import { Message, MessageLoop } from '@lumino/messaging';
 
 import { BoxLayout, Widget } from '@lumino/widgets';
@@ -254,6 +256,11 @@ export namespace MainAreaWidget {
      * An optional promise for when the content is ready to be revealed.
      */
     reveal?: Promise<any>;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**

@@ -39,6 +39,9 @@
       "path": "../services"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     },
     {
@@ -82,6 +85,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"

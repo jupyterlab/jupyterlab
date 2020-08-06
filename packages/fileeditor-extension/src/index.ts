@@ -36,6 +36,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
+import { ITranslator } from '@jupyterlab/translation';
+
 import { JSONObject } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
@@ -50,7 +52,12 @@ export { Commands } from './commands';
 const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
   activate,
   id: '@jupyterlab/fileeditor-extension:plugin',
-  requires: [IEditorServices, IFileBrowserFactory, ISettingRegistry],
+  requires: [
+    IEditorServices,
+    IFileBrowserFactory,
+    ISettingRegistry,
+    ITranslator
+  ],
   optional: [
     IConsoleTracker,
     ICommandPalette,
@@ -70,14 +77,16 @@ const plugin: JupyterFrontEndPlugin<IEditorTracker> = {
 export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/fileeditor-extension:tab-space-status',
   autoStart: true,
-  requires: [IEditorTracker, ISettingRegistry],
+  requires: [IEditorTracker, ISettingRegistry, ITranslator],
   optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
     editorTracker: IEditorTracker,
     settingRegistry: ISettingRegistry,
+    translator: ITranslator,
     statusBar: IStatusBar | null
   ) => {
+    const trans = translator.load('jupyterlab');
     if (!statusBar) {
       // Automatically disable if statusbar missing
       return;
@@ -89,20 +98,20 @@ export const tabSpaceStatus: JupyterFrontEndPlugin<void> = {
     const args: JSONObject = {
       insertSpaces: false,
       size: 4,
-      name: 'Indent with Tab'
+      name: trans.__('Indent with Tab')
     };
     menu.addItem({ command, args });
     for (const size of [1, 2, 4, 8]) {
       const args: JSONObject = {
         insertSpaces: true,
         size,
-        name: `Spaces: ${size} `
+        name: trans._n('Spaces: %1', 'Spaces: %1', size)
       };
       menu.addItem({ command, args });
     }
 
     // Create the status item.
-    const item = new TabSpaceStatus({ menu });
+    const item = new TabSpaceStatus({ menu, translator });
 
     // Keep a reference to the code editor config from the settings system.
     const updateSettings = (settings: ISettingRegistry.ISettings): void => {
@@ -150,6 +159,7 @@ function activate(
   editorServices: IEditorServices,
   browserFactory: IFileBrowserFactory,
   settingRegistry: ISettingRegistry,
+  translator: ITranslator,
   consoleTracker: IConsoleTracker | null,
   palette: ICommandPalette | null,
   launcher: ILauncher | null,
@@ -158,6 +168,7 @@ function activate(
   sessionDialogs: ISessionContextDialogs | null
 ): IEditorTracker {
   const id = plugin.id;
+  const trans = translator.load('jupyterlab');
   const namespace = 'editor';
   const factory = new FileEditorFactory({
     editorServices,
@@ -218,6 +229,7 @@ function activate(
   Commands.addCommands(
     commands,
     settingRegistry,
+    trans,
     id,
     isEnabled,
     tracker,
@@ -226,11 +238,11 @@ function activate(
 
   // Add a launcher item if the launcher is available.
   if (launcher) {
-    Commands.addLauncherItems(launcher);
+    Commands.addLauncherItems(launcher, trans);
   }
 
   if (palette) {
-    Commands.addPaletteItems(palette);
+    Commands.addPaletteItems(palette, trans);
   }
 
   if (menu) {
@@ -238,6 +250,7 @@ function activate(
       menu,
       commands,
       tracker,
+      trans,
       consoleTracker,
       sessionDialogs
     );

@@ -26,6 +26,7 @@ import { Widget } from '@lumino/widgets';
 import * as React from 'react';
 
 import { showDialog, Dialog } from './dialog';
+import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * A context object to manage a widget's kernel session connection.
@@ -279,7 +280,10 @@ export namespace ISessionContext {
     /**
      * Select a kernel for the session.
      */
-    selectKernel(session: ISessionContext): Promise<void>;
+    selectKernel(
+      session: ISessionContext,
+      translator?: ITranslator
+    ): Promise<void>;
 
     /**
      * Restart the session context.
@@ -292,7 +296,10 @@ export namespace ISessionContext {
      * kernel name and resolves with `true`. If no kernel has been started,
      * this is a no-op, and resolves with `false`.
      */
-    restart(session: ISessionContext): Promise<boolean>;
+    restart(
+      session: ISessionContext,
+      translator?: ITranslator
+    ): Promise<boolean>;
   }
 }
 
@@ -1169,7 +1176,10 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
   /**
    * Select a kernel for the session.
    */
-  async selectKernel(sessionContext: ISessionContext): Promise<void> {
+  async selectKernel(
+    sessionContext: ISessionContext,
+    translator?: ITranslator
+  ): Promise<void> {
     if (sessionContext.isDisposed) {
       return Promise.resolve();
     }
@@ -1217,7 +1227,10 @@ export const sessionContextDialogs: ISessionContext.IDialogs = {
    * If there is no kernel, we start a kernel with the last run
    * kernel name and resolves with `true`.
    */
-  async restart(sessionContext: ISessionContext): Promise<boolean> {
+  async restart(
+    sessionContext: ISessionContext,
+    translator?: ITranslator
+  ): Promise<boolean> {
     await sessionContext.initialize();
     if (sessionContext.isDisposed) {
       throw new Error('session already disposed');

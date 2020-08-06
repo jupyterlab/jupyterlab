@@ -15,6 +15,12 @@ import {
 
 import { ISchemaValidator } from '@jupyterlab/settingregistry';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { ReadonlyJSONObject } from '@lumino/coreutils';
 
 import { RawEditor } from './raweditor';
@@ -24,18 +30,23 @@ import { RawEditor } from './raweditor';
  */
 export function createInspector(
   editor: RawEditor,
-  rendermime?: IRenderMimeRegistry
+  rendermime?: IRenderMimeRegistry,
+  translator?: ITranslator
 ): InspectorPanel {
-  const connector = new InspectorConnector(editor);
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
+  const connector = new InspectorConnector(editor, translator);
   const inspector = new InspectorPanel({
-    initialContent: 'Any errors will be listed here'
+    initialContent: trans.__('Any errors will be listed here'),
+    translator: translator
   });
   const handler = new InspectionHandler({
     connector,
     rendermime:
       rendermime ||
       new RenderMimeRegistry({
-        initialFactories: standardRendererFactories
+        initialFactories: standardRendererFactories,
+        translator: translator
       })
   });
 
@@ -59,9 +70,11 @@ class InspectorConnector extends DataConnector<
   void,
   InspectionHandler.IRequest
 > {
-  constructor(editor: RawEditor) {
+  constructor(editor: RawEditor, translator?: ITranslator) {
     super();
+    this.translator = translator || nullTranslator;
     this._editor = editor;
+    this._trans = this.translator.load('jupyterlab');
   }
 
   /**
@@ -81,7 +94,7 @@ class InspectorConnector extends DataConnector<
 
         if (!errors) {
           return resolve({
-            data: { 'text/markdown': 'No errors found' },
+            data: { 'text/markdown': this._trans.__('No errors found') },
             metadata: {}
           });
         }
@@ -103,6 +116,8 @@ class InspectorConnector extends DataConnector<
     return validator.validateData({ data, id, raw, schema, version }, false);
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _current = 0;
   private _editor: RawEditor;
 }

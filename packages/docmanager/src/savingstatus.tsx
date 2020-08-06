@@ -11,6 +11,8 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 
 import { TextItem } from '@jupyterlab/statusbar';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { Widget } from '@lumino/widgets';
 
 /**
@@ -25,6 +27,11 @@ namespace SavingStatusComponent {
      * The current saving status.
      */
     fileStatus: DocumentRegistry.SaveState | null;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -38,7 +45,9 @@ namespace SavingStatusComponent {
 function SavingStatusComponent(
   props: SavingStatusComponent.IProps
 ): React.ReactElement<SavingStatusComponent.IProps> {
-  return <TextItem source={`Saving ${props.fileStatus}`} />;
+  const translator = props.translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
+  return <TextItem source={trans.__('Saving %1', props.fileStatus)} />;
 }
 
 /**
@@ -56,6 +65,7 @@ export class SavingStatus extends VDomRenderer<SavingStatus.Model> {
    */
   constructor(opts: SavingStatus.IOptions) {
     super(new SavingStatus.Model(opts.docManager));
+    this.translator = opts.translator || nullTranslator;
   }
 
   /**
@@ -65,9 +75,16 @@ export class SavingStatus extends VDomRenderer<SavingStatus.Model> {
     if (this.model === null || this.model.status === null) {
       return null;
     } else {
-      return <SavingStatusComponent fileStatus={this.model.status} />;
+      return (
+        <SavingStatusComponent
+          fileStatus={this.model.status}
+          translator={this.translator}
+        />
+      );
     }
   }
+
+  private translator?: ITranslator;
 }
 
 /**
@@ -157,5 +174,10 @@ export namespace SavingStatus {
      * The application document manager.
      */
     docManager: IDocumentManager;
+
+    /**
+     * The aplication language translator.
+     */
+    translator?: ITranslator;
   }
 }

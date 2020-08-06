@@ -22,6 +22,7 @@ import { Message } from '@lumino/messaging';
 import { Panel } from '@lumino/widgets';
 
 import { CodeConsole } from './widget';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 
 /**
  * The class name added to console panels.
@@ -46,8 +47,12 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
       name,
       manager,
       modelFactory,
-      sessionContext
+      sessionContext,
+      translator
     } = options;
+    this.translator = translator || nullTranslator;
+    const trans = this.translator.load('jupyterlab');
+
     const contentFactory = (this.contentFactory =
       options.contentFactory || ConsolePanel.defaultContentFactory);
     const count = Private.count++;
@@ -61,7 +66,7 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
         sessionManager: manager.sessions,
         specsManager: manager.kernelspecs,
         path,
-        name: name || `Console ${count}`,
+        name: name || trans.__('Console %1', count),
         type: 'console',
         kernelPreference: options.kernelPreference,
         setBusy: options.setBusy
@@ -156,9 +161,10 @@ export class ConsolePanel extends MainAreaWidget<Panel> {
    * Update the console panel title.
    */
   private _updateTitlePanel(): void {
-    Private.updateTitle(this, this._connected, this._executed);
+    Private.updateTitle(this, this._connected, this._executed, this.translator);
   }
 
+  translator: ITranslator;
   private _executed: Date | null = null;
   private _connected: Date | null = null;
   private _sessionContext: ISessionContext;
@@ -221,6 +227,11 @@ export namespace ConsolePanel {
      * The service used to look up mime types.
      */
     mimeTypeService: IEditorMimeTypeService;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
 
     /**
      * A function to call when the kernel is busy.
@@ -291,24 +302,34 @@ namespace Private {
   export function updateTitle(
     panel: ConsolePanel,
     connected: Date | null,
-    executed: Date | null
+    executed: Date | null,
+    translator?: ITranslator
   ) {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+
     const sessionContext = panel.console.sessionContext.session;
     if (sessionContext) {
+      // FIXME:
       let caption =
-        `Name: ${sessionContext.name}\n` +
-        `Directory: ${PathExt.dirname(sessionContext.path)}\n` +
-        `Kernel: ${panel.console.sessionContext.kernelDisplayName}`;
+        trans.__('Name: %1\n', sessionContext.name) +
+        trans.__('Directory: %1\n', PathExt.dirname(sessionContext.path)) +
+        trans.__('Kernel: %1', panel.console.sessionContext.kernelDisplayName);
+
       if (connected) {
-        caption += `\nConnected: ${Time.format(connected.toISOString())}`;
+        caption += trans.__(
+          '\nConnected: %1',
+          Time.format(connected.toISOString())
+        );
       }
+
       if (executed) {
-        caption += `\nLast Execution: ${Time.format(executed.toISOString())}`;
+        caption += trans.__('\nLast Execution: %1');
       }
       panel.title.label = sessionContext.name;
       panel.title.caption = caption;
     } else {
-      panel.title.label = 'Console';
+      panel.title.label = trans.__('Console');
       panel.title.caption = '';
     }
   }

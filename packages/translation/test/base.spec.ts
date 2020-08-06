@@ -3,11 +3,10 @@
 
 import 'jest';
 
-import { DefaultTranslator } from '@jupyterlab/translation';
+import { nullTranslator } from '@jupyterlab/translation';
 
 describe('@jupyterlab/translation', () => {
-  const translator = DefaultTranslator.getInstance();
-  const trans = translator.load('some-domain');
+  const trans = nullTranslator.load('some-domain');
 
   describe('BasicTranslator', () => {
     describe('#getInstance', () => {

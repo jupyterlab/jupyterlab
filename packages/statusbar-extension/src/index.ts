@@ -45,6 +45,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { ITranslator } from '@jupyterlab/translation';
+
 import { Title, Widget } from '@lumino/widgets';
 
 export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
@@ -54,15 +56,18 @@ export const STATUSBAR_PLUGIN_ID = '@jupyterlab/statusbar-extension:plugin';
  */
 const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
   id: STATUSBAR_PLUGIN_ID,
+  requires: [ITranslator],
   provides: IStatusBar,
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
+    translator: ITranslator,
     labShell: ILabShell | null,
     settingRegistry: ISettingRegistry | null,
     mainMenu: IMainMenu | null,
     palette: ICommandPalette | null
   ) => {
+    const trans = translator.load('jupyterlab');
     const statusBar = new StatusBar();
     statusBar.id = 'jp-main-statusbar';
     app.shell.add(statusBar, 'bottom');
@@ -74,11 +79,11 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
       });
     }
 
-    const category: string = 'Main Area';
+    const category: string = trans.__('Main Area');
     const command: string = 'statusbar:toggle';
 
     app.commands.addCommand(command, {
-      label: 'Show Status Bar',
+      label: trans.__('Show Status Bar'),
       execute: (args: any) => {
         statusBar.setHidden(statusBar.isVisible);
         if (settingRegistry) {
@@ -143,7 +148,13 @@ const statusBar: JupyterFrontEndPlugin<IStatusBar> = {
 export const kernelStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:kernel-status',
   autoStart: true,
-  requires: [IStatusBar, INotebookTracker, IConsoleTracker, ILabShell],
+  requires: [
+    IStatusBar,
+    INotebookTracker,
+    IConsoleTracker,
+    ILabShell,
+    ITranslator
+  ],
   optional: [ISessionContextDialogs],
   activate: (
     app: JupyterFrontEnd,
@@ -151,6 +162,7 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
     notebookTracker: INotebookTracker,
     consoleTracker: IConsoleTracker,
     labShell: ILabShell,
+    translator: ITranslator,
     sessionDialogs: ISessionContextDialogs | null
   ) => {
     // When the status item is clicked, launch the kernel
@@ -161,14 +173,13 @@ export const kernelStatus: JupyterFrontEndPlugin<void> = {
         return;
       }
       await (sessionDialogs || sessionContextDialogs).selectKernel(
-        currentSession
+        currentSession,
+        translator
       );
     };
 
     // Create the status item.
-    const item = new KernelStatus({
-      onClick: changeKernel
-    });
+    const item = new KernelStatus({ onClick: changeKernel }, translator);
 
     // When the title of the active widget changes, update the label
     // of the hover text.
@@ -229,7 +240,8 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
     INotebookTracker,
     IEditorTracker,
     IConsoleTracker,
-    ILabShell
+    ILabShell,
+    ITranslator
   ],
   activate: (
     _: JupyterFrontEnd,
@@ -237,9 +249,10 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
     notebookTracker: INotebookTracker,
     editorTracker: IEditorTracker,
     consoleTracker: IConsoleTracker,
-    labShell: ILabShell
+    labShell: ILabShell,
+    translator: ITranslator
   ) => {
-    const item = new LineCol();
+    const item = new LineCol(translator);
 
     const onActiveCellChanged = (notebook: Notebook, cell: Cell) => {
       item.model!.editor = cell && cell.editor;
@@ -317,9 +330,13 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
 export const memoryUsageItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:memory-usage-status',
   autoStart: true,
-  requires: [IStatusBar],
-  activate: (app: JupyterFrontEnd, statusBar: IStatusBar) => {
-    const item = new MemoryUsage();
+  requires: [IStatusBar, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    statusBar: IStatusBar,
+    translator: ITranslator
+  ) => {
+    const item = new MemoryUsage(translator);
 
     statusBar.registerStatusItem(
       '@jupyterlab/statusbar-extension:memory-usage-status',
@@ -341,11 +358,16 @@ export const memoryUsageItem: JupyterFrontEndPlugin<void> = {
 export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/statusbar-extension:running-sessions-status',
   autoStart: true,
-  requires: [IStatusBar],
-  activate: (app: JupyterFrontEnd, statusBar: IStatusBar) => {
+  requires: [IStatusBar, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    statusBar: IStatusBar,
+    translator: ITranslator
+  ) => {
     const item = new RunningSessions({
       onClick: () => app.shell.activateById('jp-running-sessions'),
-      serviceManager: app.serviceManager
+      serviceManager: app.serviceManager,
+      translator
     });
 
     statusBar.registerStatusItem(

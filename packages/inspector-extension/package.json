@@ -42,6 +42,7 @@
     "@jupyterlab/inspector": "^3.0.0-alpha.8",
     "@jupyterlab/launcher": "^3.0.0-alpha.8",
     "@jupyterlab/notebook": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
     "@jupyterlab/ui-components": "^3.0.0-alpha.8"
   },
   "devDependencies": {

@@ -17,6 +17,8 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { ITranslator } from '@jupyterlab/translation';
+
 import { AttachedProperty } from '@lumino/properties';
 
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
@@ -26,7 +28,7 @@ import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
  */
 export const foreign: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/console-extension:foreign',
-  requires: [IConsoleTracker, ISettingRegistry],
+  requires: [IConsoleTracker, ISettingRegistry, ITranslator],
   optional: [ICommandPalette],
   activate: activateForeign,
   autoStart: true
@@ -38,8 +40,10 @@ function activateForeign(
   app: JupyterFrontEnd,
   tracker: IConsoleTracker,
   settingRegistry: ISettingRegistry,
+  translator: ITranslator,
   palette: ICommandPalette | null
 ) {
+  const trans = translator.load('jupyterlab');
   const { shell } = app;
   tracker.widgetAdded.connect((sender, widget) => {
     const console = widget.console;
@@ -64,7 +68,7 @@ function activateForeign(
   });
 
   const { commands } = app;
-  const category = 'Console';
+  const category = trans.__('Console');
   const toggleShowAllActivity = 'console:toggle-show-all-kernel-activity';
 
   // Get the current widget and activate unless the args specify otherwise.
@@ -78,7 +82,7 @@ function activateForeign(
   }
 
   commands.addCommand(toggleShowAllActivity, {
-    label: args => 'Show All Kernel Activity',
+    label: args => trans.__('Show All Kernel Activity'),
     execute: args => {
       const current = getCurrent(args);
       if (!current) {

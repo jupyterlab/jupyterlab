@@ -38,6 +38,9 @@
     },
     {
       "path": "../settingregistry"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

@@ -21,6 +21,8 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { ITranslator } from '@jupyterlab/translation';
+
 import { Menu } from '@lumino/widgets';
 
 namespace CommandIDs {
@@ -38,14 +40,16 @@ namespace CommandIDs {
  */
 export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
   id: '@jupyterlab/apputils-extension:themes',
-  requires: [ISettingRegistry, JupyterFrontEnd.IPaths],
+  requires: [ISettingRegistry, JupyterFrontEnd.IPaths, ITranslator],
   optional: [ISplashScreen],
   activate: (
     app: JupyterFrontEnd,
     settings: ISettingRegistry,
     paths: JupyterFrontEnd.IPaths,
+    translator: ITranslator,
     splash: ISplashScreen | null
   ): IThemeManager => {
+    const trans = translator.load('jupyterlab');
     const host = app.shell;
     const commands = app.commands;
     const url = URLExt.join(paths.urls.base, paths.urls.themes);
@@ -88,7 +92,10 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
     commands.addCommand(CommandIDs.changeTheme, {
       label: args => {
         const theme = args['theme'] as string;
-        return args['isPalette'] ? `Use ${theme} Theme` : theme;
+        const displayName = manager.getDisplayName(theme);
+        return args['isPalette']
+          ? trans.__('Use Theme: %1', displayName)
+          : displayName;
       },
       isToggled: args => args['theme'] === currentTheme,
       execute: args => {
@@ -101,18 +108,18 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
     });
 
     commands.addCommand(CommandIDs.themeScrollbars, {
-      label: 'Theme Scrollbars',
+      label: trans.__('Theme Scrollbars'),
       isToggled: () => manager.isToggledThemeScrollbars(),
       execute: () => manager.toggleThemeScrollbars()
     });
 
     commands.addCommand(CommandIDs.incrFontSize, {
-      label: args => `Increase ${args['label']} Font Size`,
+      label: args => `${args['label']}`, // args['label'] is localized
       execute: args => manager.incrFontSize(args['key'] as string)
     });
 
     commands.addCommand(CommandIDs.decrFontSize, {
-      label: args => `Decrease ${args['label']} Font Size`,
+      label: args => `${args['label']}`, // args['label'] is localized
       execute: args => manager.decrFontSize(args['key'] as string)
     });
 
@@ -132,20 +139,22 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
  */
 export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:themes-palette-menu',
-  requires: [IThemeManager],
+  requires: [IThemeManager, ITranslator],
   optional: [ICommandPalette, IMainMenu],
   activate: (
     app: JupyterFrontEnd,
     manager: IThemeManager,
+    translator: ITranslator,
     palette: ICommandPalette | null,
     mainMenu: IMainMenu | null
   ): void => {
+    const trans = translator.load('jupyterlab');
     const commands = app.commands;
 
     // If we have a main menu, add the theme manager to the settings menu.
     if (mainMenu) {
       const themeMenu = new Menu({ commands });
-      themeMenu.title.label = 'JupyterLab Theme';
+      themeMenu.title.label = trans.__('JupyterLab Theme');
       void app.restored.then(() => {
         const isPalette = false;
 
@@ -165,33 +174,51 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         // increase/decrease code font size
         themeMenu.addItem({
           command: CommandIDs.incrFontSize,
-          args: { label: 'Code', key: 'code-font-size' }
+          args: {
+            label: trans.__('Increase Code Font Size'),
+            key: 'code-font-size'
+          }
         });
         themeMenu.addItem({
           command: CommandIDs.decrFontSize,
-          args: { label: 'Code', key: 'code-font-size' }
+          args: {
+            label: trans.__('Decrease Code Font Size'),
+            key: 'code-font-size'
+          }
         });
         themeMenu.addItem({ type: 'separator' });
 
         // increase/decrease content font size
         themeMenu.addItem({
           command: CommandIDs.incrFontSize,
-          args: { label: 'Content', key: 'content-font-size1' }
+          args: {
+            label: trans.__('Increase Content Font Size'),
+            key: 'content-font-size1'
+          }
         });
         themeMenu.addItem({
           command: CommandIDs.decrFontSize,
-          args: { label: 'Content', key: 'content-font-size1' }
+          args: {
+            label: trans.__('Decrease Content Font Size'),
+            key: 'content-font-size1'
+          }
         });
         themeMenu.addItem({ type: 'separator' });
 
         // increase/decrease ui font size
         themeMenu.addItem({
           command: CommandIDs.incrFontSize,
-          args: { label: 'UI', key: 'ui-font-size1' }
+          args: {
+            label: trans.__('Increase UI Font Size'),
+            key: 'ui-font-size1'
+          }
         });
         themeMenu.addItem({
           command: CommandIDs.decrFontSize,
-          args: { label: 'UI', key: 'ui-font-size1' }
+          args: {
+            label: trans.__('Decrease UI Font Size'),
+            key: 'ui-font-size1'
+          }
         });
       });
       mainMenu.settingsMenu.addGroup(
@@ -208,7 +235,7 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
     // If we have a command palette, add theme switching options to it.
     if (palette) {
       void app.restored.then(() => {
-        const category = 'Theme';
+        const category = trans.__('Theme');
         const command = CommandIDs.changeTheme;
         const isPalette = true;
 
@@ -223,34 +250,52 @@ export const themesPaletteMenuPlugin: JupyterFrontEndPlugin<void> = {
         // increase/decrease code font size
         palette.addItem({
           command: CommandIDs.incrFontSize,
-          args: { label: 'Code', key: 'code-font-size' },
+          args: {
+            label: trans.__('Increase Code Font Size'),
+            key: 'code-font-size'
+          },
           category
         });
         palette.addItem({
           command: CommandIDs.decrFontSize,
-          args: { label: 'Code', key: 'code-font-size' },
+          args: {
+            label: trans.__('Decrease Code Font Size'),
+            key: 'code-font-size'
+          },
           category
         });
         // increase/decrease content font size
         palette.addItem({
           command: CommandIDs.incrFontSize,
-          args: { label: 'Content', key: 'content-font-size1' },
+          args: {
+            label: trans.__('Increase Content Font Size'),
+            key: 'content-font-size1'
+          },
           category
         });
         palette.addItem({
           command: CommandIDs.decrFontSize,
-          args: { label: 'Content', key: 'content-font-size1' },
+          args: {
+            label: trans.__('Decrease Content Font Size'),
+            key: 'content-font-size1'
+          },
           category
         });
         // increase/decrease ui font size
         palette.addItem({
           command: CommandIDs.incrFontSize,
-          args: { label: 'UI', key: 'ui-font-size1' },
+          args: {
+            label: trans.__('Increase UI Font Size'),
+            key: 'ui-font-size1'
+          },
           category
         });
         palette.addItem({
           command: CommandIDs.decrFontSize,
-          args: { label: 'UI', key: 'ui-font-size1' },
+          args: {
+            label: trans.__('Decrease UI Font Size'),
+            key: 'ui-font-size1'
+          },
           category
         });
       });

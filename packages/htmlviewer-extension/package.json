@@ -37,6 +37,7 @@
     "@jupyterlab/apputils": "^3.0.0-alpha.8",
     "@jupyterlab/docregistry": "^3.0.0-alpha.8",
     "@jupyterlab/htmlviewer": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
     "@jupyterlab/ui-components": "^3.0.0-alpha.8"
   },
   "devDependencies": {

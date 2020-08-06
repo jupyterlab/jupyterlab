@@ -565,7 +565,7 @@ describe('docregistry/registry', () => {
 
     describe('#getFileTypeForModel()', () => {
       beforeEach(() => {
-        DocumentRegistry.defaultFileTypes.forEach(ft => {
+        DocumentRegistry.getDefaultFileTypes().forEach(ft => {
           registry.addFileType(ft);
         });
       });
@@ -621,7 +621,7 @@ describe('docregistry/registry', () => {
 
     describe('#getFileTypesForPath()', () => {
       beforeEach(() => {
-        DocumentRegistry.defaultFileTypes.forEach(ft => {
+        DocumentRegistry.getDefaultFileTypes().forEach(ft => {
           registry.addFileType(ft);
         });
       });

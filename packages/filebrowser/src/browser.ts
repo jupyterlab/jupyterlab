@@ -27,6 +27,11 @@ import { FilterFileBrowserModel } from './model';
 import { Uploader } from './upload';
 
 import { FilenameSearcher } from './search';
+import {
+  nullTranslator,
+  TranslationBundle,
+  ITranslator
+} from '@jupyterlab/translation';
 
 /**
  * The class name added to file browsers.
@@ -73,10 +78,13 @@ export class FileBrowser extends Widget {
 
     const model = (this.model = options.model);
     const renderer = options.renderer;
+    const translator = this.translator;
 
     model.connectionFailure.connect(this._onConnectionFailure, this);
+    this.translator = options.translator || nullTranslator;
     this._manager = model.manager;
-    this._crumbs = new BreadCrumbs({ model });
+    this._trans = this.translator.load('jupyterlab');
+    this._crumbs = new BreadCrumbs({ model, translator });
     this.toolbar = new Toolbar<Widget>();
     this._directoryPending = false;
 
@@ -85,28 +93,32 @@ export class FileBrowser extends Widget {
       onClick: () => {
         this.createNewDirectory();
       },
-      tooltip: 'New Folder'
+      tooltip: this._trans.__('New Folder')
     });
-    const uploader = new Uploader({ model });
+    const uploader = new Uploader({ model, translator });
 
     const refresher = new ToolbarButton({
       icon: refreshIcon,
       onClick: () => {
         void model.refresh();
       },
-      tooltip: 'Refresh File List'
+      tooltip: this._trans.__('Refresh File List')
     });
 
     this.toolbar.addItem('newFolder', newFolder);
     this.toolbar.addItem('upload', uploader);
     this.toolbar.addItem('refresher', refresher);
 
-    this._listing = new DirListing({ model, renderer });
+    this._listing = new DirListing({
+      model,
+      renderer,
+      translator: this.translator
+    });
 
     this._filenameSearcher = FilenameSearcher({
       listing: this._listing,
       useFuzzyFilter: this._useFuzzyFilter,
-      placeholder: 'Filter files by name'
+      placeholder: this._trans.__('Filter files by name')
     });
 
     this._crumbs.addClass(CRUMBS_CLASS);
@@ -286,8 +298,11 @@ export class FileBrowser extends Widget {
       args instanceof ServerConnection.ResponseError &&
       args.response.status === 404
     ) {
-      const title = 'Directory not found';
-      args.message = `Directory not found: "${this.model.path}"`;
+      const title = this._trans.__('Directory not found');
+      args.message = this._trans.__(
+        'Directory not found: "%1"',
+        this.model.path
+      );
       void showErrorMessage(title, args);
     }
   }
@@ -312,7 +327,7 @@ export class FileBrowser extends Widget {
     this._filenameSearcher = FilenameSearcher({
       listing: this._listing,
       useFuzzyFilter: this._useFuzzyFilter,
-      placeholder: 'Filter files by name',
+      placeholder: this._trans.__('Filter files by name'),
       forceRefresh: true
     });
     this._filenameSearcher.addClass(FILTERBOX_CLASS);
@@ -329,6 +344,8 @@ export class FileBrowser extends Widget {
   // Override Widget.layout with a more specific PanelLayout type.
   layout: PanelLayout;
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _crumbs: BreadCrumbs;
   private _listing: DirListing;
   private _filenameSearcher: ReactWidget;
@@ -372,5 +389,10 @@ export namespace FileBrowser {
      * browser to be able to save its state.
      */
     restore?: boolean;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }

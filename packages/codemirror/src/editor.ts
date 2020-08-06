@@ -15,6 +15,12 @@ import {
   ICollaborator
 } from '@jupyterlab/observables';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { ArrayExt } from '@lumino/algorithm';
 
 import { JSONExt, UUID } from '@lumino/coreutils';
@@ -103,6 +109,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    */
   constructor(options: CodeMirrorEditor.IOptions) {
     const host = (this.host = options.host);
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
+
     // Attach shadow root to host if host does not have already it.
     const shadowRoot = host.shadowRoot || host.attachShadow({ mode: 'open' });
 
@@ -1041,6 +1050,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * of a collaborator's cursor.
    */
   private _getCaret(collaborator: ICollaborator): HTMLElement {
+    // FIXME-TRANS: Is this localizable?
     const name = collaborator ? collaborator.displayName : 'Anonymous';
     const color = collaborator
       ? collaborator.color
@@ -1096,9 +1106,10 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     }
 
     void showDialog({
-      title: 'Code Editor out of Sync',
-      body:
+      title: this._trans.__('Code Editor out of Sync'),
+      body: this._trans.__(
         'Please open your browser JavaScript console for bug report instructions'
+      )
     });
     console.warn(
       'Please paste the following to https://github.com/jupyterlab/jupyterlab/issues/2951'
@@ -1116,6 +1127,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     );
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _model: CodeEditor.IModel;
   private _editor: CodeMirror.Editor;
   protected selectionMarkers: {
@@ -1164,6 +1177,9 @@ export namespace CodeMirrorEditor {
      * .cm-s-[name] styles is loaded.
      */
     theme?: string;
+
+    // FIXME-TRANS: Handle theme localizable names
+    // themeDisplayName?: string
 
     /**
      * Whether to use the context-sensitive indentation that the mode provides

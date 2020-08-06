@@ -23,6 +23,9 @@
     },
     {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

@@ -12,6 +12,9 @@
       "path": "../docregistry"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "."
     },
     {
@@ -25,6 +28,9 @@
     },
     {
       "path": "../docregistry"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

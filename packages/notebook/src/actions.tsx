@@ -36,21 +36,7 @@ import * as React from 'react';
 import { INotebookModel } from './model';
 
 import { Notebook } from './widget';
-
-// The message to display to the user when prompting to trust the notebook.
-const TRUST_MESSAGE = (
-  <p>
-    A trusted Jupyter notebook may execute hidden malicious code when you open
-    it.
-    <br />
-    Selecting trust will re-render this notebook in a trusted state.
-    <br />
-    For more information, see the
-    <a href="https://jupyter-notebook.readthedocs.io/en/stable/security.html">
-      Jupyter security documentation
-    </a>
-  </p>
-);
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 /**
  * The mimetype used for Jupyter cell data.
@@ -1381,7 +1367,13 @@ export namespace NotebookActions {
    * #### Notes
    * No dialog will be presented if the notebook is already trusted.
    */
-  export function trust(notebook: Notebook): Promise<void> {
+  export function trust(
+    notebook: Notebook,
+    translator?: ITranslator
+  ): Promise<void> {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+
     if (!notebook.model) {
       return Promise.resolve();
     }
@@ -1389,18 +1381,38 @@ export namespace NotebookActions {
 
     const cells = toArray(notebook.model.cells);
     const trusted = cells.every(cell => cell.trusted);
+    // FIXME
+    const trustMessage = (
+      <p>
+        {trans.__(
+          'A trusted Jupyter notebook may execute hidden malicious code when you openit.'
+        )}
+        <br />
+        {trans.__(
+          'Selecting trust will re-render this notebook in a trusted state.'
+        )}
+        <br />
+        {trans.__(
+          'For more information, see the <a href="https://jupyter-notebook.readthedocs.io/en/stable/security.html">%1</a>',
+          trans.__('Jupyter security documentation')
+        )}
+      </p>
+    );
 
     if (trusted) {
       return showDialog({
-        body: 'Notebook is already trusted',
-        buttons: [Dialog.okButton()]
+        body: trans.__('Notebook is already trusted'),
+        buttons: [Dialog.okButton({ label: trans.__('Ok') })]
       }).then(() => undefined);
     }
 
     return showDialog({
-      body: TRUST_MESSAGE,
-      title: 'Trust this notebook?',
-      buttons: [Dialog.cancelButton(), Dialog.warnButton()]
+      body: trustMessage,
+      title: trans.__('Trust this notebook?'),
+      buttons: [
+        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.warnButton({ label: trans.__('Ok') })
+      ] // FIXME?
     }).then(result => {
       if (result.button.accept) {
         cells.forEach(cell => {
@@ -1568,8 +1580,12 @@ namespace Private {
   function runCell(
     notebook: Notebook,
     cell: Cell,
-    sessionContext?: ISessionContext
+    sessionContext?: ISessionContext,
+    translator?: ITranslator
   ): Promise<boolean> {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+
     switch (cell.model.type) {
       case 'markdown':
         (cell as MarkdownCell).rendered = true;
@@ -1580,9 +1596,12 @@ namespace Private {
         if (sessionContext) {
           if (sessionContext.isTerminating) {
             void showDialog({
-              title: 'Kernel Terminating',
-              body: `The kernel for ${sessionContext.session?.path} appears to be terminating. You can not run any cell for now.`,
-              buttons: [Dialog.okButton()]
+              title: trans.__('Kernel Terminating'),
+              body: trans.__(
+                'The kernel for %1 appears to be terminating. You can not run any cell for now.',
+                sessionContext.session?.path
+              ),
+              buttons: [Dialog.okButton({ label: trans.__('Ok') })]
             });
             break;
           }

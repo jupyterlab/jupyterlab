@@ -19,6 +19,5 @@ export class TabsMenu extends JupyterLabMenu implements ITabsMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.menu.title.label = 'Tabs';
   }
 }

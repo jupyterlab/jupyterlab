@@ -35,6 +35,7 @@
   "dependencies": {
     "@jupyterlab/application": "^3.0.0-alpha.8",
     "@jupyterlab/apputils": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/disposable": "^1.3.5",
     "@lumino/signaling": "^1.3.5",

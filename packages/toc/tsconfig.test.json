@@ -30,6 +30,9 @@
       "path": "../rendermime"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     },
     {
@@ -64,6 +67,9 @@
     },
     {
       "path": "../rendermime"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"

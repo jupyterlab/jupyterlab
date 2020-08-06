@@ -2,6 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ToolbarButton, showErrorMessage } from '@jupyterlab/apputils';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { fileUploadIcon } from '@jupyterlab/ui-components';
 
 import { FileBrowserModel } from './model';
@@ -19,9 +24,13 @@ export class Uploader extends ToolbarButton {
       onClick: () => {
         this._input.click();
       },
-      tooltip: 'Upload Files'
+      tooltip: (options.translator || nullTranslator)
+        .load('jupyterlab')
+        .__('Upload Files')
     });
     this.fileBrowserModel = options.model;
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this._input.onclick = this._onInputClicked;
     this._input.onchange = this._onInputChanged;
     this.addClass('jp-id-upload');
@@ -41,7 +50,10 @@ export class Uploader extends ToolbarButton {
     const files = Array.prototype.slice.call(this._input.files) as File[];
     const pending = files.map(file => this.fileBrowserModel.upload(file));
     void Promise.all(pending).catch(error => {
-      void showErrorMessage('Upload Error', error);
+      void showErrorMessage(
+        this._trans._p('showErrorMessage', 'Upload Error'),
+        error
+      );
     });
   };
 
@@ -54,6 +66,8 @@ export class Uploader extends ToolbarButton {
     this._input.value = '';
   };
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _input = Private.createUploadInput();
 }
 
@@ -69,6 +83,11 @@ export namespace Uploader {
      * A file browser fileBrowserModel instance.
      */
     model: FileBrowserModel;
+
+    /**
+     * The language translator.
+     */
+    translator?: ITranslator;
   }
 }
 

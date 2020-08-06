@@ -3,6 +3,8 @@
 
 import { Toolbar } from '@jupyterlab/apputils';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { PanelLayout, Widget } from '@lumino/widgets';
 
 /**
@@ -12,11 +14,13 @@ export class VariablesHeader extends Widget {
   /**
    * Instantiate a new VariablesHeader.
    */
-  constructor() {
+  constructor(translator?: ITranslator) {
     super({ node: document.createElement('header') });
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
 
     const title = new Widget({ node: document.createElement('h2') });
-    title.node.textContent = 'Variables';
+    title.node.textContent = trans.__('Variables');
 
     const layout = new PanelLayout();
     layout.addWidget(title);

@@ -22,6 +22,11 @@ import * as React from 'react';
 
 import { ISessionContext, sessionContextDialogs } from './sessioncontext';
 import { UseSignal, ReactWidget } from './vdom';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 /**
  * The class name added to toolbars.
@@ -367,14 +372,17 @@ export namespace Toolbar {
    * Create an interrupt toolbar item.
    */
   export function createInterruptButton(
-    sessionContext: ISessionContext
+    sessionContext: ISessionContext,
+    translator?: ITranslator
   ): Widget {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
     return new ToolbarButton({
       icon: stopIcon,
       onClick: () => {
         void sessionContext.session?.kernel?.interrupt();
       },
-      tooltip: 'Interrupt the kernel'
+      tooltip: trans.__('Interrupt the kernel')
     });
   }
 
@@ -383,14 +391,20 @@ export namespace Toolbar {
    */
   export function createRestartButton(
     sessionContext: ISessionContext,
-    dialogs?: ISessionContext.IDialogs
+    dialogs?: ISessionContext.IDialogs,
+    translator?: ITranslator
   ): Widget {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
     return new ToolbarButton({
       icon: refreshIcon,
       onClick: () => {
-        void (dialogs ?? sessionContextDialogs).restart(sessionContext);
+        void (dialogs ?? sessionContextDialogs).restart(
+          sessionContext,
+          translator
+        );
       },
-      tooltip: 'Restart the kernel'
+      tooltip: trans.__('Restart the kernel')
     });
   }
 
@@ -414,12 +428,14 @@ export namespace Toolbar {
    */
   export function createKernelNameItem(
     sessionContext: ISessionContext,
-    dialogs?: ISessionContext.IDialogs
+    dialogs?: ISessionContext.IDialogs,
+    translator?: ITranslator
   ): Widget {
     const el = ReactWidget.create(
       <Private.KernelNameComponent
         sessionContext={sessionContext}
         dialogs={dialogs ?? sessionContextDialogs}
+        translator={translator}
       />
     );
     el.addClass('jp-KernelName');
@@ -435,9 +451,10 @@ export namespace Toolbar {
    * It can handle a change to the context or the kernel.
    */
   export function createKernelStatusItem(
-    sessionContext: ISessionContext
+    sessionContext: ISessionContext,
+    translator?: ITranslator
   ): Widget {
-    return new Private.KernelStatus(sessionContext);
+    return new Private.KernelStatus(sessionContext, translator);
   }
 }
 
@@ -465,6 +482,11 @@ export namespace ToolbarButtonComponent {
      * trigger on onMouseDown.
      */
     actualOnClick?: boolean;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -694,6 +716,7 @@ namespace Private {
     export interface IProps {
       sessionContext: ISessionContext;
       dialogs: ISessionContext.IDialogs;
+      translator?: ITranslator;
     }
   }
 
@@ -705,8 +728,10 @@ namespace Private {
    */
 
   export function KernelNameComponent(props: KernelNameComponent.IProps) {
+    const translator = props.translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
     const callback = () => {
-      void props.dialogs.selectKernel(props.sessionContext);
+      void props.dialogs.selectKernel(props.sessionContext, translator);
     };
     return (
       <UseSignal
@@ -717,7 +742,7 @@ namespace Private {
           <ToolbarButtonComponent
             className={TOOLBAR_KERNEL_NAME_CLASS}
             onClick={callback}
-            tooltip={'Switch kernel'}
+            tooltip={trans.__('Switch kernel')}
             label={sessionContext?.kernelDisplayName}
           />
         )}
@@ -732,8 +757,10 @@ namespace Private {
     /**
      * Construct a new kernel status widget.
      */
-    constructor(sessionContext: ISessionContext) {
+    constructor(sessionContext: ISessionContext, translator?: ITranslator) {
       super();
+      this.translator = translator || nullTranslator;
+      this._trans = this.translator.load('jupyterlab');
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
       this._onStatusChanged(sessionContext);
       sessionContext.statusChanged.connect(this._onStatusChanged, this);
@@ -753,7 +780,7 @@ namespace Private {
       if (this._isBusy(status)) {
         circleIcon.element({
           container: this.node,
-          title: `Kernel ${Text.titleCase(status)}`,
+          title: this._trans.__('Kernel %1', Text.titleCase(status)),
 
           stylesheet: 'toolbarButton',
           alignSelf: 'normal',
@@ -762,7 +789,7 @@ namespace Private {
       } else {
         circleEmptyIcon.element({
           container: this.node,
-          title: `Kernel ${Text.titleCase(status)}`,
+          title: this._trans.__('Kernel %1', Text.titleCase(status)),
 
           stylesheet: 'toolbarButton',
           alignSelf: 'normal',
@@ -783,5 +810,8 @@ namespace Private {
         status === 'initializing'
       );
     }
+
+    protected translator: ITranslator;
+    private _trans: TranslationBundle;
   }
 }

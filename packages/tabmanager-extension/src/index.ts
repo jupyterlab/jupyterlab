@@ -10,6 +10,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+import { ITranslator } from '@jupyterlab/translation';
 import { TabBarSvg, tabIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -17,11 +18,16 @@ import { TabBarSvg, tabIcon } from '@jupyterlab/ui-components';
  */
 const plugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/tabmanager-extension:plugin',
+  autoStart: true,
+  requires: [ITranslator],
+  optional: [ILabShell, ILayoutRestorer],
   activate: (
     app: JupyterFrontEnd,
+    translator: ITranslator,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null
   ): void => {
+    const trans = translator.load('jupyterlab');
     const { shell } = app;
     const tabs = new TabBarSvg<Widget>({ orientation: 'vertical' });
     const header = document.createElement('header');
@@ -30,10 +36,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
       restorer.add(tabs, 'tab-manager');
     }
 
+    const content = trans.__('Open Tabs');
+
     tabs.id = 'tab-manager';
-    tabs.title.caption = 'Open Tabs';
+    tabs.title.caption = content;
     tabs.title.icon = tabIcon;
-    header.textContent = 'Open Tabs';
+    header.textContent = content;
     tabs.node.insertBefore(header, tabs.contentNode);
     shell.add(tabs, 'left', { rank: 600 });
 
@@ -64,9 +72,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       // Populate the tab manager.
       populate();
     });
-  },
-  autoStart: true,
-  optional: [ILabShell, ILayoutRestorer]
+  }
 };
 
 /**

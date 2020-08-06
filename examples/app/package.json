@@ -37,6 +37,8 @@
     "@jupyterlab/theme-dark-extension": "^3.0.0-alpha.8",
     "@jupyterlab/theme-light-extension": "^3.0.0-alpha.8",
     "@jupyterlab/tooltip-extension": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
+    "@jupyterlab/translation-extension": "^3.0.0-alpha.8",
     "@jupyterlab/ui-components-extension": "^3.0.0-alpha.8",
     "es6-promise": "~4.2.8",
     "react": "~16.9.0",

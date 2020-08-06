@@ -17,6 +17,12 @@ import {
   MimeModel
 } from '@jupyterlab/rendermime';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { PromiseDelegate } from '@lumino/coreutils';
 
 import { Message } from '@lumino/messaging';
@@ -45,6 +51,8 @@ export class MarkdownViewer extends Widget {
   constructor(options: MarkdownViewer.IOptions) {
     super();
     this.context = options.context;
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this.renderer = options.renderer;
     this.node.tabIndex = -1;
     this.addClass(MARKDOWNVIEWER_CLASS);
@@ -198,13 +206,17 @@ export class MarkdownViewer extends Widget {
       requestAnimationFrame(() => {
         this.dispose();
       });
-      void showErrorMessage(`Renderer Failure: ${context.path}`, reason);
+      void showErrorMessage(
+        this._trans.__('Renderer Failure: %1', context.path),
+        reason
+      );
     }
   }
 
   readonly context: DocumentRegistry.Context;
   readonly renderer: IRenderMime.IRenderer;
-
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _config = { ...MarkdownViewer.defaultConfig };
   private _fragment = '';
   private _monitor: ActivityMonitor<DocumentRegistry.IModel, void> | null;
@@ -230,6 +242,11 @@ export namespace MarkdownViewer {
      * The renderer instance.
      */
     renderer: IRenderMime.IRenderer;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   export interface IConfig {

@@ -7,6 +7,8 @@ import { Dialog, showDialog, showErrorMessage } from '@jupyterlab/apputils';
 
 import { Builder } from '@jupyterlab/services';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import * as React from 'react';
 
 /**
@@ -16,27 +18,30 @@ import * as React from 'react';
  */
 export function doBuild(
   app: JupyterFrontEnd,
-  builder: Builder.IManager
+  builder: Builder.IManager,
+  translator?: ITranslator
 ): Promise<void> {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
   if (builder.isAvailable) {
     return builder
       .build()
       .then(() => {
         return showDialog({
-          title: 'Build Complete',
+          title: trans.__('Build Complete'),
           body: (
             <div>
-              Build successfully completed, reload page?
+              {trans.__('Build successfully completed, reload page?')}
               <br />
-              You will lose any unsaved changes.
+              {trans.__('You will lose any unsaved changes.')}
             </div>
           ),
           buttons: [
             Dialog.cancelButton({
-              label: 'Reload Without Saving',
+              label: trans.__('Reload Without Saving'),
               actions: ['reload']
             }),
-            Dialog.okButton({ label: 'Save and Reload' })
+            Dialog.okButton({ label: trans.__('Save and Reload') })
           ],
           hasClose: true
         });
@@ -49,7 +54,7 @@ export function doBuild(
               location.reload();
             })
             .catch((err: any) => {
-              void showErrorMessage('Save Failed', {
+              void showErrorMessage(trans.__('Save Failed'), {
                 message: <pre>{err.message}</pre>
               });
             });
@@ -59,7 +64,7 @@ export function doBuild(
       })
       .catch(err => {
         void showDialog({
-          title: 'Build Failed',
+          title: trans.__('Build Failed'),
           body: <pre>{err.message}</pre>
         });
       });

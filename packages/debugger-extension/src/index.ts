@@ -37,6 +37,7 @@ import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { Session } from '@jupyterlab/services';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * A plugin that provides visual debugging support for consoles.
@@ -269,13 +270,15 @@ const sources: JupyterFrontEndPlugin<IDebugger.ISources> = {
 const variables: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:variables',
   autoStart: true,
-  requires: [IDebugger],
+  requires: [IDebugger, ITranslator],
   optional: [IThemeManager],
   activate: (
     app: JupyterFrontEnd,
     service: IDebugger,
+    translator: ITranslator,
     themeManager: IThemeManager | null
   ) => {
+    const trans = translator.load('jupyterlab');
     const { commands, shell } = app;
     const tracker = new WidgetTracker<MainAreaWidget<Debugger.VariablesGrid>>({
       namespace: 'debugger/inspect-variable'
@@ -283,8 +286,8 @@ const variables: JupyterFrontEndPlugin<void> = {
     const CommandIDs = Debugger.CommandIDs;
 
     commands.addCommand(CommandIDs.inspectVariable, {
-      label: 'Inspect Variable',
-      caption: 'Inspect Variable',
+      label: trans.__('Inspect Variable'),
+      caption: trans.__('Inspect Variable'),
       execute: async args => {
         const { variableReference } = args;
         if (!variableReference || variableReference === 0) {
@@ -332,7 +335,7 @@ const variables: JupyterFrontEndPlugin<void> = {
  */
 const main: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/debugger-extension:main',
-  requires: [IDebugger, IEditorServices],
+  requires: [IDebugger, IEditorServices, ITranslator],
   optional: [
     ILabShell,
     ILayoutRestorer,
@@ -346,6 +349,7 @@ const main: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     service: IDebugger,
     editorServices: IEditorServices,
+    translator: ITranslator,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null,
@@ -353,6 +357,7 @@ const main: JupyterFrontEndPlugin<void> = {
     themeManager: IThemeManager | null,
     debuggerSources: IDebugger.ISources | null
   ): Promise<void> => {
+    const trans = translator.load('jupyterlab');
     const { commands, shell, serviceManager } = app;
     const { kernelspecs } = serviceManager;
     const CommandIDs = Debugger.CommandIDs;
@@ -371,8 +376,8 @@ const main: JupyterFrontEndPlugin<void> = {
     }
 
     commands.addCommand(CommandIDs.debugContinue, {
-      label: 'Continue',
-      caption: 'Continue',
+      label: trans.__('Continue'),
+      caption: trans.__('Continue'),
       icon: Debugger.Icons.continueIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
@@ -384,8 +389,8 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.terminate, {
-      label: 'Terminate',
-      caption: 'Terminate',
+      label: trans.__('Terminate'),
+      caption: trans.__('Terminate'),
       icon: Debugger.Icons.terminateIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
@@ -397,8 +402,8 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.next, {
-      label: 'Next',
-      caption: 'Next',
+      label: trans.__('Next'),
+      caption: trans.__('Next'),
       icon: Debugger.Icons.stepOverIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
@@ -409,8 +414,8 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.stepIn, {
-      label: 'StepIn',
-      caption: 'Step In',
+      label: trans.__('Step In'),
+      caption: trans.__('Step In'),
       icon: Debugger.Icons.stepIntoIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
@@ -421,8 +426,8 @@ const main: JupyterFrontEndPlugin<void> = {
     });
 
     commands.addCommand(CommandIDs.stepOut, {
-      label: 'StepOut',
-      caption: 'Step Out',
+      label: trans.__('Step Out'),
+      caption: trans.__('Step Out'),
       icon: Debugger.Icons.stepOutIcon,
       isEnabled: () => {
         return service.hasStoppedThreads();
@@ -445,7 +450,8 @@ const main: JupyterFrontEndPlugin<void> = {
       service,
       callstackCommands,
       editorServices,
-      themeManager
+      themeManager,
+      translator
     });
 
     if (settingRegistry) {
@@ -483,7 +489,7 @@ const main: JupyterFrontEndPlugin<void> = {
     shell.add(sidebar, 'right');
 
     if (palette) {
-      const category = 'Debugger';
+      const category = trans.__('Debugger');
       [
         CommandIDs.debugContinue,
         CommandIDs.terminate,

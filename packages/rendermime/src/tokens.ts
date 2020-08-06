@@ -10,6 +10,7 @@ import { ISanitizer } from '@jupyterlab/apputils';
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { MimeModel } from './mimemodel';
+import { ITranslator } from '@jupyterlab/translation';
 
 /* tslint:disable */
 /**
@@ -170,6 +171,11 @@ export namespace IRenderMimeRegistry {
      * The new LaTeX typesetter.
      */
     latexTypesetter?: IRenderMime.ILatexTypesetter;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 

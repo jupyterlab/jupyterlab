@@ -2,6 +2,8 @@
 | Copyright (c) Jupyter Development Team.
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
+import { ITranslator } from '@jupyterlab/translation';
+
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { Widget } from '@lumino/widgets';
@@ -267,6 +269,11 @@ export namespace IRenderMime {
    */
   export interface IRenderer extends Widget {
     /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
+
+    /**
      * Render a mime model.
      *
      * @param model - The mime model to render.
@@ -342,6 +349,11 @@ export namespace IRenderMime {
      * The LaTeX typesetter.
      */
     latexTypesetter: ILatexTypesetter | null;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**

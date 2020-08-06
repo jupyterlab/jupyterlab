@@ -34,6 +34,9 @@
       "path": "../statedb"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     }
   ]

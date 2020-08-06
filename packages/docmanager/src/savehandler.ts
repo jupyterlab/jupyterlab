@@ -133,6 +133,7 @@ export class SaveHandler implements IDisposable {
       })
       .catch(err => {
         // If the user canceled the save, do nothing.
+        // FIXME-TRANS: Is this affected by localization?
         if (err.message === 'Cancel') {
           return;
         }

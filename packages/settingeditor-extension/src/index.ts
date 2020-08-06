@@ -22,6 +22,7 @@ import {
   SettingEditor
 } from '@jupyterlab/settingeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { ITranslator } from '@jupyterlab/translation';
 import { saveIcon, settingsIcon, undoIcon } from '@jupyterlab/ui-components';
 import { IDisposable } from '@lumino/disposable';
 
@@ -47,7 +48,8 @@ const plugin: JupyterFrontEndPlugin<ISettingEditorTracker> = {
     IEditorServices,
     IStateDB,
     IRenderMimeRegistry,
-    ILabStatus
+    ILabStatus,
+    ITranslator
   ],
   optional: [ICommandPalette],
   autoStart: true,
@@ -66,8 +68,10 @@ function activate(
   state: IStateDB,
   rendermime: IRenderMimeRegistry,
   status: ILabStatus,
+  translator: ITranslator,
   palette: ICommandPalette | null
 ): ISettingEditorTracker {
+  const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
   const namespace = 'setting-editor';
   const factoryService = editorServices.factoryService;
@@ -105,6 +109,7 @@ function activate(
         registry,
         rendermime,
         state,
+        translator,
         when
       });
 
@@ -133,16 +138,19 @@ function activate(
 
       editor.id = namespace;
       editor.title.icon = settingsIcon;
-      editor.title.label = 'Settings';
+      editor.title.label = trans.__('Settings');
 
       const main = new MainAreaWidget({ content: editor });
       void tracker.add(main);
       shell.add(main);
     },
-    label: 'Advanced Settings Editor'
+    label: trans.__('Advanced Settings Editor')
   });
   if (palette) {
-    palette.addItem({ category: 'Settings', command: CommandIDs.open });
+    palette.addItem({
+      category: trans.__('Settings'),
+      command: CommandIDs.open
+    });
   }
 
   commands.addCommand(CommandIDs.revert, {
@@ -150,14 +158,14 @@ function activate(
       tracker.currentWidget?.content.revert();
     },
     icon: undoIcon,
-    label: 'Revert User Settings',
+    label: trans.__('Revert User Settings'),
     isEnabled: () => tracker.currentWidget?.content.canRevertRaw ?? false
   });
 
   commands.addCommand(CommandIDs.save, {
     execute: () => tracker.currentWidget?.content.save(),
     icon: saveIcon,
-    label: 'Save User Settings',
+    label: trans.__('Save User Settings'),
     isEnabled: () => tracker.currentWidget?.content.canSaveRaw ?? false
   });
 

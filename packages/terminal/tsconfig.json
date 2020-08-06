@@ -11,6 +11,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

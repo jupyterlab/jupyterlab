@@ -44,7 +44,8 @@ describe('@jupyterlab/mainmenu', () => {
     describe('#constructor()', () => {
       it('should construct a new run menu', () => {
         expect(menu).toBeInstanceOf(RunMenu);
-        expect(menu.menu.title.label).toBe('Run');
+        // For localization this is now defined when on the mainmenu-extension.
+        expect(menu.menu.title.label).toBe('');
       });
     });
 
@@ -52,7 +53,9 @@ describe('@jupyterlab/mainmenu', () => {
       it('should allow setting of an ICodeRunner', () => {
         const runner: IRunMenu.ICodeRunner<Wodget> = {
           tracker,
-          noun: 'Noun',
+          runLabel: (n: number) => 'Run label',
+          runAllLabel: (n: number) => 'Run all label',
+          restartAndRunAllLabel: n => 'Restart and run all',
           run: widget => {
             widget.state = 'run';
             return Promise.resolve(void 0);

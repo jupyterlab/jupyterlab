@@ -17,6 +17,9 @@
     },
     {
       "path": "../mainmenu"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

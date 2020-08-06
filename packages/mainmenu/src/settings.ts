@@ -19,6 +19,5 @@ export class SettingsMenu extends JupyterLabMenu implements ISettingsMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.menu.title.label = 'Settings';
   }
 }

@@ -22,6 +22,11 @@ import { INotebookModel } from './model';
 
 import { Notebook, StaticNotebook } from './widget';
 import { PageConfig } from '@jupyterlab/coreutils';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 /**
  * The class name added to notebook panels.
@@ -45,6 +50,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
    */
   constructor(options: DocumentWidget.IOptions<Notebook, INotebookModel>) {
     super(options);
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
 
     // Set up CSS classes
     this.addClass(NOTEBOOK_PANEL_CLASS);
@@ -198,9 +205,12 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
       // The kernel died and the server is restarting it. We notify the user so
       // they know why their kernel state is gone.
       void showDialog({
-        title: 'Kernel Restarting',
-        body: `The kernel for ${this.sessionContext.session?.path} appears to have died. It will restart automatically.`,
-        buttons: [Dialog.okButton()]
+        title: this._trans.__('Kernel Restarting'),
+        body: this._trans.__(
+          'The kernel for %1 appears to have died. It will restart automatically.',
+          this.sessionContext.session?.path
+        ),
+        buttons: [Dialog.okButton({ label: this._trans.__('Ok') })]
       });
       this._autorestarting = true;
     } else if (status === 'restarting') {
@@ -235,6 +245,8 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
     });
   }
 
+  translator: ITranslator;
+  private _trans: TranslationBundle;
   /**
    * Whether we are currently in a series of autorestarts we have already
    * notified the user about.

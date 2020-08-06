@@ -13,6 +13,12 @@ import {
   Session
 } from '@jupyterlab/services';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { kernelIcon, terminalIcon } from '@jupyterlab/ui-components';
 
 import { GroupItem, interactiveItem, TextItem } from '..';
@@ -83,6 +89,8 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
     super(new RunningSessions.Model());
     this._serviceManager = opts.serviceManager;
     this._handleClick = opts.onClick;
+    this.translator = opts.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterload');
 
     this._serviceManager.sessions.runningChanged.connect(
       this._onSessionsRunningChanged,
@@ -103,9 +111,13 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
     if (!this.model) {
       return null;
     }
-    this.title.caption = `${this.model.terminals} Terminals, ${
+    // TODO-TRANS: Should probably be handled differently.
+    // This is more localizable friendly: "Terminals: %1 | Kernels: %2"
+    this.title.caption = this._trans.__(
+      '%1 Terminals, %2 Kernel sessions',
+      this.model.terminals,
       this.model!.sessions
-    } Kernel sessions`;
+    );
     return (
       <RunningSessionsComponent
         sessions={this.model.sessions}
@@ -151,6 +163,8 @@ export class RunningSessions extends VDomRenderer<RunningSessions.Model> {
     this.model!.terminals = terminals.length;
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _handleClick: () => void;
   private _serviceManager: ServiceManager;
 }
@@ -211,5 +225,10 @@ export namespace RunningSessions {
      * to activate the running sessions side panel.
      */
     onClick: () => void;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }

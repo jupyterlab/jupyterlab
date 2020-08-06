@@ -67,7 +67,7 @@ export type TranslationBundle = {
 
 export interface ITranslator {
   load(domain: string): TranslationBundle;
-  locale(): string;
+  // locale(): string;
 }
 
 export const ITranslator = new Token<ITranslator>(

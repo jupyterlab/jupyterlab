@@ -2,6 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { ISanitizer } from '@jupyterlab/apputils';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 
@@ -20,6 +21,11 @@ interface IOptions {
    * HTML sanitizer.
    */
   sanitizer: ISanitizer;
+
+  /**
+   * The application language translator.
+   */
+  translator?: ITranslator;
 }
 
 /**
@@ -39,6 +45,7 @@ class OptionsManager extends Registry.IOptionsManager {
     super();
     this._numbering = options.numbering;
     this._widget = widget;
+    this.translator = options.translator || nullTranslator;
     this.sanitizer = options.sanitizer;
   }
 
@@ -73,6 +80,7 @@ class OptionsManager extends Registry.IOptionsManager {
     this._widget.update();
   }
 
+  translator: ITranslator;
   private _numbering: boolean;
   private _widget: TableOfContents;
 }

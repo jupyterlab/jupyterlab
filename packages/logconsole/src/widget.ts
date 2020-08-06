@@ -11,6 +11,12 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { Message } from '@lumino/messaging';
 
 import { ISignal, Signal } from '@lumino/signaling';
@@ -236,9 +242,10 @@ export class LogConsolePanel extends StackedPanel {
    * @param loggerRegistry - The logger registry that provides
    * logs to be displayed.
    */
-  constructor(loggerRegistry: ILoggerRegistry) {
+  constructor(loggerRegistry: ILoggerRegistry, translator?: ITranslator) {
     super();
-
+    this.translator = translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this._loggerRegistry = loggerRegistry;
     this.addClass('jp-LogConsolePanel');
 
@@ -387,17 +394,22 @@ export class LogConsolePanel extends StackedPanel {
       }
     );
 
-    const title = source === null ? 'Log Console' : `Log: ${source}`;
+    const title =
+      source === null
+        ? this._trans.__('Log Console')
+        : this._trans.__('Log: %1', source);
     this.title.label = title;
     this.title.caption = title;
   }
 
   private _handlePlaceholder() {
     if (this.source === null) {
-      this._placeholder.node.textContent = 'No source selected.';
+      this._placeholder.node.textContent = this._trans.__(
+        'No source selected.'
+      );
       this._placeholder.show();
     } else if (this._loggerRegistry.getLogger(this.source).length === 0) {
-      this._placeholder.node.textContent = 'No log messages.';
+      this._placeholder.node.textContent = this._trans.__('No log messages.');
       this._placeholder.show();
     } else {
       this._placeholder.hide();
@@ -467,6 +479,8 @@ export class LogConsolePanel extends StackedPanel {
     }
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _loggerRegistry: ILoggerRegistry;
   private _outputAreas = new Map<string, LogConsoleOutputArea>();
   private _source: string | null = null;

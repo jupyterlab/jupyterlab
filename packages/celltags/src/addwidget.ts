@@ -1,6 +1,11 @@
 import { Widget } from '@lumino/widgets';
 import { addIcon } from '@jupyterlab/ui-components';
 import { TagTool } from './tool';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 /**
  * A widget which hosts a cell tags area.
@@ -9,8 +14,10 @@ export class AddWidget extends Widget {
   /**
    * Construct a new tag widget.
    */
-  constructor() {
+  constructor(translator?: ITranslator) {
     super();
+    this.translator = translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this.addClass('tag');
     this.editing = false;
     this.buildTag();
@@ -21,7 +28,7 @@ export class AddWidget extends Widget {
    */
   buildTag() {
     const text = this.input || document.createElement('input');
-    text.value = 'Add Tag';
+    text.value = this._trans.__('Add Tag');
     text.contentEditable = 'true';
     text.className = 'add-tag';
     text.style.width = '49px';
@@ -149,7 +156,7 @@ export class AddWidget extends Widget {
   private _evtBlur() {
     if (this.editing) {
       this.editing = false;
-      this.input.value = 'Add Tag';
+      this.input.value = this._trans.__('Add Tag');
       this.input.style.width = '49px';
     }
   }
@@ -157,4 +164,6 @@ export class AddWidget extends Widget {
   public parent: TagTool | null = null;
   private editing: boolean;
   private input: HTMLInputElement = document.createElement('input');
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
 }

@@ -68,7 +68,7 @@ describe('docregistry/mimedocument', () => {
           name: 'markdown',
           fileTypes: ['markdown'],
           rendermime: RENDERMIME,
-          primaryFileType: DocumentRegistry.defaultTextFileType
+          primaryFileType: DocumentRegistry.getDefaultTextFileType()
         });
         expect(widgetFactory.createNew(dContext)).toBeInstanceOf(MimeDocument);
       });

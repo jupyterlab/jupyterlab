@@ -9,6 +9,12 @@ import { Text } from '@jupyterlab/coreutils';
 
 import { Session } from '@jupyterlab/services';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { interactiveItem, TextItem } from '..';
 
 import { JSONExt, JSONArray } from '@lumino/coreutils';
@@ -19,15 +25,17 @@ import { JSONExt, JSONArray } from '@lumino/coreutils';
 function KernelStatusComponent(
   props: KernelStatusComponent.IProps
 ): React.ReactElement<KernelStatusComponent.IProps> {
+  const translator = props.translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
   let statusText = '';
   if (props.status) {
-    statusText = ` | ${Text.titleCase(props.status)}`;
+    statusText = ` | ${Text.titleCase(trans.__(props.status))}`;
   }
   return (
     <TextItem
       onClick={props.handleClick}
       source={`${props.kernelName}${statusText}`}
-      title={`Change kernel for ${props.activityName}`}
+      title={trans.__('Change kernel for %1', props.activityName)}
     />
   );
 }
@@ -60,6 +68,11 @@ namespace KernelStatusComponent {
      * The status of the kernel.
      */
     status?: string;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -70,8 +83,9 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
   /**
    * Construct the kernel status widget.
    */
-  constructor(opts: KernelStatus.IOptions) {
-    super(new KernelStatus.Model());
+  constructor(opts: KernelStatus.IOptions, translator?: ITranslator) {
+    super(new KernelStatus.Model(translator));
+    this.translator = translator || nullTranslator;
     this._handleClick = opts.onClick;
     this.addClass(interactiveItem);
   }
@@ -89,11 +103,13 @@ export class KernelStatus extends VDomRenderer<KernelStatus.Model> {
           kernelName={this.model.kernelName}
           activityName={this.model.activityName}
           handleClick={this._handleClick}
+          translator={this.translator}
         />
       );
     }
   }
 
+  translator: ITranslator;
   private _handleClick: () => void;
 }
 
@@ -105,6 +121,13 @@ export namespace KernelStatus {
    * A VDomModel for the kernel status indicator.
    */
   export class Model extends VDomModel {
+    constructor(translator?: ITranslator) {
+      super();
+      translator = translator || nullTranslator;
+      this._trans = translator.load('jupyterlab');
+      this._kernelName = this._trans.__('No Kernel!');
+    }
+
     /**
      * The name of the kernel.
      */
@@ -149,7 +172,7 @@ export namespace KernelStatus {
       const oldState = this._getAllState();
       this._sessionContext = sessionContext;
       this._kernelStatus = sessionContext?.kernelDisplayStatus;
-      this._kernelName = sessionContext?.kernelDisplayName ?? 'No Kernel';
+      this._kernelName = sessionContext?.kernelDisplayName ?? 'No Kernel'; // FIXME-TRANS: ?
       sessionContext?.statusChanged.connect(this._onKernelStatusChanged, this);
       sessionContext?.connectionStatusChanged.connect(
         this._onKernelStatusChanged,
@@ -192,8 +215,10 @@ export namespace KernelStatus {
       }
     }
 
-    private _activityName: string = 'activity';
-    private _kernelName: string = 'No Kernel!';
+    protected translation: ITranslator;
+    private _trans: TranslationBundle;
+    private _activityName: string = 'activity'; // FIXME-TRANS:?
+    private _kernelName: string; // Initialized in constructor due to localization
     private _kernelStatus: string | undefined = '';
     private _sessionContext: ISessionContext | null = null;
   }

@@ -15,6 +15,8 @@ import {
 
 import { Contents, Kernel, ServiceManager } from '@jupyterlab/services';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { ArrayExt, find } from '@lumino/algorithm';
 
 import { IDisposable } from '@lumino/disposable';
@@ -46,6 +48,7 @@ export class DocumentManager implements IDocumentManager {
    * Construct a new document manager.
    */
   constructor(options: DocumentManager.IOptions) {
+    this.translator = options.translator || nullTranslator;
     this.registry = options.registry;
     this.services = options.manager;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
@@ -54,7 +57,8 @@ export class DocumentManager implements IDocumentManager {
     this._when = options.when || options.manager.ready;
 
     const widgetManager = new DocumentWidgetManager({
-      registry: this.registry
+      registry: this.registry,
+      translator: this.translator
     });
     widgetManager.activateRequested.connect(this._onActivateRequested, this);
     this._widgetManager = widgetManager;
@@ -622,6 +626,7 @@ export class DocumentManager implements IDocumentManager {
     this._activateRequested.emit(args);
   }
 
+  protected translator: ITranslator;
   private _activateRequested = new Signal<this, string>(this);
   private _contexts: Private.IContext[] = [];
   private _opener: DocumentManager.IWidgetOpener;
@@ -672,6 +677,11 @@ export namespace DocumentManager {
      * The provider for session dialogs.
      */
     sessionDialogs?: ISessionContext.IDialogs;
+
+    /**
+     * The applicaton language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**

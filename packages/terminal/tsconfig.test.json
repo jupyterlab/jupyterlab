@@ -9,6 +9,9 @@
       "path": "../services"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "."
     },
     {
@@ -19,6 +22,9 @@
     },
     {
       "path": "../services"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

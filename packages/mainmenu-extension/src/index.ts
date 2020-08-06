@@ -23,6 +23,7 @@ import {
   IMenuExtender,
   EditMenu,
   FileMenu,
+  HelpMenu,
   KernelMenu,
   MainMenu,
   RunMenu,
@@ -32,6 +33,8 @@ import {
 } from '@jupyterlab/mainmenu';
 
 import { ServerConnection } from '@jupyterlab/services';
+
+import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
 import { jupyterIcon } from '@jupyterlab/ui-components';
 
@@ -118,16 +121,18 @@ export namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IMainMenu> = {
   id: '@jupyterlab/mainmenu-extension:plugin',
-  requires: [IRouter],
+  requires: [IRouter, ITranslator],
   optional: [ICommandPalette, ILabShell],
   provides: IMainMenu,
   activate: (
     app: JupyterFrontEnd,
     router: IRouter,
+    translator: ITranslator,
     palette: ICommandPalette | null,
     labShell: ILabShell | null
   ): IMainMenu => {
     const { commands } = app;
+    const trans = translator.load('jupyterlab');
 
     const menu = new MainMenu(commands);
     menu.id = 'jp-MainMenu';
@@ -147,16 +152,17 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     menu.fileMenu.quitEntry = quitButton === 'true';
 
     // Create the application menus.
-    createEditMenu(app, menu.editMenu);
-    createFileMenu(app, menu.fileMenu, router);
-    createKernelMenu(app, menu.kernelMenu);
-    createRunMenu(app, menu.runMenu);
-    createSettingsMenu(app, menu.settingsMenu);
-    createViewMenu(app, menu.viewMenu);
+    createEditMenu(app, menu.editMenu, trans);
+    createFileMenu(app, menu.fileMenu, router, trans);
+    createKernelMenu(app, menu.kernelMenu, trans);
+    createRunMenu(app, menu.runMenu, trans);
+    createSettingsMenu(app, menu.settingsMenu, trans);
+    createViewMenu(app, menu.viewMenu, trans);
+    createHelpMenu(app, menu.helpMenu, trans);
 
     // The tabs menu relies on lab shell functionality.
     if (labShell) {
-      createTabsMenu(app, menu.tabsMenu, labShell);
+      createTabsMenu(app, menu.tabsMenu, labShell, trans);
     }
 
     // Create commands to open the main application menus.
@@ -166,39 +172,39 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     };
 
     commands.addCommand(CommandIDs.openEdit, {
-      label: 'Open Edit Menu',
+      label: trans.__('Open Edit Menu'),
       execute: () => activateMenu(menu.editMenu.menu)
     });
     commands.addCommand(CommandIDs.openFile, {
-      label: 'Open File Menu',
+      label: trans.__('Open File Menu'),
       execute: () => activateMenu(menu.fileMenu.menu)
     });
     commands.addCommand(CommandIDs.openKernel, {
-      label: 'Open Kernel Menu',
+      label: trans.__('Open Kernel Menu'),
       execute: () => activateMenu(menu.kernelMenu.menu)
     });
     commands.addCommand(CommandIDs.openRun, {
-      label: 'Open Run Menu',
+      label: trans.__('Open Run Menu'),
       execute: () => activateMenu(menu.runMenu.menu)
     });
     commands.addCommand(CommandIDs.openView, {
-      label: 'Open View Menu',
+      label: trans.__('Open View Menu'),
       execute: () => activateMenu(menu.viewMenu.menu)
     });
     commands.addCommand(CommandIDs.openSettings, {
-      label: 'Open Settings Menu',
+      label: trans.__('Open Settings Menu'),
       execute: () => activateMenu(menu.settingsMenu.menu)
     });
     commands.addCommand(CommandIDs.openTabs, {
-      label: 'Open Tabs Menu',
+      label: trans.__('Open Tabs Menu'),
       execute: () => activateMenu(menu.tabsMenu.menu)
     });
     commands.addCommand(CommandIDs.openHelp, {
-      label: 'Open Help Menu',
+      label: trans.__('Open Help Menu'),
       execute: () => activateMenu(menu.helpMenu.menu)
     });
     commands.addCommand(CommandIDs.openFirst, {
-      label: 'Open First Menu',
+      label: trans.__('Open First Menu'),
       execute: () => {
         menu.activeIndex = 0;
         menu.openActiveMenu();
@@ -210,22 +216,22 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       if (menu.fileMenu.quitEntry) {
         palette.addItem({
           command: CommandIDs.shutdown,
-          category: 'Main Area'
+          category: trans.__('Main Area')
         });
         palette.addItem({
           command: CommandIDs.logout,
-          category: 'Main Area'
+          category: trans.__('Main Area')
         });
       }
 
       palette.addItem({
         command: CommandIDs.shutdownAllKernels,
-        category: 'Kernel Operations'
+        category: trans.__('Kernel Operations')
       });
 
       palette.addItem({
         command: CommandIDs.activatePreviouslyUsedTab,
-        category: 'Main Area'
+        category: trans.__('Main Area')
       });
     }
 
@@ -239,17 +245,22 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 /**
  * Create the basic `Edit` menu.
  */
-export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
+export function createEditMenu(
+  app: JupyterFrontEnd,
+  menu: EditMenu,
+  trans: TranslationBundle
+): void {
   const commands = menu.menu.commands;
+  menu.menu.title.label = trans.__('Edit');
 
   // Add the undo/redo commands the the Edit menu.
   commands.addCommand(CommandIDs.undo, {
-    label: 'Undo',
+    label: trans.__('Undo'),
     isEnabled: Private.delegateEnabled(app, menu.undoers, 'undo'),
     execute: Private.delegateExecute(app, menu.undoers, 'undo')
   });
   commands.addCommand(CommandIDs.redo, {
-    label: 'Redo',
+    label: trans.__('Redo'),
     isEnabled: Private.delegateEnabled(app, menu.undoers, 'redo'),
     execute: Private.delegateExecute(app, menu.undoers, 'redo')
   });
@@ -261,22 +272,36 @@ export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
   // Add the clear commands to the Edit menu.
   commands.addCommand(CommandIDs.clearCurrent, {
     label: () => {
-      const noun = Private.delegateLabel(app, menu.clearers, 'noun');
       const enabled = Private.delegateEnabled(
         app,
         menu.clearers,
         'clearCurrent'
       )();
-      return `Clear${enabled ? ` ${noun}` : ''}`;
+      let localizedLabel = trans.__('Clear');
+      if (enabled) {
+        localizedLabel = Private.delegateLabel(
+          app,
+          menu.clearers,
+          'clearCurrentLabel'
+        );
+      }
+      return localizedLabel;
     },
     isEnabled: Private.delegateEnabled(app, menu.clearers, 'clearCurrent'),
     execute: Private.delegateExecute(app, menu.clearers, 'clearCurrent')
   });
   commands.addCommand(CommandIDs.clearAll, {
     label: () => {
-      const noun = Private.delegateLabel(app, menu.clearers, 'pluralNoun');
       const enabled = Private.delegateEnabled(app, menu.clearers, 'clearAll')();
-      return `Clear All${enabled ? ` ${noun}` : ''}`;
+      let localizedLabel = trans.__('Clear All');
+      if (enabled) {
+        localizedLabel = Private.delegateLabel(
+          app,
+          menu.clearers,
+          'clearAllLabel'
+        );
+      }
+      return localizedLabel;
     },
     isEnabled: Private.delegateEnabled(app, menu.clearers, 'clearAll'),
     execute: Private.delegateExecute(app, menu.clearers, 'clearAll')
@@ -287,7 +312,7 @@ export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
   );
 
   commands.addCommand(CommandIDs.goToLine, {
-    label: 'Go to Line…',
+    label: trans.__('Go to Line…'),
     isEnabled: Private.delegateEnabled(app, menu.goToLiners, 'goToLine'),
     execute: Private.delegateExecute(app, menu.goToLiners, 'goToLine')
   });
@@ -300,9 +325,12 @@ export function createEditMenu(app: JupyterFrontEnd, menu: EditMenu): void {
 export function createFileMenu(
   app: JupyterFrontEnd,
   menu: FileMenu,
-  router: IRouter
+  router: IRouter,
+  trans: TranslationBundle
 ): void {
   const commands = menu.menu.commands;
+  menu.menu.title.label = trans.__('File');
+  menu.newMenu.menu.title.label = trans.__('New');
 
   // Add a delegator command for closing and cleaning up an activity.
   // This one is a bit different, in that we consider it enabled
@@ -310,13 +338,12 @@ export function createFileMenu(
   // In that case, we instead call the application `close` command.
   commands.addCommand(CommandIDs.closeAndCleanup, {
     label: () => {
-      const action = Private.delegateLabel(
+      const localizedLabel = Private.delegateLabel(
         app,
         menu.closeAndCleaners,
-        'action'
+        'closeAndCleanupLabel'
       );
-      const name = Private.delegateLabel(app, menu.closeAndCleaners, 'name');
-      return `Close and ${action ? ` ${action} ${name}` : 'Shutdown'}`;
+      return localizedLabel ? localizedLabel : trans.__('Close and Shutdown');
     },
     isEnabled: () =>
       !!app.shell.currentWidget && !!app.shell.currentWidget.title.closable,
@@ -339,9 +366,14 @@ export function createFileMenu(
   // Add a delegator command for creating a console for an activity.
   commands.addCommand(CommandIDs.createConsole, {
     label: () => {
-      const name = Private.delegateLabel(app, menu.consoleCreators, 'name');
-      const label = `New Console for ${name ? name : 'Activity'}`;
-      return label;
+      const localizedLabel = Private.delegateLabel(
+        app,
+        menu.consoleCreators,
+        'createConsoleLabel'
+      );
+      return localizedLabel
+        ? localizedLabel
+        : trans.__('New Console for Activity');
     },
     isEnabled: Private.delegateEnabled(
       app,
@@ -352,15 +384,15 @@ export function createFileMenu(
   });
 
   commands.addCommand(CommandIDs.shutdown, {
-    label: 'Shut Down',
-    caption: 'Shut down JupyterLab',
+    label: trans.__('Shut Down'),
+    caption: trans.__('Shut down JupyterLab'),
     execute: () => {
       return showDialog({
-        title: 'Shutdown confirmation',
-        body: 'Please confirm you want to shut down JupyterLab.',
+        title: trans.__('Shutdown confirmation'),
+        body: trans.__('Please confirm you want to shut down JupyterLab.'),
         buttons: [
           Dialog.cancelButton(),
-          Dialog.warnButton({ label: 'Shut Down' })
+          Dialog.warnButton({ label: trans.__('Shut Down') })
         ]
       }).then(result => {
         if (result.button.accept) {
@@ -376,16 +408,18 @@ export function createFileMenu(
                 // Close this window if the shutdown request has been successful
                 const body = document.createElement('div');
                 const p1 = document.createElement('p');
-                p1.textContent =
-                  'You have shut down the Jupyter server. You can now close this tab.';
+                p1.textContent = trans.__(
+                  'You have shut down the Jupyter server. You can now close this tab.'
+                );
                 const p2 = document.createElement('p');
-                p2.textContent =
-                  'To use JupyterLab again, you will need to relaunch it.';
+                p2.textContent = trans.__(
+                  'To use JupyterLab again, you will need to relaunch it.'
+                );
 
                 body.appendChild(p1);
                 body.appendChild(p2);
                 void showDialog({
-                  title: 'Server stopped',
+                  title: trans.__('Server stopped'),
                   body: new Widget({ node: body }),
                   buttons: []
                 });
@@ -403,8 +437,8 @@ export function createFileMenu(
   });
 
   commands.addCommand(CommandIDs.logout, {
-    label: 'Log Out',
-    caption: 'Log out of JupyterLab',
+    label: trans.__('Log Out'),
+    caption: trans.__('Log out of JupyterLab'),
     execute: () => {
       router.navigate('/logout', { hard: true });
     }
@@ -472,11 +506,16 @@ export function createFileMenu(
 /**
  * Create the basic `Kernel` menu.
  */
-export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
+export function createKernelMenu(
+  app: JupyterFrontEnd,
+  menu: KernelMenu,
+  trans: TranslationBundle
+): void {
   const commands = menu.menu.commands;
+  menu.menu.title.label = trans.__('Kernel');
 
   commands.addCommand(CommandIDs.interruptKernel, {
-    label: 'Interrupt Kernel',
+    label: trans.__('Interrupt Kernel'),
     isEnabled: Private.delegateEnabled(
       app,
       menu.kernelUsers,
@@ -486,20 +525,27 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
   });
 
   commands.addCommand(CommandIDs.restartKernel, {
-    label: 'Restart Kernel…',
+    label: trans.__('Restart Kernel…'),
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'restartKernel'),
     execute: Private.delegateExecute(app, menu.kernelUsers, 'restartKernel')
   });
 
   commands.addCommand(CommandIDs.restartKernelAndClear, {
     label: () => {
-      const noun = Private.delegateLabel(app, menu.kernelUsers, 'noun');
       const enabled = Private.delegateEnabled(
         app,
         menu.kernelUsers,
         'restartKernelAndClear'
       )();
-      return `Restart Kernel and Clear${enabled ? ` ${noun}` : ''}…`;
+      let localizedLabel = trans.__('Restart Kernel and Clear…');
+      if (enabled) {
+        localizedLabel = Private.delegateLabel(
+          app,
+          menu.kernelUsers,
+          'restartKernelAndClearLabel'
+        );
+      }
+      return localizedLabel;
     },
     isEnabled: Private.delegateEnabled(
       app,
@@ -514,29 +560,29 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
   });
 
   commands.addCommand(CommandIDs.changeKernel, {
-    label: 'Change Kernel…',
+    label: trans.__('Change Kernel…'),
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'changeKernel'),
     execute: Private.delegateExecute(app, menu.kernelUsers, 'changeKernel')
   });
 
   commands.addCommand(CommandIDs.shutdownKernel, {
-    label: 'Shut Down Kernel',
+    label: trans.__('Shut Down Kernel'),
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'shutdownKernel'),
     execute: Private.delegateExecute(app, menu.kernelUsers, 'shutdownKernel')
   });
 
   commands.addCommand(CommandIDs.shutdownAllKernels, {
-    label: 'Shut Down All Kernels…',
+    label: trans.__('Shut Down All Kernels…'),
     isEnabled: () => {
       return app.serviceManager.sessions.running().next() !== undefined;
     },
     execute: () => {
       return showDialog({
-        title: 'Shut Down All?',
-        body: 'Shut down all kernels?',
+        title: trans.__('Shut Down All?'),
+        body: trans.__('Shut down all kernels?'),
         buttons: [
-          Dialog.cancelButton(),
-          Dialog.warnButton({ label: 'Shut Down All' })
+          Dialog.cancelButton({ label: trans.__('Dismiss') }),
+          Dialog.warnButton({ label: trans.__('Shut Down All') })
         ]
       }).then(result => {
         if (result.button.accept) {
@@ -570,11 +616,16 @@ export function createKernelMenu(app: JupyterFrontEnd, menu: KernelMenu): void {
 /**
  * Create the basic `View` menu.
  */
-export function createViewMenu(app: JupyterFrontEnd, menu: ViewMenu): void {
+export function createViewMenu(
+  app: JupyterFrontEnd,
+  menu: ViewMenu,
+  trans: TranslationBundle
+): void {
   const commands = menu.menu.commands;
+  menu.menu.title.label = trans.__('View');
 
   commands.addCommand(CommandIDs.lineNumbering, {
-    label: 'Show Line Numbers',
+    label: trans.__('Show Line Numbers'),
     isEnabled: Private.delegateEnabled(
       app,
       menu.editorViewers,
@@ -593,7 +644,7 @@ export function createViewMenu(app: JupyterFrontEnd, menu: ViewMenu): void {
   });
 
   commands.addCommand(CommandIDs.matchBrackets, {
-    label: 'Match Brackets',
+    label: trans.__('Match Brackets'),
     isEnabled: Private.delegateEnabled(
       app,
       menu.editorViewers,
@@ -612,7 +663,7 @@ export function createViewMenu(app: JupyterFrontEnd, menu: ViewMenu): void {
   });
 
   commands.addCommand(CommandIDs.wordWrap, {
-    label: 'Wrap Words',
+    label: trans.__('Wrap Words'),
     isEnabled: Private.delegateEnabled(
       app,
       menu.editorViewers,
@@ -656,14 +707,23 @@ export function createViewMenu(app: JupyterFrontEnd, menu: ViewMenu): void {
 /**
  * Create the basic `Run` menu.
  */
-export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
+export function createRunMenu(
+  app: JupyterFrontEnd,
+  menu: RunMenu,
+  trans: TranslationBundle
+): void {
   const commands = menu.menu.commands;
+  menu.menu.title.label = trans.__('Run');
 
   commands.addCommand(CommandIDs.run, {
     label: () => {
-      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      const localizedLabel = Private.delegateLabel(
+        app,
+        menu.codeRunners,
+        'runLabel'
+      );
       const enabled = Private.delegateEnabled(app, menu.codeRunners, 'run')();
-      return `Run Selected${enabled ? ` ${noun}` : ''}`;
+      return enabled ? localizedLabel : trans.__('Run Selected');
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'run'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'run')
@@ -671,26 +731,40 @@ export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
 
   commands.addCommand(CommandIDs.runAll, {
     label: () => {
-      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      let localizedLabel = trans.__('Run All');
       const enabled = Private.delegateEnabled(
         app,
         menu.codeRunners,
         'runAll'
       )();
-      return `Run All${enabled ? ` ${noun}` : ''}`;
+      if (enabled) {
+        localizedLabel = Private.delegateLabel(
+          app,
+          menu.codeRunners,
+          'runAllLabel'
+        );
+      }
+      return localizedLabel;
     },
     isEnabled: Private.delegateEnabled(app, menu.codeRunners, 'runAll'),
     execute: Private.delegateExecute(app, menu.codeRunners, 'runAll')
   });
   commands.addCommand(CommandIDs.restartAndRunAll, {
     label: () => {
-      const noun = Private.delegateLabel(app, menu.codeRunners, 'noun');
+      let localizedLabel = trans.__('Restart Kernel and Run All');
       const enabled = Private.delegateEnabled(
         app,
         menu.codeRunners,
         'restartAndRunAll'
       )();
-      return `Restart Kernel and Run All${enabled ? ` ${noun}` : ''}…`;
+      if (enabled) {
+        localizedLabel = Private.delegateLabel(
+          app,
+          menu.codeRunners,
+          'restartAndRunAllLabel'
+        );
+      }
+      return localizedLabel;
     },
     isEnabled: Private.delegateEnabled(
       app,
@@ -715,8 +789,10 @@ export function createRunMenu(app: JupyterFrontEnd, menu: RunMenu): void {
  */
 export function createSettingsMenu(
   _: JupyterFrontEnd,
-  menu: SettingsMenu
+  menu: SettingsMenu,
+  trans: TranslationBundle
 ): void {
+  menu.menu.title.label = trans.__('Settings');
   menu.addGroup([{ command: 'settingeditor:open' }], 1000);
 }
 
@@ -726,9 +802,11 @@ export function createSettingsMenu(
 export function createTabsMenu(
   app: JupyterFrontEnd,
   menu: TabsMenu,
-  labShell: ILabShell | null
+  labShell: ILabShell | null,
+  trans: TranslationBundle
 ): void {
   const commands = app.commands;
+  menu.menu.title.label = trans.__('Tabs');
 
   // Add commands for cycling the active tabs.
   menu.addGroup(
@@ -765,7 +843,7 @@ export function createTabsMenu(
   // Command to toggle between the current
   // tab and the last modified tab.
   commands.addCommand(CommandIDs.activatePreviouslyUsedTab, {
-    label: 'Activate Previously Used Tab',
+    label: trans.__('Activate Previously Used Tab'),
     isEnabled: () => !!previousId,
     execute: () => commands.execute(CommandIDs.activateById, { id: previousId })
   });
@@ -811,6 +889,17 @@ export function createTabsMenu(
   }
 }
 
+/**
+ * Create the basic `Help` menu.
+ */
+export function createHelpMenu(
+  app: JupyterFrontEnd,
+  menu: HelpMenu,
+  trans: TranslationBundle
+): void {
+  menu.menu.title.label = trans.__('Help');
+}
+
 export default plugin;
 
 /**
@@ -845,13 +934,18 @@ namespace Private {
     const extender = widget
       ? find(s, value => value.tracker.has(widget!))
       : undefined;
+
     if (!extender) {
       return '';
+    } else {
+      const count: number = extender.tracker.size;
+
+      // Coerce the result to be a string. When Typedoc is updated to use
+      // Typescript 2.8, we can possibly use conditional types to get Typescript
+      // to recognize this is a string.
+      console.log(label, extender[label]);
+      return (extender[label] as any)(count) as string;
     }
-    // Coerce the result to be a string. When Typedoc is updated to use
-    // Typescript 2.8, we can possibly use conditional types to get Typescript
-    // to recognize this is a string.
-    return (extender[label] as any) as string;
   }
 
   /**

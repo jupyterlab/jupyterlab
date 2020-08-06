@@ -22,6 +22,7 @@ import {
   createPythonGenerator,
   createRenderedMarkdownGenerator
 } from '@jupyterlab/toc';
+import { ITranslator } from '@jupyterlab/translation';
 import { tocIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -36,6 +37,7 @@ import { tocIcon } from '@jupyterlab/ui-components';
  * @param markdownViewerTracker - Markdown viewer tracker
  * @param notebookTracker - notebook tracker
  * @param rendermime - rendered MIME registry
+ * @param translator - translator
  * @returns table of contents registry
  */
 async function activateTOC(
@@ -46,17 +48,19 @@ async function activateTOC(
   restorer: ILayoutRestorer,
   markdownViewerTracker: IMarkdownViewerTracker,
   notebookTracker: INotebookTracker,
-  rendermime: IRenderMimeRegistry
+  rendermime: IRenderMimeRegistry,
+  translator: ITranslator
 ): Promise<ITableOfContentsRegistry> {
+  const trans = translator.load('jupyterlab');
   // Create the ToC widget:
-  const toc = new TableOfContents({ docmanager, rendermime });
+  const toc = new TableOfContents({ docmanager, rendermime, translator });
 
   // Create the ToC registry:
   const registry = new Registry();
 
   // Add the ToC to the left area:
   toc.title.icon = tocIcon;
-  toc.title.caption = 'Table of Contents';
+  toc.title.caption = trans.__('Table of Contents');
   toc.id = 'table-of-contents';
   labShell.add(toc, 'left', { rank: 700 });
 
@@ -67,7 +71,8 @@ async function activateTOC(
   const notebookGenerator = createNotebookGenerator(
     notebookTracker,
     toc,
-    rendermime.sanitizer
+    rendermime.sanitizer,
+    translator
   );
   registry.add(notebookGenerator);
 
@@ -75,7 +80,8 @@ async function activateTOC(
   const markdownGenerator = createMarkdownGenerator(
     editorTracker,
     toc,
-    rendermime.sanitizer
+    rendermime.sanitizer,
+    translator
   );
   registry.add(markdownGenerator);
 
@@ -83,7 +89,8 @@ async function activateTOC(
   const renderedMarkdownGenerator = createRenderedMarkdownGenerator(
     markdownViewerTracker,
     toc,
-    rendermime.sanitizer
+    rendermime.sanitizer,
+    translator
   );
   registry.add(renderedMarkdownGenerator);
 
@@ -139,7 +146,8 @@ const extension: JupyterFrontEndPlugin<ITableOfContentsRegistry> = {
     ILayoutRestorer,
     IMarkdownViewerTracker,
     INotebookTracker,
-    IRenderMimeRegistry
+    IRenderMimeRegistry,
+    ITranslator
   ],
   activate: activateTOC
 };

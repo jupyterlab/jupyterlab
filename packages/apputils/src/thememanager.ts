@@ -5,6 +5,12 @@ import { IChangedArgs, URLExt } from '@jupyterlab/coreutils';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { each } from '@lumino/algorithm';
 
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
@@ -40,6 +46,8 @@ export class ThemeManager implements IThemeManager {
    */
   constructor(options: ThemeManager.IOptions) {
     const { host, key, splash, url } = options;
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     const registry = options.settings;
 
     this._base = url;
@@ -265,6 +273,13 @@ export class ThemeManager implements IThemeManager {
   }
 
   /**
+   * Get the display name of the theme.
+   */
+  getDisplayName(name: string): string {
+    return this._themes[name]?.displayName || name;
+  }
+
+  /**
    * Change a font size by a positive or negative increment.
    */
   private _incrFontSize(key: string, add: boolean = true): Promise<void> {
@@ -347,7 +362,13 @@ export class ThemeManager implements IThemeManager {
       delete requests[theme];
 
       if (!themes[fallback]) {
-        this._onError(`Neither theme ${theme} nor default ${fallback} loaded.`);
+        this._onError(
+          this._trans.__(
+            'Neither theme %1 nor default %2 loaded.',
+            theme,
+            fallback
+          )
+        );
         return;
       }
 
@@ -419,12 +440,14 @@ export class ThemeManager implements IThemeManager {
    */
   private _onError(reason: any): void {
     void showDialog({
-      title: 'Error Loading Theme',
+      title: this._trans.__('Error Loading Theme'),
       body: String(reason),
-      buttons: [Dialog.okButton({ label: 'OK' })]
+      buttons: [Dialog.okButton({ label: this._trans.__('OK') })]
     });
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _base: string;
   private _current: string | null = null;
   private _host: Widget;
@@ -471,6 +494,11 @@ export namespace ThemeManager {
      * The url for local theme loading.
      */
     url: string;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 

@@ -28,7 +28,6 @@ export class HelpMenu extends JupyterLabMenu implements IHelpMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.menu.title.label = 'Help';
     this.kernelUsers = new Set<IHelpMenu.IKernelUser<Widget>>();
   }
 
