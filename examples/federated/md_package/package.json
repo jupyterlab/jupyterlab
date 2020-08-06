@@ -3,7 +3,7 @@
   "version": "2.1.1-alpha.4",
   "private": true,
   "scripts": {
-    "build": "npm run clean && webpack",
+    "build": "npm run clean && build-labextension .",
     "clean": "rimraf build",
     "prepublishOnly": "npm run build",
     "watch": "npm run clean && webpack --watch"

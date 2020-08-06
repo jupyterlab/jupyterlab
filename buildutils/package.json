@@ -24,6 +24,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
+    "build-labextension": "./lib/build-extension.js",
     "ensure-max-old-space": "./lib/ensure-max-old-space.js",
     "get-dependency": "./lib/get-dependency.js",
     "remove-dependency": "./lib/remove-dependency.js",
