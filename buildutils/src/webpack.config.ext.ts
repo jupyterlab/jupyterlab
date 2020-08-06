@@ -13,12 +13,13 @@ const { ModuleFederationPlugin } = webpack.container;
 
 const packagePath: string = process.env.PACKAGE_PATH || '';
 const nodeEnv: string = process.env.NODE_ENV || '';
+const corePath: string = process.env.CORE_PATH || '';
 
 if (nodeEnv === 'production') {
   baseConfig.mode = 'production';
 }
 
-const data = require(path.join(packagePath, '/package.json'));
+const data = require(path.join(packagePath, 'package.json'));
 
 const ajv = new Ajv({ useDefaults: true });
 const validate = ajv.compile(require('../metadata_schema.json'));
@@ -43,13 +44,18 @@ if (extEntry !== true) {
   exposes['./extension'] = path.join(packagePath, extEntry);
 }
 
-const coreData = require('@jupyterlab/metapackage/package.json');
+const coreData = require(path.join(corePath, 'package.json'));
 
 const shared: any = {};
 
-// Start with core dependencies.
-Object.keys(coreData.dependencies).forEach(element => {
-  shared[element] = { requiredVersion: coreData.dependencies[element] };
+// Start with core package versions.
+const coreDeps: any = {
+  ...coreData.dependencies,
+  ...(coreData.resolutions || {})
+};
+
+Object.keys(coreDeps).forEach(element => {
+  shared[element] = { requiredVersion: coreDeps[element] };
 });
 
 // Add package dependencies.

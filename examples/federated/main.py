@@ -17,43 +17,46 @@ os.environ["JUPYTER_NO_CONFIG"]="1"
 with open(os.path.join(HERE, 'package.json')) as fid:
     version = json.load(fid)['version']
 
+def _jupyter_server_extension_points():
+    return [
+        {
+            'module': __name__,
+            'app': ExampleApp
+        }
+    ]
+
 class ExampleApp(LabServerApp):
-    base_url = '/foo'
-    default_url = Unicode('/example',
-                          help='The default URL to redirect to from `/`')
+    name = "lab"
+    app_name = 'JupyterLab Example Federated App'
+    app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
+    app_version = version
+    schemas_dir = os.path.join(HERE, 'core_package', 'build', 'schemas')
+    static_dir = os.path.join(HERE, 'core_package', 'build')
+    templates_dir = os.path.join(HERE, 'templates')
+    themes_dir = os.path.join(HERE, 'core_package', 'build', 'themes')
+    user_settings_dir = os.path.join(HERE, 'core_package', 'build', 'user_settings')
+    workspaces_dir = os.path.join(HERE, 'core_package', 'build', 'workspaces')
+    labextensions_path =  [os.path.join(HERE, "labextensions")]
 
-    lab_config = LabConfig(
-        app_name = 'JupyterLab Example Federated App',
-        app_settings_dir = os.path.join(HERE, 'build', 'application_settings'),
-        app_version = version,
-        app_url = '/example',
-        schemas_dir = os.path.join(HERE, 'core_package', 'build', 'schemas'),
-        static_dir = os.path.join(HERE, 'core_package', 'build'),
-        templates_dir = os.path.join(HERE, 'templates'),
-        themes_dir = os.path.join(HERE, 'core_package', 'build', 'themes'),
-        user_settings_dir = os.path.join(HERE, 'core_package', 'build', 'user_settings'),
-        workspaces_dir = os.path.join(HERE, 'core_package', 'build', 'workspaces'),
-    )
-
-    def init_webapp(self):
-        super().init_webapp()
-
-        # Handle md ext assets
-        web_app = self.web_app
+    def initialize_handlers(self):
+        # Handle labextension assets
+        web_app = self.serverapp.web_app
         base_url = web_app.settings['base_url']
-        static_path = ujoin(base_url, 'example', 'ext', 'mdext', '(.*)')
-        static_dir = os.path.join(HERE, 'md_package', 'build')
-        web_app.add_handlers('.*$', [(static_path, FileFindHandler, {
-            'path': static_dir,
-        })])
-
-    def start(self):
-        settings = self.web_app.settings
+        page_config = web_app.settings.get('page_config_data', {})
+        web_app.settings['page_config_data'] = page_config
 
         # By default, make terminals available.
-        settings.setdefault('terminals_available', True)
+        web_app.settings.setdefault('terminals_available', True)
 
-        super().start()
+        # Add labextension metadata
+        dynamic_extensions = page_config['dynamic_extensions'] = []
+        dynamic_mime_extension = page_config['dynamic_mime_extensions'] = []
+        name = "@jupyterlab/example-federated-md"
+        path = "lab/extensions/%s/remoteEntry.js" % name
+        load_data = dict(name=name, path=path, module="./extension")
+        dynamic_extensions.append(load_data)
+
+        super().initialize_handlers()
 
 if __name__ == '__main__':
     ExampleApp.launch_instance()

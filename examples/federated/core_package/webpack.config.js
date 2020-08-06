@@ -3,124 +3,116 @@
 const data = require('./package.json');
 const Build = require('@jupyterlab/buildutils').Build;
 const webpack = require('webpack');
+const merge = require('webpack-merge');
+const baseConfig = require('@jupyterlab/buildutils/lib/webpack.config.base');
 const { ModuleFederationPlugin } = webpack.container;
+const fs = require('fs-extra');
 const path = require('path');
+const Handlebars = require('handlebars');
 
 const names = Object.keys(data.dependencies).filter(function(name) {
-  const packageData = require(name + '/package.json');
+  const packageData = require(path.join(name, 'package.json'));
   return packageData.jupyterlab !== undefined;
 });
 
+const jlab = data.jupyterlab;
+
+// Ensure a clear build directory.
+const buildDir = path.resolve(__dirname, 'build');
+if (fs.existsSync(buildDir)) {
+  fs.removeSync(buildDir);
+}
+fs.ensureDirSync(buildDir);
+
 const extras = Build.ensureAssets({
   packageNames: names,
-  output: './build'
+  output: buildDir
 });
 
-const rules = [
-  { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-  { test: /\.html$/, use: 'file-loader' },
-  { test: /\.md$/, use: 'raw-loader' },
-  { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
-  { test: /\.js.map$/, use: 'file-loader' },
-  {
-    test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-    use: 'url-loader?limit=10000&mimetype=application/font-woff'
-  },
-  {
-    test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-    use: 'url-loader?limit=10000&mimetype=application/font-woff'
-  },
-  {
-    test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-    use: 'url-loader?limit=10000&mimetype=application/octet-stream'
-  },
-  { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, use: 'file-loader' },
-  {
-    // In .css files, svg is loaded as a data URI.
-    test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-    issuer: /\.css$/,
-    use: {
-      loader: 'svg-url-loader',
-      options: { encoding: 'none', limit: 10000 }
-    }
-  },
-  {
-    // In .ts and .tsx files (both of which compile to .js), svg files
-    // must be loaded as a raw string instead of data URIs.
-    test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
-    issuer: /\.js$/,
-    use: {
-      loader: 'raw-loader'
-    }
+const singletons = {};
+
+data.jupyterlab.singletonPackages.forEach(element => {
+  singletons[element] = { singleton: true };
+});
+
+// Handle the extensions.
+const extensions = jlab.extensions || {};
+const mimeExtensions = jlab.mimeExtensions || {};
+const externalExtensions = jlab.externalExtensions || {};
+
+// go through each external extension
+// add to mapping of extension and mime extensions, of package name
+// to path of the extension.
+for (const key in externalExtensions) {
+  const {
+    jupyterlab: { extension, mimeExtension }
+  } = require(`${key}/package.json`);
+  if (extension !== undefined) {
+    extensions[key] = extension === true ? '' : extension;
   }
-];
+  if (mimeExtension !== undefined) {
+    mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
+  }
+}
 
-const options = {
-  devtool: 'source-map',
-  bail: true,
-  mode: 'development'
+// Create the entry point file.
+const source = fs.readFileSync('index.js').toString();
+const template = Handlebars.compile(source);
+const extData = {
+  jupyterlab_extensions: extensions,
+  jupyterlab_mime_extensions: mimeExtensions
 };
+const result = template(extData);
 
-let dependencies = {
-  ...data.dependencies,
-  '@jupyterlab/rendermime': '^2.1.0',
-  '@jupyterlab/coreutils': '^4.1.0',
-  '@jupyterlab/settingregistry': '^2.1.0',
-  '@lumino/algorithm': '^1.2.3',
-  '@lumino/application': '^1.8.4',
-  '@lumino/commands': '^1.10.1',
-  '@lumino/coreutils': '^1.4.3',
-  '@lumino/disposable': '^1.3.5',
-  '@lumino/domutils': '^1.1.7',
-  '@lumino/dragdrop': '^1.5.1',
-  '@lumino/messaging': '^1.3.3',
-  '@lumino/properties': '^1.1.6',
-  '@lumino/signaling': '^1.3.5',
-  '@lumino/virtualdom': '^1.6.1',
-  '@lumino/widgets': '^1.11.1',
-  react: '~16.9.0',
-  'react-dom': '~16.9.0'
-};
-delete dependencies['@jupyterlab/markdownviewer-extension'];
+fs.writeFileSync(path.join(buildDir, 'index.out.js'), result);
 
-let shared = Object.fromEntries(
-  Object.entries(dependencies).filter(
-    ([pkg]) => pkg.startsWith('@lumino') || pkg.startsWith('@jupyterlab')
-  )
-);
+// Make a bootstrap entrypoint
+const entryPoint = path.join(buildDir, 'bootstrap.js');
+const bootstrap = 'import("./index.out.js");';
+fs.writeFileSync(entryPoint, bootstrap);
+
+if (process.env.NODE_ENV === 'production') {
+  baseConfig.mode = 'production';
+}
+
 module.exports = [
-  {
-    entry: './index.js',
+  merge(baseConfig, {
+    entry: entryPoint,
     output: {
-      path: path.resolve(__dirname, 'build'),
+      path: buildDir,
       library: {
         type: 'var',
-        name: ['MYNAMESPACE', 'NAME_OUTPUT']
+        name: ['_JUPYTERLAB', 'CORE_OUTPUT']
       },
       filename: 'bundle.js',
-      publicPath: '/foo/static/example/'
+      publicPath: 'static/lab/'
     },
-    stats: 'verbose',
-    ...options,
-    module: { rules },
+    module: {
+      rules: [
+        // Workaround for https://github.com/jupyterlab/jupyterlab/issues/8655
+        {
+          test: /vega-statistics\/src\/.*.js$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: ['@babel/preset-env']
+            }
+          }
+        }
+      ]
+    },
     plugins: [
       new ModuleFederationPlugin({
         library: {
           type: 'var',
-          name: ['MYNAMESPACE', 'NAME_LIBRARY_FEDERATION']
+          name: ['_JUPYTERLAB', 'CORE_LIBRARY_FEDERATION']
         },
-        name: 'NAME_FEDERATION',
-        shared: Object.fromEntries(
-          Object.entries(shared).map(([pkg, version]) => [
-            pkg,
-            { singleton: true, requiredVersion: version }
-          ])
-        )
-      }),
-      new webpack.DefinePlugin({
-        'process.env': '{}',
-        process: {}
+        name: 'CORE_FEDERATION',
+        shared: {
+          ...data.resolutions,
+          ...singletons
+        }
       })
     ]
-  }
+  })
 ].concat(extras);

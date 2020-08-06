@@ -3,7 +3,7 @@
   "version": "2.1.1-alpha.4",
   "private": true,
   "scripts": {
-    "build": "npm run clean && build-labextension .",
+    "build": "npm run clean && build-labextension --core-path ../core_package .",
     "clean": "rimraf build",
     "prepublishOnly": "npm run build",
     "watch": "npm run clean && webpack --watch"
@@ -32,6 +32,7 @@
     "whatwg-fetch": "^3.0.0"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "outputDir": "../labextensions/@jupyterlab/example-federated-md"
   }
 }

@@ -25,6 +25,7 @@ packages/ui-components/src/icon/iconimports.ts
 jupyterlab/staging/yarn.js
 jupyterlab/staging/index.js
 tsconfigdoc.json
+examples/federated/core_package/index.js
 
 # jetbrains IDE stuff
 .idea/
