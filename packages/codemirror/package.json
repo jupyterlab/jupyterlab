@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror",
-  "version": "3.0.0-alpha.5",
+  "version": "3.0.0-alpha.6",
   "description": "JupyterLab - CodeMirror Editor Provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,12 +38,12 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-alpha.5",
-    "@jupyterlab/codeeditor": "^3.0.0-alpha.5",
-    "@jupyterlab/coreutils": "^5.0.0-alpha.5",
-    "@jupyterlab/nbformat": "^3.0.0-alpha.5",
-    "@jupyterlab/observables": "^4.0.0-alpha.5",
-    "@jupyterlab/statusbar": "^3.0.0-alpha.5",
+    "@jupyterlab/apputils": "^3.0.0-alpha.6",
+    "@jupyterlab/codeeditor": "^3.0.0-alpha.6",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.6",
+    "@jupyterlab/nbformat": "^3.0.0-alpha.6",
+    "@jupyterlab/observables": "^4.0.0-alpha.6",
+    "@jupyterlab/statusbar": "^3.0.0-alpha.6",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
     "@lumino/coreutils": "^1.4.3",
@@ -55,7 +55,7 @@
     "react": "~16.9.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-alpha.5",
+    "@jupyterlab/testutils": "^3.0.0-alpha.6",
     "@types/codemirror": "^0.0.76",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
