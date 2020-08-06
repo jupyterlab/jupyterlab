@@ -15,14 +15,14 @@ const packagePath: string = process.env.PACKAGE_PATH || '';
 const nodeEnv: string = process.env.NODE_ENV || '';
 
 if (nodeEnv === 'production') {
-  baseConfig.mode = 'production'
+  baseConfig.mode = 'production';
 }
 
 const data = require(path.join(packagePath, '/package.json'));
 
 const ajv = new Ajv({ useDefaults: true });
-const validate = ajv.compile(require('./metadata_schema.json'));
-var valid = validate(data.jupyterlab || {});
+const validate = ajv.compile(require('../metadata_schema.json'));
+let valid = validate(data.jupyterlab || {});
 if (!valid) {
   console.error(validate.errors);
   process.exit(1);
@@ -37,26 +37,26 @@ const index = require.resolve(packagePath);
 const exposes = {
   './index': index,
   './extension': index
-}
+};
 
 if (extEntry !== true) {
   exposes['./extension'] = path.join(packagePath, extEntry);
 }
 
-const coreData = require('./core_package/package.json');
+const coreData = require('@jupyterlab/metapackage/package.json');
 
 const shared: any = {};
 
 // Start with core dependencies.
-Object.keys(coreData.dependencies).forEach((element) => {
+Object.keys(coreData.dependencies).forEach(element => {
   shared[element] = { requiredVersion: coreData.dependencies[element] };
-  });
+});
 
 // Add package dependencies.
-Object.keys(data.dependencies).forEach((element) => {
+Object.keys(data.dependencies).forEach(element => {
   if (!shared[element]) {
     shared[element] = {};
-}
+  }
   shared[element].requiredVersion = data.dependencies[element];
 });
 
@@ -69,7 +69,7 @@ Object.keys(data.dependencies).forEach((element) => {
 coreData.jupyterlab.singletonPackages.forEach((element: string) => {
   if (!shared[element]) {
     shared[element] = {};
-}
+  }
   shared[element].import = false;
   shared[element].singleton = true;
 });
@@ -86,7 +86,7 @@ coreData.jupyterlab.singletonPackages.forEach((element: string) => {
 (data.jupyterlab.nonSingletonPackages || []).forEach((element: string) => {
   if (!shared[element]) {
     shared[element] = {};
-}
+  }
   shared[element].singleton = false;
 });
 
@@ -99,11 +99,14 @@ const extras = Build.ensureAssets({
   output: outputPath
 });
 
-fs.copyFileSync(path.join(packagePath, 'package.json'), path.join(outputPath, 'package.orig.json'))
+fs.copyFileSync(
+  path.join(packagePath, 'package.json'),
+  path.join(outputPath, 'package.orig.json')
+);
 
 // Make a bootstrap entrypoint
 const entryPoint = path.join(outputPath, 'bootstrap.js');
-const bootstrap = 'import("' + exposes['./extension'] + '");'
+const bootstrap = 'import("' + exposes['./extension'] + '");';
 fs.writeFileSync(entryPoint, bootstrap);
 
 module.exports = [
@@ -112,7 +115,7 @@ module.exports = [
     output: {
       filename: 'extension.js',
       path: outputPath,
-      publicPath: `lab/extensions/${data.name}/`,
+      publicPath: `lab/extensions/${data.name}/`
     },
     plugins: [
       new ModuleFederationPlugin({
@@ -123,7 +126,7 @@ module.exports = [
         },
         filename: 'remoteEntry.js',
         exposes,
-        shared,
+        shared
       })
     ]
   })

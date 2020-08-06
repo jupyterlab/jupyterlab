@@ -104,6 +104,8 @@ function ensureMetaPackage(): string[] {
   const messages: string[] = [];
   const seen: Dict<boolean> = {};
 
+  // TODO: we need the jupyterlab metadata here so extensions can use it
+
   utils.getCorePaths().forEach(pkgPath => {
     if (path.resolve(pkgPath) === path.resolve(mpPath)) {
       return;
@@ -279,6 +281,26 @@ function ensureJupyterlab(): string[] {
 }
 
 /**
+ * Ensure buildutils bin files are symlinked
+ */
+function ensureBuildUtils() {
+  const basePath = path.resolve('.');
+  const utilsPackage = path.join(basePath, 'buildutils', 'package.json');
+  const utilsData = utils.readJSONFile(utilsPackage);
+  for (const name in utilsData.bin) {
+    const src = path.join(basePath, 'buildutils', utilsData.bin[name]);
+    const dest = path.join(basePath, 'node_modules', '.bin', name);
+    fs.lstat(dest, (_, stat) => {
+      if (stat) {
+        fs.removeSync(dest);
+      }
+    });
+    fs.symlinkSync(src, dest, 'file');
+    fs.chmodSync(dest, 0o777);
+  }
+}
+
+/**
  * Ensure the repo integrity.
  */
 export async function ensureIntegrity(): Promise<boolean> {
@@ -418,6 +440,9 @@ export async function ensureIntegrity(): Promise<boolean> {
     tsConfigdocData.references.push({ path: './' + path.relative('.', pth) });
   });
   utils.writeJSONFile(tsConfigdocPath, tsConfigdocData);
+
+  // Handle buildutils
+  ensureBuildUtils();
 
   // Handle the JupyterLab application top package.
   pkgMessages = ensureJupyterlab();

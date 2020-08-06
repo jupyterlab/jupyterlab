@@ -215,7 +215,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
   ): ISchemaValidator.IError[] | null {
     const composer = this._composer;
     const validator = this._validator;
-    const validate = validator.getSchema('jupyterlab-plugin-schema');
+    const validate = validator.getSchema('jupyterlab-plugin-schema')!;
 
     // Validate against the main schema.
     if (!(validate(schema) as boolean)) {
