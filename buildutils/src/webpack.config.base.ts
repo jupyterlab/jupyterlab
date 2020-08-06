@@ -44,7 +44,10 @@ const rules = [
 ];
 
 // Map Phosphor files to Lumino files.
-const stylePath = path.join(path.dirname(require.resolve('@lumino/widgets/package.json')), 'style')
+const stylePath = path.join(
+  path.dirname(require.resolve('@lumino/widgets/package.json')),
+  'style'
+);
 
 const phosphorAlias = {
   '@phosphor/algorithm$': require.resolve('@lumino/algorithm'),
@@ -61,8 +64,7 @@ const phosphorAlias = {
   '@phosphor/widgets/style': stylePath,
   '@phosphor/virtualdom$': require.resolve('@lumino/virtualdom'),
   '@phosphor/widgets$': require.resolve('@lumino/widgets')
-}
-
+};
 
 module.exports = {
   devtool: 'source-map',
@@ -80,5 +82,4 @@ module.exports = {
       process: {}
     })
   ]
-}
-
+};

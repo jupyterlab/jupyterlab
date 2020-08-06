@@ -104,8 +104,6 @@ function ensureMetaPackage(): string[] {
   const messages: string[] = [];
   const seen: Dict<boolean> = {};
 
-  // TODO: we need the jupyterlab metadata here so extensions can use it
-
   utils.getCorePaths().forEach(pkgPath => {
     if (path.resolve(pkgPath) === path.resolve(mpPath)) {
       return;
