@@ -79,6 +79,9 @@ fi
 
 
 if [[ $GROUP == integrity2 ]]; then
+    # Run the integrity script to link binary files
+    jlpm integrity
+
     # Build the packages individually.
     jlpm run build:src
 
@@ -133,6 +136,9 @@ fi
 
 
 if [[ $GROUP == examples ]]; then
+    # Run the integrity script to link binary files
+    jlpm integrity
+
     # Build the examples.
     jlpm run build:packages
     jlpm run build:examples
