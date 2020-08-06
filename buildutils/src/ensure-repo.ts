@@ -290,11 +290,12 @@ function ensureBuildUtils() {
   for (const name in utilsData.bin) {
     const src = path.join(basePath, 'buildutils', utilsData.bin[name]);
     const dest = path.join(basePath, 'node_modules', '.bin', name);
-    fs.lstat(dest, (_, stat) => {
-      if (stat) {
-        fs.removeSync(dest);
-      }
-    });
+    try {
+      fs.lstatSync(dest);
+      fs.removeSync(dest);
+    } catch (e) {
+      // no-op
+    }
     fs.symlinkSync(src, dest, 'file');
     fs.chmodSync(dest, 0o777);
   }
