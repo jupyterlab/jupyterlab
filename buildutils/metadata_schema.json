@@ -1,0 +1,79 @@
+{
+  "title": "JupyterLab Package Metadata",
+  "version": "0.1.0",
+  "description": "JupyterLab package.json settings.",
+  "definitions": {
+    "extension": {
+      "type": ["boolean", "string"]
+    },
+    "relativePath": {
+      "type": ["string", "null"]
+    }
+  },
+  "properties": {
+    "extension": {
+      "title": "Extension",
+      "description": "Presence of or relative path to a standard JupyterLab extension",
+      "$ref": "#/definitions/extension",
+      "default": false
+    },
+    "mimeExtension": {
+      "title": "Mime extension",
+      "description": "Presence of or relative path to a JupyterLab MIME renderer extension",
+      "$ref": "#/definitions/extension",
+      "default": false
+    },
+    "themePath": {
+      "title": "Theme path",
+      "description": "The relative path to theme files",
+      "$ref": "#/definitions/relativePath",
+      "default": null
+    },
+    "schemaDir": {
+      "title": "Schema directory",
+      "description": "The relative path to schema files",
+      "$ref": "#/definitions/relativePath",
+      "default": null
+    },
+    "outputDir": {
+      "title": "Output directory",
+      "description": "The relative path to the static assets",
+      "$ref": "#/definitions/relativePath",
+      "default": "static"
+    },
+    "sharedPackages": {
+      "title": "Shared packages",
+      "description": "Packages that should be shared (in addition to core shared packages)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "nonSharedPackages": {
+      "title": "Non-shared packages",
+      "description": "Packages that should not be shared (which can include core packages)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "singletonPackages": {
+      "title": "Singleton packages",
+      "description": "Packages that should be singletons (in addition to core singleton packages)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "nonSingleltonPackages": {
+      "title": "Non-singleton packages",
+      "description": "Packages that should not be singletons (which can include core packages)",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "type": "object"
+}
