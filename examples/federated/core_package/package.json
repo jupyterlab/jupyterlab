@@ -5,7 +5,6 @@
   "scripts": {
     "build": "npm run clean && webpack",
     "clean": "rimraf build",
-    "prepublishOnly": "npm run build",
     "watch": "npm run clean && webpack --watch"
   },
   "dependencies": {
