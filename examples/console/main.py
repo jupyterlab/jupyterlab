@@ -65,7 +65,7 @@ class ExampleHandler(
 class ExampleApp(LabServerApp):
 
     extension_url = '/lab'
-
+    load_other_extensions = False
     name = __name__
     app_name = 'JupyterLab Example Console'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')

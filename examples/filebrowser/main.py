@@ -64,7 +64,7 @@ class ExampleHandler(
 class ExampleApp(LabServerApp):
 
     extension_url = '/lab'
-
+    load_other_extensions = False
     name = __name__
     app_name = 'JupyterLab Example File Browser'
     static_dir = os.path.join(HERE, 'build')

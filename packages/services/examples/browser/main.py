@@ -56,6 +56,7 @@ class ExampleApp(LabServerApp):
 
     extension_url = '/lab'
     name = __name__
+    load_other_extensions = False
     app_name = 'JupyterLab Example Service'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
     app_version = version

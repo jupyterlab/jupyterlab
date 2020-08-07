@@ -27,6 +27,7 @@ def _jupyter_server_extension_points():
 
 class ExampleApp(LabServerApp):
     name = __name__
+    load_other_extensions = False
     app_name = 'JupyterLab Example Federated App'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
     app_version = version
