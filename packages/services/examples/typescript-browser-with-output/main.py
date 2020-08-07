@@ -55,7 +55,7 @@ class ExampleHandler(
 class ExampleApp(LabServerApp):
 
     extension_url = '/lab'
-    name = 'lab'
+    name = __name__
     app_name = 'JupyterLab Example Service'
     static_dir = os.path.join(HERE, 'build')
     templates_dir = os.path.join(HERE, 'templates')
