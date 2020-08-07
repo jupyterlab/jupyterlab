@@ -31,6 +31,7 @@ The available notebook definitions are located in the `./src/notebooks` folder (
 - [`./src/notebooks/fixedDataTable.ts](./src/notebooks/fixedDataTable.ts).
 - [`./src/notebooks/largePlotly.ts](./src/notebooks/largePlotly.ts).
 - [`./src/notebooks/longOutput.ts](./src/notebooks/longOutput.ts).
+- [`./src/notebooks/manyCells.ts](./src/notebooks/manyCells.ts).
 - [`./src/notebooks/manyOutputs.ts](./src/notebooks/manyOutputs.ts).
 - [`./src/notebooks/manyPlotly.ts](./src/notebooks/manyPlotly.ts).
 
