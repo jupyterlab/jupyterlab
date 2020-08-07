@@ -38,8 +38,7 @@ commander
       cmdText += ' --watch';
     }
     if (!cmd.corePath) {
-      console.error('no');
-      process.exit(1);
+      cmd.corePath = process.cwd();
     }
     const env = {
       PACKAGE_PATH: packagePath,
