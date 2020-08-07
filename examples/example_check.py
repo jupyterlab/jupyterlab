@@ -73,9 +73,10 @@ async def run_browser(url):
     # Run the browser test and return an exit code.
     target = osp.join(get_app_dir(), 'example_test')
     if not osp.exists(osp.join(target, 'node_modules')):
-        os.makedirs(target)
-        await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(["jlpm", "add", "puppeteer^4"], cwd=target)
+        if not osp.exists(target):
+            os.makedirs(osp.join(target))
+        await run_async_process(["npm", "init", "-y"], cwd=target)
+        await run_async_process(["npm", "install", "puppeteer^4"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-example-test.js'), osp.join(target, 'chrome-example-test.js'))
     await run_async_process(["node", "chrome-example-test.js", url], cwd=target)
 
