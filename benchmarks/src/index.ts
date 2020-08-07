@@ -122,7 +122,7 @@ function writeOutput({
 
     await waitForLaunch();
 
-    for (let n = 0; n <= MAX_N; n += MAX_N / NUMBER_SAMPLES) {
+    for (let n = 0; n <= MAX_N; n += MAX_N / (NUMBER_SAMPLES - 1)) {
       // stop testing if we don't have atleast two tests to keep running
       if (notebooks.length - tooLong.size < 2) {
         break;
