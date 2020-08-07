@@ -40,7 +40,7 @@ class ExampleHandler(
             'baseUrl': self.base_url,
             'token': self.settings['token'],
             'fullStaticUrl': ujoin(self.base_url, 'static', self.name),
-            'frontendUrl': ujoin(self.base_url, 'example/')
+            'frontendUrl': ujoin(self.base_url, 'lab/')
         }
         return self.write(
             self.render_template(
@@ -54,11 +54,10 @@ class ExampleHandler(
 
 class ExampleApp(LabServerApp):
 
-    extension_url = '/example'
+    extension_url = '/lab'
     name = 'main'
     app_name = 'JupyterLab Example Service'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
-    app_url = '/example_app'
     app_version = version
     schemas_dir = os.path.join(HERE, 'build', 'schemas')
     static_dir = os.path.join(HERE, 'build')
@@ -71,7 +70,7 @@ class ExampleApp(LabServerApp):
         """Add example handler to Lab Server's handler list.
         """
         self.handlers.append(
-            ('/example', ExampleHandler)
+            ('/lab', ExampleHandler)
         )
 
 

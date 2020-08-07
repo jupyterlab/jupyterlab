@@ -51,7 +51,7 @@ class ExampleHandler(
             'token': self.settings['token'],
             'notebookPath': 'test.ipynb',
             'fullStaticUrl': ujoin(self.base_url, 'static', self.name),
-            'frontendUrl': ujoin(self.base_url, 'example/'),
+            'frontendUrl': ujoin(self.base_url, 'lab/'),
             # FIXME: Don't use a CDN here
             'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
             'mathjaxConfig': "TeX-AMS_CHTML-full,Safeee"

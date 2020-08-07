@@ -47,7 +47,7 @@ class ExampleHandler(
             'baseUrl': self.base_url,
             'token': self.settings['token'],
             'fullStaticUrl': ujoin(self.base_url, 'static', self.name),
-            'frontendUrl': ujoin(self.base_url, 'example/'),
+            'frontendUrl': ujoin(self.base_url, 'lab/'),
         }
         return self.write(
             self.render_template(
