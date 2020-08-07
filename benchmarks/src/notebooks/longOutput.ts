@@ -2,8 +2,8 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-import makeNotebook from './makeNotebook';
-import NotebookType from './notebookType';
+import makeNotebook from './../makeNotebook';
+import NotebookType from './../notebookType';
 
 export default {
   label: 'one output with 100 n divs',
@@ -21,7 +21,7 @@ export default {
                 `<div>${Array.from(
                   { length: n * 100 },
                   (_, i) =>
-                    `<div>I am a long string which is repeatedly added to the dom: ${i}</div>`
+                    `<div>I am a long string in a div which is repeatedly added to one html object: ${i}</div>`
                 ).join('')}</div>`
               ],
               'text/plain': ['<IPython.core.display.HTML object>']
@@ -34,7 +34,7 @@ export default {
         source: [
           'from IPython.display import HTML\n',
           '\n',
-          `HTML(f\'<div>{"".join("<div>I am a long string which is repeatedly added to the dom: %d</div>" % i for i in range(${n *
+          `HTML(f\'<div>{"".join("<div>I am a long string in a div which is repeatedly added to one html object: %d</div>" % i for i in range(${n *
             100}))}</div>\')`
         ]
       }

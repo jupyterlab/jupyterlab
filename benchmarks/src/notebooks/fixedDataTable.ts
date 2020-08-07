@@ -2,8 +2,8 @@
  * Copyright (c) Jupyter Development Team.
  * Distributed under the terms of the Modified BSD License.
  */
-import makeNotebook from './makeNotebook';
-import NotebookType from './notebookType';
+import makeNotebook from './../makeNotebook';
+import NotebookType from './../notebookType';
 
 const ROWS = 5000;
 const COLUMNS = 50;

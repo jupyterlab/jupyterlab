@@ -12,22 +12,22 @@ import NotebookType from './notebookType';
 const DATA_PATH = process.env['BENCHMARK_OUTPUT'] || 'out.csv';
 
 const BROWSERS: Array<'firefox' | 'chromium'> = ['firefox', 'chromium'];
-// The maximium N
+
+// The maximum N
 const MAX_N = 100;
 // The number of different n's to try out
 const NUMBER_SAMPLES = 20;
 // How many times to switch between each notebook
 const SWITCHES = 10;
-
-/**
- * Max time to stop testing if mean of previous sample was > this.
- */
+// Max time to stop testing if mean of previous sample was > this
 const MAX_TIME = 5 * 1000;
+// Selector timeout in milliseconds
+const TIME_OUT = 200 * 1000;
 
 const notebookEnv = process.env.BENCHMARK_NOTEBOOKS;
 const NOTEBOOK_PACKAGES: Array<string> = notebookEnv
   ? JSON.parse(notebookEnv)
-  : ['./largePlotly', './longOutput', './manyPlotly', './manyOutputs'];
+  : ['largePlotly', 'longOutput', 'manyPlotly', 'manyOutputs', 'errorOutputs'];
 
 type OUTPUT_TYPE = {
   browser: typeof BROWSERS[number];
@@ -56,7 +56,9 @@ function writeOutput({
 
 (async () => {
   const notebooks: Array<NotebookType> = (
-    await Promise.all(NOTEBOOK_PACKAGES.map(path => import(path)))
+    await Promise.all(
+      NOTEBOOK_PACKAGES.map(path => import('./notebooks/' + path))
+    )
   ).map(pkg => pkg.default);
   await writeLine('mode,browser,n,type,time');
   await fs.promises.mkdir('data', { recursive: true });
@@ -74,19 +76,26 @@ function writeOutput({
       width: 1280,
       height: 960
     });
-    // page.on('console', (msg: playwright.ConsoleMessage) => {
-    //   console.log(`browser type=${msg.type()} text=${msg.text()}`);
-    // });
+    /*
+    page.on('console', (msg: playwright.ConsoleMessage) => {
+      console.log(`browser type=${msg.type()} text=${msg.text()}`);
+    });
+    */
     /**
      * Wait for a widget to be visible.
      */
     async function waitForNotebook(id: string): Promise<void> {
-      await page.waitForSelector(`#${id}`, { visibility: 'visible' });
+      await page.waitForSelector(`#${id}`, {
+        visibility: 'visible',
+        timeout: TIME_OUT
+      });
       await page.waitForSelector(`#${id} .jp-Notebook-cell`, {
-        visibility: 'visible'
+        visibility: 'visible',
+        timeout: TIME_OUT
       });
       await page.waitForSelector(`#${id} .jp-Spinner`, {
-        visibility: 'hidden'
+        visibility: 'hidden',
+        timeout: TIME_OUT
       });
     }
 
@@ -104,6 +113,7 @@ function writeOutput({
       );
       return time;
     }
+
     const waitForLaunch = () =>
       page.waitForSelector('.jp-Launcher', { visibility: 'visible' });
     // Go to reset for a new workspace
@@ -111,7 +121,9 @@ function writeOutput({
 
     // https://developer.mozilla.org/en-US/docs/Web/API/Window/load_event
     await page.waitForLoadState();
+
     await waitForLaunch();
+
     for (let n = 0; n <= MAX_N; n += MAX_N / NUMBER_SAMPLES) {
       // stop testing if we don't have atleast two tests to keep running
       if (notebooks.length - tooLong.size < 2) {
