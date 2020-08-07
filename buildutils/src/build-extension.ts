@@ -20,9 +20,8 @@ import { run } from './utils';
 
 commander
   .description('Build an extension')
-  .usage('[options] <path>')
   .option('--prod', 'build in prod mode (default is dev)')
-  .option('--core-path <path>', 'the core package directory')
+  .requiredOption('--core-path <path>', 'the core package directory')
   .option('--watch')
   .action(async cmd => {
     let node_env = 'development';
