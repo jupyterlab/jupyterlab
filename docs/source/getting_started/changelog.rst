@@ -7,9 +7,14 @@ JupyterLab Changelog
 `v2.2.x <https://github.com/jupyterlab/jupyterlab/milestone/53>`__
 ------------------------------------------------------------------
 
+v2.2.3
+^^^^^^
+* Restore ``labhubapp``  (`#8780 <https://github.com/jupyterlab/jupyterlab/pull/8730>`__ `#8780 <https://github.com/jupyterlab/jupyterlab/pull/8780>`__)
+
+
 v2.2.2
 ^^^^^^
-* Fix JavaScript error when switching kernels (`#8730 <https://github.com/jupyterlab/jupyterlab/pull/8730>`__ `#8727 <https://github.com/jupyterlab/jupyterlab/pull/8727>`__)
+* Fix JavaScript error when switching kernels (`#8730 <https://github.com/jupyterlab/jupyterlab/pull/8730>`__ `#8730 <https://github.com/jupyterlab/jupyterlab/pull/8730>`__)
 
 v2.2.1
 ^^^^^^
