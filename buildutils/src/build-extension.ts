@@ -20,9 +20,8 @@ import { run } from './utils';
 
 commander
   .description('Build an extension')
-  .usage('[options] <path>')
   .option('--prod', 'build in prod mode (default is dev)')
-  .option('--core-path', 'the core package directory')
+  .requiredOption('--core-path <path>', 'the core package directory')
   .option('--watch')
   .action(async cmd => {
     let node_env = 'development';
@@ -38,8 +37,7 @@ commander
       cmdText += ' --watch';
     }
     if (!cmd.corePath) {
-      console.error('no');
-      process.exit(1);
+      cmd.corePath = process.cwd();
     }
     const env = {
       PACKAGE_PATH: packagePath,

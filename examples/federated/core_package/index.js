@@ -153,52 +153,9 @@ async function main() {
   });
   register.forEach(function(item) { lab.registerPluginModule(item); });
   lab.start({ ignorePlugins: ignorePlugins });
-
-  // Expose global app instance when in dev mode or when toggled explicitly.
-  var exposeAppInBrowser = (PageConfig.getOption('exposeAppInBrowser') || '').toLowerCase() === 'true';
-  var devMode = (PageConfig.getOption('devMode') || '').toLowerCase() === 'true';
-
-  if (exposeAppInBrowser || devMode) {
-    window.jupyterlab = lab;
-  }
-
-  // Handle a browser test.
-  var browserTest = PageConfig.getOption('browserTest');
-  if (browserTest.toLowerCase() === 'true') {
-    var el = document.createElement('div');
-    el.id = 'browserTest';
-    document.body.appendChild(el);
-    el.textContent = '[]';
-    el.style.display = 'none';
-    var errors = [];
-    var reported = false;
-    var timeout = 25000;
-
-    var report = function() {
-      if (reported) {
-        return;
-      }
-      reported = true;
-      el.className = 'completed';
-    }
-
-    window.onerror = function(msg, url, line, col, error) {
-      errors.push(String(error));
-      el.textContent = JSON.stringify(errors)
-    };
-    console.error = function(message) {
-      errors.push(String(message));
-      el.textContent = JSON.stringify(errors)
-    };
-
-    lab.restored
-      .then(function() { report(errors); })
-      .catch(function(reason) { report([`RestoreError: ${reason.message}`]); });
-
-    // Handle failures to restore after the timeout has elapsed.
-    window.setTimeout(function() { report(errors); }, timeout);
-  }
-
+  lab.restored.then(() => {
+    console.debug('Example started!');
+  });
 }
 
 window.addEventListener('load', main);

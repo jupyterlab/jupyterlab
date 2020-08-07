@@ -87,6 +87,8 @@ async def run_test_async(app, func):
     env_patch = TestEnv()
     env_patch.start()
 
+    app.log.info('Running async test')
+
     # The entry URL for browser tests is different in notebook >= 6.0,
     # since that uses a local HTML file to point the user at the app.
     if hasattr(app, 'browser_open_file'):
@@ -148,9 +150,10 @@ async def run_browser(url):
     """
     target = osp.join(get_app_dir(), 'browser_test')
     if not osp.exists(osp.join(target, 'node_modules')):
-        os.makedirs(target)
-        await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(["jlpm", "add", "puppeteer@^4"], cwd=target)
+        if not osp.exists(target):
+            os.makedirs(osp.join(target))
+        await run_async_process(["npm", "init", "-y"], cwd=target)
+        await run_async_process(["npm", "install", "puppeteer@^4"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
     await run_async_process(["node", "chrome-test.js", url], cwd=target)
 
@@ -160,11 +163,13 @@ class BrowserApp(LabApp):
     JS console errors, JS errors, and Python logged errors.
     """
     name = __name__
-    open_browser = Bool(False)
+    serverapp_config = {
+        "open_browser": False
+    }
     ip = '127.0.0.1'
     flags = test_flags
     aliases = test_aliases
-    test_browser = True
+    test_browser = Bool(True)
 
     def initialize_settings(self):
         self.settings.setdefault('page_config_data', dict())
@@ -177,17 +182,19 @@ class BrowserApp(LabApp):
         run_test(self.serverapp, func)
         super().initialize_handlers()
 
-if __name__ == '__main__':
-    skip_option = "--no-chrome-test"
-    if skip_option in sys.argv:
-        BrowserApp.test_browser = False
-        sys.argv.remove(skip_option)
-    def _jupyter_server_extension_points():
+
+def _jupyter_server_extension_points():
         return [
             {
                 'module': __name__,
                 'app': BrowserApp
             }
         ]
-    sys.modules[__name__]._jupyter_server_extension_points = _jupyter_server_extension_points
+
+if __name__ == '__main__':
+    skip_option = "--no-chrome-test"
+    if skip_option in sys.argv:
+        BrowserApp.test_browser = False
+        sys.argv.remove(skip_option)
+
     BrowserApp.launch_instance()
