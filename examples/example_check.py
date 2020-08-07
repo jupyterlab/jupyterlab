@@ -41,9 +41,7 @@ def main():
         """An app that launches an example and waits for it to start up, checking for
         JS console errors, JS errors, and Python logged errors.
         """
-        name = 'lab'
-        extension_url = '/lab'
-        default_url = '/lab'
+        name = __name__
         serverapp_config = {
             "open_browser": False
         }

@@ -51,7 +51,7 @@ class ExampleHandler(
             'token': self.settings['token'],
             'notebookPath': 'test.ipynb',
             'fullStaticUrl': ujoin(self.base_url, 'static', self.name),
-            'frontendUrl': ujoin(self.base_url, 'lab/'),
+            'frontendUrl': ujoin(self.base_url, 'example/'),
             # FIXME: Don't use a CDN here
             'mathjaxUrl': "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js",
             'mathjaxConfig': "TeX-AMS_CHTML-full,Safeee"
@@ -69,7 +69,8 @@ class ExampleHandler(
 
 class ExampleApp(LabServerApp):
 
-    extension_url = '/lab'
+    extension_url = '/example'
+    app_url = "/example"
     name = __name__
     app_name = 'JupyterLab Example Notebook'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
@@ -84,7 +85,7 @@ class ExampleApp(LabServerApp):
         """Add example handler to Lab Server's handler list.
         """
         self.handlers.append(
-            ('/lab', ExampleHandler)
+            ('/example', ExampleHandler)
         )
 
 

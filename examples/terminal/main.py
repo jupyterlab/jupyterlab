@@ -49,7 +49,7 @@ class ExampleHandler(
             'baseUrl': self.base_url,
             'token': self.settings['token'],
             'fullStaticUrl': ujoin(self.base_url, 'static', self.name),
-            'frontendUrl': ujoin(self.base_url, 'lab/'),
+            'frontendUrl': ujoin(self.base_url, 'example/'),
             'terminalsAvailable': available
         }
         return self.write(
@@ -64,7 +64,8 @@ class ExampleHandler(
 
 class ExampleApp(LabServerApp):
 
-    extension_url = '/lab'
+    extension_url = '/example'
+    app_url = "/example"
     name = __name__
     load_other_extensions = False
     app_name = 'JupyterLab Example Terminal'
@@ -80,7 +81,7 @@ class ExampleApp(LabServerApp):
         """Add example handler to Lab Server's handler list.
         """
         self.handlers.append(
-            ('/lab', ExampleHandler)
+            ('/example', ExampleHandler)
         )
 
 if __name__ == '__main__':
