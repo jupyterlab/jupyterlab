@@ -148,7 +148,7 @@ async def run_browser(url):
     """
     target = osp.join(get_app_dir(), 'browser_test')
     if not osp.exists(osp.join(target, 'node_modules')):
-        os.makedirs(target)
+        os.makedirs(osp.join(target, 'node_modules'))
         await run_async_process(["jlpm", "init", "-y"], cwd=target)
         await run_async_process(["jlpm", "add", "puppeteer@^4"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
