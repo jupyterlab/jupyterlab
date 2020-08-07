@@ -161,7 +161,7 @@ class BrowserApp(LabApp):
     """An app the launches JupyterLab and waits for it to start up, checking for
     JS console errors, JS errors, and Python logged errors.
     """
-    name = "lab"
+    name = __name__
     serverapp_config = {
         "open_browser": False
     }
