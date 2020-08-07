@@ -44,6 +44,7 @@ import {
   jsonIcon,
   markdownIcon,
   notebookIcon,
+  pdfIcon,
   pythonIcon,
   rKernelIcon,
   spreadsheetIcon,
@@ -1354,6 +1355,7 @@ export namespace DocumentRegistry {
    *
    * @returns The default directory file types.
    */
+<<<<<<< HEAD
   export function getDefaultFileTypes(
     translator?: ITranslator
   ): ReadonlyArray<Partial<IFileType>> {
@@ -1370,6 +1372,13 @@ export namespace DocumentRegistry {
         extensions: ['.md'],
         mimeTypes: ['text/markdown'],
         icon: markdownIcon
+      },
+      {
+        name: 'pdf',
+        displayName: trans.__('PDF File'),
+        extensions: ['.pdf'],
+        mimeTypes: ['application/pdf'],
+        icon: pdfIcon
       },
       {
         name: 'python',
@@ -1463,6 +1472,117 @@ export namespace DocumentRegistry {
       }
     ];
   }
+=======
+  export const defaultFileTypes: ReadonlyArray<Partial<IFileType>> = [
+    defaultTextFileType,
+    defaultNotebookFileType,
+    defaultDirectoryFileType,
+    {
+      name: 'markdown',
+      displayName: 'Markdown File',
+      extensions: ['.md'],
+      mimeTypes: ['text/markdown'],
+      icon: markdownIcon
+    },
+    {
+      name: 'pdf',
+      displayName: 'PDF File',
+      extensions: ['.pdf'],
+      mimeTypes: ['application/pdf'],
+      icon: pdfIcon
+    },
+    {
+      name: 'python',
+      displayName: 'Python File',
+      extensions: ['.py'],
+      mimeTypes: ['text/x-python'],
+      icon: pythonIcon
+    },
+    {
+      name: 'json',
+      displayName: 'JSON File',
+      extensions: ['.json'],
+      mimeTypes: ['application/json'],
+      icon: jsonIcon
+    },
+    {
+      name: 'csv',
+      displayName: 'CSV File',
+      extensions: ['.csv'],
+      mimeTypes: ['text/csv'],
+      icon: spreadsheetIcon
+    },
+    {
+      name: 'tsv',
+      displayName: 'TSV File',
+      extensions: ['.tsv'],
+      mimeTypes: ['text/csv'],
+      icon: spreadsheetIcon
+    },
+    {
+      name: 'r',
+      displayName: 'R File',
+      mimeTypes: ['text/x-rsrc'],
+      extensions: ['.r'],
+      icon: rKernelIcon
+    },
+    {
+      name: 'yaml',
+      displayName: 'YAML File',
+      mimeTypes: ['text/x-yaml', 'text/yaml'],
+      extensions: ['.yaml', '.yml'],
+      icon: yamlIcon
+    },
+    {
+      name: 'svg',
+      displayName: 'Image',
+      mimeTypes: ['image/svg+xml'],
+      extensions: ['.svg'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    },
+    {
+      name: 'tiff',
+      displayName: 'Image',
+      mimeTypes: ['image/tiff'],
+      extensions: ['.tif', '.tiff'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    },
+    {
+      name: 'jpeg',
+      displayName: 'Image',
+      mimeTypes: ['image/jpeg'],
+      extensions: ['.jpg', '.jpeg'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    },
+    {
+      name: 'gif',
+      displayName: 'Image',
+      mimeTypes: ['image/gif'],
+      extensions: ['.gif'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    },
+    {
+      name: 'png',
+      displayName: 'Image',
+      mimeTypes: ['image/png'],
+      extensions: ['.png'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    },
+    {
+      name: 'bmp',
+      displayName: 'Image',
+      mimeTypes: ['image/bmp'],
+      extensions: ['.bmp'],
+      icon: imageIcon,
+      fileFormat: 'base64'
+    }
+  ];
+>>>>>>> 47c50a3e9... create icon for pdf
 }
 
 /**
