@@ -21,8 +21,7 @@ from tornado.ioloop import IOLoop
 from traitlets import Bool, Dict, Unicode
 from jupyter_server.serverapp import ServerApp
 from jupyterlab.labapp import get_app_dir
-from jupyterlab.browser_check import run_test
-# from jupyterlab.browser_check import run_async_process
+from jupyterlab.browser_check import run_test, run_async_process
 from jupyter_server.serverapp import ServerApp
 
 
@@ -68,17 +67,17 @@ def main():
     App.launch_instance()
 
 
-def run_browser(url):
+async def run_browser(url):
     """Run the browser test and return an exit code.
     """
+    # Run the browser test and return an exit code.
     target = osp.join(get_app_dir(), 'example_test')
     if not osp.exists(osp.join(target, 'node_modules')):
         os.makedirs(target)
-        subprocess.call(["jlpm", "init", "-y"], cwd=target)
-        subprocess.call(["jlpm", "add", "puppeteer"], cwd=target)
+        await run_async_process(["jlpm", "init", "-y"], cwd=target)
+        await run_async_process(["jlpm", "add", "puppeteer^4"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-example-test.js'), osp.join(target, 'chrome-example-test.js'))
-    return subprocess.check_call(["node", "chrome-example-test.js", url], cwd=target)
-
+    await run_async_process(["node", "chrome-example-test.js", url], cwd=target)
 
 if __name__ == '__main__':
     main()

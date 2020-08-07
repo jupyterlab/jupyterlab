@@ -87,6 +87,8 @@ async def run_test_async(app, func):
     env_patch = TestEnv()
     env_patch.start()
 
+    app.log.info('Running async test')
+
     # The entry URL for browser tests is different in notebook >= 6.0,
     # since that uses a local HTML file to point the user at the app.
     if hasattr(app, 'browser_open_file'):
