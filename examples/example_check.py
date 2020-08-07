@@ -42,11 +42,12 @@ def main():
         """An app that launches an example and waits for it to start up, checking for
         JS console errors, JS errors, and Python logged errors.
         """
-        name = 'example'
-        extension_url = '/example'
-        default_url = '/example'
-        open_browser = Bool(False)
-#        base_url = '/foo/'
+        name = 'lab'
+        extension_url = '/lab'
+        default_url = '/lab'
+        serverapp_config = {
+            "open_browser": False
+        }
         ip = '127.0.0.1'
 
         def initialize_settings(self):
@@ -66,17 +67,6 @@ def main():
     App.__name__ = osp.basename(example_dir).capitalize() + 'Test'
     App.launch_instance()
 
-"""
-async def run_browser(url):
-    Run the browser test and return an exit code.
-    target = osp.join(get_app_dir(), 'example_test')
-    if not osp.exists(osp.join(target, 'node_modules')):
-        os.makedirs(target)
-        await run_async_process(["jlpm", "init", "-y"], cwd=target)
-        await run_async_process(["jlpm", "add", "puppeteer"], cwd=target)
-    shutil.copy(osp.join(here, 'chrome-example-test.js'), osp.join(target, 'chrome-example-test.js'))
-    await run_async_process(["node", "chrome-example-test.js", url], cwd=target)
-"""
 
 def run_browser(url):
     """Run the browser test and return an exit code.

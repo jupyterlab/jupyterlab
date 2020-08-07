@@ -62,10 +62,9 @@ class ExampleHandler(
 
 class ExampleApp(LabServerApp):
 
-    extension_url = '/example'
+    extension_url = '/lab'
     name = 'main'
     app_name = 'JupyterLab Example Cell'
-    app_url = '/example_app'
     static_dir = os.path.join(HERE, 'build')
     templates_dir = os.path.join(HERE, 'templates')
     app_version = version
@@ -79,7 +78,7 @@ class ExampleApp(LabServerApp):
         """Add example handler to Lab Server's handler list.
         """
         self.handlers.append(
-            ('/example', ExampleHandler)
+            ('/lab', ExampleHandler)
         )
 
 

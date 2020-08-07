@@ -8,7 +8,7 @@ import json
 import os
 from traitlets import Unicode
 
-HERE = os.path.dirname(__file__)
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 # Turn off the Jupyter configuration system so configuration files on disk do
 # not affect this app. This helps this app to truly be standalone.
