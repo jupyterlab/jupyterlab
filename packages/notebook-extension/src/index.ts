@@ -396,7 +396,8 @@ const widgetFactoryPlugin: JupyterFrontEndPlugin<NotebookWidgetFactory.IFactory>
   requires: [
     NotebookPanel.IContentFactory,
     IEditorServices,
-    IRenderMimeRegistry
+    IRenderMimeRegistry,
+    ISessionContextDialogs
   ],
   activate: activateWidgetFactory,
   autoStart: true
@@ -510,7 +511,8 @@ function activateWidgetFactory(
   app: JupyterFrontEnd,
   contentFactory: NotebookPanel.IContentFactory,
   editorServices: IEditorServices,
-  rendermime: IRenderMimeRegistry
+  rendermime: IRenderMimeRegistry,
+  sessionContextDialogs: ISessionContextDialogs
 ): NotebookWidgetFactory.IFactory {
   const factory = new NotebookWidgetFactory({
     name: FACTORY,
@@ -523,7 +525,8 @@ function activateWidgetFactory(
     contentFactory,
     editorConfig: StaticNotebook.defaultEditorConfig,
     notebookConfig: StaticNotebook.defaultNotebookConfig,
-    mimeTypeService: editorServices.mimeTypeService
+    mimeTypeService: editorServices.mimeTypeService,
+    sessionDialogs: sessionContextDialogs
   });
   app.docRegistry.addWidgetFactory(factory);
   return factory;
