@@ -8,18 +8,31 @@ of different notebook sizes and types.
 To run the benchmarks against notebooks with long outputs and notebooks with many outputs, and to see how the times change as the notebooks grow:
 
 ```bash
-jlpm # First install dependencies
+# First install dependencies.
+jlpm
+```
 
+```bash
+# Run a benchmark passing 2 notebooks that will be opened and switched between.
 env 'BENCHMARK_NOTEBOOKS=["./longOutput", "./manyOutputs"]' jlpm all
 ```
 
 ![](./screenshot.png)
 
-`BENCHMARK_NOTEBOOKS` should be a list strings that node can import that return a description of how to create a notebook. They should have a default export of the type `NotebookType` in [`./src/notebookType.ts`](./src/notebookType.ts). If you don't provide it, it will be run against all built in benchmark, which require installing some extensions below.
+`BENCHMARK_NOTEBOOKS` should be a list strings that node can import that return a description of how to create a notebook.
 
-It will keep increasing the `n` until either it reaches a maximum or the time exceeds a certain budget.
+They should have a default export of the type `NotebookType` in [`./src/notebookType.ts`](./src/notebookType.ts).
 
-It will run on both firefox and chrome.
+If you don't provide it, it will be run against all built in benchmark, which require installing some extensions below. It will keep increasing the `n` until either it reaches a maximum or the time exceeds a certain budget. It will run on both firefox and chrome.
+
+The available notebook definitions are located in the `./src/notebooks` folder (some of those like the `plotly` and the `fixed-data-tables` need specific configuration as details in the next section to activate the extension):
+
+- [`./src/notebooks/errorOutputs.ts`](./src/notebooks/errorOutputs.ts).
+- [`./src/notebooks/fixedDataTable.ts](./src/notebooks/fixedDataTable.ts).
+- [`./src/notebooks/largePlotly.ts](./src/notebooks/largePlotly.ts).
+- [`./src/notebooks/longOutput.ts](./src/notebooks/longOutput.ts).
+- [`./src/notebooks/manyOutputs.ts](./src/notebooks/manyOutputs.ts).
+- [`./src/notebooks/manyPlotly.ts](./src/notebooks/manyPlotly.ts).
 
 ## Plotly
 
