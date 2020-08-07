@@ -71,6 +71,7 @@ function writeOutput({
     const tooLong = new Set<string>();
     const browser = await playwright[browserName].launch({ headless: false });
     const context = await browser.newContext();
+    context.setDefaultTimeout(TIME_OUT);
     const page = await context.newPage();
     await page.setViewportSize({
       width: 1280,
@@ -86,16 +87,13 @@ function writeOutput({
      */
     async function waitForNotebook(id: string): Promise<void> {
       await page.waitForSelector(`#${id}`, {
-        visibility: 'visible',
-        timeout: TIME_OUT
+        visibility: 'visible'
       });
       await page.waitForSelector(`#${id} .jp-Notebook-cell`, {
-        visibility: 'visible',
-        timeout: TIME_OUT
+        visibility: 'visible'
       });
       await page.waitForSelector(`#${id} .jp-Spinner`, {
-        visibility: 'hidden',
-        timeout: TIME_OUT
+        visibility: 'hidden'
       });
     }
 
