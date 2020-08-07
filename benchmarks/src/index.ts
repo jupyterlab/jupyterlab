@@ -14,15 +14,15 @@ const DATA_PATH = process.env['BENCHMARK_OUTPUT'] || 'out.csv';
 const BROWSERS: Array<'firefox' | 'chromium'> = ['firefox', 'chromium'];
 
 // The maximum N
-const MAX_N = 100;
+const MAX_N = Number(process.env['BENCHMARK_MAX_N'] || 100);
 // The number of different n's to try out
-const NUMBER_SAMPLES = 20;
+const NUMBER_SAMPLES = Number(process.env['BENCHMARK_NUMBER_SAMPLES'] || 20);
 // How many times to switch between each notebook
-const SWITCHES = 10;
+const SWITCHES = Number(process.env['BENCHMARK_SWITCHES'] || 10);
 // Max time to stop testing if mean of previous sample was > this
-const MAX_TIME = 5 * 1000;
+const MAX_TIME = Number(process.env['BENCHMARK_MAX_TIME'] || 5 * 1000);
 // Selector timeout in milliseconds
-const TIME_OUT = 200 * 1000;
+const TIME_OUT = 5 * 60 * 1000;
 
 const notebookEnv = process.env.BENCHMARK_NOTEBOOKS;
 const NOTEBOOK_PACKAGES: Array<string> = notebookEnv
