@@ -48,6 +48,9 @@ def main():
         open_browser = Bool(False)
 #        base_url = '/foo/'
         ip = '127.0.0.1'
+        serverapp_config = {
+            "open_browser": False
+        }
 
         def initialize_settings(self):
             run_test(self.serverapp, run_browser)
