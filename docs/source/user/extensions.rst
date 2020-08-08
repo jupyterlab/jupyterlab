@@ -256,23 +256,23 @@ Listings
 When searching extensions, JupyterLab displays the complete search result and 
 the user is free to install any extension. This is the :ref:`default_mode`.
 
-To bring more security, you or your administrator can enable ``blacklists`` or ``whitelists``
+To bring more security, you or your administrator can enable ``blocked extensions`` or ``allowed extensionss``
 mode. JupyterLab will check the extensions against the defined listings.
 
 .. warning::
 
     Only one mode at a time is allowed. If you or your server administrator configures
-    both black and white listings, the JupyterLab server will not start.
+    both blocked and allowed extensions listings, the JupyterLab server will not start.
 
 
-.. figure:: images/listings/simultaneous_black_white_listings.png
+.. figure:: images/listings/simultaneous_blocked_allowed_listings.png
    :align: center
    :class: jp-screenshot
 
-   **Figure:** Simultaneous black and white listings
+   **Figure:** Simultaneous blocked and allowed listings
 
 
-The following details the behavior for the :ref:`blacklist_mode` and the :ref:`whitelist_mode`.
+The following details the behavior for the :ref:`blocked_extension_mode` and the :ref:`allowed_extensions_mode`.
 The details to enable configure the listings can be read :ref:`listings_conf`. 
 
 .. _default_mode:
@@ -283,58 +283,58 @@ Default mode
 In the ``default`` mode, no listing is enabled and the search behavior is unchanged and
 is the one described previously.
 
-.. _blacklist_mode:
+.. _blocked_extension_mode:
 
-Blacklist mode
-^^^^^^^^^^^^^^
+Blocked Extension mode
+^^^^^^^^^^^^^^^^^^^^^^
 
 Extensions can be freely downloaded without going through a vetting process.
-However, users can add malicious extensions to a blacklist. The extension manager 
+However, users can add malicious extensions to a blocked extension. The extension manager 
 will show all extensions except for those that have 
-been explicitly added to the blacklist. Therfore, the extension manager 
-does not allow you to install blacklisted extensions.
+been explicitly added to the blocked extension. Therfore, the extension manager 
+does not allow you to install blocked extensioned extensions.
 
-If you, or your administrator, has enabled the blacklist mode,
-JupyterLab will use the blacklist and remove all blacklisted
+If you, or your administrator, has enabled the blocked extension mode,
+JupyterLab will use the blocked extension and remove all blocked extensioned
 extensions from your search result.
 
-If you have installed an extension before it has been blacklisted,
+If you have installed an extension before it has been blocked extensioned,
 the extension entry in the installed list will be highlighted
 in red. It is recommended that you uninstall it. You can move
 your mouse on the question mark icon to read the instructions.
 
-.. figure:: images/listings/installed_blacklisted.png
+.. figure:: images/listings/installed_blocked_extension.png
    :align: center
    :class: jp-screenshot
 
-   **Figure:** Blacklisted installed extension which should be removed
+   **Figure:** Blocked Extension installed which should be removed
 
 
-.. _whitelist_mode:
+.. _allowed_extensions_mode:
 
-Whitelist mode
-^^^^^^^^^^^^^^
+Allowed Extensions mode
+^^^^^^^^^^^^^^^^^^^^^^^
 
-A whitelist maintains a set of approved extensions that users can freely 
+A allowed extensions listing maintains a set of approved extensions that users can freely 
 search and install. Extensions need to go through some sort of vetting process 
-before they are added to the whitelist. When using a whitelist, the extension manager 
-will only show extensions that have been explicitly added to the whitelist.
+before they are added to the allowed extensions. When using a allowed extensions, the extension manager 
+will only show extensions that have been explicitly added to the allowed extensions.
 
-If you, or your administrator, has enabled the whitelist mode
-JupyterLab will use the whitelist and only show extensions present
+If you, or your administrator, has enabled the allowed extensions mode
+JupyterLab will use the allowed extensions and only show extensions present
 in the withelist. The other extensions will not be show in the search result.
 
-If you have installed a whitelisted extension and at some point
-in time that extension is removed from the whitelist, the extension entry 
+If you have installed a allowed extensions extension and at some point
+in time that extension is removed from the allowed extensions, the extension entry 
 in the installed list will be highlighted in red. It is recommended that 
 you uninstall it. You can move your mouse on the question mark icon to
 read the instructions.
 
-.. figure:: images/listings/installed_whitelisted.png
+.. figure:: images/listings/installed_allowed_extensions.png
    :align: center
    :class: jp-screenshot
 
-   **Figure:** The second of the installed extensions was removed from the whitelist and should be removed
+   **Figure:** The second of the installed extensions was removed from the allowed extensions and should be removed
 
 .. _listings_conf:
 
@@ -343,12 +343,12 @@ Listing Configuration
 
 You or your administrator can use the following traits to define the listings loading.
 
-- ``blacklist_uris``: A list of comma-separated URIs to fetch a blacklist file from
-- ``whitelist_uris``: A list of comma-separated URIs to fetch a whitelist file from
+- ``blocked_extension_uris``: A list of comma-separated URIs to fetch a blocked extension file from
+- ``allowed_extensions_uris``: A list of comma-separated URIs to fetch a allowed extensions file from
 - ``listings_refresh_seconds``: The interval delay in seconds to refresh the lists
 - ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
 
-For example, to enable blacklist, launch the server with ``--LabServerApp.blacklist_uris=http://example.com/blacklist.json`` where ``http://example.com/blacklist.json`` is a blacklist JSON file as described below.
+For example, to enable blocked extension, launch the server with ``--LabServerApp.blocked_extension_uris=http://example.com/blocked extension.json`` where ``http://example.com/blocked extension.json`` is a blocked extension JSON file as described below.
 
 The details for the listings_request_options are listed
 on `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__  
@@ -362,16 +362,16 @@ The ``name`` attribute supports regular expressions.
 Optionally, you can also add some more fields for your records (``type``, ``reason``, ``creation_date``,
 ``last_update_date``). These optional fields are not used in the user interface.
 
-This is an example of a blacklist file.
+This is an example of a blocked extension file.
 
 .. code:: json
 
    {
-   "blacklist": [
+   "blocked extension": [
       {
          "name": "@jupyterlab-examples/launcher",
          "type": "jupyterlab",
-         "reason": "@jupyterlab-examples/launcher is blacklisted for test purpose - Do NOT take this for granted!!!",
+         "reason": "@jupyterlab-examples/launcher is blocked extensioned for test purpose - Do NOT take this for granted!!!",
          "creation_date": "2020-03-11T03:28:56.782Z",
          "last_update_date":  "2020-03-11T03:28:56.782Z"
       }
@@ -379,17 +379,17 @@ This is an example of a blacklist file.
    }
 
 
-In the following whitelist example a ``@jupyterlab/*`` will whitelist 
+In the following allowed extensions example a ``@jupyterlab/*`` will allowed extensions 
 all jupyterlab organization extensions.
 
 .. code:: json
 
    {
-   "whitelist": [
+   "allowed extensions": [
       {
          "name": "@jupyterlab/*",
          "type": "jupyterlab",
-         "reason": "All @jupyterlab org extensions are whitelisted, of course...",
+         "reason": "All @jupyterlab org extensions are allowed extensions, of course...",
          "creation_date": "2020-03-11T03:28:56.782Z",
          "last_update_date":  "2020-03-11T03:28:56.782Z"
       }
