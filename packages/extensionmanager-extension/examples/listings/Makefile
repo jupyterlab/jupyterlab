@@ -15,8 +15,8 @@ dev: listings-uris
 	@exec python main.py \
 	  --dev \
 	  --no-browser \
-	  --LabServerApp.black_extensions_uris=${BLACK_LIST_URIS} \
-	  --LabServerApp.white_extensions_uris=${WHITE_LIST_URIS} \
+	  --LabServerApp.blocked_extensions_uris=${BLACK_LIST_URIS} \
+	  --LabServerApp.allowed_extensions_uris=${WHITE_LIST_URIS} \
 	  --LabServerApp.listings_refresh_seconds=${LISTINGS_REFRESH_SECONDS} \
 	  --LabServerApp.listings_request_options=${LISTINGS_REQUEST_OPTS}
 
@@ -25,7 +25,7 @@ watch: listings-uris
 	  --dev \
 	  --no-browser \
 	  --watch \
-	  --LabServerApp.black_extensions_uris=${BLACK_LIST_URIS} \
-	  --LabServerApp.white_extensions_uris=${WHITE_LIST_URIS} \
+	  --LabServerApp.blocked_extensions_uris=${BLACK_LIST_URIS} \
+	  --LabServerApp.allowed_extensions_uris=${WHITE_LIST_URIS} \
 	  --LabServerApp.listings_refresh_seconds=${LISTINGS_REFRESH_SECONDS} \
 	  --LabServerApp.listings_request_options=${LISTINGS_REQUEST_OPTS}

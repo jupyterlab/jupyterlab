@@ -39,8 +39,8 @@ export type ListResult = null | {
 };
 
 export interface IListingApi {
-  black_extensions_uris: string[];
-  white_extensions_uris: string[];
+  blocked_extensions_uris: string[];
+  allowed_extensions_uris: string[];
   blocked_extensions: IListEntry[];
   allowed_extensions: IListEntry[];
 }
@@ -63,8 +63,8 @@ export class Lister {
           entries: []
         };
         if (
-          data.black_extensions_uris.length > 0 &&
-          data.white_extensions_uris.length > 0
+          data.blocked_extensions_uris.length > 0 &&
+          data.allowed_extensions_uris.length > 0
         ) {
           console.warn('Simultaneous black and white list are not allowed.');
           this._listings = {
@@ -73,17 +73,17 @@ export class Lister {
             entries: []
           };
         } else if (
-          data.black_extensions_uris.length > 0 ||
-          data.white_extensions_uris.length > 0
+          data.blocked_extensions_uris.length > 0 ||
+          data.allowed_extensions_uris.length > 0
         ) {
           this._listings = {
-            mode: data.black_extensions_uris.length > 0 ? 'block' : 'allow',
+            mode: data.blocked_extensions_uris.length > 0 ? 'block' : 'allow',
             uris:
-              data.black_extensions_uris.length > 0
-                ? data.black_extensions_uris
-                : data.white_extensions_uris,
+              data.blocked_extensions_uris.length > 0
+                ? data.blocked_extensions_uris
+                : data.allowed_extensions_uris,
             entries:
-              data.black_extensions_uris.length > 0
+              data.blocked_extensions_uris.length > 0
                 ? data.blocked_extensions
                 : data.allowed_extensions
           };
