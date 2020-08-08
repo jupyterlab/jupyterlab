@@ -147,7 +147,7 @@ export namespace PageConfig {
     const workspace = options.workspace ?? getOption('workspace');
     const labOrDoc = mode === 'multiple-document' ? 'lab' : 'doc';
     path = URLExt.join(path, labOrDoc);
-    if (workspace !== 'default') {
+    if (workspace !== defaultWorkspace) {
       path = URLExt.join(
         path,
         'workspaces',
@@ -160,6 +160,8 @@ export namespace PageConfig {
     }
     return path;
   }
+
+  export const defaultWorkspace: string = String.fromCharCode(0);
 
   /**
    * Options for getUrl
@@ -175,7 +177,7 @@ export namespace PageConfig {
     /**
      * The optional workspace as a string. If this argument is missing, the value will
      * be pulled from PageConfig. To use the default workspace (no /workspaces/<name>
-     * URL segment will be included) pass the string 'default'.
+     * URL segment will be included) pass the string PageConfig.defaultWorkspace.
      */
     workspace?: string;
 

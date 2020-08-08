@@ -268,7 +268,7 @@ async function activateFactory(
         } else {
           const newUrl = PageConfig.getUrl({
             mode: labShell.mode,
-            workspace: 'default',
+            workspace: PageConfig.defaultWorkspace,
             treePath: model.path
           });
           window.open(newUrl, '_blank');
@@ -442,7 +442,7 @@ function activateShareFile(
         URLExt.normalize(
           PageConfig.getUrl({
             mode: 'single-document',
-            workspace: 'default',
+            workspace: PageConfig.defaultWorkspace,
             treePath: path
           })
         )
