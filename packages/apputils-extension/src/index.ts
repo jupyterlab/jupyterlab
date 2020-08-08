@@ -111,7 +111,6 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
       PageConfig.getOption('mode') === 'multiple-document' ? 'lab' : 'doc';
     // This is used as a key in local storage to refer to workspaces, either the name
     // of the workspace or the string PageConfig.defaultWorkspace. Both lab and doc modes share the same workspace.
-    console.log('workspace', workspace, PageConfig.defaultWorkspace);
     const candidate = workspace ? workspace : PageConfig.defaultWorkspace;
     const rest = treePath ? URLExt.join('tree', treePath) : '';
     try {

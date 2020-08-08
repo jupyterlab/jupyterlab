@@ -57,7 +57,8 @@ function activate(
       const callback = (item: Widget) => {
         labShell.add(item, 'main', { ref: id });
       };
-      const launcher = new Launcher({ model, cwd, callback, commands });
+      const mode = labShell.mode;
+      const launcher = new Launcher({ model, cwd, callback, commands, mode });
 
       launcher.model = model;
       launcher.title.icon = launcherIcon;
@@ -75,6 +76,10 @@ function activate(
         // If there is only a launcher open, remove the close icon.
         main.title.closable = toArray(labShell.widgets('main')).length > 1;
       }, main);
+
+      labShell!.modeChanged.connect((_, args) => {
+        launcher.mode = args as string;
+      });
 
       return main;
     }
