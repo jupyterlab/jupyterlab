@@ -259,9 +259,7 @@ class LabWorkspaceExportApp(JupyterApp):
     """
     def start(self):
         app = LabApp(config=self.config)
-        # TODO(@echarles) Fix this...
-#        base_url = app.serverapp.base_url
-        base_url = '/'
+        base_url = app.settings.get('base_url', '/')
         directory = app.workspaces_dir
         app_url = app.app_url
 
@@ -310,9 +308,7 @@ class LabWorkspaceImportApp(JupyterApp):
 
     def start(self):
         app = LabApp(config=self.config)
-#        base_url = app.serverapp.base_url
-        # TODO(@echarles) Fix this...
-        base_url = '/'
+        base_url = app.settings.get('base_url', '/')
         directory = app.workspaces_dir
         app_url = app.app_url
         workspaces_url = ujoin(app.app_url, 'workspaces')
