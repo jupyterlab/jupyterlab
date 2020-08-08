@@ -256,7 +256,7 @@ Listings
 When searching extensions, JupyterLab displays the complete search result and 
 the user is free to install any extension. This is the :ref:`default_mode`.
 
-To bring more security, you or your administrator can enable ``blocked extensions`` or ``allowed extensionss``
+To bring more security, you or your administrator can enable ``blocked extensions`` or ``allowed extensions``
 mode. JupyterLab will check the extensions against the defined listings.
 
 .. warning::
