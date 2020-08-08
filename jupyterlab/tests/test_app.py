@@ -256,7 +256,9 @@ class JestApp(ProcessTestApp):
 
     test_config = Dict(dict(foo='bar'))
 
-    open_browser = False
+    serverapp_config = {
+        "open_browser": False
+    }
 
     @deprecated(removed_version=4)
     def get_command(self):

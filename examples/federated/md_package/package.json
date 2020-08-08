@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-federated-md",
-  "version": "2.1.1-alpha.5",
+  "version": "2.1.1-alpha.6",
   "private": true,
   "scripts": {
     "build": "npm run clean && build-labextension --core-path ../core_package .",
@@ -8,11 +8,11 @@
     "watch": "npm run clean && webpack --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-alpha.6",
-    "@jupyterlab/markdownviewer-extension": "^3.0.0-alpha.6"
+    "@jupyterlab/application": "^3.0.0-alpha.7",
+    "@jupyterlab/markdownviewer-extension": "^3.0.0-alpha.7"
   },
   "devDependencies": {
-    "@jupyterlab/buildutils": "^3.0.0-alpha.6",
+    "@jupyterlab/buildutils": "^3.0.0-alpha.7",
     "copy-webpack-plugin": "^6.0.1",
     "css-loader": "~3.2.0",
     "file-loader": "~5.0.2",
@@ -26,12 +26,13 @@
     "svg-url-loader": "~3.0.3",
     "url-loader": "~3.0.0",
     "watch": "~1.0.2",
-    "webpack": "5.0.0-beta.21",
+    "webpack": "~5.0.0-beta.22",
     "webpack-cli": "^3.3.10",
     "whatwg-fetch": "^3.0.0"
   },
   "jupyterlab": {
     "extension": true,
+    "schemaDir": "./schema",
     "outputDir": "../labextensions/@jupyterlab/example-federated-md"
   }
 }

@@ -64,10 +64,10 @@ class ExampleHandler(
 class ExampleApp(LabServerApp):
 
     extension_url = '/example'
-
-    name = "main"
+    app_url = "/example"
+    load_other_extensions = False
+    name = __name__
     app_name = 'JupyterLab Example File Browser'
-    app_url = '/example_app'
     static_dir = os.path.join(HERE, 'build')
     templates_dir = os.path.join(HERE, 'templates')
     app_version = version
@@ -81,7 +81,7 @@ class ExampleApp(LabServerApp):
     def initialize_handlers(self):
         """Add example handler to Lab Server's handler list.
         """
-        self.handlers.append(('example', ExampleHandler))
+        self.handlers.append(('/example', ExampleHandler))
 
 
 if __name__ == '__main__':

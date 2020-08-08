@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/nbconvert-css",
-  "version": "3.0.0-alpha.6",
+  "version": "3.0.0-alpha.7",
   "description": "CSS bundle for the JupyterLab nbconvert template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,12 +34,12 @@
     "watch": "webpack --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-alpha.6",
-    "@jupyterlab/cells": "^3.0.0-alpha.6",
-    "@jupyterlab/codemirror": "^3.0.0-alpha.6",
-    "@jupyterlab/notebook": "^3.0.0-alpha.6",
-    "@jupyterlab/outputarea": "^3.0.0-alpha.6",
-    "@jupyterlab/rendermime": "^3.0.0-alpha.6"
+    "@jupyterlab/apputils": "^3.0.0-alpha.7",
+    "@jupyterlab/cells": "^3.0.0-alpha.7",
+    "@jupyterlab/codemirror": "^3.0.0-alpha.7",
+    "@jupyterlab/notebook": "^3.0.0-alpha.7",
+    "@jupyterlab/outputarea": "^3.0.0-alpha.7",
+    "@jupyterlab/rendermime": "^3.0.0-alpha.7"
   },
   "devDependencies": {
     "css-loader": "~3.2.0",
@@ -49,7 +49,7 @@
     "rimraf": "~3.0.0",
     "typescript": "~3.9.2",
     "url-loader": "~3.0.0",
-    "webpack": "5.0.0-beta.21",
+    "webpack": "~5.0.0-beta.22",
     "webpack-cli": "^3.3.10"
   },
   "publishConfig": {

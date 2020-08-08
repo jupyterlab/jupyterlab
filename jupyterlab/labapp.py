@@ -515,6 +515,11 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     expose_app_in_browser = Bool(False, config=True,
         help="Whether to expose the global app instance to browser via window.jupyterlab")
 
+    # By default, open a browser for JupyterLab
+    serverapp_config = {
+        "open_browser": True
+    }
+
     @default('app_dir')
     def _default_app_dir(self):
         app_dir = get_app_dir()
@@ -610,9 +615,6 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     def initialize_handlers(self):
 
         handlers = []
-
-        # TODO(@echarles) Move this to configurable trait once jupyter_server supports it.
-        self.serverapp.open_browser = True
 
         # Set config for Jupyterlab
         page_config = self.serverapp.web_app.settings.setdefault('page_config_data', {})

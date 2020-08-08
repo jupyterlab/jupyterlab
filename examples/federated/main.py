@@ -8,7 +8,7 @@ import json
 import os
 from traitlets import Unicode
 
-HERE = os.path.dirname(__file__)
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 # Turn off the Jupyter configuration system so configuration files on disk do
 # not affect this app. This helps this app to truly be standalone.
@@ -26,7 +26,8 @@ def _jupyter_server_extension_points():
     ]
 
 class ExampleApp(LabServerApp):
-    name = "lab"
+    name = __name__
+    load_other_extensions = False
     app_name = 'JupyterLab Example Federated App'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
     app_version = version
