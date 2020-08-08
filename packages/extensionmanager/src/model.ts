@@ -74,9 +74,9 @@ export interface IEntry {
    */
   installed_version: string;
 
-  blacklistEntry: IListEntry | undefined;
+  blockedExtensionsEntry: IListEntry | undefined;
 
-  whitelistEntry: IListEntry | undefined;
+  allowedExtensionsEntry: IListEntry | undefined;
 }
 
 /**
@@ -175,10 +175,10 @@ export class ListModel extends VDomModel {
 
   private _listingIsLoaded(_: Lister, listings: ListResult) {
     this._listMode = listings!.mode;
-    this._blacklistArray = new Array<IListEntry>();
-    if (this._listMode === 'black') {
+    this._blockedExtensionsArray = new Array<IListEntry>();
+    if (this._listMode === 'block') {
       listings!.entries.map(e => {
-        this._blacklistArray.push({
+        this._blockedExtensionsArray.push({
           name: e.name,
           regexp: new RegExp(e.name),
           type: e.type,
@@ -188,10 +188,10 @@ export class ListModel extends VDomModel {
         });
       });
     }
-    this._whitelistArray = new Array<IListEntry>();
-    if (this._listMode === 'white') {
+    this._allowedExtensionsArray = new Array<IListEntry>();
+    if (this._listMode === 'allow') {
       listings!.entries.map(e => {
-        this._whitelistArray.push({
+        this._allowedExtensionsArray.push({
           name: e.name,
           regexp: new RegExp(e.name),
           type: e.type,
@@ -273,22 +273,22 @@ export class ListModel extends VDomModel {
   /**
    * The list mode.
    */
-  get listMode(): 'black' | 'white' | 'default' | 'invalid' {
+  get listMode(): 'block' | 'allow' | 'default' | 'invalid' {
     return this._listMode;
   }
 
   /**
-   * The total number of blacklisted results in the current search.
+   * The total number of blockedExtensionsed results in the current search.
    */
-  get totalBlacklistedFound(): number {
-    return this._totalBlacklistedFound;
+  get totalblockedExtensionsFound(): number {
+    return this._totalblockedExtensionsFound;
   }
 
   /**
-   * The total number of whitelisted results in the current search.
+   * The total number of allowedExtensionsed results in the current search.
    */
-  get totalWhitelistedFound(): number {
-    return this._totalWhitelistedFound;
+  get totalallowedExtensionsFound(): number {
+    return this._totalallowedExtensionsFound;
   }
 
   /**
@@ -474,8 +474,8 @@ export class ListModel extends VDomModel {
     res: Promise<ISearchResult>
   ): Promise<{ [key: string]: IEntry }> {
     const entries: { [key: string]: IEntry } = {};
-    this._totalBlacklistedFound = 0;
-    this._totalWhitelistedFound = 0;
+    this._totalblockedExtensionsFound = 0;
+    this._totalallowedExtensionsFound = 0;
     this._totalEntries = 0;
     for (const obj of (await res).objects) {
       const pkg = obj.package;
@@ -483,13 +483,21 @@ export class ListModel extends VDomModel {
         continue;
       }
       this._totalEntries = this._totalEntries + 1;
-      const isBlacklisted = this.isListed(pkg.name, this._blacklistArray);
-      if (isBlacklisted) {
-        this._totalBlacklistedFound = this._totalBlacklistedFound + 1;
+      const isblockedExtensionsed = this.isListed(
+        pkg.name,
+        this._blockedExtensionsArray
+      );
+      if (isblockedExtensionsed) {
+        this._totalblockedExtensionsFound =
+          this._totalblockedExtensionsFound + 1;
       }
-      const isWhitelisted = this.isListed(pkg.name, this._whitelistArray);
-      if (isWhitelisted) {
-        this._totalWhitelistedFound = this._totalWhitelistedFound + 1;
+      const isallowedExtensionsed = this.isListed(
+        pkg.name,
+        this._allowedExtensionsArray
+      );
+      if (isallowedExtensionsed) {
+        this._totalallowedExtensionsFound =
+          this._totalallowedExtensionsFound + 1;
       }
       entries[pkg.name] = {
         name: pkg.name,
@@ -505,8 +513,8 @@ export class ListModel extends VDomModel {
         status: null,
         latest_version: pkg.version,
         installed_version: '',
-        blacklistEntry: isBlacklisted,
-        whitelistEntry: isWhitelisted
+        blockedExtensionsEntry: isblockedExtensionsed,
+        allowedExtensionsEntry: isallowedExtensionsed
       };
     }
     return entries;
@@ -534,8 +542,14 @@ export class ListModel extends VDomModel {
             status: pkg.status,
             latest_version: pkg.latest_version,
             installed_version: pkg.installed_version,
-            blacklistEntry: this.isListed(pkg.name, this._blacklistArray),
-            whitelistEntry: this.isListed(pkg.name, this._whitelistArray)
+            blockedExtensionsEntry: this.isListed(
+              pkg.name,
+              this._blockedExtensionsArray
+            ),
+            allowedExtensionsEntry: this.isListed(
+              pkg.name,
+              this._allowedExtensionsArray
+            )
           };
         })
       );
@@ -760,7 +774,7 @@ export class ListModel extends VDomModel {
   /**
    * Contains an error message if an error occurred when searching for lists.
    */
-  blacklistError: string | null = null;
+  blockedExtensionsError: string | null = null;
 
   /**
    * Contains an error message if an error occurred when querying the server extension.
@@ -810,11 +824,11 @@ export class ListModel extends VDomModel {
   private _pendingActions: Promise<any>[] = [];
   private _debouncedUpdate: Debouncer<void, void>;
 
-  private _listMode: 'black' | 'white' | 'default' | 'invalid';
-  private _blacklistArray: Array<IListEntry>;
-  private _whitelistArray: Array<IListEntry>;
-  private _totalBlacklistedFound: number = 0;
-  private _totalWhitelistedFound: number = 0;
+  private _listMode: 'block' | 'allow' | 'default' | 'invalid';
+  private _blockedExtensionsArray: Array<IListEntry>;
+  private _allowedExtensionsArray: Array<IListEntry>;
+  private _totalblockedExtensionsFound: number = 0;
+  private _totalallowedExtensionsFound: number = 0;
 }
 
 let _isDisclaimed = false;
@@ -849,7 +863,7 @@ export namespace ListModel {
  */
 namespace Private {
   /**
-   * A comparator function that sorts whitelisted orgs to the top.
+   * A comparator function that sorts allowedExtensionsed orgs to the top.
    */
   export function comparator(a: IEntry, b: IEntry): number {
     if (a.name === b.name) {
