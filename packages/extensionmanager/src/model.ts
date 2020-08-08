@@ -278,14 +278,14 @@ export class ListModel extends VDomModel {
   }
 
   /**
-   * The total number of blockedExtensionsed results in the current search.
+   * The total number of blockedExtensions results in the current search.
    */
   get totalblockedExtensionsFound(): number {
     return this._totalblockedExtensionsFound;
   }
 
   /**
-   * The total number of allowedExtensionsed results in the current search.
+   * The total number of allowedExtensions results in the current search.
    */
   get totalallowedExtensionsFound(): number {
     return this._totalallowedExtensionsFound;
@@ -483,19 +483,19 @@ export class ListModel extends VDomModel {
         continue;
       }
       this._totalEntries = this._totalEntries + 1;
-      const isblockedExtensionsed = this.isListed(
+      const isblockedExtensions = this.isListed(
         pkg.name,
         this._blockedExtensionsArray
       );
-      if (isblockedExtensionsed) {
+      if (isblockedExtensions) {
         this._totalblockedExtensionsFound =
           this._totalblockedExtensionsFound + 1;
       }
-      const isallowedExtensionsed = this.isListed(
+      const isallowedExtensions = this.isListed(
         pkg.name,
         this._allowedExtensionsArray
       );
-      if (isallowedExtensionsed) {
+      if (isallowedExtensions) {
         this._totalallowedExtensionsFound =
           this._totalallowedExtensionsFound + 1;
       }
@@ -513,8 +513,8 @@ export class ListModel extends VDomModel {
         status: null,
         latest_version: pkg.version,
         installed_version: '',
-        blockedExtensionsEntry: isblockedExtensionsed,
-        allowedExtensionsEntry: isallowedExtensionsed
+        blockedExtensionsEntry: isblockedExtensions,
+        allowedExtensionsEntry: isallowedExtensions
       };
     }
     return entries;
@@ -863,7 +863,7 @@ export namespace ListModel {
  */
 namespace Private {
   /**
-   * A comparator function that sorts allowedExtensionsed orgs to the top.
+   * A comparator function that sorts allowedExtensions orgs to the top.
    */
   export function comparator(a: IEntry, b: IEntry): number {
     if (a.name === b.name) {

@@ -223,7 +223,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {entry.blockedExtensionsEntry && (
             <ToolbarButtonComponent
               icon={listingsInfoIcon}
-              iconLabel={`${entry.name} extension has been blockedExtensionsed since install. Please uninstall immediately and contact your blockedExtensions administrator.`}
+              iconLabel={`${entry.name} extension has been blockedExtensions since install. Please uninstall immediately and contact your blockedExtensions administrator.`}
               onClick={() =>
                 window.open(
                   'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'

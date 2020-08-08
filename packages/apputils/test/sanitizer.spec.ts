@@ -74,7 +74,7 @@ describe('defaultSanitizer', () => {
       expect(defaultSanitizer.sanitize(link)).toBe('');
     });
 
-    it('should pass through simple well-formed allowedExtensionsed markup', () => {
+    it('should pass through simple well-formed whitelisted markup', () => {
       const div = '<div><p>Hello <b>there</b></p></div>';
       expect(defaultSanitizer.sanitize(div)).toBe(div);
     });
