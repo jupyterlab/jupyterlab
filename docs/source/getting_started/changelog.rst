@@ -135,7 +135,7 @@ User-facing changes
 ^^^^^^^^^^^^^^^^^^^
 
 * Display the extension manager in the left sidebar by default. Users will need to acknowledge the disclaimer in the extension manager before using it. (`#8050 <https://github.com/jupyterlab/jupyterlab/pull/8050>`__, `#8145 <https://github.com/jupyterlab/jupyterlab/pull/8145>`__)
-* Added :ref:`blacklist and whitelist support <extension_listings>` for the extension manager (`#7989 <https://github.com/jupyterlab/jupyterlab/pull/7989>`__)
+* Added ``blacklist and whitelist support <extension_listings>`` for the extension manager (`#7989 <https://github.com/jupyterlab/jupyterlab/pull/7989>`__)
 
 * Automatically link URLs in notebook output text (`#8075 <https://github.com/jupyterlab/jupyterlab/pull/8075>`__, `#7393 <https://github.com/jupyterlab/jupyterlab/issues/7393>`__)
 * Added a "Restart Kernel and Run All Cells…" button to the notebook toolbar (`#8024 <https://github.com/jupyterlab/jupyterlab/pull/8024>`__)

@@ -814,12 +814,3 @@ release process, but this could also be done manually.
 Technically, a package that contains only a JupyterLab extension could be created
 and published on ``conda-forge``, but it would not be discoverable by the JupyterLab
 extension manager.
-
-
-Listings
-^^^^^^^^
-
-You can develop on the extension manager package and :ref:`extension_listings` with the
-example shipped in the ``packages/extensionmanager-extension/examples/listings`` folder.
-
-Follow the ``README.md`` instructions in that folder.
