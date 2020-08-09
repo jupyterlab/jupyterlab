@@ -5,7 +5,7 @@
 
 import os.path
 
-from notebook.config_manager import BaseJSONConfigManager, recursive_update
+from jupyter_server.config_manager import BaseJSONConfigManager, recursive_update
 from jupyter_core.paths import jupyter_config_dir, jupyter_config_path
 from traitlets import Unicode, Instance, List, observe, default
 from traitlets.config import LoggingConfigurable

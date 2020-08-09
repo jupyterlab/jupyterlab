@@ -148,6 +148,9 @@ fi
 
 
 if [[ $GROUP == usage ]]; then
+    # Run the integrity script to link binary files
+    jlpm integrity
+
     # Test the cli apps.
     jupyter lab clean --debug
     jupyter lab build --debug
