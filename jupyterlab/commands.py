@@ -1000,6 +1000,7 @@ class _AppHandler(object):
             did_something = True
         if did_something:
             page_config['disabled_labextensions'] = disabled
+            cm = ConfigManager()
             cm.set('page_config', page_config)
         return did_something
 

@@ -25,6 +25,7 @@ jupyterlab/static
 jupyterlab/schemas
 jupyterlab/themes
 jupyterlab/imports.css
+jupyterlab/tests/**/static
 
 packages/nbconvert-css/style/
 packages/services/examples/node/config.json

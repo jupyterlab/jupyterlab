@@ -166,12 +166,16 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension uninstall @jupyterlab/mock-extension --no-build --debug
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
     # Test with a dynamic install
+    pip install -e ./extension
     jupyter labextension build extension
-    jupyter labextension develop extension
-    jupyter labextension list --debug
+    jupyter labextension develop mock_package
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
     jupyter labextension disable @jupyterlab/mock-extension --debug
     jupyter labextension enable @jupyterlab/mock-extension --debug 
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
+    jupyter labextension list list 1>labextensions 2>&1
+    cat labextensions | grep "No dynamic extensions found"
     popd
     jupyter lab workspaces export > workspace.json --debug
     jupyter lab workspaces import --name newspace workspace.json --debug

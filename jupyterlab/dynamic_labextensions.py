@@ -160,25 +160,26 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
 
 def build_labextension(path, logger=None):
     """Build a labextension in the given path"""
-    # TODO: when porting to core, this will be in static/package.json
-    core_path = osp.join(HERE, 'core_package')
+    core_path = osp.join(HERE, 'staging')
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
     if logger:
         logger.info('Building extension in %s' % path)
-    subprocess.check_call(['jlpm', 'run', 'build:extension', path], cwd=core_path)
+    builder = osp.join('node_modules', '.bin', 'build-labextension')
+    subprocess.check_call(['node', builder, '--core-path', core_path,  path], cwd=path)
 
 
 def watch_labextension(path, logger=None):
     """Watch a labextension in a given path"""
-    core_path = osp.join(HERE, 'core_package')
+    core_path = osp.join(HERE, 'staging')
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
     if logger:
         logger.info('Watching extension in %s' % path)
-    subprocess.check_call(['jlpm', 'run', 'watch:extension', path], cwd=core_path)
+    builder = osp.join('node_modules', '.bin', 'build-labextension')
+    subprocess.check_call(['node', builder, '--core-path', core_path,  '--watch', path], cwd=path)
 
 
 #------------------------------------------------------------------------------
