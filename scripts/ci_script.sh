@@ -157,6 +157,7 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension unlink extension --no-build --debug
     jupyter labextension link extension --no-build --debug
     jupyter labextension unlink  @jupyterlab/mock-extension --no-build --debug
+    # Test with a full install
     jupyter labextension install extension  --no-build --debug
     jupyter labextension list --debug
     jupyter labextension disable @jupyterlab/mock-extension --debug
@@ -164,6 +165,13 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension disable @jupyterlab/notebook-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-extension --no-build --debug
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
+    # Test with a dynamic install
+    jupyter labextension build extension
+    jupyter labextension develop extension
+    jupyter labextension list --debug
+    jupyter labextension disable @jupyterlab/mock-extension --debug
+    jupyter labextension enable @jupyterlab/mock-extension --debug 
+    jupyter labextension uninstall @jupyterlab/mock-extension --debug
     popd
     jupyter lab workspaces export > workspace.json --debug
     jupyter lab workspaces import --name newspace workspace.json --debug
