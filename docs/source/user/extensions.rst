@@ -303,7 +303,7 @@ the extension entry in the installed list will be highlighted
 in red. It is recommended that you uninstall it. You can move
 your mouse on the question mark icon to read the instructions.
 
-.. figure:: images/listings/installed_blocked_extension.png
+.. figure:: images/listings/installed_blocked_extensions.png
    :align: center
    :class: jp-screenshot
 
