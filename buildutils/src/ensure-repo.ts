@@ -35,7 +35,7 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/buildutils': [
-    '@babel/core@',
+    '@babel/core',
     '@babel/preset-env',
     'babel-loader'
   ],
