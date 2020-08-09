@@ -39,9 +39,9 @@ Implementation
   - The command produces a set of static assets that are shipped along with a package (notionally on ``pip``/``conda``)
   - It needs to be a Python cli so it can use the dependency metadata from the active JupyterLab
   - The assets include a module federation ``remoteEntry.js``, generated bundles, and some other files that we use
-     - ``package.orig.json`` is the original ``package.json`` file that we use to gather metadata about the package
-     - ``build_log.json`` has all of the webpack options used to build the extension, for debugging purposes
-     - we use the existing ``@jupyterlab/buildutils -> build`` to generate the ``imports.css``, ``schemas`` and ``themes`` file structure
+  - ``package.orig.json`` is the original ``package.json`` file that we use to gather metadata about the package
+  - ``build_log.json`` has all of the webpack options used to build the extension, for debugging purposes
+  - we use the existing ``@jupyterlab/buildutils -> build`` to generate the ``imports.css``, ``schemas`` and ``themes`` file structure
 - We add a schema for the valid ``jupyterlab`` metadata for an extension's ``package.json`` describing the available options
 - We add a ``labextensions`` handler in ``jupyterlab_server`` that loads static assets from ``labextensions`` paths, following a similar logic to how ``nbextensions`` are discovered and loaded from disk
 - We augment the ``settings`` and ``themes`` handlers in ``jupyterlab_server`` to load from the new ``labextensions`` locations, favoring the dynamic extension locations over the bundled ones
