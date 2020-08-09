@@ -3,13 +3,17 @@
 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+from glob import glob
+import json
 import os
+import shutil
 import sys
 import traceback
 
 from copy import copy
 
 from jupyter_core.application import JupyterApp, base_flags, base_aliases
+from jupyter_core.paths import jupyter_path
 
 from traitlets import Bool, Instance, Unicode
 
@@ -19,8 +23,10 @@ from .commands import (
     link_package, unlink_package, build, get_app_version, HERE,
     update_extension, AppOptions,
 )
-from .coreconfig import CoreConfig
-from .debuglog import DebugLogFileMixin
+from jupyterlab.coreconfig import CoreConfig
+from jupyterlab.debuglog import DebugLogFileMixin
+
+from .dynamic_labextensions import develop_labextension_py, build_labextension, watch_labextension
 
 
 flags = dict(base_flags)
@@ -37,6 +43,12 @@ check_flags = copy(flags)
 check_flags['installed'] = (
     {'CheckLabExtensionsApp': {'should_check_installed_only': True}},
     "Check only if the extension is installed."
+)
+
+develop_flags = copy(flags)
+develop_flags['overwrite'] = (
+    {'DevelopLabExtensionApp': {'overwrite': True}},
+    "Overwrite files"
 )
 
 update_flags = copy(flags)
@@ -67,6 +79,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     version = VERSION
     flags = flags
     aliases = aliases
+    name = "lab"
 
     # Not configurable!
     core_config = Instance(CoreConfig, allow_none=True)
@@ -150,6 +163,42 @@ class InstallLabExtensionApp(BaseExtensionApp):
         ])
 
 
+class DevelopLabExtensionApp(BaseExtensionApp):
+    desciption = "Develop labextension"
+    flags = develop_flags
+    
+    user = Bool(False, config=True, help="Whether to do a user install")
+    sys_prefix = Bool(True, config=True, help="Use the sys.prefix as the prefix")
+    overwrite = Bool(False, config=True, help="Whether to overwrite files")
+    symlink = Bool(True, config=False, help="Whether to use a symlink")
+
+    labextensions_dir = Unicode('', config=True,
+           help="Full path to labextensions dir (probably use prefix or user)")
+
+    def run_task(self):
+        "Add config for this labextension"
+        self.extra_args = self.extra_args or [os.getcwd()]
+        for arg in self.extra_args:
+            develop_labextension_py(arg, user=self.user, sys_prefix=self.sys_prefix, labextensions_dir=self.labextensions_dir, logger=self.log, overwrite=self.overwrite,
+            symlink=self.symlink)
+
+
+class BuildLabExtensionApp(BaseExtensionApp):
+    description = "Build labextension"
+
+    def run_task(self):
+        self.extra_args = self.extra_args or [os.getcwd()]
+        build_labextension(self.extra_args[0], logger=self.log)
+
+
+class WatchLabExtensionApp(BaseExtensionApp):
+    description = "Watch labextension"
+
+    def run_task(self):
+        self.extra_args = self.extra_args or [os.getcwd()]
+        watch_labextension(self.extra_args[0], logger=self.log)
+
+
 class UpdateLabExtensionApp(BaseExtensionApp):
     description = "Update labextension(s)"
     flags = update_flags
@@ -220,6 +269,7 @@ class UninstallLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
+
         options = AppOptions(
             app_dir=self.app_dir, logger=self.log,
             core_config=self.core_config)
@@ -279,6 +329,9 @@ class CheckLabExtensionsApp(BaseExtensionApp):
 
 _examples = """
 jupyter labextension list                        # list all configured labextensions
+jupyter labextension develop                     # develop a dynamic labextension
+jupyter labextension build                       # build a dynamic labextension
+jupyter labextension watch                       # watch a dynamic labextension
 jupyter labextension install <extension name>    # install a labextension
 jupyter labextension uninstall <extension name>  # uninstall a labextension
 """
@@ -293,6 +346,9 @@ class LabExtensionApp(JupyterApp):
 
     subcommands = dict(
         install=(InstallLabExtensionApp, "Install labextension(s)"),
+        develop=(DevelopLabExtensionApp, "Develop labextension(s)"),
+        build=(BuildLabExtensionApp, "Build labextension"),
+        watch=(WatchLabExtensionApp, "Watch labextension"),
         update=(UpdateLabExtensionApp, "Update labextension(s)"),
         uninstall=(UninstallLabExtensionApp, "Uninstall labextension(s)"),
         list=(ListLabExtensionsApp, "List labextensions"),
