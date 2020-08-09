@@ -173,7 +173,7 @@ if [[ $GROUP == usage ]]; then
     # FIXME: binaries are not properly getting to all workspaces
     pushd extension
     mkdir -p node_modules/.bin
-    cp ../../../../node_modules/.bin/build-labextension node_modules/.bin
+    cp -r ../../../../node_modules/.bin node_modules/.bin
 
     jupyter labextension build .
     jupyter labextension develop mock_package
