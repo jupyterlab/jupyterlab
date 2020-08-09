@@ -150,8 +150,6 @@ fi
 if [[ $GROUP == usage ]]; then
     # Run the integrity script to link binary files
     jlpm integrity
-    # Make sure the links end up in all workspaces
-    jlpm
 
     # Test the cli apps.
     jupyter lab clean --debug
@@ -172,7 +170,10 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
     # Test with a dynamic install
     pip install -e ./extension
-    jupyter labextension build ./extension
+    pushd extension
+    # make sure we pick up node_modules/.bin
+    jlpm
+    jupyter labextension build .
     jupyter labextension develop mock_package
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
@@ -181,6 +182,7 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
     jupyter labextension list list 1>labextensions 2>&1
     cat labextensions | grep "No dynamic extensions found"
+    popd
     popd
     jupyter lab workspaces export > workspace.json --debug
     jupyter lab workspaces import --name newspace workspace.json --debug
