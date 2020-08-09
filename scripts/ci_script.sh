@@ -170,9 +170,11 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
     # Test with a dynamic install
     pip install -e ./extension
+    # FIXME: binaries are not properly getting to all workspaces
     pushd extension
-    # make sure we pick up node_modules/.bin
-    jlpm
+    mkdir -p node_modules/.bin
+    cp ../../../../node_modules/.bin/build-labextension node_modules/.bin
+
     jupyter labextension build .
     jupyter labextension develop mock_package
     jupyter labextension list 1>labextensions 2>&1
