@@ -33,16 +33,16 @@ export interface IListEntry {
  *
  */
 export type ListResult = null | {
-  mode: 'white' | 'black' | 'default' | 'invalid';
+  mode: 'block' | 'allow' | 'default' | 'invalid';
   uris: string[];
   entries: IListEntry[];
 };
 
 export interface IListingApi {
-  blacklist_uris: string[];
-  whitelist_uris: string[];
-  blacklist: IListEntry[];
-  whitelist: IListEntry[];
+  blocked_extensions_uris: string[];
+  allowed_extensions_uris: string[];
+  blocked_extensions: IListEntry[];
+  allowed_extensions: IListEntry[];
 }
 
 /**
@@ -62,7 +62,10 @@ export class Lister {
           uris: [],
           entries: []
         };
-        if (data.blacklist_uris.length > 0 && data.whitelist_uris.length > 0) {
+        if (
+          data.blocked_extensions_uris.length > 0 &&
+          data.allowed_extensions_uris.length > 0
+        ) {
           console.warn('Simultaneous black and white list are not allowed.');
           this._listings = {
             mode: 'invalid',
@@ -70,17 +73,19 @@ export class Lister {
             entries: []
           };
         } else if (
-          data.blacklist_uris.length > 0 ||
-          data.whitelist_uris.length > 0
+          data.blocked_extensions_uris.length > 0 ||
+          data.allowed_extensions_uris.length > 0
         ) {
           this._listings = {
-            mode: data.blacklist_uris.length > 0 ? 'black' : 'white',
+            mode: data.blocked_extensions_uris.length > 0 ? 'block' : 'allow',
             uris:
-              data.blacklist_uris.length > 0
-                ? data.blacklist_uris
-                : data.whitelist_uris,
+              data.blocked_extensions_uris.length > 0
+                ? data.blocked_extensions_uris
+                : data.allowed_extensions_uris,
             entries:
-              data.blacklist_uris.length > 0 ? data.blacklist : data.whitelist
+              data.blocked_extensions_uris.length > 0
+                ? data.blocked_extensions
+                : data.allowed_extensions
           };
         }
         this._listingsLoaded.emit(this._listings);

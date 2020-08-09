@@ -297,6 +297,6 @@ export function isJupyterOrg(name: string): boolean {
     parts.length > 1 && // Has a first part
     !!first && // with a finite length
     first[0] === '@' && // corresponding to an org name
-    jupyterOrg.indexOf(first.slice(1)) !== -1 // in the org whitelist.
+    jupyterOrg.indexOf(first.slice(1)) !== -1 // in the org allowedExtensions.
   );
 }

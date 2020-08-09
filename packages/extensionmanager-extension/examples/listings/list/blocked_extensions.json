@@ -1,5 +1,5 @@
 {
-  "blacklist": [
+  "blocked_extensions": [
     {
       "name": "@jupyterlab-examples/launcher",
       "type": "jupyterlab",

@@ -177,23 +177,23 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   }
   const githubUser = getExtensionGitHubUser(entry);
   if (
-    listMode === 'black' &&
-    entry.blacklistEntry &&
+    listMode === 'block' &&
+    entry.blockedExtensionsEntry &&
     viewType === 'searchResult'
   ) {
     return <li></li>;
   }
   if (
-    listMode === 'white' &&
-    !entry.whitelistEntry &&
+    listMode === 'allow' &&
+    !entry.allowedExtensionsEntry &&
     viewType === 'searchResult'
   ) {
     return <li></li>;
   }
-  if (listMode === 'black' && entry.blacklistEntry?.name) {
+  if (listMode === 'block' && entry.blockedExtensionsEntry?.name) {
     flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
   }
-  if (listMode === 'white' && !entry.whitelistEntry) {
+  if (listMode === 'allow' && !entry.allowedExtensionsEntry) {
     flagClasses.push(`jp-extensionmanager-entry-should-be-uninstalled`);
   }
   return (
@@ -220,10 +220,10 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               {entry.name}
             </a>
           </div>
-          {entry.blacklistEntry && (
+          {entry.blockedExtensionsEntry && (
             <ToolbarButtonComponent
               icon={listingsInfoIcon}
-              iconLabel={`${entry.name} extension has been blacklisted since install. Please uninstall immediately and contact your blacklist administrator.`}
+              iconLabel={`${entry.name} extension has been blockedExtensions since install. Please uninstall immediately and contact your blockedExtensions administrator.`}
               onClick={() =>
                 window.open(
                   'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
@@ -231,12 +231,12 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
               }
             />
           )}
-          {!entry.whitelistEntry &&
+          {!entry.allowedExtensionsEntry &&
             viewType === 'installed' &&
-            listMode === 'white' && (
+            listMode === 'allow' && (
               <ToolbarButtonComponent
                 icon={listingsInfoIcon}
-                iconLabel={`${entry.name} extension has been removed from the whitelist since installation. Please uninstall immediately and contact your whitelist administrator.`}
+                iconLabel={`${entry.name} extension has been removed from the allowedExtensions since installation. Please uninstall immediately and contact your allowedExtensions administrator.`}
                 onClick={() =>
                   window.open(
                     'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
@@ -259,8 +259,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           </div>
           <div className="jp-extensionmanager-entry-buttons">
             {!entry.installed &&
-              !entry.blacklistEntry &&
-              !(!entry.whitelistEntry && listMode === 'white') &&
+              !entry.blockedExtensionsEntry &&
+              !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
               ListModel.isDisclaimed() && (
                 <Button
                   onClick={() => props.performAction('install', entry)}
@@ -271,8 +271,8 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 </Button>
               )}
             {ListModel.entryHasUpdate(entry) &&
-              !entry.blacklistEntry &&
-              !(!entry.whitelistEntry && listMode === 'white') &&
+              !entry.blockedExtensionsEntry &&
+              !(!entry.allowedExtensionsEntry && listMode === 'allow') &&
               ListModel.isDisclaimed() && (
                 <Button
                   onClick={() => props.performAction('install', entry)}
@@ -329,7 +329,7 @@ export namespace ListEntry {
     /**
      * The list mode to apply.
      */
-    listMode: 'black' | 'white' | 'default' | 'invalid';
+    listMode: 'block' | 'allow' | 'default' | 'invalid';
 
     /**
      * The requested view type.
@@ -415,7 +415,7 @@ export namespace ListView {
     /**
      * The list mode to apply.
      */
-    listMode: 'black' | 'white' | 'default' | 'invalid';
+    listMode: 'block' | 'allow' | 'default' | 'invalid';
 
     /**
      * The requested view type.
