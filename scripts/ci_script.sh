@@ -248,18 +248,16 @@ if [[ $GROUP == usage ]]; then
     ./test_install/bin/jupyter lab --no-browser &
     TASK_PID=$!
     # Make sure the task is running
-    sleep 2
     ps -p $TASK_PID || exit 1
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
 
     # Check the labhubapp
-    pip install jupyterhub
-    jupyter-labhub --no-browser
+    ./test_install/bin/pip install jupyterhub
+    ./test_install/bin/jupyter-labhub --no-browser &
     TASK_PID=$!
     # Make sure the task is running
-    sleep 2
     ps -p $TASK_PID || exit 1
     sleep 5
     kill $TASK_PID
