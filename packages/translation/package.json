@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation",
-  "version": "3.0.0-alpha.4",
+  "version": "3.0.0-alpha.7",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",

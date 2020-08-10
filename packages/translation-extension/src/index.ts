@@ -65,9 +65,10 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
     let translationBundle: Gettext;
     let translationBundles: any = {};
     let metadata: any;
-    console.log('Language data from server extension', domainData);
-
     return {
+      locale: (): string => {
+        return currentLocale;
+      },
       load: (domain: string): TranslationBundle => {
         if (currentLocale == 'en') {
           return englishBundle;
@@ -152,8 +153,6 @@ const langMenu: JupyterFrontEndPlugin<void> = {
         // Get list of available locales
         requestTranslationsAPI<any>('')
           .then(data => {
-            console.log(data);
-
             for (const locale in data['data']) {
               const value = data['data'][locale];
               const displayName = value.displayName;
@@ -175,7 +174,10 @@ const langMenu: JupyterFrontEndPlugin<void> = {
                   return showDialog({
                     title: trans.__('Change interface language?'),
                     body: trans.__('Are you sure you want to refresh?'),
-                    buttons: [Dialog.cancelButton(), Dialog.okButton()]
+                    buttons: [
+                      Dialog.cancelButton({ label: trans.__('Cancel') }),
+                      Dialog.okButton({ label: trans.__('Ok') })
+                    ]
                   }).then(result => {
                     if (result.button.accept) {
                       setting
@@ -184,7 +186,7 @@ const langMenu: JupyterFrontEndPlugin<void> = {
                           window.location.reload();
                         })
                         .catch(reason => {
-                          console.log(reason);
+                          console.error(reason);
                         });
                     }
                   });

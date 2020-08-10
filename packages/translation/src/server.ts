@@ -23,9 +23,6 @@ export async function requestTranslationsAPI<T>(
     '/lab/api/translations/', // API Namespace
     locale
   );
-
-  console.log(requestUrl);
-
   let response: Response;
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
@@ -39,7 +36,7 @@ export async function requestTranslationsAPI<T>(
     try {
       data = JSON.parse(data);
     } catch (error) {
-      console.log('Not a JSON response body.', response);
+      console.error('Not a JSON response body.', response);
     }
   }
 

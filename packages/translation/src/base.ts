@@ -17,6 +17,10 @@ class EmptyTranslator implements ITranslator {
     return this._languageBundle;
   }
 
+  locale(): string {
+    return 'en-us';
+  }
+
   private _languageBundle: TranslationBundle;
 }
 
@@ -90,7 +94,7 @@ class EmptyLanguageBundle {
  *
  * This translator just returns the input string plus any interpolation if needed.
  */
-export namespace BasicTranslator {
+export namespace DefaultTranslator {
   /**
    * Get the basix translator instance.
    */

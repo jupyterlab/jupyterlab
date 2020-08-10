@@ -30,13 +30,13 @@ let JSON_TEST_DATA_VARIATION = {
 };
 
 describe('@jupyterlab/translation', () => {
+  const trans = new Gettext({ domain: 'jupyterlab', locale: 'es' });
+  trans.loadJSON(JSON_TEST_DATA, 'jupyterlab');
+  trans.loadJSON(JSON_TEST_DATA_VARIATION, 'jupyterlab');
+
   describe('Gettext', () => {
     describe('#gettext', () => {
       it('should test whether the gettext bundle gettext/__ works', () => {
-        const trans = new Gettext({ domain: 'jupyterlab', locale: 'es' });
-        trans.loadJSON(JSON_TEST_DATA, 'jupyterlab');
-        trans.loadJSON(JSON_TEST_DATA_VARIATION, 'jupyterlab');
-
         // Shorthand method
         expect(trans.__('Welcome')).toBe('Bienvenido');
         expect(trans.__('Welcome %1', 'Joe')).toBe('Bienvenido Joe');
@@ -49,10 +49,6 @@ describe('@jupyterlab/translation', () => {
 
     describe('#pgettext', () => {
       it('should test whether the gettext  bundle pgettext/_p works', () => {
-        const trans = new Gettext({ domain: 'jupyterlab', locale: 'es' });
-        trans.loadJSON(JSON_TEST_DATA, 'jupyterlab');
-        trans.loadJSON(JSON_TEST_DATA_VARIATION, 'jupyterlab');
-
         // Shorthand method
         expect(trans._p('Context', 'Welcome')).toBe('Hola');
         expect(trans._p('Context', 'Welcome %1', 'Joe')).toBe('Hola Joe');
@@ -65,10 +61,6 @@ describe('@jupyterlab/translation', () => {
 
     describe('#ngettext', () => {
       it('should test whether the gettext bundle ngettext/_n works', () => {
-        const trans = new Gettext({ domain: 'jupyterlab', locale: 'es' });
-        trans.loadJSON(JSON_TEST_DATA, 'jupyterlab');
-        trans.loadJSON(JSON_TEST_DATA_VARIATION, 'jupyterlab');
-
         // Shorthand method
         expect(trans._n('There is %1 apple', 'There are %1 apples', 1)).toBe(
           'Hay 1 manzana'
@@ -111,9 +103,7 @@ describe('@jupyterlab/translation', () => {
 
     describe('#fallbackLocale', () => {
       it('should test whether the gettext  bundle pgettext/_p works', () => {
-        const trans = new Gettext({ domain: 'jupyterlab', locale: 'es-CO' });
-        trans.loadJSON(JSON_TEST_DATA, 'jupyterlab');
-        trans.loadJSON(JSON_TEST_DATA_VARIATION, 'jupyterlab');
+        trans.setLocale('es-CO');
 
         // Shorthand method
         expect(trans.__('Welcome')).toBe('Bienvenido pirobo');

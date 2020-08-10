@@ -3,23 +3,21 @@
 
 import 'jest';
 
-import { BasicTranslator } from '@jupyterlab/translation';
+import { DefaultTranslator } from '@jupyterlab/translation';
 
 describe('@jupyterlab/translation', () => {
+  const translator = DefaultTranslator.getInstance();
+  const trans = translator.load('some-domain');
+
   describe('BasicTranslator', () => {
     describe('#getInstance', () => {
       it('should return the instance of the EmptyTranslator', () => {
-        const translator = BasicTranslator.getInstance();
-        const trans = translator.load('es_CO');
         expect(trans.gettext('Hello!')).toBe('Hello!');
       });
     });
 
     describe('#dummygettext', () => {
       it('should test whether the dummy bundle gettext/__ works', () => {
-        const translator = BasicTranslator.getInstance();
-        const trans = translator.load('es_CO');
-
         // Shorthand method
         expect(trans.__('Hello!')).toBe('Hello!');
         expect(trans.__('Hello %1!', 'Joe')).toBe('Hello Joe!');
@@ -32,9 +30,6 @@ describe('@jupyterlab/translation', () => {
 
     describe('#dummypgettext', () => {
       it('should test whether the dummy bundle pgettext/_p works', () => {
-        const translator = BasicTranslator.getInstance();
-        const trans = translator.load('es_CO');
-
         // Shorthand method
         expect(trans._p('Some context', 'Hello!')).toBe('Hello!');
         expect(trans._p('Some context', 'Hello %1!', 'Joe')).toBe('Hello Joe!');
@@ -49,9 +44,6 @@ describe('@jupyterlab/translation', () => {
 
     describe('#dummyngettext', () => {
       it('should test whether the dummy bundle ngettext/_n works', () => {
-        const translator = BasicTranslator.getInstance();
-        const trans = translator.load('es_CO');
-
         // Shorthand method
         expect(trans._n('I have %1 apple', 'I have %1 apples', 1)).toBe(
           'I have 1 apple'
@@ -84,9 +76,6 @@ describe('@jupyterlab/translation', () => {
 
     describe('#dummynpgettext', () => {
       it('should test whether the dummy bundle npgettext/_np works', () => {
-        const translator = BasicTranslator.getInstance();
-        const trans = translator.load('es_CO');
-
         // Shorthand method
         expect(
           trans._np('Some context', 'I have %1 apple', 'I have %1 apples', 1)
@@ -153,9 +142,6 @@ describe('@jupyterlab/translation', () => {
   });
   describe('#dummydcnpgettext', () => {
     it('should test whether the dummy bundle dcnpgettext works', () => {
-      const translator = BasicTranslator.getInstance();
-      const trans = translator.load('es_CO');
-
       expect(
         trans.dcnpgettext(
           'jupyterlab',

@@ -266,7 +266,8 @@ class Gettext {
    * Shorthand for gettext.
    *
    * @param msgid - The singular string to translate.
-   * @param args - Any additional values to use with interpolation
+   * @param args - Any additional values to use with interpolation.
+   *
    * @return A translated string if found, or the original string.
    *
    * ### Notes
@@ -283,7 +284,8 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param msgid_plural - The plural string to translate.
    * @param n - The number for pluralization.
-   * @param args - Any additional values to use with interpolation
+   * @param args - Any additional values to use with interpolation.
+   *
    * @return A translated string if found, or the original string.
    *
    * ### Notes
@@ -299,7 +301,8 @@ class Gettext {
    *
    * @param msgctxt - The message context.
    * @param msgid - The singular string to translate.
-   * @param args - Any additional values to use with interpolation
+   * @param args - Any additional values to use with interpolation.
+   *
    * @return A translated string if found, or the original string.
    *
    * ### Notes
@@ -317,7 +320,8 @@ class Gettext {
    * @param msgid - The singular string to translate.
    * @param msgid_plural - The plural string to translate.
    * @param n - The number for pluralization.
-   * @param args - Any additional values to use with interpolation
+   * @param args - Any additional values to use with interpolation.
+   *
    * @return A translated string if found, or the original string.
    *
    * ### Notes
@@ -338,7 +342,8 @@ class Gettext {
    * Translate a singular string with extra interpolation values.
    *
    * @param msgid - The singular string to translate.
-   * @param args - Any additional values to use with interpolation
+   * @param args - Any additional values to use with interpolation.
+   *
    * @return A translated string if found, or the original string.
    */
   gettext(msgid: string, ...args: any[]): string {
@@ -349,7 +354,8 @@ class Gettext {
    * Translate a plural string with extra interpolation values.
    *
    * @param msgid - The singular string to translate.
-   * @param args - Any additional values to use with interpolation
+   * @param args - Any additional values to use with interpolation.
+   *
    * @return A translated string if found, or the original string.
    */
   ngettext(
@@ -366,7 +372,8 @@ class Gettext {
    *
    * @param msgctxt - The message context.
    * @param msgid - The singular string to translate.
-   * @param args - Any additional values to use with interpolation
+   * @param args - Any additional values to use with interpolation.
+   *
    * @return A translated string if found, or the original string.
    *
    * ### Notes
@@ -385,6 +392,7 @@ class Gettext {
    * @param msgid_plural - The plural string to translate.
    * @param n - The number for pluralization.
    * @param args - Any additional values to use with interpolation
+   *
    * @return A translated string if found, or the original string.
    */
   npgettext(
@@ -406,6 +414,7 @@ class Gettext {
    * @param msgid_plural - The plural string to translate.
    * @param n - The number for pluralization.
    * @param args - Any additional values to use with interpolation
+   *
    * @return A translated string if found, or the original string.
    */
   dcnpgettext(
@@ -473,6 +482,7 @@ class Gettext {
    * Split a locale into parent locales. "es-CO" -> ["es-CO", "es"]
    *
    * @param locale - The locale string.
+   *
    * @return An array of locales.
    */
   private expandLocale(locale: string): Array<string> {
@@ -539,6 +549,7 @@ class Gettext {
    * @param n - The number for pluralization.
    * @param options - Translation options.
    * @param args - Any variables to interpolate.
+   *
    * @return A translation string without context.
    *
    * ### Notes
