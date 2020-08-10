@@ -190,6 +190,7 @@ setup_args['entry_points'] = {
     'console_scripts': [
         'jupyter-lab = jupyterlab.labapp:main',
         'jupyter-labextension = jupyterlab.labextensions:main',
+        'jupyter-labhub = jupyterlab.labhubapp:main',
         'jlpm = jupyterlab.jlpmapp:main',
     ],
     'pytest11': [
