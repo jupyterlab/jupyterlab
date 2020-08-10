@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror-extension",
-  "version": "3.0.0-alpha.7",
+  "version": "3.0.0-alpha.8",
   "description": "JupyterLab - CodeMirror Provider Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,14 +36,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-alpha.7",
-    "@jupyterlab/codeeditor": "^3.0.0-alpha.7",
-    "@jupyterlab/codemirror": "^3.0.0-alpha.7",
-    "@jupyterlab/docregistry": "^3.0.0-alpha.7",
-    "@jupyterlab/fileeditor": "^3.0.0-alpha.7",
-    "@jupyterlab/mainmenu": "^3.0.0-alpha.7",
-    "@jupyterlab/settingregistry": "^3.0.0-alpha.7",
-    "@jupyterlab/statusbar": "^3.0.0-alpha.7",
+    "@jupyterlab/application": "^3.0.0-alpha.8",
+    "@jupyterlab/codeeditor": "^3.0.0-alpha.8",
+    "@jupyterlab/codemirror": "^3.0.0-alpha.8",
+    "@jupyterlab/docregistry": "^3.0.0-alpha.8",
+    "@jupyterlab/fileeditor": "^3.0.0-alpha.8",
+    "@jupyterlab/mainmenu": "^3.0.0-alpha.8",
+    "@jupyterlab/settingregistry": "^3.0.0-alpha.8",
+    "@jupyterlab/statusbar": "^3.0.0-alpha.8",
     "@lumino/widgets": "^1.11.1",
     "codemirror": "~5.56.0"
   },

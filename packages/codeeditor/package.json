@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codeeditor",
-  "version": "3.0.0-alpha.7",
+  "version": "3.0.0-alpha.8",
   "description": "JupyterLab - Abstract Code Editor",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,10 +40,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^5.0.0-alpha.7",
-    "@jupyterlab/nbformat": "^3.0.0-alpha.7",
-    "@jupyterlab/observables": "^4.0.0-alpha.7",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.7",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.8",
+    "@jupyterlab/nbformat": "^3.0.0-alpha.8",
+    "@jupyterlab/observables": "^4.0.0-alpha.8",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.8",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/disposable": "^1.3.5",
     "@lumino/dragdrop": "^1.5.1",
@@ -52,7 +52,7 @@
     "@lumino/widgets": "^1.11.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-alpha.7",
+    "@jupyterlab/testutils": "^3.0.0-alpha.8",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",

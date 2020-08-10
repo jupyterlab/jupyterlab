@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/launcher-extension",
-  "version": "3.0.0-alpha.7",
+  "version": "3.0.0-alpha.8",
   "description": "JupyterLab - Launcher Page Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,10 +36,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-alpha.7",
-    "@jupyterlab/apputils": "^3.0.0-alpha.7",
-    "@jupyterlab/launcher": "^3.0.0-alpha.7",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.7",
+    "@jupyterlab/application": "^3.0.0-alpha.8",
+    "@jupyterlab/apputils": "^3.0.0-alpha.8",
+    "@jupyterlab/launcher": "^3.0.0-alpha.8",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.8",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/widgets": "^1.11.1"

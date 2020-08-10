@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/documentsearch-extension",
-  "version": "3.0.0-alpha.7",
+  "version": "3.0.0-alpha.8",
   "description": "Search document types",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,10 +33,10 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-alpha.7",
-    "@jupyterlab/apputils": "^3.0.0-alpha.7",
-    "@jupyterlab/documentsearch": "^3.0.0-alpha.7",
-    "@jupyterlab/mainmenu": "^3.0.0-alpha.7",
+    "@jupyterlab/application": "^3.0.0-alpha.8",
+    "@jupyterlab/apputils": "^3.0.0-alpha.8",
+    "@jupyterlab/documentsearch": "^3.0.0-alpha.8",
+    "@jupyterlab/mainmenu": "^3.0.0-alpha.8",
     "@lumino/widgets": "^1.11.1"
   },
   "devDependencies": {

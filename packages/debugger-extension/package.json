@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/debugger-extension",
-  "version": "3.0.0-alpha.7",
+  "version": "3.0.0-alpha.8",
   "description": "JupyterLab - Debugger Extension",
   "keywords": [
     "jupyter",
@@ -47,22 +47,22 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-alpha.7",
-    "@jupyterlab/apputils": "^3.0.0-alpha.7",
-    "@jupyterlab/codeeditor": "^3.0.0-alpha.7",
-    "@jupyterlab/console": "^3.0.0-alpha.7",
-    "@jupyterlab/coreutils": "^5.0.0-alpha.7",
-    "@jupyterlab/debugger": "^3.0.0-alpha.7",
-    "@jupyterlab/docregistry": "^3.0.0-alpha.7",
-    "@jupyterlab/fileeditor": "^3.0.0-alpha.7",
-    "@jupyterlab/notebook": "^3.0.0-alpha.7",
-    "@jupyterlab/services": "^6.0.0-alpha.7",
-    "@jupyterlab/settingregistry": "^3.0.0-alpha.7"
+    "@jupyterlab/application": "^3.0.0-alpha.8",
+    "@jupyterlab/apputils": "^3.0.0-alpha.8",
+    "@jupyterlab/codeeditor": "^3.0.0-alpha.8",
+    "@jupyterlab/console": "^3.0.0-alpha.8",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.8",
+    "@jupyterlab/debugger": "^3.0.0-alpha.8",
+    "@jupyterlab/docregistry": "^3.0.0-alpha.8",
+    "@jupyterlab/fileeditor": "^3.0.0-alpha.8",
+    "@jupyterlab/notebook": "^3.0.0-alpha.8",
+    "@jupyterlab/services": "^6.0.0-alpha.8",
+    "@jupyterlab/settingregistry": "^3.0.0-alpha.8"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^3.0.0-alpha.7",
+    "@jupyterlab/testutils": "^3.0.0-alpha.8",
     "@types/codemirror": "^0.0.76",
     "@types/jest": "^24.0.23",
     "@types/react-dom": "~16.9.4",

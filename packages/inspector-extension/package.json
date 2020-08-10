@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/inspector-extension",
-  "version": "3.0.0-alpha.7",
+  "version": "3.0.0-alpha.8",
   "description": "JupyterLab - Code Inspector Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,13 +36,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-alpha.7",
-    "@jupyterlab/apputils": "^3.0.0-alpha.7",
-    "@jupyterlab/console": "^3.0.0-alpha.7",
-    "@jupyterlab/inspector": "^3.0.0-alpha.7",
-    "@jupyterlab/launcher": "^3.0.0-alpha.7",
-    "@jupyterlab/notebook": "^3.0.0-alpha.7",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.7"
+    "@jupyterlab/application": "^3.0.0-alpha.8",
+    "@jupyterlab/apputils": "^3.0.0-alpha.8",
+    "@jupyterlab/console": "^3.0.0-alpha.8",
+    "@jupyterlab/inspector": "^3.0.0-alpha.8",
+    "@jupyterlab/launcher": "^3.0.0-alpha.8",
+    "@jupyterlab/notebook": "^3.0.0-alpha.8",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.8"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/toc",
-  "version": "5.0.0-alpha.7",
+  "version": "5.0.0-alpha.8",
   "description": "JupyterLab - Table of Contents widget",
   "keywords": [
     "jupyterlab"
@@ -45,16 +45,16 @@
     ]
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-alpha.7",
-    "@jupyterlab/cells": "^3.0.0-alpha.7",
-    "@jupyterlab/coreutils": "^5.0.0-alpha.7",
-    "@jupyterlab/docmanager": "^3.0.0-alpha.7",
-    "@jupyterlab/docregistry": "^3.0.0-alpha.7",
-    "@jupyterlab/fileeditor": "^3.0.0-alpha.7",
-    "@jupyterlab/markdownviewer": "^3.0.0-alpha.7",
-    "@jupyterlab/notebook": "^3.0.0-alpha.7",
-    "@jupyterlab/rendermime": "^3.0.0-alpha.7",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.7",
+    "@jupyterlab/apputils": "^3.0.0-alpha.8",
+    "@jupyterlab/cells": "^3.0.0-alpha.8",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.8",
+    "@jupyterlab/docmanager": "^3.0.0-alpha.8",
+    "@jupyterlab/docregistry": "^3.0.0-alpha.8",
+    "@jupyterlab/fileeditor": "^3.0.0-alpha.8",
+    "@jupyterlab/markdownviewer": "^3.0.0-alpha.8",
+    "@jupyterlab/notebook": "^3.0.0-alpha.8",
+    "@jupyterlab/rendermime": "^3.0.0-alpha.8",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.8",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/messaging": "^1.3.3",
     "@lumino/signaling": "^1.3.5",
@@ -65,7 +65,7 @@
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^3.0.0-alpha.7",
+    "@jupyterlab/testutils": "^3.0.0-alpha.8",
     "@types/jest": "^24.0.23",
     "@types/react": "~16.9.16",
     "@types/react-dom": "~16.9.4",
