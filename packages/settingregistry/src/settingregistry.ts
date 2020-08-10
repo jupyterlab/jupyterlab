@@ -218,8 +218,10 @@ export class DefaultSchemaValidator implements ISchemaValidator {
     const validate = validator.getSchema('jupyterlab-plugin-schema')!;
 
     // Validate against the main schema.
-    if (!(validate(schema) as boolean)) {
-      return validate.errors as ISchemaValidator.IError[];
+    // FIXME: Cannot invoke an object which is possibly 'undefined'
+    if (!(validate!(schema) as boolean)) {
+      // FIXME: Object is possibly 'undefined'.
+      return validate!.errors as ISchemaValidator.IError[];
     }
 
     // Validate against the JSON schema meta-schema.
