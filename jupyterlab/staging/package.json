@@ -6,6 +6,7 @@
     "build": "webpack",
     "build:dev": "jlpm run build",
     "build:dev:minimize": "jlpm run build:dev",
+    "build:extension": "build-labextension --core-path .",
     "build:prod": "ensure-max-old-space webpack --config webpack.prod.config.js",
     "build:prod:minimize": "ensure-max-old-space webpack --config webpack.prod.minimize.config.js",
     "build:prod:release": "ensure-max-old-space webpack --config webpack.prod.release.config.js",

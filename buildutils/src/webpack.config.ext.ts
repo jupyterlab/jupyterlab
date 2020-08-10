@@ -123,6 +123,9 @@ module.exports = [
       path: outputPath,
       publicPath: `lab/extensions/${data.name}/`
     },
+    module: {
+      rules: [{ test: /\.html$/, use: 'file-loader' }]
+    },
     plugins: [
       new ModuleFederationPlugin({
         name: data.name,

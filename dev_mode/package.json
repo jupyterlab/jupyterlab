@@ -116,7 +116,7 @@
     "@jupyterlab/docregistry": "~3.0.0-alpha.7",
     "@jupyterlab/documentsearch": "~3.0.0-alpha.7",
     "@jupyterlab/documentsearch-extension": "~3.0.0-alpha.7",
-    "@jupyterlab/extensionmanager": "~3.0.0-alpha.7",
+    "@jupyterlab/extensionmanager": "^3.0.0-alpha.7",
     "@jupyterlab/extensionmanager-extension": "~3.0.0-alpha.7",
     "@jupyterlab/filebrowser": "~3.0.0-alpha.7",
     "@jupyterlab/filebrowser-extension": "~3.0.0-alpha.7",

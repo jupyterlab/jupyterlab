@@ -6,7 +6,7 @@ import * as webpack from 'webpack';
 
 const rules = [
   { test: /\.css$/, use: ['style-loader', 'css-loader'] },
-  { test: /\.html$/, use: 'file-loader' },
+  { test: /\.txt$/, use: 'raw-loader' },
   { test: /\.md$/, use: 'raw-loader' },
   { test: /\.(jpg|png|gif)$/, use: 'file-loader' },
   { test: /\.js.map$/, use: 'file-loader' },
@@ -39,6 +39,16 @@ const rules = [
     issuer: /\.js$/,
     use: {
       loader: 'raw-loader'
+    }
+  },
+  // Workaround for https://github.com/jupyterlab/jupyterlab/issues/8655
+  {
+    test: /vega-statistics\/src\/.*.js$/,
+    use: {
+      loader: 'babel-loader',
+      options: {
+        presets: ['@babel/preset-env']
+      }
     }
   }
 ];

@@ -86,8 +86,7 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm run build:src
 
     # Make sure we can build for release
-    # disabled for now pending https://github.com/jupyterlab/jupyterlab/issues/8655
-    #jlpm run build:dev:prod:release
+    jlpm run build:dev:prod:release
 
     # Make sure the storybooks build.
     jlpm run build:storybook
@@ -149,6 +148,9 @@ fi
 
 
 if [[ $GROUP == usage ]]; then
+    # Run the integrity script to link binary files
+    jlpm integrity
+
     # Test the cli apps.
     jupyter lab clean --debug
     jupyter lab build --debug
@@ -158,6 +160,7 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension unlink extension --no-build --debug
     jupyter labextension link extension --no-build --debug
     jupyter labextension unlink  @jupyterlab/mock-extension --no-build --debug
+    # Test with a full install
     jupyter labextension install extension  --no-build --debug
     jupyter labextension list --debug
     jupyter labextension disable @jupyterlab/mock-extension --debug
@@ -165,6 +168,23 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension disable @jupyterlab/notebook-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-extension --no-build --debug
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
+    # Test with a dynamic install
+    pip install -e ./extension
+    # FIXME: binaries are not properly getting to all workspaces
+    pushd extension
+    mkdir -p node_modules/.bin
+    cp -r ../../../../node_modules/.bin node_modules
+
+    jupyter labextension build .
+    jupyter labextension develop mock_package
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
+    jupyter labextension disable @jupyterlab/mock-extension --debug
+    jupyter labextension enable @jupyterlab/mock-extension --debug 
+    jupyter labextension uninstall @jupyterlab/mock-extension --debug
+    jupyter labextension list list 1>labextensions 2>&1
+    cat labextensions | grep "No dynamic extensions found"
+    popd
     popd
     jupyter lab workspaces export > workspace.json --debug
     jupyter lab workspaces import --name newspace workspace.json --debug
