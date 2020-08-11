@@ -84,6 +84,11 @@ export interface IThemeManager {
    * and if the user has scrollbar styling enabled.
    */
   themeScrollbars(name: string): boolean;
+
+  /**
+   * Get display name for theme.
+   */
+  getDisplayName(name: string): string;
 }
 
 /**
@@ -95,9 +100,14 @@ export namespace IThemeManager {
    */
   export interface ITheme {
     /**
-     * The display name of the theme.
+     * The unique identifier name of the theme.
      */
     name: string;
+
+    /**
+     * The display name of the theme.
+     */
+    displayName?: string;
 
     /**
      * Whether the theme is light or dark. Downstream authors

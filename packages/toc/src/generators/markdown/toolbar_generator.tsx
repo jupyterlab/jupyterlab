@@ -4,6 +4,7 @@
 import * as React from 'react';
 import { OptionsManager } from './options_manager';
 import { numberingIcon } from '@jupyterlab/ui-components';
+import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * Interface describing toolbar properties.
@@ -43,6 +44,7 @@ function toolbar(options: OptionsManager) {
       super(props);
       this.state = { numbering: false };
       options.initializeOptions(false);
+      this._trans = options.translator.load('jupyterlab');
     }
 
     /**
@@ -59,8 +61,8 @@ function toolbar(options: OptionsManager) {
         <div
           onClick={event => toggleNumbering()}
           role="text"
-          aria-label="Toggle Auto-Numbering"
-          title="Toggle Auto-Numbering"
+          aria-label={this._trans.__('Toggle Auto-Numbering')}
+          title={this._trans.__('Toggle Auto-Numbering')}
           className={
             this.state.numbering
               ? 'toc-toolbar-icon-selected'
@@ -76,6 +78,8 @@ function toolbar(options: OptionsManager) {
         </div>
       );
     }
+
+    _trans: TranslationBundle;
   };
 }
 

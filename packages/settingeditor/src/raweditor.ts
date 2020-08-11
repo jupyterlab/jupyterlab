@@ -9,6 +9,8 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { CommandRegistry } from '@lumino/commands';
 
 import { Message } from '@lumino/messaging';
@@ -37,16 +39,6 @@ const USER_CLASS = 'jp-SettingsRawEditor-user';
 const ERROR_CLASS = 'jp-mod-error';
 
 /**
- * The banner text for the default editor.
- */
-const DEFAULT_TITLE = 'System Defaults';
-
-/**
- * The banner text for the user settings editor.
- */
-const USER_TITLE = 'User Preferences';
-
-/**
  * A raw JSON settings editor.
  */
 export class RawEditor extends SplitPanel {
@@ -60,9 +52,9 @@ export class RawEditor extends SplitPanel {
       spacing: 1
     });
 
-    const { commands, editorFactory, registry } = options;
-
+    const { commands, editorFactory, registry, translator } = options;
     this.registry = registry;
+    this.translator = translator || nullTranslator;
     this._commands = commands;
 
     // Create read-only defaults editor.
@@ -87,12 +79,19 @@ export class RawEditor extends SplitPanel {
     user.editor.model.value.changed.connect(this._onTextChanged, this);
 
     // Create and set up an inspector.
-    this._inspector = createInspector(this, options.rendermime);
+    this._inspector = createInspector(
+      this,
+      options.rendermime,
+      this.translator
+    );
 
     this.addClass(RAW_EDITOR_CLASS);
+    // FIXME-TRANS: onSaveError must have an optional translator?
     this._onSaveError = options.onSaveError;
-    this.addWidget(Private.defaultsEditor(defaults));
-    this.addWidget(Private.userEditor(user, this._toolbar, this._inspector));
+    this.addWidget(Private.defaultsEditor(defaults, this.translator));
+    this.addWidget(
+      Private.userEditor(user, this._toolbar, this._inspector, this.translator)
+    );
   }
 
   /**
@@ -223,7 +222,7 @@ export class RawEditor extends SplitPanel {
       })
       .catch(reason => {
         this._updateToolbar(true, false);
-        this._onSaveError(reason);
+        this._onSaveError(reason, this.translator);
       });
   }
 
@@ -295,13 +294,14 @@ export class RawEditor extends SplitPanel {
     this._commandsChanged.emit([commands.revert, commands.save]);
   }
 
+  protected translator: ITranslator;
   private _canRevert = false;
   private _canSave = false;
   private _commands: RawEditor.ICommandBundle;
   private _commandsChanged = new Signal<this, string[]>(this);
   private _defaults: CodeEditorWrapper;
   private _inspector: Widget;
-  private _onSaveError: (reason: any) => void;
+  private _onSaveError: (reason: any, translator?: ITranslator) => void;
   private _settings: ISettingRegistry.ISettings | null = null;
   private _toolbar = new Toolbar<Widget>();
   private _user: CodeEditorWrapper;
@@ -359,6 +359,11 @@ export namespace RawEditor {
      * The optional MIME renderer to use for rendering debug messages.
      */
     rendermime?: IRenderMimeRegistry;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -369,13 +374,19 @@ namespace Private {
   /**
    * Returns the wrapped setting defaults editor.
    */
-  export function defaultsEditor(editor: Widget): Widget {
+  export function defaultsEditor(
+    editor: Widget,
+    translator?: ITranslator
+  ): Widget {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
     const widget = new Widget();
     const layout = (widget.layout = new BoxLayout({ spacing: 0 }));
     const banner = new Widget();
     const bar = new Toolbar();
+    const defaultTitle = trans.__('System Defaults');
 
-    banner.node.innerText = DEFAULT_TITLE;
+    banner.node.innerText = defaultTitle;
     bar.insertItem(0, 'banner', banner);
     layout.addWidget(bar);
     layout.addWidget(editor);
@@ -409,13 +420,17 @@ namespace Private {
   export function userEditor(
     editor: Widget,
     toolbar: Toolbar<Widget>,
-    inspector: Widget
+    inspector: Widget,
+    translator?: ITranslator
   ): Widget {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    const userTitle = trans.__('User Preferences');
     const widget = new Widget();
     const layout = (widget.layout = new BoxLayout({ spacing: 0 }));
     const banner = new Widget();
 
-    banner.node.innerText = USER_TITLE;
+    banner.node.innerText = userTitle;
     toolbar.insertItem(0, 'banner', banner);
     layout.addWidget(toolbar);
     layout.addWidget(editor);

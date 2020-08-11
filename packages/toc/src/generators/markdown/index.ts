@@ -8,6 +8,7 @@ import {
   IMarkdownViewerTracker,
   MarkdownDocument
 } from '@jupyterlab/markdownviewer';
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { INumberedHeading } from '../../utils/headings';
@@ -70,11 +71,13 @@ function generate(editor: IDocumentWidget<FileEditor>): INumberedHeading[] {
 function createMarkdownGenerator(
   tracker: IEditorTracker,
   widget: TableOfContents,
-  sanitizer: ISanitizer
+  sanitizer: ISanitizer,
+  translator?: ITranslator
 ): Registry.IGenerator<IDocumentWidget<FileEditor>> {
   const options = new OptionsManager(widget, {
     numbering: true,
-    sanitizer
+    sanitizer,
+    translator: translator || nullTranslator
   });
   return {
     tracker,
@@ -119,11 +122,13 @@ function createMarkdownGenerator(
 function createRenderedMarkdownGenerator(
   tracker: IMarkdownViewerTracker,
   widget: TableOfContents,
-  sanitizer: ISanitizer
+  sanitizer: ISanitizer,
+  translator?: ITranslator
 ): Registry.IGenerator<MarkdownDocument> {
   const options = new OptionsManager(widget, {
     numbering: true,
-    sanitizer
+    sanitizer,
+    translator: translator || nullTranslator
   });
   return {
     tracker,

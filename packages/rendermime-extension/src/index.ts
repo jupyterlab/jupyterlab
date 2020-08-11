@@ -16,6 +16,7 @@ import {
   RenderMimeRegistry,
   standardRendererFactories
 } from '@jupyterlab/rendermime';
+import { ITranslator } from '@jupyterlab/translation';
 
 namespace CommandIDs {
   export const handleLink = 'rendermime:handle-local-link';
@@ -26,7 +27,7 @@ namespace CommandIDs {
  */
 const plugin: JupyterFrontEndPlugin<IRenderMimeRegistry> = {
   id: '@jupyterlab/rendermime-extension:plugin',
-  requires: [],
+  requires: [ITranslator],
   optional: [IDocumentManager, ILatexTypesetter],
   provides: IRenderMimeRegistry,
   activate: activate,
@@ -43,12 +44,14 @@ export default plugin;
  */
 function activate(
   app: JupyterFrontEnd,
+  translator: ITranslator,
   docManager: IDocumentManager | null,
   latexTypesetter: ILatexTypesetter | null
 ) {
+  const trans = translator.load('jupyterlab');
   if (docManager) {
     app.commands.addCommand(CommandIDs.handleLink, {
-      label: 'Handle Local Link',
+      label: trans.__('Handle Local Link'),
       execute: args => {
         const path = args['path'] as string | undefined | null;
         const id = args['id'] as string | undefined | null;
@@ -91,6 +94,7 @@ function activate(
             });
           }
         },
-    latexTypesetter: latexTypesetter ?? undefined
+    latexTypesetter: latexTypesetter ?? undefined,
+    translator: translator
   });
 }

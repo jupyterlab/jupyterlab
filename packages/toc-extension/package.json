@@ -49,6 +49,7 @@
     "@jupyterlab/notebook": "^3.0.0-alpha.8",
     "@jupyterlab/rendermime": "^3.0.0-alpha.8",
     "@jupyterlab/toc": "^5.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
     "@jupyterlab/ui-components": "^3.0.0-alpha.8"
   },
   "devDependencies": {

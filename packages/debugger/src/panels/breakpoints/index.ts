@@ -3,6 +3,8 @@
 
 import { ToolbarButton } from '@jupyterlab/apputils';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { Signal } from '@lumino/signaling';
 
 import { Panel } from '@lumino/widgets';
@@ -27,8 +29,10 @@ export class Breakpoints extends Panel {
   constructor(options: Breakpoints.IOptions) {
     super();
     const { model, service } = options;
+    const translator = options.translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
 
-    const header = new BreakpointsHeader();
+    const header = new BreakpointsHeader(translator);
     const body = new BreakpointsBody(model);
 
     header.toolbar.addItem(
@@ -38,7 +42,7 @@ export class Breakpoints extends Panel {
         onClick: (): void => {
           void service.clearBreakpoints();
         },
-        tooltip: 'Remove All Breakpoints'
+        tooltip: trans.__('Remove All Breakpoints')
       })
     );
 
@@ -68,5 +72,10 @@ export namespace Breakpoints {
      * The debugger service.
      */
     service: IDebugger;
+
+    /**
+     * The application language translator..
+     */
+    translator?: ITranslator;
   }
 }

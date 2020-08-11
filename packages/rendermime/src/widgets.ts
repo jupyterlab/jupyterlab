@@ -4,6 +4,8 @@
 |----------------------------------------------------------------------------*/
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import {
   ReadonlyJSONObject,
   ReadonlyPartialJSONObject
@@ -31,6 +33,7 @@ export abstract class RenderedCommon extends Widget
     this.sanitizer = options.sanitizer;
     this.resolver = options.resolver;
     this.linkHandler = options.linkHandler;
+    this.translator = options.translator || nullTranslator;
     this.latexTypesetter = options.latexTypesetter;
     this.node.dataset['mimeType'] = this.mimeType;
   }
@@ -59,6 +62,11 @@ export abstract class RenderedCommon extends Widget
    * The latexTypesetter.
    */
   readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+  /**
+   * The latexTypesetter.
+   */
+  readonly translator: ITranslator;
 
   /**
    * Render a mime model.
@@ -170,7 +178,8 @@ export class RenderedHTML extends RenderedHTMLCommon {
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
       shouldTypeset: this.isAttached,
-      latexTypesetter: this.latexTypesetter
+      latexTypesetter: this.latexTypesetter,
+      translator: this.translator
     });
   }
 
@@ -291,7 +300,8 @@ export class RenderedMarkdown extends RenderedHTMLCommon {
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
       shouldTypeset: this.isAttached,
-      latexTypesetter: this.latexTypesetter
+      latexTypesetter: this.latexTypesetter,
+      translator: this.translator
     });
   }
 
@@ -334,7 +344,8 @@ export class RenderedSVG extends RenderedCommon {
       host: this.node,
       source: String(model.data[this.mimeType]),
       trusted: model.trusted,
-      unconfined: metadata && (metadata.unconfined as boolean | undefined)
+      unconfined: metadata && (metadata.unconfined as boolean | undefined),
+      translator: this.translator
     });
   }
 
@@ -373,7 +384,8 @@ export class RenderedText extends RenderedCommon {
     return renderers.renderText({
       host: this.node,
       sanitizer: this.sanitizer,
-      source: String(model.data[this.mimeType])
+      source: String(model.data[this.mimeType]),
+      translator: this.translator
     });
   }
 }
@@ -400,10 +412,13 @@ export class RenderedJavaScript extends RenderedCommon {
    * @returns A promise which resolves when rendering is complete.
    */
   render(model: IRenderMime.IMimeModel): Promise<void> {
+    const trans = this.translator.load('jupyterlab');
+
     return renderers.renderText({
       host: this.node,
       sanitizer: this.sanitizer,
-      source: 'JavaScript output is disabled in JupyterLab'
+      source: trans.__('JavaScript output is disabled in JupyterLab'),
+      translator: this.translator
     });
   }
 }

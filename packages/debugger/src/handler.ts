@@ -21,6 +21,8 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 
 import { Kernel, Session } from '@jupyterlab/services';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { bugIcon } from '@jupyterlab/ui-components';
 
 import { DisposableSet } from '@lumino/disposable';
@@ -43,19 +45,22 @@ import { NotebookHandler } from './handlers/notebook';
  */
 function updateToolbar(
   widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
-  onClick: () => void
+  onClick: () => void,
+  translator?: ITranslator
 ): DisposableSet {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
   const icon = new ToolbarButton({
     className: 'jp-DebuggerBugButton',
     icon: bugIcon,
-    tooltip: 'Enable / Disable Debugger',
+    tooltip: trans.__('Enable / Disable Debugger'),
     onClick
   });
   widget.toolbar.addItem('debugger-icon', icon);
 
   const button = new ToolbarButton({
     iconClass: 'jp-ToggleSwitch',
-    tooltip: 'Enable / Disable Debugger',
+    tooltip: trans.__('Enable / Disable Debugger'),
     onClick
   });
   widget.toolbar.addItem('debugger-button', button);
@@ -113,6 +118,7 @@ export class DebuggerHandler {
       _: Session.ISessionConnection,
       status: Kernel.Status
     ): void => {
+      // FIXME-TRANS: Localizable?
       if (status.endsWith('restarting')) {
         void this._update(widget, connection);
       }

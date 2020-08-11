@@ -3,7 +3,7 @@
 
 import Ajv from 'ajv';
 
-import * as json from 'json5';
+import * as json5 from 'json5';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -152,7 +152,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
     // Parse the raw commented JSON into a user map.
     let user: JSONObject;
     try {
-      user = json.parse(plugin.raw) as JSONObject;
+      user = json5.parse(plugin.raw) as JSONObject;
     } catch (error) {
       if (error instanceof SyntaxError) {
         return [
@@ -218,9 +218,7 @@ export class DefaultSchemaValidator implements ISchemaValidator {
     const validate = validator.getSchema('jupyterlab-plugin-schema')!;
 
     // Validate against the main schema.
-    // FIXME: Cannot invoke an object which is possibly 'undefined'
     if (!(validate!(schema) as boolean)) {
-      // FIXME: Object is possibly 'undefined'.
       return validate!.errors as ISchemaValidator.IError[];
     }
 
@@ -400,7 +398,7 @@ export class SettingRegistry implements ISettingRegistry {
       return;
     }
 
-    const raw = json.parse(plugins[plugin].raw);
+    const raw = json5.parse(plugins[plugin].raw);
 
     // Delete both the value and any associated comment.
     delete raw[key];
@@ -433,7 +431,7 @@ export class SettingRegistry implements ISettingRegistry {
     }
 
     // Parse the raw JSON string removing all comments and return an object.
-    const raw = json.parse(plugins[plugin].raw);
+    const raw = json5.parse(plugins[plugin].raw);
 
     plugins[plugin].raw = Private.annotatedPlugin(plugins[plugin], {
       ...raw,

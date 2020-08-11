@@ -94,11 +94,6 @@ export class JupyterLab extends JupyterFrontEnd<ILabShell> {
           this.shell.collapseRight();
           return;
         }
-        if (this.shell.mode === 'single-document') {
-          this.shell.collapseLeft();
-        } else {
-          this.shell.expandLeft();
-        }
       }, this);
       Private.setFormat(this);
     });
@@ -269,11 +264,10 @@ export namespace JupyterLab {
       base: PageConfig.getOption('baseUrl'),
       notFound: PageConfig.getOption('notFoundUrl'),
       app: PageConfig.getOption('appUrl'),
+      doc: PageConfig.getOption('docUrl'),
       static: PageConfig.getOption('staticUrl'),
       settings: PageConfig.getOption('settingsUrl'),
       themes: PageConfig.getOption('themesUrl'),
-      tree: PageConfig.getOption('treeUrl'),
-      workspaces: PageConfig.getOption('workspacesUrl'),
       hubHost: PageConfig.getOption('hubHost') || undefined,
       hubPrefix: PageConfig.getOption('hubPrefix') || undefined,
       hubUser: PageConfig.getOption('hubUser') || undefined,

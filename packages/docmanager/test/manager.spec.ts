@@ -85,7 +85,7 @@ describe('@jupyterlab/docmanager', () => {
     const registry = new DocumentRegistry({ textModelFactory });
     registry.addWidgetFactory(widgetFactory);
     registry.addWidgetFactory(widgetFactoryShared);
-    DocumentRegistry.defaultFileTypes.forEach(ft => {
+    DocumentRegistry.getDefaultFileTypes().forEach(ft => {
       registry.addFileType(ft);
     });
     manager = new DocumentManager({

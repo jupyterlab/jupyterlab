@@ -4,6 +4,7 @@
 import { ISanitizer } from '@jupyterlab/apputils';
 import { CodeCell, CodeCellModel, MarkdownCell, Cell } from '@jupyterlab/cells';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
+import { nullTranslator } from '@jupyterlab/translation';
 import { TableOfContentsRegistry as Registry } from '../../registry';
 import { TableOfContents } from '../../toc';
 import { isMarkdown } from '../../utils/is_markdown';
@@ -18,6 +19,7 @@ import { appendHeading } from './append_heading';
 import { appendMarkdownHeading } from './append_markdown_heading';
 import { render } from './render';
 import { toolbar } from './toolbar_generator';
+import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * Returns a ToC generator for notebooks.
@@ -26,16 +28,19 @@ import { toolbar } from './toolbar_generator';
  * @param tracker - notebook tracker
  * @param widget - table of contents widget
  * @param sanitizer - HTML sanitizer
+ * @param translator - Language translator
  * @returns ToC generator capable of parsing notebooks
  */
 function createNotebookGenerator(
   tracker: INotebookTracker,
   widget: TableOfContents,
-  sanitizer: ISanitizer
+  sanitizer: ISanitizer,
+  translator?: ITranslator
 ): Registry.IGenerator<NotebookPanel> {
   const options = new OptionsManager(widget, tracker, {
     numbering: false,
-    sanitizer: sanitizer
+    sanitizer: sanitizer,
+    translator: translator || nullTranslator
   });
   return {
     tracker,

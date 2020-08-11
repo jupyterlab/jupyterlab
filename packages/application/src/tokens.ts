@@ -5,6 +5,8 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { ServerConnection, ServiceManager } from '@jupyterlab/services';
 
+import { ITranslator } from '@jupyterlab/translation';
+
 import { Token, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
@@ -29,7 +31,8 @@ export const IConnectionLost = new Token<IConnectionLost>(
  */
 export type IConnectionLost = (
   manager: ServiceManager.IManager,
-  err: ServerConnection.NetworkError
+  err: ServerConnection.NetworkError,
+  translator?: ITranslator
 ) => Promise<void>;
 
 /**
@@ -144,6 +147,12 @@ export namespace IRouter {
      * history API change.
      */
     hard?: boolean;
+
+    /**
+     * Should the routing stage be skipped when navigating? This will simply rewrite the URL
+     * and push the new state to the history API, no routing commands will be triggered.
+     */
+    skipRouting?: boolean;
   }
 
   /**

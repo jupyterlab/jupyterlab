@@ -44,7 +44,8 @@ describe('@jupyterlab/mainmenu', () => {
     describe('#constructor()', () => {
       it('should construct a new edit menu', () => {
         expect(menu).toBeInstanceOf(EditMenu);
-        expect(menu.menu.title.label).toBe('Edit');
+        // For localization this is now defined when on the mainmenu-extension.
+        expect(menu.menu.title.label).toBe('');
       });
     });
 
@@ -73,7 +74,8 @@ describe('@jupyterlab/mainmenu', () => {
       it('should allow setting of an IClearer', () => {
         const clearer: IEditMenu.IClearer<Wodget> = {
           tracker,
-          noun: 'Nouns',
+          clearCurrentLabel: (n: number) => 'Clear current label',
+          clearAllLabel: (n: number) => 'Clear all label',
           clearCurrent: widget => {
             widget.state = 'clearCurrent';
             return;

@@ -8,7 +8,7 @@ import { ITranslator, TranslationBundle } from './tokens';
  * A translator that loads a dummy language bundle that returns the same input
  * strings.
  */
-class EmptyTranslator implements ITranslator {
+class NullTranslator implements ITranslator {
   constructor(bundle: TranslationBundle) {
     this._languageBundle = bundle;
   }
@@ -18,7 +18,7 @@ class EmptyTranslator implements ITranslator {
   }
 
   locale(): string {
-    return 'en-us';
+    return 'en';
   }
 
   private _languageBundle: TranslationBundle;
@@ -27,7 +27,7 @@ class EmptyTranslator implements ITranslator {
 /**
  * A language bundle that returns the same input strings.
  */
-class EmptyLanguageBundle {
+class NullLanguageBundle {
   __(msgid: string, ...args: any[]): string {
     return this.gettext(msgid, ...args);
   }
@@ -90,26 +90,7 @@ class EmptyLanguageBundle {
 }
 
 /**
- * The basic translator interface.
- *
- * This translator just returns the input string plus any interpolation if needed.
+ * The application null translator instance that just returns the same text.
+ * Also provides interpolation.
  */
-export namespace DefaultTranslator {
-  /**
-   * Get the basix translator instance.
-   */
-  export function getInstance(): ITranslator {
-    return Private.instance;
-  }
-}
-
-/**
- * The namespace for module private data.
- */
-namespace Private {
-  /**
-   * The application base translator instance that just returns the same text.
-   * Also provides interpolation.
-   */
-  export let instance = new EmptyTranslator(new EmptyLanguageBundle());
-}
+export const nullTranslator = new NullTranslator(new NullLanguageBundle());

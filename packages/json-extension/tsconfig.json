@@ -13,6 +13,9 @@
       "path": "../rendermime-interfaces"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     }
   ]

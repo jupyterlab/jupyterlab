@@ -30,6 +30,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 import { CSVDelimiter } from './toolbar';
 
 import { DSVModel } from './model';
+import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * The class name added to a CSV viewer.
@@ -484,6 +485,11 @@ export namespace CSVDocumentWidget {
   export interface IOptions
     extends DocumentWidget.IOptionsOptionalContent<CSVViewer> {
     delimiter?: string;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -507,7 +513,8 @@ export class CSVViewerFactory extends ABCWidgetFactory<
   protected createNewWidget(
     context: DocumentRegistry.Context
   ): IDocumentWidget<CSVViewer> {
-    return new CSVDocumentWidget({ context });
+    const translator = this.translator;
+    return new CSVDocumentWidget({ context, translator });
   }
 }
 
@@ -524,6 +531,10 @@ export class TSVViewerFactory extends ABCWidgetFactory<
     context: DocumentRegistry.Context
   ): IDocumentWidget<CSVViewer> {
     const delimiter = '\t';
-    return new CSVDocumentWidget({ context, delimiter });
+    return new CSVDocumentWidget({
+      context,
+      delimiter,
+      translator: this.translator
+    });
   }
 }

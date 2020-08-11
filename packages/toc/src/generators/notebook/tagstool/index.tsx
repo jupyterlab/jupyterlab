@@ -4,8 +4,10 @@
 import * as React from 'react';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 import { OptionsManager } from '../options_manager';
 import { TagListComponent } from './tag_list';
+import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * Interface describing component properties.
@@ -32,6 +34,11 @@ interface IProperties {
    * Input filter.
    */
   inputFilter: string[];
+
+  /**
+   * Language translator.
+   */
+  translator?: ITranslator;
 }
 
 /**
@@ -63,6 +70,8 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
     this.state = {
       selected: this.props.inputFilter
     };
+    const translator = this.props.translator || nullTranslator;
+    this._trans = translator.load('jupyterlab');
   }
 
   /**
@@ -172,10 +181,18 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
    * @returns rendered component
    */
   render() {
-    let jsx = <div className="toc-no-tags-div">No Tags Available</div>;
+    let jsx = (
+      <div className="toc-no-tags-div">
+        {this._trans.__('No Tags Available')}
+      </div>
+    );
     let text;
     if (this.state.selected.length === 0) {
-      text = <span className={'toc-filter-button-na'}> Clear Filters </span>;
+      text = (
+        <span className={'toc-filter-button-na'}>
+          {this._trans.__('Clear Filters')}
+        </span>
+      );
     } else if (this.state.selected.length === 1) {
       text = (
         <span
@@ -211,6 +228,8 @@ class TagsToolComponent extends React.Component<IProperties, IState> {
     }
     return jsx;
   }
+
+  _trans: TranslationBundle;
 }
 
 /**

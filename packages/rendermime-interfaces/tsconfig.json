@@ -5,5 +5,9 @@
     "rootDir": "src"
   },
   "include": ["src/*"],
-  "references": []
+  "references": [
+    {
+      "path": "../translation"
+    }
+  ]
 }

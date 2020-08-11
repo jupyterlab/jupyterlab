@@ -3,6 +3,11 @@ import { PanelLayout } from '@lumino/widgets';
 import { NotebookTools, INotebookTracker } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { TagWidget } from './widget';
 import { AddWidget } from './addwidget';
 
@@ -15,9 +20,15 @@ export class TagTool extends NotebookTools.Tool {
    *
    * @param tracker - The notebook tracker.
    */
-  constructor(tracker: INotebookTracker, app: JupyterFrontEnd) {
+  constructor(
+    tracker: INotebookTracker,
+    app: JupyterFrontEnd,
+    translator?: ITranslator
+  ) {
     super();
     app;
+    this.translator = translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this.tracker = tracker;
     this.layout = new PanelLayout();
     this.createTagInput();
@@ -28,7 +39,7 @@ export class TagTool extends NotebookTools.Tool {
    */
   createTagInput() {
     const layout = this.layout as PanelLayout;
-    const input = new AddWidget();
+    const input = new AddWidget(this.translator);
     input.id = 'add-tag';
     layout.insertWidget(0, input);
   }
@@ -179,7 +190,7 @@ export class TagTool extends NotebookTools.Tool {
   protected onAfterAttach() {
     if (!this.header) {
       const header = document.createElement('header');
-      header.textContent = 'Tags in Notebook';
+      header.textContent = this._trans.__('Tags in Notebook');
       header.className = 'tag-header';
       this.parent!.node.insertBefore(header, this.node);
       this.header = true;
@@ -220,4 +231,6 @@ export class TagTool extends NotebookTools.Tool {
   public tracker: INotebookTracker;
   private tagList: string[] = [];
   private header: boolean = false;
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
 }

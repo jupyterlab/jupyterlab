@@ -28,6 +28,8 @@ import {
 
 import { IStateDB } from '@jupyterlab/statedb';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { Widget } from '@lumino/widgets';
 
 namespace CommandIDs {
@@ -47,7 +49,13 @@ const ICON_NAME = 'jp-JupyterIcon';
 export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:workspaces',
   autoStart: true,
-  requires: [IMainMenu, IFileBrowserFactory, IWindowResolver, IStateDB],
+  requires: [
+    IMainMenu,
+    IFileBrowserFactory,
+    IWindowResolver,
+    IStateDB,
+    ITranslator
+  ],
   optional: [IRouter],
   activate: (
     app: JupyterFrontEnd,
@@ -55,13 +63,15 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
     fbf: IFileBrowserFactory,
     resolver: IWindowResolver,
     state: IStateDB,
+    translator: ITranslator,
     router: IRouter | null
   ): void => {
+    const trans = translator.load('jupyterlab');
     const ft: DocumentRegistry.IFileType = {
       name: WORKSPACE_NAME,
       contentType: 'file',
       fileFormat: 'text',
-      displayName: 'JupyterLab workspace File',
+      displayName: trans.__('JupyterLab workspace File'),
       extensions: [WORKSPACE_EXT],
       mimeTypes: ['text/json'],
       iconClass: ICON_NAME
@@ -72,31 +82,39 @@ export const workspacesPlugin: JupyterFrontEndPlugin<void> = {
     const factory = new Private.WorkspaceFactory(
       app.serviceManager.workspaces,
       router,
-      state
+      state,
+      translator
     );
     app.docRegistry.addWidgetFactory(factory);
 
     app.commands.addCommand(CommandIDs.saveWorkspaceAs, {
-      label: 'Save Current Workspace As...',
+      label: trans.__('Save Current Workspace As...'),
       execute: async () => {
         const data = app.serviceManager.workspaces.fetch(resolver.name);
         await Private.saveAs(
           fbf.defaultBrowser,
           app.serviceManager.contents,
           data,
-          state
+          state,
+          translator
         );
       }
     });
 
     app.commands.addCommand(CommandIDs.saveWorkspace, {
-      label: 'Save Current Workspace',
+      label: trans.__('Save Current Workspace'),
       execute: async () => {
         const { contents } = app.serviceManager;
         const data = app.serviceManager.workspaces.fetch(resolver.name);
         const lastSave = (await state.fetch(LAST_SAVE_ID)) as string;
         if (lastSave === undefined) {
-          await Private.saveAs(fbf.defaultBrowser, contents, data, state);
+          await Private.saveAs(
+            fbf.defaultBrowser,
+            contents,
+            data,
+            state,
+            translator
+          );
         } else {
           await Private.save(lastSave, contents, data, state);
         }
@@ -152,8 +170,10 @@ namespace Private {
     browser: FileBrowser,
     contents: ContentsManager,
     data: Promise<Workspace.IWorkspace>,
-    state: IStateDB
+    state: IStateDB,
+    translator?: ITranslator
   ): Promise<void> {
+    translator = translator || nullTranslator;
     const lastSave = await state.fetch(LAST_SAVE_ID);
 
     let defaultName;
@@ -167,7 +187,7 @@ namespace Private {
     }
 
     const defaultPath = browser.model.path + '/' + defaultName + WORKSPACE_EXT;
-    const userPath = await getSavePath(defaultPath);
+    const userPath = await getSavePath(defaultPath, translator);
 
     if (userPath) {
       await save(userPath, contents, data, state);
@@ -187,10 +207,13 @@ namespace Private {
     constructor(
       workspaces: WorkspaceManager,
       router: IRouter | null,
-      state: IStateDB
+      state: IStateDB,
+      translator?: ITranslator
     ) {
+      translator = translator || nullTranslator;
+      const trans = translator.load('jupyterlab');
       super({
-        name: 'Workspace loader',
+        name: trans.__('Workspace loader'),
         fileTypes: [WORKSPACE_NAME],
         defaultFor: [WORKSPACE_NAME],
         readOnly: true
@@ -257,14 +280,19 @@ namespace Private {
    * Ask user for a path to save to.
    * @param defaultPath Path already present when the dialog is shown
    */
-  async function getSavePath(defaultPath: string): Promise<string | null> {
-    const saveBtn = Dialog.okButton({ label: 'Save' });
+  async function getSavePath(
+    defaultPath: string,
+    translator?: ITranslator
+  ): Promise<string | null> {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    const saveBtn = Dialog.okButton({ label: trans.__('Save') });
     const result = await showDialog({
-      title: 'Save Current Workspace As...',
+      title: trans.__('Save Current Workspace As...'),
       body: new SaveWidget(defaultPath),
-      buttons: [Dialog.cancelButton(), saveBtn]
+      buttons: [Dialog.cancelButton({ label: trans.__('Cancel') }), saveBtn]
     });
-    if (result.button.label === 'Save') {
+    if (result.button.label === trans.__('Save')) {
       return result.value;
     } else {
       return null;

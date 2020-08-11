@@ -19,6 +19,8 @@ import {
   IHTMLViewerTracker
 } from '@jupyterlab/htmlviewer';
 
+import { ITranslator } from '@jupyterlab/translation';
+
 import { html5Icon } from '@jupyterlab/ui-components';
 
 /**
@@ -35,6 +37,7 @@ const htmlPlugin: JupyterFrontEndPlugin<IHTMLViewerTracker> = {
   activate: activateHTMLViewer,
   id: '@jupyterlab/htmlviewer-extension:plugin',
   provides: IHTMLViewerTracker,
+  requires: [ITranslator],
   optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
@@ -44,15 +47,17 @@ const htmlPlugin: JupyterFrontEndPlugin<IHTMLViewerTracker> = {
  */
 function activateHTMLViewer(
   app: JupyterFrontEnd,
+  translator: ITranslator,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null
 ): IHTMLViewerTracker {
   // Add an HTML file type to the docregistry.
+  const trans = translator.load('jupyterlab');
   const ft: DocumentRegistry.IFileType = {
     name: 'html',
     contentType: 'file',
     fileFormat: 'text',
-    displayName: 'HTML File',
+    displayName: trans.__('HTML File'),
     extensions: ['.html'],
     mimeTypes: ['text/html'],
     icon: html5Icon
@@ -61,7 +66,7 @@ function activateHTMLViewer(
 
   // Create a new viewer factory.
   const factory = new HTMLViewerFactory({
-    name: 'HTML Viewer',
+    name: trans.__('HTML Viewer'),
     fileTypes: ['html'],
     defaultFor: ['html'],
     readOnly: true
@@ -103,7 +108,7 @@ function activateHTMLViewer(
   // Add a command to trust the active HTML document,
   // allowing script executions in its context.
   app.commands.addCommand(CommandIDs.trustHTML, {
-    label: 'Trust HTML File',
+    label: trans.__('Trust HTML File'),
     isEnabled: () => !!tracker.currentWidget,
     isToggled: () => {
       const current = tracker.currentWidget;
@@ -124,7 +129,7 @@ function activateHTMLViewer(
   if (palette) {
     palette.addItem({
       command: CommandIDs.trustHTML,
-      category: 'File Operations'
+      category: trans.__('File Operations')
     });
   }
 

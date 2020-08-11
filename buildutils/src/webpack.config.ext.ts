@@ -111,7 +111,8 @@ fs.rmdirSync(outputPath, { recursive: true });
 fs.mkdirSync(outputPath, { recursive: true });
 
 const extras = Build.ensureAssets({
-  packageNames: [data.name],
+  packageNames: [],
+  packagePaths: [packagePath],
   output: outputPath
 });
 

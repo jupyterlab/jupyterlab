@@ -43,6 +43,7 @@
     "@jupyterlab/coreutils": "^5.0.0-alpha.8",
     "@jupyterlab/nbformat": "^3.0.0-alpha.8",
     "@jupyterlab/observables": "^4.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
     "@jupyterlab/ui-components": "^3.0.0-alpha.8",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/disposable": "^1.3.5",

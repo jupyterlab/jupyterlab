@@ -20,6 +20,11 @@ import {
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import * as nbformat from '@jupyterlab/nbformat';
 import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
   addIcon,
   copyIcon,
   cutIcon,
@@ -51,13 +56,17 @@ export namespace ToolbarItems {
   /**
    * Create save button toolbar item.
    */
-  export function createSaveButton(panel: NotebookPanel): Widget {
+  export function createSaveButton(
+    panel: NotebookPanel,
+    translator?: ITranslator
+  ): Widget {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     function onClick() {
       if (panel.context.model.readOnly) {
         return showDialog({
-          title: 'Cannot Save',
-          body: 'Document is read-only',
-          buttons: [Dialog.okButton()]
+          title: trans.__('Cannot Save'),
+          body: trans.__('Document is read-only'),
+          buttons: [Dialog.okButton({ label: trans.__('Ok') })]
         });
       }
       void panel.context.save().then(() => {
@@ -73,7 +82,9 @@ export namespace ToolbarItems {
             <ToolbarButtonComponent
               icon={saveIcon}
               onClick={onClick}
-              tooltip="Save the notebook contents and create checkpoint"
+              tooltip={trans.__(
+                'Save the notebook contents and create checkpoint'
+              )}
               enabled={
                 !!(
                   panel &&
@@ -92,65 +103,85 @@ export namespace ToolbarItems {
   /**
    * Create an insert toolbar item.
    */
-  export function createInsertButton(panel: NotebookPanel): Widget {
+  export function createInsertButton(
+    panel: NotebookPanel,
+    translator?: ITranslator
+  ): Widget {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: addIcon,
       onClick: () => {
         NotebookActions.insertBelow(panel.content);
       },
-      tooltip: 'Insert a cell below'
+      tooltip: trans.__('Insert a cell below')
     });
   }
 
   /**
    * Create a cut toolbar item.
    */
-  export function createCutButton(panel: NotebookPanel): Widget {
+  export function createCutButton(
+    panel: NotebookPanel,
+    translator?: ITranslator
+  ): Widget {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: cutIcon,
       onClick: () => {
         NotebookActions.cut(panel.content);
       },
-      tooltip: 'Cut the selected cells'
+      tooltip: trans.__('Cut the selected cells')
     });
   }
 
   /**
    * Create a copy toolbar item.
    */
-  export function createCopyButton(panel: NotebookPanel): Widget {
+  export function createCopyButton(
+    panel: NotebookPanel,
+    translator?: ITranslator
+  ): Widget {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: copyIcon,
       onClick: () => {
         NotebookActions.copy(panel.content);
       },
-      tooltip: 'Copy the selected cells'
+      tooltip: trans.__('Copy the selected cells')
     });
   }
 
   /**
    * Create a paste toolbar item.
    */
-  export function createPasteButton(panel: NotebookPanel): Widget {
+  export function createPasteButton(
+    panel: NotebookPanel,
+    translator?: ITranslator
+  ): Widget {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: pasteIcon,
       onClick: () => {
         NotebookActions.paste(panel.content);
       },
-      tooltip: 'Paste cells from the clipboard'
+      tooltip: trans.__('Paste cells from the clipboard')
     });
   }
 
   /**
    * Create a run toolbar item.
    */
-  export function createRunButton(panel: NotebookPanel): Widget {
+  export function createRunButton(
+    panel: NotebookPanel,
+    translator?: ITranslator
+  ): Widget {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: runIcon,
       onClick: () => {
         void NotebookActions.runAndAdvance(panel.content, panel.sessionContext);
       },
-      tooltip: 'Run the selected cells and advance'
+      tooltip: trans.__('Run the selected cells and advance')
     });
   }
   /**
@@ -158,13 +189,15 @@ export namespace ToolbarItems {
    */
   export function createRestartRunAllButton(
     panel: NotebookPanel,
-    dialogs?: ISessionContext.IDialogs
+    dialogs?: ISessionContext.IDialogs,
+    translator?: ITranslator
   ): Widget {
+    const trans = (translator || nullTranslator).load('jupyterlab');
     return new ToolbarButton({
       icon: fastForwardIcon,
       onClick: () => {
         void (dialogs ?? sessionContextDialogs)
-          .restart(panel.sessionContext)
+          .restart(panel.sessionContext, translator)
           .then(restarted => {
             if (restarted) {
               void NotebookActions.runAll(panel.content, panel.sessionContext);
@@ -172,7 +205,7 @@ export namespace ToolbarItems {
             return restarted;
           });
       },
-      tooltip: 'Restart the kernel, then re-run the whole notebook'
+      tooltip: trans.__('Restart the kernel, then re-run the whole notebook')
     });
   }
 
@@ -187,8 +220,11 @@ export namespace ToolbarItems {
    * cell types of the selected cells.
    * It can handle a change to the context.
    */
-  export function createCellTypeItem(panel: NotebookPanel): Widget {
-    return new CellTypeSwitcher(panel.content);
+  export function createCellTypeItem(
+    panel: NotebookPanel,
+    translator?: ITranslator
+  ): Widget {
+    return new CellTypeSwitcher(panel.content, translator);
   }
 
   /**
@@ -196,42 +232,45 @@ export namespace ToolbarItems {
    */
   export function getDefaultItems(
     panel: NotebookPanel,
-    sessionDialogs?: ISessionContextDialogs
+    sessionDialogs?: ISessionContextDialogs,
+    translator?: ITranslator
   ): DocumentRegistry.IToolbarItem[] {
     return [
-      { name: 'save', widget: createSaveButton(panel) },
-      { name: 'insert', widget: createInsertButton(panel) },
-      { name: 'cut', widget: createCutButton(panel) },
-      { name: 'copy', widget: createCopyButton(panel) },
-      { name: 'paste', widget: createPasteButton(panel) },
-      { name: 'run', widget: createRunButton(panel) },
+      { name: 'save', widget: createSaveButton(panel, translator) },
+      { name: 'insert', widget: createInsertButton(panel, translator) },
+      { name: 'cut', widget: createCutButton(panel, translator) },
+      { name: 'copy', widget: createCopyButton(panel, translator) },
+      { name: 'paste', widget: createPasteButton(panel, translator) },
+      { name: 'run', widget: createRunButton(panel, translator) },
       {
         name: 'interrupt',
-        widget: Toolbar.createInterruptButton(panel.sessionContext)
+        widget: Toolbar.createInterruptButton(panel.sessionContext, translator)
       },
       {
         name: 'restart',
         widget: Toolbar.createRestartButton(
           panel.sessionContext,
-          sessionDialogs
+          sessionDialogs,
+          translator
         )
       },
       {
         name: 'restart-and-run',
-        widget: createRestartRunAllButton(panel, sessionDialogs)
+        widget: createRestartRunAllButton(panel, sessionDialogs, translator)
       },
-      { name: 'cellType', widget: createCellTypeItem(panel) },
+      { name: 'cellType', widget: createCellTypeItem(panel, translator) },
       { name: 'spacer', widget: Toolbar.createSpacerItem() },
       {
         name: 'kernelName',
         widget: Toolbar.createKernelNameItem(
           panel.sessionContext,
-          sessionDialogs
+          sessionDialogs,
+          translator
         )
       },
       {
         name: 'kernelStatus',
-        widget: Toolbar.createKernelStatusItem(panel.sessionContext)
+        widget: Toolbar.createKernelStatusItem(panel.sessionContext, translator)
       }
     ];
   }
@@ -244,8 +283,9 @@ export class CellTypeSwitcher extends ReactWidget {
   /**
    * Construct a new cell type switcher.
    */
-  constructor(widget: Notebook) {
+  constructor(widget: Notebook, translator?: ITranslator) {
     super();
+    this._trans = (translator || nullTranslator).load('jupyterlab');
     this.addClass(TOOLBAR_CELLTYPE_CLASS);
     this._notebook = widget;
     if (widget.model) {
@@ -297,15 +337,16 @@ export class CellTypeSwitcher extends ReactWidget {
         onChange={this.handleChange}
         onKeyDown={this.handleKeyDown}
         value={value}
-        aria-label="Cell type"
+        aria-label={this._trans.__('Cell type')}
       >
         <option value="-">-</option>
-        <option value="code">Code</option>
-        <option value="markdown">Markdown</option>
-        <option value="raw">Raw</option>
+        <option value="code">{this._trans.__('Code')}</option>
+        <option value="markdown">{this._trans.__('Markdown')}</option>
+        <option value="raw">{this._trans.__('Raw')}</option>
       </HTMLSelect>
     );
   }
 
+  private _trans: TranslationBundle;
   private _notebook: Notebook;
 }

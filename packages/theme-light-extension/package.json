@@ -33,7 +33,8 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.0.0-alpha.8",
-    "@jupyterlab/apputils": "^3.0.0-alpha.8"
+    "@jupyterlab/apputils": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

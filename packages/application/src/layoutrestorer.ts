@@ -582,7 +582,6 @@ namespace Private {
       dock: (area && area.dock && serializeArea(area.dock.main)) || null
     };
     if (area) {
-      dehydrated.mode = area.mode;
       if (area.currentWidget) {
         const current = Private.nameProperty.get(area.currentWidget);
         if (current) {
@@ -675,13 +674,10 @@ namespace Private {
 
     const name = (area as any).current || null;
     const dock = (area as any).dock || null;
-    const mode = (area as any).mode || null;
 
     return {
       currentWidget: (name && names.has(name) && names.get(name)) || null,
-      dock: dock ? { main: deserializeArea(dock, names) } : null,
-      mode:
-        mode === 'multiple-document' || mode === 'single-document' ? mode : null
+      dock: dock ? { main: deserializeArea(dock, names) } : null
     };
   }
 }

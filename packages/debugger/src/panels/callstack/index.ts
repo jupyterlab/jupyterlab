@@ -3,6 +3,8 @@
 
 import { CommandToolbarButton } from '@jupyterlab/apputils';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { CommandRegistry } from '@lumino/commands';
 
 import { Panel } from '@lumino/widgets';
@@ -25,8 +27,8 @@ export class Callstack extends Panel {
   constructor(options: Callstack.IOptions) {
     super();
     const { commands, model } = options;
-
-    const header = new CallstackHeader();
+    const translator = options.translator || nullTranslator;
+    const header = new CallstackHeader(translator);
     const body = new CallstackBody(model);
 
     header.toolbar.addItem(
@@ -128,5 +130,10 @@ export namespace Callstack {
      * The model for the callstack.
      */
     model: IDebugger.Model.ICallstack;
+
+    /**
+     * The application language translator
+     */
+    translator?: ITranslator;
   }
 }

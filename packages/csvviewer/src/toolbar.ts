@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { each, zip } from '@lumino/algorithm';
+import { each } from '@lumino/algorithm';
 
 import { Message } from '@lumino/messaging';
 
@@ -10,16 +10,7 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { Widget } from '@lumino/widgets';
 
 import { Styling } from '@jupyterlab/apputils';
-
-/**
- * The supported parsing delimiters.
- */
-const DELIMITERS = [',', ';', '\t', '|', '#'];
-
-/**
- * The labels for each delimiter as they appear in the dropdown menu.
- */
-const LABELS = [',', ';', 'tab', 'pipe', 'hash'];
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 /**
  * The class name added to a csv toolbar widget.
@@ -41,7 +32,7 @@ export class CSVDelimiter extends Widget {
    * Construct a new csv table widget.
    */
   constructor(options: CSVToolbar.IOptions) {
-    super({ node: Private.createNode(options.selected) });
+    super({ node: Private.createNode(options.selected, options.translator) });
     this.addClass(CSV_DELIMITER_CLASS);
   }
 
@@ -108,6 +99,11 @@ export namespace CSVToolbar {
      * The initially selected delimiter.
      */
     selected: string;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -118,13 +114,28 @@ namespace Private {
   /**
    * Create the node for the delimiter switcher.
    */
-  export function createNode(selected: string): HTMLElement {
+  export function createNode(
+    selected: string,
+    translator?: ITranslator
+  ): HTMLElement {
+    translator = translator || nullTranslator;
+    const trans = translator?.load('jupyterlab');
+
+    // The supported parsing delimiters and labels.
+    const delimiters = [
+      [',', ','],
+      [';', ';'],
+      ['\t', trans.__('tab')],
+      ['|', trans.__('pipe')],
+      ['#', trans.__('hash')]
+    ];
+
     const div = document.createElement('div');
     const label = document.createElement('span');
     const select = document.createElement('select');
-    label.textContent = 'Delimiter: ';
+    label.textContent = trans.__('Delimiter: ');
     label.className = CSV_DELIMITER_LABEL_CLASS;
-    each(zip(DELIMITERS, LABELS), ([delimiter, label]) => {
+    each(delimiters, ([delimiter, label]) => {
       const option = document.createElement('option');
       option.value = delimiter;
       option.textContent = label;

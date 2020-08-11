@@ -29,6 +29,11 @@ export namespace Build {
      * The names of the packages to ensure.
      */
     packageNames: ReadonlyArray<string>;
+
+    /**
+     * The package paths to ensure.
+     */
+    packagePaths?: ReadonlyArray<string>;
   }
 
   /**
@@ -102,6 +107,8 @@ export namespace Build {
 
     const themeConfig: webpack.Configuration[] = [];
 
+    const packagePaths: string[] = options.packagePaths?.slice() || [];
+
     // Get the CSS imports.
     // We must import the application CSS first.
     // The order of the rest does not matter.
@@ -110,9 +117,18 @@ export namespace Build {
     let appCSS = '';
 
     packageNames.forEach(name => {
-      const packageDataPath = require.resolve(path.join(name, 'package.json'));
+      packagePaths.push(
+        path.dirname(require.resolve(path.join(name, 'package.json')))
+      );
+    });
+
+    packagePaths.forEach(packagePath => {
+      const packageDataPath = require.resolve(
+        path.join(packagePath, 'package.json')
+      );
       const packageDir = path.dirname(packageDataPath);
       const data = utils.readJSONFile(packageDataPath);
+      const name = data.name;
       const extension = normalizeExtension(data);
 
       const { schemaDir, themePath } = extension;

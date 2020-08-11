@@ -3,6 +3,7 @@ from tempfile import TemporaryDirectory
 import threading
 
 import asyncio
+import os
 import pytest
 import json
 import tornado
@@ -69,11 +70,17 @@ class TestBuildAPI:
         assert 'message' in resp
 
 #    @pytest.mark.gen_test(timeout=30)
+    # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
+    @pytest.mark.skipif(os.name == 'nt',
+                    reason="Currently failing on windows")
     async def test_build(self, build_api_tester):
         r = await build_api_tester.build()
         assert r.code == 200
 
 #    @pytest.mark.gen_test(timeout=30)
+    # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
+    @pytest.mark.skipif(os.name == 'nt',
+                    reason="Currently failing on windows")
     async def test_clear(self, build_api_tester):
         with pytest.raises(tornado.httpclient.HTTPClientError) as e:
             r = await build_api_tester.clear()

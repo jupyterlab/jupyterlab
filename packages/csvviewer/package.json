@@ -43,6 +43,7 @@
     "@jupyterlab/apputils": "^3.0.0-alpha.8",
     "@jupyterlab/coreutils": "^5.0.0-alpha.8",
     "@jupyterlab/docregistry": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/datagrid": "^0.6.0",

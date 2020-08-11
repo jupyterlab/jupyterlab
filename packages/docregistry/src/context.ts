@@ -32,6 +32,12 @@ import { RenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { DocumentRegistry } from './registry';
 
 /**
@@ -47,6 +53,8 @@ export class Context<
    */
   constructor(options: Context.IOptions<T>) {
     const manager = (this._manager = options.manager);
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this._factory = options.factory;
     this._dialogs = options.sessionDialogs || sessionContextDialogs;
     this._opener = options.opener || Private.noOp;
@@ -544,7 +552,10 @@ export class Context<
       // Otherwise show an error message and throw the error.
       const localPath = this._manager.contents.localPath(this._path);
       const name = PathExt.basename(localPath);
-      void this._handleError(err, `File Save Error for ${name}`);
+      void this._handleError(
+        err,
+        this._trans.__('File Save Error for %1', name)
+      );
 
       // Emit failure.
       this._saveState.emit('failed');
@@ -604,7 +615,10 @@ export class Context<
       .catch(async err => {
         const localPath = this._manager.contents.localPath(this._path);
         const name = PathExt.basename(localPath);
-        void this._handleError(err, `File Load Error for ${name}`);
+        void this._handleError(
+          err,
+          this._trans.__('File Load Error for %1', name)
+        );
         throw err;
       });
   }
@@ -697,25 +711,29 @@ export class Context<
         `while the current file seems to have been saved ` +
         `${tDisk}`
     );
-    const body =
-      `"${this.path}" has changed on disk since the last time it ` +
-      `was opened or saved. ` +
-      `Do you want to overwrite the file on disk with the version ` +
-      ` open here, or load the version on disk (revert)?`;
-    const revertBtn = Dialog.okButton({ label: 'Revert' });
-    const overwriteBtn = Dialog.warnButton({ label: 'Overwrite' });
+    const body = this._trans.__(
+      `"%1" has changed on disk since the last time it was opened or saved.
+Do you want to overwrite the file on disk with the version open here, 
+or load the version on disk (revert)?`,
+      this.path
+    );
+    const revertBtn = Dialog.okButton({ label: this._trans.__('Revert') });
+    const overwriteBtn = Dialog.warnButton({
+      label: this._trans.__('Overwrite')
+    });
     return showDialog({
-      title: 'File Changed',
+      title: this._trans.__('File Changed'),
       body,
       buttons: [Dialog.cancelButton(), revertBtn, overwriteBtn]
     }).then(result => {
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
-      if (result.button.label === 'Overwrite') {
+      if (result.button.label === this._trans.__('Overwrite')) {
         return this._manager.contents.save(this._path, options);
       }
-      if (result.button.label === 'Revert') {
+      // FIXME-TRANS: Why compare to label?
+      if (result.button.label === this._trans.__('Revert')) {
         return this.revert().then(() => {
           return model;
         });
@@ -728,17 +746,23 @@ export class Context<
    * Handle a time conflict.
    */
   private _maybeOverWrite(path: string): Promise<void> {
-    const body = `"${path}" already exists. Do you want to replace it?`;
-    const overwriteBtn = Dialog.warnButton({ label: 'Overwrite' });
+    const body = this._trans.__(
+      '"%1" already exists. Do you want to replace it?',
+      path
+    );
+    const overwriteBtn = Dialog.warnButton({
+      label: this._trans.__('Overwrite')
+    });
     return showDialog({
-      title: 'File Overwrite?',
+      title: this._trans.__('File Overwrite?'),
       body,
       buttons: [Dialog.cancelButton(), overwriteBtn]
     }).then(result => {
       if (this.isDisposed) {
         return Promise.reject(new Error('Disposed'));
       }
-      if (result.button.label === 'Overwrite') {
+      // FIXME-TRANS: Why compare to label?
+      if (result.button.label === this._trans.__('Overwrite')) {
         return this._manager.contents.delete(path).then(() => {
           return this._finishSaveAs(path);
         });
@@ -758,6 +782,8 @@ export class Context<
     await this._maybeCheckpoint(true);
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _manager: ServiceManager.IManager;
   private _opener: (
     widget: Widget,
@@ -828,6 +854,11 @@ export namespace Context {
      * The dialogs used for the session context.
      */
     sessionDialogs?: ISessionContext.IDialogs;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -838,14 +869,21 @@ namespace Private {
   /**
    * Get a new file path from the user.
    */
-  export function getSavePath(path: string): Promise<string | undefined> {
-    const saveBtn = Dialog.okButton({ label: 'Save' });
+  export function getSavePath(
+    path: string,
+    translator?: ITranslator
+  ): Promise<string | undefined> {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+
+    const saveBtn = Dialog.okButton({ label: trans.__('Save') });
     return showDialog({
-      title: 'Save File As..',
+      title: trans.__('Save File As..'),
       body: new SaveWidget(path),
       buttons: [Dialog.cancelButton(), saveBtn]
     }).then(result => {
-      if (result.button.label === 'Save') {
+      // FIXME-TRANS: Why use the label?
+      if (result.button.label === trans.__('Save')) {
         return result.value ?? undefined;
       }
       return;

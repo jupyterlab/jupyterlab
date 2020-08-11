@@ -6,6 +6,11 @@ import { VDomRenderer, ToolbarButtonComponent } from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+import {
   Button,
   caretDownIcon,
   caretRightIcon,
@@ -119,16 +124,18 @@ export namespace SearchBar {
  * @param props Configuration of the build prompt.
  */
 function BuildPrompt(props: BuildPrompt.IProperties): React.ReactElement<any> {
+  const translator = props.translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
   return (
     <div className="jp-extensionmanager-buildprompt">
       <div className="jp-extensionmanager-buildmessage">
-        A build is needed to include the latest changes
+        {trans.__('A build is needed to include the latest changes')}
       </div>
       <Button onClick={props.performBuild} minimal small>
-        Rebuild
+        {trans.__('Rebuild')}
       </Button>
       <Button onClick={props.ignoreBuild} minimal small>
-        Ignore
+        {trans.__('Ignore')}
       </Button>
     </div>
   );
@@ -151,6 +158,11 @@ namespace BuildPrompt {
      * Callback for when a build notice is dismissed.
      */
     ignoreBuild: () => void;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -166,6 +178,8 @@ function getExtensionGitHubUser(entry: IEntry) {
  */
 function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   const { entry, listMode, viewType } = props;
+  const translator = props.translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
   const flagClasses = [];
   if (entry.status && ['ok', 'warning', 'error'].indexOf(entry.status) !== -1) {
     flagClasses.push(`jp-extensionmanager-entry-${entry.status}`);
@@ -173,7 +187,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
   let title = entry.name;
   const entryIsJupyterOrg = isJupyterOrg(entry.name);
   if (entryIsJupyterOrg) {
-    title = `${entry.name} (Developed by Project Jupyter)`;
+    title = trans.__('%1 (Developed by Project Jupyter)', entry.name);
   }
   const githubUser = getExtensionGitHubUser(entry);
   if (
@@ -223,7 +237,10 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           {entry.blockedExtensionsEntry && (
             <ToolbarButtonComponent
               icon={listingsInfoIcon}
-              iconLabel={`${entry.name} extension has been blockedExtensions since install. Please uninstall immediately and contact your blockedExtensions administrator.`}
+              iconLabel={trans.__(
+                '%1 extension has been blockedExtensions since install. Please uninstall immediately and contact your blockedExtensions administrator.',
+                entry.name
+              )}
               onClick={() =>
                 window.open(
                   'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
@@ -236,7 +253,10 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
             listMode === 'allow' && (
               <ToolbarButtonComponent
                 icon={listingsInfoIcon}
-                iconLabel={`${entry.name} extension has been removed from the allowedExtensions since installation. Please uninstall immediately and contact your allowedExtensions administrator.`}
+                iconLabel={trans.__(
+                  '%1 extension has been removed from the allowedExtensions since installation. Please uninstall immediately and contact your allowedExtensions administrator.',
+                  entry.name
+                )}
                 onClick={() =>
                   window.open(
                     'https://jupyterlab.readthedocs.io/en/stable/user/extensions.html'
@@ -267,7 +287,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                   minimal
                   small
                 >
-                  Install
+                  {trans.__('Install')}
                 </Button>
               )}
             {ListModel.entryHasUpdate(entry) &&
@@ -279,7 +299,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                   minimal
                   small
                 >
-                  Update
+                  {trans.__('Update')}
                 </Button>
               )}
             {entry.installed && (
@@ -288,7 +308,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 minimal
                 small
               >
-                Uninstall
+                {trans.__('Uninstall')}
               </Button>
             )}
             {entry.enabled && (
@@ -297,7 +317,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 minimal
                 small
               >
-                Disable
+                {trans.__('Disable')}
               </Button>
             )}
             {entry.installed && !entry.enabled && (
@@ -306,7 +326,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 minimal
                 small
               >
-                Enable
+                {trans.__('Enable')}
               </Button>
             )}
           </div>
@@ -340,6 +360,11 @@ export namespace ListEntry {
      * Callback to use for performing an action on the entry.
      */
     performAction: (action: Action, entry: IEntry) => void;
+
+    /**
+     * The language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -347,6 +372,8 @@ export namespace ListEntry {
  * List view widget for extensions
  */
 export function ListView(props: ListView.IProperties): React.ReactElement<any> {
+  const translator = props.translator || nullTranslator;
+  const trans = translator.load('jupytrlab');
   const entryViews = [];
   for (const entry of props.entries) {
     entryViews.push(
@@ -356,6 +383,7 @@ export function ListView(props: ListView.IProperties): React.ReactElement<any> {
         viewType={props.viewType}
         key={entry.name}
         performAction={props.performAction}
+        translator={translator}
       />
     );
   }
@@ -389,7 +417,7 @@ export function ListView(props: ListView.IProperties): React.ReactElement<any> {
         listview
       ) : (
         <div key="message" className="jp-extensionmanager-listview-message">
-          No entries
+          {trans.__('No entries')}
         </div>
       )}
       {pagination}
@@ -421,6 +449,11 @@ export namespace ListView {
      * The requested view type.
      */
     viewType: 'installed' | 'searchResult';
+
+    /**
+     * The language translator.
+     */
+    translator?: ITranslator;
 
     /**
      * The callback to use for changing the page
@@ -576,14 +609,19 @@ export namespace CollapsibleSection {
  * The main view for the discovery extension.
  */
 export class ExtensionView extends VDomRenderer<ListModel> {
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _settings: ISettingRegistry.ISettings;
   private _forceOpen: boolean;
   constructor(
     app: JupyterFrontEnd,
     serviceManager: ServiceManager,
-    settings: ISettingRegistry.ISettings
+    settings: ISettingRegistry.ISettings,
+    translator?: ITranslator
   ) {
-    super(new ListModel(app, serviceManager, settings));
+    super(new ListModel(app, serviceManager, settings, translator));
+    this.translator = translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this._settings = settings;
     this._forceOpen = false;
     this.addClass('jp-extensionmanager-view');
@@ -610,8 +648,9 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       return [
         <div style={{ padding: 8 }} key="invalid">
           <div>
-            The extension manager is disabled. Please contact your system
-            administrator to verify the listings configuration.
+            {this._trans
+              .__(`The extension manager is disabled. Please contact your system
+administrator to verify the listings configuration.`)}
           </div>
           <div>
             <a
@@ -619,7 +658,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
               target="_blank"
               rel="noopener noreferrer"
             >
-              Read more in the JupyterLab documentation.
+              {this._trans.__('Read more in the JupyterLab documentation.')}
             </a>
           </div>
         </div>
@@ -629,7 +668,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     const elements = [
       <SearchBar
         key="searchbar"
-        placeholder="SEARCH"
+        placeholder={this._trans.__('SEARCH')}
         disabled={!ListModel.isDisclaimed()}
         settings={this._settings}
       />
@@ -638,6 +677,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       elements.push(
         <BuildPrompt
           key="promt"
+          translator={this.translator}
           performBuild={() => {
             model.performBuild();
           }}
@@ -662,14 +702,15 @@ export class ExtensionView extends VDomRenderer<ListModel> {
         key="warning-section"
         isOpen={!ListModel.isDisclaimed()}
         disabled={false}
-        header={'Warning'}
+        header={this._trans.__('Warning')}
       >
         <div className="jp-extensionmanager-disclaimer">
           <div>
-            The JupyterLab development team is excited to have a robust
-            third-party extension community. However, we do not review
-            third-party extensions, and some extensions may introduce security
-            risks or contain malicious code that runs on your machine.
+            {this._trans
+              .__(`The JupyterLab development team is excited to have a robust
+third-party extension community. However, we do not review
+third-party extensions, and some extensions may introduce security
+risks or contain malicious code that runs on your machine.`)}
           </div>
           <div style={{ paddingTop: 8 }}>
             {ListModel.isDisclaimed() && (
@@ -683,7 +724,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
                   });
                 }}
               >
-                Disable
+                {this._trans.__('Disable')}
               </Button>
             )}
             {!ListModel.isDisclaimed() && (
@@ -698,7 +739,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
                   });
                 }}
               >
-                Enable
+                {this._trans.__('Enable')}
               </Button>
             )}
           </div>
@@ -708,18 +749,19 @@ export class ExtensionView extends VDomRenderer<ListModel> {
     if (!model.initialized) {
       content.push(
         <div key="loading-placeholder" className="jp-extensionmanager-loader">
-          Updating extensions list
+          {this._trans.__('Updating extensions list')}
         </div>
       );
     } else if (model.serverConnectionError !== null) {
       content.push(
         <ErrorMessage key="error-msg">
           <p>
-            Error communicating with server extension. Consult the documentation
-            for how to ensure that it is enabled.
+            {this._trans
+              .__(`Error communicating with server extension. Consult the documentation
+            for how to ensure that it is enabled.`)}
           </p>
 
-          <p>Reason given:</p>
+          <p>{this._trans.__('Reason given:')}</p>
           <pre>{model.serverConnectionError}</pre>
         </ErrorMessage>
       );
@@ -727,10 +769,12 @@ export class ExtensionView extends VDomRenderer<ListModel> {
       content.push(
         <ErrorMessage key="server-requirements-error">
           <p>
-            The server has some missing requirements for installing extensions.
+            {this._trans.__(
+              'The server has some missing requirements for installing extensions.'
+            )}
           </p>
 
-          <p>Details:</p>
+          <p>{this._trans.__('Details:')}</p>
           <pre>{model.serverRequirementsError}</pre>
         </ErrorMessage>
       );
@@ -754,6 +798,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
             viewType={'installed'}
             entries={model.installed}
             numPages={1}
+            translator={this.translator}
             onPage={value => {
               /* no-op */
             }}
@@ -768,7 +813,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
           isOpen={ListModel.isDisclaimed()}
           forceOpen={this._forceOpen}
           disabled={!ListModel.isDisclaimed()}
-          header="Installed"
+          header={this._trans.__('Installed')}
           headerElements={
             <ToolbarButtonComponent
               key="refresh-button"
@@ -776,7 +821,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
               onClick={() => {
                 model.refreshInstalled();
               }}
-              tooltip="Refresh extension list"
+              tooltip={this._trans.__('Refresh extension list')}
             />
           }
         >
@@ -808,6 +853,7 @@ export class ExtensionView extends VDomRenderer<ListModel> {
               this.onPage(value);
             }}
             performAction={this.onAction.bind(this)}
+            translator={this.translator}
           />
         );
       }
@@ -818,7 +864,11 @@ export class ExtensionView extends VDomRenderer<ListModel> {
           isOpen={ListModel.isDisclaimed()}
           forceOpen={this._forceOpen}
           disabled={!ListModel.isDisclaimed()}
-          header={model.query ? 'Search Results' : 'Discover'}
+          header={
+            model.query
+              ? this._trans.__('Search Results')
+              : this._trans.__('Discover')
+          }
           onCollapse={(isOpen: boolean) => {
             if (isOpen && model.query === null) {
               model.query = '';

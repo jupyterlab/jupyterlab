@@ -75,18 +75,6 @@ export abstract class JupyterFrontEnd<
       options.restored ||
       this.started.then(() => restored).catch(() => restored);
     this.serviceManager = options.serviceManager || new ServiceManager();
-
-    this.commands.addCommand(Private.CONTEXT_MENU_INFO, {
-      label: 'Shift+Right Click for Browser Menu',
-      isEnabled: () => false,
-      execute: () => void 0
-    });
-
-    this.contextMenu.addItem({
-      command: Private.CONTEXT_MENU_INFO,
-      selector: 'body',
-      rank: Infinity
-    });
   }
 
   /**
@@ -211,7 +199,7 @@ export abstract class JupyterFrontEnd<
       // allow the native one to open.
       if (
         items.length === 1 &&
-        items[0].command === Private.CONTEXT_MENU_INFO
+        items[0].command === JupyterFrontEndContextMenu.contextMenu
       ) {
         this.contextMenu.menu.close();
         return;
@@ -304,6 +292,22 @@ export namespace JupyterFrontEnd {
   }
 
   /**
+   * Is JupyterLab in document mode?
+   *
+   * @param path - Full URL of JupyterLab
+   * @param paths - The current IPaths object hydrated from PageConfig.
+   */
+  export function inDocMode(path: string, paths: IPaths) {
+    const docPattern = new RegExp(`^${paths.urls.doc}`);
+    const match = path.match(docPattern);
+    if (match) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  /**
    * The application paths dictionary token.
    */
   export const IPaths = new Token<IPaths>('@jupyterlab/application:IPaths');
@@ -319,11 +323,10 @@ export namespace JupyterFrontEnd {
       readonly base: string;
       readonly notFound?: string;
       readonly app: string;
+      readonly doc: string;
       readonly static: string;
       readonly settings: string;
       readonly themes: string;
-      readonly tree: string;
-      readonly workspaces: string;
       readonly hubPrefix?: string;
       readonly hubHost?: string;
       readonly hubUser?: string;
@@ -397,15 +400,19 @@ export namespace JupyterFrontEnd {
  */
 namespace Private {
   /**
-   * An id for a private context-menu-info
-   * ersatz command.
-   */
-  export const CONTEXT_MENU_INFO = '__internal:context-menu-info';
-
-  /**
    * Returns whether the element is itself, or a child of, an element with the `jp-suppress-context-menu` data attribute.
    */
   export function suppressContextMenu(element: HTMLElement): boolean {
     return element.closest('[data-jp-suppress-context-menu]') !== null;
   }
+}
+
+/**
+ * A namespace for the context menu override.
+ */
+export namespace JupyterFrontEndContextMenu {
+  /**
+   * An id for a private context-menu-info ersatz command.
+   */
+  export const contextMenu = '__internal:context-menu-info';
 }

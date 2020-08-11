@@ -106,6 +106,10 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
             ans = self.run_task()
             if ans and self.should_build:
                 parts = ['build']
+                # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
+                if os.name == 'nt':
+                    self.dev_build = True
+                    self.minimize = False
                 parts.append('none' if self.dev_build is None else
                              'dev' if self.dev_build else
                              'prod')
@@ -188,7 +192,7 @@ class BuildLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(self.extra_args[0], logger=self.log)
+        build_labextension(self.extra_args[0], logger=self.log, app_dir=self.app_dir)
 
 
 class WatchLabExtensionApp(BaseExtensionApp):
@@ -196,7 +200,7 @@ class WatchLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        watch_labextension(self.extra_args[0], logger=self.log)
+        watch_labextension(self.extra_args[0], logger=self.log, app_dir=self.app_dir)
 
 
 class UpdateLabExtensionApp(BaseExtensionApp):

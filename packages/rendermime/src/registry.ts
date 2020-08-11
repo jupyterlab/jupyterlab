@@ -14,6 +14,8 @@ import {
   defaultSanitizer
 } from '@jupyterlab/apputils';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { MimeModel } from './mimemodel';
@@ -38,6 +40,7 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    */
   constructor(options: RenderMimeRegistry.IOptions = {}) {
     // Parse the options.
+    this.translator = options.translator || nullTranslator;
     this.resolver = options.resolver || null;
     this.linkHandler = options.linkHandler || null;
     this.latexTypesetter = options.latexTypesetter || null;
@@ -70,6 +73,11 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
    * The LaTeX typesetter for the rendermime.
    */
   readonly latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+  /**
+   * The application language translator.
+   */
+  readonly translator: ITranslator;
 
   /**
    * The ordered list of mimeTypes.
@@ -138,7 +146,8 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
       resolver: this.resolver,
       sanitizer: this.sanitizer,
       linkHandler: this.linkHandler,
-      latexTypesetter: this.latexTypesetter
+      latexTypesetter: this.latexTypesetter,
+      translator: this.translator
     });
   }
 
@@ -167,7 +176,8 @@ export class RenderMimeRegistry implements IRenderMimeRegistry {
       sanitizer: options.sanitizer || this.sanitizer || undefined,
       linkHandler: options.linkHandler || this.linkHandler || undefined,
       latexTypesetter:
-        options.latexTypesetter || this.latexTypesetter || undefined
+        options.latexTypesetter || this.latexTypesetter || undefined,
+      translator: this.translator
     });
 
     // Clone the internal state.
@@ -302,6 +312,11 @@ export namespace RenderMimeRegistry {
      * An optional LaTeX typesetter.
      */
     latexTypesetter?: IRenderMime.ILatexTypesetter;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**

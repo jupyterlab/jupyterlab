@@ -18,6 +18,9 @@
       "path": "../statusbar"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "."
     },
     {
@@ -37,6 +40,9 @@
     },
     {
       "path": "../statusbar"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

@@ -13,6 +13,8 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { toArray } from '@lumino/algorithm';
 
 import escape from 'lodash.escape';
@@ -36,9 +38,12 @@ export function renderHTML(options: renderHTML.IOptions): Promise<void> {
     resolver,
     linkHandler,
     shouldTypeset,
-    latexTypesetter
+    latexTypesetter,
+    translator
   } = options;
 
+  translator = translator || nullTranslator;
+  const trans = translator?.load('jupyterlab');
   let originalSource = source;
 
   // Bail early if the source is empty.
@@ -66,10 +71,11 @@ export function renderHTML(options: renderHTML.IOptions): Promise<void> {
     } else {
       const container = document.createElement('div');
       const warning = document.createElement('pre');
-      warning.textContent =
-        'This HTML output contains inline scripts. Are you sure that you want to run arbitrary Javascript within your JupyterLab session?';
+      warning.textContent = trans.__(
+        'This HTML output contains inline scripts. Are you sure that you want to run arbitrary Javascript within your JupyterLab session?'
+      );
       const runButton = document.createElement('button');
-      runButton.textContent = 'Run';
+      runButton.textContent = trans.__('Run');
       runButton.onclick = event => {
         host.innerHTML = originalSource;
         Private.evalInnerHTMLScriptTags(host);
@@ -149,6 +155,11 @@ export namespace renderHTML {
      * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -393,6 +404,11 @@ export namespace renderMarkdown {
      * The LaTeX typesetter for the application.
      */
     latexTypesetter: IRenderMime.ILatexTypesetter | null;
+
+    /**
+     * The application languate translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -464,6 +480,11 @@ export namespace renderSVG {
      * Whether the svg should be unconfined.
      */
     unconfined?: boolean;
+
+    /**
+     * The application language translator.
+     */
+    translator: ITranslator;
   }
 }
 
@@ -546,6 +567,11 @@ export namespace renderText {
      * The source text to render.
      */
     source: string;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 

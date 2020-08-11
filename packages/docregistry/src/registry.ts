@@ -34,6 +34,8 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Contents, Kernel } from '@jupyterlab/services';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import {
   fileIcon,
   folderIcon,
@@ -59,15 +61,19 @@ export class DocumentRegistry implements IDisposable {
    */
   constructor(options: DocumentRegistry.IOptions = {}) {
     const factory = options.textModelFactory;
+    this.translator = options.translator || nullTranslator;
+
     if (factory && factory.name !== 'text') {
       throw new Error('Text model factory must have the name `text`');
     }
     this._modelFactories['text'] = factory || new TextModelFactory();
 
-    const fts = options.initialFileTypes || DocumentRegistry.defaultFileTypes;
+    const fts =
+      options.initialFileTypes ||
+      DocumentRegistry.getDefaultFileTypes(this.translator);
     fts.forEach(ft => {
       const value: DocumentRegistry.IFileType = {
-        ...DocumentRegistry.fileTypeDefaults,
+        ...DocumentRegistry.getFileTypeDefaults(this.translator),
         ...ft
       };
       this._fileTypes.push(value);
@@ -287,7 +293,7 @@ export class DocumentRegistry implements IDisposable {
    */
   addFileType(fileType: Partial<DocumentRegistry.IFileType>): IDisposable {
     const value: DocumentRegistry.IFileType = {
-      ...DocumentRegistry.fileTypeDefaults,
+      ...DocumentRegistry.getFileTypeDefaults(this.translator),
       ...fileType,
       // fall back to fileIcon if needed
       ...(!(fileType.icon || fileType.iconClass) && { icon: fileIcon })
@@ -620,12 +626,12 @@ export class DocumentRegistry implements IDisposable {
       case 'directory':
         return (
           find(this._fileTypes, ft => ft.contentType === 'directory') ||
-          DocumentRegistry.defaultDirectoryFileType
+          DocumentRegistry.getDefaultDirectoryFileType(this.translator)
         );
       case 'notebook':
         return (
           find(this._fileTypes, ft => ft.contentType === 'notebook') ||
-          DocumentRegistry.defaultNotebookFileType
+          DocumentRegistry.getDefaultNotebookFileType(this.translator)
         );
       default:
         // Find the best matching extension.
@@ -636,7 +642,10 @@ export class DocumentRegistry implements IDisposable {
             return fts[0];
           }
         }
-        return this.getFileType('text') || DocumentRegistry.defaultTextFileType;
+        return (
+          this.getFileType('text') ||
+          DocumentRegistry.getDefaultTextFileType(this.translator)
+        );
     }
   }
 
@@ -676,6 +685,7 @@ export class DocumentRegistry implements IDisposable {
     return fts;
   }
 
+  protected translator: ITranslator;
   private _modelFactories: {
     [key: string]: DocumentRegistry.ModelFactory;
   } = Object.create(null);
@@ -729,6 +739,11 @@ export namespace DocumentRegistry {
      * The [[DocumentRegistry.defaultFileTypes]] will be used if not given.
      */
     initialFileTypes?: DocumentRegistry.IFileType[];
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**
@@ -1025,6 +1040,11 @@ export namespace DocumentRegistry {
     readonly shutdownOnClose?: boolean;
 
     /**
+     * The application language translator.
+     */
+    readonly translator?: ITranslator;
+
+    /**
      * A function producing toolbar widgets, overriding the default toolbar widgets.
      */
     readonly toolbarFactory?: (widget: T) => DocumentRegistry.IToolbarItem[];
@@ -1061,6 +1081,12 @@ export namespace DocumentRegistry {
      * This field may be used or ignored depending on shell implementation.
      */
     rank?: number;
+
+    /**
+     * If the document manager is in single document mode, open the document in
+     * a new browser tab and JupyterLab workspace.
+     */
+    maybeNewWorkspace?: boolean;
   }
 
   /**
@@ -1206,17 +1232,6 @@ export namespace DocumentRegistry {
   }
 
   /**
-   * The defaults used for a file type.
-   */
-  export const fileTypeDefaults: IFileType = {
-    name: 'default',
-    extensions: [],
-    mimeTypes: [],
-    contentType: 'file',
-    fileFormat: 'text'
-  };
-
-  /**
    * An arguments object for the `changed` signal.
    */
   export interface IChangedArgs {
@@ -1241,147 +1256,213 @@ export namespace DocumentRegistry {
   }
 
   /**
-   * The default text file type used by the document registry.
+   * The defaults used for a file type.
+   *
+   * @param translator - The application language translator.
+   *
+   * @returns The default file type.
    */
-  export const defaultTextFileType: IFileType = {
-    ...fileTypeDefaults,
-    name: 'text',
-    mimeTypes: ['text/plain'],
-    extensions: ['.txt'],
-    icon: fileIcon
-  };
+  export function getFileTypeDefaults(translator?: ITranslator): IFileType {
+    translator = translator || nullTranslator;
+    const trans = translator?.load('jupyterlab');
+
+    return {
+      name: 'default',
+      displayName: trans.__('default'),
+      extensions: [],
+      mimeTypes: [],
+      contentType: 'file',
+      fileFormat: 'text'
+    };
+  }
+
+  /**
+   * The default text file type used by the document registry.
+   *
+   * @param translator - The application language translator.
+   *
+   * @returns The default text file type.
+   */
+  export function getDefaultTextFileType(translator?: ITranslator): IFileType {
+    translator = translator || nullTranslator;
+    const trans = translator?.load('jupyterlab');
+    const fileTypeDefaults = getFileTypeDefaults(translator);
+
+    return {
+      ...fileTypeDefaults,
+      name: 'text',
+      displayName: trans.__('Text'),
+      mimeTypes: ['text/plain'],
+      extensions: ['.txt'],
+      icon: fileIcon
+    };
+  }
 
   /**
    * The default notebook file type used by the document registry.
+   *
+   * @param translator - The application language translator.
+   *
+   * @returns The default notebook file type.
    */
-  export const defaultNotebookFileType: IFileType = {
-    ...fileTypeDefaults,
-    name: 'notebook',
-    displayName: 'Notebook',
-    mimeTypes: ['application/x-ipynb+json'],
-    extensions: ['.ipynb'],
-    contentType: 'notebook',
-    fileFormat: 'json',
-    icon: notebookIcon
-  };
+  export function getDefaultNotebookFileType(
+    translator?: ITranslator
+  ): IFileType {
+    translator = translator || nullTranslator;
+    const trans = translator?.load('jupyterlab');
+
+    return {
+      ...getFileTypeDefaults(translator),
+      name: 'notebook',
+      displayName: trans.__('Notebook'),
+      mimeTypes: ['application/x-ipynb+json'],
+      extensions: ['.ipynb'],
+      contentType: 'notebook',
+      fileFormat: 'json',
+      icon: notebookIcon
+    };
+  }
 
   /**
    * The default directory file type used by the document registry.
+   *
+   * @param translator - The application language translator.
+   *
+   * @returns The default directory file type.
    */
-  export const defaultDirectoryFileType: IFileType = {
-    ...fileTypeDefaults,
-    name: 'directory',
-    extensions: [],
-    mimeTypes: ['text/directory'],
-    contentType: 'directory',
-    icon: folderIcon
-  };
+  export function getDefaultDirectoryFileType(
+    translator?: ITranslator
+  ): IFileType {
+    translator = translator || nullTranslator;
+    const trans = translator?.load('jupyterlab');
+
+    return {
+      ...getFileTypeDefaults(translator),
+      name: 'directory',
+      displayName: trans.__('Directory'),
+      extensions: [],
+      mimeTypes: ['text/directory'],
+      contentType: 'directory',
+      icon: folderIcon
+    };
+  }
 
   /**
    * The default file types used by the document registry.
+   *
+   * @param translator - The application language translator.
+   *
+   * @returns The default directory file types.
    */
-  export const defaultFileTypes: ReadonlyArray<Partial<IFileType>> = [
-    defaultTextFileType,
-    defaultNotebookFileType,
-    defaultDirectoryFileType,
-    {
-      name: 'markdown',
-      displayName: 'Markdown File',
-      extensions: ['.md'],
-      mimeTypes: ['text/markdown'],
-      icon: markdownIcon
-    },
-    {
-      name: 'python',
-      displayName: 'Python File',
-      extensions: ['.py'],
-      mimeTypes: ['text/x-python'],
-      icon: pythonIcon
-    },
-    {
-      name: 'json',
-      displayName: 'JSON File',
-      extensions: ['.json'],
-      mimeTypes: ['application/json'],
-      icon: jsonIcon
-    },
-    {
-      name: 'csv',
-      displayName: 'CSV File',
-      extensions: ['.csv'],
-      mimeTypes: ['text/csv'],
-      icon: spreadsheetIcon
-    },
-    {
-      name: 'tsv',
-      displayName: 'TSV File',
-      extensions: ['.tsv'],
-      mimeTypes: ['text/csv'],
-      icon: spreadsheetIcon
-    },
-    {
-      name: 'r',
-      displayName: 'R File',
-      mimeTypes: ['text/x-rsrc'],
-      extensions: ['.r'],
-      icon: rKernelIcon
-    },
-    {
-      name: 'yaml',
-      displayName: 'YAML File',
-      mimeTypes: ['text/x-yaml', 'text/yaml'],
-      extensions: ['.yaml', '.yml'],
-      icon: yamlIcon
-    },
-    {
-      name: 'svg',
-      displayName: 'Image',
-      mimeTypes: ['image/svg+xml'],
-      extensions: ['.svg'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    },
-    {
-      name: 'tiff',
-      displayName: 'Image',
-      mimeTypes: ['image/tiff'],
-      extensions: ['.tif', '.tiff'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    },
-    {
-      name: 'jpeg',
-      displayName: 'Image',
-      mimeTypes: ['image/jpeg'],
-      extensions: ['.jpg', '.jpeg'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    },
-    {
-      name: 'gif',
-      displayName: 'Image',
-      mimeTypes: ['image/gif'],
-      extensions: ['.gif'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    },
-    {
-      name: 'png',
-      displayName: 'Image',
-      mimeTypes: ['image/png'],
-      extensions: ['.png'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    },
-    {
-      name: 'bmp',
-      displayName: 'Image',
-      mimeTypes: ['image/bmp'],
-      extensions: ['.bmp'],
-      icon: imageIcon,
-      fileFormat: 'base64'
-    }
-  ];
+  export function getDefaultFileTypes(
+    translator?: ITranslator
+  ): ReadonlyArray<Partial<IFileType>> {
+    translator = translator || nullTranslator;
+    const trans = translator?.load('jupyterlab');
+
+    return [
+      getDefaultTextFileType(translator),
+      getDefaultNotebookFileType(translator),
+      getDefaultDirectoryFileType(translator),
+      {
+        name: 'markdown',
+        displayName: trans.__('Markdown File'),
+        extensions: ['.md'],
+        mimeTypes: ['text/markdown'],
+        icon: markdownIcon
+      },
+      {
+        name: 'python',
+        displayName: trans.__('Python File'),
+        extensions: ['.py'],
+        mimeTypes: ['text/x-python'],
+        icon: pythonIcon
+      },
+      {
+        name: 'json',
+        displayName: trans.__('JSON File'),
+        extensions: ['.json'],
+        mimeTypes: ['application/json'],
+        icon: jsonIcon
+      },
+      {
+        name: 'csv',
+        displayName: trans.__('CSV File'),
+        extensions: ['.csv'],
+        mimeTypes: ['text/csv'],
+        icon: spreadsheetIcon
+      },
+      {
+        name: 'tsv',
+        displayName: trans.__('TSV File'),
+        extensions: ['.tsv'],
+        mimeTypes: ['text/csv'],
+        icon: spreadsheetIcon
+      },
+      {
+        name: 'r',
+        displayName: trans.__('R File'),
+        mimeTypes: ['text/x-rsrc'],
+        extensions: ['.r'],
+        icon: rKernelIcon
+      },
+      {
+        name: 'yaml',
+        displayName: trans.__('YAML File'),
+        mimeTypes: ['text/x-yaml', 'text/yaml'],
+        extensions: ['.yaml', '.yml'],
+        icon: yamlIcon
+      },
+      {
+        name: 'svg',
+        displayName: trans.__('Image'),
+        mimeTypes: ['image/svg+xml'],
+        extensions: ['.svg'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'tiff',
+        displayName: trans.__('Image'),
+        mimeTypes: ['image/tiff'],
+        extensions: ['.tif', '.tiff'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'jpeg',
+        displayName: trans.__('Image'),
+        mimeTypes: ['image/jpeg'],
+        extensions: ['.jpg', '.jpeg'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'gif',
+        displayName: trans.__('Image'),
+        mimeTypes: ['image/gif'],
+        extensions: ['.gif'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'png',
+        displayName: trans.__('Image'),
+        mimeTypes: ['image/png'],
+        extensions: ['.png'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      },
+      {
+        name: 'bmp',
+        displayName: trans.__('Image'),
+        mimeTypes: ['image/bmp'],
+        extensions: ['.bmp'],
+        icon: imageIcon,
+        fileFormat: 'base64'
+      }
+    ];
+  }
 }
 
 /**

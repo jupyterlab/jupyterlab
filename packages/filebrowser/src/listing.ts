@@ -56,6 +56,11 @@ import { Widget } from '@lumino/widgets';
 import { VirtualDOM, h } from '@lumino/virtualdom';
 
 import { FilterFileBrowserModel } from './model';
+import {
+  nullTranslator,
+  TranslationBundle,
+  ITranslator
+} from '@jupyterlab/translation';
 
 /**
  * The class name added to DirListing widget.
@@ -206,6 +211,8 @@ export class DirListing extends Widget {
       node: (options.renderer || DirListing.defaultRenderer).createNode()
     });
     this.addClass(DIR_LISTING_CLASS);
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this._model = options.model;
     this._model.fileChanged.connect(this._onFileChanged, this);
     this._model.refreshed.connect(this._onModelRefreshed, this);
@@ -216,7 +223,7 @@ export class DirListing extends Widget {
     this._renderer = options.renderer || DirListing.defaultRenderer;
 
     const headerNode = DOMUtils.findElement(this.node, HEADER_CLASS);
-    this._renderer.populateHeaderNode(headerNode);
+    this._renderer.populateHeaderNode(headerNode, this.translator);
     this._manager.activateRequested.connect(this._onActivateRequested, this);
   }
 
@@ -373,7 +380,10 @@ export class DirListing extends Widget {
         return undefined;
       })
       .catch(error => {
-        void showErrorMessage('Paste Error', error);
+        void showErrorMessage(
+          this._trans._p('showErrorMessage', 'Paste Error'),
+          error
+        );
       });
   }
 
@@ -391,13 +401,22 @@ export class DirListing extends Widget {
 
     const message =
       items.length === 1
-        ? `Are you sure you want to permanently delete: ${items[0].name}?`
-        : `Are you sure you want to permanently delete the ${items.length} ` +
-          `files/folders selected?`;
+        ? this._trans.__(
+            'Are you sure you want to permanently delete: %1?',
+            items[0].name
+          )
+        : this._trans._n(
+            'Are you sure you want to permanently delete the %1 selected item?',
+            'Are you sure you want to permanently delete the %1 selected items?',
+            items.length
+          );
     const result = await showDialog({
-      title: 'Delete',
+      title: this._trans.__('Delete'),
       body: message,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Delete' })]
+      buttons: [
+        Dialog.cancelButton({ label: this._trans.__('Cancel') }),
+        Dialog.warnButton({ label: this._trans.__('Delete') })
+      ]
     });
 
     if (!this.isDisposed && result.button.accept) {
@@ -425,7 +444,10 @@ export class DirListing extends Widget {
         return undefined;
       })
       .catch(error => {
-        void showErrorMessage('Duplicate file', error);
+        void showErrorMessage(
+          this._trans._p('showErrorMessage', 'Duplicate file'),
+          error
+        );
       });
   }
 
@@ -462,7 +484,10 @@ export class DirListing extends Widget {
         return undefined;
       })
       .catch(error => {
-        void showErrorMessage('Shut down kernel', error);
+        void showErrorMessage(
+          this._trans._p('showErrorMessage', 'Shut down kernel'),
+          error
+        );
       });
   }
 
@@ -764,7 +789,7 @@ export class DirListing extends Widget {
     items.forEach((item, i) => {
       const node = nodes[i];
       const ft = this._manager.registry.getFileTypeForModel(item);
-      renderer.updateItemNode(node, item, ft);
+      renderer.updateItemNode(node, item, ft, this.translator);
       if (this._selection[item.name]) {
         node.classList.add(SELECTED_CLASS);
         if (this._isCut && this._model.path === this._prevPath) {
@@ -801,9 +826,9 @@ export class DirListing extends Widget {
         node.classList.add(RUNNING_CLASS);
         if (specs && name) {
           const spec = specs.kernelspecs[name];
-          name = spec ? spec.display_name : 'unknown';
+          name = spec ? spec.display_name : 'unknown'; // FIXME-TRANS: Is this localizable?
         }
-        node.title = `${node.title}\nKernel: ${name}`;
+        node.title = this._trans.__('%1\nKernel: %2', node.title, name);
       }
     });
 
@@ -946,10 +971,17 @@ export class DirListing extends Widget {
       const localPath = this._manager.services.contents.localPath(item.path);
       this._model
         .cd(`/${localPath}`)
-        .catch(error => showErrorMessage('Open directory', error));
+        .catch(error =>
+          showErrorMessage(
+            this._trans._p('showErrorMessage', 'Open directory'),
+            error
+          )
+        );
     } else {
       const path = item.path;
-      this._manager.openOrReveal(path);
+      this._manager.openOrReveal(path, 'default', undefined, {
+        maybeNewWorkspace: true
+      });
     }
   }
 
@@ -1163,7 +1195,10 @@ export class DirListing extends Widget {
       }
     }
     Promise.all(promises).catch(error => {
-      void showErrorMessage('Error while copying/moving files', error);
+      void showErrorMessage(
+        this._trans._p('showErrorMessage', 'Error while copying/moving files'),
+        error
+      );
     });
   }
 
@@ -1197,6 +1232,7 @@ export class DirListing extends Widget {
     const dragImage = this.renderer.createDragImage(
       source,
       selectedNames.length,
+      this._trans,
       ft
     );
 
@@ -1376,7 +1412,10 @@ export class DirListing extends Widget {
     await Promise.all(
       paths.map(path =>
         this._model.manager.deleteFile(path).catch(err => {
-          void showErrorMessage('Delete Failed', err);
+          void showErrorMessage(
+            this._trans._p('showErrorMessage', 'Delete Failed'),
+            err
+          );
         })
       )
     );
@@ -1405,11 +1444,13 @@ export class DirListing extends Widget {
       }
       if (!isValidFileName(newName)) {
         void showErrorMessage(
-          'Rename Error',
+          this._trans.__('showErrorMessage', 'Rename Error'),
           Error(
-            `"${newName}" is not a valid name for a file. ` +
-              `Names must have nonzero length, ` +
-              `and cannot include "/", "\\", or ":"`
+            this._trans._p(
+              'showErrorMessage',
+              '"%1" is not a valid name for a file. Names must have nonzero length, and cannot include "/", "\\", or ":"',
+              newName
+            )
           )
         );
         this._inRename = false;
@@ -1428,7 +1469,10 @@ export class DirListing extends Widget {
       return promise
         .catch(error => {
           if (error !== 'File not renamed') {
-            void showErrorMessage('Rename Error', error);
+            void showErrorMessage(
+              this._trans._p('showErrorMessage', 'Rename Error'),
+              error
+            );
           }
           this._inRename = false;
           return original;
@@ -1535,6 +1579,8 @@ export class DirListing extends Widget {
     });
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _model: FilterFileBrowserModel;
   private _editNode: HTMLInputElement;
   private _items: HTMLElement[] = [];
@@ -1583,6 +1629,11 @@ export namespace DirListing {
      * The default is a shared `Renderer` instance.
      */
     renderer?: IRenderer;
+
+    /**
+     * A language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**
@@ -1633,7 +1684,7 @@ export namespace DirListing {
      *
      * @param node - The header node to populate.
      */
-    populateHeaderNode(node: HTMLElement): void;
+    populateHeaderNode(node: HTMLElement, translator?: ITranslator): void;
 
     /**
      * Handle a header click.
@@ -1665,7 +1716,8 @@ export namespace DirListing {
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
-      fileType?: DocumentRegistry.IFileType
+      fileType?: DocumentRegistry.IFileType,
+      translator?: ITranslator
     ): void;
 
     /**
@@ -1691,6 +1743,7 @@ export namespace DirListing {
     createDragImage(
       node: HTMLElement,
       count: number,
+      trans: TranslationBundle,
       fileType?: DocumentRegistry.IFileType
     ): HTMLElement;
   }
@@ -1719,9 +1772,11 @@ export namespace DirListing {
      *
      * @param node - The header node to populate.
      */
-    populateHeaderNode(node: HTMLElement): void {
-      const name = this._createHeaderItemNode('Name');
-      const modified = this._createHeaderItemNode('Last Modified');
+    populateHeaderNode(node: HTMLElement, translator?: ITranslator): void {
+      translator = translator || nullTranslator;
+      const trans = translator.load('jupyterlab');
+      const name = this._createHeaderItemNode(trans.__('Name'));
+      const modified = this._createHeaderItemNode(trans.__('Last Modified'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
@@ -1838,9 +1893,15 @@ export namespace DirListing {
     updateItemNode(
       node: HTMLElement,
       model: Contents.IModel,
-      fileType: DocumentRegistry.IFileType = DocumentRegistry.defaultTextFileType
+      fileType?: DocumentRegistry.IFileType,
+      translator?: ITranslator
     ): void {
+      translator = translator || nullTranslator;
+      fileType =
+        fileType || DocumentRegistry.getDefaultTextFileType(translator);
       const { icon, iconClass, name } = fileType;
+      translator = translator || nullTranslator;
+      const trans = translator.load('jupyterlab');
 
       const iconContainer = DOMUtils.findElement(node, ITEM_ICON_CLASS);
       const text = DOMUtils.findElement(node, ITEM_TEXT_CLASS);
@@ -1855,31 +1916,37 @@ export namespace DirListing {
         stylesheet: 'listing'
       });
 
-      let hoverText = 'Name: ' + model.name;
+      let hoverText = trans.__('Name: %1', model.name);
+
       // add file size to pop up if its available
       if (model.size !== null && model.size !== undefined) {
-        hoverText += '\nSize: ' + Private.formatFileSize(model.size, 1, 1024);
+        hoverText += trans.__(
+          '\nSize: %1',
+          Private.formatFileSize(model.size, 1, 1024)
+        );
       }
       if (model.path) {
         const dirname = PathExt.dirname(model.path);
         if (dirname) {
-          hoverText += '\nPath: ' + dirname.substr(0, 50);
+          hoverText += trans.__('\nPath: %1', dirname.substr(0, 50));
           if (dirname.length > 50) {
             hoverText += '...';
           }
         }
       }
       if (model.created) {
-        hoverText +=
-          '\nCreated: ' +
-          Time.format(new Date(model.created), 'YYYY-MM-DD HH:mm:ss');
+        hoverText += trans.__(
+          '\nCreated: %1',
+          Time.format(new Date(model.created), 'YYYY-MM-DD HH:mm:ss')
+        );
       }
       if (model.last_modified) {
-        hoverText +=
-          '\nModified: ' +
-          Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss');
+        hoverText += trans.__(
+          '\nModified: %1',
+          Time.format(new Date(model.last_modified), 'YYYY-MM-DD HH:mm:ss')
+        );
       }
-      hoverText += '\nWritable: ' + model.writable;
+      hoverText += trans.__('\nWritable: %1', model.writable);
 
       node.title = hoverText;
       node.setAttribute('data-file-type', name);
@@ -1930,6 +1997,7 @@ export namespace DirListing {
     createDragImage(
       node: HTMLElement,
       count: number,
+      trans: TranslationBundle,
       fileType?: DocumentRegistry.IFileType
     ): HTMLElement {
       const dragImage = node.cloneNode(true) as HTMLElement;
@@ -1948,7 +2016,7 @@ export namespace DirListing {
 
       if (count > 1) {
         const nameNode = DOMUtils.findElement(dragImage, ITEM_TEXT_CLASS);
-        nameNode.textContent = count + ' Items';
+        nameNode.textContent = trans._n('%1 Item', '%1 Items', count);
       }
       return dragImage;
     }

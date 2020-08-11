@@ -435,7 +435,7 @@ def clean(app_options=None):
     if app_dir == pjoin(HERE, 'core'):
         raise ValueError('Cannot clean the core app')
 
-    if app_options.all:
+    if getattr(app_options, 'all', False):
         logger.info('Removing everything in %s...', app_dir)
         _rmtree_star(app_dir, logger)
     else:
@@ -451,12 +451,12 @@ def clean(app_options=None):
                 logger.info('%s not present, skipping...', name)
 
     logger.info('Success!')
-    if app_options.all or app_options.extensions:
+    if getattr(app_options, 'all', False) or getattr(app_options, 'extensions', False):
         logger.info('All of your extensions have been removed, and will need to be reinstalled')
 
 
 def build(name=None, version=None, static_url=None,
-          command='build:prod', kill_event=None,
+          command=None, kill_event=None,
           clean_staging=False, app_options=None):
     """Build the JupyterLab application.
     """
@@ -627,10 +627,18 @@ class _AppHandler(object):
         return True
 
     def build(self, name=None, version=None, static_url=None,
-              command='build:prod:minimize', clean_staging=False):
+              command=None, clean_staging=False):
         """Build the application.
         """
         # resolve the build type
+
+        # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
+        if command == None:
+            if os.name == 'nt':
+                command = 'build:dev'
+            else:
+                command = 'build:prod:minimize'
+
         parts = command.split(':')
         if len(parts) < 2:
             parts.append('dev')
@@ -658,14 +666,14 @@ class _AppHandler(object):
             self.logger.debug(msg)
             raise RuntimeError(msg)
 
-        dedupe_yarn(staging, self.logger)
-
         # Build the app.
-        ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
-        if ret != 0:
-            msg = 'JupyterLab failed to build'
-            self.logger.debug(msg)
-            raise RuntimeError(msg)
+        if parts[1] != 'nobuild':
+            dedupe_yarn(staging, self.logger)
+            ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
+            if ret != 0:
+                msg = 'JupyterLab failed to build'
+                self.logger.debug(msg)
+                raise RuntimeError(msg)
 
     def watch(self):
         """Start the application watcher and then run the watch in
@@ -1246,7 +1254,7 @@ class _AppHandler(object):
         # Handle local extensions.
         for (key, source) in local.items():
             jlab['linkedPackages'][key] = source
-            data['resolutions'][key] = source
+            data['resolutions'][key] = 'file:' + self.info['extensions'][key]['path']
 
         # Handle linked packages.
         for (key, item) in linked.items():
