@@ -7,7 +7,7 @@ jobs:
     name: Windows
     strategy:
       matrix:
-        group: [python, integrity, usage]
+        group: [integrity, integrity2, docs, usage, python, examples, nonode]
       fail-fast: false
     runs-on: windows-latest
     steps:
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v1
         with:
-          python-version: 3.5
+          python-version: 3.6
       - name: Set up Node
         uses: actions/setup-node@v1
         with:
@@ -55,5 +55,6 @@ jobs:
         run: jlpm config current
       - name: Run test ${{ matrix.group }}
         env:
-          NAME: ${{ matrix.group }}
-        run: cmd /E:ON /V:ON /C .\\scripts\\appveyor.cmd
+          GROUP: ${{ matrix.group }}
+        run: |
+          bash ./scripts/ci_script.sh
