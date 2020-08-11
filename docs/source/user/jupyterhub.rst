@@ -3,7 +3,7 @@
 JupyterLab on JupyterHub
 ------------------------
 
-JupyterLab works out of the box with JupyterHub, and can even run side by side
+JupyterLab works out of the box with JupyterHub 1.0+, and can even run side by side
 with the classic Notebook.
 
 When JupyterLab is deployed with JupyterHub it will show additional menu
@@ -19,14 +19,11 @@ Notebook (``/tree``) by default. To change the user's default user interface to
 JupyterLab, set the following configuration option in your
 :file:`jupyterhub_config.py` file::
 
-    c.Spawner.default_url = '/lab'
+    c.Spawner.cmd=["jupyter-labhub"]
 
 In this configuration, users can still access the classic Notebook at ``/tree``,
 by either typing that URL into the browser, or by using the "Launch Classic
 Notebook" item in JupyterLab's Help menu.
-
-For this to work, you will need to enable the jupyterlab server 
-extension with ``jupyter serverextension enable jupyterlab``.
 
 Example Configuration
 ~~~~~~~~~~~~~~~~~~~~~

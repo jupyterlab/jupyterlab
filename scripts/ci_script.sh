@@ -273,6 +273,16 @@ if [[ $GROUP == usage ]]; then
     kill $TASK_PID
     wait $TASK_PID
 
+    # Check the labhubapp
+    ./test_install/bin/pip install jupyterhub
+    ./test_install/bin/jupyter-labhub --no-browser &
+    TASK_PID=$!
+    # Make sure the task is running
+    ps -p $TASK_PID || exit 1
+    sleep 5
+    kill $TASK_PID
+    wait $TASK_PID
+
     # Make sure we can clean various bits of the app dir
     jupyter lab clean
     jupyter lab clean --extensions
