@@ -164,7 +164,6 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
 
 def build_labextension(path, app_dir=None, logger=None):
     """Build a labextension in the given path"""
-    # Ensure a staging directory but don't actually build anything.
     core_path = osp.join(HERE, 'staging')
     options = AppOptions(app_dir=app_dir, logger=logger)
     builder = _ensure_builder(options)
@@ -180,7 +179,6 @@ def build_labextension(path, app_dir=None, logger=None):
 
 def watch_labextension(path, app_dir=None, logger=None):
     """Watch a labextension in a given path"""
-    # Ensure a staging directory but don't actually build anything.
     core_path = osp.join(HERE, 'staging')
     options = AppOptions(app_dir=app_dir, logger=logger)
     builder = _ensure_builder(options)
@@ -199,7 +197,7 @@ def watch_labextension(path, app_dir=None, logger=None):
 
 
 def _ensure_builder(options):
-    """Ensure a build directory exists and is ready to build.  Return the build script path
+    """Ensure a build directory exists and is ready to build but do not build anything.  Return the build script path.
     """
     build(app_options=options, command="build:nobuild")
     staging_path = osp.join(options.app_dir, 'staging')
