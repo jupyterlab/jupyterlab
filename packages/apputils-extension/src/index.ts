@@ -7,8 +7,7 @@ import {
   ILayoutRestorer,
   IRouter,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin,
-  JupyterLab
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import {
