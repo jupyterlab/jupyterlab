@@ -168,6 +168,11 @@ def build_labextension(path, app_dir=None, logger=None):
     staging_path = osp.join(options.app_dir, 'staging')
     builder = osp.join(staging_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
 
+    # FIXME: remove this after releasing JS packages
+    build_utils = osp.abspath(osp.join(HERE, '..', 'buildutils', 'lib'))
+    for fname in os.listdir(build_utils):
+        shutil.copy(osp.join(build_utils, fname), osp.join(osp.dirname(builder), fname))
+    
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
@@ -185,6 +190,10 @@ def watch_labextension(path, app_dir=None, logger=None):
     build(app_options=options, command="build:nobuild")
     staging_path = osp.join(options.app_dir, 'staging')
     builder = osp.join(staging_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
+
+    # FIXME: remove this after releasing JS packages
+    for fname in os.listdir(build_utils):
+        shutil.copy(osp.join(build_utils, fname), osp.join(osp.dirname(builder), fname))
     
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
