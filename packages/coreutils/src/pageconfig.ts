@@ -161,7 +161,7 @@ export namespace PageConfig {
     return path;
   }
 
-  export const defaultWorkspace: string = String.fromCharCode(0);
+  export const defaultWorkspace: string = 'default';
 
   /**
    * Options for getUrl
