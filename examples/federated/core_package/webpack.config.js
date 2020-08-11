@@ -85,6 +85,8 @@ module.exports = [
         name: ['_JUPYTERLAB', 'CORE_OUTPUT']
       },
       filename: 'bundle.js',
+      // TODO: if this path changes we will also have to
+      // change main.py (name property inside ExampleApp)
       publicPath: 'static/lab/'
     },
     module: {
