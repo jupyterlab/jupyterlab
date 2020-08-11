@@ -44,13 +44,15 @@ describe('@jupyterlab/mainmenu', () => {
     describe('#constructor()', () => {
       it('should construct a new file menu', () => {
         expect(menu).toBeInstanceOf(FileMenu);
-        expect(menu.menu.title.label).toBe('File');
+        // For localization this is now defined when on the mainmenu-extension.
+        expect(menu.menu.title.label).toBe('');
       });
     });
 
     describe('#newMenu', () => {
       it('should be a submenu for `New...` commands', () => {
-        expect(menu.newMenu.menu.title.label).toBe('New');
+        // For localization this is now defined when on the mainmenu-extension.
+        expect(menu.newMenu.menu.title.label).toBe('');
       });
     });
 
@@ -58,8 +60,7 @@ describe('@jupyterlab/mainmenu', () => {
       it('should allow setting of an ICloseAndCleaner', () => {
         const cleaner: IFileMenu.ICloseAndCleaner<Wodget> = {
           tracker,
-          name: 'Wodget',
-          action: 'Clean',
+          closeAndCleanupLabel: (n: number) => 'closeAndCleanupLabel',
           closeAndCleanup: widget => {
             widget.state = 'clean';
             return Promise.resolve(void 0);
@@ -75,7 +76,7 @@ describe('@jupyterlab/mainmenu', () => {
       it('should allow setting of an IConsoleCreator', () => {
         const creator: IFileMenu.IConsoleCreator<Wodget> = {
           tracker,
-          name: 'Wodget',
+          createConsoleLabel: (n: number) => 'createConsoleLabel',
           createConsole: widget => {
             widget.state = 'create';
             return Promise.resolve(void 0);

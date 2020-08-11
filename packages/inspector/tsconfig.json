@@ -23,6 +23,9 @@
     },
     {
       "path": "../statedb"
+    },
+    {
+      "path": "../translation"
     }
   ]
 }

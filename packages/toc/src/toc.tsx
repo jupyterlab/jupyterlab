@@ -6,6 +6,11 @@ import * as ReactDOM from 'react-dom';
 import { ActivityMonitor, PathExt } from '@jupyterlab/coreutils';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { Message } from '@lumino/messaging';
 import { Widget } from '@lumino/widgets';
 import { IHeading } from './utils/headings';
@@ -31,8 +36,10 @@ export class TableOfContents extends Widget {
    */
   constructor(options: TableOfContents.IOptions) {
     super();
+    this.translator = options.translator || nullTranslator;
     this._docmanager = options.docmanager;
     this._rendermime = options.rendermime;
+    this._trans = this.translator.load('jupyterlab');
   }
 
   /**
@@ -103,7 +110,7 @@ export class TableOfContents extends Widget {
    */
   protected onUpdateRequest(msg: Message): void {
     let toc: IHeading[] = [];
-    let title = 'Table of Contents';
+    let title = this._trans.__('Table of Contents');
     if (this._current) {
       toc = this._current.generator.generate(this._current.widget);
       const context = this._docmanager.contextForWidget(this._current.widget);
@@ -155,6 +162,8 @@ export class TableOfContents extends Widget {
     this.update();
   }
 
+  private translator: ITranslator;
+  private _trans: TranslationBundle;
   private _toolbar: any;
   private _rendermime: IRenderMimeRegistry;
   private _docmanager: IDocumentManager;
@@ -179,6 +188,11 @@ export namespace TableOfContents {
      * Application rendered MIME type.
      */
     rendermime: IRenderMimeRegistry;
+
+    /**
+     * Application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**

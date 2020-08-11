@@ -27,7 +27,8 @@ describe('@jupyterlab/mainmenu', () => {
     describe('#constructor()', () => {
       it('should construct a new help menu', () => {
         expect(menu).toBeInstanceOf(HelpMenu);
-        expect(menu.menu.title.label).toBe('Help');
+        // For localization this is now defined when on the mainmenu-extension.
+        expect(menu.menu.title.label).toBe('');
       });
     });
   });

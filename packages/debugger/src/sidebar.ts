@@ -5,6 +5,8 @@ import { IThemeManager } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { bugIcon } from '@jupyterlab/ui-components';
 
 import { Panel, SplitPanel, Widget } from '@lumino/widgets';
@@ -40,30 +42,34 @@ export class DebuggerSidebar extends Panel {
       service,
       themeManager
     } = options;
-
+    const translator = options.translator || nullTranslator;
     const model = service.model;
 
     this.variables = new VariablesPanel({
       model: model.variables,
       commands: callstackCommands.registry,
       service,
-      themeManager
+      themeManager,
+      translator
     });
 
     this.callstack = new CallstackPanel({
       commands: callstackCommands,
-      model: model.callstack
+      model: model.callstack,
+      translator
     });
 
     this.breakpoints = new BreakpointsPanel({
       service,
-      model: model.breakpoints
+      model: model.breakpoints,
+      translator
     });
 
     this.sources = new SourcesPanel({
       model: model.sources,
       service,
-      editorServices
+      editorServices,
+      translator
     });
 
     const header = new DebuggerSidebar.Header();
@@ -147,6 +153,11 @@ export namespace DebuggerSidebar {
      * An optional application theme manager to detect theme changes.
      */
     themeManager?: IThemeManager | null;
+
+    /**
+     * An optional application language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**

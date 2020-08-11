@@ -7,6 +7,12 @@ import {
   VDomRenderer
 } from '@jupyterlab/apputils';
 
+import {
+  nullTranslator,
+  TranslationBundle,
+  ITranslator
+} from '@jupyterlab/translation';
+
 import { classes, LabIcon } from '@jupyterlab/ui-components';
 
 import {
@@ -34,17 +40,6 @@ import * as React from 'react';
  * The class name added to Launcher instances.
  */
 const LAUNCHER_CLASS = 'jp-Launcher';
-
-/**
- * The known categories of launcher items and their default ordering.
- */
-const KNOWN_CATEGORIES = ['Notebook', 'Console', 'Other'];
-
-/**
- * These launcher item categories are known to have kernels, so the kernel icons
- * are used.
- */
-const KERNEL_CATEGORIES = ['Notebook', 'Console'];
 
 /* tslint:disable */
 /**
@@ -118,6 +113,8 @@ export class Launcher extends VDomRenderer<LauncherModel> {
   constructor(options: ILauncher.IOptions) {
     super(options.model);
     this._cwd = options.cwd;
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this._callback = options.callback;
     this._commands = options.commands;
     this.addClass(LAUNCHER_CLASS);
@@ -153,10 +150,20 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       return null;
     }
 
+    const knownCategories = [
+      this._trans.__('Notebook'),
+      this._trans.__('Console'),
+      this._trans.__('Other')
+    ];
+    const kernelCategories = [
+      this._trans.__('Notebook'),
+      this._trans.__('Console')
+    ];
+
     // First group-by categories
     const categories = Object.create(null);
     each(this.model.items(), (item, index) => {
-      const cat = item.category || 'Other';
+      const cat = item.category || this._trans.__('Other');
       if (!(cat in categories)) {
         categories[cat] = [];
       }
@@ -178,11 +185,11 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     // Assemble the final ordered list of categories, beginning with
     // KNOWN_CATEGORIES.
     const orderedCategories: string[] = [];
-    each(KNOWN_CATEGORIES, (cat, index) => {
+    each(knownCategories, (cat, index) => {
       orderedCategories.push(cat);
     });
     for (const cat in categories) {
-      if (KNOWN_CATEGORIES.indexOf(cat) === -1) {
+      if (knownCategories.indexOf(cat) === -1) {
         orderedCategories.push(cat);
       }
     }
@@ -194,7 +201,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
       }
       const item = categories[cat][0] as ILauncher.IItemOptions;
       const args = { ...item.args, cwd: this.cwd };
-      const kernel = KERNEL_CATEGORIES.indexOf(cat) > -1;
+      const kernel = kernelCategories.indexOf(cat) > -1;
 
       // DEPRECATED: remove _icon when lumino 2.0 is adopted
       // if icon is aliasing iconClass, don't use it
@@ -221,6 +228,7 @@ export class Launcher extends VDomRenderer<LauncherModel> {
                     item,
                     this,
                     this._commands,
+                    this._trans,
                     this._callback
                   );
                 })
@@ -245,6 +253,8 @@ export class Launcher extends VDomRenderer<LauncherModel> {
     );
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _commands: CommandRegistry;
   private _callback: (widget: Widget) => void;
   private _pending = false;
@@ -273,6 +283,11 @@ export namespace ILauncher {
      * The command registry used by the launcher.
      */
     commands: CommandRegistry;
+
+    /**
+     * The application language translation.
+     */
+    translator?: ITranslator;
 
     /**
      * The callback used when an item is launched.
@@ -363,6 +378,7 @@ function Card(
   item: ILauncher.IItemOptions,
   launcher: Launcher,
   commands: CommandRegistry,
+  trans: TranslationBundle,
   launcherCallback: (widget: Widget) => void
 ): React.ReactElement<any> {
   // Get some properties of the command
@@ -394,7 +410,7 @@ function Card(
       })
       .catch(err => {
         launcher.pending = false;
-        void showErrorMessage('Launcher Error', err);
+        void showErrorMessage(trans._p('Error', 'Launcher Error'), err);
       });
   };
 
@@ -420,7 +436,7 @@ function Card(
       onClick={onclick}
       onKeyPress={onkeypress}
       tabIndex={100}
-      data-category={item.category || 'Other'}
+      data-category={item.category || trans.__('Other')}
       key={Private.keyProperty.get(item)}
     >
       <div className="jp-LauncherCard-icon">

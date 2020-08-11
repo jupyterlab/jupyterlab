@@ -40,6 +40,7 @@ window.addEventListener('load', async function() {
     require('@jupyterlab/theme-dark-extension'),
     require('@jupyterlab/theme-light-extension'),
     require('@jupyterlab/tooltip-extension'),
+    require('@jupyterlab/translation-extension'),
     require('@jupyterlab/ui-components-extension')
   ];
   const lab = new JupyterLab();

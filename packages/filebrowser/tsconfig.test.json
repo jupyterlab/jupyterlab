@@ -24,6 +24,9 @@
       "path": "../statusbar"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     },
     {
@@ -52,6 +55,9 @@
     },
     {
       "path": "../statusbar"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"

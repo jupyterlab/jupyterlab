@@ -8,6 +8,7 @@ import {
 } from '@jupyterlab/application';
 import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
 import { ILauncher, LauncherModel, Launcher } from '@jupyterlab/launcher';
+import { ITranslator } from '@jupyterlab/translation';
 import { launcherIcon } from '@jupyterlab/ui-components';
 
 import { toArray } from '@lumino/algorithm';
@@ -27,7 +28,7 @@ namespace CommandIDs {
 const plugin: JupyterFrontEndPlugin<ILauncher> = {
   activate,
   id: '@jupyterlab/launcher-extension:plugin',
-  requires: [ILabShell],
+  requires: [ILabShell, ITranslator],
   optional: [ICommandPalette],
   provides: ILauncher,
   autoStart: true
@@ -44,24 +45,32 @@ export default plugin;
 function activate(
   app: JupyterFrontEnd,
   labShell: ILabShell,
+  translator: ITranslator,
   palette: ICommandPalette | null
 ): ILauncher {
   const { commands } = app;
+  const trans = translator.load('jupyterlab');
   const model = new LauncherModel();
 
   commands.addCommand(CommandIDs.create, {
-    label: 'New Launcher',
+    label: trans.__('New Launcher'),
     execute: (args: JSONObject) => {
       const cwd = args['cwd'] ? String(args['cwd']) : '';
       const id = `launcher-${Private.id++}`;
       const callback = (item: Widget) => {
         labShell.add(item, 'main', { ref: id });
       };
-      const launcher = new Launcher({ model, cwd, callback, commands });
+      const launcher = new Launcher({
+        model,
+        cwd,
+        callback,
+        commands,
+        translator
+      });
 
       launcher.model = model;
       launcher.title.icon = launcherIcon;
-      launcher.title.label = 'Launcher';
+      launcher.title.label = trans.__('Launcher');
 
       const main = new MainAreaWidget({ content: launcher });
 
@@ -81,7 +90,10 @@ function activate(
   });
 
   if (palette) {
-    palette.addItem({ command: CommandIDs.create, category: 'Launcher' });
+    palette.addItem({
+      command: CommandIDs.create,
+      category: trans.__('Launcher')
+    });
   }
 
   return model;

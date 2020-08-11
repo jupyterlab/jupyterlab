@@ -42,6 +42,7 @@
     "@jupyterlab/property-inspector": "^3.0.0-alpha.8",
     "@jupyterlab/settingregistry": "^3.0.0-alpha.8",
     "@jupyterlab/statedb": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
     "@jupyterlab/ui-components": "^3.0.0-alpha.8",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.3",

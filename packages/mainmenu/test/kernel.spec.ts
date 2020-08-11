@@ -44,7 +44,8 @@ describe('@jupyterlab/mainmenu', () => {
     describe('#constructor()', () => {
       it('should construct a new kernel menu', () => {
         expect(menu).toBeInstanceOf(KernelMenu);
-        expect(menu.menu.title.label).toBe('Kernel');
+        // For localization this is now defined when on the mainmenu-extension.
+        expect(menu.menu.title.label).toBe('');
       });
     });
 
@@ -52,7 +53,8 @@ describe('@jupyterlab/mainmenu', () => {
       it('should allow setting of an IKernelUser', () => {
         const user: IKernelMenu.IKernelUser<Wodget> = {
           tracker,
-          noun: 'Wodget',
+          restartKernelAndClearLabel: (n: number) =>
+            'restartKernelAndClearLabel',
           interruptKernel: widget => {
             widget.state = 'interrupt';
             return Promise.resolve(void 0);

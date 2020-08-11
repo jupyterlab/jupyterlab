@@ -11,6 +11,7 @@ import {
   ConnectionLost,
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
+  JupyterFrontEndContextMenu,
   JupyterLab,
   LabShell,
   LayoutRestorer,
@@ -35,6 +36,8 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStateDB } from '@jupyterlab/statedb';
+
+import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
 import { buildIcon } from '@jupyterlab/ui-components';
 
@@ -91,16 +94,19 @@ namespace CommandIDs {
  */
 const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
   id: '@jupyterlab/application-extension:main',
-  requires: [IRouter, IWindowResolver],
-  provides: ITreePathUpdater,
+  requires: [IRouter, IWindowResolver, ITranslator],
   optional: [ICommandPalette, IConnectionLost],
+  provides: ITreePathUpdater,
   activate: (
     app: JupyterFrontEnd,
     router: IRouter,
     resolver: IWindowResolver,
+    translator: ITranslator,
     palette: ICommandPalette | null,
     connectionLost: IConnectionLost | null
   ) => {
+    const trans = translator.load('jupyterlab');
+
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${main.id} must be activated in JupyterLab.`);
     }
@@ -134,10 +140,12 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         <pre>{app.registerPluginErrors.map(e => e.message).join('\n')}</pre>
       );
 
-      void showErrorMessage('Error Registering Plugins', { message: body });
+      void showErrorMessage(trans.__('Error Registering Plugins'), {
+        message: body
+      });
     }
 
-    addCommands(app, palette);
+    addCommands(app, palette, trans);
 
     // If the application shell layout is modified,
     // trigger a refresh of the commands.
@@ -169,7 +177,9 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
     // If the connection to the server is lost, handle it with the
     // connection lost handler.
     connectionLost = connectionLost || ConnectionLost;
-    app.serviceManager.connectionFailure.connect(connectionLost);
+    app.serviceManager.connectionFailure.connect((manager, error) =>
+      connectionLost!(manager, error, translator)
+    );
 
     const builder = app.serviceManager.builder;
     const build = () => {
@@ -177,20 +187,20 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
         .build()
         .then(() => {
           return showDialog({
-            title: 'Build Complete',
+            title: trans.__('Build Complete'),
             body: (
               <div>
-                Build successfully completed, reload page?
+                {trans.__('Build successfully completed, reload page?')}
                 <br />
-                You will lose any unsaved changes.
+                {trans.__('You will lose any unsaved changes.')}
               </div>
             ),
             buttons: [
               Dialog.cancelButton({
-                label: 'Reload Without Saving',
+                label: trans.__('Reload Without Saving'),
                 actions: ['reload']
               }),
-              Dialog.okButton({ label: 'Save and Reload' })
+              Dialog.okButton({ label: trans.__('Save and Reload') })
             ],
             hasClose: true
           });
@@ -203,7 +213,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
                 router.reload();
               })
               .catch(err => {
-                void showErrorMessage('Save Failed', {
+                void showErrorMessage(trans.__('Save Failed'), {
                   message: <pre>{err.message}</pre>
                 });
               });
@@ -212,7 +222,7 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
           }
         })
         .catch(err => {
-          void showErrorMessage('Build Failed', {
+          void showErrorMessage(trans.__('Build Failed'), {
             message: <pre>{err.message}</pre>
           });
         });
@@ -230,23 +240,26 @@ const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
 
         const body = (
           <div>
-            JupyterLab build is suggested:
+            {trans.__('JupyterLab build is suggested:')}
             <br />
             <pre>{response.message}</pre>
           </div>
         );
 
         void showDialog({
-          title: 'Build Recommended',
+          title: trans.__('Build Recommended'),
           body,
-          buttons: [Dialog.cancelButton(), Dialog.okButton({ label: 'Build' })]
+          buttons: [
+            Dialog.cancelButton(),
+            Dialog.okButton({ label: trans.__('Build') })
+          ]
         }).then(result => (result.button.accept ? build() : undefined));
       });
     }
 
-    const message =
-      'Are you sure you want to exit JupyterLab?\n' +
-      'Any unsaved changes will be lost.';
+    const message = trans.__(
+      'Are you sure you want to exit JupyterLab?\n\nAny unsaved changes will be lost.'
+    );
 
     // The spec for the `beforeunload` event is implemented differently by
     // the different browser vendors. Consequently, the `event.returnValue`
@@ -393,12 +406,14 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
  */
 const notfound: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:notfound',
-  requires: [JupyterFrontEnd.IPaths, IRouter],
+  requires: [JupyterFrontEnd.IPaths, IRouter, ITranslator],
   activate: (
     _: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
-    router: IRouter
+    router: IRouter,
+    translator: ITranslator
   ) => {
+    const trans = translator.load('jupyterlab');
     const bad = paths.urls.notFound;
 
     if (!bad) {
@@ -406,14 +421,16 @@ const notfound: JupyterFrontEndPlugin<void> = {
     }
 
     const base = router.base;
-    const message = `
-      The path: ${bad} was not found. JupyterLab redirected to: ${base}
-    `;
+    const message = trans.__(
+      'The path: %1 was not found. JupyterLab redirected to: %2',
+      bad,
+      base
+    );
 
     // Change the URL back to the base application URL.
     router.navigate('');
 
-    void showErrorMessage('Path Not Found', { message });
+    void showErrorMessage(trans.__('Path Not Found'), { message });
   },
   autoStart: true
 };
@@ -459,14 +476,19 @@ const SIDEBAR_ID = '@jupyterlab/application-extension:sidebar';
  */
 const sidebar: JupyterFrontEndPlugin<void> = {
   id: SIDEBAR_ID,
+  autoStart: true,
+  requires: [ISettingRegistry, ILabShell, ITranslator],
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
     labShell: ILabShell,
+    translator: ITranslator,
     info: JupyterLab.IInfo
   ) => {
+    const trans = translator.load('jupyterlab');
     type overrideMap = { [id: string]: 'left' | 'right' };
     let overrides: overrideMap = {};
+    // const trans = translator.load("jupyterlab");
     const handleLayoutOverrides = () => {
       each(labShell.widgets('left'), widget => {
         if (overrides[widget.id] && overrides[widget.id] === 'right') {
@@ -494,7 +516,7 @@ const sidebar: JupyterFrontEndPlugin<void> = {
 
     // Add a command to switch a side panels's side
     app.commands.addCommand(CommandIDs.switchSidebar, {
-      label: 'Switch Sidebar Side',
+      label: trans.__('Switch Sidebar Side'),
       execute: () => {
         // First, try to find the correct panel based on the
         // application context menu click.
@@ -529,17 +551,32 @@ const sidebar: JupyterFrontEndPlugin<void> = {
       selector: '.jp-SideBar .lm-TabBar-tab',
       rank: 500
     });
-  },
-  requires: [ISettingRegistry, ILabShell],
-  autoStart: true
+  }
 };
 
 /**
  * Add the main application commands.
  */
-function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
+function addCommands(
+  app: JupyterLab,
+  palette: ICommandPalette | null,
+  trans: TranslationBundle
+): void {
   const { commands, contextMenu, shell } = app;
-  const category = 'Main Area';
+  const category = trans.__('Main Area');
+
+  // Add Command to override the JLab context menu.
+  commands.addCommand(JupyterFrontEndContextMenu.contextMenu, {
+    label: trans.__('Shift+Right Click for Browser Menu'),
+    isEnabled: () => false,
+    execute: () => void 0
+  });
+
+  app.contextMenu.addItem({
+    command: JupyterFrontEndContextMenu.contextMenu,
+    selector: 'body',
+    rank: Infinity // At the bottom always
+  });
 
   // Returns the widget associated with the most recent contextmenu event.
   const contextMenuWidget = (): Widget | null => {
@@ -620,28 +657,28 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   };
 
   commands.addCommand(CommandIDs.activateNextTab, {
-    label: 'Activate Next Tab',
+    label: trans.__('Activate Next Tab'),
     execute: () => {
       shell.activateNextTab();
     }
   });
 
   commands.addCommand(CommandIDs.activatePreviousTab, {
-    label: 'Activate Previous Tab',
+    label: trans.__('Activate Previous Tab'),
     execute: () => {
       shell.activatePreviousTab();
     }
   });
 
   commands.addCommand(CommandIDs.activateNextTabBar, {
-    label: 'Activate Next Tab Bar',
+    label: trans.__('Activate Next Tab Bar'),
     execute: () => {
       shell.activateNextTabBar();
     }
   });
 
   commands.addCommand(CommandIDs.activatePreviousTabBar, {
-    label: 'Activate Previous Tab Bar',
+    label: trans.__('Activate Previous Tab Bar'),
     execute: () => {
       shell.activatePreviousTabBar();
     }
@@ -654,7 +691,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
     '#jp-main-dock-panel .lm-DockPanel-tabBar.jp-Activity .lm-TabBar-tab';
 
   commands.addCommand(CommandIDs.close, {
-    label: () => 'Close Tab',
+    label: () => trans.__('Close Tab'),
     isEnabled: () => {
       const widget = contextMenuWidget();
       return !!widget && widget.title.closable;
@@ -673,14 +710,14 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   });
 
   commands.addCommand(CommandIDs.closeAll, {
-    label: 'Close All Tabs',
+    label: trans.__('Close All Tabs'),
     execute: () => {
       shell.closeAll();
     }
   });
 
   commands.addCommand(CommandIDs.closeOtherTabs, {
-    label: () => `Close All Other Tabs`,
+    label: () => trans.__('Close All Other Tabs'),
     isEnabled: () => {
       // Ensure there are at least two widgets.
       const iterator = shell.widgets('main');
@@ -705,7 +742,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   });
 
   commands.addCommand(CommandIDs.closeRightTabs, {
-    label: () => `Close Tabs to Right`,
+    label: () => trans.__('Close Tabs to Right'),
     isEnabled: () =>
       !!contextMenuWidget() && widgetsRightOf(contextMenuWidget()!).length > 0,
     execute: () => {
@@ -723,7 +760,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   });
 
   app.commands.addCommand(CommandIDs.toggleLeftArea, {
-    label: () => 'Show Left Sidebar',
+    label: () => trans.__('Show Left Sidebar'),
     execute: () => {
       if (shell.leftCollapsed) {
         shell.expandLeft();
@@ -739,7 +776,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   });
 
   app.commands.addCommand(CommandIDs.toggleRightArea, {
-    label: () => 'Show Right Sidebar',
+    label: () => trans.__('Show Right Sidebar'),
     execute: () => {
       if (shell.rightCollapsed) {
         shell.expandRight();
@@ -755,7 +792,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   });
 
   app.commands.addCommand(CommandIDs.togglePresentationMode, {
-    label: () => 'Presentation Mode',
+    label: () => trans.__('Presentation Mode'),
     execute: () => {
       shell.presentationMode = !shell.presentationMode;
     },
@@ -779,7 +816,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   });
 
   app.commands.addCommand(CommandIDs.toggleMode, {
-    label: 'Single-Document Mode',
+    label: trans.__('Single-Document Mode'),
     isToggled: () => shell.mode === 'single-document',
     execute: () => {
       const args =
@@ -877,17 +914,23 @@ const paths: JupyterFrontEndPlugin<JupyterFrontEnd.IPaths> = {
 const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   id: '@jupyterlab/application-extension:property-inspector',
   autoStart: true,
-  requires: [ILabShell],
+  requires: [ILabShell, ITranslator],
   optional: [ILayoutRestorer],
   provides: IPropertyInspectorProvider,
   activate: (
     app: JupyterFrontEnd,
     labshell: ILabShell,
+    translator: ITranslator,
     restorer: ILayoutRestorer | null
   ) => {
-    const widget = new SideBarPropertyInspectorProvider(labshell);
+    const trans = translator.load('jupyterlab');
+    const widget = new SideBarPropertyInspectorProvider(
+      labshell,
+      undefined,
+      translator
+    );
     widget.title.icon = buildIcon;
-    widget.title.caption = 'Property Inspector';
+    widget.title.caption = trans.__('Property Inspector');
     widget.id = 'jp-property-inspector';
     labshell.add(widget, 'left');
     if (restorer) {

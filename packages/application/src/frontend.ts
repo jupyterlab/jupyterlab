@@ -75,18 +75,6 @@ export abstract class JupyterFrontEnd<
       options.restored ||
       this.started.then(() => restored).catch(() => restored);
     this.serviceManager = options.serviceManager || new ServiceManager();
-
-    this.commands.addCommand(Private.CONTEXT_MENU_INFO, {
-      label: 'Shift+Right Click for Browser Menu',
-      isEnabled: () => false,
-      execute: () => void 0
-    });
-
-    this.contextMenu.addItem({
-      command: Private.CONTEXT_MENU_INFO,
-      selector: 'body',
-      rank: Infinity
-    });
   }
 
   /**
@@ -211,7 +199,7 @@ export abstract class JupyterFrontEnd<
       // allow the native one to open.
       if (
         items.length === 1 &&
-        items[0].command === Private.CONTEXT_MENU_INFO
+        items[0].command === JupyterFrontEndContextMenu.contextMenu
       ) {
         this.contextMenu.menu.close();
         return;
@@ -412,15 +400,19 @@ export namespace JupyterFrontEnd {
  */
 namespace Private {
   /**
-   * An id for a private context-menu-info
-   * ersatz command.
-   */
-  export const CONTEXT_MENU_INFO = '__internal:context-menu-info';
-
-  /**
    * Returns whether the element is itself, or a child of, an element with the `jp-suppress-context-menu` data attribute.
    */
   export function suppressContextMenu(element: HTMLElement): boolean {
     return element.closest('[data-jp-suppress-context-menu]') !== null;
   }
+}
+
+/**
+ * A namespace for the context menu override.
+ */
+export namespace JupyterFrontEndContextMenu {
+  /**
+   * An id for a private context-menu-info ersatz command.
+   */
+  export const contextMenu = '__internal:context-menu-info';
 }

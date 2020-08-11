@@ -2,6 +2,11 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IObservableJSON } from '@jupyterlab/observables';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 import { checkIcon, undoIcon } from '@jupyterlab/ui-components';
 
 import {
@@ -43,7 +48,8 @@ export class JSONEditor extends Widget {
    */
   constructor(options: JSONEditor.IOptions) {
     super();
-
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this.addClass(JSONEDITOR_CLASS);
 
     this.headerNode = document.createElement('div');
@@ -51,12 +57,12 @@ export class JSONEditor extends Widget {
 
     this.revertButtonNode = undoIcon.element({
       tag: 'span',
-      title: 'Revert changes to data'
+      title: this._trans.__('Revert changes to data')
     });
 
     this.commitButtonNode = checkIcon.element({
       tag: 'span',
-      title: 'Commit changes to data',
+      title: this._trans.__('Commit changes to data'),
       marginLeft: '8px'
     });
 
@@ -71,7 +77,7 @@ export class JSONEditor extends Widget {
 
     const model = new CodeEditor.Model();
 
-    model.value.text = 'No data!';
+    model.value.text = this._trans.__('No data!');
     model.mimeType = 'application/json';
     model.value.changed.connect(this._onValueChanged, this);
     this.model = model;
@@ -304,7 +310,7 @@ export class JSONEditor extends Widget {
     const content = this._source ? this._source.toJSON() : {};
     this._changeGuard = true;
     if (content === void 0) {
-      model.value.text = 'No data!';
+      model.value.text = this._trans.__('No data!');
       this._originalValue = JSONExt.emptyObject;
     } else {
       const value = JSON.stringify(content, null, 4);
@@ -321,6 +327,8 @@ export class JSONEditor extends Widget {
     this.revertButtonNode.hidden = true;
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _dataDirty = false;
   private _inputDirty = false;
   private _source: IObservableJSON | null = null;
@@ -340,5 +348,10 @@ export namespace JSONEditor {
      * The editor factory used by the editor.
      */
     editorFactory: CodeEditor.Factory;
+
+    /**
+     * The language translator.
+     */
+    translator?: ITranslator;
   }
 }

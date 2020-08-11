@@ -5,6 +5,8 @@ import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
 import { Printing } from '@jupyterlab/apputils';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { Message } from '@lumino/messaging';
 
 import { Widget } from '@lumino/widgets';
@@ -40,6 +42,7 @@ export class RenderedJSON extends Widget
     this.addClass('CodeMirror');
     this.addClass('cm-s-jupyter');
     this._mimeType = options.mimeType;
+    this.translator = options.translator || nullTranslator;
   }
 
   [Printing.symbol]() {
@@ -54,7 +57,11 @@ export class RenderedJSON extends Widget
     const metadata = (model.metadata[this._mimeType] || {}) as JSONObject;
     return new Promise<void>((resolve, reject) => {
       ReactDOM.render(
-        <Component data={data} metadata={metadata} />,
+        <Component
+          data={data}
+          metadata={metadata}
+          translator={this.translator}
+        />,
         this.node,
         () => {
           resolve();
@@ -71,6 +78,7 @@ export class RenderedJSON extends Widget
     ReactDOM.unmountComponentAtNode(this.node);
   }
 
+  translator: ITranslator;
   private _mimeType: string;
 }
 

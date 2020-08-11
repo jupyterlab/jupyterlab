@@ -21,6 +21,8 @@ import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { Contents } from '@jupyterlab/services';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 /**
  * The class name added to document widgets.
  */
@@ -35,6 +37,7 @@ export class DocumentWidgetManager implements IDisposable {
    */
   constructor(options: DocumentWidgetManager.IOptions) {
     this._registry = options.registry;
+    this.translator = options.translator || nullTranslator;
   }
 
   /**
@@ -254,6 +257,7 @@ export class DocumentWidgetManager implements IDisposable {
    * @param widget - The target widget.
    */
   protected async setCaption(widget: Widget): Promise<void> {
+    const trans = this.translator.load('jupyterlab');
     const context = Private.contextProperty.get(widget);
     if (!context) {
       return;
@@ -271,13 +275,17 @@ export class DocumentWidgetManager implements IDisposable {
         }
         const last = checkpoints[checkpoints.length - 1];
         const checkpoint = last ? Time.format(last.last_modified) : 'None';
-        let caption = `Name: ${model!.name}\nPath: ${model!.path}\n`;
+        let caption = trans.__(
+          'Name: %1\nPath: %2\n',
+          model!.name,
+          model!.path
+        );
         if (context!.model.readOnly) {
-          caption += 'Read-only';
+          caption += trans.__('Read-only');
         } else {
           caption +=
-            `Last Saved: ${Time.format(model!.last_modified)}\n` +
-            `Last Checkpoint: ${checkpoint}`;
+            trans.__('Last Saved: %1\n', Time.format(model!.last_modified)) +
+            trans.__('Last Checkpoint: %1', checkpoint);
         }
         widget.title.caption = caption;
       });
@@ -329,7 +337,12 @@ export class DocumentWidgetManager implements IDisposable {
   /**
    * Ask the user whether to close an unsaved file.
    */
-  private _maybeClose(widget: Widget): Promise<[boolean, boolean]> {
+  private _maybeClose(
+    widget: Widget,
+    translator?: ITranslator
+  ): Promise<[boolean, boolean]> {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
     // Bail if the model is not dirty or other widgets are using the model.)
     const context = Private.contextProperty.get(widget);
     if (!context) {
@@ -358,13 +371,15 @@ export class DocumentWidgetManager implements IDisposable {
       return Promise.resolve([true, true]);
     }
     const fileName = widget.title.label;
-    const saveLabel = context.contentsModel?.writable ? 'Save' : 'Save as';
+    const saveLabel = context.contentsModel?.writable
+      ? trans.__('Save')
+      : trans.__('Save as');
     return showDialog({
-      title: 'Save your work',
-      body: `Save changes in "${fileName}" before closing?`,
+      title: trans.__('Save your work'),
+      body: trans.__('Save changes in "%1" before closing?', fileName),
       buttons: [
-        Dialog.cancelButton(),
-        Dialog.warnButton({ label: 'Discard' }),
+        Dialog.cancelButton({ label: trans.__('Cancel') }),
+        Dialog.warnButton({ label: trans.__('Discard') }),
         Dialog.okButton({ label: saveLabel })
       ]
     }).then(result => {
@@ -420,6 +435,7 @@ export class DocumentWidgetManager implements IDisposable {
     });
   }
 
+  protected translator: ITranslator;
   private _registry: DocumentRegistry;
   private _activateRequested = new Signal<this, string>(this);
   private _isDisposed = false;
@@ -437,6 +453,11 @@ export namespace DocumentWidgetManager {
      * A document registry instance.
      */
     registry: DocumentRegistry;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 

@@ -30,6 +30,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { IStatusBar } from '@jupyterlab/statusbar';
 
+import { ITranslator } from '@jupyterlab/translation';
+
 /**
  * The command IDs used by the codemirror plugin.
  */
@@ -59,7 +61,7 @@ const services: JupyterFrontEndPlugin<IEditorServices> = {
  */
 const commands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:commands',
-  requires: [IEditorTracker, ISettingRegistry],
+  requires: [IEditorTracker, ISettingRegistry, ITranslator],
   optional: [IMainMenu],
   activate: activateEditorCommands,
   autoStart: true
@@ -71,19 +73,20 @@ const commands: JupyterFrontEndPlugin<void> = {
 export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/codemirror-extension:editor-syntax-status',
   autoStart: true,
-  requires: [IEditorTracker, ILabShell],
+  requires: [IEditorTracker, ILabShell, ITranslator],
   optional: [IStatusBar],
   activate: (
     app: JupyterFrontEnd,
     tracker: IEditorTracker,
     labShell: ILabShell,
+    translator: ITranslator,
     statusBar: IStatusBar | null
   ) => {
     if (!statusBar) {
       // Automatically disable if statusbar missing
       return;
     }
-    const item = new EditorSyntaxStatus({ commands: app.commands });
+    const item = new EditorSyntaxStatus({ commands: app.commands, translator });
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
       if (current && tracker.has(current) && item.model) {
@@ -139,8 +142,10 @@ function activateEditorCommands(
   app: JupyterFrontEnd,
   tracker: IEditorTracker,
   settingRegistry: ISettingRegistry,
+  translator: ITranslator,
   mainMenu: IMainMenu | null
 ): void {
+  const trans = translator.load('jupyterlab');
   const { commands, restored } = app;
   let {
     theme,
@@ -250,16 +255,16 @@ function activateEditorCommands(
   const keyMapMenu = new Menu({ commands });
   const modeMenu = new Menu({ commands });
 
-  themeMenu.title.label = 'Text Editor Theme';
-  keyMapMenu.title.label = 'Text Editor Key Map';
-  modeMenu.title.label = 'Text Editor Syntax Highlighting';
+  themeMenu.title.label = trans.__('Text Editor Theme');
+  keyMapMenu.title.label = trans.__('Text Editor Key Map');
+  modeMenu.title.label = trans.__('Text Editor Syntax Highlighting');
 
   commands.addCommand(CommandIDs.changeTheme, {
     label: args => {
       if (args['theme'] === 'default') {
-        return 'codemirror';
+        return trans.__('codemirror');
       } else {
-        return args['theme'] as string;
+        return args['displayName'] as string;
       }
     },
     execute: args => {
@@ -275,8 +280,9 @@ function activateEditorCommands(
 
   commands.addCommand(CommandIDs.changeKeyMap, {
     label: args => {
-      const title = args['keyMap'] as string;
-      return title === 'sublime' ? 'Sublime Text' : title;
+      const title = args['displayName'] as string;
+      const keyMap = args['keyMap'] as string;
+      return keyMap === 'sublime' ? trans.__('Sublime Text') : title;
     },
     execute: args => {
       const key = 'keyMap';
@@ -290,7 +296,7 @@ function activateEditorCommands(
   });
 
   commands.addCommand(CommandIDs.find, {
-    label: 'Find...',
+    label: trans.__('Find...'),
     execute: () => {
       const widget = tracker.currentWidget;
       if (!widget) {
@@ -303,7 +309,7 @@ function activateEditorCommands(
   });
 
   commands.addCommand(CommandIDs.goToLine, {
-    label: 'Go to Line...',
+    label: trans.__('Go to Line...'),
     execute: () => {
       const widget = tracker.currentWidget;
       if (!widget) {
@@ -357,33 +363,40 @@ function activateEditorCommands(
       });
     });
 
+  // FIXME-TRANS: Check this is working as expected
   [
-    'jupyter',
-    'default',
-    'abcdef',
-    'base16-dark',
-    'base16-light',
-    'hopscotch',
-    'material',
-    'mbo',
-    'mdn-like',
-    'seti',
-    'solarized dark',
-    'solarized light',
-    'the-matrix',
-    'xq-light',
-    'zenburn'
-  ].forEach(name =>
+    ['jupyter', trans.__('jupyter')],
+    ['default', trans.__('default')],
+    ['abcdef', trans.__('abcdef')],
+    ['base16-dark', trans.__('base16-dark')],
+    ['base16-light', trans.__('base16-light')],
+    ['hopscotch', trans.__('hopscotch')],
+    ['material', trans.__('material')],
+    ['mbo', trans.__('mbo')],
+    ['mdn-like', trans.__('mdn-like')],
+    ['seti', trans.__('seti')],
+    ['solarized dark', trans.__('solarized dark')],
+    ['solarized light', trans.__('solarized light')],
+    ['the-matrix', trans.__('the-matrix')],
+    ['xq-light', trans.__('xq-light')],
+    ['zenburn', trans.__('zenburn')]
+  ].forEach((name, displayName) =>
     themeMenu.addItem({
       command: CommandIDs.changeTheme,
-      args: { theme: name }
+      args: { theme: name, displayName: displayName }
     })
   );
 
-  ['default', 'sublime', 'vim', 'emacs'].forEach(name => {
+  // FIXME-TRANS: Check this is working as expected
+  [
+    ['default', trans.__('default')],
+    ['sublime', trans.__('sublime')],
+    ['vim', trans.__('vim')],
+    ['emacs', trans.__('emacs')]
+  ].forEach((name, displayName) => {
     keyMapMenu.addItem({
       command: CommandIDs.changeKeyMap,
-      args: { keyMap: name }
+      args: { keyMap: name, displayName: displayName }
     });
   });
 

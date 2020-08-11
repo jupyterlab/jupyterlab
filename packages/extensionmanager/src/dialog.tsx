@@ -3,6 +3,8 @@
 
 import { Dialog, showDialog } from '@jupyterlab/apputils';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import * as React from 'react';
 
 /**
@@ -11,18 +13,22 @@ import * as React from 'react';
  * @param name The name of the extension
  * @param errorMessage Any error message giving details about the failure.
  */
-export function reportInstallError(name: string, errorMessage?: string) {
+export function reportInstallError(
+  name: string,
+  errorMessage?: string,
+  translator?: ITranslator
+) {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
   const entries = [];
   entries.push(
-    <p>
-      An error occurred installing <code>{name}</code>.
-    </p>
+    <p>{trans.__('An error occurred installing <code>%1</code>.', name)}</p>
   );
   if (errorMessage) {
     entries.push(
       <p>
         <span className="jp-extensionmanager-dialog-subheader">
-          Error message:
+          {trans.__('Error message:')}
         </span>
       </p>,
       <pre>{errorMessage.trim()}</pre>
@@ -30,8 +36,8 @@ export function reportInstallError(name: string, errorMessage?: string) {
   }
   const body = <div className="jp-extensionmanager-dialog">{entries}</div>;
   void showDialog({
-    title: 'Extension Installation Error',
+    title: trans.__('Extension Installation Error'),
     body,
-    buttons: [Dialog.warnButton({ label: 'OK' })]
+    buttons: [Dialog.warnButton({ label: trans.__('OK') })]
   });
 }

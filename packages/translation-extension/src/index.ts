@@ -66,9 +66,6 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
     let translationBundles: any = {};
     let metadata: any;
     return {
-      locale: (): string => {
-        return currentLocale;
-      },
       load: (domain: string): TranslationBundle => {
         if (currentLocale == 'en') {
           return englishBundle;

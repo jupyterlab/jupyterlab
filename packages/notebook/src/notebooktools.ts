@@ -28,6 +28,12 @@ import * as nbformat from '@jupyterlab/nbformat';
 
 import { IObservableMap, ObservableJSON } from '@jupyterlab/observables';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { NotebookPanel } from './panel';
 import { INotebookModel } from './model';
 import { INotebookTools, INotebookTracker } from './tokens';
@@ -76,9 +82,11 @@ export class NotebookTools extends Widget implements INotebookTools {
     super();
     this.addClass('jp-NotebookTools');
 
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this._commonTools = new RankedPanel<NotebookTools.Tool>();
     this._advancedTools = new RankedPanel<NotebookTools.Tool>();
-    this._advancedTools.title.label = 'Advanced Tools';
+    this._advancedTools.title.label = this._trans.__('Advanced Tools');
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(this._commonTools);
@@ -244,6 +252,8 @@ export class NotebookTools extends Widget implements INotebookTools {
     return chain(this._commonTools.children(), this._advancedTools.children());
   }
 
+  translator: ITranslator;
+  private _trans: TranslationBundle;
   private _commonTools: RankedPanel<NotebookTools.Tool>;
   private _advancedTools: RankedPanel<NotebookTools.Tool>;
   private _tracker: INotebookTracker;
@@ -263,6 +273,11 @@ export namespace NotebookTools {
      * The notebook tracker used by the notebook tools.
      */
     tracker: INotebookTracker;
+
+    /**
+     * Language translator.
+     */
+    translator?: ITranslator;
   }
 
   /**
@@ -543,6 +558,11 @@ export namespace NotebookTools {
        * Initial collapse state, defaults to true.
        */
       collapsed?: boolean;
+
+      /**
+       * Language translator.
+       */
+      translator?: ITranslator;
     }
   }
 
@@ -551,7 +571,9 @@ export namespace NotebookTools {
    */
   export class NotebookMetadataEditorTool extends MetadataEditorTool {
     constructor(options: MetadataEditorTool.IOptions) {
-      options.label = options.label || 'Notebook Metadata';
+      const translator = options.translator || nullTranslator;
+      const trans = translator.load('jupyterlab');
+      options.label = options.label || trans.__('Notebook Metadata');
       super(options);
     }
 
@@ -582,7 +604,9 @@ export namespace NotebookTools {
    */
   export class CellMetadataEditorTool extends MetadataEditorTool {
     constructor(options: MetadataEditorTool.IOptions) {
-      options.label = options.label || 'Cell Metadata';
+      const translator = options.translator || nullTranslator;
+      const trans = translator.load('jupyterlab');
+      options.label = options.label || trans.__('Cell Metadata');
       super(options);
     }
 
@@ -833,7 +857,16 @@ export namespace NotebookTools {
   /**
    * Create a slideshow selector.
    */
-  export function createSlideShowSelector(): KeySelector {
+  export function createSlideShowSelector(
+    translator?: ITranslator
+  ): KeySelector {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    trans.__('');
+    // FIXME-TRANS: optionsMap needs to be reversed to have the id as the key
+    // not the translatable string. The name should change to reflect the
+    // breaking change othwerwise other extension devs might get unexected
+    // results
     const options: KeySelector.IOptions = {
       key: 'slideshow',
       title: 'Slide Type',
@@ -874,11 +907,18 @@ export namespace NotebookTools {
    * Create an nbconvert selector.
    */
   export function createNBConvertSelector(
-    optionsMap: ReadonlyPartialJSONObject
+    // FIXME-TRANS: optionsMap needs to be reversed to have the id as the key
+    // not the translatable string. The name should change to reflect the
+    // breaking change othwerwise other extension devs might get unexected
+    // results
+    optionsMap: ReadonlyPartialJSONObject,
+    translator?: ITranslator
   ): KeySelector {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
     return new KeySelector({
       key: 'raw_mimetype',
-      title: 'Raw NBConvert Format',
+      title: trans.__('Raw NBConvert Format'),
       optionsMap: optionsMap,
       validCellTypes: ['raw']
     });

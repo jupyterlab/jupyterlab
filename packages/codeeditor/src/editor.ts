@@ -17,6 +17,7 @@ import {
   IObservableMap,
   IObservableString
 } from '@jupyterlab/observables';
+import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * A namespace for code editors.
@@ -705,6 +706,11 @@ export namespace CodeEditor {
      * The configuration options for the editor.
      */
     config?: Partial<IConfig>;
+
+    /**
+     * The configuration options for the editor.
+     */
+    translator?: ITranslator;
   }
 
   export namespace Model {

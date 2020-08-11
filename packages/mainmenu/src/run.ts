@@ -27,8 +27,6 @@ export class RunMenu extends JupyterLabMenu implements IRunMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.menu.title.label = 'Run';
-
     this.codeRunners = new Set<IRunMenu.ICodeRunner<Widget>>();
   }
 
@@ -59,10 +57,28 @@ export namespace IRunMenu {
    */
   export interface ICodeRunner<T extends Widget> extends IMenuExtender<T> {
     /**
-     * A string label for the thing that is being run,
-     * which is used to populate the menu labels.
+     * Return the label associated to the `run` function.
+     *
+     * This function receives the number of items `n` to be able to provided
+     * correct pluralized forms of tranlsations.
      */
-    noun: string;
+    runLabel?: (n: number) => string;
+
+    /**
+     * Return the label associated to the `runAllLabel` function.
+     *
+     * This function receives the number of items `n` to be able to provided
+     * correct pluralized forms of tranlsations.
+     */
+    runAllLabel?: (n: number) => string;
+
+    /**
+     * Return the label associated to the `restartAndRunAllLabel` function.
+     *
+     * This function receives the number of items `n` to be able to provided
+     * correct pluralized forms of tranlsations.
+     */
+    restartAndRunAllLabel?: (n: number) => string;
 
     /**
      * A function to run a chunk of code.

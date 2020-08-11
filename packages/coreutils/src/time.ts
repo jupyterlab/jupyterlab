@@ -15,7 +15,9 @@ export namespace Time {
    * @returns A formatted date.
    */
   export function formatHuman(value: string | Date): string {
+    moment.locale(document.documentElement.lang);
     let time = moment(value).fromNow();
+    // FIXME-TRANS: This is not localization friendly!
     time = time === 'a few seconds ago' ? 'seconds ago' : time;
     return time;
   }

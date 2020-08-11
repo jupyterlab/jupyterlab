@@ -6,6 +6,7 @@ import { Dialog, showDialog } from '@jupyterlab/apputils';
 import * as React from 'react';
 
 import { KernelSpec } from '@jupyterlab/services';
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 /**
  * An object representing a companion installation info.
@@ -126,15 +127,18 @@ function getInstallCommands(info: IInstallInfo) {
  */
 export function presentCompanions(
   kernelCompanions: KernelCompanion[],
-  serverCompanion: IInstallInfo | undefined
+  serverCompanion: IInstallInfo | undefined,
+  translator?: ITranslator
 ): Promise<boolean> {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
   const entries = [];
   if (serverCompanion) {
     entries.push(
       <p key="server-companion">
-        This package has indicated that it needs a corresponding server
-        extension. Please contact your Administrator to update the server with
-        one of the following commands:
+        {trans.__(`This package has indicated that it needs a corresponding server
+extension. Please contact your Administrator to update the server with
+one of the following commands:`)}
         {getInstallCommands(serverCompanion).map(command => {
           return (
             <p key={command}>
@@ -148,16 +152,18 @@ export function presentCompanions(
   if (kernelCompanions.length > 0) {
     entries.push(
       <p key={'kernel-companion'}>
-        This package has indicated that it needs a corresponding package for the
-        kernel.
+        {trans.__(
+          'This package has indicated that it needs a corresponding package for the kernel.'
+        )}
       </p>
     );
     for (const [index, entry] of kernelCompanions.entries()) {
       entries.push(
         <p key={`companion-${index}`}>
-          The package
-          <code>{entry.kernelInfo.base.name!}</code>, is required by the
-          following kernels:
+          {trans.__(
+            `The package <code>%1</code>, is required by the following kernels:`,
+            entry.kernelInfo.base.name!
+          )}
         </p>
       );
       const kernelEntries = [];
@@ -171,9 +177,9 @@ export function presentCompanions(
       entries.push(<ul key={'kernel-companion-end'}>{kernelEntries}</ul>);
       entries.push(
         <p key={`kernel-companion-${index}`}>
-          This package has indicated that it needs a corresponding kernel
-          package. Please contact your Administrator to update the server with
-          one of the following commands:
+          {trans.__(`This package has indicated that it needs a corresponding kernel
+package. Please contact your Administrator to update the server with
+one of the following commands:`)}
           {getInstallCommands(entry.kernelInfo).map(command => {
             return (
               <p key={command}>
@@ -189,9 +195,9 @@ export function presentCompanions(
     <div>
       {entries}
       <p>
-        You should make sure that the indicated packages are installed before
-        trying to use the extension. Do you want to continue with the extension
-        installation?
+        {trans.__(`You should make sure that the indicated packages are installed before
+trying to use the extension. Do you want to continue with the extension
+installation?`)}
       </p>
     </div>
   );
@@ -199,20 +205,20 @@ export function presentCompanions(
   const hasServerCompanion = !!serverCompanion;
   let title = '';
   if (hasKernelCompanions && hasServerCompanion) {
-    title = 'Kernel and Server Companions';
+    title = trans.__('Kernel and Server Companions');
   } else if (hasKernelCompanions) {
-    title = 'Kernel Companions';
+    title = trans.__('Kernel Companions');
   } else {
-    title = 'Server Companion';
+    title = trans.__('Server Companion');
   }
   return showDialog({
     title,
     body,
     buttons: [
-      Dialog.cancelButton(),
+      Dialog.cancelButton({ label: trans.__('Cancel') }),
       Dialog.okButton({
-        label: 'OK',
-        caption: 'Install the JupyterLab extension.'
+        label: trans.__('OK'),
+        caption: trans.__('Install the JupyterLab extension.')
       })
     ]
   }).then(result => {

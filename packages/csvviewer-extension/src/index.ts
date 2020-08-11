@@ -22,6 +22,7 @@ import { ISearchProviderRegistry } from '@jupyterlab/documentsearch';
 import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 import { DataGrid } from '@lumino/datagrid';
 import { CSVSearchProvider } from './searchprovider';
+import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * The name of the factories that creates widgets.
@@ -35,7 +36,7 @@ const FACTORY_TSV = 'TSVTable';
 const csv: JupyterFrontEndPlugin<void> = {
   activate: activateCsv,
   id: '@jupyterlab/csvviewer-extension:csv',
-  requires: [],
+  requires: [ITranslator],
   optional: [
     ILayoutRestorer,
     IThemeManager,
@@ -51,7 +52,7 @@ const csv: JupyterFrontEndPlugin<void> = {
 const tsv: JupyterFrontEndPlugin<void> = {
   activate: activateTsv,
   id: '@jupyterlab/csvviewer-extension:tsv',
-  requires: [],
+  requires: [ITranslator],
   optional: [
     ILayoutRestorer,
     IThemeManager,
@@ -66,14 +67,16 @@ const tsv: JupyterFrontEndPlugin<void> = {
  */
 function addMenuEntries(
   mainMenu: IMainMenu,
-  tracker: WidgetTracker<IDocumentWidget<CSVViewer>>
+  tracker: WidgetTracker<IDocumentWidget<CSVViewer>>,
+  translator: ITranslator
 ) {
+  const trans = translator.load('jupyterlab');
   // Add go to line capability to the edit menu.
   mainMenu.editMenu.goToLiners.add({
     tracker,
     goToLine: (widget: IDocumentWidget<CSVViewer>) => {
       return InputDialog.getNumber({
-        title: 'Go to Line',
+        title: trans.__('Go to Line'),
         value: 0
       }).then(value => {
         if (value.button.accept && value.value !== null) {
@@ -89,6 +92,7 @@ function addMenuEntries(
  */
 function activateCsv(
   app: JupyterFrontEnd,
+  translator: ITranslator,
   restorer: ILayoutRestorer | null,
   themeManager: IThemeManager | null,
   mainMenu: IMainMenu | null,
@@ -98,7 +102,8 @@ function activateCsv(
     name: FACTORY_CSV,
     fileTypes: ['csv'],
     defaultFor: ['csv'],
-    readOnly: true
+    readOnly: true,
+    translator
   });
   const tracker = new WidgetTracker<IDocumentWidget<CSVViewer>>({
     namespace: 'csvviewer'
@@ -157,7 +162,7 @@ function activateCsv(
   }
 
   if (mainMenu) {
-    addMenuEntries(mainMenu, tracker);
+    addMenuEntries(mainMenu, tracker, translator);
   }
   if (searchregistry) {
     searchregistry.register('csv', CSVSearchProvider);
@@ -169,6 +174,7 @@ function activateCsv(
  */
 function activateTsv(
   app: JupyterFrontEnd,
+  translator: ITranslator,
   restorer: ILayoutRestorer | null,
   themeManager: IThemeManager | null,
   mainMenu: IMainMenu | null,
@@ -178,7 +184,8 @@ function activateTsv(
     name: FACTORY_TSV,
     fileTypes: ['tsv'],
     defaultFor: ['tsv'],
-    readOnly: true
+    readOnly: true,
+    translator
   });
   const tracker = new WidgetTracker<IDocumentWidget<CSVViewer>>({
     namespace: 'tsvviewer'
@@ -237,7 +244,7 @@ function activateTsv(
   }
 
   if (mainMenu) {
-    addMenuEntries(mainMenu, tracker);
+    addMenuEntries(mainMenu, tracker, translator);
   }
   if (searchregistry) {
     searchregistry.register('tsv', CSVSearchProvider);

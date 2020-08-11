@@ -34,7 +34,6 @@ export class EditMenu extends JupyterLabMenu implements IEditMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.menu.title.label = 'Edit';
 
     this.undoers = new Set<IEditMenu.IUndoer<Widget>>();
 
@@ -92,14 +91,20 @@ export namespace IEditMenu {
    */
   export interface IClearer<T extends Widget> extends IMenuExtender<T> {
     /**
-     * A name for the thing to be cleared, used for labeling `clearCurrent`.
+     * A function to create the label for the `clearCurrent`action.
+     *
+     * This function receives the number of items `n` to be able to provided
+     * correct pluralized forms of tranlsations.
      */
-    noun?: string;
+    clearCurrentLabel?: (n: number) => string;
 
     /**
-     * A plural name for the thing to be cleared, used for labeling `clearAll`.
+     * A function to create the label for the `clearAll`action.
+     *
+     * This function receives the number of items `n` to be able to provided
+     * correct pluralized forms of tranlsations.
      */
-    pluralNoun?: string;
+    clearAllLabel?: (n: number) => string;
 
     /**
      * A function to clear the currently portion of activity.

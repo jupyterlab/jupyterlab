@@ -17,6 +17,12 @@ import { PageConfig, PathExt } from '@jupyterlab/coreutils';
 
 import { renameFile } from '@jupyterlab/docmanager';
 
+import {
+  nullTranslator,
+  TranslationBundle,
+  ITranslator
+} from '@jupyterlab/translation';
+
 import { ellipsesIcon, folderIcon } from '@jupyterlab/ui-components';
 
 import { FileBrowserModel } from './model';
@@ -62,6 +68,8 @@ export class BreadCrumbs extends Widget {
    */
   constructor(options: BreadCrumbs.IOptions) {
     super();
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this._model = options.model;
     this.addClass(BREADCRUMB_CLASS);
     this._crumbs = Private.createCrumbs();
@@ -161,7 +169,9 @@ export class BreadCrumbs extends Widget {
         );
         this._model
           .cd(BREAD_CRUMB_PATHS[index])
-          .catch(error => showErrorMessage('Open Error', error));
+          .catch(error =>
+            showErrorMessage(this._trans.__('Open Error'), error)
+          );
 
         // Stop the event propagation.
         event.preventDefault();
@@ -268,10 +278,12 @@ export class BreadCrumbs extends Widget {
       promises.push(renameFile(manager, oldPath, newPath));
     }
     void Promise.all(promises).catch(err => {
-      return showErrorMessage('Move Error', err);
+      return showErrorMessage(this._trans.__('Move Error'), err);
     });
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _model: FileBrowserModel;
   private _crumbs: ReadonlyArray<HTMLElement>;
   private _crumbSeps: ReadonlyArray<HTMLElement>;
@@ -289,6 +301,11 @@ export namespace BreadCrumbs {
      * A file browser model instance.
      */
     model: FileBrowserModel;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 

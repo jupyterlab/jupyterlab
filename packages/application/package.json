@@ -48,6 +48,7 @@
     "@jupyterlab/rendermime-interfaces": "^3.0.0-alpha.8",
     "@jupyterlab/services": "^6.0.0-alpha.8",
     "@jupyterlab/statedb": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
     "@jupyterlab/ui-components": "^3.0.0-alpha.8",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/application": "^1.8.4",

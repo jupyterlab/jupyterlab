@@ -40,6 +40,7 @@ import { settingsPlugin } from './settingsplugin';
 import { themesPlugin, themesPaletteMenuPlugin } from './themesplugins';
 
 import { workspacesPlugin } from './workspacesplugin';
+import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -65,10 +66,13 @@ namespace CommandIDs {
  * The default command palette extension.
  */
 const palette: JupyterFrontEndPlugin<ICommandPalette> = {
-  activate: Palette.activate,
   id: '@jupyterlab/apputils-extension:palette',
+  autoStart: true,
+  requires: [ITranslator],
   provides: ICommandPalette,
-  autoStart: true
+  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+    return Palette.activate(app, translator);
+  }
 };
 
 /**
@@ -81,10 +85,16 @@ const palette: JupyterFrontEndPlugin<ICommandPalette> = {
  * in the application load cycle.
  */
 const paletteRestorer: JupyterFrontEndPlugin<void> = {
-  activate: Palette.restore,
   id: '@jupyterlab/apputils-extension:palette-restorer',
-  requires: [ILayoutRestorer],
-  autoStart: true
+  autoStart: true,
+  requires: [ILayoutRestorer, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer,
+    translator: ITranslator
+  ) => {
+    Palette.restore(app, restorer, translator);
+  }
 };
 
 /**
@@ -142,8 +152,10 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
 const splash: JupyterFrontEndPlugin<ISplashScreen> = {
   id: '@jupyterlab/apputils-extension:splash',
   autoStart: true,
+  requires: [ITranslator],
   provides: ISplashScreen,
-  activate: app => {
+  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+    const trans = translator.load('jupyterlab');
     const { commands, restored } = app;
 
     // Create splash element and populate it.
@@ -186,12 +198,12 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
         }
 
         dialog = new Dialog({
-          title: 'Loading...',
-          body: `The loading screen is taking a long time.
-          Would you like to clear the workspace or keep waiting?`,
+          title: trans.__('Loading...'),
+          body: trans.__(`The loading screen is taking a long time. 
+Would you like to clear the workspace or keep waiting?`),
           buttons: [
-            Dialog.cancelButton({ label: 'Keep Waiting' }),
-            Dialog.warnButton({ label: 'Clear Workspace' })
+            Dialog.cancelButton({ label: trans.__('Keep Waiting') }),
+            Dialog.warnButton({ label: trans.__('Clear Workspace') })
           ]
         });
 
@@ -252,9 +264,11 @@ const splash: JupyterFrontEndPlugin<ISplashScreen> = {
 const print: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:print',
   autoStart: true,
-  activate: (app: JupyterFrontEnd) => {
+  requires: [ITranslator],
+  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+    const trans = translator.load('jupyterlab');
     app.commands.addCommand(CommandIDs.print, {
-      label: 'Print...',
+      label: trans.__('Print...'),
       isEnabled: () => {
         const widget = app.shell.currentWidget;
         return Printing.getPrintFunction(widget) !== null;
@@ -282,15 +296,18 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
   id: '@jupyterlab/apputils-extension:state',
   autoStart: true,
   provides: IStateDB,
-  requires: [JupyterFrontEnd.IPaths, IRouter],
+  requires: [JupyterFrontEnd.IPaths, IRouter, ITranslator],
   optional: [ISplashScreen, IWindowResolver],
   activate: (
     app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
     router: IRouter,
+    translator: ITranslator,
     splash: ISplashScreen | null,
     resolver: IWindowResolver | null
   ) => {
+    const trans = translator.load('jupyterlab');
+
     if (resolver === null) {
       return new StateDB();
     }
@@ -376,7 +393,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
     });
 
     commands.addCommand(CommandIDs.reset, {
-      label: 'Reset Application State',
+      label: trans.__('Reset Application State'),
       execute: async ({ reload }: { reload: boolean }) => {
         await db.clear();
         await save.invoke();
@@ -467,11 +484,13 @@ const sessionDialogs: JupyterFrontEndPlugin<ISessionContextDialogs> = {
  */
 const utilityCommands: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/apputils-extension:utilityCommands',
+  requires: [ITranslator],
   autoStart: true,
-  activate: app => {
+  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
+    const trans = translator.load('jupyterlab');
     const { commands } = app;
     commands.addCommand(CommandIDs.runFirstEnabled, {
-      label: 'Run First Enabled Command',
+      label: trans.__('Run First Enabled Command'),
       execute: args => {
         const commands: string[] = args.commands as string[];
         const commandArgs: any = args.args;

@@ -24,8 +24,6 @@ export class KernelMenu extends JupyterLabMenu implements IKernelMenu {
    */
   constructor(options: Menu.IOptions) {
     super(options);
-    this.menu.title.label = 'Kernel';
-
     this.kernelUsers = new Set<IKernelMenu.IKernelUser<Widget>>();
   }
 
@@ -80,8 +78,11 @@ export namespace IKernelMenu {
     shutdownKernel?: (widget: T) => Promise<void>;
 
     /**
-     * A noun to use for the restart and clear all command.
+     * A function to return the label associated to the `restartKernelAndClear` action.
+     *
+     * This function receives the number of items `n` to be able to provided
+     * correct pluralized forms of tranlsations.
      */
-    noun?: string;
+    restartKernelAndClearLabel?: (n: number) => string;
   }
 }

@@ -52,6 +52,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { JSONObject, ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { Menu } from '@lumino/widgets';
+import { TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The command IDs used by the fileeditor plugin.
@@ -185,51 +186,52 @@ export namespace Commands {
   export function addCommands(
     commands: CommandRegistry,
     settingRegistry: ISettingRegistry,
+    trans: TranslationBundle,
     id: string,
     isEnabled: () => boolean,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
     browserFactory: IFileBrowserFactory
   ) {
     // Add a command to change font size.
-    addChangeFontSizeCommand(commands, settingRegistry, id);
+    addChangeFontSizeCommand(commands, settingRegistry, trans, id);
 
-    addLineNumbersCommand(commands, settingRegistry, id, isEnabled);
+    addLineNumbersCommand(commands, settingRegistry, trans, id, isEnabled);
 
-    addWordWrapCommand(commands, settingRegistry, id, isEnabled);
+    addWordWrapCommand(commands, settingRegistry, trans, id, isEnabled);
 
-    addChangeTabsCommand(commands, settingRegistry, id);
+    addChangeTabsCommand(commands, settingRegistry, trans, id);
 
-    addMatchBracketsCommand(commands, settingRegistry, id, isEnabled);
+    addMatchBracketsCommand(commands, settingRegistry, trans, id, isEnabled);
 
-    addAutoClosingBracketsCommand(commands, settingRegistry, id);
+    addAutoClosingBracketsCommand(commands, settingRegistry, trans, id);
 
-    addReplaceSelectionCommand(commands, tracker, isEnabled);
+    addReplaceSelectionCommand(commands, tracker, trans, isEnabled);
 
-    addCreateConsoleCommand(commands, tracker, isEnabled);
+    addCreateConsoleCommand(commands, tracker, trans, isEnabled);
 
-    addRunCodeCommand(commands, tracker, isEnabled);
+    addRunCodeCommand(commands, tracker, trans, isEnabled);
 
-    addRunAllCodeCommand(commands, tracker, isEnabled);
+    addRunAllCodeCommand(commands, tracker, trans, isEnabled);
 
-    addMarkdownPreviewCommand(commands, tracker);
+    addMarkdownPreviewCommand(commands, tracker, trans);
 
     // Add a command for creating a new text file.
-    addCreateNewCommand(commands, browserFactory);
+    addCreateNewCommand(commands, browserFactory, trans);
 
     // Add a command for creating a new Markdown file.
-    addCreateNewMarkdownCommand(commands, browserFactory);
+    addCreateNewMarkdownCommand(commands, browserFactory, trans);
 
-    addUndoCommand(commands, tracker, isEnabled);
+    addUndoCommand(commands, tracker, trans, isEnabled);
 
-    addRedoCommand(commands, tracker, isEnabled);
+    addRedoCommand(commands, tracker, trans, isEnabled);
 
-    addCutCommand(commands, tracker, isEnabled);
+    addCutCommand(commands, tracker, trans, isEnabled);
 
-    addCopyCommand(commands, tracker, isEnabled);
+    addCopyCommand(commands, tracker, trans, isEnabled);
 
-    addPasteCommand(commands, tracker, isEnabled);
+    addPasteCommand(commands, tracker, trans, isEnabled);
 
-    addSelectAllCommand(commands, tracker, isEnabled);
+    addSelectAllCommand(commands, tracker, trans, isEnabled);
   }
 
   /**
@@ -238,6 +240,7 @@ export namespace Commands {
   export function addChangeFontSizeCommand(
     commands: CommandRegistry,
     settingRegistry: ISettingRegistry,
+    trans: TranslationBundle,
     id: string
   ) {
     commands.addCommand(CommandIDs.changeFontSize, {
@@ -272,6 +275,7 @@ export namespace Commands {
   export function addLineNumbersCommand(
     commands: CommandRegistry,
     settingRegistry: ISettingRegistry,
+    trans: TranslationBundle,
     id: string,
     isEnabled: () => boolean
   ) {
@@ -286,7 +290,7 @@ export namespace Commands {
       },
       isEnabled,
       isToggled: () => config.lineNumbers,
-      label: 'Line Numbers'
+      label: trans.__('Line Numbers')
     });
   }
 
@@ -296,6 +300,7 @@ export namespace Commands {
   export function addWordWrapCommand(
     commands: CommandRegistry,
     settingRegistry: ISettingRegistry,
+    trans: TranslationBundle,
     id: string,
     isEnabled: () => boolean
   ) {
@@ -315,7 +320,7 @@ export namespace Commands {
         const lineWrap = (args['mode'] as wrappingMode) || 'off';
         return config.lineWrap === lineWrap;
       },
-      label: 'Word Wrap'
+      label: trans.__('Word Wrap')
     });
   }
 
@@ -325,6 +330,7 @@ export namespace Commands {
   export function addChangeTabsCommand(
     commands: CommandRegistry,
     settingRegistry: ISettingRegistry,
+    trans: TranslationBundle,
     id: string
   ) {
     commands.addCommand(CommandIDs.changeTabs, {
@@ -352,6 +358,7 @@ export namespace Commands {
   export function addMatchBracketsCommand(
     commands: CommandRegistry,
     settingRegistry: ISettingRegistry,
+    trans: TranslationBundle,
     id: string,
     isEnabled: () => boolean
   ) {
@@ -364,7 +371,7 @@ export namespace Commands {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
       },
-      label: 'Match Brackets',
+      label: trans.__('Match Brackets'),
       isEnabled,
       isToggled: () => config.matchBrackets
     });
@@ -376,6 +383,7 @@ export namespace Commands {
   export function addAutoClosingBracketsCommand(
     commands: CommandRegistry,
     settingRegistry: ISettingRegistry,
+    trans: TranslationBundle,
     id: string
   ) {
     commands.addCommand(CommandIDs.autoClosingBrackets, {
@@ -387,7 +395,7 @@ export namespace Commands {
             console.error(`Failed to set ${id}: ${reason.message}`);
           });
       },
-      label: 'Auto Close Brackets for Text Editor',
+      label: trans.__('Auto Close Brackets for Text Editor'),
       isToggled: () => config.autoClosingBrackets
     });
   }
@@ -398,6 +406,7 @@ export namespace Commands {
   export function addReplaceSelectionCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     isEnabled: () => boolean
   ) {
     commands.addCommand(CommandIDs.replaceSelection, {
@@ -410,7 +419,7 @@ export namespace Commands {
         widget.content.editor.replaceSelection?.(text);
       },
       isEnabled,
-      label: 'Replace Selection in Editor'
+      label: trans.__('Replace Selection in Editor')
     });
   }
 
@@ -420,6 +429,7 @@ export namespace Commands {
   export function addCreateConsoleCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     isEnabled: () => boolean
   ) {
     commands.addCommand(CommandIDs.createConsole, {
@@ -433,7 +443,7 @@ export namespace Commands {
         return getCreateConsoleFunction(commands)(widget, args);
       },
       isEnabled,
-      label: 'Create Console for Editor'
+      label: trans.__('Create Console for Editor')
     });
   }
 
@@ -443,6 +453,7 @@ export namespace Commands {
   export function addRunCodeCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     isEnabled: () => boolean
   ) {
     commands.addCommand(CommandIDs.runCode, {
@@ -503,7 +514,7 @@ export namespace Commands {
         }
       },
       isEnabled,
-      label: 'Run Code'
+      label: trans.__('Run Code')
     });
   }
 
@@ -513,6 +524,7 @@ export namespace Commands {
   export function addRunAllCodeCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     isEnabled: () => boolean
   ) {
     commands.addCommand(CommandIDs.runAllCode, {
@@ -547,7 +559,7 @@ export namespace Commands {
         }
       },
       isEnabled,
-      label: 'Run All Code'
+      label: trans.__('Run All Code')
     });
   }
 
@@ -556,7 +568,8 @@ export namespace Commands {
    */
   export function addMarkdownPreviewCommand(
     commands: CommandRegistry,
-    tracker: WidgetTracker<IDocumentWidget<FileEditor>>
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle
   ) {
     commands.addCommand(CommandIDs.markdownPreview, {
       execute: () => {
@@ -578,7 +591,7 @@ export namespace Commands {
           (widget && PathExt.extname(widget.context.path) === '.md') || false
         );
       },
-      label: 'Show Markdown Preview'
+      label: trans.__('Show Markdown Preview')
     });
   }
 
@@ -588,6 +601,7 @@ export namespace Commands {
   export function addUndoCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     isEnabled: () => boolean
   ) {
     commands.addCommand(CommandIDs.undo, {
@@ -615,7 +629,7 @@ export namespace Commands {
         return true;
       },
       icon: undoIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: 'Undo'
+      label: trans.__('Undo')
     });
   }
 
@@ -625,6 +639,7 @@ export namespace Commands {
   export function addRedoCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     isEnabled: () => boolean
   ) {
     commands.addCommand(CommandIDs.redo, {
@@ -652,7 +667,7 @@ export namespace Commands {
         return true;
       },
       icon: redoIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: 'Redo'
+      label: trans.__('Redo')
     });
   }
 
@@ -662,6 +677,7 @@ export namespace Commands {
   export function addCutCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     isEnabled: () => boolean
   ) {
     commands.addCommand(CommandIDs.cut, {
@@ -693,7 +709,7 @@ export namespace Commands {
         return isSelected(widget.editor as CodeMirrorEditor);
       },
       icon: cutIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: 'Cut'
+      label: trans.__('Cut')
     });
   }
 
@@ -703,6 +719,7 @@ export namespace Commands {
   export function addCopyCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     isEnabled: () => boolean
   ) {
     commands.addCommand(CommandIDs.copy, {
@@ -733,7 +750,7 @@ export namespace Commands {
         return isSelected(widget.editor as CodeMirrorEditor);
       },
       icon: copyIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: 'Copy'
+      label: trans.__('Copy')
     });
   }
 
@@ -743,6 +760,7 @@ export namespace Commands {
   export function addPasteCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     isEnabled: () => boolean
   ) {
     commands.addCommand(CommandIDs.paste, {
@@ -766,7 +784,7 @@ export namespace Commands {
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
       icon: pasteIcon.bindprops({ stylesheet: 'menuItem' }),
-      label: 'Paste'
+      label: trans.__('Paste')
     });
   }
 
@@ -776,6 +794,7 @@ export namespace Commands {
   export function addSelectAllCommand(
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     isEnabled: () => boolean
   ) {
     commands.addCommand(CommandIDs.selectAll, {
@@ -790,7 +809,7 @@ export namespace Commands {
         editor.execCommand('selectAll');
       },
       isEnabled: () => Boolean(isEnabled() && tracker.currentWidget?.content),
-      label: 'Select All'
+      label: trans.__('Select All')
     });
   }
 
@@ -844,11 +863,13 @@ export namespace Commands {
    */
   export function addCreateNewCommand(
     commands: CommandRegistry,
-    browserFactory: IFileBrowserFactory
+    browserFactory: IFileBrowserFactory,
+    trans: TranslationBundle
   ) {
     commands.addCommand(CommandIDs.createNew, {
-      label: args => (args['isPalette'] ? 'New Text File' : 'Text File'),
-      caption: 'Create a new text file',
+      label: args =>
+        args['isPalette'] ? trans.__('New Text File') : trans.__('Text File'),
+      caption: trans.__('Create a new text file'),
       icon: args => (args['isPalette'] ? undefined : textEditorIcon),
       execute: args => {
         const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
@@ -862,12 +883,15 @@ export namespace Commands {
    */
   export function addCreateNewMarkdownCommand(
     commands: CommandRegistry,
-    browserFactory: IFileBrowserFactory
+    browserFactory: IFileBrowserFactory,
+    trans: TranslationBundle
   ) {
     commands.addCommand(CommandIDs.createNewMarkdown, {
       label: args =>
-        args['isPalette'] ? 'New Markdown File' : 'Markdown File',
-      caption: 'Create a new markdown file',
+        args['isPalette']
+          ? trans.__('New Markdown File')
+          : trans.__('Markdown File'),
+      caption: trans.__('Create a new markdown file'),
       icon: args => (args['isPalette'] ? undefined : markdownIcon),
       execute: args => {
         const cwd = args['cwd'] || browserFactory.defaultBrowser.model.path;
@@ -879,19 +903,25 @@ export namespace Commands {
   /**
    * Wrapper function for adding the default launcher items for File Editor
    */
-  export function addLauncherItems(launcher: ILauncher) {
-    addCreateNewToLauncher(launcher);
+  export function addLauncherItems(
+    launcher: ILauncher,
+    trans: TranslationBundle
+  ) {
+    addCreateNewToLauncher(launcher, trans);
 
-    addCreateNewMarkdownToLauncher(launcher);
+    addCreateNewMarkdownToLauncher(launcher, trans);
   }
 
   /**
    * Add Create New Text File to the Launcher
    */
-  export function addCreateNewToLauncher(launcher: ILauncher) {
+  export function addCreateNewToLauncher(
+    launcher: ILauncher,
+    trans: TranslationBundle
+  ) {
     launcher.add({
       command: CommandIDs.createNew,
-      category: 'Other',
+      category: trans.__('Other'),
       rank: 1
     });
   }
@@ -899,10 +929,13 @@ export namespace Commands {
   /**
    * Add Create New Markdown to the Launcher
    */
-  export function addCreateNewMarkdownToLauncher(launcher: ILauncher) {
+  export function addCreateNewMarkdownToLauncher(
+    launcher: ILauncher,
+    trans: TranslationBundle
+  ) {
     launcher.add({
       command: CommandIDs.createNewMarkdown,
-      category: 'Other',
+      category: trans.__('Other'),
       rank: 2
     });
   }
@@ -910,29 +943,31 @@ export namespace Commands {
   /**
    * Wrapper function for adding the default items to the File Editor palette
    */
-  export function addPaletteItems(palette: ICommandPalette) {
-    addChangeTabsCommandsToPalette(palette);
+  export function addPaletteItems(
+    palette: ICommandPalette,
+    trans: TranslationBundle
+  ) {
+    addChangeTabsCommandsToPalette(palette, trans);
 
-    addCreateNewCommandToPalette(palette);
+    addCreateNewCommandToPalette(palette, trans);
 
-    addCreateNewMarkdownCommandToPalette(palette);
+    addCreateNewMarkdownCommandToPalette(palette, trans);
 
-    addChangeFontSizeCommandsToPalette(palette);
+    addChangeFontSizeCommandsToPalette(palette, trans);
   }
-
-  /**
-   * The category for File Editor palette commands for use in addToPalette functions
-   */
-  const paletteCategory = 'Text Editor';
 
   /**
    * Add commands to change the tab indentation to the File Editor palette
    */
-  export function addChangeTabsCommandsToPalette(palette: ICommandPalette) {
+  export function addChangeTabsCommandsToPalette(
+    palette: ICommandPalette,
+    trans: TranslationBundle
+  ) {
+    const paletteCategory = trans.__('Text Editor');
     const args: JSONObject = {
       insertSpaces: false,
       size: 4,
-      name: 'Indent with Tab'
+      name: trans.__('Indent with Tab')
     };
     const command = 'fileeditor:change-tabs';
     palette.addItem({ command, args, category: paletteCategory });
@@ -941,7 +976,7 @@ export namespace Commands {
       const args: JSONObject = {
         insertSpaces: true,
         size,
-        name: `Spaces: ${size} `
+        name: trans._n('Spaces: %1', 'Spaces: %1', size)
       };
       palette.addItem({ command, args, category: paletteCategory });
     }
@@ -950,7 +985,11 @@ export namespace Commands {
   /**
    * Add a Create New File command to the File Editor palette
    */
-  export function addCreateNewCommandToPalette(palette: ICommandPalette) {
+  export function addCreateNewCommandToPalette(
+    palette: ICommandPalette,
+    trans: TranslationBundle
+  ) {
+    const paletteCategory = trans.__('Text Editor');
     palette.addItem({
       command: CommandIDs.createNew,
       args: { isPalette: true },
@@ -962,8 +1001,10 @@ export namespace Commands {
    * Add a Create New Markdown command to the File Editor palette
    */
   export function addCreateNewMarkdownCommandToPalette(
-    palette: ICommandPalette
+    palette: ICommandPalette,
+    trans: TranslationBundle
   ) {
+    const paletteCategory = trans.__('Text Editor');
     palette.addItem({
       command: CommandIDs.createNewMarkdown,
       args: { isPalette: true },
@@ -974,13 +1015,17 @@ export namespace Commands {
   /**
    * Add commands to change the font size to the File Editor palette
    */
-  export function addChangeFontSizeCommandsToPalette(palette: ICommandPalette) {
+  export function addChangeFontSizeCommandsToPalette(
+    palette: ICommandPalette,
+    trans: TranslationBundle
+  ) {
+    const paletteCategory = trans.__('Text Editor');
     const command = CommandIDs.changeFontSize;
 
-    let args = { name: 'Increase Font Size', delta: 1 };
+    let args = { name: trans.__('Increase Font Size'), delta: 1 };
     palette.addItem({ command, args, category: paletteCategory });
 
-    args = { name: 'Decrease Font Size', delta: -1 };
+    args = { name: trans.__('Decrease Font Size'), delta: -1 };
     palette.addItem({ command, args, category: paletteCategory });
   }
 
@@ -991,11 +1036,12 @@ export namespace Commands {
     menu: IMainMenu,
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle,
     consoleTracker: IConsoleTracker | null,
     sessionDialogs: ISessionContextDialogs | null
   ) {
     // Add the editing commands to the settings menu.
-    addEditingCommandsToSettingsMenu(menu, commands);
+    addEditingCommandsToSettingsMenu(menu, commands, trans);
 
     // Add new text file creation to the file menu.
     addCreateNewFileToFileMenu(menu);
@@ -1007,10 +1053,10 @@ export namespace Commands {
     addUndoRedoToEditMenu(menu, tracker);
 
     // Add editor view options.
-    addEditorViewerToViewMenu(menu, tracker);
+    addEditorViewerToViewMenu(menu, tracker, trans);
 
     // Add a console creator the the file menu.
-    addConsoleCreatorToFileMenu(menu, commands, tracker);
+    addConsoleCreatorToFileMenu(menu, commands, tracker, trans);
 
     // Add a code runner to the run menu.
     if (consoleTracker) {
@@ -1019,6 +1065,7 @@ export namespace Commands {
         commands,
         tracker,
         consoleTracker,
+        trans,
         sessionDialogs
       );
     }
@@ -1030,14 +1077,15 @@ export namespace Commands {
    */
   export function addEditingCommandsToSettingsMenu(
     menu: IMainMenu,
-    commands: CommandRegistry
+    commands: CommandRegistry,
+    trans: TranslationBundle
   ) {
     const tabMenu = new Menu({ commands });
-    tabMenu.title.label = 'Text Editor Indentation';
+    tabMenu.title.label = trans.__('Text Editor Indentation');
     const args: JSONObject = {
       insertSpaces: false,
       size: 4,
-      name: 'Indent with Tab'
+      name: trans.__('Indent with Tab')
     };
     const command = 'fileeditor:change-tabs';
     tabMenu.addItem({ command, args });
@@ -1046,7 +1094,7 @@ export namespace Commands {
       const args: JSONObject = {
         insertSpaces: true,
         size,
-        name: `Spaces: ${size} `
+        name: trans._n('Spaces: %1', 'Spaces: %1', size)
       };
       tabMenu.addItem({ command, args });
     }
@@ -1055,11 +1103,11 @@ export namespace Commands {
       [
         {
           command: CommandIDs.changeFontSize,
-          args: { name: 'Increase Text Editor Font Size', delta: +1 }
+          args: { name: trans.__('Increase Text Editor Font Size'), delta: +1 }
         },
         {
           command: CommandIDs.changeFontSize,
-          args: { name: 'Decrease Text Editor Font Size', delta: -1 }
+          args: { name: trans.__('Decrease Text Editor Font Size'), delta: -1 }
         },
         { type: 'submenu', submenu: tabMenu },
         { command: CommandIDs.autoClosingBrackets }
@@ -1108,7 +1156,8 @@ export namespace Commands {
    */
   export function addEditorViewerToViewMenu(
     menu: IMainMenu,
-    tracker: WidgetTracker<IDocumentWidget<FileEditor>>
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle
   ) {
     menu.viewMenu.editorViewers.add({
       tracker,
@@ -1140,14 +1189,15 @@ export namespace Commands {
   export function addConsoleCreatorToFileMenu(
     menu: IMainMenu,
     commands: CommandRegistry,
-    tracker: WidgetTracker<IDocumentWidget<FileEditor>>
+    tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
+    trans: TranslationBundle
   ) {
     const createConsole: (
       widget: IDocumentWidget<FileEditor>
     ) => Promise<void> = getCreateConsoleFunction(commands);
     menu.fileMenu.consoleCreators.add({
       tracker,
-      name: 'Editor',
+      createConsoleLabel: (n: number) => trans.__('Editor'),
       createConsole
     } as IFileMenu.IConsoleCreator<IDocumentWidget<FileEditor>>);
   }
@@ -1160,11 +1210,15 @@ export namespace Commands {
     commands: CommandRegistry,
     tracker: WidgetTracker<IDocumentWidget<FileEditor>>,
     consoleTracker: IConsoleTracker,
+    trans: TranslationBundle,
     sessionDialogs: ISessionContextDialogs | null
   ) {
     menu.runMenu.codeRunners.add({
       tracker,
-      noun: 'Code',
+      runLabel: (n: number) => trans.__('Run Code'),
+      runAllLabel: (n: number) => trans.__('Run All Code'),
+      restartAndRunAllLabel: (n: number) =>
+        trans.__('Restart Kernel and Run All Code'),
       isEnabled: current =>
         !!consoleTracker.find(
           widget => widget.sessionContext.session?.path === current.context.path

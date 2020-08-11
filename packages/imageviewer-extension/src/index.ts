@@ -17,6 +17,8 @@ import {
   IImageTracker
 } from '@jupyterlab/imageviewer';
 
+import { ITranslator } from '@jupyterlab/translation';
+
 /**
  * The command IDs used by the image widget plugin.
  */
@@ -70,6 +72,7 @@ const plugin: JupyterFrontEndPlugin<IImageTracker> = {
   activate,
   id: '@jupyterlab/imageviewer-extension:plugin',
   provides: IImageTracker,
+  requires: [ITranslator],
   optional: [ICommandPalette, ILayoutRestorer],
   autoStart: true
 };
@@ -84,9 +87,11 @@ export default plugin;
  */
 function activate(
   app: JupyterFrontEnd,
+  translator: ITranslator,
   palette: ICommandPalette | null,
   restorer: ILayoutRestorer | null
 ): IImageTracker {
+  const trans = translator.load('jupyterlab');
   const namespace = 'image-widget';
 
   function onWidgetCreated(
@@ -147,10 +152,10 @@ function activate(
     });
   }
 
-  addCommands(app, tracker);
+  addCommands(app, tracker, translator);
 
   if (palette) {
-    const category = 'Image Viewer';
+    const category = trans.__('Image Viewer');
     [
       CommandIDs.zoomIn,
       CommandIDs.zoomOut,
@@ -171,7 +176,12 @@ function activate(
 /**
  * Add the commands for the image widget.
  */
-export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
+export function addCommands(
+  app: JupyterFrontEnd,
+  tracker: IImageTracker,
+  translator: ITranslator
+) {
+  const trans = translator.load('jupyterlab');
   const { commands, shell } = app;
 
   /**
@@ -186,49 +196,49 @@ export function addCommands(app: JupyterFrontEnd, tracker: IImageTracker) {
 
   commands.addCommand('imageviewer:zoom-in', {
     execute: zoomIn,
-    label: 'Zoom In',
+    label: trans.__('Zoom In'),
     isEnabled
   });
 
   commands.addCommand('imageviewer:zoom-out', {
     execute: zoomOut,
-    label: 'Zoom Out',
+    label: trans.__('Zoom Out'),
     isEnabled
   });
 
   commands.addCommand('imageviewer:reset-image', {
     execute: resetImage,
-    label: 'Reset Image',
+    label: trans.__('Reset Image'),
     isEnabled
   });
 
   commands.addCommand('imageviewer:rotate-clockwise', {
     execute: rotateClockwise,
-    label: 'Rotate Clockwise',
+    label: trans.__('Rotate Clockwise'),
     isEnabled
   });
 
   commands.addCommand('imageviewer:rotate-counterclockwise', {
     execute: rotateCounterclockwise,
-    label: 'Rotate Counterclockwise',
+    label: trans.__('Rotate Counterclockwise'),
     isEnabled
   });
 
   commands.addCommand('imageviewer:flip-horizontal', {
     execute: flipHorizontal,
-    label: 'Flip image horizontally',
+    label: trans.__('Flip image horizontally'),
     isEnabled
   });
 
   commands.addCommand('imageviewer:flip-vertical', {
     execute: flipVertical,
-    label: 'Flip image vertically',
+    label: trans.__('Flip image vertically'),
     isEnabled
   });
 
   commands.addCommand('imageviewer:invert-colors', {
     execute: invertColors,
-    label: 'Invert Colors',
+    label: trans.__('Invert Colors'),
     isEnabled
   });
 

@@ -7,6 +7,8 @@ import { ToolbarButton } from '@jupyterlab/apputils';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { Panel } from '@lumino/widgets';
 
 import { viewBreakpointIcon } from '../../icons';
@@ -29,8 +31,10 @@ export class Sources extends Panel {
   constructor(options: Sources.IOptions) {
     super();
     const { model, service, editorServices } = options;
+    const translator = options.translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
 
-    const header = new SourcesHeader(model);
+    const header = new SourcesHeader(model, translator);
     const body = new SourcesBody({
       service,
       model,
@@ -41,7 +45,7 @@ export class Sources extends Panel {
       new ToolbarButton({
         icon: viewBreakpointIcon,
         onClick: (): void => model.open(),
-        tooltip: 'Open in the Main Area'
+        tooltip: trans.__('Open in the Main Area')
       })
     );
     this.addWidget(header);
@@ -71,5 +75,10 @@ export namespace Sources {
      * The editor services used to create new read-only editors.
      */
     editorServices: IEditorServices;
+
+    /**
+     * The application language translator
+     */
+    translator?: ITranslator;
   }
 }

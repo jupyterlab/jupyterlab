@@ -30,6 +30,8 @@ import { Searcher, ISearchResult, isJupyterOrg } from './npm';
 
 import { Lister, ListResult, IListEntry } from './listings';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 /**
  * Information about an extension.
  */
@@ -156,9 +158,11 @@ export class ListModel extends VDomModel {
   constructor(
     app: JupyterFrontEnd,
     serviceManager: ServiceManager,
-    settings: ISettingRegistry.ISettings
+    settings: ISettingRegistry.ISettings,
+    translator?: ITranslator
   ) {
     super();
+    this.translator = translator || nullTranslator;
     this._app = app;
     this._installed = [];
     this._searchResult = [];
@@ -323,7 +327,7 @@ export class ListModel extends VDomModel {
       // Updating
       await this._performAction('install', entry).then(data => {
         if (data.status !== 'ok') {
-          reportInstallError(entry.name, data.message);
+          reportInstallError(entry.name, data.message, this.translator);
         }
         return this.update();
       });
@@ -332,7 +336,7 @@ export class ListModel extends VDomModel {
       if (shouldInstall) {
         return this._performAction('install', entry).then(data => {
           if (data.status !== 'ok') {
-            reportInstallError(entry.name, data.message);
+            reportInstallError(entry.name, data.message, this.translator);
           }
           return this.update();
         });
@@ -406,7 +410,11 @@ export class ListModel extends VDomModel {
         if (kernelCompanions.length < 1 && !discovery.server) {
           return true;
         }
-        return presentCompanions(kernelCompanions, discovery.server);
+        return presentCompanions(
+          kernelCompanions,
+          discovery.server,
+          this.translator
+        );
       });
   }
 
@@ -813,6 +821,7 @@ export class ListModel extends VDomModel {
    */
   protected serviceManager: ServiceManager;
 
+  protected translator: ITranslator;
   private _app: JupyterFrontEnd;
   private _query: string | null = null;
   private _page: number = 0;

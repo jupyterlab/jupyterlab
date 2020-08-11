@@ -54,6 +54,7 @@
     "@jupyterlab/markdownviewer": "^3.0.0-alpha.8",
     "@jupyterlab/notebook": "^3.0.0-alpha.8",
     "@jupyterlab/rendermime": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
     "@jupyterlab/ui-components": "^3.0.0-alpha.8",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/messaging": "^1.3.3",

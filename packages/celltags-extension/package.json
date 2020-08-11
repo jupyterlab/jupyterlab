@@ -40,7 +40,8 @@
   "dependencies": {
     "@jupyterlab/application": "^3.0.0-alpha.8",
     "@jupyterlab/celltags": "^3.0.0-alpha.8",
-    "@jupyterlab/notebook": "^3.0.0-alpha.8"
+    "@jupyterlab/notebook": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8"
   },
   "devDependencies": {
     "@types/node": "^12.12.17",

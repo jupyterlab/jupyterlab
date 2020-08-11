@@ -16,6 +16,7 @@ import {
   RunningSessions
 } from '@jupyterlab/running';
 import { Session } from '@jupyterlab/services';
+import { ITranslator } from '@jupyterlab/translation';
 import {
   consoleIcon,
   fileIcon,
@@ -30,6 +31,7 @@ const plugin: JupyterFrontEndPlugin<IRunningSessionManagers> = {
   activate,
   id: '@jupyterlab/running-extension:plugin',
   provides: IRunningSessionManagers,
+  requires: [ITranslator],
   optional: [ILayoutRestorer],
   autoStart: true
 };
@@ -44,12 +46,14 @@ export default plugin;
  */
 function activate(
   app: JupyterFrontEnd,
+  translator: ITranslator,
   restorer: ILayoutRestorer | null
 ): IRunningSessionManagers {
+  const trans = translator.load('jupyterlab');
   const runningSessionManagers = new RunningSessionManagers();
-  const running = new RunningSessions(runningSessionManagers);
+  const running = new RunningSessions(runningSessionManagers, translator);
   running.id = 'jp-running-sessions';
-  running.title.caption = 'Running Terminals and Kernels';
+  running.title.caption = trans.__('Running Terminals and Kernels');
   running.title.icon = runningIcon;
 
   // Let the application restorer track the running panel for restoration of
@@ -58,7 +62,7 @@ function activate(
   if (restorer) {
     restorer.add(running, 'running-sessions');
   }
-  addKernelRunningSessionManager(runningSessionManagers, app);
+  addKernelRunningSessionManager(runningSessionManagers, translator, app);
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.add(running, 'left', { rank: 200 });
@@ -71,8 +75,10 @@ function activate(
  */
 function addKernelRunningSessionManager(
   managers: IRunningSessionManagers,
+  translator: ITranslator,
   app: JupyterFrontEnd
 ) {
+  const trans = translator.load('jupyterlab');
   const manager = app.serviceManager.sessions;
   const specsManager = app.serviceManager.kernelspecs;
   function filterSessions(m: Session.IModel) {
@@ -82,7 +88,7 @@ function addKernelRunningSessionManager(
   }
 
   managers.add({
-    name: 'Kernel',
+    name: trans.__('Kernels'),
     running: () => {
       return toArray(manager.running())
         .filter(filterSessions)
@@ -127,7 +133,7 @@ function addKernelRunningSessionManager(
         const spec = specsManager.specs.kernelspecs[kernelName];
         kernelName = spec ? spec.display_name : 'unknown';
       }
-      return `Path: ${path}\nKernel: ${kernelName}`;
+      return trans.__('Path: %1\nKernel: %2', path, kernelName);
     }
 
     private _model: Session.IModel;

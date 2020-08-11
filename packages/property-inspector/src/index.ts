@@ -5,6 +5,12 @@ import { ILabShell } from '@jupyterlab/application';
 
 import { ReactWidget } from '@jupyterlab/apputils';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { Signal, ISignal } from '@lumino/signaling';
 
 import { Widget, FocusTracker, SingletonLayout } from '@lumino/widgets';
@@ -147,16 +153,22 @@ export class SideBarPropertyInspectorProvider extends PropertyInspectorProvider 
   /**
    * Construct a new Side Bar Property Inspector.
    */
-  constructor(labshell: ILabShell, placeholder?: Widget) {
+  constructor(
+    labshell: ILabShell,
+    placeholder?: Widget,
+    translator?: ITranslator
+  ) {
     super();
     this._labshell = labshell;
+    this.translator = translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     const layout = (this.layout = new SingletonLayout());
     if (placeholder) {
       this._placeholder = placeholder;
     } else {
       const node = document.createElement('div');
       const content = document.createElement('div');
-      content.textContent = 'No properties to inspect.';
+      content.textContent = this._trans.__('No properties to inspect.');
       content.className = 'jp-PropertyInspector-placeholderContent';
       node.appendChild(content);
       this._placeholder = new Widget({ node });
@@ -207,6 +219,8 @@ export class SideBarPropertyInspectorProvider extends PropertyInspectorProvider 
     }
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _labshell: ILabShell;
   private _placeholder: Widget;
 }

@@ -36,14 +36,10 @@ export interface IFileMenu extends IJupyterLabMenu {
 export class FileMenu extends JupyterLabMenu implements IFileMenu {
   constructor(options: Menu.IOptions) {
     super(options);
-
-    this.menu.title.label = 'File';
-
     this.quitEntry = false;
 
     // Create the "New" submenu.
     this.newMenu = new JupyterLabMenu(options, false);
-    this.newMenu.menu.title.label = 'New';
     this.closeAndCleaners = new Set<IFileMenu.ICloseAndCleaner<Widget>>();
     this.consoleCreators = new Set<IFileMenu.IConsoleCreator<Widget>>();
   }
@@ -88,14 +84,12 @@ export namespace IFileMenu {
    */
   export interface ICloseAndCleaner<T extends Widget> extends IMenuExtender<T> {
     /**
-     * A label to use for the activity that is being cleaned up.
+     * A function to create the label for the `closeAndCleanup`action.
+     *
+     * This function receives the number of items `n` to be able to provided
+     * correct pluralized forms of tranlsations.
      */
-    name: string;
-
-    /**
-     * A label to use for the cleanup action.
-     */
-    action: string;
+    closeAndCleanupLabel?: (n: number) => string;
 
     /**
      * A function to perform the close and cleanup action.
@@ -108,9 +102,12 @@ export namespace IFileMenu {
    */
   export interface IConsoleCreator<T extends Widget> extends IMenuExtender<T> {
     /**
-     * A label to use for the activity for which a console is being created.
+     * A function to create the label for the `createConsole`action.
+     *
+     * This function receives the number of items `n` to be able to provided
+     * correct pluralized forms of tranlsations.
      */
-    name: string;
+    createConsoleLabel?: (n: number) => string;
 
     /**
      * The function to create the console.

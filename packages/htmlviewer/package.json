@@ -35,6 +35,7 @@
     "@jupyterlab/apputils": "^3.0.0-alpha.8",
     "@jupyterlab/coreutils": "^5.0.0-alpha.8",
     "@jupyterlab/docregistry": "^3.0.0-alpha.8",
+    "@jupyterlab/translation": "^3.0.0-alpha.8",
     "@jupyterlab/ui-components": "^3.0.0-alpha.8",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/signaling": "^1.3.5",

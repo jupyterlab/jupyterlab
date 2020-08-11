@@ -3,7 +3,11 @@
 
 export { ConnectionLost } from './connectionlost';
 
-export { JupyterFrontEnd, JupyterFrontEndPlugin } from './frontend';
+export {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
+  JupyterFrontEndContextMenu
+} from './frontend';
 
 export { JupyterLab } from './lab';
 

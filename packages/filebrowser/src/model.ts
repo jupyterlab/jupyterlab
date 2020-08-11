@@ -28,6 +28,11 @@ import { IDisposable } from '@lumino/disposable';
 import { Poll } from '@lumino/polling';
 
 import { ISignal, Signal } from '@lumino/signaling';
+import {
+  nullTranslator,
+  TranslationBundle,
+  ITranslator
+} from '@jupyterlab/translation';
 
 /**
  * The default duration of the auto-refresh in ms
@@ -68,6 +73,8 @@ export class FileBrowserModel implements IDisposable {
    */
   constructor(options: FileBrowserModel.IOptions) {
     this.manager = options.manager;
+    this.translator = options.translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
     this._driveName = options.driveName || '';
     const rootPath = this._driveName ? this._driveName + ':' : '';
     this._model = {
@@ -90,7 +97,7 @@ export class FileBrowserModel implements IDisposable {
 
     this._unloadEventListener = (e: Event) => {
       if (this._uploads.length > 0) {
-        const confirmationMessage = 'Files still uploading';
+        const confirmationMessage = this._trans.__('Files still uploading');
 
         (e as any).returnValue = confirmationMessage;
         return confirmationMessage;
@@ -294,7 +301,10 @@ export class FileBrowserModel implements IDisposable {
         this._pendingPath = null;
         this._pending = null;
         if (error.response && error.response.status === 404) {
-          error.message = `Directory not found: "${this._model.path}"`;
+          error.message = this._trans.__(
+            'Directory not found: "%1"',
+            this._model.path
+          );
           console.error(error);
           this._connectionFailure.emit(error);
           return this.cd('/');
@@ -395,8 +405,11 @@ export class FileBrowserModel implements IDisposable {
     const largeFile = file.size > LARGE_FILE_SIZE;
 
     if (largeFile && !supportsChunked) {
-      const msg = `Cannot upload file (>${LARGE_FILE_SIZE /
-        (1024 * 1024)} MB). ${file.name}`;
+      const msg = this._trans.__(
+        'Cannot upload file (>%1 MB). %2',
+        LARGE_FILE_SIZE / (1024 * 1024),
+        file.name
+      );
       console.warn(msg);
       throw msg;
     }
@@ -421,11 +434,15 @@ export class FileBrowserModel implements IDisposable {
 
   private async _shouldUploadLarge(file: File): Promise<boolean> {
     const { button } = await showDialog({
-      title: 'Large file size warning',
-      body: `The file size is ${Math.round(
-        file.size / (1024 * 1024)
-      )} MB. Do you still want to upload it?`,
-      buttons: [Dialog.cancelButton(), Dialog.warnButton({ label: 'Upload' })]
+      title: this._trans.__('Large file size warning'),
+      body: this._trans.__(
+        'The file size is %1 MB. Do you still want to upload it?',
+        Math.round(file.size / (1024 * 1024))
+      ),
+      buttons: [
+        Dialog.cancelButton({ label: this._trans.__('Cancel') }),
+        Dialog.warnButton({ label: this._trans.__('Upload') })
+      ]
     });
     return button.accept;
   }
@@ -617,6 +634,8 @@ export class FileBrowserModel implements IDisposable {
     });
   }
 
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
   private _connectionFailure = new Signal<this, Error>(this);
   private _fileChanged = new Signal<this, Contents.IChangedArgs>(this);
   private _items: Contents.IModel[] = [];
@@ -676,6 +695,11 @@ export namespace FileBrowserModel {
      * folder was last opened when it is restored.
      */
     state?: IStateDB;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -685,7 +709,7 @@ export namespace FileBrowserModel {
 export class FilterFileBrowserModel extends FileBrowserModel {
   constructor(options: FilterFileBrowserModel.IOptions) {
     super(options);
-
+    this.translator = options.translator || nullTranslator;
     this._filter = options.filter ? options.filter : model => true;
   }
 

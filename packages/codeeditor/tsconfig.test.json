@@ -12,6 +12,9 @@
       "path": "../observables"
     },
     {
+      "path": "../translation"
+    },
+    {
       "path": "../ui-components"
     },
     {
@@ -28,6 +31,9 @@
     },
     {
       "path": "../observables"
+    },
+    {
+      "path": "../translation"
     },
     {
       "path": "../ui-components"

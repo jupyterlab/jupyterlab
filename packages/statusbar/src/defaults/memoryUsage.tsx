@@ -9,6 +9,12 @@ import { URLExt } from '@jupyterlab/coreutils';
 
 import { ServerConnection } from '@jupyterlab/services';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 import { Poll } from '@lumino/polling';
 
 import { TextItem } from '..';
@@ -22,8 +28,10 @@ export class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
   /**
    * Construct a new memory usage status item.
    */
-  constructor() {
+  constructor(translator?: ITranslator) {
     super(new MemoryUsage.Model({ refreshRate: 5000 }));
+    this.translator = translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
   }
 
   /**
@@ -35,28 +43,36 @@ export class MemoryUsage extends VDomRenderer<MemoryUsage.Model> {
     }
     let text: string;
     if (this.model.memoryLimit === null) {
-      text = `Mem: ${this.model.currentMemory.toFixed(
-        Private.DECIMAL_PLACES
-      )} ${this.model.units}`;
-    } else {
-      text = `Mem: ${this.model.currentMemory.toFixed(
-        Private.DECIMAL_PLACES
-      )} / ${this.model.memoryLimit.toFixed(Private.DECIMAL_PLACES)} ${
+      text = this._trans.__(
+        'Mem: %1 %2',
+        this.model.currentMemory.toFixed(Private.DECIMAL_PLACES),
         this.model.units
-      }`;
+      );
+    } else {
+      text = this._trans.__(
+        'Mem: %1 / %2 %3',
+        this.model.currentMemory.toFixed(Private.DECIMAL_PLACES),
+        this.model.memoryLimit.toFixed(Private.DECIMAL_PLACES),
+        this.model.units
+      );
     }
     if (!this.model.usageWarning) {
-      return <TextItem title="Current mem usage" source={text} />;
+      return (
+        <TextItem title={this._trans.__('Current mem usage')} source={text} />
+      );
     } else {
       return (
         <TextItem
-          title="Current mem usage"
+          title={this._trans.__('Current mem usage')}
           source={text}
           className={nbresuse}
         />
       );
     }
   }
+
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
 }
 
 /**

@@ -3,6 +3,8 @@
 
 import { IThemeManager, ToolbarButton } from '@jupyterlab/apputils';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { CommandRegistry } from '@lumino/commands';
 
 import { Panel, Widget } from '@lumino/widgets';
@@ -28,8 +30,9 @@ export class Variables extends Panel {
     super();
 
     const { model, service, commands, themeManager } = options;
-
-    this._header = new VariablesHeader();
+    const translator = options.translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    this._header = new VariablesHeader(translator);
     this._tree = new VariablesBodyTree({ model, service });
     this._table = new VariablesBodyGrid({ model, commands, themeManager });
     this._table.hide();
@@ -52,7 +55,7 @@ export class Variables extends Panel {
       new ToolbarButton({
         iconClass: 'jp-ToggleSwitch',
         onClick,
-        tooltip: 'Table / Tree View'
+        tooltip: trans.__('Table / Tree View')
       })
     );
 
@@ -141,5 +144,10 @@ export namespace Variables {
      * An optional application theme manager to detect theme changes.
      */
     themeManager?: IThemeManager | null;
+
+    /**
+     * The application language translator
+     */
+    translator?: ITranslator;
   }
 }

@@ -7,6 +7,11 @@ import { Text } from '@jupyterlab/coreutils';
 import { Notebook, NotebookMode } from '.';
 
 import { TextItem } from '@jupyterlab/statusbar';
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
 
 /**
  * A pure function for rendering a Command/Edit mode component.
@@ -18,7 +23,12 @@ import { TextItem } from '@jupyterlab/statusbar';
 function CommandEditComponent(
   props: CommandEditComponent.IProps
 ): React.ReactElement<CommandEditComponent.IProps> {
-  return <TextItem source={`Mode: ${Text.titleCase(props.notebookMode)}`} />;
+  const trans = (props.translator || nullTranslator).load('jupyterlab');
+  return (
+    <TextItem
+      source={trans.__('Mode: %1', Text.titleCase(props.notebookMode))}
+    />
+  );
 }
 
 /**
@@ -33,6 +43,11 @@ namespace CommandEditComponent {
      * The current mode of the current notebook.
      */
     notebookMode: NotebookMode;
+
+    /**
+     * Language translator.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -43,8 +58,10 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
   /**
    * Construct a new CommandEdit status item.
    */
-  constructor() {
+  constructor(translator?: ITranslator) {
     super(new CommandEditStatus.Model());
+    this.translator = translator || nullTranslator;
+    this._trans = this.translator.load('jupyterlab');
   }
 
   /**
@@ -54,9 +71,20 @@ export class CommandEditStatus extends VDomRenderer<CommandEditStatus.Model> {
     if (!this.model) {
       return null;
     }
-    this.node.title = `Notebook is in ${this.model.notebookMode} mode`;
-    return <CommandEditComponent notebookMode={this.model.notebookMode} />;
+    this.node.title = this._trans.__(
+      'Notebook is in %1 mode',
+      this.model.notebookMode
+    );
+    return (
+      <CommandEditComponent
+        notebookMode={this.model.notebookMode}
+        translator={this.translator}
+      />
+    );
   }
+
+  protected translator: ITranslator;
+  private _trans: TranslationBundle;
 }
 
 /**

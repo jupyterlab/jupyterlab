@@ -15,6 +15,12 @@ import { FitAddon } from 'xterm-addon-fit';
 
 import { ITerminal } from '.';
 
+import {
+  nullTranslator,
+  ITranslator,
+  TranslationBundle
+} from '@jupyterlab/translation';
+
 /**
  * The class name added to a terminal widget.
  */
@@ -35,13 +41,17 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
    * @param session - The terminal session object.
    *
    * @param options - The terminal configuration options.
+   *
+   * @param translator - The language translator.
    */
   constructor(
     session: TerminalNS.ITerminalConnection,
-    options: Partial<ITerminal.IOptions> = {}
+    options: Partial<ITerminal.IOptions> = {},
+    translator?: ITranslator
   ) {
     super();
-
+    translator = translator || nullTranslator;
+    this._trans = translator.load('jupyterlab');
     this.session = session;
 
     // Initialize settings.
@@ -63,7 +73,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
     this._initializeTerm();
 
     this.id = `jp-Terminal-${Private.id++}`;
-    this.title.label = 'Terminal';
+    this.title.label = this._trans.__('Terminal');
 
     session.messageReceived.connect(this._onMessage, this);
     session.disposed.connect(this.dispose, this);
@@ -84,7 +94,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
       return;
     }
 
-    this.title.label = `Terminal ${this.session.name}`;
+    this.title.label = this._trans.__('Terminal %1', this.session.name);
     this._setSessionSize();
     if (this._options.initialCommand) {
       this.session.send({
@@ -350,6 +360,7 @@ export class Terminal extends Widget implements ITerminal.ITerminal {
 
   private readonly _term: Xterm;
   private readonly _fitAddon: FitAddon;
+  private _trans: TranslationBundle;
   private _needsResize = true;
   private _termOpened = false;
   private _offsetWidth = -1;

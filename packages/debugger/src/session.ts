@@ -3,6 +3,8 @@
 
 import { KernelMessage, Session } from '@jupyterlab/services';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { PromiseDelegate } from '@lumino/coreutils';
 
 import { ISignal, Signal } from '@lumino/signaling';
@@ -20,6 +22,7 @@ export class DebuggerSession implements IDebugger.ISession {
    */
   constructor(options: DebuggerSession.IOptions) {
     this.connection = options.connection;
+    this.translator = options.translator || nullTranslator;
   }
 
   /**
@@ -116,7 +119,7 @@ export class DebuggerSession implements IDebugger.ISession {
       supportsVariableType: true,
       supportsVariablePaging: true,
       supportsRunInTerminalRequest: true,
-      locale: 'en-us'
+      locale: document.documentElement.lang
     });
 
     this._isStarted = true;
@@ -205,6 +208,7 @@ export class DebuggerSession implements IDebugger.ISession {
     return reply.promise;
   }
 
+  protected translator: ITranslator;
   private _seq = 0;
   private _ready = new PromiseDelegate<void>();
   private _connection: Session.ISessionConnection | null;
@@ -229,5 +233,10 @@ export namespace DebuggerSession {
      * The session connection used by the debug session.
      */
     connection: Session.ISessionConnection;
+
+    /**
+     * The application language translator.
+     */
+    translator?: ITranslator;
   }
 }

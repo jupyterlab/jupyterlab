@@ -22,6 +22,7 @@ import { AttachedProperty } from '@lumino/properties';
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from './index';
 
 import { ILayoutRestorer } from './layoutrestorer';
+import { ITranslator } from '@jupyterlab/translation';
 
 /**
  * A class that tracks mime documents.
@@ -96,9 +97,13 @@ export function createRendermimePlugin(
 ): JupyterFrontEndPlugin<void> {
   return {
     id: item.id,
-    requires: [IRenderMimeRegistry],
+    requires: [IRenderMimeRegistry, ITranslator],
     autoStart: true,
-    activate: (app: JupyterFrontEnd, rendermime: IRenderMimeRegistry) => {
+    activate: (
+      app: JupyterFrontEnd,
+      rendermime: IRenderMimeRegistry,
+      translator: ITranslator
+    ) => {
       // Add the mime renderer.
       if (item.rank !== undefined) {
         rendermime.addFactory(item.rendererFactory, item.rank);
@@ -146,7 +151,8 @@ export function createRendermimePlugin(
           fileTypes: option.fileTypes,
           defaultFor: option.defaultFor,
           defaultRendered: option.defaultRendered,
-          toolbarFactory
+          toolbarFactory,
+          translator
         });
         registry.addWidgetFactory(factory);
 

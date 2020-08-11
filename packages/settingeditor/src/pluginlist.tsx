@@ -5,6 +5,8 @@
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
+import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+
 import { classes, LabIcon, settingsIcon } from '@jupyterlab/ui-components';
 
 import { Message } from '@lumino/messaging';
@@ -27,6 +29,7 @@ export class PluginList extends Widget {
   constructor(options: PluginList.IOptions) {
     super();
     this.registry = options.registry;
+    this.translator = options.translator || nullTranslator;
     this.addClass('jp-PluginList');
     this._confirm = options.confirm;
     this.registry.pluginChanged.connect(() => {
@@ -108,8 +111,9 @@ export class PluginList extends Widget {
   protected onUpdateRequest(msg: Message): void {
     const { node, registry } = this;
     const selection = this._selection;
+    const translation = this.translator;
 
-    Private.populateList(registry, selection, node);
+    Private.populateList(registry, selection, node, translation);
     const ul = node.querySelector('ul');
     if (ul && this._scrollTop !== undefined) {
       ul.scrollTop = this._scrollTop;
@@ -154,6 +158,7 @@ export class PluginList extends Widget {
       });
   }
 
+  protected translator: ITranslator;
   private _changed = new Signal<this, void>(this);
   private _confirm: () => Promise<void>;
   private _scrollTop: number | undefined = 0;
@@ -182,6 +187,11 @@ export namespace PluginList {
      * The setting registry for the plugin list.
      */
     registry: ISettingRegistry;
+
+    /**
+     * The setting registry for the plugin list.
+     */
+    translator?: ITranslator;
   }
 }
 
@@ -252,8 +262,11 @@ namespace Private {
   export function populateList(
     registry: ISettingRegistry,
     selection: string,
-    node: HTMLElement
+    node: HTMLElement,
+    translator?: ITranslator
   ): void {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
     const plugins = sortPlugins(registry).filter(plugin => {
       const { schema } = plugin;
       const deprecated = schema['jupyter.lab.setting-deprecated'] === true;
@@ -264,7 +277,12 @@ namespace Private {
     });
     const items = plugins.map(plugin => {
       const { id, schema, version } = plugin;
-      const itemTitle = `${schema.description}\n${id}\n${version}`;
+      const title = trans.__(
+        typeof schema.title === 'string' ? schema.title : id
+      );
+      const description =
+        typeof schema.description === 'string' ? schema.description : '';
+      const itemTitle = `${description}\n${id}\n${version}`;
       const icon = getHint(ICON_KEY, registry, plugin);
       const iconClass = getHint(ICON_CLASS_KEY, registry, plugin);
       const iconTitle = getHint(ICON_LABEL_KEY, registry, plugin);
@@ -283,7 +301,7 @@ namespace Private {
             tag="span"
             stylesheet="settingsEditor"
           />
-          <span>{schema.title || id}</span>
+          <span>{title}</span>
         </li>
       );
     });
