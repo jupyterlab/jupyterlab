@@ -245,15 +245,6 @@ def ensure_app(app_dir):
     return msgs
 
 
-def ensure_staging(app_options=None):
-    """Ensure that the staging directory available.
-    """
-    app_options = _ensure_options(app_options)
-    _node_check(app_options.logger)
-    handler = _AppHandler(app_options)
-    return handler.ensure_staging()
-
-
 def watch_packages(logger=None):
     """Run watch mode for the source packages.
 
@@ -907,12 +898,6 @@ class _AppHandler(object):
             self.logger.warning('No labextension named "%s" installed' % name)
             return False
         return self._update_extension(name)
-
-    def ensure_staging(self, name):
-        """Ensure that the staging directory exists.
-        """
-
-
 
     def _update_extension(self, name):
         """Update an extension by name.

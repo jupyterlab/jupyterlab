@@ -164,20 +164,13 @@ def build_labextension(path, app_dir=None, logger=None):
     # Ensure a staging directory but don't actually build anything.
     core_path = osp.join(HERE, 'staging')
     options = AppOptions(app_dir=app_dir, logger=logger)
-    build(app_options=options, command="build:nobuild")
-    staging_path = osp.join(options.app_dir, 'staging')
-    builder = osp.join(staging_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
-
-    # FIXME: remove this after releasing JS packages
-    build_utils = osp.abspath(osp.join(HERE, '..', 'buildutils', 'lib'))
-    for fname in os.listdir(build_utils):
-        shutil.copy(osp.join(build_utils, fname), osp.join(osp.dirname(builder), fname))
+    builder = _ensure_builder(options)
     
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
-    if logger:
-        logger.info('Building extension in %s' % path)
+
+    options.logger.info('Building extension in %s' % path)
 
     subprocess.check_call(['node', builder, '--core-path', core_path,  path], cwd=path)
 
@@ -187,20 +180,12 @@ def watch_labextension(path, app_dir=None, logger=None):
     # Ensure a staging directory but don't actually build anything.
     core_path = osp.join(HERE, 'staging')
     options = AppOptions(app_dir=app_dir, logger=logger)
-    build(app_options=options, command="build:nobuild")
-    staging_path = osp.join(options.app_dir, 'staging')
-    builder = osp.join(staging_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
+    builder = _ensure_builder(options)
 
-    # FIXME: remove this after releasing JS packages
-    for fname in os.listdir(build_utils):
-        shutil.copy(osp.join(build_utils, fname), osp.join(osp.dirname(builder), fname))
-    
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
-    if logger:
-        logger.info('Watching extension in %s' % path)
-
+    options.logger.info('Watching extension in %s' % path)
 
     subprocess.check_call(['node', builder, '--core-path', core_path,  '--watch', path], cwd=path)
 
@@ -210,31 +195,19 @@ def watch_labextension(path, app_dir=None, logger=None):
 #------------------------------------------------------------------------------
 
 
-def _ensure_builder(logger=None):
-    # Ensure staging from commands
-    build(command=None)
+def _ensure_builder(options):
+    """Ensure a build directory exists and is ready to build.  Return the build script path
+    """
+    build(app_options=options, command="build:nobuild")
+    staging_path = osp.join(options.app_dir, 'staging')
+    builder = osp.join(staging_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
 
-    target = osp.join(get_app_dir(), 'extension_builder')
-    if not osp.exists(osp.join(target, 'package.json')):
-        if logger:
-            logger.info('Generating extension builder in %s' % target)
-        os.makedirs(osp.join(target))
-        subprocess.check_call(["npm", "init", "-y"], cwd=target)
+    # FIXME: remove this after releasing JS packages
+    build_utils = osp.abspath(osp.join(HERE, '..', 'buildutils', 'lib'))
+    for fname in os.listdir(build_utils):
+        shutil.copy(osp.join(build_utils, fname), osp.join(osp.dirname(builder), fname))
     
-    core_path = osp.join(HERE, 'staging')
-    with open(osp.join(core_path, 'package.json')) as fid:
-        core_data = json.load(fid)
-    
-    # Make sure we have the latest deps
-    target_package = osp.join(target, 'package.json')
-    with open(target_package) as fid:
-        package_data = json.load(fid)
-    package_data['devDependencies'] = core_data['devDependencies']
-    package_data['dependencies'] = core_data['dependencies']
-    with open(target_package, 'w') as fid:
-        json.dump(package_data, fid)
-    subprocess.check_call(["npm", "install"], cwd=target)
-    return osp.join(target, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
+    return builder
     
 
 def _should_copy(src, dest, logger=None):
