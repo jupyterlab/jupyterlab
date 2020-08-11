@@ -117,7 +117,9 @@ export namespace Build {
     let appCSS = '';
 
     packageNames.forEach(name => {
-      packagePaths.push(require.resolve(name));
+      packagePaths.push(
+        path.dirname(require.resolve(path.join(name, 'package.json')))
+      );
     });
 
     packagePaths.forEach(packagePath => {
