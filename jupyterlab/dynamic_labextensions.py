@@ -6,6 +6,7 @@
 
 from __future__ import print_function
 
+import json
 import os
 import os.path as osp
 import shutil
@@ -24,9 +25,12 @@ from jupyter_core.paths import (
 from jupyter_core.utils import ensure_dir_exists
 from ipython_genutils.py3compat import string_types, cast_unicode_py2
 from ipython_genutils.tempdir import TemporaryDirectory
-from notebook.config_manager import BaseJSONConfigManager
+from jupyter_server.config_manager import BaseJSONConfigManager
 
 from traitlets.utils.importstring import import_item
+
+from .commands import get_app_dir
+
 
 DEPRECATED_ARGUMENT = object()
 
@@ -161,24 +165,27 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
 def build_labextension(path, logger=None):
     """Build a labextension in the given path"""
     core_path = osp.join(HERE, 'staging')
+    builder = _ensure_builder()
+
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
     if logger:
         logger.info('Building extension in %s' % path)
-    builder = osp.join('node_modules', '.bin', 'build-labextension')
     subprocess.check_call(['node', builder, '--core-path', core_path,  path], cwd=path)
 
 
 def watch_labextension(path, logger=None):
     """Watch a labextension in a given path"""
     core_path = osp.join(HERE, 'staging')
+    builder = _ensure_builder()
+
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
     if logger:
         logger.info('Watching extension in %s' % path)
-    builder = osp.join('node_modules', '.bin', 'build-labextension')
+
     subprocess.check_call(['node', builder, '--core-path', core_path,  '--watch', path], cwd=path)
 
 
@@ -186,6 +193,22 @@ def watch_labextension(path, logger=None):
 # Private API
 #------------------------------------------------------------------------------
 
+
+def _ensure_builder():
+    core_path = osp.join(HERE, 'staging')
+    with open(core_path) as fid:
+        data = json.load(fid)
+    version = data['devDpendencies']['@jupyterlab/buildutils']
+    requirement = "@jupyterlab/buildutils@%s" % version
+
+    target = osp.join(get_app_dir(), 'extension_builder')
+    if not osp.exists(osp.join(target, 'node_modules')):
+        if not osp.exists(target):
+            os.makedirs(osp.join(target))
+        subprocess.check_call(["npm", "init", "-y"], cwd=target)
+        subprocess.check_call(["npm", "install", requirement], cwd=target)
+    return target
+    
 
 def _should_copy(src, dest, logger=None):
     """Should a file be copied, if it doesn't exist, or is newer?
