@@ -1246,7 +1246,7 @@ class _AppHandler(object):
         # Handle local extensions.
         for (key, source) in local.items():
             jlab['linkedPackages'][key] = source
-            data['resolutions'][key] = source
+            data['resolutions'][key] = self.info['extensions'][key]['path']
 
         # Handle linked packages.
         for (key, item) in linked.items():

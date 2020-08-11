@@ -92,8 +92,13 @@ def check_assets():
 
 cmdclass = create_cmdclass('jsdeps', data_files_spec=data_files_spec,
                            package_data_spec=package_data_spec, exclude=exclude)
+# FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
+if os.name == 'nt':
+    build_cmd = 'build'
+else:
+    build_cmd = 'build:proc'
 cmdclass['jsdeps'] = combine_commands(
-    install_npm(build_cmd='build:prod', path=staging, source_dir=staging,
+    install_npm(build_cmd=build_cmd, path=staging, source_dir=staging,
                 build_dir=pjoin(HERE, NAME, 'static'), npm=npm),
     command_for_func(check_assets)
 )
