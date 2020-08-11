@@ -982,10 +982,15 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._clearKernelState();
     this._updateStatus('restarting');
 
-    // Kick off an async kernel request to eventually reset the kernel status.
-    // We do this with a setTimeout so that it comes after the microtask
-    // logic in _handleMessage for restarting/autostarting status updates.
+    // Reconnect to a new websocket and kick off an async kernel request to
+    // eventually reset the kernel status. We do this with a setTimeout so
+    // that it comes after the microtask logic in _handleMessage for
+    // restarting/autostarting status updates.
     setTimeout(() => {
+      // We must reconnect since the kernel connection information may have
+      // changed, and the server only refreshes its zmq connection when a new
+      // websocket is opened.
+      void this.reconnect();
       void this.requestKernelInfo();
     }, 0);
   }
