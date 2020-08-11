@@ -22,7 +22,7 @@ import { Diagnostics } from '../codemirror/features/diagnostics';
 import { Highlights } from '../codemirror/features/highlights';
 import { Hover } from '../codemirror/features/hover';
 import { Signature } from '../codemirror/features/signature';
-import { ILSPFeatureConstructor, ILSPFeature } from '../codemirror/feature';
+import { ILSPFeatureConstructor, ILSPFeature, IFeatureSettings } from '../codemirror/feature';
 import { JumpToDefinition } from '../codemirror/features/jump_to';
 import { ICommandContext } from '../../command_manager';
 import { JSONObject } from '@lumino/coreutils';
@@ -32,6 +32,35 @@ import {
   ISocketConnectionOptions
 } from '../../connection_manager';
 import { Rename } from '../codemirror/features/rename';
+import { LSPExtension } from "../../index";
+import { ISettingRegistry } from "@jupyterlab/settingregistry";
+
+
+class LabFeatureSettings implements IFeatureSettings {
+
+  private key = 'features';
+
+  constructor(private extension: LSPExtension, protected feature_name: string) {}
+
+  protected get lab_settings(): ISettingRegistry.ISettings {
+    return this.extension.settings;
+  }
+
+  protected get_obj(): any {
+    return (this.lab_settings.get(this.key).composite as any)[this.feature_name.toLowerCase()];
+  }
+
+  get(setting: string) {
+    return this.get_obj()[setting];
+  }
+
+  set(setting: string, value: any) {
+    let obj = this.get_obj();
+    obj[setting] = value;
+    this.lab_settings.set(this.key, obj).catch(console.warn)
+  }
+}
+
 
 export const lsp_features: Array<ILSPFeatureConstructor> = [
   Completion,
@@ -119,18 +148,28 @@ export abstract class JupyterLabWidgetAdapter
   public status_message: StatusMessage;
   public isDisposed = false;
 
+  protected app: JupyterFrontEnd;
+  protected rendermime_registry: IRenderMimeRegistry;
+  /**
+   * Completions are extraordinary in that they require separate settings for the completion component
+   * which is heavily integrated with JupyterLab rather than with the CodeMirror
+   * @protected
+   */
+  protected completion_settings: IFeatureSettings;
+
   protected constructor(
-    protected app: JupyterFrontEnd,
+    protected extension: LSPExtension,
     protected widget: IDocumentWidget,
-    protected rendermime_registry: IRenderMimeRegistry,
     invoke: string,
-    connection_manager: DocumentConnectionManager
   ) {
+    this.app = extension.app;
+    this.rendermime_registry = extension.rendermime_registry;
+    this.connection_manager = extension.connection_manager;
     this.document_connected = new Signal(this);
     this.invoke_command = invoke;
     this.adapters = new Map();
     this.status_message = new StatusMessage();
-    this.connection_manager = connection_manager;
+    this.completion_settings = new LabFeatureSettings(this.extension, 'completion')
 
     // set up signal connections
     this.widget.context.saveState.connect(this.on_save_state, this);
@@ -473,7 +512,8 @@ export abstract class JupyterLabWidgetAdapter
         virtual_document,
         connection,
         this,
-        this.status_message
+        this.status_message,
+        new LabFeatureSettings(this.extension, feature_type.name)
       );
       adapter_features.push(feature);
     }

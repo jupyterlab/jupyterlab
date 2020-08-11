@@ -22,6 +22,7 @@ import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
+import { DummySettings } from "./cm_adapter.spec";
 
 const js_fib_code = `function fib(n) {
   return n<2?n:fib(n-1)+fib(n-2);
@@ -119,7 +120,8 @@ describe('Feature', () => {
         virtual_editor.virtual_document,
         connection,
         dummy_components_manager,
-        new StatusMessage()
+        new StatusMessage(),
+        new DummySettings()
       );
     }
 

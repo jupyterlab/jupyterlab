@@ -7,8 +7,16 @@ import {
 } from '../jupyterlab/jl_adapter';
 import { IRootPosition } from '../../positioning';
 import * as CodeMirror from 'codemirror';
-import { CodeMirrorLSPFeature } from './feature';
+import { CodeMirrorLSPFeature, IFeatureSettings } from './feature';
 import { FileEditorFeatureTestEnvironment } from './testutils';
+
+export class DummySettings implements IFeatureSettings {
+  get(setting: string): any {
+  }
+
+  set(setting: string, value: any): void {
+  }
+}
 
 describe('CodeMirrorAdapter', () => {
   let env: FileEditorFeatureTestEnvironment;
@@ -46,7 +54,8 @@ describe('CodeMirrorAdapter', () => {
         virtual_editor.virtual_document,
         connection,
         dummy_components_manager,
-        new StatusMessage()
+        new StatusMessage(),
+        new DummySettings()
       );
 
       let adapter = new CodeMirrorAdapter(

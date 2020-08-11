@@ -46,44 +46,32 @@ const lsp_commands: Array<IFeatureCommand> = [].concat(
   ...lsp_features.map(feature => feature.commands)
 );
 
-/**
- * The plugin registration information.
- */
-const plugin: JupyterFrontEndPlugin<void> = {
-  id: '@krassowski/jupyterlab-lsp:plugin',
-  requires: [
-    IEditorTracker,
-    INotebookTracker,
-    ISettingRegistry,
-    ICommandPalette,
-    IDocumentManager,
-    ICompletionManager,
-    IRenderMimeRegistry,
-    IPaths,
-    ILabShell,
-    IStatusBar
-  ],
-  activate: (
-    app: JupyterFrontEnd,
+export class LSPExtension {
+  connection_manager: DocumentConnectionManager;
+  language_server_manager: LanguageServerManager;
+  settings: ISettingRegistry.ISettings;
+
+  constructor(
+    public app: JupyterFrontEnd,
     fileEditorTracker: IEditorTracker,
     notebookTracker: INotebookTracker,
-    settingRegistry: ISettingRegistry,
+    private setting_registry: ISettingRegistry,
     palette: ICommandPalette,
     documentManager: IDocumentManager,
-    completion_manager: ICompletionManager,
-    rendermime_registry: IRenderMimeRegistry,
+    public completion_manager: ICompletionManager,
+    public rendermime_registry: IRenderMimeRegistry,
     paths: IPaths,
     labShell: ILabShell,
     status_bar: IStatusBar
-  ) => {
-    const language_server_manager = new LanguageServerManager({});
-    const connection_manager = new DocumentConnectionManager({
-      language_server_manager
+  ) {
+    this.language_server_manager = new LanguageServerManager({});
+    this.connection_manager = new DocumentConnectionManager({
+      language_server_manager: this.language_server_manager
     });
 
     const status_bar_item = new LSPStatus();
-    status_bar_item.model.language_server_manager = language_server_manager;
-    status_bar_item.model.connection_manager = connection_manager;
+    status_bar_item.model.language_server_manager = this.language_server_manager;
+    status_bar_item.model.connection_manager = this.connection_manager;
 
     labShell.currentChanged.connect(() => {
       const current = labShell.currentWidget;
@@ -134,12 +122,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
       if (fileEditor.editor instanceof CodeMirrorEditor) {
         let jumper = new FileEditorJumper(widget, documentManager);
         let adapter = new FileEditorAdapter(
+          this,
           widget,
           jumper,
-          app,
-          completion_manager,
-          rendermime_registry,
-          connection_manager
         );
         file_editor_adapters.set(fileEditor.id, adapter);
 
@@ -181,12 +166,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
       // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
       let jumper = new NotebookJumper(widget, documentManager);
       let adapter = new NotebookAdapter(
+        this,
         widget,
         jumper,
-        app,
-        completion_manager,
-        rendermime_registry,
-        connection_manager
       );
       notebook_adapters.set(widget.id, adapter);
 
@@ -235,36 +217,65 @@ const plugin: JupyterFrontEndPlugin<void> = {
     notebook_command_manager.add_context_separator(0);
     notebook_command_manager.add(lsp_commands);
 
-    function updateOptions(settings: ISettingRegistry.ISettings): void {
+    const updateOptions = (settings: ISettingRegistry.ISettings) => {
       const options = settings.composite;
-
-      // Object.keys(options).forEach((key) => {
-      //  if (key === 'modifier') {
-      //    // let modifier = options[key] as KeyModifier;
-      //    CodeMirrorExtension.modifierKey = modifier;
-      //  }
-      // });
 
       const languageServerSettings = (options.language_servers ||
         {}) as TLanguageServerConfigurations;
-      connection_manager.updateServerConfigurations(languageServerSettings);
+      this.connection_manager.updateServerConfigurations(languageServerSettings);
+      this.settings = settings;
     }
 
-    settingRegistry
+    this.setting_registry
       .load(plugin.id)
       .then(settings => {
         // Store the initial server settings, to be sent asynchronously
         // when the servers are initialized.
-        connection_manager.initial_configurations = (settings.composite
+        this.connection_manager.initial_configurations = (settings.composite
           .language_servers || {}) as TLanguageServerConfigurations;
 
         settings.changed.connect(() => {
           updateOptions(settings);
         });
+        this.settings = settings;
       })
       .catch((reason: Error) => {
         console.error(reason.message);
       });
+  }
+
+}
+
+/**
+ * The plugin registration information.
+ */
+const plugin: JupyterFrontEndPlugin<void> = {
+  id: '@krassowski/jupyterlab-lsp:plugin',
+  requires: [
+    IEditorTracker,
+    INotebookTracker,
+    ISettingRegistry,
+    ICommandPalette,
+    IDocumentManager,
+    ICompletionManager,
+    IRenderMimeRegistry,
+    IPaths,
+    ILabShell,
+    IStatusBar
+  ],
+  activate: (app, ...args) => {
+    new LSPExtension(app, ...args as [
+      IEditorTracker,
+      INotebookTracker,
+      ISettingRegistry,
+      ICommandPalette,
+      IDocumentManager,
+      ICompletionManager,
+      IRenderMimeRegistry,
+      IPaths,
+      ILabShell,
+      IStatusBar
+    ]);
   },
   autoStart: true
 };

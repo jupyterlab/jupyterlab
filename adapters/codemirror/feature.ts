@@ -91,6 +91,11 @@ export interface ILSPFeature {
   ): void;
 }
 
+export interface IFeatureSettings {
+  get(setting: string): any;
+  set(setting: string, value: any): void;
+}
+
 export interface IEditorRange {
   start: IEditorPosition;
   end: IEditorPosition;
@@ -124,7 +129,8 @@ export abstract class CodeMirrorLSPFeature implements ILSPFeature {
     public virtual_document: VirtualDocument,
     public connection: LSPConnection,
     public jupyterlab_components: IJupyterLabComponentsManager,
-    public status_message: StatusMessage
+    public status_message: StatusMessage,
+    public settings: IFeatureSettings
   ) {
     this.editor_handlers = new Map();
     this.connection_handlers = new Map();

@@ -4,8 +4,6 @@ import * as CodeMirror from 'codemirror';
 import { VirtualEditorForNotebook } from '../../virtual/editors/notebook';
 import { ICompletionManager } from '@jupyterlab/completer';
 import { NotebookJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/notebook';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
-import { JupyterFrontEnd } from '@jupyterlab/application';
 import { until_ready } from '../../utils';
 import { LSPConnector } from './components/completion';
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -14,15 +12,14 @@ import { foreign_code_extractors } from '../../extractors/defaults';
 import { Cell } from '@jupyterlab/cells';
 import * as nbformat from '@jupyterlab/nbformat';
 import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
-import { DocumentConnectionManager } from '../../connection_manager';
 import { Session } from '@jupyterlab/services';
 import { SessionContext } from '@jupyterlab/apputils';
+import { LSPExtension } from "../../index";
 
 export class NotebookAdapter extends JupyterLabWidgetAdapter {
   editor: Notebook;
   widget: NotebookPanel;
   virtual_editor: VirtualEditorForNotebook;
-  completion_manager: ICompletionManager;
   jumper: NotebookJumper;
 
   protected current_completion_connector: LSPConnector;
@@ -30,22 +27,16 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
   private _language_info: ILanguageInfoMetadata;
 
   constructor(
+    extension: LSPExtension,
     editor_widget: NotebookPanel,
-    jumper: NotebookJumper,
-    app: JupyterFrontEnd,
-    completion_manager: ICompletionManager,
-    rendermime_registry: IRenderMimeRegistry,
-    connection_manager: DocumentConnectionManager
+    jumper: NotebookJumper
   ) {
     super(
-      app,
+      extension,
       editor_widget,
-      rendermime_registry,
       'completer:invoke-notebook',
-      connection_manager
     );
     this.editor = editor_widget.content;
-    this.completion_manager = completion_manager;
     this.jumper = jumper;
     this.init_once_ready().catch(console.warn);
   }
@@ -172,6 +163,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       editor: cell.editor,
       connections: this.connection_manager.connections,
       virtual_editor: this.virtual_editor,
+      settings: this.completion_settings,
       session: this.widget.sessionContext.session
     });
   }
@@ -185,7 +177,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       return;
     }
     this.set_completion_connector(cell);
-    const handler = this.completion_manager.register({
+    const handler = this.extension.completion_manager.register({
       connector: this.current_completion_connector,
       editor: cell.editor,
       parent: this.widget

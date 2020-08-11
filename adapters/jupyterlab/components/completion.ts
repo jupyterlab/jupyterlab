@@ -21,6 +21,7 @@ import { LSPConnection } from '../../../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 import { kernelIcon } from '@jupyterlab/ui-components';
+import { IFeatureSettings } from "../../codemirror/feature";
 
 /**
  * A LSP connector for completion handlers.
@@ -33,22 +34,27 @@ export class LSPConnector
   private _context_connector: ContextConnector;
   private _kernel_connector: KernelConnector;
   private _kernel_and_context_connector: CompletionConnector;
-  protected options: LSPConnector.IOptions;
 
   // signal that this is the new type connector (providing completion items)
   responseType = ICompletionItemsResponseType;
 
   virtual_editor: VirtualEditor;
   private trigger_kind: CompletionTriggerKind;
-  // TODO expose this in user settings
-  private suppress_auto_invoke_in = ['comment', 'string'];
+
+  private get suppress_auto_invoke_in(): string[] {
+    return this.options.settings.get("suppressInvokeIn")
+  }
+
+  private get should_show_documentation(): boolean {
+    return this.options.settings.get("showDocumentation")
+  }
 
   /**
    * Create a new LSP connector for completion requests.
    *
    * @param options - The instantiation options for the LSP connector.
    */
-  constructor(options: LSPConnector.IOptions) {
+  constructor(protected options: LSPConnector.IOptions) {
     this._editor = options.editor;
     this._connections = options.connections;
     this.virtual_editor = options.virtual_editor;
@@ -60,7 +66,6 @@ export class LSPConnector
         kernel_options
       );
     }
-    this.options = options;
   }
 
   dispose() {
@@ -216,14 +221,17 @@ export class LSPConnector
     let prefix = token.value.slice(0, position_in_token + 1);
     let all_non_prefixed = true;
     let items: CompletionHandler.ICompletionItem[] = [];
+    const show_documentation = this.should_show_documentation;
     lspCompletionItems.forEach(match => {
       let completionItem = {
         label: match.label,
         insertText: match.insertText,
         type: match.kind ? completionItemKindNames[match.kind] : '',
-        documentation: lsProtocol.MarkupContent.is(match.documentation)
+        documentation: show_documentation ? (
+          lsProtocol.MarkupContent.is(match.documentation)
           ? match.documentation.value
-          : match.documentation,
+          : match.documentation
+        ) : null,
         filterText: match.filterText,
         deprecated: match.deprecated,
         data: { ...match }
@@ -385,6 +393,8 @@ export namespace LSPConnector {
      * The connections to be used by the LSP connector.
      */
     connections: Map<VirtualDocument.id_path, LSPConnection>;
+
+    settings: IFeatureSettings;
 
     session?: Session.ISessionConnection;
   }

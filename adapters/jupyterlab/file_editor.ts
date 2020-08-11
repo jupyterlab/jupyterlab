@@ -3,14 +3,11 @@ import { FileEditor } from '@jupyterlab/fileeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { FileEditorJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/fileeditor';
 import * as CodeMirror from 'codemirror';
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { ICompletionManager } from '@jupyterlab/completer';
 import { LSPConnector } from './components/completion';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualFileEditor } from '../../virtual/editors/file_editor';
-import { DocumentConnectionManager } from '../../connection_manager';
+import { LSPExtension } from "../../index";
 
 export class FileEditorAdapter extends JupyterLabWidgetAdapter {
   editor: FileEditor;
@@ -44,19 +41,14 @@ export class FileEditorAdapter extends JupyterLabWidgetAdapter {
   }
 
   constructor(
+    extension: LSPExtension,
     editor_widget: IDocumentWidget<FileEditor>,
-    jumper: FileEditorJumper,
-    app: JupyterFrontEnd,
-    protected completion_manager: ICompletionManager,
-    rendermime_registry: IRenderMimeRegistry,
-    connection_manager: DocumentConnectionManager
+    jumper: FileEditorJumper
   ) {
     super(
-      app,
+      extension,
       editor_widget,
-      rendermime_registry,
       'completer:invoke-file',
-      connection_manager
     );
     this.jumper = jumper;
     this.editor = editor_widget.content;
@@ -84,9 +76,10 @@ export class FileEditorAdapter extends JupyterLabWidgetAdapter {
     this.current_completion_connector = new LSPConnector({
       editor: this.editor.editor,
       connections: this.connection_manager.connections,
-      virtual_editor: this.virtual_editor
+      virtual_editor: this.virtual_editor,
+      settings: this.completion_settings,
     });
-    this.completion_manager.register({
+    this.extension.completion_manager.register({
       connector: this.current_completion_connector,
       editor: this.editor.editor,
       parent: this.widget
