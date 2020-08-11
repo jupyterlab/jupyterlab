@@ -21,7 +21,7 @@ import {
   sessionContextDialogs
 } from '@jupyterlab/apputils';
 
-import { URLExt } from '@jupyterlab/coreutils';
+import { URLExt, PageConfig } from '@jupyterlab/coreutils';
 
 import { IStateDB, StateDB } from '@jupyterlab/statedb';
 
@@ -96,20 +96,21 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
   provides: IWindowResolver,
   requires: [JupyterFrontEnd.IPaths, IRouter],
   activate: async (
-    _: JupyterFrontEnd,
+    app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
     router: IRouter
   ) => {
-    const { hash, path, search } = router.current;
+    const { hash, search } = router.current;
     const query = URLExt.queryStringToObject(search || '');
     const solver = new WindowResolver();
-    const { urls } = paths;
-    const match = path.match(new RegExp(`^${urls.workspaces}\/([^?\/]+)`));
-    const workspace = (match && decodeURIComponent(match[1])) || '';
-    const candidate = Private.candidate(paths, workspace);
-    const rest = workspace
-      ? path.replace(new RegExp(`^${urls.workspaces}\/${workspace}`), '')
-      : path.replace(new RegExp(`^${urls.app}\/?`), '');
+    const workspace = PageConfig.getOption('workspace');
+    const treePath = PageConfig.getOption('treePath');
+    const mode =
+      PageConfig.getOption('mode') === 'multiple-document' ? 'lab' : 'doc';
+    // This is used as a key in local storage to refer to workspaces, either the name
+    // of the workspace or the string PageConfig.defaultWorkspace. Both lab and doc modes share the same workspace.
+    const candidate = workspace ? workspace : PageConfig.defaultWorkspace;
+    const rest = treePath ? URLExt.join('tree', treePath) : '';
     try {
       await solver.resolve(candidate);
       return solver;
@@ -118,14 +119,15 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
       // that never resolves to prevent the application from loading plugins
       // that rely on `IWindowResolver`.
       return new Promise<IWindowResolver>(() => {
-        const { base, workspaces } = paths.urls;
+        const { base } = paths.urls;
         const pool =
           'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         const random = pool[Math.floor(Math.random() * pool.length)];
-        const path = URLExt.join(base, workspaces, `auto-${random}`, rest);
+        let path = URLExt.join(base, mode, 'workspaces', `auto-${random}`);
+        path = rest ? URLExt.join(path, URLExt.encodeParts(rest)) : path;
 
-        // Clone the originally requested workspace after redirecting.
-        query['clone'] = workspace;
+        // Reset the workspace on load.
+        query['reset'] = '';
 
         const url = path + URLExt.objectToQueryString(query) + (hash || '');
         router.navigate(url, { hard: true });
@@ -324,7 +326,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
           typeof query['clone'] === 'string'
             ? query['clone'] === ''
               ? URLExt.join(urls.base, urls.app)
-              : URLExt.join(urls.base, urls.workspaces, query['clone'])
+              : URLExt.join(urls.base, urls.app, 'workspaces', query['clone'])
             : null;
         const source = clone || workspace || null;
 
@@ -414,10 +416,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
         delete query['reset'];
 
         const url = path + URLExt.objectToQueryString(query) + hash;
-        const cleared = db
-          .clear()
-          .then(() => save.invoke())
-          .then(() => router.stop);
+        const cleared = db.clear().then(() => save.invoke());
 
         // After the state has been reset, navigate to the URL.
         if (clone) {
@@ -507,24 +506,3 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   workspacesPlugin
 ];
 export default plugins;
-
-/**
- * The namespace for module private data.
- */
-namespace Private {
-  /**
-   * Generate a workspace name candidate.
-   *
-   * @param workspace - A potential workspace name parsed from the URL.
-   *
-   * @returns A workspace name candidate.
-   */
-  export function candidate(
-    { urls }: JupyterFrontEnd.IPaths,
-    workspace = ''
-  ): string {
-    return workspace
-      ? URLExt.join(urls.workspaces, workspace)
-      : URLExt.join(urls.app);
-  }
-}

@@ -104,7 +104,6 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
     mainMenu: IMainMenu | null,
     sessionDialogs: ISessionContextDialogs | null
   ): IDocumentManager => {
-    const { shell } = app;
     const manager = app.serviceManager;
     const contexts = new WeakSet<DocumentRegistry.Context>();
     const opener: DocumentManager.IWidgetOpener = {
@@ -117,9 +116,9 @@ const docManagerPlugin: JupyterFrontEndPlugin<IDocumentManager> = {
           ...widget.title.dataset
         };
         if (!widget.isAttached) {
-          shell.add(widget, 'main', options || {});
+          app.shell.add(widget, 'main', options || {});
         }
-        shell.activateById(widget.id);
+        app.shell.activateById(widget.id);
 
         // Handle dirty state for open documents.
         const context = docManager.contextForWidget(widget);
@@ -247,6 +246,11 @@ ${fileTypes}`;
     // If the document registry gains or loses a factory or file type,
     // regenerate the settings description with the available options.
     registry.changed.connect(() => settingRegistry.reload(pluginId));
+
+    docManager.mode = labShell!.mode;
+    labShell!.modeChanged.connect((_, args) => {
+      docManager.mode = args as string;
+    });
 
     return docManager;
   }

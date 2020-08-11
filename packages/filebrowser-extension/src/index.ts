@@ -4,6 +4,7 @@
 import {
   ILabShell,
   ILayoutRestorer,
+  ITreePathUpdater,
   IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -140,7 +141,8 @@ const browser: JupyterFrontEndPlugin<void> = {
     IDocumentManager,
     ILabShell,
     ILayoutRestorer,
-    ISettingRegistry
+    ISettingRegistry,
+    ITreePathUpdater
   ],
   optional: [ICommandPalette, IMainMenu],
   autoStart: true
@@ -153,7 +155,7 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
-  requires: [IDocumentManager],
+  requires: [ILabShell, IDocumentManager],
   optional: [IStateDB, IRouter, JupyterFrontEnd.ITreeResolver]
 };
 
@@ -231,6 +233,7 @@ export default plugins;
  */
 async function activateFactory(
   app: JupyterFrontEnd,
+  labShell: ILabShell,
   docManager: IDocumentManager,
   state: IStateDB | null,
   router: IRouter | null,
@@ -257,11 +260,22 @@ async function activateFactory(
     const launcher = new ToolbarButton({
       icon: addIcon,
       onClick: () => {
-        if (commands.hasCommand('launcher:create')) {
+        if (
+          labShell.mode === 'multiple-document' &&
+          commands.hasCommand('launcher:create')
+        ) {
           return Private.createLauncher(commands, widget);
+        } else {
+          const newUrl = PageConfig.getUrl({
+            mode: labShell.mode,
+            workspace: PageConfig.defaultWorkspace,
+            treePath: model.path
+          });
+          window.open(newUrl, '_blank');
         }
       },
-      tooltip: 'New Launcher'
+      tooltip: 'New Launcher',
+      actualOnClick: true
     });
     widget.toolbar.insertItem(0, 'launch', launcher);
 
@@ -291,6 +305,7 @@ function activateBrowser(
   labShell: ILabShell,
   restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
+  treePathUpdater: ITreePathUpdater,
   commandPalette: ICommandPalette | null,
   mainMenu: IMainMenu | null
 ): void {
@@ -335,9 +350,10 @@ function activateBrowser(
   });
   labShell.add(browser, 'left', { rank: 100 });
 
-  // If the layout is a fresh session without saved data, open file browser.
+  // If the layout is a fresh session without saved data and not in single document
+  // mode, open file browser.
   void labShell.restored.then(layout => {
-    if (layout.fresh) {
+    if (layout.fresh && labShell.mode !== 'single-document') {
       void commands.execute(CommandIDs.showBrowser, void 0);
     }
   });
@@ -398,6 +414,10 @@ function activateBrowser(
       }
     });
 
+    browser.model.pathChanged.connect((sender, args) => {
+      treePathUpdater(args.newValue);
+    });
+
     maybeCreate();
   });
 }
@@ -417,7 +437,16 @@ function activateShareFile(
         return;
       }
       const path = encodeURI(model.path);
-      Clipboard.copyToSystem(URLExt.join(PageConfig.getTreeShareUrl(), path));
+
+      Clipboard.copyToSystem(
+        URLExt.normalize(
+          PageConfig.getUrl({
+            mode: 'single-document',
+            workspace: PageConfig.defaultWorkspace,
+            treePath: path
+          })
+        )
+      );
     },
     isVisible: () =>
       !!tracker.currentWidget &&
@@ -516,9 +545,10 @@ function addCommands(
   commands.addCommand(CommandIDs.goToPath, {
     execute: async args => {
       const path = (args.path as string) || '';
+      const showBrowser = !(args?.dontShowBrowser ?? false);
       try {
         const item = await Private.navigateToPath(path, factory);
-        if (item.type !== 'directory') {
+        if (item.type !== 'directory' && showBrowser) {
           const browserForPath = Private.getBrowserForPath(path, factory);
           if (browserForPath) {
             browserForPath.clearSelectedItems();
@@ -532,15 +562,20 @@ function addCommands(
       } catch (reason) {
         console.warn(`${CommandIDs.goToPath} failed to go to: ${path}`, reason);
       }
-      return commands.execute(CommandIDs.showBrowser, { path });
+      if (showBrowser) {
+        return commands.execute(CommandIDs.showBrowser, { path });
+      }
     }
   });
 
   commands.addCommand(CommandIDs.openPath, {
     label: args => (args.path ? `Open ${args.path}` : 'Open from Path…'),
     caption: args => (args.path ? `Open ${args.path}` : 'Open from path'),
-    execute: async ({ path }: { path?: string }) => {
-      if (!path) {
+    execute: async args => {
+      let path: string | undefined;
+      if (args?.path) {
+        path = args.path as string;
+      } else {
         path =
           (
             await InputDialog.getText({
@@ -568,7 +603,10 @@ function addCommands(
         if (trailingSlash && item.type !== 'directory') {
           throw new Error(`Path ${path}/ is not a directory`);
         }
-        await commands.execute(CommandIDs.goToPath, { path });
+        await commands.execute(CommandIDs.goToPath, {
+          path,
+          dontShowBrowser: args.dontShowBrowser
+        });
         if (item.type === 'directory') {
           return;
         }
@@ -1166,10 +1204,16 @@ namespace Private {
         // Restore the model without populating it.
         await browser.model.restore(browser.id, false);
         if (paths.file) {
-          await commands.execute(CommandIDs.openPath, { path: paths.file });
+          await commands.execute(CommandIDs.openPath, {
+            path: paths.file,
+            dontShowBrowser: true
+          });
         }
         if (paths.browser) {
-          await commands.execute(CommandIDs.openPath, { path: paths.browser });
+          await commands.execute(CommandIDs.openPath, {
+            path: paths.browser,
+            dontShowBrowser: true
+          });
         }
       } else {
         await browser.model.restore(browser.id);

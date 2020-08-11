@@ -13,7 +13,7 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
-import { DockPanel, Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 describe('apputils', () => {
   describe('LayoutRestorer', () => {
@@ -60,9 +60,8 @@ describe('apputils', () => {
           registry: new CommandRegistry()
         });
         const currentWidget = new Widget();
-        const mode: DockPanel.Mode = 'single-document';
         const dehydrated: ILabShell.ILayout = {
-          mainArea: { currentWidget, dock: null, mode },
+          mainArea: { currentWidget, dock: null },
           leftArea: { collapsed: true, currentWidget: null, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
@@ -72,7 +71,6 @@ describe('apputils', () => {
         await restorer.save(dehydrated);
         const layout = await restorer.fetch();
         expect(layout.mainArea?.currentWidget).toBe(currentWidget);
-        expect(layout.mainArea?.mode).toBe(mode);
       });
     });
 
@@ -98,7 +96,7 @@ describe('apputils', () => {
         // The `fresh` attribute is only here to check against the return value.
         const dehydrated: ILabShell.ILayout = {
           fresh: false,
-          mainArea: { currentWidget: null, dock: null, mode: null },
+          mainArea: { currentWidget: null, dock: null },
           leftArea: {
             currentWidget,
             collapsed: true,
@@ -155,7 +153,7 @@ describe('apputils', () => {
           registry: new CommandRegistry()
         });
         const dehydrated: ILabShell.ILayout = {
-          mainArea: { currentWidget: null, dock: null, mode: null },
+          mainArea: { currentWidget: null, dock: null },
           leftArea: { currentWidget: null, collapsed: true, widgets: null },
           rightArea: { collapsed: true, currentWidget: null, widgets: null }
         };
@@ -177,7 +175,7 @@ describe('apputils', () => {
         // The `fresh` attribute is only here to check against the return value.
         const dehydrated: ILabShell.ILayout = {
           fresh: false,
-          mainArea: { currentWidget: null, dock: null, mode: null },
+          mainArea: { currentWidget: null, dock: null },
           leftArea: {
             currentWidget,
             collapsed: true,

@@ -7,6 +7,7 @@ import {
   ILabStatus,
   ILayoutRestorer,
   IRouter,
+  ITreePathUpdater,
   ConnectionLost,
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
@@ -24,7 +25,7 @@ import {
   showErrorMessage
 } from '@jupyterlab/apputils';
 
-import { PathExt, URLExt } from '@jupyterlab/coreutils';
+import { URLExt, PageConfig } from '@jupyterlab/coreutils';
 
 import {
   IPropertyInspectorProvider,
@@ -43,7 +44,7 @@ import { PromiseDelegate } from '@lumino/coreutils';
 
 import { DisposableDelegate, DisposableSet } from '@lumino/disposable';
 
-import { Widget, DockLayout } from '@lumino/widgets';
+import { Widget, DockLayout, DockPanel } from '@lumino/widgets';
 
 import * as React from 'react';
 
@@ -88,9 +89,10 @@ namespace CommandIDs {
 /**
  * The main extension.
  */
-const main: JupyterFrontEndPlugin<void> = {
+const main: JupyterFrontEndPlugin<ITreePathUpdater> = {
   id: '@jupyterlab/application-extension:main',
   requires: [IRouter, IWindowResolver],
+  provides: ITreePathUpdater,
   optional: [ICommandPalette, IConnectionLost],
   activate: (
     app: JupyterFrontEnd,
@@ -101,6 +103,22 @@ const main: JupyterFrontEndPlugin<void> = {
   ) => {
     if (!(app instanceof JupyterLab)) {
       throw new Error(`${main.id} must be activated in JupyterLab.`);
+    }
+
+    // These two internal state variables are used to manage the two source
+    // of the tree part of the URL being updated: 1) path of the active document,
+    // 2) path of the default browser if the active main area widget isn't a document.
+    let _docTreePath = '';
+    let _defaultBrowserTreePath = '';
+
+    function updateTreePath(treePath: string) {
+      _defaultBrowserTreePath = treePath;
+      if (!_docTreePath) {
+        const path = PageConfig.getUrl({ treePath });
+        router.navigate(path, { skipRouting: true });
+        // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
+        PageConfig.setOption('treePath', treePath);
+      }
     }
 
     // Requiring the window resolver guarantees that the application extension
@@ -125,6 +143,27 @@ const main: JupyterFrontEndPlugin<void> = {
     // trigger a refresh of the commands.
     app.shell.layoutModified.connect(() => {
       app.commands.notifyCommandChanged();
+    });
+
+    // Watch the mode and update the page URL to /lab or /doc to reflect the
+    // change.
+    app.shell.modeChanged.connect((_, args: DockPanel.Mode) => {
+      const path = PageConfig.getUrl({ mode: args as string });
+      router.navigate(path, { skipRouting: true });
+      // Persist this mode change to PageConfig as it is used elsewhere at runtime.
+      PageConfig.setOption('mode', args as string);
+    });
+
+    // Watch the path of the current widget in the main area and update the page
+    // URL to reflect the change.
+    app.shell.currentPathChanged.connect((_, args) => {
+      const maybeTreePath = args.newValue as string;
+      const treePath = maybeTreePath || _defaultBrowserTreePath;
+      const path = PageConfig.getUrl({ treePath: treePath });
+      router.navigate(path, { skipRouting: true });
+      // Persist the new tree path to PageConfig as it is used elsewhere at runtime.
+      PageConfig.setOption('treePath', treePath);
+      _docTreePath = maybeTreePath;
     });
 
     // If the connection to the server is lost, handle it with the
@@ -219,6 +258,7 @@ const main: JupyterFrontEndPlugin<void> = {
         return ((event as any).returnValue = message);
       }
     });
+    return updateTreePath;
   },
   autoStart: true
 };
@@ -229,13 +269,21 @@ const main: JupyterFrontEndPlugin<void> = {
 const layout: JupyterFrontEndPlugin<ILayoutRestorer> = {
   id: '@jupyterlab/application-extension:layout',
   requires: [IStateDB, ILabShell],
-  activate: (app: JupyterFrontEnd, state: IStateDB, labShell: ILabShell) => {
+  activate: (
+    app: JupyterFrontEnd,
+    state: IStateDB,
+    labShell: ILabShell,
+    info: JupyterLab.IInfo
+  ) => {
     const first = app.started;
     const registry = app.commands;
     const restorer = new LayoutRestorer({ connector: state, first, registry });
 
     void restorer.fetch().then(saved => {
-      labShell.restoreLayout(saved);
+      labShell.restoreLayout(
+        PageConfig.getOption('mode') as DockPanel.Mode,
+        saved
+      );
       labShell.layoutModified.connect(() => {
         void restorer.save(labShell.saveLayout());
       });
@@ -289,12 +337,12 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
     resolver: IWindowResolver
   ): JupyterFrontEnd.ITreeResolver => {
     const { commands } = app;
-    const treePattern = new RegExp(`^${paths.urls.tree}([^?]+)`);
-    const workspacePattern = new RegExp(
-      `^${paths.urls.workspaces}/[^?/]+/tree/([^?]+)`
-    );
     const set = new DisposableSet();
     const delegate = new PromiseDelegate<JupyterFrontEnd.ITreeResolver.Paths>();
+
+    const treePattern = new RegExp(
+      '/(lab|doc)(/workspaces/[a-zA-Z0-9-_]+)?(/tree/.*)?'
+    );
 
     set.add(
       commands.addCommand(CommandIDs.tree, {
@@ -303,40 +351,21 @@ const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
             return;
           }
 
-          const treeMatch = args.path.match(treePattern);
-          const workspaceMatch = args.path.match(workspacePattern);
-          const match = treeMatch || workspaceMatch;
-          const file = match ? decodeURI(match[1]) : '';
-          const workspace = PathExt.basename(resolver.name);
           const query = URLExt.queryStringToObject(args.search ?? '');
           const browser = query['file-browser-path'] || '';
 
           // Remove the file browser path from the query string.
           delete query['file-browser-path'];
 
-          // Remove the tree portion of the URL.
-          const url =
-            (workspaceMatch
-              ? URLExt.join(paths.urls.workspaces, workspace)
-              : paths.urls.app) +
-            URLExt.objectToQueryString(query) +
-            args.hash;
-
-          // Route to the cleaned URL.
-          router.navigate(url);
-
           // Clean up artifacts immediately upon routing.
           set.dispose();
 
-          delegate.resolve({ browser, file });
+          delegate.resolve({ browser, file: PageConfig.getOption('treePath') });
         }
       })
     );
     set.add(
       router.register({ command: CommandIDs.tree, pattern: treePattern })
-    );
-    set.add(
-      router.register({ command: CommandIDs.tree, pattern: workspacePattern })
     );
 
     // If a route is handled by the router without the tree command being
@@ -433,7 +462,8 @@ const sidebar: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry,
-    labShell: ILabShell
+    labShell: ILabShell,
+    info: JupyterLab.IInfo
   ) => {
     type overrideMap = { [id: string]: 'left' | 'right' };
     let overrides: overrideMap = {};
@@ -567,7 +597,7 @@ function addCommands(app: JupyterLab, palette: ICommandPalette | null): void {
   // Find the tab area for a widget within the main dock area.
   const tabAreaFor = (widget: Widget): DockLayout.ITabAreaConfig | null => {
     const { mainArea } = shell.saveLayout();
-    if (!mainArea || mainArea.mode !== 'multiple-document') {
+    if (!mainArea || PageConfig.getOption('mode') !== 'multiple-document') {
       return null;
     }
     const area = mainArea.dock?.main;

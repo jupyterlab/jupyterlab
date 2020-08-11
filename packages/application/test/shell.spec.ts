@@ -9,7 +9,7 @@ import { toArray } from '@lumino/algorithm';
 
 import { Message } from '@lumino/messaging';
 
-import { Widget } from '@lumino/widgets';
+import { Widget, DockPanel } from '@lumino/widgets';
 
 import { simulate } from 'simulate-event';
 
@@ -121,7 +121,8 @@ describe('LabShell', () => {
   describe('#restored', () => {
     it('should resolve when the app is restored for the first time', () => {
       const state = shell.saveLayout();
-      shell.restoreLayout(state);
+      const mode: DockPanel.Mode = 'multiple-document';
+      shell.restoreLayout(mode, state);
       return shell.restored;
     });
   });
@@ -393,7 +394,7 @@ describe('LabShell', () => {
       shell.add(foo, 'main');
       const state = shell.saveLayout();
       shell.activateById('foo');
-      expect(state.mainArea?.mode).toBe('multiple-document');
+      expect(shell.mode).toBe('multiple-document');
       expect(state.mainArea?.currentWidget).toBe(null);
     });
   });
@@ -401,9 +402,10 @@ describe('LabShell', () => {
   describe('#restoreLayout', () => {
     it('should restore the layout of the shell', () => {
       const state = shell.saveLayout();
+      const mode: DockPanel.Mode = 'multiple-document';
       shell.mode = 'single-document';
-      shell.restoreLayout(state);
-      expect(state.mainArea?.mode).toBe('multiple-document');
+      shell.restoreLayout(mode, state);
+      expect(shell.mode).toBe('multiple-document');
     });
   });
 

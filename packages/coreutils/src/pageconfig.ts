@@ -133,6 +133,63 @@ export namespace PageConfig {
   }
 
   /**
+   * Create a new URL given an optional mode and tree path.
+   *
+   * This is used to create URLS when the mode or tree path change as the user
+   * changes mode or the current document in the main area. If fields in
+   * options are omitted, the value in PageConfig will be used.
+   *
+   * @param options - IGetUrlOptions for the new path.
+   */
+  export function getUrl(options: IGetUrlOptions): string {
+    let path = getOption('baseUrl') || '/';
+    const mode = options.mode ?? getOption('mode');
+    const workspace = options.workspace ?? getOption('workspace');
+    const labOrDoc = mode === 'multiple-document' ? 'lab' : 'doc';
+    path = URLExt.join(path, labOrDoc);
+    if (workspace !== defaultWorkspace) {
+      path = URLExt.join(
+        path,
+        'workspaces',
+        encodeURIComponent(getOption('workspace'))
+      );
+    }
+    const treePath = options.treePath ?? getOption('treePath');
+    if (treePath) {
+      path = URLExt.join(path, 'tree', URLExt.encodeParts(treePath));
+    }
+    return path;
+  }
+
+  export const defaultWorkspace: string = 'default';
+
+  /**
+   * Options for getUrl
+   */
+
+  export interface IGetUrlOptions {
+    /**
+     * The optional mode as a string 'single-document' or 'multiple-document'. If
+     * the mode argument is missing, it will be provided from the PageConfig.
+     */
+    mode?: string;
+
+    /**
+     * The optional workspace as a string. If this argument is missing, the value will
+     * be pulled from PageConfig. To use the default workspace (no /workspaces/<name>
+     * URL segment will be included) pass the string PageConfig.defaultWorkspace.
+     */
+    workspace?: string;
+
+    /**
+     * The optional tree path as as string. If treePath is not provided it will be
+     * provided from the PageConfig. If an empty string, the resulting path will not
+     * contain a tree portion.
+     */
+    treePath?: string;
+  }
+
+  /**
    * Get the base websocket url for a Jupyter application, or an empty string.
    */
   export function getWsUrl(baseUrl?: string): string {

@@ -457,6 +457,14 @@ export namespace ToolbarButtonComponent {
     tooltip?: string;
     onClick?: () => void;
     enabled?: boolean;
+
+    /**
+     * Trigger the button on the actual onClick event rather than onMouseDown.
+     *
+     * See note in ToolbarButtonComponent below as to why the default is to
+     * trigger on onMouseDown.
+     */
+    actualOnClick?: boolean;
   }
 }
 
@@ -485,6 +493,12 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
     }
   };
 
+  const handleClick = (event: React.MouseEvent) => {
+    if (event.button === 0) {
+      props.onClick?.();
+    }
+  };
+
   return (
     <Button
       className={
@@ -493,7 +507,10 @@ export function ToolbarButtonComponent(props: ToolbarButtonComponent.IProps) {
           : 'jp-ToolbarButtonComponent'
       }
       disabled={props.enabled === false}
-      onMouseDown={handleMouseDown}
+      onClick={props.actualOnClick ?? false ? handleClick : undefined}
+      onMouseDown={
+        !(props.actualOnClick ?? false) ? handleMouseDown : undefined
+      }
       onKeyDown={handleKeyDown}
       title={props.tooltip || props.iconLabel}
       minimal

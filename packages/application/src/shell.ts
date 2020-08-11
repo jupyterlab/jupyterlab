@@ -3,7 +3,7 @@
 
 import { MainAreaWidget } from '@jupyterlab/apputils';
 
-import { DocumentRegistry } from '@jupyterlab/docregistry';
+import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 
 import { classes, DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
 
@@ -99,6 +99,21 @@ export namespace ILabShell {
   export type IChangedArgs = FocusTracker.IChangedArgs<Widget>;
 
   /**
+   * The args for the current path change signal.
+   */
+  export interface ICurrentPathChangedArgs {
+    /**
+     * The new value of the tree path, not including '/tree'.
+     */
+    oldValue: string;
+
+    /**
+     * The old value of the tree path, not including '/tree'.
+     */
+    newValue: string;
+  }
+
+  /**
    * A description of the application's user interface layout.
    */
   export interface ILayout {
@@ -142,11 +157,6 @@ export namespace ILabShell {
      * The contents of the main application dock panel.
      */
     readonly dock: DockLayout.ILayoutConfig | null;
-
-    /**
-     * The document mode (i.e., multiple/single) of the main dock panel.
-     */
-    readonly mode: DockPanel.Mode | null;
   }
 
   /**
@@ -310,6 +320,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         );
         this._updateTitlePanelTitle();
       }
+
+      if (newValue && newValue instanceof DocumentWidget) {
+        newValue.context.pathChanged.connect(this._updateCurrentPath, this);
+      }
+      this._updateCurrentPath();
     });
   }
 
@@ -332,6 +347,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   get currentChanged(): ISignal<this, ILabShell.IChangedArgs> {
     return this._currentChanged;
+  }
+
+  /**
+   * A signal emitted when the shell/dock panel change modes (single/mutiple document).
+   */
+  get modeChanged(): ISignal<this, DockPanel.Mode> {
+    return this._modeChanged;
+  }
+
+  /**
+   * A signal emitted when the path of the current document changes.
+   *
+   * This also fires when the current document itself changes.
+   */
+  get currentPathChanged(): ISignal<this, ILabShell.ICurrentPathChangedArgs> {
+    return this._currentPathChanged;
   }
 
   /**
@@ -408,6 +439,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._titleHandler.panel.show();
       this._updateTitlePanelTitle();
 
+      this._modeChanged.emit(mode);
       return;
     }
 
@@ -450,6 +482,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     this.node.dataset.shellMode = mode;
     // Hide the title panel
     this._titleHandler.panel.hide();
+    // Emit the mode changed signal
+    this._modeChanged.emit(mode);
   }
 
   /**
@@ -685,12 +719,11 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   /**
    * Restore the layout state for the application shell.
    */
-  restoreLayout(layout: ILabShell.ILayout): void {
+  restoreLayout(mode: DockPanel.Mode, layout: ILabShell.ILayout): void {
     const { mainArea, leftArea, rightArea } = layout;
-
     // Rehydrate the main area.
     if (mainArea) {
-      const { currentWidget, dock, mode } = mainArea;
+      const { currentWidget, dock } = mainArea;
 
       if (dock) {
         this._dockPanel.restoreLayout(dock);
@@ -701,16 +734,29 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       if (currentWidget) {
         this.activateById(currentWidget.id);
       }
+    } else {
+      // This is needed when loading in an empty workspace in single doc mode
+      if (mode) {
+        this.mode = mode;
+      }
     }
 
     // Rehydrate the left area.
     if (leftArea) {
       this._leftHandler.rehydrate(leftArea);
+    } else {
+      if (mode === 'single-document') {
+        this.collapseLeft();
+      }
     }
 
     // Rehydrate the right area.
     if (rightArea) {
       this._rightHandler.rehydrate(rightArea);
+    } else {
+      if (mode === 'single-document') {
+        this.collapseRight();
+      }
     }
 
     if (!this._isRestored) {
@@ -728,18 +774,18 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   saveLayout(): ILabShell.ILayout {
     // If the application is in single document mode, use the cached layout if
     // available. Otherwise, default to querying the dock panel for layout.
-    return {
+    const layout = {
       mainArea: {
         currentWidget: this._tracker.currentWidget,
         dock:
           this.mode === 'single-document'
             ? this._cachedLayout || this._dockPanel.saveLayout()
-            : this._dockPanel.saveLayout(),
-        mode: this._dockPanel.mode
+            : this._dockPanel.saveLayout()
       },
       leftArea: this._leftHandler.dehydrate(),
       rightArea: this._rightHandler.dehydrate()
     };
+    return layout;
   }
 
   /**
@@ -780,6 +826,22 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._titleWidget.node.innerHTML =
         '<h1>' + current.content.title.label + '</h1>';
     }
+  }
+
+  /**
+   * The path of the current widget changed, fire the _currentPathChanged signal.
+   */
+  private _updateCurrentPath() {
+    let current = this.currentWidget;
+    let newValue = '';
+    if (current && current instanceof DocumentWidget) {
+      newValue = current.context.path;
+    }
+    this._currentPathChanged.emit({
+      newValue: newValue,
+      oldValue: this._currentPath
+    });
+    this._currentPath = newValue;
   }
 
   /**
@@ -1087,6 +1149,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _activeChanged = new Signal<this, ILabShell.IChangedArgs>(this);
   private _cachedLayout: DockLayout.ILayoutConfig | null = null;
   private _currentChanged = new Signal<this, ILabShell.IChangedArgs>(this);
+  private _currentPath = '';
+  private _currentPathChanged = new Signal<
+    this,
+    ILabShell.ICurrentPathChangedArgs
+  >(this);
+  private _modeChanged = new Signal<this, DockPanel.Mode>(this);
   private _dockPanel: DockPanel;
   private _isRestored = false;
   private _layoutModified = new Signal<this, void>(this);
@@ -1305,7 +1373,8 @@ namespace Private {
     rehydrate(data: ILabShell.ISideArea): void {
       if (data.currentWidget) {
         this.activate(data.currentWidget.id);
-      } else if (data.collapsed) {
+      }
+      if (data.collapsed) {
         this.collapse();
       }
     }

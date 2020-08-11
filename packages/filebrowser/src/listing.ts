@@ -949,7 +949,9 @@ export class DirListing extends Widget {
         .catch(error => showErrorMessage('Open directory', error));
     } else {
       const path = item.path;
-      this._manager.openOrReveal(path);
+      this._manager.openOrReveal(path, 'default', undefined, {
+        maybeNewWorkspace: true
+      });
     }
   }
 

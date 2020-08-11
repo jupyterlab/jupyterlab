@@ -175,6 +175,7 @@ class BrowserApp(LabApp):
         self.settings.setdefault('page_config_data', dict())
         self.settings['page_config_data']['browserTest'] = True
         self.settings['page_config_data']['buildAvailable'] = False
+        self.settings['page_config_data']['exposeAppInBrowser'] = True
         super().initialize_settings()
 
     def initialize_handlers(self):

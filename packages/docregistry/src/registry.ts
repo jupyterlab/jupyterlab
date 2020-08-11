@@ -1061,6 +1061,12 @@ export namespace DocumentRegistry {
      * This field may be used or ignored depending on shell implementation.
      */
     rank?: number;
+
+    /**
+     * If the document manager is in single document mode, open the document in
+     * a new browser tab and JupyterLab workspace.
+     */
+    maybeNewWorkspace?: boolean;
   }
 
   /**

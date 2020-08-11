@@ -144,6 +144,12 @@ export namespace IRouter {
      * history API change.
      */
     hard?: boolean;
+
+    /**
+     * Should the routing stage be skipped when navigating? This will simply rewrite the URL
+     * and push the new state to the history API, no routing commands will be triggered.
+     */
+    skipRouting?: boolean;
   }
 
   /**
