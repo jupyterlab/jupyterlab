@@ -1642,7 +1642,7 @@ class _AppHandler(object):
         directory.
         """
         is_dir = osp.exists(source) and osp.isdir(source)
-        if is_dir and not osp.exists(pjoin(source, 'node_modules')):
+        if is_dir:
             self._run(['node', YARN_PATH, 'install'], cwd=source)
 
         info = dict(source=source, is_dir=is_dir)

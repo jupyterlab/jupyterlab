@@ -19,6 +19,11 @@ IF "%NAME%"=="python" (
     if !errorlevel! neq 0 exit /b !errorlevel!
     python -m jupyterlab.browser_check
 
+) ELSE IF "%NAME%"=="usage" (  
+    setx GROUP usage
+    if !errorlevel! neq 0 exit /b !errorlevel!
+    bash scripts/ci_script.sh
+
 ) ELSE (
     set NODE_OPTIONS=--max-old-space-size=1028
     jlpm run build:packages
