@@ -59,22 +59,28 @@ const stylePath = path.join(
   'style'
 );
 
-const phosphorAlias = {
-  '@phosphor/algorithm$': require.resolve('@lumino/algorithm'),
-  '@phosphor/application$': require.resolve('@lumino/application'),
-  '@phosphor/commands$': require.resolve('@lumino/commands'),
-  '@phosphor/coreutils$': require.resolve('@lumino/coreutils'),
-  '@phosphor/disposable$': require.resolve('@lumino/disposable'),
-  '@phosphor/domutils$': require.resolve('@lumino/domutils'),
-  '@phosphor/dragdrop$': require.resolve('@lumino/dragdrop'),
-  '@phosphor/dragdrop/style': stylePath,
-  '@phosphor/messaging$': require.resolve('@lumino/messaging'),
-  '@phosphor/properties$': require.resolve('@lumino/properties'),
-  '@phosphor/signaling': require.resolve('@lumino/signaling'),
-  '@phosphor/widgets/style': stylePath,
-  '@phosphor/virtualdom$': require.resolve('@lumino/virtualdom'),
-  '@phosphor/widgets$': require.resolve('@lumino/widgets')
-};
+let phosphorAlias = {};
+
+try {
+  phosphorAlias = {
+    '@phosphor/algorithm$': require.resolve('@lumino/algorithm'),
+    '@phosphor/application$': require.resolve('@lumino/application'),
+    '@phosphor/commands$': require.resolve('@lumino/commands'),
+    '@phosphor/coreutils$': require.resolve('@lumino/coreutils'),
+    '@phosphor/disposable$': require.resolve('@lumino/disposable'),
+    '@phosphor/domutils$': require.resolve('@lumino/domutils'),
+    '@phosphor/dragdrop$': require.resolve('@lumino/dragdrop'),
+    '@phosphor/dragdrop/style': stylePath,
+    '@phosphor/messaging$': require.resolve('@lumino/messaging'),
+    '@phosphor/properties$': require.resolve('@lumino/properties'),
+    '@phosphor/signaling': require.resolve('@lumino/signaling'),
+    '@phosphor/widgets/style': stylePath,
+    '@phosphor/virtualdom$': require.resolve('@lumino/virtualdom'),
+    '@phosphor/widgets$': require.resolve('@lumino/widgets')
+  };
+} catch (e) {
+  // no Phosphor shims required
+}
 
 module.exports = {
   devtool: 'source-map',

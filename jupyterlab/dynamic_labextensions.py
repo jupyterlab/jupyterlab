@@ -162,10 +162,11 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
 def build_labextension(path, app_dir=None, logger=None):
     """Build a labextension in the given path"""
     # Ensure a staging directory but don't actually build anything.
+    core_path = osp.join(HERE, 'staging')
     options = AppOptions(app_dir=app_dir, logger=logger)
     build(app_options=options, command="build:nobuild")
-    core_path = osp.join(options.app_dir, 'staging')
-    builder = osp.join(core_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
+    staging_path = osp.join(options.app_dir, 'staging')
+    builder = osp.join(staging_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
 
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
@@ -179,9 +180,11 @@ def build_labextension(path, app_dir=None, logger=None):
 def watch_labextension(path, app_dir=None, logger=None):
     """Watch a labextension in a given path"""
     # Ensure a staging directory but don't actually build anything.
+    core_path = osp.join(HERE, 'staging')
+    options = AppOptions(app_dir=app_dir, logger=logger)
     build(app_options=options, command="build:nobuild")
-    core_path = osp.join(options.app_dir, 'staging')
-    builder = osp.join(core_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
+    staging_path = osp.join(options.app_dir, 'staging')
+    builder = osp.join(staging_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
     
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
