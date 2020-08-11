@@ -6,6 +6,7 @@
 
 from __future__ import print_function
 
+import json
 import os
 import os.path as osp
 import shutil
@@ -24,9 +25,12 @@ from jupyter_core.paths import (
 from jupyter_core.utils import ensure_dir_exists
 from ipython_genutils.py3compat import string_types, cast_unicode_py2
 from ipython_genutils.tempdir import TemporaryDirectory
-from notebook.config_manager import BaseJSONConfigManager
+from jupyter_server.config_manager import BaseJSONConfigManager
 
 from traitlets.utils.importstring import import_item
+
+from .commands import build, AppOptions
+
 
 DEPRECATED_ARGUMENT = object()
 
@@ -158,27 +162,32 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
     return full_dests
 
 
-def build_labextension(path, logger=None):
+def build_labextension(path, app_dir=None, logger=None):
     """Build a labextension in the given path"""
     core_path = osp.join(HERE, 'staging')
+    options = AppOptions(app_dir=app_dir, logger=logger)
+    builder = _ensure_builder(options)
+    
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
-    if logger:
-        logger.info('Building extension in %s' % path)
-    builder = osp.join('node_modules', '.bin', 'build-labextension')
+
+    options.logger.info('Building extension in %s' % path)
+
     subprocess.check_call(['node', builder, '--core-path', core_path,  path], cwd=path)
 
 
-def watch_labextension(path, logger=None):
+def watch_labextension(path, app_dir=None, logger=None):
     """Watch a labextension in a given path"""
     core_path = osp.join(HERE, 'staging')
+    options = AppOptions(app_dir=app_dir, logger=logger)
+    builder = _ensure_builder(options)
+
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
-    if logger:
-        logger.info('Watching extension in %s' % path)
-    builder = osp.join('node_modules', '.bin', 'build-labextension')
+    options.logger.info('Watching extension in %s' % path)
+
     subprocess.check_call(['node', builder, '--core-path', core_path,  '--watch', path], cwd=path)
 
 
@@ -186,6 +195,21 @@ def watch_labextension(path, logger=None):
 # Private API
 #------------------------------------------------------------------------------
 
+
+def _ensure_builder(options):
+    """Ensure a build directory exists and is ready to build but do not build anything.  Return the build script path.
+    """
+    build(app_options=options, command="build:nobuild")
+    staging_path = osp.join(options.app_dir, 'staging')
+    builder = osp.join(staging_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
+
+    # FIXME: remove this after releasing JS packages
+    build_utils = osp.abspath(osp.join(HERE, '..', 'buildutils', 'lib'))
+    for fname in os.listdir(build_utils):
+        shutil.copy(osp.join(build_utils, fname), osp.join(osp.dirname(builder), fname))
+    
+    return builder
+    
 
 def _should_copy(src, dest, logger=None):
     """Should a file be copied, if it doesn't exist, or is newer?

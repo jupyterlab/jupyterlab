@@ -572,15 +572,15 @@ class Gettext {
       plural = options.pluralFunc(n);
 
       // if plural form never interpreted before, do it now and store it
-    } else if (!this._pluralFuncs[options.locale]) {
-      this._pluralFuncs[options.locale] = this.getPluralFunc(
-        this._pluralForms[options.locale]
+    } else if (!this._pluralFuncs[options.locale || '']) {
+      this._pluralFuncs[options.locale || ''] = this.getPluralFunc(
+        this._pluralForms[options.locale || '']
       );
-      plural = this._pluralFuncs[options.locale](n);
+      plural = this._pluralFuncs[options.locale || ''](n);
 
       // we have the plural function, compute the plural result
     } else {
-      plural = this._pluralFuncs[options.locale](n);
+      plural = this._pluralFuncs[options.locale || ''](n);
     }
 
     // If there is a problem with plurals, fallback to singular one

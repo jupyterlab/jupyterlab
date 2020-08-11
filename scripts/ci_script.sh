@@ -45,6 +45,18 @@ if [[ $GROUP == docs ]]; then
     make html
     popd
 
+    # Build the API docs
+    jlpm build:packages
+    jlpm docs
+fi
+
+if [[ $GROUP == linkcheck ]]; then
+    # Build the tutorial docs
+    pushd docs
+    pip install -r ./requirements.txt
+    make html
+    popd
+
     # Run the link check on the built html files
     CACHE_DIR="${HOME}/.cache/pytest-link-check"
     mkdir -p ${CACHE_DIR}
@@ -55,10 +67,6 @@ if [[ $GROUP == docs ]]; then
     args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
     args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html ${args}"
     py.test $args --links-ext .html -k .html docs/build/html || py.test $args --links-ext .html -k .html --lf docs/build/html
-
-    # Build the API docs
-    jlpm build:packages
-    jlpm docs
 
     # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
     args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
@@ -72,7 +80,10 @@ if [[ $GROUP == integrity ]]; then
 
     # Check yarn.lock file
     jlpm check --integrity
+fi
 
+
+if [[ $GROUP == lint ]]; then
     # Lint our files.
     jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
 fi
@@ -86,7 +97,10 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm run build:src
 
     # Make sure we can build for release
-    jlpm run build:dev:prod:release
+    # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
+    if [ $OSTYPE == "Linux" ]; then
+        jlpm run build:dev:prod:release
+    fi
 
     # Make sure the storybooks build.
     jlpm run build:storybook
@@ -170,12 +184,7 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
     # Test with a dynamic install
     pip install -e ./extension
-    # FIXME: binaries are not properly getting to all workspaces
-    pushd extension
-    mkdir -p node_modules/.bin
-    cp -r ../../../../node_modules/.bin node_modules
-
-    jupyter labextension build .
+    jupyter labextension build ./extension
     jupyter labextension develop mock_package
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
@@ -184,7 +193,6 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
     jupyter labextension list list 1>labextensions 2>&1
     cat labextensions | grep "No dynamic extensions found"
-    popd
     popd
     jupyter lab workspaces export > workspace.json --debug
     jupyter lab workspaces import --name newspace workspace.json --debug

@@ -22,7 +22,7 @@ data['jupyterlab']['linkedPackages'] = {};
 const staging = './jupyterlab/staging';
 
 // Ensure a clean staging directory.
-const keep = ['yarn.js', '.yarnrc', 'webpack.config.js'];
+const keep = ['yarn.js', '.yarnrc'];
 fs.readdirSync(staging).forEach(name => {
   if (keep.indexOf(name) === -1) {
     fs.removeSync(path.join(staging, name));
