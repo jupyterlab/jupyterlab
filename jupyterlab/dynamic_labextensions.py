@@ -149,6 +149,9 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
         if logger:
             logger.info("Installing %s -> %s" % (src, dest))
 
+        if not os.path.exists(src):
+            build_labextension(src, logger=logger)
+
         full_dest = develop_labextension(
             src, overwrite=overwrite, symlink=symlink,
             user=user, sys_prefix=sys_prefix, labextensions_dir=labextensions_dir,
