@@ -77,17 +77,14 @@ if (process.env.NODE_ENV === 'production') {
 
 module.exports = [
   merge(baseConfig, {
-    entry: entryPoint,
+    entry: ['./publicpath.js', entryPoint],
     output: {
       path: buildDir,
       library: {
         type: 'var',
         name: ['_JUPYTERLAB', 'CORE_OUTPUT']
       },
-      filename: 'bundle.js',
-      // TODO: if this path changes we will also have to
-      // change main.py (name property inside ExampleApp)
-      publicPath: 'static/lab/'
+      filename: 'bundle.js'
     },
     module: {
       rules: [

@@ -26,8 +26,6 @@ def _jupyter_server_extension_points():
     ]
 
 class ExampleApp(LabServerApp):
-    # TODO: right now static url use 'name' param if this changes
-    # we have to change webpack.config.js output.publicPath
     name = 'lab'
     load_other_extensions = False
     app_name = 'JupyterLab Example Federated App'
