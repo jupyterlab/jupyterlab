@@ -7,8 +7,10 @@ set -o pipefail
 
 # Building should work without yarn installed globally, so uninstall the
 # global yarn installed by default.
-sudo rm -rf $(which yarn)
-! yarn
+if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    sudo rm -rf $(which yarn)
+    ! yarn
+fi
 
 # create jupyter base dir (needed for config retrieval)
 mkdir ~/.jupyter
