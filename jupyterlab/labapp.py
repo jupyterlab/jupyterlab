@@ -613,6 +613,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
 
     def initialize_settings(self):
+        # FIXME: why isn't the default being applied?
+        self.app_version = self._default_app_version()
         super().initialize_settings()
 
 
