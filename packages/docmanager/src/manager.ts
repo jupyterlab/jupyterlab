@@ -78,10 +78,18 @@ export class DocumentManager implements IDocumentManager {
     return this._activateRequested;
   }
 
+  /**
+   * The document mode of the document manager, either 'single-document' or 'multiple-document'.
+   *
+   * This is usually synced with the `mode` attribute of the shell.
+   */
   get mode(): string {
     return this._mode;
   }
 
+  /**
+   * Set the mode of the document manager, either 'single-document' or 'multiple-document'.
+   */
   set mode(value: string) {
     this._mode = value;
   }

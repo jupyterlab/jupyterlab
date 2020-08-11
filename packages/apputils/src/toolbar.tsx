@@ -459,8 +459,10 @@ export namespace ToolbarButtonComponent {
     enabled?: boolean;
 
     /**
-     * Trigger the button on the actual onClick event rather than onMouseDown. See note below as to why the
-     * default is to trigger on onMouseDown.
+     * Trigger the button on the actual onClick event rather than onMouseDown.
+     *
+     * See note in ToolbarButtonComponent below as to why the default is to
+     * trigger on onMouseDown.
      */
     actualOnClick?: boolean;
   }
