@@ -18,6 +18,12 @@ jobs:
             python: 3.5
           - group: usage
             python: 3.5
+          - group: linkcheck
+            python: 3.5
+          - group: nonode
+            python: 3.5
+          - group: lint
+            python: 3.5
           - group: examples
             python: 3.5
       fail-fast: false
