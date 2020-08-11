@@ -86,7 +86,10 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm run build:src
 
     # Make sure we can build for release
-    jlpm run build:dev:prod:release
+    # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
+    if [ $OSTYPE == "Linux" ]; then
+        jlpm run build:dev:prod:release
+    fi
 
     # Make sure the storybooks build.
     jlpm run build:storybook
