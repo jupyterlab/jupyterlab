@@ -157,11 +157,6 @@ export namespace ILabShell {
      * The contents of the main application dock panel.
      */
     readonly dock: DockLayout.ILayoutConfig | null;
-
-    /**
-     * The document mode (i.e., multiple/single) of the main dock panel.
-     */
-    // readonly mode: DockPanel.Mode | null;
   }
 
   /**
