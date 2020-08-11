@@ -145,21 +145,6 @@ export class Launcher extends VDomRenderer<LauncherModel> {
   }
 
   /**
-   * The single or multiple document mode of the shell.
-   *
-   * This is proxied here so the launcher can be designed to behave differently
-   * in single or document mode. The type is a string to avoid having to import
-   * DockPanel in the launcher. Values can be 'single-document' or 'multiple-document'.
-   */
-  get mode(): string {
-    return this._mode;
-  }
-  set mode(value: string) {
-    console.log('launcher mode:', value);
-    this._mode = value;
-  }
-
-  /**
    * Render the launcher to virtual DOM nodes.
    */
   protected render(): React.ReactElement<any> | null {
@@ -264,7 +249,6 @@ export class Launcher extends VDomRenderer<LauncherModel> {
   private _callback: (widget: Widget) => void;
   private _pending = false;
   private _cwd = '';
-  private _mode = '';
 }
 
 /**
@@ -289,12 +273,6 @@ export namespace ILauncher {
      * The command registry used by the launcher.
      */
     commands: CommandRegistry;
-
-    /**
-     * The mode of the application shell, either 'single-document' or
-     * 'multiple-document'.
-     */
-    mode: string;
 
     /**
      * The callback used when an item is launched.
