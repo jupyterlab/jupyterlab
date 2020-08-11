@@ -15,6 +15,20 @@
 | Overall styles
 |----------------------------------------------------------------------------*/
 
+.jp-ModalCommandPalette {
+  position: absolute;
+  z-index: 10000;
+  top: 38px;
+  left: 30%;
+  margin: 0;
+  padding: 4px;
+  width: 40%;
+  max-height: 40%;
+  box-shadow: var(--jp-elevation-z4);
+  border-radius: 4px;
+  background: var(--jp-layout-color0);
+}
+
 .lm-CommandPalette {
   padding-bottom: 0px;
   color: var(--jp-ui-font-color1);
@@ -100,6 +114,7 @@
   margin-top: 8px;
   padding: 8px 0 8px 12px;
   text-transform: uppercase;
+  display: none;
 }
 
 .lm-CommandPalette-header.lm-mod-active {
@@ -122,6 +137,7 @@
 
 .lm-CommandPalette-item.lm-mod-disabled {
   color: var(--jp-ui-font-color3);
+  display: none;
 }
 
 .lm-CommandPalette-item.lm-mod-active {

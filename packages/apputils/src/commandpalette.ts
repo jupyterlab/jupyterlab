@@ -7,7 +7,7 @@ import { Token } from '@lumino/coreutils';
 
 import { IDisposable } from '@lumino/disposable';
 
-import { CommandPalette } from '@lumino/widgets';
+import { CommandPalette, Widget, Panel } from '@lumino/widgets';
 
 /* tslint:disable */
 /**
@@ -45,4 +45,27 @@ export interface ICommandPalette {
    * @returns A disposable that will remove the item from the palette.
    */
   addItem(options: IPaletteItem): IDisposable;
+}
+
+export class ModalCommandPalette extends Panel {
+  constructor(options: ModalCommandPalette.IOptions) {
+    super();
+    this.addClass('jp-ModalCommandPalette');
+    this.id = 'modal-command-palette';
+    this._host = document.body;
+    this._commandPalette = options.commandPalette;
+    this._commandPalette.addClass('jp-ModalCommandPalette-command-palette');
+    this.addWidget(this._commandPalette);
+    Widget.attach(this, this._host);
+    this.hide();
+  }
+
+  private _host: HTMLElement;
+  private _commandPalette: CommandPalette;
+}
+
+export namespace ModalCommandPalette {
+  export interface IOptions {
+    commandPalette: CommandPalette;
+  }
 }

@@ -9,8 +9,12 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { CommandPalette } from '@lumino/widgets';
 
 import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
-import { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+import {
+  ICommandPalette,
+  IPaletteItem,
+  ModalCommandPalette
+} from '@jupyterlab/apputils';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -85,6 +89,7 @@ export namespace Palette {
     const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
     const palette = Private.createPalette(app, translator);
+    const modalPalette = new ModalCommandPalette({ commandPalette: palette });
 
     // Show the current palette shortcut in its title.
     const updatePaletteTitle = () => {
@@ -106,7 +111,7 @@ export namespace Palette {
 
     commands.addCommand(CommandIDs.activate, {
       execute: () => {
-        shell.activateById(palette.id);
+        modalPalette.show();
       },
       label: trans.__('Activate Command Palette')
     });
@@ -132,6 +137,8 @@ export namespace Palette {
     // application state (e.g. setting the command palette as the current side bar
     // widget).
     restorer.add(palette, 'command-palette');
+  }
+    return new Palette(palette);
   }
 }
 

@@ -4,7 +4,6 @@
 |----------------------------------------------------------------------------*/
 
 import {
-  ILayoutRestorer,
   IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -512,7 +511,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   palette,
-  paletteRestorer,
+  // paletteRestorer,
   print,
   resolver,
   settingsPlugin,
