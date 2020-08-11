@@ -207,7 +207,7 @@ def _ensure_builder():
             os.makedirs(osp.join(target))
         subprocess.check_call(["npm", "init", "-y"], cwd=target)
         subprocess.check_call(["npm", "install", requirement], cwd=target)
-    return target
+    return osp.join(target, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
     
 
 def _should_copy(src, dest, logger=None):
