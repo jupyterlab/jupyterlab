@@ -96,7 +96,7 @@ cmdclass = create_cmdclass('jsdeps', data_files_spec=data_files_spec,
 if os.name == 'nt':
     build_cmd = 'build'
 else:
-    build_cmd = 'build:proc'
+    build_cmd = 'build:prod'
 cmdclass['jsdeps'] = combine_commands(
     install_npm(build_cmd=build_cmd, path=staging, source_dir=staging,
                 build_dir=pjoin(HERE, NAME, 'static'), npm=npm),
