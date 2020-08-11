@@ -635,7 +635,7 @@ class _AppHandler(object):
         # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
         if command == None:
             if os.name == 'nt':
-                command = 'build'
+                command = 'build:dev'
             else:
                 command = 'build:prod:minimize'
 
