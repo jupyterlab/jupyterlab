@@ -121,11 +121,7 @@ export class LSPExtension {
 
       if (fileEditor.editor instanceof CodeMirrorEditor) {
         let jumper = new FileEditorJumper(widget, documentManager);
-        let adapter = new FileEditorAdapter(
-          this,
-          widget,
-          jumper,
-        );
+        let adapter = new FileEditorAdapter(this, widget, jumper);
         file_editor_adapters.set(fileEditor.id, adapter);
 
         const disconnect = () => {
@@ -165,11 +161,7 @@ export class LSPExtension {
     const connect_notebook = (widget: NotebookPanel) => {
       // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
       let jumper = new NotebookJumper(widget, documentManager);
-      let adapter = new NotebookAdapter(
-        this,
-        widget,
-        jumper,
-      );
+      let adapter = new NotebookAdapter(this, widget, jumper);
       notebook_adapters.set(widget.id, adapter);
 
       const disconnect = () => {
@@ -222,9 +214,11 @@ export class LSPExtension {
 
       const languageServerSettings = (options.language_servers ||
         {}) as TLanguageServerConfigurations;
-      this.connection_manager.updateServerConfigurations(languageServerSettings);
+      this.connection_manager.updateServerConfigurations(
+        languageServerSettings
+      );
       this.settings = settings;
-    }
+    };
 
     this.setting_registry
       .load(plugin.id)
@@ -243,7 +237,6 @@ export class LSPExtension {
         console.error(reason.message);
       });
   }
-
 }
 
 /**
@@ -264,18 +257,21 @@ const plugin: JupyterFrontEndPlugin<void> = {
     IStatusBar
   ],
   activate: (app, ...args) => {
-    new LSPExtension(app, ...args as [
-      IEditorTracker,
-      INotebookTracker,
-      ISettingRegistry,
-      ICommandPalette,
-      IDocumentManager,
-      ICompletionManager,
-      IRenderMimeRegistry,
-      IPaths,
-      ILabShell,
-      IStatusBar
-    ]);
+    new LSPExtension(
+      app,
+      ...(args as [
+        IEditorTracker,
+        INotebookTracker,
+        ISettingRegistry,
+        ICommandPalette,
+        IDocumentManager,
+        ICompletionManager,
+        IRenderMimeRegistry,
+        IPaths,
+        ILabShell,
+        IStatusBar
+      ])
+    );
   },
   autoStart: true
 };

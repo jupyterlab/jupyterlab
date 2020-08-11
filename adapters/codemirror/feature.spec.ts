@@ -8,6 +8,7 @@ import {
 import { CodeMirrorLSPFeature } from './feature';
 import {
   code_cell,
+  DummySettings,
   FeatureTestEnvironment,
   FileEditorFeatureTestEnvironment,
   getCellsJSON,
@@ -22,7 +23,6 @@ import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { DummySettings } from "./cm_adapter.spec";
 
 const js_fib_code = `function fib(n) {
   return n<2?n:fib(n-1)+fib(n-2);

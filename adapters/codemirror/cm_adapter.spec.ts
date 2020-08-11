@@ -7,16 +7,8 @@ import {
 } from '../jupyterlab/jl_adapter';
 import { IRootPosition } from '../../positioning';
 import * as CodeMirror from 'codemirror';
-import { CodeMirrorLSPFeature, IFeatureSettings } from './feature';
-import { FileEditorFeatureTestEnvironment } from './testutils';
-
-export class DummySettings implements IFeatureSettings {
-  get(setting: string): any {
-  }
-
-  set(setting: string, value: any): void {
-  }
-}
+import { CodeMirrorLSPFeature } from './feature';
+import { DummySettings, FileEditorFeatureTestEnvironment } from './testutils';
 
 describe('CodeMirrorAdapter', () => {
   let env: FileEditorFeatureTestEnvironment;

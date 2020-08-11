@@ -7,7 +7,7 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { LSPConnector } from './components/completion';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualFileEditor } from '../../virtual/editors/file_editor';
-import { LSPExtension } from "../../index";
+import { LSPExtension } from '../../index';
 
 export class FileEditorAdapter extends JupyterLabWidgetAdapter {
   editor: FileEditor;
@@ -45,11 +45,7 @@ export class FileEditorAdapter extends JupyterLabWidgetAdapter {
     editor_widget: IDocumentWidget<FileEditor>,
     jumper: FileEditorJumper
   ) {
-    super(
-      extension,
-      editor_widget,
-      'completer:invoke-file',
-    );
+    super(extension, editor_widget, 'completer:invoke-file');
     this.jumper = jumper;
     this.editor = editor_widget.content;
 
@@ -77,7 +73,7 @@ export class FileEditorAdapter extends JupyterLabWidgetAdapter {
       editor: this.editor.editor,
       connections: this.connection_manager.connections,
       virtual_editor: this.virtual_editor,
-      settings: this.completion_settings,
+      settings: this.completion_settings
     });
     this.extension.completion_manager.register({
       connector: this.current_completion_connector,

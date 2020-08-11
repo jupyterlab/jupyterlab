@@ -21,7 +21,7 @@ import { LSPConnection } from '../../../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 import { kernelIcon } from '@jupyterlab/ui-components';
-import { IFeatureSettings } from "../../codemirror/feature";
+import { IFeatureSettings } from '../../codemirror/feature';
 
 /**
  * A LSP connector for completion handlers.
@@ -42,11 +42,11 @@ export class LSPConnector
   private trigger_kind: CompletionTriggerKind;
 
   private get suppress_auto_invoke_in(): string[] {
-    return this.options.settings.get("suppressInvokeIn")
+    return this.options.settings.get('suppressInvokeIn');
   }
 
   private get should_show_documentation(): boolean {
-    return this.options.settings.get("showDocumentation")
+    return this.options.settings.get('showDocumentation');
   }
 
   /**
@@ -227,11 +227,11 @@ export class LSPConnector
         label: match.label,
         insertText: match.insertText,
         type: match.kind ? completionItemKindNames[match.kind] : '',
-        documentation: show_documentation ? (
-          lsProtocol.MarkupContent.is(match.documentation)
-          ? match.documentation.value
-          : match.documentation
-        ) : null,
+        documentation: show_documentation
+          ? lsProtocol.MarkupContent.is(match.documentation)
+            ? match.documentation.value
+            : match.documentation
+          : null,
         filterText: match.filterText,
         deprecated: match.deprecated,
         data: { ...match }

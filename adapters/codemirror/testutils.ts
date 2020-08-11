@@ -3,7 +3,11 @@ import {
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
 import { VirtualEditor } from '../../virtual/editor';
-import { CodeMirrorLSPFeature, ILSPFeatureConstructor } from './feature';
+import {
+  CodeMirrorLSPFeature,
+  IFeatureSettings,
+  ILSPFeatureConstructor
+} from './feature';
 import { LSPConnection } from '../../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualFileEditor } from '../../virtual/editors/file_editor';
@@ -19,11 +23,11 @@ import { IOverridesRegistry } from '../../magics/overrides';
 import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
 import * as nbformat from '@jupyterlab/nbformat';
 import { ICellModel } from '@jupyterlab/cells';
-import createNotebook = NBTestUtils.createNotebook;
 import { CodeMirrorAdapter } from './cm_adapter';
 import { VirtualDocument } from '../../virtual/document';
 import { LanguageServerManager } from '../../manager';
 import { DocumentConnectionManager } from '../../connection_manager';
+import createNotebook = NBTestUtils.createNotebook;
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
@@ -274,5 +278,15 @@ export async function synchronize_content(
     await adapter.updateAfterChange();
   } catch (e) {
     console.warn(e);
+  }
+}
+
+export class DummySettings implements IFeatureSettings {
+  get(setting: string): any {
+    return null;
+  }
+
+  set(setting: string, value: any): void {
+    return;
   }
 }

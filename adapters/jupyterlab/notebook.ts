@@ -14,7 +14,7 @@ import * as nbformat from '@jupyterlab/nbformat';
 import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 import { Session } from '@jupyterlab/services';
 import { SessionContext } from '@jupyterlab/apputils';
-import { LSPExtension } from "../../index";
+import { LSPExtension } from '../../index';
 
 export class NotebookAdapter extends JupyterLabWidgetAdapter {
   editor: Notebook;
@@ -31,11 +31,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     editor_widget: NotebookPanel,
     jumper: NotebookJumper
   ) {
-    super(
-      extension,
-      editor_widget,
-      'completer:invoke-notebook',
-    );
+    super(extension, editor_widget, 'completer:invoke-notebook');
     this.editor = editor_widget.content;
     this.jumper = jumper;
     this.init_once_ready().catch(console.warn);
