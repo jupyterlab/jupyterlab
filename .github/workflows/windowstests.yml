@@ -7,7 +7,7 @@ jobs:
     name: Windows
     strategy:
       matrix:
-        group: [integrity, integrity2, docs, usage, python, examples, nonode]
+        group: [integrity, integrity2, usage, python, examples, nonode]
       fail-fast: false
     runs-on: windows-latest
     steps:
@@ -41,7 +41,7 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-              
+
       - name: Enable long paths
         run: powershell Set-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem -Name LongPathsEnabled -Value 1
 
