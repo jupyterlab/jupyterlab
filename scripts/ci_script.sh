@@ -45,6 +45,18 @@ if [[ $GROUP == docs ]]; then
     make html
     popd
 
+    # Build the API docs
+    jlpm build:packages
+    jlpm docs
+fi
+
+if [[ $GROUP == linkcheck ]]; then
+    # Build the tutorial docs
+    pushd docs
+    pip install -r ./requirements.txt
+    make html
+    popd
+
     # Run the link check on the built html files
     CACHE_DIR="${HOME}/.cache/pytest-link-check"
     mkdir -p ${CACHE_DIR}
@@ -55,10 +67,6 @@ if [[ $GROUP == docs ]]; then
     args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
     args="--ignore docs/build/html/genindex.html --ignore docs/build/html/search.html ${args}"
     py.test $args --links-ext .html -k .html docs/build/html || py.test $args --links-ext .html -k .html --lf docs/build/html
-
-    # Build the API docs
-    jlpm build:packages
-    jlpm docs
 
     # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
     args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
@@ -72,7 +80,10 @@ if [[ $GROUP == integrity ]]; then
 
     # Check yarn.lock file
     jlpm check --integrity
+fi
 
+
+if [[ $GROUP == lint ]]; then
     # Lint our files.
     jlpm run lint:check || (echo 'Please run `jlpm run lint` locally and push changes' && exit 1)
 fi
