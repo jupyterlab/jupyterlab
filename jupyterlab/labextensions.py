@@ -188,7 +188,7 @@ class BuildLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(self.extra_args[0], logger=self.log)
+        build_labextension(self.extra_args[0], logger=self.log, app_dir=self.app_dir)
 
 
 class WatchLabExtensionApp(BaseExtensionApp):
@@ -196,7 +196,7 @@ class WatchLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        watch_labextension(self.extra_args[0], logger=self.log)
+        watch_labextension(self.extra_args[0], logger=self.log, app_dir=self.app_dir)
 
 
 class UpdateLabExtensionApp(BaseExtensionApp):

@@ -29,7 +29,7 @@ from jupyter_server.config_manager import BaseJSONConfigManager
 
 from traitlets.utils.importstring import import_item
 
-from .commands import get_app_dir
+from .commands import build, AppOptions
 
 
 DEPRECATED_ARGUMENT = object()
@@ -149,9 +149,6 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
         if logger:
             logger.info("Installing %s -> %s" % (src, dest))
 
-        if not os.path.exists(src):
-            build_labextension(src, logger=logger)
-
         full_dest = develop_labextension(
             src, overwrite=overwrite, symlink=symlink,
             user=user, sys_prefix=sys_prefix, labextensions_dir=labextensions_dir,
@@ -162,29 +159,36 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
     return full_dests
 
 
-def build_labextension(path, logger=None):
+def build_labextension(path, app_dir=None, logger=None):
     """Build a labextension in the given path"""
-    core_path = osp.join(HERE, 'staging')
-    builder = _ensure_builder()
+    # Ensure a staging directory but don't actually build anything.
+    options = AppOptions(app_dir=app_dir, logger=logger)
+    build(app_options=options, command="build:nobuild")
+    core_path = osp.join(options.app_dir, 'staging')
+    builder = osp.join(core_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
 
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
     if logger:
         logger.info('Building extension in %s' % path)
+
     subprocess.check_call(['node', builder, '--core-path', core_path,  path], cwd=path)
 
 
-def watch_labextension(path, logger=None):
+def watch_labextension(path, app_dir=None, logger=None):
     """Watch a labextension in a given path"""
-    core_path = osp.join(HERE, 'staging')
-    builder = _ensure_builder()
-
+    # Ensure a staging directory but don't actually build anything.
+    build(app_options=options, command="build:nobuild")
+    core_path = osp.join(options.app_dir, 'staging')
+    builder = osp.join(core_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
+    
     path = os.path.abspath(path)
     if not osp.exists(osp.join(path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=path)
     if logger:
         logger.info('Watching extension in %s' % path)
+
 
     subprocess.check_call(['node', builder, '--core-path', core_path,  '--watch', path], cwd=path)
 
@@ -194,19 +198,30 @@ def watch_labextension(path, logger=None):
 #------------------------------------------------------------------------------
 
 
-def _ensure_builder():
-    core_path = osp.join(HERE, 'staging')
-    with open(core_path) as fid:
-        data = json.load(fid)
-    version = data['devDpendencies']['@jupyterlab/buildutils']
-    requirement = "@jupyterlab/buildutils@%s" % version
+def _ensure_builder(logger=None):
+    # Ensure staging from commands
+    build(command=None)
 
     target = osp.join(get_app_dir(), 'extension_builder')
-    if not osp.exists(osp.join(target, 'node_modules')):
-        if not osp.exists(target):
-            os.makedirs(osp.join(target))
+    if not osp.exists(osp.join(target, 'package.json')):
+        if logger:
+            logger.info('Generating extension builder in %s' % target)
+        os.makedirs(osp.join(target))
         subprocess.check_call(["npm", "init", "-y"], cwd=target)
-        subprocess.check_call(["npm", "install", requirement], cwd=target)
+    
+    core_path = osp.join(HERE, 'staging')
+    with open(osp.join(core_path, 'package.json')) as fid:
+        core_data = json.load(fid)
+    
+    # Make sure we have the latest deps
+    target_package = osp.join(target, 'package.json')
+    with open(target_package) as fid:
+        package_data = json.load(fid)
+    package_data['devDependencies'] = core_data['devDependencies']
+    package_data['dependencies'] = core_data['dependencies']
+    with open(target_package, 'w') as fid:
+        json.dump(package_data, fid)
+    subprocess.check_call(["npm", "install"], cwd=target)
     return osp.join(target, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
     
 

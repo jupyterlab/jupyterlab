@@ -245,6 +245,15 @@ def ensure_app(app_dir):
     return msgs
 
 
+def ensure_staging(app_options=None):
+    """Ensure that the staging directory available.
+    """
+    app_options = _ensure_options(app_options)
+    _node_check(app_options.logger)
+    handler = _AppHandler(app_options)
+    return handler.ensure_staging()
+
+
 def watch_packages(logger=None):
     """Run watch mode for the source packages.
 
@@ -658,14 +667,14 @@ class _AppHandler(object):
             self.logger.debug(msg)
             raise RuntimeError(msg)
 
-        dedupe_yarn(staging, self.logger)
-
         # Build the app.
-        ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
-        if ret != 0:
-            msg = 'JupyterLab failed to build'
-            self.logger.debug(msg)
-            raise RuntimeError(msg)
+        if parts[1] != 'nobuild':
+            dedupe_yarn(staging, self.logger)
+            ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
+            if ret != 0:
+                msg = 'JupyterLab failed to build'
+                self.logger.debug(msg)
+                raise RuntimeError(msg)
 
     def watch(self):
         """Start the application watcher and then run the watch in
@@ -898,6 +907,12 @@ class _AppHandler(object):
             self.logger.warning('No labextension named "%s" installed' % name)
             return False
         return self._update_extension(name)
+
+    def ensure_staging(self, name):
+        """Ensure that the staging directory exists.
+        """
+
+
 
     def _update_extension(self, name):
         """Update an extension by name.
