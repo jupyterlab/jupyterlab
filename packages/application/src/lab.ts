@@ -243,12 +243,6 @@ export namespace JupyterLab {
      * Whether files are cached on the server.
      */
     readonly filesCached: boolean;
-
-    /**
-     * The workspace name provided by the server, or 'default' if the URL doesn't explicitly
-     * name a workspace.
-     */
-    readonly workspace: string;
   }
 
   /**
@@ -259,8 +253,7 @@ export namespace JupyterLab {
     deferred: { patterns: [], matches: [] },
     disabled: { patterns: [], matches: [] },
     mimeExtensions: [],
-    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true',
-    workspace: PageConfig.getOption('workspace')
+    filesCached: PageConfig.getOption('cacheFiles').toLowerCase() === 'true'
   };
 
   /**

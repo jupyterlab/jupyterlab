@@ -95,17 +95,16 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
   id: '@jupyterlab/apputils-extension:resolver',
   autoStart: true,
   provides: IWindowResolver,
-  requires: [JupyterFrontEnd.IPaths, JupyterLab.IInfo, IRouter],
+  requires: [JupyterFrontEnd.IPaths, IRouter],
   activate: async (
     app: JupyterFrontEnd,
     paths: JupyterFrontEnd.IPaths,
-    info: JupyterLab.IInfo,
     router: IRouter
   ) => {
     const { hash, search } = router.current;
     const query = URLExt.queryStringToObject(search || '');
     const solver = new WindowResolver();
-    const workspace = info.workspace;
+    const workspace = PageConfig.getOption('workspace');
     const treePath = PageConfig.getOption('treePath');
     const mode =
       PageConfig.getOption('mode') === 'multiple-document' ? 'lab' : 'doc';
