@@ -183,7 +183,6 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension list list 1>labextensions 2>&1
     cat labextensions | grep "No dynamic extensions found"
     popd
-    popd
     jupyter lab workspaces export > workspace.json --debug
     jupyter lab workspaces import --name newspace workspace.json --debug
     jupyter lab workspaces export newspace > newspace.json --debug
