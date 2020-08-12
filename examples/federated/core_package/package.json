@@ -248,7 +248,6 @@
       "@jupyterlab/terminal-extension": "",
       "@jupyterlab/theme-light-extension": "",
       "@jupyterlab/tooltip-extension": "",
-      "@jupyterlab/translation": "",
       "@jupyterlab/translation-extension": "",
       "@jupyterlab/ui-components-extension": "",
       "@jupyterlab/vdom-extension": ""
