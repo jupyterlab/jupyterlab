@@ -246,25 +246,6 @@ const FACTORY = 'Notebook';
 const FORMAT_EXCLUDE = ['notebook', 'python', 'custom'];
 
 /**
- * The exluded Cell Inspector Raw NbConvert Formats
- * (returned from nbconvert's export list)
- */
-const RAW_FORMAT_EXCLUDE = ['pdf', 'slides', 'script', 'notebook', 'custom'];
-
-/**
- * The default Export To ... formats and their human readable labels.
- */
-const FORMAT_LABEL: { [k: string]: string } = {
-  html: 'HTML',
-  latex: 'LaTeX',
-  markdown: 'Markdown',
-  pdf: 'PDF',
-  rst: 'ReStructured Text',
-  script: 'Executable Script',
-  slides: 'Reveal.js Slides'
-};
-
-/**
  * The notebook widget tracker provider.
  */
 const trackerPlugin: JupyterFrontEndPlugin<INotebookTracker> = {
@@ -469,18 +450,38 @@ function activateNotebookTools(
   optionsMap.None = null;
   void services.nbconvert.getExportFormats().then(response => {
     if (response) {
+      /**
+       * The excluded Cell Inspector Raw NbConvert Formats
+       * (returned from nbconvert's export list)
+       */
+      const rawFormatExclude = [
+        'pdf',
+        'slides',
+        'script',
+        'notebook',
+        'custom'
+      ];
+      let optionValueArray: any = [
+        [trans.__('PDF'), 'pdf'],
+        [trans.__('Slides'), 'slides'],
+        [trans.__('Script'), 'script'],
+        [trans.__('Notebook'), 'notebook'],
+        [trans.__('Custom'), 'custom']
+      ];
+
       // convert exportList to palette and menu items
       const formatList = Object.keys(response);
+      const formatLabels = Private.getFormatLabels(translator);
       formatList.forEach(function(key) {
-        if (RAW_FORMAT_EXCLUDE.indexOf(key) === -1) {
-          const capCaseKey = key[0].toUpperCase() + key.substr(1);
-          const labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
-          const mimeType = response[key].output_mimetype;
-          optionsMap[labelStr] = mimeType;
+        if (rawFormatExclude.indexOf(key) === -1) {
+          const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
+          const option = formatLabels[key] ? formatLabels[key] : altOption;
+          const mimeTypeValue = response[key].output_mimetype;
+          optionValueArray.push([option, mimeTypeValue]);
         }
       });
       const nbConvert = NotebookTools.createNBConvertSelector(
-        optionsMap,
+        optionValueArray,
         translator
       );
       notebookTools.addItem({ tool: nbConvert, section: 'common', rank: 3 });
@@ -1251,7 +1252,7 @@ function addCommands(
     label: args => {
       const formatLabel = args['label'] as string;
       return args['isPalette']
-        ? trans.__('Export Notebook to %1', formatLabel)
+        ? trans.__('Export Notebook: %1', formatLabel)
         : formatLabel;
     },
     execute: args => {
@@ -2103,7 +2104,6 @@ function populateMenus(
 ): void {
   const trans = translator.load('jupyterlab');
   const { commands } = app;
-
   sessionDialogs = sessionDialogs || sessionContextDialogs;
 
   // Add undo/redo hooks to the edit menu.
@@ -2161,15 +2161,17 @@ function populateMenus(
   exportTo.title.label = trans.__('Export Notebook As…');
   void services.nbconvert.getExportFormats().then(response => {
     if (response) {
+      const formatLabels: any = Private.getFormatLabels(translator);
+
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
       formatList.forEach(function(key) {
-        const capCaseKey = key[0].toUpperCase() + key.substr(1);
-        const labelStr = FORMAT_LABEL[key] ? FORMAT_LABEL[key] : capCaseKey;
-        const args = {
+        const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
+        const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
+        let args = {
           format: key,
           label: labelStr,
-          isPalette: true
+          isPalette: false
         };
         if (FORMAT_EXCLUDE.indexOf(key) === -1) {
           exportTo.addItem({
@@ -2177,6 +2179,11 @@ function populateMenus(
             args: args
           });
           if (palette) {
+            args = {
+              format: key,
+              label: labelStr,
+              isPalette: true
+            };
             const category = trans.__('Notebook Operations');
             palette.addItem({
               command: CommandIDs.exportToFormat,
@@ -2482,5 +2489,29 @@ namespace Private {
        */
       translator?: ITranslator;
     }
+  }
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * The default Export To ... formats and their human readable labels.
+   */
+  export function getFormatLabels(
+    translator?: ITranslator
+  ): { [k: string]: string } {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    return {
+      html: trans.__('HTML'),
+      latex: trans.__('LaTeX'),
+      markdown: trans.__('Markdown'),
+      pdf: trans.__('PDF'),
+      rst: trans.__('ReStructured Text'),
+      script: trans.__('Executable Script'),
+      slides: trans.__('Reveal.js Slides')
+    };
   }
 }

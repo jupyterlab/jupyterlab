@@ -266,6 +266,17 @@ export class NotebookTools extends Widget implements INotebookTools {
  */
 export namespace NotebookTools {
   /**
+   * A type alias for a readonly partial JSON tuples `[option, value]`.
+   * `option` should be localized.
+   *
+   * Note: Partial here means that JSON object attributes can be `undefined`.
+   */
+  export type ReadonlyPartialJSONOptionValueArray = [
+    ReadonlyPartialJSONValue | undefined,
+    ReadonlyPartialJSONValue
+  ][];
+
+  /**
    * The options used to create a NotebookTools object.
    */
   export interface IOptions {
@@ -804,18 +815,23 @@ export namespace NotebookTools {
       key: string;
 
       /**
-       * The map of options to values.
+       * The map of values to options.
+       *
+       * Value corresponds to the unique identifier.
+       * Option corresponds to the localizable value to display.
+       *
+       * See: `<option value="volvo">Volvo</option>`
        *
        * #### Notes
        * If a value equals the default, choosing it may erase the key from the
        * metadata.
        */
-      optionsMap: ReadonlyPartialJSONObject;
+      optionValueArray: ReadonlyPartialJSONOptionValueArray;
 
       /**
        * The optional title of the selector - defaults to capitalized `key`.
        */
-      title?: string;
+      title: string;
 
       /**
        * The optional valid cell types - defaults to all valid types.
@@ -863,21 +879,17 @@ export namespace NotebookTools {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');
     trans.__('');
-    // FIXME-TRANS: optionsMap needs to be reversed to have the id as the key
-    // not the translatable string. The name should change to reflect the
-    // breaking change othwerwise other extension devs might get unexected
-    // results
     const options: KeySelector.IOptions = {
       key: 'slideshow',
-      title: 'Slide Type',
-      optionsMap: {
-        '-': null,
-        Slide: 'slide',
-        'Sub-Slide': 'subslide',
-        Fragment: 'fragment',
-        Skip: 'skip',
-        Notes: 'notes'
-      },
+      title: trans.__('Slide Type'),
+      optionValueArray: [
+        ['-', null],
+        [trans.__('Slide'), 'slide'],
+        [trans.__('Sub-Slide'), 'subslide'],
+        [trans.__('Fragment'), 'fragment'],
+        [trans.__('Skip'), 'skip'],
+        [trans.__('Notes'), 'notes']
+      ],
       getter: cell => {
         const value = cell.model.metadata.get('slideshow') as
           | ReadonlyPartialJSONObject
@@ -907,11 +919,7 @@ export namespace NotebookTools {
    * Create an nbconvert selector.
    */
   export function createNBConvertSelector(
-    // FIXME-TRANS: optionsMap needs to be reversed to have the id as the key
-    // not the translatable string. The name should change to reflect the
-    // breaking change othwerwise other extension devs might get unexected
-    // results
-    optionsMap: ReadonlyPartialJSONObject,
+    optionValueArray: ReadonlyPartialJSONOptionValueArray,
     translator?: ITranslator
   ): KeySelector {
     translator = translator || nullTranslator;
@@ -919,7 +927,7 @@ export namespace NotebookTools {
     return new KeySelector({
       key: 'raw_mimetype',
       title: trans.__('Raw NBConvert Format'),
-      optionsMap: optionsMap,
+      optionValueArray: optionValueArray,
       validCellTypes: ['raw']
     });
   }
@@ -960,10 +968,13 @@ namespace Private {
     const name = options.key;
     const title = options.title || name[0].toLocaleUpperCase() + name.slice(1);
     const optionNodes: VirtualNode[] = [];
-    for (const label in options.optionsMap) {
-      const value = JSON.stringify(options.optionsMap[label]);
-      optionNodes.push(h.option({ value }, label));
-    }
+    let value: any;
+    let option: any;
+    each(options.optionValueArray, item => {
+      option = item[0];
+      value = JSON.stringify(item[1]);
+      optionNodes.push(h.option({ value }, option));
+    });
     const node = VirtualDOM.realize(
       h.div({}, h.label(title, h.select({}, optionNodes)))
     );

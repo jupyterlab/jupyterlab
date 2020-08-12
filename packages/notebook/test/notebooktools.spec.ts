@@ -7,8 +7,6 @@ import { Message } from '@lumino/messaging';
 
 import { TabPanel, Widget } from '@lumino/widgets';
 
-import { JSONValue } from '@lumino/coreutils';
-
 import { simulate } from 'simulate-event';
 
 import { CodeMirrorEditorFactory } from '@jupyterlab/codemirror';
@@ -383,10 +381,11 @@ describe('@jupyterlab/notebook', () => {
       beforeEach(() => {
         tool = new LogKeySelector({
           key: 'foo',
-          optionsMap: {
-            bar: 1,
-            baz: [1, 2, 'a']
-          }
+          title: 'Foo',
+          optionValueArray: [
+            ['bar', 1],
+            ['baz', [1, 2, 'a']]
+          ]
         });
         notebookTools.addItem({ tool });
         simulate(panel0.node, 'focus');
@@ -528,16 +527,16 @@ describe('@jupyterlab/notebook', () => {
 
     describe('NotebookTools.createNBConvertSelector()', () => {
       it('should create a raw mimetype selector', () => {
-        const optionsMap: { [key: string]: JSONValue } = {
-          None: '-',
-          LaTeX: 'text/latex',
-          reST: 'text/restructuredtext',
-          HTML: 'text/html',
-          Markdown: 'text/markdown',
-          Python: 'text/x-python'
-        };
-        optionsMap.None = '-';
-        const tool = NotebookTools.createNBConvertSelector(optionsMap);
+        const optionValueArray: any = [
+          [null, '-'],
+          ['LaTeX', 'text/latex'],
+          ['reST', 'text/restructuredtext'],
+          ['HTML', 'text/html'],
+          ['Markdown', 'text/markdown'],
+          ['Python', 'text/x-python']
+        ];
+        optionValueArray.push(['None', '-']);
+        const tool = NotebookTools.createNBConvertSelector(optionValueArray);
         tool.selectNode.selectedIndex = -1;
         notebookTools.addItem({ tool });
         simulate(panel0.node, 'focus');
@@ -557,15 +556,15 @@ describe('@jupyterlab/notebook', () => {
       });
 
       it('should have no effect on a code cell', () => {
-        const optionsMap: { [key: string]: JSONValue } = {
-          None: '-',
-          LaTeX: 'text/latex',
-          reST: 'text/restructuredtext',
-          HTML: 'text/html',
-          Markdown: 'text/markdown',
-          Python: 'text/x-python'
-        };
-        const tool = NotebookTools.createNBConvertSelector(optionsMap);
+        const optionValueArray: any = [
+          ['None', '-'],
+          ['LaTeX', 'text/latex'],
+          ['reST', 'text/restructuredtext'],
+          ['HTML', 'text/html'],
+          ['Markdown', 'text/markdown'],
+          ['Python', 'text/x-python']
+        ];
+        const tool = NotebookTools.createNBConvertSelector(optionValueArray);
         tool.selectNode.selectedIndex = -1;
         notebookTools.addItem({ tool });
         simulate(panel0.node, 'focus');
