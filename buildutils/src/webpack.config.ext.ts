@@ -33,7 +33,7 @@ let outputPath = data.jupyterlab['outputDir'];
 outputPath = path.join(packagePath, outputPath);
 
 // Handle the extension entry point and the lib entry point, if different
-let extEntry = data.jupyterlab.extension ?? data.jupyterlab.mimeExtension;
+let extEntry = data.jupyterlab.extension || data.jupyterlab.mimeExtension;
 const index = require.resolve(packagePath);
 const exposes = {
   './index': index,
