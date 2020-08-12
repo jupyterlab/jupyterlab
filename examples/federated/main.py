@@ -53,9 +53,8 @@ class ExampleApp(LabServerApp):
         dynamic_extensions = page_config['dynamic_extensions'] = []
         dynamic_mime_extension = page_config['dynamic_mime_extensions'] = []
         name = "@jupyterlab/example-federated-md"
-        path = "lab/extensions/%s/remoteEntry.js" % name
-        load_data = dict(name=name, path=path, module="./extension")
-        dynamic_extensions.append(load_data)
+        dynamic_extensions.append(dict(name=name, module="./extension"))
+        dynamic_mime_extension.append(dict(name=name, module="./mimeExtension"))
 
         super().initialize_handlers()
 

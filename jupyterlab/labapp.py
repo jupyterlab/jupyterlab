@@ -699,13 +699,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         dynamic_mime_extension = page_config['dynamic_mime_extensions'] = []
         for (ext, ext_data) in info.get('dynamic_exts', dict()).items():
             name = ext_data['name']
-            path = "lab/extensions/%s/remoteEntry.js" % name
-            module = "./extension"
-            load_data = dict(name=name, path=path, module=module)
             if ext_data['jupyterlab'].get('extension'):
-                dynamic_extensions.append(load_data)
-            else:
-                dynamic_mime_extension.append(load_data)
+                dynamic_extensions.append(dict(name=name, module="./extension"))
+            if ext_data['jupyterlab'].get('mimeExtension'):
+                dynamic_mime_extension.append(dict(name=name, module="./mimeExtension"))
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings['page_config_data'] = page_config

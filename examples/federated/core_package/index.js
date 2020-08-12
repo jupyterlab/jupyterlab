@@ -1,7 +1,7 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { PageConfig } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 // This must be after the public path is set.
 // This cannot be extracted because the public path is dynamic.
@@ -56,7 +56,7 @@ async function main() {
   // TODO: deconflict these with builtins?
   const dynamicPromises = extension_data.map(data =>
     loadComponent(
-      data.path,
+      `${URLExt.join(PageConfig.getOption('fullLabextensionsUrl'), data.name, 'remoteEntry.js')}`,
       data.name,
       data.module
     )
@@ -65,7 +65,7 @@ async function main() {
 
   const dynamicMimePromises = mime_extension_data.map(data =>
     loadComponent(
-      data.path,
+      `${URLExt.join(PageConfig.getOption('fullLabextensionsUrl'), data.name, 'remoteEntry.js')}`,
       data.name,
       data.module
     )

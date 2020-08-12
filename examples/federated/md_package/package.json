@@ -2,6 +2,8 @@
   "name": "@jupyterlab/example-federated-md",
   "version": "2.1.1-alpha.8",
   "private": true,
+  "main": "./index.js",
+  "style": "./style/index.css",
   "scripts": {
     "build": "npm run clean && build-labextension --core-path ../core_package .",
     "clean": "rimraf build",
@@ -33,6 +35,7 @@
   "jupyterlab": {
     "extension": true,
     "schemaDir": "./schema",
-    "outputDir": "../labextensions/@jupyterlab/example-federated-md"
+    "outputDir": "../labextensions/@jupyterlab/example-federated-md",
+    "mimeExtension": "./mime.js"
   }
 }
