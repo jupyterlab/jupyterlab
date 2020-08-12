@@ -451,10 +451,16 @@ function activateNotebookTools(
   void services.nbconvert.getExportFormats().then(response => {
     if (response) {
       /**
-       * The exluded Cell Inspector Raw NbConvert Formats
+       * The excluded Cell Inspector Raw NbConvert Formats
        * (returned from nbconvert's export list)
        */
-      const rawFormtExclude = ['pdf', 'slides', 'script', 'notebook', 'custom'];
+      const rawFormatExclude = [
+        'pdf',
+        'slides',
+        'script',
+        'notebook',
+        'custom'
+      ];
       let optionValueArray: any = [
         [trans.__('PDF'), 'pdf'],
         [trans.__('Slides'), 'slides'],
@@ -465,9 +471,9 @@ function activateNotebookTools(
 
       // convert exportList to palette and menu items
       const formatList = Object.keys(response);
-      const formatLabels = getFormatLabels(translator);
+      const formatLabels = Private.getFormatLabels(translator);
       formatList.forEach(function(key) {
-        if (rawFormtExclude.indexOf(key) === -1) {
+        if (rawFormatExclude.indexOf(key) === -1) {
           const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
           const option = formatLabels[key] ? formatLabels[key] : altOption;
           const mimeTypeValue = response[key].output_mimetype;
@@ -2085,23 +2091,6 @@ function populatePalette(
 }
 
 /**
- * The default Export To ... formats and their human readable labels.
- */
-function getFormatLabels(translator?: ITranslator): { [k: string]: string } {
-  translator = translator || nullTranslator;
-  const trans = translator.load('jupyterlab');
-  return {
-    html: trans.__('HTML'),
-    latex: trans.__('LaTeX'),
-    markdown: trans.__('Markdown'),
-    pdf: trans.__('PDF'),
-    rst: trans.__('ReStructured Text'),
-    script: trans.__('Executable Script'),
-    slides: trans.__('Reveal.js Slides')
-  };
-}
-
-/**
  * Populates the application menus for the notebook.
  */
 function populateMenus(
@@ -2172,7 +2161,7 @@ function populateMenus(
   exportTo.title.label = trans.__('Export Notebook As…');
   void services.nbconvert.getExportFormats().then(response => {
     if (response) {
-      const formatLabels: any = getFormatLabels(translator);
+      const formatLabels: any = Private.getFormatLabels(translator);
 
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
@@ -2500,5 +2489,29 @@ namespace Private {
        */
       translator?: ITranslator;
     }
+  }
+}
+
+/**
+ * A namespace for private data.
+ */
+namespace Private {
+  /**
+   * The default Export To ... formats and their human readable labels.
+   */
+  export function getFormatLabels(
+    translator?: ITranslator
+  ): { [k: string]: string } {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    return {
+      html: trans.__('HTML'),
+      latex: trans.__('LaTeX'),
+      markdown: trans.__('Markdown'),
+      pdf: trans.__('PDF'),
+      rst: trans.__('ReStructured Text'),
+      script: trans.__('Executable Script'),
+      slides: trans.__('Reveal.js Slides')
+    };
   }
 }

@@ -38,17 +38,6 @@ import { NotebookPanel } from './panel';
 import { INotebookModel } from './model';
 import { INotebookTools, INotebookTracker } from './tokens';
 
-/**
- * A type alias for a readonly partial JSON tuples `[option, value]`.
- * `option` should be localized.
- *
- * Note: Partial here means that JSON object attributes can be `undefined`.
- */
-export declare type ReadonlyPartialJSONOptionValueArray = [
-  ReadonlyPartialJSONValue | undefined,
-  ReadonlyPartialJSONValue
-][];
-
 class RankedPanel<T extends Widget = Widget> extends Widget {
   constructor() {
     super();
@@ -276,6 +265,17 @@ export class NotebookTools extends Widget implements INotebookTools {
  * The namespace for NotebookTools class statics.
  */
 export namespace NotebookTools {
+  /**
+   * A type alias for a readonly partial JSON tuples `[option, value]`.
+   * `option` should be localized.
+   *
+   * Note: Partial here means that JSON object attributes can be `undefined`.
+   */
+  export type ReadonlyPartialJSONOptionValueArray = [
+    ReadonlyPartialJSONValue | undefined,
+    ReadonlyPartialJSONValue
+  ][];
+
   /**
    * The options used to create a NotebookTools object.
    */
