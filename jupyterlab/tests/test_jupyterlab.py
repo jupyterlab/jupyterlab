@@ -95,7 +95,8 @@ class AppHandlerTest(TestCase):
             shutil.copytree(src, dest, ignore=ignore)
 
             # Make a node modules folder so npm install is not called.
-            os.makedirs(pjoin(dest, 'node_modules'))
+            if not os.path.exists(pjoin(dest, 'node_modules')):
+                os.makedirs(pjoin(dest, 'node_modules'))
 
             setattr(self, 'mock_' + name, dest)
             with open(pjoin(dest, 'package.json')) as fid:
