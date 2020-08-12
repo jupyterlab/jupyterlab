@@ -77,15 +77,14 @@ if (process.env.NODE_ENV === 'production') {
 
 module.exports = [
   merge(baseConfig, {
-    entry: entryPoint,
+    entry: ['./publicpath.js', entryPoint],
     output: {
       path: buildDir,
       library: {
         type: 'var',
         name: ['_JUPYTERLAB', 'CORE_OUTPUT']
       },
-      filename: 'bundle.js',
-      publicPath: 'static/lab/'
+      filename: 'bundle.js'
     },
     module: {
       rules: [

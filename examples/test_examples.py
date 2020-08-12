@@ -48,8 +48,6 @@ def main():
                 runner = osp.join(path, 'main.py')
                 subprocess.check_call([sys.executable, runner], cwd=cwd)
                 count += 1
-        elif osp.basename(path) == 'federated':
-            print('Skipping federated test for now')
         elif osp.exists(osp.join(path, 'main.py')):
             with tempfile.TemporaryDirectory() as cwd:
                 header(path)
