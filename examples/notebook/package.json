@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-notebook",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,16 +8,16 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/codemirror": "^3.0.0-alpha.9",
-    "@jupyterlab/completer": "^3.0.0-alpha.9",
-    "@jupyterlab/docmanager": "^3.0.0-alpha.9",
-    "@jupyterlab/docregistry": "^3.0.0-alpha.9",
-    "@jupyterlab/documentsearch": "^3.0.0-alpha.9",
-    "@jupyterlab/mathjax2": "^3.0.0-alpha.9",
-    "@jupyterlab/notebook": "^3.0.0-alpha.9",
-    "@jupyterlab/rendermime": "^3.0.0-alpha.9",
-    "@jupyterlab/services": "^6.0.0-alpha.9",
-    "@jupyterlab/theme-light-extension": "^3.0.0-alpha.9",
+    "@jupyterlab/codemirror": "^3.0.0-alpha.10",
+    "@jupyterlab/completer": "^3.0.0-alpha.10",
+    "@jupyterlab/docmanager": "^3.0.0-alpha.10",
+    "@jupyterlab/docregistry": "^3.0.0-alpha.10",
+    "@jupyterlab/documentsearch": "^3.0.0-alpha.10",
+    "@jupyterlab/mathjax2": "^3.0.0-alpha.10",
+    "@jupyterlab/notebook": "^3.0.0-alpha.10",
+    "@jupyterlab/rendermime": "^3.0.0-alpha.10",
+    "@jupyterlab/services": "^6.0.0-alpha.10",
+    "@jupyterlab/theme-light-extension": "^3.0.0-alpha.10",
     "@lumino/commands": "^1.10.1",
     "@lumino/widgets": "^1.11.1",
     "es6-promise": "~4.2.8"

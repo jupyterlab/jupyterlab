@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/buildutils",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "description": "JupyterLab - Build Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/htmlviewer-extension",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "description": "JupyterLab extension to render HTML files",
   "keywords": [
     "jupyter",
@@ -33,12 +33,12 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-alpha.9",
-    "@jupyterlab/apputils": "^3.0.0-alpha.9",
-    "@jupyterlab/docregistry": "^3.0.0-alpha.9",
-    "@jupyterlab/htmlviewer": "^3.0.0-alpha.9",
-    "@jupyterlab/translation": "^3.0.0-alpha.9",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.9"
+    "@jupyterlab/application": "^3.0.0-alpha.10",
+    "@jupyterlab/apputils": "^3.0.0-alpha.10",
+    "@jupyterlab/docregistry": "^3.0.0-alpha.10",
+    "@jupyterlab/htmlviewer": "^3.0.0-alpha.10",
+    "@jupyterlab/translation": "^3.0.0-alpha.10",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.10"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

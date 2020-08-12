@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/cells",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "description": "JupyterLab - Notebook Cells",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,18 +40,18 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-alpha.9",
-    "@jupyterlab/attachments": "^3.0.0-alpha.9",
-    "@jupyterlab/codeeditor": "^3.0.0-alpha.9",
-    "@jupyterlab/codemirror": "^3.0.0-alpha.9",
-    "@jupyterlab/coreutils": "^5.0.0-alpha.9",
-    "@jupyterlab/filebrowser": "^3.0.0-alpha.9",
-    "@jupyterlab/nbformat": "^3.0.0-alpha.9",
-    "@jupyterlab/observables": "^4.0.0-alpha.9",
-    "@jupyterlab/outputarea": "^3.0.0-alpha.9",
-    "@jupyterlab/rendermime": "^3.0.0-alpha.9",
-    "@jupyterlab/services": "^6.0.0-alpha.9",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.9",
+    "@jupyterlab/apputils": "^3.0.0-alpha.10",
+    "@jupyterlab/attachments": "^3.0.0-alpha.10",
+    "@jupyterlab/codeeditor": "^3.0.0-alpha.10",
+    "@jupyterlab/codemirror": "^3.0.0-alpha.10",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.10",
+    "@jupyterlab/filebrowser": "^3.0.0-alpha.10",
+    "@jupyterlab/nbformat": "^3.0.0-alpha.10",
+    "@jupyterlab/observables": "^4.0.0-alpha.10",
+    "@jupyterlab/outputarea": "^3.0.0-alpha.10",
+    "@jupyterlab/rendermime": "^3.0.0-alpha.10",
+    "@jupyterlab/services": "^6.0.0-alpha.10",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.10",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/dragdrop": "^1.5.1",
@@ -62,7 +62,7 @@
     "react": "~16.9.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-alpha.9",
+    "@jupyterlab/testutils": "^3.0.0-alpha.10",
     "@types/jest": "^24.0.23",
     "@types/react": "~16.9.16",
     "jest": "^25.2.3",

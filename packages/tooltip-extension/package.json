@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/tooltip-extension",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "description": "JupyterLab - Tooltip Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,15 +36,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-alpha.9",
-    "@jupyterlab/codeeditor": "^3.0.0-alpha.9",
-    "@jupyterlab/console": "^3.0.0-alpha.9",
-    "@jupyterlab/coreutils": "^5.0.0-alpha.9",
-    "@jupyterlab/fileeditor": "^3.0.0-alpha.9",
-    "@jupyterlab/notebook": "^3.0.0-alpha.9",
-    "@jupyterlab/rendermime": "^3.0.0-alpha.9",
-    "@jupyterlab/services": "^6.0.0-alpha.9",
-    "@jupyterlab/tooltip": "^3.0.0-alpha.9",
+    "@jupyterlab/application": "^3.0.0-alpha.10",
+    "@jupyterlab/codeeditor": "^3.0.0-alpha.10",
+    "@jupyterlab/console": "^3.0.0-alpha.10",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.10",
+    "@jupyterlab/fileeditor": "^3.0.0-alpha.10",
+    "@jupyterlab/notebook": "^3.0.0-alpha.10",
+    "@jupyterlab/rendermime": "^3.0.0-alpha.10",
+    "@jupyterlab/services": "^6.0.0-alpha.10",
+    "@jupyterlab/tooltip": "^3.0.0-alpha.10",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/widgets": "^1.11.1"

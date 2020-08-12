@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/launcher",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "description": "JupyterLab - Launcher Panel",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,9 +35,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-alpha.9",
-    "@jupyterlab/translation": "^3.0.0-alpha.9",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.9",
+    "@jupyterlab/apputils": "^3.0.0-alpha.10",
+    "@jupyterlab/translation": "^3.0.0-alpha.10",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.10",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
     "@lumino/coreutils": "^1.4.3",

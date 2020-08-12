@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/ui-components-extension",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "description": "JupyterLab - UI component plugins",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,8 +34,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-alpha.9",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.9"
+    "@jupyterlab/application": "^3.0.0-alpha.10",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.10"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

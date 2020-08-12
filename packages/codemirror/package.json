@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/codemirror",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "description": "JupyterLab - CodeMirror Editor Provider",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -38,13 +38,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-alpha.9",
-    "@jupyterlab/codeeditor": "^3.0.0-alpha.9",
-    "@jupyterlab/coreutils": "^5.0.0-alpha.9",
-    "@jupyterlab/nbformat": "^3.0.0-alpha.9",
-    "@jupyterlab/observables": "^4.0.0-alpha.9",
-    "@jupyterlab/statusbar": "^3.0.0-alpha.9",
-    "@jupyterlab/translation": "^3.0.0-alpha.9",
+    "@jupyterlab/apputils": "^3.0.0-alpha.10",
+    "@jupyterlab/codeeditor": "^3.0.0-alpha.10",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.10",
+    "@jupyterlab/nbformat": "^3.0.0-alpha.10",
+    "@jupyterlab/observables": "^4.0.0-alpha.10",
+    "@jupyterlab/statusbar": "^3.0.0-alpha.10",
+    "@jupyterlab/translation": "^3.0.0-alpha.10",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
     "@lumino/coreutils": "^1.4.3",
@@ -56,7 +56,7 @@
     "react": "~16.9.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-alpha.9",
+    "@jupyterlab/testutils": "^3.0.0-alpha.10",
     "@types/codemirror": "^0.0.76",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",

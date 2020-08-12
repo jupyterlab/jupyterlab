@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/application",
-  "version": "3.0.0-alpha.9",
+  "version": "3.0.0-alpha.10",
   "description": "JupyterLab - Application",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -41,15 +41,15 @@
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.12.0",
-    "@jupyterlab/apputils": "^3.0.0-alpha.9",
-    "@jupyterlab/coreutils": "^5.0.0-alpha.9",
-    "@jupyterlab/docregistry": "^3.0.0-alpha.9",
-    "@jupyterlab/rendermime": "^3.0.0-alpha.9",
-    "@jupyterlab/rendermime-interfaces": "^3.0.0-alpha.9",
-    "@jupyterlab/services": "^6.0.0-alpha.9",
-    "@jupyterlab/statedb": "^3.0.0-alpha.9",
-    "@jupyterlab/translation": "^3.0.0-alpha.9",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.9",
+    "@jupyterlab/apputils": "^3.0.0-alpha.10",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.10",
+    "@jupyterlab/docregistry": "^3.0.0-alpha.10",
+    "@jupyterlab/rendermime": "^3.0.0-alpha.10",
+    "@jupyterlab/rendermime-interfaces": "^3.0.0-alpha.10",
+    "@jupyterlab/services": "^6.0.0-alpha.10",
+    "@jupyterlab/statedb": "^3.0.0-alpha.10",
+    "@jupyterlab/translation": "^3.0.0-alpha.10",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.10",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/application": "^1.8.4",
     "@lumino/commands": "^1.10.1",
@@ -62,7 +62,7 @@
     "@lumino/widgets": "^1.11.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-alpha.9",
+    "@jupyterlab/testutils": "^3.0.0-alpha.10",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",
