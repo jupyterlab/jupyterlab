@@ -202,12 +202,6 @@ def _ensure_builder(options):
     build(app_options=options, command="build:nobuild")
     staging_path = osp.join(options.app_dir, 'staging')
     builder = osp.join(staging_path, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
-
-    # FIXME: remove this after releasing JS packages
-    build_utils = osp.abspath(osp.join(HERE, '..', 'buildutils', 'lib'))
-    for fname in os.listdir(build_utils):
-        shutil.copy(osp.join(build_utils, fname), osp.join(osp.dirname(builder), fname))
-    
     return builder
     
 
