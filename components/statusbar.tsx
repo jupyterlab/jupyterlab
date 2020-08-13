@@ -5,9 +5,9 @@
 import React from 'react';
 
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import '../../../../style/statusbar.css';
+import '../../style/statusbar.css';
 
-import * as SCHEMA from '../../../_schema';
+import * as SCHEMA from '../_schema';
 
 import {
   GroupItem,
@@ -23,11 +23,12 @@ import {
   runningIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
-import { JupyterLabWidgetAdapter } from '../jl_adapter';
-import { collect_documents, VirtualDocument } from '../../../virtual/document';
-import { LSPConnection } from '../../../connection';
-import { DocumentConnectionManager } from '../../../connection_manager';
-import { ILanguageServerManager } from '../../../tokens';
+import { WidgetAdapter } from '../adapters/jupyterlab/jl_adapter';
+import { collect_documents, VirtualDocument } from '../virtual/document';
+import { LSPConnection } from '../connection';
+import { DocumentConnectionManager } from '../connection_manager';
+import { ILanguageServerManager, ILSPAdapterManager } from '../tokens';
+import { IDocumentWidget } from "@jupyterlab/docregistry";
 
 interface IServerStatusProps {
   server: SCHEMA.LanguageServerSession;
@@ -234,8 +235,8 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
   /**
    * Construct a new VDomRenderer for the status item.
    */
-  constructor() {
-    super(new LSPStatus.Model());
+  constructor(widget_manager: ILSPAdapterManager) {
+    super(new LSPStatus.Model(widget_manager));
     this.addClass(interactiveItem);
     this.addClass('lsp-statusbar-item');
     this.title.caption = 'LSP status';
@@ -319,6 +320,16 @@ export namespace LSPStatus {
     server_extension_status: SCHEMA.ServersResponse = null;
     language_server_manager: ILanguageServerManager;
     private _connection_manager: DocumentConnectionManager;
+
+    constructor(widget_adapter_manager: ILSPAdapterManager) {
+      super();
+      widget_adapter_manager.adapterChanged.connect((manager, adapter) => { this.change_adapter(adapter) }, this )
+      widget_adapter_manager.adapterDisposed.connect((manager, adapter) => {
+        if (this.adapter === adapter) {
+          this.change_adapter(null);
+        }
+      }, this)
+    }
 
     get available_servers(): Array<SCHEMA.LanguageServerSession> {
       return Array.from(this.language_server_manager.sessions.values());
@@ -514,11 +525,11 @@ export namespace LSPStatus {
       return msg;
     }
 
-    get adapter(): JupyterLabWidgetAdapter | null {
+    get adapter(): WidgetAdapter<IDocumentWidget> | null {
       return this._adapter;
     }
 
-    set adapter(adapter: JupyterLabWidgetAdapter | null) {
+    change_adapter(adapter: WidgetAdapter<IDocumentWidget> | null) {
       if (this._adapter != null) {
         this._adapter.status_message.changed.connect(this._onChange);
       }
@@ -558,6 +569,6 @@ export namespace LSPStatus {
       this.stateChanged.emit(void 0);
     };
 
-    private _adapter: JupyterLabWidgetAdapter | null = null;
+    private _adapter: WidgetAdapter<IDocumentWidget> | null = null;
   }
 }

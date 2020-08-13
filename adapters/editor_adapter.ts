@@ -1,25 +1,23 @@
-import * as CodeMirror from 'codemirror';
-import { until_ready } from '../../utils';
-import { VirtualCodeMirrorEditor } from '../../virtual/editor';
-import { VirtualDocument } from '../../virtual/document';
-import { IRootPosition } from '../../positioning';
-import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
-import { FeatureEditorIntegration } from '../../feature';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import IEditor = CodeEditor.IEditor;
+import { IEditorChange, IVirtualEditor } from "../virtual/editor";
+import { FeatureEditorIntegration } from "../feature";
+import { CodeEditor } from "@jupyterlab/codeeditor";
+import { VirtualDocument } from "../virtual/document";
+import { until_ready } from "../utils";
+import { IRootPosition } from "../positioning";
 
-export class CodeMirrorAdapter {
-  features: Map<string, FeatureEditorIntegration<CodeMirrorEditor>>;
+export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
+  features: Map<string, FeatureEditorIntegration<T>>;
   isDisposed = false;
 
-  private last_change: CodeMirror.EditorChange;
+  private last_change: IEditorChange;
 
   constructor(
-    protected editor: VirtualCodeMirrorEditor,
+    protected editor: IVirtualEditor<CodeEditor.IEditor>,
     protected virtual_document: VirtualDocument,
-    protected jupyterlab_components: IJupyterLabComponentsManager,
-    features = new Array<FeatureEditorIntegration<CodeMirrorEditor>>()
+    features = new Array<FeatureEditorIntegration<T>>()
   ) {
-    this.editor.on('change', this.saveChange);
+    this.editor.change.connect(this.saveChange, this);
 
     this.features = new Map();
 
@@ -37,7 +35,6 @@ export class CodeMirrorAdapter {
   }
 
   public async updateAfterChange() {
-    this.jupyterlab_components.remove_tooltip();
 
     try {
       await until_ready(() => this.last_change != null, 30, 22);
@@ -48,14 +45,14 @@ export class CodeMirrorAdapter {
       return;
     }
 
-    let change: CodeMirror.EditorChange = this.last_change;
+    let change: IEditorChange = this.last_change;
 
     let root_position: IRootPosition;
 
     try {
-      root_position = this.editor.getDoc().getCursor('end') as IRootPosition;
+      root_position = this.editor.get_cursor_position();
     } catch (err) {
-      console.log('LSP: Root positon not found');
+      console.log('LSP: Root position not found');
       return;
     }
 
@@ -86,10 +83,7 @@ export class CodeMirrorAdapter {
     this.last_change = null;
   }
 
-  public saveChange = (
-    doc: CodeMirror.Doc,
-    change: CodeMirror.EditorChange
-  ) => {
+  public saveChange(sender: IVirtualEditor<IEditor>, change: IEditorChange) {
     this.last_change = change;
   };
 
@@ -101,7 +95,7 @@ export class CodeMirrorAdapter {
       feature.remove();
     }
     this.features.clear();
-    this.editor.off('change', this.saveChange);
+    this.editor.change.disconnect(this.saveChange);
 
     // just to be sure
     this.editor = null;

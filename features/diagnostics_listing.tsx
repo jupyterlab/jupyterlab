@@ -5,7 +5,7 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
 import { IEditorPosition } from '../positioning';
 import { VirtualCodeMirrorEditor } from '../virtual/editor';
-import { VirtualEditorForNotebook } from '../virtual/editors/notebook';
+import { VirtualCodeMirrorNotebookEditor } from '../virtual/editors/notebook';
 import { VirtualDocument } from '../virtual/document';
 
 import '../../style/diagnostics_listing.css';
@@ -79,7 +79,7 @@ function DocumentLocator(props: {
         let last_line = document.virtual_lines.get(
           document.last_virtual_line - 1
         );
-        let notebook_editor = editor as VirtualEditorForNotebook;
+        let notebook_editor = editor as VirtualCodeMirrorNotebookEditor;
         let { cell_id: first_cell, cell } = notebook_editor.find_cell_by_editor(
           first_line.editor
         );
@@ -290,7 +290,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         return diagnostics.map((diagnostic_data, i) => {
           let cell_number: number = null;
           if (editor.has_cells) {
-            let notebook_editor = editor as VirtualEditorForNotebook;
+            let notebook_editor = editor as VirtualCodeMirrorNotebookEditor;
             let { cell_id } = notebook_editor.find_cell_by_editor(
               diagnostic_data.editor
             );

@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { CodeMirrorAdapter } from './cm_adapter';
 import { LSPConnection } from '../../connection';
 import {
   IJupyterLabComponentsManager,
@@ -9,6 +8,7 @@ import { IRootPosition } from '../../positioning';
 import * as CodeMirror from 'codemirror';
 import { DummySettings, FileEditorFeatureTestEnvironment } from './testutils';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
+import { EditorAdapter } from "../editor_adapter";
 
 describe('CodeMirrorAdapter', () => {
   let env: FileEditorFeatureTestEnvironment;
@@ -50,7 +50,7 @@ describe('CodeMirrorAdapter', () => {
         new DummySettings()
       );
 
-      let adapter = new CodeMirrorAdapter(
+      let adapter = new EditorAdapter(
         virtual_editor,
         virtual_editor.virtual_document,
         dummy_components_manager,

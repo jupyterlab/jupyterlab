@@ -5,38 +5,19 @@ import { PositionConverter } from '../converter';
 import { IVirtualPosition } from '../positioning';
 import { uri_to_contents_path, uris_equal } from '../utils';
 import { AnyLocation } from 'lsp-ws-connection/lib/types';
-import { IFeatureCommand } from '../feature';
+import { FeatureSettings, IFeatureCommand, IFeatureLabIntegration } from '../feature';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ILSPFeatureManager } from '../index';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IDocumentManager } from '@jupyterlab/docmanager';
+import { ILSPFeatureManager } from "../tokens";
 
 export class CMJumpToDefinition extends CodeMirrorIntegration {
-  name = 'JumpToDefinition';
-  static commands: Array<IFeatureCommand> = [
-    {
-      id: 'jump-to-definition',
-      execute: async ({ connection, virtual_position, document, features }) => {
-        const jump_feature = features.get(
-          'JumpToDefinition'
-        ) as CMJumpToDefinition;
-        const targets = await connection.getDefinition(
-          virtual_position,
-          document.document_info,
-          false
-        );
-        await jump_feature.handle_jump(targets, document.document_info.uri);
-      },
-      is_enabled: ({ connection }) => connection.isDefinitionSupported(),
-      label: 'Jump to definition'
-    }
-  ];
 
   get jumper() {
     return (this.feature.labIntegration as JumperLabIntegration).jumper;
@@ -149,10 +130,12 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
   }
 }
 
-class JumperLabIntegration {
+class JumperLabIntegration implements IFeatureLabIntegration {
   private fileEditorTracker: IEditorTracker;
   private notebookTracker: INotebookTracker;
   private jumpers: Map<string, CodeJumper>;
+  // settings should be implemented in the future
+  settings?: FeatureSettings<any>;
 
   constructor(
     fileEditorTracker: IEditorTracker,
@@ -187,9 +170,28 @@ class JumperLabIntegration {
   }
 }
 
-const FEATURE_ID = '@krassowski/feature-jump_to:plugin';
 
-// TODO returning jump is useless; maybe return the registered one at least?
+const commands: Array<IFeatureCommand> = [
+  {
+    id: 'jump-to-definition',
+    execute: async ({ connection, virtual_position, document, features }) => {
+      const jump_feature = features.get(
+        'JumpToDefinition'
+      ) as CMJumpToDefinition;
+      const targets = await connection.getDefinition(
+        virtual_position,
+        document.document_info,
+        false
+      );
+      await jump_feature.handle_jump(targets, document.document_info.uri);
+    },
+    is_enabled: ({ connection }) => connection.isDefinitionSupported(),
+    label: 'Jump to definition'
+  }
+];
+
+const FEATURE_ID = '@krassowski/jupyterlab-lsp:jump-to';
+
 export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
   requires: [
@@ -216,6 +218,7 @@ export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
         editorIntegrationFactory: new Map([
           ['CodeMirrorEditor', CMJumpToDefinition]
         ]),
+        commands: commands,
         id: FEATURE_ID,
         name: 'Jump to definition',
         labIntegration: labIntegration

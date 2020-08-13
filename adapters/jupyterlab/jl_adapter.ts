@@ -1,20 +1,11 @@
-import * as CodeMirror from 'codemirror';
-import { CodeMirrorAdapter } from '../codemirror/cm_adapter';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { PositionConverter } from '../../converter';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-import * as lsProtocol from 'vscode-languageserver-protocol';
-import { FreeTooltip } from './components/free_tooltip';
-import { Widget } from '@lumino/widgets';
-import { VirtualCodeMirrorEditor } from '../../virtual/editor';
+import { IVirtualEditor } from '../../virtual/editor';
 import { VirtualDocument, IForeignContext } from '../../virtual/document';
 import { Signal } from '@lumino/signaling';
-import { IEditorPosition, IRootPosition } from '../../positioning';
+import { IRootPosition } from '../../positioning';
 import { LSPConnection } from '../../connection';
-import { LSPConnector } from './components/completion';
-import { CompletionTriggerKind } from '../../lsp';
 import { ICommandContext } from '../../command_manager';
 import { JSONObject } from '@lumino/coreutils';
 import {
@@ -23,51 +14,10 @@ import {
   ISocketConnectionOptions
 } from '../../connection_manager';
 import { LSPExtension } from '../../index';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { IFeatureSettings } from '../../editor_integration/codemirror';
 import { FeatureEditorIntegration } from '../../feature';
 import IEditor = CodeEditor.IEditor;
+import { EditorAdapter } from "../editor_adapter";
 
-class LabFeatureSettings implements IFeatureSettings {
-  private key = 'features';
-
-  constructor(
-    private extension: LSPExtension,
-    protected feature_name: string
-  ) {}
-
-  protected get lab_settings(): ISettingRegistry.ISettings {
-    return this.extension.settings;
-  }
-
-  protected get_obj(): any {
-    return (this.lab_settings.get(this.key).composite as any)[
-      this.feature_name.toLowerCase()
-    ];
-  }
-
-  get(setting: string) {
-    return this.get_obj()[setting];
-  }
-
-  set(setting: string, value: any) {
-    let obj = this.get_obj();
-    obj[setting] = value;
-    this.lab_settings.set(this.key, obj).catch(console.warn);
-  }
-}
-
-export interface IJupyterLabComponentsManager {
-  invoke_completer: (kind: CompletionTriggerKind) => void;
-  create_tooltip: (
-    markup: lsProtocol.MarkupContent,
-    cm_editor: CodeMirror.Editor,
-    position: IEditorPosition
-  ) => FreeTooltip;
-  remove_tooltip: () => void;
-  dispose(): void;
-  isDisposed: boolean;
-}
 
 export class StatusMessage {
   /**
@@ -111,56 +61,44 @@ const mime_type_language_map: JSONObject = {
   'text/x-ipython': 'python'
 };
 
+export interface IEditorChangedData {
+  editor: CodeEditor.IEditor;
+}
+
 /**
  * Foreign code: low level adapter is not aware of the presence of foreign languages;
  * it operates on the virtual document and must not attempt to infer the language dependencies
  * as this would make the logic of inspections caching impossible to maintain, thus the WidgetAdapter
  * has to handle that, keeping multiple connections and multiple virtual documents.
  */
-export abstract class JupyterLabWidgetAdapter
-  implements IJupyterLabComponentsManager {
-  protected adapters: Map<VirtualDocument.id_path, CodeMirrorAdapter>;
-  private readonly invoke_command: string;
-  protected document_connected: Signal<
-    JupyterLabWidgetAdapter,
+export abstract class WidgetAdapter<T extends IDocumentWidget> {
+  protected adapters: Map<VirtualDocument.id_path, EditorAdapter<IVirtualEditor<IEditor>>>;
+  public adapterConnected: Signal<
+    WidgetAdapter<T>,
     IDocumentConnectionData
   >;
-  protected abstract current_completion_connector: LSPConnector;
-  private _tooltip: FreeTooltip;
   public connection_manager: DocumentConnectionManager;
   public status_message: StatusMessage;
   public isDisposed = false;
 
   protected app: JupyterFrontEnd;
-  protected rendermime_registry: IRenderMimeRegistry;
-  /**
-   * Completions are extraordinary in that they require separate settings for the completion component
-   * which is heavily integrated with JupyterLab rather than with the CodeMirror
-   * @protected
-   */
-  protected completion_settings: IFeatureSettings;
+
+  public activeEditorChanged: Signal<WidgetAdapter<T>, IEditorChangedData>
 
   protected constructor(
     protected extension: LSPExtension,
-    protected widget: IDocumentWidget,
-    invoke: string
+    public widget: T
   ) {
     this.app = extension.app;
-    this.rendermime_registry = extension.rendermime_registry;
     this.connection_manager = extension.connection_manager;
-    this.document_connected = new Signal(this);
-    this.invoke_command = invoke;
+    this.adapterConnected = new Signal(this);
+    this.activeEditorChanged = new Signal(this)
     this.adapters = new Map();
     this.status_message = new StatusMessage();
-    this.completion_settings = new LabFeatureSettings(
-      this.extension,
-      'completion'
-    );
 
     // set up signal connections
     this.widget.context.saveState.connect(this.on_save_state, this);
     this.connection_manager.closed.connect(this.on_connection_closed, this);
-    this.document_connected.connect(this.connect_completion, this);
     this.widget.disposed.connect(this.dispose, this);
   }
 
@@ -188,7 +126,6 @@ export abstract class JupyterLabWidgetAdapter
 
     this.widget.context.saveState.disconnect(this.on_save_state, this);
     this.connection_manager.closed.disconnect(this.on_connection_closed, this);
-    this.document_connected.disconnect(this.connect_completion, this);
     this.widget.disposed.disconnect(this.dispose, this);
     this.widget.context.model.contentChanged.disconnect(
       this.update_documents,
@@ -204,26 +141,20 @@ export abstract class JupyterLabWidgetAdapter
     );
     this.virtual_editor.dispose();
 
-    this.current_completion_connector?.dispose();
-
     // just to be sure
     this.virtual_editor = null;
     this.app = null;
     this.widget = null;
-    this._tooltip = null;
     this.connection_manager = null;
-    this.current_completion_connector = null;
-    this.rendermime_registry = null;
     this.widget = null;
 
     // actually disposed
     this.isDisposed = true;
   }
 
-  abstract virtual_editor: VirtualCodeMirrorEditor;
+  abstract virtual_editor: IVirtualEditor<IEditor>;
   abstract get document_path(): string;
   abstract get mime_type(): string;
-  protected abstract connect_completion(): void;
 
   get widget_id(): string {
     return this.widget.id;
@@ -286,17 +217,13 @@ export abstract class JupyterLabWidgetAdapter
     }
   }
 
-  abstract find_ce_editor(cm_editor: CodeMirror.Editor): CodeEditor.IEditor;
-
-  invoke_completer(kind: CompletionTriggerKind) {
-    return this.app.commands.execute(this.invoke_command);
-  }
+  abstract activeEditor: CodeEditor.IEditor;
 
   protected async on_connected(data: IDocumentConnectionData) {
     let { virtual_document } = data;
 
     await this.connect_adapter(data.virtual_document, data.connection);
-    this.document_connected.emit(data);
+    this.adapterConnected.emit(data);
 
     await this.virtual_editor.update_documents().then(() => {
       // refresh the document on the LSP server
@@ -490,8 +417,8 @@ export abstract class JupyterLabWidgetAdapter
   create_adapter(
     virtual_document: VirtualDocument,
     connection: LSPConnection
-  ): CodeMirrorAdapter {
-    let adapter_features = new Array<FeatureEditorIntegration<IEditor>>();
+  ): EditorAdapter<IVirtualEditor<IEditor>> {
+    let adapter_features = new Array<FeatureEditorIntegration<IVirtualEditor<IEditor>>>();
     for (let feature of this.extension.feature_manager.features) {
       let featureEditorIntegrationConstructor = feature.editorIntegrationFactory.get(
         this.virtual_editor.editor_name
@@ -501,16 +428,15 @@ export abstract class JupyterLabWidgetAdapter
         virtual_editor: this.virtual_editor,
         virtual_document: virtual_document,
         connection: connection,
-        status_message: this.status_message
-        //settings: new LabFeatureSettings(this.extension, feature_type.name)
+        status_message: this.status_message,
+        settings: feature.settings
       });
       adapter_features.push(integration);
     }
 
-    let adapter = new CodeMirrorAdapter(
+    let adapter = new EditorAdapter(
       this.virtual_editor,
       virtual_document,
-      this,
       adapter_features
     );
     console.log('LSP: Adapter for', this.document_path, 'is ready.');
@@ -545,13 +471,12 @@ export abstract class JupyterLabWidgetAdapter
       event.stopPropagation();
     }
 
-    return this.virtual_editor.coordsChar(
+    return this.virtual_editor.window_coords_to_root_position(
       {
         left: left,
         top: top
-      },
-      'window'
-    ) as IRootPosition;
+      }
+    );
   }
 
   get_context(root_position: IRootPosition): ICommandContext {
@@ -574,34 +499,5 @@ export abstract class JupyterLabWidgetAdapter
   get_context_from_context_menu(): ICommandContext {
     let root_position = this.get_position_from_context_menu();
     return this.get_context(root_position);
-  }
-
-  public create_tooltip(
-    markup: lsProtocol.MarkupContent,
-    cm_editor: CodeMirror.Editor,
-    position: IEditorPosition
-  ): FreeTooltip {
-    this.remove_tooltip();
-    const bundle =
-      markup.kind === 'plaintext'
-        ? { 'text/plain': markup.value }
-        : { 'text/markdown': markup.value };
-    const tooltip = new FreeTooltip({
-      anchor: this.widget.content,
-      bundle: bundle,
-      editor: this.find_ce_editor(cm_editor),
-      rendermime: this.rendermime_registry,
-      position: PositionConverter.cm_to_ce(position),
-      moveToLineEnd: false
-    });
-    Widget.attach(tooltip, document.body);
-    this._tooltip = tooltip;
-    return tooltip;
-  }
-
-  remove_tooltip() {
-    if (this._tooltip !== undefined) {
-      this._tooltip.dispose();
-    }
   }
 }

@@ -22,7 +22,7 @@ class VirtualEditorImplementation extends VirtualCodeMirrorEditor {
     return 0;
   }
 
-  transform_editor_to_root(
+  _transform_editor_to_root(
     cm_editor: CodeMirror.Editor,
     position: IEditorPosition
   ): IRootPosition {

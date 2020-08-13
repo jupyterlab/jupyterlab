@@ -2,7 +2,7 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import { InputDialog } from '@jupyterlab/apputils';
 import { Diagnostics } from './diagnostics';
 import { VirtualCodeMirrorEditor } from '../virtual/editor';
-import { VirtualEditorForNotebook } from '../virtual/editors/notebook';
+import { VirtualCodeMirrorNotebookEditor } from '../virtual/editors/notebook';
 import { IFeatureCommand } from '../feature';
 import {
   CodeMirrorIntegration,
@@ -136,7 +136,7 @@ function ux_workaround_for_rope_limitation(
         let message = diagnostic.diagnostic.message;
         let start = diagnostic.range.start;
         if (editor.has_cells) {
-          let notebook_editor = editor as VirtualEditorForNotebook;
+          let notebook_editor = editor as VirtualCodeMirrorNotebookEditor;
           let { cell_id } = notebook_editor.find_cell_by_editor(
             diagnostic.editor
           );

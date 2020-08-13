@@ -1,8 +1,7 @@
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
   IFeatureCommand,
   FeatureEditorIntegration,
-  IEditorIntegrationOptions
+  IEditorIntegrationOptions, FeatureSettings
 } from '../feature';
 import { CodeMirrorHandler, VirtualCodeMirrorEditor } from '../virtual/editor';
 import { VirtualDocument } from '../virtual/document';
@@ -32,12 +31,6 @@ function toDocumentChanges(changes: {
   return documentChanges;
 }
 
-export interface IFeatureSettings {
-  get(setting: string): any;
-
-  set(setting: string, value: any): void;
-}
-
 export interface IEditorRange {
   start: IEditorPosition;
   end: IEditorPosition;
@@ -60,7 +53,7 @@ export interface IEditOutcome {
  * (the initialization is performed by the adapter).
  */
 export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
-  CodeMirrorEditor
+  VirtualCodeMirrorEditor
 > {
   public is_registered: boolean;
   protected readonly editor_handlers: Map<string, CodeMirrorHandler>;
@@ -72,7 +65,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
   protected virtual_document: VirtualDocument;
   protected connection: LSPConnection;
   protected status_message: StatusMessage;
-  protected settings: IFeatureSettings;
+  settings: FeatureSettings<any>;
 
   constructor(options: IEditorIntegrationOptions) {
     super(options);
@@ -81,8 +74,6 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
     this.wrapper_handlers = new Map();
     this.is_registered = false;
   }
-
-  abstract get name(): string;
 
   register(): void {
     // register editor handlers
@@ -106,16 +97,6 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
     // TODO - use settings
     return true;
   }
-
-  /** Return JupyterLab commands to be registered;
-   * intended for single-use in index.ts (during extension registration)
-   */
-  static readonly commands = new Array<IFeatureCommand>();
-
-  /* Just a safeguard to enforce static commands in sub-classes */
-  // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
-  // @ts-ignore
-  private commands: any;
 
   remove(): void {
     // unregister editor handlers
@@ -182,7 +163,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
     let editor_position = this.virtual_document.transform_virtual_to_editor(
       start
     );
-    return this.virtual_editor.transform_editor_to_root(
+    return this.virtual_editor._transform_editor_to_root(
       cm_editor,
       editor_position
     );

@@ -4,6 +4,13 @@
 import { Tooltip } from '@jupyterlab/tooltip';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { HoverBox } from '@jupyterlab/apputils';
+import * as lsProtocol from "vscode-languageserver-protocol";
+import { IEditorPosition } from "../positioning";
+import { PositionConverter } from "../converter";
+import { Widget } from "@lumino/widgets";
+import { IRenderMimeRegistry } from "@jupyterlab/rendermime";
+import { DocumentWidget } from "@jupyterlab/docregistry";
+import { ILSPAdapterManager } from "../tokens";
 
 const MIN_HEIGHT = 20;
 const MAX_HEIGHT = 250;
@@ -83,3 +90,49 @@ export class FreeTooltip extends Tooltip {
     });
   }
 }
+
+
+export namespace EditorTooltip {
+  export interface IOptions {
+    markup: lsProtocol.MarkupContent,
+    ce_editor: CodeEditor.IEditor,
+    position: IEditorPosition,
+  }
+}
+
+export class EditorTooltipManager {
+  private currentTooltip: FreeTooltip = null;
+
+  constructor(private rendermime_registry: IRenderMimeRegistry, private adapterManager: ILSPAdapterManager) {
+  }
+
+  create(options: EditorTooltip.IOptions): FreeTooltip {
+    this.remove();
+    let { markup, position } = options
+    let adapter = this.adapterManager.currentAdapter;
+    let widget = adapter.widget;
+    const bundle =
+      markup.kind === 'plaintext'
+        ? { 'text/plain': markup.value }
+        : { 'text/markdown': markup.value };
+    const tooltip = new FreeTooltip({
+      anchor: widget.content,
+      bundle: bundle,
+      editor: adapter.virtual_editor.ce_editor,
+      rendermime: this.rendermime_registry,
+      position: PositionConverter.cm_to_ce(position),
+      moveToLineEnd: false
+    });
+    Widget.attach(tooltip, document.body);
+    this.currentTooltip = tooltip;
+    return tooltip;
+  }
+
+  remove() {
+    if (this.currentTooltip !== undefined) {
+      this.currentTooltip.dispose();
+    }
+  }
+}
+
+

@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-import { CodeMirrorAdapter } from './cm_adapter';
 import { LSPConnection } from '../../connection';
 import {
   IJupyterLabComponentsManager,
@@ -22,6 +21,7 @@ import { foreign_code_extractors } from '../../extractors/defaults';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
+import { EditorAdapter } from "../editor_adapter";
 
 const js_fib_code = `function fib(n) {
   return n<2?n:fib(n-1)+fib(n-2);
@@ -128,7 +128,7 @@ describe('Feature', () => {
       environment: FeatureTestEnvironment,
       feature: CodeMirrorIntegration
     ) {
-      return new CodeMirrorAdapter(
+      return new EditorAdapter(
         environment.virtual_editor,
         environment.virtual_editor.virtual_document,
         dummy_components_manager,
@@ -137,7 +137,7 @@ describe('Feature', () => {
     }
 
     describe('editing in FileEditor', () => {
-      let adapter: CodeMirrorAdapter;
+      let adapter: EditorAdapter;
       let feature: EditApplyingFeature;
       let environment: FileEditorFeatureTestEnvironment;
 
@@ -200,7 +200,7 @@ describe('Feature', () => {
     });
 
     describe('editing in Notebook', () => {
-      let adapter: CodeMirrorAdapter;
+      let adapter: EditorAdapter;
       let feature: EditApplyingFeature;
       let environment: NotebookFeatureTestEnvironment;
 

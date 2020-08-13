@@ -12,18 +12,84 @@ import { until_ready } from '../utils';
 import { Signal } from '@lumino/signaling';
 import { EditorLogConsole, create_console } from './console';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { CodeEditor } from "@jupyterlab/codeeditor";
+import { PositionConverter } from "../converter";
+
+export interface IWindowCoordinates {
+  /**
+   * The number of pixels away from the left edge of the window.
+   */
+  left: number;
+  /**
+   * The number of pixels away from the top edge of the window.
+   */
+  top: number;
+}
 
 export type CodeMirrorHandler = (instance: any, ...args: any[]) => void;
 type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
 
+
+export interface IEditorChange {
+  /** Position (in the pre-change coordinate system) where the change started. */
+  from: CodeMirror.Position;
+  /** Position (in the pre-change coordinate system) where the change ended. */
+  to: CodeMirror.Position;
+  /** Array of strings representing the text that replaced the changed range (split by line). */
+  text: string[];
+  /**  Text that used to be between from and to, which is overwritten by this change. */
+  removed?: string[];
+  /**  String representing the origin of the change event and whether it can be merged with history */
+  origin?: string;
+}
+
 export interface IVirtualEditor<IEditor> {
   virtual_document: VirtualDocument;
+  console: EditorLogConsole;
+
+  readonly editor_name: string;
 
   /**
-   * TODO retrieve the editor name
+   *
    */
-  editor_name: string;
+  dispose(): void;
+
+  /**
+   * (re)create virtual document using current path and language
+   */
+  create_virtual_document(): void
+
+  /**
+   * Update all the virtual documents, emit documents updated with root document if succeeded,
+   * and resolve a void promise. The promise does not contain the text value of the root document,
+   * as to avoid an easy trap of ignoring the changes in the virtual documents.
+   */
+  update_documents(): Promise<void>
+
+  /**
+   * Execute provided callback within an update-locked context, which guarantees that:
+   *  - the previous updates must have finished before the callback call, and
+   *  - no update will happen when executing the callback
+   * @param fn - the callback to execute in update lock
+   */
+  with_update_lock(fn: Function): Promise<void>
+
+  document_at_root_position(position: IRootPosition): VirtualDocument
+
+  root_position_to_virtual_position(position: IRootPosition): IVirtualPosition
+
+  window_coords_to_root_position(coordinates: IWindowCoordinates): IRootPosition;
+
+  get_token_at(position: IRootPosition): CodeEditor.IToken;
+
+  transform_editor_to_root(ce_editor: CodeEditor.IEditor, position: CodeEditor.IPosition): IRootPosition
+
+  get_cursor_position(): IRootPosition;
+
+  change: Signal<IVirtualEditor<IEditor>, IEditorChange>;
 }
+
+// TODO: Create VirtualEditorManager token, register codemirror as one of many, make a decision sequence to create a specific virtual editor depending on detected editor
 
 /**
  * VirtualEditor extends the CodeMirror.Editor interface; its subclasses may either
@@ -33,11 +99,14 @@ export interface IVirtualEditor<IEditor> {
  */
 export abstract class VirtualCodeMirrorEditor
   implements IVirtualEditor<CodeMirrorEditor>, CodeMirror.Editor {
+  abstract find_ce_editor(cm_editor: CodeMirror.Editor): CodeEditor.IEditor;
+
   // TODO: getValue could be made private in the virtual editor and the virtual editor
   //  could stop exposing the full implementation of CodeMirror but rather hide it inside.
   editor_name: 'CodeMirrorEditor';
   virtual_document: VirtualDocument;
   code_extractors: IForeignCodeExtractorsRegistry;
+  console: EditorLogConsole;
   /**
    * Signal emitted by the editor that triggered the update, providing the root document of the updated documents.
    */
@@ -46,8 +115,13 @@ export abstract class VirtualCodeMirrorEditor
    * Whether the editor reflects an interface with multiple cells (such as a notebook)
    */
   has_cells: boolean;
-  console: EditorLogConsole;
   isDisposed = false;
+
+  change: Signal<IVirtualEditor<CodeMirrorEditor>, IEditorChange>;
+
+  get_cursor_position(): IRootPosition {
+    return this.getDoc().getCursor('end') as IRootPosition;
+  }
 
   public constructor(
     protected language: () => string,
@@ -64,7 +138,31 @@ export abstract class VirtualCodeMirrorEditor
     >(this);
     this.documents_updated.connect(this.on_updated, this);
     this.console = create_console('browser');
+    this.change = new Signal(this);
+
+    this.on('change', this.emit_change)
   }
+
+  private emit_change(
+    doc: CodeMirror.Doc,
+    change: CodeMirror.EditorChange
+  ) {
+    this.change.emit(change)
+  }
+
+  window_coords_to_root_position(coordinates: IWindowCoordinates) {
+    return this.coordsChar(coordinates, 'window') as IRootPosition;
+  }
+
+  get_token_at(position: IRootPosition): CodeEditor.IToken {
+    let token = this.getTokenAt(position)
+    return {
+      value: token.string,
+      offset: token.start,
+      type: token.type
+    }
+  }
+
 
   create_virtual_document() {
     this.virtual_document = new VirtualDocument(
@@ -83,6 +181,7 @@ export abstract class VirtualCodeMirrorEditor
       return;
     }
 
+    this.off('change', this.emit_change)
     this.documents_updated.disconnect(this.on_updated, this);
 
     for (let [[eventName], wrapped_handler] of this._event_wrappers.entries()) {
@@ -122,7 +221,13 @@ export abstract class VirtualCodeMirrorEditor
     return this.virtual_document.transform_virtual_to_editor(position);
   }
 
-  abstract transform_editor_to_root(
+  transform_editor_to_root(ce_editor: CodeEditor.IEditor, position: CodeEditor.IPosition): IRootPosition {
+    let cm_editor = (ce_editor as CodeMirrorEditor).editor;
+    let cm_start = PositionConverter.ce_to_cm(position) as IEditorPosition;
+    return this._transform_editor_to_root(cm_editor, cm_start);
+  }
+
+  abstract _transform_editor_to_root(
     cm_editor: CodeMirror.Editor,
     position: IEditorPosition
   ): IRootPosition;
@@ -158,11 +263,6 @@ export abstract class VirtualCodeMirrorEditor
     });
   }
 
-  /**
-   * Update all the virtual documents, emit documents updated with root document if succeeded,
-   * and resolve a void promise. The promise does not contain the text value of the root document,
-   * as to avoid an easy trap of ignoring the changes in the virtual documents.
-   */
   public async update_documents(): Promise<void> {
     return new Promise<void>(async (resolve, reject) => {
       // defer the update by up to 50 ms (10 retrials * 5 ms break),

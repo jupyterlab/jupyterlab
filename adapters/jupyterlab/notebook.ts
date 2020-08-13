@@ -1,12 +1,9 @@
-import { JupyterLabWidgetAdapter } from './jl_adapter';
+import { WidgetAdapter } from './jl_adapter';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import * as CodeMirror from 'codemirror';
-import { VirtualEditorForNotebook } from '../../virtual/editors/notebook';
+import { VirtualCodeMirrorNotebookEditor } from '../../virtual/editors/notebook';
 import { ICompletionManager } from '@jupyterlab/completer';
 import { NotebookJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/notebook';
 import { until_ready } from '../../utils';
-import { LSPConnector } from './components/completion';
-import { CodeEditor } from '@jupyterlab/codeeditor';
 import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
 import { Cell } from '@jupyterlab/cells';
@@ -16,18 +13,15 @@ import { Session } from '@jupyterlab/services';
 import { SessionContext } from '@jupyterlab/apputils';
 import { LSPExtension } from '../../index';
 
-export class NotebookAdapter extends JupyterLabWidgetAdapter {
+export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   editor: Notebook;
-  widget: NotebookPanel;
-  virtual_editor: VirtualEditorForNotebook;
+  virtual_editor: VirtualCodeMirrorNotebookEditor;
   jumper: NotebookJumper;
-
-  protected current_completion_connector: LSPConnector;
 
   private _language_info: ILanguageInfoMetadata;
 
   constructor(extension: LSPExtension, editor_widget: NotebookPanel) {
-    super(extension, editor_widget, 'completer:invoke-notebook');
+    super(extension, editor_widget);
     this.editor = editor_widget.content;
     this.init_once_ready().catch(console.warn);
   }
@@ -68,7 +62,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
       this.on_kernel_changed,
       this
     );
-    this.widget.content.activeCellChanged.disconnect(this.on_completions, this);
+    this.widget.content.activeCellChanged.disconnect(this.activeCellChanged, this);
     if (this.current_completion_handler) {
       this.current_completion_handler.connector = null;
       this.current_completion_handler.editor = null;
@@ -112,10 +106,6 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     return language_metadata.file_extension.replace('.', '');
   }
 
-  find_ce_editor(cm_editor: CodeMirror.Editor): CodeEditor.IEditor {
-    return this.virtual_editor.cm_editor_to_cell.get(cm_editor).editor;
-  }
-
   async init_once_ready() {
     console.log('LSP: waiting for', this.document_path, 'to fully load');
     await this.widget.context.sessionContext.ready;
@@ -123,7 +113,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     await this.update_language_info();
     console.log('LSP:', this.document_path, 'ready for connection');
 
-    this.virtual_editor = new VirtualEditorForNotebook(
+    this.virtual_editor = new VirtualCodeMirrorNotebookEditor(
       this.widget.content,
       this.widget.node,
       () => this.language,
@@ -146,43 +136,20 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
     );
   }
 
-  private set_completion_connector(cell: Cell) {
-    if (this.current_completion_connector) {
-      delete this.current_completion_connector;
-    }
-    this.current_completion_connector = new LSPConnector({
-      editor: cell.editor,
-      connections: this.connection_manager.connections,
-      virtual_editor: this.virtual_editor,
-      settings: this.completion_settings,
-      session: this.widget.sessionContext.session
-    });
-  }
 
   current_completion_handler: ICompletionManager.ICompletableAttributes;
 
   connect_completion() {
-    // see https://github.com/jupyterlab/jupyterlab/blob/c0e9eb94668832d1208ad3b00a9791ef181eca4c/packages/completer-extension/src/index.ts#L198-L213
-    const cell = this.widget.content.activeCell;
-    if (cell == null) {
-      return;
-    }
-    this.set_completion_connector(cell);
-    const handler = this.extension.completion_manager.register({
-      connector: this.current_completion_connector,
-      editor: cell.editor,
-      parent: this.widget
-    });
-    this.current_completion_handler = handler;
-    this.widget.content.activeCellChanged.connect(this.on_completions, this);
+    this.widget.content.activeCellChanged.connect(this.activeCellChanged, this);
   }
 
-  on_completions(notebook: Notebook, cell: Cell) {
-    if (cell == null) {
-      return;
-    }
-    this.set_completion_connector(cell);
-    this.current_completion_handler.editor = cell.editor;
-    this.current_completion_handler.connector = this.current_completion_connector;
+  get activeEditor() {
+    return this.widget.content.activeCell.editor;
+  }
+
+  activeCellChanged(notebook: Notebook, cell: Cell) {
+    this.activeEditorChanged.emit({
+      editor: cell.editor
+    })
   }
 }

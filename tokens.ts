@@ -1,7 +1,11 @@
-import { ISignal } from '@lumino/signaling';
+import { ISignal, Signal } from '@lumino/signaling';
 import { ServerConnection } from '@jupyterlab/services';
 
 import * as SCHEMA from './_schema';
+import { WidgetAdapter } from "./adapters/jupyterlab/jl_adapter";
+import { IDocumentWidget } from "@jupyterlab/docregistry/lib/registry";
+import { Token } from "@lumino/coreutils";
+import { IFeatureOptions, PLUGIN_ID, WidgetAdapterManager } from "./index";
 
 export type TLanguageServerId = string;
 export type TLanguageId = string;
@@ -59,3 +63,26 @@ export namespace ILanguageServerManager {
     mimeType?: string;
   }
 }
+
+export interface ILSPFeatureManager {
+  register(options: IFeatureOptions): void;
+}
+
+export interface AdapterRegistration {
+  id: string;
+  adapter: WidgetAdapter<IDocumentWidget>;
+  type: 'notebook' | 'file-editor';
+  re_connector: Function;
+}
+
+export interface ILSPAdapterManager {
+  adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>
+  adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>
+  currentAdapter: WidgetAdapter<IDocumentWidget>
+  isAnyActive: () => boolean
+  register: (options: AdapterRegistration) => void;
+}
+
+export const ILSPFeatureManager = new Token<ILSPFeatureManager>(PLUGIN_ID + ':ILSPFeatureManager');
+
+export const ILSPAdapterManager = new Token<ILSPAdapterManager>(PLUGIN_ID + ':ILSPWidgetAdapterManager');

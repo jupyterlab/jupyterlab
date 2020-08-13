@@ -1,31 +1,25 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { ICommandPalette, IWidgetTracker } from '@jupyterlab/apputils';
-import { JupyterLabWidgetAdapter } from './adapters/jupyterlab/jl_adapter';
+import { WidgetAdapter } from './adapters/jupyterlab/jl_adapter';
 import { FeatureEditorIntegration, IFeatureCommand } from './feature';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
-import { FileEditorAdapter } from './adapters/jupyterlab/file_editor';
-import { NotebookAdapter } from './adapters/jupyterlab/notebook';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
-import {
-  IEditorPosition,
-  IRootPosition,
-  IVirtualPosition
-} from './positioning';
-import { VirtualCodeMirrorEditor } from './virtual/editor';
+import { IEditorPosition, IRootPosition, IVirtualPosition } from './positioning';
+import { IVirtualEditor } from './virtual/editor';
 import { PositionConverter } from './converter';
+import { CodeEditor } from "@jupyterlab/codeeditor";
+import { IDocumentWidget } from "@jupyterlab/docregistry";
+import { file_editor_adapters, notebook_adapters } from "./index";
 
-export const file_editor_adapters: Map<string, FileEditorAdapter> = new Map();
-export const notebook_adapters: Map<string, NotebookAdapter> = new Map();
-
-function is_context_menu_over_token(adapter: JupyterLabWidgetAdapter) {
+function is_context_menu_over_token(adapter: WidgetAdapter<IDocumentWidget>) {
   let position = adapter.get_position_from_context_menu();
   if (!position) {
     return false;
   }
-  let token = adapter.virtual_editor.getTokenAt(position);
-  return token.string !== '';
+  let token = adapter.virtual_editor.get_token_at(position);
+  return token.value !== '';
 }
 
 export enum CommandEntryPoint {
@@ -42,7 +36,7 @@ abstract class LSPCommandManager {
   ) {}
 
   abstract entry_point: CommandEntryPoint;
-  abstract get current_adapter(): JupyterLabWidgetAdapter;
+  abstract get current_adapter(): WidgetAdapter<IDocumentWidget>;
   abstract attach_command(command: IFeatureCommand): void;
   abstract execute(command: IFeatureCommand): void;
   abstract is_enabled(command: IFeatureCommand): boolean;
@@ -260,6 +254,6 @@ export interface ICommandContext {
   virtual_position: IVirtualPosition;
   root_position: IRootPosition;
   features: Map<string, FeatureEditorIntegration<any>>;
-  editor: VirtualCodeMirrorEditor;
-  adapter: JupyterLabWidgetAdapter;
+  editor: IVirtualEditor<CodeEditor.IEditor>;
+  adapter: WidgetAdapter<IDocumentWidget>;
 }

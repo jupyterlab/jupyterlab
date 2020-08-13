@@ -5,20 +5,19 @@ import {
 import { VirtualCodeMirrorEditor } from '../../virtual/editor';
 import { LSPConnection } from '../../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { VirtualFileEditor } from '../../virtual/editors/file_editor';
-import { FreeTooltip } from '../jupyterlab/components/free_tooltip';
+import { VirtualCodeMirrorFileEditor } from '../../virtual/editors/file_editor';
+import { FreeTooltip } from '../../components/free_tooltip';
 import {
   IJupyterLabComponentsManager,
   StatusMessage
 } from '../jupyterlab/jl_adapter';
-import { VirtualEditorForNotebook } from '../../virtual/editors/notebook';
+import { VirtualCodeMirrorNotebookEditor } from '../../virtual/editors/notebook';
 import { Notebook, NotebookModel } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { IOverridesRegistry } from '../../magics/overrides';
 import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
 import * as nbformat from '@jupyterlab/nbformat';
 import { ICellModel } from '@jupyterlab/cells';
-import { CodeMirrorAdapter } from './cm_adapter';
 import { VirtualDocument } from '../../virtual/document';
 import { LanguageServerManager } from '../../manager';
 import { DocumentConnectionManager } from '../../connection_manager';
@@ -28,6 +27,7 @@ import {
   IFeatureSettings,
   ILSPFeatureConstructor
 } from '../../editor_integration/codemirror';
+import { EditorAdapter } from "../editor_adapter";
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
@@ -157,8 +157,8 @@ export class FileEditorFeatureTestEnvironment extends FeatureTestEnvironment {
     this.init();
   }
 
-  create_virtual_editor(): VirtualFileEditor {
-    return new VirtualFileEditor(
+  create_virtual_editor(): VirtualCodeMirrorFileEditor {
+    return new VirtualCodeMirrorFileEditor(
       this.language,
       this.file_extension,
       this.path,
@@ -174,7 +174,7 @@ export class FileEditorFeatureTestEnvironment extends FeatureTestEnvironment {
 
 export class NotebookFeatureTestEnvironment extends FeatureTestEnvironment {
   public notebook: Notebook;
-  virtual_editor: VirtualEditorForNotebook;
+  virtual_editor: VirtualCodeMirrorNotebookEditor;
   public wrapper: HTMLElement;
 
   constructor(
@@ -190,8 +190,8 @@ export class NotebookFeatureTestEnvironment extends FeatureTestEnvironment {
     this.init();
   }
 
-  create_virtual_editor(): VirtualEditorForNotebook {
-    return new VirtualEditorForNotebook(
+  create_virtual_editor(): VirtualCodeMirrorNotebookEditor {
+    return new VirtualCodeMirrorNotebookEditor(
       this.notebook,
       this.wrapper,
       this.language,
@@ -270,7 +270,7 @@ export function getCellsJSON(notebook: Notebook) {
 
 export async function synchronize_content(
   environment: FeatureTestEnvironment,
-  adapter: CodeMirrorAdapter
+  adapter: EditorAdapter
 ) {
   await environment.virtual_editor.update_documents();
   try {

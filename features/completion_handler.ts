@@ -6,22 +6,21 @@ import {
 } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { JSONArray, JSONObject } from '@lumino/coreutils';
-import { completionItemKindNames, CompletionTriggerKind } from '../../../lsp';
+import { completionItemKindNames, CompletionTriggerKind } from '../lsp';
 import * as lsProtocol from 'vscode-languageserver-types';
-import { PositionConverter } from '../../../converter';
-import { VirtualDocument } from '../../../virtual/document';
-import { VirtualCodeMirrorEditor } from '../../../virtual/editor';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { VirtualDocument } from '../virtual/document';
+import { IVirtualEditor } from '../virtual/editor';
 import {
-  IEditorPosition,
   IRootPosition,
   IVirtualPosition
-} from '../../../positioning';
-import { LSPConnection } from '../../../connection';
+} from '../positioning';
+import { LSPConnection } from '../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 import { kernelIcon } from '@jupyterlab/ui-components';
-import { IFeatureSettings } from '../../../editor_integration/codemirror';
+
+import { LSPCompletionSettings } from '../_completion';
+import { FeatureSettings } from "../feature";
 
 /**
  * A LSP connector for completion handlers.
@@ -38,15 +37,15 @@ export class LSPConnector
   // signal that this is the new type connector (providing completion items)
   responseType = ICompletionItemsResponseType;
 
-  virtual_editor: VirtualCodeMirrorEditor;
+  virtual_editor: IVirtualEditor<CodeEditor.IEditor>;
   private trigger_kind: CompletionTriggerKind;
 
   private get suppress_auto_invoke_in(): string[] {
-    return this.options.settings.get('suppressInvokeIn');
+    return this.options.settings.composite.suppressInvokeIn;
   }
 
   private get should_show_documentation(): boolean {
-    return this.options.settings.get('showDocumentation');
+    return this.options.settings.composite.showDocumentation;
   }
 
   /**
@@ -97,9 +96,7 @@ export class LSPConnector
   }
 
   transform_from_editor_to_root(position: CodeEditor.IPosition): IRootPosition {
-    let cm_editor = (this._editor as CodeMirrorEditor).editor;
-    let cm_start = PositionConverter.ce_to_cm(position) as IEditorPosition;
-    return this.virtual_editor.transform_editor_to_root(cm_editor, cm_start);
+    return this.virtual_editor.transform_editor_to_root(this._editor, position);
   }
 
   /**
@@ -388,13 +385,13 @@ export namespace LSPConnector {
      * The editor used by the LSP connector.
      */
     editor: CodeEditor.IEditor;
-    virtual_editor: VirtualCodeMirrorEditor;
+    virtual_editor: IVirtualEditor<CodeEditor.IEditor>;
     /**
      * The connections to be used by the LSP connector.
      */
     connections: Map<VirtualDocument.id_path, LSPConnection>;
 
-    settings: IFeatureSettings;
+    settings: FeatureSettings<LSPCompletionSettings>;
 
     session?: Session.ISessionConnection;
   }

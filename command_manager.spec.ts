@@ -4,7 +4,7 @@ import {
   ContextCommandManager,
   ICommandContext
 } from './command_manager';
-import { JupyterLabWidgetAdapter } from './adapters/jupyterlab/jl_adapter';
+import { WidgetAdapter } from './adapters/jupyterlab/jl_adapter';
 import { IFeatureCommand } from './feature';
 
 describe('ContextMenuCommandManager', () => {
@@ -16,7 +16,7 @@ describe('ContextMenuCommandManager', () => {
     entry_point: CommandEntryPoint;
     selector: string;
 
-    get current_adapter(): JupyterLabWidgetAdapter {
+    get current_adapter(): WidgetAdapter {
       return undefined;
     }
 

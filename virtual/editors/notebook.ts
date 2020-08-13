@@ -10,13 +10,14 @@ import {
   IRootPosition,
   IVirtualPosition
 } from '../../positioning';
+import { CodeEditor } from "@jupyterlab/codeeditor";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 class DocDispatcher implements CodeMirror.Doc {
-  virtual_editor: VirtualEditorForNotebook;
+  virtual_editor: VirtualCodeMirrorNotebookEditor;
 
-  constructor(virtual_notebook: VirtualEditorForNotebook) {
+  constructor(virtual_notebook: VirtualCodeMirrorNotebookEditor) {
     this.virtual_editor = virtual_notebook;
   }
 
@@ -52,12 +53,16 @@ class DocDispatcher implements CodeMirror.Doc {
   }
 }
 
-export class VirtualEditorForNotebook extends VirtualCodeMirrorEditor {
+export class VirtualCodeMirrorNotebookEditor extends VirtualCodeMirrorEditor {
   cell_to_corresponding_source_line: Map<Cell, number>;
   cm_editor_to_cell: Map<CodeMirror.Editor, Cell>;
   has_cells = true;
 
-  private _proxy: VirtualEditorForNotebook;
+  find_ce_editor(cm_editor: CodeMirror.Editor): CodeEditor.IEditor {
+    return this.cm_editor_to_cell.get(cm_editor).editor;
+  }
+
+  private _proxy: VirtualCodeMirrorNotebookEditor;
 
   constructor(
     public notebook: Notebook,
@@ -83,7 +88,7 @@ export class VirtualEditorForNotebook extends VirtualCodeMirrorEditor {
     this.language = language;
     this._proxy = new Proxy(this, {
       get: function (
-        target: VirtualEditorForNotebook,
+        target: VirtualCodeMirrorNotebookEditor,
         prop: keyof CodeMirror.Editor,
         receiver: any
       ) {
@@ -131,7 +136,7 @@ export class VirtualEditorForNotebook extends VirtualCodeMirrorEditor {
     } as IRootPosition;
   }
 
-  public transform_editor_to_root(
+  public _transform_editor_to_root(
     cm_editor: CodeMirror.Editor,
     position: IEditorPosition
   ): IRootPosition {
