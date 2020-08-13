@@ -13,7 +13,7 @@ describe('Rename', () => {
   describe('Works with VirtualFileEditor', () => {
     let feature: Rename;
 
-    beforeEach(() => (feature = env.init_feature(Rename)));
+    beforeEach(() => (feature = env.init_integration(Rename)));
     afterEach(() => env.dispose_feature(feature));
 
     PageConfig.setOption('rootUri', 'file://');
@@ -39,7 +39,7 @@ describe('Rename', () => {
 
       await env.virtual_editor.update_documents();
 
-      expect(feature.status_message.message).to.be.equal('Renamed a variable');
+      expect(env.status_message.message).to.be.equal('Renamed a variable');
       expect(main_document.value).to.be.equal('y = 1\n');
     });
   });

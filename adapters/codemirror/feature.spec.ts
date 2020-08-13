@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import { LSPConnection } from '../../connection';
 import {
-  IJupyterLabComponentsManager,
   StatusMessage
 } from '../jupyterlab/jl_adapter';
 import {
@@ -22,6 +21,9 @@ import { NotebookModel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 import { EditorAdapter } from "../editor_adapter";
+import { IVirtualEditor } from "../../virtual/editor";
+import { CodeEditor } from "@jupyterlab/codeeditor";
+import IEditor = CodeEditor.IEditor;
 
 const js_fib_code = `function fib(n) {
   return n<2?n:fib(n-1)+fib(n-2);
@@ -106,12 +108,9 @@ describe('Feature', () => {
     }
     let connection: LSPConnection;
 
-    let dummy_components_manager: IJupyterLabComponentsManager;
-
     function init_feature(environment: FeatureTestEnvironment) {
       // TODO: instead, make feature args an interface and this func
       //  return the object obeying the interface
-      dummy_components_manager = environment.create_dummy_components();
       let virtual_editor = environment.virtual_editor;
 
       return new EditApplyingFeature({
@@ -119,8 +118,8 @@ describe('Feature', () => {
         virtual_editor: virtual_editor,
         virtual_document: virtual_editor.virtual_document,
         connection: connection,
-        status_message: new StatusMessage()
-        // settings: new DummySettings()
+        status_message: new StatusMessage(),
+        settings: null
       });
     }
 
@@ -131,13 +130,12 @@ describe('Feature', () => {
       return new EditorAdapter(
         environment.virtual_editor,
         environment.virtual_editor.virtual_document,
-        dummy_components_manager,
         [feature]
       );
     }
 
     describe('editing in FileEditor', () => {
-      let adapter: EditorAdapter;
+      let adapter: EditorAdapter<IVirtualEditor<IEditor>>;
       let feature: EditApplyingFeature;
       let environment: FileEditorFeatureTestEnvironment;
 
@@ -200,7 +198,7 @@ describe('Feature', () => {
     });
 
     describe('editing in Notebook', () => {
-      let adapter: EditorAdapter;
+      let adapter: EditorAdapter<IVirtualEditor<IEditor>>;
       let feature: EditApplyingFeature;
       let environment: NotebookFeatureTestEnvironment;
 

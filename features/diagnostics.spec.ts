@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { TextMarker } from 'codemirror';
 import {
-  Diagnostics,
+  DiagnosticsCM,
   diagnostics_panel,
   message_without_code
 } from './diagnostics';
@@ -19,14 +19,14 @@ import { foreign_code_extractors } from '../extractors/defaults';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 
 describe('Diagnostics', () => {
-  let feature: Diagnostics;
+  let feature: DiagnosticsCM;
 
   describe('FileEditor integration', () => {
     let env: FileEditorFeatureTestEnvironment;
 
     beforeEach(() => {
       env = new FileEditorFeatureTestEnvironment();
-      feature = env.init_feature(Diagnostics);
+      feature = env.init_integration(DiagnosticsCM);
     });
     afterEach(() => {
       env.dispose();
@@ -76,7 +76,7 @@ describe('Diagnostics', () => {
         language_specific_overrides,
         foreign_code_extractors
       );
-      feature = env.init_feature(Diagnostics);
+      feature = env.init_integration(DiagnosticsCM);
     });
     afterEach(() => {
       env.dispose();
@@ -189,8 +189,8 @@ describe('Diagnostics', () => {
       expect(document.foreign_documents.size).to.be.equal(1);
       let foreign_document = document.foreign_documents.values().next().value;
 
-      let foreign_feature: Diagnostics = env.init_feature(
-        Diagnostics,
+      let foreign_feature: DiagnosticsCM = env.init_integration(
+        DiagnosticsCM,
         true,
         foreign_document
       );

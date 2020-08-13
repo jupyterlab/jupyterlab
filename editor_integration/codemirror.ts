@@ -1,5 +1,4 @@
 import {
-  IFeatureCommand,
   FeatureEditorIntegration,
   IEditorIntegrationOptions, FeatureSettings
 } from '../feature';
@@ -469,9 +468,6 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
   }
 }
 
-export type ILSPFeatureConstructor = {
-  // TODO: ILSPFeatureOptions
-  new (...args: any[]): CodeMirrorIntegration;
-
-  commands: Array<IFeatureCommand>;
+export type CodeMirrorIntegrationConstructor = {
+  new (options: IEditorIntegrationOptions): CodeMirrorIntegration;
 };

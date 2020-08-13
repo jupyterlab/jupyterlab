@@ -10,11 +10,16 @@ import * as CodeMirror from 'codemirror';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
 import { MockLanguageServerManager } from '../adapters/codemirror/testutils';
+import { CodeEditor } from "@jupyterlab/codeeditor";
 
 class VirtualEditorImplementation extends VirtualCodeMirrorEditor {
   private cm_editor: CodeMirror.Editor;
 
   get_cm_editor(position: IRootPosition): CodeMirror.Editor {
+    return undefined;
+  }
+
+  find_ce_editor(cm_editor: CodeMirror.Editor): CodeEditor.IEditor {
     return undefined;
   }
 

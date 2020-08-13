@@ -2,13 +2,11 @@ import {
   CodeMirrorEditor,
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
-import { VirtualCodeMirrorEditor } from '../../virtual/editor';
+import { IVirtualEditor, VirtualCodeMirrorEditor } from '../../virtual/editor';
 import { LSPConnection } from '../../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualCodeMirrorFileEditor } from '../../virtual/editors/file_editor';
-import { FreeTooltip } from '../../components/free_tooltip';
 import {
-  IJupyterLabComponentsManager,
   StatusMessage
 } from '../jupyterlab/jl_adapter';
 import { VirtualCodeMirrorNotebookEditor } from '../../virtual/editors/notebook';
@@ -24,10 +22,10 @@ import { DocumentConnectionManager } from '../../connection_manager';
 import createNotebook = NBTestUtils.createNotebook;
 import {
   CodeMirrorIntegration,
-  IFeatureSettings,
-  ILSPFeatureConstructor
+  CodeMirrorIntegrationConstructor
 } from '../../editor_integration/codemirror';
 import { EditorAdapter } from "../editor_adapter";
+import IEditor = CodeEditor.IEditor;
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
@@ -52,6 +50,7 @@ export abstract class FeatureTestEnvironment
   implements IFeatureTestEnvironment {
   host: HTMLElement;
   virtual_editor: VirtualCodeMirrorEditor;
+  status_message: StatusMessage;
   private connections: Map<CodeMirrorIntegration, LSPConnection>;
 
   protected constructor(
@@ -66,23 +65,25 @@ export abstract class FeatureTestEnvironment
 
   init() {
     this.virtual_editor = this.create_virtual_editor();
+    this.status_message = new StatusMessage();
   }
 
   abstract create_virtual_editor(): VirtualCodeMirrorEditor;
 
-  public init_feature<T extends CodeMirrorIntegration>(
-    feature_type: ILSPFeatureConstructor,
+  public init_integration<T extends CodeMirrorIntegration>(
+    integration_type: CodeMirrorIntegrationConstructor,
     register = true,
     document: VirtualDocument = null
   ): T {
-    let dummy_components_manager = this.create_dummy_components();
     let connection = this.create_dummy_connection();
-    const feature = new feature_type(
-      this.virtual_editor,
-      document ? document : this.virtual_editor.virtual_document,
-      connection,
-      dummy_components_manager,
-      new StatusMessage()
+    const feature = new integration_type({
+        feature: null,
+        virtual_editor: this.virtual_editor,
+        virtual_document: document ? document : this.virtual_editor.virtual_document,
+        connection: connection,
+        status_message: this.status_message,
+        settings: null
+      }
     );
     this.connections.set(feature as CodeMirrorIntegration, connection);
 
@@ -106,25 +107,7 @@ export abstract class FeatureTestEnvironment
       rootUri: 'file:///unit-test'
     });
   }
-
-  public create_dummy_components(): IJupyterLabComponentsManager {
-    return {
-      invoke_completer: () => {
-        // nothing yet
-      },
-      create_tooltip: () => {
-        return {} as FreeTooltip;
-      },
-      remove_tooltip: () => {
-        // nothing yet
-      },
-      isDisposed: false,
-      dispose: () => {
-        // nothing yet
-      }
-    };
-  }
-
+  
   dispose(): void {
     document.body.removeChild(this.host);
   }
@@ -162,7 +145,7 @@ export class FileEditorFeatureTestEnvironment extends FeatureTestEnvironment {
       this.language,
       this.file_extension,
       this.path,
-      this.ce_editor.editor
+      this.ce_editor
     );
   }
 
@@ -270,7 +253,7 @@ export function getCellsJSON(notebook: Notebook) {
 
 export async function synchronize_content(
   environment: FeatureTestEnvironment,
-  adapter: EditorAdapter
+  adapter: EditorAdapter<IVirtualEditor<IEditor>>
 ) {
   await environment.virtual_editor.update_documents();
   try {
@@ -280,12 +263,3 @@ export async function synchronize_content(
   }
 }
 
-export class DummySettings implements IFeatureSettings {
-  get(setting: string): any {
-    return null;
-  }
-
-  set(setting: string, value: any): void {
-    return;
-  }
-}

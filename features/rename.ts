@@ -1,6 +1,6 @@
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { InputDialog } from '@jupyterlab/apputils';
-import { Diagnostics } from './diagnostics';
+import { DiagnosticsCM } from './diagnostics';
 import { VirtualCodeMirrorEditor } from '../virtual/editor';
 import { VirtualCodeMirrorNotebookEditor } from '../virtual/editors/notebook';
 import { FeatureSettings, IFeatureCommand } from '../feature';
@@ -32,7 +32,7 @@ export class Rename extends CodeMirrorIntegration {
           let status = '';
 
           if (features.has('Diagnostics')) {
-            let diagnostics_feature = features.get('Diagnostics') as Diagnostics;
+            let diagnostics_feature = features.get('Diagnostics') as DiagnosticsCM;
 
             status = ux_workaround_for_rope_limitation(
               error,
@@ -115,7 +115,7 @@ export class Rename extends CodeMirrorIntegration {
  */
 function ux_workaround_for_rope_limitation(
   error: any,
-  diagnostics_feature: Diagnostics,
+  diagnostics_feature: DiagnosticsCM,
   editor: VirtualCodeMirrorEditor
 ): string {
   let has_index_error = false;

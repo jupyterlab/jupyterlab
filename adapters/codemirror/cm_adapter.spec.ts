@@ -1,12 +1,11 @@
 import { expect } from 'chai';
 import { LSPConnection } from '../../connection';
 import {
-  IJupyterLabComponentsManager,
   StatusMessage
 } from '../jupyterlab/jl_adapter';
 import { IRootPosition } from '../../positioning';
 import * as CodeMirror from 'codemirror';
-import { DummySettings, FileEditorFeatureTestEnvironment } from './testutils';
+import { FileEditorFeatureTestEnvironment } from './testutils';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 import { EditorAdapter } from "../editor_adapter";
 
@@ -17,7 +16,6 @@ describe('CodeMirrorAdapter', () => {
   afterEach(() => env.dispose());
 
   describe('Works with VirtualFileEditor', () => {
-    let dummy_components_manager: IJupyterLabComponentsManager;
     let connection: LSPConnection;
 
     it('updates on change', async () => {
@@ -38,22 +36,20 @@ describe('CodeMirrorAdapter', () => {
       }
 
       connection = env.create_dummy_connection();
-      dummy_components_manager = env.create_dummy_components();
       let virtual_editor = env.virtual_editor;
 
-      let feature = new UpdateReceivingFeature(
+      let feature = new UpdateReceivingFeature({
+        feature: null,
         virtual_editor,
-        virtual_editor.virtual_document,
-        connection,
-        dummy_components_manager,
-        new StatusMessage(),
-        new DummySettings()
-      );
+        virtual_document: virtual_editor.virtual_document,
+        connection: connection,
+        status_message: new StatusMessage(),
+        settings: null
+      })
 
       let adapter = new EditorAdapter(
         virtual_editor,
         virtual_editor.virtual_document,
-        dummy_components_manager,
         [feature]
       );
       env.ce_editor.model.value.text = 'f';
