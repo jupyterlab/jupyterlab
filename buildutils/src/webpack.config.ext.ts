@@ -53,6 +53,10 @@ if (data.jupyterlab.mimeExtension === true) {
   );
 }
 
+if (data.style) {
+  exposes['./style'] = path.join(packagePath, data.style);
+}
+
 const coreData = require(path.join(corePath, 'package.json'));
 
 const shared: any = {};
@@ -138,7 +142,7 @@ module.exports = [
     output: {
       filename: '[name].[chunkhash].js',
       path: outputPath,
-      publicPath: `lab/extensions/${data.name}/`
+      publicPath: `/lab/extensions/${data.name}/`
     },
     module: {
       rules: [{ test: /\.html$/, use: 'file-loader' }]

@@ -18,7 +18,7 @@ function loadScript(url) {
   });
 }
 
-async function loadComponent(url, scope, module) {
+async function loadComponent(url, scope) {
   await loadScript(url);
 
   // From MIT-licensed https://github.com/module-federation/module-federation-examples/blob/af043acd6be1718ee195b2511adf6011fba4233c/advanced-api/dynamic-remotes/app1/src/App.js#L6-L12
@@ -26,7 +26,9 @@ async function loadComponent(url, scope, module) {
   const container = window._JUPYTERLAB[scope];
   // Initialize the container, it may provide shared modules and may need ours
   await container.init(__webpack_share_scopes__.default);
+}
 
+async function createModule(scope, module) {
   const factory = await window._JUPYTERLAB[scope].get(module);
   const Module = factory();
   return Module;
@@ -48,29 +50,29 @@ async function main() {
   const extension_data = JSON.parse(
     PageConfig.getOption('dynamic_extensions')
   );
-  const mime_extension_data = JSON.parse(
-    PageConfig.getOption('dynamic_mime_extensions')
-  );
+
+  const dynamicPlugins = [];
+  const dynamicMimePlugins = [];
+  const dynamicStyles = [];
 
   // Get dynamic plugins
   // TODO: deconflict these with builtins?
-  const dynamicPromises = extension_data.map(data =>
-    loadComponent(
+  const componentLoadPromises = extension_data.map(async (data) => {
+    await loadComponent(
       `${URLExt.join(PageConfig.getOption('fullLabextensionsUrl'), data.name, 'remoteEntry.js')}`,
-      data.name,
-      data.module
+      data.name
     )
-  );
-  const dynamicPlugins = await Promise.all(dynamicPromises);
-
-  const dynamicMimePromises = mime_extension_data.map(data =>
-    loadComponent(
-      `${URLExt.join(PageConfig.getOption('fullLabextensionsUrl'), data.name, 'remoteEntry.js')}`,
-      data.name,
-      data.module
-    )
-  );
-  const dynamicMimePlugins = await Promise.all(dynamicMimePromises);
+    if (data.plugin) {
+      dynamicPlugins.push(await createModule(data.name, data.plugin));
+    }
+    if (data.mimePlugin) {
+      dynamicMimePlugins.push(await createModule(data.name, data.mimePlugin));
+    }
+    if (data.style) {
+      dynamicStyles.push(await createModule(data.name, data.style));
+    }
+  });
+  await Promise.all(componentLoadPromises);
 
   // Handle the registered mime extensions.
   var mimeExtensions = [];

@@ -50,11 +50,13 @@ class ExampleApp(LabServerApp):
         web_app.settings.setdefault('terminals_available', True)
 
         # Add labextension metadata
-        dynamic_extensions = page_config['dynamic_extensions'] = []
-        dynamic_mime_extension = page_config['dynamic_mime_extensions'] = []
-        name = "@jupyterlab/example-federated-md"
-        dynamic_extensions.append(dict(name=name, module="./extension"))
-        dynamic_mime_extension.append(dict(name=name, module="./mimeExtension"))
+        extension = {
+            'name': '@jupyterlab/example-federated-md',
+            'plugin': './extension',
+            'mimePlugin': './mimeExtension',
+            'style': './style'
+        }
+        page_config['dynamic_extensions'] = [extension];
 
         super().initialize_handlers()
 
