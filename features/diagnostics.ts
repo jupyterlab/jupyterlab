@@ -3,7 +3,7 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import { Menu } from '@lumino/widgets';
 import { PositionConverter } from '../converter';
 import { IVirtualPosition, IEditorPosition } from '../positioning';
-import { diagnosticSeverityNames } from '../lsp';
+import { DiagnosticSeverity, diagnosticSeverityNames } from '../lsp';
 import { DefaultMap, uris_equal } from '../utils';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import {
@@ -15,11 +15,14 @@ import {
 } from './diagnostics_listing';
 import { VirtualDocument } from '../virtual/document';
 import { VirtualCodeMirrorEditor } from '../virtual/editor';
-import { IFeatureCommand } from '../feature';
+import { FeatureSettings, IFeatureCommand } from '../feature';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
+import { LSPDiagnosticsSettings } from "../_diagnostics";
+import { PLUGIN_ID } from "../index";
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
+import { ILSPFeatureManager } from "../tokens";
+import { ISettingRegistry } from "@jupyterlab/settingregistry";
 
-// TODO: settings
-const default_severity = 2;
 
 class DiagnosticsPanel {
   private _content: DiagnosticsListing = null;
@@ -69,14 +72,15 @@ export const diagnostics_databases = new WeakMap<
 
 const CMD_COLUMN_VISIBILITY = 'lsp-set-column-visibility';
 
-export class Diagnostics extends CodeMirrorIntegration {
+export class DiagnosticsCM extends CodeMirrorIntegration {
   name = 'Diagnostics';
+  settings: FeatureSettings<LSPDiagnosticsSettings>
 
   static commands: Array<IFeatureCommand> = [
     {
       id: 'show-diagnostics-panel',
       execute: ({ app, features, adapter }) => {
-        let diagnostics_feature = features.get('Diagnostics') as Diagnostics;
+        let diagnostics_feature = features.get('Diagnostics') as DiagnosticsCM;
         diagnostics_feature.switchDiagnosticsPanelSource();
 
         let panel_widget = diagnostics_panel.widget;
@@ -217,6 +221,10 @@ export class Diagnostics extends CodeMirrorIntegration {
     return map;
   }
 
+  get defaultSeverity(): lsProtocol.DiagnosticSeverity {
+    return DiagnosticSeverity[this.settings.composite.defaultSeverity];
+  }
+
   public handleDiagnostic = (response: lsProtocol.PublishDiagnosticsParams) => {
     if (!uris_equal(response.uri, this.virtual_document.document_info.uri)) {
       return;
@@ -237,8 +245,13 @@ export class Diagnostics extends CodeMirrorIntegration {
 
       // TODO: test case for severity class always being set, even if diagnostic has no severity
 
+      const ignoredDiagnosticsCodes = new Set(this.settings.composite.ignoreCodes);
+
       let diagnostics_by_range = this.collapse_overlapping_diagnostics(
-        response.diagnostics
+        response.diagnostics.filter(diagnostic => {
+          // remove ignored diagnostics
+          return !ignoredDiagnosticsCodes.has(diagnostic.code.toString())
+        })
       );
 
       diagnostics_by_range.forEach(
@@ -297,7 +310,7 @@ export class Diagnostics extends CodeMirrorIntegration {
           }
 
           let highest_severity_code = diagnostics
-            .map(diagnostic => diagnostic.severity || default_severity)
+            .map(diagnostic => diagnostic.severity || this.defaultSeverity)
             .sort()[0];
 
           const severity = diagnosticSeverityNames[highest_severity_code];
@@ -429,3 +442,31 @@ export function message_without_code(diagnostic: lsProtocol.Diagnostic) {
   }
   return message;
 }
+
+const FEATURE_ID = PLUGIN_ID + ':diagnostics';
+
+export const DIAGNOSTICS_PLUGIN: JupyterFrontEndPlugin<void> = {
+  id: FEATURE_ID,
+  requires: [
+    ILSPFeatureManager,
+    ISettingRegistry,
+  ],
+  activate: (
+    app: JupyterFrontEnd,
+    featureManager: ILSPFeatureManager,
+    settingRegistry: ISettingRegistry,
+  ) => {
+    const settings = new FeatureSettings(settingRegistry, FEATURE_ID)
+
+    featureManager.register({
+      feature: {
+        editorIntegrationFactory: new Map([
+          ['CodeMirrorEditor', DiagnosticsCM]
+        ]),
+        id: FEATURE_ID,
+        name: 'LSP Diagnostics',
+        settings: settings
+      }
+    });
+  }
+};

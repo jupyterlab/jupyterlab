@@ -31,6 +31,7 @@ import IPaths = JupyterFrontEnd.IPaths;
 import { HOVER_PLUGIN } from "./features/hover";
 import { RENAME_PLUGIN } from "./features/rename";
 import { HIGHLIGHTS_PLUGIN } from "./features/highlights";
+import { DIAGNOSTICS_PLUGIN } from "./features/diagnostics";
 
 export const PLUGIN_ID = '@krassowski/jupyterlab-lsp';
 
@@ -335,10 +336,8 @@ const default_features: JupyterFrontEndPlugin<void>[] = [
   SIGNATURE_PLUGIN,
   HOVER_PLUGIN,
   RENAME_PLUGIN,
-  HIGHLIGHTS_PLUGIN
-  /*
-    Diagnostics,
-   */
+  HIGHLIGHTS_PLUGIN,
+  DIAGNOSTICS_PLUGIN
 ];
 
 const plugins: JupyterFrontEndPlugin<any>[] = [

@@ -1,4 +1,4 @@
-namespace DiagnosticSeverity {
+export namespace DiagnosticSeverity {
   export const Error = 1;
   export const Warning = 2;
   export const Information = 3;
