@@ -1,10 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
-
-import { JSONObject } from '@lumino/coreutils';
-
 import { Widget } from '@lumino/widgets';
 
 /**
