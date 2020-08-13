@@ -1,15 +1,12 @@
 import * as lsProtocol from 'vscode-languageserver-protocol';
-import {
-  CodeMirrorLSPFeature,
-  IEditOutcome,
-  IFeatureCommand
-} from '../feature';
 import { InputDialog } from '@jupyterlab/apputils';
 import { Diagnostics } from './diagnostics';
-import { VirtualEditor } from '../../../virtual/editor';
-import { VirtualEditorForNotebook } from '../../../virtual/editors/notebook';
+import { VirtualCodeMirrorEditor } from '../virtual/editor';
+import { VirtualEditorForNotebook } from '../virtual/editors/notebook';
+import { IFeatureCommand } from "../feature";
+import { CodeMirrorIntegration, IEditOutcome } from "../editor_integration/codemirror";
 
-export class Rename extends CodeMirrorLSPFeature {
+export class Rename extends CodeMirrorIntegration {
   name = 'Rename';
   static commands: Array<IFeatureCommand> = [
     {
@@ -106,7 +103,7 @@ export class Rename extends CodeMirrorLSPFeature {
 function ux_workaround_for_rope_limitation(
   error: any,
   diagnostics_feature: Diagnostics,
-  editor: VirtualEditor
+  editor: VirtualCodeMirrorEditor
 ): string {
   let has_index_error = false;
   try {

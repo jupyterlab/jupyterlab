@@ -11,11 +11,11 @@ import {
   NotebookFeatureTestEnvironment,
   set_notebook_content,
   showAllCells
-} from '../testutils';
+} from '../adapters/codemirror/testutils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { is_equal } from '../../../positioning';
-import { language_specific_overrides } from '../../../magics/defaults';
-import { foreign_code_extractors } from '../../../extractors/defaults';
+import { is_equal } from '../positioning';
+import { language_specific_overrides } from '../magics/defaults';
+import { foreign_code_extractors } from '../extractors/defaults';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 
 describe('Diagnostics', () => {

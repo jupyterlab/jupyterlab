@@ -1,33 +1,20 @@
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorAdapter } from '../codemirror/cm_adapter';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { CodeJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/jumper';
 import { PositionConverter } from '../../converter';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
-
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { FreeTooltip } from './components/free_tooltip';
 import { Widget } from '@lumino/widgets';
-import { VirtualEditor } from '../../virtual/editor';
+import { VirtualCodeMirrorEditor } from '../../virtual/editor';
 import { VirtualDocument, IForeignContext } from '../../virtual/document';
 import { Signal } from '@lumino/signaling';
 import { IEditorPosition, IRootPosition } from '../../positioning';
 import { LSPConnection } from '../../connection';
 import { LSPConnector } from './components/completion';
 import { CompletionTriggerKind } from '../../lsp';
-import { Completion } from '../codemirror/features/completion';
-import { Diagnostics } from '../codemirror/features/diagnostics';
-import { Highlights } from '../codemirror/features/highlights';
-import { Hover } from '../codemirror/features/hover';
-import { Signature } from '../codemirror/features/signature';
-import {
-  ILSPFeatureConstructor,
-  ILSPFeature,
-  IFeatureSettings
-} from '../codemirror/feature';
-import { JumpToDefinition } from '../codemirror/features/jump_to';
 import { ICommandContext } from '../../command_manager';
 import { JSONObject } from '@lumino/coreutils';
 import {
@@ -35,9 +22,11 @@ import {
   IDocumentConnectionData,
   ISocketConnectionOptions
 } from '../../connection_manager';
-import { Rename } from '../codemirror/features/rename';
 import { LSPExtension } from '../../index';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IFeatureSettings } from "../../editor_integration/codemirror";
+import { FeatureEditorIntegration } from "../../feature";
+import IEditor = CodeEditor.IEditor;
 
 class LabFeatureSettings implements IFeatureSettings {
   private key = 'features';
@@ -68,16 +57,6 @@ class LabFeatureSettings implements IFeatureSettings {
   }
 }
 
-export const lsp_features: Array<ILSPFeatureConstructor> = [
-  Completion,
-  Diagnostics,
-  Highlights,
-  Hover,
-  Signature,
-  JumpToDefinition,
-  Rename
-];
-
 export interface IJupyterLabComponentsManager {
   invoke_completer: (kind: CompletionTriggerKind) => void;
   create_tooltip: (
@@ -86,7 +65,6 @@ export interface IJupyterLabComponentsManager {
     position: IEditorPosition
   ) => FreeTooltip;
   remove_tooltip: () => void;
-  jumper: CodeJumper;
   dispose(): void;
   isDisposed: boolean;
 }
@@ -141,7 +119,6 @@ const mime_type_language_map: JSONObject = {
  */
 export abstract class JupyterLabWidgetAdapter
   implements IJupyterLabComponentsManager {
-  jumper: CodeJumper;
   protected adapters: Map<VirtualDocument.id_path, CodeMirrorAdapter>;
   private readonly invoke_command: string;
   protected document_connected: Signal<
@@ -243,7 +220,7 @@ export abstract class JupyterLabWidgetAdapter
     this.isDisposed = true;
   }
 
-  abstract virtual_editor: VirtualEditor;
+  abstract virtual_editor: VirtualCodeMirrorEditor;
   abstract get document_path(): string;
   abstract get mime_type(): string;
   protected abstract connect_completion(): void;
@@ -514,17 +491,18 @@ export abstract class JupyterLabWidgetAdapter
     virtual_document: VirtualDocument,
     connection: LSPConnection
   ): CodeMirrorAdapter {
-    let adapter_features = new Array<ILSPFeature>();
-    for (let feature_type of lsp_features) {
-      let feature = new feature_type(
-        this.virtual_editor,
-        virtual_document,
-        connection,
-        this,
-        this.status_message,
-        new LabFeatureSettings(this.extension, feature_type.name)
-      );
-      adapter_features.push(feature);
+    let adapter_features = new Array<FeatureEditorIntegration<IEditor>>();
+    for (let feature of this.extension.feature_manager.features) {
+      let featureEditorIntegrationConstructor = feature.editorIntegrationFactory.get(this.virtual_editor.editor_name)
+      let integration = new featureEditorIntegrationConstructor({
+        feature: feature,
+        virtual_editor: this.virtual_editor,
+        virtual_document: virtual_document,
+        connection: connection,
+        status_message: this.status_message,
+        //settings: new LabFeatureSettings(this.extension, feature_type.name)
+      });
+      adapter_features.push(integration);
     }
 
     let adapter = new CodeMirrorAdapter(

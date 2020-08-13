@@ -3,17 +3,17 @@ import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
 import { caretDownIcon, caretUpIcon, LabIcon } from '@jupyterlab/ui-components';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
-import { IEditorPosition } from '../../../positioning';
-import { VirtualEditor } from '../../../virtual/editor';
-import { VirtualEditorForNotebook } from '../../../virtual/editors/notebook';
-import { VirtualDocument } from '../../../virtual/document';
+import { IEditorPosition } from '../positioning';
+import { VirtualCodeMirrorEditor } from '../virtual/editor';
+import { VirtualEditorForNotebook } from '../virtual/editors/notebook';
+import { VirtualDocument } from '../virtual/document';
 
-import '../../../../style/diagnostics_listing.css';
+import '../../style/diagnostics_listing.css';
 import { Cell } from '@jupyterlab/cells';
-import { diagnosticSeverityNames } from '../../../lsp';
+import { diagnosticSeverityNames } from '../lsp';
 import { message_without_code } from './diagnostics';
 
-import diagnosticsSvg from '../../../../style/icons/diagnostics.svg';
+import diagnosticsSvg from '../../style/icons/diagnostics.svg';
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
@@ -54,7 +54,7 @@ function focus_on(node: HTMLElement) {
 
 function DocumentLocator(props: {
   document: VirtualDocument;
-  editor: VirtualEditor;
+  editor: VirtualCodeMirrorEditor;
 }) {
   let { document, editor } = props;
   let ancestry = document.ancestry;
@@ -126,7 +126,7 @@ interface IDiagnosticsRow {
 
 interface IListingContext {
   db: DiagnosticsDatabase;
-  editor: VirtualEditor;
+  editor: VirtualCodeMirrorEditor;
 }
 
 interface IColumnOptions {
@@ -365,7 +365,7 @@ export namespace DiagnosticsListing {
    */
   export class Model extends VDomModel {
     diagnostics: DiagnosticsDatabase;
-    virtual_editor: VirtualEditor;
+    virtual_editor: VirtualCodeMirrorEditor;
 
     constructor() {
       super();

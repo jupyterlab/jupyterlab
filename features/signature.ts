@@ -1,9 +1,9 @@
 import * as lsProtocol from 'vscode-languageserver-protocol';
-import { IRootPosition } from '../../../positioning';
+import { IRootPosition } from '../positioning';
 import * as CodeMirror from 'codemirror';
-import { CodeMirrorLSPFeature } from '../feature';
+import { CodeMirrorIntegration } from "../editor_integration/codemirror";
 
-export class Signature extends CodeMirrorLSPFeature {
+export class Signature extends CodeMirrorIntegration {
   name = 'Signature';
   protected signature_character: IRootPosition;
   protected _signatureCharacters: string[];

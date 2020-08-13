@@ -1,12 +1,13 @@
 import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
-import { documentHighlightKindNames } from '../../../lsp';
-import { VirtualDocument } from '../../../virtual/document';
-import { IRootPosition } from '../../../positioning';
-import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
-import { uris_equal } from '../../../utils';
+import { documentHighlightKindNames } from '../lsp';
+import { VirtualDocument } from '../virtual/document';
+import { IRootPosition } from '../positioning';
+import { uris_equal } from '../utils';
+import { IFeatureCommand } from "../feature";
+import { CodeMirrorIntegration } from "../editor_integration/codemirror";
 
-export class Highlights extends CodeMirrorLSPFeature {
+export class Highlights extends CodeMirrorIntegration {
   name = 'Highlights';
   protected highlight_markers: CodeMirror.TextMarker[] = [];
 

@@ -1,8 +1,8 @@
-import { CompletionTriggerKind } from '../../../lsp';
+import { CompletionTriggerKind } from '../lsp';
 import * as CodeMirror from 'codemirror';
-import { CodeMirrorLSPFeature } from '../feature';
+import { CodeMirrorIntegration } from "../editor_integration/codemirror";
 
-export class Completion extends CodeMirrorLSPFeature {
+export class Completion extends CodeMirrorIntegration {
   name = 'Completion';
   private _completionCharacters: string[];
 

@@ -2,12 +2,7 @@ import {
   CodeMirrorEditor,
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
-import { VirtualEditor } from '../../virtual/editor';
-import {
-  CodeMirrorLSPFeature,
-  IFeatureSettings,
-  ILSPFeatureConstructor
-} from './feature';
+import { VirtualCodeMirrorEditor } from '../../virtual/editor';
 import { LSPConnection } from '../../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualFileEditor } from '../../virtual/editors/file_editor';
@@ -28,10 +23,11 @@ import { VirtualDocument } from '../../virtual/document';
 import { LanguageServerManager } from '../../manager';
 import { DocumentConnectionManager } from '../../connection_manager';
 import createNotebook = NBTestUtils.createNotebook;
+import { CodeMirrorIntegration, IFeatureSettings, ILSPFeatureConstructor } from "../../editor_integration/codemirror";
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
-  virtual_editor: VirtualEditor;
+  virtual_editor: VirtualCodeMirrorEditor;
 
   dispose(): void;
 }
@@ -51,8 +47,8 @@ export class MockLanguageServerManager extends LanguageServerManager {
 export abstract class FeatureTestEnvironment
   implements IFeatureTestEnvironment {
   host: HTMLElement;
-  virtual_editor: VirtualEditor;
-  private connections: Map<CodeMirrorLSPFeature, LSPConnection>;
+  virtual_editor: VirtualCodeMirrorEditor;
+  private connections: Map<CodeMirrorIntegration, LSPConnection>;
 
   protected constructor(
     public language: () => string,
@@ -68,9 +64,9 @@ export abstract class FeatureTestEnvironment
     this.virtual_editor = this.create_virtual_editor();
   }
 
-  abstract create_virtual_editor(): VirtualEditor;
+  abstract create_virtual_editor(): VirtualCodeMirrorEditor;
 
-  public init_feature<T extends CodeMirrorLSPFeature>(
+  public init_feature<T extends CodeMirrorIntegration>(
     feature_type: ILSPFeatureConstructor,
     register = true,
     document: VirtualDocument = null
@@ -84,7 +80,7 @@ export abstract class FeatureTestEnvironment
       dummy_components_manager,
       new StatusMessage()
     );
-    this.connections.set(feature as CodeMirrorLSPFeature, connection);
+    this.connections.set(feature as CodeMirrorIntegration, connection);
 
     if (register) {
       feature.register();
@@ -93,7 +89,7 @@ export abstract class FeatureTestEnvironment
     return feature as T;
   }
 
-  public dispose_feature(feature: CodeMirrorLSPFeature) {
+  public dispose_feature(feature: CodeMirrorIntegration) {
     let connection = this.connections.get(feature);
     connection.close();
     feature.is_registered = false;

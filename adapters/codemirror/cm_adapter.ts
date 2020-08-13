@@ -1,22 +1,23 @@
 import * as CodeMirror from 'codemirror';
 import { until_ready } from '../../utils';
-import { VirtualEditor } from '../../virtual/editor';
+import { VirtualCodeMirrorEditor } from '../../virtual/editor';
 import { VirtualDocument } from '../../virtual/document';
 import { IRootPosition } from '../../positioning';
-import { ILSPFeature } from './feature';
 import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
+import { FeatureEditorIntegration } from "../../feature";
+import { CodeMirrorEditor } from "@jupyterlab/codemirror";
 
 export class CodeMirrorAdapter {
-  features: Map<string, ILSPFeature>;
+  features: Map<string, FeatureEditorIntegration<CodeMirrorEditor>>;
   isDisposed = false;
 
   private last_change: CodeMirror.EditorChange;
 
   constructor(
-    protected editor: VirtualEditor,
+    protected editor: VirtualCodeMirrorEditor,
     protected virtual_document: VirtualDocument,
     protected jupyterlab_components: IJupyterLabComponentsManager,
-    features = new Array<ILSPFeature>()
+    features = new Array<FeatureEditorIntegration<CodeMirrorEditor>>()
   ) {
     this.editor.on('change', this.saveChange);
 
@@ -31,7 +32,7 @@ export class CodeMirrorAdapter {
           'was not registered properly'
         );
       }
-      this.features.set(feature.name, feature);
+      this.features.set(feature.feature.id, feature);
     }
   }
 

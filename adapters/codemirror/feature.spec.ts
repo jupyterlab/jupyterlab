@@ -5,7 +5,6 @@ import {
   IJupyterLabComponentsManager,
   StatusMessage
 } from '../jupyterlab/jl_adapter';
-import { CodeMirrorLSPFeature } from './feature';
 import {
   code_cell,
   DummySettings,
@@ -23,6 +22,7 @@ import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
+import { CodeMirrorIntegration } from "../../editor_integration/codemirror";
 
 const js_fib_code = `function fib(n) {
   return n<2?n:fib(n-1)+fib(n-2);
@@ -99,7 +99,7 @@ describe('Feature', () => {
   PageConfig.setOption('rootUri', 'file://');
 
   describe('apply_edit()', () => {
-    class EditApplyingFeature extends CodeMirrorLSPFeature {
+    class EditApplyingFeature extends CodeMirrorIntegration {
       name = 'EditApplyingFeature';
       do_apply_edit(workspaceEdit: lsProtocol.WorkspaceEdit) {
         return this.apply_edit(workspaceEdit);
@@ -127,7 +127,7 @@ describe('Feature', () => {
 
     function init_adapter(
       environment: FeatureTestEnvironment,
-      feature: CodeMirrorLSPFeature
+      feature: CodeMirrorIntegration
     ) {
       return new CodeMirrorAdapter(
         environment.virtual_editor,

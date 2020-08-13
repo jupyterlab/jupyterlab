@@ -3,7 +3,7 @@ import { Cell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { IOverridesRegistry } from '../../magics/overrides';
 import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
-import { VirtualEditor } from '../editor';
+import { VirtualCodeMirrorEditor } from '../editor';
 import * as CodeMirror from 'codemirror';
 import {
   IEditorPosition,
@@ -52,7 +52,7 @@ class DocDispatcher implements CodeMirror.Doc {
   }
 }
 
-export class VirtualEditorForNotebook extends VirtualEditor {
+export class VirtualEditorForNotebook extends VirtualCodeMirrorEditor {
   cell_to_corresponding_source_line: Map<Cell, number>;
   cm_editor_to_cell: Map<CodeMirror.Editor, Cell>;
   has_cells = true;

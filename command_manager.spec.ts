@@ -1,10 +1,10 @@
 import { expect } from 'chai';
 import { ContextCommandManager, ICommandContext } from './command_manager';
 import {
-  CommandEntryPoint,
-  IFeatureCommand
+  CommandEntryPoint
 } from './adapters/codemirror/feature';
 import { JupyterLabWidgetAdapter } from './adapters/jupyterlab/jl_adapter';
+import { IFeatureCommand } from "./feature";
 
 describe('ContextMenuCommandManager', () => {
   class ManagerImplementation extends ContextCommandManager {

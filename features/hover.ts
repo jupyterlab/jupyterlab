@@ -1,18 +1,18 @@
-import { getModifierState, uris_equal } from '../../../utils';
+import { getModifierState, uris_equal } from '../utils';
 import {
   IRootPosition,
   is_equal,
   IVirtualPosition
-} from '../../../positioning';
+} from '../positioning';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
-import { CodeMirrorLSPFeature, IEditorRange } from '../feature';
 import { Debouncer } from '@lumino/polling';
+import { CodeMirrorIntegration, IEditorRange } from "../editor_integration/codemirror";
 
 export type KeyModifier = 'Alt' | 'Control' | 'Shift' | 'Meta' | 'AltGraph';
 const hover_modifier: KeyModifier = 'Control';
 
-export class Hover extends CodeMirrorLSPFeature {
+export class Hover extends CodeMirrorIntegration {
   name = 'Hover';
   protected hover_character: IRootPosition;
   private last_hover_response: lsProtocol.Hover;

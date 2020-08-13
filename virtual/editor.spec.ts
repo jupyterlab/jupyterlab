@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { VirtualEditor } from './editor';
+import { VirtualCodeMirrorEditor } from './editor';
 import { RegExpForeignCodeExtractor } from '../extractors/regexp';
 import {
   IEditorPosition,
@@ -11,7 +11,7 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
 import { MockLanguageServerManager } from '../adapters/codemirror/testutils';
 
-class VirtualEditorImplementation extends VirtualEditor {
+class VirtualEditorImplementation extends VirtualCodeMirrorEditor {
   private cm_editor: CodeMirror.Editor;
 
   get_cm_editor(position: IRootPosition): CodeMirror.Editor {

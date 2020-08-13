@@ -10,7 +10,7 @@ import { completionItemKindNames, CompletionTriggerKind } from '../../../lsp';
 import * as lsProtocol from 'vscode-languageserver-types';
 import { PositionConverter } from '../../../converter';
 import { VirtualDocument } from '../../../virtual/document';
-import { VirtualEditor } from '../../../virtual/editor';
+import { VirtualCodeMirrorEditor } from '../../../virtual/editor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import {
   IEditorPosition,
@@ -21,7 +21,7 @@ import { LSPConnection } from '../../../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 import { kernelIcon } from '@jupyterlab/ui-components';
-import { IFeatureSettings } from '../../codemirror/feature';
+import { IFeatureSettings } from "../../../editor_integration/codemirror";
 
 /**
  * A LSP connector for completion handlers.
@@ -38,7 +38,7 @@ export class LSPConnector
   // signal that this is the new type connector (providing completion items)
   responseType = ICompletionItemsResponseType;
 
-  virtual_editor: VirtualEditor;
+  virtual_editor: VirtualCodeMirrorEditor;
   private trigger_kind: CompletionTriggerKind;
 
   private get suppress_auto_invoke_in(): string[] {
@@ -388,7 +388,7 @@ export namespace LSPConnector {
      * The editor used by the LSP connector.
      */
     editor: CodeEditor.IEditor;
-    virtual_editor: VirtualEditor;
+    virtual_editor: VirtualCodeMirrorEditor;
     /**
      * The connections to be used by the LSP connector.
      */

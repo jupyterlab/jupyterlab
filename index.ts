@@ -9,11 +9,10 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentManager } from '@jupyterlab/docmanager';
+import { Token } from '@lumino/coreutils';
 
 import { LanguageServerManager } from './manager';
 
-import { FileEditorJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/fileeditor';
-import { NotebookJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/notebook';
 
 // TODO: make use of it for jump target selection (requires to be added to package.json)?
 // import 'codemirror/addon/hint/show-hint.css';
@@ -24,9 +23,8 @@ import { ICompletionManager } from '@jupyterlab/completer';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { NotebookAdapter } from './adapters/jupyterlab/notebook';
 import { FileEditorAdapter } from './adapters/jupyterlab/file_editor';
-import { lsp_features } from './adapters/jupyterlab/jl_adapter';
-import { IFeatureCommand } from './adapters/codemirror/feature';
 import {
+  ContextCommandManager,
   file_editor_adapters,
   FileEditorCommandManager,
   notebook_adapters,
@@ -41,15 +39,49 @@ import {
 } from '@jupyterlab/docregistry/lib/registry';
 import { DocumentConnectionManager } from './connection_manager';
 import { TLanguageServerConfigurations } from './tokens';
+import { IFeature } from "./feature";
+import { JUMP_PLUGIN } from "./features/jump_to";
 
-const lsp_commands: Array<IFeatureCommand> = [].concat(
-  ...lsp_features.map(feature => feature.commands)
-);
+
+export interface IFeatureOptions {
+    feature: IFeature;
+    /** ids of the features this feature wants to disable;
+    use it to override the default feature implementations with your custom implementation
+    (e.g. a custom completer from Kite)  */
+    supersedes?: string[];
+}
+
+export interface ILSPFeatureManager {
+  register(options: IFeatureOptions): void;
+}
+
+class FeatureManager implements ILSPFeatureManager{
+
+  features: Array<IFeature> = [];
+  constructor(
+    private command_managers: Array<ContextCommandManager> = []
+  ) {
+
+  }
+
+
+  register(options: IFeatureOptions): void {
+    for (let option of options.supersedes) {
+      this.features = this.features.filter(feature => feature.id != option)
+    }
+    this.features.push(options.feature)
+
+    for (let command_manager of this.command_managers) {
+      command_manager.add(options.feature.commands);
+    }
+  }
+}
 
 export class LSPExtension {
   connection_manager: DocumentConnectionManager;
   language_server_manager: LanguageServerManager;
   settings: ISettingRegistry.ISettings;
+  feature_manager: FeatureManager;
 
   constructor(
     public app: JupyterFrontEnd,
@@ -120,8 +152,7 @@ export class LSPExtension {
       let fileEditor = widget.content;
 
       if (fileEditor.editor instanceof CodeMirrorEditor) {
-        let jumper = new FileEditorJumper(widget, documentManager);
-        let adapter = new FileEditorAdapter(this, widget, jumper);
+        let adapter = new FileEditorAdapter(this, widget);
         file_editor_adapters.set(fileEditor.id, adapter);
 
         const disconnect = () => {
@@ -156,12 +187,10 @@ export class LSPExtension {
       fileEditorTracker,
       'file_editor'
     );
-    command_manager.add(lsp_commands);
 
     const connect_notebook = (widget: NotebookPanel) => {
       // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
-      let jumper = new NotebookJumper(widget, documentManager);
-      let adapter = new NotebookAdapter(this, widget, jumper);
+      let adapter = new NotebookAdapter(this, widget);
       notebook_adapters.set(widget.id, adapter);
 
       const disconnect = () => {
@@ -204,10 +233,11 @@ export class LSPExtension {
       10 + Number.EPSILON,
       // the group size is increased by one to account for separator,
       // and by another one to prevent exceeding 11th rank by epsilon.
-      lsp_commands.length + 2
+      // TODO hardcoded space for 2 commands only!
+      2 + 2
     );
     notebook_command_manager.add_context_separator(0);
-    notebook_command_manager.add(lsp_commands);
+    this.feature_manager = new FeatureManager([command_manager, notebook_command_manager]);
 
     const updateOptions = (settings: ISettingRegistry.ISettings) => {
       const options = settings.composite;
@@ -239,10 +269,15 @@ export class LSPExtension {
   }
 }
 
+const PLUGIN_ID = '@krassowski/jupyterlab-lsp'
+
+export const ILSPFeatureManager = new Token<ILSPFeatureManager>(PLUGIN_ID);
+
+
 /**
  * The plugin registration information.
  */
-const plugin: JupyterFrontEndPlugin<void> = {
+const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
   id: '@krassowski/jupyterlab-lsp:plugin',
   requires: [
     IEditorTracker,
@@ -257,7 +292,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     IStatusBar
   ],
   activate: (app, ...args) => {
-    new LSPExtension(
+    let extension = new LSPExtension(
       app,
       ...(args as [
         IEditorTracker,
@@ -272,11 +307,28 @@ const plugin: JupyterFrontEndPlugin<void> = {
         IStatusBar
       ])
     );
+    return extension.feature_manager;
   },
+  provides: ILSPFeatureManager,
   autoStart: true
 };
 
+const default_features: JupyterFrontEndPlugin<void>[] = [
+  JUMP_PLUGIN
+  /*
+    Completion,
+    Diagnostics,
+    Highlights,
+    Hover,
+    Signature,
+    JumpToDefinition,
+    Rename
+   */
+];
+
+const plugins: JupyterFrontEndPlugin<any>[] = [plugin, ...default_features];
+
 /**
- * Export the plugin as default.
+ * Export the plugins as default.
  */
-export default plugin;
+export default plugins;

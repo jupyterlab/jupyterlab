@@ -1,4 +1,4 @@
-import { VirtualEditor } from '../editor';
+import { VirtualCodeMirrorEditor } from '../editor';
 import * as CodeMirror from 'codemirror';
 import {
   IEditorPosition,
@@ -6,7 +6,7 @@ import {
   IVirtualPosition
 } from '../../positioning';
 
-export class VirtualFileEditor extends VirtualEditor {
+export class VirtualFileEditor extends VirtualCodeMirrorEditor {
   protected cm_editor: CodeMirror.Editor;
   has_cells = false;
 

@@ -28,12 +28,10 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
 
   constructor(
     extension: LSPExtension,
-    editor_widget: NotebookPanel,
-    jumper: NotebookJumper
+    editor_widget: NotebookPanel
   ) {
     super(extension, editor_widget, 'completer:invoke-notebook');
     this.editor = editor_widget.content;
-    this.jumper = jumper;
     this.init_once_ready().catch(console.warn);
   }
 

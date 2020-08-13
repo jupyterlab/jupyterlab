@@ -11,9 +11,20 @@ import {
 import { until_ready } from '../utils';
 import { Signal } from '@lumino/signaling';
 import { EditorLogConsole, create_console } from './console';
+import { CodeMirrorEditor } from "@jupyterlab/codemirror";
 
 export type CodeMirrorHandler = (instance: any, ...args: any[]) => void;
 type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
+
+export interface IVirtualEditor<IEditor> {
+  virtual_document: VirtualDocument;
+
+  /**
+   * TODO retrieve the editor name
+   */
+  editor_name: string;
+}
+
 
 /**
  * VirtualEditor extends the CodeMirror.Editor interface; its subclasses may either
@@ -21,15 +32,16 @@ type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
  * (using ES6 Proxy), or implement custom behaviour, allowing for the use of
  * virtual documents representing code in complex entities such as notebooks.
  */
-export abstract class VirtualEditor implements CodeMirror.Editor {
+export abstract class VirtualCodeMirrorEditor implements IVirtualEditor<CodeMirrorEditor>, CodeMirror.Editor  {
   // TODO: getValue could be made private in the virtual editor and the virtual editor
   //  could stop exposing the full implementation of CodeMirror but rather hide it inside.
+  editor_name: 'CodeMirrorEditor'
   virtual_document: VirtualDocument;
   code_extractors: IForeignCodeExtractorsRegistry;
   /**
    * Signal emitted by the editor that triggered the update, providing the root document of the updated documents.
    */
-  private documents_updated: Signal<VirtualEditor, VirtualDocument>;
+  private documents_updated: Signal<VirtualCodeMirrorEditor, VirtualDocument>;
   /**
    * Whether the editor reflects an interface with multiple cells (such as a notebook)
    */
@@ -46,7 +58,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
     public has_lsp_supported_file: boolean
   ) {
     this.create_virtual_document();
-    this.documents_updated = new Signal<VirtualEditor, VirtualDocument>(this);
+    this.documents_updated = new Signal<VirtualCodeMirrorEditor, VirtualDocument>(this);
     this.documents_updated.connect(this.on_updated, this);
     this.console = create_console('browser');
   }
@@ -93,7 +105,7 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
    * Once all the foreign documents were refreshed, the unused documents (and their connections)
    * should be terminated if their lifetime has expired.
    */
-  on_updated(editor: VirtualEditor, root_document: VirtualDocument) {
+  on_updated(editor: VirtualCodeMirrorEditor, root_document: VirtualDocument) {
     try {
       root_document.close_expired_documents();
     } catch (e) {
@@ -254,4 +266,4 @@ export abstract class VirtualEditor implements CodeMirror.Editor {
 }
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface VirtualEditor extends CodeMirror.Editor {}
+export interface VirtualCodeMirrorEditor extends CodeMirror.Editor {}

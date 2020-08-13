@@ -7,8 +7,8 @@ import {
 } from '../jupyterlab/jl_adapter';
 import { IRootPosition } from '../../positioning';
 import * as CodeMirror from 'codemirror';
-import { CodeMirrorLSPFeature } from './feature';
 import { DummySettings, FileEditorFeatureTestEnvironment } from './testutils';
+import { CodeMirrorIntegration } from "../../editor_integration/codemirror";
 
 describe('CodeMirrorAdapter', () => {
   let env: FileEditorFeatureTestEnvironment;
@@ -21,7 +21,7 @@ describe('CodeMirrorAdapter', () => {
     let connection: LSPConnection;
 
     it('updates on change', async () => {
-      class UpdateReceivingFeature extends CodeMirrorLSPFeature {
+      class UpdateReceivingFeature extends CodeMirrorIntegration {
         name = 'UpdateReceivingFeature';
         public received_update = false;
         public last_change: CodeMirror.EditorChange = null;

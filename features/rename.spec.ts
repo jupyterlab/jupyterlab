@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 import { Rename } from './rename';
-import { FileEditorFeatureTestEnvironment } from '../testutils';
+import { FileEditorFeatureTestEnvironment } from '../adapters/codemirror/testutils';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PageConfig } from '@jupyterlab/coreutils';
 

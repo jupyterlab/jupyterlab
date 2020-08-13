@@ -1,11 +1,7 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { ICommandPalette, IWidgetTracker } from '@jupyterlab/apputils';
 import { JupyterLabWidgetAdapter } from './adapters/jupyterlab/jl_adapter';
-import {
-  CommandEntryPoint,
-  IFeatureCommand,
-  ILSPFeature
-} from './adapters/codemirror/feature';
+import { CommandEntryPoint, FeatureEditorIntegration } from './feature';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { FileEditorAdapter } from './adapters/jupyterlab/file_editor';
 import { NotebookAdapter } from './adapters/jupyterlab/notebook';
@@ -17,8 +13,9 @@ import {
   IRootPosition,
   IVirtualPosition
 } from './positioning';
-import { VirtualEditor } from './virtual/editor';
+import { VirtualCodeMirrorEditor } from './virtual/editor';
 import { PositionConverter } from './converter';
+import { IFeatureCommand } from "./feature";
 
 export const file_editor_adapters: Map<string, FileEditorAdapter> = new Map();
 export const notebook_adapters: Map<string, NotebookAdapter> = new Map();
@@ -258,7 +255,7 @@ export interface ICommandContext {
   connection: LSPConnection;
   virtual_position: IVirtualPosition;
   root_position: IRootPosition;
-  features: Map<string, ILSPFeature>;
-  editor: VirtualEditor;
+  features: Map<string, FeatureEditorIntegration<any>>;
+  editor: VirtualCodeMirrorEditor;
   adapter: JupyterLabWidgetAdapter;
 }

@@ -1,11 +1,10 @@
 import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { Menu } from '@lumino/widgets';
-import { PositionConverter } from '../../../converter';
-import { IVirtualPosition, IEditorPosition } from '../../../positioning';
-import { diagnosticSeverityNames } from '../../../lsp';
-import { DefaultMap, uris_equal } from '../../../utils';
-import { CodeMirrorLSPFeature, IFeatureCommand } from '../feature';
+import { PositionConverter } from '../converter';
+import { IVirtualPosition, IEditorPosition } from '../positioning';
+import { diagnosticSeverityNames } from '../lsp';
+import { DefaultMap, uris_equal } from '../utils';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import {
   DIAGNOSTICS_LISTING_CLASS,
@@ -14,8 +13,10 @@ import {
   IEditorDiagnostic,
   diagnosticsIcon
 } from './diagnostics_listing';
-import { VirtualDocument } from '../../../virtual/document';
-import { VirtualEditor } from '../../../virtual/editor';
+import { VirtualDocument } from '../virtual/document';
+import { VirtualCodeMirrorEditor } from '../virtual/editor';
+import { IFeatureCommand } from "../feature";
+import { CodeMirrorIntegration } from "../editor_integration/codemirror";
 
 // TODO: settings
 const default_severity = 2;
@@ -62,13 +63,13 @@ class DiagnosticsPanel {
 
 export const diagnostics_panel = new DiagnosticsPanel();
 export const diagnostics_databases = new WeakMap<
-  VirtualEditor,
+  VirtualCodeMirrorEditor,
   DiagnosticsDatabase
 >();
 
 const CMD_COLUMN_VISIBILITY = 'lsp-set-column-visibility';
 
-export class Diagnostics extends CodeMirrorLSPFeature {
+export class Diagnostics extends CodeMirrorIntegration {
   name = 'Diagnostics';
 
   static commands: Array<IFeatureCommand> = [
