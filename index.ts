@@ -28,6 +28,9 @@ import { WidgetAdapter } from "./adapters/jupyterlab/jl_adapter";
 import { SIGNATURE_PLUGIN } from "./features/signature";
 import { IDocumentWidget } from "@jupyterlab/docregistry";
 import IPaths = JupyterFrontEnd.IPaths;
+import { HOVER_PLUGIN } from "./features/hover";
+import { RENAME_PLUGIN } from "./features/rename";
+import { HIGHLIGHTS_PLUGIN } from "./features/highlights";
 
 export const PLUGIN_ID = '@krassowski/jupyterlab-lsp';
 
@@ -330,12 +333,11 @@ const default_features: JupyterFrontEndPlugin<void>[] = [
   JUMP_PLUGIN,
   COMPLETION_PLUGIN,
   SIGNATURE_PLUGIN,
+  HOVER_PLUGIN,
+  RENAME_PLUGIN,
+  HIGHLIGHTS_PLUGIN
   /*
     Diagnostics,
-    Highlights,
-    Hover,
-    Signature,
-    Rename
    */
 ];
 

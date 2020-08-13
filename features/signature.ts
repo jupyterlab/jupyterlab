@@ -167,7 +167,6 @@ class SignatureLabIntegration implements IFeatureLabIntegration {
 
 const FEATURE_ID = PLUGIN_ID + ':signature';
 
-
 export const SIGNATURE_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
   requires: [

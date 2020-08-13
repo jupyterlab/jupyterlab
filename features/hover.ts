@@ -3,15 +3,18 @@ import { IRootPosition, is_equal, IVirtualPosition } from '../positioning';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
 import { Debouncer } from '@lumino/polling';
-import {
-  CodeMirrorIntegration,
-  IEditorRange
-} from '../editor_integration/codemirror';
+import { CodeMirrorIntegration, IEditorRange } from '../editor_integration/codemirror';
+import { FeatureSettings, IFeatureLabIntegration } from "../feature";
+import { EditorTooltipManager } from "../components/free_tooltip";
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
+import { IRenderMimeRegistry } from "@jupyterlab/rendermime";
+import { ILSPAdapterManager, ILSPFeatureManager } from "../tokens";
+import { PLUGIN_ID } from "../index";
+import { ISettingRegistry } from "@jupyterlab/settingregistry";
+import { LSPHoverSettings, ModifierKey } from "../_hover";
 
-export type KeyModifier = 'Alt' | 'Control' | 'Shift' | 'Meta' | 'AltGraph';
-const hover_modifier: KeyModifier = 'Control';
 
-export class Hover extends CodeMirrorIntegration {
+export class HoverCM extends CodeMirrorIntegration {
   name = 'Hover';
   protected hover_character: IRootPosition;
   private last_hover_response: lsProtocol.Hover;
@@ -19,8 +22,14 @@ export class Hover extends CodeMirrorIntegration {
   private last_hover_character: CodeMirror.Position;
   protected hover_marker: CodeMirror.TextMarker;
   private virtual_position: IVirtualPosition;
+  lab_integration: HoverLabIntegration
+  settings: FeatureSettings<LSPHoverSettings>
 
   private debounced_get_hover: Debouncer<Promise<lsProtocol.Hover>>;
+
+  get modifierKey(): ModifierKey {
+    return this.settings.composite.modifierKey
+  }
 
   register(): void {
     this.wrapper_handlers.set('mousemove', this.handleMouseOver);
@@ -33,7 +42,7 @@ export class Hover extends CodeMirrorIntegration {
     // show hover after pressing the modifier key
     this.wrapper_handlers.set('keydown', (event: KeyboardEvent) => {
       if (
-        (!hover_modifier || getModifierState(event, hover_modifier)) &&
+        (!this.modifierKey || getModifierState(event, this.modifierKey)) &&
         this.hover_character === this.last_hover_character
       ) {
         this.show_next_tooltip = true;
@@ -52,12 +61,11 @@ export class Hover extends CodeMirrorIntegration {
   }
 
   on_hover = async () => {
-    const hover = await this.connection.getHoverTooltip(
+    return await this.connection.getHoverTooltip(
       this.virtual_position,
       this.virtual_document.document_info,
       false
     );
-    return hover;
   };
 
   protected static get_markup_for_hover(
@@ -122,18 +130,18 @@ export class Hover extends CodeMirrorIntegration {
       return;
     }
 
-    const markup = Hover.get_markup_for_hover(response);
+    const markup = HoverCM.get_markup_for_hover(response);
     let root_position = this.hover_character;
     let cm_editor = this.get_cm_editor(root_position);
     let editor_position = this.virtual_editor.root_position_to_editor(
       root_position
     );
 
-    this.jupyterlab_components.create_tooltip(
+    this.lab_integration.tooltip.create({
       markup,
-      cm_editor,
-      editor_position
-    );
+      position: editor_position,
+      ce_editor: this.virtual_editor.find_ce_editor(cm_editor)
+    });
   };
 
   protected is_token_empty(token: CodeMirror.Token) {
@@ -189,7 +197,7 @@ export class Hover extends CodeMirrorIntegration {
   public handleMouseOver = (event: MouseEvent) => {
     // proceed when no hover modifier or hover modifier pressed
     this.show_next_tooltip =
-      !hover_modifier || getModifierState(event, hover_modifier);
+      !this.modifierKey || getModifierState(event, this.modifierKey);
 
     try {
       return this._handleMouseOver(event);
@@ -240,7 +248,7 @@ export class Hover extends CodeMirrorIntegration {
   }
 
   hide_hover() {
-    this.jupyterlab_components.remove_tooltip();
+    this.lab_integration.tooltip.remove();
     this.remove_range_highlight();
   }
 
@@ -264,3 +272,46 @@ export class Hover extends CodeMirrorIntegration {
     this.on_hover = null;
   }
 }
+
+class HoverLabIntegration implements IFeatureLabIntegration {
+  tooltip: EditorTooltipManager;
+  settings: FeatureSettings<any>;
+
+  constructor(app: JupyterFrontEnd, settings: FeatureSettings<any>, renderMimeRegistry: IRenderMimeRegistry, adapterManager: ILSPAdapterManager) {
+    this.tooltip = new EditorTooltipManager(renderMimeRegistry, adapterManager);
+  }
+}
+
+const FEATURE_ID = PLUGIN_ID + ':hover';
+
+export const HOVER_PLUGIN: JupyterFrontEndPlugin<void> = {
+  id: FEATURE_ID,
+  requires: [
+    ILSPFeatureManager,
+    ISettingRegistry,
+    IRenderMimeRegistry,
+    ILSPFeatureManager
+  ],
+  activate: (
+    app: JupyterFrontEnd,
+    featureManager: ILSPFeatureManager,
+    settingRegistry: ISettingRegistry,
+    renderMimeRegistry: IRenderMimeRegistry,
+    adapterManager: ILSPAdapterManager
+  ) => {
+    const settings = new FeatureSettings(settingRegistry, FEATURE_ID)
+    const labIntegration = new HoverLabIntegration(app, settings, renderMimeRegistry, adapterManager);
+
+    featureManager.register({
+      feature: {
+        editorIntegrationFactory: new Map([
+          ['CodeMirrorEditor', HoverCM]
+        ]),
+        id: FEATURE_ID,
+        name: 'LSP Hover tooltip',
+        labIntegration: labIntegration,
+        settings: settings
+      }
+    });
+  }
+};

@@ -9,7 +9,6 @@ import { IEditorPosition } from "../positioning";
 import { PositionConverter } from "../converter";
 import { Widget } from "@lumino/widgets";
 import { IRenderMimeRegistry } from "@jupyterlab/rendermime";
-import { DocumentWidget } from "@jupyterlab/docregistry";
 import { ILSPAdapterManager } from "../tokens";
 
 const MIN_HEIGHT = 20;
@@ -118,7 +117,7 @@ export class EditorTooltipManager {
     const tooltip = new FreeTooltip({
       anchor: widget.content,
       bundle: bundle,
-      editor: adapter.virtual_editor.ce_editor,
+      editor: options.ce_editor,
       rendermime: this.rendermime_registry,
       position: PositionConverter.cm_to_ce(position),
       moveToLineEnd: false

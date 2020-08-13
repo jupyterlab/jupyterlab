@@ -4,10 +4,14 @@ import { documentHighlightKindNames } from '../lsp';
 import { VirtualDocument } from '../virtual/document';
 import { IRootPosition } from '../positioning';
 import { uris_equal } from '../utils';
-import { IFeatureCommand } from '../feature';
+import { FeatureSettings, IFeatureCommand } from '../feature';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
+import { PLUGIN_ID } from "../index";
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
+import { ILSPFeatureManager } from "../tokens";
+import { ISettingRegistry } from "@jupyterlab/settingregistry";
 
-export class Highlights extends CodeMirrorIntegration {
+export class HighlightsCM extends CodeMirrorIntegration {
   name = 'Highlights';
   protected highlight_markers: CodeMirror.TextMarker[] = [];
 
@@ -121,3 +125,31 @@ export class Highlights extends CodeMirrorIntegration {
     }
   };
 }
+
+const FEATURE_ID = PLUGIN_ID + ':highlights';
+
+export const HIGHLIGHTS_PLUGIN: JupyterFrontEndPlugin<void> = {
+  id: FEATURE_ID,
+  requires: [
+    ILSPFeatureManager,
+    ISettingRegistry,
+  ],
+  activate: (
+    app: JupyterFrontEnd,
+    featureManager: ILSPFeatureManager,
+    settingRegistry: ISettingRegistry,
+  ) => {
+    const settings = new FeatureSettings(settingRegistry, FEATURE_ID)
+
+    featureManager.register({
+      feature: {
+        editorIntegrationFactory: new Map([
+          ['CodeMirrorEditor', HighlightsCM]
+        ]),
+        id: FEATURE_ID,
+        name: 'LSP Highlights',
+        settings: settings
+      }
+    });
+  }
+};
