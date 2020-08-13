@@ -1,13 +1,12 @@
 import { getModifierState, uris_equal } from '../utils';
-import {
-  IRootPosition,
-  is_equal,
-  IVirtualPosition
-} from '../positioning';
+import { IRootPosition, is_equal, IVirtualPosition } from '../positioning';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
 import { Debouncer } from '@lumino/polling';
-import { CodeMirrorIntegration, IEditorRange } from "../editor_integration/codemirror";
+import {
+  CodeMirrorIntegration,
+  IEditorRange
+} from '../editor_integration/codemirror';
 
 export type KeyModifier = 'Alt' | 'Control' | 'Shift' | 'Meta' | 'AltGraph';
 const hover_modifier: KeyModifier = 'Control';

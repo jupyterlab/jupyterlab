@@ -8,7 +8,7 @@ import {
 import { IRootPosition } from '../../positioning';
 import * as CodeMirror from 'codemirror';
 import { DummySettings, FileEditorFeatureTestEnvironment } from './testutils';
-import { CodeMirrorIntegration } from "../../editor_integration/codemirror";
+import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 
 describe('CodeMirrorAdapter', () => {
   let env: FileEditorFeatureTestEnvironment;

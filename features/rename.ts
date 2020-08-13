@@ -3,8 +3,11 @@ import { InputDialog } from '@jupyterlab/apputils';
 import { Diagnostics } from './diagnostics';
 import { VirtualCodeMirrorEditor } from '../virtual/editor';
 import { VirtualEditorForNotebook } from '../virtual/editors/notebook';
-import { IFeatureCommand } from "../feature";
-import { CodeMirrorIntegration, IEditOutcome } from "../editor_integration/codemirror";
+import { IFeatureCommand } from '../feature';
+import {
+  CodeMirrorIntegration,
+  IEditOutcome
+} from '../editor_integration/codemirror';
 
 export class Rename extends CodeMirrorIntegration {
   name = 'Rename';

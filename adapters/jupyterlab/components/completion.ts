@@ -21,7 +21,7 @@ import { LSPConnection } from '../../../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 import { kernelIcon } from '@jupyterlab/ui-components';
-import { IFeatureSettings } from "../../../editor_integration/codemirror";
+import { IFeatureSettings } from '../../../editor_integration/codemirror';
 
 /**
  * A LSP connector for completion handlers.

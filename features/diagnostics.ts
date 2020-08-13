@@ -15,8 +15,8 @@ import {
 } from './diagnostics_listing';
 import { VirtualDocument } from '../virtual/document';
 import { VirtualCodeMirrorEditor } from '../virtual/editor';
-import { IFeatureCommand } from "../feature";
-import { CodeMirrorIntegration } from "../editor_integration/codemirror";
+import { IFeatureCommand } from '../feature';
+import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 
 // TODO: settings
 const default_severity = 2;

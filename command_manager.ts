@@ -8,7 +8,11 @@ import { NotebookAdapter } from './adapters/jupyterlab/notebook';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
-import { IEditorPosition, IRootPosition, IVirtualPosition } from './positioning';
+import {
+  IEditorPosition,
+  IRootPosition,
+  IVirtualPosition
+} from './positioning';
 import { VirtualCodeMirrorEditor } from './virtual/editor';
 import { PositionConverter } from './converter';
 

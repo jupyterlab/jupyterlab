@@ -23,7 +23,11 @@ import { VirtualDocument } from '../../virtual/document';
 import { LanguageServerManager } from '../../manager';
 import { DocumentConnectionManager } from '../../connection_manager';
 import createNotebook = NBTestUtils.createNotebook;
-import { CodeMirrorIntegration, IFeatureSettings, ILSPFeatureConstructor } from "../../editor_integration/codemirror";
+import {
+  CodeMirrorIntegration,
+  IFeatureSettings,
+  ILSPFeatureConstructor
+} from '../../editor_integration/codemirror';
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;

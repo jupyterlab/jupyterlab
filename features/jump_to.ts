@@ -1,19 +1,21 @@
-import { CodeJumper } from "@krassowski/jupyterlab_go_to_definition/lib/jumpers/jumper";
+import { CodeJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/jumper';
 import { FileEditorJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/fileeditor';
 import { NotebookJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/notebook';
 import { PositionConverter } from '../converter';
 import { IVirtualPosition } from '../positioning';
 import { uri_to_contents_path, uris_equal } from '../utils';
 import { AnyLocation } from 'lsp-ws-connection/lib/types';
-import { IFeatureCommand } from "../feature";
-import { CodeMirrorIntegration } from "../editor_integration/codemirror";
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { ILSPFeatureManager } from "../index";
-import { IEditorTracker } from "@jupyterlab/fileeditor";
-import { CodeMirrorEditor } from "@jupyterlab/codemirror";
-import { INotebookTracker } from "@jupyterlab/notebook";
-import { IDocumentManager } from "@jupyterlab/docmanager";
-
+import { IFeatureCommand } from '../feature';
+import { CodeMirrorIntegration } from '../editor_integration/codemirror';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { ILSPFeatureManager } from '../index';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { IDocumentManager } from '@jupyterlab/docmanager';
 
 export class CMJumpToDefinition extends CodeMirrorIntegration {
   name = 'JumpToDefinition';
@@ -147,13 +149,16 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
   }
 }
 
-
 class JumperLabIntegration {
   private fileEditorTracker: IEditorTracker;
   private notebookTracker: INotebookTracker;
   private jumpers: Map<string, CodeJumper>;
 
-  constructor(fileEditorTracker: IEditorTracker, notebookTracker: INotebookTracker, documentManager: IDocumentManager) {
+  constructor(
+    fileEditorTracker: IEditorTracker,
+    notebookTracker: INotebookTracker,
+    documentManager: IDocumentManager
+  ) {
     this.fileEditorTracker = fileEditorTracker;
     this.notebookTracker = notebookTracker;
     this.jumpers = new Map();
@@ -175,31 +180,46 @@ class JumperLabIntegration {
   }
 
   get jumper(): CodeJumper {
-    let current = this.notebookTracker.currentWidget.id || this.fileEditorTracker.currentWidget.id;
-    return this.jumpers.get(current)
+    let current =
+      this.notebookTracker.currentWidget.id ||
+      this.fileEditorTracker.currentWidget.id;
+    return this.jumpers.get(current);
   }
-
 }
 
-const FEATURE_ID = '@krassowski/feature-jump_to:plugin'
+const FEATURE_ID = '@krassowski/feature-jump_to:plugin';
 
 // TODO returning jump is useless; maybe return the registered one at least?
 export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
-  requires: [ILSPFeatureManager, IEditorTracker, INotebookTracker, IDocumentManager],
-  activate: (app: JupyterFrontEnd, featureManager: ILSPFeatureManager, fileEditorTracker: IEditorTracker, notebookTracker: INotebookTracker, documentManager: IDocumentManager) => {
-
-    let labIntegration = new JumperLabIntegration(fileEditorTracker, notebookTracker, documentManager);
-
-    featureManager.register(
-      {
-        feature: {
-          editorIntegrationFactory: new Map([['CodeMirrorEditor', CMJumpToDefinition]]),
-          id: FEATURE_ID,
-          name: 'Jump to definition',
-          labIntegration: labIntegration
-        }
-      }
+  requires: [
+    ILSPFeatureManager,
+    IEditorTracker,
+    INotebookTracker,
+    IDocumentManager
+  ],
+  activate: (
+    app: JupyterFrontEnd,
+    featureManager: ILSPFeatureManager,
+    fileEditorTracker: IEditorTracker,
+    notebookTracker: INotebookTracker,
+    documentManager: IDocumentManager
+  ) => {
+    let labIntegration = new JumperLabIntegration(
+      fileEditorTracker,
+      notebookTracker,
+      documentManager
     );
+
+    featureManager.register({
+      feature: {
+        editorIntegrationFactory: new Map([
+          ['CodeMirrorEditor', CMJumpToDefinition]
+        ]),
+        id: FEATURE_ID,
+        name: 'Jump to definition',
+        labIntegration: labIntegration
+      }
+    });
   }
-}
+};

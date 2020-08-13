@@ -1,7 +1,7 @@
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { IRootPosition } from '../positioning';
 import * as CodeMirror from 'codemirror';
-import { CodeMirrorIntegration } from "../editor_integration/codemirror";
+import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 
 export class Signature extends CodeMirrorIntegration {
   name = 'Signature';

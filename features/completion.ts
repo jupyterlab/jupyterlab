@@ -1,6 +1,6 @@
 import { CompletionTriggerKind } from '../lsp';
 import * as CodeMirror from 'codemirror';
-import { CodeMirrorIntegration } from "../editor_integration/codemirror";
+import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 
 export class Completion extends CodeMirrorIntegration {
   name = 'Completion';

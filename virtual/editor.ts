@@ -11,7 +11,7 @@ import {
 import { until_ready } from '../utils';
 import { Signal } from '@lumino/signaling';
 import { EditorLogConsole, create_console } from './console';
-import { CodeMirrorEditor } from "@jupyterlab/codemirror";
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 export type CodeMirrorHandler = (instance: any, ...args: any[]) => void;
 type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
@@ -25,17 +25,17 @@ export interface IVirtualEditor<IEditor> {
   editor_name: string;
 }
 
-
 /**
  * VirtualEditor extends the CodeMirror.Editor interface; its subclasses may either
  * fast-forward any requests to an existing instance of the CodeMirror.Editor
  * (using ES6 Proxy), or implement custom behaviour, allowing for the use of
  * virtual documents representing code in complex entities such as notebooks.
  */
-export abstract class VirtualCodeMirrorEditor implements IVirtualEditor<CodeMirrorEditor>, CodeMirror.Editor  {
+export abstract class VirtualCodeMirrorEditor
+  implements IVirtualEditor<CodeMirrorEditor>, CodeMirror.Editor {
   // TODO: getValue could be made private in the virtual editor and the virtual editor
   //  could stop exposing the full implementation of CodeMirror but rather hide it inside.
-  editor_name: 'CodeMirrorEditor'
+  editor_name: 'CodeMirrorEditor';
   virtual_document: VirtualDocument;
   code_extractors: IForeignCodeExtractorsRegistry;
   /**
@@ -58,7 +58,10 @@ export abstract class VirtualCodeMirrorEditor implements IVirtualEditor<CodeMirr
     public has_lsp_supported_file: boolean
   ) {
     this.create_virtual_document();
-    this.documents_updated = new Signal<VirtualCodeMirrorEditor, VirtualDocument>(this);
+    this.documents_updated = new Signal<
+      VirtualCodeMirrorEditor,
+      VirtualDocument
+    >(this);
     this.documents_updated.connect(this.on_updated, this);
     this.console = create_console('browser');
   }

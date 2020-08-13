@@ -4,8 +4,8 @@ import { VirtualCodeMirrorEditor } from '../../virtual/editor';
 import { VirtualDocument } from '../../virtual/document';
 import { IRootPosition } from '../../positioning';
 import { IJupyterLabComponentsManager } from '../jupyterlab/jl_adapter';
-import { FeatureEditorIntegration } from "../../feature";
-import { CodeMirrorEditor } from "@jupyterlab/codemirror";
+import { FeatureEditorIntegration } from '../../feature';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 export class CodeMirrorAdapter {
   features: Map<string, FeatureEditorIntegration<CodeMirrorEditor>>;

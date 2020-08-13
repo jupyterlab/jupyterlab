@@ -4,8 +4,8 @@ import { documentHighlightKindNames } from '../lsp';
 import { VirtualDocument } from '../virtual/document';
 import { IRootPosition } from '../positioning';
 import { uris_equal } from '../utils';
-import { IFeatureCommand } from "../feature";
-import { CodeMirrorIntegration } from "../editor_integration/codemirror";
+import { IFeatureCommand } from '../feature';
+import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 
 export class Highlights extends CodeMirrorIntegration {
   name = 'Highlights';

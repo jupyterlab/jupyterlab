@@ -21,7 +21,7 @@ import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { CodeMirrorIntegration } from "../../editor_integration/codemirror";
+import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 
 const js_fib_code = `function fib(n) {
   return n<2?n:fib(n-1)+fib(n-2);
@@ -115,14 +115,13 @@ describe('Feature', () => {
       let virtual_editor = environment.virtual_editor;
 
       return new EditApplyingFeature({
-          feature: null,
-          virtual_editor: virtual_editor,
-          virtual_document: virtual_editor.virtual_document,
-          connection: connection,
-          status_message: new StatusMessage(),
-          // settings: new DummySettings()
-      }
-      );
+        feature: null,
+        virtual_editor: virtual_editor,
+        virtual_document: virtual_editor.virtual_document,
+        connection: connection,
+        status_message: new StatusMessage()
+        // settings: new DummySettings()
+      });
     }
 
     function init_adapter(

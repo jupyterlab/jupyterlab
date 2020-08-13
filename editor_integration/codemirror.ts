@@ -1,14 +1,23 @@
-import { CodeMirrorEditor } from "@jupyterlab/codemirror";
-import { IFeatureCommand, FeatureEditorIntegration, IEditorIntegrationOptions } from "../feature";
-import { CodeMirrorHandler, VirtualCodeMirrorEditor } from "../virtual/editor";
-import { VirtualDocument } from "../virtual/document";
-import { LSPConnection } from "../connection";
-import { StatusMessage } from "../adapters/jupyterlab/jl_adapter";
-import * as CodeMirror from "codemirror";
-import { IEditorPosition, IRootPosition, IVirtualPosition, offset_at_position } from "../positioning";
-import * as lsProtocol from "vscode-languageserver-protocol";
-import { PositionConverter } from "../converter";
-import { DefaultMap } from "../utils";
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import {
+  IFeatureCommand,
+  FeatureEditorIntegration,
+  IEditorIntegrationOptions
+} from '../feature';
+import { CodeMirrorHandler, VirtualCodeMirrorEditor } from '../virtual/editor';
+import { VirtualDocument } from '../virtual/document';
+import { LSPConnection } from '../connection';
+import { StatusMessage } from '../adapters/jupyterlab/jl_adapter';
+import * as CodeMirror from 'codemirror';
+import {
+  IEditorPosition,
+  IRootPosition,
+  IVirtualPosition,
+  offset_at_position
+} from '../positioning';
+import * as lsProtocol from 'vscode-languageserver-protocol';
+import { PositionConverter } from '../converter';
+import { DefaultMap } from '../utils';
 
 function toDocumentChanges(changes: {
   [uri: string]: lsProtocol.TextEdit[];
@@ -16,7 +25,7 @@ function toDocumentChanges(changes: {
   let documentChanges = [];
   for (let uri of Object.keys(changes)) {
     documentChanges.push({
-      textDocument: {uri},
+      textDocument: { uri },
       edits: changes[uri]
     } as lsProtocol.TextDocumentEdit);
   }
@@ -50,7 +59,9 @@ export interface IEditOutcome {
  * One feature of each type exists per VirtualDocument
  * (the initialization is performed by the adapter).
  */
-export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<CodeMirrorEditor> {
+export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
+  CodeMirrorEditor
+> {
   public is_registered: boolean;
   protected readonly editor_handlers: Map<string, CodeMirrorHandler>;
   protected readonly connection_handlers: Map<string, any>;
@@ -64,7 +75,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<Cod
   protected settings: IFeatureSettings;
 
   constructor(options: IEditorIntegrationOptions) {
-    super(options)
+    super(options);
     this.editor_handlers = new Map();
     this.connection_handlers = new Map();
     this.wrapper_handlers = new Map();
@@ -202,7 +213,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<Cod
   ): CodeMirror.TextMarker {
     return range.editor
       .getDoc()
-      .markText(range.start, range.end, {className: class_name});
+      .markText(range.start, range.end, { className: class_name });
   }
 
   /**
@@ -227,8 +238,8 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<Cod
     // Specs: documentChanges are preferred over changes
     let changes = workspaceEdit.documentChanges
       ? workspaceEdit.documentChanges.map(
-        change => change as lsProtocol.TextDocumentEdit
-      )
+          change => change as lsProtocol.TextDocumentEdit
+        )
       : toDocumentChanges(workspaceEdit.changes);
     let applied_changes = null;
     let edited_cells: number;
@@ -244,10 +255,10 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<Cod
       ) {
         errors.push(
           'Workspace-wide edits not implemented (' +
-          decodeURI(uri) +
-          ' != ' +
-          decodeURI(current_uri) +
-          ')'
+            decodeURI(uri) +
+            ' != ' +
+            decodeURI(current_uri) +
+            ')'
         );
       } else {
         is_whole_document_edit =
@@ -310,7 +321,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<Cod
 
           edit = {
             range: {
-              start: {line: 0, character: 0},
+              start: { line: 0, character: 0 },
               end: {
                 line: lines.length - 1,
                 character: lines[lines.length - 1].length
@@ -357,7 +368,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<Cod
     let raw_value = doc.getValue('\n');
     // extract foreign documents and substitute magics,
     // as it was done when the shadow virtual document was being created
-    let {lines} = document.prepare_code_block(raw_value, editor);
+    let { lines } = document.prepare_code_block(raw_value, editor);
     let old_value = lines.join('\n');
 
     if (is_whole_document_edit) {
@@ -381,7 +392,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<Cod
 
     doc.replaceRange(
       new_value,
-      {line: 0, ch: 0},
+      { line: 0, ch: 0 },
       {
         line: fragment_end.line - fragment_start.line + 1,
         ch: 0
@@ -392,7 +403,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<Cod
       // try to restore the cursor to the position prior to the edit
       // (this might not be the best UX, but definitely better than
       // the cursor jumping to the very end of the cell/file).
-      doc.setCursor(cursor, cursor.ch, {scroll: false});
+      doc.setCursor(cursor, cursor.ch, { scroll: false });
       // note: this does not matter for actions invoke from context menu
       // as those loose focus anyways (this might be addressed elsewhere)
     } catch (e) {
@@ -417,7 +428,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<Cod
     if (start_editor !== end_editor) {
       let last_editor = start_editor;
       let fragment_start = start;
-      let fragment_end = {...start};
+      let fragment_end = { ...start };
 
       let line = start.line;
       let recently_replaced = false;
@@ -479,7 +490,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<Cod
 
 export type ILSPFeatureConstructor = {
   // TODO: ILSPFeatureOptions
-  new(...args: any[]): CodeMirrorIntegration;
+  new (...args: any[]): CodeMirrorIntegration;
 
   commands: Array<IFeatureCommand>;
 };

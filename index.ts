@@ -13,7 +13,6 @@ import { Token } from '@lumino/coreutils';
 
 import { LanguageServerManager } from './manager';
 
-
 // TODO: make use of it for jump target selection (requires to be added to package.json)?
 // import 'codemirror/addon/hint/show-hint.css';
 // import 'codemirror/addon/hint/show-hint';
@@ -39,37 +38,30 @@ import {
 } from '@jupyterlab/docregistry/lib/registry';
 import { DocumentConnectionManager } from './connection_manager';
 import { TLanguageServerConfigurations } from './tokens';
-import { IFeature } from "./feature";
-import { JUMP_PLUGIN } from "./features/jump_to";
-
+import { IFeature } from './feature';
+import { JUMP_PLUGIN } from './features/jump_to';
 
 export interface IFeatureOptions {
-    feature: IFeature;
-    /** ids of the features this feature wants to disable;
+  feature: IFeature;
+  /** ids of the features this feature wants to disable;
     use it to override the default feature implementations with your custom implementation
     (e.g. a custom completer from Kite)  */
-    supersedes?: string[];
+  supersedes?: string[];
 }
 
 export interface ILSPFeatureManager {
   register(options: IFeatureOptions): void;
 }
 
-class FeatureManager implements ILSPFeatureManager{
-
+class FeatureManager implements ILSPFeatureManager {
   features: Array<IFeature> = [];
-  constructor(
-    private command_managers: Array<ContextCommandManager> = []
-  ) {
-
-  }
-
+  constructor(private command_managers: Array<ContextCommandManager> = []) {}
 
   register(options: IFeatureOptions): void {
     for (let option of options.supersedes) {
-      this.features = this.features.filter(feature => feature.id != option)
+      this.features = this.features.filter(feature => feature.id != option);
     }
-    this.features.push(options.feature)
+    this.features.push(options.feature);
 
     for (let command_manager of this.command_managers) {
       command_manager.add(options.feature.commands);
@@ -237,7 +229,10 @@ export class LSPExtension {
       2 + 2
     );
     notebook_command_manager.add_context_separator(0);
-    this.feature_manager = new FeatureManager([command_manager, notebook_command_manager]);
+    this.feature_manager = new FeatureManager([
+      command_manager,
+      notebook_command_manager
+    ]);
 
     const updateOptions = (settings: ISettingRegistry.ISettings) => {
       const options = settings.composite;
@@ -269,10 +264,9 @@ export class LSPExtension {
   }
 }
 
-const PLUGIN_ID = '@krassowski/jupyterlab-lsp'
+const PLUGIN_ID = '@krassowski/jupyterlab-lsp';
 
 export const ILSPFeatureManager = new Token<ILSPFeatureManager>(PLUGIN_ID);
-
 
 /**
  * The plugin registration information.

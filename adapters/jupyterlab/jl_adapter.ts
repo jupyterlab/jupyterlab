@@ -24,8 +24,8 @@ import {
 } from '../../connection_manager';
 import { LSPExtension } from '../../index';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { IFeatureSettings } from "../../editor_integration/codemirror";
-import { FeatureEditorIntegration } from "../../feature";
+import { IFeatureSettings } from '../../editor_integration/codemirror';
+import { FeatureEditorIntegration } from '../../feature';
 import IEditor = CodeEditor.IEditor;
 
 class LabFeatureSettings implements IFeatureSettings {
@@ -493,13 +493,15 @@ export abstract class JupyterLabWidgetAdapter
   ): CodeMirrorAdapter {
     let adapter_features = new Array<FeatureEditorIntegration<IEditor>>();
     for (let feature of this.extension.feature_manager.features) {
-      let featureEditorIntegrationConstructor = feature.editorIntegrationFactory.get(this.virtual_editor.editor_name)
+      let featureEditorIntegrationConstructor = feature.editorIntegrationFactory.get(
+        this.virtual_editor.editor_name
+      );
       let integration = new featureEditorIntegrationConstructor({
         feature: feature,
         virtual_editor: this.virtual_editor,
         virtual_document: virtual_document,
         connection: connection,
-        status_message: this.status_message,
+        status_message: this.status_message
         //settings: new LabFeatureSettings(this.extension, feature_type.name)
       });
       adapter_features.push(integration);

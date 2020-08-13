@@ -26,10 +26,7 @@ export class NotebookAdapter extends JupyterLabWidgetAdapter {
 
   private _language_info: ILanguageInfoMetadata;
 
-  constructor(
-    extension: LSPExtension,
-    editor_widget: NotebookPanel
-  ) {
+  constructor(extension: LSPExtension, editor_widget: NotebookPanel) {
     super(extension, editor_widget, 'completer:invoke-notebook');
     this.editor = editor_widget.content;
     this.init_once_ready().catch(console.warn);
