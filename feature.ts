@@ -1,18 +1,13 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { ICommandContext } from "./command_manager";
-import IEditor = CodeEditor.IEditor;
+import { CommandEntryPoint, ICommandContext } from "./command_manager";
 import { IVirtualEditor, VirtualCodeMirrorEditor } from "./virtual/editor";
 import { VirtualDocument } from "./virtual/document";
 import { LSPConnection } from "./connection";
 import * as CodeMirror from "codemirror";
 import { IRootPosition } from "./positioning";
 import { StatusMessage } from "./adapters/jupyterlab/jl_adapter";
+import IEditor = CodeEditor.IEditor;
 
-
-export enum CommandEntryPoint {
-    CellContextMenu,
-    FileEditorContextMenu
-}
 
 export interface IFeatureCommand {
     /**

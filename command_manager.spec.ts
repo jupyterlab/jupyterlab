@@ -1,8 +1,5 @@
 import { expect } from 'chai';
-import { ContextCommandManager, ICommandContext } from './command_manager';
-import {
-  CommandEntryPoint
-} from './adapters/codemirror/feature';
+import { CommandEntryPoint, ContextCommandManager, ICommandContext } from './command_manager';
 import { JupyterLabWidgetAdapter } from './adapters/jupyterlab/jl_adapter';
 import { IFeatureCommand } from "./feature";
 

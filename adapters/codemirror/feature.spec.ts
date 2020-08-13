@@ -7,7 +7,6 @@ import {
 } from '../jupyterlab/jl_adapter';
 import {
   code_cell,
-  DummySettings,
   FeatureTestEnvironment,
   FileEditorFeatureTestEnvironment,
   getCellsJSON,
@@ -115,13 +114,14 @@ describe('Feature', () => {
       dummy_components_manager = environment.create_dummy_components();
       let virtual_editor = environment.virtual_editor;
 
-      return new EditApplyingFeature(
-        virtual_editor,
-        virtual_editor.virtual_document,
-        connection,
-        dummy_components_manager,
-        new StatusMessage(),
-        new DummySettings()
+      return new EditApplyingFeature({
+          feature: null,
+          virtual_editor: virtual_editor,
+          virtual_document: virtual_editor.virtual_document,
+          connection: connection,
+          status_message: new StatusMessage(),
+          // settings: new DummySettings()
+      }
       );
     }
 

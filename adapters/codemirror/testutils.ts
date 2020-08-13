@@ -114,7 +114,6 @@ export abstract class FeatureTestEnvironment
       remove_tooltip: () => {
         // nothing yet
       },
-      jumper: null,
       isDisposed: false,
       dispose: () => {
         // nothing yet

@@ -1,21 +1,16 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { ICommandPalette, IWidgetTracker } from '@jupyterlab/apputils';
 import { JupyterLabWidgetAdapter } from './adapters/jupyterlab/jl_adapter';
-import { CommandEntryPoint, FeatureEditorIntegration } from './feature';
+import { FeatureEditorIntegration, IFeatureCommand } from './feature';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { FileEditorAdapter } from './adapters/jupyterlab/file_editor';
 import { NotebookAdapter } from './adapters/jupyterlab/notebook';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
-import {
-  IEditorPosition,
-  IRootPosition,
-  IVirtualPosition
-} from './positioning';
+import { IEditorPosition, IRootPosition, IVirtualPosition } from './positioning';
 import { VirtualCodeMirrorEditor } from './virtual/editor';
 import { PositionConverter } from './converter';
-import { IFeatureCommand } from "./feature";
 
 export const file_editor_adapters: Map<string, FileEditorAdapter> = new Map();
 export const notebook_adapters: Map<string, NotebookAdapter> = new Map();
@@ -27,6 +22,11 @@ function is_context_menu_over_token(adapter: JupyterLabWidgetAdapter) {
   }
   let token = adapter.virtual_editor.getTokenAt(position);
   return token.string !== '';
+}
+
+export enum CommandEntryPoint {
+  CellContextMenu,
+  FileEditorContextMenu
 }
 
 abstract class LSPCommandManager {
