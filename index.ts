@@ -20,20 +20,24 @@ import { ContextCommandManager, FileEditorCommandManager, NotebookCommandManager
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './components/statusbar';
 import { DocumentConnectionManager } from './connection_manager';
-import { AdapterRegistration, ILSPAdapterManager, ILSPFeatureManager, TLanguageServerConfigurations } from './tokens';
+import {
+  AdapterRegistration,
+  ILSPAdapterManager,
+  ILSPFeatureManager,
+  PLUGIN_ID,
+  TLanguageServerConfigurations
+} from './tokens';
 import { IFeature } from './feature';
 import { JUMP_PLUGIN } from './features/jump_to';
 import { COMPLETION_PLUGIN } from "./features/completion";
 import { WidgetAdapter } from "./adapters/jupyterlab/jl_adapter";
 import { SIGNATURE_PLUGIN } from "./features/signature";
 import { IDocumentWidget } from "@jupyterlab/docregistry";
-import IPaths = JupyterFrontEnd.IPaths;
 import { HOVER_PLUGIN } from "./features/hover";
 import { RENAME_PLUGIN } from "./features/rename";
 import { HIGHLIGHTS_PLUGIN } from "./features/highlights";
 import { DIAGNOSTICS_PLUGIN } from "./features/diagnostics";
-
-export const PLUGIN_ID = '@krassowski/jupyterlab-lsp';
+import IPaths = JupyterFrontEnd.IPaths;
 
 
 export interface IFeatureOptions {
@@ -72,6 +76,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
 
   constructor(private labShell: ILabShell, private fileEditorTracker: IEditorTracker, private notebookTracker: INotebookTracker) {
     this.adapterChanged = new Signal(this);
+    this.adapterDisposed = new Signal(this);
     labShell.currentChanged.connect(this.onLabFocusChanged, this);
   }
 
@@ -123,7 +128,10 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
       re_connector();
     };
 
-    widget.disposed.connect(disconnect);
+    widget.disposed.connect(() => {
+      disconnect();
+      this.adapterDisposed.emit(adapter);
+    });
     widget.context.pathChanged.connect(reconnect);
 
     // TODO: maybe emit adapterCreated. Should it be handled by statusbar?

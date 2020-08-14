@@ -8,9 +8,8 @@ import {
   CodeMirrorIntegration,
   IEditOutcome
 } from '../editor_integration/codemirror';
-import { PLUGIN_ID } from "../index";
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { ILSPFeatureManager } from "../tokens";
+import { ILSPFeatureManager, PLUGIN_ID } from "../tokens";
 import { ISettingRegistry } from "@jupyterlab/settingregistry";
 import { SignatureCM } from "./signature";
 

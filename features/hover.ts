@@ -8,8 +8,7 @@ import { FeatureSettings, IFeatureLabIntegration } from "../feature";
 import { EditorTooltipManager } from "../components/free_tooltip";
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
 import { IRenderMimeRegistry } from "@jupyterlab/rendermime";
-import { ILSPAdapterManager, ILSPFeatureManager } from "../tokens";
-import { PLUGIN_ID } from "../index";
+import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from "../tokens";
 import { ISettingRegistry } from "@jupyterlab/settingregistry";
 import { LSPHoverSettings, ModifierKey } from "../_hover";
 

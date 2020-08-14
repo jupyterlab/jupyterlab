@@ -13,8 +13,7 @@ import { ISettingRegistry } from "@jupyterlab/settingregistry";
 
 import { LSPCompletionSettings } from '../_completion';
 import { IDocumentConnectionData } from "../connection_manager";
-import { ILSPAdapterManager, ILSPFeatureManager } from "../tokens";
-import { PLUGIN_ID } from "../index";
+import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from "../tokens";
 import { NotebookAdapter } from "../adapters/jupyterlab/notebook";
 
 
