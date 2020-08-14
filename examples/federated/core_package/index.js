@@ -71,7 +71,7 @@ async function main() {
 
   // Get dynamic plugins
   // TODO: deconflict these with builtins?
-  extension_data.map((data) => {
+  const loadComponentPromises = extension_data.map((data) => {
     const loadComponentPromise = loadComponent(
       `${URLExt.join(PageConfig.getOption('fullLabextensionsUrl'), data.name, 'remoteEntry.js')}`,
       data.name
@@ -93,6 +93,7 @@ async function main() {
     }
     return loadComponentPromise;
   });
+  await Promise.all(loadComponentPromises);
 
   // Handle the registered mime extensions.
   var mimeExtensions = [];
