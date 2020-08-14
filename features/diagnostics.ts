@@ -233,12 +233,20 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     const ignoredDiagnosticsCodes = new Set(
       this.settings.composite.ignoreCodes
     );
+    const ignoredMessagesRegExp = this.settings.composite.ignoreMessagesPatterns.map(
+      (pattern) => new RegExp(pattern)
+    );
+
     return diagnostics.filter(diagnostic => {
-      // remove ignored diagnostics
-      if (typeof diagnostic.code === 'undefined') {
-        return true;
+      let code = diagnostic.code;
+      if (typeof code !== 'undefined' && ignoredDiagnosticsCodes.has(code.toString())) {
+        return false;
       }
-      return !ignoredDiagnosticsCodes.has(diagnostic.code.toString());
+      let message = diagnostic.message;
+      if (message && ignoredMessagesRegExp.filter((pattern) => pattern.test(message))) {
+        return false;
+      }
+      return true;
     });
   }
 
