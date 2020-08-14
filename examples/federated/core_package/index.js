@@ -29,12 +29,23 @@ async function loadComponent(url, scope) {
 }
 
 async function createModule(scope, module) {
-  if (!module) {
-    return null;
+  return window._JUPYTERLAB[scope].get(module)
+  .then((factory) => ({ Module: factory() }))
+  .catch((error) => {
+    console.warn(`Failed to create module. scope: '${scope}' module: '${module}'`);
+    return { error };
+  });
+}
+
+function getModuleOrThrow(data) {
+  const { error = null, Module = null } = data;
+  if (Module) {
+    return Module;
   }
-  const factory = await window._JUPYTERLAB[scope].get(module);
-  const Module = factory();
-  return Module;
+  if (error) {
+    throw error;
+  }
+  throw new Error(`Unexpected module data: ${data}`);
 }
 
 
@@ -54,31 +65,34 @@ async function main() {
     PageConfig.getOption('dynamic_extensions')
   );
 
-  const dynamicPlugins = [];
-  const dynamicMimePlugins = [];
+  const dynamicPluginPromises = [];
+  const dynamicMimePluginPromises = [];
+  const dynamicStylePromises = [];
 
   // Get dynamic plugins
   // TODO: deconflict these with builtins?
-  const componentLoadPromises = extension_data.map((data) =>
-    loadComponent(
+  extension_data.map((data) => {
+    const loadComponentPromise = loadComponent(
       `${URLExt.join(PageConfig.getOption('fullLabextensionsUrl'), data.name, 'remoteEntry.js')}`,
       data.name
-    )
-    .then(() => Promise.all([
-      createModule(data.name, data.plugin),
-      createModule(data.name, data.mimePlugin),
-      createModule(data.name, data.style)
-    ]))
-    .then(([plugin, mimePlugin, _]) => {
-      if (plugin) {
-        dynamicPlugins.push(plugin);
-      }
-      if (mimePlugin) {
-        dynamicMimePlugins.push(mimePlugin);
-      }
-    })
-  );
-  await Promise.all(componentLoadPromises);
+    );
+    if (data.plugin) {
+      dynamicPluginPromises.push(
+        loadComponentPromise.then(() => createModule(data.name, data.plugin))
+      );
+    }
+    if (data.mimePlugin) {
+      dynamicMimePluginPromises.push(
+        loadComponentPromise.then(() => createModule(data.name, data.mimePlugin))
+      );
+    }
+    if (data.style) {
+      dynamicStylePromises.push(
+        loadComponentPromise.then(() => createModule(data.name, data.style))
+      );
+    }
+    return loadComponentPromise;
+  });
 
   // Handle the registered mime extensions.
   var mimeExtensions = [];
@@ -113,7 +127,8 @@ async function main() {
   {{/each}}
 
   // Add the dyanmic mime extensions.
-  dynamicMimePlugins.forEach(plugin => { mimeExtensions.push(plugin); });
+  const dynamicMimePlugins = await Promise.all(dynamicMimePluginPromises);
+  dynamicMimePlugins.forEach(plugin => { mimeExtensions.push(getModuleOrThrow(plugin)); });
 
   // Handled the registered standard extensions.
   {{#each jupyterlab_extensions}}
@@ -144,7 +159,11 @@ async function main() {
   {{/each}}
 
   // Add the dynamic extensions.
-  dynamicPlugins.forEach(plugin => { register.push(plugin) });
+  const dynamicPlugins = await Promise.all(dynamicPluginPromises);
+  dynamicPlugins.forEach(plugin => { register.push(getModuleOrThrow(plugin)) });
+
+  // Wait for the styles to load and check if everything loaded correctly
+  (await Promise.all(dynamicStylePromises)).forEach(plugin => getModuleOrThrow(plugin));
 
   var lab = new JupyterLab({
     mimeExtensions: mimeExtensions,
