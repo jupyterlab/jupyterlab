@@ -16,7 +16,7 @@ import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 import { kernelIcon } from '@jupyterlab/ui-components';
 
-import { LSPCompletionSettings } from '../_completion';
+import { CodeCompletion as LSPCompletionSettings } from '../_completion';
 import { FeatureSettings } from '../feature';
 
 /**

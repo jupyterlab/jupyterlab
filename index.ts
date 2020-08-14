@@ -47,6 +47,15 @@ import { HIGHLIGHTS_PLUGIN } from './features/highlights';
 import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import IPaths = JupyterFrontEnd.IPaths;
 
+import { LabIcon } from '@jupyterlab/ui-components';
+
+import codeCheckSvg from '../style/icons/code-check.svg';
+
+export const codeCheckIcon = new LabIcon({
+  name: 'lsp:codeCheck',
+  svgstr: codeCheckSvg
+});
+
 export interface IFeatureOptions {
   feature: IFeature;
   /** ids of the features this feature wants to disable;

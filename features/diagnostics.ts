@@ -17,7 +17,7 @@ import { VirtualDocument } from '../virtual/document';
 import { VirtualCodeMirrorEditor } from '../virtual/editor';
 import { FeatureSettings, IFeatureCommand } from '../feature';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
-import { LSPDiagnosticsSettings } from '../_diagnostics';
+import { CodeDiagnostics as LSPDiagnosticsSettings } from '../_diagnostics';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin

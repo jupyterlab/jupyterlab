@@ -16,7 +16,15 @@ import {
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { LSPHoverSettings, ModifierKey } from '../_hover';
+import { CodeHover as LSPHoverSettings, ModifierKey } from '../_hover';
+import { LabIcon } from '@jupyterlab/ui-components';
+
+import hoverSvg from '../../style/icons/hover.svg';
+
+export const hoverIcon = new LabIcon({
+  name: 'lsp:hover',
+  svgstr: hoverSvg
+});
 
 export class HoverCM extends CodeMirrorIntegration {
   protected hover_character: IRootPosition;

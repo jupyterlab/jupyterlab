@@ -17,10 +17,18 @@ import { NotebookPanel } from '@jupyterlab/notebook';
 import { FeatureSettings, IFeatureLabIntegration } from '../feature';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
-import { LSPCompletionSettings } from '../_completion';
+import { CodeCompletion as LSPCompletionSettings } from '../_completion';
 import { IDocumentConnectionData } from '../connection_manager';
 import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { NotebookAdapter } from '../adapters/jupyterlab/notebook';
+import { LabIcon } from '@jupyterlab/ui-components';
+
+import completionSvg from '../../style/icons/completion.svg';
+
+export const completionIcon = new LabIcon({
+  name: 'lsp:completion',
+  svgstr: completionSvg
+});
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];

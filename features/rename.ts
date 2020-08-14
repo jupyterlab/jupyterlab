@@ -15,6 +15,14 @@ import {
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from './diagnostics';
+import { LabIcon } from '@jupyterlab/ui-components';
+
+import renameSvg from '../../style/icons/rename.svg';
+
+export const hoverIcon = new LabIcon({
+  name: 'lsp:rename',
+  svgstr: renameSvg
+});
 
 const FEATURE_ID = PLUGIN_ID + ':rename';
 
