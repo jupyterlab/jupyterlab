@@ -10,7 +10,6 @@ import { IRenderMimeRegistry } from "@jupyterlab/rendermime";
 import { EditorTooltipManager } from "../components/free_tooltip";
 
 export class SignatureCM extends CodeMirrorIntegration {
-  name = 'Signature';
   protected signature_character: IRootPosition;
   protected _signatureCharacters: string[];
   lab_integration: SignatureLabIntegration;
@@ -172,8 +171,9 @@ export const SIGNATURE_PLUGIN: JupyterFrontEndPlugin<void> = {
     ILSPFeatureManager,
     ISettingRegistry,
     IRenderMimeRegistry,
-    ILSPFeatureManager
+    ILSPAdapterManager
   ],
+  autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,

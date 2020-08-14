@@ -11,64 +11,70 @@ import {
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
 import { ILSPFeatureManager, PLUGIN_ID } from "../tokens";
 import { ISettingRegistry } from "@jupyterlab/settingregistry";
-import { SignatureCM } from "./signature";
+import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from "./diagnostics";
 
-export class Rename extends CodeMirrorIntegration {
-  name = 'Rename';
-  static commands: Array<IFeatureCommand> = [
-    {
-      id: 'rename-symbol',
-      execute: async ({
-        editor,
-        connection,
-        virtual_position,
-        document,
-        features
-      }) => {
-        let old_value = document.getTokenAt(virtual_position).string;
-        const rename_feature = features.get('Rename') as Rename;
-        let handle_failure = (error: any) => {
-          let status = '';
+const FEATURE_ID = PLUGIN_ID + ':rename';
 
-          if (features.has('Diagnostics')) {
-            let diagnostics_feature = features.get('Diagnostics') as DiagnosticsCM;
+const COMMANDS: IFeatureCommand[] = [
+  {
+    id: 'rename-symbol',
+    execute: async ({
+                      editor,
+                      connection,
+                      virtual_position,
+                      document,
+                      features
+                    }) => {
+      let old_value = document.getTokenAt(virtual_position).string;
+      const rename_feature = features.get(FEATURE_ID) as RenameCM;
+      let handle_failure = (error: any) => {
+        let status = '';
 
-            status = ux_workaround_for_rope_limitation(
-              error,
-              diagnostics_feature,
-              editor as VirtualCodeMirrorEditor
-            );
-          }
+        if (features.has(DIAGNOSTICS_PLUGIN_ID)) {
+          let diagnostics_feature = features.get(DIAGNOSTICS_PLUGIN_ID) as DiagnosticsCM;
 
-          if (!status) {
-            status = `Rename failed: ${error}`;
-          }
-
-          rename_feature.status_message.set(status, 7.5 * 1000);
-        };
-
-        const dialog_value = await InputDialog.getText({
-          title: 'Rename to',
-          text: old_value,
-          okLabel: 'Rename'
-        });
-
-        try {
-          const edit = await connection.rename(
-            virtual_position,
-            document.document_info,
-            dialog_value.value,
-            false
+          status = ux_workaround_for_rope_limitation(
+            error,
+            diagnostics_feature,
+            editor as VirtualCodeMirrorEditor
           );
-          await rename_feature.handleRename(edit);
-        } catch (error) {
-          handle_failure(error);
         }
-      },
-      is_enabled: ({ connection }) => connection.isRenameSupported(),
-      label: 'Rename symbol'
-    }
-  ];
+
+        if (!status) {
+          status = `Rename failed: ${error}`;
+        }
+
+        rename_feature.setStatus(status, 7.5 * 1000);
+      };
+
+      const dialog_value = await InputDialog.getText({
+        title: 'Rename to',
+        text: old_value,
+        okLabel: 'Rename'
+      });
+
+      try {
+        const edit = await connection.rename(
+          virtual_position,
+          document.document_info,
+          dialog_value.value,
+          false
+        );
+        await rename_feature.handleRename(edit);
+      } catch (error) {
+        handle_failure(error);
+      }
+    },
+    is_enabled: ({ connection }) => connection.isRenameSupported(),
+    label: 'Rename symbol'
+  }
+];
+
+export class RenameCM extends CodeMirrorIntegration {
+
+  public setStatus(message: string, timeout: number) {
+    return this.status_message.set(status, 7.5 * 1000);
+  }
 
   async handleRename(workspaceEdit: lsProtocol.WorkspaceEdit) {
     let outcome: IEditOutcome;
@@ -161,14 +167,13 @@ function ux_workaround_for_rope_limitation(
   return `Syntax error(s) prevent rename: ${dire_errors}`;
 }
 
-const FEATURE_ID = PLUGIN_ID + ':rename';
-
 export const RENAME_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
   requires: [
     ILSPFeatureManager,
     ISettingRegistry,
   ],
+  autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
@@ -179,11 +184,12 @@ export const RENAME_PLUGIN: JupyterFrontEndPlugin<void> = {
     featureManager.register({
       feature: {
         editorIntegrationFactory: new Map([
-          ['CodeMirrorEditor', SignatureCM]
+          ['CodeMirrorEditor', RenameCM]
         ]),
         id: FEATURE_ID,
         name: 'LSP Rename',
-        settings: settings
+        settings: settings,
+        commands: COMMANDS
       }
     });
   }

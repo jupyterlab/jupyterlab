@@ -22,6 +22,69 @@ import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application"
 import { ILSPFeatureManager, PLUGIN_ID } from "../tokens";
 import { ISettingRegistry } from "@jupyterlab/settingregistry";
 
+export const FEATURE_ID = PLUGIN_ID + ':diagnostics';
+
+const COMMANDS: IFeatureCommand[] = [
+  {
+    id: 'show-diagnostics-panel',
+    execute: ({ app, features, adapter }) => {
+      let diagnostics_feature = features.get(FEATURE_ID) as DiagnosticsCM;
+      diagnostics_feature.switchDiagnosticsPanelSource();
+
+      let panel_widget = diagnostics_panel.widget;
+
+      let get_column = (name: string) => {
+        // TODO: a hashmap in the panel itself?
+        for (let column of panel_widget.content.columns) {
+          if (column.name === name) {
+            return column;
+          }
+        }
+      };
+
+      if (!diagnostics_panel.is_registered) {
+        let columns_menu = new Menu({ commands: app.commands });
+        app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
+          execute: args => {
+            let column = get_column(args['name'] as string);
+            column.is_visible = !column.is_visible;
+            panel_widget.update();
+          },
+          label: args => args['name'] as string,
+          isToggled: args => {
+            let column = get_column(args['name'] as string);
+            return column.is_visible;
+          }
+        });
+        columns_menu.title.label = 'Panel columns';
+        for (let column of panel_widget.content.columns) {
+          columns_menu.addItem({
+            command: CMD_COLUMN_VISIBILITY,
+            args: { name: column.name }
+          });
+        }
+        app.contextMenu.addItem({
+          selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' th',
+          submenu: columns_menu,
+          type: 'submenu'
+        });
+        diagnostics_panel.is_registered = true;
+      }
+
+      if (!panel_widget.isAttached) {
+        app.shell.add(panel_widget, 'main', {
+          ref: adapter.widget_id,
+          mode: 'split-bottom'
+        });
+      }
+      app.shell.activateById(panel_widget.id);
+    },
+    is_enabled: () => true,
+    label: 'Show diagnostics panel',
+    rank: 10
+  }
+];
+
 
 class DiagnosticsPanel {
   private _content: DiagnosticsListing = null;
@@ -72,69 +135,7 @@ export const diagnostics_databases = new WeakMap<
 const CMD_COLUMN_VISIBILITY = 'lsp-set-column-visibility';
 
 export class DiagnosticsCM extends CodeMirrorIntegration {
-  name = 'Diagnostics';
   settings: FeatureSettings<LSPDiagnosticsSettings>
-
-  static commands: Array<IFeatureCommand> = [
-    {
-      id: 'show-diagnostics-panel',
-      execute: ({ app, features, adapter }) => {
-        let diagnostics_feature = features.get('Diagnostics') as DiagnosticsCM;
-        diagnostics_feature.switchDiagnosticsPanelSource();
-
-        let panel_widget = diagnostics_panel.widget;
-
-        let get_column = (name: string) => {
-          // TODO: a hashmap in the panel itself?
-          for (let column of panel_widget.content.columns) {
-            if (column.name === name) {
-              return column;
-            }
-          }
-        };
-
-        if (!diagnostics_panel.is_registered) {
-          let columns_menu = new Menu({ commands: app.commands });
-          app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
-            execute: args => {
-              let column = get_column(args['name'] as string);
-              column.is_visible = !column.is_visible;
-              panel_widget.update();
-            },
-            label: args => args['name'] as string,
-            isToggled: args => {
-              let column = get_column(args['name'] as string);
-              return column.is_visible;
-            }
-          });
-          columns_menu.title.label = 'Panel columns';
-          for (let column of panel_widget.content.columns) {
-            columns_menu.addItem({
-              command: CMD_COLUMN_VISIBILITY,
-              args: { name: column.name }
-            });
-          }
-          app.contextMenu.addItem({
-            selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' th',
-            submenu: columns_menu,
-            type: 'submenu'
-          });
-          diagnostics_panel.is_registered = true;
-        }
-
-        if (!panel_widget.isAttached) {
-          app.shell.add(panel_widget, 'main', {
-            ref: adapter.widget_id,
-            mode: 'split-bottom'
-          });
-        }
-        app.shell.activateById(panel_widget.id);
-      },
-      is_enabled: () => true,
-      label: 'Show diagnostics panel',
-      rank: 10
-    }
-  ];
 
   register(): void {
     this.connection_handlers.set('diagnostic', this.handleDiagnostic);
@@ -224,6 +225,17 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     return DiagnosticSeverity[this.settings.composite.defaultSeverity];
   }
 
+  private filterDiagnostics(diagnostics: lsProtocol.Diagnostic[]): lsProtocol.Diagnostic[] {
+    const ignoredDiagnosticsCodes = new Set(this.settings.composite.ignoreCodes);
+    return diagnostics.filter(diagnostic => {
+      // remove ignored diagnostics
+      if (typeof diagnostic.code === 'undefined') {
+        return true;
+      }
+      return !ignoredDiagnosticsCodes.has(diagnostic.code.toString())
+    })
+  }
+
   public handleDiagnostic = (response: lsProtocol.PublishDiagnosticsParams) => {
     if (!uris_equal(response.uri, this.virtual_document.document_info.uri)) {
       return;
@@ -244,13 +256,8 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
 
       // TODO: test case for severity class always being set, even if diagnostic has no severity
 
-      const ignoredDiagnosticsCodes = new Set(this.settings.composite.ignoreCodes);
-
       let diagnostics_by_range = this.collapse_overlapping_diagnostics(
-        response.diagnostics.filter(diagnostic => {
-          // remove ignored diagnostics
-          return !ignoredDiagnosticsCodes.has(diagnostic.code.toString())
-        })
+        this.filterDiagnostics(response.diagnostics)
       );
 
       diagnostics_by_range.forEach(
@@ -442,7 +449,6 @@ export function message_without_code(diagnostic: lsProtocol.Diagnostic) {
   return message;
 }
 
-const FEATURE_ID = PLUGIN_ID + ':diagnostics';
 
 export const DIAGNOSTICS_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
@@ -450,6 +456,7 @@ export const DIAGNOSTICS_PLUGIN: JupyterFrontEndPlugin<void> = {
     ILSPFeatureManager,
     ISettingRegistry,
   ],
+  autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
@@ -464,8 +471,9 @@ export const DIAGNOSTICS_PLUGIN: JupyterFrontEndPlugin<void> = {
         ]),
         id: FEATURE_ID,
         name: 'LSP Diagnostics',
-        settings: settings
-      }
-    });
+        settings: settings,
+        commands: COMMANDS
+      },
+    })
   }
 };

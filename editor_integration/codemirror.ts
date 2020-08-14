@@ -5,7 +5,6 @@ import {
 import { CodeMirrorHandler, VirtualCodeMirrorEditor } from '../virtual/editor';
 import { VirtualDocument } from '../virtual/document';
 import { LSPConnection } from '../connection';
-import { StatusMessage } from '../adapters/jupyterlab/jl_adapter';
 import * as CodeMirror from 'codemirror';
 import {
   IEditorPosition,
@@ -63,7 +62,6 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
   protected virtual_editor: VirtualCodeMirrorEditor;
   protected virtual_document: VirtualDocument;
   protected connection: LSPConnection;
-  protected status_message: StatusMessage;
   settings: FeatureSettings<any>;
 
   constructor(options: IEditorIntegrationOptions) {

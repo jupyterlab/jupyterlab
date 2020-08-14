@@ -35,7 +35,6 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
   }
 
   public async updateAfterChange() {
-
     try {
       await until_ready(() => this.last_change != null, 30, 22);
     } catch (err) {

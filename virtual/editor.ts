@@ -103,7 +103,7 @@ export abstract class VirtualCodeMirrorEditor
 
   // TODO: getValue could be made private in the virtual editor and the virtual editor
   //  could stop exposing the full implementation of CodeMirror but rather hide it inside.
-  editor_name: 'CodeMirrorEditor';
+  editor_name = 'CodeMirrorEditor';
   virtual_document: VirtualDocument;
   code_extractors: IForeignCodeExtractorsRegistry;
   console: EditorLogConsole;
@@ -140,7 +140,12 @@ export abstract class VirtualCodeMirrorEditor
     this.console = create_console('browser');
     this.change = new Signal(this);
 
-    this.on('change', this.emit_change)
+    // wait for the children constructor to finish initialization and only then set event handlers:
+    setTimeout(this.set_event_handlers.bind(this), 0)
+  }
+
+  private set_event_handlers() {
+    this.on('change', this.emit_change.bind(this))
   }
 
   private emit_change(

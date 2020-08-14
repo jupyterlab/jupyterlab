@@ -37,14 +37,18 @@ export class FeatureSettings<T> {
   protected settings: ISettingRegistry.ISettings;
 
   constructor(protected settingRegistry: ISettingRegistry, featureID: string) {
-    settingRegistry
-      .load(featureID)
-      .then(settings => {
-        this.settings = settings
-        settings.changed.connect(() => {
-          this.settings = settings;
+    if (!(featureID in settingRegistry.plugins)) {
+      console.warn(`${featureID} settings schema could not be found and was not loaded`)
+    } else {
+      settingRegistry
+        .load(featureID)
+        .then(settings => {
+          this.settings = settings
+          settings.changed.connect(() => {
+            this.settings = settings;
+          })
         })
-      })
+    }
   }
 
   get composite(): T {
@@ -83,6 +87,7 @@ export abstract class FeatureEditorIntegration<T extends IVirtualEditor<IEditor>
   protected virtual_editor: IVirtualEditor<T>;
   protected virtual_document: VirtualDocument;
   protected connection: LSPConnection;
+  protected status_message: StatusMessage;
   feature: IFeature;
 
   get settings() {
@@ -98,6 +103,7 @@ export abstract class FeatureEditorIntegration<T extends IVirtualEditor<IEditor>
     this.virtual_editor = options.virtual_editor;
     this.virtual_document = options.virtual_document;
     this.connection = options.connection;
+    this.status_message = options.status_message;
   }
 
   /**

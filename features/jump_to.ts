@@ -15,7 +15,9 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { ILSPFeatureManager } from "../tokens";
+import { ILSPFeatureManager, PLUGIN_ID } from "../tokens";
+
+const FEATURE_ID = PLUGIN_ID + ':jump-to';
 
 export class CMJumpToDefinition extends CodeMirrorIntegration {
 
@@ -171,12 +173,12 @@ class JumperLabIntegration implements IFeatureLabIntegration {
 }
 
 
-const commands: Array<IFeatureCommand> = [
+const COMMANDS: IFeatureCommand[] = [
   {
     id: 'jump-to-definition',
     execute: async ({ connection, virtual_position, document, features }) => {
       const jump_feature = features.get(
-        'JumpToDefinition'
+        FEATURE_ID
       ) as CMJumpToDefinition;
       const targets = await connection.getDefinition(
         virtual_position,
@@ -190,8 +192,6 @@ const commands: Array<IFeatureCommand> = [
   }
 ];
 
-const FEATURE_ID = '@krassowski/jupyterlab-lsp:jump-to';
-
 export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
   requires: [
@@ -200,6 +200,7 @@ export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
     INotebookTracker,
     IDocumentManager
   ],
+  autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
@@ -218,7 +219,7 @@ export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
         editorIntegrationFactory: new Map([
           ['CodeMirrorEditor', CMJumpToDefinition]
         ]),
-        commands: commands,
+        commands: COMMANDS,
         id: FEATURE_ID,
         name: 'Jump to definition',
         labIntegration: labIntegration

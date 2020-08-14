@@ -65,6 +65,7 @@ export class VirtualCodeMirrorNotebookEditor extends VirtualCodeMirrorEditor {
   private _proxy: VirtualCodeMirrorNotebookEditor;
 
   constructor(
+    // TODO: change to private & make the dependencies read widget from WidgetAdapter instead (possibly with duck-typing)
     public notebook: Notebook,
     private wrapper: HTMLElement,
     language: () => string,
@@ -94,7 +95,7 @@ export class VirtualCodeMirrorNotebookEditor extends VirtualCodeMirrorEditor {
       ) {
         if (!(prop in target)) {
           console.warn(
-            `Unimplemented method ${prop} for VirtualEditorForNotebook`
+            `Unimplemented method ${prop} for VirtualCodeMirrorEditor`
           );
           return;
         } else {

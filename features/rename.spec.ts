@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Rename } from './rename';
+import { RenameCM } from './rename';
 import { FileEditorFeatureTestEnvironment } from '../adapters/codemirror/testutils';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PageConfig } from '@jupyterlab/coreutils';
@@ -11,9 +11,9 @@ describe('Rename', () => {
   afterEach(() => env.dispose());
 
   describe('Works with VirtualFileEditor', () => {
-    let feature: Rename;
+    let feature: RenameCM;
 
-    beforeEach(() => (feature = env.init_integration(Rename)));
+    beforeEach(() => (feature = env.init_integration(RenameCM)));
     afterEach(() => env.dispose_feature(feature));
 
     PageConfig.setOption('rootUri', 'file://');

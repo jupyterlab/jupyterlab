@@ -144,6 +144,7 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
     ICompletionManager,
     ILSPAdapterManager,
   ],
+  autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
@@ -154,6 +155,7 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID)
     const labIntegration = new CompletionLabIntegration(app, completionManager, settings, adapterManager);
 
+    console.log(featureManager)
     featureManager.register({
       feature: {
         editorIntegrationFactory: new Map([

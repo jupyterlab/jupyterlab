@@ -14,7 +14,6 @@ import { LSPHoverSettings, ModifierKey } from "../_hover";
 
 
 export class HoverCM extends CodeMirrorIntegration {
-  name = 'Hover';
   protected hover_character: IRootPosition;
   private last_hover_response: lsProtocol.Hover;
   private show_next_tooltip: boolean;
@@ -289,8 +288,9 @@ export const HOVER_PLUGIN: JupyterFrontEndPlugin<void> = {
     ILSPFeatureManager,
     ISettingRegistry,
     IRenderMimeRegistry,
-    ILSPFeatureManager
+    ILSPAdapterManager
   ],
+  autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,

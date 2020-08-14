@@ -328,7 +328,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       return;
     }
 
-    // console.log(
+    // this.virtual_editor.console.log(
     //   'LSP: virtual document',
     //   virtual_document.id_path,
     //   'has changed sending update'

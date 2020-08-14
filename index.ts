@@ -53,13 +53,17 @@ class FeatureManager implements ILSPFeatureManager {
   constructor(private command_managers: Array<ContextCommandManager> = []) {}
 
   register(options: IFeatureOptions): void {
-    for (let option of options.supersedes) {
-      this.features = this.features.filter(feature => feature.id != option);
+    if (options.supersedes) {
+      for (let option of options.supersedes) {
+        this.features = this.features.filter(feature => feature.id != option);
+      }
     }
     this.features.push(options.feature);
 
     for (let command_manager of this.command_managers) {
-      command_manager.add(options.feature.commands);
+      if (options.feature.commands) {
+        command_manager.add(options.feature.commands);
+      }
     }
   }
 }
@@ -96,6 +100,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
 
     if (adapter != null) {
       this.adapterChanged.emit(adapter);
+      this.currentAdapter = adapter;
     }
   }
 
@@ -147,7 +152,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
 }
 
 const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
-  id: PLUGIN_ID + ':ILSPWidgetAdapterManager',
+  id: PLUGIN_ID + ':ILSPAdapterManager',
   requires: [
     IEditorTracker,
     INotebookTracker,

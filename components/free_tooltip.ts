@@ -128,7 +128,7 @@ export class EditorTooltipManager {
   }
 
   remove() {
-    if (this.currentTooltip !== undefined) {
+    if (this.currentTooltip !== null) {
       this.currentTooltip.dispose();
     }
   }

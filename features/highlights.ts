@@ -10,26 +10,27 @@ import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application"
 import { ILSPFeatureManager, PLUGIN_ID } from "../tokens";
 import { ISettingRegistry } from "@jupyterlab/settingregistry";
 
-export class HighlightsCM extends CodeMirrorIntegration {
-  name = 'Highlights';
-  protected highlight_markers: CodeMirror.TextMarker[] = [];
 
-  static commands: Array<IFeatureCommand> = [
-    {
-      id: 'highlight-references',
-      execute: ({ connection, virtual_position, document }) =>
-        connection.getReferences(virtual_position, document.document_info),
-      is_enabled: ({ connection }) => connection.isReferencesSupported(),
-      label: 'Highlight references'
-    },
-    {
-      id: 'highlight-type-definition',
-      execute: ({ connection, virtual_position, document }) =>
-        connection.getTypeDefinition(virtual_position, document.document_info),
-      is_enabled: ({ connection }) => connection.isTypeDefinitionSupported(),
-      label: 'Highlight type definition'
-    }
-  ];
+const COMMANDS: IFeatureCommand[] = [
+  {
+    id: 'highlight-references',
+    execute: ({ connection, virtual_position, document }) =>
+      connection.getReferences(virtual_position, document.document_info),
+    is_enabled: ({ connection }) => connection.isReferencesSupported(),
+    label: 'Highlight references'
+  },
+  {
+    id: 'highlight-type-definition',
+    execute: ({ connection, virtual_position, document }) =>
+      connection.getTypeDefinition(virtual_position, document.document_info),
+    is_enabled: ({ connection }) => connection.isTypeDefinitionSupported(),
+    label: 'Highlight type definition'
+  }
+];
+
+
+export class HighlightsCM extends CodeMirrorIntegration {
+  protected highlight_markers: CodeMirror.TextMarker[] = [];
 
   register(): void {
     this.editor_handlers.set('cursorActivity', this.onCursorActivity);
@@ -133,6 +134,7 @@ export const HIGHLIGHTS_PLUGIN: JupyterFrontEndPlugin<void> = {
     ILSPFeatureManager,
     ISettingRegistry,
   ],
+  autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
@@ -147,7 +149,8 @@ export const HIGHLIGHTS_PLUGIN: JupyterFrontEndPlugin<void> = {
         ]),
         id: FEATURE_ID,
         name: 'LSP Highlights',
-        settings: settings
+        settings: settings,
+        commands: COMMANDS
       }
     });
   }
