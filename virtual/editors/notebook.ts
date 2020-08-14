@@ -10,7 +10,7 @@ import {
   IRootPosition,
   IVirtualPosition
 } from '../../positioning';
-import { CodeEditor } from "@jupyterlab/codeeditor";
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore

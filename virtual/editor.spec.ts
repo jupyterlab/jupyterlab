@@ -10,7 +10,7 @@ import * as CodeMirror from 'codemirror';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
 import { MockLanguageServerManager } from '../adapters/codemirror/testutils';
-import { CodeEditor } from "@jupyterlab/codeeditor";
+import { CodeEditor } from '@jupyterlab/codeeditor';
 
 class VirtualEditorImplementation extends VirtualCodeMirrorEditor {
   private cm_editor: CodeMirror.Editor;

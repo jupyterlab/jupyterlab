@@ -1,10 +1,10 @@
 import IEditor = CodeEditor.IEditor;
-import { IEditorChange, IVirtualEditor } from "../virtual/editor";
-import { FeatureEditorIntegration } from "../feature";
-import { CodeEditor } from "@jupyterlab/codeeditor";
-import { VirtualDocument } from "../virtual/document";
-import { until_ready } from "../utils";
-import { IRootPosition } from "../positioning";
+import { IEditorChange, IVirtualEditor } from '../virtual/editor';
+import { FeatureEditorIntegration } from '../feature';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { VirtualDocument } from '../virtual/document';
+import { until_ready } from '../utils';
+import { IRootPosition } from '../positioning';
 
 export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
   features: Map<string, FeatureEditorIntegration<T>>;
@@ -84,7 +84,7 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
 
   public saveChange(sender: IVirtualEditor<IEditor>, change: IEditorChange) {
     this.last_change = change;
-  };
+  }
 
   public dispose() {
     if (this.isDisposed) {

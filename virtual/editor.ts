@@ -12,9 +12,9 @@ import { until_ready } from '../utils';
 import { Signal } from '@lumino/signaling';
 import { EditorLogConsole, create_console } from './console';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { CodeEditor } from "@jupyterlab/codeeditor";
-import { PositionConverter } from "../converter";
-import { IEditorName } from "../feature";
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { PositionConverter } from '../converter';
+import { IEditorName } from '../feature';
 
 export interface IWindowCoordinates {
   /**
@@ -29,7 +29,6 @@ export interface IWindowCoordinates {
 
 export type CodeMirrorHandler = (instance: any, ...args: any[]) => void;
 type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
-
 
 export interface IEditorChange {
   /** Position (in the pre-change coordinate system) where the change started. */
@@ -58,14 +57,14 @@ export interface IVirtualEditor<IEditor> {
   /**
    * (re)create virtual document using current path and language
    */
-  create_virtual_document(): void
+  create_virtual_document(): void;
 
   /**
    * Update all the virtual documents, emit documents updated with root document if succeeded,
    * and resolve a void promise. The promise does not contain the text value of the root document,
    * as to avoid an easy trap of ignoring the changes in the virtual documents.
    */
-  update_documents(): Promise<void>
+  update_documents(): Promise<void>;
 
   /**
    * Execute provided callback within an update-locked context, which guarantees that:
@@ -73,17 +72,22 @@ export interface IVirtualEditor<IEditor> {
    *  - no update will happen when executing the callback
    * @param fn - the callback to execute in update lock
    */
-  with_update_lock(fn: Function): Promise<void>
+  with_update_lock(fn: Function): Promise<void>;
 
-  document_at_root_position(position: IRootPosition): VirtualDocument
+  document_at_root_position(position: IRootPosition): VirtualDocument;
 
-  root_position_to_virtual_position(position: IRootPosition): IVirtualPosition
+  root_position_to_virtual_position(position: IRootPosition): IVirtualPosition;
 
-  window_coords_to_root_position(coordinates: IWindowCoordinates): IRootPosition;
+  window_coords_to_root_position(
+    coordinates: IWindowCoordinates
+  ): IRootPosition;
 
   get_token_at(position: IRootPosition): CodeEditor.IToken;
 
-  transform_editor_to_root(ce_editor: CodeEditor.IEditor, position: CodeEditor.IPosition): IRootPosition
+  transform_editor_to_root(
+    ce_editor: CodeEditor.IEditor,
+    position: CodeEditor.IPosition
+  ): IRootPosition;
 
   get_cursor_position(): IRootPosition;
 
@@ -142,18 +146,15 @@ export abstract class VirtualCodeMirrorEditor
     this.change = new Signal(this);
 
     // wait for the children constructor to finish initialization and only then set event handlers:
-    setTimeout(this.set_event_handlers.bind(this), 0)
+    setTimeout(this.set_event_handlers.bind(this), 0);
   }
 
   private set_event_handlers() {
-    this.on('change', this.emit_change.bind(this))
+    this.on('change', this.emit_change.bind(this));
   }
 
-  private emit_change(
-    doc: CodeMirror.Doc,
-    change: CodeMirror.EditorChange
-  ) {
-    this.change.emit(change)
+  private emit_change(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
+    this.change.emit(change);
   }
 
   window_coords_to_root_position(coordinates: IWindowCoordinates) {
@@ -161,14 +162,13 @@ export abstract class VirtualCodeMirrorEditor
   }
 
   get_token_at(position: IRootPosition): CodeEditor.IToken {
-    let token = this.getTokenAt(position)
+    let token = this.getTokenAt(position);
     return {
       value: token.string,
       offset: token.start,
       type: token.type
-    }
+    };
   }
-
 
   create_virtual_document() {
     this.virtual_document = new VirtualDocument(
@@ -187,7 +187,7 @@ export abstract class VirtualCodeMirrorEditor
       return;
     }
 
-    this.off('change', this.emit_change)
+    this.off('change', this.emit_change);
     this.documents_updated.disconnect(this.on_updated, this);
 
     for (let [[eventName], wrapped_handler] of this._event_wrappers.entries()) {
@@ -227,7 +227,10 @@ export abstract class VirtualCodeMirrorEditor
     return this.virtual_document.transform_virtual_to_editor(position);
   }
 
-  transform_editor_to_root(ce_editor: CodeEditor.IEditor, position: CodeEditor.IPosition): IRootPosition {
+  transform_editor_to_root(
+    ce_editor: CodeEditor.IEditor,
+    position: CodeEditor.IPosition
+  ): IRootPosition {
     let cm_editor = (ce_editor as CodeMirrorEditor).editor;
     let cm_start = PositionConverter.ce_to_cm(position) as IEditorPosition;
     return this._transform_editor_to_root(cm_editor, cm_start);

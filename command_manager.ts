@@ -6,12 +6,16 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
-import { IEditorPosition, IRootPosition, IVirtualPosition } from './positioning';
+import {
+  IEditorPosition,
+  IRootPosition,
+  IVirtualPosition
+} from './positioning';
 import { IVirtualEditor } from './virtual/editor';
 import { PositionConverter } from './converter';
-import { CodeEditor } from "@jupyterlab/codeeditor";
-import { IDocumentWidget } from "@jupyterlab/docregistry";
-import { file_editor_adapters, notebook_adapters } from "./index";
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { file_editor_adapters, notebook_adapters } from './index';
 
 function is_context_menu_over_token(adapter: WidgetAdapter<IDocumentWidget>) {
   let position = adapter.get_position_from_context_menu();

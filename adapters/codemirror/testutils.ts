@@ -6,9 +6,7 @@ import { IVirtualEditor, VirtualCodeMirrorEditor } from '../../virtual/editor';
 import { LSPConnection } from '../../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualCodeMirrorFileEditor } from '../../virtual/editors/file_editor';
-import {
-  StatusMessage
-} from '../jupyterlab/jl_adapter';
+import { StatusMessage } from '../jupyterlab/jl_adapter';
 import { VirtualCodeMirrorNotebookEditor } from '../../virtual/editors/notebook';
 import { Notebook, NotebookModel } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/testutils';
@@ -24,7 +22,7 @@ import {
   CodeMirrorIntegration,
   CodeMirrorIntegrationConstructor
 } from '../../editor_integration/codemirror';
-import { EditorAdapter } from "../editor_adapter";
+import { EditorAdapter } from '../editor_adapter';
 import IEditor = CodeEditor.IEditor;
 
 interface IFeatureTestEnvironment {
@@ -77,14 +75,15 @@ export abstract class FeatureTestEnvironment
   ): T {
     let connection = this.create_dummy_connection();
     const feature = new integration_type({
-        feature: null,
-        virtual_editor: this.virtual_editor,
-        virtual_document: document ? document : this.virtual_editor.virtual_document,
-        connection: connection,
-        status_message: this.status_message,
-        settings: null
-      }
-    );
+      feature: null,
+      virtual_editor: this.virtual_editor,
+      virtual_document: document
+        ? document
+        : this.virtual_editor.virtual_document,
+      connection: connection,
+      status_message: this.status_message,
+      settings: null
+    });
     this.connections.set(feature as CodeMirrorIntegration, connection);
 
     if (register) {
@@ -107,7 +106,7 @@ export abstract class FeatureTestEnvironment
       rootUri: 'file:///unit-test'
     });
   }
-  
+
   dispose(): void {
     document.body.removeChild(this.host);
   }
@@ -262,4 +261,3 @@ export async function synchronize_content(
     console.warn(e);
   }
 }
-

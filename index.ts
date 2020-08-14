@@ -1,4 +1,8 @@
-import { ILabShell, JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
+import {
+  ILabShell,
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
@@ -16,12 +20,16 @@ import '../style/index.css';
 
 import { NotebookAdapter } from './adapters/jupyterlab/notebook';
 import { FileEditorAdapter } from './adapters/jupyterlab/file_editor';
-import { ContextCommandManager, FileEditorCommandManager, NotebookCommandManager } from './command_manager';
+import {
+  ContextCommandManager,
+  FileEditorCommandManager,
+  NotebookCommandManager
+} from './command_manager';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './components/statusbar';
 import { DocumentConnectionManager } from './connection_manager';
 import {
-  AdapterRegistration,
+  IAdapterRegistration,
   ILSPAdapterManager,
   ILSPFeatureManager,
   PLUGIN_ID,
@@ -29,16 +37,15 @@ import {
 } from './tokens';
 import { IFeature } from './feature';
 import { JUMP_PLUGIN } from './features/jump_to';
-import { COMPLETION_PLUGIN } from "./features/completion";
-import { WidgetAdapter } from "./adapters/jupyterlab/jl_adapter";
-import { SIGNATURE_PLUGIN } from "./features/signature";
-import { IDocumentWidget } from "@jupyterlab/docregistry";
-import { HOVER_PLUGIN } from "./features/hover";
-import { RENAME_PLUGIN } from "./features/rename";
-import { HIGHLIGHTS_PLUGIN } from "./features/highlights";
-import { DIAGNOSTICS_PLUGIN } from "./features/diagnostics";
+import { COMPLETION_PLUGIN } from './features/completion';
+import { WidgetAdapter } from './adapters/jupyterlab/jl_adapter';
+import { SIGNATURE_PLUGIN } from './features/signature';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { HOVER_PLUGIN } from './features/hover';
+import { RENAME_PLUGIN } from './features/rename';
+import { HIGHLIGHTS_PLUGIN } from './features/highlights';
+import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import IPaths = JupyterFrontEnd.IPaths;
-
 
 export interface IFeatureOptions {
   feature: IFeature;
@@ -68,17 +75,23 @@ class FeatureManager implements ILSPFeatureManager {
   }
 }
 
-
-export type AdaptersMap<T extends WidgetAdapter<IDocumentWidget>> = Map<string, T>;
+export type AdaptersMap<T extends WidgetAdapter<IDocumentWidget>> = Map<
+  string,
+  T
+>;
 export const file_editor_adapters: AdaptersMap<FileEditorAdapter> = new Map();
 export const notebook_adapters: AdaptersMap<NotebookAdapter> = new Map();
 
 export class WidgetAdapterManager implements ILSPAdapterManager {
-  adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>
-  adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>
-  currentAdapter: WidgetAdapter<IDocumentWidget>
+  adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
+  adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
+  currentAdapter: WidgetAdapter<IDocumentWidget>;
 
-  constructor(private labShell: ILabShell, private fileEditorTracker: IEditorTracker, private notebookTracker: INotebookTracker) {
+  constructor(
+    private labShell: ILabShell,
+    private fileEditorTracker: IEditorTracker,
+    private notebookTracker: INotebookTracker
+  ) {
     this.adapterChanged = new Signal(this);
     this.adapterDisposed = new Signal(this);
     labShell.currentChanged.connect(this.onLabFocusChanged, this);
@@ -104,17 +117,17 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     }
   }
 
-  register(options: AdapterRegistration) {
+  register(options: IAdapterRegistration) {
     let { id, adapter, type, re_connector } = options;
     let widget = options.adapter.widget;
 
     let map: AdaptersMap<any>;
 
     switch (type) {
-      case "file-editor":
+      case 'file-editor':
         map = file_editor_adapters;
         break;
-      case "notebook":
+      case 'notebook':
         map = notebook_adapters;
         break;
     }
@@ -143,23 +156,30 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
   }
 
   isAnyActive() {
-   return this.labShell.currentWidget &&
-    (this.fileEditorTracker.currentWidget || this.notebookTracker.currentWidget) &&
-    (this.labShell.currentWidget === this.fileEditorTracker.currentWidget ||
-      this.labShell.currentWidget === this.notebookTracker.currentWidget)
+    return (
+      this.labShell.currentWidget &&
+      (this.fileEditorTracker.currentWidget ||
+        this.notebookTracker.currentWidget) &&
+      (this.labShell.currentWidget === this.fileEditorTracker.currentWidget ||
+        this.labShell.currentWidget === this.notebookTracker.currentWidget)
+    );
   }
-
 }
 
 const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
   id: PLUGIN_ID + ':ILSPAdapterManager',
-  requires: [
-    IEditorTracker,
-    INotebookTracker,
-    ILabShell,
-  ],
-  activate: (app, fileEditorTracker: IEditorTracker, notebookTracker: INotebookTracker, labShell: ILabShell) => {
-    return new WidgetAdapterManager(labShell, fileEditorTracker, notebookTracker);
+  requires: [IEditorTracker, INotebookTracker, ILabShell],
+  activate: (
+    app,
+    fileEditorTracker: IEditorTracker,
+    notebookTracker: INotebookTracker,
+    labShell: ILabShell
+  ) => {
+    return new WidgetAdapterManager(
+      labShell,
+      fileEditorTracker,
+      notebookTracker
+    );
   },
   provides: ILSPAdapterManager,
   autoStart: true
@@ -186,11 +206,9 @@ export class LSPExtension {
       language_server_manager: this.language_server_manager
     });
 
-
     fileEditorTracker.widgetAdded.connect((sender, widget) => {
       this.connect_file_editor(widget);
     }, this);
-
 
     notebookTracker.widgetAdded.connect(async (sender, widget) => {
       this.connect_notebook(widget);
@@ -200,15 +218,12 @@ export class LSPExtension {
     status_bar_item.model.language_server_manager = this.language_server_manager;
     status_bar_item.model.connection_manager = this.connection_manager;
 
-    status_bar.registerStatusItem(
-      PLUGIN_ID + ':language-server-status',
-      {
-        item: status_bar_item,
-        align: 'left',
-        rank: 1,
-        isActive: () => adapterManager.isAnyActive()
-      }
-    );
+    status_bar.registerStatusItem(PLUGIN_ID + ':language-server-status', {
+      item: status_bar_item,
+      align: 'left',
+      rank: 1,
+      isActive: () => adapterManager.isAnyActive()
+    });
 
     fileEditorTracker.widgetUpdated.connect((_sender, _widget) => {
       console.log(_sender);
@@ -286,11 +301,11 @@ export class LSPExtension {
         adapter: adapter,
         type: 'file-editor',
         re_connector: () => {
-          this.connect_file_editor(widget)
+          this.connect_file_editor(widget);
         }
-      })
+      });
     }
-  };
+  }
 
   private connect_notebook(widget: NotebookPanel) {
     // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
@@ -300,13 +315,11 @@ export class LSPExtension {
       adapter: adapter,
       type: 'notebook',
       re_connector: () => {
-        this.connect_notebook(widget)
+        this.connect_notebook(widget);
       }
-    })
-  };
+    });
+  }
 }
-
-
 
 /**
  * The plugin registration information.
@@ -357,7 +370,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   plugin,
   WIDGET_ADAPTER_MANAGER,
   ...default_features
-]
+];
 
 /**
  * Export the plugins as default.

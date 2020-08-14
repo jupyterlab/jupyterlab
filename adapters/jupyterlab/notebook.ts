@@ -59,7 +59,10 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       this.on_kernel_changed,
       this
     );
-    this.widget.content.activeCellChanged.disconnect(this.activeCellChanged, this);
+    this.widget.content.activeCellChanged.disconnect(
+      this.activeCellChanged,
+      this
+    );
     super.dispose();
   }
 
@@ -137,6 +140,6 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   activeCellChanged(notebook: Notebook, cell: Cell) {
     this.activeEditorChanged.emit({
       editor: cell.editor
-    })
+    });
   }
 }

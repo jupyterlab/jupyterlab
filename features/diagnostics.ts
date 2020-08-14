@@ -17,10 +17,13 @@ import { VirtualDocument } from '../virtual/document';
 import { VirtualCodeMirrorEditor } from '../virtual/editor';
 import { FeatureSettings, IFeatureCommand } from '../feature';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
-import { LSPDiagnosticsSettings } from "../_diagnostics";
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { ILSPFeatureManager, PLUGIN_ID } from "../tokens";
-import { ISettingRegistry } from "@jupyterlab/settingregistry";
+import { LSPDiagnosticsSettings } from '../_diagnostics';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 export const FEATURE_ID = PLUGIN_ID + ':diagnostics';
 
@@ -85,7 +88,6 @@ const COMMANDS: IFeatureCommand[] = [
   }
 ];
 
-
 class DiagnosticsPanel {
   private _content: DiagnosticsListing = null;
   private _widget: MainAreaWidget<DiagnosticsListing> = null;
@@ -135,7 +137,7 @@ export const diagnostics_databases = new WeakMap<
 const CMD_COLUMN_VISIBILITY = 'lsp-set-column-visibility';
 
 export class DiagnosticsCM extends CodeMirrorIntegration {
-  settings: FeatureSettings<LSPDiagnosticsSettings>
+  settings: FeatureSettings<LSPDiagnosticsSettings>;
 
   register(): void {
     this.connection_handlers.set('diagnostic', this.handleDiagnostic);
@@ -225,15 +227,19 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     return DiagnosticSeverity[this.settings.composite.defaultSeverity];
   }
 
-  private filterDiagnostics(diagnostics: lsProtocol.Diagnostic[]): lsProtocol.Diagnostic[] {
-    const ignoredDiagnosticsCodes = new Set(this.settings.composite.ignoreCodes);
+  private filterDiagnostics(
+    diagnostics: lsProtocol.Diagnostic[]
+  ): lsProtocol.Diagnostic[] {
+    const ignoredDiagnosticsCodes = new Set(
+      this.settings.composite.ignoreCodes
+    );
     return diagnostics.filter(diagnostic => {
       // remove ignored diagnostics
       if (typeof diagnostic.code === 'undefined') {
         return true;
       }
-      return !ignoredDiagnosticsCodes.has(diagnostic.code.toString())
-    })
+      return !ignoredDiagnosticsCodes.has(diagnostic.code.toString());
+    });
   }
 
   public handleDiagnostic = (response: lsProtocol.PublishDiagnosticsParams) => {
@@ -449,20 +455,16 @@ export function message_without_code(diagnostic: lsProtocol.Diagnostic) {
   return message;
 }
 
-
 export const DIAGNOSTICS_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
-  requires: [
-    ILSPFeatureManager,
-    ISettingRegistry,
-  ],
+  requires: [ILSPFeatureManager, ISettingRegistry],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
-    settingRegistry: ISettingRegistry,
+    settingRegistry: ISettingRegistry
   ) => {
-    const settings = new FeatureSettings(settingRegistry, FEATURE_ID)
+    const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
 
     featureManager.register({
       feature: {
@@ -473,7 +475,7 @@ export const DIAGNOSTICS_PLUGIN: JupyterFrontEndPlugin<void> = {
         name: 'LSP Diagnostics',
         settings: settings,
         commands: COMMANDS
-      },
-    })
+      }
+    });
   }
 };

@@ -2,12 +2,15 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import { IRootPosition } from '../positioning';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
-import { FeatureSettings, IFeatureLabIntegration } from "../feature";
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from "../tokens";
-import { ISettingRegistry } from "@jupyterlab/settingregistry";
-import { IRenderMimeRegistry } from "@jupyterlab/rendermime";
-import { EditorTooltipManager } from "../components/free_tooltip";
+import { FeatureSettings, IFeatureLabIntegration } from '../feature';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { EditorTooltipManager } from '../components/free_tooltip';
 
 export class SignatureCM extends CodeMirrorIntegration {
   protected signature_character: IRootPosition;
@@ -110,9 +113,9 @@ export class SignatureCM extends CodeMirrorIntegration {
     );
 
     let tooltip = this.lab_integration.tooltip.create({
-        markup,
-        position: editor_position,
-        ce_editor: this.virtual_editor.find_ce_editor(cm_editor)
+      markup,
+      position: editor_position,
+      ce_editor: this.virtual_editor.find_ce_editor(cm_editor)
     });
     tooltip.addClass('lsp-signature-help');
   }
@@ -153,12 +156,16 @@ export class SignatureCM extends CodeMirrorIntegration {
   }
 }
 
-
 class SignatureLabIntegration implements IFeatureLabIntegration {
   tooltip: EditorTooltipManager;
   settings: FeatureSettings<any>;
 
-  constructor(app: JupyterFrontEnd, settings: FeatureSettings<any>, renderMimeRegistry: IRenderMimeRegistry, adapterManager: ILSPAdapterManager) {
+  constructor(
+    app: JupyterFrontEnd,
+    settings: FeatureSettings<any>,
+    renderMimeRegistry: IRenderMimeRegistry,
+    adapterManager: ILSPAdapterManager
+  ) {
     this.tooltip = new EditorTooltipManager(renderMimeRegistry, adapterManager);
   }
 }
@@ -181,14 +188,17 @@ export const SIGNATURE_PLUGIN: JupyterFrontEndPlugin<void> = {
     renderMimeRegistry: IRenderMimeRegistry,
     adapterManager: ILSPAdapterManager
   ) => {
-    const settings = new FeatureSettings(settingRegistry, FEATURE_ID)
-    const labIntegration = new SignatureLabIntegration(app, settings, renderMimeRegistry, adapterManager);
+    const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
+    const labIntegration = new SignatureLabIntegration(
+      app,
+      settings,
+      renderMimeRegistry,
+      adapterManager
+    );
 
     featureManager.register({
       feature: {
-        editorIntegrationFactory: new Map([
-          ['CodeMirrorEditor', SignatureCM]
-        ]),
+        editorIntegrationFactory: new Map([['CodeMirrorEditor', SignatureCM]]),
         id: FEATURE_ID,
         name: 'LSP Function signature',
         labIntegration: labIntegration,

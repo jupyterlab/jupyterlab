@@ -2,10 +2,10 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { ServerConnection } from '@jupyterlab/services';
 
 import * as SCHEMA from './_schema';
-import { WidgetAdapter } from "./adapters/jupyterlab/jl_adapter";
-import { IDocumentWidget } from "@jupyterlab/docregistry/lib/registry";
-import { Token } from "@lumino/coreutils";
-import { IFeatureOptions, WidgetAdapterManager } from "./index";
+import { WidgetAdapter } from './adapters/jupyterlab/jl_adapter';
+import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
+import { Token } from '@lumino/coreutils';
+import { IFeatureOptions, WidgetAdapterManager } from './index';
 
 export type TLanguageServerId = string;
 export type TLanguageId = string;
@@ -68,7 +68,7 @@ export interface ILSPFeatureManager {
   register(options: IFeatureOptions): void;
 }
 
-export interface AdapterRegistration {
+export interface IAdapterRegistration {
   id: string;
   adapter: WidgetAdapter<IDocumentWidget>;
   type: 'notebook' | 'file-editor';
@@ -76,15 +76,19 @@ export interface AdapterRegistration {
 }
 
 export interface ILSPAdapterManager {
-  adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>
-  adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>
-  currentAdapter: WidgetAdapter<IDocumentWidget>
-  isAnyActive: () => boolean
-  register: (options: AdapterRegistration) => void;
+  adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
+  adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
+  currentAdapter: WidgetAdapter<IDocumentWidget>;
+  isAnyActive: () => boolean;
+  register: (options: IAdapterRegistration) => void;
 }
 
 export const PLUGIN_ID = '@krassowski/jupyterlab-lsp';
 
-export const ILSPFeatureManager = new Token<ILSPFeatureManager>(PLUGIN_ID + ':ILSPFeatureManager');
+export const ILSPFeatureManager = new Token<ILSPFeatureManager>(
+  PLUGIN_ID + ':ILSPFeatureManager'
+);
 
-export const ILSPAdapterManager = new Token<ILSPAdapterManager>(PLUGIN_ID + ':ILSPWidgetAdapterManager');
+export const ILSPAdapterManager = new Token<ILSPAdapterManager>(
+  PLUGIN_ID + ':ILSPWidgetAdapterManager'
+);

@@ -6,7 +6,9 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualCodeMirrorFileEditor } from '../../virtual/editors/file_editor';
 import { LSPExtension } from '../../index';
 
-export class FileEditorAdapter extends WidgetAdapter<IDocumentWidget<FileEditor>> {
+export class FileEditorAdapter extends WidgetAdapter<
+  IDocumentWidget<FileEditor>
+> {
   editor: FileEditor;
   virtual_editor: VirtualCodeMirrorFileEditor;
 

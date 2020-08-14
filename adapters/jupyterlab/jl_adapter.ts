@@ -16,8 +16,7 @@ import {
 import { LSPExtension } from '../../index';
 import { FeatureEditorIntegration } from '../../feature';
 import IEditor = CodeEditor.IEditor;
-import { EditorAdapter } from "../editor_adapter";
-
+import { EditorAdapter } from '../editor_adapter';
 
 export class StatusMessage {
   /**
@@ -72,27 +71,24 @@ export interface IEditorChangedData {
  * has to handle that, keeping multiple connections and multiple virtual documents.
  */
 export abstract class WidgetAdapter<T extends IDocumentWidget> {
-  protected adapters: Map<VirtualDocument.id_path, EditorAdapter<IVirtualEditor<IEditor>>>;
-  public adapterConnected: Signal<
-    WidgetAdapter<T>,
-    IDocumentConnectionData
+  protected adapters: Map<
+    VirtualDocument.id_path,
+    EditorAdapter<IVirtualEditor<IEditor>>
   >;
+  public adapterConnected: Signal<WidgetAdapter<T>, IDocumentConnectionData>;
   public connection_manager: DocumentConnectionManager;
   public status_message: StatusMessage;
   public isDisposed = false;
 
   protected app: JupyterFrontEnd;
 
-  public activeEditorChanged: Signal<WidgetAdapter<T>, IEditorChangedData>
+  public activeEditorChanged: Signal<WidgetAdapter<T>, IEditorChangedData>;
 
-  protected constructor(
-    protected extension: LSPExtension,
-    public widget: T
-  ) {
+  protected constructor(protected extension: LSPExtension, public widget: T) {
     this.app = extension.app;
     this.connection_manager = extension.connection_manager;
     this.adapterConnected = new Signal(this);
-    this.activeEditorChanged = new Signal(this)
+    this.activeEditorChanged = new Signal(this);
     this.adapters = new Map();
     this.status_message = new StatusMessage();
 
@@ -418,7 +414,9 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     virtual_document: VirtualDocument,
     connection: LSPConnection
   ): EditorAdapter<IVirtualEditor<IEditor>> {
-    let adapter_features = new Array<FeatureEditorIntegration<IVirtualEditor<IEditor>>>();
+    let adapter_features = new Array<
+      FeatureEditorIntegration<IVirtualEditor<IEditor>>
+    >();
     for (let feature of this.extension.feature_manager.features) {
       let featureEditorIntegrationConstructor = feature.editorIntegrationFactory.get(
         this.virtual_editor.editor_name
@@ -471,12 +469,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       event.stopPropagation();
     }
 
-    return this.virtual_editor.window_coords_to_root_position(
-      {
-        left: left,
-        top: top
-      }
-    );
+    return this.virtual_editor.window_coords_to_root_position({
+      left: left,
+      top: top
+    });
   }
 
   get_context(root_position: IRootPosition): ICommandContext {

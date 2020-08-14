@@ -10,17 +10,14 @@ import { completionItemKindNames, CompletionTriggerKind } from '../lsp';
 import * as lsProtocol from 'vscode-languageserver-types';
 import { VirtualDocument } from '../virtual/document';
 import { IVirtualEditor } from '../virtual/editor';
-import {
-  IRootPosition,
-  IVirtualPosition
-} from '../positioning';
+import { IRootPosition, IVirtualPosition } from '../positioning';
 import { LSPConnection } from '../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 import { kernelIcon } from '@jupyterlab/ui-components';
 
 import { LSPCompletionSettings } from '../_completion';
-import { FeatureSettings } from "../feature";
+import { FeatureSettings } from '../feature';
 
 /**
  * A LSP connector for completion handlers.

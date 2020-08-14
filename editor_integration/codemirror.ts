@@ -1,6 +1,7 @@
 import {
   FeatureEditorIntegration,
-  IEditorIntegrationOptions, FeatureSettings
+  IEditorIntegrationOptions,
+  FeatureSettings
 } from '../feature';
 import { CodeMirrorHandler, VirtualCodeMirrorEditor } from '../virtual/editor';
 import { VirtualDocument } from '../virtual/document';

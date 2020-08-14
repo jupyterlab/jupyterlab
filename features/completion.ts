@@ -1,26 +1,31 @@
 import { CompletionTriggerKind } from '../lsp';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
-import {  IEditorChangedData, WidgetAdapter } from "../adapters/jupyterlab/jl_adapter";
-import { LSPConnector } from "./completion_handler";
-import { ICompletionManager } from "@jupyterlab/completer";
-import { CodeEditor } from "@jupyterlab/codeeditor";
-import { IDocumentWidget } from "@jupyterlab/docregistry";
-import { NotebookPanel } from "@jupyterlab/notebook";
-import { FeatureSettings, IFeatureLabIntegration } from "../feature";
-import { ISettingRegistry } from "@jupyterlab/settingregistry";
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import {
+  IEditorChangedData,
+  WidgetAdapter
+} from '../adapters/jupyterlab/jl_adapter';
+import { LSPConnector } from './completion_handler';
+import { ICompletionManager } from '@jupyterlab/completer';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { NotebookPanel } from '@jupyterlab/notebook';
+import { FeatureSettings, IFeatureLabIntegration } from '../feature';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { LSPCompletionSettings } from '../_completion';
-import { IDocumentConnectionData } from "../connection_manager";
-import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from "../tokens";
-import { NotebookAdapter } from "../adapters/jupyterlab/notebook";
-
+import { IDocumentConnectionData } from '../connection_manager';
+import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { NotebookAdapter } from '../adapters/jupyterlab/notebook';
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];
   // TODO chek if this works if yest then remove settings from options
-  settings: FeatureSettings<LSPCompletionSettings>
+  settings: FeatureSettings<LSPCompletionSettings>;
 
   get completionCharacters() {
     if (
@@ -42,11 +47,11 @@ export class CompletionCM extends CodeMirrorIntegration {
     if (
       change.text &&
       change.text[0].length == 1 &&
-      (this.settings.composite.continuousHinting)
+      this.settings.composite.continuousHinting
     ) {
-      (this.feature.labIntegration as CompletionLabIntegration).invoke_completer(
-        CompletionTriggerKind.Invoked
-      ).catch(console.warn);
+      (this.feature.labIntegration as CompletionLabIntegration)
+        .invoke_completer(CompletionTriggerKind.Invoked)
+        .catch(console.warn);
       return;
     }
 
@@ -56,9 +61,9 @@ export class CompletionCM extends CodeMirrorIntegration {
         'Will invoke completer after',
         last_character
       );
-      (this.feature.labIntegration as CompletionLabIntegration).invoke_completer(
-        CompletionTriggerKind.TriggerCharacter
-      ).catch(console.warn);
+      (this.feature.labIntegration as CompletionLabIntegration)
+        .invoke_completer(CompletionTriggerKind.TriggerCharacter)
+        .catch(console.warn);
     }
   }
 }
@@ -70,26 +75,36 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
   protected current_adapter: WidgetAdapter<IDocumentWidget> = null;
 
   constructor(
-    private app: JupyterFrontEnd, private completionManager: ICompletionManager,
+    private app: JupyterFrontEnd,
+    private completionManager: ICompletionManager,
     public settings: FeatureSettings<LSPCompletionSettings>,
     private adapterManager: ILSPAdapterManager
   ) {
     // disconnect old adapter, connect new adapter
-    adapterManager.adapterChanged.connect(this.swap_adapter, this)
+    adapterManager.adapterChanged.connect(this.swap_adapter, this);
   }
 
-  private swap_adapter(manager: ILSPAdapterManager, adapter: WidgetAdapter<IDocumentWidget>) {
+  private swap_adapter(
+    manager: ILSPAdapterManager,
+    adapter: WidgetAdapter<IDocumentWidget>
+  ) {
     if (this.current_adapter) {
-      this.current_adapter.activeEditorChanged.disconnect(this.set_connector)
-      this.current_adapter.adapterConnected.disconnect(this.connect_completion)
+      this.current_adapter.activeEditorChanged.disconnect(this.set_connector);
+      this.current_adapter.adapterConnected.disconnect(this.connect_completion);
     }
     this.current_adapter = adapter;
-    this.current_adapter.activeEditorChanged.connect(this.set_connector, this)
-    this.current_adapter.adapterConnected.connect(this.connect_completion, this);
+    this.current_adapter.activeEditorChanged.connect(this.set_connector, this);
+    this.current_adapter.adapterConnected.connect(
+      this.connect_completion,
+      this
+    );
   }
 
-  connect_completion(adapter: WidgetAdapter<IDocumentWidget>, data: IDocumentConnectionData) {
-    let editor = adapter.activeEditor
+  connect_completion(
+    adapter: WidgetAdapter<IDocumentWidget>,
+    data: IDocumentConnectionData
+  ) {
+    let editor = adapter.activeEditor;
     if (editor == null) {
       return;
     }
@@ -105,20 +120,26 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     let command: string;
 
     if (this.adapterManager.currentAdapter instanceof NotebookAdapter) {
-      command = 'completer:invoke-notebook'
+      command = 'completer:invoke-notebook';
     } else {
       command = 'completer:invoke-file';
     }
     return this.app.commands.execute(command);
   }
 
-  set_connector(adapter: WidgetAdapter<IDocumentWidget>, editor_changed: IEditorChangedData) {
+  set_connector(
+    adapter: WidgetAdapter<IDocumentWidget>,
+    editor_changed: IEditorChangedData
+  ) {
     this.set_completion_connector(adapter, editor_changed.editor);
     this.current_completion_handler.editor = editor_changed.editor;
     this.current_completion_handler.connector = this.current_completion_connector;
   }
 
-  private set_completion_connector(adapter: WidgetAdapter<IDocumentWidget>, editor: CodeEditor.IEditor) {
+  private set_completion_connector(
+    adapter: WidgetAdapter<IDocumentWidget>,
+    editor: CodeEditor.IEditor
+  ) {
     if (this.current_completion_connector) {
       delete this.current_completion_connector;
     }
@@ -128,13 +149,13 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       virtual_editor: this.current_adapter.virtual_editor,
       settings: this.settings,
       // it might or might not be a notebook panel (if it is not, the sessionContext and session will just be undefined)
-      session: (this.current_adapter.widget as NotebookPanel)?.sessionContext?.session
+      session: (this.current_adapter.widget as NotebookPanel)?.sessionContext
+        ?.session
     });
   }
 }
 
 const FEATURE_ID = PLUGIN_ID + ':completion';
-
 
 export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
@@ -142,7 +163,7 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
     ILSPFeatureManager,
     ISettingRegistry,
     ICompletionManager,
-    ILSPAdapterManager,
+    ILSPAdapterManager
   ],
   autoStart: true,
   activate: (
@@ -152,14 +173,17 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
     completionManager: ICompletionManager,
     adapterManager: ILSPAdapterManager
   ) => {
-    const settings = new FeatureSettings(settingRegistry, FEATURE_ID)
-    const labIntegration = new CompletionLabIntegration(app, completionManager, settings, adapterManager);
+    const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
+    const labIntegration = new CompletionLabIntegration(
+      app,
+      completionManager,
+      settings,
+      adapterManager
+    );
 
     featureManager.register({
       feature: {
-        editorIntegrationFactory: new Map([
-          ['CodeMirrorEditor', CompletionCM]
-        ]),
+        editorIntegrationFactory: new Map([['CodeMirrorEditor', CompletionCM]]),
         id: FEATURE_ID,
         name: 'LSP Completion',
         labIntegration: labIntegration,

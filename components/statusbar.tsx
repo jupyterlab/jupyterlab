@@ -28,7 +28,7 @@ import { collect_documents, VirtualDocument } from '../virtual/document';
 import { LSPConnection } from '../connection';
 import { DocumentConnectionManager } from '../connection_manager';
 import { ILanguageServerManager, ILSPAdapterManager } from '../tokens';
-import { IDocumentWidget } from "@jupyterlab/docregistry";
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 interface IServerStatusProps {
   server: SCHEMA.LanguageServerSession;
@@ -323,12 +323,14 @@ export namespace LSPStatus {
 
     constructor(widget_adapter_manager: ILSPAdapterManager) {
       super();
-      widget_adapter_manager.adapterChanged.connect((manager, adapter) => { this.change_adapter(adapter) }, this )
+      widget_adapter_manager.adapterChanged.connect((manager, adapter) => {
+        this.change_adapter(adapter);
+      }, this);
       widget_adapter_manager.adapterDisposed.connect((manager, adapter) => {
         if (this.adapter === adapter) {
           this.change_adapter(null);
         }
-      }, this)
+      }, this);
     }
 
     get available_servers(): Array<SCHEMA.LanguageServerSession> {

@@ -3,15 +3,20 @@ import { IRootPosition, is_equal, IVirtualPosition } from '../positioning';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
 import { Debouncer } from '@lumino/polling';
-import { CodeMirrorIntegration, IEditorRange } from '../editor_integration/codemirror';
-import { FeatureSettings, IFeatureLabIntegration } from "../feature";
-import { EditorTooltipManager } from "../components/free_tooltip";
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { IRenderMimeRegistry } from "@jupyterlab/rendermime";
-import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from "../tokens";
-import { ISettingRegistry } from "@jupyterlab/settingregistry";
-import { LSPHoverSettings, ModifierKey } from "../_hover";
-
+import {
+  CodeMirrorIntegration,
+  IEditorRange
+} from '../editor_integration/codemirror';
+import { FeatureSettings, IFeatureLabIntegration } from '../feature';
+import { EditorTooltipManager } from '../components/free_tooltip';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
+import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { LSPHoverSettings, ModifierKey } from '../_hover';
 
 export class HoverCM extends CodeMirrorIntegration {
   protected hover_character: IRootPosition;
@@ -20,13 +25,13 @@ export class HoverCM extends CodeMirrorIntegration {
   private last_hover_character: CodeMirror.Position;
   protected hover_marker: CodeMirror.TextMarker;
   private virtual_position: IVirtualPosition;
-  lab_integration: HoverLabIntegration
-  settings: FeatureSettings<LSPHoverSettings>
+  lab_integration: HoverLabIntegration;
+  settings: FeatureSettings<LSPHoverSettings>;
 
   private debounced_get_hover: Debouncer<Promise<lsProtocol.Hover>>;
 
   get modifierKey(): ModifierKey {
-    return this.settings.composite.modifierKey
+    return this.settings.composite.modifierKey;
   }
 
   register(): void {
@@ -275,7 +280,12 @@ class HoverLabIntegration implements IFeatureLabIntegration {
   tooltip: EditorTooltipManager;
   settings: FeatureSettings<any>;
 
-  constructor(app: JupyterFrontEnd, settings: FeatureSettings<any>, renderMimeRegistry: IRenderMimeRegistry, adapterManager: ILSPAdapterManager) {
+  constructor(
+    app: JupyterFrontEnd,
+    settings: FeatureSettings<any>,
+    renderMimeRegistry: IRenderMimeRegistry,
+    adapterManager: ILSPAdapterManager
+  ) {
     this.tooltip = new EditorTooltipManager(renderMimeRegistry, adapterManager);
   }
 }
@@ -298,14 +308,17 @@ export const HOVER_PLUGIN: JupyterFrontEndPlugin<void> = {
     renderMimeRegistry: IRenderMimeRegistry,
     adapterManager: ILSPAdapterManager
   ) => {
-    const settings = new FeatureSettings(settingRegistry, FEATURE_ID)
-    const labIntegration = new HoverLabIntegration(app, settings, renderMimeRegistry, adapterManager);
+    const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
+    const labIntegration = new HoverLabIntegration(
+      app,
+      settings,
+      renderMimeRegistry,
+      adapterManager
+    );
 
     featureManager.register({
       feature: {
-        editorIntegrationFactory: new Map([
-          ['CodeMirrorEditor', HoverCM]
-        ]),
+        editorIntegrationFactory: new Map([['CodeMirrorEditor', HoverCM]]),
         id: FEATURE_ID,
         name: 'LSP Hover tooltip',
         labIntegration: labIntegration,

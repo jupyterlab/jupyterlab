@@ -6,10 +6,12 @@ import { IRootPosition } from '../positioning';
 import { uris_equal } from '../utils';
 import { FeatureSettings, IFeatureCommand } from '../feature';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { ILSPFeatureManager, PLUGIN_ID } from "../tokens";
-import { ISettingRegistry } from "@jupyterlab/settingregistry";
-
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 const COMMANDS: IFeatureCommand[] = [
   {
@@ -27,7 +29,6 @@ const COMMANDS: IFeatureCommand[] = [
     label: 'Highlight type definition'
   }
 ];
-
 
 export class HighlightsCM extends CodeMirrorIntegration {
   protected highlight_markers: CodeMirror.TextMarker[] = [];
@@ -130,23 +131,18 @@ const FEATURE_ID = PLUGIN_ID + ':highlights';
 
 export const HIGHLIGHTS_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
-  requires: [
-    ILSPFeatureManager,
-    ISettingRegistry,
-  ],
+  requires: [ILSPFeatureManager, ISettingRegistry],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
-    settingRegistry: ISettingRegistry,
+    settingRegistry: ISettingRegistry
   ) => {
-    const settings = new FeatureSettings(settingRegistry, FEATURE_ID)
+    const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
 
     featureManager.register({
       feature: {
-        editorIntegrationFactory: new Map([
-          ['CodeMirrorEditor', HighlightsCM]
-        ]),
+        editorIntegrationFactory: new Map([['CodeMirrorEditor', HighlightsCM]]),
         id: FEATURE_ID,
         name: 'LSP Highlights',
         settings: settings,

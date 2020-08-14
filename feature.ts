@@ -6,7 +6,7 @@ import { LSPConnection } from './connection';
 import { IRootPosition } from './positioning';
 import { StatusMessage } from './adapters/jupyterlab/jl_adapter';
 import IEditor = CodeEditor.IEditor;
-import { ISettingRegistry } from "@jupyterlab/settingregistry";
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 export interface IFeatureCommand {
   /**
@@ -37,21 +37,24 @@ export class FeatureSettings<T> {
 
   constructor(protected settingRegistry: ISettingRegistry, featureID: string) {
     if (!(featureID in settingRegistry.plugins)) {
-      console.warn(`${featureID} settings schema could not be found and was not loaded`)
+      console.warn(
+        `${featureID} settings schema could not be found and was not loaded`
+      );
     } else {
       settingRegistry
         .load(featureID)
         .then(settings => {
-          this.settings = settings
+          this.settings = settings;
           settings.changed.connect(() => {
             this.settings = settings;
-          })
+          });
         })
+        .catch(console.warn);
     }
   }
 
   get composite(): T {
-    return this.settings.composite as unknown as T
+    return (this.settings.composite as unknown) as T;
   }
 
   set(setting: string, value: any) {
@@ -102,10 +105,12 @@ export interface IFeature {
    * Settings to be passed to the FeatureEditorIntegration.
    * To use the same settings for lab integration bind the same FeatureSettings object to the labIntegration object.
    */
-  settings?: FeatureSettings<any>
+  settings?: FeatureSettings<any>;
 }
 
-export abstract class FeatureEditorIntegration<T extends IVirtualEditor<IEditor>> {
+export abstract class FeatureEditorIntegration<
+  T extends IVirtualEditor<IEditor>
+> {
   is_registered: boolean;
   feature: IFeature;
 
@@ -119,7 +124,7 @@ export abstract class FeatureEditorIntegration<T extends IVirtualEditor<IEditor>
   }
 
   get lab_integration() {
-    return this.feature.labIntegration
+    return this.feature.labIntegration;
   }
 
   protected constructor(options: IEditorIntegrationOptions) {
@@ -152,7 +157,9 @@ export abstract class FeatureEditorIntegration<T extends IVirtualEditor<IEditor>
   ): void;
 }
 
-export interface IFeatureEditorIntegrationConstructor<T extends IVirtualEditor<IEditor>> {
+export interface IFeatureEditorIntegrationConstructor<
+  T extends IVirtualEditor<IEditor>
+> {
   new (options: IEditorIntegrationOptions): FeatureEditorIntegration<T>;
 }
 
@@ -166,5 +173,5 @@ export interface IEditorIntegrationOptions {
 }
 
 export interface IFeatureLabIntegration {
-  settings?: FeatureSettings<any>
+  settings?: FeatureSettings<any>;
 }

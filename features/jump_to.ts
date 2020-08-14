@@ -5,7 +5,11 @@ import { PositionConverter } from '../converter';
 import { IVirtualPosition } from '../positioning';
 import { uri_to_contents_path, uris_equal } from '../utils';
 import { AnyLocation } from 'lsp-ws-connection/lib/types';
-import { FeatureSettings, IFeatureCommand, IFeatureLabIntegration } from '../feature';
+import {
+  FeatureSettings,
+  IFeatureCommand,
+  IFeatureLabIntegration
+} from '../feature';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import {
   JupyterFrontEnd,
@@ -15,12 +19,11 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { ILSPFeatureManager, PLUGIN_ID } from "../tokens";
+import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 
 const FEATURE_ID = PLUGIN_ID + ':jump-to';
 
 export class CMJumpToDefinition extends CodeMirrorIntegration {
-
   get jumper() {
     return (this.feature.labIntegration as JumperLabIntegration).jumper;
   }
@@ -172,14 +175,11 @@ class JumperLabIntegration implements IFeatureLabIntegration {
   }
 }
 
-
 const COMMANDS: IFeatureCommand[] = [
   {
     id: 'jump-to-definition',
     execute: async ({ connection, virtual_position, document, features }) => {
-      const jump_feature = features.get(
-        FEATURE_ID
-      ) as CMJumpToDefinition;
+      const jump_feature = features.get(FEATURE_ID) as CMJumpToDefinition;
       const targets = await connection.getDefinition(
         virtual_position,
         document.document_info,

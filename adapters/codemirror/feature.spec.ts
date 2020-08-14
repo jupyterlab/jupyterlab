@@ -1,8 +1,6 @@
 import { expect } from 'chai';
 import { LSPConnection } from '../../connection';
-import {
-  StatusMessage
-} from '../jupyterlab/jl_adapter';
+import { StatusMessage } from '../jupyterlab/jl_adapter';
 import {
   code_cell,
   FeatureTestEnvironment,
@@ -20,9 +18,9 @@ import { foreign_code_extractors } from '../../extractors/defaults';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
-import { EditorAdapter } from "../editor_adapter";
-import { IVirtualEditor } from "../../virtual/editor";
-import { CodeEditor } from "@jupyterlab/codeeditor";
+import { EditorAdapter } from '../editor_adapter';
+import { IVirtualEditor } from '../../virtual/editor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
 import IEditor = CodeEditor.IEditor;
 
 const js_fib_code = `function fib(n) {

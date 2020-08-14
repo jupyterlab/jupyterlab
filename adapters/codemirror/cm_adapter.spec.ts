@@ -1,13 +1,11 @@
 import { expect } from 'chai';
 import { LSPConnection } from '../../connection';
-import {
-  StatusMessage
-} from '../jupyterlab/jl_adapter';
+import { StatusMessage } from '../jupyterlab/jl_adapter';
 import { IRootPosition } from '../../positioning';
 import * as CodeMirror from 'codemirror';
 import { FileEditorFeatureTestEnvironment } from './testutils';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
-import { EditorAdapter } from "../editor_adapter";
+import { EditorAdapter } from '../editor_adapter';
 
 describe('CodeMirrorAdapter', () => {
   let env: FileEditorFeatureTestEnvironment;
@@ -45,7 +43,7 @@ describe('CodeMirrorAdapter', () => {
         connection: connection,
         status_message: new StatusMessage(),
         settings: null
-      })
+      });
 
       let adapter = new EditorAdapter(
         virtual_editor,

@@ -5,8 +5,8 @@ import {
   IRootPosition,
   IVirtualPosition
 } from '../../positioning';
-import { CodeEditor } from "@jupyterlab/codeeditor";
-import { CodeMirrorEditor } from "@jupyterlab/codemirror";
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 export class VirtualCodeMirrorFileEditor extends VirtualCodeMirrorEditor {
   protected cm_editor: CodeMirror.Editor;
@@ -26,7 +26,7 @@ export class VirtualCodeMirrorFileEditor extends VirtualCodeMirrorEditor {
     //  although it would make sense to pass extractors (e.g. for CSS in HTML,
     //  or SQL in Python files) in the future.
     super(language, file_extension, path, {}, {}, true);
-    let cm_editor = (ce_editor as CodeMirrorEditor).editor
+    let cm_editor = (ce_editor as CodeMirrorEditor).editor;
     this.cm_editor = cm_editor;
 
     let handler = {
