@@ -19,7 +19,7 @@ import { NotebookAdapter } from "../adapters/jupyterlab/notebook";
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];
-  // TODO chek if this works if yest then remove seetings from options
+  // TODO chek if this works if yest then remove settings from options
   settings: FeatureSettings<LSPCompletionSettings>
 
   get completionCharacters() {
@@ -155,7 +155,6 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID)
     const labIntegration = new CompletionLabIntegration(app, completionManager, settings, adapterManager);
 
-    console.log(featureManager)
     featureManager.register({
       feature: {
         editorIntegrationFactory: new Map([

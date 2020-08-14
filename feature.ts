@@ -1,9 +1,8 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CommandEntryPoint, ICommandContext } from './command_manager';
-import { IVirtualEditor } from './virtual/editor';
+import { IEditorChange, IVirtualEditor } from './virtual/editor';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
-import * as CodeMirror from 'codemirror';
 import { IRootPosition } from './positioning';
 import { StatusMessage } from './adapters/jupyterlab/jl_adapter';
 import IEditor = CodeEditor.IEditor;
@@ -60,20 +59,44 @@ export class FeatureSettings<T> {
   }
 }
 
+/**
+ * Names of the supported editors.
+ *
+ * Note: once the dynamic editor adapters support is implemented,
+ * this type will be replaced by string and the dynamic checks will be implemented instead.
+ */
+export type IEditorName = 'CodeMirrorEditor';
+
 export interface IFeature {
+  /**
+   * The feature identifier. It must be the same as the feature plugin id.
+   */
   id: string;
   /**
-   * The user-readable name of the feature
+   * The user-readable name of the feature.
    */
   name: string;
-  commands?: Array<IFeatureCommand>;
-  // each feature can be written in mind with mind to support one or more editors;
-  // by default we target CodeMirrorEditor, but let's think about allowing others too
-  // supportedEditors: typeof CodeEditor[] = [CodeMirrorEditor];
+  /**
+   * Each feature can be written in mind with support for one or more editors.
+   * Separate editor integration implementations should be provided for each supported editor.
+   *
+   * Currently only CodeMirrorEditor is supported.
+   */
   editorIntegrationFactory: Map<
-    string,
+    IEditorName,
     IFeatureEditorIntegrationConstructor<IVirtualEditor<IEditor>>
   >;
+  /**
+   * Command specification, including context menu placement options.
+   */
+  commands?: Array<IFeatureCommand>;
+  /**
+   * Objects implementing JupyterLab-specific integration,
+   * for example, adding new GUI elements such as hover tooltips or replacing completer.
+   *
+   * It can be accessed from the FeatureEditorIntegration object
+   * constructor using (options: IEditorIntegrationOptions).feature.
+   */
   labIntegration?: IFeatureLabIntegration;
   /**
    * Settings to be passed to the FeatureEditorIntegration.
@@ -84,11 +107,12 @@ export interface IFeature {
 
 export abstract class FeatureEditorIntegration<T extends IVirtualEditor<IEditor>> {
   is_registered: boolean;
+  feature: IFeature;
+
   protected virtual_editor: IVirtualEditor<T>;
   protected virtual_document: VirtualDocument;
   protected connection: LSPConnection;
   protected status_message: StatusMessage;
-  feature: IFeature;
 
   get settings() {
     return this.feature.settings;
@@ -121,8 +145,9 @@ export abstract class FeatureEditorIntegration<T extends IVirtualEditor<IEditor>
    */
   abstract remove(): void;
 
+  // TODO: replace with a signal
   abstract afterChange(
-    change: CodeMirror.EditorChange, // TODO: provide an editor-diagnostic abstraction layer for EditorChange
+    change: IEditorChange,
     root_position: IRootPosition
   ): void;
 }

@@ -14,6 +14,7 @@ import { EditorLogConsole, create_console } from './console';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from "@jupyterlab/codeeditor";
 import { PositionConverter } from "../converter";
+import { IEditorName } from "../feature";
 
 export interface IWindowCoordinates {
   /**
@@ -47,7 +48,7 @@ export interface IVirtualEditor<IEditor> {
   virtual_document: VirtualDocument;
   console: EditorLogConsole;
 
-  readonly editor_name: string;
+  readonly editor_name: IEditorName;
 
   /**
    *
@@ -103,7 +104,7 @@ export abstract class VirtualCodeMirrorEditor
 
   // TODO: getValue could be made private in the virtual editor and the virtual editor
   //  could stop exposing the full implementation of CodeMirror but rather hide it inside.
-  editor_name = 'CodeMirrorEditor';
+  editor_name: IEditorName = 'CodeMirrorEditor';
   virtual_document: VirtualDocument;
   code_extractors: IForeignCodeExtractorsRegistry;
   console: EditorLogConsole;

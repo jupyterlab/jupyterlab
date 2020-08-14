@@ -1,8 +1,6 @@
 import { WidgetAdapter } from './jl_adapter';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { VirtualCodeMirrorNotebookEditor } from '../../virtual/editors/notebook';
-import { ICompletionManager } from '@jupyterlab/completer';
-import { NotebookJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/notebook';
 import { until_ready } from '../../utils';
 import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
@@ -16,7 +14,6 @@ import { LSPExtension } from '../../index';
 export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   editor: Notebook;
   virtual_editor: VirtualCodeMirrorNotebookEditor;
-  jumper: NotebookJumper;
 
   private _language_info: ILanguageInfoMetadata;
 
@@ -63,11 +60,6 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       this
     );
     this.widget.content.activeCellChanged.disconnect(this.activeCellChanged, this);
-    if (this.current_completion_handler) {
-      this.current_completion_handler.connector = null;
-      this.current_completion_handler.editor = null;
-      this.current_completion_handler = null;
-    }
     super.dispose();
   }
 
@@ -134,12 +126,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       this.on_kernel_changed,
       this
     );
-  }
 
-
-  current_completion_handler: ICompletionManager.ICompletableAttributes;
-
-  connect_completion() {
     this.widget.content.activeCellChanged.connect(this.activeCellChanged, this);
   }
 
