@@ -475,6 +475,8 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     });
   }
 
+  abstract context_from_active_document(): ICommandContext | null;
+
   get_context(root_position: IRootPosition): ICommandContext {
     let document = this.virtual_editor.document_at_root_position(root_position);
     let virtual_position = this.virtual_editor.root_position_to_virtual_position(

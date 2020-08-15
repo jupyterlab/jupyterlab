@@ -5,7 +5,11 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualCodeMirrorFileEditor } from '../../virtual/editors/file_editor';
 import { LSPExtension } from '../../index';
+import { PositionConverter } from "../../converter";
+import { IRootPosition } from "../../positioning";
+import { ICommandContext } from "../../command_manager";
 
+// TODO if (fileEditor.editor instanceof CodeMirrorEditor) {
 export class FileEditorAdapter extends WidgetAdapter<
   IDocumentWidget<FileEditor>
 > {
@@ -62,5 +66,12 @@ export class FileEditorAdapter extends WidgetAdapter<
 
   get path() {
     return this.widget.context.path;
+  }
+
+  context_from_active_document(): ICommandContext {
+    let editor = this.widget.content.editor;
+    let ce_cursor = editor.getCursorPosition();
+    let root_position = PositionConverter.ce_to_cm(ce_cursor) as IRootPosition;
+    return this?.get_context(root_position);
   }
 }

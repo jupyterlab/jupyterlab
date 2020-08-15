@@ -3,10 +3,9 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ICommandPalette } from '@jupyterlab/apputils';
-import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
-import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { FileEditor, IEditorTracker } from '@jupyterlab/fileeditor';
+import { ICommandPalette, IWidgetTracker } from '@jupyterlab/apputils';
+import { INotebookTracker } from '@jupyterlab/notebook';
+import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { Signal } from '@lumino/signaling';
@@ -21,9 +20,8 @@ import '../style/index.css';
 import { NotebookAdapter } from './adapters/jupyterlab/notebook';
 import { FileEditorAdapter } from './adapters/jupyterlab/file_editor';
 import {
-  ContextCommandManager,
-  FileEditorCommandManager,
-  NotebookCommandManager
+  CommandEntryPoint,
+  ContextCommandManager, IContextMenuOptions
 } from './command_manager';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './components/statusbar';
@@ -84,40 +82,70 @@ class FeatureManager implements ILSPFeatureManager {
   }
 }
 
-export type AdaptersMap<T extends WidgetAdapter<IDocumentWidget>> = Map<
-  string,
-  T
->;
-export const file_editor_adapters: AdaptersMap<FileEditorAdapter> = new Map();
-export const notebook_adapters: AdaptersMap<NotebookAdapter> = new Map();
+export type WidgetAdapterConstructor<T extends IDocumentWidget> = {
+  new (extension: LSPExtension, widget: T): WidgetAdapter<T>;
+};
+
+export interface IWidgetTypeOptions<T extends IDocumentWidget> {
+  tracker: IWidgetTracker<T>;
+  name: string;
+  adapter: WidgetAdapterConstructor<T>;
+  entrypoint: CommandEntryPoint;
+  context_menu: IContextMenuOptions;
+  get_id(widget: T): string;
+}
 
 export class WidgetAdapterManager implements ILSPAdapterManager {
   adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
   adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
-  currentAdapter: WidgetAdapter<IDocumentWidget>;
+  currentAdapter: WidgetAdapter<IDocumentWidget>;   // TODO populate this!
+
+  protected adapters: Map<string, WidgetAdapter<IDocumentWidget>> = new Map();
+
+  get types(): IWidgetTypeOptions<IDocumentWidget>[] {
+    return this.widgetTypes;
+  }
 
   constructor(
-    private labShell: ILabShell,
-    private fileEditorTracker: IEditorTracker,
-    private notebookTracker: INotebookTracker
+    protected labShell: ILabShell,
+    protected widgetTypes: IWidgetTypeOptions<IDocumentWidget>[]
   ) {
     this.adapterChanged = new Signal(this);
     this.adapterDisposed = new Signal(this);
     labShell.currentChanged.connect(this.onLabFocusChanged, this);
   }
 
+  public registerExtension(extension: LSPExtension) {
+    for(let type of this.widgetTypes) {
+      type.tracker.widgetAdded.connect((tracker, widget) => {
+        this.connectWidget(extension, widget, type)
+      })
+    }
+  }
+
+  protected connectWidget(extension: LSPExtension, widget: IDocumentWidget, type: IWidgetTypeOptions<IDocumentWidget>) {
+    let adapter = new type.adapter(extension, widget);
+    this.registerAdapter({
+      adapter: adapter,
+      id: type.get_id(widget),
+      re_connector: () => {
+        this.connectWidget(extension, widget, type)
+      }
+    });
+  }
+
   protected onLabFocusChanged() {
-    const current = this.labShell.currentWidget;
+    const current = this.labShell.currentWidget as IDocumentWidget;
     if (!current) {
       return;
     }
     let adapter = null;
-    if (this.notebookTracker.has(current)) {
-      let id = (current as NotebookPanel).id;
-      adapter = notebook_adapters.get(id);
-    } else if (this.fileEditorTracker.has(current)) {
-      let id = (current as IDocumentWidget<FileEditor>).content.id;
-      adapter = file_editor_adapters.get(id);
+
+    for (let type of this.widgetTypes) {
+      if (type.tracker.has(current)) {
+        let id = type.get_id(current);
+        adapter = this.adapters.get(id);
+      }
     }
 
     if (adapter != null) {
@@ -126,25 +154,18 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     }
   }
 
-  register(options: IAdapterRegistration) {
-    let { id, adapter, type, re_connector } = options;
+  registerAdapter(options: IAdapterRegistration) {
+    let { id, adapter, re_connector } = options;
     let widget = options.adapter.widget;
 
-    let map: AdaptersMap<any>;
-
-    switch (type) {
-      case 'file-editor':
-        map = file_editor_adapters;
-        break;
-      case 'notebook':
-        map = notebook_adapters;
-        break;
+    if (this.adapters.has(id)) {
+      let old = this.adapters.get(id);
+      console.warn(`Adapter with id ${id} was already registered (${adapter} vs ${old}) `);
     }
-
-    map.set(id, adapter);
+    this.adapters.set(id, adapter);
 
     const disconnect = () => {
-      map.delete(id);
+      this.adapters.delete(id);
       widget.disposed.disconnect(disconnect);
       widget.context.pathChanged.disconnect(reconnect);
       adapter.dispose();
@@ -167,10 +188,9 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
   isAnyActive() {
     return (
       this.labShell.currentWidget &&
-      (this.fileEditorTracker.currentWidget ||
-        this.notebookTracker.currentWidget) &&
-      (this.labShell.currentWidget === this.fileEditorTracker.currentWidget ||
-        this.labShell.currentWidget === this.notebookTracker.currentWidget)
+      this.widgetTypes.some((type) => type.tracker.currentWidget)
+      &&
+      this.widgetTypes.some((type) => type.tracker.currentWidget == this.labShell.currentWidget)
     );
   }
 }
@@ -184,10 +204,51 @@ const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
     notebookTracker: INotebookTracker,
     labShell: ILabShell
   ) => {
+    const widgetTypes: IWidgetTypeOptions<IDocumentWidget>[] = [
+      {
+        name: 'notebook',
+        tracker: notebookTracker,
+        adapter: NotebookAdapter,
+        entrypoint: CommandEntryPoint.CellContextMenu,
+        get_id(widget: IDocumentWidget): string {
+          // TODO can we use id instead of content.id?
+          return widget.content.id
+        },
+        context_menu  : {
+          selector: '.jp-Notebook .jp-CodeCell .jp-Editor',
+          // position context menu entries after 10th but before 11th default entry
+          // this lets it be before "Clear outputs" which is the last entry of the
+          // CodeCell contextmenu and plays nicely with the first notebook entry
+          // ('Clear all outputs') thus should stay as the last one.
+          // see https://github.com/blink1073/jupyterlab/blob/3592afd328116a588e3307b4cdd9bcabc7fe92bb/packages/notebook-extension/src/index.ts#L802
+          // TODO: PR bumping rank of clear all outputs instead?
+          // adding a very small number (epsilon) places the group just after 10th entry
+          rank_group: 10 + Number.EPSILON,
+          // the group size is increased by one to account for separator,
+          // and by another one to prevent exceeding 11th rank by epsilon.
+          // TODO hardcoded space for 2 commands only!
+          rank_group_size: 2 + 2,
+          callback(manager) {
+            manager.add_context_separator(0);
+          }
+        }
+      },
+      {
+        name: 'file_editor',
+        tracker: fileEditorTracker,
+        adapter: FileEditorAdapter,
+        entrypoint: CommandEntryPoint.FileEditorContextMenu,
+        get_id(widget: IDocumentWidget): string {
+          return widget.id
+        },
+        context_menu: {
+          selector: '.jp-FileEditor',
+        }
+      }
+    ];
     return new WidgetAdapterManager(
       labShell,
-      fileEditorTracker,
-      notebookTracker
+      widgetTypes
     );
   },
   provides: ILSPAdapterManager,
@@ -201,26 +262,16 @@ export class LSPExtension {
 
   constructor(
     public app: JupyterFrontEnd,
-    fileEditorTracker: IEditorTracker,
-    notebookTracker: INotebookTracker,
     private setting_registry: ISettingRegistry,
     palette: ICommandPalette,
     documentManager: IDocumentManager,
     paths: IPaths,
     status_bar: IStatusBar,
-    private adapterManager: ILSPAdapterManager
+    adapterManager: ILSPAdapterManager
   ) {
     this.language_server_manager = new LanguageServerManager({});
     this.connection_manager = new DocumentConnectionManager({
       language_server_manager: this.language_server_manager
-    });
-
-    fileEditorTracker.widgetAdded.connect((sender, widget) => {
-      this.connect_file_editor(widget);
-    }, this);
-
-    notebookTracker.widgetAdded.connect(async (sender, widget) => {
-      this.connect_notebook(widget);
     });
 
     const status_bar_item = new LSPStatus(adapterManager);
@@ -234,54 +285,23 @@ export class LSPExtension {
       isActive: () => adapterManager.isAnyActive()
     });
 
-    fileEditorTracker.widgetUpdated.connect((_sender, _widget) => {
-      console.log(_sender);
-      console.log(_widget);
-      // TODO?
-      // adapter.remove();
-      // connection.close();
-    });
+    let command_mangers: ContextCommandManager[] = []
 
-    let command_manager = new FileEditorCommandManager(
-      app,
-      palette,
-      fileEditorTracker,
-      'file_editor'
-    );
+    for (let type of adapterManager.types) {
+      new ContextCommandManager(
+        {
+          adapter_manager: adapterManager,
+          app: app,
+          palette: palette,
+          tracker: type.tracker,
+          suffix: type.name,
+          entry_point: type.entrypoint,
+          ...type.context_menu
+        }
+      )
+    }
 
-    // position context menu entries after 10th but before 11th default entry
-    // this lets it be before "Clear outputs" which is the last entry of the
-    // CodeCell contextmenu and plays nicely with the first notebook entry
-    // ('Clear all outputs') thus should stay as the last one.
-    // see https://github.com/blink1073/jupyterlab/blob/3592afd328116a588e3307b4cdd9bcabc7fe92bb/packages/notebook-extension/src/index.ts#L802
-    // TODO: PR bumping rank of clear all outputs instead?
-    let notebook_command_manager = new NotebookCommandManager(
-      app,
-      palette,
-      notebookTracker,
-      'notebook',
-      // adding a very small number (epsilon) places the group just after 10th entry
-      10 + Number.EPSILON,
-      // the group size is increased by one to account for separator,
-      // and by another one to prevent exceeding 11th rank by epsilon.
-      // TODO hardcoded space for 2 commands only!
-      2 + 2
-    );
-    notebook_command_manager.add_context_separator(0);
-    this.feature_manager = new FeatureManager([
-      command_manager,
-      notebook_command_manager
-    ]);
-
-    const updateOptions = (settings: ISettingRegistry.ISettings) => {
-      const options = settings.composite;
-
-      const languageServerSettings = (options.language_servers ||
-        {}) as TLanguageServerConfigurations;
-      this.connection_manager.updateServerConfigurations(
-        languageServerSettings
-      );
-    };
+    this.feature_manager = new FeatureManager(command_mangers);
 
     this.setting_registry
       .load(plugin.id)
@@ -292,7 +312,7 @@ export class LSPExtension {
           .language_servers || {}) as TLanguageServerConfigurations;
 
         settings.changed.connect(() => {
-          updateOptions(settings);
+          this.updateOptions(settings);
         });
       })
       .catch((reason: Error) => {
@@ -300,33 +320,14 @@ export class LSPExtension {
       });
   }
 
-  private connect_file_editor(widget: IDocumentWidget<FileEditor>) {
-    let fileEditor = widget.content;
+  private updateOptions(settings: ISettingRegistry.ISettings) {
+    const options = settings.composite;
 
-    if (fileEditor.editor instanceof CodeMirrorEditor) {
-      let adapter = new FileEditorAdapter(this, widget);
-      this.adapterManager.register({
-        id: fileEditor.id,
-        adapter: adapter,
-        type: 'file-editor',
-        re_connector: () => {
-          this.connect_file_editor(widget);
-        }
-      });
-    }
-  }
-
-  private connect_notebook(widget: NotebookPanel) {
-    // NOTE: assuming that the default cells content factory produces CodeMirror editors(!)
-    let adapter = new NotebookAdapter(this, widget);
-    this.adapterManager.register({
-      id: widget.id,
-      adapter: adapter,
-      type: 'notebook',
-      re_connector: () => {
-        this.connect_notebook(widget);
-      }
-    });
+    const languageServerSettings = (options.language_servers ||
+      {}) as TLanguageServerConfigurations;
+    this.connection_manager.updateServerConfigurations(
+      languageServerSettings
+    );
   }
 }
 
@@ -349,8 +350,6 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
     let extension = new LSPExtension(
       app,
       ...(args as [
-        IEditorTracker,
-        INotebookTracker,
         ISettingRegistry,
         ICommandPalette,
         IDocumentManager,

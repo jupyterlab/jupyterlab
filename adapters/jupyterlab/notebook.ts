@@ -10,6 +10,9 @@ import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 import { Session } from '@jupyterlab/services';
 import { SessionContext } from '@jupyterlab/apputils';
 import { LSPExtension } from '../../index';
+import { PositionConverter } from "../../converter";
+import { IEditorPosition } from "../../positioning";
+import { ICommandContext } from "../../command_manager";
 
 export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   editor: Notebook;
@@ -141,5 +144,30 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     this.activeEditorChanged.emit({
       editor: cell.editor
     });
+  }
+
+  context_from_active_document(): ICommandContext | null {
+    let cell = this.widget.content.activeCell;
+    let editor = cell.editor;
+    let ce_cursor = editor.getCursorPosition();
+    let cm_cursor = PositionConverter.ce_to_cm(ce_cursor) as IEditorPosition;
+
+    let virtual_editor = this?.virtual_editor;
+
+    if (virtual_editor == null) {
+      return null;
+    }
+
+    let root_position = virtual_editor.transform_from_notebook_to_root(
+      cell,
+      cm_cursor
+    );
+
+    if (root_position == null) {
+      console.warn('Could not retrieve current context', virtual_editor);
+      return null;
+    }
+
+    return this?.get_context(root_position);
   }
 }
