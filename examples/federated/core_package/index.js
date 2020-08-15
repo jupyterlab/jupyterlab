@@ -3,6 +3,24 @@
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
+// Promise.allSettled polyfill, until our supported browsers implement it
+// See https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/allSettled
+if (Promise.allSettled === undefined) {
+  Promise.allSettled = promises =>
+    Promise.all(
+      promises.map(promise =>
+        promise
+          .then(value => ({
+            status: "fulfilled",
+            value,
+          }), reason => ({
+            status: "rejected",
+            reason,
+          }))
+      )
+    );
+}
+
 // This must be after the public path is set.
 // This cannot be extracted because the public path is dynamic.
 require('./imports.css');
@@ -29,25 +47,14 @@ async function loadComponent(url, scope) {
 }
 
 async function createModule(scope, module) {
-  return window._JUPYTERLAB[scope].get(module)
-  .then((factory) => ({ Module: factory() }))
-  .catch((error) => {
-    console.warn(`Failed to create module. scope: '${scope}' module: '${module}'`);
-    return { error };
-  });
-}
-
-function getModuleOrThrow(data) {
-  const { error = null, Module = null } = data;
-  if (Module) {
-    return Module;
+  try {
+    const factory = await window._JUPYTERLAB[scope].get(module);
+    return factory();  
+  } catch(e) {
+    console.warn(`Failed to create module: package: ${scope}; module: ${module}`);
+    throw e;
   }
-  if (error) {
-    throw error;
-  }
-  throw new Error(`Unexpected module data: ${data}`);
 }
-
 
 /**
  * The main entry point for the application.
@@ -69,102 +76,121 @@ async function main() {
   const dynamicMimePluginPromises = [];
   const dynamicStylePromises = [];
 
-  // Get dynamic plugins
-  // TODO: deconflict these with builtins?
-  const loadComponentPromises = extension_data.map((data) => {
-    const loadComponentPromise = loadComponent(
+  // We first load all dynamic components so that the shared module
+  // deduplication can run and figure out which shared modules from all
+  // components should be actually used.
+  const extensions = await Promise.allSettled(extension_data.map( async data => {
+    await loadComponent(
       `${URLExt.join(PageConfig.getOption('fullLabextensionsUrl'), data.name, 'remoteEntry.js')}`,
       data.name
     );
+    return data;
+  }));
+
+  extensions.forEach(p => {
+    if (p.status === "error") {
+      // There was an error loading the component
+      console.error(p.reason);
+      return;
+    }
+
+    const data = p.value;
     if (data.plugin) {
-      dynamicPluginPromises.push(
-        loadComponentPromise.then(() => createModule(data.name, data.plugin))
-      );
+      dynamicPluginPromises.push(createModule(data.name, data.plugin));
     }
     if (data.mimePlugin) {
-      dynamicMimePluginPromises.push(
-        loadComponentPromise.then(() => createModule(data.name, data.mimePlugin))
-      );
+      dynamicMimePluginPromises.push(createModule(data.name, data.mimePlugin));
     }
     if (data.style) {
-      dynamicStylePromises.push(
-        loadComponentPromise.then(() => createModule(data.name, data.style))
-      );
+      dynamicStylePromises.push(createModule(data.name, data.style));
     }
-    return loadComponentPromise;
   });
-  await Promise.all(loadComponentPromises);
 
   // Handle the registered mime extensions.
   var mimeExtensions = [];
   var extension;
   var extMod;
   var plugins = [];
-  {{#each jupyterlab_mime_extensions}}
-  try {
-    extMod = require('{{@key}}/{{this}}');
-    extension = extMod.default;
 
-    // Handle CommonJS exports.
-    if (!extMod.hasOwnProperty('__esModule')) {
-      extension = extMod;
+  /**
+   * Iterate over active plugins in an extension.
+   * 
+   * #### Notes
+   * This also populates the disabled, deferred, and ignored arrays.
+   */
+  function* activePlugins(extension) {
+    // Handle commonjs or es2015 modules
+    let exports;
+    if (extension.hasOwnProperty('__esModule')) {
+      exports = extension.default;
+    } else {
+      // CommonJS exports.
+      exports = extension;
     }
 
-    plugins = Array.isArray(extension) ? extension : [extension];
-    plugins.forEach(function(plugin) {
+    let plugins = Array.isArray(exports) ? exports : [exports];
+    for (let plugin of plugins) {
+      if (PageConfig.Extension.isDisabled(plugin.id)) {
+        disabled.push(plugin.id);
+        continue;
+      }
       if (PageConfig.Extension.isDeferred(plugin.id)) {
         deferred.push(plugin.id);
         ignorePlugins.push(plugin.id);
       }
-      if (PageConfig.Extension.isDisabled(plugin.id)) {
-        disabled.push(plugin.id);
-        return;
-      }
+      yield plugin;
+    }
+  }
+
+  {{#each jupyterlab_mime_extensions}}
+  try {
+    for (let plugin of activePlugins(require('{{@key}}/{{this}}'))) {
       mimeExtensions.push(plugin);
-    });
+    }
   } catch (e) {
     console.error(e);
   }
   {{/each}}
 
-  // Add the dyanmic mime extensions.
-  const dynamicMimePlugins = await Promise.all(dynamicMimePluginPromises);
-  dynamicMimePlugins.forEach(plugin => { mimeExtensions.push(getModuleOrThrow(plugin)); });
+  // Add the dynamic mime extensions.
+  const dynamicMimePlugins = await Promise.allSettled(dynamicMimePluginPromises);
+  dynamicMimePlugins.forEach(p => {
+    if (p.status === "fulfilled") {
+      for (let plugin of activePlugins(p.value)) {
+        mimeExtensions.push(plugin);
+      }
+    } else {
+      console.error(p.reason);
+    }
+  });
 
   // Handled the registered standard extensions.
   {{#each jupyterlab_extensions}}
   try {
-    extMod = require('{{@key}}/{{this}}');
-    extension = extMod.default;
-
-    // Handle CommonJS exports.
-    if (!extMod.hasOwnProperty('__esModule')) {
-      extension = extMod;
-    }
-
-    plugins = Array.isArray(extension) ? extension : [extension];
-    plugins.forEach(function(plugin) {
-      if (PageConfig.Extension.isDeferred(plugin.id)) {
-        deferred.push(plugin.id);
-        ignorePlugins.push(plugin.id);
-      }
-      if (PageConfig.Extension.isDisabled(plugin.id)) {
-        disabled.push(plugin.id);
-        return;
-      }
+    for (let plugin of activePlugins(require('{{@key}}/{{this}}'))) {
       register.push(plugin);
-    });
+    }
   } catch (e) {
     console.error(e);
   }
   {{/each}}
 
   // Add the dynamic extensions.
-  const dynamicPlugins = await Promise.all(dynamicPluginPromises);
-  dynamicPlugins.forEach(plugin => { register.push(getModuleOrThrow(plugin)) });
+  const dynamicPlugins = await Promise.allSettled(dynamicPluginPromises);
+  dynamicPlugins.forEach(p => {
+    if (p.status === "fulfilled") {
+      for (let plugin of activePlugins(p.value)) {
+        register.push(plugin);
+      }
+    } else {
+      console.error(p.reason);
+    }
+  });
 
-  // Wait for the styles to load and check if everything loaded correctly
-  (await Promise.all(dynamicStylePromises)).forEach(plugin => getModuleOrThrow(plugin));
+  // Load all dynamic component styles and log errors for any that do not
+  (await Promise.allSettled(dynamicStylePromises)).filter(({status}) => status === "rejected").forEach(({reason}) => {
+     console.error(reason);
+    });
 
   var lab = new JupyterLab({
     mimeExtensions: mimeExtensions,
@@ -180,7 +206,7 @@ async function main() {
     },
   });
   register.forEach(function(item) { lab.registerPluginModule(item); });
-  lab.start({ ignorePlugins: ignorePlugins });
+  lab.start({ ignorePlugins });
   lab.restored.then(() => {
     console.debug('Example started!');
   });
