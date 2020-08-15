@@ -1,4 +1,4 @@
-import { WidgetAdapter } from './jl_adapter';
+import { WidgetAdapter } from '../adapter';
 import { FileEditor } from '@jupyterlab/fileeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';

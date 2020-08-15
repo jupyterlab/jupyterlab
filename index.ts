@@ -1,14 +1,9 @@
-import {
-  ILabShell,
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
+import { JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { ICommandPalette, IWidgetTracker } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { Signal } from '@lumino/signaling';
 
 import { LanguageServerManager } from './manager';
 
@@ -16,38 +11,29 @@ import { LanguageServerManager } from './manager';
 // import 'codemirror/addon/hint/show-hint.css';
 // import 'codemirror/addon/hint/show-hint';
 import '../style/index.css';
-
-import { NotebookAdapter } from './adapters/jupyterlab/notebook';
-import { FileEditorAdapter } from './adapters/jupyterlab/file_editor';
-import {
-  CommandEntryPoint,
-  ContextCommandManager, IContextMenuOptions
-} from './command_manager';
+import { CommandEntryPoint, ContextCommandManager, IContextMenuOptions } from './command_manager';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './components/statusbar';
 import { DocumentConnectionManager } from './connection_manager';
-import {
-  IAdapterRegistration,
-  ILSPAdapterManager,
-  ILSPFeatureManager,
-  PLUGIN_ID,
-  TLanguageServerConfigurations
-} from './tokens';
+import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID, TLanguageServerConfigurations } from './tokens';
 import { IFeature } from './feature';
 import { JUMP_PLUGIN } from './features/jump_to';
 import { COMPLETION_PLUGIN } from './features/completion';
-import { WidgetAdapter } from './adapters/jupyterlab/jl_adapter';
+import { WidgetAdapter } from './adapters/adapter';
 import { SIGNATURE_PLUGIN } from './features/signature';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { HOVER_PLUGIN } from './features/hover';
 import { RENAME_PLUGIN } from './features/rename';
 import { HIGHLIGHTS_PLUGIN } from './features/highlights';
 import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
-import IPaths = JupyterFrontEnd.IPaths;
 
 import { LabIcon } from '@jupyterlab/ui-components';
 
 import codeCheckSvg from '../style/icons/code-check.svg';
+import { WIDGET_ADAPTER_MANAGER } from "./adapter_manager";
+import { FILE_EDITOR_ADAPTER } from "./adapters/file_editor";
+import { NOTEBOOK_ADAPTER } from "./adapters/notebook";
+import IPaths = JupyterFrontEnd.IPaths;
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -95,198 +81,6 @@ export interface IAdapterTypeOptions<T extends IDocumentWidget> {
   get_id(widget: T): string;
 }
 
-export class WidgetAdapterManager implements ILSPAdapterManager {
-  adapterTypeAdded: Signal<WidgetAdapterManager, IAdapterTypeOptions<IDocumentWidget>>
-  adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
-  adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
-  currentAdapter: WidgetAdapter<IDocumentWidget>;
-
-  protected adapters: Map<string, WidgetAdapter<IDocumentWidget>> = new Map();
-  protected adapterTypes: IAdapterTypeOptions<IDocumentWidget>[];
-
-  get types(): IAdapterTypeOptions<IDocumentWidget>[] {
-    return this.adapterTypes;
-  }
-
-  constructor(
-    protected labShell: ILabShell
-  ) {
-    this.adapterChanged = new Signal(this);
-    this.adapterDisposed = new Signal(this);
-    this.adapterTypes = [];
-    labShell.currentChanged.connect(this.onLabFocusChanged, this);
-  }
-
-  public registerAdapterType(options: IAdapterTypeOptions<IDocumentWidget>) {
-    this.adapterTypes.push(options);
-    this.adapterTypeAdded.emit(options);
-  }
-
-  private connect(extension: LSPExtension, type: IAdapterTypeOptions<IDocumentWidget>) {
-    type.tracker.widgetAdded.connect((tracker, widget) => {
-      this.connectWidget(extension, widget, type)
-    })
-  }
-  
-  public registerExtension(extension: LSPExtension) {
-    for(let type of this.adapterTypes) {
-      this.connect(extension, type)
-    }
-    this.adapterTypeAdded.connect((manager, type) => {
-      this.connect(extension, type)
-      
-    })
-  }
-
-  protected connectWidget(extension: LSPExtension, widget: IDocumentWidget, type: IAdapterTypeOptions<IDocumentWidget>) {
-    let adapter = new type.adapter(extension, widget);
-    this.registerAdapter({
-      adapter: adapter,
-      id: type.get_id(widget),
-      re_connector: () => {
-        this.connectWidget(extension, widget, type)
-      }
-    });
-  }
-
-  protected onLabFocusChanged() {
-    const current = this.labShell.currentWidget as IDocumentWidget;
-    if (!current) {
-      return;
-    }
-    let adapter = null;
-
-    for (let type of this.adapterTypes) {
-      if (type.tracker.has(current)) {
-        let id = type.get_id(current);
-        adapter = this.adapters.get(id);
-      }
-    }
-
-    if (adapter != null) {
-      this.adapterChanged.emit(adapter);
-      this.currentAdapter = adapter;
-    }
-  }
-
-  protected registerAdapter(options: IAdapterRegistration) {
-    let { id, adapter, re_connector } = options;
-    let widget = options.adapter.widget;
-
-    if (this.adapters.has(id)) {
-      let old = this.adapters.get(id);
-      console.warn(`Adapter with id ${id} was already registered (${adapter} vs ${old}) `);
-    }
-    this.adapters.set(id, adapter);
-
-    const disconnect = () => {
-      this.adapters.delete(id);
-      widget.disposed.disconnect(disconnect);
-      widget.context.pathChanged.disconnect(reconnect);
-      adapter.dispose();
-    };
-
-    const reconnect = () => {
-      disconnect();
-      re_connector();
-    };
-
-    widget.disposed.connect(() => {
-      disconnect();
-      this.adapterDisposed.emit(adapter);
-    });
-    widget.context.pathChanged.connect(reconnect);
-
-    // TODO: maybe emit adapterCreated. Should it be handled by statusbar?
-  }
-
-  isAnyActive() {
-    return (
-      this.labShell.currentWidget &&
-      this.adapterTypes.some((type) => type.tracker.currentWidget)
-      &&
-      this.adapterTypes.some((type) => type.tracker.currentWidget == this.labShell.currentWidget)
-    );
-  }
-}
-
-
-const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
-  id: PLUGIN_ID + ':ILSPAdapterManager',
-  requires: [ILabShell],
-  activate: (
-    app,
-    labShell: ILabShell
-  ) => {
-    return new WidgetAdapterManager(labShell);
-  },
-  provides: ILSPAdapterManager,
-  autoStart: true
-};
-
-
-export const CellContextMenuEntryPoint: CommandEntryPoint = 'notebook-cell-context-menu';
-export const FileEditorContextMenuEntryPoint: CommandEntryPoint = 'file-editor-context-menu';
-
-const NOTEBOOK_ADAPTER: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID + ':NotebookAdapter',
-  requires: [ILSPAdapterManager, INotebookTracker],
-  activate(app, adapterManager: ILSPAdapterManager, notebookTracker: INotebookTracker) {
-    adapterManager.registerAdapterType(
-      {
-        name: 'notebook',
-        tracker: notebookTracker,
-        adapter: NotebookAdapter,
-        entrypoint: CellContextMenuEntryPoint,
-        get_id(widget: IDocumentWidget): string {
-          // TODO can we use id instead of content.id?
-          return widget.content.id
-        },
-        context_menu  : {
-          selector: '.jp-Notebook .jp-CodeCell .jp-Editor',
-          // position context menu entries after 10th but before 11th default entry
-          // this lets it be before "Clear outputs" which is the last entry of the
-          // CodeCell contextmenu and plays nicely with the first notebook entry
-          // ('Clear all outputs') thus should stay as the last one.
-          // see https://github.com/blink1073/jupyterlab/blob/3592afd328116a588e3307b4cdd9bcabc7fe92bb/packages/notebook-extension/src/index.ts#L802
-          // TODO: PR bumping rank of clear all outputs instead?
-          // adding a very small number (epsilon) places the group just after 10th entry
-          rank_group: 10 + Number.EPSILON,
-          // the group size is increased by one to account for separator,
-          // and by another one to prevent exceeding 11th rank by epsilon.
-          // TODO hardcoded space for 2 commands only!
-          rank_group_size: 2 + 2,
-          callback(manager) {
-            manager.add_context_separator(0);
-          }
-        }
-      } as IAdapterTypeOptions<IDocumentWidget>
-    );
-  },
-  autoStart: true
-}
-
-const FILE_EDITOR_ADAPTER: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID + ':NotebookAdapter',
-  requires: [ILSPAdapterManager, IEditorTracker],
-  activate(app, adapterManager: ILSPAdapterManager, fileEditorTracker: IEditorTracker) {
-    adapterManager.registerAdapterType(
-      {
-        name: 'file_editor',
-        tracker: fileEditorTracker,
-        adapter: FileEditorAdapter,
-        entrypoint: FileEditorContextMenuEntryPoint,
-        get_id(widget: IDocumentWidget): string {
-          return widget.id
-        },
-        context_menu: {
-          selector: '.jp-FileEditor',
-        }
-      }
-    );
-  },
-  autoStart: true
-}
 
 export class LSPExtension {
   connection_manager: DocumentConnectionManager;

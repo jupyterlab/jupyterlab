@@ -3,7 +3,7 @@ import {
   CommandEntryPoint,
   ContextCommandManager, IContextMenuOptions
 } from './command_manager';
-import { WidgetAdapter } from './adapters/jupyterlab/jl_adapter';
+import { WidgetAdapter } from './adapters/adapter';
 import { IFeatureCommand } from './feature';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 

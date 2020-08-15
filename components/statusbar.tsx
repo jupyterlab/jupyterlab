@@ -23,7 +23,7 @@ import {
   runningIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
-import { WidgetAdapter } from '../adapters/jupyterlab/jl_adapter';
+import { WidgetAdapter } from '../adapters/adapter';
 import { collect_documents, VirtualDocument } from '../virtual/document';
 import { LSPConnection } from '../connection';
 import { DocumentConnectionManager } from '../connection_manager';

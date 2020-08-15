@@ -2,27 +2,27 @@ import {
   CodeMirrorEditor,
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
-import { IVirtualEditor, VirtualCodeMirrorEditor } from '../../virtual/editor';
-import { LSPConnection } from '../../connection';
+import { IVirtualEditor, VirtualCodeMirrorEditor } from '../virtual/editor';
+import { LSPConnection } from '../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { VirtualCodeMirrorFileEditor } from '../../virtual/editors/file_editor';
-import { StatusMessage } from '../jupyterlab/jl_adapter';
-import { VirtualCodeMirrorNotebookEditor } from '../../virtual/editors/notebook';
+import { VirtualCodeMirrorFileEditor } from '../virtual/editors/file_editor';
+import { StatusMessage } from '../adapters/adapter';
+import { VirtualCodeMirrorNotebookEditor } from '../virtual/editors/notebook';
 import { Notebook, NotebookModel } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/testutils';
-import { IOverridesRegistry } from '../../magics/overrides';
-import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
+import { IOverridesRegistry } from '../magics/overrides';
+import { IForeignCodeExtractorsRegistry } from '../extractors/types';
 import * as nbformat from '@jupyterlab/nbformat';
 import { ICellModel } from '@jupyterlab/cells';
-import { VirtualDocument } from '../../virtual/document';
-import { LanguageServerManager } from '../../manager';
-import { DocumentConnectionManager } from '../../connection_manager';
+import { VirtualDocument } from '../virtual/document';
+import { LanguageServerManager } from '../manager';
+import { DocumentConnectionManager } from '../connection_manager';
 import createNotebook = NBTestUtils.createNotebook;
 import {
   CodeMirrorIntegration,
   CodeMirrorIntegrationConstructor
-} from '../../editor_integration/codemirror';
-import { EditorAdapter } from '../editor_adapter';
+} from './codemirror';
+import { EditorAdapter } from './editor_adapter';
 import IEditor = CodeEditor.IEditor;
 
 interface IFeatureTestEnvironment {

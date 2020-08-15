@@ -9,7 +9,7 @@ import {
 import * as CodeMirror from 'codemirror';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
-import { MockLanguageServerManager } from '../adapters/codemirror/testutils';
+import { MockLanguageServerManager } from '../editor_integration/testutils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 class VirtualEditorImplementation extends VirtualCodeMirrorEditor {

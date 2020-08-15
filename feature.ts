@@ -4,7 +4,7 @@ import { IEditorChange, IVirtualEditor } from './virtual/editor';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
 import { IRootPosition } from './positioning';
-import { StatusMessage } from './adapters/jupyterlab/jl_adapter';
+import { StatusMessage } from './adapters/adapter';
 import IEditor = CodeEditor.IEditor;
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 

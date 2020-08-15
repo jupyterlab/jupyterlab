@@ -8,7 +8,7 @@ import {
 import {
   IEditorChangedData,
   WidgetAdapter
-} from '../adapters/jupyterlab/jl_adapter';
+} from '../adapters/adapter';
 import { LSPConnector } from './completion_handler';
 import { ICompletionManager } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -20,7 +20,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { CodeCompletion as LSPCompletionSettings } from '../_completion';
 import { IDocumentConnectionData } from '../connection_manager';
 import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
-import { NotebookAdapter } from '../adapters/jupyterlab/notebook';
+import { NotebookAdapter } from '../adapters/notebook/notebook';
 import { LabIcon } from '@jupyterlab/ui-components';
 
 import completionSvg from '../../style/icons/completion.svg';

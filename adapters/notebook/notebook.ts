@@ -1,4 +1,4 @@
-import { WidgetAdapter } from './jl_adapter';
+import { WidgetAdapter } from '../adapter';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { VirtualCodeMirrorNotebookEditor } from '../../virtual/editors/notebook';
 import { until_ready } from '../../utils';

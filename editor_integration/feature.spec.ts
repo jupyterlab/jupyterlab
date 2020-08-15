@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { LSPConnection } from '../../connection';
-import { StatusMessage } from '../jupyterlab/jl_adapter';
+import { LSPConnection } from '../connection';
+import { StatusMessage } from '../adapters/adapter';
 import {
   code_cell,
   FeatureTestEnvironment,
@@ -13,13 +13,13 @@ import {
 } from './testutils';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as nbformat from '@jupyterlab/nbformat';
-import { language_specific_overrides } from '../../magics/defaults';
-import { foreign_code_extractors } from '../../extractors/defaults';
+import { language_specific_overrides } from '../magics/defaults';
+import { foreign_code_extractors } from '../extractors/defaults';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
-import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
-import { EditorAdapter } from '../editor_adapter';
-import { IVirtualEditor } from '../../virtual/editor';
+import { CodeMirrorIntegration } from './codemirror';
+import { EditorAdapter } from './editor_adapter';
+import { IVirtualEditor } from '../virtual/editor';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import IEditor = CodeEditor.IEditor;
 

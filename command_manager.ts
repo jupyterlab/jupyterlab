@@ -1,6 +1,6 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { ICommandPalette, IWidgetTracker } from '@jupyterlab/apputils';
-import { WidgetAdapter } from './adapters/jupyterlab/jl_adapter';
+import { WidgetAdapter } from './adapters/adapter';
 import { FeatureEditorIntegration, IFeatureCommand } from './feature';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';

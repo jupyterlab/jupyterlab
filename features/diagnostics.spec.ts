@@ -11,7 +11,7 @@ import {
   NotebookFeatureTestEnvironment,
   set_notebook_content,
   showAllCells
-} from '../adapters/codemirror/testutils';
+} from '../editor_integration/testutils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { is_equal } from '../positioning';
 import { language_specific_overrides } from '../magics/defaults';

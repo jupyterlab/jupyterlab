@@ -2,10 +2,11 @@ import { ISignal, Signal } from '@lumino/signaling';
 import { ServerConnection } from '@jupyterlab/services';
 
 import * as SCHEMA from './_schema';
-import { WidgetAdapter } from './adapters/jupyterlab/jl_adapter';
+import { WidgetAdapter } from './adapters/adapter';
 import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
 import { Token } from '@lumino/coreutils';
-import { IFeatureOptions, IAdapterTypeOptions, LSPExtension, WidgetAdapterManager } from './index';
+import { IFeatureOptions, IAdapterTypeOptions, LSPExtension} from './index';
+import { WidgetAdapterManager } from "./adapter_manager";
 
 export type TLanguageServerId = string;
 export type TLanguageId = string;
