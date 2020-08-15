@@ -5,7 +5,7 @@ import * as SCHEMA from './_schema';
 import { WidgetAdapter } from './adapters/jupyterlab/jl_adapter';
 import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
 import { Token } from '@lumino/coreutils';
-import { IFeatureOptions, IWidgetTypeOptions, LSPExtension, WidgetAdapterManager } from './index';
+import { IFeatureOptions, IAdapterTypeOptions, LSPExtension, WidgetAdapterManager } from './index';
 
 export type TLanguageServerId = string;
 export type TLanguageId = string;
@@ -79,9 +79,10 @@ export interface ILSPAdapterManager {
   adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
   currentAdapter: WidgetAdapter<IDocumentWidget>;
   isAnyActive: () => boolean;
-  registerAdapter: (options: IAdapterRegistration) => void;
-  registerExtension: (extension: LSPExtension) => void;
-  readonly types: IWidgetTypeOptions<IDocumentWidget>[];
+  // TODO: make async, return promises?
+  registerExtension(extension: LSPExtension): void;
+  registerAdapterType(options: IAdapterTypeOptions<IDocumentWidget>): void;
+  readonly types: IAdapterTypeOptions<IDocumentWidget>[];
 }
 
 export const PLUGIN_ID = '@krassowski/jupyterlab-lsp';

@@ -86,7 +86,7 @@ export type WidgetAdapterConstructor<T extends IDocumentWidget> = {
   new (extension: LSPExtension, widget: T): WidgetAdapter<T>;
 };
 
-export interface IWidgetTypeOptions<T extends IDocumentWidget> {
+export interface IAdapterTypeOptions<T extends IDocumentWidget> {
   tracker: IWidgetTracker<T>;
   name: string;
   adapter: WidgetAdapterConstructor<T>;
@@ -96,34 +96,49 @@ export interface IWidgetTypeOptions<T extends IDocumentWidget> {
 }
 
 export class WidgetAdapterManager implements ILSPAdapterManager {
+  adapterTypeAdded: Signal<WidgetAdapterManager, IAdapterTypeOptions<IDocumentWidget>>
   adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
   adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
-  currentAdapter: WidgetAdapter<IDocumentWidget>;   // TODO populate this!
+  currentAdapter: WidgetAdapter<IDocumentWidget>;
 
   protected adapters: Map<string, WidgetAdapter<IDocumentWidget>> = new Map();
+  protected adapterTypes: IAdapterTypeOptions<IDocumentWidget>[];
 
-  get types(): IWidgetTypeOptions<IDocumentWidget>[] {
-    return this.widgetTypes;
+  get types(): IAdapterTypeOptions<IDocumentWidget>[] {
+    return this.adapterTypes;
   }
 
   constructor(
-    protected labShell: ILabShell,
-    protected widgetTypes: IWidgetTypeOptions<IDocumentWidget>[]
+    protected labShell: ILabShell
   ) {
     this.adapterChanged = new Signal(this);
     this.adapterDisposed = new Signal(this);
+    this.adapterTypes = [];
     labShell.currentChanged.connect(this.onLabFocusChanged, this);
   }
 
-  public registerExtension(extension: LSPExtension) {
-    for(let type of this.widgetTypes) {
-      type.tracker.widgetAdded.connect((tracker, widget) => {
-        this.connectWidget(extension, widget, type)
-      })
-    }
+  public registerAdapterType(options: IAdapterTypeOptions<IDocumentWidget>) {
+    this.adapterTypes.push(options);
+    this.adapterTypeAdded.emit(options);
   }
 
-  protected connectWidget(extension: LSPExtension, widget: IDocumentWidget, type: IWidgetTypeOptions<IDocumentWidget>) {
+  private connect(extension: LSPExtension, type: IAdapterTypeOptions<IDocumentWidget>) {
+    type.tracker.widgetAdded.connect((tracker, widget) => {
+      this.connectWidget(extension, widget, type)
+    })
+  }
+  
+  public registerExtension(extension: LSPExtension) {
+    for(let type of this.adapterTypes) {
+      this.connect(extension, type)
+    }
+    this.adapterTypeAdded.connect((manager, type) => {
+      this.connect(extension, type)
+      
+    })
+  }
+
+  protected connectWidget(extension: LSPExtension, widget: IDocumentWidget, type: IAdapterTypeOptions<IDocumentWidget>) {
     let adapter = new type.adapter(extension, widget);
     this.registerAdapter({
       adapter: adapter,
@@ -141,7 +156,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     }
     let adapter = null;
 
-    for (let type of this.widgetTypes) {
+    for (let type of this.adapterTypes) {
       if (type.tracker.has(current)) {
         let id = type.get_id(current);
         adapter = this.adapters.get(id);
@@ -154,7 +169,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     }
   }
 
-  registerAdapter(options: IAdapterRegistration) {
+  protected registerAdapter(options: IAdapterRegistration) {
     let { id, adapter, re_connector } = options;
     let widget = options.adapter.widget;
 
@@ -188,23 +203,33 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
   isAnyActive() {
     return (
       this.labShell.currentWidget &&
-      this.widgetTypes.some((type) => type.tracker.currentWidget)
+      this.adapterTypes.some((type) => type.tracker.currentWidget)
       &&
-      this.widgetTypes.some((type) => type.tracker.currentWidget == this.labShell.currentWidget)
+      this.adapterTypes.some((type) => type.tracker.currentWidget == this.labShell.currentWidget)
     );
   }
 }
 
+
 const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
   id: PLUGIN_ID + ':ILSPAdapterManager',
-  requires: [IEditorTracker, INotebookTracker, ILabShell],
+  requires: [ILabShell],
   activate: (
     app,
-    fileEditorTracker: IEditorTracker,
-    notebookTracker: INotebookTracker,
     labShell: ILabShell
   ) => {
-    const widgetTypes: IWidgetTypeOptions<IDocumentWidget>[] = [
+    return new WidgetAdapterManager(labShell);
+  },
+  provides: ILSPAdapterManager,
+  autoStart: true
+};
+
+
+const NOTEBOOK_ADAPTER: JupyterFrontEndPlugin<void> = {
+  id: PLUGIN_ID + ':NotebookAdapter',
+  requires: [ILSPAdapterManager, INotebookTracker],
+  activate(app, adapterManager: ILSPAdapterManager, notebookTracker: INotebookTracker) {
+    adapterManager.registerAdapterType(
       {
         name: 'notebook',
         tracker: notebookTracker,
@@ -232,7 +257,17 @@ const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
             manager.add_context_separator(0);
           }
         }
-      },
+      } as IAdapterTypeOptions<IDocumentWidget>
+    );
+  },
+  autoStart: true
+}
+
+const FILE_EDITOR_ADAPTER: JupyterFrontEndPlugin<void> = {
+  id: PLUGIN_ID + ':NotebookAdapter',
+  requires: [ILSPAdapterManager, IEditorTracker],
+  activate(app, adapterManager: ILSPAdapterManager, fileEditorTracker: IEditorTracker) {
+    adapterManager.registerAdapterType(
       {
         name: 'file_editor',
         tracker: fileEditorTracker,
@@ -245,15 +280,10 @@ const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
           selector: '.jp-FileEditor',
         }
       }
-    ];
-    return new WidgetAdapterManager(
-      labShell,
-      widgetTypes
     );
   },
-  provides: ILSPAdapterManager,
   autoStart: true
-};
+}
 
 export class LSPExtension {
   connection_manager: DocumentConnectionManager;
@@ -377,6 +407,8 @@ const default_features: JupyterFrontEndPlugin<void>[] = [
 const plugins: JupyterFrontEndPlugin<any>[] = [
   plugin,
   WIDGET_ADAPTER_MANAGER,
+  NOTEBOOK_ADAPTER,
+  FILE_EDITOR_ADAPTER,
   ...default_features
 ];
 
