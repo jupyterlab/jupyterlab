@@ -22,11 +22,7 @@ function is_context_menu_over_token(adapter: WidgetAdapter<IDocumentWidget>) {
   return token.value !== '';
 }
 
-// TODO: this has to be provided by each widget
-export enum CommandEntryPoint {
-  CellContextMenu,
-  FileEditorContextMenu
-}
+export type CommandEntryPoint = string;
 
 export interface ILSPCommandManagerOptions {
   adapter_manager: ILSPAdapterManager,

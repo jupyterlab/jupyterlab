@@ -225,6 +225,9 @@ const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
 };
 
 
+export const CellContextMenuEntryPoint: CommandEntryPoint = 'notebook-cell-context-menu';
+export const FileEditorContextMenuEntryPoint: CommandEntryPoint = 'file-editor-context-menu';
+
 const NOTEBOOK_ADAPTER: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID + ':NotebookAdapter',
   requires: [ILSPAdapterManager, INotebookTracker],
@@ -234,7 +237,7 @@ const NOTEBOOK_ADAPTER: JupyterFrontEndPlugin<void> = {
         name: 'notebook',
         tracker: notebookTracker,
         adapter: NotebookAdapter,
-        entrypoint: CommandEntryPoint.CellContextMenu,
+        entrypoint: CellContextMenuEntryPoint,
         get_id(widget: IDocumentWidget): string {
           // TODO can we use id instead of content.id?
           return widget.content.id
@@ -272,7 +275,7 @@ const FILE_EDITOR_ADAPTER: JupyterFrontEndPlugin<void> = {
         name: 'file_editor',
         tracker: fileEditorTracker,
         adapter: FileEditorAdapter,
-        entrypoint: CommandEntryPoint.FileEditorContextMenu,
+        entrypoint: FileEditorContextMenuEntryPoint,
         get_id(widget: IDocumentWidget): string {
           return widget.id
         },

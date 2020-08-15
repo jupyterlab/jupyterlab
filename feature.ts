@@ -27,7 +27,7 @@ export interface IFeatureCommand {
    */
   is_rank_relative?: boolean;
   /**
-   * By default the command will be attached to the cell and file editor context menus.
+   * By default the command will be attached to context menus of each adapter.
    */
   attach_to?: Set<CommandEntryPoint>;
 }
