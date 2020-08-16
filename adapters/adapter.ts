@@ -2,21 +2,17 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { DocumentRegistry, IDocumentWidget } from '@jupyterlab/docregistry';
 import { IVirtualEditor } from '../virtual/editor';
-import { VirtualDocument, IForeignContext } from '../virtual/document';
+import { IForeignContext, VirtualDocument } from '../virtual/document';
 import { Signal } from '@lumino/signaling';
 import { IRootPosition } from '../positioning';
 import { LSPConnection } from '../connection';
 import { ICommandContext } from '../command_manager';
 import { JSONObject } from '@lumino/coreutils';
-import {
-  DocumentConnectionManager,
-  IDocumentConnectionData,
-  ISocketConnectionOptions
-} from '../connection_manager';
+import { DocumentConnectionManager, IDocumentConnectionData, ISocketConnectionOptions } from '../connection_manager';
 import { LSPExtension } from '../index';
 import { FeatureEditorIntegration } from '../feature';
-import IEditor = CodeEditor.IEditor;
 import { EditorAdapter } from '../editor_integration/editor_adapter';
+import IEditor = CodeEditor.IEditor;
 
 export class StatusMessage {
   /**
@@ -78,11 +74,16 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   public adapterConnected: Signal<WidgetAdapter<T>, IDocumentConnectionData>;
   public connection_manager: DocumentConnectionManager;
   public status_message: StatusMessage;
-  public isDisposed = false;
+  protected isDisposed = false;
 
   protected app: JupyterFrontEnd;
 
   public activeEditorChanged: Signal<WidgetAdapter<T>, IEditorChangedData>;
+
+  /**
+   * (re)create virtual document using current path and language
+   */
+  abstract create_virtual_document(): VirtualDocument;
 
   protected constructor(protected extension: LSPExtension, public widget: T) {
     this.app = extension.app;
@@ -124,9 +125,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.connection_manager.closed.disconnect(this.on_connection_closed, this);
     this.widget.disposed.disconnect(this.dispose, this);
     this.widget.context.model.contentChanged.disconnect(
-      this.update_documents,
+      this.onContentChanged,
       this
     );
+
     for (let adapter of this.adapters.values()) {
       adapter.dispose();
     }
@@ -191,9 +193,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     );
 
     // recreate virtual document using current path and language
-    this.virtual_editor.create_virtual_document();
+    let virtual_document = this.create_virtual_document();
+    this.virtual_editor.virtual_document = virtual_document;
     // reconnect
-    this.connect_document(this.virtual_editor.virtual_document, true).catch(
+    this.connect_document(virtual_document, true).catch(
       console.warn
     );
   }
@@ -215,13 +218,17 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   abstract activeEditor: CodeEditor.IEditor;
 
+  private update_documents() {
+    return this.virtual_editor.virtual_document.update_manager.update_documents(this.virtual_editor.perform_documents_update);
+  }
+
   protected async on_connected(data: IDocumentConnectionData) {
     let { virtual_document } = data;
 
     await this.connect_adapter(data.virtual_document, data.connection);
     this.adapterConnected.emit(data);
 
-    await this.virtual_editor.update_documents().then(() => {
+    await this.update_documents().then(() => {
       // refresh the document on the LSP server
       this.document_changed(virtual_document, virtual_document, true);
 
@@ -291,7 +298,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     );
   }
 
-  on_foreign_document_closed(host: VirtualDocument, context: IForeignContext) {
+  private on_foreign_document_closed(host: VirtualDocument, context: IForeignContext) {
     const { foreign_document } = context;
     foreign_document.foreign_document_closed.disconnect(
       this.on_foreign_document_closed,
@@ -304,7 +311,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     foreign_document.changed.disconnect(this.document_changed, this);
   }
 
-  document_changed(
+  private document_changed(
     virtual_document: VirtualDocument,
     document: VirtualDocument,
     is_init = false
@@ -342,8 +349,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       //  it introduces an unnecessary delay. A better way could be to invalidate some of the updates when a new one comes in.
       //  but maybe not every one (then the outdated state could be kept for too long fo a user who writes very quickly)
       //  also we would not want to invalidate the updates for the purpose of autocompletion (the trigger characters)
-      this.virtual_editor
-        .with_update_lock(async () => {
+      this.virtual_editor.virtual_document.update_manager.with_update_lock(async () => {
           await adapter.updateAfterChange();
         })
         .then()
@@ -405,12 +411,12 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
    */
   connect_contentChanged_signal() {
     this.widget.context.model.contentChanged.connect(
-      this.update_documents,
+      this.onContentChanged,
       this
     );
   }
 
-  create_adapter(
+  private create_adapter(
     virtual_document: VirtualDocument,
     connection: LSPConnection
   ): EditorAdapter<IVirtualEditor<IEditor>> {
@@ -443,9 +449,9 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     return adapter;
   }
 
-  update_documents(_slot: any) {
+  private onContentChanged(_slot: any) {
     // update the virtual documents (sending the updates to LSP is out of scope here)
-    this.virtual_editor.update_documents().then().catch(console.warn);
+    this.update_documents().then().catch(console.warn);
   }
 
   get_position_from_context_menu(): IRootPosition {

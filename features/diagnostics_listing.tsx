@@ -63,7 +63,7 @@ function DocumentLocator(props: {
     if (!document.parent) {
       let path = document.path;
       if (
-        !editor.has_lsp_supported_file &&
+        !document.has_lsp_supported_file &&
         path.endsWith(document.file_extension)
       ) {
         path = path.slice(0, -document.file_extension.length - 1);

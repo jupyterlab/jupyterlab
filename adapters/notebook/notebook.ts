@@ -13,10 +13,14 @@ import { LSPExtension } from '../../index';
 import { PositionConverter } from "../../converter";
 import { IEditorPosition } from "../../positioning";
 import { ICommandContext } from "../../command_manager";
+import { IVirtualEditor } from "../../virtual/editor";
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import IEditor = CodeEditor.IEditor;
+import { VirtualDocument } from "../../virtual/document";
 
 export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   editor: Notebook;
-  virtual_editor: VirtualCodeMirrorNotebookEditor;
+  virtual_editor: IVirtualEditor<IEditor>;
 
   private _language_info: ILanguageInfoMetadata;
 
@@ -111,14 +115,12 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     await this.update_language_info();
     console.log('LSP:', this.document_path, 'ready for connection');
 
+    let virtual_document = this.create_virtual_document();
+
     this.virtual_editor = new VirtualCodeMirrorNotebookEditor(
       this.widget.content,
       this.widget.node,
-      () => this.language,
-      () => this.language_file_extension,
-      language_specific_overrides,
-      foreign_code_extractors,
-      () => this.document_path
+      virtual_document
     );
     this.connect_contentChanged_signal();
 
@@ -136,11 +138,26 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     this.widget.content.activeCellChanged.connect(this.activeCellChanged, this);
   }
 
+  create_virtual_document() {
+    return new VirtualDocument( {
+      language: this.language,
+      path: this.document_path,
+      overrides_registry: language_specific_overrides,
+      foreign_code_extractors: foreign_code_extractors,
+      file_extension: this.language_file_extension,
+      // notebooks are continuous, each cell is dependent on the previous one
+      standalone: false,
+      // notebooks are not supported by LSP servers
+      has_lsp_supported_file: false
+      }
+    );
+  }
+
   get activeEditor() {
     return this.widget.content.activeCell.editor;
   }
 
-  activeCellChanged(notebook: Notebook, cell: Cell) {
+  private activeCellChanged(notebook: Notebook, cell: Cell) {
     this.activeEditorChanged.emit({
       editor: cell.editor
     });
@@ -158,8 +175,8 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       return null;
     }
 
-    let root_position = virtual_editor.transform_from_notebook_to_root(
-      cell,
+    let root_position = virtual_editor.transform_from_editor_to_root(
+      editor,
       cm_cursor
     );
 

@@ -1,5 +1,4 @@
 import { VirtualDocument } from './document';
-import { IOverridesRegistry } from '../magics/overrides';
 import { IForeignCodeExtractorsRegistry } from '../extractors/types';
 import * as CodeMirror from 'codemirror';
 import {
@@ -8,13 +7,13 @@ import {
   ISourcePosition,
   IVirtualPosition
 } from '../positioning';
-import { until_ready } from '../utils';
 import { Signal } from '@lumino/signaling';
 import { EditorLogConsole, create_console } from './console';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { PositionConverter } from '../converter';
 import { IEditorName } from '../feature';
+import IEditor = CodeEditor.IEditor;
 
 export interface IWindowCoordinates {
   /**
@@ -30,7 +29,11 @@ export interface IWindowCoordinates {
 export type CodeMirrorHandler = (instance: any, ...args: any[]) => void;
 type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
 
+/**
+ * This is based on CodeMirror.EditorChange
+ */
 export interface IEditorChange {
+  // TODO chamge position type
   /** Position (in the pre-change coordinate system) where the change started. */
   from: CodeMirror.Position;
   /** Position (in the pre-change coordinate system) where the change ended. */
@@ -54,26 +57,6 @@ export interface IVirtualEditor<IEditor> {
    */
   dispose(): void;
 
-  /**
-   * (re)create virtual document using current path and language
-   */
-  create_virtual_document(): void;
-
-  /**
-   * Update all the virtual documents, emit documents updated with root document if succeeded,
-   * and resolve a void promise. The promise does not contain the text value of the root document,
-   * as to avoid an easy trap of ignoring the changes in the virtual documents.
-   */
-  update_documents(): Promise<void>;
-
-  /**
-   * Execute provided callback within an update-locked context, which guarantees that:
-   *  - the previous updates must have finished before the callback call, and
-   *  - no update will happen when executing the callback
-   * @param fn - the callback to execute in update lock
-   */
-  with_update_lock(fn: Function): Promise<void>;
-
   document_at_root_position(position: IRootPosition): VirtualDocument;
 
   root_position_to_virtual_position(position: IRootPosition): IVirtualPosition;
@@ -92,9 +75,19 @@ export interface IVirtualEditor<IEditor> {
   get_cursor_position(): IRootPosition;
 
   change: Signal<IVirtualEditor<IEditor>, IEditorChange>;
-}
 
-// TODO: Create VirtualEditorManager token, register codemirror as one of many, make a decision sequence to create a specific virtual editor depending on detected editor
+  /**
+   * Some adapters have more than one editor, thus...
+   * @param editor
+   * @param position
+   */
+  transform_from_editor_to_root(
+    editor: CodeEditor.IEditor,
+    position: IEditorPosition
+  ): IRootPosition | null
+
+  perform_documents_update(): void;
+}
 
 /**
  * VirtualEditor extends the CodeMirror.Editor interface; its subclasses may either
@@ -113,10 +106,6 @@ export abstract class VirtualCodeMirrorEditor
   code_extractors: IForeignCodeExtractorsRegistry;
   console: EditorLogConsole;
   /**
-   * Signal emitted by the editor that triggered the update, providing the root document of the updated documents.
-   */
-  private documents_updated: Signal<VirtualCodeMirrorEditor, VirtualDocument>;
-  /**
    * Whether the editor reflects an interface with multiple cells (such as a notebook)
    */
   has_cells: boolean;
@@ -124,24 +113,17 @@ export abstract class VirtualCodeMirrorEditor
 
   change: Signal<IVirtualEditor<CodeMirrorEditor>, IEditorChange>;
 
+  abstract transform_from_editor_to_root(
+    editor: CodeEditor.IEditor,
+    position: IEditorPosition
+  ): IRootPosition | null;
+
   get_cursor_position(): IRootPosition {
     return this.getDoc().getCursor('end') as IRootPosition;
   }
 
-  public constructor(
-    protected language: () => string,
-    protected file_extension: () => string,
-    protected path: () => string,
-    protected overrides_registry: IOverridesRegistry,
-    protected foreign_code_extractors: IForeignCodeExtractorsRegistry,
-    public has_lsp_supported_file: boolean
-  ) {
-    this.create_virtual_document();
-    this.documents_updated = new Signal<
-      VirtualCodeMirrorEditor,
-      VirtualDocument
-    >(this);
-    this.documents_updated.connect(this.on_updated, this);
+  public constructor(virtual_document: VirtualDocument) {
+    this.virtual_document = virtual_document;
     this.console = create_console('browser');
     this.change = new Signal(this);
 
@@ -170,25 +152,12 @@ export abstract class VirtualCodeMirrorEditor
     };
   }
 
-  create_virtual_document() {
-    this.virtual_document = new VirtualDocument(
-      this.language(),
-      this.path(),
-      this.overrides_registry,
-      this.foreign_code_extractors,
-      false,
-      this.file_extension(),
-      this.has_lsp_supported_file
-    );
-  }
-
   dispose() {
     if (this.isDisposed) {
       return;
     }
 
     this.off('change', this.emit_change);
-    this.documents_updated.disconnect(this.on_updated, this);
 
     for (let [[eventName], wrapped_handler] of this._event_wrappers.entries()) {
       this.forEveryBlockEditor(cm_editor => {
@@ -202,23 +171,9 @@ export abstract class VirtualCodeMirrorEditor
 
     // just to be sure
     this.virtual_document = null;
-    this.overrides_registry = null;
-    this.foreign_code_extractors = null;
     this.code_extractors = null;
 
     this.isDisposed = true;
-  }
-
-  /**
-   * Once all the foreign documents were refreshed, the unused documents (and their connections)
-   * should be terminated if their lifetime has expired.
-   */
-  on_updated(editor: VirtualCodeMirrorEditor, root_document: VirtualDocument) {
-    try {
-      root_document.close_expired_documents();
-    } catch (e) {
-      this.console.warn('LSP: Failed to close expired documents');
-    }
   }
 
   abstract get_editor_index(position: IVirtualPosition): number;
@@ -244,66 +199,9 @@ export abstract class VirtualCodeMirrorEditor
   abstract get_cm_editor(position: IRootPosition): CodeMirror.Editor;
 
   /**
-   * Virtual documents update guard.
-   */
-  private is_update_in_progress: boolean = false;
-
-  private can_update() {
-    return !this.isDisposed && !this.is_update_in_progress && !this.update_lock;
-  }
-
-  private update_lock: boolean = false;
-
-  /**
-   * Execute provided callback within an update-locked context, which guarantees that:
-   *  - the previous updates must have finished before the callback call, and
-   *  - no update will happen when executing the callback
-   * @param fn - the callback to execute in update lock
-   */
-  public async with_update_lock(fn: Function) {
-    // this.console.log('Will enter update lock with', fn);
-    await until_ready(() => this.can_update(), 12, 10).then(() => {
-      try {
-        this.update_lock = true;
-        fn();
-      } finally {
-        this.update_lock = false;
-      }
-    });
-  }
-
-  public async update_documents(): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
-      // defer the update by up to 50 ms (10 retrials * 5 ms break),
-      // awaiting for the previous update to complete.
-      await until_ready(() => this.can_update(), 10, 5).then(() => {
-        if (this.isDisposed || !this.virtual_document) {
-          resolve();
-        }
-        try {
-          this.is_update_in_progress = true;
-          this.perform_documents_update();
-
-          if (this.virtual_document) {
-            this.documents_updated.emit(this.virtual_document);
-            this.virtual_document.maybe_emit_changed();
-          }
-
-          resolve();
-        } catch (e) {
-          this.console.warn('Documents update failed:', e);
-          reject(e);
-        } finally {
-          this.is_update_in_progress = false;
-        }
-      });
-    });
-  }
-
-  /**
    * Actual implementation of the update action.
    */
-  protected abstract perform_documents_update(): void;
+  public abstract perform_documents_update(): void;
 
   // TODO: remove?
   abstract addEventListener(

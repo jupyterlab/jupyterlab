@@ -8,13 +8,15 @@ import { LSPExtension } from '../../index';
 import { PositionConverter } from "../../converter";
 import { IRootPosition } from "../../positioning";
 import { ICommandContext } from "../../command_manager";
+import { IVirtualEditor } from "../../virtual/editor";
+import IEditor = CodeEditor.IEditor;
+import { VirtualDocument } from "../../virtual/document";
 
-// TODO if (fileEditor.editor instanceof CodeMirrorEditor) {
 export class FileEditorAdapter extends WidgetAdapter<
   IDocumentWidget<FileEditor>
 > {
   editor: FileEditor;
-  virtual_editor: VirtualCodeMirrorFileEditor;
+  virtual_editor: IVirtualEditor<IEditor>;
 
   get document_path() {
     return this.widget.context.path;
@@ -45,12 +47,11 @@ export class FileEditorAdapter extends WidgetAdapter<
     this.editor = editor_widget.content;
 
     // TODO editor-agnostic mechanism
+    // TODO if (fileEditor.editor instanceof CodeMirrorEditor) {
     this.virtual_editor = new VirtualCodeMirrorFileEditor(
-      () => this.language,
-      () => this.language_file_extension,
-      () => this.document_path,
+      this.create_virtual_document(),
       this.ce_editor
-    );
+    )
     this.connect_contentChanged_signal();
 
     console.log('LSP: file ready for connection:', this.path);
@@ -73,5 +74,24 @@ export class FileEditorAdapter extends WidgetAdapter<
     let ce_cursor = editor.getCursorPosition();
     let root_position = PositionConverter.ce_to_cm(ce_cursor) as IRootPosition;
     return this?.get_context(root_position);
+  }
+
+  create_virtual_document(): VirtualDocument {
+    // TODO: for now the magics and extractors are not used in FileEditor,
+    //  although it would make sense to pass extractors (e.g. for CSS in HTML,
+    //  or SQL in Python files) in the future. However, these would need to be
+    //  a different registry (as we would not want to extract kernel-specific
+    //  constructs like magics)
+    return new VirtualDocument(
+      {
+        language: this.language,
+        file_extension: this.language_file_extension,
+        path: this.document_path,
+        overrides_registry: {},
+        foreign_code_extractors: {},
+        standalone: true,
+        has_lsp_supported_file: true
+  }
+    )
   }
 }

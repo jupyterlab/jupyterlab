@@ -7,6 +7,7 @@ import {
 } from '../../positioning';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { VirtualDocument } from "../document";
 
 export class VirtualCodeMirrorFileEditor extends VirtualCodeMirrorEditor {
   protected cm_editor: CodeMirror.Editor;
@@ -17,15 +18,10 @@ export class VirtualCodeMirrorFileEditor extends VirtualCodeMirrorEditor {
   }
 
   constructor(
-    language: () => string,
-    file_extension: () => string,
-    path: () => string,
+    virtual_document: VirtualDocument,
     protected ce_editor: CodeEditor.IEditor
   ) {
-    // TODO: for now the magics and extractors are not used in FileEditor,
-    //  although it would make sense to pass extractors (e.g. for CSS in HTML,
-    //  or SQL in Python files) in the future.
-    super(language, file_extension, path, {}, {}, true);
+    super(virtual_document);
     let cm_editor = (ce_editor as CodeMirrorEditor).editor;
     this.cm_editor = cm_editor;
 
@@ -49,10 +45,18 @@ export class VirtualCodeMirrorFileEditor extends VirtualCodeMirrorEditor {
     return (position as unknown) as IEditorPosition;
   }
 
+  // TODO why is this public
   public _transform_editor_to_root(
     cm_editor: CodeMirror.Editor,
     position: IEditorPosition
   ): IRootPosition {
+    return (position as unknown) as IRootPosition;
+  }
+
+  transform_from_editor_to_root(
+    editor: CodeEditor.IEditor,
+    position: IEditorPosition
+  ): IRootPosition | null {
     return (position as unknown) as IRootPosition;
   }
 
@@ -64,7 +68,7 @@ export class VirtualCodeMirrorFileEditor extends VirtualCodeMirrorEditor {
     return this.cm_editor;
   }
 
-  protected perform_documents_update(): void {
+  perform_documents_update(): void {
     if (this.isDisposed) {
       return;
     }

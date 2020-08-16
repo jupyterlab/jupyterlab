@@ -1,8 +1,6 @@
 import { Notebook } from '@jupyterlab/notebook';
 import { Cell } from '@jupyterlab/cells';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { IOverridesRegistry } from '../../magics/overrides';
-import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
 import { VirtualCodeMirrorEditor } from '../editor';
 import * as CodeMirror from 'codemirror';
 import {
@@ -11,6 +9,7 @@ import {
   IVirtualPosition
 } from '../../positioning';
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { VirtualDocument } from "../document";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
@@ -49,12 +48,12 @@ class DocDispatcher implements CodeMirror.Doc {
     let cursor = active_editor.editor
       .getDoc()
       .getCursor(start) as IEditorPosition;
-    return this.virtual_editor.transform_from_notebook_to_root(cell, cursor);
+    return this.virtual_editor.transform_from_editor_to_root(cell.editor, cursor);
   }
 }
 
 export class VirtualCodeMirrorNotebookEditor extends VirtualCodeMirrorEditor {
-  cell_to_corresponding_source_line: Map<Cell, number>;
+  cell_to_corresponding_source_line: Map<CodeEditor.IEditor, number>;
   cm_editor_to_cell: Map<CodeMirror.Editor, Cell>;
   has_cells = true;
 
@@ -68,25 +67,11 @@ export class VirtualCodeMirrorNotebookEditor extends VirtualCodeMirrorEditor {
     // TODO: change to private & make the dependencies read widget from WidgetAdapter instead (possibly with duck-typing)
     public notebook: Notebook,
     private wrapper: HTMLElement,
-    language: () => string,
-    file_extension: () => string,
-    overrides_registry: IOverridesRegistry,
-    foreign_code_extractors: IForeignCodeExtractorsRegistry,
-    path: () => string
+    virtual_document: VirtualDocument
   ) {
-    super(
-      language,
-      file_extension,
-      () => path() + '.' + file_extension(),
-      overrides_registry,
-      foreign_code_extractors,
-      false
-    );
+    super(virtual_document);
     this.cell_to_corresponding_source_line = new Map();
     this.cm_editor_to_cell = new Map();
-    this.overrides_registry = overrides_registry;
-    this.code_extractors = foreign_code_extractors;
-    this.language = language;
     this._proxy = new Proxy(this, {
       get: function (
         target: VirtualCodeMirrorNotebookEditor,
@@ -121,12 +106,13 @@ export class VirtualCodeMirrorNotebookEditor extends VirtualCodeMirrorEditor {
     this._proxy = null;
   }
 
-  transform_from_notebook_to_root(
-    cell: Cell,
+  // TODO document that editor is given because there may be more than one
+  transform_from_editor_to_root(
+    editor: CodeEditor.IEditor,
     position: IEditorPosition
   ): IRootPosition | null {
     // TODO: if cell is not known, refresh
-    let shift = this.cell_to_corresponding_source_line.get(cell);
+    let shift = this.cell_to_corresponding_source_line.get(editor);
     if (shift == null) {
       console.warn('Cell not found in cell_line_map');
       return null;
@@ -142,7 +128,7 @@ export class VirtualCodeMirrorNotebookEditor extends VirtualCodeMirrorEditor {
     position: IEditorPosition
   ): IRootPosition {
     let cell = this.cm_editor_to_cell.get(cm_editor);
-    return this.transform_from_notebook_to_root(cell, position);
+    return this.transform_from_editor_to_root(cell.editor, position);
   }
 
   transform_from_root_to_editor(pos: IRootPosition): CodeMirror.Position {
@@ -228,7 +214,7 @@ export class VirtualCodeMirrorNotebookEditor extends VirtualCodeMirrorEditor {
         continue;
       }
 
-      return this.transform_from_notebook_to_root(cell, pos as IEditorPosition);
+      return this.transform_from_editor_to_root(cell.editor, pos as IEditorPosition);
     }
   }
 
@@ -312,7 +298,7 @@ export class VirtualCodeMirrorNotebookEditor extends VirtualCodeMirrorEditor {
     return this.virtual_document.get_editor_at_virtual_line(pos);
   }
 
-  protected perform_documents_update(): void {
+  perform_documents_update(): void {
     if (this.isDisposed) {
       return;
     }
@@ -334,7 +320,7 @@ export class VirtualCodeMirrorNotebookEditor extends VirtualCodeMirrorEditor {
         let cell_code = cm_editor.getValue();
         // every code cell is placed into the cell-map
         this.cell_to_corresponding_source_line.set(
-          cell,
+          cell.editor,
           this.virtual_document.last_source_line
         );
 
