@@ -71,7 +71,7 @@
     "ts-jest": "^25.2.1",
     "typedoc": "^0.17.7",
     "typescript": "~3.9.2",
-    "webpack": "~5.0.0-beta.22",
+    "webpack": "~5.0.0-beta.26",
     "webpack-cli": "^3.3.10"
   },
   "publishConfig": {
