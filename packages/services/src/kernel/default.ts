@@ -1210,11 +1210,6 @@ export class KernelConnection implements Kernel.IKernelConnection {
       partialUrl,
       'channels?session_id=' + encodeURIComponent(this._clientId)
     );
-    // If token authentication is in use.
-    const token = settings.token;
-    if (token !== '') {
-      url = url + `&token=${encodeURIComponent(token)}`;
-    }
 
     this._ws = new settings.WebSocket(url);
 
