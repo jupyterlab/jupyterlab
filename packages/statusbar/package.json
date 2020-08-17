@@ -36,10 +36,10 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.2.2",
-    "@jupyterlab/codeeditor": "^2.2.1",
-    "@jupyterlab/coreutils": "^4.2.1",
-    "@jupyterlab/services": "^5.2.1",
+    "@jupyterlab/apputils": "^2.2.3",
+    "@jupyterlab/codeeditor": "^2.2.2",
+    "@jupyterlab/coreutils": "^4.2.2",
+    "@jupyterlab/services": "^5.2.2",
     "@jupyterlab/ui-components": "^2.2.1",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",
@@ -53,7 +53,7 @@
     "typestyle": "^2.0.4"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.2",
+    "@jupyterlab/testutils": "^2.2.3",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",

@@ -38,11 +38,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.2.2",
-    "@jupyterlab/codeeditor": "^2.2.1",
-    "@jupyterlab/coreutils": "^4.2.1",
-    "@jupyterlab/nbformat": "^2.2.1",
-    "@jupyterlab/observables": "^3.2.1",
+    "@jupyterlab/apputils": "^2.2.3",
+    "@jupyterlab/codeeditor": "^2.2.2",
+    "@jupyterlab/coreutils": "^4.2.2",
+    "@jupyterlab/nbformat": "^2.2.2",
+    "@jupyterlab/observables": "^3.2.2",
     "@jupyterlab/statusbar": "^2.2.1",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
@@ -55,7 +55,7 @@
     "react": "~16.9.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.2",
+    "@jupyterlab/testutils": "^2.2.3",
     "@types/codemirror": "^0.0.76",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",

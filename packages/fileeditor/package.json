@@ -40,8 +40,8 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.2.2",
-    "@jupyterlab/codeeditor": "^2.2.1",
+    "@jupyterlab/apputils": "^2.2.3",
+    "@jupyterlab/codeeditor": "^2.2.2",
     "@jupyterlab/docregistry": "^2.2.1",
     "@jupyterlab/statusbar": "^2.2.1",
     "@jupyterlab/ui-components": "^2.2.1",
@@ -51,7 +51,7 @@
     "react": "~16.9.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.2",
+    "@jupyterlab/testutils": "^2.2.3",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",
