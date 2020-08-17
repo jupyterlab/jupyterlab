@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { PageConfig, URLExt } from '@jupyterlab/coreutils';
-import { PromiseDelegate, UUID } from '@lumino/coreutils';
+import { PromiseDelegate } from '@lumino/coreutils';
 import { sleep } from './common';
 
 /**
@@ -202,8 +202,6 @@ namespace Private {
    */
   export function handleConfig(): string {
     // Set up configuration.
-    const token = UUID.uuid4();
-    PageConfig.setOption('token', token);
     PageConfig.setOption('terminalsAvailable', 'true');
 
     const configDir = mktempDir('config');
@@ -216,7 +214,13 @@ namespace Private {
 
     const configData = {
       LabApp: { user_settings_dir, workspaces_dir, app_dir },
-      NotebookApp: { token, open_browser: false, notebook_dir },
+      NotebookApp: {
+        token: '',
+        open_browser: false,
+        notebook_dir,
+        disable_check_xsrf: true,
+        allow_origin: '*'
+      },
       MultiKernelManager: {
         default_kernel_name: 'echo',
         shutdown_wait_time: 1.0
