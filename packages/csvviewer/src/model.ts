@@ -141,6 +141,16 @@ export class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
+   * The initial chunk of rows to parse.
+   */
+  get initialRows(): number {
+    return this._initialRows;
+  }
+  set initialRows(value: number) {
+    this._initialRows = value;
+  }
+
+  /**
    * #### Notes
    * The index of the first character in the data string for row r, column c is
    * _columnOffsets[(r-this._columnOffsetsStartingRow)*numColumns+c]
