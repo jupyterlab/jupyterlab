@@ -12,11 +12,15 @@ HERE = osp.dirname(osp.realpath(__file__))
 
 class NodeApp(ProcessApp):
 
+    token = ""
+    disable_check_xsrf = True
+    allow_origin = "*"
+
     def get_command(self):
         """Get the command and kwargs to run.
         """
         # Run the node script with command arguments.
-        config = dict(baseUrl=self.connection_url, token=self.token)
+        config = dict(baseUrl=self.connection_url)
 
         with open(osp.join(HERE, 'config.json'), 'w') as fid:
             json.dump(config, fid)

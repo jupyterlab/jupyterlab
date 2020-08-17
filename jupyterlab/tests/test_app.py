@@ -231,6 +231,13 @@ class JestApp(ProcessTestApp):
 
     open_browser = False
 
+    token = ""
+
+    disable_check_xsrf = True
+
+    allow_origin = "*"
+
+
     @deprecated(removed_version=4)
     def get_command(self):
         """Get the command to run"""
@@ -273,8 +280,7 @@ class JestApp(ProcessTestApp):
             cmd += ['--silent']
 
         config = dict(baseUrl=self.connection_url,
-                      terminalsAvailable=str(terminalsAvailable),
-                      token=self.token)
+                      terminalsAvailable=str(terminalsAvailable))
         config.update(**self.test_config)
 
         td = tempfile.mkdtemp()
@@ -295,6 +301,9 @@ class KarmaTestApp(ProcessTestApp):
     karma_pattern = Unicode('src/*.spec.ts*')
     karma_base_dir = Unicode('')
     karma_coverage_dir = Unicode('')
+    token = ""
+    disable_check_xsrf = True
+    allow_origin = "*"
 
     @deprecated(removed_version=4)
     def get_command(self):
@@ -302,7 +311,7 @@ class KarmaTestApp(ProcessTestApp):
         terminalsAvailable = self.web_app.settings['terminals_available']
         # Compatibility with Notebook 4.2.
         token = getattr(self, 'token', '')
-        config = dict(baseUrl=self.connection_url, token=token,
+        config = dict(baseUrl=self.connection_url, 
                       terminalsAvailable=str(terminalsAvailable),
                       foo='bar')
 
