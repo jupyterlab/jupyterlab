@@ -150,6 +150,13 @@ export class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
+   * A boolean determined by whether parsing has completed.
+   */
+  get doneParsing(): boolean {
+    return this._doneParsing;
+  }
+
+  /**
    * Get the row count for a region in the data model.
    *
    * @param region - The row region of interest.
