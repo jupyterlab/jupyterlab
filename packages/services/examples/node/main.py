@@ -12,6 +12,10 @@ HERE = osp.dirname(osp.realpath(__file__))
 
 class NodeApp(ProcessApp):
 
+    token = ""
+    disable_check_xsrf = True
+    allow_origin = "*"
+    
     def get_command(self):
         """Get the command and kwargs to run.
         """

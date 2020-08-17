@@ -126,6 +126,10 @@ class ProcessTestApp(ProcessApp):
     user_settings_dir = Unicode(_create_user_settings_dir())
     workspaces_dir = Unicode(_create_workspaces_dir())
 
+    token = ""
+    disable_check_xsrf = True
+    allow_origin = "*"
+
     def __init__(self):
         self.env_patch = TestEnv()
         self.env_patch.start()
@@ -271,8 +275,7 @@ class JestApp(ProcessTestApp):
             cmd += ['--silent']
 
         config = dict(baseUrl=self.connection_url,
-                      terminalsAvailable=str(terminalsAvailable),
-                      token=self.token)
+                      terminalsAvailable=str(terminalsAvailable))
         config.update(**self.test_config)
 
         td = tempfile.mkdtemp()
@@ -297,9 +300,7 @@ class KarmaTestApp(ProcessTestApp):
     def get_command(self):
         """Get the command to run."""
         terminalsAvailable = self.web_app.settings['terminals_available']
-        # Compatibility with Notebook 4.2.
-        token = getattr(self, 'token', '')
-        config = dict(baseUrl=self.connection_url, token=token,
+        config = dict(baseUrl=self.connection_url,
                       terminalsAvailable=str(terminalsAvailable),
                       foo='bar')
 
