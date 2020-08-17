@@ -33,15 +33,28 @@ let outputPath = data.jupyterlab['outputDir'];
 outputPath = path.join(packagePath, outputPath);
 
 // Handle the extension entry point and the lib entry point, if different
-let extEntry = data.jupyterlab.extension || data.jupyterlab.mimeExtension;
 const index = require.resolve(packagePath);
-const exposes = {
-  './index': index,
-  './extension': index
+const exposes: { [id: string]: string } = {
+  './index': index
 };
 
-if (extEntry !== true) {
-  exposes['./extension'] = path.join(packagePath, extEntry);
+if (data.jupyterlab.extension === true) {
+  exposes['./extension'] = index;
+} else if (typeof data.jupyterlab.extension === 'string') {
+  exposes['./extension'] = path.join(packagePath, data.jupyterlab.extension);
+}
+
+if (data.jupyterlab.mimeExtension === true) {
+  exposes['./mimeExtension'] = index;
+} else if (typeof data.jupyterlab.mimeExtension === 'string') {
+  exposes['./mimeExtension'] = path.join(
+    packagePath,
+    data.jupyterlab.mimeExtension
+  );
+}
+
+if (data.style) {
+  exposes['./style'] = path.join(packagePath, data.style);
 }
 
 const coreData = require(path.join(corePath, 'package.json'));
@@ -129,7 +142,7 @@ module.exports = [
     output: {
       filename: '[name].[chunkhash].js',
       path: outputPath,
-      publicPath: `lab/extensions/${data.name}/`
+      publicPath: `/lab/extensions/${data.name}/`
     },
     module: {
       rules: [{ test: /\.html$/, use: 'file-loader' }]

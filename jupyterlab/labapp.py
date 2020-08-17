@@ -695,17 +695,18 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
         # Handle dynamic extensions
         info = get_app_info()
-        dynamic_extensions = page_config['dynamic_extensions'] = []
-        dynamic_mime_extension = page_config['dynamic_mime_extensions'] = []
+        extensions = page_config['dynamic_extensions'] = []
         for (ext, ext_data) in info.get('dynamic_exts', dict()).items():
-            name = ext_data['name']
-            path = "lab/extensions/%s/remoteEntry.js" % name
-            module = "./extension"
-            load_data = dict(name=name, path=path, module=module)
+            extension = {
+                'name': ext_data['name']
+            }
             if ext_data['jupyterlab'].get('extension'):
-                dynamic_extensions.append(load_data)
-            else:
-                dynamic_mime_extension.append(load_data)
+                extension['plugin'] = './extension'
+            if ext_data['jupyterlab'].get('mimeExtension'):
+                extension['mimePlugin'] = './mimeExtension'
+            if ext_data.get('style'):
+                extension['style'] = './style'
+            extensions.append(extension)
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings['page_config_data'] = page_config
