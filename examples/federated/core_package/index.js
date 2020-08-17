@@ -106,12 +106,6 @@ async function main() {
     }
   });
 
-  // Handle the registered mime extensions.
-  var mimeExtensions = [];
-  var extension;
-  var extMod;
-  var plugins = [];
-
   /**
    * Iterate over active plugins in an extension.
    * 
@@ -142,6 +136,8 @@ async function main() {
     }
   }
 
+  // Handle the registered mime extensions.
+  const mimeExtensions = [];
   {{#each jupyterlab_mime_extensions}}
   try {
     for (let plugin of activePlugins(require('{{@key}}/{{this}}'))) {
@@ -192,8 +188,8 @@ async function main() {
      console.error(reason);
     });
 
-  var lab = new JupyterLab({
-    mimeExtensions: mimeExtensions,
+  const lab = new JupyterLab({
+    mimeExtensions,
     disabled: {
       matches: disabled,
       patterns: PageConfig.Extension.disabled
