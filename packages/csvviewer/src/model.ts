@@ -110,7 +110,7 @@ export class DSVModel extends DataModel implements IDisposable {
    * The delimiter between entries on the same row.
    */
   get delimiter(): string {
-    return this._delimiter
+    return this._delimiter;
   }
 
   /**
@@ -146,7 +146,7 @@ export class DSVModel extends DataModel implements IDisposable {
    * _columnOffsets[(r-this._columnOffsetsStartingRow)*numColumns+c]
    */
   get columnOffsets(): Uint32Array {
-    return this._columnOffsets
+    return this._columnOffsets;
   }
 
   /**
@@ -340,7 +340,7 @@ export class DSVModel extends DataModel implements IDisposable {
         if (this._parser === 'quotes') {
           console.warn(e);
           this._parser = 'noquotes';
-          this._resetParser();
+          this.resetParser();
           this._computeRowOffsets(endRow);
         } else {
           throw e;
@@ -350,7 +350,7 @@ export class DSVModel extends DataModel implements IDisposable {
     };
 
     // Reset the parser to its initial state.
-    this._resetParser();
+    this.resetParser();
 
     // Parse the first rows to give us the start of the data right away.
     const done = parseChunk(currentRows);
@@ -556,7 +556,10 @@ export class DSVModel extends DataModel implements IDisposable {
       nextIndex = this.getOffsetIndex(row, column + 1);
 
       // Trim off the delimiter if it exists at the end of the field
-      if (index < nextIndex && this._rawData[nextIndex - 1] === this._delimiter) {
+      if (
+        index < nextIndex &&
+        this._rawData[nextIndex - 1] === this._delimiter
+      ) {
         trimRight += 1;
       }
     }
@@ -582,7 +585,7 @@ export class DSVModel extends DataModel implements IDisposable {
   /**
    * Reset the parser state.
    */
-  private _resetParser(): void {
+  resetParser(): void {
     this._columnCount = undefined;
 
     // First row offset is *always* 0, so we always have the first row offset.
