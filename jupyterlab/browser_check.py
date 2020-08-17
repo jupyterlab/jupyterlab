@@ -13,6 +13,8 @@ import sys
 import subprocess
 
 from tornado.ioloop import IOLoop
+from tornado.iostream import StreamClosedError
+from tornado.websocket import WebSocketClosedError
 from notebook.notebookapp import flags, aliases
 from notebook.utils import urljoin, pathname2url
 from traitlets import Bool
