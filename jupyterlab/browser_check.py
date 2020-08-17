@@ -48,11 +48,11 @@ class LogErrorHandler(logging.Handler):
         self.errored = False
 
     def filter(self, record):
-        # known startup error message
-        if 'paste' in record.msg:
-            return
-        # handle known shutdown message
-        if 'Stream is closed' in record.msg:
+        # Handle known StreamClosedError from Tornado
+        # These occur when we forcibly close Websockets or
+        # browser connections during the test.
+        # https://github.com/tornadoweb/tornado/issues/2834
+        if hasattr(record, 'exc_info') and not record.exc_info is None and isinstance(record.exc_info[1], (StreamClosedError, WebSocketClosedError)):
             return
         return super().filter(record)
 
