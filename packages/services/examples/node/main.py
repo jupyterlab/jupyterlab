@@ -21,6 +21,11 @@ def _jupyter_server_extension_points():
 class NodeApp(ProcessApp):
 
     name = __name__
+    serverapp_config = dict(
+        disable_check_xsrf = True,
+        allow_origin = "*",
+        token=""
+    )
 
     def get_command(self):
         """Get the command and kwargs to run.
@@ -28,8 +33,7 @@ class NodeApp(ProcessApp):
         # Run the node script with command arguments.
         config = dict(
             baseUrl='http://localhost:{}{}'.format(self.serverapp.port, self.settings['base_url']),
-            token=self.settings['token']
-            )
+            token="")
 
         with open(osp.join(HERE, 'config.json'), 'w') as fid:
             json.dump(config, fid)
