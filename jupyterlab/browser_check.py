@@ -48,6 +48,9 @@ class LogErrorHandler(logging.Handler):
         self.errored = False
 
     def filter(self, record):
+        # known startup error message
+        if 'paste' in record.msg:
+            return
         # Handle known StreamClosedError from Tornado
         # These occur when we forcibly close Websockets or
         # browser connections during the test.
