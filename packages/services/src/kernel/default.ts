@@ -1168,11 +1168,6 @@ export class DefaultKernel implements Kernel.IKernel {
       partialUrl,
       'channels?session_id=' + encodeURIComponent(this._clientId)
     );
-    // If token authentication is in use.
-    let token = settings.token;
-    if (token !== '') {
-      url = url + `&token=${encodeURIComponent(token)}`;
-    }
 
     this._wsStopped = false;
     this._ws = new settings.WebSocket(url);

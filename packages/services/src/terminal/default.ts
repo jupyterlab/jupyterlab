@@ -177,16 +177,11 @@ export class DefaultTerminalSession implements TerminalSession.ISession {
 
     return new Promise<void>((resolve, reject) => {
       const settings = this.serverSettings;
-      const token = this.serverSettings.token;
 
       this._url = Private.getTermUrl(settings.baseUrl, this._name);
       Private.running[this._url] = this;
 
       let wsUrl = URLExt.join(settings.wsUrl, `terminals/websocket/${name}`);
-
-      if (token) {
-        wsUrl = wsUrl + `?token=${encodeURIComponent(token)}`;
-      }
 
       socket = this._ws = new settings.WebSocket(wsUrl);
 
