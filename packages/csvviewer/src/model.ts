@@ -151,15 +151,6 @@ export class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
-   * #### Notes
-   * The index of the first character in the data string for row r, column c is
-   * _columnOffsets[(r-this._columnOffsetsStartingRow)*numColumns+c]
-   */
-  get columnOffsets(): Uint32Array {
-    return this._columnOffsets;
-  }
-
-  /**
    * A boolean determined by whether parsing has completed.
    */
   get doneParsing(): boolean {
