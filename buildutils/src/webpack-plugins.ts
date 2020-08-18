@@ -7,6 +7,10 @@ import DuplicatePackageCheckerPlugin from 'duplicate-package-checker-webpack-plu
 import * as fs from 'fs-extra';
 import * as webpack from 'webpack';
 
+// From
+// https://github.com/webpack/webpack/blob/95120bdf98a01649740b104bebc426b0123651ce/lib/WatchIgnorePlugin.js
+const IGNORE_TIME_ENTRY = 'ignore';
+
 export namespace WPPlugin {
   /**
    * A WebPack Plugin that copies the assets to the static directory
@@ -86,9 +90,7 @@ export namespace WPPlugin {
     ) {
       files = Array.from(files);
       dirs = Array.from(dirs);
-
       const notIgnored = (path: string) => !this.ignored(path);
-
       const ignoredFiles = files.filter(this.ignored);
       const ignoredDirs = dirs.filter(this.ignored);
 
@@ -100,31 +102,25 @@ export namespace WPPlugin {
         options,
         (
           err: any,
-          filesModified: any,
-          dirsModified: any,
-          missingModified: any,
           fileTimestamps: any,
           dirTimestamps: any,
+          changedFiles: any,
           removedFiles: any
         ) => {
-          if (err) {
-            return callback(err);
-          }
+          if (err) return callback(err);
           for (const path of ignoredFiles) {
-            fileTimestamps.set(path, 1);
+            fileTimestamps.set(path, IGNORE_TIME_ENTRY);
           }
 
           for (const path of ignoredDirs) {
-            dirTimestamps.set(path, 1);
+            dirTimestamps.set(path, IGNORE_TIME_ENTRY);
           }
 
           callback(
             err,
-            filesModified,
-            dirsModified,
-            missingModified,
             fileTimestamps,
             dirTimestamps,
+            changedFiles,
             removedFiles
           );
         },
@@ -134,17 +130,17 @@ export namespace WPPlugin {
       return {
         close: () => watcher.close(),
         pause: () => watcher.pause(),
-        getContextTimestamps: () => {
-          const dirTimestamps = watcher.getContextTimestamps();
+        getContextTimeInfoEntries: () => {
+          const dirTimestamps = watcher.getContextInfoEntries();
           for (const path of ignoredDirs) {
-            dirTimestamps.set(path, 1);
+            dirTimestamps.set(path, IGNORE_TIME_ENTRY);
           }
           return dirTimestamps;
         },
-        getFileTimestamps: () => {
-          const fileTimestamps = watcher.getFileTimestamps();
+        getFileTimeInfoEntries: () => {
+          const fileTimestamps = watcher.getFileTimeInfoEntries();
           for (const path of ignoredFiles) {
-            fileTimestamps.set(path, 1);
+            fileTimestamps.set(path, IGNORE_TIME_ENTRY);
           }
           return fileTimestamps;
         }
