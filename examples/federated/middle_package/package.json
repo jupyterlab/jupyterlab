@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "build": "npm run clean && build-labextension --core-path ../core_package .",
-    "clean": "rimraf build",
-    "prepublishOnly": "npm run build"
+    "clean": "rimraf build"
   },
   "dependencies": {
     "@jupyterlab/coreutils": "^5.0.0-alpha.11"
