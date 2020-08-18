@@ -64,7 +64,7 @@
     "sort-package-json": "~1.31.0",
     "typescript": "~3.9.2",
     "webpack": "~5.0.0-beta.26",
-    "webpack-merge": "^5.1.1",
+    "webpack-merge": "^5.1.2",
     "which": "^2.0.2"
   },
   "devDependencies": {

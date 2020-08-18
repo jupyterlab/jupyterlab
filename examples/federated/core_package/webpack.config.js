@@ -3,7 +3,7 @@
 const data = require('./package.json');
 const Build = require('@jupyterlab/buildutils').Build;
 const webpack = require('webpack');
-const merge = require('webpack-merge');
+const merge = require('webpack-merge').default;
 const baseConfig = require('@jupyterlab/buildutils/lib/webpack.config.base');
 const { ModuleFederationPlugin } = webpack.container;
 const fs = require('fs-extra');

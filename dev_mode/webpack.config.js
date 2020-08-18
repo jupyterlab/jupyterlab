@@ -8,7 +8,7 @@ const fs = require('fs-extra');
 const Handlebars = require('handlebars');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
-const merge = require('webpack-merge');
+const merge = require('webpack-merge').default;
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
 const baseConfig = require('@jupyterlab/buildutils/lib/webpack.config.base');
