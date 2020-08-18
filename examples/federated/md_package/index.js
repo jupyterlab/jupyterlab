@@ -13,7 +13,7 @@ import {
 } from '@jupyterlab/rendermime';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { PathExt } from '@jupyterlab/coreutils';
-import {IMiddleToken} from '@jupyterlab/example-federated-middle';
+import { IMiddleToken } from '@jupyterlab/example-federated-middle';
 
 /**
  * The command IDs used by the markdownviewer plugin.
@@ -34,7 +34,12 @@ const plugin = {
   activate,
   id: '@jupyterlab/example-federated-md:plugin',
   provides: IMarkdownViewerTracker,
-  requires: [ILayoutRestorer, IRenderMimeRegistry, ISettingRegistry, IMiddleToken],
+  requires: [
+    ILayoutRestorer,
+    IRenderMimeRegistry,
+    ISettingRegistry,
+    IMiddleToken
+  ],
   autoStart: true
 };
 /**
