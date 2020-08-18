@@ -10,7 +10,7 @@ import { ICommandContext } from "../../command_manager";
 import { IVirtualEditor } from "../../virtual/editor";
 import IEditor = CodeEditor.IEditor;
 import { VirtualDocument } from "../../virtual/document";
-import { VirtualCodeMirrorEditor } from "../../virtual/codemirror_editor";
+
 
 export class FileEditorAdapter extends WidgetAdapter<
   IDocumentWidget<FileEditor>
@@ -62,6 +62,10 @@ export class FileEditorAdapter extends WidgetAdapter<
 
   get_editor_index(ce_editor: CodeEditor.IEditor): number {
     return 0;
+  }
+
+  get_editor_wrapper(ce_editor: CodeEditor.IEditor): HTMLElement {
+    return this.wrapper_element;
   }
 
   get wrapper_element(): HTMLElement {

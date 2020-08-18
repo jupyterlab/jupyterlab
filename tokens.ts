@@ -3,7 +3,6 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import * as SCHEMA from './_schema';
 import { WidgetAdapter } from './adapters/adapter';
-import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
 import { Token } from '@lumino/coreutils';
 import { IFeatureOptions, LSPExtension } from './index';
 import { WidgetAdapterManager } from "./adapter_manager";

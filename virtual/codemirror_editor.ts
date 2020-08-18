@@ -494,9 +494,19 @@ export class VirtualCodeMirrorEditor
    * using a hashmap based approach may be more efficient.
    * @param cm_editor
    */
-  find_editor_index(cm_editor: CodeMirror.Editor) {
+  find_editor(cm_editor: CodeMirror.Editor) {
     let ce_editor = this.cm_editor_to_ce_editor.get(cm_editor);
-    return this.adapter.get_editor_index(ce_editor);
+    return {
+      index: this.adapter.get_editor_index(ce_editor),
+      node: this.adapter.get_editor_wrapper(ce_editor)
+    };
+  }
+
+  /**
+   * @deprecated use adapter.has_multiple_editors instead.
+   */
+  get has_multiple_editors() {
+    return this.ce_editor_to_cm_editor.size > 1;
   }
 }
 

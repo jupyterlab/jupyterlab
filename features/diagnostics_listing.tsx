@@ -7,12 +7,11 @@ import { IEditorPosition } from '../positioning';
 import { VirtualDocument } from '../virtual/document';
 
 import '../../style/diagnostics_listing.css';
-import { Cell } from '@jupyterlab/cells';
 import { diagnosticSeverityNames } from '../lsp';
 import { message_without_code } from './diagnostics';
 
 import diagnosticsSvg from '../../style/icons/diagnostics.svg';
-import { VirtualCodeMirrorEditor, VirtualCodeMirrorNotebookEditor } from "../virtual/codemirror_editor";
+import { VirtualCodeMirrorEditor } from "../virtual/codemirror_editor";
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
@@ -57,7 +56,7 @@ function DocumentLocator(props: {
 }) {
   let { document, editor } = props;
   let ancestry = document.ancestry;
-  let target_cell: Cell = null;
+  let target: HTMLElement = null;
   let breadcrumbs: any = ancestry.map(document => {
     if (!document.parent) {
       let path = document.path;
@@ -78,14 +77,10 @@ function DocumentLocator(props: {
         let last_line = document.virtual_lines.get(
           document.last_virtual_line - 1
         );
-        let notebook_editor = editor as VirtualCodeMirrorNotebookEditor;
-        let { cell_id: first_cell, cell } = notebook_editor.find_editor_index(
-          first_line.editor
-        );
-        let { cell_id: last_cell } = notebook_editor.find_editor_index(
-          last_line.editor
-        );
-        target_cell = cell;
+
+        let { index: first_cell, node } = editor.find_editor(editor.ce_editor_to_cm_editor.get(first_line.editor));
+        let { index: last_cell } = editor.find_editor(editor.ce_editor_to_cm_editor.get(last_line.editor));
+        target = node
 
         let cell_locator =
           first_cell === last_cell
@@ -106,7 +101,7 @@ function DocumentLocator(props: {
   return (
     <div
       className={'lsp-document-locator'}
-      onClick={() => focus_on(target_cell ? target_cell.node : null)}
+      onClick={() => focus_on(target ? target: null)}
     >
       {breadcrumbs}
     </div>
@@ -193,7 +188,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
   columns = [
     new Column({
       name: 'Virtual Document',
-      render_cell: (row, context) => (
+      render_cell: (row, context: IListingContext) => (
         <td key={0}>
           <DocumentLocator document={row.document} editor={context.editor} />
         </td>
@@ -289,8 +284,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         return diagnostics.map((diagnostic_data, i) => {
           let cell_number: number = null;
           if (editor.has_multiple_editors) {
-            let notebook_editor = editor as VirtualCodeMirrorNotebookEditor;
-            let { cell_id } = notebook_editor.find_editor_index(
+            let { index: cell_id } = editor.find_editor(
               diagnostic_data.editor
             );
             cell_number = cell_id + 1;

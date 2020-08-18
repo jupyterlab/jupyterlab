@@ -224,6 +224,11 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     });
   }
 
+  get_editor_wrapper(ce_editor: CodeEditor.IEditor): HTMLElement {
+    let cell = this.ce_editor_to_cell.get(ce_editor);
+    return cell.node;
+  }
+
   private get_cell_at(pos: IVirtualPosition): Cell {
     let ce_editor = this.virtual_editor.virtual_document.get_editor_at_virtual_line(pos);
     return this.ce_editor_to_cell.get(ce_editor);

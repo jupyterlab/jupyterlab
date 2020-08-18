@@ -88,6 +88,8 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   abstract get_editor_index(ce_editor: CodeEditor.IEditor): number;
 
+  abstract get_editor_wrapper(ce_editor: CodeEditor.IEditor): HTMLElement;
+
   // note: it could be using namespace/IOptions pattern,
   // but I do not know how to make it work with the generic type T
   // (other than using 'any' in the IOptions interface)
