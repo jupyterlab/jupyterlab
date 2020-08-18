@@ -1,4 +1,4 @@
-const merge = require('webpack-merge');
+const merge = require('webpack-merge').default;
 const config = require('./webpack.prod.minimize.config');
 
 config[0] = merge(config[0], {
