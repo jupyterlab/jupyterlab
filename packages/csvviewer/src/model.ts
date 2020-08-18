@@ -357,7 +357,7 @@ export class DSVModel extends DataModel implements IDisposable {
         if (this._parser === 'quotes') {
           console.warn(e);
           this._parser = 'noquotes';
-          this.resetParser();
+          this._resetParser();
           this._computeRowOffsets(endRow);
         } else {
           throw e;
@@ -367,7 +367,7 @@ export class DSVModel extends DataModel implements IDisposable {
     };
 
     // Reset the parser to its initial state.
-    this.resetParser();
+    this._resetParser();
 
     // Parse the first rows to give us the start of the data right away.
     const done = parseChunk(currentRows);
@@ -602,7 +602,7 @@ export class DSVModel extends DataModel implements IDisposable {
   /**
    * Reset the parser state.
    */
-  resetParser(): void {
+  private _resetParser(): void {
     this._columnCount = undefined;
 
     // First row offset is *always* 0, so we always have the first row offset.
