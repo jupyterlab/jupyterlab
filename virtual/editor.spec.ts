@@ -1,17 +1,15 @@
 import { expect } from 'chai';
-import { VirtualCodeMirrorEditor } from './editor';
 import { RegExpForeignCodeExtractor } from '../extractors/regexp';
 import {
-  IEditorPosition,
   IRootPosition,
-  IVirtualPosition
 } from '../positioning';
 import * as CodeMirror from 'codemirror';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
 import { MockLanguageServerManager } from '../editor_integration/testutils';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { VirtualCodeMirrorEditor } from "./codemirror_editor";
 
+// TODO: implements IVirtualEditor OR rename to test CM
 class VirtualEditorImplementation extends VirtualCodeMirrorEditor {
   private cm_editor: CodeMirror.Editor;
 
@@ -19,29 +17,10 @@ class VirtualEditorImplementation extends VirtualCodeMirrorEditor {
     return undefined;
   }
 
-  find_ce_editor(cm_editor: CodeMirror.Editor): CodeEditor.IEditor {
-    return undefined;
-  }
-
-  get_editor_index(position: IVirtualPosition): number {
-    return 0;
-  }
-
-  _transform_editor_to_root(
-    cm_editor: CodeMirror.Editor,
-    position: IEditorPosition
-  ): IRootPosition {
-    return undefined;
-  }
-
   addEventListener(
     type: string,
     listener: EventListener | EventListenerObject
   ): void {
-    // nothing yet
-  }
-
-  protected perform_documents_update(): void {
     // nothing yet
   }
 

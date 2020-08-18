@@ -3,7 +3,6 @@ import {
   IEditorIntegrationOptions,
   FeatureSettings
 } from '../feature';
-import { CodeMirrorHandler, VirtualCodeMirrorEditor } from '../virtual/editor';
 import { VirtualDocument } from '../virtual/document';
 import { LSPConnection } from '../connection';
 import * as CodeMirror from 'codemirror';
@@ -16,6 +15,8 @@ import {
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../converter';
 import { DefaultMap } from '../utils';
+import { CodeEditor } from "@jupyterlab/codeeditor";
+import { CodeMirrorHandler, VirtualCodeMirrorEditor } from "../virtual/codemirror_editor";
 
 function toDocumentChanges(changes: {
   [uri: string]: lsProtocol.TextEdit[];
@@ -132,9 +133,10 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
       let start_in_root = this.transform_virtual_position_to_root_position(
         start
       );
-      cm_editor = this.virtual_editor.get_editor_at_root_position(
+      let ce_editor = this.virtual_editor.get_editor_at_root_position(
         start_in_root
       );
+      cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor)
     }
 
     return {
@@ -154,17 +156,14 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
     ) as IRootPosition;
   }
 
-  protected transform_virtual_position_to_root_position(
+  public transform_virtual_position_to_root_position(
     start: IVirtualPosition
   ): IRootPosition {
-    let cm_editor = this.virtual_document.virtual_lines.get(start.line).editor;
+    let ce_editor = this.virtual_document.virtual_lines.get(start.line).editor;
     let editor_position = this.virtual_document.transform_virtual_to_editor(
       start
     );
-    return this.virtual_editor._transform_editor_to_root(
-      cm_editor,
-      editor_position
-    );
+    return this.virtual_editor.transform_editor_to_root(ce_editor, editor_position)
   }
 
   protected get_cm_editor(position: IRootPosition) {
@@ -325,7 +324,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
 
   protected replace_fragment(
     newText: string,
-    editor: CodeMirror.Editor,
+    editor: CodeEditor.IEditor,
     fragment_start: CodeMirror.Position,
     fragment_end: CodeMirror.Position,
     start: CodeMirror.Position,
@@ -342,7 +341,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
       newFragmentText = newFragmentText.slice(0, -1);
     }
 
-    let doc = editor.getDoc();
+    let doc = this.virtual_editor.ce_editor_to_cm_editor.get(editor).getDoc();
 
     let raw_value = doc.getValue('\n');
     // extract foreign documents and substitute magics,

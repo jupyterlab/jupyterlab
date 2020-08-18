@@ -2,12 +2,11 @@ import {
   CodeMirrorEditor,
   CodeMirrorEditorFactory
 } from '@jupyterlab/codemirror';
-import { IVirtualEditor, VirtualCodeMirrorEditor } from '../virtual/editor';
+import { IVirtualEditor} from '../virtual/editor';
 import { LSPConnection } from '../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualCodeMirrorFileEditor } from '../virtual/editors/file_editor';
-import { StatusMessage } from '../adapters/adapter';
-import { VirtualCodeMirrorNotebookEditor } from '../virtual/editors/notebook';
+import { StatusMessage, WidgetAdapter } from '../adapters/adapter';
 import { Notebook, NotebookModel } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import { IOverridesRegistry } from '../magics/overrides';
@@ -24,6 +23,8 @@ import {
 } from './codemirror';
 import { EditorAdapter } from './editor_adapter';
 import IEditor = CodeEditor.IEditor;
+import { VirtualCodeMirrorEditor, VirtualCodeMirrorNotebookEditor } from "../virtual/codemirror_editor";
+import { WidgetAdapterConstructor } from "../index";
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
@@ -50,6 +51,8 @@ export abstract class FeatureTestEnvironment
   virtual_editor: VirtualCodeMirrorEditor;
   status_message: StatusMessage;
   private connections: Map<CodeMirrorIntegration, LSPConnection>;
+  private adapter_type: WidgetAdapterConstructor<any>;
+  adapter: WidgetAdapter<any>;
 
   protected constructor(
     public language: () => string,
@@ -82,7 +85,9 @@ export abstract class FeatureTestEnvironment
         : this.virtual_editor.virtual_document,
       connection: connection,
       status_message: this.status_message,
-      settings: null
+      settings: null,
+      // TODO
+      adapter: new this.adapter_type(null, null)
     });
     this.connections.set(feature as CodeMirrorIntegration, connection);
 
@@ -141,9 +146,15 @@ export class FileEditorFeatureTestEnvironment extends FeatureTestEnvironment {
 
   create_virtual_editor(): VirtualCodeMirrorFileEditor {
     return new VirtualCodeMirrorFileEditor(
-      this.language,
-      this.file_extension,
-      this.path,
+      new VirtualDocument({
+        language: this.language(),
+        file_extension: this.file_extension(),
+        path: this.path(),
+        has_lsp_supported_file: true,
+        standalone: true,
+        foreign_code_extractors: {},
+        overrides_registry: {}
+      }),
       this.ce_editor
     );
   }
@@ -176,11 +187,15 @@ export class NotebookFeatureTestEnvironment extends FeatureTestEnvironment {
     return new VirtualCodeMirrorNotebookEditor(
       this.notebook,
       this.wrapper,
-      this.language,
-      this.file_extension,
-      this.overrides_registry,
-      this.foreign_code_extractors,
-      this.path
+      new VirtualDocument({
+        language: this.language(),
+        file_extension: this.file_extension(),
+        path: this.path(),
+        has_lsp_supported_file: true,
+        standalone: true,
+        foreign_code_extractors: {},
+        overrides_registry: {}
+      }),
     );
   }
 }

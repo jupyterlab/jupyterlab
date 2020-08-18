@@ -3,14 +3,14 @@ import { FileEditor } from '@jupyterlab/fileeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { VirtualCodeMirrorFileEditor } from '../../virtual/editors/file_editor';
 import { LSPExtension } from '../../index';
 import { PositionConverter } from "../../converter";
-import { IRootPosition } from "../../positioning";
+import { IRootPosition, IVirtualPosition } from "../../positioning";
 import { ICommandContext } from "../../command_manager";
 import { IVirtualEditor } from "../../virtual/editor";
 import IEditor = CodeEditor.IEditor;
 import { VirtualDocument } from "../../virtual/document";
+import { VirtualCodeMirrorEditor } from "../../virtual/codemirror_editor";
 
 export class FileEditorAdapter extends WidgetAdapter<
   IDocumentWidget<FileEditor>
@@ -46,12 +46,7 @@ export class FileEditorAdapter extends WidgetAdapter<
     super(extension, editor_widget);
     this.editor = editor_widget.content;
 
-    // TODO editor-agnostic mechanism
-    // TODO if (fileEditor.editor instanceof CodeMirrorEditor) {
-    this.virtual_editor = new VirtualCodeMirrorFileEditor(
-      this.create_virtual_document(),
-      this.ce_editor
-    )
+    this.init_virtual();
     this.connect_contentChanged_signal();
 
     console.log('LSP: file ready for connection:', this.path);
@@ -65,6 +60,14 @@ export class FileEditorAdapter extends WidgetAdapter<
     this.editor.model.mimeTypeChanged.connect(this.reload_connection, this);
   }
 
+  get_editor_index(ce_editor: CodeEditor.IEditor): number {
+    return 0;
+  }
+
+  get wrapper_element(): HTMLElement {
+    return this.widget.node;
+  }
+
   get path() {
     return this.widget.context.path;
   }
@@ -74,6 +77,14 @@ export class FileEditorAdapter extends WidgetAdapter<
     let ce_cursor = editor.getCursorPosition();
     let root_position = PositionConverter.ce_to_cm(ce_cursor) as IRootPosition;
     return this?.get_context(root_position);
+  }
+
+  get_editor_index_at(position: IVirtualPosition): number {
+    return 0;
+  }
+
+  get editors(): CodeEditor.IEditor[] {
+    return [this.editor.editor];
   }
 
   create_virtual_document(): VirtualDocument {

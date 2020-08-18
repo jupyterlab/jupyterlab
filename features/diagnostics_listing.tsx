@@ -4,8 +4,6 @@ import { caretDownIcon, caretUpIcon, LabIcon } from '@jupyterlab/ui-components';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
 import { IEditorPosition } from '../positioning';
-import { VirtualCodeMirrorEditor } from '../virtual/editor';
-import { VirtualCodeMirrorNotebookEditor } from '../virtual/editors/notebook';
 import { VirtualDocument } from '../virtual/document';
 
 import '../../style/diagnostics_listing.css';
@@ -14,6 +12,7 @@ import { diagnosticSeverityNames } from '../lsp';
 import { message_without_code } from './diagnostics';
 
 import diagnosticsSvg from '../../style/icons/diagnostics.svg';
+import { VirtualCodeMirrorEditor, VirtualCodeMirrorNotebookEditor } from "../virtual/codemirror_editor";
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
@@ -74,16 +73,16 @@ function DocumentLocator(props: {
       return <span key={document.uri}>Empty document</span>;
     }
     try {
-      if (editor.has_cells) {
+      if (editor.has_multiple_editors) {
         let first_line = document.virtual_lines.get(0);
         let last_line = document.virtual_lines.get(
           document.last_virtual_line - 1
         );
         let notebook_editor = editor as VirtualCodeMirrorNotebookEditor;
-        let { cell_id: first_cell, cell } = notebook_editor.find_cell_by_editor(
+        let { cell_id: first_cell, cell } = notebook_editor.find_editor_index(
           first_line.editor
         );
-        let { cell_id: last_cell } = notebook_editor.find_cell_by_editor(
+        let { cell_id: last_cell } = notebook_editor.find_editor_index(
           last_line.editor
         );
         target_cell = cell;
@@ -247,7 +246,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
           : a.data.range.start.ch > b.data.range.start.ch
           ? 1
           : -1,
-      is_available: context => context.editor.has_cells
+      is_available: context => context.editor.has_multiple_editors
     }),
     new Column({
       name: 'Line:Ch',
@@ -289,9 +288,9 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         }
         return diagnostics.map((diagnostic_data, i) => {
           let cell_number: number = null;
-          if (editor.has_cells) {
+          if (editor.has_multiple_editors) {
             let notebook_editor = editor as VirtualCodeMirrorNotebookEditor;
-            let { cell_id } = notebook_editor.find_cell_by_editor(
+            let { cell_id } = notebook_editor.find_editor_index(
               diagnostic_data.editor
             );
             cell_number = cell_id + 1;

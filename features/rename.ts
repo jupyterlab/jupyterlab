@@ -1,8 +1,6 @@
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { InputDialog } from '@jupyterlab/apputils';
 import { DiagnosticsCM } from './diagnostics';
-import { VirtualCodeMirrorEditor } from '../virtual/editor';
-import { VirtualCodeMirrorNotebookEditor } from '../virtual/editors/notebook';
 import { FeatureSettings, IFeatureCommand } from '../feature';
 import {
   CodeMirrorIntegration,
@@ -18,6 +16,7 @@ import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from './diagnostics';
 import { LabIcon } from '@jupyterlab/ui-components';
 
 import renameSvg from '../../style/icons/rename.svg';
+import { VirtualCodeMirrorEditor } from "../virtual/codemirror_editor";
 
 export const hoverIcon = new LabIcon({
   name: 'lsp:rename',
@@ -36,8 +35,9 @@ const COMMANDS: IFeatureCommand[] = [
       document,
       features
     }) => {
-      let old_value = document.getTokenAt(virtual_position).string;
       const rename_feature = features.get(FEATURE_ID) as RenameCM;
+      let root_position = rename_feature.transform_virtual_position_to_root_position(virtual_position)
+      let old_value = editor.get_token_at(root_position).value;
       let handle_failure = (error: any) => {
         let status = '';
 
@@ -46,10 +46,11 @@ const COMMANDS: IFeatureCommand[] = [
             DIAGNOSTICS_PLUGIN_ID
           ) as DiagnosticsCM;
 
-          status = ux_workaround_for_rope_limitation(
+          status = RenameCM.ux_workaround_for_rope_limitation(
             error,
             diagnostics_feature,
-            editor as VirtualCodeMirrorEditor
+            editor as VirtualCodeMirrorEditor,
+            rename_feature
           );
         }
 
@@ -103,7 +104,7 @@ export class RenameCM extends CodeMirrorIntegration {
 
       if (outcome.wasGranular) {
         status = `Renamed a variable in ${outcome.appliedChanges} places`;
-      } else if (this.virtual_editor.has_cells) {
+      } else if (this.adapter.has_multiple_editors) {
         status = `Renamed a variable in ${outcome.modifiedCells} cells`;
       } else {
         status = `Renamed a variable`;
@@ -120,63 +121,64 @@ export class RenameCM extends CodeMirrorIntegration {
 
     return outcome;
   }
-}
 
-/**
- * In #115 an issue with rename for Python (when using pyls) was identified:
- * rename was failing with an obscure message when the source code could
- * not be parsed correctly by rope (due to a user's syntax error).
- *
- * This function detects such a condition using diagnostics feature
- * and provides a nice error message to the user.
- */
-function ux_workaround_for_rope_limitation(
-  error: any,
-  diagnostics_feature: DiagnosticsCM,
-  editor: VirtualCodeMirrorEditor
-): string {
-  let has_index_error = false;
-  try {
-    has_index_error = error.message.includes('IndexError');
-  } catch (e) {
-    return null;
-  }
-  if (!has_index_error) {
-    return null;
-  }
-  let dire_python_errors = (
-    diagnostics_feature.diagnostics_db.all || []
-  ).filter(
-    diagnostic =>
-      diagnostic.diagnostic.message.includes('invalid syntax') ||
-      diagnostic.diagnostic.message.includes('SyntaxError') ||
-      diagnostic.diagnostic.message.includes('IndentationError')
-  );
+  /**
+   * In #115 an issue with rename for Python (when using pyls) was identified:
+   * rename was failing with an obscure message when the source code could
+   * not be parsed correctly by rope (due to a user's syntax error).
+   *
+   * This function detects such a condition using diagnostics feature
+   * and provides a nice error message to the user.
+   */
+  static ux_workaround_for_rope_limitation(
+    error: any,
+    diagnostics_feature: DiagnosticsCM,
+    editor: VirtualCodeMirrorEditor,
+    rename_feature: RenameCM
+  ): string {
+    let has_index_error = false;
+    try {
+      has_index_error = error.message.includes('IndexError');
+    } catch (e) {
+      return null;
+    }
+    if (!has_index_error) {
+      return null;
+    }
+    let dire_python_errors = (
+      diagnostics_feature.diagnostics_db.all || []
+    ).filter(
+      diagnostic =>
+        diagnostic.diagnostic.message.includes('invalid syntax') ||
+        diagnostic.diagnostic.message.includes('SyntaxError') ||
+        diagnostic.diagnostic.message.includes('IndentationError')
+    );
 
-  if (dire_python_errors.length === 0) {
-    return null;
-  }
+    if (dire_python_errors.length === 0) {
+      return null;
+    }
 
-  let dire_errors = [
-    ...new Set(
-      dire_python_errors.map(diagnostic => {
-        let message = diagnostic.diagnostic.message;
-        let start = diagnostic.range.start;
-        if (editor.has_cells) {
-          let notebook_editor = editor as VirtualCodeMirrorNotebookEditor;
-          let { cell_id } = notebook_editor.find_cell_by_editor(
-            diagnostic.editor
-          );
-          let cell_nr = cell_id + 1;
-          // TODO: should we show "code cell" numbers, or just cell number?
-          return `${message} in cell ${cell_nr} at line ${start.line}`;
-        } else {
-          return `${message} at line ${start.line}`;
-        }
-      })
-    )
-  ].join(', ');
-  return `Syntax error(s) prevent rename: ${dire_errors}`;
+    let dire_errors = [
+      ...new Set(
+        dire_python_errors.map(diagnostic => {
+          let message = diagnostic.diagnostic.message;
+          let start = diagnostic.range.start;
+          if (rename_feature.adapter.has_multiple_editors) {
+            let notebook_editor = editor as VirtualCodeMirrorEditor;
+            let editor_id = notebook_editor.find_editor_index(
+              diagnostic.editor
+            );
+            let cell_number = editor_id + 1;
+            // TODO: should we show "code cell" numbers, or just cell number?
+            return `${message} in cell ${cell_number} at line ${start.line}`;
+          } else {
+            return `${message} at line ${start.line}`;
+          }
+        })
+      )
+    ].join(', ');
+    return `Syntax error(s) prevent rename: ${dire_errors}`;
+  }
 }
 
 export const RENAME_PLUGIN: JupyterFrontEndPlugin<void> = {

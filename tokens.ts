@@ -7,6 +7,10 @@ import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
 import { Token } from '@lumino/coreutils';
 import { IFeatureOptions, IAdapterTypeOptions, LSPExtension} from './index';
 import { WidgetAdapterManager } from "./adapter_manager";
+import { IEditorName } from "./feature";
+import { CodeEditor } from "@jupyterlab/codeeditor";
+import IEditor = CodeEditor.IEditor;
+import { IVirtualEditor } from "./virtual/editor";
 
 export type TLanguageServerId = string;
 export type TLanguageId = string;
@@ -86,6 +90,23 @@ export interface ILSPAdapterManager {
   readonly types: IAdapterTypeOptions<IDocumentWidget>[];
 }
 
+
+export interface IVirtualEditorType<T extends IEditor> {
+  implementation: IVirtualEditor.Constructor;
+  name: IEditorName;
+  supports: new (...args: any) => T;
+}
+
+export interface ILSPVirtualEditorManager {
+  registerEditorType(options: IVirtualEditorType<IEditor>): void;
+
+  /**
+   * Choose the most appropriate VirtualEditor implementation
+   * given all the editors occurring in the widget.
+   */
+  findBestImplementation(editors: CodeEditor.IEditor[]): IVirtualEditorType<any>;
+}
+
 export const PLUGIN_ID = '@krassowski/jupyterlab-lsp';
 
 export const ILSPFeatureManager = new Token<ILSPFeatureManager>(
@@ -93,5 +114,9 @@ export const ILSPFeatureManager = new Token<ILSPFeatureManager>(
 );
 
 export const ILSPAdapterManager = new Token<ILSPAdapterManager>(
-  PLUGIN_ID + ':ILSPWidgetAdapterManager'
+  PLUGIN_ID + ':ILSPAdapterManager'
+);
+
+export const ILSPVirtualEditorManager = new Token<ILSPVirtualEditorManager>(
+  PLUGIN_ID + ':ILSPVirtualEditorManager'
 );

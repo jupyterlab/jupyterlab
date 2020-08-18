@@ -15,7 +15,13 @@ import { CommandEntryPoint, ContextCommandManager, IContextMenuOptions } from '.
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './components/statusbar';
 import { DocumentConnectionManager } from './connection_manager';
-import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID, TLanguageServerConfigurations } from './tokens';
+import {
+  ILSPAdapterManager,
+  ILSPFeatureManager,
+  ILSPVirtualEditorManager,
+  PLUGIN_ID,
+  TLanguageServerConfigurations
+} from './tokens';
 import { IFeature } from './feature';
 import { JUMP_PLUGIN } from './features/jump_to';
 import { COMPLETION_PLUGIN } from './features/completion';
@@ -34,6 +40,7 @@ import { WIDGET_ADAPTER_MANAGER } from "./adapter_manager";
 import { FILE_EDITOR_ADAPTER } from "./adapters/file_editor";
 import { NOTEBOOK_ADAPTER } from "./adapters/notebook";
 import IPaths = JupyterFrontEnd.IPaths;
+import { VIRTUAL_EDITOR_MANAGER } from "./virtual/editor";
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -94,7 +101,8 @@ export class LSPExtension {
     documentManager: IDocumentManager,
     paths: IPaths,
     status_bar: IStatusBar,
-    adapterManager: ILSPAdapterManager
+    adapterManager: ILSPAdapterManager,
+    public editor_type_manager: ILSPVirtualEditorManager
   ) {
     this.language_server_manager = new LanguageServerManager({});
     this.connection_manager = new DocumentConnectionManager({
@@ -171,7 +179,8 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
     IDocumentManager,
     IPaths,
     IStatusBar,
-    ILSPAdapterManager
+    ILSPAdapterManager,
+    ILSPVirtualEditorManager,
   ],
   activate: (app, ...args) => {
     let extension = new LSPExtension(
@@ -182,7 +191,8 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
         IDocumentManager,
         IPaths,
         IStatusBar,
-        ILSPAdapterManager
+        ILSPAdapterManager,
+        ILSPVirtualEditorManager
       ])
     );
     return extension.feature_manager;
@@ -206,6 +216,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   WIDGET_ADAPTER_MANAGER,
   NOTEBOOK_ADAPTER,
   FILE_EDITOR_ADAPTER,
+  VIRTUAL_EDITOR_MANAGER,
   ...default_features
 ];
 

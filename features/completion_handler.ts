@@ -10,7 +10,7 @@ import { completionItemKindNames, CompletionTriggerKind } from '../lsp';
 import * as lsProtocol from 'vscode-languageserver-types';
 import { VirtualDocument } from '../virtual/document';
 import { IVirtualEditor } from '../virtual/editor';
-import { IRootPosition, IVirtualPosition } from '../positioning';
+import { IEditorPosition, IRootPosition, IVirtualPosition } from '../positioning';
 import { LSPConnection } from '../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
@@ -18,6 +18,7 @@ import { kernelIcon } from '@jupyterlab/ui-components';
 
 import { CodeCompletion as LSPCompletionSettings } from '../_completion';
 import { FeatureSettings } from '../feature';
+import { PositionConverter } from "../converter";
 
 /**
  * A LSP connector for completion handlers.
@@ -93,7 +94,8 @@ export class LSPConnector
   }
 
   transform_from_editor_to_root(position: CodeEditor.IPosition): IRootPosition {
-    return this.virtual_editor.transform_editor_to_root(this._editor, position);
+    let editor_position = PositionConverter.ce_to_cm(position) as IEditorPosition;
+    return this.virtual_editor.transform_editor_to_root(this._editor, editor_position);
   }
 
   /**

@@ -1,6 +1,5 @@
 import { WidgetAdapter } from '../adapter';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
-import { VirtualCodeMirrorNotebookEditor } from '../../virtual/editors/notebook';
 import { until_ready } from '../../utils';
 import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
@@ -11,21 +10,22 @@ import { Session } from '@jupyterlab/services';
 import { SessionContext } from '@jupyterlab/apputils';
 import { LSPExtension } from '../../index';
 import { PositionConverter } from "../../converter";
-import { IEditorPosition } from "../../positioning";
+import { IEditorPosition, IVirtualPosition } from "../../positioning";
 import { ICommandContext } from "../../command_manager";
-import { IVirtualEditor } from "../../virtual/editor";
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import IEditor = CodeEditor.IEditor;
 import { VirtualDocument } from "../../virtual/document";
 
+
 export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   editor: Notebook;
-  virtual_editor: IVirtualEditor<IEditor>;
+  private ce_editor_to_cell: Map<IEditor, Cell>;
 
   private _language_info: ILanguageInfoMetadata;
 
   constructor(extension: LSPExtension, editor_widget: NotebookPanel) {
     super(extension, editor_widget);
+    this.ce_editor_to_cell = new Map();
     this.editor = editor_widget.content;
     this.init_once_ready().catch(console.warn);
   }
@@ -70,6 +70,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       this.activeCellChanged,
       this
     );
+    this.ce_editor_to_cell.clear();
     super.dispose();
   }
 
@@ -108,6 +109,10 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     return language_metadata.file_extension.replace('.', '');
   }
 
+  get wrapper_element() {
+    return this.widget.node;
+  }
+
   async init_once_ready() {
     console.log('LSP: waiting for', this.document_path, 'to fully load');
     await this.widget.context.sessionContext.ready;
@@ -115,13 +120,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     await this.update_language_info();
     console.log('LSP:', this.document_path, 'ready for connection');
 
-    let virtual_document = this.create_virtual_document();
-
-    this.virtual_editor = new VirtualCodeMirrorNotebookEditor(
-      this.widget.content,
-      this.widget.node,
-      virtual_document
-    );
+    this.init_virtual();
     this.connect_contentChanged_signal();
 
     // connect the document, but do not open it as the adapter will handle this
@@ -136,6 +135,27 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     );
 
     this.widget.content.activeCellChanged.connect(this.activeCellChanged, this);
+  }
+
+  get editors(): CodeEditor.IEditor[] {
+    if (this.isDisposed) {
+      return;
+    }
+
+    let notebook = this.widget.content;
+
+    this.ce_editor_to_cell.clear();
+
+    if (notebook.isDisposed) {
+      return [];
+    }
+
+    return notebook.widgets.map(cell => {
+      if (cell.model.type === 'code') {
+        this.ce_editor_to_cell.set(cell.editor, cell);
+        return cell.editor;
+      }
+    });
   }
 
   create_virtual_document() {
@@ -186,5 +206,26 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     }
 
     return this?.get_context(root_position);
+  }
+
+  get_editor_index_at(position: IVirtualPosition): number {
+    let cell = this.get_cell_at(position);
+    let notebook = this.widget.content
+    return notebook.widgets.findIndex(other_cell => {
+      return cell === other_cell;
+    });
+  }
+
+  get_editor_index(ce_editor: CodeEditor.IEditor): number {
+    let cell = this.ce_editor_to_cell.get(ce_editor);
+    let notebook = this.widget.content
+    return notebook.widgets.findIndex(other_cell => {
+      return cell === other_cell;
+    });
+  }
+
+  private get_cell_at(pos: IVirtualPosition): Cell {
+    let ce_editor = this.virtual_editor.virtual_document.get_editor_at_virtual_line(pos);
+    return this.ce_editor_to_cell.get(ce_editor);
   }
 }

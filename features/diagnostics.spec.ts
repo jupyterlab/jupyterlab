@@ -148,8 +148,8 @@ describe('Diagnostics', () => {
         ]
       });
 
-      let cm_editors = env.virtual_editor.notebook.widgets.map(
-        cell => (cell.editor as CodeMirrorEditor).editor
+      let cm_editors = env.adapter.editors.map(
+        editor => (editor as CodeMirrorEditor).editor
       );
       let marks_cell_1 = cm_editors[0].getDoc().getAllMarks();
       // test from mypy, test from pyflakes, whitespace around operator from pycodestyle
@@ -212,8 +212,8 @@ describe('Diagnostics', () => {
 
       // test guards against wrongly propagated responses:
       feature.handleDiagnostic(response);
-      let cm_editors = env.virtual_editor.notebook.widgets.map(
-        cell => (cell.editor as CodeMirrorEditor).editor
+      let cm_editors = env.adapter.editors.map(
+        ce_editor => (ce_editor as CodeMirrorEditor).editor
       );
 
       let marks_cell_1 = cm_editors[0].getDoc().getAllMarks();

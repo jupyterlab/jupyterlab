@@ -14,7 +14,6 @@ import {
   diagnosticsIcon
 } from './diagnostics_listing';
 import { VirtualDocument } from '../virtual/document';
-import { VirtualCodeMirrorEditor } from '../virtual/editor';
 import { FeatureSettings, IFeatureCommand } from '../feature';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import { CodeDiagnostics as LSPDiagnosticsSettings } from '../_diagnostics';
@@ -24,6 +23,7 @@ import {
 } from '@jupyterlab/application';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { VirtualCodeMirrorEditor } from "../virtual/codemirror_editor";
 
 export const FEATURE_ID = PLUGIN_ID + ':diagnostics';
 
@@ -335,7 +335,8 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
 
           const severity = diagnosticSeverityNames[highest_severity_code];
 
-          let cm_editor = document.get_editor_at_virtual_line(start);
+          let ce_editor = document.get_editor_at_virtual_line(start);
+          let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
 
           let start_in_editor = document.transform_virtual_to_editor(start);
           let end_in_editor: IEditorPosition;

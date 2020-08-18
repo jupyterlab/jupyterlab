@@ -76,7 +76,7 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
     ) as IVirtualPosition;
 
     if (uris_equal(uri, document_uri)) {
-      let editor_index = this.virtual_editor.get_editor_index(virtual_position);
+      let editor_index = this.adapter.get_editor_index_at(virtual_position);
       // if in current file, transform from the position within virtual document to the editor position:
       let editor_position = this.virtual_editor.transform_virtual_to_editor(
         virtual_position

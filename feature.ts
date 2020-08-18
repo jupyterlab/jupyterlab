@@ -4,9 +4,10 @@ import { IEditorChange, IVirtualEditor } from './virtual/editor';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
 import { IRootPosition } from './positioning';
-import { StatusMessage } from './adapters/adapter';
+import { StatusMessage, WidgetAdapter } from './adapters/adapter';
 import IEditor = CodeEditor.IEditor;
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IDocumentWidget } from "@jupyterlab/docregistry";
 
 export interface IFeatureCommand {
   /**
@@ -114,10 +115,12 @@ export abstract class FeatureEditorIntegration<
   is_registered: boolean;
   feature: IFeature;
 
-  protected virtual_editor: IVirtualEditor<T>;
+  // TODO: T
+  protected virtual_editor: IVirtualEditor<IEditor>;
   protected virtual_document: VirtualDocument;
   protected connection: LSPConnection;
   protected status_message: StatusMessage;
+  protected adapter: WidgetAdapter<IDocumentWidget>;
 
   get settings() {
     return this.feature.settings;
@@ -133,6 +136,7 @@ export abstract class FeatureEditorIntegration<
     this.virtual_document = options.virtual_document;
     this.connection = options.connection;
     this.status_message = options.status_message;
+    this.adapter = options.adapter
   }
 
   /**
@@ -165,8 +169,25 @@ export interface IFeatureEditorIntegrationConstructor<
 
 export interface IEditorIntegrationOptions {
   feature: IFeature;
+  /**
+   * Provides the editor-implementation-specific methods;
+   * is NOT aware of existence of cells or multiple editors
+   */
   virtual_editor: IVirtualEditor<IEditor>;
+  /**
+   * Provides an abstraction of continuous document,
+   * regardless of the actual underlying model or GUI display
+   * (even if it is a notebook, it can be viewed as a continuous document).
+   * Is aware of the document potentially having multiple editors (blocks),
+   * but is NOT aware of the actual editor-implementation (such as CodeMirror).
+   */
   virtual_document: VirtualDocument;
+  /**
+   * Interfaces with the relevant JupyterLab widget, such as Notebook or FileEditor.
+   * Is aware of existence of cells in notebook (exposed as multiple editors),
+   * but is NOT aware of editor-implementation details (such as existence of CodeMirror).
+   */
+  adapter: WidgetAdapter<IDocumentWidget>;
   connection: LSPConnection;
   status_message: StatusMessage;
   settings: FeatureSettings<any>;
