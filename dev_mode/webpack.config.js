@@ -222,7 +222,7 @@ module.exports = [
     },
     output: {
       path: plib.resolve(buildDir),
-      publicPath: 'static/lab/',
+      publicPath: '/static/lab/',
       filename: '[name].[chunkhash].js'
     },
     optimization: {
