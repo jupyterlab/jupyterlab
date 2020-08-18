@@ -6,6 +6,10 @@ JupyterLab Changelog
 `v1.2.x <https://github.com/jupyterlab/jupyterlab/milestone/54>`__
 ---------------------------------------------------------------------------
 
+v1.2.17
+^^^^^^^
+* Do not use token parameters in websocket urls (`#8837 <https://github.com/jupyterlab/jupyterlab/pull/8837>`__)
+
 v1.2.16
 ^^^^^^^
 * Handle quit_button when launched as an extension (`#8487 <https://github.com/jupyterlab/jupyterlab/pull/8487>`__)
