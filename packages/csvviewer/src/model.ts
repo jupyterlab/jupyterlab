@@ -107,20 +107,6 @@ export class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
-   * The delimiter between entries on the same row.
-   */
-  get delimiter(): string {
-    return this._delimiter;
-  }
-
-  /**
-   * The delimiter between rows.
-   */
-  get rowDelimiter(): string {
-    return this._rowDelimiter;
-  }
-
-  /**
    * The string representation of the data.
    */
   get rawData(): string {
@@ -128,6 +114,16 @@ export class DSVModel extends DataModel implements IDisposable {
   }
   set rawData(value: string) {
     this._rawData = value;
+  }
+
+  /**
+   * The initial chunk of rows to parse.
+   */
+  get initialRows(): number {
+    return this._initialRows;
+  }
+  set initialRows(value: number) {
+    this._initialRows = value;
   }
 
   /**
@@ -141,13 +137,17 @@ export class DSVModel extends DataModel implements IDisposable {
   }
 
   /**
-   * The initial chunk of rows to parse.
+   * The delimiter between entries on the same row.
    */
-  get initialRows(): number {
-    return this._initialRows;
+  get delimiter(): string {
+    return this._delimiter;
   }
-  set initialRows(value: number) {
-    this._initialRows = value;
+
+  /**
+   * The delimiter between rows.
+   */
+  get rowDelimiter(): string {
+    return this._rowDelimiter;
   }
 
   /**
