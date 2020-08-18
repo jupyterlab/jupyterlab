@@ -3,7 +3,7 @@
   "version": "2.1.1-alpha.10",
   "private": true,
   "scripts": {
-    "build": "npm run build:core && npm run build:md",
+    "build": "npm run build:core && && npm run build:middle && npm run build:md",
     "build:core": "cd core_package && npm run build",
     "build:md": "cd md_package && npm run build",
     "build:middle": "cd middle_package && npm run build"
