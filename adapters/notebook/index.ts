@@ -1,10 +1,9 @@
 import { CommandEntryPoint } from "../../command_manager";
 import { JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { ILSPAdapterManager, PLUGIN_ID } from "../../tokens";
+import { IAdapterTypeOptions, ILSPAdapterManager, PLUGIN_ID } from "../../tokens";
 import { INotebookTracker } from "@jupyterlab/notebook";
 import { NotebookAdapter } from "./notebook";
 import { IDocumentWidget } from "@jupyterlab/docregistry";
-import { IAdapterTypeOptions } from "../../index";
 
 export const CellContextMenuEntryPoint: CommandEntryPoint = 'notebook-cell-context-menu';
 export const NOTEBOOK_ADAPTER: JupyterFrontEndPlugin<void> = {

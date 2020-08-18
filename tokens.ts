@@ -5,12 +5,15 @@ import * as SCHEMA from './_schema';
 import { WidgetAdapter } from './adapters/adapter';
 import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
 import { Token } from '@lumino/coreutils';
-import { IFeatureOptions, IAdapterTypeOptions, LSPExtension} from './index';
+import { IFeatureOptions, LSPExtension } from './index';
 import { WidgetAdapterManager } from "./adapter_manager";
 import { IEditorName } from "./feature";
 import { CodeEditor } from "@jupyterlab/codeeditor";
-import IEditor = CodeEditor.IEditor;
 import { IVirtualEditor } from "./virtual/editor";
+import { IDocumentWidget } from "@jupyterlab/docregistry";
+import { IWidgetTracker } from "@jupyterlab/apputils";
+import { CommandEntryPoint, IContextMenuOptions } from "./command_manager";
+import IEditor = CodeEditor.IEditor;
 
 export type TLanguageServerId = string;
 export type TLanguageId = string;
@@ -77,6 +80,20 @@ export interface IAdapterRegistration {
   id: string;
   adapter: WidgetAdapter<IDocumentWidget>;
   re_connector: Function;
+}
+
+export type WidgetAdapterConstructor<T extends IDocumentWidget> = {
+  new(extension: LSPExtension, widget: T): WidgetAdapter<T>;
+};
+
+export interface IAdapterTypeOptions<T extends IDocumentWidget> {
+  tracker: IWidgetTracker<T>;
+  name: string;
+  adapter: WidgetAdapterConstructor<T>;
+  entrypoint: CommandEntryPoint;
+  context_menu: IContextMenuOptions;
+
+  get_id(widget: T): string;
 }
 
 export interface ILSPAdapterManager {

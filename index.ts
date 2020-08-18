@@ -1,5 +1,5 @@
 import { JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
-import { ICommandPalette, IWidgetTracker } from '@jupyterlab/apputils';
+import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
@@ -7,11 +7,8 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 
 import { LanguageServerManager } from './manager';
 
-// TODO: make use of it for jump target selection (requires to be added to package.json)?
-// import 'codemirror/addon/hint/show-hint.css';
-// import 'codemirror/addon/hint/show-hint';
 import '../style/index.css';
-import { CommandEntryPoint, ContextCommandManager, IContextMenuOptions } from './command_manager';
+import { ContextCommandManager } from './command_manager';
 import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './components/statusbar';
 import { DocumentConnectionManager } from './connection_manager';
@@ -25,9 +22,7 @@ import {
 import { IFeature } from './feature';
 import { JUMP_PLUGIN } from './features/jump_to';
 import { COMPLETION_PLUGIN } from './features/completion';
-import { WidgetAdapter } from './adapters/adapter';
 import { SIGNATURE_PLUGIN } from './features/signature';
-import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { HOVER_PLUGIN } from './features/hover';
 import { RENAME_PLUGIN } from './features/rename';
 import { HIGHLIGHTS_PLUGIN } from './features/highlights';
@@ -39,8 +34,9 @@ import codeCheckSvg from '../style/icons/code-check.svg';
 import { WIDGET_ADAPTER_MANAGER } from "./adapter_manager";
 import { FILE_EDITOR_ADAPTER } from "./adapters/file_editor";
 import { NOTEBOOK_ADAPTER } from "./adapters/notebook";
-import IPaths = JupyterFrontEnd.IPaths;
 import { VIRTUAL_EDITOR_MANAGER } from "./virtual/editor";
+import IPaths = JupyterFrontEnd.IPaths;
+import { CODEMIRROR_VIRTUAL_EDITOR } from "./virtual/codemirror_editor";
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -73,19 +69,6 @@ class FeatureManager implements ILSPFeatureManager {
       }
     }
   }
-}
-
-export type WidgetAdapterConstructor<T extends IDocumentWidget> = {
-  new (extension: LSPExtension, widget: T): WidgetAdapter<T>;
-};
-
-export interface IAdapterTypeOptions<T extends IDocumentWidget> {
-  tracker: IWidgetTracker<T>;
-  name: string;
-  adapter: WidgetAdapterConstructor<T>;
-  entrypoint: CommandEntryPoint;
-  context_menu: IContextMenuOptions;
-  get_id(widget: T): string;
 }
 
 
@@ -217,6 +200,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   NOTEBOOK_ADAPTER,
   FILE_EDITOR_ADAPTER,
   VIRTUAL_EDITOR_MANAGER,
+  CODEMIRROR_VIRTUAL_EDITOR,
   ...default_features
 ];
 

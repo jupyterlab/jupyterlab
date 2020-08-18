@@ -24,7 +24,7 @@ import {
 import { EditorAdapter } from './editor_adapter';
 import IEditor = CodeEditor.IEditor;
 import { VirtualCodeMirrorEditor, VirtualCodeMirrorNotebookEditor } from "../virtual/codemirror_editor";
-import { WidgetAdapterConstructor } from "../index";
+import { WidgetAdapterConstructor } from "../tokens";
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;

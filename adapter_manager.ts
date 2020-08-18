@@ -1,9 +1,9 @@
-import { IAdapterRegistration, ILSPAdapterManager, PLUGIN_ID } from "./tokens";
+import { IAdapterRegistration, IAdapterTypeOptions, ILSPAdapterManager, PLUGIN_ID } from "./tokens";
 import { Signal } from "@lumino/signaling";
 import { IDocumentWidget } from "@jupyterlab/docregistry";
 import { WidgetAdapter } from "./adapters/adapter";
 import { ILabShell, JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { IAdapterTypeOptions, LSPExtension } from "./index";
+import { LSPExtension } from "./index";
 
 export class WidgetAdapterManager implements ILSPAdapterManager {
   adapterTypeAdded: Signal<WidgetAdapterManager, IAdapterTypeOptions<IDocumentWidget>>
