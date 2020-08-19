@@ -142,6 +142,8 @@ export class LSPExtension implements ILSPExtension {
       .catch((reason: Error) => {
         console.error(reason.message);
       });
+
+    adapterManager.registerExtension(this);
   }
 
   private updateOptions(settings: ISettingRegistry.ISettings) {
