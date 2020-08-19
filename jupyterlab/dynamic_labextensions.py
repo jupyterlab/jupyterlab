@@ -331,19 +331,21 @@ def _get_labextension_metadata(module):
     if not hasattr(m, '_jupyter_labextension_paths'):
         mod_path = osp.abspath(module)
         if osp.exists(mod_path):
+            sys.path.insert(0, mod_path)
+
             # First see if the module is already installed
             from setuptools import find_packages
             packages = find_packages(mod_path)
 
-            # If not, temporarily adding the path
+            # If not, get the package name from setup.py
             if not packages:
-                sys.path.insert(0, mod_path)
                 name = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=mod_path)
                 packages = [name.decode('utf8').strip()]
-                sys.path.pop(0)
             
             # Import the first found package
             m = import_item(packages[0])
+
+            sys.path.pop(0)
 
     if not hasattr(m, '_jupyter_labextension_paths'):
         raise KeyError('The Python module {} is not a valid labextension, '
