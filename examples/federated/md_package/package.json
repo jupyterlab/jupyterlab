@@ -11,7 +11,9 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.0.0-alpha.11",
-    "@jupyterlab/markdownviewer-extension": "^3.0.0-alpha.11"
+    "@jupyterlab/example-federated-middle": "^2.1.0",
+    "@jupyterlab/markdownviewer-extension": "^3.0.0-alpha.11",
+    "@lumino/widgets": "^1.11.1"
   },
   "devDependencies": {
     "@jupyterlab/buildutils": "^3.0.0-alpha.11",
