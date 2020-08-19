@@ -511,7 +511,7 @@ export class CodeMirrorVirtualEditor
 }
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface VirtualCodeMirrorEditor extends CodeMirror.Editor {
+export interface CodeMirrorVirtualEditor extends CodeMirror.Editor {
 }
 
 export const CODEMIRROR_VIRTUAL_EDITOR: JupyterFrontEndPlugin<void> = {

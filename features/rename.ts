@@ -164,8 +164,7 @@ export class RenameCM extends CodeMirrorIntegration {
           let message = diagnostic.diagnostic.message;
           let start = diagnostic.range.start;
           if (rename_feature.adapter.has_multiple_editors) {
-            let notebook_editor = editor as CodeMirrorVirtualEditor;
-            let { index: editor_id } = notebook_editor.find_editor(
+            let { index: editor_id } = editor.find_editor(
               diagnostic.editor
             );
             let cell_number = editor_id + 1;
