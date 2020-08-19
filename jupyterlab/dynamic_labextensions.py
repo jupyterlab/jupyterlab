@@ -15,6 +15,7 @@ import tarfile
 import zipfile
 from os.path import basename, join as pjoin, normpath
 import subprocess
+import sys
 
 from urllib.parse import urlparse
 from urllib.request import urlretrieve
@@ -150,7 +151,7 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
             logger.info("Installing %s -> %s" % (src, dest))
 
         if not os.path.exists(src):
-            build_labextension(src, logger=logger)
+            build_labextension(base_path, logger=logger)
 
         full_dest = develop_labextension(
             src, overwrite=overwrite, symlink=symlink,
@@ -328,11 +329,20 @@ def _get_labextension_metadata(module):
         m = None
 
     if not hasattr(m, '_jupyter_labextension_paths'):
-        if osp.exists(osp.abspath(module)):
+        mod_path = osp.abspath(module)
+        if osp.exists(mod_path):
+            # First see if the module is already installed
             from setuptools import find_packages
-            packages = find_packages(module)
+            packages = find_packages(mod_path)
+
+            # If not, temporarily adding the path
             if not packages:
-                raise ValueError('Could not find module %s' % module)
+                sys.path.insert(0, mod_path)
+                name = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=mod_path)
+                packages = [name.decode('utf8').strip()]
+                sys.path.pop(0)
+            
+            # Import the first found package
             m = import_item(packages[0])
 
     if not hasattr(m, '_jupyter_labextension_paths'):
