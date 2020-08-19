@@ -11,7 +11,11 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IVirtualEditor } from './virtual/editor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { IWidgetTracker } from '@jupyterlab/apputils';
-import { CommandEntryPoint, IContextMenuOptions } from './command_manager';
+import {
+  CommandEntryPoint,
+  ContextCommandManager,
+  IContextMenuOptions
+} from './command_manager';
 import IEditor = CodeEditor.IEditor;
 
 export type TLanguageServerId = string;
@@ -74,6 +78,7 @@ export namespace ILanguageServerManager {
 export interface ILSPFeatureManager {
   readonly features: IFeature[];
   register(options: IFeatureOptions): void;
+  registerCommandManager(manager: ContextCommandManager): void;
 }
 
 export interface IAdapterRegistration {
@@ -97,6 +102,10 @@ export interface IAdapterTypeOptions<T extends IDocumentWidget> {
 }
 
 export interface ILSPAdapterManager {
+  adapterTypeAdded: Signal<
+    WidgetAdapterManager,
+    IAdapterTypeOptions<IDocumentWidget>
+  >;
   adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
   adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
   currentAdapter: WidgetAdapter<IDocumentWidget>;

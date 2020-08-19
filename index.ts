@@ -5,9 +5,8 @@ import {
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-
+import { Signal } from '@lumino/signaling';
 import { LanguageServerManager } from './manager';
-
 import '../style/index.css';
 import { ContextCommandManager } from './command_manager';
 import { IStatusBar } from '@jupyterlab/statusbar';
@@ -28,16 +27,14 @@ import { HOVER_PLUGIN } from './features/hover';
 import { RENAME_PLUGIN } from './features/rename';
 import { HIGHLIGHTS_PLUGIN } from './features/highlights';
 import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
-
-import { LabIcon } from '@jupyterlab/ui-components';
-
-import codeCheckSvg from '../style/icons/code-check.svg';
 import { WIDGET_ADAPTER_MANAGER } from './adapter_manager';
 import { FILE_EDITOR_ADAPTER } from './adapters/file_editor';
 import { NOTEBOOK_ADAPTER } from './adapters/notebook';
 import { VIRTUAL_EDITOR_MANAGER } from './virtual/editor';
 import IPaths = JupyterFrontEnd.IPaths;
 import { CODEMIRROR_VIRTUAL_EDITOR } from './virtual/codemirror_editor';
+import { LabIcon } from '@jupyterlab/ui-components';
+import codeCheckSvg from '../style/icons/code-check.svg';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -54,7 +51,15 @@ export interface IFeatureOptions {
 
 export class FeatureManager implements ILSPFeatureManager {
   features: Array<IFeature> = [];
-  constructor(private command_managers: Array<ContextCommandManager> = []) {}
+  private command_managers: Array<ContextCommandManager> = [];
+  private command_manager_registered: Signal<
+    FeatureManager,
+    ContextCommandManager
+  >;
+
+  constructor() {
+    this.command_manager_registered = new Signal(this);
+  }
 
   register(options: IFeatureOptions): void {
     if (options.supersedes) {
@@ -64,11 +69,21 @@ export class FeatureManager implements ILSPFeatureManager {
     }
     this.features.push(options.feature);
 
-    for (let command_manager of this.command_managers) {
-      if (options.feature.commands) {
+    if (options.feature.commands) {
+      for (let command_manager of this.command_managers) {
         command_manager.add(options.feature.commands);
       }
+      this.command_manager_registered.connect(
+        (feature_manager, command_manager) => {
+          command_manager.add(options.feature.commands);
+        }
+      );
     }
+  }
+
+  registerCommandManager(manager: ContextCommandManager) {
+    this.command_managers.push(manager);
+    this.command_manager_registered.emit(manager);
   }
 }
 
@@ -111,10 +126,10 @@ export class LSPExtension implements ILSPExtension {
       isActive: () => adapterManager.isAnyActive()
     });
 
-    let command_mangers: ContextCommandManager[] = [];
+    this.feature_manager = new FeatureManager();
 
-    for (let type of adapterManager.types) {
-      new ContextCommandManager({
+    adapterManager.adapterTypeAdded.connect((manager, type) => {
+      let command_manger = new ContextCommandManager({
         adapter_manager: adapterManager,
         app: app,
         palette: palette,
@@ -123,9 +138,8 @@ export class LSPExtension implements ILSPExtension {
         entry_point: type.entrypoint,
         ...type.context_menu
       });
-    }
-
-    this.feature_manager = new FeatureManager(command_mangers);
+      this.feature_manager.registerCommandManager(command_manger);
+    });
 
     this.setting_registry
       .load(plugin.id)
