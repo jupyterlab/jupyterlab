@@ -112,6 +112,7 @@ export abstract class TestEnvironment
     let adapter_type = this.get_adapter_type();
     this.adapter = new adapter_type(this.extension, this.widget)
     this.virtual_editor = this.create_virtual_editor();
+    this.adapter.virtual_editor = this.virtual_editor;
   }
 
   create_virtual_editor(): CodeMirrorVirtualEditor{

@@ -1,13 +1,11 @@
 import { expect } from 'chai';
 import {
   code_cell,
-  IFeatureTestEnvironment,
   FileEditorFeatureTestEnvironment,
   getCellsJSON,
   NotebookFeatureTestEnvironment,
   python_notebook_metadata,
-  showAllCells,
-  synchronize_content
+  showAllCells
 } from './testutils';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as nbformat from '@jupyterlab/nbformat';
@@ -16,10 +14,6 @@ import { foreign_code_extractors } from '../extractors/defaults';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { CodeMirrorIntegration } from './codemirror';
-import { EditorAdapter } from './editor_adapter';
-import { IVirtualEditor } from '../virtual/editor';
-import { CodeEditor } from '@jupyterlab/codeeditor';
-import IEditor = CodeEditor.IEditor;
 
 const js_fib_code = `function fib(n) {
   return n<2?n:fib(n-1)+fib(n-2);
@@ -103,26 +97,13 @@ describe('Feature', () => {
       }
     }
 
-    function init_adapter(
-      environment: IFeatureTestEnvironment,
-      feature: CodeMirrorIntegration
-    ) {
-      return new EditorAdapter(
-        environment.virtual_editor,
-        environment.virtual_editor.virtual_document,
-        [feature]
-      );
-    }
-
     describe('editing in FileEditor', () => {
-      let adapter: EditorAdapter<IVirtualEditor<IEditor>>;
       let feature: EditApplyingFeatureCM;
       let environment: FileEditorFeatureTestEnvironment;
 
       beforeEach(() => {
         environment = new FileEditorFeatureTestEnvironment();
         feature = environment.init_integration(EditApplyingFeatureCM, 'EditApplyingFeature')
-        adapter = init_adapter(environment, feature);
       });
 
       afterEach(() => {
@@ -132,7 +113,6 @@ describe('Feature', () => {
       it('applies simple edit in FileEditor', async () => {
         environment.ce_editor.model.value.text = 'foo bar';
         await environment.adapter.update_documents();
-        await adapter.updateAfterChange();
 
         await feature.do_apply_edit({
           changes: {
@@ -157,7 +137,6 @@ describe('Feature', () => {
       it('applies partial edits', async () => {
         environment.ce_editor.model.value.text = js_fib_code;
         await environment.adapter.update_documents();
-        await adapter.updateAfterChange();
 
         let result = await feature.do_apply_edit({
           changes: { ['file://' + environment.document_options.path]: js_partial_edits }
@@ -175,7 +154,6 @@ describe('Feature', () => {
     });
 
     describe('editing in Notebook', () => {
-      let adapter: EditorAdapter<IVirtualEditor<IEditor>>;
       let feature: EditApplyingFeatureCM;
       let environment: NotebookFeatureTestEnvironment;
 
@@ -186,7 +164,6 @@ describe('Feature', () => {
         });
 
         feature = environment.init_integration(EditApplyingFeatureCM, 'EditApplyingFeature')
-        adapter = init_adapter(environment, feature);
       });
 
       afterEach(() => {
@@ -194,7 +171,7 @@ describe('Feature', () => {
       });
 
       async function synchronizeContent() {
-        await synchronize_content(environment, adapter);
+        await environment.adapter.update_documents();
       }
 
       it('applies edit across cells', async () => {
