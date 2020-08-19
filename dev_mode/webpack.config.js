@@ -218,11 +218,11 @@ module.exports = [
   merge(baseConfig, {
     mode: 'development',
     entry: {
-      main: ['whatwg-fetch', entryPoint]
+      main: ['./publicpath', 'whatwg-fetch', entryPoint]
     },
     output: {
       path: plib.resolve(buildDir),
-      publicPath: 'static/lab/',
+      publicPath: '{{page_config.fullStaticUrl}}/',
       filename: '[name].[chunkhash].js'
     },
     optimization: {
