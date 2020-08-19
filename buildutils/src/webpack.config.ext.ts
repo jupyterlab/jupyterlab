@@ -119,8 +119,18 @@ shared[data.name] = {
   import: index
 };
 
-// Ensure a clean output directory.
-fs.rmdirSync(outputPath, { recursive: true });
+// Ensure a clean output directory - remove files but not the directory
+// in case it is a symlink
+if (fs.existsSync(outputPath)) {
+  const outputFiles = fs.readdirSync(outputPath);
+  outputFiles.forEach(filePath => {
+    if (fs.statSync(filePath).isFile()) {
+      fs.unlinkSync(filePath);
+    } else {
+      fs.rmdirSync(filePath, { recursive: true });
+    }
+  });
+}
 fs.mkdirSync(outputPath, { recursive: true });
 
 const extras = Build.ensureAssets({
