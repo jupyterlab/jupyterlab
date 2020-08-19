@@ -6,8 +6,7 @@
   "style": "./style/index.css",
   "scripts": {
     "build": "npm run clean && build-labextension --core-path ../core_package .",
-    "clean": "rimraf build",
-    "watch": "npm run clean && webpack --watch"
+    "clean": "rimraf ../labextensions/@jupyterlab/example-federated-md"
   },
   "dependencies": {
     "@jupyterlab/application": "^3.0.0-alpha.11",
@@ -17,23 +16,7 @@
   },
   "devDependencies": {
     "@jupyterlab/buildutils": "^3.0.0-alpha.11",
-    "copy-webpack-plugin": "^6.0.1",
-    "css-loader": "~3.2.0",
-    "file-loader": "~5.0.2",
-    "fs-extra": "^8.1.0",
-    "glob": "~7.1.6",
-    "mini-css-extract-plugin": "~0.10.0",
-    "raw-loader": "~4.0.0",
-    "read-package-tree": "^5.3.1",
-    "rimraf": "~3.0.0",
-    "style-loader": "~1.0.1",
-    "svg-url-loader": "~3.0.3",
-    "to-string-loader": "^1.1.6",
-    "url-loader": "~3.0.0",
-    "watch": "~1.0.2",
-    "webpack": "~5.0.0-beta.26",
-    "webpack-cli": "^3.3.10",
-    "whatwg-fetch": "^3.0.0"
+    "rimraf": "~3.0.0"
   },
   "jupyterlab": {
     "extension": true,

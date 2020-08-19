@@ -35,6 +35,20 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
   '@jupyterlab/buildutils': [
+    // For the phosphor shim
+    '@lumino/algorithm',
+    '@lumino/application',
+    '@lumino/commands',
+    '@lumino/disposable',
+    '@lumino/domutils',
+    '@lumino/dragdrop',
+    '@lumino/messaging',
+    '@lumino/properties',
+    '@lumino/signaling',
+    '@lumino/virtualdom',
+    '@lumino/widgets',
+
+    // The libraries needed for building other extensions.
     '@babel/core',
     '@babel/preset-env',
     'babel-loader',

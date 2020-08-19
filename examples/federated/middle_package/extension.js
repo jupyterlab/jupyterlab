@@ -1,4 +1,7 @@
-const IMiddleToken = require('./index').IMiddleToken;
+// Copyright (c) Jupyter Development Team.
+// Distributed under the terms of the Modified BSD License.
+
+const IMiddleToken = require('./tokens').IMiddleToken;
 
 module.exports = [
   {
