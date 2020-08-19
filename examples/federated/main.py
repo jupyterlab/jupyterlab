@@ -3,7 +3,6 @@
 
 from jupyterlab_server import LabServerApp, LabConfig
 from jupyterlab_server.server import FileFindHandler
-from notebook.utils import url_path_join as ujoin
 import json
 import os
 from traitlets import Unicode
