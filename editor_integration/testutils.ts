@@ -1,14 +1,13 @@
 import {
   CodeMirrorEditor,
-  CodeMirrorEditorFactory
+  CodeMirrorEditorFactory, CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
 import { IVirtualEditor} from '../virtual/editor';
 import { LSPConnection } from '../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { VirtualCodeMirrorFileEditor } from '../virtual/editors/file_editor';
 import { StatusMessage, WidgetAdapter } from '../adapters/adapter';
-import { Notebook, NotebookModel } from '@jupyterlab/notebook';
-import { NBTestUtils } from '@jupyterlab/testutils';
+import { Notebook, NotebookModel, NotebookPanel } from '@jupyterlab/notebook';
+import { initNotebookContext, NBTestUtils } from '@jupyterlab/testutils';
 import { IOverridesRegistry } from '../magics/overrides';
 import { IForeignCodeExtractorsRegistry } from '../extractors/types';
 import * as nbformat from '@jupyterlab/nbformat';
@@ -16,18 +15,22 @@ import { ICellModel } from '@jupyterlab/cells';
 import { VirtualDocument } from '../virtual/document';
 import { LanguageServerManager } from '../manager';
 import { DocumentConnectionManager } from '../connection_manager';
-import createNotebook = NBTestUtils.createNotebook;
 import {
   CodeMirrorIntegration,
   CodeMirrorIntegrationConstructor
 } from './codemirror';
 import { EditorAdapter } from './editor_adapter';
 import IEditor = CodeEditor.IEditor;
-import { CodeMirrorVirtualEditor, VirtualCodeMirrorNotebookEditor } from "../virtual/codemirror_editor";
+import { CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
 import { WidgetAdapterConstructor } from "../tokens";
+import { FileEditorAdapter } from "../adapters/file_editor/file_editor";
+import { NotebookAdapter } from "../adapters/notebook/notebook";
+import { Context, IDocumentWidget, TextModelFactory } from "@jupyterlab/docregistry";
+import createNotebookPanel = NBTestUtils.createNotebookPanel;
+import { FileEditor, FileEditorFactory } from "@jupyterlab/fileeditor";
+import { ServiceManager } from "@jupyterlab/services";
 
 interface IFeatureTestEnvironment {
-  host: HTMLElement;
   virtual_editor: CodeMirrorVirtualEditor;
 
   dispose(): void;
@@ -47,24 +50,22 @@ export class MockLanguageServerManager extends LanguageServerManager {
 
 export abstract class FeatureTestEnvironment
   implements IFeatureTestEnvironment {
-  host: HTMLElement;
   virtual_editor: CodeMirrorVirtualEditor;
   status_message: StatusMessage;
   private connections: Map<CodeMirrorIntegration, LSPConnection>;
-  private adapter_type: WidgetAdapterConstructor<any>;
+  protected abstract adapter_type: WidgetAdapterConstructor<any>;
   adapter: WidgetAdapter<any>;
+  abstract widget: IDocumentWidget;
 
   protected constructor(
-    public language: () => string,
-    public path: () => string,
-    public file_extension: () => string
+    public language: string,
+    public path: string,
+    public file_extension: string
   ) {
     this.connections = new Map();
-    this.host = document.createElement('div');
-    document.body.appendChild(this.host);
   }
 
-  init() {
+  async init() {
     this.virtual_editor = this.create_virtual_editor();
     this.status_message = new StatusMessage();
   }
@@ -87,7 +88,7 @@ export abstract class FeatureTestEnvironment
       status_message: this.status_message,
       settings: null,
       // TODO
-      adapter: new this.adapter_type(null, null)
+      adapter: new this.adapter_type(null, this.widget)
     });
     this.connections.set(feature as CodeMirrorIntegration, connection);
 
@@ -106,56 +107,72 @@ export abstract class FeatureTestEnvironment
 
   public create_dummy_connection() {
     return new LSPConnection({
-      languageId: this.language(),
+      languageId: this.language,
       serverUri: 'ws://localhost:8080',
       rootUri: 'file:///unit-test'
     });
   }
 
   dispose(): void {
-    document.body.removeChild(this.host);
   }
 }
 
 export class FileEditorFeatureTestEnvironment extends FeatureTestEnvironment {
-  ce_editor: CodeMirrorEditor;
   connection_manager: DocumentConnectionManager;
   language_server_manager: LanguageServerManager;
+  protected adapter_type = FileEditorAdapter;
+  widget: IDocumentWidget<FileEditor>
 
   constructor(
-    language = () => 'python',
-    path = () => 'dummy.py',
-    file_extension = () => 'py'
+    language = 'python',
+    path = 'dummy.py',
+    file_extension = 'py'
   ) {
     super(language, path, file_extension);
-    const factoryService = new CodeMirrorEditorFactory();
-    let model = new CodeEditor.Model();
-
-    this.ce_editor = factoryService.newDocumentEditor({
-      host: this.host,
-      model
-    });
 
     this.language_server_manager = new MockLanguageServerManager({});
     this.connection_manager = new DocumentConnectionManager({
       language_server_manager: this.language_server_manager
     });
-
-    this.init();
   }
 
-  create_virtual_editor(): VirtualCodeMirrorFileEditor {
-    return new VirtualCodeMirrorFileEditor(
-      new VirtualDocument({
-        language: this.language(),
-        file_extension: this.file_extension(),
-        path: this.path(),
-        has_lsp_supported_file: true,
-        standalone: true,
-        foreign_code_extractors: {},
-        overrides_registry: {}
-      }),
-      this.ce_editor
+  get ce_editor(): CodeMirrorEditor {
+    return this.widget.content.editor as CodeMirrorEditor;
+  }
+
+  async init(): Promise<void> {
+    let factory = new FileEditorFactory({
+      editorServices: {
+        factoryService: new CodeMirrorEditorFactory(),
+        mimeTypeService: new CodeMirrorMimeTypeService()
+      },
+      factoryOptions: {
+        name: 'Editor',
+        fileTypes: ['*']
+      }
+    })
+    this.widget = factory.createNew(new Context({
+      manager: new ServiceManager({ standby: 'never' }),
+      factory: new TextModelFactory(),
+      path: this.path
+    }));
+    await super.init();
+  }
+
+  create_virtual_editor(): CodeMirrorVirtualEditor {
+    return new CodeMirrorVirtualEditor(
+      {
+        adapter: this.adapter,
+        virtual_document: new VirtualDocument({
+          language: this.language,
+          file_extension: this.file_extension,
+          path: this.path,
+          has_lsp_supported_file: true,
+          standalone: true,
+          foreign_code_extractors: {},
+          overrides_registry: {}
+        })
+      }
     );
   }
 
@@ -166,37 +183,42 @@ export class FileEditorFeatureTestEnvironment extends FeatureTestEnvironment {
 }
 
 export class NotebookFeatureTestEnvironment extends FeatureTestEnvironment {
-  public notebook: Notebook;
-  virtual_editor: VirtualCodeMirrorNotebookEditor;
-  public wrapper: HTMLElement;
+  public widget: NotebookPanel;
+  protected adapter_type = NotebookAdapter;
+
+  get notebook(): Notebook {
+    return this.widget.content;
+  }
 
   constructor(
-    language = () => 'python',
-    path = () => 'notebook.ipynb',
-    file_extension = () => 'py',
+    language = 'python',
+    path = 'notebook.ipynb',
+    file_extension = 'py',
     public overrides_registry: IOverridesRegistry = {},
     public foreign_code_extractors: IForeignCodeExtractorsRegistry = {}
   ) {
     super(language, path, file_extension);
-    this.notebook = createNotebook();
-    this.wrapper = document.createElement('div');
-    this.init();
   }
 
-  create_virtual_editor(): VirtualCodeMirrorNotebookEditor {
-    return new VirtualCodeMirrorNotebookEditor(
-      this.notebook,
-      this.wrapper,
-      new VirtualDocument({
-        language: this.language(),
-        file_extension: this.file_extension(),
-        path: this.path(),
+  async init(): Promise<void> {
+    let context = await initNotebookContext();
+    this.widget = createNotebookPanel(context);
+    await super.init();
+  }
+
+  create_virtual_editor(): CodeMirrorVirtualEditor{
+    return new CodeMirrorVirtualEditor({
+      adapter: this.adapter,
+      virtual_document: new VirtualDocument({
+        language: this.language,
+        file_extension: this.file_extension,
+        path: this.path,
         has_lsp_supported_file: true,
         standalone: true,
         foreign_code_extractors: {},
         overrides_registry: {}
-      }),
-    );
+      })
+    })
   }
 }
 
@@ -269,7 +291,7 @@ export async function synchronize_content(
   environment: FeatureTestEnvironment,
   adapter: EditorAdapter<IVirtualEditor<IEditor>>
 ) {
-  await environment.virtual_editor.update_documents();
+  await environment.adapter.update_documents();
   try {
     await adapter.updateAfterChange();
   } catch (e) {

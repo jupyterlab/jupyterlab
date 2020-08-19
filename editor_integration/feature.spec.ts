@@ -117,6 +117,7 @@ describe('Feature', () => {
         virtual_document: virtual_editor.virtual_document,
         connection: connection,
         status_message: new StatusMessage(),
+        adapter: environment.adapter,
         settings: null
       });
     }
@@ -137,8 +138,9 @@ describe('Feature', () => {
       let feature: EditApplyingFeature;
       let environment: FileEditorFeatureTestEnvironment;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         environment = new FileEditorFeatureTestEnvironment();
+        await environment.init()
         connection = environment.create_dummy_connection();
 
         feature = init_feature(environment);
@@ -152,12 +154,12 @@ describe('Feature', () => {
 
       it('applies simple edit in FileEditor', async () => {
         environment.ce_editor.model.value.text = 'foo bar';
-        await environment.virtual_editor.update_documents();
+        await environment.adapter.update_documents();
         await adapter.updateAfterChange();
 
         await feature.do_apply_edit({
           changes: {
-            ['file://' + environment.path()]: [
+            ['file://' + environment.path]: [
               {
                 range: {
                   start: { line: 0, character: 0 },
@@ -177,11 +179,11 @@ describe('Feature', () => {
 
       it('applies partial edits', async () => {
         environment.ce_editor.model.value.text = js_fib_code;
-        await environment.virtual_editor.update_documents();
+        await environment.adapter.update_documents();
         await adapter.updateAfterChange();
 
         let result = await feature.do_apply_edit({
-          changes: { ['file://' + environment.path()]: js_partial_edits }
+          changes: { ['file://' + environment.path]: js_partial_edits }
         });
         let raw_value = environment.ce_editor.doc.getValue();
         expect(raw_value).to.be.equal(js_fib2_code);
@@ -200,14 +202,15 @@ describe('Feature', () => {
       let feature: EditApplyingFeature;
       let environment: NotebookFeatureTestEnvironment;
 
-      beforeEach(() => {
+      beforeEach(async () => {
         environment = new NotebookFeatureTestEnvironment(
-          () => 'python',
-          () => 'notebook.ipynb',
-          () => 'py',
+          'python',
+          'notebook.ipynb',
+          'py',
           language_specific_overrides,
           foreign_code_extractors
         );
+        await environment.init()
 
         connection = environment.create_dummy_connection();
 

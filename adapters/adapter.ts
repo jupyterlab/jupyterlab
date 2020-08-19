@@ -231,7 +231,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   abstract get editors(): CodeEditor.IEditor[]
 
-  private update_documents() {
+  /**
+   * public for use in tests (but otherwise could be private)
+   */
+  public update_documents() {
     this.documentsUpdateBegan.emit();
     return this.virtual_editor.virtual_document.update_manager.update_documents(
       this.editors.map((ce_editor) => {

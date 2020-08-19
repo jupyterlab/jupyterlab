@@ -8,10 +8,14 @@ import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
 import { MockLanguageServerManager } from '../editor_integration/testutils';
 import { CodeMirrorVirtualEditor } from "./codemirror_editor";
+import { CodeEditor } from "@jupyterlab/codeeditor";
+import { VirtualDocument } from "./document";
+import { CodeMirrorEditor } from "@jupyterlab/codemirror";
+import { FileEditorAdapter } from "../adapters/file_editor/file_editor";
+
 
 // TODO: implements IVirtualEditor OR rename to test CM
 class VirtualEditorImplementation extends CodeMirrorVirtualEditor {
-  private cm_editor: CodeMirror.Editor;
 
   get_cm_editor(position: IRootPosition): CodeMirror.Editor {
     return undefined;
@@ -25,7 +29,10 @@ class VirtualEditorImplementation extends CodeMirrorVirtualEditor {
   }
 
   forEveryBlockEditor(callback: (cm_editor: CodeMirror.Editor) => void): void {
-    callback(this.cm_editor);
+    for (let editor of this.adapter.editors) {
+      let cm_editor = (editor as CodeMirrorEditor).editor;
+      callback(cm_editor);
+    }
   }
 }
 
@@ -55,14 +62,22 @@ describe('VirtualEditor', () => {
     console.log(CONNECTION_MANAGER);
   }
 
-  let editor = new VirtualEditorImplementation(
-    () => 'python',
-    () => 'py',
-    () => 'test.ipynb',
-    {},
-    { python: [r_line_extractor] },
-    false
-  );
+
+  let editor = new VirtualEditorImplementation({
+    virtual_document: new VirtualDocument(
+      {
+        language: 'python',
+        file_extension: 'py',
+        path: 'test.ipynb',
+        overrides_registry: {},
+        foreign_code_extractors: { python: [r_line_extractor] },
+        standalone: false,
+        has_lsp_supported_file: true
+      }
+    ),
+    // TODO provide the widget (re-use testutils!)
+    adapter: new FileEditorAdapter(null, null)
+  });
 
   describe('#has_lsp_supported', () => {
     it('gets passed on to the virtual document & used for connection uri base', () => {
@@ -74,13 +89,20 @@ describe('VirtualEditor', () => {
       let uris = DocumentConnectionManager.solve_uris(document, 'python');
       expect(uris.base.startsWith(virtualDocumentsUri)).to.be.equal(true);
 
-      let editor_with_plain_file = new VirtualEditorImplementation(
-        () => 'python',
-        () => 'py',
-        () => 'test.ipynb',
-        {},
-        { python: [r_line_extractor] },
-        true
+      let editor_with_plain_file = new VirtualEditorImplementation({
+        // TODO: reuse document? or call
+        virtual_document: new VirtualDocument({
+            language: 'python',
+            file_extension: 'py',
+            path: 'test.ipynb',
+            overrides_registry: {},
+            foreign_code_extractors: { python: [r_line_extractor] },
+            standalone: false,
+            has_lsp_supported_file: true
+          }),
+          // TODO
+          adapter: null
+        }
       );
       document = editor_with_plain_file.virtual_document;
       uris = DocumentConnectionManager.solve_uris(document, 'python');
@@ -90,15 +112,15 @@ describe('VirtualEditor', () => {
 
   describe('#document_at_root_position()', () => {
     it('returns correct document', () => {
-      let cm_editor_for_cell_1 = {} as CodeMirror.Editor;
-      let cm_editor_for_cell_2 = {} as CodeMirror.Editor;
+      let ce_editor_for_cell_1 = {} as CodeEditor.IEditor;
+      let ce_editor_for_cell_2 = {} as CodeEditor.IEditor;
       editor.virtual_document.append_code_block(
         'test line in Python 1\n%R test line in R 1',
-        cm_editor_for_cell_1
+        ce_editor_for_cell_1
       );
       editor.virtual_document.append_code_block(
         'test line in Python 2\n%R test line in R 2',
-        cm_editor_for_cell_2
+        ce_editor_for_cell_2
       );
 
       // The first (Python) line in the first block

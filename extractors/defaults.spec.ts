@@ -36,15 +36,15 @@ describe('Default extractors', () => {
   }
 
   beforeEach(() => {
-    document = new VirtualDocument(
-      'python',
-      'test.ipynb',
-      {},
-      foreign_code_extractors,
-      false,
-      'py',
-      false
-    );
+    document = new VirtualDocument({
+      language: 'python',
+      path: 'test.ipynb',
+      overrides_registry: {},
+      foreign_code_extractors: foreign_code_extractors,
+      standalone: false,
+      file_extension: 'py',
+      has_lsp_supported_file: false
+    });
   });
 
   afterEach(() => {

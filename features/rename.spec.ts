@@ -20,12 +20,12 @@ describe('Rename', () => {
 
     it('renders inspections', async () => {
       env.ce_editor.model.value.text = 'x = 1\n';
-      await env.virtual_editor.update_documents();
+      await env.adapter.update_documents();
       let main_document = env.virtual_editor.virtual_document;
 
       await feature.handleRename({
         changes: {
-          ['file://' + env.path()]: [
+          ['file://' + env.path]: [
             {
               range: {
                 start: { line: 0, character: 0 },
@@ -37,7 +37,7 @@ describe('Rename', () => {
         }
       });
 
-      await env.virtual_editor.update_documents();
+      await env.adapter.update_documents();
 
       expect(env.status_message.message).to.be.equal('Renamed a variable');
       expect(main_document.value).to.be.equal('y = 1\n');

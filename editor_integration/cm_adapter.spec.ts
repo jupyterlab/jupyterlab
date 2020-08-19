@@ -42,6 +42,7 @@ describe('CodeMirrorAdapter', () => {
         virtual_document: virtual_editor.virtual_document,
         connection: connection,
         status_message: new StatusMessage(),
+        adapter: env.adapter,
         settings: null
       });
 
@@ -51,11 +52,11 @@ describe('CodeMirrorAdapter', () => {
         [feature]
       );
       env.ce_editor.model.value.text = 'f';
-      await virtual_editor.update_documents();
+      await env.adapter.update_documents();
       expect(feature.received_update).to.equal(false);
 
       env.ce_editor.model.value.text = 'fo';
-      await virtual_editor.update_documents();
+      await env.adapter.update_documents();
       await adapter.updateAfterChange();
 
       expect(feature.received_update).to.equal(true);

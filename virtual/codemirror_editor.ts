@@ -82,7 +82,7 @@ export class CodeMirrorVirtualEditor
   editor_to_source_line: Map<CodeEditor.IEditor, number>;
 
   private _proxy: CodeMirrorVirtualEditor;
-  private readonly adapter: WidgetAdapter<IDocumentWidget>
+  protected readonly adapter: WidgetAdapter<IDocumentWidget>
 
   constructor(options: IVirtualEditor.IOptions) {
     this.adapter = options.adapter

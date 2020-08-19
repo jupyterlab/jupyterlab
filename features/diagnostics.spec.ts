@@ -40,7 +40,7 @@ describe('Diagnostics', () => {
 
     it('renders inspections', async () => {
       env.ce_editor.model.value.text = ' foo \n bar \n baz ';
-      await env.virtual_editor.update_documents();
+      await env.adapter.update_documents();
 
       let markers: TextMarker[];
 
@@ -48,7 +48,7 @@ describe('Diagnostics', () => {
       expect(markers.length).to.equal(0);
 
       feature.handleDiagnostic({
-        uri: env.path(),
+        uri: env.path,
         diagnostics: [
           {
             range: {
@@ -70,9 +70,9 @@ describe('Diagnostics', () => {
 
     beforeEach(() => {
       env = new NotebookFeatureTestEnvironment(
-        () => 'python',
-        () => 'notebook.ipynb',
-        () => 'py',
+        'python',
+        'notebook.ipynb',
+        'py',
         language_specific_overrides,
         foreign_code_extractors
       );
@@ -89,7 +89,7 @@ describe('Diagnostics', () => {
         code_cell(['    '])
       ]);
       showAllCells(env.notebook);
-      await env.virtual_editor.update_documents();
+      await env.adapter.update_documents();
 
       let document = env.virtual_editor.virtual_document;
       let uri = env.virtual_editor.virtual_document.uri;
@@ -183,7 +183,7 @@ describe('Diagnostics', () => {
         code_cell(['%%python\n', 'y = 1\n', 'x'])
       ]);
       showAllCells(env.notebook);
-      await env.virtual_editor.update_documents();
+      await env.adapter.update_documents();
 
       let document = env.virtual_editor.virtual_document;
       expect(document.foreign_documents.size).to.be.equal(1);

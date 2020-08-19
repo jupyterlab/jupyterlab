@@ -1,6 +1,5 @@
 import { expect } from 'chai';
 import { is_within_range, VirtualDocument } from './document';
-import * as CodeMirror from 'codemirror';
 import { ISourcePosition, IVirtualPosition } from '../positioning';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { foreign_code_extractors } from '../extractors/defaults';
@@ -46,15 +45,15 @@ describe('is_within_range', () => {
 });
 
 describe('VirtualDocument', () => {
-  let document = new VirtualDocument(
-    'python',
-    'test.ipynb',
-    {},
-    foreign_code_extractors,
-    false,
-    'py',
-    false
-  );
+  let document = new VirtualDocument({
+    language: 'python',
+    path: 'test.ipynb',
+    overrides_registry: {},
+    foreign_code_extractors: foreign_code_extractors,
+    standalone: false,
+    file_extension: 'py',
+    has_lsp_supported_file: false
+  });
 
   describe('#extract_foreign_code', () => {
     it('joins non-standalone fragments together', () => {
@@ -83,34 +82,34 @@ describe('VirtualDocument', () => {
   });
 
   let init_document_with_Python_and_R = () => {
-    let cm_editor_for_cell_1 = {} as CodeMirror.Editor;
-    let cm_editor_for_cell_2 = {} as CodeMirror.Editor;
-    let cm_editor_for_cell_3 = {} as CodeMirror.Editor;
-    let cm_editor_for_cell_4 = {} as CodeMirror.Editor;
+    let ce_editor_for_cell_1 = {} as CodeEditor.IEditor;
+    let ce_editor_for_cell_2 = {} as CodeEditor.IEditor;
+    let ce_editor_for_cell_3 = {} as CodeEditor.IEditor;
+    let ce_editor_for_cell_4 = {} as CodeEditor.IEditor;
     // first block
     document.append_code_block(
       'test line in Python 1\n%R 1st test line in R line magic 1',
-      cm_editor_for_cell_1
+      ce_editor_for_cell_1
     );
     // second block
     document.append_code_block(
       'test line in Python 2\n%R 1st test line in R line magic 2',
-      cm_editor_for_cell_2
+      ce_editor_for_cell_2
     );
     // third block
     document.append_code_block(
       'test line in Python 3\n%R -i imported_variable 1st test line in R line magic 3',
-      cm_editor_for_cell_2
+      ce_editor_for_cell_2
     );
     // fourth block
     document.append_code_block(
       '%%R\n1st test line in R cell magic 1',
-      cm_editor_for_cell_3
+      ce_editor_for_cell_3
     );
     // fifth block
     document.append_code_block(
       '%%R -i imported_variable\n1st test line in R cell magic 2',
-      cm_editor_for_cell_4
+      ce_editor_for_cell_4
     );
   };
 
