@@ -29,6 +29,7 @@ import { FileEditor, FileEditorFactory } from "@jupyterlab/fileeditor";
 import { ServiceManager } from "@jupyterlab/services";
 import { FeatureManager, ILSPExtension } from "../index";
 import { JupyterFrontEnd } from "@jupyterlab/application";
+import { IFeatureSettings } from "../feature";
 
 export interface ITestEnvironment {
   document_options: VirtualDocument.IOptions
@@ -56,6 +57,19 @@ export class MockLanguageServerManager extends LanguageServerManager {
     } as any);
     this._sessionsChanged.emit(void 0);
   }
+}
+
+export class MockSettings<T> implements IFeatureSettings<T> {
+  constructor(private settings: T) {
+  }
+  get composite(): T {
+    return this.settings;
+  }
+
+  set(setting: keyof T, value: any): void {
+    this.settings[setting] = value;
+  }
+
 }
 
 export class MockExtension implements ILSPExtension {
@@ -128,14 +142,19 @@ export abstract class TestEnvironment
 
 export interface IFeatureTestEnvironment extends ITestEnvironment {
 
-  init_integration<T extends CodeMirrorIntegration>(
-    integration_type: CodeMirrorIntegrationConstructor,
-    id: string,
-    register: boolean,
-    document: VirtualDocument
-  ): T
+  init_integration<T extends CodeMirrorIntegration>(options: IFeatureTestEnvironment.InitOptions): T
 
   dispose_feature(feature: CodeMirrorIntegration): void
+}
+
+export namespace IFeatureTestEnvironment {
+  export interface InitOptions {
+    constructor: CodeMirrorIntegrationConstructor,
+    id: string,
+    register?: boolean,
+    document?: VirtualDocument,
+    settings?: IFeatureSettings<any>
+  }
 }
 
 type TestEnvironmentConstructor = new (...args: any[]) => ITestEnvironment;
@@ -149,31 +168,27 @@ function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
       super.init();
     }
 
-    public init_integration<T extends CodeMirrorIntegration>(
-      integration_type: CodeMirrorIntegrationConstructor,
-      id: string,
-      register = true,
-      document: VirtualDocument = null
-    ): T {
+    public init_integration<T extends CodeMirrorIntegration>(options: IFeatureTestEnvironment.InitOptions): T {
       let connection = this.create_dummy_connection();
-      const feature = new integration_type({
+      const feature = new options.constructor({
         feature: {
-          id: id,
-          name: id,
-          editorIntegrationFactory: new Map([['CodeMirrorEditor', integration_type]])
+          id: options.id,
+          name: options.id,
+          editorIntegrationFactory: new Map([['CodeMirrorEditor', options.constructor]]),
+          settings: options.settings
         },
         virtual_editor: this.virtual_editor,
-        virtual_document: document
-          ? document
+        virtual_document: options.document
+          ? options.document
           : this.virtual_editor.virtual_document,
         connection: connection,
         status_message: this.status_message,
-        settings: null,
+        settings: options.settings,
         adapter: this.adapter
       });
       this._connections.set(feature as CodeMirrorIntegration, connection);
 
-      if (register) {
+      if (typeof options.register === 'undefined' || options.register) {
         feature.register();
       }
 

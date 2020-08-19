@@ -103,7 +103,10 @@ describe('Feature', () => {
 
       beforeEach(() => {
         environment = new FileEditorFeatureTestEnvironment();
-        feature = environment.init_integration(EditApplyingFeatureCM, 'EditApplyingFeature')
+        feature = environment.init_integration({
+          constructor: EditApplyingFeatureCM,
+          id: 'EditApplyingFeature'
+        })
       });
 
       afterEach(() => {
@@ -163,7 +166,10 @@ describe('Feature', () => {
           foreign_code_extractors: foreign_code_extractors
         });
 
-        feature = environment.init_integration(EditApplyingFeatureCM, 'EditApplyingFeature')
+        feature = environment.init_integration({
+          constructor: EditApplyingFeatureCM,
+          id: 'EditApplyingFeature'
+        })
       });
 
       afterEach(() => {

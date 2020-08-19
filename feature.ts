@@ -33,7 +33,13 @@ export interface IFeatureCommand {
   attach_to?: Set<CommandEntryPoint>;
 }
 
-export class FeatureSettings<T> {
+export interface IFeatureSettings<T> {
+  readonly composite: T
+
+  set(setting: keyof T, value: any): void
+}
+
+export class FeatureSettings<T> implements IFeatureSettings<T>{
   protected settings: ISettingRegistry.ISettings;
 
   constructor(protected settingRegistry: ISettingRegistry, featureID: string) {
@@ -58,8 +64,8 @@ export class FeatureSettings<T> {
     return (this.settings.composite as unknown) as T;
   }
 
-  set(setting: string, value: any) {
-    this.settings.set(setting, value).catch(console.warn);
+  set(setting: keyof T, value: any) {
+    this.settings.set(setting as string, value).catch(console.warn);
   }
 }
 
@@ -103,7 +109,7 @@ export interface IFeature {
    * Settings to be passed to the FeatureEditorIntegration.
    * To use the same settings for lab integration bind the same FeatureSettings object to the labIntegration object.
    */
-  settings?: FeatureSettings<any>;
+  settings?: IFeatureSettings<any>;
 }
 
 export abstract class FeatureEditorIntegration<
@@ -187,9 +193,9 @@ export interface IEditorIntegrationOptions {
   adapter: WidgetAdapter<IDocumentWidget>;
   connection: LSPConnection;
   status_message: StatusMessage;
-  settings: FeatureSettings<any>;
+  settings: IFeatureSettings<any>;
 }
 
 export interface IFeatureLabIntegration {
-  settings?: FeatureSettings<any>;
+  settings?: IFeatureSettings<any>;
 }

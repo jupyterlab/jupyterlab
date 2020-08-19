@@ -7,7 +7,7 @@ import {
 } from './diagnostics';
 import {
   code_cell,
-  FileEditorFeatureTestEnvironment,
+  FileEditorFeatureTestEnvironment, MockSettings,
   NotebookFeatureTestEnvironment,
   set_notebook_content,
   showAllCells
@@ -17,16 +17,26 @@ import { is_equal } from '../positioning';
 import { language_specific_overrides } from '../magics/defaults';
 import { foreign_code_extractors } from '../extractors/defaults';
 import * as lsProtocol from 'vscode-languageserver-protocol';
+import { CodeDiagnostics as LSPDiagnosticsSettings } from '../_diagnostics';
 
 describe('Diagnostics', () => {
   let feature: DiagnosticsCM;
+  let default_settings = new MockSettings<LSPDiagnosticsSettings>({
+    defaultSeverity: 'Warning',
+    ignoreCodes: [],
+    ignoreMessagesPatterns: []
+  });
 
   describe('FileEditor integration', () => {
     let env: FileEditorFeatureTestEnvironment;
 
     beforeEach(() => {
       env = new FileEditorFeatureTestEnvironment();
-      feature = env.init_integration(DiagnosticsCM, 'Diagnostics');
+      feature = env.init_integration({
+        constructor: DiagnosticsCM,
+        id: 'Diagnostics',
+        settings: default_settings
+      });
     });
     afterEach(() => {
       env.dispose();
@@ -73,7 +83,11 @@ describe('Diagnostics', () => {
           overrides_registry: language_specific_overrides,
           foreign_code_extractors
       });
-      feature = env.init_integration(DiagnosticsCM, 'Diagnostics');
+      feature = env.init_integration({
+        constructor: DiagnosticsCM,
+        id: 'Diagnostics',
+        settings: default_settings
+      });
     });
     afterEach(() => {
       env.dispose();
@@ -186,11 +200,12 @@ describe('Diagnostics', () => {
       expect(document.foreign_documents.size).to.be.equal(1);
       let foreign_document = document.foreign_documents.values().next().value;
 
-      let foreign_feature: DiagnosticsCM = env.init_integration(
-        DiagnosticsCM,
-        'Diagnostics',
-        true,
-        foreign_document
+      let foreign_feature: DiagnosticsCM = env.init_integration({
+        constructor: DiagnosticsCM,
+        id: 'Diagnostics',
+        document: foreign_document,
+        settings: default_settings
+      }
       );
 
       let response = {
