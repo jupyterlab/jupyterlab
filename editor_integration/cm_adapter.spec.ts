@@ -10,7 +10,9 @@ import { EditorAdapter } from './editor_adapter';
 describe('CodeMirrorAdapter', () => {
   let env: FileEditorFeatureTestEnvironment;
 
-  beforeEach(() => (env = new FileEditorFeatureTestEnvironment()));
+  beforeEach(() => {
+    env = new FileEditorFeatureTestEnvironment();
+  });
   afterEach(() => env.dispose());
 
   describe('Works with VirtualFileEditor', () => {
@@ -57,6 +59,7 @@ describe('CodeMirrorAdapter', () => {
 
       env.ce_editor.model.value.text = 'fo';
       await env.adapter.update_documents();
+      console.log(adapter)
       await adapter.updateAfterChange();
 
       expect(feature.received_update).to.equal(true);

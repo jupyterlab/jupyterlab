@@ -101,7 +101,7 @@ export class CodeMirrorVirtualEditor
       ) {
         if (!(prop in target)) {
           console.warn(
-            `Unimplemented method ${prop} for VirtualCodeMirrorEditor`
+            `Unimplemented method ${prop.toString()} for VirtualCodeMirrorEditor`
           );
           return;
         } else {

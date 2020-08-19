@@ -51,7 +51,7 @@ export interface IFeatureOptions {
   supersedes?: string[];
 }
 
-class FeatureManager implements ILSPFeatureManager {
+export class FeatureManager implements ILSPFeatureManager {
   features: Array<IFeature> = [];
   constructor(private command_managers: Array<ContextCommandManager> = []) {}
 
@@ -71,11 +71,18 @@ class FeatureManager implements ILSPFeatureManager {
   }
 }
 
-
-export class LSPExtension {
+export interface ILSPExtension {
+  app: JupyterFrontEnd;
   connection_manager: DocumentConnectionManager;
   language_server_manager: LanguageServerManager;
-  feature_manager: FeatureManager;
+  feature_manager: ILSPFeatureManager;
+  editor_type_manager: ILSPVirtualEditorManager
+}
+
+export class LSPExtension implements ILSPExtension {
+  connection_manager: DocumentConnectionManager;
+  language_server_manager: LanguageServerManager;
+  feature_manager: ILSPFeatureManager;
 
   constructor(
     public app: JupyterFrontEnd,

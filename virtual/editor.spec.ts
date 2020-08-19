@@ -3,38 +3,17 @@ import { RegExpForeignCodeExtractor } from '../extractors/regexp';
 import {
   IRootPosition,
 } from '../positioning';
-import * as CodeMirror from 'codemirror';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
-import { MockLanguageServerManager } from '../editor_integration/testutils';
-import { CodeMirrorVirtualEditor } from "./codemirror_editor";
+import {
+  FileEditorTestEnvironment,
+  MockLanguageServerManager,
+  NotebookTestEnvironment
+} from '../editor_integration/testutils';
 import { CodeEditor } from "@jupyterlab/codeeditor";
+import { IForeignCodeExtractorsRegistry } from "../extractors/types";
 import { VirtualDocument } from "./document";
-import { CodeMirrorEditor } from "@jupyterlab/codemirror";
-import { FileEditorAdapter } from "../adapters/file_editor/file_editor";
 
-
-// TODO: implements IVirtualEditor OR rename to test CM
-class VirtualEditorImplementation extends CodeMirrorVirtualEditor {
-
-  get_cm_editor(position: IRootPosition): CodeMirror.Editor {
-    return undefined;
-  }
-
-  addEventListener(
-    type: string,
-    listener: EventListener | EventListenerObject
-  ): void {
-    // nothing yet
-  }
-
-  forEveryBlockEditor(callback: (cm_editor: CodeMirror.Editor) => void): void {
-    for (let editor of this.adapter.editors) {
-      let cm_editor = (editor as CodeMirrorEditor).editor;
-      callback(cm_editor);
-    }
-  }
-}
 
 describe('VirtualEditor', () => {
   let r_line_extractor = new RegExpForeignCodeExtractor({
@@ -62,22 +41,18 @@ describe('VirtualEditor', () => {
     console.log(CONNECTION_MANAGER);
   }
 
+  let notebook_env: NotebookTestEnvironment;
+  let file_editor_env: FileEditorTestEnvironment;
 
-  let editor = new VirtualEditorImplementation({
-    virtual_document: new VirtualDocument(
-      {
-        language: 'python',
-        file_extension: 'py',
-        path: 'test.ipynb',
-        overrides_registry: {},
-        foreign_code_extractors: { python: [r_line_extractor] },
-        standalone: false,
-        has_lsp_supported_file: true
-      }
-    ),
-    // TODO provide the widget (re-use testutils!)
-    adapter: new FileEditorAdapter(null, null)
-  });
+  const options: Partial<VirtualDocument.IOptions> = {
+    foreign_code_extractors: { python: [r_line_extractor] } as IForeignCodeExtractorsRegistry,
+  }
+
+  beforeAll(() => {
+    notebook_env = new NotebookTestEnvironment(options);
+    file_editor_env = new FileEditorTestEnvironment(options);
+  })
+
 
   describe('#has_lsp_supported', () => {
     it('gets passed on to the virtual document & used for connection uri base', () => {
@@ -85,26 +60,11 @@ describe('VirtualEditor', () => {
       const virtualDocumentsUri = PageConfig.getOption('virtualDocumentsUri');
       expect(rootUri).to.be.not.equal(virtualDocumentsUri);
 
-      let document = editor.virtual_document;
+      let document = notebook_env.virtual_editor.virtual_document;
       let uris = DocumentConnectionManager.solve_uris(document, 'python');
       expect(uris.base.startsWith(virtualDocumentsUri)).to.be.equal(true);
 
-      let editor_with_plain_file = new VirtualEditorImplementation({
-        // TODO: reuse document? or call
-        virtual_document: new VirtualDocument({
-            language: 'python',
-            file_extension: 'py',
-            path: 'test.ipynb',
-            overrides_registry: {},
-            foreign_code_extractors: { python: [r_line_extractor] },
-            standalone: false,
-            has_lsp_supported_file: true
-          }),
-          // TODO
-          adapter: null
-        }
-      );
-      document = editor_with_plain_file.virtual_document;
+      document = file_editor_env.virtual_editor.virtual_document;
       uris = DocumentConnectionManager.solve_uris(document, 'python');
       expect(uris.base.startsWith(virtualDocumentsUri)).to.be.equal(false);
     });
@@ -114,6 +74,8 @@ describe('VirtualEditor', () => {
     it('returns correct document', () => {
       let ce_editor_for_cell_1 = {} as CodeEditor.IEditor;
       let ce_editor_for_cell_2 = {} as CodeEditor.IEditor;
+      let editor = notebook_env.virtual_editor;
+
       editor.virtual_document.append_code_block(
         'test line in Python 1\n%R test line in R 1',
         ce_editor_for_cell_1

@@ -9,7 +9,7 @@ import { LSPConnection } from '../connection';
 import { ICommandContext } from '../command_manager';
 import { JSONObject } from '@lumino/coreutils';
 import { DocumentConnectionManager, IDocumentConnectionData, ISocketConnectionOptions } from '../connection_manager';
-import { LSPExtension } from '../index';
+import { ILSPExtension } from '../index';
 import { FeatureEditorIntegration } from '../feature';
 import { EditorAdapter } from '../editor_integration/editor_adapter';
 import IEditor = CodeEditor.IEditor;
@@ -93,7 +93,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   // note: it could be using namespace/IOptions pattern,
   // but I do not know how to make it work with the generic type T
   // (other than using 'any' in the IOptions interface)
-  protected constructor(protected extension: LSPExtension, public widget: T) {
+  protected constructor(protected extension: ILSPExtension, public widget: T) {
     this.app = extension.app;
     this.connection_manager = extension.connection_manager;
     this.adapterConnected = new Signal(this);

@@ -1,9 +1,7 @@
 import { expect } from 'chai';
-import { LSPConnection } from '../connection';
-import { StatusMessage } from '../adapters/adapter';
 import {
   code_cell,
-  FeatureTestEnvironment,
+  IFeatureTestEnvironment,
   FileEditorFeatureTestEnvironment,
   getCellsJSON,
   NotebookFeatureTestEnvironment,
@@ -98,32 +96,15 @@ describe('Feature', () => {
   PageConfig.setOption('rootUri', 'file://');
 
   describe('apply_edit()', () => {
-    class EditApplyingFeature extends CodeMirrorIntegration {
-      name = 'EditApplyingFeature';
+    class EditApplyingFeatureCM extends CodeMirrorIntegration {
+
       do_apply_edit(workspaceEdit: lsProtocol.WorkspaceEdit) {
         return this.apply_edit(workspaceEdit);
       }
     }
-    let connection: LSPConnection;
-
-    function init_feature(environment: FeatureTestEnvironment) {
-      // TODO: instead, make feature args an interface and this func
-      //  return the object obeying the interface
-      let virtual_editor = environment.virtual_editor;
-
-      return new EditApplyingFeature({
-        feature: null,
-        virtual_editor: virtual_editor,
-        virtual_document: virtual_editor.virtual_document,
-        connection: connection,
-        status_message: new StatusMessage(),
-        adapter: environment.adapter,
-        settings: null
-      });
-    }
 
     function init_adapter(
-      environment: FeatureTestEnvironment,
+      environment: IFeatureTestEnvironment,
       feature: CodeMirrorIntegration
     ) {
       return new EditorAdapter(
@@ -135,20 +116,16 @@ describe('Feature', () => {
 
     describe('editing in FileEditor', () => {
       let adapter: EditorAdapter<IVirtualEditor<IEditor>>;
-      let feature: EditApplyingFeature;
+      let feature: EditApplyingFeatureCM;
       let environment: FileEditorFeatureTestEnvironment;
 
-      beforeEach(async () => {
+      beforeEach(() => {
         environment = new FileEditorFeatureTestEnvironment();
-        await environment.init()
-        connection = environment.create_dummy_connection();
-
-        feature = init_feature(environment);
+        feature = environment.init_integration(EditApplyingFeatureCM, 'EditApplyingFeature')
         adapter = init_adapter(environment, feature);
       });
 
       afterEach(() => {
-        connection.close();
         environment.dispose();
       });
 
@@ -159,7 +136,7 @@ describe('Feature', () => {
 
         await feature.do_apply_edit({
           changes: {
-            ['file://' + environment.path]: [
+            ['file://' + environment.document_options.path]: [
               {
                 range: {
                   start: { line: 0, character: 0 },
@@ -183,7 +160,7 @@ describe('Feature', () => {
         await adapter.updateAfterChange();
 
         let result = await feature.do_apply_edit({
-          changes: { ['file://' + environment.path]: js_partial_edits }
+          changes: { ['file://' + environment.document_options.path]: js_partial_edits }
         });
         let raw_value = environment.ce_editor.doc.getValue();
         expect(raw_value).to.be.equal(js_fib2_code);
@@ -199,27 +176,20 @@ describe('Feature', () => {
 
     describe('editing in Notebook', () => {
       let adapter: EditorAdapter<IVirtualEditor<IEditor>>;
-      let feature: EditApplyingFeature;
+      let feature: EditApplyingFeatureCM;
       let environment: NotebookFeatureTestEnvironment;
 
-      beforeEach(async () => {
-        environment = new NotebookFeatureTestEnvironment(
-          'python',
-          'notebook.ipynb',
-          'py',
-          language_specific_overrides,
-          foreign_code_extractors
-        );
-        await environment.init()
+      beforeEach(() => {
+        environment = new NotebookFeatureTestEnvironment({
+          overrides_registry: language_specific_overrides,
+          foreign_code_extractors: foreign_code_extractors
+        });
 
-        connection = environment.create_dummy_connection();
-
-        feature = init_feature(environment);
+        feature = environment.init_integration(EditApplyingFeatureCM, 'EditApplyingFeature')
         adapter = init_adapter(environment, feature);
       });
 
       afterEach(() => {
-        connection.close();
         environment.dispose();
       });
 

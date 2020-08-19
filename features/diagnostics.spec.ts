@@ -26,7 +26,7 @@ describe('Diagnostics', () => {
 
     beforeEach(() => {
       env = new FileEditorFeatureTestEnvironment();
-      feature = env.init_integration(DiagnosticsCM);
+      feature = env.init_integration(DiagnosticsCM, 'Diagnostics');
     });
     afterEach(() => {
       env.dispose();
@@ -48,7 +48,7 @@ describe('Diagnostics', () => {
       expect(markers.length).to.equal(0);
 
       feature.handleDiagnostic({
-        uri: env.path,
+        uri: env.document_options.path,
         diagnostics: [
           {
             range: {
@@ -69,14 +69,11 @@ describe('Diagnostics', () => {
     let env: NotebookFeatureTestEnvironment;
 
     beforeEach(() => {
-      env = new NotebookFeatureTestEnvironment(
-        'python',
-        'notebook.ipynb',
-        'py',
-        language_specific_overrides,
-        foreign_code_extractors
-      );
-      feature = env.init_integration(DiagnosticsCM);
+      env = new NotebookFeatureTestEnvironment({
+          overrides_registry: language_specific_overrides,
+          foreign_code_extractors
+      });
+      feature = env.init_integration(DiagnosticsCM, 'Diagnostics');
     });
     afterEach(() => {
       env.dispose();
@@ -191,6 +188,7 @@ describe('Diagnostics', () => {
 
       let foreign_feature: DiagnosticsCM = env.init_integration(
         DiagnosticsCM,
+        'Diagnostics',
         true,
         foreign_document
       );

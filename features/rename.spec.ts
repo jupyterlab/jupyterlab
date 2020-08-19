@@ -7,13 +7,15 @@ import { PageConfig } from '@jupyterlab/coreutils';
 describe('Rename', () => {
   let env: FileEditorFeatureTestEnvironment;
 
-  beforeEach(() => (env = new FileEditorFeatureTestEnvironment()));
+  beforeEach(() => {
+    env = new FileEditorFeatureTestEnvironment();
+  });
   afterEach(() => env.dispose());
 
   describe('Works with VirtualFileEditor', () => {
     let feature: RenameCM;
 
-    beforeEach(() => (feature = env.init_integration(RenameCM)));
+    beforeEach(() => (feature = env.init_integration(RenameCM, 'Rename')));
     afterEach(() => env.dispose_feature(feature));
 
     PageConfig.setOption('rootUri', 'file://');
@@ -25,7 +27,7 @@ describe('Rename', () => {
 
       await feature.handleRename({
         changes: {
-          ['file://' + env.path]: [
+          ['file://' + env.document_options.path]: [
             {
               range: {
                 start: { line: 0, character: 0 },

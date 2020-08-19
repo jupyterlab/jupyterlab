@@ -4,9 +4,9 @@ import { ServerConnection } from '@jupyterlab/services';
 import * as SCHEMA from './_schema';
 import { WidgetAdapter } from './adapters/adapter';
 import { Token } from '@lumino/coreutils';
-import { IFeatureOptions, LSPExtension } from './index';
+import { IFeatureOptions, ILSPExtension, LSPExtension } from './index';
 import { WidgetAdapterManager } from "./adapter_manager";
-import { IEditorName } from "./feature";
+import { IEditorName, IFeature } from "./feature";
 import { CodeEditor } from "@jupyterlab/codeeditor";
 import { IVirtualEditor } from "./virtual/editor";
 import { IDocumentWidget } from "@jupyterlab/docregistry";
@@ -72,6 +72,7 @@ export namespace ILanguageServerManager {
 }
 
 export interface ILSPFeatureManager {
+  readonly features: IFeature[];
   register(options: IFeatureOptions): void;
 }
 
@@ -82,7 +83,7 @@ export interface IAdapterRegistration {
 }
 
 export type WidgetAdapterConstructor<T extends IDocumentWidget> = {
-  new(extension: LSPExtension, widget: T): WidgetAdapter<T>;
+  new(extension: ILSPExtension, widget: T): WidgetAdapter<T>;
 };
 
 export interface IAdapterTypeOptions<T extends IDocumentWidget> {
