@@ -243,7 +243,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
         return false;
       }
       let message = diagnostic.message;
-      if (message && ignoredMessagesRegExp.filter((pattern) => pattern.test(message))) {
+      if (message && ignoredMessagesRegExp.some((pattern) => pattern.test(message))) {
         return false;
       }
       return true;

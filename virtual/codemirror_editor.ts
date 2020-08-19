@@ -2,7 +2,7 @@ import * as CodeMirror from "codemirror";
 import { CodeMirrorEditor } from "@jupyterlab/codemirror";
 import { CodeEditor } from "@jupyterlab/codeeditor";
 import { IEditorName } from "../feature";
-import { VirtualDocument } from "./document";
+import { IBlockAddedInfo, UpdateManager, VirtualDocument } from "./document";
 import { IForeignCodeExtractorsRegistry } from "../extractors/types";
 import { create_console, EditorLogConsole } from "./console";
 import { Signal } from "@lumino/signaling";
@@ -114,8 +114,9 @@ export class CodeMirrorVirtualEditor
       this.onEditorsUpdated(this.adapter.editors)
     }, this)
 
-    // wait for the children constructor to finish initialization and only then set event handlers:
-    setTimeout(this.set_event_handlers.bind(this), 0);
+    this.virtual_document.update_manager.block_added.connect(this.save_block_position, this)
+
+    this.set_event_handlers();
     return this._proxy;
   }
 
@@ -155,15 +156,22 @@ export class CodeMirrorVirtualEditor
     return this.getDoc().getCursor('end') as IRootPosition;
   }
 
-  // TODO get a signal from the adapter which will provide editors herein
   private onEditorsUpdated(editors: Array<CodeEditor.IEditor>): void {
     this.cm_editor_to_ce_editor.clear()
     this.ce_editor_to_cm_editor.clear()
+    this.editor_to_source_line.clear()
     for (let ce_editor of editors) {
       let cm_editor = (ce_editor as CodeMirrorEditor).editor
       this.cm_editor_to_ce_editor.set(cm_editor, ce_editor)
       this.ce_editor_to_cm_editor.set(ce_editor, cm_editor)
     }
+  }
+
+  private save_block_position(update_manager: UpdateManager, block_data: IBlockAddedInfo) {
+    this.editor_to_source_line.set(
+      block_data.block.ce_editor,
+      block_data.virtual_document.last_source_line
+    );
   }
 
   private set_event_handlers() {
@@ -264,7 +272,6 @@ export class CodeMirrorVirtualEditor
     return this.cm_editor_to_ce_editor.get(cm_editor);
   }
 
-  // TODO document that editor is given because there may be more than one
   transform_from_editor_to_root(
     editor: CodeEditor.IEditor,
     position: IEditorPosition
@@ -272,7 +279,7 @@ export class CodeMirrorVirtualEditor
     // TODO: if cell is not known, refresh
     let shift = this.editor_to_source_line.get(editor);
     if (shift == null) {
-      console.warn('Cell not found in cell_line_map');
+      console.warn('Editor not found in editor_to_source_line map');
       return null;
     }
     return {

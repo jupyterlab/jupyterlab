@@ -788,6 +788,11 @@ export function collect_documents(
   return collected;
 }
 
+export interface IBlockAddedInfo {
+  virtual_document: VirtualDocument;
+  block: ICodeBlockOptions
+}
+
 export class UpdateManager {
 
   console: EditorLogConsole;
@@ -805,9 +810,11 @@ export class UpdateManager {
    * Signal emitted by the editor that triggered the update, providing the root document of the updated documents.
    */
   private document_updated: Signal<UpdateManager, VirtualDocument>;
+  public block_added: Signal<UpdateManager, IBlockAddedInfo>
 
   constructor(private virtual_document: VirtualDocument) {
     this.document_updated = new Signal(this);
+    this.block_added = new Signal(this);
     this.document_updated.connect(this.on_updated, this);
     // TODO singleton
     this.console = create_console('browser');
@@ -843,7 +850,6 @@ export class UpdateManager {
    * @param fn - the callback to execute in update lock
    */
   public async with_update_lock(fn: Function): Promise<void> {
-    // this.console.log('Will enter update lock with', fn);
     await until_ready(() => this.can_update(), 12, 10).then(() => {
       try {
         this.update_lock = true;
@@ -873,6 +879,7 @@ export class UpdateManager {
           this.virtual_document.clear();
 
           for (let code_block of blocks) {
+            this.block_added.emit({block: code_block, virtual_document: this.virtual_document})
             this.virtual_document.append_code_block(code_block.value, code_block.ce_editor);
           }
 

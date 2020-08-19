@@ -5,7 +5,7 @@ import {
 import { IVirtualEditor, VirtualEditorManager } from '../virtual/editor';
 import { LSPConnection } from '../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import { StatusMessage, WidgetAdapter } from '../adapters/adapter';
+import { WidgetAdapter } from '../adapters/adapter';
 import { Notebook, NotebookModel, NotebookModelFactory, NotebookPanel } from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import * as nbformat from '@jupyterlab/nbformat';
@@ -35,8 +35,6 @@ export interface ITestEnvironment {
   document_options: VirtualDocument.IOptions
 
   virtual_editor: CodeMirrorVirtualEditor;
-
-  status_message: StatusMessage;
 
   adapter: WidgetAdapter<any>;
   /**
@@ -99,7 +97,6 @@ export class MockExtension implements ILSPExtension {
 export abstract class TestEnvironment
   implements ITestEnvironment {
   virtual_editor: CodeMirrorVirtualEditor;
-  status_message: StatusMessage;
   protected abstract get_adapter_type(): WidgetAdapterConstructor<any>;
   adapter: WidgetAdapter<any>;
   abstract widget: IDocumentWidget;
@@ -121,7 +118,6 @@ export abstract class TestEnvironment
   protected abstract create_widget(): IDocumentWidget;
 
   init() {
-    this.status_message = new StatusMessage();
     this.widget = this.create_widget();
     let adapter_type = this.get_adapter_type();
     this.adapter = new adapter_type(this.extension, this.widget)
@@ -168,30 +164,33 @@ function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
       super.init();
     }
 
+    get status_message() {
+      return this.adapter.status_message;
+    }
+
     public init_integration<T extends CodeMirrorIntegration>(options: IFeatureTestEnvironment.InitOptions): T {
       let connection = this.create_dummy_connection();
-      const feature = new options.constructor({
-        feature: {
+      let document = options.document
+          ? options.document
+          : this.virtual_editor.virtual_document
+
+      let editor_adapter = this.adapter.connect_adapter(
+        document,
+        connection,
+        [{
           id: options.id,
           name: options.id,
           editorIntegrationFactory: new Map([['CodeMirrorEditor', options.constructor]]),
           settings: options.settings
-        },
-        virtual_editor: this.virtual_editor,
-        virtual_document: options.document
-          ? options.document
-          : this.virtual_editor.virtual_document,
-        connection: connection,
-        status_message: this.status_message,
-        settings: options.settings,
-        adapter: this.adapter
+        }]
+      )
+      this.virtual_editor.virtual_document = document;
+      document.changed.connect(async () => {
+        await editor_adapter.updateAfterChange();
       });
+
+      let feature = editor_adapter.features.get(options.id);
       this._connections.set(feature as CodeMirrorIntegration, connection);
-
-      if (typeof options.register === 'undefined' || options.register) {
-        feature.register();
-      }
-
       return feature as T;
     }
 

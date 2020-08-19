@@ -10,7 +10,7 @@ import { ICommandContext } from '../command_manager';
 import { JSONObject } from '@lumino/coreutils';
 import { DocumentConnectionManager, IDocumentConnectionData, ISocketConnectionOptions } from '../connection_manager';
 import { ILSPExtension } from '../index';
-import { FeatureEditorIntegration } from '../feature';
+import { FeatureEditorIntegration, IFeature } from '../feature';
 import { EditorAdapter } from '../editor_integration/editor_adapter';
 import IEditor = CodeEditor.IEditor;
 
@@ -78,6 +78,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   public documentsUpdateBegan: Signal<WidgetAdapter<T>, void>
   public activeEditorChanged: Signal<WidgetAdapter<T>, IEditorChangedData>;
+  public update_finished: Promise<void>;
 
   /**
    * (re)create virtual document using current path and language
@@ -253,7 +254,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   protected async on_connected(data: IDocumentConnectionData) {
     let {virtual_document} = data;
 
-    await this.connect_adapter(data.virtual_document, data.connection);
+    this.connect_adapter(data.virtual_document, data.connection);
     this.adapterConnected.emit(data);
 
     await this.update_documents().then(() => {
@@ -360,7 +361,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     foreign_document.changed.disconnect(this.document_changed, this);
   }
 
-  private document_changed(
+  document_changed(
     virtual_document: VirtualDocument,
     document: VirtualDocument,
     is_init = false
@@ -406,12 +407,14 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     }
   }
 
-  private async connect_adapter(
+  connect_adapter(
     virtual_document: VirtualDocument,
-    connection: LSPConnection
-  ) {
-    let adapter = this.create_adapter(virtual_document, connection);
+    connection: LSPConnection,
+    features: IFeature[] = null
+  ): EditorAdapter<any> {
+    let adapter = this.create_adapter(virtual_document, connection, features);
     this.adapters.set(virtual_document.id_path, adapter);
+    return adapter
   }
 
   private disconnect_adapter(virtual_document: VirtualDocument) {
@@ -467,10 +470,16 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   private create_adapter(
     virtual_document: VirtualDocument,
-    connection: LSPConnection
+    connection: LSPConnection,
+    features: IFeature[] = null
   ): EditorAdapter<IVirtualEditor<IEditor>> {
     let adapter_features = new Array<FeatureEditorIntegration<IVirtualEditor<IEditor>>>();
-    for (let feature of this.extension.feature_manager.features) {
+
+    if (features === null) {
+      features = this.extension.feature_manager.features
+    }
+
+    for (let feature of features) {
       let featureEditorIntegrationConstructor = feature.editorIntegrationFactory.get(
         this.virtual_editor.editor_name
       );
@@ -499,7 +508,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   private onContentChanged(_slot: any) {
     // update the virtual documents (sending the updates to LSP is out of scope here)
-    this.update_documents().then().catch(console.warn);
+    this.update_finished = this.update_documents().catch(console.warn);
   }
 
   get_position_from_context_menu(): IRootPosition {

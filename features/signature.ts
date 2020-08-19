@@ -1,6 +1,5 @@
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { IRootPosition } from '../positioning';
-import * as CodeMirror from 'codemirror';
 import { CodeMirrorIntegration } from '../editor_integration/codemirror';
 import { FeatureSettings, IFeatureLabIntegration } from '../feature';
 import {
@@ -11,6 +10,7 @@ import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { EditorTooltipManager } from '../components/free_tooltip';
+import { IEditorChange } from "../virtual/editor";
 
 export class SignatureCM extends CodeMirrorIntegration {
   protected signature_character: IRootPosition;
@@ -127,7 +127,7 @@ export class SignatureCM extends CodeMirrorIntegration {
     return this._signatureCharacters;
   }
 
-  afterChange(change: CodeMirror.EditorChange, root_position: IRootPosition) {
+  afterChange(change: IEditorChange, root_position: IRootPosition) {
     let last_character = this.extract_last_character(change);
 
     if (this.signatureCharacters.indexOf(last_character) === -1) {
