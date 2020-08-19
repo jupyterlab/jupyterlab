@@ -58,6 +58,9 @@ class ExampleApp(LabServerApp):
         }, {
             'name': '@jupyterlab/example-federated-middle',
             'plugin': './extension'
+        }, {
+            'name': '@jupyterlab/example-federated-phosphor',
+            'plugin': './index'
         }]
 
         super().initialize_handlers()
