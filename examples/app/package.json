@@ -55,6 +55,7 @@
     "rimraf": "~3.0.0",
     "style-loader": "~1.0.1",
     "svg-url-loader": "~3.0.3",
+    "to-string-loader": "^1.1.6",
     "url-loader": "~3.0.0",
     "watch": "~1.0.2",
     "webpack": "~5.0.0-beta.26",
