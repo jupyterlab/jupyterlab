@@ -23,7 +23,7 @@ import {
 } from '@jupyterlab/application';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { VirtualCodeMirrorEditor } from "../virtual/codemirror_editor";
+import { CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
 
 export const FEATURE_ID = PLUGIN_ID + ':diagnostics';
 
@@ -130,7 +130,7 @@ class DiagnosticsPanel {
 
 export const diagnostics_panel = new DiagnosticsPanel();
 export const diagnostics_databases = new WeakMap<
-  VirtualCodeMirrorEditor,
+  CodeMirrorVirtualEditor,
   DiagnosticsDatabase
 >();
 

@@ -23,12 +23,12 @@ import {
 } from './codemirror';
 import { EditorAdapter } from './editor_adapter';
 import IEditor = CodeEditor.IEditor;
-import { VirtualCodeMirrorEditor, VirtualCodeMirrorNotebookEditor } from "../virtual/codemirror_editor";
+import { CodeMirrorVirtualEditor, VirtualCodeMirrorNotebookEditor } from "../virtual/codemirror_editor";
 import { WidgetAdapterConstructor } from "../tokens";
 
 interface IFeatureTestEnvironment {
   host: HTMLElement;
-  virtual_editor: VirtualCodeMirrorEditor;
+  virtual_editor: CodeMirrorVirtualEditor;
 
   dispose(): void;
 }
@@ -48,7 +48,7 @@ export class MockLanguageServerManager extends LanguageServerManager {
 export abstract class FeatureTestEnvironment
   implements IFeatureTestEnvironment {
   host: HTMLElement;
-  virtual_editor: VirtualCodeMirrorEditor;
+  virtual_editor: CodeMirrorVirtualEditor;
   status_message: StatusMessage;
   private connections: Map<CodeMirrorIntegration, LSPConnection>;
   private adapter_type: WidgetAdapterConstructor<any>;
@@ -69,7 +69,7 @@ export abstract class FeatureTestEnvironment
     this.status_message = new StatusMessage();
   }
 
-  abstract create_virtual_editor(): VirtualCodeMirrorEditor;
+  abstract create_virtual_editor(): CodeMirrorVirtualEditor;
 
   public init_integration<T extends CodeMirrorIntegration>(
     integration_type: CodeMirrorIntegrationConstructor,

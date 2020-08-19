@@ -16,7 +16,7 @@ import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../converter';
 import { DefaultMap } from '../utils';
 import { CodeEditor } from "@jupyterlab/codeeditor";
-import { CodeMirrorHandler, VirtualCodeMirrorEditor } from "../virtual/codemirror_editor";
+import { CodeMirrorHandler, CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
 
 function toDocumentChanges(changes: {
   [uri: string]: lsProtocol.TextEdit[];
@@ -53,7 +53,7 @@ export interface IEditOutcome {
  * (the initialization is performed by the adapter).
  */
 export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
-  VirtualCodeMirrorEditor
+  CodeMirrorVirtualEditor
 > {
   public is_registered: boolean;
   protected readonly editor_handlers: Map<string, CodeMirrorHandler>;
@@ -61,7 +61,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
   protected readonly wrapper_handlers: Map<keyof HTMLElementEventMap, any>;
   protected wrapper: HTMLElement;
 
-  protected virtual_editor: VirtualCodeMirrorEditor;
+  protected virtual_editor: CodeMirrorVirtualEditor;
   protected virtual_document: VirtualDocument;
   protected connection: LSPConnection;
   settings: FeatureSettings<any>;

@@ -65,11 +65,8 @@ export class FeatureSettings<T> {
 
 /**
  * Names of the supported editors.
- *
- * Note: once the dynamic editor adapters support is implemented,
- * this type will be replaced by string and the dynamic checks will be implemented instead.
  */
-export type IEditorName = 'CodeMirrorEditor';
+export type IEditorName = string;
 
 export interface IFeature {
   /**

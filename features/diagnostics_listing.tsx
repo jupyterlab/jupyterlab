@@ -11,7 +11,7 @@ import { diagnosticSeverityNames } from '../lsp';
 import { message_without_code } from './diagnostics';
 
 import diagnosticsSvg from '../../style/icons/diagnostics.svg';
-import { VirtualCodeMirrorEditor } from "../virtual/codemirror_editor";
+import { CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
@@ -52,7 +52,7 @@ function focus_on(node: HTMLElement) {
 
 function DocumentLocator(props: {
   document: VirtualDocument;
-  editor: VirtualCodeMirrorEditor;
+  editor: CodeMirrorVirtualEditor;
 }) {
   let { document, editor } = props;
   let ancestry = document.ancestry;
@@ -120,7 +120,7 @@ interface IDiagnosticsRow {
 
 interface IListingContext {
   db: DiagnosticsDatabase;
-  editor: VirtualCodeMirrorEditor;
+  editor: CodeMirrorVirtualEditor;
 }
 
 interface IColumnOptions {
@@ -358,7 +358,7 @@ export namespace DiagnosticsListing {
    */
   export class Model extends VDomModel {
     diagnostics: DiagnosticsDatabase;
-    virtual_editor: VirtualCodeMirrorEditor;
+    virtual_editor: CodeMirrorVirtualEditor;
 
     constructor() {
       super();

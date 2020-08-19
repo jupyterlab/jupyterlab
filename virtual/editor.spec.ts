@@ -7,10 +7,10 @@ import * as CodeMirror from 'codemirror';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
 import { MockLanguageServerManager } from '../editor_integration/testutils';
-import { VirtualCodeMirrorEditor } from "./codemirror_editor";
+import { CodeMirrorVirtualEditor } from "./codemirror_editor";
 
 // TODO: implements IVirtualEditor OR rename to test CM
-class VirtualEditorImplementation extends VirtualCodeMirrorEditor {
+class VirtualEditorImplementation extends CodeMirrorVirtualEditor {
   private cm_editor: CodeMirror.Editor;
 
   get_cm_editor(position: IRootPosition): CodeMirror.Editor {

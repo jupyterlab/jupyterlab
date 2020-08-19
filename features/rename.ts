@@ -16,7 +16,7 @@ import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from './diagnostics';
 import { LabIcon } from '@jupyterlab/ui-components';
 
 import renameSvg from '../../style/icons/rename.svg';
-import { VirtualCodeMirrorEditor } from "../virtual/codemirror_editor";
+import { CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
 
 export const hoverIcon = new LabIcon({
   name: 'lsp:rename',
@@ -49,7 +49,7 @@ const COMMANDS: IFeatureCommand[] = [
           status = RenameCM.ux_workaround_for_rope_limitation(
             error,
             diagnostics_feature,
-            editor as VirtualCodeMirrorEditor,
+            editor as CodeMirrorVirtualEditor,
             rename_feature
           );
         }
@@ -133,7 +133,7 @@ export class RenameCM extends CodeMirrorIntegration {
   static ux_workaround_for_rope_limitation(
     error: any,
     diagnostics_feature: DiagnosticsCM,
-    editor: VirtualCodeMirrorEditor,
+    editor: CodeMirrorVirtualEditor,
     rename_feature: RenameCM
   ): string {
     let has_index_error = false;
@@ -164,7 +164,7 @@ export class RenameCM extends CodeMirrorIntegration {
           let message = diagnostic.diagnostic.message;
           let start = diagnostic.range.start;
           if (rename_feature.adapter.has_multiple_editors) {
-            let notebook_editor = editor as VirtualCodeMirrorEditor;
+            let notebook_editor = editor as CodeMirrorVirtualEditor;
             let { index: editor_id } = notebook_editor.find_editor(
               diagnostic.editor
             );

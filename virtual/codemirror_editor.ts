@@ -21,7 +21,7 @@ type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
 class DocDispatcher implements CodeMirror.Doc {
 
   constructor(
-    private virtual_editor: VirtualCodeMirrorEditor,
+    private virtual_editor: CodeMirrorVirtualEditor,
     private adapter: WidgetAdapter<IDocumentWidget>
   ) {
   }
@@ -64,7 +64,7 @@ class DocDispatcher implements CodeMirror.Doc {
  * (using ES6 Proxy), or implement custom behaviour, allowing for the use of
  * virtual documents representing code in complex entities such as notebooks.
  */
-export class VirtualCodeMirrorEditor
+export class CodeMirrorVirtualEditor
   implements IVirtualEditor<CodeMirrorEditor>, CodeMirror.Editor {
 
   // TODO: getValue could be made private in the virtual editor and the virtual editor
@@ -81,7 +81,7 @@ export class VirtualCodeMirrorEditor
 
   editor_to_source_line: Map<CodeEditor.IEditor, number>;
 
-  private _proxy: VirtualCodeMirrorEditor;
+  private _proxy: CodeMirrorVirtualEditor;
   private readonly adapter: WidgetAdapter<IDocumentWidget>
 
   constructor(options: IVirtualEditor.IOptions) {
@@ -95,7 +95,7 @@ export class VirtualCodeMirrorEditor
     this.ce_editor_to_cm_editor = new Map();
     this._proxy = new Proxy(this, {
       get: function (
-        target: VirtualCodeMirrorEditor,
+        target: CodeMirrorVirtualEditor,
         prop: keyof CodeMirror.Editor,
         receiver: any
       ) {
@@ -515,11 +515,11 @@ export interface VirtualCodeMirrorEditor extends CodeMirror.Editor {
 }
 
 export const CODEMIRROR_VIRTUAL_EDITOR: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID + ':ILSPVirtualEditorManager',
+  id: PLUGIN_ID + ':CodeMirrorVirtualEditor',
   requires: [ILSPVirtualEditorManager],
   activate: (app, editorManager: ILSPVirtualEditorManager) => {
     return editorManager.registerEditorType({
-      implementation: VirtualCodeMirrorEditor,
+      implementation: CodeMirrorVirtualEditor,
       name: "CodeMirrorEditor",
       supports: CodeMirrorEditor
     });
