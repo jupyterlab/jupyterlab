@@ -1,15 +1,22 @@
-import { IForeignCodeExtractor, IForeignCodeExtractorsRegistry } from '../extractors/types';
+import {
+  IForeignCodeExtractor,
+  IForeignCodeExtractorsRegistry
+} from '../extractors/types';
 import { CellMagicsMap, LineMagicsMap } from '../magics/maps';
 import { IOverridesRegistry } from '../magics/overrides';
 import { DefaultMap, until_ready } from '../utils';
 import { Signal } from '@lumino/signaling';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import * as CodeMirror from 'codemirror';
-import { IEditorPosition, ISourcePosition, IVirtualPosition } from '../positioning';
+import {
+  IEditorPosition,
+  ISourcePosition,
+  IVirtualPosition
+} from '../positioning';
 import { IDocumentInfo } from 'lsp-ws-connection/src';
 
 import { DocumentConnectionManager } from '../connection_manager';
-import { create_console, EditorLogConsole } from "./console";
+import { create_console, EditorLogConsole } from './console';
 import IRange = CodeEditor.IRange;
 
 type language = string;
@@ -111,7 +118,7 @@ export class VirtualDocumentInfo implements IDocumentInfo {
 export namespace VirtualDocument {
   export interface IOptions {
     language: string;
-    foreign_code_extractors: IForeignCodeExtractorsRegistry,
+    foreign_code_extractors: IForeignCodeExtractorsRegistry;
     overrides_registry: IOverridesRegistry;
     path: string;
     file_extension: string;
@@ -127,7 +134,6 @@ export namespace VirtualDocument {
     parent?: VirtualDocument;
   }
 }
-
 
 /**
  * A notebook can hold one or more virtual documents; there is always one,
@@ -191,22 +197,24 @@ export class VirtualDocument {
   private previous_value: string;
   public changed: Signal<VirtualDocument, VirtualDocument>;
 
-  public path: string
-  public file_extension: string
-  public has_lsp_supported_file: boolean
-  public parent?: VirtualDocument
+  public path: string;
+  public file_extension: string;
+  public has_lsp_supported_file: boolean;
+  public parent?: VirtualDocument;
   private readonly options: VirtualDocument.IOptions;
   public update_manager: UpdateManager;
 
   constructor(options: VirtualDocument.IOptions) {
     this.options = options;
-    this.path = options.path
-    this.file_extension = options.file_extension
-    this.has_lsp_supported_file = options.has_lsp_supported_file
-    this.parent = options.parent
+    this.path = options.path;
+    this.file_extension = options.file_extension;
+    this.has_lsp_supported_file = options.has_lsp_supported_file;
+    this.parent = options.parent;
     this.language = options.language;
     let overrides =
-      this.language in options.overrides_registry ? options.overrides_registry[this.language] : null;
+      this.language in options.overrides_registry
+        ? options.overrides_registry[this.language]
+        : null;
     this.cell_magics_overrides = new CellMagicsMap(
       overrides ? overrides.cell_magics : []
     );
@@ -335,15 +343,13 @@ export class VirtualDocument {
     standalone: boolean,
     file_extension: string
   ): VirtualDocument {
-    let document = new VirtualDocument(
-      {
-        ...this.options,
-        parent: this,
-        standalone: standalone,
-        file_extension: file_extension,
-        language: language
-      }
-    );
+    let document = new VirtualDocument({
+      ...this.options,
+      parent: this,
+      standalone: standalone,
+      file_extension: file_extension,
+      language: language
+    });
     const context: IForeignContext = {
       foreign_document: document,
       parent_host: this
@@ -790,11 +796,10 @@ export function collect_documents(
 
 export interface IBlockAddedInfo {
   virtual_document: VirtualDocument;
-  block: ICodeBlockOptions
+  block: ICodeBlockOptions;
 }
 
 export class UpdateManager {
-
   console: EditorLogConsole;
 
   /**
@@ -810,7 +815,7 @@ export class UpdateManager {
    * Signal emitted by the editor that triggered the update, providing the root document of the updated documents.
    */
   private document_updated: Signal<UpdateManager, VirtualDocument>;
-  public block_added: Signal<UpdateManager, IBlockAddedInfo>
+  public block_added: Signal<UpdateManager, IBlockAddedInfo>;
 
   constructor(private virtual_document: VirtualDocument) {
     this.document_updated = new Signal(this);
@@ -879,8 +884,14 @@ export class UpdateManager {
           this.virtual_document.clear();
 
           for (let code_block of blocks) {
-            this.block_added.emit({block: code_block, virtual_document: this.virtual_document})
-            this.virtual_document.append_code_block(code_block.value, code_block.ce_editor);
+            this.block_added.emit({
+              block: code_block,
+              virtual_document: this.virtual_document
+            });
+            this.virtual_document.append_code_block(
+              code_block.value,
+              code_block.ce_editor
+            );
           }
 
           if (this.virtual_document) {
@@ -900,8 +911,7 @@ export class UpdateManager {
   }
 }
 
-
 export interface ICodeBlockOptions {
-  ce_editor: CodeEditor.IEditor
-  value: string
+  ce_editor: CodeEditor.IEditor;
+  value: string;
 }

@@ -1,7 +1,8 @@
 import { expect } from 'chai';
 import {
   CommandEntryPoint,
-  ContextCommandManager, IContextMenuOptions
+  ContextCommandManager,
+  IContextMenuOptions
 } from './command_manager';
 import { WidgetAdapter } from './adapters/adapter';
 import { IFeatureCommand } from './feature';
@@ -9,7 +10,6 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 describe('ContextMenuCommandManager', () => {
   class ManagerImplementation extends ContextCommandManager {
-
     constructor(options: IContextMenuOptions) {
       super({
         app: null,
@@ -72,10 +72,10 @@ describe('ContextMenuCommandManager', () => {
 
   it('respects is_rank_relative value', () => {
     manager = new ManagerImplementation({
-        selector: null,
-        rank_group: 0,
-        rank_group_size: 5
-      });
+      selector: null,
+      rank_group: 0,
+      rank_group_size: 5
+    });
 
     let rank = manager.get_rank({
       ...base_command,

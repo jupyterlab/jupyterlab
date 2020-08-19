@@ -1,12 +1,18 @@
 import {
   CodeMirrorEditor,
-  CodeMirrorEditorFactory, CodeMirrorMimeTypeService
+  CodeMirrorEditorFactory,
+  CodeMirrorMimeTypeService
 } from '@jupyterlab/codemirror';
 import { IVirtualEditor, VirtualEditorManager } from '../virtual/editor';
 import { LSPConnection } from '../connection';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { WidgetAdapter } from '../adapters/adapter';
-import { Notebook, NotebookModel, NotebookModelFactory, NotebookPanel } from '@jupyterlab/notebook';
+import {
+  Notebook,
+  NotebookModel,
+  NotebookModelFactory,
+  NotebookPanel
+} from '@jupyterlab/notebook';
 import { NBTestUtils } from '@jupyterlab/testutils';
 import * as nbformat from '@jupyterlab/nbformat';
 import { ICellModel } from '@jupyterlab/cells';
@@ -19,20 +25,28 @@ import {
 } from './codemirror';
 import { EditorAdapter } from './editor_adapter';
 import IEditor = CodeEditor.IEditor;
-import { CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
-import { ILSPFeatureManager, ILSPVirtualEditorManager, WidgetAdapterConstructor } from "../tokens";
-import { FileEditorAdapter } from "../adapters/file_editor/file_editor";
-import { NotebookAdapter } from "../adapters/notebook/notebook";
-import { Context, IDocumentWidget, TextModelFactory } from "@jupyterlab/docregistry";
+import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
+import {
+  ILSPFeatureManager,
+  ILSPVirtualEditorManager,
+  WidgetAdapterConstructor
+} from '../tokens';
+import { FileEditorAdapter } from '../adapters/file_editor/file_editor';
+import { NotebookAdapter } from '../adapters/notebook/notebook';
+import {
+  Context,
+  IDocumentWidget,
+  TextModelFactory
+} from '@jupyterlab/docregistry';
 import createNotebookPanel = NBTestUtils.createNotebookPanel;
-import { FileEditor, FileEditorFactory } from "@jupyterlab/fileeditor";
-import { ServiceManager } from "@jupyterlab/services";
-import { FeatureManager, ILSPExtension } from "../index";
-import { JupyterFrontEnd } from "@jupyterlab/application";
-import { IFeatureSettings } from "../feature";
+import { FileEditor, FileEditorFactory } from '@jupyterlab/fileeditor';
+import { ServiceManager } from '@jupyterlab/services';
+import { FeatureManager, ILSPExtension } from '../index';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { IFeatureSettings } from '../feature';
 
 export interface ITestEnvironment {
-  document_options: VirtualDocument.IOptions
+  document_options: VirtualDocument.IOptions;
 
   virtual_editor: CodeMirrorVirtualEditor;
 
@@ -58,8 +72,7 @@ export class MockLanguageServerManager extends LanguageServerManager {
 }
 
 export class MockSettings<T> implements IFeatureSettings<T> {
-  constructor(private settings: T) {
-  }
+  constructor(private settings: T) {}
   get composite(): T {
     return this.settings;
   }
@@ -67,16 +80,14 @@ export class MockSettings<T> implements IFeatureSettings<T> {
   set(setting: keyof T, value: any): void {
     this.settings[setting] = value;
   }
-
 }
 
 export class MockExtension implements ILSPExtension {
-
   app: JupyterFrontEnd;
   connection_manager: DocumentConnectionManager;
   language_server_manager: LanguageServerManager;
   feature_manager: ILSPFeatureManager;
-  editor_type_manager: ILSPVirtualEditorManager
+  editor_type_manager: ILSPVirtualEditorManager;
 
   constructor() {
     this.app = null;
@@ -88,29 +99,26 @@ export class MockExtension implements ILSPExtension {
     });
     this.editor_type_manager.registerEditorType({
       implementation: CodeMirrorVirtualEditor,
-      name: "CodeMirrorEditor",
+      name: 'CodeMirrorEditor',
       supports: CodeMirrorEditor
-    })
+    });
   }
 }
 
-export abstract class TestEnvironment
-  implements ITestEnvironment {
+export abstract class TestEnvironment implements ITestEnvironment {
   virtual_editor: CodeMirrorVirtualEditor;
   protected abstract get_adapter_type(): WidgetAdapterConstructor<any>;
   adapter: WidgetAdapter<any>;
   abstract widget: IDocumentWidget;
   protected extension: ILSPExtension;
   protected abstract get_defaults(): VirtualDocument.IOptions;
-  public document_options: VirtualDocument.IOptions
+  public document_options: VirtualDocument.IOptions;
 
-  constructor(
-    options?: Partial<VirtualDocument.IOptions>
-  ) {
+  constructor(options?: Partial<VirtualDocument.IOptions>) {
     this.document_options = {
-      ...(this.get_defaults()),
+      ...this.get_defaults(),
       ...(options || {})
-    }
+    };
     this.extension = new MockExtension();
     this.init();
   }
@@ -120,43 +128,46 @@ export abstract class TestEnvironment
   init() {
     this.widget = this.create_widget();
     let adapter_type = this.get_adapter_type();
-    this.adapter = new adapter_type(this.extension, this.widget)
+    this.adapter = new adapter_type(this.extension, this.widget);
     this.virtual_editor = this.create_virtual_editor();
     this.adapter.virtual_editor = this.virtual_editor;
   }
 
-  create_virtual_editor(): CodeMirrorVirtualEditor{
+  create_virtual_editor(): CodeMirrorVirtualEditor {
     return new CodeMirrorVirtualEditor({
       adapter: this.adapter,
       virtual_document: new VirtualDocument(this.document_options)
-    })
+    });
   }
 
   dispose(): void {
+    this.adapter.dispose();
   }
 }
 
 export interface IFeatureTestEnvironment extends ITestEnvironment {
+  init_integration<T extends CodeMirrorIntegration>(
+    options: IFeatureTestEnvironment.IInitOptions
+  ): T;
 
-  init_integration<T extends CodeMirrorIntegration>(options: IFeatureTestEnvironment.InitOptions): T
-
-  dispose_feature(feature: CodeMirrorIntegration): void
+  dispose_feature(feature: CodeMirrorIntegration): void;
 }
 
 export namespace IFeatureTestEnvironment {
-  export interface InitOptions {
-    constructor: CodeMirrorIntegrationConstructor,
-    id: string,
-    register?: boolean,
-    document?: VirtualDocument,
-    settings?: IFeatureSettings<any>
+  export interface IInitOptions {
+    constructor: CodeMirrorIntegrationConstructor;
+    id: string;
+    register?: boolean;
+    document?: VirtualDocument;
+    settings?: IFeatureSettings<any>;
   }
 }
 
 type TestEnvironmentConstructor = new (...args: any[]) => ITestEnvironment;
 
 function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
-  return class FeatureTestEnvironment extends Base implements IFeatureTestEnvironment {
+  return class FeatureTestEnvironment extends Base
+    implements IFeatureTestEnvironment {
     _connections: Map<CodeMirrorIntegration, LSPConnection>;
 
     init() {
@@ -168,22 +179,24 @@ function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
       return this.adapter.status_message;
     }
 
-    public init_integration<T extends CodeMirrorIntegration>(options: IFeatureTestEnvironment.InitOptions): T {
+    public init_integration<T extends CodeMirrorIntegration>(
+      options: IFeatureTestEnvironment.IInitOptions
+    ): T {
       let connection = this.create_dummy_connection();
       let document = options.document
-          ? options.document
-          : this.virtual_editor.virtual_document
+        ? options.document
+        : this.virtual_editor.virtual_document;
 
-      let editor_adapter = this.adapter.connect_adapter(
-        document,
-        connection,
-        [{
+      let editor_adapter = this.adapter.connect_adapter(document, connection, [
+        {
           id: options.id,
           name: options.id,
-          editorIntegrationFactory: new Map([['CodeMirrorEditor', options.constructor]]),
+          editorIntegrationFactory: new Map([
+            ['CodeMirrorEditor', options.constructor]
+          ]),
           settings: options.settings
-        }]
-      )
+        }
+      ]);
       this.virtual_editor.virtual_document = document;
       document.changed.connect(async () => {
         await editor_adapter.updateAfterChange();
@@ -214,12 +227,14 @@ function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
         connection.close();
       }
     }
-  }
+  };
 }
 
 export class FileEditorTestEnvironment extends TestEnvironment {
-  protected get_adapter_type() { return FileEditorAdapter };
-  widget: IDocumentWidget<FileEditor>
+  protected get_adapter_type() {
+    return FileEditorAdapter;
+  }
+  widget: IDocumentWidget<FileEditor>;
 
   protected get_defaults(): VirtualDocument.IOptions {
     return {
@@ -247,12 +262,14 @@ export class FileEditorTestEnvironment extends TestEnvironment {
         name: 'Editor',
         fileTypes: ['*']
       }
-    })
-    return factory.createNew(new Context({
-      manager: new ServiceManager({ standby: 'never' }),
-      factory: new TextModelFactory(),
-      path: this.document_options.path
-    }));
+    });
+    return factory.createNew(
+      new Context({
+        manager: new ServiceManager({ standby: 'never' }),
+        factory: new TextModelFactory(),
+        path: this.document_options.path
+      })
+    );
   }
 
   dispose(): void {
@@ -263,7 +280,9 @@ export class FileEditorTestEnvironment extends TestEnvironment {
 
 export class NotebookTestEnvironment extends TestEnvironment {
   public widget: NotebookPanel;
-  protected get_adapter_type() { return NotebookAdapter }
+  protected get_adapter_type() {
+    return NotebookAdapter;
+  }
 
   get notebook(): Notebook {
     return this.widget.content;
@@ -277,7 +296,7 @@ export class NotebookTestEnvironment extends TestEnvironment {
       overrides_registry: {},
       foreign_code_extractors: {},
       has_lsp_supported_file: false,
-      standalone: true,
+      standalone: true
     };
   }
 
@@ -287,13 +306,16 @@ export class NotebookTestEnvironment extends TestEnvironment {
       factory: new NotebookModelFactory({}),
       path: this.document_options.path
     });
-    return createNotebookPanel(context)
+    return createNotebookPanel(context);
   }
 }
 
-
-export class FileEditorFeatureTestEnvironment extends FeatureSupport(FileEditorTestEnvironment) {}
-export class NotebookFeatureTestEnvironment extends FeatureSupport(NotebookTestEnvironment) {}
+export class FileEditorFeatureTestEnvironment extends FeatureSupport(
+  FileEditorTestEnvironment
+) {}
+export class NotebookFeatureTestEnvironment extends FeatureSupport(
+  NotebookTestEnvironment
+) {}
 
 export function code_cell(
   source: string[] | string,

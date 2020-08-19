@@ -4,14 +4,11 @@ import { WidgetAdapter } from './adapters/adapter';
 import { FeatureEditorIntegration, IFeatureCommand } from './feature';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
-import {
-  IRootPosition,
-  IVirtualPosition
-} from './positioning';
+import { IRootPosition, IVirtualPosition } from './positioning';
 import { IVirtualEditor } from './virtual/editor';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { ILSPAdapterManager } from "./tokens";
+import { ILSPAdapterManager } from './tokens';
 
 function is_context_menu_over_token(adapter: WidgetAdapter<IDocumentWidget>) {
   let position = adapter.get_position_from_context_menu();
@@ -25,29 +22,29 @@ function is_context_menu_over_token(adapter: WidgetAdapter<IDocumentWidget>) {
 export type CommandEntryPoint = string;
 
 export interface ILSPCommandManagerOptions {
-  adapter_manager: ILSPAdapterManager,
-  app: JupyterFrontEnd,
-  palette: ICommandPalette,
-  tracker: IWidgetTracker,
-  suffix: string,
-  entry_point: CommandEntryPoint,
+  adapter_manager: ILSPAdapterManager;
+  app: JupyterFrontEnd;
+  palette: ICommandPalette;
+  tracker: IWidgetTracker;
+  suffix: string;
+  entry_point: CommandEntryPoint;
 }
 
 abstract class LSPCommandManager {
-  protected adapter_manager: ILSPAdapterManager
-  protected app: JupyterFrontEnd
-  protected palette: ICommandPalette
-  protected tracker: IWidgetTracker
-  protected suffix: string
-  protected entry_point: CommandEntryPoint
+  protected adapter_manager: ILSPAdapterManager;
+  protected app: JupyterFrontEnd;
+  protected palette: ICommandPalette;
+  protected tracker: IWidgetTracker;
+  protected suffix: string;
+  protected entry_point: CommandEntryPoint;
 
   protected constructor(options: ILSPCommandManagerOptions) {
-    this.adapter_manager = options.adapter_manager
-    this.app = options.app
-    this.palette = options.palette
-    this.tracker = options.tracker
-    this.suffix = options.suffix
-    this.entry_point = options.entry_point
+    this.adapter_manager = options.adapter_manager;
+    this.app = options.app;
+    this.palette = options.palette;
+    this.tracker = options.tracker;
+    this.suffix = options.suffix;
+    this.entry_point = options.entry_point;
   }
 
   get current_adapter() {
@@ -93,33 +90,32 @@ abstract class LSPCommandManager {
 }
 
 export interface IContextMenuOptions {
-  selector: string
-  rank_group?: number
-  rank_group_size?: number
+  selector: string;
+  rank_group?: number;
+  rank_group_size?: number;
   callback?(manager: ContextCommandManager): void;
 }
 
-export interface ILSPContextManagerOptions extends ILSPCommandManagerOptions, IContextMenuOptions { }
+export interface ILSPContextManagerOptions
+  extends ILSPCommandManagerOptions,
+    IContextMenuOptions {}
 
 /**
  * Contextual commands, with the context retrieved from the ContextMenu
  * position (if open) or from the cursor in the current widget.
  */
 export class ContextCommandManager extends LSPCommandManager {
+  protected selector: string;
+  public entry_point: CommandEntryPoint;
+  protected rank_group?: number;
+  protected rank_group_size?: number;
 
-  protected selector: string
-  public entry_point: CommandEntryPoint
-  protected rank_group?: number
-  protected rank_group_size?: number
-
-  constructor(
-    options: ILSPContextManagerOptions
-  ) {
+  constructor(options: ILSPContextManagerOptions) {
     super(options);
-    this.selector = options.selector
-    this.entry_point = options.entry_point
-    this.rank_group = options.rank_group
-    this.rank_group_size = options.rank_group_size
+    this.selector = options.selector;
+    this.entry_point = options.entry_point;
+    this.rank_group = options.rank_group;
+    this.rank_group_size = options.rank_group_size;
     if (options.callback) {
       options.callback(this);
     }

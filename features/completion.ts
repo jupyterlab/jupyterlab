@@ -5,10 +5,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import {
-  IEditorChangedData,
-  WidgetAdapter
-} from '../adapters/adapter';
+import { IEditorChangedData, WidgetAdapter } from '../adapters/adapter';
 import { LSPConnector } from './completion_handler';
 import { ICompletionManager } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';

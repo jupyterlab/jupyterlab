@@ -15,7 +15,13 @@ describe('Rename', () => {
   describe('Works with VirtualFileEditor', () => {
     let feature: RenameCM;
 
-    beforeEach(() => (feature = env.init_integration({constructor: RenameCM, id: 'Rename'})));
+    beforeEach(
+      () =>
+        (feature = env.init_integration({
+          constructor: RenameCM,
+          id: 'Rename'
+        }))
+    );
     afterEach(() => env.dispose_feature(feature));
 
     PageConfig.setOption('rootUri', 'file://');

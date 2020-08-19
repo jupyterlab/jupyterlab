@@ -1,17 +1,22 @@
-import * as CodeMirror from "codemirror";
-import { CodeMirrorEditor } from "@jupyterlab/codemirror";
-import { CodeEditor } from "@jupyterlab/codeeditor";
-import { IEditorName } from "../feature";
-import { IBlockAddedInfo, UpdateManager, VirtualDocument } from "./document";
-import { IForeignCodeExtractorsRegistry } from "../extractors/types";
-import { create_console, EditorLogConsole } from "./console";
-import { Signal } from "@lumino/signaling";
-import { IEditorPosition, IRootPosition, ISourcePosition, IVirtualPosition } from "../positioning";
-import { IEditorChange, IVirtualEditor, IWindowCoordinates } from "./editor";
-import { IEditorChangedData, WidgetAdapter } from "../adapters/adapter";
-import { IDocumentWidget } from "@jupyterlab/docregistry";
-import { JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { ILSPVirtualEditorManager, PLUGIN_ID } from "../tokens";
+import * as CodeMirror from 'codemirror';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IEditorName } from '../feature';
+import { IBlockAddedInfo, UpdateManager, VirtualDocument } from './document';
+import { IForeignCodeExtractorsRegistry } from '../extractors/types';
+import { create_console, EditorLogConsole } from './console';
+import { Signal } from '@lumino/signaling';
+import {
+  IEditorPosition,
+  IRootPosition,
+  ISourcePosition,
+  IVirtualPosition
+} from '../positioning';
+import { IEditorChange, IVirtualEditor, IWindowCoordinates } from './editor';
+import { IEditorChangedData, WidgetAdapter } from '../adapters/adapter';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { ILSPVirtualEditorManager, PLUGIN_ID } from '../tokens';
 
 export type CodeMirrorHandler = (instance: any, ...args: any[]) => void;
 type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
@@ -19,12 +24,10 @@ type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
 // @ts-ignore
 class DocDispatcher implements CodeMirror.Doc {
-
   constructor(
     private virtual_editor: CodeMirrorVirtualEditor,
     private adapter: WidgetAdapter<IDocumentWidget>
-  ) {
-  }
+  ) {}
 
   markText(
     from: IRootPosition,
@@ -47,16 +50,18 @@ class DocDispatcher implements CodeMirror.Doc {
   }
 
   getCursor(start?: string): CodeMirror.Position {
-    let active_editor = this.adapter.activeEditor as CodeMirrorEditor
+    let active_editor = this.adapter.activeEditor as CodeMirrorEditor;
     if (active_editor == null) {
       return;
     }
     let cursor = active_editor.editor
       .getDoc()
       .getCursor(start) as IEditorPosition;
-    return this.virtual_editor.transform_from_editor_to_root(active_editor, cursor);
+    return this.virtual_editor.transform_from_editor_to_root(
+      active_editor,
+      cursor
+    );
   }
-
 }
 /**
  * VirtualEditor extends the CodeMirror.Editor interface; its subclasses may either
@@ -66,7 +71,6 @@ class DocDispatcher implements CodeMirror.Doc {
  */
 export class CodeMirrorVirtualEditor
   implements IVirtualEditor<CodeMirrorEditor>, CodeMirror.Editor {
-
   // TODO: getValue could be made private in the virtual editor and the virtual editor
   //  could stop exposing the full implementation of CodeMirror but rather hide it inside.
   editor_name: IEditorName = 'CodeMirrorEditor';
@@ -82,10 +86,10 @@ export class CodeMirrorVirtualEditor
   editor_to_source_line: Map<CodeEditor.IEditor, number>;
 
   private _proxy: CodeMirrorVirtualEditor;
-  protected readonly adapter: WidgetAdapter<IDocumentWidget>
+  protected readonly adapter: WidgetAdapter<IDocumentWidget>;
 
   constructor(options: IVirtualEditor.IOptions) {
-    this.adapter = options.adapter
+    this.adapter = options.adapter;
     this.virtual_document = options.virtual_document;
     this.console = create_console('browser');
     this.change = new Signal(this);
@@ -111,10 +115,13 @@ export class CodeMirrorVirtualEditor
     });
     this.adapter.documentsUpdateBegan.connect(() => {
       // this is not thee most efficient, but probably the most reliable way
-      this.onEditorsUpdated(this.adapter.editors)
-    }, this)
+      this.onEditorsUpdated(this.adapter.editors);
+    }, this);
 
-    this.virtual_document.update_manager.block_added.connect(this.save_block_position, this)
+    this.virtual_document.update_manager.block_added.connect(
+      this.save_block_position,
+      this
+    );
 
     this.set_event_handlers();
     return this._proxy;
@@ -126,8 +133,8 @@ export class CodeMirrorVirtualEditor
     }
 
     this.editor_to_source_line.clear();
-    this.cm_editor_to_ce_editor.clear()
-    this.ce_editor_to_cm_editor.clear()
+    this.cm_editor_to_ce_editor.clear();
+    this.ce_editor_to_cm_editor.clear();
 
     this.off('change', this.emit_change);
 
@@ -157,17 +164,20 @@ export class CodeMirrorVirtualEditor
   }
 
   private onEditorsUpdated(editors: Array<CodeEditor.IEditor>): void {
-    this.cm_editor_to_ce_editor.clear()
-    this.ce_editor_to_cm_editor.clear()
-    this.editor_to_source_line.clear()
+    this.cm_editor_to_ce_editor.clear();
+    this.ce_editor_to_cm_editor.clear();
+    this.editor_to_source_line.clear();
     for (let ce_editor of editors) {
-      let cm_editor = (ce_editor as CodeMirrorEditor).editor
-      this.cm_editor_to_ce_editor.set(cm_editor, ce_editor)
-      this.ce_editor_to_cm_editor.set(ce_editor, cm_editor)
+      let cm_editor = (ce_editor as CodeMirrorEditor).editor;
+      this.cm_editor_to_ce_editor.set(cm_editor, ce_editor);
+      this.ce_editor_to_cm_editor.set(ce_editor, cm_editor);
     }
   }
 
-  private save_block_position(update_manager: UpdateManager, block_data: IBlockAddedInfo) {
+  private save_block_position(
+    update_manager: UpdateManager,
+    block_data: IBlockAddedInfo
+  ) {
     this.editor_to_source_line.set(
       block_data.block.ce_editor,
       block_data.virtual_document.last_source_line
@@ -207,7 +217,7 @@ export class CodeMirrorVirtualEditor
     ce_editor: CodeEditor.IEditor,
     position: IEditorPosition
   ): IRootPosition {
-    return this.transform_from_editor_to_root(ce_editor, position)
+    return this.transform_from_editor_to_root(ce_editor, position);
   }
 
   // TODO .root is not really needed as we are in editor now...
@@ -233,8 +243,10 @@ export class CodeMirrorVirtualEditor
     return this.virtual_document.root.transform_source_to_editor(root_position);
   }
 
-  private _event_wrappers = new Map<[string, CodeMirrorHandler],
-    WrappedHandler>();
+  private _event_wrappers = new Map<
+    [string, CodeMirrorHandler],
+    WrappedHandler
+  >();
 
   /**
    * Proxy the event handler binding to the CodeMirror editors,
@@ -249,7 +261,7 @@ export class CodeMirrorVirtualEditor
       } catch (error) {
         this.console.warn(
           'Wrapped handler (which should accept a CodeMirror Editor instance) failed',
-          {error, instance, args, this: this}
+          { error, instance, args, this: this }
         );
       }
     };
@@ -343,7 +355,7 @@ export class CodeMirrorVirtualEditor
       return editor.charCoords(pos, mode);
     } catch (e) {
       console.log(e);
-      return {bottom: 0, left: 0, right: 0, top: 0};
+      return { bottom: 0, left: 0, right: 0, top: 0 };
     }
   }
 
@@ -380,7 +392,7 @@ export class CodeMirrorVirtualEditor
       let editor = this.get_editor_at_root_line(where);
       return editor.cursorCoords(this.transform_from_root_to_editor(where));
     }
-    return {bottom: 0, left: 0, top: 0};
+    return { bottom: 0, left: 0, top: 0 };
   }
 
   get any_editor(): CodeMirror.Editor {
@@ -417,7 +429,7 @@ export class CodeMirrorVirtualEditor
   }
 
   private get_editor_at_root_line(pos: IRootPosition): CodeMirror.Editor {
-    let ce_editor = this.virtual_document.root.get_editor_at_source_line(pos)
+    let ce_editor = this.virtual_document.root.get_editor_at_source_line(pos);
     return this.ce_editor_to_cm_editor.get(ce_editor);
   }
 
@@ -439,7 +451,7 @@ export class CodeMirrorVirtualEditor
     let codemirror_editor = editor as CodeMirrorEditor;
     let cm_editor = codemirror_editor.editor;
 
-    return cm_editor.getValue()
+    return cm_editor.getValue();
   }
 
   getWrapperElement(): HTMLElement {
@@ -482,16 +494,18 @@ export class CodeMirrorVirtualEditor
       callback(cm_editor);
     }
     if (monitor_for_new_blocks) {
-      this.adapter.activeEditorChanged.connect((adapter, data: IEditorChangedData) => {
-        let {editor} = data;
-        if (editor == null) {
-          return;
+      this.adapter.activeEditorChanged.connect(
+        (adapter, data: IEditorChangedData) => {
+          let { editor } = data;
+          if (editor == null) {
+            return;
+          }
+          let cm_editor = (editor as CodeMirrorEditor).editor;
+          if (!editors_with_handlers.has(cm_editor)) {
+            callback(cm_editor);
+          }
         }
-        let cm_editor = (editor as CodeMirrorEditor).editor;
-        if (!editors_with_handlers.has(cm_editor)) {
-          callback(cm_editor);
-        }
-      })
+      );
     }
   }
 
@@ -518,8 +532,7 @@ export class CodeMirrorVirtualEditor
 }
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
-export interface CodeMirrorVirtualEditor extends CodeMirror.Editor {
-}
+export interface CodeMirrorVirtualEditor extends CodeMirror.Editor {}
 
 export const CODEMIRROR_VIRTUAL_EDITOR: JupyterFrontEndPlugin<void> = {
   id: PLUGIN_ID + ':CodeMirrorVirtualEditor',
@@ -527,7 +540,7 @@ export const CODEMIRROR_VIRTUAL_EDITOR: JupyterFrontEndPlugin<void> = {
   activate: (app, editorManager: ILSPVirtualEditorManager) => {
     return editorManager.registerEditorType({
       implementation: CodeMirrorVirtualEditor,
-      name: "CodeMirrorEditor",
+      name: 'CodeMirrorEditor',
       supports: CodeMirrorEditor
     });
   },

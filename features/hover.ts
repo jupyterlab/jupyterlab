@@ -233,14 +233,14 @@ export class HoverCM extends CodeMirrorIntegration {
       let ce_editor = this.virtual_editor.get_editor_at_root_position(
         character
       );
-      let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor)
+      let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
       return this.range_to_editor_range(range, cm_editor);
     } else {
       // construct range manually using the token information
       let ce_editor = this.virtual_document.root.get_editor_at_source_line(
         character
       );
-      let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor)
+      let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
       let token = this.virtual_editor.getTokenAt(character);
 
       let start_in_root = {

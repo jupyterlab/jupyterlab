@@ -9,13 +9,12 @@ import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
 import { Session } from '@jupyterlab/services';
 import { SessionContext } from '@jupyterlab/apputils';
 import { LSPExtension } from '../../index';
-import { PositionConverter } from "../../converter";
-import { IEditorPosition, IVirtualPosition } from "../../positioning";
-import { ICommandContext } from "../../command_manager";
+import { PositionConverter } from '../../converter';
+import { IEditorPosition, IVirtualPosition } from '../../positioning';
+import { ICommandContext } from '../../command_manager';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import IEditor = CodeEditor.IEditor;
-import { VirtualDocument } from "../../virtual/document";
-
+import { VirtualDocument } from '../../virtual/document';
 
 export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   editor: Notebook;
@@ -159,7 +158,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   }
 
   create_virtual_document() {
-    return new VirtualDocument( {
+    return new VirtualDocument({
       language: this.language,
       path: this.document_path,
       overrides_registry: language_specific_overrides,
@@ -169,8 +168,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       standalone: false,
       // notebooks are not supported by LSP servers
       has_lsp_supported_file: false
-      }
-    );
+    });
   }
 
   get activeEditor() {
@@ -210,7 +208,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
 
   get_editor_index_at(position: IVirtualPosition): number {
     let cell = this.get_cell_at(position);
-    let notebook = this.widget.content
+    let notebook = this.widget.content;
     return notebook.widgets.findIndex(other_cell => {
       return cell === other_cell;
     });
@@ -218,7 +216,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
 
   get_editor_index(ce_editor: CodeEditor.IEditor): number {
     let cell = this.ce_editor_to_cell.get(ce_editor);
-    let notebook = this.widget.content
+    let notebook = this.widget.content;
     return notebook.widgets.findIndex(other_cell => {
       return cell === other_cell;
     });
@@ -230,7 +228,9 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
   }
 
   private get_cell_at(pos: IVirtualPosition): Cell {
-    let ce_editor = this.virtual_editor.virtual_document.get_editor_at_virtual_line(pos);
+    let ce_editor = this.virtual_editor.virtual_document.get_editor_at_virtual_line(
+      pos
+    );
     return this.ce_editor_to_cell.get(ce_editor);
   }
 }

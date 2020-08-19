@@ -11,7 +11,7 @@ import { diagnosticSeverityNames } from '../lsp';
 import { message_without_code } from './diagnostics';
 
 import diagnosticsSvg from '../../style/icons/diagnostics.svg';
-import { CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
+import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
@@ -78,9 +78,13 @@ function DocumentLocator(props: {
           document.last_virtual_line - 1
         );
 
-        let { index: first_cell, node } = editor.find_editor(editor.ce_editor_to_cm_editor.get(first_line.editor));
-        let { index: last_cell } = editor.find_editor(editor.ce_editor_to_cm_editor.get(last_line.editor));
-        target = node
+        let { index: first_cell, node } = editor.find_editor(
+          editor.ce_editor_to_cm_editor.get(first_line.editor)
+        );
+        let { index: last_cell } = editor.find_editor(
+          editor.ce_editor_to_cm_editor.get(last_line.editor)
+        );
+        target = node;
 
         let cell_locator =
           first_cell === last_cell
@@ -101,7 +105,7 @@ function DocumentLocator(props: {
   return (
     <div
       className={'lsp-document-locator'}
-      onClick={() => focus_on(target ? target: null)}
+      onClick={() => focus_on(target ? target : null)}
     >
       {breadcrumbs}
     </div>
@@ -284,9 +288,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         return diagnostics.map((diagnostic_data, i) => {
           let cell_number: number = null;
           if (editor.has_multiple_editors) {
-            let { index: cell_id } = editor.find_editor(
-              diagnostic_data.editor
-            );
+            let { index: cell_id } = editor.find_editor(diagnostic_data.editor);
             cell_number = cell_id + 1;
           }
           return {

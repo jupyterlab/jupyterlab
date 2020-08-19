@@ -1,4 +1,7 @@
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IEditorTracker } from '@jupyterlab/fileeditor';
@@ -31,12 +34,12 @@ import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import { LabIcon } from '@jupyterlab/ui-components';
 
 import codeCheckSvg from '../style/icons/code-check.svg';
-import { WIDGET_ADAPTER_MANAGER } from "./adapter_manager";
-import { FILE_EDITOR_ADAPTER } from "./adapters/file_editor";
-import { NOTEBOOK_ADAPTER } from "./adapters/notebook";
-import { VIRTUAL_EDITOR_MANAGER } from "./virtual/editor";
+import { WIDGET_ADAPTER_MANAGER } from './adapter_manager';
+import { FILE_EDITOR_ADAPTER } from './adapters/file_editor';
+import { NOTEBOOK_ADAPTER } from './adapters/notebook';
+import { VIRTUAL_EDITOR_MANAGER } from './virtual/editor';
 import IPaths = JupyterFrontEnd.IPaths;
-import { CODEMIRROR_VIRTUAL_EDITOR } from "./virtual/codemirror_editor";
+import { CODEMIRROR_VIRTUAL_EDITOR } from './virtual/codemirror_editor';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -76,7 +79,7 @@ export interface ILSPExtension {
   connection_manager: DocumentConnectionManager;
   language_server_manager: LanguageServerManager;
   feature_manager: ILSPFeatureManager;
-  editor_type_manager: ILSPVirtualEditorManager
+  editor_type_manager: ILSPVirtualEditorManager;
 }
 
 export class LSPExtension implements ILSPExtension {
@@ -110,20 +113,18 @@ export class LSPExtension implements ILSPExtension {
       isActive: () => adapterManager.isAnyActive()
     });
 
-    let command_mangers: ContextCommandManager[] = []
+    let command_mangers: ContextCommandManager[] = [];
 
     for (let type of adapterManager.types) {
-      new ContextCommandManager(
-        {
-          adapter_manager: adapterManager,
-          app: app,
-          palette: palette,
-          tracker: type.tracker,
-          suffix: type.name,
-          entry_point: type.entrypoint,
-          ...type.context_menu
-        }
-      )
+      new ContextCommandManager({
+        adapter_manager: adapterManager,
+        app: app,
+        palette: palette,
+        tracker: type.tracker,
+        suffix: type.name,
+        entry_point: type.entrypoint,
+        ...type.context_menu
+      });
     }
 
     this.feature_manager = new FeatureManager(command_mangers);
@@ -150,9 +151,7 @@ export class LSPExtension implements ILSPExtension {
 
     const languageServerSettings = (options.language_servers ||
       {}) as TLanguageServerConfigurations;
-    this.connection_manager.updateServerConfigurations(
-      languageServerSettings
-    );
+    this.connection_manager.updateServerConfigurations(languageServerSettings);
   }
 }
 
@@ -170,7 +169,7 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
     IPaths,
     IStatusBar,
     ILSPAdapterManager,
-    ILSPVirtualEditorManager,
+    ILSPVirtualEditorManager
   ],
   activate: (app, ...args) => {
     let extension = new LSPExtension(

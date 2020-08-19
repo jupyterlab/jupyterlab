@@ -1,8 +1,6 @@
 import { expect } from 'chai';
 import { RegExpForeignCodeExtractor } from '../extractors/regexp';
-import {
-  IRootPosition,
-} from '../positioning';
+import { IRootPosition } from '../positioning';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { DocumentConnectionManager } from '../connection_manager';
 import {
@@ -10,10 +8,9 @@ import {
   MockLanguageServerManager,
   NotebookTestEnvironment
 } from '../editor_integration/testutils';
-import { CodeEditor } from "@jupyterlab/codeeditor";
-import { IForeignCodeExtractorsRegistry } from "../extractors/types";
-import { VirtualDocument } from "./document";
-
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IForeignCodeExtractorsRegistry } from '../extractors/types';
+import { VirtualDocument } from './document';
 
 describe('VirtualEditor', () => {
   let r_line_extractor = new RegExpForeignCodeExtractor({
@@ -45,14 +42,15 @@ describe('VirtualEditor', () => {
   let file_editor_env: FileEditorTestEnvironment;
 
   const options: Partial<VirtualDocument.IOptions> = {
-    foreign_code_extractors: { python: [r_line_extractor] } as IForeignCodeExtractorsRegistry,
-  }
+    foreign_code_extractors: {
+      python: [r_line_extractor]
+    } as IForeignCodeExtractorsRegistry
+  };
 
   beforeAll(() => {
     notebook_env = new NotebookTestEnvironment(options);
     file_editor_env = new FileEditorTestEnvironment(options);
-  })
-
+  });
 
   describe('#has_lsp_supported', () => {
     it('gets passed on to the virtual document & used for connection uri base', () => {

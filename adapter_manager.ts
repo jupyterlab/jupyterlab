@@ -1,12 +1,20 @@
-import { IAdapterRegistration, IAdapterTypeOptions, ILSPAdapterManager, PLUGIN_ID } from "./tokens";
-import { Signal } from "@lumino/signaling";
-import { IDocumentWidget } from "@jupyterlab/docregistry";
-import { WidgetAdapter } from "./adapters/adapter";
-import { ILabShell, JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { LSPExtension } from "./index";
+import {
+  IAdapterRegistration,
+  IAdapterTypeOptions,
+  ILSPAdapterManager,
+  PLUGIN_ID
+} from './tokens';
+import { Signal } from '@lumino/signaling';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { WidgetAdapter } from './adapters/adapter';
+import { ILabShell, JupyterFrontEndPlugin } from '@jupyterlab/application';
+import { LSPExtension } from './index';
 
 export class WidgetAdapterManager implements ILSPAdapterManager {
-  adapterTypeAdded: Signal<WidgetAdapterManager, IAdapterTypeOptions<IDocumentWidget>>
+  adapterTypeAdded: Signal<
+    WidgetAdapterManager,
+    IAdapterTypeOptions<IDocumentWidget>
+  >;
   adapterChanged: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
   adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
   currentAdapter: WidgetAdapter<IDocumentWidget>;
@@ -18,9 +26,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     return this.adapterTypes;
   }
 
-  constructor(
-    protected labShell: ILabShell
-  ) {
+  constructor(protected labShell: ILabShell) {
     this.adapterChanged = new Signal(this);
     this.adapterDisposed = new Signal(this);
     this.adapterTypes = [];
@@ -32,29 +38,35 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     this.adapterTypeAdded.emit(options);
   }
 
-  private connect(extension: LSPExtension, type: IAdapterTypeOptions<IDocumentWidget>) {
+  private connect(
+    extension: LSPExtension,
+    type: IAdapterTypeOptions<IDocumentWidget>
+  ) {
     type.tracker.widgetAdded.connect((tracker, widget) => {
-      this.connectWidget(extension, widget, type)
-    })
+      this.connectWidget(extension, widget, type);
+    });
   }
 
   public registerExtension(extension: LSPExtension) {
     for (let type of this.adapterTypes) {
-      this.connect(extension, type)
+      this.connect(extension, type);
     }
     this.adapterTypeAdded.connect((manager, type) => {
-      this.connect(extension, type)
-
-    })
+      this.connect(extension, type);
+    });
   }
 
-  protected connectWidget(extension: LSPExtension, widget: IDocumentWidget, type: IAdapterTypeOptions<IDocumentWidget>) {
+  protected connectWidget(
+    extension: LSPExtension,
+    widget: IDocumentWidget,
+    type: IAdapterTypeOptions<IDocumentWidget>
+  ) {
     let adapter = new type.adapter(extension, widget);
     this.registerAdapter({
       adapter: adapter,
       id: type.get_id(widget),
       re_connector: () => {
-        this.connectWidget(extension, widget, type)
+        this.connectWidget(extension, widget, type);
       }
     });
   }
@@ -80,12 +92,14 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
   }
 
   protected registerAdapter(options: IAdapterRegistration) {
-    let {id, adapter, re_connector} = options;
+    let { id, adapter, re_connector } = options;
     let widget = options.adapter.widget;
 
     if (this.adapters.has(id)) {
       let old = this.adapters.get(id);
-      console.warn(`Adapter with id ${id} was already registered (${adapter} vs ${old}) `);
+      console.warn(
+        `Adapter with id ${id} was already registered (${adapter} vs ${old}) `
+      );
     }
     this.adapters.set(id, adapter);
 
@@ -113,9 +127,10 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
   isAnyActive() {
     return (
       this.labShell.currentWidget &&
-      this.adapterTypes.some((type) => type.tracker.currentWidget)
-      &&
-      this.adapterTypes.some((type) => type.tracker.currentWidget == this.labShell.currentWidget)
+      this.adapterTypes.some(type => type.tracker.currentWidget) &&
+      this.adapterTypes.some(
+        type => type.tracker.currentWidget == this.labShell.currentWidget
+      )
     );
   }
 }
@@ -123,10 +138,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
 export const WIDGET_ADAPTER_MANAGER: JupyterFrontEndPlugin<ILSPAdapterManager> = {
   id: PLUGIN_ID + ':ILSPAdapterManager',
   requires: [ILabShell],
-  activate: (
-    app,
-    labShell: ILabShell
-  ) => {
+  activate: (app, labShell: ILabShell) => {
     return new WidgetAdapterManager(labShell);
   },
   provides: ILSPAdapterManager,

@@ -7,7 +7,7 @@ import { IRootPosition } from './positioning';
 import { StatusMessage, WidgetAdapter } from './adapters/adapter';
 import IEditor = CodeEditor.IEditor;
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { IDocumentWidget } from "@jupyterlab/docregistry";
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 export interface IFeatureCommand {
   /**
@@ -34,12 +34,12 @@ export interface IFeatureCommand {
 }
 
 export interface IFeatureSettings<T> {
-  readonly composite: T
+  readonly composite: T;
 
-  set(setting: keyof T, value: any): void
+  set(setting: keyof T, value: any): void;
 }
 
-export class FeatureSettings<T> implements IFeatureSettings<T>{
+export class FeatureSettings<T> implements IFeatureSettings<T> {
   protected settings: ISettingRegistry.ISettings;
 
   constructor(protected settingRegistry: ISettingRegistry, featureID: string) {
@@ -139,7 +139,7 @@ export abstract class FeatureEditorIntegration<
     this.virtual_document = options.virtual_document;
     this.connection = options.connection;
     this.status_message = options.status_message;
-    this.adapter = options.adapter
+    this.adapter = options.adapter;
   }
 
   /**

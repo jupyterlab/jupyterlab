@@ -23,7 +23,7 @@ import {
 } from '@jupyterlab/application';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
+import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 
 export const FEATURE_ID = PLUGIN_ID + ':diagnostics';
 
@@ -234,16 +234,22 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
       this.settings.composite.ignoreCodes
     );
     const ignoredMessagesRegExp = this.settings.composite.ignoreMessagesPatterns.map(
-      (pattern) => new RegExp(pattern)
+      pattern => new RegExp(pattern)
     );
 
     return diagnostics.filter(diagnostic => {
       let code = diagnostic.code;
-      if (typeof code !== 'undefined' && ignoredDiagnosticsCodes.has(code.toString())) {
+      if (
+        typeof code !== 'undefined' &&
+        ignoredDiagnosticsCodes.has(code.toString())
+      ) {
         return false;
       }
       let message = diagnostic.message;
-      if (message && ignoredMessagesRegExp.some((pattern) => pattern.test(message))) {
+      if (
+        message &&
+        ignoredMessagesRegExp.some(pattern => pattern.test(message))
+      ) {
         return false;
       }
       return true;
@@ -336,7 +342,9 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
           const severity = diagnosticSeverityNames[highest_severity_code];
 
           let ce_editor = document.get_editor_at_virtual_line(start);
-          let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
+          let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(
+            ce_editor
+          );
 
           let start_in_editor = document.transform_virtual_to_editor(start);
           let end_in_editor: IEditorPosition;

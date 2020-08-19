@@ -5,13 +5,13 @@ import * as SCHEMA from './_schema';
 import { WidgetAdapter } from './adapters/adapter';
 import { Token } from '@lumino/coreutils';
 import { IFeatureOptions, ILSPExtension, LSPExtension } from './index';
-import { WidgetAdapterManager } from "./adapter_manager";
-import { IEditorName, IFeature } from "./feature";
-import { CodeEditor } from "@jupyterlab/codeeditor";
-import { IVirtualEditor } from "./virtual/editor";
-import { IDocumentWidget } from "@jupyterlab/docregistry";
-import { IWidgetTracker } from "@jupyterlab/apputils";
-import { CommandEntryPoint, IContextMenuOptions } from "./command_manager";
+import { WidgetAdapterManager } from './adapter_manager';
+import { IEditorName, IFeature } from './feature';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IVirtualEditor } from './virtual/editor';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { IWidgetTracker } from '@jupyterlab/apputils';
+import { CommandEntryPoint, IContextMenuOptions } from './command_manager';
 import IEditor = CodeEditor.IEditor;
 
 export type TLanguageServerId = string;
@@ -83,7 +83,7 @@ export interface IAdapterRegistration {
 }
 
 export type WidgetAdapterConstructor<T extends IDocumentWidget> = {
-  new(extension: ILSPExtension, widget: T): WidgetAdapter<T>;
+  new (extension: ILSPExtension, widget: T): WidgetAdapter<T>;
 };
 
 export interface IAdapterTypeOptions<T extends IDocumentWidget> {
@@ -107,7 +107,6 @@ export interface ILSPAdapterManager {
   readonly types: IAdapterTypeOptions<IDocumentWidget>[];
 }
 
-
 export interface IVirtualEditorType<T extends IEditor> {
   implementation: IVirtualEditor.Constructor;
   name: IEditorName;
@@ -121,7 +120,9 @@ export interface ILSPVirtualEditorManager {
    * Choose the most appropriate VirtualEditor implementation
    * given all the editors occurring in the widget.
    */
-  findBestImplementation(editors: CodeEditor.IEditor[]): IVirtualEditorType<any>;
+  findBestImplementation(
+    editors: CodeEditor.IEditor[]
+  ): IVirtualEditorType<any>;
 }
 
 export const PLUGIN_ID = '@krassowski/jupyterlab-lsp';

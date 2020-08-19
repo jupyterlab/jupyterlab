@@ -91,7 +91,6 @@ describe('Feature', () => {
 
   describe('apply_edit()', () => {
     class EditApplyingFeatureCM extends CodeMirrorIntegration {
-
       do_apply_edit(workspaceEdit: lsProtocol.WorkspaceEdit) {
         return this.apply_edit(workspaceEdit);
       }
@@ -106,7 +105,7 @@ describe('Feature', () => {
         feature = environment.init_integration({
           constructor: EditApplyingFeatureCM,
           id: 'EditApplyingFeature'
-        })
+        });
       });
 
       afterEach(() => {
@@ -142,7 +141,9 @@ describe('Feature', () => {
         await environment.adapter.update_documents();
 
         let result = await feature.do_apply_edit({
-          changes: { ['file://' + environment.document_options.path]: js_partial_edits }
+          changes: {
+            ['file://' + environment.document_options.path]: js_partial_edits
+          }
         });
         let raw_value = environment.ce_editor.doc.getValue();
         expect(raw_value).to.be.equal(js_fib2_code);
@@ -169,7 +170,7 @@ describe('Feature', () => {
         feature = environment.init_integration({
           constructor: EditApplyingFeatureCM,
           id: 'EditApplyingFeature'
-        })
+        });
       });
 
       afterEach(() => {

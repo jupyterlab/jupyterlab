@@ -1,15 +1,23 @@
 import { VirtualDocument } from './document';
 import * as CodeMirror from 'codemirror';
-import { IEditorPosition, IRootPosition, IVirtualPosition } from '../positioning';
+import {
+  IEditorPosition,
+  IRootPosition,
+  IVirtualPosition
+} from '../positioning';
 import { Signal } from '@lumino/signaling';
 import { EditorLogConsole } from './console';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorName } from '../feature';
 import IEditor = CodeEditor.IEditor;
-import { JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { IVirtualEditorType, ILSPVirtualEditorManager, PLUGIN_ID } from "../tokens";
-import { WidgetAdapter } from "../adapters/adapter";
-import { IDocumentWidget } from "@jupyterlab/docregistry/lib/registry";
+import { JupyterFrontEndPlugin } from '@jupyterlab/application';
+import {
+  IVirtualEditorType,
+  ILSPVirtualEditorManager,
+  PLUGIN_ID
+} from '../tokens';
+import { WidgetAdapter } from '../adapters/adapter';
+import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
 
 export interface IWindowCoordinates {
   /**
@@ -73,20 +81,20 @@ export interface IVirtualEditor<T extends IEditor> {
   transform_from_editor_to_root(
     editor: T,
     position: IEditorPosition
-  ): IRootPosition | null
+  ): IRootPosition | null;
 
   get_editor_value(editor: T): string;
 }
 
 export namespace IVirtualEditor {
   export interface IOptions {
-    adapter: WidgetAdapter<IDocumentWidget>,
-    virtual_document: VirtualDocument
+    adapter: WidgetAdapter<IDocumentWidget>;
+    virtual_document: VirtualDocument;
   }
 
   export type Constructor = {
-    new (options: IVirtualEditor.IOptions): IVirtualEditor<any>
-  }
+    new (options: IVirtualEditor.IOptions): IVirtualEditor<any>;
+  };
 }
 
 export class VirtualEditorManager implements ILSPVirtualEditorManager {
@@ -100,7 +108,9 @@ export class VirtualEditorManager implements ILSPVirtualEditorManager {
     this.editorTypes.push(options);
   }
 
-  findBestImplementation(editors: CodeEditor.IEditor[]): IVirtualEditorType<any> {
+  findBestImplementation(
+    editors: CodeEditor.IEditor[]
+  ): IVirtualEditorType<any> {
     // for now, we check if all editors are of the same type,
     // but it could be good enough if majority of the editors
     // had the requested type
@@ -109,7 +119,9 @@ export class VirtualEditorManager implements ILSPVirtualEditorManager {
         return editorType;
       }
     }
-    console.warn(`Cold not find a VirtualEditor suitable for the provided set of editors: ${editors}`)
+    console.warn(
+      `Cold not find a VirtualEditor suitable for the provided set of editors: ${editors}`
+    );
     return null;
   }
 }
@@ -117,7 +129,7 @@ export class VirtualEditorManager implements ILSPVirtualEditorManager {
 export const VIRTUAL_EDITOR_MANAGER: JupyterFrontEndPlugin<ILSPVirtualEditorManager> = {
   id: PLUGIN_ID + ':ILSPVirtualEditorManager',
   requires: [],
-  activate: (app) => {
+  activate: app => {
     return new VirtualEditorManager();
   },
   provides: ILSPVirtualEditorManager,

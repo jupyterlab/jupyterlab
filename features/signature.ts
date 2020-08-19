@@ -10,7 +10,7 @@ import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { EditorTooltipManager } from '../components/free_tooltip';
-import { IEditorChange } from "../virtual/editor";
+import { IEditorChange } from '../virtual/editor';
 
 export class SignatureCM extends CodeMirrorIntegration {
   protected signature_character: IRootPosition;

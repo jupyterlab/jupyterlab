@@ -16,7 +16,7 @@ import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from './diagnostics';
 import { LabIcon } from '@jupyterlab/ui-components';
 
 import renameSvg from '../../style/icons/rename.svg';
-import { CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
+import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 
 export const hoverIcon = new LabIcon({
   name: 'lsp:rename',
@@ -36,7 +36,9 @@ const COMMANDS: IFeatureCommand[] = [
       features
     }) => {
       const rename_feature = features.get(FEATURE_ID) as RenameCM;
-      let root_position = rename_feature.transform_virtual_position_to_root_position(virtual_position)
+      let root_position = rename_feature.transform_virtual_position_to_root_position(
+        virtual_position
+      );
       let old_value = editor.get_token_at(root_position).value;
       let handle_failure = (error: any) => {
         let status = '';
@@ -164,9 +166,7 @@ export class RenameCM extends CodeMirrorIntegration {
           let message = diagnostic.diagnostic.message;
           let start = diagnostic.range.start;
           if (rename_feature.adapter.has_multiple_editors) {
-            let { index: editor_id } = editor.find_editor(
-              diagnostic.editor
-            );
+            let { index: editor_id } = editor.find_editor(diagnostic.editor);
             let cell_number = editor_id + 1;
             // TODO: should we show "code cell" numbers, or just cell number?
             return `${message} in cell ${cell_number} at line ${start.line}`;

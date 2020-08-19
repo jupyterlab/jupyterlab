@@ -7,7 +7,8 @@ import {
 } from './diagnostics';
 import {
   code_cell,
-  FileEditorFeatureTestEnvironment, MockSettings,
+  FileEditorFeatureTestEnvironment,
+  MockSettings,
   NotebookFeatureTestEnvironment,
   set_notebook_content,
   showAllCells
@@ -65,9 +66,9 @@ describe('Diagnostics', () => {
         message: 'Trimming whitespace',
         code: 'W001'
       }
-    ]
+    ];
 
-    const text = 'res = aa + 1\nres '
+    const text = 'res = aa + 1\nres ';
 
     it('renders inspections', async () => {
       env.ce_editor.model.value.text = text;
@@ -107,7 +108,9 @@ describe('Diagnostics', () => {
 
       let markers = env.ce_editor.editor.getDoc().getAllMarks();
       expect(markers.length).to.equal(1);
-      expect((markers[0] as TextMarkerOptions).title).to.equal('Undefined symbol "aa"')
+      expect((markers[0] as TextMarkerOptions).title).to.equal(
+        'Undefined symbol "aa"'
+      );
     });
 
     it('filters out inspections by message text', async () => {
@@ -130,7 +133,9 @@ describe('Diagnostics', () => {
 
       let markers = env.ce_editor.editor.getDoc().getAllMarks();
       expect(markers.length).to.equal(1);
-      expect((markers[0] as TextMarkerOptions).title).to.equal('Trimming whitespace')
+      expect((markers[0] as TextMarkerOptions).title).to.equal(
+        'Trimming whitespace'
+      );
     });
   });
 
@@ -139,8 +144,8 @@ describe('Diagnostics', () => {
 
     beforeEach(() => {
       env = new NotebookFeatureTestEnvironment({
-          overrides_registry: language_specific_overrides,
-          foreign_code_extractors
+        overrides_registry: language_specific_overrides,
+        foreign_code_extractors
       });
       feature = env.init_integration({
         constructor: DiagnosticsCM,
@@ -264,8 +269,7 @@ describe('Diagnostics', () => {
         id: 'Diagnostics',
         document: foreign_document,
         settings: default_settings
-      }
-      );
+      });
 
       let response = {
         uri: foreign_document.uri,

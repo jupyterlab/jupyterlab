@@ -4,13 +4,12 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { LSPExtension } from '../../index';
-import { PositionConverter } from "../../converter";
-import { IRootPosition, IVirtualPosition } from "../../positioning";
-import { ICommandContext } from "../../command_manager";
-import { IVirtualEditor } from "../../virtual/editor";
+import { PositionConverter } from '../../converter';
+import { IRootPosition, IVirtualPosition } from '../../positioning';
+import { ICommandContext } from '../../command_manager';
+import { IVirtualEditor } from '../../virtual/editor';
 import IEditor = CodeEditor.IEditor;
-import { VirtualDocument } from "../../virtual/document";
-
+import { VirtualDocument } from '../../virtual/document';
 
 export class FileEditorAdapter extends WidgetAdapter<
   IDocumentWidget<FileEditor>
@@ -97,16 +96,14 @@ export class FileEditorAdapter extends WidgetAdapter<
     //  or SQL in Python files) in the future. However, these would need to be
     //  a different registry (as we would not want to extract kernel-specific
     //  constructs like magics)
-    return new VirtualDocument(
-      {
-        language: this.language,
-        file_extension: this.language_file_extension,
-        path: this.document_path,
-        overrides_registry: {},
-        foreign_code_extractors: {},
-        standalone: true,
-        has_lsp_supported_file: true
-  }
-    )
+    return new VirtualDocument({
+      language: this.language,
+      file_extension: this.language_file_extension,
+      path: this.document_path,
+      overrides_registry: {},
+      foreign_code_extractors: {},
+      standalone: true,
+      has_lsp_supported_file: true
+    });
   }
 }

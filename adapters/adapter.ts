@@ -8,7 +8,11 @@ import { IRootPosition, IVirtualPosition } from '../positioning';
 import { LSPConnection } from '../connection';
 import { ICommandContext } from '../command_manager';
 import { JSONObject } from '@lumino/coreutils';
-import { DocumentConnectionManager, IDocumentConnectionData, ISocketConnectionOptions } from '../connection_manager';
+import {
+  DocumentConnectionManager,
+  IDocumentConnectionData,
+  ISocketConnectionOptions
+} from '../connection_manager';
 import { ILSPExtension } from '../index';
 import { FeatureEditorIntegration, IFeature } from '../feature';
 import { EditorAdapter } from '../editor_integration/editor_adapter';
@@ -67,8 +71,10 @@ export interface IEditorChangedData {
  * has to handle that, keeping multiple connections and multiple virtual documents.
  */
 export abstract class WidgetAdapter<T extends IDocumentWidget> {
-  protected adapters: Map<VirtualDocument.id_path,
-    EditorAdapter<IVirtualEditor<IEditor>>>;
+  protected adapters: Map<
+    VirtualDocument.id_path,
+    EditorAdapter<IVirtualEditor<IEditor>>
+  >;
   public adapterConnected: Signal<WidgetAdapter<T>, IDocumentConnectionData>;
   public connection_manager: DocumentConnectionManager;
   public status_message: StatusMessage;
@@ -76,7 +82,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   protected app: JupyterFrontEnd;
 
-  public documentsUpdateBegan: Signal<WidgetAdapter<T>, void>
+  public documentsUpdateBegan: Signal<WidgetAdapter<T>, void>;
   public activeEditorChanged: Signal<WidgetAdapter<T>, IEditorChangedData>;
   public update_finished: Promise<void>;
 
@@ -111,7 +117,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   on_connection_closed(
     manager: DocumentConnectionManager,
-    {virtual_document}: IDocumentConnectionData
+    { virtual_document }: IDocumentConnectionData
   ) {
     console.log(
       'LSP: connection closed, disconnecting adapter',
@@ -208,9 +214,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     let virtual_document = this.create_virtual_document();
     this.virtual_editor.virtual_document = virtual_document;
     // reconnect
-    this.connect_document(virtual_document, true).catch(
-      console.warn
-    );
+    this.connect_document(virtual_document, true).catch(console.warn);
   }
 
   protected on_save_state(context: any, state: DocumentRegistry.SaveState) {
@@ -230,7 +234,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   abstract activeEditor: CodeEditor.IEditor;
 
-  abstract get editors(): CodeEditor.IEditor[]
+  abstract get editors(): CodeEditor.IEditor[];
 
   /**
    * public for use in tests (but otherwise could be private)
@@ -238,21 +242,21 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   public update_documents() {
     this.documentsUpdateBegan.emit();
     return this.virtual_editor.virtual_document.update_manager.update_documents(
-      this.editors.map((ce_editor) => {
+      this.editors.map(ce_editor => {
         return {
           ce_editor: ce_editor,
           value: this.virtual_editor.get_editor_value(ce_editor)
-        }
+        };
       })
     );
   }
 
   get has_multiple_editors(): boolean {
     return this.editors.length > 1;
-  };
+  }
 
   protected async on_connected(data: IDocumentConnectionData) {
-    let {virtual_document} = data;
+    let { virtual_document } = data;
 
     this.connect_adapter(data.virtual_document, data.connection);
     this.adapterConnected.emit(data);
@@ -305,8 +309,12 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     }
   }
 
-  private create_virtual_editor(options: IVirtualEditor.IOptions): IVirtualEditor<IEditor> {
-    let editorType = this.extension.editor_type_manager.findBestImplementation(this.editors)
+  private create_virtual_editor(
+    options: IVirtualEditor.IOptions
+  ): IVirtualEditor<IEditor> {
+    let editorType = this.extension.editor_type_manager.findBestImplementation(
+      this.editors
+    );
     if (editorType == null) {
       return null;
     }
@@ -320,7 +328,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       virtual_document: this.create_virtual_document()
     });
     if (virtual_editor == null) {
-      console.error(`Could not initialize a VirtualEditor for ${this} adapter`)
+      console.error(`Could not initialize a VirtualEditor for ${this} adapter`);
       return;
     }
     this.virtual_editor = virtual_editor;
@@ -338,7 +346,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     host: VirtualDocument,
     context: IForeignContext
   ) {
-    const {foreign_document} = context;
+    const { foreign_document } = context;
 
     await this.connect_document(foreign_document, true);
 
@@ -348,8 +356,11 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     );
   }
 
-  private on_foreign_document_closed(host: VirtualDocument, context: IForeignContext) {
-    const {foreign_document} = context;
+  private on_foreign_document_closed(
+    host: VirtualDocument,
+    context: IForeignContext
+  ) {
+    const { foreign_document } = context;
     foreign_document.foreign_document_closed.disconnect(
       this.on_foreign_document_closed,
       this
@@ -399,9 +410,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       //  it introduces an unnecessary delay. A better way could be to invalidate some of the updates when a new one comes in.
       //  but maybe not every one (then the outdated state could be kept for too long fo a user who writes very quickly)
       //  also we would not want to invalidate the updates for the purpose of autocompletion (the trigger characters)
-      this.virtual_editor.virtual_document.update_manager.with_update_lock(async () => {
-        await adapter.updateAfterChange();
-      })
+      this.virtual_editor.virtual_document.update_manager
+        .with_update_lock(async () => {
+          await adapter.updateAfterChange();
+        })
         .then()
         .catch(console.warn);
     }
@@ -414,7 +426,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
   ): EditorAdapter<any> {
     let adapter = this.create_adapter(virtual_document, connection, features);
     this.adapters.set(virtual_document.id_path, adapter);
-    return adapter
+    return adapter;
   }
 
   private disconnect_adapter(virtual_document: VirtualDocument) {
@@ -443,7 +455,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
     let connection = await this.connection_manager.connect(options);
 
-    await this.on_connected({virtual_document, connection});
+    await this.on_connected({ virtual_document, connection });
 
     return {
       connection,
@@ -473,10 +485,12 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     connection: LSPConnection,
     features: IFeature[] = null
   ): EditorAdapter<IVirtualEditor<IEditor>> {
-    let adapter_features = new Array<FeatureEditorIntegration<IVirtualEditor<IEditor>>>();
+    let adapter_features = new Array<
+      FeatureEditorIntegration<IVirtualEditor<IEditor>>
+    >();
 
     if (features === null) {
-      features = this.extension.feature_manager.features
+      features = this.extension.feature_manager.features;
     }
 
     for (let feature of features) {
@@ -518,7 +532,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     // get the first node as it gives the most accurate approximation
     let leaf_node = this.app.contextMenuHitTest(() => true);
 
-    let {left, top} = leaf_node.getBoundingClientRect();
+    let { left, top } = leaf_node.getBoundingClientRect();
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
     // @ts-ignore
@@ -564,4 +578,3 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   abstract get wrapper_element(): HTMLElement;
 }
-

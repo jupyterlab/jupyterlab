@@ -15,8 +15,11 @@ import {
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../converter';
 import { DefaultMap } from '../utils';
-import { CodeEditor } from "@jupyterlab/codeeditor";
-import { CodeMirrorHandler, CodeMirrorVirtualEditor } from "../virtual/codemirror_editor";
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import {
+  CodeMirrorHandler,
+  CodeMirrorVirtualEditor
+} from '../virtual/codemirror_editor';
 
 function toDocumentChanges(changes: {
   [uri: string]: lsProtocol.TextEdit[];
@@ -136,7 +139,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
       let ce_editor = this.virtual_editor.get_editor_at_root_position(
         start_in_root
       );
-      cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor)
+      cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(ce_editor);
     }
 
     return {
@@ -163,7 +166,10 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
     let editor_position = this.virtual_document.transform_virtual_to_editor(
       start
     );
-    return this.virtual_editor.transform_editor_to_root(ce_editor, editor_position)
+    return this.virtual_editor.transform_editor_to_root(
+      ce_editor,
+      editor_position
+    );
   }
 
   protected get_cm_editor(position: IRootPosition) {
