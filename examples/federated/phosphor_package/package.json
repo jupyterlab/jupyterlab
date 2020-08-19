@@ -7,8 +7,8 @@
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-phosphor"
   },
   "dependencies": {
-    "@phosphor/coreutils": "^1.0.0",
-    "@jupyterlab/apputils": "^3.0.0-alpha.11"
+    "@jupyterlab/apputils": "^3.0.0-alpha.11",
+    "@phosphor/coreutils": "^1.0.0"
   },
   "devDependencies": {
     "@jupyterlab/buildutils": "^3.0.0-alpha.11",
