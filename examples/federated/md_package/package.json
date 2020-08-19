@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^3.0.0-alpha.11",
-    "@jupyterlab/example-federated-middle": "../middle_package",
+    "@jupyterlab/example-federated-middle": "^2.1.0",
     "@jupyterlab/markdownviewer-extension": "^3.0.0-alpha.11",
     "@lumino/widgets": "^1.11.1"
   },
