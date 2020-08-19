@@ -189,7 +189,7 @@ export class CodeMirrorVirtualEditor
   }
 
   private emit_change(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
-    this.change.emit(change);
+    this.change.emit(change as IEditorChange);
   }
 
   window_coords_to_root_position(coordinates: IWindowCoordinates) {

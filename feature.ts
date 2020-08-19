@@ -118,7 +118,7 @@ export abstract class FeatureEditorIntegration<
   is_registered: boolean;
   feature: IFeature;
 
-  // TODO: T
+  // TODO: use T generic type here (difficult to conciliate with options!)
   protected virtual_editor: IVirtualEditor<IEditor>;
   protected virtual_document: VirtualDocument;
   protected connection: LSPConnection;
@@ -157,7 +157,7 @@ export abstract class FeatureEditorIntegration<
    */
   abstract remove(): void;
 
-  // TODO: replace with a signal
+  // TODO: replace with a signal after EditorAdapter rewrite?
   abstract afterChange(
     change: IEditorChange,
     root_position: IRootPosition

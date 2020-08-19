@@ -1,8 +1,8 @@
 import { VirtualDocument } from './document';
-import * as CodeMirror from 'codemirror';
 import {
   IEditorPosition,
   IRootPosition,
+  ISourcePosition,
   IVirtualPosition
 } from '../positioning';
 import { Signal } from '@lumino/signaling';
@@ -34,11 +34,10 @@ export interface IWindowCoordinates {
  * This is based on CodeMirror.EditorChange
  */
 export interface IEditorChange {
-  // TODO chamge position type
   /** Position (in the pre-change coordinate system) where the change started. */
-  from: CodeMirror.Position;
+  from: ISourcePosition;
   /** Position (in the pre-change coordinate system) where the change ended. */
-  to: CodeMirror.Position;
+  to: ISourcePosition;
   /** Array of strings representing the text that replaced the changed range (split by line). */
   text: string[];
   /**  Text that used to be between from and to, which is overwritten by this change. */

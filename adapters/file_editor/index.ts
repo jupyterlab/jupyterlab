@@ -8,7 +8,7 @@ import { CommandEntryPoint } from '../../command_manager';
 export const FileEditorContextMenuEntryPoint: CommandEntryPoint =
   'file-editor-context-menu';
 export const FILE_EDITOR_ADAPTER: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID + ':NotebookAdapter',
+  id: PLUGIN_ID + ':FileEditorAdapter',
   requires: [ILSPAdapterManager, IEditorTracker],
   activate(
     app,
