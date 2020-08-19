@@ -3,8 +3,6 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ICommandPalette } from '@jupyterlab/apputils';
-import { INotebookTracker } from '@jupyterlab/notebook';
-import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
@@ -161,8 +159,6 @@ export class LSPExtension implements ILSPExtension {
 const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
   id: PLUGIN_ID + ':plugin',
   requires: [
-    IEditorTracker,
-    INotebookTracker,
     ISettingRegistry,
     ICommandPalette,
     IDocumentManager,
@@ -201,12 +197,12 @@ const default_features: JupyterFrontEndPlugin<void>[] = [
 ];
 
 const plugins: JupyterFrontEndPlugin<any>[] = [
-  plugin,
   WIDGET_ADAPTER_MANAGER,
   NOTEBOOK_ADAPTER,
   FILE_EDITOR_ADAPTER,
   VIRTUAL_EDITOR_MANAGER,
   CODEMIRROR_VIRTUAL_EDITOR,
+  plugin,
   ...default_features
 ];
 

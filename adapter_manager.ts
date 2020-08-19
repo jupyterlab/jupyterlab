@@ -29,6 +29,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
   constructor(protected labShell: ILabShell) {
     this.adapterChanged = new Signal(this);
     this.adapterDisposed = new Signal(this);
+    this.adapterTypeAdded = new Signal(this);
     this.adapterTypes = [];
     labShell.currentChanged.connect(this.onLabFocusChanged, this);
   }
