@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { TextMarker } from 'codemirror';
+import { TextMarker, TextMarkerOptions } from 'codemirror';
 import {
   DiagnosticsCM,
   diagnostics_panel,
@@ -39,8 +39,8 @@ describe('Diagnostics', () => {
       });
     });
     afterEach(() => {
-      env.dispose();
       env.dispose_feature(feature);
+      env.dispose();
     });
 
     it('calls parent register()', () => {
@@ -48,8 +48,29 @@ describe('Diagnostics', () => {
       expect(feature.is_registered).to.equal(true);
     });
 
+    const diagnostics = [
+      {
+        range: {
+          start: { line: 0, character: 7 },
+          end: { line: 0, character: 9 }
+        },
+        message: 'Undefined symbol "aa"',
+        code: 'E001'
+      },
+      {
+        range: {
+          start: { line: 1, character: 3 },
+          end: { line: 1, character: 4 }
+        },
+        message: 'Trimming whitespace',
+        code: 'W001'
+      }
+    ]
+
+    const text = 'res = aa + 1\nres '
+
     it('renders inspections', async () => {
-      env.ce_editor.model.value.text = ' foo \n bar \n baz ';
+      env.ce_editor.model.value.text = text;
       await env.adapter.update_documents();
 
       let markers: TextMarker[];
@@ -59,19 +80,57 @@ describe('Diagnostics', () => {
 
       feature.handleDiagnostic({
         uri: env.document_options.path,
-        diagnostics: [
-          {
-            range: {
-              start: { line: 0, character: 1 },
-              end: { line: 0, character: 4 }
-            },
-            message: 'Undefined symbol'
-          }
-        ]
+        diagnostics: diagnostics
       });
 
       let marks = env.ce_editor.editor.getDoc().getAllMarks();
-      expect(marks.length).to.equal(1);
+      expect(marks.length).to.equal(2);
+    });
+
+    it('filters out inspections by code', async () => {
+      feature = env.init_integration({
+        constructor: DiagnosticsCM,
+        id: 'Diagnostics',
+        settings: new MockSettings({
+          defaultSeverity: 'Warning',
+          ignoreCodes: ['W001'],
+          ignoreMessagesPatterns: []
+        })
+      });
+      env.ce_editor.model.value.text = text;
+      await env.adapter.update_documents();
+
+      feature.handleDiagnostic({
+        uri: env.document_options.path,
+        diagnostics: diagnostics
+      });
+
+      let markers = env.ce_editor.editor.getDoc().getAllMarks();
+      expect(markers.length).to.equal(1);
+      expect((markers[0] as TextMarkerOptions).title).to.equal('Undefined symbol "aa"')
+    });
+
+    it('filters out inspections by message text', async () => {
+      feature = env.init_integration({
+        constructor: DiagnosticsCM,
+        id: 'Diagnostics',
+        settings: new MockSettings({
+          defaultSeverity: 'Warning',
+          ignoreCodes: [],
+          ignoreMessagesPatterns: ['Undefined symbol "\\w+"']
+        })
+      });
+      env.ce_editor.model.value.text = text;
+      await env.adapter.update_documents();
+
+      feature.handleDiagnostic({
+        uri: env.document_options.path,
+        diagnostics: diagnostics
+      });
+
+      let markers = env.ce_editor.editor.getDoc().getAllMarks();
+      expect(markers.length).to.equal(1);
+      expect((markers[0] as TextMarkerOptions).title).to.equal('Trimming whitespace')
     });
   });
 
