@@ -40,7 +40,7 @@ import { settingsPlugin } from './settingsplugin';
 import { themesPlugin, themesPaletteMenuPlugin } from './themesplugins';
 
 import { workspacesPlugin } from './workspacesplugin';
-import { ITranslator } from '@jupyterlab/translation';
+import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
 /**
  * The interval in milliseconds before recover options appear during splash.
@@ -135,7 +135,6 @@ const resolver: JupyterFrontEndPlugin<IWindowResolver> = {
         const random = pool[Math.floor(Math.random() * pool.length)];
         let path = URLExt.join(base, mode, 'workspaces', `auto-${random}`);
         path = rest ? URLExt.join(path, URLExt.encodeParts(rest)) : path;
-
         // Reset the workspace on load.
         query['reset'] = '';
 
@@ -285,6 +284,30 @@ const print: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Update the browser title based on the workspace and the current
+ * active item.
+ */
+async function updateTabTitle(
+  workspace: string,
+  db: IStateDB,
+  trans: TranslationBundle
+) {
+  if (workspace.startsWith('auto-')) {
+    const data: any = await db.toJSON();
+    // Number of restorable items, minus the layout restorer data
+    const count: number = Object.keys(data).length - 1;
+    let current: string = data['layout-restorer:data']?.main?.current;
+    current = current.split(':')[1];
+
+    document.title = `${current}${
+      count - 1 > 0 ? ' + ' + (count - 1) : ''
+    } - JupyterLab`;
+  } else {
+    document.title = `${workspace} - JupyterLab`;
+  }
+}
+
+/**
  * The default state database for storing application state.
  *
  * #### Notes
@@ -327,6 +350,7 @@ const state: JupyterFrontEndPlugin<IStateDB> = {
 
     // Any time the local state database changes, save the workspace.
     db.changed.connect(() => void save.invoke(), db);
+    db.changed.connect(() => updateTabTitle(workspace, db, trans));
 
     commands.addCommand(CommandIDs.loadState, {
       execute: async (args: IRouter.ILocation) => {
