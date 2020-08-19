@@ -37,7 +37,19 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/buildutils': [
     '@babel/core',
     '@babel/preset-env',
-    'babel-loader'
+    'babel-loader',
+    'css-loader',
+    'file-loader',
+    'html-loader',
+    'raw-loader',
+    'source-map-loader',
+    'style-loader',
+    'svg-url-loader',
+    'terser-webpack-plugin',
+    'to-string-loader',
+    'url-loader',
+    'webpack-cli',
+    'worker-loader'
   ],
   '@jupyterlab/services': ['node-fetch', 'ws'],
   '@jupyterlab/rendermime': ['@jupyterlab/mathjax2'],
