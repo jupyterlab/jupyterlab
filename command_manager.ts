@@ -202,9 +202,15 @@ export class ContextCommandManager extends LSPCommandManager {
 
   protected get_rank(command: IFeatureCommand): number {
     let is_relative =
-      command.is_rank_relative == null ? true : command.is_rank_relative;
-    if (is_relative && this.rank_group != null && this.rank_group_size) {
-      let relative = command.rank != null ? command.rank : 0;
+      typeof command.is_rank_relative === 'undefined'
+        ? true
+        : command.is_rank_relative;
+    if (
+      is_relative &&
+      typeof this.rank_group !== 'undefined' &&
+      this.rank_group_size
+    ) {
+      let relative = typeof command.rank !== 'undefined' ? command.rank : 0;
       return this.rank_group + relative / this.rank_group_size;
     } else {
       return command.rank != null ? command.rank : Infinity;

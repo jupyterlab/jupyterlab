@@ -84,7 +84,7 @@ const COMMANDS: IFeatureCommand[] = [
     },
     is_enabled: () => true,
     label: 'Show diagnostics panel',
-    rank: 10,
+    rank: 3,
     icon: diagnosticsIcon
   }
 ];

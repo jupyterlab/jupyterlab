@@ -24,7 +24,9 @@ export const FILE_EDITOR_ADAPTER: JupyterFrontEndPlugin<void> = {
         return widget.id;
       },
       context_menu: {
-        selector: '.jp-FileEditor'
+        selector: '.jp-FileEditor',
+        rank_group: 0,
+        rank_group_size: 4
       }
     });
   },

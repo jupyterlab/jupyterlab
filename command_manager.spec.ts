@@ -67,6 +67,12 @@ describe('ContextMenuCommandManager', () => {
 
       rank = manager.get_rank({ ...base_command, rank: 1 });
       expect(rank).to.equal(1 + 1 / 5);
+
+      manager = new ManagerImplementation({
+        selector: null
+      });
+      rank = manager.get_rank(base_command);
+      expect(rank).to.equal(Infinity);
     });
   });
 
