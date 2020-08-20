@@ -24,7 +24,7 @@ export class StatusMessage {
    */
   message: string;
   changed: Signal<StatusMessage, void>;
-  timer: number;
+  private timer: number;
 
   constructor() {
     this.message = '';
