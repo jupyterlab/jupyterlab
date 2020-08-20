@@ -31,19 +31,23 @@ describe('Rename', () => {
       await env.adapter.update_documents();
       let main_document = env.virtual_editor.virtual_document;
 
-      await feature.handleRename({
-        changes: {
-          ['file://' + env.document_options.path]: [
-            {
-              range: {
-                start: { line: 0, character: 0 },
-                end: { line: 2, character: 0 }
-              },
-              newText: 'y = 1\n'
-            } as lsProtocol.TextEdit
-          ]
-        }
-      });
+      await feature.handleRename(
+        {
+          changes: {
+            ['file://' + env.document_options.path]: [
+              {
+                range: {
+                  start: { line: 0, character: 0 },
+                  end: { line: 2, character: 0 }
+                },
+                newText: 'y = 1\n'
+              } as lsProtocol.TextEdit
+            ]
+          }
+        },
+        'x',
+        'y'
+      );
 
       await env.adapter.update_documents();
 

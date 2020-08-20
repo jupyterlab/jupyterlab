@@ -69,13 +69,22 @@ const COMMANDS: IFeatureCommand[] = [
       });
 
       try {
+        if (dialog_value.button.accept != true) {
+          // the user has cancelled the rename action
+          return;
+        }
+        let new_value = dialog_value.value;
+        rename_feature.setStatus(
+          `Renaming ${old_value} to ${new_value}...`,
+          2 * 1000
+        );
         const edit = await connection.rename(
           virtual_position,
           document.document_info,
-          dialog_value.value,
+          new_value,
           false
         );
-        await rename_feature.handleRename(edit);
+        await rename_feature.handleRename(edit, old_value, new_value);
       } catch (error) {
         handle_failure(error);
       }
@@ -88,10 +97,14 @@ const COMMANDS: IFeatureCommand[] = [
 
 export class RenameCM extends CodeMirrorIntegration {
   public setStatus(message: string, timeout: number) {
-    return this.status_message.set(status, 7.5 * 1000);
+    return this.status_message.set(message, timeout);
   }
 
-  async handleRename(workspaceEdit: lsProtocol.WorkspaceEdit) {
+  async handleRename(
+    workspaceEdit: lsProtocol.WorkspaceEdit,
+    old_value: string,
+    new_value: string
+  ) {
     let outcome: IEditOutcome;
 
     try {
@@ -103,13 +116,18 @@ export class RenameCM extends CodeMirrorIntegration {
 
     try {
       let status: string;
+      const change_text = `${old_value} to ${new_value}`;
 
       if (outcome.wasGranular) {
-        status = `Renamed a variable in ${outcome.appliedChanges} places`;
+        if (outcome.appliedChanges === 0) {
+          status = `Could not rename ${change_text} - consult the language server documentation`;
+        } else {
+          status = `Renamed ${change_text} in ${outcome.appliedChanges} places`;
+        }
       } else if (this.adapter.has_multiple_editors) {
-        status = `Renamed a variable in ${outcome.modifiedCells} cells`;
+        status = `Renamed ${change_text} in ${outcome.modifiedCells} cells`;
       } else {
-        status = `Renamed a variable`;
+        status = `Renamed ${change_text}`;
       }
 
       if (outcome.errors.length !== 0) {

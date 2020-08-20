@@ -225,7 +225,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
           change => change as lsProtocol.TextDocumentEdit
         )
       : toDocumentChanges(workspaceEdit.changes);
-    let applied_changes = null;
+    let applied_changes = 0;
     let edited_cells: number;
     let is_whole_document_edit: boolean;
     let errors: string[] = [];
@@ -316,6 +316,7 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
           console.assert(this.is_whole_document_edit(edit));
         } else {
           edit = change.edits[0];
+          applied_changes += 1;
         }
         edited_cells = this.apply_single_edit(edit);
       }

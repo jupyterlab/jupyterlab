@@ -116,7 +116,7 @@ describe('Feature', () => {
         environment.ce_editor.model.value.text = 'foo bar';
         await environment.adapter.update_documents();
 
-        await feature.do_apply_edit({
+        let outcome = await feature.do_apply_edit({
           changes: {
             ['file://' + environment.document_options.path]: [
               {
@@ -134,6 +134,26 @@ describe('Feature', () => {
         expect(environment.ce_editor.model.value.text).to.be.equal(
           'changed bar'
         );
+        expect(outcome.wasGranular).to.be.equal(false);
+        expect(outcome.modifiedCells).to.be.equal(1);
+        expect(outcome.appliedChanges).to.be.equal(1);
+      });
+
+      it('correctly summarizes empty edit', async () => {
+        environment.ce_editor.model.value.text = 'foo bar';
+        await environment.adapter.update_documents();
+
+        let outcome = await feature.do_apply_edit({
+          changes: {
+            ['file://' + environment.document_options.path]: []
+          }
+        });
+        let raw_value = environment.ce_editor.doc.getValue();
+        expect(raw_value).to.be.equal('foo bar');
+        expect(environment.ce_editor.model.value.text).to.be.equal('foo bar');
+        expect(outcome.wasGranular).to.be.equal(false);
+        expect(outcome.appliedChanges).to.be.equal(0);
+        expect(outcome.modifiedCells).to.be.equal(0);
       });
 
       it('applies partial edits', async () => {
