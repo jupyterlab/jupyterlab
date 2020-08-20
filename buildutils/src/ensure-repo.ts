@@ -314,23 +314,25 @@ function ensureJupyterlab(): string[] {
 }
 
 /**
- * Ensure buildutils bin files are symlinked
+ * Ensure buildutils and builder bin files are symlinked
  */
 function ensureBuildUtils() {
   const basePath = path.resolve('.');
-  const utilsPackage = path.join(basePath, 'buildutils', 'package.json');
-  const utilsData = utils.readJSONFile(utilsPackage);
-  for (const name in utilsData.bin) {
-    const src = path.join(basePath, 'buildutils', utilsData.bin[name]);
-    const dest = path.join(basePath, 'node_modules', '.bin', name);
-    try {
-      fs.lstatSync(dest);
-      fs.removeSync(dest);
-    } catch (e) {
-      // no-op
+  for (let name in ['builder', 'buildutils']) {
+    const utilsPackage = path.join(basePath, name, 'package.json');
+    const utilsData = utils.readJSONFile(utilsPackage);
+    for (const name in utilsData.bin) {
+      const src = path.join(basePath, name, utilsData.bin[name]);
+      const dest = path.join(basePath, 'node_modules', '.bin', name);
+      try {
+        fs.lstatSync(dest);
+        fs.removeSync(dest);
+      } catch (e) {
+        // no-op
+      }
+      fs.symlinkSync(src, dest, 'file');
+      fs.chmodSync(dest, 0o777);
     }
-    fs.symlinkSync(src, dest, 'file');
-    fs.chmodSync(dest, 0o777);
   }
 }
 
