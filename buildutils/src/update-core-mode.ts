@@ -39,6 +39,7 @@ const notice =
 
 [
   'index.js',
+  'pageconfig.js',
   'webpack.config.js',
   'webpack.prod.config.js',
   'webpack.prod.minimize.config.js',
