@@ -51,7 +51,7 @@ describe('Rename', () => {
 
       await env.adapter.update_documents();
 
-      expect(env.status_message.message).to.be.equal('Renamed a variable');
+      expect(env.status_message.message).to.be.equal('Renamed x to y');
       expect(main_document.value).to.be.equal('y = 1\n');
     });
   });

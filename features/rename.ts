@@ -116,16 +116,21 @@ export class RenameCM extends CodeMirrorIntegration {
 
     try {
       let status: string;
+      let is_plural: boolean;
       const change_text = `${old_value} to ${new_value}`;
 
-      if (outcome.wasGranular) {
-        if (outcome.appliedChanges === 0) {
-          status = `Could not rename ${change_text} - consult the language server documentation`;
-        } else {
-          status = `Renamed ${change_text} in ${outcome.appliedChanges} places`;
-        }
+      if (outcome.appliedChanges === 0) {
+        status = `Could not rename ${change_text} - consult the language server documentation`;
+      } else if (outcome.wasGranular) {
+        is_plural = outcome.appliedChanges > 1;
+        status = `Renamed ${change_text} in ${outcome.appliedChanges} place${
+          is_plural ? 's' : ''
+        }`;
       } else if (this.adapter.has_multiple_editors) {
-        status = `Renamed ${change_text} in ${outcome.modifiedCells} cells`;
+        is_plural = outcome.modifiedCells > 1;
+        status = `Renamed ${change_text} in ${outcome.modifiedCells} cell${
+          is_plural ? 's' : ''
+        }`;
       } else {
         status = `Renamed ${change_text}`;
       }

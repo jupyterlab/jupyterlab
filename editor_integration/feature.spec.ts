@@ -252,7 +252,7 @@ describe('Feature', () => {
         );
         expect(code_cells[1]).to.have.property('source', 'x = a_function_2()');
 
-        expect(outcome.appliedChanges).to.be.equal(null);
+        expect(outcome.appliedChanges).to.be.equal(1);
         expect(outcome.wasGranular).to.be.equal(false);
         expect(outcome.modifiedCells).to.be.equal(2);
       });

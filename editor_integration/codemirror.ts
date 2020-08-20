@@ -321,10 +321,11 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
         edited_cells = this.apply_single_edit(edit);
       }
     }
+    const all_empty = changes.every(change => change.edits.length === 0);
     return {
       appliedChanges: applied_changes,
       modifiedCells: edited_cells,
-      wasGranular: !is_whole_document_edit,
+      wasGranular: !is_whole_document_edit && !all_empty,
       errors: errors
     };
   }
