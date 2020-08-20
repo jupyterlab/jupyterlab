@@ -32,6 +32,7 @@ import { DocumentConnectionManager } from '../connection_manager';
 import { ILanguageServerManager, ILSPAdapterManager } from '../tokens';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { codeCheckIcon } from '../index';
+import { DocumentLocator } from './utils';
 
 interface IServerStatusProps {
   server: SCHEMA.LanguageServerSession;
@@ -123,7 +124,6 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
       key += 1;
       let documents_html = new Array<any>();
       for (let [language, documents] of documents_by_language) {
-        // TODO user readable document ids: filename, [cell id]
         // TODO: stop button
         // TODO: add a config buttons next to the language header
         let list = documents.map((document, i) => {
@@ -144,7 +144,10 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
 
           return (
             <li key={i}>
-              {document.id_path}
+              <DocumentLocator
+                document={document}
+                adapter={this.model.adapter}
+              />
               <span className={'lsp-document-status'}>
                 {status}
                 <icon.react
