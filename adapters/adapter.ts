@@ -336,7 +336,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
       virtual_document: this.create_virtual_document()
     });
     if (virtual_editor == null) {
-      console.error(`Could not initialize a VirtualEditor for ${this} adapter`);
+      console.error('Could not initialize a VirtualEditor for adapter: ', this);
       return;
     }
     this.virtual_editor = virtual_editor;

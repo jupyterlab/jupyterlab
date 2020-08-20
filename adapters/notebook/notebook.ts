@@ -149,12 +149,12 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       return [];
     }
 
-    return notebook.widgets.map(cell => {
-      if (cell.model.type === 'code') {
+    return notebook.widgets
+      .filter(cell => cell.model.type === 'code')
+      .map(cell => {
         this.ce_editor_to_cell.set(cell.editor, cell);
         return cell.editor;
-      }
-    });
+      });
   }
 
   create_virtual_document() {

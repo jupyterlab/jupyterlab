@@ -122,7 +122,8 @@ export class VirtualEditorManager implements ILSPVirtualEditorManager {
       }
     }
     console.warn(
-      `Cold not find a VirtualEditor suitable for the provided set of editors: ${editors}`
+      'Cold not find a VirtualEditor suitable for the provided set of editors:',
+      editors
     );
     return null;
   }
