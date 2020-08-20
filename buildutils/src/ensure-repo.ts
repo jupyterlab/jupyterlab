@@ -318,11 +318,11 @@ function ensureJupyterlab(): string[] {
  */
 function ensureBuildUtils() {
   const basePath = path.resolve('.');
-  for (let name in ['builder', 'buildutils']) {
-    const utilsPackage = path.join(basePath, name, 'package.json');
+  ['builder', 'buildutils'].forEach(packageName => {
+    const utilsPackage = path.join(basePath, packageName, 'package.json');
     const utilsData = utils.readJSONFile(utilsPackage);
     for (const name in utilsData.bin) {
-      const src = path.join(basePath, name, utilsData.bin[name]);
+      const src = path.join(basePath, packageName, utilsData.bin[name]);
       const dest = path.join(basePath, 'node_modules', '.bin', name);
       try {
         fs.lstatSync(dest);
@@ -333,7 +333,7 @@ function ensureBuildUtils() {
       fs.symlinkSync(src, dest, 'file');
       fs.chmodSync(dest, 0o777);
     }
-  }
+  });
 }
 
 /**
