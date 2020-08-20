@@ -124,6 +124,7 @@ shared[data.name] = {
 if (fs.existsSync(outputPath)) {
   const outputFiles = fs.readdirSync(outputPath);
   outputFiles.forEach(filePath => {
+    filePath = path.join(outputPath, filePath);
     if (fs.statSync(filePath).isFile()) {
       fs.unlinkSync(filePath);
     } else {

@@ -184,6 +184,7 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
     # Test with a dynamic install
     jupyter labextension develop extension --debug
+    jupyter labextension build extension
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
     jupyter labextension disable @jupyterlab/mock-extension --debug
