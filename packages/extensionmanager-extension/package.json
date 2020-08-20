@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/extensionmanager-extension",
-  "version": "3.0.0-alpha.13",
+  "version": "3.0.0-alpha.14",
   "description": "JupyterLab - Extension Manager Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -37,13 +37,13 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-alpha.13",
-    "@jupyterlab/apputils": "^3.0.0-alpha.13",
-    "@jupyterlab/extensionmanager": "^3.0.0-alpha.13",
-    "@jupyterlab/mainmenu": "^3.0.0-alpha.13",
-    "@jupyterlab/settingregistry": "^3.0.0-alpha.13",
-    "@jupyterlab/translation": "^3.0.0-alpha.13",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.13"
+    "@jupyterlab/application": "^3.0.0-alpha.14",
+    "@jupyterlab/apputils": "^3.0.0-alpha.14",
+    "@jupyterlab/extensionmanager": "^3.0.0-alpha.14",
+    "@jupyterlab/mainmenu": "^3.0.0-alpha.14",
+    "@jupyterlab/settingregistry": "^3.0.0-alpha.14",
+    "@jupyterlab/translation": "^3.0.0-alpha.14",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.14"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

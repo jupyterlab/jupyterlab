@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/notebook",
-  "version": "3.0.0-alpha.13",
+  "version": "3.0.0-alpha.14",
   "description": "JupyterLab - Notebook",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -40,18 +40,18 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-alpha.13",
-    "@jupyterlab/cells": "^3.0.0-alpha.13",
-    "@jupyterlab/codeeditor": "^3.0.0-alpha.13",
-    "@jupyterlab/coreutils": "^5.0.0-alpha.13",
-    "@jupyterlab/docregistry": "^3.0.0-alpha.13",
-    "@jupyterlab/nbformat": "^3.0.0-alpha.13",
-    "@jupyterlab/observables": "^4.0.0-alpha.13",
-    "@jupyterlab/rendermime": "^3.0.0-alpha.13",
-    "@jupyterlab/services": "^6.0.0-alpha.13",
-    "@jupyterlab/statusbar": "^3.0.0-alpha.13",
-    "@jupyterlab/translation": "^3.0.0-alpha.13",
-    "@jupyterlab/ui-components": "^3.0.0-alpha.13",
+    "@jupyterlab/apputils": "^3.0.0-alpha.14",
+    "@jupyterlab/cells": "^3.0.0-alpha.14",
+    "@jupyterlab/codeeditor": "^3.0.0-alpha.14",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.14",
+    "@jupyterlab/docregistry": "^3.0.0-alpha.14",
+    "@jupyterlab/nbformat": "^3.0.0-alpha.14",
+    "@jupyterlab/observables": "^4.0.0-alpha.14",
+    "@jupyterlab/rendermime": "^3.0.0-alpha.14",
+    "@jupyterlab/services": "^6.0.0-alpha.14",
+    "@jupyterlab/statusbar": "^3.0.0-alpha.14",
+    "@jupyterlab/translation": "^3.0.0-alpha.14",
+    "@jupyterlab/ui-components": "^3.0.0-alpha.14",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/domutils": "^1.1.7",
@@ -64,7 +64,7 @@
     "react": "~16.9.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-alpha.13",
+    "@jupyterlab/testutils": "^3.0.0-alpha.14",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",
