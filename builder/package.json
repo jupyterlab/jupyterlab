@@ -16,10 +16,7 @@
     "metadata_schema.json",
     "lib/*.d.ts",
     "lib/*.js.map",
-    "lib/*.js",
-    "template/package.json",
-    "template/tsconfig.json",
-    "template/src/index.ts"
+    "lib/*.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

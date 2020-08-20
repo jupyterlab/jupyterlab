@@ -13,7 +13,6 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "files": [
-    "metadata_schema.json",
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
