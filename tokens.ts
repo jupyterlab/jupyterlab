@@ -122,7 +122,6 @@ export interface ILSPAdapterManager {
   adapterDisposed: Signal<WidgetAdapterManager, WidgetAdapter<IDocumentWidget>>;
   currentAdapter: WidgetAdapter<IDocumentWidget>;
   isAnyActive: () => boolean;
-  // TODO: make async, return promises?
   registerExtension(extension: LSPExtension): void;
   registerAdapterType(options: IAdapterTypeOptions<IDocumentWidget>): void;
   readonly types: IAdapterTypeOptions<IDocumentWidget>[];
