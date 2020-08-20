@@ -312,11 +312,11 @@ type StatusMap = Record<StatusCode, string>;
 type StatusIconClass = Record<StatusCode, string>;
 
 const classByStatus: StatusIconClass = {
-  waiting: 'jp-icon4',
-  initialized: 'jp-icon0',
-  initializing: 'jp-icon3',
-  initialized_but_some_missing: 'jp-icon1',
-  connecting: 'jp-icon3'
+  waiting: 'inactive',
+  initialized: 'ready',
+  initializing: 'preparing',
+  initialized_but_some_missing: 'ready',
+  connecting: 'preparing'
 };
 
 const shortMessageByStatus: StatusMap = {
@@ -496,7 +496,7 @@ export namespace LSPStatus {
         return stopIcon;
       }
       return codeCheckIcon.bindprops({
-        className: classByStatus[this.status.status]
+        className: 'lsp-status-icon ' + classByStatus[this.status.status]
       });
     }
 
