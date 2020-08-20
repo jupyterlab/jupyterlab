@@ -62,6 +62,7 @@
     "@jupyterlab/vega5-extension": "~3.0.0-alpha.11"
   },
   "devDependencies": {
+    "@jupyterlab/builder": "^3.0.0-alpha.11",
     "@jupyterlab/buildutils": "^3.0.0-alpha.11",
     "chokidar": "^3.4.0",
     "css-loader": "~3.2.0",
@@ -386,6 +387,7 @@
       "@jupyterlab/vdom": "../packages/vdom",
       "@jupyterlab/vdom-extension": "../packages/vdom-extension",
       "@jupyterlab/vega5-extension": "../packages/vega5-extension",
+      "@jupyterlab/builder": "../builder",
       "@jupyterlab/buildutils": "../buildutils",
       "@jupyterlab/template": "../buildutils/template",
       "@jupyterlab/testutils": "../testutils"

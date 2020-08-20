@@ -11,11 +11,11 @@ const webpack = require('webpack');
 const merge = require('webpack-merge').default;
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
   .BundleAnalyzerPlugin;
-const baseConfig = require('@jupyterlab/buildutils/lib/webpack.config.base');
+const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
 const { ModuleFederationPlugin } = webpack.container;
 
-const Build = require('@jupyterlab/buildutils').Build;
-const WPPlugin = require('@jupyterlab/buildutils').WPPlugin;
+const Build = require('@jupyterlab/builder').Build;
+const WPPlugin = require('@jupyterlab/builder').WPPlugin;
 const package_data = require('./package.json');
 
 // Handle the extensions.

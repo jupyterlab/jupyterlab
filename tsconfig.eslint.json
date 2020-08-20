@@ -4,6 +4,7 @@
     "packages/**/src/**/*",
     "packages/**/test/**/*",
     "testutils/src/*",
+    "builder/**/*",
     "buildutils/**/*",
     "tests/**/*",
     "dev_mode/*",

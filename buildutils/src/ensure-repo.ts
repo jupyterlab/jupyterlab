@@ -24,7 +24,7 @@ type Dict<T> = { [key: string]: T };
 
 // Data to ignore.
 const MISSING: Dict<string[]> = {
-  '@jupyterlab/buildutils': ['path'],
+  '@jupyterlab/buildutils': ['path', 'webpack'],
   '@jupyterlab/testutils': ['fs'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
@@ -34,11 +34,11 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/apputils': ['@types/react', 'buffer', 'url'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
-  '@jupyterlab/buildutils': [
-    // For the phosphor shim
+  '@jupyterlab/builder': [
     '@lumino/algorithm',
     '@lumino/application',
     '@lumino/commands',
+    '@lumino/coreutils',
     '@lumino/disposable',
     '@lumino/domutils',
     '@lumino/dragdrop',
@@ -314,24 +314,26 @@ function ensureJupyterlab(): string[] {
 }
 
 /**
- * Ensure buildutils bin files are symlinked
+ * Ensure buildutils and builder bin files are symlinked
  */
 function ensureBuildUtils() {
   const basePath = path.resolve('.');
-  const utilsPackage = path.join(basePath, 'buildutils', 'package.json');
-  const utilsData = utils.readJSONFile(utilsPackage);
-  for (const name in utilsData.bin) {
-    const src = path.join(basePath, 'buildutils', utilsData.bin[name]);
-    const dest = path.join(basePath, 'node_modules', '.bin', name);
-    try {
-      fs.lstatSync(dest);
-      fs.removeSync(dest);
-    } catch (e) {
-      // no-op
+  ['builder', 'buildutils'].forEach(packageName => {
+    const utilsPackage = path.join(basePath, packageName, 'package.json');
+    const utilsData = utils.readJSONFile(utilsPackage);
+    for (const name in utilsData.bin) {
+      const src = path.join(basePath, packageName, utilsData.bin[name]);
+      const dest = path.join(basePath, 'node_modules', '.bin', name);
+      try {
+        fs.lstatSync(dest);
+        fs.removeSync(dest);
+      } catch (e) {
+        // no-op
+      }
+      fs.symlinkSync(src, dest, 'file');
+      fs.chmodSync(dest, 0o777);
     }
-    fs.symlinkSync(src, dest, 'file');
-    fs.chmodSync(dest, 0o777);
-  }
+  });
 }
 
 /**

@@ -2,7 +2,7 @@
 // Distributed under the terms of the Modified BSD License.
 const data = require('./package.json');
 const webpack = require('webpack');
-const Build = require('@jupyterlab/buildutils').Build;
+const Build = require('@jupyterlab/builder').Build;
 
 const names = Object.keys(data.dependencies).filter(function(name) {
   const packageData = require(name + '/package.json');

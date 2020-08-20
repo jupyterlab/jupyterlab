@@ -1,10 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 const data = require('./package.json');
-const Build = require('@jupyterlab/buildutils').Build;
+const Build = require('@jupyterlab/builder').Build;
 const webpack = require('webpack');
 const merge = require('webpack-merge').default;
-const baseConfig = require('@jupyterlab/buildutils/lib/webpack.config.base');
+const baseConfig = require('@jupyterlab/builder/lib/webpack.config.base');
 const { ModuleFederationPlugin } = webpack.container;
 const fs = require('fs-extra');
 const path = require('path');
