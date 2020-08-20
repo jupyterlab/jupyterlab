@@ -1147,7 +1147,8 @@ class _AppHandler(object):
                 _rmtree(staging, self.logger)
                 os.makedirs(staging)
 
-        for fname in ['index.js', 'webpack.config.js',
+        for fname in ['index.js', 'publicpath.js',
+                      'webpack.config.js',
                       'webpack.prod.config.js',
                       'webpack.prod.minimize.config.js',
                       '.yarnrc', 'yarn.js']:
