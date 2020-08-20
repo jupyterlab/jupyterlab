@@ -98,7 +98,7 @@ async function main() {
   }));
 
   extensions.forEach(p => {
-    if (p.status === "error") {
+    if (p.status === "rejected") {
       // There was an error loading the component
       console.error(p.reason);
       return;
