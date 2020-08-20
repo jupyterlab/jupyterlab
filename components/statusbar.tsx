@@ -17,18 +17,14 @@ import {
   TextItem
 } from '@jupyterlab/statusbar';
 
-import {
-  LabIcon,
-  refreshIcon,
-  runningIcon,
-  stopIcon
-} from '@jupyterlab/ui-components';
+import { LabIcon, stopIcon } from '@jupyterlab/ui-components';
 import { WidgetAdapter } from '../adapters/adapter';
 import { collect_documents, VirtualDocument } from '../virtual/document';
 import { LSPConnection } from '../connection';
 import { DocumentConnectionManager } from '../connection_manager';
 import { ILanguageServerManager, ILSPAdapterManager } from '../tokens';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { codeCheckIcon } from '../index';
 
 interface IServerStatusProps {
   server: SCHEMA.LanguageServerSession;
@@ -278,7 +274,12 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
   };
 }
 
-type StatusCode = 'waiting' | 'initializing' | 'initialized' | 'connecting';
+type StatusCode =
+  | 'waiting'
+  | 'initializing'
+  | 'initialized'
+  | 'connecting'
+  | 'initialized_but_some_missing';
 
 export interface IStatus {
   connected_documents: Set<VirtualDocument>;
@@ -296,18 +297,21 @@ function collect_languages(virtual_document: VirtualDocument): Set<string> {
 }
 
 type StatusMap = Record<StatusCode, string>;
-type StatusIcon = Record<StatusCode, LabIcon>;
+type StatusIconClass = Record<StatusCode, string>;
 
-const iconByStatus: StatusIcon = {
-  waiting: refreshIcon,
-  initialized: runningIcon,
-  initializing: refreshIcon,
-  connecting: refreshIcon
+const classByStatus: StatusIconClass = {
+  waiting: 'jp-icon4',
+  initialized: 'jp-icon0',
+  initializing: 'jp-icon3',
+  initialized_but_some_missing: 'jp-icon1',
+  connecting: 'jp-icon3'
 };
 
 const shortMessageByStatus: StatusMap = {
   waiting: 'Waiting...',
   initialized: 'Fully initialized',
+  initialized_but_some_missing:
+    'Initialized (additional servers can be installed)',
   initializing: 'Partially initialized',
   connecting: 'Connecting...'
 };
@@ -423,11 +427,17 @@ export namespace LSPStatus {
       const detected_documents = this._connection_manager.documents;
       let connected_documents = new Set<VirtualDocument>();
       let initialized_documents = new Set<VirtualDocument>();
+      let absent_documents = new Set<VirtualDocument>();
+      // detected documents with LSP servers available
+      let documents_with_servers = new Set<VirtualDocument>();
 
       detected_documents.forEach((document, id_path) => {
         let connection = this._connection_manager.connections.get(id_path);
         if (!connection) {
+          absent_documents.add(document);
           return;
+        } else {
+          documents_with_servers.add(document);
         }
 
         if (connection.isConnected) {
@@ -450,10 +460,11 @@ export namespace LSPStatus {
       let status: StatusCode;
       if (detected_documents.size === 0) {
         status = 'waiting';
-        // TODO: instead of detected documents, I should use "detected_documents_with_LSP_servers_available"
       } else if (initialized_documents.size === detected_documents.size) {
         status = 'initialized';
-      } else if (connected_documents.size === detected_documents.size) {
+      } else if (initialized_documents.size === documents_with_servers.size) {
+        status = 'initialized_but_some_missing';
+      } else if (connected_documents.size === documents_with_servers.size) {
         status = 'initializing';
       } else {
         status = 'connecting';
@@ -472,7 +483,9 @@ export namespace LSPStatus {
       if (!this.adapter) {
         return stopIcon;
       }
-      return iconByStatus[this.status.status];
+      return codeCheckIcon.bindprops({
+        className: classByStatus[this.status.status]
+      });
     }
 
     get short_message(): string {

@@ -138,7 +138,7 @@ export class DocumentConnectionManager {
     });
 
     // lazily load 1) the underlying library (1.5mb) and/or 2) a live WebSocket-
-    // like connection: either already connected or potentiailly in the process
+    // like connection: either already connected or potentially in the process
     // of connecting.
     const connection = await Private.connection(
       language,
