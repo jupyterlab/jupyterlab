@@ -126,7 +126,7 @@ export class ContextCommandManager extends LSPCommandManager {
     this.app.contextMenu.addItem({
       selector: this.selector,
       command: this.create_id(command),
-      rank: this.get_rank(command),
+      rank: this.get_rank(command)
     });
   }
 

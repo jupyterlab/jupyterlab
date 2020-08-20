@@ -37,7 +37,6 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
 
   get_uri_and_range(location_or_locations: AnyLocation) {
     if (location_or_locations == null) {
-      console.log('No jump targets found');
       return;
     }
     // some language servers appear to return a single object
@@ -72,8 +71,9 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
   async handle_jump(location_or_locations: AnyLocation, document_uri: string) {
     const target_info = this.get_uri_and_range(location_or_locations);
 
-    if (target_info == null) {
-      console.log('No jump targets found');
+    if (!target_info) {
+      this.status_message.set('No jump targets found', 2 * 1000);
+      return;
     }
 
     let { uri, range } = target_info;
