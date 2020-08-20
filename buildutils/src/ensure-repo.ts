@@ -24,7 +24,7 @@ type Dict<T> = { [key: string]: T };
 
 // Data to ignore.
 const MISSING: Dict<string[]> = {
-  '@jupyterlab/buildutils': ['path'],
+  '@jupyterlab/buildutils': ['path', 'webpack'],
   '@jupyterlab/testutils': ['fs'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
@@ -34,11 +34,11 @@ const UNUSED: Dict<string[]> = {
   '@jupyterlab/apputils': ['@types/react', 'buffer', 'url'],
   '@jupyterlab/application': ['@fortawesome/fontawesome-free'],
   '@jupyterlab/apputils-extension': ['es6-promise'],
-  '@jupyterlab/buildutils': [
-    // For the phosphor shim
+  '@jupyterlab/builder': [
     '@lumino/algorithm',
     '@lumino/application',
     '@lumino/commands',
+    '@lumino/coreutils',
     '@lumino/disposable',
     '@lumino/domutils',
     '@lumino/dragdrop',

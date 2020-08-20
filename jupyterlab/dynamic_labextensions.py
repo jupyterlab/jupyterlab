@@ -195,31 +195,31 @@ def watch_labextension(path, app_dir=None, logger=None):
 def _ensure_builder(ext_path, core_path):
     """Ensure that we can build the extension and return the builder script path
     """
-    # Test for compatible dependency on @jupyterlab/buildutils
+    # Test for compatible dependency on @jupyterlab/builder
     with open(osp.join(core_path, 'package.json')) as fid:
         core_data = json.load(fid)
     with open(osp.join(ext_path, 'package.json')) as fid:
         ext_data = json.load(fid)
-    depVersion1 = core_data['devDependencies']['@jupyterlab/buildutils']
-    depVersion2 = ext_data.get('devDependencies', dict()).get('@jupyterlab/buildutils')
-    depVersion2 = depVersion2 or ext_data.get('dependencies', dict()).get('@jupyterlab/buildutils')
+    depVersion1 = core_data['devDependencies']['@jupyterlab/builder']
+    depVersion2 = ext_data.get('devDependencies', dict()).get('@jupyterlab/builder')
+    depVersion2 = depVersion2 or ext_data.get('dependencies', dict()).get('@jupyterlab/builder')
     if depVersion2 is None:
-        raise ValueError('Extensions require a devDependency on @jupyterlab/buildutils@%s' % depVersion1)
+        raise ValueError('Extensions require a devDependency on @jupyterlab/builder@%s' % depVersion1)
     overlap = _test_overlap(depVersion1, depVersion2, drop_prerelease1=True)
     if not overlap:
-        raise ValueError('Extensions require a devDependency on @jupyterlab/buildutils@%s' % depVersion1)
+        raise ValueError('Extensions require a devDependency on @jupyterlab/builder@%s' % depVersion1)
     if not osp.exists(osp.join(ext_path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=ext_path)
 
-    # Find @jupyterlab/buildutils using node module resolution
+    # Find @jupyterlab/builder using node module resolution
     # We cannot use a script because the script path is a shell script on Windows
     target = ext_path
-    while not osp.exists(osp.join(target, 'node_modules', '@jupyterlab', 'buildutils')):
+    while not osp.exists(osp.join(target, 'node_modules', '@jupyterlab', 'builder')):
         if osp.dirname(target) == target:
-            raise ValueError('Could not find @jupyterlab/buildutils')
+            raise ValueError('Could not find @jupyterlab/builder')
         target = osp.dirname(target)
 
-    return osp.join(target, 'node_modules', '@jupyterlab', 'buildutils', 'lib', 'build-extension.js')
+    return osp.join(target, 'node_modules', '@jupyterlab', 'builder', 'lib', 'build-extension.js')
     
 
 def _should_copy(src, dest, logger=None):

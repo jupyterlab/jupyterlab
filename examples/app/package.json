@@ -11,7 +11,7 @@
     "@jupyterlab/application": "^3.0.0-alpha.11",
     "@jupyterlab/application-extension": "^3.0.0-alpha.11",
     "@jupyterlab/apputils-extension": "^3.0.0-alpha.11",
-    "@jupyterlab/buildutils": "^3.0.0-alpha.11",
+    "@jupyterlab/builder": "^3.0.0-alpha.11",
     "@jupyterlab/codemirror-extension": "^3.0.0-alpha.11",
     "@jupyterlab/completer-extension": "^3.0.0-alpha.11",
     "@jupyterlab/console-extension": "^3.0.0-alpha.11",

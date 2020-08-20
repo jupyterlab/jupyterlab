@@ -10,7 +10,7 @@
     "@lumino/coreutils": "^1.4.3"
   },
   "devDependencies": {
-    "@jupyterlab/buildutils": "^3.0.0-alpha.11",
+    "@jupyterlab/builder": "^3.0.0-alpha.11",
     "rimraf": "~3.0.0"
   },
   "publishConfig": {

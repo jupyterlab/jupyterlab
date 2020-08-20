@@ -16,7 +16,7 @@
 
 import * as path from 'path';
 import commander from 'commander';
-import { run } from './utils';
+import { run } from '@jupyterlab/buildutils';
 
 commander
   .description('Build an extension')

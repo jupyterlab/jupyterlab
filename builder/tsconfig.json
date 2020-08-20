@@ -1,0 +1,14 @@
+{
+  "extends": "../tsconfigbase",
+  "compilerOptions": {
+    "outDir": "lib",
+    "rootDir": "src",
+    "module": "commonjs"
+  },
+  "include": ["src/*"],
+  "references": [
+    {
+      "path": "../buildutils"
+    }
+  ]
+}
