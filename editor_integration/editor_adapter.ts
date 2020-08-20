@@ -5,7 +5,7 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualDocument } from '../virtual/document';
 import { until_ready } from '../utils';
 import { IRootPosition } from '../positioning';
-import { create_console, EditorLogConsole } from "../virtual/console";
+import { create_console, EditorLogConsole } from '../virtual/console';
 
 export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
   features: Map<string, IFeatureEditorIntegration<T>>;

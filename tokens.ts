@@ -129,8 +129,17 @@ export interface ILSPAdapterManager {
 }
 
 export interface IVirtualEditorType<T extends IEditor> {
+  /**
+   * The constructor of the IVirtualEditor<T> instance.
+   */
   implementation: IVirtualEditor.Constructor;
+  /**
+   * The name of the editor T.
+   */
   name: IEditorName;
+  /**
+   * The implementation of and editor being supported.
+   */
   supports: new (...args: any) => T;
 }
 
