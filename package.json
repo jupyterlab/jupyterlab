@@ -27,7 +27,7 @@
     "build": "jlpm run build:dev",
     "build:builder": "cd builder && jlpm run build",
     "build:core": "cd jupyterlab/staging && jlpm && (jlpm deduplicate || jlpm) && jlpm run build",
-    "build:dev": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build && jlpm run build:builder",
+    "build:dev": "jlpm run integrity && jlpm run build:packages && jlpm run build:builder && cd dev_mode && jlpm run build",
     "build:dev:prod": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build:prod",
     "build:dev:prod:release": "jlpm run integrity && jlpm run build:packages && cd dev_mode && jlpm run build:prod:release",
     "build:examples": "lerna run build --scope \"@jupyterlab/example-*\"",
