@@ -179,7 +179,7 @@ export class ContextCommandManager extends LSPCommandManager {
       }
     }
     if (context == null) {
-      context = this.current_adapter.context_from_active_document();
+      context = this.current_adapter?.context_from_active_document();
     }
     return context;
   }

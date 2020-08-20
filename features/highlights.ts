@@ -84,6 +84,7 @@ export class HighlightsCM extends CodeMirrorIntegration {
     }
     let root_position: IRootPosition;
 
+    await this.virtual_editor.virtual_document.update_manager.update_done;
     try {
       root_position = this.virtual_editor
         .getDoc()

@@ -85,7 +85,6 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     public settings: FeatureSettings<LSPCompletionSettings>,
     private adapterManager: ILSPAdapterManager
   ) {
-    // disconnect old adapter, connect new adapter
     adapterManager.adapterChanged.connect(this.swap_adapter, this);
   }
 
@@ -94,20 +93,26 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     adapter: WidgetAdapter<IDocumentWidget>
   ) {
     if (this.current_adapter) {
-      this.current_adapter.activeEditorChanged.disconnect(this.set_connector);
-      this.current_adapter.adapterConnected.disconnect(this.connect_completion);
+      // disconnect signals from the old adapter
+      this.current_adapter.activeEditorChanged.disconnect(this.set_connector, this);
+      this.current_adapter.adapterConnected.disconnect(
+        this.connect_completion,
+        this
+      );
     }
     this.current_adapter = adapter;
+    // connect signals to the new adapter
     this.current_adapter.activeEditorChanged.connect(this.set_connector, this);
     this.current_adapter.adapterConnected.connect(
       this.connect_completion,
       this
     );
+    this.set_connector(adapter, {editor: adapter.activeEditor});
   }
 
   connect_completion(
     adapter: WidgetAdapter<IDocumentWidget>,
-    data: IDocumentConnectionData
+    data?: IDocumentConnectionData
   ) {
     let editor = adapter.activeEditor;
     if (editor == null) {
@@ -136,6 +141,10 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     adapter: WidgetAdapter<IDocumentWidget>,
     editor_changed: IEditorChangedData
   ) {
+    if (!this.current_completion_handler) {
+      // workaround for current_completion_handler not being there yet
+      this.connect_completion(adapter);
+    }
     this.set_completion_connector(adapter, editor_changed.editor);
     this.current_completion_handler.editor = editor_changed.editor;
     this.current_completion_handler.connector = this.current_completion_connector;

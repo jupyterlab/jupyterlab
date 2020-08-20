@@ -31,7 +31,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     this.adapterDisposed = new Signal(this);
     this.adapterTypeAdded = new Signal(this);
     this.adapterTypes = [];
-    labShell.currentChanged.connect(this.onLabFocusChanged, this);
+    labShell.currentChanged.connect(this.refreshAdapterFromCurrentWidget, this);
   }
 
   public registerAdapterType(options: IAdapterTypeOptions<IDocumentWidget>) {
@@ -70,9 +70,11 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
         this.connectWidget(extension, widget, type);
       }
     });
+    // possibly update the value of currentAdapter using the current widget
+    this.refreshAdapterFromCurrentWidget();
   }
 
-  protected onLabFocusChanged() {
+  protected refreshAdapterFromCurrentWidget() {
     const current = this.labShell.currentWidget as IDocumentWidget;
     if (!current) {
       return;
@@ -87,8 +89,8 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     }
 
     if (adapter != null) {
-      this.adapterChanged.emit(adapter);
       this.currentAdapter = adapter;
+      this.adapterChanged.emit(adapter);
     }
   }
 

@@ -2,7 +2,7 @@ import * as CodeMirror from 'codemirror';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorName } from '../feature';
-import { IBlockAddedInfo, UpdateManager, VirtualDocument } from './document';
+import { IBlockAddedInfo, ICodeBlockOptions, UpdateManager, VirtualDocument } from './document';
 import { IForeignCodeExtractorsRegistry } from '../extractors/types';
 import { create_console, EditorLogConsole } from './console';
 import { Signal } from '@lumino/signaling';
@@ -84,6 +84,7 @@ export class CodeMirrorVirtualEditor
   change: Signal<IVirtualEditor<CodeMirrorEditor>, IEditorChange>;
 
   editor_to_source_line: Map<CodeEditor.IEditor, number>;
+  private editor_to_source_line_new: Map<CodeEditor.IEditor, number>;
 
   private _proxy: CodeMirrorVirtualEditor;
   protected readonly adapter: WidgetAdapter<IDocumentWidget>;
@@ -113,15 +114,16 @@ export class CodeMirrorVirtualEditor
         }
       }
     });
-    this.adapter.documentsUpdateBegan.connect(() => {
-      // this is not thee most efficient, but probably the most reliable way
-      this.onEditorsUpdated(this.adapter.editors);
-    }, this);
+    // this is not thee most efficient, but probably the most reliable way
+    this.virtual_document.update_manager.update_began.connect(this.onEditorsUpdated, this);
 
     this.virtual_document.update_manager.block_added.connect(
       this.save_block_position,
       this
     );
+    this.virtual_document.update_manager.update_finished.connect(() => {
+      this.editor_to_source_line = this.editor_to_source_line_new;
+    }, this);
 
     this.set_event_handlers();
     return this._proxy;
@@ -163,11 +165,12 @@ export class CodeMirrorVirtualEditor
     return this.getDoc().getCursor('end') as IRootPosition;
   }
 
-  private onEditorsUpdated(editors: Array<CodeEditor.IEditor>): void {
+  private onEditorsUpdated(update_manager: UpdateManager, blocks: ICodeBlockOptions[]): void {
     this.cm_editor_to_ce_editor.clear();
     this.ce_editor_to_cm_editor.clear();
-    this.editor_to_source_line.clear();
-    for (let ce_editor of editors) {
+    this.editor_to_source_line_new = new Map();
+    for (let block of blocks) {
+      let ce_editor = block.ce_editor;
       let cm_editor = (ce_editor as CodeMirrorEditor).editor;
       this.cm_editor_to_ce_editor.set(cm_editor, ce_editor);
       this.ce_editor_to_cm_editor.set(ce_editor, cm_editor);
@@ -178,7 +181,7 @@ export class CodeMirrorVirtualEditor
     update_manager: UpdateManager,
     block_data: IBlockAddedInfo
   ) {
-    this.editor_to_source_line.set(
+    this.editor_to_source_line_new.set(
       block_data.block.ce_editor,
       block_data.virtual_document.last_source_line
     );
@@ -449,9 +452,19 @@ export class CodeMirrorVirtualEditor
 
   get_editor_value(editor: CodeEditor.IEditor): string {
     let codemirror_editor = editor as CodeMirrorEditor;
-    let cm_editor = codemirror_editor.editor;
-
-    return cm_editor.getValue();
+    return codemirror_editor.model.value.text;
+    // A previous implementation was using the underlying
+    // CodeMirror editor instance (as one could expect), i.e:
+    //     let cm_editor = codemirror_editor.editor;
+    //     return cm_editor.getValue();
+    // however, because we are listening to:
+    // this.widget.context.model.contentChanged
+    // it turns out that the model can not be as fast to propagate
+    // the changes to the underlying CodeMirror editor instance yet
+    // so it seems reasonable to use the newer value from the model
+    // to build the next VirtualDocument; it turned out to solve some
+    // of the failures to resolve position within the virtual document
+    // which were due to race conditions.
   }
 
   getWrapperElement(): HTMLElement {

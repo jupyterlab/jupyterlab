@@ -816,10 +816,16 @@ export class UpdateManager {
    */
   private document_updated: Signal<UpdateManager, VirtualDocument>;
   public block_added: Signal<UpdateManager, IBlockAddedInfo>;
+  // possibly redundant
+  update_done: Promise<void> = new Promise<void>(() => {});
+  update_began: Signal<UpdateManager, ICodeBlockOptions[]>;
+  update_finished: Signal<UpdateManager, ICodeBlockOptions[]>;
 
   constructor(private virtual_document: VirtualDocument) {
     this.document_updated = new Signal(this);
     this.block_added = new Signal(this);
+    this.update_began = new Signal(this);
+    this.update_finished = new Signal(this);
     this.document_updated.connect(this.on_updated, this);
     // TODO singleton
     this.console = create_console('browser');
@@ -871,7 +877,7 @@ export class UpdateManager {
    * as to avoid an easy trap of ignoring the changes in the virtual documents.
    */
   public async update_documents(blocks: ICodeBlockOptions[]): Promise<void> {
-    return new Promise<void>(async (resolve, reject) => {
+    let update = new Promise<void>(async (resolve, reject) => {
       // defer the update by up to 50 ms (10 retrials * 5 ms break),
       // awaiting for the previous update to complete.
       await until_ready(() => this.can_update(), 10, 5).then(() => {
@@ -880,6 +886,7 @@ export class UpdateManager {
         }
         try {
           this.is_update_in_progress = true;
+          this.update_began.emit(blocks);
 
           this.virtual_document.clear();
 
@@ -893,6 +900,8 @@ export class UpdateManager {
               code_block.ce_editor
             );
           }
+
+          this.update_finished.emit(blocks);
 
           if (this.virtual_document) {
             this.document_updated.emit(this.virtual_document);
@@ -908,6 +917,8 @@ export class UpdateManager {
         }
       });
     });
+    this.update_done = update;
+    return update;
   }
 }
 

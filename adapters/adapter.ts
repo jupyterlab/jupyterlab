@@ -82,7 +82,6 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
   protected app: JupyterFrontEnd;
 
-  public documentsUpdateBegan: Signal<WidgetAdapter<T>, void>;
   public activeEditorChanged: Signal<WidgetAdapter<T>, IEditorChangedData>;
   public update_finished: Promise<void>;
 
@@ -105,7 +104,6 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.connection_manager = extension.connection_manager;
     this.adapterConnected = new Signal(this);
     this.activeEditorChanged = new Signal(this);
-    this.documentsUpdateBegan = new Signal(this);
     this.adapters = new Map();
     this.status_message = new StatusMessage();
 
@@ -240,7 +238,6 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
    * public for use in tests (but otherwise could be private)
    */
   public update_documents() {
-    this.documentsUpdateBegan.emit();
     return this.virtual_editor.virtual_document.update_manager.update_documents(
       this.editors.map(ce_editor => {
         return {
@@ -520,9 +517,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     return adapter;
   }
 
-  private onContentChanged(_slot: any) {
+  private async onContentChanged(_slot: any) {
     // update the virtual documents (sending the updates to LSP is out of scope here)
     this.update_finished = this.update_documents().catch(console.warn);
+    await this.update_finished;
   }
 
   get_position_from_context_menu(): IRootPosition {

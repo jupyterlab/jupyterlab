@@ -128,19 +128,6 @@ export class LSPExtension implements ILSPExtension {
 
     this.feature_manager = new FeatureManager();
 
-    adapterManager.adapterTypeAdded.connect((manager, type) => {
-      let command_manger = new ContextCommandManager({
-        adapter_manager: adapterManager,
-        app: app,
-        palette: palette,
-        tracker: type.tracker,
-        suffix: type.name,
-        entry_point: type.entrypoint,
-        ...type.context_menu
-      });
-      this.feature_manager.registerCommandManager(command_manger);
-    });
-
     this.setting_registry
       .load(plugin.id)
       .then(settings => {
@@ -158,6 +145,19 @@ export class LSPExtension implements ILSPExtension {
       });
 
     adapterManager.registerExtension(this);
+
+    adapterManager.adapterTypeAdded.connect((manager, type) => {
+      let command_manger = new ContextCommandManager({
+        adapter_manager: adapterManager,
+        app: app,
+        palette: palette,
+        tracker: type.tracker,
+        suffix: type.name,
+        entry_point: type.entrypoint,
+        ...type.context_menu
+      });
+      this.feature_manager.registerCommandManager(command_manger);
+    });
   }
 
   private updateOptions(settings: ISettingRegistry.ISettings) {
