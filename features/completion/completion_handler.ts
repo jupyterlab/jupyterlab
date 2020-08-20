@@ -101,7 +101,7 @@ export class LSPConnector
     let editor_position = PositionConverter.ce_to_cm(
       position
     ) as IEditorPosition;
-    return this.virtual_editor.transform_editor_to_root(
+    return this.virtual_editor.transform_from_editor_to_root(
       this._editor,
       editor_position
     );

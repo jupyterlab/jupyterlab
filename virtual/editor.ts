@@ -6,7 +6,6 @@ import {
   IVirtualPosition
 } from '../positioning';
 import { Signal } from '@lumino/signaling';
-import { EditorLogConsole } from './console';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorName } from '../feature';
 import IEditor = CodeEditor.IEditor;
@@ -46,45 +45,83 @@ export interface IEditorChange {
   origin?: string;
 }
 
+/**
+ * A virtual editor represents an abstraction of a single editor,
+ * even when it aggregates multiple underlying editors. It is not
+ * concerned with how the editors are presented (e.g. as cells or
+ * tiles) but should be able to pass on the responsibilities to the
+ * appropriate editor transparently, so that the features do not
+ * need to know about existence of multiple editors.
+ */
 export interface IVirtualEditor<T extends IEditor> {
+  /**
+   * The root (outermost, with no parent) virtual document
+   * representing the underlying document. While it is NOT
+   * being created by the virtual editor (but passed into
+   * the constructor), the instance stored there is the
+   * reference for all other objects.
+   */
   virtual_document: VirtualDocument;
   /**
-   * Console for debugging and reporting for the use by features.
+   * A signal which will be emitted after each change in the
+   * value of any of the underlying editors
    */
-  console: EditorLogConsole;
   change: Signal<IVirtualEditor<T>, IEditorChange>;
 
+  /**
+   * The editor name that will be used by feature-integration layer
+   * to identify this virtual editor.
+   */
   readonly editor_name: IEditorName;
 
+  /**
+   * Remove all handlers, signal connections and dispose any other objects
+   * created by the virtual editor.
+   */
   dispose(): void;
 
+  /**
+   * Get the innermost virtual document present at given root position.
+   */
   document_at_root_position(position: IRootPosition): VirtualDocument;
 
+  /**
+   * Transform a root position to a position relative to the innermost virtual document
+   * corresponding to the same character.
+   */
   root_position_to_virtual_position(position: IRootPosition): IVirtualPosition;
 
+  /**
+   * Retrieve a position the text cursor would have if it
+   * was placed at given window coordinates (screen pixels).
+   */
   window_coords_to_root_position(
     coordinates: IWindowCoordinates
   ): IRootPosition;
 
+  /**
+   * Get the token at given root source position.
+   */
   get_token_at(position: IRootPosition): CodeEditor.IToken;
 
-  transform_editor_to_root(
-    ce_editor: T,
-    position: IEditorPosition
-  ): IRootPosition;
-
+  /**
+   * Get the position of the active text cursor in terms of the
+   * root position. If each editor has a separate cursor,
+   * the cursor of the active editor should be returned.
+   */
   get_cursor_position(): IRootPosition;
 
   /**
-   * Some adapters have more than one editor, thus...
-   * @param editor
-   * @param position
+   * Transform the position within an editor to a root position.
    */
   transform_from_editor_to_root(
-    editor: T,
+    ce_editor: T,
     position: IEditorPosition
   ): IRootPosition | null;
 
+  /**
+   * Get the text from the model of the editor.
+   */
   get_editor_value(editor: T): string;
 }
 

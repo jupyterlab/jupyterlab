@@ -227,13 +227,6 @@ export class CodeMirrorVirtualEditor
     return this.virtual_document.transform_virtual_to_editor(position);
   }
 
-  transform_editor_to_root(
-    ce_editor: CodeEditor.IEditor,
-    position: IEditorPosition
-  ): IRootPosition {
-    return this.transform_from_editor_to_root(ce_editor, position);
-  }
-
   // TODO .root is not really needed as we are in editor now...
   document_at_root_position(position: IRootPosition): VirtualDocument {
     let root_as_source = position as ISourcePosition;
@@ -302,12 +295,11 @@ export class CodeMirrorVirtualEditor
     editor: CodeEditor.IEditor,
     position: IEditorPosition
   ): IRootPosition | null {
-    // TODO: if cell is not known, refresh
-    let shift = this.editor_to_source_line.get(editor);
-    if (shift == null) {
+    if (!this.editor_to_source_line.has(editor)) {
       console.warn('Editor not found in editor_to_source_line map');
       return null;
     }
+    let shift = this.editor_to_source_line.get(editor);
     return {
       ...(position as CodeMirror.Position),
       line: position.line + shift

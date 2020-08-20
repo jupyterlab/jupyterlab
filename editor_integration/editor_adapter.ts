@@ -5,10 +5,16 @@ import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualDocument } from '../virtual/document';
 import { until_ready } from '../utils';
 import { IRootPosition } from '../positioning';
+import { create_console, EditorLogConsole } from "../virtual/console";
 
 export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
   features: Map<string, IFeatureEditorIntegration<T>>;
   isDisposed = false;
+
+  /**
+   * Console for debugging.
+   */
+  console: EditorLogConsole;
 
   private last_change: IEditorChange;
 
@@ -18,13 +24,14 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
     features = new Array<IFeatureEditorIntegration<T>>()
   ) {
     this.editor.change.connect(this.saveChange, this);
+    this.console = create_console('browser');
 
     this.features = new Map();
 
     for (let feature of features) {
       feature.register();
       if (!feature.is_registered) {
-        this.editor.console.warn(
+        this.console.warn(
           'The feature ',
           feature,
           'was not registered properly'
@@ -72,8 +79,8 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
       }
       return true;
     } catch (e) {
-      this.editor.console.log('updateAfterChange failure');
-      this.editor.console.error(e);
+      this.console.log('updateAfterChange failure');
+      this.console.error(e);
     }
     this.invalidateLastChange();
   }

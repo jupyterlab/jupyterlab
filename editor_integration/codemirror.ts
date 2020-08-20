@@ -174,7 +174,7 @@ export abstract class CodeMirrorIntegration
     let editor_position = this.virtual_document.transform_virtual_to_editor(
       start
     );
-    return this.virtual_editor.transform_editor_to_root(
+    return this.virtual_editor.transform_from_editor_to_root(
       ce_editor,
       editor_position
     );
