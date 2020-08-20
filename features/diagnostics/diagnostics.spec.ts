@@ -12,13 +12,13 @@ import {
   NotebookFeatureTestEnvironment,
   set_notebook_content,
   showAllCells
-} from '../editor_integration/testutils';
+} from '../../editor_integration/testutils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
-import { is_equal } from '../positioning';
-import { language_specific_overrides } from '../magics/defaults';
-import { foreign_code_extractors } from '../extractors/defaults';
+import { is_equal } from '../../positioning';
+import { language_specific_overrides } from '../../magics/defaults';
+import { foreign_code_extractors } from '../../extractors/defaults';
 import * as lsProtocol from 'vscode-languageserver-protocol';
-import { CodeDiagnostics as LSPDiagnosticsSettings } from '../_diagnostics';
+import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
 
 describe('Diagnostics', () => {
   let feature: DiagnosticsCM;

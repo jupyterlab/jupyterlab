@@ -1,31 +1,19 @@
-import { CompletionTriggerKind } from '../lsp';
+import { CompletionTriggerKind } from '../../lsp';
 import * as CodeMirror from 'codemirror';
-import { CodeMirrorIntegration } from '../editor_integration/codemirror';
-import {
-  JupyterFrontEnd,
-  JupyterFrontEndPlugin
-} from '@jupyterlab/application';
-import { IEditorChangedData, WidgetAdapter } from '../adapters/adapter';
+import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { IEditorChangedData, WidgetAdapter } from '../../adapters/adapter';
 import { LSPConnector } from './completion_handler';
 import { ICompletionManager } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { NotebookPanel } from '@jupyterlab/notebook';
-import { FeatureSettings, IFeatureLabIntegration } from '../feature';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { FeatureSettings, IFeatureLabIntegration } from '../../feature';
 
-import { CodeCompletion as LSPCompletionSettings } from '../_completion';
-import { IDocumentConnectionData } from '../connection_manager';
-import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
-import { NotebookAdapter } from '../adapters/notebook/notebook';
-import { LabIcon } from '@jupyterlab/ui-components';
-
-import completionSvg from '../../style/icons/completion.svg';
-
-export const completionIcon = new LabIcon({
-  name: 'lsp:completion',
-  svgstr: completionSvg
-});
+import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
+import { IDocumentConnectionData } from '../../connection_manager';
+import { ILSPAdapterManager } from '../../tokens';
+import { NotebookAdapter } from '../../adapters/notebook/notebook';
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];
@@ -171,41 +159,3 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     });
   }
 }
-
-const FEATURE_ID = PLUGIN_ID + ':completion';
-
-export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
-  id: FEATURE_ID,
-  requires: [
-    ILSPFeatureManager,
-    ISettingRegistry,
-    ICompletionManager,
-    ILSPAdapterManager
-  ],
-  autoStart: true,
-  activate: (
-    app: JupyterFrontEnd,
-    featureManager: ILSPFeatureManager,
-    settingRegistry: ISettingRegistry,
-    completionManager: ICompletionManager,
-    adapterManager: ILSPAdapterManager
-  ) => {
-    const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
-    const labIntegration = new CompletionLabIntegration(
-      app,
-      completionManager,
-      settings,
-      adapterManager
-    );
-
-    featureManager.register({
-      feature: {
-        editorIntegrationFactory: new Map([['CodeMirrorEditor', CompletionCM]]),
-        id: FEATURE_ID,
-        name: 'LSP Completion',
-        labIntegration: labIntegration,
-        settings: settings
-      }
-    });
-  }
-};

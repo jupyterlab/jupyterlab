@@ -6,23 +6,23 @@ import {
 } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { JSONArray, JSONObject } from '@lumino/coreutils';
-import { completionItemKindNames, CompletionTriggerKind } from '../lsp';
+import { completionItemKindNames, CompletionTriggerKind } from '../../lsp';
 import * as lsProtocol from 'vscode-languageserver-types';
-import { VirtualDocument } from '../virtual/document';
-import { IVirtualEditor } from '../virtual/editor';
+import { VirtualDocument } from '../../virtual/document';
+import { IVirtualEditor } from '../../virtual/editor';
 import {
   IEditorPosition,
   IRootPosition,
   IVirtualPosition
-} from '../positioning';
-import { LSPConnection } from '../connection';
+} from '../../positioning';
+import { LSPConnection } from '../../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 import { kernelIcon } from '@jupyterlab/ui-components';
 
-import { CodeCompletion as LSPCompletionSettings } from '../_completion';
-import { FeatureSettings } from '../feature';
-import { PositionConverter } from '../converter';
+import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
+import { FeatureSettings } from '../../feature';
+import { PositionConverter } from '../../converter';
 
 /**
  * A LSP connector for completion handlers.

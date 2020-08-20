@@ -21,12 +21,10 @@ import {
 } from './tokens';
 import { IFeature } from './feature';
 import { JUMP_PLUGIN } from './features/jump_to';
-import { COMPLETION_PLUGIN } from './features/completion';
 import { SIGNATURE_PLUGIN } from './features/signature';
 import { HOVER_PLUGIN } from './features/hover';
 import { RENAME_PLUGIN } from './features/rename';
 import { HIGHLIGHTS_PLUGIN } from './features/highlights';
-import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import { WIDGET_ADAPTER_MANAGER } from './adapter_manager';
 import { FILE_EDITOR_ADAPTER } from './adapters/file_editor';
 import { NOTEBOOK_ADAPTER } from './adapters/notebook';
@@ -35,6 +33,8 @@ import IPaths = JupyterFrontEnd.IPaths;
 import { CODEMIRROR_VIRTUAL_EDITOR } from './virtual/codemirror_editor';
 import { LabIcon } from '@jupyterlab/ui-components';
 import codeCheckSvg from '../style/icons/code-check.svg';
+import { DIAGNOSTICS_PLUGIN } from "./features/diagnostics";
+import { COMPLETION_PLUGIN } from "./features/completion";
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',

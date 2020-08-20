@@ -1,6 +1,6 @@
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { InputDialog } from '@jupyterlab/apputils';
-import { DiagnosticsCM } from './diagnostics';
+import { DiagnosticsCM } from './diagnostics/diagnostics';
 import { FeatureSettings, IFeatureCommand } from '../feature';
 import {
   CodeMirrorIntegration,
@@ -12,10 +12,10 @@ import {
 } from '@jupyterlab/application';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from './diagnostics';
 import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 import { LabIcon } from '@jupyterlab/ui-components';
 import renameSvg from '../../style/icons/rename.svg';
+import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from "./diagnostics";
 
 export const renameIcon = new LabIcon({
   name: 'lsp:rename',

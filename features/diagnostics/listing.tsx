@@ -1,27 +1,20 @@
 import React, { ReactElement } from 'react';
 import { VDomModel, VDomRenderer } from '@jupyterlab/apputils';
-import { caretDownIcon, caretUpIcon, LabIcon } from '@jupyterlab/ui-components';
+import { caretDownIcon, caretUpIcon } from '@jupyterlab/ui-components';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
-import { IEditorPosition } from '../positioning';
-import { VirtualDocument } from '../virtual/document';
+import { IEditorPosition } from '../../positioning';
+import { VirtualDocument } from '../../virtual/document';
 
-import '../../style/diagnostics_listing.css';
-import { diagnosticSeverityNames } from '../lsp';
+import '../../../style/diagnostics_listing.css';
+import { diagnosticSeverityNames } from '../../lsp';
 import { message_without_code } from './diagnostics';
-
-import diagnosticsSvg from '../../style/icons/diagnostics.svg';
-import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
-import { WidgetAdapter } from '../adapters/adapter';
-import { IVirtualEditor } from '../virtual/editor';
+import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
+import { WidgetAdapter } from '../../adapters/adapter';
+import { IVirtualEditor } from '../../virtual/editor';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
-import { DocumentLocator, focus_on } from '../components/utils';
-
-export const diagnosticsIcon = new LabIcon({
-  name: 'lsp:diagnostics',
-  svgstr: diagnosticsSvg
-});
+import { DocumentLocator, focus_on } from '../../components/utils';
 
 /**
  * Diagnostic which is localized at a specific editor (cell) within a notebook
