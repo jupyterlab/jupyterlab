@@ -12,6 +12,19 @@ import {
 } from '@jupyterlab/application';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { LabIcon } from '@jupyterlab/ui-components';
+import highlightSvg from '../../style/icons/highlight.svg';
+import highlightTypeSvg from '../../style/icons/highlight-type.svg';
+
+export const highlightIcon = new LabIcon({
+  name: 'lsp:highlight',
+  svgstr: highlightSvg
+});
+
+export const highlightTypeIcon = new LabIcon({
+  name: 'lsp:highlight-type',
+  svgstr: highlightTypeSvg
+});
 
 const COMMANDS: IFeatureCommand[] = [
   {
@@ -19,14 +32,16 @@ const COMMANDS: IFeatureCommand[] = [
     execute: ({ connection, virtual_position, document }) =>
       connection.getReferences(virtual_position, document.document_info),
     is_enabled: ({ connection }) => connection.isReferencesSupported(),
-    label: 'Highlight references'
+    label: 'Highlight references',
+    icon: highlightIcon
   },
   {
     id: 'highlight-type-definition',
     execute: ({ connection, virtual_position, document }) =>
       connection.getTypeDefinition(virtual_position, document.document_info),
     is_enabled: ({ connection }) => connection.isTypeDefinitionSupported(),
-    label: 'Highlight type definition'
+    label: 'Highlight type definition',
+    icon: highlightTypeIcon
   }
 ];
 

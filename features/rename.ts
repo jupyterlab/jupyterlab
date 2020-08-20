@@ -13,9 +13,9 @@ import {
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from './diagnostics';
+import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 import { LabIcon } from '@jupyterlab/ui-components';
 import renameSvg from '../../style/icons/rename.svg';
-import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 
 export const renameIcon = new LabIcon({
   name: 'lsp:rename',
