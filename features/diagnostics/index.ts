@@ -1,12 +1,15 @@
-import { ILSPFeatureManager, PLUGIN_ID } from "../../tokens";
-import { FeatureSettings, IFeatureCommand } from "../../feature";
-import { Menu } from "@lumino/widgets";
-import { DIAGNOSTICS_LISTING_CLASS } from "./listing";
-import { JupyterFrontEnd, JupyterFrontEndPlugin } from "@jupyterlab/application";
-import { ISettingRegistry } from "@jupyterlab/settingregistry";
-import { diagnostics_panel, DiagnosticsCM } from "./diagnostics";
-import { LabIcon } from "@jupyterlab/ui-components";
-import diagnosticsSvg from "../../../style/icons/diagnostics.svg";
+import { ILSPFeatureManager, PLUGIN_ID } from '../../tokens';
+import { FeatureSettings, IFeatureCommand } from '../../feature';
+import { Menu } from '@lumino/widgets';
+import { DIAGNOSTICS_LISTING_CLASS } from './listing';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
+} from '@jupyterlab/application';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { diagnostics_panel, DiagnosticsCM } from './diagnostics';
+import { LabIcon } from '@jupyterlab/ui-components';
+import diagnosticsSvg from '../../../style/icons/diagnostics.svg';
 
 export const FEATURE_ID = PLUGIN_ID + ':diagnostics';
 
@@ -18,7 +21,7 @@ export const diagnosticsIcon = new LabIcon({
 const COMMANDS: IFeatureCommand[] = [
   {
     id: 'show-diagnostics-panel',
-    execute: ({app, features, adapter}) => {
+    execute: ({ app, features, adapter }) => {
       let diagnostics_feature = features.get(FEATURE_ID) as DiagnosticsCM;
       diagnostics_feature.switchDiagnosticsPanelSource();
 
@@ -34,7 +37,7 @@ const COMMANDS: IFeatureCommand[] = [
       };
 
       if (!diagnostics_panel.is_registered) {
-        let columns_menu = new Menu({commands: app.commands});
+        let columns_menu = new Menu({ commands: app.commands });
         app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
           execute: args => {
             let column = get_column(args['name'] as string);
@@ -51,7 +54,7 @@ const COMMANDS: IFeatureCommand[] = [
         for (let column of panel_widget.content.columns) {
           columns_menu.addItem({
             command: CMD_COLUMN_VISIBILITY,
-            args: {name: column.name}
+            args: { name: column.name }
           });
         }
         app.contextMenu.addItem({

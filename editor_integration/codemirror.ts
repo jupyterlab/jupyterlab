@@ -1,7 +1,8 @@
 import {
-  FeatureEditorIntegration,
+  IFeatureEditorIntegration,
   IEditorIntegrationOptions,
-  FeatureSettings
+  IFeature,
+  IFeatureSettings
 } from '../feature';
 import { VirtualDocument } from '../virtual/document';
 import { LSPConnection } from '../connection';
@@ -20,6 +21,8 @@ import {
   CodeMirrorHandler,
   CodeMirrorVirtualEditor
 } from '../virtual/codemirror_editor';
+import { StatusMessage, WidgetAdapter } from '../adapters/adapter';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 function toDocumentChanges(changes: {
   [uri: string]: lsProtocol.TextEdit[];
@@ -55,10 +58,11 @@ export interface IEditOutcome {
  * One feature of each type exists per VirtualDocument
  * (the initialization is performed by the adapter).
  */
-export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
-  CodeMirrorVirtualEditor
-> {
-  public is_registered: boolean;
+export abstract class CodeMirrorIntegration
+  implements IFeatureEditorIntegration<CodeMirrorVirtualEditor> {
+  is_registered: boolean;
+  feature: IFeature;
+
   protected readonly editor_handlers: Map<string, CodeMirrorHandler>;
   protected readonly connection_handlers: Map<string, any>;
   protected readonly wrapper_handlers: Map<keyof HTMLElementEventMap, any>;
@@ -67,10 +71,26 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
   protected virtual_editor: CodeMirrorVirtualEditor;
   protected virtual_document: VirtualDocument;
   protected connection: LSPConnection;
-  settings: FeatureSettings<any>;
+
+  protected status_message: StatusMessage;
+  protected adapter: WidgetAdapter<IDocumentWidget>;
+
+  get settings(): IFeatureSettings<any> {
+    return this.feature.settings;
+  }
+
+  get lab_integration() {
+    return this.feature.labIntegration;
+  }
 
   constructor(options: IEditorIntegrationOptions) {
-    super(options);
+    this.feature = options.feature;
+    this.virtual_editor = options.virtual_editor as CodeMirrorVirtualEditor;
+    this.virtual_document = options.virtual_document;
+    this.connection = options.connection;
+    this.status_message = options.status_message;
+    this.adapter = options.adapter;
+
     this.editor_handlers = new Map();
     this.connection_handlers = new Map();
     this.wrapper_handlers = new Map();
@@ -95,11 +115,6 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
     this.is_registered = true;
   }
 
-  isEnabled() {
-    // TODO - use settings
-    return true;
-  }
-
   remove(): void {
     // unregister editor handlers
     for (let [event_name, handler] of this.editor_handlers) {
@@ -116,13 +131,6 @@ export abstract class CodeMirrorIntegration extends FeatureEditorIntegration<
       this.wrapper.removeEventListener(event_name, handler);
     }
     this.wrapper_handlers.clear();
-  }
-
-  afterChange(
-    change: CodeMirror.EditorChange,
-    root_position: IRootPosition
-  ): void {
-    // nothing here, yet
   }
 
   protected range_to_editor_range(

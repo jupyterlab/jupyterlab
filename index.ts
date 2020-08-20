@@ -33,8 +33,8 @@ import IPaths = JupyterFrontEnd.IPaths;
 import { CODEMIRROR_VIRTUAL_EDITOR } from './virtual/codemirror_editor';
 import { LabIcon } from '@jupyterlab/ui-components';
 import codeCheckSvg from '../style/icons/code-check.svg';
-import { DIAGNOSTICS_PLUGIN } from "./features/diagnostics";
-import { COMPLETION_PLUGIN } from "./features/completion";
+import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
+import { COMPLETION_PLUGIN } from './features/completion';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -42,10 +42,15 @@ export const codeCheckIcon = new LabIcon({
 });
 
 export interface IFeatureOptions {
+  /**
+   * The feature to be registered.
+   */
   feature: IFeature;
-  /** ids of the features this feature wants to disable;
-    use it to override the default feature implementations with your custom implementation
-    (e.g. a custom completer from Kite)  */
+  /**
+   * Identifiers (values of `JupyterFrontEndPlugin.id` field) of the features
+   * that your feature wants to disable; use it to override the default feature
+   * implementations with your custom implementation (e.g. a custom completer)
+   */
   supersedes?: string[];
 }
 

@@ -1,13 +1,13 @@
 import IEditor = CodeEditor.IEditor;
 import { IEditorChange, IVirtualEditor } from '../virtual/editor';
-import { FeatureEditorIntegration } from '../feature';
+import { IFeatureEditorIntegration } from '../feature';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { VirtualDocument } from '../virtual/document';
 import { until_ready } from '../utils';
 import { IRootPosition } from '../positioning';
 
 export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
-  features: Map<string, FeatureEditorIntegration<T>>;
+  features: Map<string, IFeatureEditorIntegration<T>>;
   isDisposed = false;
 
   private last_change: IEditorChange;
@@ -15,7 +15,7 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
   constructor(
     protected editor: IVirtualEditor<CodeEditor.IEditor>,
     protected virtual_document: VirtualDocument,
-    features = new Array<FeatureEditorIntegration<T>>()
+    features = new Array<IFeatureEditorIntegration<T>>()
   ) {
     this.editor.change.connect(this.saveChange, this);
 

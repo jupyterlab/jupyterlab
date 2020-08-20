@@ -5,13 +5,17 @@ import { IEditorPosition, IVirtualPosition } from '../../positioning';
 import { DiagnosticSeverity, diagnosticSeverityNames } from '../../lsp';
 import { DefaultMap, uris_equal } from '../../utils';
 import { MainAreaWidget } from '@jupyterlab/apputils';
-import { DiagnosticsDatabase, DiagnosticsListing, IEditorDiagnostic } from './listing';
+import {
+  DiagnosticsDatabase,
+  DiagnosticsListing,
+  IEditorDiagnostic
+} from './listing';
 import { VirtualDocument } from '../../virtual/document';
 import { FeatureSettings } from '../../feature';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
 import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
-import { diagnosticsIcon } from "./index";
+import { diagnosticsIcon } from './index';
 
 class DiagnosticsPanel {
   private _content: DiagnosticsListing = null;
@@ -409,4 +413,3 @@ export function message_without_code(diagnostic: lsProtocol.Diagnostic) {
   }
   return message;
 }
-

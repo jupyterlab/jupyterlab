@@ -48,6 +48,9 @@ export interface IEditorChange {
 
 export interface IVirtualEditor<T extends IEditor> {
   virtual_document: VirtualDocument;
+  /**
+   * Console for debugging and reporting for the use by features.
+   */
   console: EditorLogConsole;
   change: Signal<IVirtualEditor<T>, IEditorChange>;
 

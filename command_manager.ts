@@ -1,7 +1,7 @@
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { ICommandPalette, IWidgetTracker } from '@jupyterlab/apputils';
 import { WidgetAdapter } from './adapters/adapter';
-import { FeatureEditorIntegration, IFeatureCommand } from './feature';
+import { IFeatureEditorIntegration, IFeatureCommand } from './feature';
 import { VirtualDocument } from './virtual/document';
 import { LSPConnection } from './connection';
 import { IRootPosition, IVirtualPosition } from './positioning';
@@ -224,7 +224,7 @@ export interface ICommandContext {
   connection: LSPConnection;
   virtual_position: IVirtualPosition;
   root_position: IRootPosition;
-  features: Map<string, FeatureEditorIntegration<any>>;
+  features: Map<string, IFeatureEditorIntegration<any>>;
   editor: IVirtualEditor<CodeEditor.IEditor>;
   adapter: WidgetAdapter<IDocumentWidget>;
 }

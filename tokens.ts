@@ -76,8 +76,20 @@ export namespace ILanguageServerManager {
 }
 
 export interface ILSPFeatureManager {
+  /**
+   * A read-only registry of all registered features.
+   */
   readonly features: IFeature[];
+
+  /**
+   * Register the new feature (frontend capability)
+   * for one or more code editor implementations.
+   */
   register(options: IFeatureOptions): void;
+  /**
+   * Register the context command manager. Should not be used directly
+   * by the features - pass our commands in `IFeature.commands` instead.
+   */
   registerCommandManager(manager: ContextCommandManager): void;
 }
 
@@ -123,6 +135,9 @@ export interface IVirtualEditorType<T extends IEditor> {
 }
 
 export interface ILSPVirtualEditorManager {
+  /**
+   * Register editor type implementation.
+   */
   registerEditorType(options: IVirtualEditorType<IEditor>): void;
 
   /**

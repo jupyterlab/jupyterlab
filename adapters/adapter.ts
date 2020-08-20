@@ -14,7 +14,7 @@ import {
   ISocketConnectionOptions
 } from '../connection_manager';
 import { ILSPExtension } from '../index';
-import { FeatureEditorIntegration, IFeature } from '../feature';
+import { IFeatureEditorIntegration, IFeature } from '../feature';
 import { EditorAdapter } from '../editor_integration/editor_adapter';
 import IEditor = CodeEditor.IEditor;
 
@@ -494,7 +494,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     features: IFeature[] = null
   ): EditorAdapter<IVirtualEditor<IEditor>> {
     let adapter_features = new Array<
-      FeatureEditorIntegration<IVirtualEditor<IEditor>>
+      IFeatureEditorIntegration<IVirtualEditor<IEditor>>
     >();
 
     if (features === null) {

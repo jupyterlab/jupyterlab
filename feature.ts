@@ -128,62 +128,42 @@ export interface IFeature {
   settings?: IFeatureSettings<any>;
 }
 
-export abstract class FeatureEditorIntegration<
-  T extends IVirtualEditor<IEditor>
-> {
+export interface IFeatureEditorIntegration<T extends IVirtualEditor<IEditor>> {
+  /**
+   * Stores registration confirmation and should be set to true once register()
+   * is successfully called (and false beforehand)
+   */
   is_registered: boolean;
+  /**
+   * The reference to the Feature (it will be provided in the constructor options;
+   * the implementations should expose them as public so that the specific features
+   * can access their settings and metadata).
+   */
   feature: IFeature;
-
-  // TODO: use T generic type here (difficult to conciliate with options!)
-  protected virtual_editor: IVirtualEditor<IEditor>;
-  protected virtual_document: VirtualDocument;
-  protected connection: LSPConnection;
-  protected status_message: StatusMessage;
-  protected adapter: WidgetAdapter<IDocumentWidget>;
-
-  get settings() {
-    return this.feature.settings;
-  }
-
-  get lab_integration() {
-    return this.feature.labIntegration;
-  }
-
-  protected constructor(options: IEditorIntegrationOptions) {
-    this.feature = options.feature;
-    this.virtual_editor = options.virtual_editor;
-    this.virtual_document = options.virtual_document;
-    this.connection = options.connection;
-    this.status_message = options.status_message;
-    this.adapter = options.adapter;
-  }
-
   /**
-   * Connect event handlers to the editor, virtual document and connection(s)
+   * Connect event handlers to the editor, virtual document and connection(s).
    */
-  abstract register(): void;
-
+  register(): void;
   /**
-   * Will allow the user to disable specific functions
+   * Remove the event handlers.
    */
-  abstract isEnabled(): boolean;
-
+  remove(): void;
   /**
-   * Remove event handlers on destruction
+   * A callback which is executed after a change in the virtual document has been
+   * recorded and the document positions were recalculated; this is different from
+   * observing value changes in the underlying editor implementation itself (e.g. in
+   * the CodeMirror.Editor) as the direct listening to the events does not guarantee
+   * that the appropriate changes were reflected in the virtual document at the point
+   * the listeners were reached (thus not using afterChange() when needed may lead to
+   * position transformation errors).
    */
-  abstract remove(): void;
-
-  // TODO: replace with a signal after EditorAdapter rewrite?
-  abstract afterChange(
-    change: IEditorChange,
-    root_position: IRootPosition
-  ): void;
+  afterChange?(change: IEditorChange, root_position: IRootPosition): void;
 }
 
 export interface IFeatureEditorIntegrationConstructor<
   T extends IVirtualEditor<IEditor>
 > {
-  new (options: IEditorIntegrationOptions): FeatureEditorIntegration<T>;
+  new (options: IEditorIntegrationOptions): IFeatureEditorIntegration<T>;
 }
 
 export interface IEditorIntegrationOptions {
