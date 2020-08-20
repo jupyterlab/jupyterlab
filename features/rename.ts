@@ -14,11 +14,10 @@ import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { FEATURE_ID as DIAGNOSTICS_PLUGIN_ID } from './diagnostics';
 import { LabIcon } from '@jupyterlab/ui-components';
-
 import renameSvg from '../../style/icons/rename.svg';
 import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
 
-export const hoverIcon = new LabIcon({
+export const renameIcon = new LabIcon({
   name: 'lsp:rename',
   svgstr: renameSvg
 });
@@ -82,7 +81,8 @@ const COMMANDS: IFeatureCommand[] = [
       }
     },
     is_enabled: ({ connection }) => connection.isRenameSupported(),
-    label: 'Rename symbol'
+    label: 'Rename symbol',
+    icon: renameIcon
   }
 ];
 

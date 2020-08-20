@@ -8,6 +8,7 @@ import { StatusMessage, WidgetAdapter } from './adapters/adapter';
 import IEditor = CodeEditor.IEditor;
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { LabIcon } from '@jupyterlab/ui-components';
 
 export interface IFeatureCommand {
   /**
@@ -16,8 +17,19 @@ export interface IFeatureCommand {
    * identified by an attachment-point-specific suffix.
    */
   id: string;
+  /**
+   * Execute callback, will be called when users executes the command.
+   * @param context
+   */
   execute: (context: ICommandContext) => void;
+  /**
+   * A callback to check whether the command is available in given context.
+   * @param context
+   */
   is_enabled: (context: ICommandContext) => boolean;
+  /**
+   * The user-facing name of the command.
+   */
   label: string;
   /**
    * Default infinity (unassigned) if absolute, otherwise 0 (for relative ranks)
@@ -31,6 +43,10 @@ export interface IFeatureCommand {
    * By default the command will be attached to context menus of each adapter.
    */
   attach_to?: Set<CommandEntryPoint>;
+  /**
+   * The icon to be displayed next to the label.
+   */
+  icon?: LabIcon;
 }
 
 export interface IFeatureSettings<T> {

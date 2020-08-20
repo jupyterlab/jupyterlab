@@ -20,6 +20,13 @@ import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { LabIcon } from '@jupyterlab/ui-components';
+import jumpToSvg from '../../style/icons/jump-to.svg';
+
+export const jumpToIcon = new LabIcon({
+  name: 'lsp:jump-to',
+  svgstr: jumpToSvg
+});
 
 const FEATURE_ID = PLUGIN_ID + ':jump-to';
 
@@ -188,7 +195,8 @@ const COMMANDS: IFeatureCommand[] = [
       await jump_feature.handle_jump(targets, document.document_info.uri);
     },
     is_enabled: ({ connection }) => connection.isDefinitionSupported(),
-    label: 'Jump to definition'
+    label: 'Jump to definition',
+    icon: jumpToIcon
   }
 ];
 

@@ -64,7 +64,8 @@ abstract class LSPCommandManager {
         execute: () => this.execute(cmd),
         isEnabled: () => this.is_enabled(cmd),
         isVisible: () => this.is_visible(cmd),
-        label: cmd.label
+        label: cmd.label,
+        icon: cmd.icon
       });
 
       if (this.should_attach(cmd)) {
@@ -125,7 +126,7 @@ export class ContextCommandManager extends LSPCommandManager {
     this.app.contextMenu.addItem({
       selector: this.selector,
       command: this.create_id(command),
-      rank: this.get_rank(command)
+      rank: this.get_rank(command),
     });
   }
 
