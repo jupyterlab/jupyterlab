@@ -72,6 +72,11 @@
       "items": {
         "type": "string"
       }
+    },
+    "discovery": {
+      "title": "Discovery metadata",
+      "description": "Discovery metadata used to for companion packages",
+      "type": "object"
     }
   },
   "additionalProperties": false,
