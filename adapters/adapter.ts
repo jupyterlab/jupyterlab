@@ -23,31 +23,42 @@ export class StatusMessage {
    * The text message to be shown on the statusbar
    */
   message: string;
-  changed: Signal<StatusMessage, string>;
+  changed: Signal<StatusMessage, void>;
+  timer: number;
 
   constructor() {
     this.message = '';
     this.changed = new Signal(this);
+    this.timer = null;
   }
 
   /**
    * Set the text message and (optionally) the timeout to remove it.
    * @param message
    * @param timeout - number of ms to until the message is cleaned;
-   *        -1 if the message should stay up indefinitely
+   *        -1 if the message should stay up indefinitely;
+   *        defaults to 3000ms (3 seconds)
    */
-  set(message: string, timeout?: number) {
+  set(message: string, timeout: number = 1000 * 3) {
+    this.expire_timer();
     this.message = message;
-    this.changed.emit('');
-    if (timeout == null && timeout !== -1) {
-      setTimeout(this.cleanup, timeout);
+    this.changed.emit();
+    if (timeout !== -1) {
+      this.timer = window.setTimeout(this.clear.bind(this), timeout);
     }
   }
 
-  cleanup = () => {
+  clear() {
     this.message = '';
-    this.changed.emit('');
-  };
+    this.changed.emit();
+  }
+
+  private expire_timer() {
+    if (this.timer !== null) {
+      window.clearTimeout(this.timer);
+      this.timer = 0;
+    }
+  }
 }
 
 /**
