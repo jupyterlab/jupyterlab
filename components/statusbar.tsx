@@ -17,7 +17,14 @@ import {
   TextItem
 } from '@jupyterlab/statusbar';
 
-import { LabIcon, stopIcon } from '@jupyterlab/ui-components';
+import {
+  caretDownIcon,
+  caretUpIcon,
+  LabIcon,
+  stopIcon,
+  circleEmptyIcon,
+  circleIcon
+} from '@jupyterlab/ui-components';
 import { WidgetAdapter } from '../adapters/adapter';
 import { collect_documents, VirtualDocument } from '../virtual/document';
 import { LSPConnection } from '../connection';
@@ -74,6 +81,9 @@ class CollapsibleList extends React.Component<
   };
 
   render() {
+    const collapseExpandIcon = !this.state.isCollapsed
+      ? caretUpIcon
+      : caretDownIcon;
     return (
       <div
         className={
@@ -82,8 +92,8 @@ class CollapsibleList extends React.Component<
         }
       >
         <h4 onClick={this.handleClick}>
-          <span className={'lsp-caret'}></span>
-          {this.props.title} ({this.props.list.length})
+          <collapseExpandIcon.react tag="span" className="lsp-caret-icon" />
+          {this.props.title}: {this.props.list.length}
         </h4>
         <div>{this.props.list}</div>
       </div>
@@ -130,19 +140,18 @@ class LSPPopup extends VDomRenderer<LSPStatus.Model> {
             status = 'not connected';
           }
 
+          const icon = status === 'initialized' ? circleIcon : circleEmptyIcon;
+
           return (
             <li key={i}>
               {document.id_path}
               <span className={'lsp-document-status'}>
                 {status}
-                <span
-                  className={
-                    'lsp-document-status-icon ' +
-                    (status === 'initialized'
-                      ? 'jp-FilledCircleIcon'
-                      : 'jp-CircleIcon')
-                  }
-                ></span>
+                <icon.react
+                  tag="span"
+                  className="lsp-document-status-icon"
+                  elementSize={'small'}
+                />
               </span>
             </li>
           );
@@ -247,7 +256,7 @@ export class LSPStatus extends VDomRenderer<LSPStatus.Model> {
     }
     return (
       <GroupItem
-        spacing={4}
+        spacing={2}
         title={this.model.long_message}
         onClick={this.handleClick}
       >
