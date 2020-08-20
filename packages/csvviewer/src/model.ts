@@ -53,7 +53,7 @@ export class DSVModel extends DataModel implements IDisposable {
       header = true,
       initialRows = 500
     } = options;
-    this._data = data;
+    this._rawData = data;
     this._delimiter = delimiter;
     this._quote = quote;
     this._quoteEscaped = new RegExp(quote + quote, 'g');
@@ -80,7 +80,7 @@ export class DSVModel extends DataModel implements IDisposable {
     this._parser = quoteParser ? 'quotes' : 'noquotes';
 
     // Parse the data.
-    this._parseAsync();
+    this.parseAsync();
 
     // Cache the header row.
     if (header === true && this._columnCount! > 0) {
@@ -104,6 +104,57 @@ export class DSVModel extends DataModel implements IDisposable {
    */
   get ready(): Promise<void> {
     return this._ready.promise;
+  }
+
+  /**
+   * The string representation of the data.
+   */
+  get rawData(): string {
+    return this._rawData;
+  }
+  set rawData(value: string) {
+    this._rawData = value;
+  }
+
+  /**
+   * The initial chunk of rows to parse.
+   */
+  get initialRows(): number {
+    return this._initialRows;
+  }
+  set initialRows(value: number) {
+    this._initialRows = value;
+  }
+
+  /**
+   * The header strings.
+   */
+  get header(): string[] {
+    return this._header;
+  }
+  set header(value: string[]) {
+    this._header = value;
+  }
+
+  /**
+   * The delimiter between entries on the same row.
+   */
+  get delimiter(): string {
+    return this._delimiter;
+  }
+
+  /**
+   * The delimiter between rows.
+   */
+  get rowDelimiter(): string {
+    return this._rowDelimiter;
+  }
+
+  /**
+   * A boolean determined by whether parsing has completed.
+   */
+  get doneParsing(): boolean {
+    return this._doneParsing;
   }
 
   /**
@@ -196,7 +247,7 @@ export class DSVModel extends DataModel implements IDisposable {
     this._rowCount = undefined;
     this._rowOffsets = null!;
     this._columnOffsets = null!;
-    this._data = null!;
+    this._rawData = null!;
 
     // Clear out state associated with the asynchronous parsing.
     if (this._doneParsing === false) {
@@ -210,6 +261,135 @@ export class DSVModel extends DataModel implements IDisposable {
     if (this._delayedParse !== null) {
       window.clearTimeout(this._delayedParse);
     }
+  }
+
+  /**
+   * Get the index in the data string for the first character of a row and
+   * column.
+   *
+   * @param row - The row of the data item.
+   * @param column - The column of the data item.
+   * @returns - The index into the data string where the data item starts.
+   */
+  getOffsetIndex(row: number, column: number): number {
+    // Declare local variables.
+    const ncols = this._columnCount!;
+
+    // Check to see if row *should* be in the cache, based on the cache size.
+    let rowIndex = (row - this._columnOffsetsStartingRow) * ncols;
+    if (rowIndex < 0 || rowIndex > this._columnOffsets.length) {
+      // Row isn't in the cache, so we invalidate the entire cache and set up
+      // the cache to hold the requested row.
+      this._columnOffsets.fill(0xffffffff);
+      this._columnOffsetsStartingRow = row;
+      rowIndex = 0;
+    }
+
+    // Check to see if we need to fetch the row data into the cache.
+    if (this._columnOffsets[rowIndex] === 0xffffffff) {
+      // Figure out how many rows below us also need to be fetched.
+      let maxRows = 1;
+      while (
+        maxRows <= this._maxCacheGet &&
+        this._columnOffsets[rowIndex + maxRows * ncols] === 0xffffff
+      ) {
+        maxRows++;
+      }
+
+      // Parse the data to get the column offsets.
+      const { offsets } = PARSERS[this._parser]({
+        data: this._rawData,
+        delimiter: this._delimiter,
+        rowDelimiter: this._rowDelimiter,
+        quote: this._quote,
+        columnOffsets: true,
+        maxRows: maxRows,
+        ncols: ncols,
+        startIndex: this._rowOffsets[row]
+      });
+
+      // Copy results to the cache.
+      for (let i = 0; i < offsets.length; i++) {
+        this._columnOffsets[rowIndex + i] = offsets[i];
+      }
+    }
+
+    // Return the offset index from cache.
+    return this._columnOffsets[rowIndex + column];
+  }
+
+  /**
+   * Parse the data string asynchronously.
+   *
+   * #### Notes
+   * It can take several seconds to parse a several hundred megabyte string, so
+   * we parse the first 500 rows to get something up on the screen, then we
+   * parse the full data string asynchronously.
+   */
+  parseAsync(): void {
+    // Number of rows to get initially.
+    let currentRows = this._initialRows;
+
+    // Number of rows to get in each chunk thereafter. We set this high to just
+    // get the rest of the rows for now.
+    let chunkRows = Math.pow(2, 32) - 1;
+
+    // We give the UI a chance to draw by delaying the chunk parsing.
+    const delay = 30; // milliseconds
+
+    // Define a function to parse a chunk up to and including endRow.
+    const parseChunk = (endRow: number) => {
+      try {
+        this._computeRowOffsets(endRow);
+      } catch (e) {
+        // Sometimes the data string cannot be parsed with the full parser (for
+        // example, we may have the wrong delimiter). In these cases, fall back to
+        // the simpler parser so we can show something.
+        if (this._parser === 'quotes') {
+          console.warn(e);
+          this._parser = 'noquotes';
+          this._resetParser();
+          this._computeRowOffsets(endRow);
+        } else {
+          throw e;
+        }
+      }
+      return this._doneParsing;
+    };
+
+    // Reset the parser to its initial state.
+    this._resetParser();
+
+    // Parse the first rows to give us the start of the data right away.
+    const done = parseChunk(currentRows);
+
+    // If we are done, return early.
+    if (done) {
+      return;
+    }
+
+    // Define a function to recursively parse the next chunk after a delay.
+    const delayedParse = () => {
+      // Parse up to the new end row.
+      const done = parseChunk(currentRows + chunkRows);
+      currentRows += chunkRows;
+
+      // Gradually double the chunk size until we reach a million rows, if we
+      // start below a million-row chunk size.
+      if (chunkRows < 1000000) {
+        chunkRows *= 2;
+      }
+
+      // If we aren't done, the schedule another parse.
+      if (done) {
+        this._delayedParse = null;
+      } else {
+        this._delayedParse = window.setTimeout(delayedParse, delay);
+      }
+    };
+
+    // Parse full data string in chunks, delayed by a few milliseconds to give the UI a chance to draw.
+    this._delayedParse = window.setTimeout(delayedParse, delay);
   }
 
   /**
@@ -234,7 +414,7 @@ export class DSVModel extends DataModel implements IDisposable {
     if (this._columnCount === undefined) {
       // Get number of columns in first row
       this._columnCount = PARSERS[this._parser]({
-        data: this._data,
+        data: this._rawData,
         delimiter: this._delimiter,
         rowDelimiter: this._rowDelimiter,
         quote: this._quote,
@@ -246,7 +426,7 @@ export class DSVModel extends DataModel implements IDisposable {
     // Parse the data up to and including the requested row, starting from the
     // last row offset we have.
     const { nrows, offsets } = PARSERS[this._parser]({
-      data: this._data,
+      data: this._rawData,
       startIndex: this._rowOffsets[this._rowCount! - 1],
       delimiter: this._delimiter,
       rowDelimiter: this._rowDelimiter,
@@ -347,7 +527,7 @@ export class DSVModel extends DataModel implements IDisposable {
     let nextIndex;
 
     // Find the index for the first character in the field.
-    const index = this._getOffsetIndex(row, column);
+    const index = this.getOffsetIndex(row, column);
 
     // Initialize the trim adjustments.
     let trimRight = 0;
@@ -360,7 +540,7 @@ export class DSVModel extends DataModel implements IDisposable {
       // Check if we are getting any row but the last.
       if (row < this._rowCount! - 1) {
         // Set the next offset to the next row, column 0.
-        nextIndex = this._getOffsetIndex(row + 1, 0);
+        nextIndex = this.getOffsetIndex(row + 1, 0);
 
         // Since we are not at the last row, we need to trim off the row
         // delimiter.
@@ -368,12 +548,12 @@ export class DSVModel extends DataModel implements IDisposable {
       } else {
         // We are getting the last data item, so the slice end is the end of the
         // data string.
-        nextIndex = this._data.length;
+        nextIndex = this._rawData.length;
 
         // The string may or may not end in a row delimiter (RFC 4180 2.2), so
         // we explicitly check if we should trim off a row delimiter.
         if (
-          this._data[nextIndex - 1] ===
+          this._rawData[nextIndex - 1] ===
           this._rowDelimiter[this._rowDelimiter.length - 1]
         ) {
           trimRight += this._rowDelimiter.length;
@@ -381,22 +561,25 @@ export class DSVModel extends DataModel implements IDisposable {
       }
     } else {
       // The next field starts at the next column offset.
-      nextIndex = this._getOffsetIndex(row, column + 1);
+      nextIndex = this.getOffsetIndex(row, column + 1);
 
       // Trim off the delimiter if it exists at the end of the field
-      if (index < nextIndex && this._data[nextIndex - 1] === this._delimiter) {
+      if (
+        index < nextIndex &&
+        this._rawData[nextIndex - 1] === this._delimiter
+      ) {
         trimRight += 1;
       }
     }
 
     // Check to see if the field begins with a quote. If it does, trim a quote on either side.
-    if (this._data[index] === this._quote) {
+    if (this._rawData[index] === this._quote) {
       trimLeft += 1;
       trimRight += 1;
     }
 
     // Slice the actual value out of the data string.
-    value = this._data.slice(index + trimLeft, nextIndex - trimRight);
+    value = this._rawData.slice(index + trimLeft, nextIndex - trimRight);
 
     // If we have a quoted field and we have an escaped quote inside it, unescape it.
     if (trimLeft === 1 && value.indexOf(this._quote) !== -1) {
@@ -405,135 +588,6 @@ export class DSVModel extends DataModel implements IDisposable {
 
     // Return the value.
     return value;
-  }
-
-  /**
-   * Get the index in the data string for the first character of a row and
-   * column.
-   *
-   * @param row - The row of the data item.
-   * @param column - The column of the data item.
-   * @returns - The index into the data string where the data item starts.
-   */
-  private _getOffsetIndex(row: number, column: number): number {
-    // Declare local variables.
-    const ncols = this._columnCount!;
-
-    // Check to see if row *should* be in the cache, based on the cache size.
-    let rowIndex = (row - this._columnOffsetsStartingRow) * ncols;
-    if (rowIndex < 0 || rowIndex > this._columnOffsets.length) {
-      // Row isn't in the cache, so we invalidate the entire cache and set up
-      // the cache to hold the requested row.
-      this._columnOffsets.fill(0xffffffff);
-      this._columnOffsetsStartingRow = row;
-      rowIndex = 0;
-    }
-
-    // Check to see if we need to fetch the row data into the cache.
-    if (this._columnOffsets[rowIndex] === 0xffffffff) {
-      // Figure out how many rows below us also need to be fetched.
-      let maxRows = 1;
-      while (
-        maxRows <= this._maxCacheGet &&
-        this._columnOffsets[rowIndex + maxRows * ncols] === 0xffffff
-      ) {
-        maxRows++;
-      }
-
-      // Parse the data to get the column offsets.
-      const { offsets } = PARSERS[this._parser]({
-        data: this._data,
-        delimiter: this._delimiter,
-        rowDelimiter: this._rowDelimiter,
-        quote: this._quote,
-        columnOffsets: true,
-        maxRows: maxRows,
-        ncols: ncols,
-        startIndex: this._rowOffsets[row]
-      });
-
-      // Copy results to the cache.
-      for (let i = 0; i < offsets.length; i++) {
-        this._columnOffsets[rowIndex + i] = offsets[i];
-      }
-    }
-
-    // Return the offset index from cache.
-    return this._columnOffsets[rowIndex + column];
-  }
-
-  /**
-   * Parse the data string asynchronously.
-   *
-   * #### Notes
-   * It can take several seconds to parse a several hundred megabyte string, so
-   * we parse the first 500 rows to get something up on the screen, then we
-   * parse the full data string asynchronously.
-   */
-  private _parseAsync(): void {
-    // Number of rows to get initially.
-    let currentRows = this._initialRows;
-
-    // Number of rows to get in each chunk thereafter. We set this high to just
-    // get the rest of the rows for now.
-    let chunkRows = Math.pow(2, 32) - 1;
-
-    // We give the UI a chance to draw by delaying the chunk parsing.
-    const delay = 30; // milliseconds
-
-    // Define a function to parse a chunk up to and including endRow.
-    const parseChunk = (endRow: number) => {
-      try {
-        this._computeRowOffsets(endRow);
-      } catch (e) {
-        // Sometimes the data string cannot be parsed with the full parser (for
-        // example, we may have the wrong delimiter). In these cases, fall back to
-        // the simpler parser so we can show something.
-        if (this._parser === 'quotes') {
-          console.warn(e);
-          this._parser = 'noquotes';
-          this._resetParser();
-          this._computeRowOffsets(endRow);
-        } else {
-          throw e;
-        }
-      }
-      return this._doneParsing;
-    };
-
-    // Reset the parser to its initial state.
-    this._resetParser();
-
-    // Parse the first rows to give us the start of the data right away.
-    const done = parseChunk(currentRows);
-
-    // If we are done, return early.
-    if (done) {
-      return;
-    }
-
-    // Define a function to recursively parse the next chunk after a delay.
-    const delayedParse = () => {
-      // Parse up to the new end row.
-      const done = parseChunk(currentRows + chunkRows);
-      currentRows += chunkRows;
-
-      // Gradually double the chunk size until we reach a million rows, if we
-      // start below a million-row chunk size.
-      if (chunkRows < 1000000) {
-        chunkRows *= 2;
-      }
-
-      // If we aren't done, the schedule another parse.
-      if (done) {
-        this._delayedParse = null;
-      } else {
-        this._delayedParse = window.setTimeout(delayedParse, delay);
-      }
-    };
-
-    // Parse full data string in chunks, delayed by a few milliseconds to give the UI a chance to draw.
-    this._delayedParse = window.setTimeout(delayedParse, delay);
   }
 
   /**
@@ -576,7 +630,7 @@ export class DSVModel extends DataModel implements IDisposable {
   private _rowDelimiter: string;
 
   // Data values
-  private _data: string;
+  private _rawData: string;
   private _rowCount: number | undefined = 1;
   private _columnCount: number | undefined;
 
