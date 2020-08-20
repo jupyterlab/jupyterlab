@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/vega5-extension",
-  "version": "3.0.0-alpha.11",
+  "version": "3.0.0-alpha.12",
   "description": "JupyterLab - Vega 5 and Vega-Lite 3 Mime Renderer Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,7 +34,7 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/rendermime-interfaces": "^3.0.0-alpha.11",
+    "@jupyterlab/rendermime-interfaces": "^3.0.0-alpha.12",
     "@lumino/coreutils": "^1.4.3",
     "@lumino/widgets": "^1.11.1",
     "vega": "^5.9.0",

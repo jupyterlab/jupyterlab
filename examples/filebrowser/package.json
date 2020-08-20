@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-filebrowser",
-  "version": "3.0.0-alpha.11",
+  "version": "3.0.0-alpha.12",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,14 +8,14 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-alpha.11",
-    "@jupyterlab/codemirror": "^3.0.0-alpha.11",
-    "@jupyterlab/docmanager": "^3.0.0-alpha.11",
-    "@jupyterlab/docregistry": "^3.0.0-alpha.11",
-    "@jupyterlab/filebrowser": "^3.0.0-alpha.11",
-    "@jupyterlab/fileeditor": "^3.0.0-alpha.11",
-    "@jupyterlab/services": "^6.0.0-alpha.11",
-    "@jupyterlab/theme-light-extension": "^3.0.0-alpha.11",
+    "@jupyterlab/apputils": "^3.0.0-alpha.12",
+    "@jupyterlab/codemirror": "^3.0.0-alpha.12",
+    "@jupyterlab/docmanager": "^3.0.0-alpha.12",
+    "@jupyterlab/docregistry": "^3.0.0-alpha.12",
+    "@jupyterlab/filebrowser": "^3.0.0-alpha.12",
+    "@jupyterlab/fileeditor": "^3.0.0-alpha.12",
+    "@jupyterlab/services": "^6.0.0-alpha.12",
+    "@jupyterlab/theme-light-extension": "^3.0.0-alpha.12",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/commands": "^1.10.1",
     "@lumino/widgets": "^1.11.1",

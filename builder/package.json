@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/builder",
-  "version": "3.0.0-alpha.11",
+  "version": "3.0.0-alpha.12",
   "description": "JupyterLab - Extension Builder",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,7 +36,7 @@
   "dependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/buildutils": "^3.0.0-alpha.11",
+    "@jupyterlab/buildutils": "^3.0.0-alpha.12",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/application": "^1.8.4",
     "@lumino/commands": "^1.10.1",

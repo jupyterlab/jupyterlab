@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/translation",
-  "version": "3.0.0-alpha.11",
+  "version": "3.0.0-alpha.12",
   "description": "JupyterLab - Translation services",
   "keywords": [
     "jupyter",
@@ -46,13 +46,13 @@
     "watch": "tsc -w"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^5.0.0-alpha.11",
-    "@jupyterlab/services": "^6.0.0-alpha.11",
-    "@jupyterlab/statedb": "^3.0.0-alpha.11",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.12",
+    "@jupyterlab/services": "^6.0.0-alpha.12",
+    "@jupyterlab/statedb": "^3.0.0-alpha.12",
     "@lumino/coreutils": "^1.4.3"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-alpha.11",
+    "@jupyterlab/testutils": "^3.0.0-alpha.12",
     "@types/jest": "^24.0.23",
     "@typescript-eslint/eslint-plugin": "^2.25.0",
     "@typescript-eslint/parser": "^2.25.0",

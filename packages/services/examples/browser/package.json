@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-services-browser",
-  "version": "3.0.0-alpha.11",
+  "version": "3.0.0-alpha.12",
   "private": true,
   "scripts": {
     "build": "tsc && webpack",
@@ -8,8 +8,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/coreutils": "^5.0.0-alpha.11",
-    "@jupyterlab/services": "^6.0.0-alpha.11",
+    "@jupyterlab/coreutils": "^5.0.0-alpha.12",
+    "@jupyterlab/services": "^6.0.0-alpha.12",
     "@lumino/coreutils": "^1.4.3"
   },
   "devDependencies": {
