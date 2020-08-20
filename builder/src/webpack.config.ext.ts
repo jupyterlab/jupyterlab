@@ -76,7 +76,6 @@ Object.keys(data.dependencies).forEach(element => {
   if (!shared[element]) {
     shared[element] = {};
   }
-  shared[element].requiredVersion = data.dependencies[element];
 });
 
 // Remove non-shared.
