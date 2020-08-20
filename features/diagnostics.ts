@@ -288,12 +288,25 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
           const end = PositionConverter.lsp_to_cm(
             range.end
           ) as IVirtualPosition;
-          if (start.line > this.virtual_document.last_virtual_line) {
+          const last_line_number = this.virtual_document.last_virtual_line;
+          if (start.line > last_line_number) {
             console.log(
-              'Malformed diagnostic was skipped (out of lines) ',
+              `Out of range diagnostic (${start.line} line > ${last_line_number}) was skipped `,
               diagnostics
             );
             return;
+          } else {
+            let last_line = this.virtual_document.last_line;
+            if (
+              start.line == this.virtual_document.last_virtual_line &&
+              start.ch > last_line.length
+            ) {
+              console.log(
+                `Out of range diagnostic (${start.ch} character > ${last_line.length} at line ${last_line_number}) was skipped `,
+                diagnostics
+              );
+              return;
+            }
           }
 
           let document: VirtualDocument;

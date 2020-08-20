@@ -94,7 +94,10 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
   ) {
     if (this.current_adapter) {
       // disconnect signals from the old adapter
-      this.current_adapter.activeEditorChanged.disconnect(this.set_connector, this);
+      this.current_adapter.activeEditorChanged.disconnect(
+        this.set_connector,
+        this
+      );
       this.current_adapter.adapterConnected.disconnect(
         this.connect_completion,
         this
@@ -107,7 +110,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       this.connect_completion,
       this
     );
-    this.set_connector(adapter, {editor: adapter.activeEditor});
+    this.set_connector(adapter, { editor: adapter.activeEditor });
   }
 
   connect_completion(

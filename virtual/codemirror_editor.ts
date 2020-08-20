@@ -2,7 +2,12 @@ import * as CodeMirror from 'codemirror';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IEditorName } from '../feature';
-import { IBlockAddedInfo, ICodeBlockOptions, UpdateManager, VirtualDocument } from './document';
+import {
+  IBlockAddedInfo,
+  ICodeBlockOptions,
+  UpdateManager,
+  VirtualDocument
+} from './document';
 import { IForeignCodeExtractorsRegistry } from '../extractors/types';
 import { create_console, EditorLogConsole } from './console';
 import { Signal } from '@lumino/signaling';
@@ -115,7 +120,10 @@ export class CodeMirrorVirtualEditor
       }
     });
     // this is not thee most efficient, but probably the most reliable way
-    this.virtual_document.update_manager.update_began.connect(this.onEditorsUpdated, this);
+    this.virtual_document.update_manager.update_began.connect(
+      this.onEditorsUpdated,
+      this
+    );
 
     this.virtual_document.update_manager.block_added.connect(
       this.save_block_position,
@@ -165,7 +173,10 @@ export class CodeMirrorVirtualEditor
     return this.getDoc().getCursor('end') as IRootPosition;
   }
 
-  private onEditorsUpdated(update_manager: UpdateManager, blocks: ICodeBlockOptions[]): void {
+  private onEditorsUpdated(
+    update_manager: UpdateManager,
+    blocks: ICodeBlockOptions[]
+  ): void {
     this.cm_editor_to_ce_editor.clear();
     this.ce_editor_to_cm_editor.clear();
     this.editor_to_source_line_new = new Map();

@@ -642,6 +642,10 @@ export class VirtualDocument {
     return this.lines.join(lines_padding);
   }
 
+  get last_line() {
+    return this.lines[this.lines.length];
+  }
+
   close_expired_documents() {
     for (let document of this.unused_documents.values()) {
       document.remaining_lifetime -= 1;
@@ -816,8 +820,9 @@ export class UpdateManager {
    */
   private document_updated: Signal<UpdateManager, VirtualDocument>;
   public block_added: Signal<UpdateManager, IBlockAddedInfo>;
-  // possibly redundant
-  update_done: Promise<void> = new Promise<void>(() => {});
+  update_done: Promise<void> = new Promise<void>(resolve => {
+    resolve();
+  });
   update_began: Signal<UpdateManager, ICodeBlockOptions[]>;
   update_finished: Signal<UpdateManager, ICodeBlockOptions[]>;
 
