@@ -52,8 +52,7 @@
     "prettier": "^1.19.1",
     "semver": "^6.3.0",
     "sort-package-json": "~1.31.0",
-    "typescript": "~3.9.2",
-    "which": "^2.0.2"
+    "typescript": "~3.9.2"
   },
   "devDependencies": {
     "@types/fs-extra": "^8.0.1",
