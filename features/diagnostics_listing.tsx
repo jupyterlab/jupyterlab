@@ -12,6 +12,10 @@ import { message_without_code } from './diagnostics';
 
 import diagnosticsSvg from '../../style/icons/diagnostics.svg';
 import { CodeMirrorVirtualEditor } from '../virtual/codemirror_editor';
+import { WidgetAdapter } from '../adapters/adapter';
+import { IVirtualEditor } from '../virtual/editor';
+import { CodeEditor } from '@jupyterlab/codeeditor';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
@@ -50,14 +54,11 @@ function focus_on(node: HTMLElement) {
   node.focus();
 }
 
-function DocumentLocator(props: {
-  document: VirtualDocument;
-  editor: CodeMirrorVirtualEditor;
-}) {
-  let { document, editor } = props;
-  let ancestry = document.ancestry;
-  let target: HTMLElement = null;
-  let breadcrumbs: any = ancestry.map(document => {
+export function get_breadcrumbs(
+  document: VirtualDocument,
+  adapter: WidgetAdapter<IDocumentWidget>
+): JSX.Element[] {
+  return document.ancestry.map((document: VirtualDocument) => {
     if (!document.parent) {
       let path = document.path;
       if (
@@ -72,19 +73,14 @@ function DocumentLocator(props: {
       return <span key={document.uri}>Empty document</span>;
     }
     try {
-      if (editor.has_multiple_editors) {
+      if (adapter.has_multiple_editors) {
         let first_line = document.virtual_lines.get(0);
         let last_line = document.virtual_lines.get(
           document.last_virtual_line - 1
         );
 
-        let { index: first_cell, node } = editor.find_editor(
-          editor.ce_editor_to_cm_editor.get(first_line.editor)
-        );
-        let { index: last_cell } = editor.find_editor(
-          editor.ce_editor_to_cm_editor.get(last_line.editor)
-        );
-        target = node;
+        let first_cell = adapter.get_editor_index(first_line.editor);
+        let last_cell = adapter.get_editor_index(last_line.editor);
 
         let cell_locator =
           first_cell === last_cell
@@ -102,6 +98,19 @@ function DocumentLocator(props: {
     }
     return <span key={document.uri}>{document.language}</span>;
   });
+}
+
+function DocumentLocator(props: {
+  document: VirtualDocument;
+  adapter: WidgetAdapter<any>;
+}) {
+  let { document, adapter } = props;
+  let target: HTMLElement = null;
+  if (adapter.has_multiple_editors) {
+    let first_line = document.virtual_lines.get(0);
+    target = adapter.get_editor_wrapper(first_line.editor);
+  }
+  let breadcrumbs: any = get_breadcrumbs(document, adapter);
   return (
     <div
       className={'lsp-document-locator'}
@@ -124,7 +133,8 @@ interface IDiagnosticsRow {
 
 interface IListingContext {
   db: DiagnosticsDatabase;
-  editor: CodeMirrorVirtualEditor;
+  editor: IVirtualEditor<CodeEditor.IEditor>;
+  adapter: WidgetAdapter<IDocumentWidget>;
 }
 
 interface IColumnOptions {
@@ -194,7 +204,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       name: 'Virtual Document',
       render_cell: (row, context: IListingContext) => (
         <td key={0}>
-          <DocumentLocator document={row.document} editor={context.editor} />
+          <DocumentLocator document={row.document} adapter={context.adapter} />
         </td>
       ),
       sort: (a, b) => a.document.id_path.localeCompare(b.document.id_path),
@@ -245,7 +255,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
           : a.data.range.start.ch > b.data.range.start.ch
           ? 1
           : -1,
-      is_available: context => context.editor.has_multiple_editors
+      is_available: context => context.adapter.has_multiple_editors
     }),
     new Column({
       name: 'Line:Ch',
@@ -276,6 +286,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
   render() {
     let diagnostics_db = this.model.diagnostics;
     const editor = this.model.virtual_editor;
+    const adapter = this.model.adapter;
     if (!diagnostics_db || editor == null) {
       return <div>No issues detected, great job!</div>;
     }
@@ -287,7 +298,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
         }
         return diagnostics.map((diagnostic_data, i) => {
           let cell_number: number = null;
-          if (editor.has_multiple_editors) {
+          if (adapter.has_multiple_editors) {
             let { index: cell_id } = editor.find_editor(diagnostic_data.editor);
             cell_number = cell_id + 1;
           }
@@ -311,7 +322,8 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
 
     let context: IListingContext = {
       db: diagnostics_db,
-      editor: editor
+      editor: editor,
+      adapter: adapter
     };
 
     let columns_to_display = this.columns.filter(
@@ -361,6 +373,7 @@ export namespace DiagnosticsListing {
   export class Model extends VDomModel {
     diagnostics: DiagnosticsDatabase;
     virtual_editor: CodeMirrorVirtualEditor;
+    adapter: WidgetAdapter<any>;
 
     constructor() {
       super();

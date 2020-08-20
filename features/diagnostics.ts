@@ -171,6 +171,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     }
     diagnostics_panel.content.model.diagnostics = this.diagnostics_db;
     diagnostics_panel.content.model.virtual_editor = this.virtual_editor;
+    diagnostics_panel.content.model.adapter = this.adapter;
     diagnostics_panel.update();
   };
 
@@ -465,6 +466,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     ) {
       diagnostics_panel.content.model.virtual_editor = null;
       diagnostics_panel.content.model.diagnostics = null;
+      diagnostics_panel.content.model.adapter = null;
     }
 
     diagnostics_panel.update();

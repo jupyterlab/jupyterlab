@@ -546,13 +546,6 @@ export class CodeMirrorVirtualEditor
       node: this.adapter.get_editor_wrapper(ce_editor)
     };
   }
-
-  /**
-   * @deprecated use adapter.has_multiple_editors instead.
-   */
-  get has_multiple_editors() {
-    return this.ce_editor_to_cm_editor.size > 1;
-  }
 }
 
 // eslint-disable-next-line @typescript-eslint/interface-name-prefix
