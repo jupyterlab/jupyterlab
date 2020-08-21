@@ -70,7 +70,7 @@
     "text-encoding": "^0.7.0",
     "ts-jest": "^25.2.1",
     "typedoc": "^0.17.7",
-    "typescript": "~3.9.2",
+    "typescript": "~4.0.2",
     "webpack": "~5.0.0-beta.26",
     "webpack-cli": "^3.3.10"
   },

@@ -124,7 +124,7 @@
     "fs-extra": "^8.1.0",
     "rimraf": "~3.0.0",
     "typedoc": "^0.17.7",
-    "typescript": "~3.9.2"
+    "typescript": "~4.0.2"
   },
   "publishConfig": {
     "access": "public"

@@ -62,7 +62,7 @@
     "jest": "^25.2.3",
     "prettier": "^1.19.1",
     "rimraf": "~3.0.0",
-    "typescript": "~3.9.2"
+    "typescript": "~4.0.2"
   },
   "publishConfig": {
     "access": "public"
