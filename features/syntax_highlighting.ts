@@ -7,6 +7,7 @@ import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { LabIcon } from '@jupyterlab/ui-components';
 import syntaxSvg from '../../style/icons/syntax-highlight.svg';
 import {
+  FeatureSettings,
   IEditorIntegrationOptions,
   IFeatureLabIntegration,
   IFeatureSettings
@@ -17,13 +18,14 @@ import CodeMirror from 'codemirror';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor/lib/mimetype';
 import { IEditorServices } from '@jupyterlab/codeeditor/lib/tokens';
 import { CodeSyntax as LSPSyntaxHighlightingSettings } from '../_syntax_highlighting';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 export const syntaxHighlightingIcon = new LabIcon({
   name: 'lsp:syntax-highlighting',
   svgstr: syntaxSvg
 });
 
-const FEATURE_ID = PLUGIN_ID + ':syntax-highlighting';
+const FEATURE_ID = PLUGIN_ID + ':syntax_highlighting';
 
 export class CMSyntaxHighlighting extends CodeMirrorIntegration {
   lab_integration: SyntaxLabIntegration;
@@ -91,13 +93,16 @@ class SyntaxLabIntegration implements IFeatureLabIntegration {
 
 export const SYNTAX_HIGHLIGHTING_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
-  requires: [ILSPFeatureManager, IEditorServices],
+  requires: [ILSPFeatureManager, IEditorServices, ISettingRegistry],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
-    editorServices: IEditorServices
+    editorServices: IEditorServices,
+    settingRegistry: ISettingRegistry
   ) => {
+    const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
+
     featureManager.register({
       feature: {
         editorIntegrationFactory: new Map([
@@ -106,7 +111,10 @@ export const SYNTAX_HIGHLIGHTING_PLUGIN: JupyterFrontEndPlugin<void> = {
         commands: [],
         id: FEATURE_ID,
         name: 'Syntax highlighting',
-        labIntegration: new SyntaxLabIntegration(editorServices.mimeTypeService)
+        labIntegration: new SyntaxLabIntegration(
+          editorServices.mimeTypeService
+        ),
+        settings: settings
       }
     });
   }
