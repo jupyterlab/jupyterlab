@@ -19,7 +19,7 @@ import { IEditorTracker } from '@jupyterlab/fileeditor';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { IDocumentManager } from '@jupyterlab/docmanager';
-import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { LabIcon } from '@jupyterlab/ui-components';
 import jumpToSvg from '../../style/icons/jump-to.svg';
 
@@ -102,7 +102,6 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       // otherwise there is no virtual document and we expect the returned position to be source position:
       let source_position_ce = PositionConverter.cm_to_ce(virtual_position);
       console.log(`Jumping to external file: ${uri}`);
-
       console.log('Jump target (source location):', source_position_ce);
 
       // can it be resolved vs our guessed server root?
@@ -143,19 +142,18 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
 }
 
 class JumperLabIntegration implements IFeatureLabIntegration {
-  private fileEditorTracker: IEditorTracker;
-  private notebookTracker: INotebookTracker;
+  private adapterManager: ILSPAdapterManager;
   private jumpers: Map<string, CodeJumper>;
   // settings should be implemented in the future
   settings?: FeatureSettings<any>;
 
   constructor(
+    adapterManager: ILSPAdapterManager,
     fileEditorTracker: IEditorTracker,
     notebookTracker: INotebookTracker,
     documentManager: IDocumentManager
   ) {
-    this.fileEditorTracker = fileEditorTracker;
-    this.notebookTracker = notebookTracker;
+    this.adapterManager = adapterManager;
     this.jumpers = new Map();
 
     fileEditorTracker.widgetAdded.connect((sender, widget) => {
@@ -175,9 +173,7 @@ class JumperLabIntegration implements IFeatureLabIntegration {
   }
 
   get jumper(): CodeJumper {
-    let current =
-      this.notebookTracker.currentWidget.id ||
-      this.fileEditorTracker.currentWidget.id;
+    let current = this.adapterManager.currentAdapter.widget.id;
     return this.jumpers.get(current);
   }
 }
@@ -204,6 +200,7 @@ export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
   requires: [
     ILSPFeatureManager,
+    ILSPAdapterManager,
     IEditorTracker,
     INotebookTracker,
     IDocumentManager
@@ -212,11 +209,13 @@ export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
+    adapterManager: ILSPAdapterManager,
     fileEditorTracker: IEditorTracker,
     notebookTracker: INotebookTracker,
     documentManager: IDocumentManager
   ) => {
     let labIntegration = new JumperLabIntegration(
+      adapterManager,
       fileEditorTracker,
       notebookTracker,
       documentManager
