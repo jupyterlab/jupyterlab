@@ -7,7 +7,6 @@ import { IOverridesRegistry } from '../magics/overrides';
 import { DefaultMap, until_ready } from '../utils';
 import { Signal } from '@lumino/signaling';
 import { CodeEditor } from '@jupyterlab/codeeditor';
-import * as CodeMirror from 'codemirror';
 import {
   IEditorPosition,
   ISourcePosition,
@@ -41,6 +40,8 @@ export interface IVirtualDocumentBlock {
   virtual_document: VirtualDocument;
 }
 
+export type ForeignDocumentsMap = Map<IRange, IVirtualDocumentBlock>;
+
 interface ISourceLine {
   virtual_line: number;
   editor: CodeEditor.IEditor;
@@ -50,7 +51,7 @@ interface ISourceLine {
   /**
    * Everything which is not in the range of foreign documents belongs to the host.
    */
-  foreign_documents_map: Map<IRange, IVirtualDocumentBlock>;
+  foreign_documents_map: ForeignDocumentsMap;
 }
 
 export interface IForeignContext {
@@ -580,6 +581,14 @@ export class VirtualDocument {
     return { lines, foreign_document_map, skip_inspect };
   }
 
+  get foreign_document_maps(): ForeignDocumentsMap[] {
+    let maps = new Set<ForeignDocumentsMap>();
+    for (let line of this.source_lines.values()) {
+      maps.add(line.foreign_documents_map);
+    }
+    return [...maps.values()];
+  }
+
   append_code_block(
     cell_code: string,
     ce_editor: CodeEditor.IEditor,
@@ -753,7 +762,7 @@ export class VirtualDocument {
     return this.virtual_lines.get(line).editor;
   }
 
-  get_editor_at_source_line(pos: CodeMirror.Position): CodeEditor.IEditor {
+  get_editor_at_source_line(pos: ISourcePosition): CodeEditor.IEditor {
     return this.source_lines.get(pos.line).editor;
   }
 
