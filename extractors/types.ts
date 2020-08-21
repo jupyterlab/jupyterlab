@@ -40,7 +40,7 @@ export interface IExtractedCode {
  */
 export interface IForeignCodeExtractor {
   /**
-   * The foreign language.
+   * The foreign language. TODO what is language, what is host language, ILanguageInfo
    */
   language: string;
 

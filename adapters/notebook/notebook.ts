@@ -2,7 +2,6 @@ import { WidgetAdapter } from '../adapter';
 import { Notebook, NotebookPanel } from '@jupyterlab/notebook';
 import { until_ready } from '../../utils';
 import { language_specific_overrides } from '../../magics/defaults';
-import { foreign_code_extractors } from '../../extractors/defaults';
 import { Cell } from '@jupyterlab/cells';
 import * as nbformat from '@jupyterlab/nbformat';
 import ILanguageInfoMetadata = nbformat.ILanguageInfoMetadata;
@@ -162,7 +161,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       language: this.language,
       path: this.document_path,
       overrides_registry: language_specific_overrides,
-      foreign_code_extractors: foreign_code_extractors,
+      foreign_code_extractors: this.foreign_code_extractors,
       file_extension: this.language_file_extension,
       // notebooks are continuous, each cell is dependent on the previous one
       standalone: false,

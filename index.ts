@@ -13,7 +13,7 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './components/statusbar';
 import { DocumentConnectionManager } from './connection_manager';
 import {
-  ILSPAdapterManager,
+  ILSPAdapterManager, ILSPCodeExtractorsManager,
   ILSPFeatureManager,
   ILSPVirtualEditorManager,
   PLUGIN_ID,
@@ -35,6 +35,8 @@ import { LabIcon } from '@jupyterlab/ui-components';
 import codeCheckSvg from '../style/icons/code-check.svg';
 import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import { COMPLETION_PLUGIN } from './features/completion';
+import { CODE_EXTRACTORS_MANAGER } from "./extractors/manger";
+import { IForeignCodeExtractorsRegistry } from "./extractors/types";
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -98,6 +100,7 @@ export interface ILSPExtension {
   language_server_manager: LanguageServerManager;
   feature_manager: ILSPFeatureManager;
   editor_type_manager: ILSPVirtualEditorManager;
+  foreign_code_extractors: IForeignCodeExtractorsRegistry;
 }
 
 export class LSPExtension implements ILSPExtension {
@@ -113,7 +116,8 @@ export class LSPExtension implements ILSPExtension {
     paths: IPaths,
     status_bar: IStatusBar,
     adapterManager: ILSPAdapterManager,
-    public editor_type_manager: ILSPVirtualEditorManager
+    public editor_type_manager: ILSPVirtualEditorManager,
+    private code_extractors_manager: ILSPCodeExtractorsManager
   ) {
     this.language_server_manager = new LanguageServerManager({});
     this.connection_manager = new DocumentConnectionManager({
@@ -165,6 +169,10 @@ export class LSPExtension implements ILSPExtension {
     });
   }
 
+  get foreign_code_extractors () {
+    return this.code_extractors_manager.registry;
+  }
+
   private updateOptions(settings: ISettingRegistry.ISettings) {
     const options = settings.composite;
 
@@ -186,7 +194,8 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
     IPaths,
     IStatusBar,
     ILSPAdapterManager,
-    ILSPVirtualEditorManager
+    ILSPVirtualEditorManager,
+    ILSPCodeExtractorsManager
   ],
   activate: (app, ...args) => {
     let extension = new LSPExtension(
@@ -198,7 +207,8 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
         IPaths,
         IStatusBar,
         ILSPAdapterManager,
-        ILSPVirtualEditorManager
+        ILSPVirtualEditorManager,
+        ILSPCodeExtractorsManager
       ])
     );
     return extension.feature_manager;
@@ -218,6 +228,7 @@ const default_features: JupyterFrontEndPlugin<void>[] = [
 ];
 
 const plugins: JupyterFrontEndPlugin<any>[] = [
+  CODE_EXTRACTORS_MANAGER,
   WIDGET_ADAPTER_MANAGER,
   NOTEBOOK_ADAPTER,
   FILE_EDITOR_ADAPTER,

@@ -5,6 +5,8 @@ import {
   rpy2_args_pattern,
   RPY2_MAX_ARGS
 } from '../magics/rpy2';
+import { JupyterFrontEndPlugin } from "@jupyterlab/application";
+import { ILSPCodeExtractorsManager, PLUGIN_ID } from "../tokens";
 
 function rpy2_code_extractor(match: string, ...args: string[]) {
   let r = extract_r_args(args, -3);
@@ -122,4 +124,17 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
       file_extension: 'md'
     })
   ]
+};
+
+export const DEFAULT_CODE_EXTRACTORS: JupyterFrontEndPlugin<void> = {
+  id: PLUGIN_ID + ':default-extractors',
+  requires: [ILSPCodeExtractorsManager],
+  activate: (app, extractors_manager: ILSPCodeExtractorsManager) => {
+    for (let language of Object.keys(foreign_code_extractors)) {
+      for (let extractor of foreign_code_extractors[language]) {
+        extractors_manager.register(extractor, language);
+      }
+    }
+  },
+  autoStart: true
 };

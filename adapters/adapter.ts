@@ -124,6 +124,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.widget.disposed.connect(this.dispose, this);
   }
 
+  protected get foreign_code_extractors() {
+    return this.extension.foreign_code_extractors;
+  }
+
   on_connection_closed(
     manager: DocumentConnectionManager,
     { virtual_document }: IDocumentConnectionData
