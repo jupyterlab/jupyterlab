@@ -32,12 +32,18 @@ interface IVirtualLine {
   editor: CodeEditor.IEditor;
 }
 
+export interface ICodeBlockOptions {
+  ce_editor: CodeEditor.IEditor;
+  value: string;
+}
+
 export interface IVirtualDocumentBlock {
   /**
    * Line corresponding to the block in the entire foreign document
    */
   virtual_line: number;
   virtual_document: VirtualDocument;
+  editor: CodeEditor.IEditor;
 }
 
 export type ForeignDocumentsMap = Map<IRange, IVirtualDocumentBlock>;
@@ -480,14 +486,15 @@ export class VirtualDocument {
   }
 
   extract_foreign_code(
-    cell_code: string,
-    ce_editor: CodeEditor.IEditor,
+    block: ICodeBlockOptions,
     editor_shift: CodeEditor.IPosition
   ) {
     let foreign_document_map = new Map<
       CodeEditor.IRange,
       IVirtualDocumentBlock
     >();
+
+    let cell_code = block.value;
 
     for (let extractor of this.foreign_extractors) {
       // first, check if there is any foreign code:
@@ -506,15 +513,18 @@ export class VirtualDocument {
 
           foreign_document_map.set(result.range, {
             virtual_line: foreign_document.last_virtual_line,
-            virtual_document: foreign_document
+            virtual_document: foreign_document,
+            editor: block.ce_editor
           });
           let foreign_shift = {
             line: editor_shift.line + result.range.start.line,
             column: editor_shift.column + result.range.start.column
           };
           foreign_document.append_code_block(
-            result.foreign_code,
-            ce_editor,
+            {
+              value: result.foreign_code,
+              ce_editor: block.ce_editor
+            },
             foreign_shift,
             result.virtual_shift
           );
@@ -548,19 +558,17 @@ export class VirtualDocument {
   }
 
   prepare_code_block(
-    cell_code: string,
-    ce_editor: CodeEditor.IEditor,
+    block: ICodeBlockOptions,
     editor_shift: CodeEditor.IPosition = { line: 0, column: 0 }
   ) {
     let lines: Array<string>;
     let skip_inspect: Array<Array<VirtualDocument.id_path>>;
 
     let { cell_code_kept, foreign_document_map } = this.extract_foreign_code(
-      cell_code,
-      ce_editor,
+      block,
       editor_shift
     );
-    cell_code = cell_code_kept;
+    let cell_code = cell_code_kept;
 
     // cell magics are replaced if requested and matched
     let cell_override = this.cell_magics_overrides.override_for(cell_code);
@@ -590,16 +598,17 @@ export class VirtualDocument {
   }
 
   append_code_block(
-    cell_code: string,
-    ce_editor: CodeEditor.IEditor,
+    block: ICodeBlockOptions,
     editor_shift: CodeEditor.IPosition = { line: 0, column: 0 },
     virtual_shift?: CodeEditor.IPosition
   ) {
+    let cell_code = block.value;
+    let ce_editor = block.ce_editor;
+
     let source_cell_lines = cell_code.split('\n');
 
     let { lines, foreign_document_map, skip_inspect } = this.prepare_code_block(
-      cell_code,
-      ce_editor,
+      block,
       editor_shift
     );
 
@@ -909,10 +918,7 @@ export class UpdateManager {
               block: code_block,
               virtual_document: this.virtual_document
             });
-            this.virtual_document.append_code_block(
-              code_block.value,
-              code_block.ce_editor
-            );
+            this.virtual_document.append_code_block(code_block);
           }
 
           this.update_finished.emit(blocks);
@@ -934,9 +940,4 @@ export class UpdateManager {
     this.update_done = update;
     return update;
   }
-}
-
-export interface ICodeBlockOptions {
-  ce_editor: CodeEditor.IEditor;
-  value: string;
 }

@@ -35,6 +35,7 @@ import { LabIcon } from '@jupyterlab/ui-components';
 import codeCheckSvg from '../style/icons/code-check.svg';
 import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import { COMPLETION_PLUGIN } from './features/completion';
+import { SYNTAX_HIGHLIGHTING_PLUGIN } from './features/syntax_highlighting';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -214,7 +215,8 @@ const default_features: JupyterFrontEndPlugin<void>[] = [
   HOVER_PLUGIN,
   RENAME_PLUGIN,
   HIGHLIGHTS_PLUGIN,
-  DIAGNOSTICS_PLUGIN
+  DIAGNOSTICS_PLUGIN,
+  SYNTAX_HIGHLIGHTING_PLUGIN
 ];
 
 const plugins: JupyterFrontEndPlugin<any>[] = [
