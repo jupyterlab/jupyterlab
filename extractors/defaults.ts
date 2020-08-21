@@ -94,7 +94,7 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
     // IPython magics producing continuous documents (non-standalone):
     //
     new RegExpForeignCodeExtractor({
-      language: 'js',
+      language: 'javascript',
       pattern: '^%%(js|javascript)( .*?)?\n([^]*)',
       extract_to_foreign: '$3',
       is_standalone: false,
