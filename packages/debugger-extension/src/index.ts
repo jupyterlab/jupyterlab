@@ -363,13 +363,10 @@ const main: JupyterFrontEndPlugin<void> = {
     const CommandIDs = Debugger.CommandIDs;
 
     // First check if there is a PageConfig override for the extension visibility
-    const showDebuggerExtension = String(
-      PageConfig.getOption('showDebuggerExtension')
-    ).toLowerCase();
-    if (showDebuggerExtension === 'false') {
-      return;
-    }
-    if (showDebuggerExtension !== 'true') {
+    const alwaysShowDebuggerExtension =
+      PageConfig.getOption('alwaysShowDebuggerExtension').toLowerCase() ===
+      'true';
+    if (!alwaysShowDebuggerExtension) {
       // hide the debugger sidebar if no kernel with support for debugging is available
       await kernelspecs.ready;
       const specs = kernelspecs.specs?.kernelspecs;
