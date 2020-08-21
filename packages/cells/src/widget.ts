@@ -171,11 +171,11 @@ const CONTENTS_MIME_RICH = 'application/x-jupyter-icontentsrich';
 /**
  * A base cell widget.
  */
-export class Cell extends Widget {
+export class Cell<T extends ICellModel = ICellModel> extends Widget {
   /**
    * Construct a new base cell widget.
    */
-  constructor(options: Cell.IOptions) {
+  constructor(options: Cell.IOptions<T>) {
     super();
     this.addClass(CELL_CLASS);
     const model = (this._model = options.model);
@@ -271,7 +271,7 @@ export class Cell extends Widget {
   /**
    * Get the model used by the cell.
    */
-  get model(): ICellModel {
+  get model(): T {
     return this._model;
   }
 
@@ -446,7 +446,7 @@ export class Cell extends Widget {
   /**
    * Clone the cell, using the same model.
    */
-  clone(): Cell {
+  clone(): Cell<T> {
     const constructor = this.constructor as typeof Cell;
     return new constructor({
       model: this.model,
@@ -529,7 +529,7 @@ export class Cell extends Widget {
   }
 
   private _readOnly = false;
-  private _model: ICellModel;
+  private _model: T;
   private _inputHidden = false;
   private _input: InputArea;
   private _inputWrapper: Widget;
@@ -545,11 +545,11 @@ export namespace Cell {
   /**
    * An options object for initializing a cell widget.
    */
-  export interface IOptions {
+  export interface IOptions<T extends ICellModel> {
     /**
      * The model used by the cell.
      */
-    model: ICellModel;
+    model: T;
 
     /**
      * The factory object for customizable cell children.
@@ -680,7 +680,7 @@ export namespace Cell {
 /**
  * A widget for a code cell.
  */
-export class CodeCell extends Cell {
+export class CodeCell extends Cell<ICodeCellModel> {
   /**
    * Construct a code cell widget.
    */
@@ -720,11 +720,6 @@ export class CodeCell extends Cell {
     });
     model.stateChanged.connect(this.onStateChanged, this);
   }
-
-  /**
-   * The model used by the widget.
-   */
-  readonly model: ICodeCellModel;
 
   /**
    * Initialize view state from model.
@@ -1012,12 +1007,7 @@ export namespace CodeCell {
   /**
    * An options object for initializing a base cell widget.
    */
-  export interface IOptions extends Cell.IOptions {
-    /**
-     * The model used by the cell.
-     */
-    model: ICodeCellModel;
-
+  export interface IOptions extends Cell.IOptions<ICodeCellModel> {
     /**
      * The mime renderer for the cell widget.
      */
@@ -1129,7 +1119,9 @@ export namespace CodeCell {
  * `AttachmentsCell` - A base class for a cell widget that allows
  *  attachments to be drag/drop'd or pasted onto it
  */
-export abstract class AttachmentsCell extends Cell {
+export abstract class AttachmentsCell<
+  T extends IAttachmentsCellModel
+> extends Cell<T> {
   /**
    * Handle the DOM events for the widget.
    *
@@ -1362,11 +1354,6 @@ export abstract class AttachmentsCell extends Cell {
       ? UUID.uuid4().concat(name.substring(lastIndex))
       : UUID.uuid4();
   }
-
-  /**
-   * The model used by the widget.
-   */
-  readonly model: IAttachmentsCellModel;
 }
 
 /** ****************************************************************************
@@ -1382,7 +1369,7 @@ export abstract class AttachmentsCell extends Cell {
  * or the input area model changes.  We don't support automatically
  * updating the rendered text in all of these cases.
  */
-export class MarkdownCell extends AttachmentsCell {
+export class MarkdownCell extends AttachmentsCell<IMarkdownCellModel> {
   /**
    * Construct a Markdown cell widget.
    */
@@ -1416,11 +1403,6 @@ export class MarkdownCell extends AttachmentsCell {
     });
     this.renderInput(this._renderer!);
   }
-
-  /**
-   * The model used by the widget.
-   */
-  readonly model: IMarkdownCellModel;
 
   /**
    * A promise that resolves when the widget renders for the first time.
@@ -1546,12 +1528,7 @@ export namespace MarkdownCell {
   /**
    * An options object for initializing a base cell widget.
    */
-  export interface IOptions extends Cell.IOptions {
-    /**
-     * The model used by the cell.
-     */
-    model: IMarkdownCellModel;
-
+  export interface IOptions extends Cell.IOptions<IMarkdownCellModel> {
     /**
      * The mime renderer for the cell widget.
      */
@@ -1566,11 +1543,11 @@ export namespace MarkdownCell {
 /**
  * A widget for a raw cell.
  */
-export class RawCell extends Cell {
+export class RawCell extends Cell<IRawCellModel> {
   /**
    * Construct a raw cell widget.
    */
-  constructor(options: Cell.IOptions) {
+  constructor(options: RawCell.IOptions) {
     super(options);
     this.addClass(RAW_CELL_CLASS);
   }
@@ -1585,11 +1562,6 @@ export class RawCell extends Cell {
       contentFactory: this.contentFactory
     });
   }
-
-  /**
-   * The model used by the widget.
-   */
-  readonly model: IRawCellModel;
 }
 
 /**
@@ -1599,10 +1571,5 @@ export namespace RawCell {
   /**
    * An options object for initializing a base cell widget.
    */
-  export interface IOptions extends Cell.IOptions {
-    /**
-     * The model used by the cell.
-     */
-    model: IRawCellModel;
-  }
+  export interface IOptions extends Cell.IOptions<IRawCellModel> {}
 }
