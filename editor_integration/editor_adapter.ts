@@ -75,7 +75,11 @@ export class EditorAdapter<T extends IVirtualEditor<IEditor>> {
       }
 
       for (let feature of this.features.values()) {
-        feature.afterChange(change, root_position);
+        try {
+          feature.afterChange(change, root_position);
+        } catch (err) {
+          console.warn('afterChange of feature', feature, 'failed with', err);
+        }
       }
       return true;
     } catch (e) {

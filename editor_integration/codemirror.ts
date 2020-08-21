@@ -23,6 +23,7 @@ import {
 } from '../virtual/codemirror_editor';
 import { StatusMessage, WidgetAdapter } from '../adapters/adapter';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
+import { IEditorChange } from '../virtual/editor';
 
 function toDocumentChanges(changes: {
   [uri: string]: lsProtocol.TextEdit[];
@@ -405,6 +406,10 @@ export abstract class CodeMirrorIntegration
     }
 
     return 1;
+  }
+
+  afterChange(change: IEditorChange, root_position: IRootPosition) {
+    // nothing here
   }
 
   protected apply_single_edit(edit: lsProtocol.TextEdit): number {
