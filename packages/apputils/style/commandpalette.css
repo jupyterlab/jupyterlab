@@ -23,10 +23,14 @@
   margin: 0;
   padding: 4px;
   width: 40%;
-  max-height: 40%;
+  /* max-height: 40%; */
   box-shadow: var(--jp-elevation-z4);
   border-radius: 4px;
   background: var(--jp-layout-color0);
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette {
+  max-height: 40vh;
 }
 
 .lm-CommandPalette {
@@ -129,6 +133,8 @@
 
 .lm-CommandPalette-item {
   padding: 4px 12px 4px 4px;
+  margin-left: 4px;
+  margin-right: 4px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   font-weight: 400;

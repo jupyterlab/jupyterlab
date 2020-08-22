@@ -8,7 +8,7 @@ import { CommandRegistry } from '@lumino/commands';
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { CommandPalette } from '@lumino/widgets';
 
-import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   ICommandPalette,
   IPaletteItem,
@@ -86,7 +86,7 @@ export namespace Palette {
     app: JupyterFrontEnd,
     translator: ITranslator
   ): ICommandPalette {
-    const { commands, shell } = app;
+    const { commands } = app;
     const trans = translator.load('jupyterlab');
     const palette = Private.createPalette(app, translator);
     const modalPalette = new ModalCommandPalette({ commandPalette: palette });
@@ -111,32 +111,14 @@ export namespace Palette {
 
     commands.addCommand(CommandIDs.activate, {
       execute: () => {
-        modalPalette.show();
+        modalPalette.activate();
       },
       label: trans.__('Activate Command Palette')
     });
 
     palette.inputNode.placeholder = trans.__('SEARCH');
 
-    shell.add(palette, 'left', { rank: 300 });
-
     return new Palette(palette, translator);
-  }
-
-  /**
-   * Restore the command palette.
-   */
-  export function restore(
-    app: JupyterFrontEnd,
-    restorer: ILayoutRestorer,
-    translator: ITranslator
-  ): void {
-    const palette = Private.createPalette(app, translator);
-
-    // Let the application restorer track the command palette for restoration of
-    // application state (e.g. setting the command palette as the current side bar
-    // widget).
-    restorer.add(palette, 'command-palette');
   }
 }
 
