@@ -12,7 +12,6 @@ import {
   IFeatureLabIntegration,
   IFeatureSettings
 } from '../feature';
-import { VirtualDocument } from '../virtual/document';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import CodeMirror from 'codemirror';
 import { IEditorMimeTypeService } from '@jupyterlab/codeeditor/lib/mimetype';
@@ -51,12 +50,11 @@ export class CMSyntaxHighlighting extends CodeMirrorIntegration {
     return CodeMirror.findModeByMIME(mimetype);
   }
 
-  update_mode(doc: VirtualDocument, changed_document: VirtualDocument) {
+  update_mode() {
     let root = this.virtual_document;
     for (let map of root.foreign_document_maps) {
       for (let [range, block] of map.entries()) {
         let ce_editor = block.editor;
-        // get the ce_editor from block
         let editor = (ce_editor as CodeMirrorEditor).editor;
         let lines = editor.getValue('\n');
         let total_area = lines.concat('').length;
