@@ -84,7 +84,6 @@ export class CompletionIconManager implements ILSPCompletionIconsManager {
 
   protected is_theme_light() {
     const current = this.themeManager.theme;
-    console.warn('CURRENT THEME', current)
     if (!current) {
       // assume true by default
       return true;
@@ -123,11 +122,9 @@ export class CompletionIconManager implements ILSPCompletionIconsManager {
   }
 
   get_icon(type: string): LabIcon {
-    console.log(this.current_theme)
     if (this.current_theme === null) {
       return null;
     }
-    console.log(this.create_icons)
     let options = this.current_theme.icons.options || {};
     if (this.current_icons.has(type)) {
       return this.current_icons.get(type).bindprops(options);
@@ -137,7 +134,9 @@ export class CompletionIconManager implements ILSPCompletionIconsManager {
 
   set_icon_theme(name: string | null) {
     if (!this.themes.has(name)) {
-      console.warn(`[LSP][Completer] Icons theme ${name} cannot be set yet (it may be loaded later).`)
+      console.warn(
+        `[LSP][Completer] Icons theme ${name} cannot be set yet (it may be loaded later).`
+      );
     }
     this.current_theme_name = name;
     this.update_icons_set();

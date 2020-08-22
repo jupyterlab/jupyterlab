@@ -230,7 +230,7 @@ export class LSPConnector
     let items: CompletionHandler.ICompletionItem[] = [];
     const show_documentation = this.should_show_documentation;
     lspCompletionItems.forEach(match => {
-      let kind = match.kind ? CompletionItemKind[match.kind] : ''
+      let kind = match.kind ? CompletionItemKind[match.kind] : '';
       let completionItem = {
         label: match.label,
         insertText: match.insertText,
@@ -245,8 +245,8 @@ export class LSPConnector
         data: { ...match }
       } as CompletionHandler.ICompletionItem;
 
-      let icon = this.icon_for(kind)
-      console.warn(icon)
+      let icon = this.icon_for(kind);
+      console.warn(icon);
       if (icon) {
         completionItem.icon = icon;
       }
@@ -291,7 +291,7 @@ export class LSPConnector
       return undefined;
     }
     if (typeof type === 'undefined' || type == '<unknown>') {
-      type = 'Kernel'
+      type = 'Kernel';
     }
     return this.options.icons_manager.get_icon(type) || undefined;
   }

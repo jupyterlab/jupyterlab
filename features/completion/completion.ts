@@ -126,14 +126,14 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     let command: string;
     this.current_completion_connector.trigger_kind = kind;
 
-    // TODO ?
     if (this.adapterManager.currentAdapter instanceof NotebookAdapter) {
       command = 'completer:invoke-notebook';
     } else {
       command = 'completer:invoke-file';
     }
     return this.app.commands.execute(command).then(() => {
-      this.current_completion_connector.trigger_kind = CompletionTriggerKind.Invoked;
+      this.current_completion_connector.trigger_kind =
+        CompletionTriggerKind.Invoked;
     });
   }
 
