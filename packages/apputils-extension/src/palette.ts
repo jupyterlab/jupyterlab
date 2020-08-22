@@ -9,12 +9,12 @@ import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 import { CommandPalette } from '@lumino/widgets';
 
 import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
-import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import {
   ICommandPalette,
   IPaletteItem,
   ModalCommandPalette
 } from '@jupyterlab/apputils';
+import { ITranslator, nullTranslator } from '@jupyterlab/translation';
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -137,8 +137,6 @@ export namespace Palette {
     // application state (e.g. setting the command palette as the current side bar
     // widget).
     restorer.add(palette, 'command-palette');
-  }
-    return new Palette(palette);
   }
 }
 

@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  ILayoutRestorer,
   IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -83,18 +84,18 @@ const palette: JupyterFrontEndPlugin<ICommandPalette> = {
  * causes the command palette to be unavailable to other extensions earlier
  * in the application load cycle.
  */
-const paletteRestorer: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/apputils-extension:palette-restorer',
-  autoStart: true,
-  requires: [ILayoutRestorer, ITranslator],
-  activate: (
-    app: JupyterFrontEnd,
-    restorer: ILayoutRestorer,
-    translator: ITranslator
-  ) => {
-    Palette.restore(app, restorer, translator);
-  }
-};
+// const paletteRestorer: JupyterFrontEndPlugin<void> = {
+//   id: '@jupyterlab/apputils-extension:palette-restorer',
+//   autoStart: true,
+//   requires: [ILayoutRestorer, ITranslator],
+//   activate: (
+//     app: JupyterFrontEnd,
+//     restorer: ILayoutRestorer,
+//     translator: ITranslator
+//   ) => {
+//     Palette.restore(app, restorer, translator);
+//   }
+// };
 
 /**
  * The default window name resolver provider.
