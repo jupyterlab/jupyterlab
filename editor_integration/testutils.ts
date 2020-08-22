@@ -44,6 +44,7 @@ import { ServiceManager } from '@jupyterlab/services';
 import { FeatureManager, ILSPExtension } from '../index';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { IFeatureSettings } from '../feature';
+import { Signal } from '@lumino/signaling';
 
 export interface ITestEnvironment {
   document_options: VirtualDocument.IOptions;
@@ -72,7 +73,12 @@ export class MockLanguageServerManager extends LanguageServerManager {
 }
 
 export class MockSettings<T> implements IFeatureSettings<T> {
-  constructor(private settings: T) {}
+  changed: Signal<IFeatureSettings<T>, void>;
+
+  constructor(private settings: T) {
+    this.changed = new Signal(this);
+  }
+
   get composite(): T {
     return this.settings;
   }

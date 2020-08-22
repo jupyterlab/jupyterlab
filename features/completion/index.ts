@@ -13,6 +13,7 @@ import { FeatureSettings } from '../../feature';
 import { CompletionCM, CompletionLabIntegration } from './completion';
 import { LabIcon } from '@jupyterlab/ui-components';
 import completionSvg from '../../../style/icons/completion.svg';
+import { ILSPCompletionIconsManager } from './theme';
 
 export const completionIcon = new LabIcon({
   name: 'lsp:completion',
@@ -27,7 +28,8 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
     ILSPFeatureManager,
     ISettingRegistry,
     ICompletionManager,
-    ILSPAdapterManager
+    ILSPAdapterManager,
+    ILSPCompletionIconsManager
   ],
   autoStart: true,
   activate: (
@@ -35,14 +37,16 @@ export const COMPLETION_PLUGIN: JupyterFrontEndPlugin<void> = {
     featureManager: ILSPFeatureManager,
     settingRegistry: ISettingRegistry,
     completionManager: ICompletionManager,
-    adapterManager: ILSPAdapterManager
+    adapterManager: ILSPAdapterManager,
+    iconsThemeManager: ILSPCompletionIconsManager
   ) => {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
     const labIntegration = new CompletionLabIntegration(
       app,
       completionManager,
       settings,
-      adapterManager
+      adapterManager,
+      iconsThemeManager
     );
 
     featureManager.register({

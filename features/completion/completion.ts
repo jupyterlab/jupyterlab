@@ -14,6 +14,7 @@ import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { IDocumentConnectionData } from '../../connection_manager';
 import { ILSPAdapterManager } from '../../tokens';
 import { NotebookAdapter } from '../../adapters/notebook/notebook';
+import { ILSPCompletionIconsManager } from './theme';
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];
@@ -71,9 +72,13 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     private app: JupyterFrontEnd,
     private completionManager: ICompletionManager,
     public settings: FeatureSettings<LSPCompletionSettings>,
-    private adapterManager: ILSPAdapterManager
+    private adapterManager: ILSPAdapterManager,
+    private iconsThemeManager: ILSPCompletionIconsManager
   ) {
     adapterManager.adapterChanged.connect(this.swap_adapter, this);
+    settings.changed.connect(() => {
+      iconsThemeManager.set_icon_theme(this.settings.composite.icons);
+    });
   }
 
   private swap_adapter(
@@ -119,13 +124,17 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
 
   invoke_completer(kind: CompletionTriggerKind) {
     let command: string;
+    this.current_completion_connector.trigger_kind = kind;
 
+    // TODO ?
     if (this.adapterManager.currentAdapter instanceof NotebookAdapter) {
       command = 'completer:invoke-notebook';
     } else {
       command = 'completer:invoke-file';
     }
-    return this.app.commands.execute(command);
+    return this.app.commands.execute(command).then(() => {
+      this.current_completion_connector.trigger_kind = CompletionTriggerKind.Invoked;
+    });
   }
 
   set_connector(
@@ -150,6 +159,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     }
     this.current_completion_connector = new LSPConnector({
       editor: editor,
+      icons_manager: this.iconsThemeManager,
       connections: this.current_adapter.connection_manager.connections,
       virtual_editor: this.current_adapter.virtual_editor,
       settings: this.settings,

@@ -1,6 +1,6 @@
 import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
-import { documentHighlightKindNames } from '../lsp';
+import { DocumentHighlightKind } from '../lsp';
 import { VirtualDocument } from '../virtual/document';
 import { IRootPosition } from '../positioning';
 import { uris_equal } from '../utils';
@@ -83,7 +83,7 @@ export class HighlightsCM extends CodeMirrorIntegration {
     for (let item of items) {
       let range = this.range_to_editor_range(item.range);
       let kind_class = item.kind
-        ? 'cm-lsp-highlight-' + documentHighlightKindNames[item.kind]
+        ? 'cm-lsp-highlight-' + DocumentHighlightKind[item.kind]
         : '';
       let marker = this.highlight_range(
         range,
