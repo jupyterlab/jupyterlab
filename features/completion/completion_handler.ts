@@ -246,7 +246,6 @@ export class LSPConnector
       } as CompletionHandler.ICompletionItem;
 
       let icon = this.icon_for(kind);
-      console.warn(icon);
       if (icon) {
         completionItem.icon = icon;
       }

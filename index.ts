@@ -37,6 +37,7 @@ import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import { COMPLETION_PLUGIN } from './features/completion';
 import { COMPLETION_ICONS_MANAGER } from './features/completion/theme';
 import { COMPLETION_ICONS_VSCODE } from './features/completion/themes/vscode';
+import { COMPLETION_ICONS_MATERIAL } from './features/completion/themes/material';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -227,6 +228,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   CODEMIRROR_VIRTUAL_EDITOR,
   COMPLETION_ICONS_MANAGER,
   COMPLETION_ICONS_VSCODE,
+  COMPLETION_ICONS_MATERIAL,
   plugin,
   ...default_features
 ];
