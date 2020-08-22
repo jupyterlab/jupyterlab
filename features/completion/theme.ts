@@ -76,9 +76,11 @@ export class CompletionIconManager implements ILSPCompletionIconsManager {
   protected current_icons: Map<string, LabIcon>;
   protected themes: Map<string, ICompletionIconTheme>;
   private current_theme_name: string;
+  private icons_cache: Map<string, LabIcon>;
 
   constructor(protected themeManager: IThemeManager) {
     this.themes = new Map();
+    this.icons_cache = new Map();
     themeManager.themeChanged.connect(this.update_icons_set, this);
   }
 
@@ -97,13 +99,17 @@ export class CompletionIconManager implements ILSPCompletionIconsManager {
     for (let [completion_kind, svg] of Object.entries(icon_set)) {
       let name =
         'lsp:' + this.current_theme_name + '-' + completion_kind + '-' + mode;
-      icons.set(
-        completion_kind,
-        new LabIcon({
+      let icon: LabIcon;
+      if (this.icons_cache.has(name)) {
+        icon = this.icons_cache.get(name);
+      } else {
+        icon = new LabIcon({
           name: name,
           svgstr: svg
-        })
-      );
+        });
+        this.icons_cache.set(name, icon);
+      }
+      icons.set(completion_kind, icon);
     }
     return icons;
   }
