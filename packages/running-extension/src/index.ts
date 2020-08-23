@@ -5,21 +5,30 @@ import { toArray } from '@lumino/algorithm';
 
 import { Widget } from '@lumino/widgets';
 
+import { ISignal, Signal } from '@lumino/signaling';
+
 import {
   ILayoutRestorer,
   ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
+
+import { MainAreaWidget } from '@jupyterlab/apputils';
+
 import { PathExt } from '@jupyterlab/coreutils';
+
 import {
   IRunningSessions,
   IRunningSessionManagers,
   RunningSessionManagers,
   RunningSessions
 } from '@jupyterlab/running';
+
 import { Session } from '@jupyterlab/services';
+
 import { ITranslator } from '@jupyterlab/translation';
+
 import {
   consoleIcon,
   fileIcon,
@@ -68,10 +77,10 @@ function activate(
   if (restorer) {
     restorer.add(running, 'running-sessions');
   }
-  addKernelRunningSessionManager(runningSessionManagers, translator, app);
   if (labShell) {
     addOpenTabs(runningSessionManagers, labShell);
   }
+  addKernelRunningSessionManager(runningSessionManagers, translator, app);
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.add(running, 'left', { rank: 200 });
@@ -79,26 +88,56 @@ function activate(
   return runningSessionManagers;
 }
 
+class OpenTabsSignaler {
+  constructor(labShell: ILabShell) {
+    this._labShell = labShell;
+    this._labShell.layoutModified.connect(this._emitTabsChanged, this);
+  }
+
+  get tabsChanged(): ISignal<this, void> {
+    return this._tabsChanged;
+  }
+
+  addWidget(widget: Widget): void {
+    if (widget instanceof MainAreaWidget) {
+      widget.content.title.changed.connect(this._emitTabsChanged, this);
+      this._widgets.push(widget);
+    }
+  }
+
+  private _emitTabsChanged(): void {
+    this._widgets.forEach(widget => {
+      widget.content.title.changed.disconnect(this._emitTabsChanged, this);
+    });
+    this._widgets = [];
+    this._tabsChanged.emit(void 0);
+  }
+
+  private _tabsChanged = new Signal<this, void>(this);
+  private _labShell: ILabShell;
+  private _widgets: MainAreaWidget[] = [];
+}
 
 function addOpenTabs(managers: IRunningSessionManagers, labShell: ILabShell) {
+  const signaler = new OpenTabsSignaler(labShell);
+
   managers.add({
     name: 'Open Tabs',
     running: () => {
-      return toArray(labShell.widgets('main')).map(
-        (widget: Widget) => new OpenTab(widget)
-      );
-    }, 
+      return toArray(labShell.widgets('main')).map((widget: Widget) => {
+        signaler.addWidget(widget);
+        return new OpenTab(widget);
+      });
+    },
     shutdownAll: () => {
-      toArray(labShell.widgets('main')).forEach( (widget: Widget) => {
+      toArray(labShell.widgets('main')).forEach((widget: Widget) => {
         widget.close();
-      })
+      });
     },
     refreshRunning: () => {
       return void 0;
     },
-    runningChanged: () => {
-      return labShell.layoutModified;
-    }
+    runningChanged: signaler.tabsChanged
   });
 
   class OpenTab implements IRunningSessions.IRunningItem {
