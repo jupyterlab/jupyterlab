@@ -31,7 +31,6 @@
 @import url('~@jupyterlab/running-extension/style/index.css');
 @import url('~@jupyterlab/settingeditor-extension/style/index.css');
 @import url('~@jupyterlab/statusbar-extension/style/index.css');
-@import url('~@jupyterlab/tabmanager-extension/style/index.css');
 @import url('~@jupyterlab/terminal-extension/style/index.css');
 @import url('~@jupyterlab/toc-extension/style/index.css');
 @import url('~@jupyterlab/tooltip-extension/style/index.css');
