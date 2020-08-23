@@ -23,7 +23,6 @@
   margin: 0;
   padding: 4px;
   width: 40%;
-  /* max-height: 40%; */
   box-shadow: var(--jp-elevation-z4);
   border-radius: 4px;
   background: var(--jp-layout-color0);
