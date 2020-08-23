@@ -35,7 +35,6 @@ window.addEventListener('load', async function () {
     require('@jupyterlab/settingeditor-extension'),
     require('@jupyterlab/shortcuts-extension'),
     require('@jupyterlab/statusbar-extension'),
-    require('@jupyterlab/tabmanager-extension'),
     require('@jupyterlab/terminal-extension'),
     require('@jupyterlab/theme-dark-extension'),
     require('@jupyterlab/theme-light-extension'),
