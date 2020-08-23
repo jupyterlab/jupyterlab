@@ -3,7 +3,7 @@
 
 import { toArray } from '@lumino/algorithm';
 
-import { Widget } from '@lumino/widget';
+import { Widget } from '@lumino/widgets';
 
 import {
   ILayoutRestorer,
@@ -24,8 +24,7 @@ import {
   consoleIcon,
   fileIcon,
   notebookIcon,
-  runningIcon,
-  LabIcon
+  runningIcon
 } from '@jupyterlab/ui-components';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -38,7 +37,7 @@ const plugin: JupyterFrontEndPlugin<IRunningSessionManagers> = {
   id: '@jupyterlab/running-extension:plugin',
   provides: IRunningSessionManagers,
   requires: [ITranslator],
-  optional: [ILayoutRestorer],
+  optional: [ILayoutRestorer, ILabShell],
   autoStart: true
 };
 
@@ -53,7 +52,8 @@ export default plugin;
 function activate(
   app: JupyterFrontEnd,
   translator: ITranslator,
-  restorer: ILayoutRestorer | null
+  restorer: ILayoutRestorer | null,
+  labShell: ILabShell | null
 ): IRunningSessionManagers {
   const trans = translator.load('jupyterlab');
   const runningSessionManagers = new RunningSessionManagers();
@@ -69,7 +69,9 @@ function activate(
     restorer.add(running, 'running-sessions');
   }
   addKernelRunningSessionManager(runningSessionManagers, translator, app);
-  addOpenTabs(runningSessionManagers, app);
+  if (labShell) {
+    addOpenTabs(runningSessionManagers, labShell);
+  }
   // Rank has been chosen somewhat arbitrarily to give priority to the running
   // sessions widget in the sidebar.
   app.shell.add(running, 'left', { rank: 200 });
@@ -77,21 +79,26 @@ function activate(
   return runningSessionManagers;
 }
 
-function addOpenTabs(managers: IRunningSessionManagers, app: JupyterFrontEnd) {
+
+function addOpenTabs(managers: IRunningSessionManagers, labShell: ILabShell) {
   managers.add({
     name: 'Open Tabs',
     running: () => {
-      return toArray(app.shell.widgets('main')).map(
-        widget => new OpenTab(widget)
+      return toArray(labShell.widgets('main')).map(
+        (widget: Widget) => new OpenTab(widget)
       );
-    },
+    }, 
     shutdownAll: () => {
-      return void 0;
+      toArray(labShell.widgets('main')).forEach( (widget: Widget) => {
+        widget.close();
+      })
     },
     refreshRunning: () => {
       return void 0;
     },
-    runningChanged: app.shell.layoutModified
+    runningChanged: () => {
+      return labShell.layoutModified;
+    }
   });
 
   class OpenTab implements IRunningSessions.IRunningItem {
@@ -99,18 +106,18 @@ function addOpenTabs(managers: IRunningSessionManagers, app: JupyterFrontEnd) {
       this._widget = widget;
     }
     open() {
-      app.shell.activateById(this._widget.id);
+      labShell.activateById(this._widget.id);
     }
     shutdown() {
       this._widget.close();
     }
     icon() {
-      const icon = this._widget.icon;
-      let labIcon: LabIcon;
-      if (icon instanceof string) {
-        labIcon = new LabIcon();
-      }
-      return labIcon;
+      // const icon = this._widget.icon;
+      // let labIcon: LabIcon;
+      // if (icon instanceof string) {
+      //   labIcon = new LabIcon();
+      // }
+      return fileIcon;
     }
     label() {
       return this._widget.title.label;

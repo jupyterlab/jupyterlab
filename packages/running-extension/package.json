@@ -37,6 +37,7 @@
   "dependencies": {
     "@jupyterlab/application": "^3.0.0-beta.4",
     "@jupyterlab/coreutils": "^5.0.0-beta.4",
+    "@jupyterlab/docregistry": "^3.0.0-beta.4",
     "@jupyterlab/running": "^3.0.0-beta.4",
     "@jupyterlab/services": "^6.0.0-beta.4",
     "@jupyterlab/translation": "^3.0.0-beta.4",
