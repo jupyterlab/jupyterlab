@@ -294,7 +294,7 @@ namespace Private {
 
     // Set the content type if there is no given data and we are
     // using an authenticated connection.
-    if (!request.bodyUsed && authenticated) {
+    if (!request.headers.has('Content-Type') && authenticated) {
       request.headers.set('Content-Type', 'application/json');
     }
 
