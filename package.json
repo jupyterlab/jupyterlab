@@ -106,7 +106,7 @@
     "prettier": "^1.19.1",
     "react-docgen-typescript-loader": "^3.7.2",
     "shell-quote": "^1.7.2",
-    "typedoc": "next",
+    "typedoc": "0.17.0-3",
     "yarn": "1.21.1"
   }
 }

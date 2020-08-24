@@ -16422,6 +16422,22 @@ typedoc-default-themes@^0.10.1:
   dependencies:
     lunr "^2.3.8"
 
+typedoc@0.17.0-3:
+  version "0.17.0-3"
+  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.17.0-3.tgz#91996e77427ff3a208ab76595a927ee11b75e9e8"
+  integrity sha512-DO2djkR4NHgzAWfNbJb2eQKsFMs+gOuYBXlQ8dOSCjkAK5DRI7ZywDufBGPUw7Ue9Qwi2Cw1DxLd3reDq8wFuQ==
+  dependencies:
+    "@types/minimatch" "3.0.3"
+    fs-extra "^8.1.0"
+    handlebars "^4.7.2"
+    highlight.js "^9.18.0"
+    lodash "^4.17.15"
+    marked "^0.8.0"
+    minimatch "^3.0.0"
+    progress "^2.0.3"
+    shelljs "^0.8.3"
+    typedoc-default-themes "0.8.0-0"
+
 typedoc@^0.17.7:
   version "0.17.7"
   resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.17.7.tgz#70797401140403a5f91589ed3f4f24c03841bf7a"
@@ -16437,22 +16453,6 @@ typedoc@^0.17.7:
     progress "^2.0.3"
     shelljs "^0.8.4"
     typedoc-default-themes "^0.10.1"
-
-typedoc@next:
-  version "0.17.0-3"
-  resolved "https://registry.yarnpkg.com/typedoc/-/typedoc-0.17.0-3.tgz#91996e77427ff3a208ab76595a927ee11b75e9e8"
-  integrity sha512-DO2djkR4NHgzAWfNbJb2eQKsFMs+gOuYBXlQ8dOSCjkAK5DRI7ZywDufBGPUw7Ue9Qwi2Cw1DxLd3reDq8wFuQ==
-  dependencies:
-    "@types/minimatch" "3.0.3"
-    fs-extra "^8.1.0"
-    handlebars "^4.7.2"
-    highlight.js "^9.18.0"
-    lodash "^4.17.15"
-    marked "^0.8.0"
-    minimatch "^3.0.0"
-    progress "^2.0.3"
-    shelljs "^0.8.3"
-    typedoc-default-themes "0.8.0-0"
 
 typescript@~4.0.2:
   version "4.0.2"
