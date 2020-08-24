@@ -300,7 +300,10 @@ export class DocumentWidgetManager implements IDisposable {
    */
   protected async onClose(widget: Widget): Promise<boolean> {
     // Handle dirty state.
-    const [shouldClose, ignoreSave] = await this._maybeClose(widget);
+    const [shouldClose, ignoreSave] = await this._maybeClose(
+      widget,
+      this.translator
+    );
     if (widget.isDisposed) {
       return true;
     }

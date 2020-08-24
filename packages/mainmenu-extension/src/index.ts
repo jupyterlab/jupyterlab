@@ -943,7 +943,6 @@ namespace Private {
       // Coerce the result to be a string. When Typedoc is updated to use
       // Typescript 2.8, we can possibly use conditional types to get Typescript
       // to recognize this is a string.
-      console.log(label, extender[label]);
       return (extender[label] as any)(count) as string;
     }
   }

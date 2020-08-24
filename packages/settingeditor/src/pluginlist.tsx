@@ -277,11 +277,14 @@ namespace Private {
     });
     const items = plugins.map(plugin => {
       const { id, schema, version } = plugin;
-      const title = trans.__(
-        typeof schema.title === 'string' ? schema.title : id
-      );
+      const title =
+        typeof schema.title === 'string'
+          ? trans._p('schema', schema.title)
+          : id;
       const description =
-        typeof schema.description === 'string' ? schema.description : '';
+        typeof schema.description === 'string'
+          ? trans._p('schema', schema.description)
+          : '';
       const itemTitle = `${description}\n${id}\n${version}`;
       const icon = getHint(ICON_KEY, registry, plugin);
       const iconClass = getHint(ICON_CLASS_KEY, registry, plugin);

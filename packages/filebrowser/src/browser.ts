@@ -95,7 +95,7 @@ export class FileBrowser extends Widget {
       },
       tooltip: this._trans.__('New Folder')
     });
-    const uploader = new Uploader({ model, translator });
+    const uploader = new Uploader({ model, translator: this.translator });
 
     const refresher = new ToolbarButton({
       icon: refreshIcon,
