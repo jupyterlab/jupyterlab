@@ -207,7 +207,11 @@ export class CellModel extends CodeEditor.Model implements ICellModel {
   /**
    * The type of cell.
    */
-  readonly type: nbformat.CellType;
+  get type(): nbformat.CellType {
+    // This getter really should be abstract, but our current constructor
+    // depends on .type working
+    return 'raw';
+  }
 
   /**
    * A signal emitted when the state of the model changes.

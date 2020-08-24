@@ -6,7 +6,7 @@
 
 // Modified to work with Webpack 5 typings by Jason Grout <https://github.com/jasongrout>
 
-/* eslint-disable @typescript-eslint/interface-name-prefix */
+/* eslint-disable @typescript-eslint/naming-convention */
 
 // Once to get a typed module first.
 declare module 'duplicate-package-checker-webpack-plugin';

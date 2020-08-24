@@ -93,8 +93,8 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.27.0",
-    "@typescript-eslint/parser": "^2.27.0",
+    "@typescript-eslint/eslint-plugin": "^3.10.0",
+    "@typescript-eslint/parser": "^3.10.0",
     "eslint": "^7.5.0",
     "eslint-config-prettier": "^6.7.0",
     "eslint-plugin-jest": "^23.8.2",
@@ -106,7 +106,7 @@
     "prettier": "^1.19.1",
     "react-docgen-typescript-loader": "^3.7.2",
     "shell-quote": "^1.7.2",
-    "typedoc": "next",
+    "typedoc": "0.17.0-3",
     "yarn": "1.21.1"
   }
 }

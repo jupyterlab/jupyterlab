@@ -109,11 +109,6 @@ export class NotebookPanel extends DocumentWidget<Notebook, INotebookModel> {
   }
 
   /**
-   * The notebook used by the widget.
-   */
-  readonly content: Notebook;
-
-  /**
    * The model for the widget.
    */
   get model(): INotebookModel | null {

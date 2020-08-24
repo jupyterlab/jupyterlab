@@ -25,7 +25,7 @@ describe('kernel/validate', () => {
         session: 'baz',
         content: { comm_id: 'foo', data: {} }
       });
-      delete msg.channel;
+      delete (msg as any).channel;
       expect(() => validateMessage(msg)).toThrowError();
     });
 
