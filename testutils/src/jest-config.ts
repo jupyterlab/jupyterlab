@@ -13,6 +13,7 @@ module.exports = function(baseDir: string) {
       '\\.svg$': 'jest-raw-loader',
       '^.+\\.md?$': 'markdown-loader-jest'
     },
+    testTimeout: 10000,
     setupFiles: ['@jupyterlab/testutils/lib/jest-shim.js'],
     testPathIgnorePatterns: ['/lib/', '/node_modules/'],
     moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],

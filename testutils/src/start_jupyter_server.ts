@@ -214,10 +214,14 @@ namespace Private {
     const workspaces_dir = mktempDir('workspaces');
 
     const configData = {
-      LabApp: { user_settings_dir, workspaces_dir, app_dir },
+      LabApp: {
+        user_settings_dir,
+        workspaces_dir,
+        app_dir,
+        open_browser: false
+      },
       ServerApp: {
         token: '',
-        open_browser: false,
         notebook_dir,
         disable_check_xsrf: true,
         allow_origin: '*'

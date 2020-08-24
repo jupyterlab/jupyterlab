@@ -107,7 +107,7 @@ describe('@jupyterlab/apputils', () => {
           (sender, { oldValue, newValue }) => {
             expect(sender).toBe(sessionContext);
             expect(oldValue).toBeNull();
-            expect(newValue).toBe(sessionContext.session?.kernel);
+            expect(newValue).toBe(sessionContext.session?.kernel || null);
             called = true;
           }
         );

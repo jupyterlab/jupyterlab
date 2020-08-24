@@ -189,9 +189,9 @@ export class SessionConnection implements Session.ISessionConnection {
       if (this._kernel !== null) {
         this._kernel.dispose();
       }
-      const oldValue = this._kernel;
+      const oldValue = this._kernel || null;
       this.setupKernel(model.kernel);
-      const newValue = this._kernel;
+      const newValue = this._kernel || null;
       this._kernelChanged.emit({ name: 'kernel', oldValue, newValue });
     }
 
