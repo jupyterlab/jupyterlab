@@ -36,6 +36,10 @@ interface ILicenseInfo {
 
 export interface ICompletionIconTheme {
   /**
+   * Theme identifier (which can be part of a valid HTML class name).
+   */
+  id: string;
+  /**
    * Name of the icons theme.
    */
   name: string;
@@ -57,6 +61,11 @@ export interface ICompletionIconTheme {
     dark?: ICompletionIconSet;
     /**
      * Icon properties to be set on each of the icons.
+     * NOTE: setting className here will not work, as
+     * it would be overwritten in the completer.
+     * In order to style the icons use:
+     * `.lsp-completer-theme-{id} .jp-Completer-icon svg`
+     * instead, where {id} is the identifier of your theme.
      */
     options?: LabIcon.IProps;
   };
@@ -75,7 +84,7 @@ export const ILSPCompletionIconsManager = new Token<ILSPCompletionIconsManager>(
 export class CompletionIconManager implements ILSPCompletionIconsManager {
   protected current_icons: Map<string, LabIcon>;
   protected themes: Map<string, ICompletionIconTheme>;
-  private current_theme_name: string;
+  private current_theme_id: string;
   private icons_cache: Map<string, LabIcon>;
 
   constructor(protected themeManager: IThemeManager) {
@@ -98,7 +107,12 @@ export class CompletionIconManager implements ILSPCompletionIconsManager {
     const mode = this.is_theme_light() ? 'light' : 'dark';
     for (let [completion_kind, svg] of Object.entries(icon_set)) {
       let name =
-        'lsp:' + this.current_theme_name + '-' + completion_kind + '-' + mode;
+        'lsp:' +
+        this.current_theme_id +
+        '-' +
+        completion_kind.toLowerCase() +
+        '-' +
+        mode;
       let icon: LabIcon;
       if (this.icons_cache.has(name)) {
         icon = this.icons_cache.get(name);
@@ -132,38 +146,47 @@ export class CompletionIconManager implements ILSPCompletionIconsManager {
       return null;
     }
     let options = this.current_theme.icons.options || {};
+    console.log(options);
     if (this.current_icons.has(type)) {
       return this.current_icons.get(type).bindprops(options);
     }
     return null;
   }
 
-  set_icon_theme(name: string | null) {
-    if (!this.themes.has(name)) {
+  protected get current_theme_class() {
+    return 'lsp-completer-theme-' + this.current_theme_id;
+  }
+
+  set_icon_theme(id: string | null) {
+    if (this.current_theme_id) {
+      document.body.classList.remove(this.current_theme_class);
+    }
+    if (!this.themes.has(id)) {
       console.warn(
-        `[LSP][Completer] Icons theme ${name} cannot be set yet (it may be loaded later).`
+        `[LSP][Completer] Icons theme ${id} cannot be set yet (it may be loaded later).`
       );
     }
-    this.current_theme_name = name;
+    this.current_theme_id = id;
+    document.body.classList.add(this.current_theme_class);
     this.update_icons_set();
   }
 
   protected get current_theme(): ICompletionIconTheme | null {
-    if (this.themes.has(this.current_theme_name)) {
-      return this.themes.get(this.current_theme_name);
+    if (this.themes.has(this.current_theme_id)) {
+      return this.themes.get(this.current_theme_id);
     }
     return null;
   }
 
   register_theme(theme: ICompletionIconTheme) {
-    if (this.themes.has(theme.name)) {
+    if (this.themes.has(theme.id)) {
       console.warn(
         'Theme with name',
-        theme.name,
+        theme.id,
         'was already registered, overwriting.'
       );
     }
-    this.themes.set(theme.name, theme);
+    this.themes.set(theme.id, theme);
     this.update_icons_set();
   }
 }

@@ -47,6 +47,7 @@ const default_set: ICompletionIconSet = {
   Unit: beaker,
   Value: value,
   Enum: list_numbered,
+  // TODO not outline
   Keyword: key,
   Snippet: snippet,
   Color: palette,
@@ -64,7 +65,8 @@ const default_set: ICompletionIconSet = {
 };
 
 const iconTheme: ICompletionIconTheme = {
-  name: 'material',
+  id: 'material',
+  name: 'Material Design',
   licence: {
     name: 'SIL Open Font License 1.1',
     abbreviation: 'OFL',
@@ -72,7 +74,10 @@ const iconTheme: ICompletionIconTheme = {
     link: 'https://github.com/Templarian/MaterialDesign/blob/master/LICENSE'
   },
   icons: {
-    light: default_set
+    light: default_set,
+    options: {
+      className: 'lsp-icons-material'
+    }
   }
 };
 

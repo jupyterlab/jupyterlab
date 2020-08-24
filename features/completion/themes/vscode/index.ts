@@ -120,7 +120,8 @@ const dark_set: ICompletionIconSet = {
 };
 
 const iconTheme: ICompletionIconTheme = {
-  name: 'vscode',
+  id: 'vscode',
+  name: 'VSCode',
   licence: {
     name: 'Creative Commons Attribution 4.0 International Public License',
     abbreviation: 'CC 4.0',
