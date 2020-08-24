@@ -1413,6 +1413,9 @@ namespace Private {
     const { preference, sessions, specs } = options;
     const { name, id, language, canStart, shouldStart } = preference;
 
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+
     if (!specs || canStart === false) {
       node.appendChild(optionForNone(translator));
       node.value = 'null';
@@ -1453,7 +1456,7 @@ namespace Private {
 
     // Handle a preferred kernels in order of display name.
     const preferred = document.createElement('optgroup');
-    preferred.label = this._trans.__('Start Preferred Kernel');
+    preferred.label = trans.__('Start Preferred Kernel');
 
     names.sort((a, b) => displayNames[a].localeCompare(displayNames[b]));
     for (const name of names) {
@@ -1468,7 +1471,7 @@ namespace Private {
     node.appendChild(optionForNone());
 
     const other = document.createElement('optgroup');
-    other.label = this._trans.__('Start Other Kernel');
+    other.label = trans.__('Start Other Kernel');
 
     // Add the rest of the kernel names in alphabetical order.
     const otherNames: string[] = [];
@@ -1517,7 +1520,7 @@ namespace Private {
     });
 
     const matching = document.createElement('optgroup');
-    matching.label = this._trans.__('Use Kernel from Preferred Session');
+    matching.label = trans.__('Use Kernel from Preferred Session');
     node.appendChild(matching);
 
     if (matchingSessions.length) {
@@ -1532,7 +1535,7 @@ namespace Private {
     }
 
     const otherSessionsNode = document.createElement('optgroup');
-    otherSessionsNode.label = this._trans.__('Use Kernel from Other Session');
+    otherSessionsNode.label = trans.__('Use Kernel from Other Session');
     node.appendChild(otherSessionsNode);
 
     if (otherSessions.length) {
@@ -1599,7 +1602,7 @@ namespace Private {
     translator?: ITranslator
   ): HTMLOptionElement {
     translator = translator || nullTranslator;
-    const trans = this.translator.load('jupyterlab');
+    const trans = translator.load('jupyterlab');
 
     const option = document.createElement('option');
     const sessionName = session.name || PathExt.basename(session.path);

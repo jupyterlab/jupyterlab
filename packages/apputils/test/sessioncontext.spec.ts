@@ -105,9 +105,12 @@ describe('@jupyterlab/apputils', () => {
         let called = false;
         sessionContext.kernelChanged.connect(
           (sender, { oldValue, newValue }) => {
+            if (oldValue !== null) {
+              return;
+            }
             expect(sender).toBe(sessionContext);
             expect(oldValue).toBeNull();
-            expect(newValue).toBe(sessionContext.session?.kernel);
+            expect(newValue).toBe(sessionContext.session?.kernel || null);
             called = true;
           }
         );
@@ -121,6 +124,9 @@ describe('@jupyterlab/apputils', () => {
         let called = false;
         sessionContext.sessionChanged.connect(
           (sender, { oldValue, newValue }) => {
+            if (oldValue !== null) {
+              return;
+            }
             expect(sender).toBe(sessionContext);
             expect(oldValue).toBeNull();
             expect(newValue).toBe(sessionContext.session);
