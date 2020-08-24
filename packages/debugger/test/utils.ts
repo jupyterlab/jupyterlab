@@ -15,7 +15,6 @@ export const KERNELSPECS: JSONObject = {
       spec: {
         language: 'python',
         argv: [],
-        // eslint-disable-next-line @typescript-eslint/camelcase
         display_name: 'Python 3',
         env: {}
       },
@@ -26,7 +25,6 @@ export const KERNELSPECS: JSONObject = {
       spec: {
         language: 'python',
         argv: [],
-        // eslint-disable-next-line @typescript-eslint/camelcase
         display_name: 'xpython',
         env: {},
         metadata: { debugger: true }
