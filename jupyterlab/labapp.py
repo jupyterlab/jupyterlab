@@ -539,8 +539,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
     @default('app_version')
     def _default_app_version(self):
-        info = get_app_info(app_options=AppOptions(app_dir=self.app_dir))
-        return info['version']
+        return app_version
 
     @default('cache_files')
     def _default_cache_files(self):
@@ -613,8 +612,6 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
 
 
     def initialize_settings(self):
-        # FIXME: why isn't the default being applied?
-        self.app_version = self._default_app_version()
         super().initialize_settings()
 
 
