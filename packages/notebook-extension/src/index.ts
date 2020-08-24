@@ -2122,7 +2122,7 @@ function populateMenus(
     tracker,
     clearCurrentLabel: (n: number) => trans.__('Clear Output'),
     clearAllLabel: (n: number) => {
-      return trans._n('Clear All Outputs', 'Clear All Outputs', n);
+      return trans.__('Clear All Outputs');
     },
     clearCurrent: (current: NotebookPanel) => {
       return NotebookActions.clearOutputs(current.content);
@@ -2500,7 +2500,7 @@ namespace Private {
    * The default Export To ... formats and their human readable labels.
    */
   export function getFormatLabels(
-    translator?: ITranslator
+    translator: ITranslator
   ): { [k: string]: string } {
     translator = translator || nullTranslator;
     const trans = translator.load('jupyterlab');

@@ -24,9 +24,7 @@ export class Uploader extends ToolbarButton {
       onClick: () => {
         this._input.click();
       },
-      tooltip: (options.translator || nullTranslator)
-        .load('jupyterlab')
-        .__('Upload Files')
+      tooltip: Private.translateToolTip(options.translator)
     });
     this.fileBrowserModel = options.model;
     this.translator = options.translator || nullTranslator;
@@ -103,5 +101,14 @@ namespace Private {
     input.type = 'file';
     input.multiple = true;
     return input;
+  }
+
+  /**
+   * Translate upload tooltip.
+   */
+  export function translateToolTip(translator?: ITranslator) {
+    translator = translator || nullTranslator;
+    const trans = translator.load('jupyterlab');
+    return trans.__('Upload Files');
   }
 }

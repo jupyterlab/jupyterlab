@@ -373,7 +373,7 @@ export namespace ListEntry {
  */
 export function ListView(props: ListView.IProperties): React.ReactElement<any> {
   const translator = props.translator || nullTranslator;
-  const trans = translator.load('jupytrlab');
+  const trans = translator.load('jupyterlab');
   const entryViews = [];
   for (const entry of props.entries) {
     entryViews.push(
