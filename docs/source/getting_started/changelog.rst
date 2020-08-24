@@ -7,6 +7,10 @@ JupyterLab Changelog
 `v2.2.x <https://github.com/jupyterlab/jupyterlab/milestone/53>`__
 ------------------------------------------------------------------
 
+v2.2.5
+^^^^^^
+* Header 'Content-Type' should not be overwritten  (`#8892 <https://github.com/jupyterlab/jupyterlab/pull/8892>`__)
+
 v2.2.4
 ^^^^^^
 * Do not use token parameters in websocket urls (`#8836 <https://github.com/jupyterlab/jupyterlab/pull/8836>`__)
