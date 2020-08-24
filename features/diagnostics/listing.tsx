@@ -93,7 +93,10 @@ class Column {
   }
 }
 
-function SortableTH(props: { name: string; listing: DiagnosticsListing }): any {
+function SortableTH(props: {
+  name: string;
+  listing: DiagnosticsListing;
+}): ReactElement {
   const is_sort_key = props.name === props.listing.sort_key;
   const sortIcon =
     !is_sort_key || props.listing.sort_direction === 1

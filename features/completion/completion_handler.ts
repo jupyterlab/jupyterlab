@@ -22,7 +22,7 @@ import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponse
 import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { FeatureSettings } from '../../feature';
 import { PositionConverter } from '../../converter';
-import { ILSPCompletionIconsManager } from './theme';
+import { ILSPCompletionThemeManager } from './themes/types';
 
 /**
  * A LSP connector for completion handlers.
@@ -286,7 +286,7 @@ export class LSPConnector
   }
 
   protected icon_for(type: string) {
-    if (!this.options.settings.composite.icons) {
+    if (!this.options.settings.composite.theme) {
       return undefined;
     }
     if (typeof type === 'undefined' || type == '<unknown>') {
@@ -416,7 +416,7 @@ export namespace LSPConnector {
 
     settings: FeatureSettings<LSPCompletionSettings>;
 
-    icons_manager: ILSPCompletionIconsManager;
+    icons_manager: ILSPCompletionThemeManager;
 
     session?: Session.ISessionConnection;
   }

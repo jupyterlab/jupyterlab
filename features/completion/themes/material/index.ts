@@ -1,14 +1,8 @@
-import {
-  ICompletionIconSet,
-  ICompletionIconTheme,
-  ILSPCompletionIconsManager
-} from '../../theme';
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { PLUGIN_ID } from '../../../../tokens';
-import { kernelIcon } from '@jupyterlab/ui-components';
 
 import alphabetical from '../../../../../style/icons/themes/material/alphabetical.svg';
-import shapes from '../../../../../style/icons/themes/material/shape-outline.svg';
+import sitemap from '../../../../../style/icons/themes/material/sitemap.svg';
 import palette from '../../../../../style/icons/themes/material/palette-outline.svg';
 import plus_minus from '../../../../../style/icons/themes/material/plus-minus-variant.svg';
 import beaker from '../../../../../style/icons/themes/material/beaker-outline.svg';
@@ -29,9 +23,14 @@ import number from '../../../../../style/icons/themes/material/numeric.svg';
 import shield from '../../../../../style/icons/themes/material/shield-outline.svg';
 import structure from '../../../../../style/icons/themes/material/file-tree.svg';
 import lightning from '../../../../../style/icons/themes/material/flash-outline.svg';
-import key from '../../../../../style/icons/themes/material/key-outline.svg';
+import key from '../../../../../style/icons/themes/material/key.svg';
 import snippet from '../../../../../style/icons/themes/material/border-none-variant.svg';
 import alpha_t from '../../../../../style/icons/themes/material/alpha-t.svg';
+import {
+  ICompletionIconSet,
+  ICompletionTheme,
+  ILSPCompletionThemeManager
+} from '../types';
 
 const default_set: ICompletionIconSet = {
   Text: alphabetical,
@@ -40,14 +39,13 @@ const default_set: ICompletionIconSet = {
   Constructor: hammer_wrench,
   Field: field,
   Variable: variable,
-  Class: shapes,
+  Class: structure,
   Interface: connection,
   Module: module,
   Property: wrench,
   Unit: beaker,
   Value: value,
   Enum: list_numbered,
-  // TODO not outline
   Keyword: key,
   Snippet: snippet,
   Color: palette,
@@ -56,36 +54,31 @@ const default_set: ICompletionIconSet = {
   Folder: folder,
   EnumMember: number,
   Constant: shield,
-  // or sitemap?
-  Struct: structure,
+  Struct: sitemap,
   Event: lightning,
   Operator: plus_minus,
-  TypeParameter: alpha_t,
-  Kernel: kernelIcon.svgstr
+  TypeParameter: alpha_t
 };
 
-const iconTheme: ICompletionIconTheme = {
+const completionTheme: ICompletionTheme = {
   id: 'material',
   name: 'Material Design',
-  licence: {
-    name: 'SIL Open Font License 1.1',
-    abbreviation: 'OFL',
-    licensor: 'Austin Andrews and Google',
-    link: 'https://github.com/Templarian/MaterialDesign/blob/master/LICENSE'
-  },
   icons: {
-    light: default_set,
-    options: {
-      className: 'lsp-icons-material'
-    }
+    licence: {
+      name: 'SIL Open Font License 1.1',
+      abbreviation: 'OFL',
+      licensor: 'Austin Andrews and Google',
+      link: 'https://github.com/Templarian/MaterialDesign/blob/master/LICENSE'
+    },
+    light: default_set
   }
 };
 
-export const COMPLETION_ICONS_MATERIAL: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID + ':completion-icons-material',
-  requires: [ILSPCompletionIconsManager],
-  activate: (app, iconsManager: ILSPCompletionIconsManager) => {
-    iconsManager.register_theme(iconTheme);
+export const COMPLETION_THEME_MATERIAL: JupyterFrontEndPlugin<void> = {
+  id: PLUGIN_ID + ':completion-theme-material',
+  requires: [ILSPCompletionThemeManager],
+  activate: (app, iconsManager: ILSPCompletionThemeManager) => {
+    iconsManager.register_theme(completionTheme);
   },
   autoStart: true
 };

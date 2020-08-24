@@ -14,7 +14,7 @@ import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { IDocumentConnectionData } from '../../connection_manager';
 import { ILSPAdapterManager } from '../../tokens';
 import { NotebookAdapter } from '../../adapters/notebook/notebook';
-import { ILSPCompletionIconsManager } from './theme';
+import { ILSPCompletionThemeManager } from './themes/types';
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];
@@ -73,11 +73,11 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     private completionManager: ICompletionManager,
     public settings: FeatureSettings<LSPCompletionSettings>,
     private adapterManager: ILSPAdapterManager,
-    private iconsThemeManager: ILSPCompletionIconsManager
+    private completionThemeManager: ILSPCompletionThemeManager
   ) {
     adapterManager.adapterChanged.connect(this.swap_adapter, this);
     settings.changed.connect(() => {
-      iconsThemeManager.set_icon_theme(this.settings.composite.icons);
+      completionThemeManager.set_theme(this.settings.composite.theme);
     });
   }
 
@@ -159,7 +159,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     }
     this.current_completion_connector = new LSPConnector({
       editor: editor,
-      icons_manager: this.iconsThemeManager,
+      icons_manager: this.completionThemeManager,
       connections: this.current_adapter.connection_manager.connections,
       virtual_editor: this.current_adapter.virtual_editor,
       settings: this.settings,

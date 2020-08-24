@@ -1,11 +1,5 @@
-import {
-  ICompletionIconSet,
-  ICompletionIconTheme,
-  ILSPCompletionIconsManager
-} from '../../theme';
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { PLUGIN_ID } from '../../../../tokens';
-import { kernelIcon } from '@jupyterlab/ui-components';
 
 /**
  * Light theme variants
@@ -60,6 +54,11 @@ import dark_symbol_structure from '../../../../../style/icons/themes/vscode/dark
 import dark_symbol_event from '../../../../../style/icons/themes/vscode/dark/symbol-event.svg';
 import dark_symbol_operator from '../../../../../style/icons/themes/vscode/dark/symbol-operator.svg';
 import dark_symbol_parameter from '../../../../../style/icons/themes/vscode/dark/symbol-parameter.svg';
+import {
+  ICompletionIconSet,
+  ICompletionTheme,
+  ILSPCompletionThemeManager
+} from '../types';
 
 const light_set: ICompletionIconSet = {
   Text: symbol_string,
@@ -86,8 +85,7 @@ const light_set: ICompletionIconSet = {
   Struct: symbol_structure,
   Event: symbol_event,
   Operator: symbol_operator,
-  TypeParameter: symbol_parameter,
-  Kernel: kernelIcon.svgstr
+  TypeParameter: symbol_parameter
 };
 
 const dark_set: ICompletionIconSet = {
@@ -115,30 +113,29 @@ const dark_set: ICompletionIconSet = {
   Struct: dark_symbol_structure,
   Event: dark_symbol_event,
   Operator: dark_symbol_operator,
-  TypeParameter: dark_symbol_parameter,
-  Kernel: kernelIcon.svgstr
+  TypeParameter: dark_symbol_parameter
 };
 
-const iconTheme: ICompletionIconTheme = {
+const completionTheme: ICompletionTheme = {
   id: 'vscode',
   name: 'VSCode',
-  licence: {
-    name: 'Creative Commons Attribution 4.0 International Public License',
-    abbreviation: 'CC 4.0',
-    licensor: 'Microsoft',
-    link: 'https://github.com/microsoft/vscode-icons/blob/master/LICENSE'
-  },
   icons: {
+    licence: {
+      name: 'Creative Commons Attribution 4.0 International Public License',
+      abbreviation: 'CC 4.0',
+      licensor: 'Microsoft',
+      link: 'https://github.com/microsoft/vscode-icons/blob/master/LICENSE'
+    },
     light: light_set,
     dark: dark_set
   }
 };
 
-export const COMPLETION_ICONS_VSCODE: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID + ':completion-icons-vscode',
-  requires: [ILSPCompletionIconsManager],
-  activate: (app, iconsManager: ILSPCompletionIconsManager) => {
-    iconsManager.register_theme(iconTheme);
+export const COMPLETION_THEME_VSCODE: JupyterFrontEndPlugin<void> = {
+  id: PLUGIN_ID + ':completion-theme-vscode',
+  requires: [ILSPCompletionThemeManager],
+  activate: (app, iconsManager: ILSPCompletionThemeManager) => {
+    iconsManager.register_theme(completionTheme);
   },
   autoStart: true
 };

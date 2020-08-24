@@ -35,9 +35,9 @@ import { LabIcon } from '@jupyterlab/ui-components';
 import codeCheckSvg from '../style/icons/code-check.svg';
 import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import { COMPLETION_PLUGIN } from './features/completion';
-import { COMPLETION_ICONS_MANAGER } from './features/completion/theme';
-import { COMPLETION_ICONS_VSCODE } from './features/completion/themes/vscode';
-import { COMPLETION_ICONS_MATERIAL } from './features/completion/themes/material';
+import { COMPLETION_THEME_MANAGER } from './features/completion/themes/theme';
+import { COMPLETION_THEME_VSCODE } from './features/completion/themes/vscode';
+import { COMPLETION_THEME_MATERIAL } from './features/completion/themes/material';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -226,9 +226,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   FILE_EDITOR_ADAPTER,
   VIRTUAL_EDITOR_MANAGER,
   CODEMIRROR_VIRTUAL_EDITOR,
-  COMPLETION_ICONS_MANAGER,
-  COMPLETION_ICONS_VSCODE,
-  COMPLETION_ICONS_MATERIAL,
+  COMPLETION_THEME_MANAGER,
+  COMPLETION_THEME_VSCODE,
+  COMPLETION_THEME_MATERIAL,
   plugin,
   ...default_features
 ];
