@@ -131,15 +131,6 @@ const extensions: IRenderMime.IExtension | IRenderMime.IExtension[] = [
     id: '@jupyterlab/pdf-extension:factory',
     rendererFactory,
     dataType: 'string',
-    fileTypes: [
-      {
-        name: 'PDF',
-        displayName: 'PDF',
-        fileFormat: 'base64',
-        mimeTypes: [MIME_TYPE],
-        extensions: ['.pdf']
-      }
-    ],
     documentWidgetFactoryOptions: {
       name: 'PDF',
       modelName: 'base64',

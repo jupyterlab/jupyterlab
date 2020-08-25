@@ -58,6 +58,7 @@ import notebookSvgstr from '../../style/icons/filetype/notebook.svg';
 import numberingSvgstr from '../../style/icons/toolbar/numbering.svg';
 import paletteSvgstr from '../../style/icons/sidebar/palette.svg';
 import pasteSvgstr from '../../style/icons/toolbar/paste.svg';
+import pdfSvgstr from '../../style/icons/filetype/pdf.svg';
 import pythonSvgstr from '../../style/icons/filetype/python.svg';
 import rKernelSvgstr from '../../style/icons/filetype/r-kernel.svg';
 import reactSvgstr from '../../style/icons/filetype/react.svg';
@@ -132,6 +133,7 @@ export const notebookIcon = new LabIcon({ name: 'ui-components:notebook', svgstr
 export const numberingIcon = new LabIcon({ name: 'ui-components:numbering', svgstr: numberingSvgstr });
 export const paletteIcon = new LabIcon({ name: 'ui-components:palette', svgstr: paletteSvgstr });
 export const pasteIcon = new LabIcon({ name: 'ui-components:paste', svgstr: pasteSvgstr });
+export const pdfIcon = new LabIcon({ name: 'ui-components:pdf', svgstr: pdfSvgstr });
 export const pythonIcon = new LabIcon({ name: 'ui-components:python', svgstr: pythonSvgstr });
 export const rKernelIcon = new LabIcon({ name: 'ui-components:r-kernel', svgstr: rKernelSvgstr });
 export const reactIcon = new LabIcon({ name: 'ui-components:react', svgstr: reactSvgstr });

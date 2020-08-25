@@ -44,6 +44,7 @@ import {
   jsonIcon,
   markdownIcon,
   notebookIcon,
+  pdfIcon,
   pythonIcon,
   rKernelIcon,
   spreadsheetIcon,
@@ -1370,6 +1371,13 @@ export namespace DocumentRegistry {
         extensions: ['.md'],
         mimeTypes: ['text/markdown'],
         icon: markdownIcon
+      },
+      {
+        name: 'pdf',
+        displayName: trans.__('PDF File'),
+        extensions: ['.pdf'],
+        mimeTypes: ['application/pdf'],
+        icon: pdfIcon
       },
       {
         name: 'python',

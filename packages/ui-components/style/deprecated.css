@@ -62,6 +62,7 @@
   --jp-icon-numbering: url('icons/toolbar/numbering.svg');
   --jp-icon-palette: url('icons/sidebar/palette.svg');
   --jp-icon-paste: url('icons/toolbar/paste.svg');
+  --jp-icon-pdf: url('icons/filetype/pdf.svg');
   --jp-icon-python: url('icons/filetype/python.svg');
   --jp-icon-r-kernel: url('icons/filetype/r-kernel.svg');
   --jp-icon-react: url('icons/filetype/react.svg');
@@ -237,6 +238,9 @@
 }
 .jp-PasteIcon {
   background-image: var(--jp-icon-paste);
+}
+.jp-PdfIcon {
+  background-image: var(--jp-icon-pdf);
 }
 .jp-PythonIcon {
   background-image: var(--jp-icon-python);
