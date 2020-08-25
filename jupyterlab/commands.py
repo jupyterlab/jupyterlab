@@ -826,7 +826,7 @@ class _AppHandler(object):
         # Handle dynamic extensions first
         if name in info['dynamic_exts']:
             data = info['dynamic_exts'].pop(name)
-            target = os.path.dirname(data['ext_dir'])
+            target = data['ext_path']
             logger.info("Removing: %s" % target)
             if os.path.isdir(target) and not os.path.islink(target):
                 shutil.rmtree(target)
@@ -1116,6 +1116,7 @@ class _AppHandler(object):
                     data = json.load(fid)
                 if data['name'] not in dynamic_exts:
                     data['ext_dir'] = ext_dir
+                    data['ext_path'] = os.path.dirname(ext_path)
                     data['is_local'] = False
                     dynamic_exts[data['name']] = data
                     dynamic_ext_dirs[ext_dir] = True
