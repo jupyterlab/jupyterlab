@@ -18,7 +18,7 @@ from setupbase import (
 from setuptools import setup
 from setuptools.command.develop import develop
 
-min_version = (3, 5)
+min_version = (3, 6)
 
 if sys.version_info < min_version:
     error = """
@@ -146,9 +146,9 @@ setup_args = dict(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
     ],
 )
 
@@ -186,7 +186,7 @@ setup_args['extras_require'] = {
 
 setup_args['package_data'] = package_data_spec
 setup_args['include_package_data'] = True
-setup_args['python_requires'] = '>=3.5'
+setup_args['python_requires'] = '>=3.6'
 
 # Force entrypoints with setuptools (needed for Windows, unconditional
 # because of wheels)

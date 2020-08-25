@@ -8,24 +8,24 @@ jobs:
     strategy:
       matrix:
         group: [integrity, integrity2, docs, usage, python, examples, nonode, linkcheck, lint]
-        python: [3.5, 3.8]
+        python: [3.6, 3.8]
         exclude:
           - group: integrity
-            python: 3.5
+            python: 3.6
           - group: integrity2
-            python: 3.5
+            python: 3.6
           - group: docs
-            python: 3.5
+            python: 3.6
           - group: usage
-            python: 3.5
+            python: 3.6
           - group: linkcheck
-            python: 3.5
+            python: 3.6
           - group: nonode
-            python: 3.5
+            python: 3.6
           - group: lint
-            python: 3.5
+            python: 3.6
           - group: examples
-            python: 3.5
+            python: 3.6
       fail-fast: false
     timeout-minutes: 120
     runs-on: ubuntu-latest
