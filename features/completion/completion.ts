@@ -14,7 +14,7 @@ import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { IDocumentConnectionData } from '../../connection_manager';
 import { ILSPAdapterManager } from '../../tokens';
 import { NotebookAdapter } from '../../adapters/notebook/notebook';
-import { ILSPCompletionThemeManager } from './themes/types';
+import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];

@@ -13,7 +13,7 @@ import { FeatureSettings } from '../../feature';
 import { CompletionCM, CompletionLabIntegration } from './completion';
 import { LabIcon } from '@jupyterlab/ui-components';
 import completionSvg from '../../../style/icons/completion.svg';
-import { ILSPCompletionThemeManager } from './themes/types';
+import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
 
 export const completionIcon = new LabIcon({
   name: 'lsp:completion',

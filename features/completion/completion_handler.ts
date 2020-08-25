@@ -22,7 +22,8 @@ import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponse
 import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { FeatureSettings } from '../../feature';
 import { PositionConverter } from '../../converter';
-import { ILSPCompletionThemeManager } from './themes/types';
+import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
+import { LabIcon } from '@jupyterlab/ui-components';
 
 /**
  * A LSP connector for completion handlers.
@@ -285,14 +286,14 @@ export class LSPConnector
     };
   }
 
-  protected icon_for(type: string) {
+  protected icon_for(type: string): LabIcon {
     if (!this.options.settings.composite.theme) {
       return undefined;
     }
     if (typeof type === 'undefined' || type == '<unknown>') {
       type = 'Kernel';
     }
-    return this.options.icons_manager.get_icon(type) || undefined;
+    return (this.options.icons_manager.get_icon(type) as LabIcon) || undefined;
   }
 
   private transform_reply(
