@@ -91,6 +91,8 @@ import { Message, MessageLoop } from '@lumino/messaging';
 
 import { Panel, Menu } from '@lumino/widgets';
 
+import { logNotebookOutput } from './nboutput';
+
 /**
  * The command IDs used by the notebook plugin.
  */
@@ -398,7 +400,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   tools,
   commandEditItem,
   notebookTrustItem,
-  widgetFactoryPlugin
+  widgetFactoryPlugin,
+  logNotebookOutput
 ];
 export default plugins;
 

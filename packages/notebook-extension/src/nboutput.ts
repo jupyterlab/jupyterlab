@@ -19,16 +19,21 @@ import { KernelMessage } from '@jupyterlab/services';
  */
 export const logNotebookOutput: JupyterFrontEndPlugin<void> = {
   activate: activateNBOutput,
-  id: '@jupyterlab/logconsole:nboutput',
-  requires: [ILoggerRegistry, INotebookTracker],
+  id: '@jupyterlab/notebook-extension:log-output',
+  requires: [INotebookTracker],
+  optional: [ILoggerRegistry],
   autoStart: true
 };
 
 function activateNBOutput(
   app: JupyterFrontEnd,
-  loggerRegistry: ILoggerRegistry,
-  nbtracker: INotebookTracker
+  nbtracker: INotebookTracker,
+  loggerRegistry: ILoggerRegistry | null
 ) {
+  if (!loggerRegistry) {
+    // Automatically disable if logconsole is missing
+    return;
+  }
   function registerNB(nb: NotebookPanel) {
     function logOutput(
       msg: KernelMessage.IIOPubMessage,
@@ -41,7 +46,7 @@ function activateNBOutput(
         KernelMessage.isErrorMsg(msg) ||
         KernelMessage.isExecuteResultMsg(msg)
       ) {
-        const logger = loggerRegistry.getLogger(nb.context.path);
+        const logger = loggerRegistry!.getLogger(nb.context.path);
         logger.rendermime = nb.content.rendermime;
         const data: nbformat.IOutput = {
           ...msg.content,
