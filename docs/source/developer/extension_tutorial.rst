@@ -301,8 +301,6 @@ TypeScript files as they are changed and saved.
 
 Now return to your editor. Modify the imports at the top of the file to add a few more imports:
 
-TODO: when I did this next step, the webpack watch errored out. Instead, it should keep watching.
-
 .. code:: typescript
 
     import { ICommandPalette, MainAreaWidget } from '@jupyterlab/apputils';
