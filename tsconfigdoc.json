@@ -64,6 +64,18 @@
       "path": "./packages/csvviewer-extension"
     },
     {
+      "path": "./packages/datastore"
+    },
+    {
+      "path": "./packages/datastore-extension"
+    },
+    {
+      "path": "./packages/debugger"
+    },
+    {
+      "path": "./packages/debugger-extension"
+    },
+    {
       "path": "./packages/docmanager"
     },
     {
@@ -238,10 +250,22 @@
       "path": "./packages/theme-light-extension"
     },
     {
+      "path": "./packages/toc"
+    },
+    {
+      "path": "./packages/toc-extension"
+    },
+    {
       "path": "./packages/tooltip"
     },
     {
       "path": "./packages/tooltip-extension"
+    },
+    {
+      "path": "./packages/translation"
+    },
+    {
+      "path": "./packages/translation-extension"
     },
     {
       "path": "./packages/ui-components"
@@ -254,6 +278,9 @@
     },
     {
       "path": "./packages/vdom-extension"
+    },
+    {
+      "path": "./packages/vega4-extension"
     },
     {
       "path": "./packages/vega5-extension"

@@ -42,6 +42,8 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { INotebookModel } from './model';
 
+// import { Placedholder } from './placeholder';
+
 /**
  * The data attribute added to a widget that has an active kernel.
  */
@@ -143,6 +145,27 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 const DRAG_THRESHOLD = 5;
 
 /**
+ * TODO
+ *
+ * TODO Migrate to settings
+ */
+const CELL_NUM_DIRECT_RENDER = 3;
+
+/**
+ * TODO
+ *
+ * TODO Migrate to settings
+ */
+const RENDER_CELLS_ON_IDLE = false;
+
+/**
+ * TODO
+ *
+ * TODO Migrate to settings
+ */
+const NON_OBSERVERED_BOTTOM_MARGIN = '-200px';
+
+/**
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
@@ -174,6 +197,32 @@ export class StaticNotebook extends Widget {
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._mimetypeService = options.mimeTypeService;
+
+    this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
+    this._cellsArray = new Array<Cell>();
+    this._observer = new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach(o => {
+          if (o.isIntersecting) {
+            observer.unobserve(o.target);
+            const ci = this._toRenderMap.get(o.target.id);
+            if (ci) {
+              const { index, cell } = ci;
+              const pl = this.layout as PanelLayout;
+              pl.removeWidgetAt(index);
+              pl.insertWidget(index, cell);
+              this._toRenderMap.delete(o.target.id);
+              this._renderedCount++;
+            }
+          }
+        });
+      },
+      {
+        root: this.node,
+        threshold: 1,
+        rootMargin: '0px 0px ' + NON_OBSERVERED_BOTTOM_MARGIN + ' 0px'
+      }
+    );
   }
 
   /**
@@ -473,9 +522,46 @@ export class StaticNotebook extends Widget {
         widget = this._createRawCell(cell as IRawCellModel);
     }
     widget.addClass(NB_CELL_CLASS);
+
     const layout = this.layout as PanelLayout;
-    layout.insertWidget(index, widget);
-    this.onCellInserted(index, widget);
+    this._cellsArray.push(widget);
+    if (this._renderedCount <= CELL_NUM_DIRECT_RENDER) {
+      layout.insertWidget(index, widget);
+      this._renderedCount++;
+      this.onCellInserted(index, widget);
+    } else {
+      this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
+      const placeholder = this._createPlaceholderCell(
+        cell as IRawCellModel,
+        index
+      );
+      placeholder.node.id = widget.model.id;
+      layout.insertWidget(index, placeholder);
+      this.onCellInserted(index, placeholder);
+      this._observer.observe(placeholder.node);
+    }
+
+    if (RENDER_CELLS_ON_IDLE) {
+      const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
+      (window as any).requestIdleCallback(renderPlaceholderCells, {
+        timeout: 1000
+      });
+    }
+  }
+
+  private _renderPlaceholderCells(deadline: any) {
+    if (
+      this._renderedCount < this._cellsArray.length &&
+      this._renderedCount >= CELL_NUM_DIRECT_RENDER
+    ) {
+      const index = this._renderedCount;
+      const cell = this._cellsArray[index];
+      const pl = this.layout as PanelLayout;
+      pl.removeWidgetAt(index - 1);
+      pl.insertWidget(index - 1, cell);
+      this._toRenderMap.delete(cell.model.id);
+      this._renderedCount++;
+    }
   }
 
   /**
@@ -490,7 +576,8 @@ export class StaticNotebook extends Widget {
       model,
       rendermime,
       contentFactory,
-      updateEditorOnShow: false
+      updateEditorOnShow: false,
+      placeholder: false
     };
     const cell = this.contentFactory.createCodeCell(options, this);
     cell.syncCollapse = true;
@@ -511,9 +598,44 @@ export class StaticNotebook extends Widget {
       model,
       rendermime,
       contentFactory,
-      updateEditorOnShow: false
+      updateEditorOnShow: false,
+      placeholder: false
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    return cell;
+  }
+
+  /**
+   * Create a placeholder cell widget from a raw cell model.
+   */
+  private _createPlaceholderCell(model: IRawCellModel, index: number): RawCell {
+    const contentFactory = this.contentFactory;
+    const editorConfig = this.editorConfig.raw;
+    const options = {
+      editorConfig,
+      model,
+      contentFactory,
+      updateEditorOnShow: false,
+      placeholder: true
+    };
+    const cell = this.contentFactory.createRawCell(options, this);
+    cell.node.innerHTML = `
+      <div class="jp-Cell-Placeholder">
+        <div class="jp-Cell-Placeholder-wrapper">
+          <div class="jp-Cell-Placeholder-wrapper-inner">
+            <div class="jp-Cell-Placeholder-wrapper-body">
+              <div class="jp-Cell-Placeholder-h1"></div>
+              <div class="jp-Cell-Placeholder-h2"></div>
+              <div class="jp-Cell-Placeholder-content-1"></div>
+              <div class="jp-Cell-Placeholder-content-2"></div>
+              <div class="jp-Cell-Placeholder-content-3"></div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    cell.inputHidden = true;
     cell.syncCollapse = true;
     cell.syncEditable = true;
     return cell;
@@ -529,7 +651,8 @@ export class StaticNotebook extends Widget {
       editorConfig,
       model,
       contentFactory,
-      updateEditorOnShow: false
+      updateEditorOnShow: false,
+      placeholder: false
     };
     const cell = this.contentFactory.createRawCell(options, this);
     cell.syncCollapse = true;
@@ -634,6 +757,10 @@ export class StaticNotebook extends Widget {
   private _mimetypeService: IEditorMimeTypeService;
   private _modelChanged = new Signal<this, void>(this);
   private _modelContentChanged = new Signal<this, void>(this);
+  private _observer: IntersectionObserver;
+  private _renderedCount = 0;
+  private _toRenderMap: Map<string, { index: number; cell: Cell }>;
+  private _cellsArray: Array<Cell>;
 }
 
 /**

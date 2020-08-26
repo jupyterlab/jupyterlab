@@ -36,3 +36,4 @@
 @import url('~@jupyterlab/ui-components-extension/style/index.css');
 @import url('~@jupyterlab/vdom-extension/style/index.css');
 @import url('~@jupyterlab/vega5-extension/style/index.css');
+@import url('~fdtmime/style/index.css');

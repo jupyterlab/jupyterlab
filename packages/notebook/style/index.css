@@ -15,3 +15,4 @@
 @import url('~@jupyterlab/cells/style/index.css');
 
 @import url('./base.css');
+@import url('./placeholder.css');
