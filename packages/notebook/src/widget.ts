@@ -19,6 +19,8 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { h, VirtualDOM } from '@lumino/virtualdom';
 
+import { ElementExt } from '@lumino/domutils';
+
 import {
   ICellModel,
   Cell,
@@ -1218,6 +1220,21 @@ export class Notebook extends StaticNotebook {
     if (Math.abs(delta) > (ar.height * threshold) / 100) {
       node.scrollTop += delta;
     }
+  }
+
+  /**
+   * Scroll so that the given cell is in view. Selects and activates cell.
+   *
+   * @param cell - A cell in the notebook widget.
+   *
+   */
+  scrollToCell(cell: Cell): void {
+    // use Phosphor to scroll
+    ElementExt.scrollIntoViewIfNeeded(this.node, cell.node);
+    // change selection and active cell:
+    this.deselectAll();
+    this.select(cell);
+    cell.activate();
   }
 
   /**
