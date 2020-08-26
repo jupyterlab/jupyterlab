@@ -19,7 +19,7 @@ import { PanelLayout, Widget } from '@lumino/widgets';
 
 import { h, VirtualDOM } from '@lumino/virtualdom';
 
-import { ElementExt } from '@phosphor/domutils';
+import { ElementExt } from '@lumino/domutils';
 
 import {
   ICellModel,
