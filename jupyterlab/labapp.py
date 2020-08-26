@@ -448,13 +448,13 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         jupyter lab --certfile=mycert.pem # use SSL/TLS certificate
     """
 
-    aliases['app-dir'] = 'LabApp.app_dir'
+    aliases = aliases
     aliases.update({
         'watch': 'LabApp.watch',
-        'open_browser': 'ServerApp.open_browser',
-        'base_url': 'ServerApp.base_url'
     })
+    aliases['app-dir'] = 'LabApp.app_dir'
 
+    flags = flags
     flags['core-mode'] = (
         {'LabApp': {'core_mode': True}},
         "Start the app in core mode."
