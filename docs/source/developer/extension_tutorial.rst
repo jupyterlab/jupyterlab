@@ -892,7 +892,9 @@ Packaging your extension
 
 JupyterLab extensions for JupyterLab 3.0 can be distributed as Python
 packages. The cookiecutter template we used contains all of the Python
-packaging instructions in the ``setup.py`` file. Before generating a package, we first need to install ``jupyter_packaging``.
+packaging instructions in the ``setup.py`` file to wrap your extension in a
+Python package. Before generating a package, we first need to install
+``jupyter_packaging``.
 
 .. code:: bash
 
@@ -912,8 +914,8 @@ To create a Python wheel package (``.whl``) in the ``dist/`` directory, do:
 
 Both of these commands will build the JavaScript into a bundle in the
 ``jupyterlab_apod/static`` directory, which is then distributed with the
-package. This bundle will include any necessary JavaScript dependencies as
-well. You may want to check in the ``jupyterlab_apod/static`` directory to
+Python package. This bundle will include any necessary JavaScript dependencies
+as well. You may want to check in the ``jupyterlab_apod/static`` directory to
 retain a record of what JavaScript is distributed in your package, or you may
 want to keep this "build artifact" out of your source repository history.
 
@@ -931,6 +933,31 @@ extension.
 You should see a fresh JupyterLab browser tab appear. When it does,
 execute the *Random Astronomy Picture* command to check that your extension
 works.
+
+Publishing your extension
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can publish your Python package to the [pypi](https://pypi.org/) or
+[conda-forge](https://conda-forge.org/) repositories so users can easily
+install the extension using ``pip`` or ``conda``.
+
+You may want to also publish your extension as a JavaScript package to the
+[npm](https://www.npmjs.com/) package repository for several reasons:
+
+1. Distributing an extension as an npm package allows users to compile the
+   extension into JupyterLab explicitly (similar to how was done in JupyterLab
+   versions 1 and 2), which leads to a more optimal JupyterLab package.
+
+2. As we saw above, JupyterLab enables extensions to use objects provided by
+   other extensions. If you want to provide an object to the JupyterLab system
+   for other extensions to use, you will need to publish your JavaScript
+   package to npm so other extensions can depend on it and import and require
+   your token. For example, our extension above uses the ``ICommandPalette``
+   and ``ILayoutRestorer`` objects provided by some core extensions in
+   JupyterLab. We were able to tell JupyterLab we required these objects by
+   importing their tokens from the ``@jupyterlab/apputils`` and
+   ``@jupyterlab/application`` npm packages and listing them in our plugin
+   definition.
 
 Learn more
 ~~~~~~~~~~
