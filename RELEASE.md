@@ -190,7 +190,7 @@ commit and other commits that involve installing packages to update to the new
 versions:
 
 ```bash
-git checkout -b 0.XX # whatever the new version is
+git checkout -b BRANCH # whatever the new version is, e.g., 1.0
 git rebase -i --root
 ```
 
@@ -208,10 +208,10 @@ updating package versions, then do the next steps instead.
 git checkout --orphan name-of-branch
 git rm -rf .
 git clean -dfx
-cookiecutter path-to-local-extension-cookiecutter-ts
+cookiecutter -o initial path-to-local-extension-cookiecutter-ts
 # Fill in the values from the previous branch package.json initial commit
-cp -r jupyterlab_apod/ .
-rm -rf jupyterlab_apod
+cp -r initial/jupyterlab_apod .
+rm -rf initial
 ```
 
 - Create a new PR in JupyterLab.
@@ -223,34 +223,34 @@ rm -rf jupyterlab_apod
 
 #### Publishing extension tutorial changes
 
-- Replace the tag references in the tutorial with the new branch number, e.g.
-  replace `1.0-` with `1.1-`. Prefix the new tags with the branch name, e.g.
-  `1.0-01-show-a-panel`
-  ```bash
-  git tag 0.XX-01-show-a-panel HEAD~5
-  git tag 0.XX-02-show-an-image HEAD~4
-  git tag 0.XX-03-style-and-attribute HEAD~3
-  git tag 0.XX-04-refactor-and-refresh HEAD~2
-  git tag 0.XX-05-restore-panel-state HEAD~1
-  git tag 0.XX-06-prepare-to-publish HEAD
+- Tag commits in the branch with the appropriate `branch-step` tag. If you are at the final commit, you can tag all commits with the below, replacing `BRANCH` with the branch name (e.g., `1.0-01-show-a-panel`) ```bash
+  git tag BRANCH-01-show-a-panel HEAD~4
+  git tag BRANCH-02-show-an-image HEAD~3
+  git tag BRANCH-03-style-and-attribute HEAD~2
+  git tag BRANCH-04-refactor-and-refresh HEAD~1
+  git tag BRANCH-05-restore-panel-state HEAD
+
   ```
+
+  ```
+
 - Push the branch with the new tags
   ```bash
-  git push origin 0.XX --tags
+  git push origin BRANCH --tags
   ```
   Set the branch as the default branch (see `github.com/jupyterlab/jupyterlab_apod/settings/branches`).
 - If there were changes to the example in the documentation, submit a PR to JupyterLab
-- Publish the new `@jupyterlab/apod` npm package. Make sure to update the version
+- Publish the new `jupyterlab_apod` python package. Make sure to update the version
   number in the last commit of the branch.
   ```bash
-  npm publish
+  twine upload dist/*
   ```
 
 If you make a mistake and need to start over, clear the tags using the
-following pattern:
+following pattern (replacing `BRANCH` with the branch name):
 
 ```bash
-git tag | grep 0.XX | xargs git tag -d
+git tag | grep BRANCH | xargs git tag -d
 ```
 
 ### Publishing to conda-forge
