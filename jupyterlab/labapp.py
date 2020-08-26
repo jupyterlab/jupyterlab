@@ -451,8 +451,9 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     aliases['app-dir'] = 'LabApp.app_dir'
     aliases.update({
         'watch': 'LabApp.watch',
+        'open_browser': 'ServerApp.open_browser',
+        'base_url': 'ServerApp.base_url'
     })
-
 
     flags['core-mode'] = (
         {'LabApp': {'core_mode': True}},
@@ -526,7 +527,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     def _default_app_dir(self):
         app_dir = get_app_dir()
         if self.core_mode:
-            app_dir = HERE 
+            app_dir = HERE
             self.log.info('Running JupyterLab in core mode')
         elif self.dev_mode:
             app_dir = DEV_DIR
@@ -563,8 +564,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     def _default_static_dir(self):
         return pjoin(self.app_dir, 'static')
 
-    @property
-    def static_url_prefix(self):
+    @default('static_url_prefix')
+    def _default_static_url_prefix(self):
         if self.override_static_url:
             return self.override_static_url
         else:

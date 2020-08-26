@@ -156,7 +156,7 @@ setup_args = dict(
 setup_args['install_requires'] = [
     'ipython',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
-    'jupyterlab_server~=2.0.0b1',
+    'jupyterlab_server~=2.0.0b3',
     'nbclassic~=0.2.0rc4',
     'jinja2>=2.10'
 ]
@@ -164,9 +164,9 @@ setup_args['install_requires'] = [
 
 setup_args['extras_require'] = {
     'test': [
-        'pytest==5.3.2', 
-        'pytest-cov', 
-        'pytest-tornasync', 
+        'pytest==5.3.2',
+        'pytest-cov',
+        'pytest-tornasync',
         'pytest-console-scripts',
         'pytest-check-links',
         'requests',

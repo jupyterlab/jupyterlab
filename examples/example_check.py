@@ -43,7 +43,8 @@ def main():
         """
         name = __name__
         serverapp_config = {
-            "open_browser": False
+            "open_browser": False,
+            "base_url": "/foo/"
         }
         ip = '127.0.0.1'
 
