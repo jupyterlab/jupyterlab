@@ -165,15 +165,15 @@ dependencies and install the extension into the JupyterLab environment.
     pip install -ve .
 
 The above command copies the frontend part of the extension into JupyterLab.
-We can either run it again every time we make a change to copy the change into
-JupyterLab, or on Linux or macOS, we can link the frontend extension part to
-our changes for a more natural development experience:
+We can run this ``pip install`` command again every time we make a change to
+copy the change into JupyterLab. Even better, on Linux or macOS, we can use
+the ``develop`` command to create a symbolic link from JupyterLab to our
+source directory. This means our changes are automatically available in
+JupyterLab:
 
 .. code:: bash
 
-    jupyter labextension uninstall jupyterlab_apod
-    jupyter labextension develop .
-
+    jupyter labextension develop --overwrite .
 
 See the initial extension in action
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
