@@ -182,7 +182,7 @@ module.exports = [
       [data.name]: publicpath
     },
     output: {
-      filename: '[name].[chunkhash].js',
+      filename: '[name].[contenthash].js',
       path: outputPath
     },
     module: {
@@ -195,7 +195,7 @@ module.exports = [
           type: 'var',
           name: ['_JUPYTERLAB', data.name]
         },
-        filename: 'remoteEntry.js',
+        filename: 'remoteEntry.[contenthash].js',
         exposes,
         shared
       })
