@@ -190,19 +190,19 @@ class DevelopLabExtensionApp(BaseExtensionApp):
 class BuildLabExtensionApp(BaseExtensionApp):
     description = "Build labextension"
 
-    static_path = Unicode('', config=True,
-        help="Sets the path for static assets when building")
+    static_url = Unicode('', config=True,
+        help="Sets the url for static assets when building")
 
     development = Bool(False, config=True,
         help="Build in development mode")
 
     aliases = {
-        'static-path': 'BuildLabExtensionApp.static_path'
+        'static-url': 'BuildLabExtensionApp.static_url'
     }
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(self.extra_args[0], logger=self.log, development=self.development, static_path=self.static_path or None)
+        build_labextension(self.extra_args[0], logger=self.log, development=self.development, static_url=self.static_url or None)
 
 
 class WatchLabExtensionApp(BaseExtensionApp):

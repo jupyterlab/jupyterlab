@@ -15,7 +15,7 @@ const { ModuleFederationPlugin } = webpack.container;
 
 const packagePath: string = process.env.PACKAGE_PATH || '';
 const corePath: string = process.env.CORE_PATH || '';
-const staticPath: string = process.env.STATIC_PATH || '';
+const staticUrl: string = process.env.STATIC_URL || '';
 
 const data = require(path.join(packagePath, 'package.json'));
 
@@ -142,8 +142,8 @@ fs.copyFileSync(
   path.join(outputPath, 'package.json')
 );
 
-const webpackPublicPathString = staticPath
-  ? `"${staticPath}"`
+const webpackPublicPathString = staticUrl
+  ? `"${staticUrl}"`
   : `getOption('fullLabextensionsUrl') + '/${data.name}/'`;
 const publicpath = path.join(outputPath, 'publicPath.js');
 fs.writeFileSync(
