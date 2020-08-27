@@ -709,15 +709,17 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         info = get_app_info()
         extensions = page_config['dynamic_extensions'] = []
         for (ext, ext_data) in info.get('dynamic_exts', dict()).items():
+            extbuild = ext_data['_build']
             extension = {
-                'name': ext_data['name']
+                'name': ext_data['name'],
+                'load': extbuild['load']
             }
-            if ext_data['jupyterlab'].get('extension'):
-                extension['plugin'] = './extension'
-            if ext_data['jupyterlab'].get('mimeExtension'):
-                extension['mimePlugin'] = './mimeExtension'
-            if ext_data.get('style'):
-                extension['style'] = './style'
+            if 'extension' in extbuild:
+                extension['extension'] = extbuild['extension']
+            if 'mimeExtension' in extbuild:
+                extension['mimeExtension'] = extbuild['mimeExtension']
+            if 'style' in extbuild:
+                extension['style'] = extbuild['style']
             extensions.append(extension)
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.

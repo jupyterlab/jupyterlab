@@ -72,8 +72,8 @@ async function main() {
     PageConfig.getOption('dynamic_extensions')
   );
 
-  const dynamicPluginPromises = [];
-  const dynamicMimePluginPromises = [];
+  const dynamicExtensionPromises = [];
+  const dynamicMimeExtensionPromises = [];
   const dynamicStylePromises = [];
 
   // We first load all dynamic components so that the shared module
@@ -81,7 +81,7 @@ async function main() {
   // components should be actually used.
   const extensions = await Promise.allSettled(extension_data.map( async data => {
     await loadComponent(
-      `${URLExt.join(PageConfig.getOption('fullLabextensionsUrl'), data.name, 'remoteEntry.js')}`,
+      `${URLExt.join(PageConfig.getOption('fullLabextensionsUrl'), data.name, data.load)}`,
       data.name
     );
     return data;
@@ -95,11 +95,11 @@ async function main() {
     }
 
     const data = p.value;
-    if (data.plugin) {
-      dynamicPluginPromises.push(createModule(data.name, data.plugin));
+    if (data.extension) {
+      dynamicExtensionPromises.push(createModule(data.name, data.extension));
     }
-    if (data.mimePlugin) {
-      dynamicMimePluginPromises.push(createModule(data.name, data.mimePlugin));
+    if (data.mimeExtension) {
+      dynamicMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
     if (data.style) {
       dynamicStylePromises.push(createModule(data.name, data.style));
@@ -149,8 +149,8 @@ async function main() {
   {{/each}}
 
   // Add the dynamic mime extensions.
-  const dynamicMimePlugins = await Promise.allSettled(dynamicMimePluginPromises);
-  dynamicMimePlugins.forEach(p => {
+  const dynamicMimeExtensions = await Promise.allSettled(dynamicMimeExtensionPromises);
+  dynamicMimeExtensions.forEach(p => {
     if (p.status === "fulfilled") {
       for (let plugin of activePlugins(p.value)) {
         mimeExtensions.push(plugin);
@@ -172,8 +172,8 @@ async function main() {
   {{/each}}
 
   // Add the dynamic extensions.
-  const dynamicPlugins = await Promise.allSettled(dynamicPluginPromises);
-  dynamicPlugins.forEach(p => {
+  const dynamicExtensions = await Promise.allSettled(dynamicExtensionPromises);
+  dynamicExtensions.forEach(p => {
     if (p.status === "fulfilled") {
       for (let plugin of activePlugins(p.value)) {
         register.push(plugin);

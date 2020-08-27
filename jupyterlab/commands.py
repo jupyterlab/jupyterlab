@@ -1110,7 +1110,7 @@ class _AppHandler(object):
         dynamic_exts = dict()
         dynamic_ext_dirs = dict()
         for ext_dir in jupyter_path('labextensions'):
-            ext_pattern = ext_dir + '/**/package.orig.json'
+            ext_pattern = ext_dir + '/**/package.json'
             for ext_path in [path for path in glob(ext_pattern, recursive=True)]:
                 with open(ext_path) as fid:
                     data = json.load(fid)
