@@ -44,7 +44,7 @@
     "react": "~16.13.1",
     "react-dom": "~16.13.1",
     "react-highlighter": "^0.4.3",
-    "react-json-tree": "^0.11.2"
+    "react-json-tree": "^0.12.1"
   },
   "devDependencies": {
     "@types/react": "~16.9.48",

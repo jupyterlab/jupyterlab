@@ -47,8 +47,8 @@
     "@lumino/domutils": "^1.2.3",
     "@lumino/messaging": "^1.4.3",
     "@lumino/widgets": "^1.14.0",
-    "xterm": "~4.2.0",
-    "xterm-addon-fit": "~0.3.0"
+    "xterm": "~4.8.1",
+    "xterm-addon-fit": "~0.4.0"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.0.0-beta.0",
