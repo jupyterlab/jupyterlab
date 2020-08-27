@@ -71,7 +71,6 @@
     "jest-junit": "^11.1.0",
     "jest-raw-loader": "^1.0.1",
     "jest-summary-reporter": "^0.0.2",
-    "prettier": "^1.19.1",
     "rimraf": "~3.0.0",
     "shell-quote": "^1.7.2",
     "ts-jest": "^26.3.0",
