@@ -51,7 +51,7 @@
     "@lumino/properties": "^1.2.3",
     "@lumino/signaling": "^1.4.3",
     "child_process": "~1.0.2",
-    "fs-extra": "^8.1.0",
+    "fs-extra": "^9.0.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^26.4.2",
     "jest-junit": "^10.0.0",
