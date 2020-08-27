@@ -85,6 +85,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     manager: ILSPAdapterManager,
     adapter: WidgetAdapter<IDocumentWidget>
   ) {
+    console.log('ADAPTER CHANGED TO ', adapter);
     if (this.current_adapter) {
       // disconnect signals from the old adapter
       this.current_adapter.activeEditorChanged.disconnect(
@@ -97,13 +98,17 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
       );
     }
     this.current_adapter = adapter;
+    // connect the new adapter
+    if (this.current_adapter.isConnected) {
+      this.connect_completion(this.current_adapter);
+      this.set_connector(adapter, { editor: adapter.activeEditor });
+    }
     // connect signals to the new adapter
     this.current_adapter.activeEditorChanged.connect(this.set_connector, this);
     this.current_adapter.adapterConnected.connect(
       this.connect_completion,
       this
     );
-    this.set_connector(adapter, { editor: adapter.activeEditor });
   }
 
   connect_completion(

@@ -87,6 +87,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     EditorAdapter<IVirtualEditor<IEditor>>
   >;
   public adapterConnected: Signal<WidgetAdapter<T>, IDocumentConnectionData>;
+  public isConnected: boolean;
   public connection_manager: DocumentConnectionManager;
   public status_message: StatusMessage;
   protected isDisposed = false;
@@ -117,6 +118,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.activeEditorChanged = new Signal(this);
     this.adapters = new Map();
     this.status_message = new StatusMessage();
+    this.isConnected = false;
 
     // set up signal connections
     this.widget.context.saveState.connect(this.on_save_state, this);
@@ -268,6 +270,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
     this.connect_adapter(data.virtual_document, data.connection);
     this.adapterConnected.emit(data);
+    this.isConnected = true;
 
     await this.update_documents().then(() => {
       // refresh the document on the LSP server
