@@ -149,7 +149,9 @@ fs.copyFileSync(
 // into remoteEntry.js. We should either delete it, or figure out a way to
 // have the entry point below be dynamically generated text without having to
 // write to a file.
-const webpackPublicPathString = staticPath ? `"${staticPath}"` : `getOption('fullLabextensionsUrl') + '/${data.name}/'`;
+const webpackPublicPathString = staticPath
+  ? `"${staticPath}"`
+  : `getOption('fullLabextensionsUrl') + '/${data.name}/'`;
 const publicpath = path.join(outputPath, 'publicPath.js');
 fs.writeFileSync(
   publicpath,
@@ -181,7 +183,7 @@ module.exports = [
     },
     output: {
       filename: '[name].[chunkhash].js',
-      path: outputPath,
+      path: outputPath
     },
     module: {
       rules: [{ test: /\.html$/, use: 'file-loader' }]

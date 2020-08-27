@@ -44,7 +44,7 @@ commander
       PACKAGE_PATH: packagePath,
       NODE_ENV: node_env,
       CORE_PATH: path.resolve(cmd.corePath),
-      STATIC_PATH: cmd.staticPath,
+      STATIC_PATH: cmd.staticPath
     };
     run(cmdText, { env: { ...process.env, ...env } });
   });
