@@ -20,15 +20,13 @@ import { run } from '@jupyterlab/buildutils';
 
 commander
   .description('Build an extension')
-  .option(
-    '--development',
-    'build in development mode (default is to build in production mode)'
-  )
+  .option('--development', 'build in development mode')
   .requiredOption('--core-path <path>', 'the core package directory')
   .option('--static-path <path>', 'static path for build assets')
   .option('--watch')
   .action(async cmd => {
     const mode = cmd.development ? 'development' : 'production';
+    const corePath = path.resolve(cmd.corePath || process.cwd());
     const packagePath = path.resolve(cmd.args[0]);
 
     const webpack = require.resolve('webpack-cli/bin/cli.js');
@@ -37,13 +35,10 @@ commander
     if (cmd.watch) {
       cmdText += ' --watch';
     }
-    if (!cmd.corePath) {
-      cmd.corePath = process.cwd();
-    }
     const env = {
       PACKAGE_PATH: packagePath,
       NODE_ENV: mode,
-      CORE_PATH: path.resolve(cmd.corePath),
+      CORE_PATH: corePath,
       STATIC_PATH: cmd.staticPath
     };
     run(cmdText, { env: { ...process.env, ...env } });
