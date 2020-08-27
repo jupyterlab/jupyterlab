@@ -49,7 +49,7 @@
     "@jupyterlab/coreutils": "^5.0.0-beta.0",
     "@jupyterlab/services": "^6.0.0-beta.0",
     "@jupyterlab/statedb": "^3.0.0-beta.0",
-    "@lumino/coreutils": "^1.4.3"
+    "@lumino/coreutils": "^1.5.3"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.0.0-beta.0",

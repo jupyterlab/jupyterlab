@@ -38,7 +38,7 @@
     "watch": "tsc -w --listEmittedFiles"
   },
   "dependencies": {
-    "@lumino/coreutils": "^1.4.3",
+    "@lumino/coreutils": "^1.5.3",
     "@yarnpkg/lockfile": "^1.1.0",
     "child_process": "~1.0.2",
     "commander": "~4.0.1",

@@ -156,7 +156,7 @@ setup_args = dict(
 setup_args['install_requires'] = [
     'ipython',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
-    'jupyterlab_server~=2.0.0b3',
+    'jupyterlab_server~=2.0.0b5',
     'nbclassic~=0.2.0rc4',
     'jinja2>=2.10'
 ]

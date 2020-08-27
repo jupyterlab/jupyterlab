@@ -43,7 +43,7 @@
     "@jupyterlab/mainmenu": "^3.0.0-beta.0",
     "@jupyterlab/settingregistry": "^3.0.0-beta.0",
     "@jupyterlab/translation": "^3.0.0-beta.0",
-    "@lumino/widgets": "^1.11.1"
+    "@lumino/widgets": "^1.14.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.25.0",

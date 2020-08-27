@@ -37,11 +37,11 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@lumino/algorithm": "^1.2.3",
-    "@lumino/coreutils": "^1.4.3",
-    "@lumino/disposable": "^1.3.5",
-    "@lumino/messaging": "^1.3.3",
-    "@lumino/signaling": "^1.3.5"
+    "@lumino/algorithm": "^1.3.3",
+    "@lumino/coreutils": "^1.5.3",
+    "@lumino/disposable": "^1.4.3",
+    "@lumino/messaging": "^1.4.3",
+    "@lumino/signaling": "^1.4.3"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.0.0-beta.0",
