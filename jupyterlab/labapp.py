@@ -14,7 +14,7 @@ from jinja2 import Environment, FileSystemLoader
 from jupyter_core.application import JupyterApp, base_aliases, base_flags
 from jupyter_core.application import NoStart
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
-from jupyter_server.serverapp import aliases, flags
+from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
 from jupyter_server._version import version_info as jpserver_version_info
 from traitlets import Bool, Instance, Unicode, default
@@ -408,6 +408,20 @@ class LabWorkspaceApp(JupyterApp):
         except NoStart:
             pass
         self.exit(0)
+
+
+aliases = dict(base_aliases)
+aliases.update({
+    'ip': 'ServerApp.ip',
+    'port': 'ServerApp.port',
+    'port-retries': 'ServerApp.port_retries',
+    'keyfile': 'ServerApp.keyfile',
+    'certfile': 'ServerApp.certfile',
+    'client-ca': 'ServerApp.client_ca',
+    'notebook-dir': 'ServerApp.root_dir',
+    'browser': 'ServerApp.browser',
+    'pylab': 'ServerApp.pylab',
+})
 
 
 class LabApp(NBClassicConfigShimMixin, LabServerApp):
