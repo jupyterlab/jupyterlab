@@ -6,7 +6,9 @@ import * as webpack from 'webpack';
 import { Build } from './build';
 import { merge } from 'webpack-merge';
 import * as fs from 'fs';
+import * as glob from 'glob';
 import Ajv from 'ajv';
+import { readJSONFile, writeJSONFile } from '@jupyterlab/buildutils';
 
 const baseConfig = require('./webpack.config.base');
 const { ModuleFederationPlugin } = webpack.container;
@@ -142,13 +144,9 @@ const extras = Build.ensureAssets({
 
 fs.copyFileSync(
   path.join(packagePath, 'package.json'),
-  path.join(outputPath, 'package.orig.json')
+  path.join(outputPath, 'package.json')
 );
 
-// TODO: We don't need this file after our compilation, since it is folded
-// into remoteEntry.js. We should either delete it, or figure out a way to
-// have the entry point below be dynamically generated text without having to
-// write to a file.
 const webpackPublicPathString = staticPath
   ? `"${staticPath}"`
   : `getOption('fullLabextensionsUrl') + '/${data.name}/'`;
@@ -174,6 +172,34 @@ __webpack_public_path__ = ${webpackPublicPathString};
 `
 );
 
+class CleanupPlugin {
+  apply(compiler: any) {
+    compiler.hooks.done.tap('Cleanup', () => {
+      fs.unlinkSync(publicpath);
+      // Find the remoteEntry file and add it to the package.json metadata
+      const files = glob.sync(path.join(outputPath, 'remoteEntry.*.js'));
+      if (files.length !== 1) {
+        throw new Error('There is not a single remoteEntry file generated.');
+      }
+      const data = readJSONFile(path.join(outputPath, 'package.json'));
+      const _build: any = {
+        load: path.basename(files[0]),
+      };
+      if (exposes['./extension'] !== undefined) {
+        _build.extension = './extension';
+      }
+      if (exposes['./mimeExtension'] !== undefined) {
+        _build.mimeExtension = './mimeExtension';
+      }
+      if (exposes['./style'] !== undefined) {
+        _build.style = './style';
+      }
+      data.jupyterlab._build = _build;
+      writeJSONFile(path.join(outputPath, 'package.json'), data);
+    });
+  }
+}
+
 module.exports = [
   merge(baseConfig, {
     // Using empty object {} for entry because we want only
@@ -198,10 +224,11 @@ module.exports = [
         filename: 'remoteEntry.[contenthash].js',
         exposes,
         shared
-      })
+      }),
+      new CleanupPlugin()
     ]
   })
 ].concat(extras);
 
-const logPath = path.join(outputPath, 'build_log.json');
-fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));
+// const logPath = path.join(outputPath, 'build_log.json');
+// fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));

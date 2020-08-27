@@ -6,6 +6,7 @@ from jupyterlab_server.server import FileFindHandler
 import json
 import os
 from traitlets import Unicode
+from glob import glob
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -48,19 +49,25 @@ class ExampleApp(LabServerApp):
         # By default, make terminals available.
         web_app.settings.setdefault('terminals_available', True)
 
-        # Add labextension metadata
-        page_config['dynamic_extensions'] = [{
-            'name': '@jupyterlab/example-federated-md',
-            'plugin': './extension',
-            'mimePlugin': './mimeExtension',
-            'style': './style'
-        }, {
-            'name': '@jupyterlab/example-federated-middle',
-            'plugin': './extension'
-        }, {
-            'name': '@jupyterlab/example-federated-phosphor',
-            'plugin': './index'
-        }]
+        # Extract the dynamic extension data from lab_extensions
+        dynamic_exts = []
+        for ext_path in [path for path in glob('./labextensions/**/package.json', recursive=True)]:
+            with open(ext_path) as fid:
+                data = json.load(fid)
+            extbuild = data['jupyterlab']['_build']
+            ext = {
+                'name': data['name'],
+                'load': extbuild['load'],
+            }
+            if 'extension' in extbuild:
+                ext['extension'] = extbuild['extension']
+            if 'mimeExtension' in extbuild:
+                ext['mimeExtension'] = extbuild['mimeExtension']
+            if 'style' in extbuild:
+                ext['style'] = extbuild['style']
+            dynamic_exts.append(ext)
+
+        page_config['dynamic_extensions'] = dynamic_exts
 
         super().initialize_handlers()
 
