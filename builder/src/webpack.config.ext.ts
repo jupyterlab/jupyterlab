@@ -183,7 +183,7 @@ class CleanupPlugin {
       }
       const data = readJSONFile(path.join(outputPath, 'package.json'));
       const _build: any = {
-        load: path.basename(files[0]),
+        load: path.basename(files[0])
       };
       if (exposes['./extension'] !== undefined) {
         _build.extension = './extension';
