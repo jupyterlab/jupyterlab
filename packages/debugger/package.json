@@ -68,7 +68,7 @@
     "@lumino/disposable": "^1.4.3",
     "@lumino/signaling": "^1.4.3",
     "@lumino/widgets": "^1.14.0",
-    "codemirror": "~5.56.0",
+    "codemirror": "~5.57.0",
     "murmurhash-js": "^1.0.0",
     "react": "~16.13.1",
     "vscode-debugprotocol": "^1.37.0"
@@ -77,7 +77,7 @@
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
     "@jupyterlab/testutils": "^3.0.0-beta.0",
-    "@types/codemirror": "^0.0.76",
+    "@types/codemirror": "^0.0.97",
     "@types/jest": "^26.0.10",
     "@types/murmurhash-js": "1.0.3",
     "@types/react-dom": "~16.9.8",
