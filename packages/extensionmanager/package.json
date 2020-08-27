@@ -43,7 +43,7 @@
     "@jupyterlab/translation": "^3.0.0-beta.0",
     "@jupyterlab/ui-components": "^3.0.0-beta.0",
     "@lumino/messaging": "^1.4.3",
-    "@lumino/polling": "^1.1.1",
+    "@lumino/polling": "^1.3.3",
     "@lumino/signaling": "^1.4.3",
     "react": "~16.13.1",
     "react-paginate": "^6.3.2",
