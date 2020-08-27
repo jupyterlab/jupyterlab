@@ -58,7 +58,8 @@ module.exports = {
     'jest/no-jest-import': 'off',
     'jest/no-export': 'warn',
     'jest/no-try-expect': 'warn',
-    'jest/expect-expect': 'off'
+    'jest/expect-expect': 'off',
+    'react/prop-types': 'warn'
   },
   settings: {
     react: {
