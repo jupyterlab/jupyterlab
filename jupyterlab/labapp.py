@@ -709,7 +709,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         info = get_app_info()
         extensions = page_config['dynamic_extensions'] = []
         for (ext, ext_data) in info.get('dynamic_exts', dict()).items():
-            extbuild = ext_data['_build']
+            extbuild = ext_data['jupyterlab']['_build']
             extension = {
                 'name': ext_data['name'],
                 'load': extbuild['load']
