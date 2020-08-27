@@ -190,9 +190,16 @@ class DevelopLabExtensionApp(BaseExtensionApp):
 class BuildLabExtensionApp(BaseExtensionApp):
     description = "Build labextension"
 
+    static_path = Unicode('', config=True,
+        help="Sets the path for static assets when building")
+
+    aliases = {
+        'static-path': 'BuildLabExtensionApp.static_path'
+    }
+
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(self.extra_args[0], logger=self.log)
+        build_labextension(self.extra_args[0], logger=self.log, static_path=self.static_path or None)
 
 
 class WatchLabExtensionApp(BaseExtensionApp):
