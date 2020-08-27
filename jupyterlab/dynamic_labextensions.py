@@ -163,7 +163,7 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
     return full_dests
 
 
-def build_labextension(path, logger=None, static_path=None):
+def build_labextension(path, logger=None, development=False, static_url=None):
     """Build a labextension in the given path"""
     core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
@@ -174,13 +174,15 @@ def build_labextension(path, logger=None, static_path=None):
     builder = _ensure_builder(ext_path, core_path)
 
     arguments = ['node', builder, '--core-path', core_path,  ext_path]
-    if static_path is not None:
-        arguments.extend(['--static-path', static_path])
+    if static_url is not None:
+        arguments.extend(['--static-url', static_url])
+    if development:
+        arguments.append('--development')
 
     subprocess.check_call(arguments, cwd=ext_path)
 
 
-def watch_labextension(path, app_dir=None, logger=None):
+def watch_labextension(path, logger=None, development=False):
     """Watch a labextension in a given path"""
     core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
@@ -188,8 +190,12 @@ def watch_labextension(path, app_dir=None, logger=None):
     if logger:
         logger.info('Building extension in %s' % path)
 
+    arguments = ['node', builder, '--core-path', core_path,  '--watch', ext_path]
+    if development:
+        arguments.append('--development')
+
     builder = _ensure_builder(ext_path, core_path)
-    subprocess.check_call(['node', builder, '--core-path', core_path,  '--watch', ext_path], cwd=ext_path)
+    subprocess.check_call(arguments, cwd=ext_path)
 
 
 #------------------------------------------------------------------------------
@@ -224,7 +230,7 @@ def _ensure_builder(ext_path, core_path):
             raise ValueError('Could not find @jupyterlab/builder')
         target = osp.dirname(target)
 
-    return osp.join(target, 'node_modules', '@jupyterlab', 'builder', 'lib', 'build-extension.js')
+    return osp.join(target, 'node_modules', '@jupyterlab', 'builder', 'lib', 'build-labextension.js')
     
 
 def _should_copy(src, dest, logger=None):

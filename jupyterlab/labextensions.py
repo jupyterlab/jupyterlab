@@ -91,7 +91,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         help="Whether to build the app after the action")
 
     dev_build = Bool(None, allow_none=True, config=True,
-        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (prod mode).")
+        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (production mode).")
 
     minimize = Bool(True, config=True,
         help="Whether to use a minifier during the Webpack build (defaults to True). Only affects production builds.")
@@ -190,24 +190,30 @@ class DevelopLabExtensionApp(BaseExtensionApp):
 class BuildLabExtensionApp(BaseExtensionApp):
     description = "Build labextension"
 
-    static_path = Unicode('', config=True,
-        help="Sets the path for static assets when building")
+    static_url = Unicode('', config=True,
+        help="Sets the url for static assets when building")
+
+    development = Bool(False, config=True,
+        help="Build in development mode")
 
     aliases = {
-        'static-path': 'BuildLabExtensionApp.static_path'
+        'static-url': 'BuildLabExtensionApp.static_url'
     }
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(self.extra_args[0], logger=self.log, static_path=self.static_path or None)
+        build_labextension(self.extra_args[0], logger=self.log, development=self.development, static_url=self.static_url or None)
 
 
 class WatchLabExtensionApp(BaseExtensionApp):
     description = "Watch labextension"
 
+    development = Bool(False, config=True,
+        help="Build in development mode")
+
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        watch_labextension(self.extra_args[0], logger=self.log)
+        watch_labextension(self.extra_args[0], logger=self.log, development=self.development)
 
 
 class UpdateLabExtensionApp(BaseExtensionApp):
