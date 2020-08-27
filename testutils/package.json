@@ -53,7 +53,7 @@
     "child_process": "~1.0.2",
     "fs-extra": "^8.1.0",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^25.2.3",
+    "jest": "^26.4.2",
     "jest-junit": "^10.0.0",
     "jest-raw-loader": "^1.0.1",
     "jest-summary-reporter": "^0.0.2",
@@ -62,10 +62,10 @@
     "node-fetch": "^2.6.0",
     "path": "~0.12.7",
     "simulate-event": "~1.4.0",
-    "ts-jest": "^25.2.1"
+    "ts-jest": "^26.3.0"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.23",
+    "@types/jest": "^26.0.10",
     "@types/node-fetch": "^2.5.4",
     "jest-retries": "^1.0.1",
     "lighthouse": "5.6.0",
