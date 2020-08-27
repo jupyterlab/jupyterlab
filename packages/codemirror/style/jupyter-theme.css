@@ -17,6 +17,7 @@
 
 .CodeMirror {
   background: transparent;
+  color: inherit;
 }
 
 .cm-s-jupyter .CodeMirror-cursor {
