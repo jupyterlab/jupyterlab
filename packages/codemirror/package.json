@@ -12,12 +12,6 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
-    "style/*.css"
-  ],
   "sideEffects": true,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -25,6 +19,12 @@
   "directories": {
     "lib": "lib/"
   },
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "style/*.css"
+  ],
   "scripts": {
     "build": "tsc -b",
     "build:test": "tsc --build tsconfig.test.json",

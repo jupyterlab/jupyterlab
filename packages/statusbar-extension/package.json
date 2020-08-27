@@ -12,13 +12,6 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter, Richa Gadgil, Takahiro Shimokobe, Declan Kelly",
-  "files": [
-    "lib/**/*.d.ts",
-    "lib/**/*.js.map",
-    "lib/**/*.js",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
-    "schema/*.json"
-  ],
   "sideEffects": [
     "style/**/*"
   ],
@@ -28,6 +21,13 @@
   "directories": {
     "lib": "lib/"
   },
+  "files": [
+    "lib/**/*.d.ts",
+    "lib/**/*.js.map",
+    "lib/**/*.js",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "schema/*.json"
+  ],
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",

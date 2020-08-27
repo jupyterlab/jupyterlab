@@ -12,14 +12,6 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
-    "template/package.json",
-    "template/tsconfig.json",
-    "template/src/index.ts"
-  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
@@ -31,6 +23,14 @@
   "directories": {
     "lib": "lib/"
   },
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "template/package.json",
+    "template/tsconfig.json",
+    "template/src/index.ts"
+  ],
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",

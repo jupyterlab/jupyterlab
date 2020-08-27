@@ -12,12 +12,6 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "files": [
-    "metadata_schema.json",
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js"
-  ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
@@ -27,6 +21,12 @@
   "directories": {
     "lib": "lib/"
   },
+  "files": [
+    "metadata_schema.json",
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js"
+  ],
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",

@@ -2,14 +2,14 @@
   "name": "@jupyterlab/example-services-outputarea",
   "version": "3.0.0-beta.0",
   "private": true,
-  "files": [
-    "style/index.css",
-    "lib/*"
-  ],
   "sideEffects": [
     "style/*"
   ],
   "style": "style/index.css",
+  "files": [
+    "style/index.css",
+    "lib/*"
+  ],
   "scripts": {
     "build": "tsc && webpack",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",

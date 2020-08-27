@@ -17,10 +17,6 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "files": [
-    "lib/*.{d.ts,js}",
-    "style/*.css"
-  ],
   "sideEffects": [
     "style/*.css"
   ],
@@ -30,6 +26,10 @@
   "directories": {
     "lib": "lib/"
   },
+  "files": [
+    "lib/*.{d.ts,js}",
+    "style/*.css"
+  ],
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
