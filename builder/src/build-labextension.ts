@@ -22,7 +22,10 @@ commander
   .description('Build an extension')
   .option('--development', 'build in development mode')
   .requiredOption('--core-path <path>', 'the core package directory')
-  .option('--static-url <url>', 'url for build assets, if hosted outside the built extension')
+  .option(
+    '--static-url <url>',
+    'url for build assets, if hosted outside the built extension'
+  )
   .option('--watch')
   .action(async cmd => {
     const mode = cmd.development ? 'development' : 'production';
