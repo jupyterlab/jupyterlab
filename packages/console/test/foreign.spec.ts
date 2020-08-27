@@ -116,7 +116,7 @@ describe('@jupyterlab/console', () => {
       content: { wait: false }
     });
 
-    beforeAll(async function() {
+    beforeAll(async function () {
       const path = UUID.uuid4();
       const kernel0 = new Mock.KernelMock({});
       const kernel1 = Mock.cloneKernel(kernel0);

@@ -304,7 +304,11 @@ describe('cells/model', () => {
 
         // Setting `collapsed` works
         model = new CodeCellModel({
-          cell: { cell_type: 'code', source: '', metadata: { collapsed: true } }
+          cell: {
+            cell_type: 'code',
+            source: '',
+            metadata: { collapsed: true }
+          }
         });
         expect(model.metadata.get('collapsed')).toBe(true);
         jupyter = model.metadata.get('jupyter') as JSONObject;

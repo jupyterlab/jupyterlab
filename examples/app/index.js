@@ -9,7 +9,7 @@ __webpack_public_path__ = PageConfig.getOption('fullStaticUrl') + '/';
 // This cannot be extracted because the public path is dynamic.
 require('./build/imports.css');
 
-window.addEventListener('load', async function() {
+window.addEventListener('load', async function () {
   const JupyterLab = require('@jupyterlab/application').JupyterLab;
 
   const mods = [

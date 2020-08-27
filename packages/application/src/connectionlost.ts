@@ -12,7 +12,7 @@ import { IConnectionLost } from './tokens';
 /**
  * A default connection lost handler, which brings up an error dialog.
  */
-export const ConnectionLost: IConnectionLost = async function(
+export const ConnectionLost: IConnectionLost = async function (
   manager: ServiceManager.IManager,
   err: ServerConnection.NetworkError,
   translator?: ITranslator

@@ -20,7 +20,8 @@ import * as renderers from './renderers';
 /**
  * A common base class for mime renderers.
  */
-export abstract class RenderedCommon extends Widget
+export abstract class RenderedCommon
+  extends Widget
   implements IRenderMime.IRenderer {
   /**
    * Construct a new rendered common widget.

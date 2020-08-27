@@ -4,7 +4,7 @@ const data = require('./package.json');
 const webpack = require('webpack');
 const Build = require('@jupyterlab/builder').Build;
 
-const names = Object.keys(data.dependencies).filter(function(name) {
+const names = Object.keys(data.dependencies).filter(function (name) {
   const packageData = require(name + '/package.json');
   return packageData.jupyterlab !== undefined;
 });

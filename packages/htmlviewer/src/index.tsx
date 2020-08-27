@@ -65,7 +65,8 @@ const CSS_CLASS = 'jp-HTMLViewer';
  * requests, so that local HTML documents can access CSS, images,
  * etc from the files system.
  */
-export class HTMLViewer extends DocumentWidget<IFrame>
+export class HTMLViewer
+  extends DocumentWidget<IFrame>
   implements IDocumentWidget<IFrame> {
   /**
    * Create a new widget for rendering HTML.

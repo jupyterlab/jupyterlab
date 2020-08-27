@@ -10,7 +10,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const Handlebars = require('handlebars');
 
-const names = Object.keys(data.dependencies).filter(function(name) {
+const names = Object.keys(data.dependencies).filter(function (name) {
   const packageData = require(path.join(name, 'package.json'));
   return packageData.jupyterlab !== undefined;
 });

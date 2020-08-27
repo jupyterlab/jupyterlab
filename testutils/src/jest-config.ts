@@ -1,6 +1,6 @@
 import path = require('path');
 
-module.exports = function(baseDir: string) {
+module.exports = function (baseDir: string) {
   return {
     preset: 'ts-jest/presets/js-with-babel',
     moduleNameMapper: {

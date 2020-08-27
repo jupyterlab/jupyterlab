@@ -69,11 +69,13 @@ export namespace Mode {
     },
     {
       // Fetch the mode asynchronously.
-      loader: function(spec) {
+      loader: function (spec) {
         return new Promise<boolean>((resolve, reject) => {
           // An arrow function below seems to miscompile in our current webpack to
           // invalid js.
-          require([`codemirror/mode/${spec.mode}/${spec.mode}.js`], function() {
+          require([
+            `codemirror/mode/${spec.mode}/${spec.mode}.js`
+          ], function () {
             resolve(true);
           });
         });

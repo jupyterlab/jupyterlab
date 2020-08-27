@@ -781,7 +781,8 @@ export namespace StaticNotebook {
   /**
    * The default implementation of an `IContentFactory`.
    */
-  export class ContentFactory extends Cell.ContentFactory
+  export class ContentFactory
+    extends Cell.ContentFactory
     implements IContentFactory {
     /**
      * Create a new code cell widget.

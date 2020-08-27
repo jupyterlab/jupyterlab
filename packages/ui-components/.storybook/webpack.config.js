@@ -7,10 +7,7 @@ module.exports = ({ config }) => {
   // https://github.com/storybookjs/storybook/issues/6758
   config.module.rules = config.module.rules.map(rule => {
     if (rule.test.toString().includes('svg')) {
-      const test = rule.test
-        .toString()
-        .replace('svg|', '')
-        .replace(/\//g, '');
+      const test = rule.test.toString().replace('svg|', '').replace(/\//g, '');
       return { ...rule, test: new RegExp(test) };
     } else {
       return rule;

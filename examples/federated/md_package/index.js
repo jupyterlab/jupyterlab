@@ -19,7 +19,7 @@ import { IMiddleToken } from '@jupyterlab/example-federated-middle';
  * The command IDs used by the markdownviewer plugin.
  */
 let CommandIDs;
-(function(CommandIDs) {
+(function (CommandIDs) {
   CommandIDs.markdownPreview = 'markdownviewer:open';
   CommandIDs.markdownEditor = 'markdownviewer:edit';
 })(CommandIDs || (CommandIDs = {}));

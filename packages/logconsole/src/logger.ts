@@ -108,7 +108,8 @@ class LogConsoleModelContentFactory extends OutputAreaModel.ContentFactory {
  * Output Area Model implementation which is able to
  * limit number of outputs stored.
  */
-export class LoggerOutputAreaModel extends OutputAreaModel
+export class LoggerOutputAreaModel
+  extends OutputAreaModel
   implements ILoggerOutputAreaModel {
   constructor({ maxLength, ...options }: LoggerOutputAreaModel.IOptions) {
     super(options);

@@ -475,7 +475,7 @@ function activateNotebookTools(
       // convert exportList to palette and menu items
       const formatList = Object.keys(response);
       const formatLabels = Private.getFormatLabels(translator);
-      formatList.forEach(function(key) {
+      formatList.forEach(function (key) {
         if (rawFormatExclude.indexOf(key) === -1) {
           const altOption = trans.__(key[0].toUpperCase() + key.substr(1));
           const option = formatLabels[key] ? formatLabels[key] : altOption;
@@ -2168,7 +2168,7 @@ function populateMenus(
 
       // Convert export list to palette and menu items.
       const formatList = Object.keys(response);
-      formatList.forEach(function(key) {
+      formatList.forEach(function (key) {
         const capCaseKey = trans.__(key[0].toUpperCase() + key.substr(1));
         const labelStr = formatLabels[key] ? formatLabels[key] : capCaseKey;
         let args = {

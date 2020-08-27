@@ -55,7 +55,7 @@ describe('@jupyterlab/notebook', () => {
     let sessionContext: ISessionContext;
     let ipySessionContext: ISessionContext;
 
-    beforeAll(async function() {
+    beforeAll(async function () {
       jest.setTimeout(20000);
       rendermime = utils.defaultRenderMime();
 

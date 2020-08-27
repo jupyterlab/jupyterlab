@@ -26,7 +26,8 @@ import { DocumentRegistry, IDocumentWidget } from './index';
 /**
  * The default implementation of a document model.
  */
-export class DocumentModel extends CodeEditor.Model
+export class DocumentModel
+  extends CodeEditor.Model
   implements DocumentRegistry.ICodeModel {
   /**
    * Construct a new document model.
@@ -464,9 +465,11 @@ const DIRTY_CLASS = 'jp-mod-dirty';
  * A document widget implementation.
  */
 export class DocumentWidget<
-  T extends Widget = Widget,
-  U extends DocumentRegistry.IModel = DocumentRegistry.IModel
-> extends MainAreaWidget<T> implements IDocumentWidget<T, U> {
+    T extends Widget = Widget,
+    U extends DocumentRegistry.IModel = DocumentRegistry.IModel
+  >
+  extends MainAreaWidget<T>
+  implements IDocumentWidget<T, U> {
   constructor(options: DocumentWidget.IOptions<T, U>) {
     // Include the context ready promise in the widget reveal promise
     options.reveal = Promise.all([options.reveal, options.context.ready]);

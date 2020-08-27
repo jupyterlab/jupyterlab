@@ -896,7 +896,8 @@ namespace Private {
   /**
    * A renderer for IFrame data.
    */
-  export class IsolatedRenderer extends Widget
+  export class IsolatedRenderer
+    extends Widget
     implements IRenderMime.IRenderer {
     /**
      * Create an isolated renderer.

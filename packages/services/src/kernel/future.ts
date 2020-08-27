@@ -20,9 +20,11 @@ declare let setImmediate: any;
  *
  */
 export abstract class KernelFutureHandler<
-  REQUEST extends KernelMessage.IShellControlMessage,
-  REPLY extends KernelMessage.IShellControlMessage
-> extends DisposableDelegate implements Kernel.IFuture<REQUEST, REPLY> {
+    REQUEST extends KernelMessage.IShellControlMessage,
+    REPLY extends KernelMessage.IShellControlMessage
+  >
+  extends DisposableDelegate
+  implements Kernel.IFuture<REQUEST, REPLY> {
   /**
    * Construct a new KernelFutureHandler.
    */
@@ -308,15 +310,17 @@ export abstract class KernelFutureHandler<
 }
 
 export class KernelControlFutureHandler<
-  REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,
-  REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
-> extends KernelFutureHandler<REQUEST, REPLY>
+    REQUEST extends KernelMessage.IControlMessage = KernelMessage.IControlMessage,
+    REPLY extends KernelMessage.IControlMessage = KernelMessage.IControlMessage
+  >
+  extends KernelFutureHandler<REQUEST, REPLY>
   implements Kernel.IControlFuture<REQUEST, REPLY> {}
 
 export class KernelShellFutureHandler<
-  REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
-  REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
-> extends KernelFutureHandler<REQUEST, REPLY>
+    REQUEST extends KernelMessage.IShellMessage = KernelMessage.IShellMessage,
+    REPLY extends KernelMessage.IShellMessage = KernelMessage.IShellMessage
+  >
+  extends KernelFutureHandler<REQUEST, REPLY>
   implements Kernel.IShellFuture<REQUEST, REPLY> {}
 
 namespace Private {

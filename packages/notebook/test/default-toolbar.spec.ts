@@ -233,7 +233,7 @@ describe('@jupyterlab/notebook', () => {
       let context: Context<INotebookModel>;
       let panel: NotebookPanel;
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         context = await utils.createMockContext(true);
         panel = utils.createNotebookPanel(context);
         context.model.fromJSON(utils.DEFAULT_CONTENT);

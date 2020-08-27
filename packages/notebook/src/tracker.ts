@@ -10,7 +10,8 @@ import { INotebookTracker } from './tokens';
 import { NotebookPanel } from './panel';
 import { Notebook } from './widget';
 
-export class NotebookTracker extends WidgetTracker<NotebookPanel>
+export class NotebookTracker
+  extends WidgetTracker<NotebookPanel>
   implements INotebookTracker {
   /**
    * The currently focused cell.

@@ -129,7 +129,7 @@ class Gettext {
     this._defaults = {
       domain: 'messages',
       locale: document.documentElement.getAttribute('lang') || 'en',
-      pluralFunc: function(n: number) {
+      pluralFunc: function (n: number) {
         return { nplurals: 2, plural: n != 1 ? 1 : 0 };
       },
       contextDelimiter: String.fromCharCode(4) // \u0004
@@ -225,7 +225,7 @@ class Gettext {
         // put space after double % to prevent placeholder replacement of such matches
         .replace(/%%/g, '%% ')
         // replace placeholders
-        .replace(/%(\d+)/g, function(str, p1) {
+        .replace(/%(\d+)/g, function (str, p1) {
           return args[p1 - 1];
         })
         // replace double % and space with single %
