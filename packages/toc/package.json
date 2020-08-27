@@ -71,7 +71,7 @@
     "@types/react": "~16.9.48",
     "@types/react-dom": "~16.9.8",
     "jest": "^26.4.2",
-    "lint-staged": "^8.2.1",
+    "lint-staged": "^10.2.13",
     "prettier": "^1.19.1",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",

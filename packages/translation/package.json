@@ -54,9 +54,9 @@
   "devDependencies": {
     "@jupyterlab/testutils": "^3.0.0-beta.0",
     "@types/jest": "^26.0.10",
-    "@typescript-eslint/eslint-plugin": "^2.25.0",
-    "@typescript-eslint/parser": "^2.25.0",
-    "eslint": "^6.8.0",
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
+    "eslint": "^7.7.0",
     "eslint-config-prettier": "^6.10.1",
     "eslint-plugin-prettier": "^3.1.2",
     "jest": "^26.4.2",

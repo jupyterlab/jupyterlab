@@ -89,7 +89,7 @@
     "webpack-merge": "^5.1.2",
     "whatwg-fetch": "^3.0.0",
     "worker-loader": "^3.0.2",
-    "yarn-deduplicate": "^1.1.1"
+    "yarn-deduplicate": "^2.1.1"
   },
   "resolutions": {
     "@jupyterlab/application": "~3.0.0-beta.0",

@@ -102,7 +102,7 @@
     "eslint-plugin-react": "^7.19.0",
     "husky": "^4.2.5",
     "lerna": "^3.19.0",
-    "lint-staged": "^9.5.0",
+    "lint-staged": "^10.2.13",
     "prettier": "^1.19.1",
     "react-docgen-typescript-loader": "^3.7.2",
     "shell-quote": "^1.7.2",
