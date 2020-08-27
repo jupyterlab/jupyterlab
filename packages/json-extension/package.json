@@ -52,7 +52,7 @@
     "@types/react-highlighter": "^0.3.4",
     "@types/react-json-tree": "^0.6.11",
     "rimraf": "~3.0.0",
-    "typedoc": "^0.17.7",
+    "typedoc": "0.17.0-3",
     "typescript": "~4.0.2"
   },
   "publishConfig": {
