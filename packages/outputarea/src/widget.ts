@@ -1,6 +1,8 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import ResizeObserver from 'resize-observer-polyfill';
+
 import {
   JSONObject,
   PromiseDelegate,
@@ -906,7 +908,9 @@ namespace Private {
       this._wrapped = wrapped;
 
       // Once the iframe is loaded, the subarea is dynamically inserted
-      const iframe = this.node as HTMLIFrameElement;
+      const iframe = this.node as HTMLIFrameElement & {
+        heightChangeObserver: ResizeObserver;
+      };
 
       iframe.frameBorder = '0';
       iframe.scrolling = 'auto';
@@ -927,7 +931,11 @@ namespace Private {
         const body = iframe.contentDocument!.body;
 
         // Adjust the iframe height automatically
-        iframe.style.height = body.scrollHeight + 'px';
+        iframe.style.height = `${body.scrollHeight}px`;
+        iframe.heightChangeObserver = new ResizeObserver(() => {
+          iframe.style.height = `${body.scrollHeight}px`;
+        });
+        iframe.heightChangeObserver.observe(body);
       });
     }
 
