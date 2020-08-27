@@ -22,7 +22,7 @@ commander
   .description('Build an extension')
   .option('--development', 'build in development mode')
   .requiredOption('--core-path <path>', 'the core package directory')
-  .option('--static-path <path>', 'static path for build assets')
+  .option('--static-url <url>', 'static path for build assets')
   .option('--watch')
   .action(async cmd => {
     const mode = cmd.development ? 'development' : 'production';
@@ -39,7 +39,7 @@ commander
       PACKAGE_PATH: packagePath,
       NODE_ENV: mode,
       CORE_PATH: corePath,
-      STATIC_PATH: cmd.staticPath
+      STATIC_URL: cmd.staticUrl
     };
     run(cmdText, { env: { ...process.env, ...env } });
   });
