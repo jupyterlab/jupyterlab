@@ -230,7 +230,7 @@ def _ensure_builder(ext_path, core_path):
             raise ValueError('Could not find @jupyterlab/builder')
         target = osp.dirname(target)
 
-    return osp.join(target, 'node_modules', '@jupyterlab', 'builder', 'lib', 'build-extension.js')
+    return osp.join(target, 'node_modules', '@jupyterlab', 'builder', 'lib', 'build-labextension.js')
     
 
 def _should_copy(src, dest, logger=None):
