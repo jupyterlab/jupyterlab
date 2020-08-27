@@ -14,7 +14,7 @@ from jinja2 import Environment, FileSystemLoader
 from jupyter_core.application import JupyterApp, base_aliases, base_flags
 from jupyter_core.application import NoStart
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
-from jupyter_server.serverapp import aliases, flags
+from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin
 from jupyter_server._version import version_info as jpserver_version_info
 from traitlets import Bool, Instance, Unicode, default
@@ -410,6 +410,20 @@ class LabWorkspaceApp(JupyterApp):
         self.exit(0)
 
 
+aliases = dict(base_aliases)
+aliases.update({
+    'ip': 'ServerApp.ip',
+    'port': 'ServerApp.port',
+    'port-retries': 'ServerApp.port_retries',
+    'keyfile': 'ServerApp.keyfile',
+    'certfile': 'ServerApp.certfile',
+    'client-ca': 'ServerApp.client_ca',
+    'notebook-dir': 'ServerApp.root_dir',
+    'browser': 'ServerApp.browser',
+    'pylab': 'ServerApp.pylab',
+})
+
+
 class LabApp(NBClassicConfigShimMixin, LabServerApp):
     version = version
 
@@ -448,12 +462,13 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         jupyter lab --certfile=mycert.pem # use SSL/TLS certificate
     """
 
-    aliases['app-dir'] = 'LabApp.app_dir'
+    aliases = aliases
     aliases.update({
         'watch': 'LabApp.watch',
     })
+    aliases['app-dir'] = 'LabApp.app_dir'
 
-
+    flags = flags
     flags['core-mode'] = (
         {'LabApp': {'core_mode': True}},
         "Start the app in core mode."
@@ -526,7 +541,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     def _default_app_dir(self):
         app_dir = get_app_dir()
         if self.core_mode:
-            app_dir = HERE 
+            app_dir = HERE
             self.log.info('Running JupyterLab in core mode')
         elif self.dev_mode:
             app_dir = DEV_DIR
@@ -563,8 +578,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     def _default_static_dir(self):
         return pjoin(self.app_dir, 'static')
 
-    @property
-    def static_url_prefix(self):
+    @default('static_url_prefix')
+    def _default_static_url_prefix(self):
         if self.override_static_url:
             return self.override_static_url
         else:
