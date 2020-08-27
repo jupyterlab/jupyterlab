@@ -14,6 +14,7 @@ const { ModuleFederationPlugin } = webpack.container;
 const packagePath: string = process.env.PACKAGE_PATH || '';
 const nodeEnv: string = process.env.NODE_ENV || '';
 const corePath: string = process.env.CORE_PATH || '';
+const outputPublicPath: string = process.env.PUBLIC_WEBPACK_PATH || '';
 
 if (nodeEnv === 'production') {
   baseConfig.mode = 'production';
@@ -179,7 +180,8 @@ module.exports = [
     },
     output: {
       filename: '[name].[chunkhash].js',
-      path: outputPath
+      path: outputPath,
+      publicPath: outputPublicPath
     },
     module: {
       rules: [{ test: /\.html$/, use: 'file-loader' }]
