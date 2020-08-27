@@ -14,7 +14,7 @@ const { ModuleFederationPlugin } = webpack.container;
 const packagePath: string = process.env.PACKAGE_PATH || '';
 const nodeEnv: string = process.env.NODE_ENV || '';
 const corePath: string = process.env.CORE_PATH || '';
-const outputPublicPath: string = process.env.PUBLIC_WEBPACK_PATH || '';
+const staticPath: string = process.env.STATIC_PATH || '';
 
 if (nodeEnv === 'production') {
   baseConfig.mode = 'production';
@@ -149,6 +149,7 @@ fs.copyFileSync(
 // into remoteEntry.js. We should either delete it, or figure out a way to
 // have the entry point below be dynamically generated text without having to
 // write to a file.
+const webpackPublicPathString = staticPath ? `"${staticPath}"` : `getOption('fullLabextensionsUrl') + '/${data.name}/'`;
 const publicpath = path.join(outputPath, 'publicPath.js');
 fs.writeFileSync(
   publicpath,
@@ -167,7 +168,7 @@ function getOption(name) {
 }
 
 // eslint-disable-next-line no-undef
-__webpack_public_path__ = getOption('fullLabextensionsUrl') + '/${data.name}/';
+__webpack_public_path__ = ${webpackPublicPathString};
 `
 );
 
@@ -181,7 +182,6 @@ module.exports = [
     output: {
       filename: '[name].[chunkhash].js',
       path: outputPath,
-      publicPath: outputPublicPath
     },
     module: {
       rules: [{ test: /\.html$/, use: 'file-loader' }]

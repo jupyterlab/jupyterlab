@@ -190,12 +190,12 @@ class DevelopLabExtensionApp(BaseExtensionApp):
 class BuildLabExtensionApp(BaseExtensionApp):
     description = "Build labextension"
 
-    public_webpack_path = Unicode('', config=True,
-        help="Sets the base path for webpack to use for all app assets")
+    static_path = Unicode('', config=True,
+        help="Sets the path for static assets when building")
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(self.extra_args[0], logger=self.log, public_webpack_path=self.public_webpack_path)
+        build_labextension(self.extra_args[0], logger=self.log, static_path=self.static_path)
 
 
 class WatchLabExtensionApp(BaseExtensionApp):

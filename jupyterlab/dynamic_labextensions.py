@@ -163,7 +163,7 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
     return full_dests
 
 
-def build_labextension(path, logger=None, public_webpack_path=None):
+def build_labextension(path, logger=None, static_path=None):
     """Build a labextension in the given path"""
     core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
@@ -174,8 +174,8 @@ def build_labextension(path, logger=None, public_webpack_path=None):
     builder = _ensure_builder(ext_path, core_path)
 
     arguments = ['node', builder, '--core-path', core_path,  ext_path]
-    if public_webpack_path is not None:
-        arguments.extend(['--public-webpack-path', public_webpack_path])
+    if static_path is not None:
+        arguments.extend(['--static-path', static_path])
 
     subprocess.check_call(arguments, cwd=ext_path)
 
