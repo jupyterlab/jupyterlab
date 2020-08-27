@@ -85,7 +85,6 @@ try {
 module.exports = {
   devtool: 'source-map',
   bail: true,
-  mode: 'development',
   module: { rules },
   resolve: { alias: { url: false, buffer: false, ...phosphorAlias } },
   watchOptions: {
