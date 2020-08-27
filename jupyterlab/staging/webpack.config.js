@@ -193,7 +193,6 @@ const plugins = [
     template: plib.join(__dirname, 'templates', 'template.html'),
     title: jlab.name || 'JupyterLab'
   }),
-  new webpack.ids.HashedModuleIdsPlugin(),
   // custom plugin for ignoring files during a `--watch` build
   new WPPlugin.FilterWatchIgnorePlugin(ignored),
   // custom plugin that copies the assets to the static directory
@@ -224,7 +223,7 @@ module.exports = [
     output: {
       path: plib.resolve(buildDir),
       publicPath: '{{page_config.fullStaticUrl}}/',
-      filename: '[name].[chunkhash].js'
+      filename: '[name].[contenthash].js'
     },
     optimization: {
       splitChunks: {
