@@ -88,11 +88,12 @@ const manager: JupyterFrontEndPlugin<ICompletionManager> = {
 
     return {
       register: (
-        completable: ICompletionManager.ICompletable
+        completable: ICompletionManager.ICompletable,
+        renderer: Completer.IRenderer = Completer.defaultRenderer
       ): ICompletionManager.ICompletableAttributes => {
         const { connector, editor, parent } = completable;
         const model = new CompleterModel();
-        const completer = new Completer({ editor, model });
+        const completer = new Completer({ editor, model, renderer });
         const handler = new CompletionHandler({
           completer,
           connector
