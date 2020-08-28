@@ -47,6 +47,7 @@ def main():
             "base_url": "/foo/"
         }
         ip = '127.0.0.1'
+        notebook_dir = osp.abspath(example_dir)
 
         def initialize_settings(self):
             run_test(self.serverapp, run_browser)

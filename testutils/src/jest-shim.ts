@@ -60,7 +60,7 @@ if (!window.hasOwnProperty('getSelection')) {
 }
 
 // Used by xterm.js
-(window as any).matchMedia = function(media: string) {
+(window as any).matchMedia = function (media: string) {
   return {
     matches: false,
     media,
