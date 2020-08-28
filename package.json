@@ -79,7 +79,7 @@
     "test:all": "lerna run test --scope \"@jupyterlab/*\" --concurrency 1 --stream --no-bail",
     "test:examples": "python examples/test_examples.py",
     "test:scope": "lerna run test --concurrency 1 --stream",
-    "test:summary": "lerna run test --scope \"@jupyterlab/test-*\" --parallel --no-bail | grep -Ei '.* test.*(failed|passed|total|completed|skipped)' | sort",
+    "test:summary": "lerna run test --scope \"@jupyterlab/*\" --parallel --no-bail | grep -Ei '.* test.*(failed|passed|total|completed|skipped)' | sort",
     "update:dependency": "node buildutils/lib/update-dependency.js --lerna",
     "watch": "python scripts/watch_dev.py",
     "watch:main": "jlpm run watch",
