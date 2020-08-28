@@ -737,7 +737,8 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     void Mode.ensure(mime).then(spec => {
       editor.setOption('mode', spec?.mime ?? 'null');
     });
-    const extraKeys = (editor.getOption('extraKeys' as any) || {}) as CodeMirror.KeyMap;
+    const extraKeys = (editor.getOption('extraKeys' as any) ||
+      {}) as CodeMirror.KeyMap;
     const isCode = mime !== 'text/plain' && mime !== 'text/x-ipythongfm';
     if (isCode) {
       extraKeys['Backspace'] = 'delSpaceToPrevTabStop';
@@ -1549,7 +1550,10 @@ namespace Private {
         break;
       }
       case 'tabSize':
-        editor.setOption('indentUnit', value as CodeMirror.EditorConfiguration['tabSize']);
+        editor.setOption(
+          'indentUnit',
+          value as CodeMirror.EditorConfiguration['tabSize']
+        );
         break;
       case 'insertSpaces':
         editor.setOption('indentWithTabs', !value);

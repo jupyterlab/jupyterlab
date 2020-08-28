@@ -18,7 +18,7 @@ import {
   ServiceManager,
   Contents,
   ServerConnection,
-  ContentsManager,
+  ContentsManager
 } from '@jupyterlab/services';
 
 import { ArrayIterator } from '@lumino/algorithm';
@@ -34,7 +34,7 @@ import { PathExt } from '@jupyterlab/coreutils';
 // The default kernel name
 export const DEFAULT_NAME = 'python3';
 
-export const KERNELSPECS: {[key: string]: KernelSpec.ISpecModel} = {
+export const KERNELSPECS: { [key: string]: KernelSpec.ISpecModel } = {
   [DEFAULT_NAME]: {
     argv: [
       '/Users/someuser/miniconda3/envs/jupyterlab/bin/python',
@@ -157,7 +157,7 @@ export const KernelMock = jest.fn<
   Kernel.IKernelConnection,
   [Private.RecursivePartial<Kernel.IKernelConnection.IOptions>]
 >(options => {
-  const model = {id: 'foo', name: DEFAULT_NAME, ...options.model};
+  const model = { id: 'foo', name: DEFAULT_NAME, ...options.model };
   options = {
     clientId: UUID.uuid4(),
     username: UUID.uuid4(),
@@ -230,7 +230,10 @@ export const KernelMock = jest.fn<
           }
         }
       );
-      return new MockShellFuture(reply) as Kernel.IShellFuture<KernelMessage.IExecuteRequestMsg, KernelMessage.IExecuteReplyMsg>;
+      return new MockShellFuture(reply) as Kernel.IShellFuture<
+        KernelMessage.IExecuteRequestMsg,
+        KernelMessage.IExecuteReplyMsg
+      >;
     })
   };
   // Add signals.
@@ -458,7 +461,7 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
       checkPointContent.set(path, files.get(path)?.content);
       return Promise.resolve(data);
     }),
-    listCheckpoints: jest.fn( (path) => {
+    listCheckpoints: jest.fn(path => {
       const p = checkpoints.get(path);
       if (p !== undefined) {
         return Promise.resolve([p]);
@@ -769,9 +772,7 @@ namespace Private {
     return path;
   }
 
-  export function makeResponseError<T>(
-    status: number
-  ): Promise<T> {
+  export function makeResponseError<T>(status: number): Promise<T> {
     const resp = new Response(void 0, { status });
     return Promise.reject(new ServerConnection.ResponseError(resp));
   }
@@ -788,9 +789,7 @@ namespace Private {
   }
 
   // Get the kernel info for kernel name
-  export function getInfo(
-    name: string
-  ): KernelMessage.IInfoReply {
+  export function getInfo(name: string): KernelMessage.IInfoReply {
     return {
       protocol_version: '1',
       implementation: 'foo',
