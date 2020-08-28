@@ -235,7 +235,7 @@ export const KernelMock = jest.fn<
         KernelMessage.IExecuteReplyMsg
       >;
     })
-  };
+  } as any; // FIXME: fix the typing error this any cast is ignoring
   // Add signals.
   const iopubMessageSignal = new Signal<
     Kernel.IKernelConnection,
@@ -299,7 +299,7 @@ export const SessionConnectionMock = jest.fn<
       propertyChangedSignal.emit('type');
       return Promise.resolve();
     })
-  };
+  } as any; // FIXME: fix the typing error this any cast is ignoring
   const disposedSignal = new Signal<Session.ISessionConnection, undefined>(
     thisObject
   );
@@ -386,7 +386,7 @@ export const SessionContextMock = jest.fn<
       );
     }),
     shutdown: jest.fn(() => Promise.resolve())
-  };
+  } as any; // FIXME: fix the typing error this any cast is ignoring
 
   const disposedSignal = new Signal<ISessionContext, undefined>(thisObject);
 
