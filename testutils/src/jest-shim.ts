@@ -59,6 +59,14 @@ if (!window.hasOwnProperty('getSelection')) {
   };
 }
 
+// Used by xterm.js
+(window as any).matchMedia = function(media: string) {
+  return {
+    matches: false,
+    media
+  };
+};
+
 process.on('unhandledRejection', (error, promise) => {
   console.error('Unhandled promise rejection somewhere in tests');
   if (error) {
