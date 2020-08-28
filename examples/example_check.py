@@ -44,10 +44,10 @@ def main():
         name = __name__
         serverapp_config = {
             "open_browser": False,
-            "base_url": "/foo/"
+            "base_url": "/foo/",
+            "root_dir": osp.abspath(example_dir)
         }
         ip = '127.0.0.1'
-        notebook_dir = osp.abspath(example_dir)
 
         def initialize_settings(self):
             run_test(self.serverapp, run_browser)
