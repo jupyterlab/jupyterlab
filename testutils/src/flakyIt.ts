@@ -1,6 +1,9 @@
 // Adapted from https://github.com/bluzi/jest-retries/blob/01a9713a7379edcfd2d1bccec7c0fbc66d4602da/src/retry.js
 
-import 'jest';
+// We explicitly reference the jest typings since the jest.d.ts file shipped
+// with jest 26 masks the @types/jest typings
+
+/// <reference types="jest" />
 
 import { sleep } from './common';
 
