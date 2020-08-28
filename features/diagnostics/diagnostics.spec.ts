@@ -16,7 +16,7 @@ import {
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { is_equal } from '../../positioning';
 import { language_specific_overrides } from '../../magics/defaults';
-import { foreign_code_extractors } from '../../extractors/defaults';
+import { foreign_code_extractors } from '../../extractors/ipython';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
 

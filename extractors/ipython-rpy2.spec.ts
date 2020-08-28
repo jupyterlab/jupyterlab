@@ -1,38 +1,18 @@
-import { IVirtualDocumentBlock, VirtualDocument } from '../virtual/document';
+import { VirtualDocument } from '../virtual/document';
 import { expect } from 'chai';
-import { foreign_code_extractors } from './defaults';
-import { CodeEditor } from '@jupyterlab/codeeditor';
+import { foreign_code_extractors } from './ipython-rpy2';
+import {
+  extract_code,
+  get_the_only_pair,
+  get_the_only_virtual,
+  wrap_in_python_lines
+} from './testutils';
 
-function wrap_in_python_lines(line: string) {
-  return 'print("some code before")\n' + line + '\n' + 'print("and after")\n';
-}
-
-describe('Default extractors', () => {
+describe('IPython rpy2 extractors', () => {
   let document: VirtualDocument;
 
   function extract(code: string) {
-    return document.extract_foreign_code(code, null, {
-      line: 0,
-      column: 0
-    });
-  }
-
-  function get_the_only_pair(
-    foreign_document_map: Map<CodeEditor.IRange, IVirtualDocumentBlock>
-  ) {
-    expect(foreign_document_map.size).to.equal(1);
-
-    let range = foreign_document_map.keys().next().value;
-    let { virtual_document } = foreign_document_map.get(range);
-
-    return { range, virtual_document };
-  }
-
-  function get_the_only_virtual(
-    foreign_document_map: Map<CodeEditor.IRange, IVirtualDocumentBlock>
-  ) {
-    let { virtual_document } = get_the_only_pair(foreign_document_map);
-    return virtual_document;
+    return extract_code(document, code);
   }
 
   beforeEach(() => {

@@ -13,7 +13,8 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './components/statusbar';
 import { DocumentConnectionManager } from './connection_manager';
 import {
-  ILSPAdapterManager, ILSPCodeExtractorsManager,
+  ILSPAdapterManager,
+  ILSPCodeExtractorsManager,
   ILSPFeatureManager,
   ILSPVirtualEditorManager,
   PLUGIN_ID,
@@ -35,8 +36,9 @@ import { LabIcon } from '@jupyterlab/ui-components';
 import codeCheckSvg from '../style/icons/code-check.svg';
 import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import { COMPLETION_PLUGIN } from './features/completion';
-import { CODE_EXTRACTORS_MANAGER } from "./extractors/manger";
-import { IForeignCodeExtractorsRegistry } from "./extractors/types";
+import { CODE_EXTRACTORS_MANAGER } from './extractors/manager';
+import { IForeignCodeExtractorsRegistry } from './extractors/types';
+import { DEFAULT_CODE_EXTRACTORS } from './extractors/defaults';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -169,7 +171,7 @@ export class LSPExtension implements ILSPExtension {
     });
   }
 
-  get foreign_code_extractors () {
+  get foreign_code_extractors() {
     return this.code_extractors_manager.registry;
   }
 
@@ -235,6 +237,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   VIRTUAL_EDITOR_MANAGER,
   CODEMIRROR_VIRTUAL_EDITOR,
   plugin,
+  ...DEFAULT_CODE_EXTRACTORS,
   ...default_features
 ];
 
