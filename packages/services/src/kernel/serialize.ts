@@ -84,7 +84,7 @@ function serializeBinary(msg: KernelMessage.IMessage): ArrayBuffer {
     // msg.buffers elements could be either views or ArrayBuffers
     // buffers elements are ArrayBuffers
     const b: any = origBuffers[i];
-    buffers.push(b instanceof ArrayBuffer ? b : b.buffer);
+    buffers.push(ArrayBuffer.isView(b) ? b.buffer : b);
   }
   const nbufs = buffers.length;
   offsets.push(4 * (nbufs + 1));
