@@ -85,7 +85,6 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     manager: ILSPAdapterManager,
     adapter: WidgetAdapter<IDocumentWidget>
   ) {
-    console.log('ADAPTER CHANGED TO ', adapter);
     if (this.current_adapter) {
       // disconnect signals from the old adapter
       this.current_adapter.activeEditorChanged.disconnect(

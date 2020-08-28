@@ -22,7 +22,10 @@ import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponse
 import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { FeatureSettings } from '../../feature';
 import { PositionConverter } from '../../converter';
-import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/types';
+import {
+  ILSPCompletionThemeManager,
+  KernelKind
+} from '@krassowski/completion-theme/lib/types';
 import { LabIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -291,7 +294,7 @@ export class LSPConnector
       return undefined;
     }
     if (typeof type === 'undefined' || type == '<unknown>') {
-      type = 'Kernel';
+      type = KernelKind;
     }
     return (this.options.icons_manager.get_icon(type) as LabIcon) || undefined;
   }
