@@ -63,7 +63,13 @@ if (!window.hasOwnProperty('getSelection')) {
 (window as any).matchMedia = function(media: string) {
   return {
     matches: false,
-    media
+    media,
+    addEventListener: () => {
+      /* empty */
+    },
+    removeEventListener: () => {
+      /* empty */
+    }
   };
 };
 
