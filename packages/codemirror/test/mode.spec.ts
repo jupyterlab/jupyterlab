@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 import CodeMirror from 'codemirror';
 
 import { Mode } from '@jupyterlab/codemirror';

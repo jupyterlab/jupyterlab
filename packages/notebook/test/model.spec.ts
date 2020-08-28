@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 import { ArrayExt, toArray } from '@lumino/algorithm';
 
 import { CodeCellModel } from '@jupyterlab/cells';

@@ -1,9 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-// Distributed under the terms of the Modified BSD License.
-
 declare let define: any;
 
 if (typeof define !== 'function') {

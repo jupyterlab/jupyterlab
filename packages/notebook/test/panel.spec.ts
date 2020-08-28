@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 import { Context } from '@jupyterlab/docregistry';
 
 import { INotebookModel, NotebookPanel, Notebook } from '../src';
