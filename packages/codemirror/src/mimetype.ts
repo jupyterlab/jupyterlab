@@ -27,7 +27,7 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
         name: info.name,
         ext: [ext.split('.').slice(-1)[0]]
       }
-    ).mime;
+    ).mime as string;
   }
 
   /**
@@ -44,6 +44,6 @@ export class CodeMirrorMimeTypeService implements IEditorMimeTypeService {
       return 'text/x-ipythongfm';
     }
     const mode = Mode.findByFileName(path) || Mode.findBest('');
-    return mode.mime;
+    return mode.mime as string;
   }
 }

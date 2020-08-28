@@ -737,14 +737,14 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     void Mode.ensure(mime).then(spec => {
       editor.setOption('mode', spec?.mime ?? 'null');
     });
-    const extraKeys = editor.getOption('extraKeys') || {};
+    const extraKeys = (editor.getOption('extraKeys' as any) || {}) as CodeMirror.KeyMap;
     const isCode = mime !== 'text/plain' && mime !== 'text/x-ipythongfm';
     if (isCode) {
       extraKeys['Backspace'] = 'delSpaceToPrevTabStop';
     } else {
       delete extraKeys['Backspace'];
     }
-    editor.setOption('extraKeys', extraKeys);
+    editor.setOption('extraKeys' as any, extraKeys);
   }
 
   /**
@@ -1205,7 +1205,7 @@ export namespace CodeMirrorEditor {
      * Can be used to specify extra keybindings for the editor, alongside the
      * ones defined by keyMap. Should be either null, or a valid keymap value.
      */
-    extraKeys?: any;
+    extraKeys?: CodeMirror.KeyMap | null;
 
     /**
      * Can be used to add extra gutters (beyond or instead of the line number
@@ -1372,7 +1372,7 @@ namespace Private {
       lineWrapping: lineWrap === 'off' ? false : true,
       readOnly,
       ...otherOptions
-    };
+    } as CodeMirror.EditorConfiguration;
     return CodeMirror(el => {
       if (fontFamily) {
         el.style.fontFamily = fontFamily;
@@ -1429,7 +1429,8 @@ namespace Private {
    */
   export function delSpaceToPrevTabStop(cm: CodeMirror.Editor): void {
     const doc = cm.getDoc();
-    const tabSize = cm.getOption('indentUnit');
+    // default tabsize is 2, according to codemirror docs: https://codemirror.net/doc/manual.html#config
+    const tabSize = cm.getOption('indentUnit') ?? 2;
     const ranges = doc.listSelections(); // handle multicursor
     for (let i = ranges.length - 1; i >= 0; i--) {
       // iterate reverse so any deletions don't overlap
@@ -1548,17 +1549,17 @@ namespace Private {
         break;
       }
       case 'tabSize':
-        editor.setOption('indentUnit', value);
+        editor.setOption('indentUnit', value as CodeMirror.EditorConfiguration['tabSize']);
         break;
       case 'insertSpaces':
         editor.setOption('indentWithTabs', !value);
         break;
       case 'autoClosingBrackets':
-        editor.setOption('autoCloseBrackets', value);
+        editor.setOption('autoCloseBrackets', value as any);
         break;
       case 'rulers': {
         const rulers = value as Array<number>;
-        editor.setOption(
+        (editor.setOption as any)(
           'rulers',
           rulers.map(column => {
             return {
@@ -1570,34 +1571,34 @@ namespace Private {
         break;
       }
       case 'readOnly':
-        el.classList.toggle(READ_ONLY_CLASS, value);
-        editor.setOption(option, value);
+        el.classList.toggle(READ_ONLY_CLASS, value as boolean);
+        (editor.setOption as any)(option, value);
         break;
       case 'fontFamily':
-        el.style.fontFamily = value;
+        el.style.fontFamily = value as string;
         break;
       case 'fontSize':
         el.style.setProperty('font-size', value ? value + 'px' : null);
         break;
       case 'lineHeight':
-        el.style.lineHeight = value ? value.toString() : null;
+        el.style.lineHeight = (value ? value.toString() : null) as any;
         break;
       case 'gutters':
-        editor.setOption(option, getActiveGutters(config));
+        (editor.setOption as any)(option, getActiveGutters(config));
         break;
       case 'lineNumbers':
-        editor.setOption(option, value);
+        (editor.setOption as any)(option, value);
         editor.setOption('gutters', getActiveGutters(config));
         break;
       case 'codeFolding':
-        editor.setOption('foldGutter', value);
+        (editor.setOption as any)('foldGutter', value);
         editor.setOption('gutters', getActiveGutters(config));
         break;
       case 'theme':
-        void setTheme(editor, shadowRoot, value);
+        void setTheme(editor, shadowRoot, value as string);
         break;
       default:
-        editor.setOption(option, value);
+        (editor.setOption as any)(option, value);
         break;
     }
   }

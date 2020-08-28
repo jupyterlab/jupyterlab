@@ -88,7 +88,7 @@ export namespace Mode {
    * Get the raw list of available modes specs.
    */
   export function getModeInfo(): ISpec[] {
-    return CodeMirror.modeInfo;
+    return CodeMirror.modeInfo as ISpec[];
   }
 
   /**
