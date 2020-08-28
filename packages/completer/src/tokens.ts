@@ -10,6 +10,7 @@ import { Token } from '@lumino/coreutils';
 import { Widget } from '@lumino/widgets';
 
 import { CompletionHandler } from './handler';
+import { Completer } from './widget';
 
 /* tslint:disable */
 /**
@@ -30,7 +31,8 @@ export interface ICompletionManager {
    * @returns A completable object whose attributes can be updated as necessary.
    */
   register(
-    completable: ICompletionManager.ICompletable
+    completable: ICompletionManager.ICompletable,
+    renderer?: Completer.IRenderer
   ): ICompletionManager.ICompletableAttributes;
 }
 
