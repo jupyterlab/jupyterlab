@@ -456,7 +456,7 @@ def clean(app_options=None):
 
 
 def build(name=None, version=None, static_url=None,
-          command=None, kill_event=None,
+          command='build:prod', kill_event=None,
           clean_staging=False, app_options=None):
     """Build the JupyterLab application.
     """
@@ -627,18 +627,10 @@ class _AppHandler(object):
         return True
 
     def build(self, name=None, version=None, static_url=None,
-              command=None, clean_staging=False):
+              command='build:prod:minimize', clean_staging=False):
         """Build the application.
         """
         # resolve the build type
-
-        # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
-        if command == None:
-            if os.name == 'nt':
-                command = 'build:dev'
-            else:
-                command = 'build:prod:minimize'
-
         parts = command.split(':')
         if len(parts) < 2:
             parts.append('dev')
