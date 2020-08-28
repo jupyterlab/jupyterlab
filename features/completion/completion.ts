@@ -163,7 +163,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     }
     this.current_completion_connector = new LSPConnector({
       editor: editor,
-      icons_manager: this.completionThemeManager,
+      themeManager: this.completionThemeManager,
       connections: this.current_adapter.connection_manager.connections,
       virtual_editor: this.current_adapter.virtual_editor,
       settings: this.settings,

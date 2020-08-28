@@ -296,7 +296,7 @@ export class LSPConnector
     if (typeof type === 'undefined' || type == '<unknown>') {
       type = KernelKind;
     }
-    return (this.options.icons_manager.get_icon(type) as LabIcon) || undefined;
+    return (this.options.themeManager.get_icon(type) as LabIcon) || undefined;
   }
 
   private transform_reply(
@@ -420,7 +420,7 @@ export namespace LSPConnector {
 
     settings: FeatureSettings<LSPCompletionSettings>;
 
-    icons_manager: ILSPCompletionThemeManager;
+    themeManager: ILSPCompletionThemeManager;
 
     session?: Session.ISessionConnection;
   }
