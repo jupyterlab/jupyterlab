@@ -60,14 +60,26 @@ if (!window.hasOwnProperty('getSelection')) {
 }
 
 // Used by xterm.js
-(window as any).matchMedia = function (media: string) {
+(window as any).matchMedia = function (media: string): MediaQueryList {
   return {
     matches: false,
     media,
+    onchange: () => {
+      /* empty */
+    },
     addEventListener: () => {
       /* empty */
     },
     removeEventListener: () => {
+      /* empty */
+    },
+    dispatchEvent: () => {
+      return true;
+    },
+    addListener: () => {
+      /* empty */
+    },
+    removeListener: () => {
       /* empty */
     }
   };
