@@ -1,6 +1,6 @@
 import { IExtractedCode, IForeignCodeExtractor } from './types';
 import { position_at_offset } from '../positioning';
-import { replacer } from '../magics/overrides';
+import { replacer } from '../overrides/tokens';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 
 export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {

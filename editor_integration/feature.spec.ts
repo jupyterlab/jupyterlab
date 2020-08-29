@@ -9,8 +9,8 @@ import {
 } from './testutils';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as nbformat from '@jupyterlab/nbformat';
-import { language_specific_overrides } from '../magics/defaults';
-import { foreign_code_extractors } from '../extractors/ipython';
+import { overrides } from '../transclusions/ipython/overrides';
+import { foreign_code_extractors } from '../transclusions/ipython/extractors';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { PageConfig } from '@jupyterlab/coreutils';
 import { CodeMirrorIntegration } from './codemirror';
@@ -183,7 +183,12 @@ describe('Feature', () => {
 
       beforeEach(() => {
         environment = new NotebookFeatureTestEnvironment({
-          overrides_registry: language_specific_overrides,
+          overrides_registry: {
+            python: {
+              cell: overrides.filter(override => override.scope == 'cell'),
+              line: overrides.filter(override => override.scope == 'line')
+            }
+          },
           foreign_code_extractors: foreign_code_extractors
         });
 

@@ -128,6 +128,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     return this.extension.foreign_code_extractors;
   }
 
+  protected get code_overrides() {
+    return this.extension.code_overrides;
+  }
+
   on_connection_closed(
     manager: DocumentConnectionManager,
     { virtual_document }: IDocumentConnectionData

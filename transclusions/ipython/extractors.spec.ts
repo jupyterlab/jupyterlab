@@ -1,7 +1,7 @@
-import { VirtualDocument } from '../virtual/document';
+import { VirtualDocument } from '../../virtual/document';
 import { expect } from 'chai';
-import { foreign_code_extractors } from './ipython';
-import { extract_code, get_the_only_virtual } from './testutils';
+import { foreign_code_extractors } from './extractors';
+import { extract_code, get_the_only_virtual } from '../../extractors/testutils';
 
 describe('IPython extractors', () => {
   let document: VirtualDocument;

@@ -1,7 +1,5 @@
-import { IForeignCodeExtractorsRegistry } from './types';
-import { RegExpForeignCodeExtractor } from './regexp';
-import { JupyterFrontEndPlugin } from '@jupyterlab/application';
-import { ILSPCodeExtractorsManager, PLUGIN_ID } from '../tokens';
+import { IForeignCodeExtractorsRegistry } from '../../extractors/types';
+import { RegExpForeignCodeExtractor } from '../../extractors/regexp';
 
 export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
   // general note: to match new lines use [^] instead of dot, unless the target is ES2018, then use /s
@@ -77,17 +75,4 @@ export let foreign_code_extractors: IForeignCodeExtractorsRegistry = {
       file_extension: 'md'
     })
   ]
-};
-
-export const IPYTHON_CODE_EXTRACTORS: JupyterFrontEndPlugin<void> = {
-  id: PLUGIN_ID + ':extractors-ipython',
-  requires: [ILSPCodeExtractorsManager],
-  activate: (app, extractors_manager: ILSPCodeExtractorsManager) => {
-    for (let language of Object.keys(foreign_code_extractors)) {
-      for (let extractor of foreign_code_extractors[language]) {
-        extractors_manager.register(extractor, language);
-      }
-    }
-  },
-  autoStart: true
 };

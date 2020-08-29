@@ -38,7 +38,11 @@ import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import { COMPLETION_PLUGIN } from './features/completion';
 import { CODE_EXTRACTORS_MANAGER } from './extractors/manager';
 import { IForeignCodeExtractorsRegistry } from './extractors/types';
-import { DEFAULT_CODE_EXTRACTORS } from './extractors/defaults';
+import {
+  ILSPCodeOverridesManager,
+  ICodeOverridesRegistry
+} from './overrides/tokens';
+import { DEFAULT_TRANSCLUSIONS } from './transclusions/defaults';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -103,6 +107,7 @@ export interface ILSPExtension {
   feature_manager: ILSPFeatureManager;
   editor_type_manager: ILSPVirtualEditorManager;
   foreign_code_extractors: IForeignCodeExtractorsRegistry;
+  code_overrides: ICodeOverridesRegistry;
 }
 
 export class LSPExtension implements ILSPExtension {
@@ -119,7 +124,8 @@ export class LSPExtension implements ILSPExtension {
     status_bar: IStatusBar,
     adapterManager: ILSPAdapterManager,
     public editor_type_manager: ILSPVirtualEditorManager,
-    private code_extractors_manager: ILSPCodeExtractorsManager
+    private code_extractors_manager: ILSPCodeExtractorsManager,
+    private code_overrides_manager: ILSPCodeOverridesManager
   ) {
     this.language_server_manager = new LanguageServerManager({});
     this.connection_manager = new DocumentConnectionManager({
@@ -175,6 +181,10 @@ export class LSPExtension implements ILSPExtension {
     return this.code_extractors_manager.registry;
   }
 
+  get code_overrides() {
+    return this.code_overrides_manager.registry;
+  }
+
   private updateOptions(settings: ISettingRegistry.ISettings) {
     const options = settings.composite;
 
@@ -197,7 +207,8 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
     IStatusBar,
     ILSPAdapterManager,
     ILSPVirtualEditorManager,
-    ILSPCodeExtractorsManager
+    ILSPCodeExtractorsManager,
+    ILSPCodeOverridesManager
   ],
   activate: (app, ...args) => {
     let extension = new LSPExtension(
@@ -210,7 +221,8 @@ const plugin: JupyterFrontEndPlugin<ILSPFeatureManager> = {
         IStatusBar,
         ILSPAdapterManager,
         ILSPVirtualEditorManager,
-        ILSPCodeExtractorsManager
+        ILSPCodeExtractorsManager,
+        ILSPCodeOverridesManager
       ])
     );
     return extension.feature_manager;
@@ -237,7 +249,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   VIRTUAL_EDITOR_MANAGER,
   CODEMIRROR_VIRTUAL_EDITOR,
   plugin,
-  ...DEFAULT_CODE_EXTRACTORS,
+  ...DEFAULT_TRANSCLUSIONS,
   ...default_features
 ];
 

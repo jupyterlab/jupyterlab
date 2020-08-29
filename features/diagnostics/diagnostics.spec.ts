@@ -15,8 +15,7 @@ import {
 } from '../../editor_integration/testutils';
 import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 import { is_equal } from '../../positioning';
-import { language_specific_overrides } from '../../magics/defaults';
-import { foreign_code_extractors } from '../../extractors/ipython';
+import { foreign_code_extractors } from '../../transclusions/ipython/extractors';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
 
@@ -144,7 +143,7 @@ describe('Diagnostics', () => {
 
     beforeEach(() => {
       env = new NotebookFeatureTestEnvironment({
-        overrides_registry: language_specific_overrides,
+        overrides_registry: {},
         foreign_code_extractors
       });
       feature = env.init_integration({

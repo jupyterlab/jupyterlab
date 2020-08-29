@@ -1,7 +1,7 @@
-import { IMagicOverride, IMagicOverrideRule, replacer } from './overrides';
+import { ICodeOverride, replacer } from './tokens';
 
-abstract class MagicsMap extends Map<RegExp, string | replacer> {
-  protected constructor(magic_overrides: IMagicOverrideRule[]) {
+abstract class OverridesMap extends Map<RegExp, string | replacer> {
+  protected constructor(magic_overrides: ICodeOverride[]) {
     super(magic_overrides.map(m => [new RegExp(m.pattern), m.replacement]));
   }
 
@@ -19,42 +19,29 @@ abstract class MagicsMap extends Map<RegExp, string | replacer> {
   }
 }
 
-abstract class ReversibleMagicsMap extends MagicsMap {
-  protected abstract type(overrides: IMagicOverrideRule[]): any;
-  private overrides: IMagicOverride[];
+export class ReversibleOverridesMap extends OverridesMap {
+  private overrides: ICodeOverride[];
 
-  constructor(magic_overrides: IMagicOverride[]) {
+  constructor(magic_overrides: ICodeOverride[]) {
     super(magic_overrides);
     this.overrides = magic_overrides;
   }
 
-  get reverse(): MagicsMap {
+  get reverse(): OverridesMap {
     return this.type(this.overrides.map(override => override.reverse));
   }
-}
 
-export class CellMagicsMap extends ReversibleMagicsMap {
-  type(overrides: IMagicOverride[]) {
-    return new CellMagicsMap(overrides);
+  type(overrides: ICodeOverride[]) {
+    return new ReversibleOverridesMap(overrides);
   }
 
   override_for(cell: string): string | null {
     return super._override_for(cell);
   }
-}
-
-export class LineMagicsMap extends ReversibleMagicsMap {
-  type(overrides: IMagicOverride[]) {
-    return new LineMagicsMap(overrides);
-  }
-
-  override_for(line: string): string | null {
-    return super._override_for(line);
-  }
 
   replace_all(
     raw_lines: string[],
-    map: MagicsMap = this
+    map: OverridesMap = this
   ): { lines: string[]; skip_inspect: boolean[] } {
     let substituted_lines = new Array<string>();
     let skip_inspect = new Array<boolean>();

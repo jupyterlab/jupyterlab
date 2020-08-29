@@ -2,8 +2,7 @@ import {
   IForeignCodeExtractor,
   IForeignCodeExtractorsRegistry
 } from '../extractors/types';
-import { CellMagicsMap, LineMagicsMap } from '../magics/maps';
-import { IOverridesRegistry } from '../magics/overrides';
+import { ICodeOverridesRegistry } from '../overrides/tokens';
 import { DefaultMap, until_ready } from '../utils';
 import { Signal } from '@lumino/signaling';
 import { CodeEditor } from '@jupyterlab/codeeditor';
@@ -17,6 +16,7 @@ import { IDocumentInfo } from 'lsp-ws-connection/src';
 import { DocumentConnectionManager } from '../connection_manager';
 import { create_console, EditorLogConsole } from './console';
 import IRange = CodeEditor.IRange;
+import { ReversibleOverridesMap } from '../overrides/maps';
 
 type language = string;
 
@@ -120,7 +120,7 @@ export namespace VirtualDocument {
   export interface IOptions {
     language: string;
     foreign_code_extractors: IForeignCodeExtractorsRegistry;
-    overrides_registry: IOverridesRegistry;
+    overrides_registry: ICodeOverridesRegistry;
     path: string;
     file_extension: string;
     has_lsp_supported_file: boolean;
@@ -175,7 +175,7 @@ export class VirtualDocument {
   protected source_lines: Map<number, ISourceLine>;
 
   foreign_extractors: IForeignCodeExtractor[];
-  overrides_registry: IOverridesRegistry;
+  overrides_registry: ICodeOverridesRegistry;
   protected foreign_extractors_registry: IForeignCodeExtractorsRegistry;
   protected lines: Array<string>;
 
@@ -187,8 +187,8 @@ export class VirtualDocument {
   >;
 
   private _remaining_lifetime: number;
-  private cell_magics_overrides: CellMagicsMap;
-  private line_magics_overrides: LineMagicsMap;
+  private cell_magics_overrides: ReversibleOverridesMap;
+  private line_magics_overrides: ReversibleOverridesMap;
   private static instances_count = 0;
   public foreign_documents: Map<VirtualDocument.virtual_id, VirtualDocument>;
 
@@ -216,11 +216,11 @@ export class VirtualDocument {
       this.language in options.overrides_registry
         ? options.overrides_registry[this.language]
         : null;
-    this.cell_magics_overrides = new CellMagicsMap(
-      overrides ? overrides.cell_magics : []
+    this.cell_magics_overrides = new ReversibleOverridesMap(
+      overrides ? overrides.cell : []
     );
-    this.line_magics_overrides = new LineMagicsMap(
-      overrides ? overrides.line_magics : []
+    this.line_magics_overrides = new ReversibleOverridesMap(
+      overrides ? overrides.line : []
     );
     this.foreign_extractors_registry = options.foreign_code_extractors;
     this.foreign_extractors =

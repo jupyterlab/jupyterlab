@@ -1,6 +1,6 @@
 import { expect } from 'chai';
-import { language_specific_overrides } from './defaults';
-import { CellMagicsMap, LineMagicsMap } from './maps';
+import { ReversibleOverridesMap } from '../../overrides/maps';
+import { overrides } from './overrides';
 
 const CELL_MAGIC_EXISTS = `%%MAGIC
 some text
@@ -33,8 +33,8 @@ const LINE_MAGIC_WITH_SPACE = `%MAGIC line = dd`;
 
 describe('Default IPython overrides', () => {
   describe('IPython cell magics', () => {
-    let cell_magics_map = new CellMagicsMap(
-      language_specific_overrides['python'].cell_magics
+    let cell_magics_map = new ReversibleOverridesMap(
+      overrides.filter(override => override.scope == 'cell')
     );
     it('overrides cell magics', () => {
       let override = cell_magics_map.override_for(CELL_MAGIC_EXISTS);
@@ -91,8 +91,8 @@ describe('Default IPython overrides', () => {
   });
 
   describe('IPython line magics', () => {
-    let line_magics_map = new LineMagicsMap(
-      language_specific_overrides['python'].line_magics
+    let line_magics_map = new ReversibleOverridesMap(
+      overrides.filter(override => override.scope == 'line')
     );
     it('overrides line magics', () => {
       let override = line_magics_map.override_for(LINE_MAGIC_WITH_SPACE);
