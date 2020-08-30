@@ -4,17 +4,25 @@
 |----------------------------------------------------------------------------*/
 
 import { find } from '@lumino/algorithm';
+
 import { CommandRegistry } from '@lumino/commands';
+
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+
 import { CommandPalette } from '@lumino/widgets';
 
-import { JupyterFrontEnd } from '@jupyterlab/application';
+import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
+
 import {
   ICommandPalette,
   IPaletteItem,
   ModalCommandPalette
 } from '@jupyterlab/apputils';
+
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -23,6 +31,8 @@ import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 namespace CommandIDs {
   export const activate = 'apputils:activate-command-palette';
 }
+
+const PALETTE_PLUGIN_ID = '@jupyterlab/apputils-extension:palette';
 
 /**
  * A thin wrapper around the `CommandPalette` class to conform with the
@@ -84,12 +94,44 @@ export namespace Palette {
    */
   export function activate(
     app: JupyterFrontEnd,
-    translator: ITranslator
+    translator: ITranslator,
+    settingRegistry: ISettingRegistry | null
   ): ICommandPalette {
-    const { commands } = app;
+    const { commands, shell } = app;
+    console.log('Activating command palette');
     const trans = translator.load('jupyterlab');
     const palette = Private.createPalette(app, translator);
     const modalPalette = new ModalCommandPalette({ commandPalette: palette });
+    let modal = true;
+
+    if (settingRegistry) {
+      const loadSettings = settingRegistry.load(PALETTE_PLUGIN_ID);
+      const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+        const newModal = settings.get('modal').composite as boolean;
+        console.log('update settings', modal, newModal);
+        if (modal && !newModal) {
+          palette.parent = null;
+          modalPalette.detach();
+          shell.add(palette, 'left', { rank: 300 });
+        } else if (!modal && newModal) {
+          palette.parent = null;
+          modalPalette.palette = palette;
+          modalPalette.attach();
+        }
+        modal = newModal;
+      };
+
+      Promise.all([loadSettings, app.restored])
+        .then(([settings]) => {
+          updateSettings(settings);
+          settings.changed.connect(settings => {
+            updateSettings(settings);
+          });
+        })
+        .catch((reason: Error) => {
+          console.error(reason.message);
+        });
+    }
 
     // Show the current palette shortcut in its title.
     const updatePaletteTitle = () => {
@@ -111,7 +153,11 @@ export namespace Palette {
 
     commands.addCommand(CommandIDs.activate, {
       execute: () => {
-        modalPalette.activate();
+        if (modal) {
+          modalPalette.activate();
+        } else {
+          shell.activateById(palette.id);
+        }
       },
       label: trans.__('Activate Command Palette')
     });
@@ -119,6 +165,22 @@ export namespace Palette {
     palette.inputNode.placeholder = trans.__('SEARCH');
 
     return new Palette(palette, translator);
+  }
+
+  /**
+   * Restore the command palette.
+   */
+  export function restore(
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer,
+    translator: ITranslator
+  ): void {
+    console.log('restoring palette');
+    const palette = Private.createPalette(app, translator);
+    // Let the application restorer track the command palette for restoration of
+    // application state (e.g. setting the command palette as the current side bar
+    // widget).
+    restorer.add(palette, 'command-palette');
   }
 }
 
@@ -139,6 +201,7 @@ namespace Private {
     translator: ITranslator
   ): CommandPalette {
     if (!palette) {
+      console.log('Creating palette');
       // use a renderer tweaked to use inline svg icons
       palette = new CommandPalette({
         commands: app.commands,

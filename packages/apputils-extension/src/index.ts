@@ -4,6 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 import {
+  ILayoutRestorer,
   IRouter,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -35,6 +36,8 @@ import { Debouncer, Throttler } from '@lumino/polling';
 import { Palette } from './palette';
 
 import { settingsPlugin } from './settingsplugin';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import { themesPlugin, themesPaletteMenuPlugin } from './themesplugins';
 
@@ -69,8 +72,35 @@ const palette: JupyterFrontEndPlugin<ICommandPalette> = {
   autoStart: true,
   requires: [ITranslator],
   provides: ICommandPalette,
-  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
-    return Palette.activate(app, translator);
+  optional: [ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    return Palette.activate(app, translator, settingRegistry);
+  }
+};
+
+/**
+ * The default command palette's restoration extension.
+ *
+ * #### Notes
+ * The command palette's restoration logic is handled separately from the
+ * command palette provider extension because the layout restorer dependency
+ * causes the command palette to be unavailable to other extensions earlier
+ * in the application load cycle.
+ */
+const paletteRestorer: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/apputils-extension:palette-restorer',
+  autoStart: true,
+  requires: [ILayoutRestorer, ITranslator],
+  activate: (
+    app: JupyterFrontEnd,
+    restorer: ILayoutRestorer,
+    translator: ITranslator
+  ) => {
+    Palette.restore(app, restorer, translator);
   }
 };
 
@@ -489,6 +519,7 @@ const utilityCommands: JupyterFrontEndPlugin<void> = {
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
   palette,
+  paletteRestorer,
   print,
   resolver,
   settingsPlugin,

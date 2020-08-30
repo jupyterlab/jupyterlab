@@ -57,17 +57,34 @@ export class ModalCommandPalette extends Panel {
     super();
     this.addClass('jp-ModalCommandPalette');
     this.id = 'modal-command-palette';
-    this._host = document.body;
     this._commandPalette = options.commandPalette;
     this._commandPalette.addClass('jp-ModalCommandPalette-command-palette');
     this.addWidget(this._commandPalette);
-    Widget.attach(this, this._host);
+    this.attach();
     this._commandPalette.commands.commandExecuted.connect(() => {
       if (this.isAttached && this.isVisible) {
         this.hideAndReset();
       }
     });
     this.hideAndReset();
+  }
+
+  get palette(): CommandPalette {
+    return this._commandPalette;
+  }
+
+  set palette(value: CommandPalette) {
+    this._commandPalette = value;
+    this.addWidget(value);
+    this.hideAndReset();
+  }
+
+  attach(): void {
+    Widget.attach(this, document.body);
+  }
+
+  detach(): void {
+    Widget.detach(this);
   }
 
   /**
@@ -143,7 +160,6 @@ export class ModalCommandPalette extends Panel {
     }
   }
 
-  private _host: HTMLElement;
   private _commandPalette: CommandPalette;
 }
 

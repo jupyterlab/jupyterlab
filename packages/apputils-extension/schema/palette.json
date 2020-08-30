@@ -8,7 +8,14 @@
       "selector": "body"
     }
   ],
-  "additionalProperties": false,
-  "properties": {},
-  "type": "object"
+  "properties": {
+    "modal": {
+      "title": "Modal Command Palette",
+      "description": "Whether the command palette should be modal or in the left panel.",
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "type": "object",
+  "additionalProperties": false
 }
