@@ -45,7 +45,7 @@ export function addKernelRunningSessionManager(
     shutdownLabel: trans.__('Shut Down'),
     shutdownAllLabel: trans.__('Shut Down All'),
     shutdownAllConfirmationText: trans.__(
-      'Are you sure you want to permanently shutdown all running kernels?'
+      'Are you sure you want to permanently shut down all running kernels?'
     )
   });
 

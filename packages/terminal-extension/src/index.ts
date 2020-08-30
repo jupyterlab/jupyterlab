@@ -293,7 +293,7 @@ function addRunningSessionManager(
     shutdownLabel: trans.__('Shut Down'),
     shutdownAllLabel: trans.__('Shut Down All'),
     shutdownAllConfirmationText: trans.__(
-      'Are you sure you want to permanently shutdown all running terminals?'
+      'Are you sure you want to permanently shut down all running terminals?'
     )
   });
 

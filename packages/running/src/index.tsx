@@ -57,6 +57,11 @@ const ITEM_CLASS = 'jp-RunningSessions-item';
 const ITEM_LABEL_CLASS = 'jp-RunningSessions-itemLabel';
 
 /**
+ * The class name added to a running session item detail.
+ */
+const ITEM_DETAIL_CLASS = 'jp-RunningSessions-itemDetail';
+
+/**
  * The class name added to a running session item shutdown button.
  */
 const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
@@ -122,11 +127,17 @@ export class RunningSessionManagers implements IRunningSessionManagers {
 
 function Item(props: {
   runningItem: IRunningSessions.IRunningItem;
-  shutdownLabel: string;
+  shutdownLabel?: string;
+  shutdownItemIcon?: LabIcon;
   translator?: ITranslator;
 }) {
   const { runningItem } = props;
   const icon = runningItem.icon();
+  const detail = runningItem.detail?.();
+  const translator = props.translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
+  const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
+  const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
 
   return (
     <li className={ITEM_CLASS}>
@@ -138,11 +149,12 @@ function Item(props: {
       >
         {runningItem.label()}
       </span>
+      {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
       <ToolbarButtonComponent
         className={SHUTDOWN_BUTTON_CLASS}
-        icon={closeIcon}
+        icon={shutdownItemIcon}
         onClick={() => runningItem.shutdown()}
-        tooltip={props.shutdownLabel}
+        tooltip={shutdownLabel}
       />
     </li>
   );
@@ -150,8 +162,9 @@ function Item(props: {
 
 function ListView(props: {
   runningItems: IRunningSessions.IRunningItem[];
-  shutdownLabel: string;
-  shutdownAllLabel: string;
+  shutdownLabel?: string;
+  shutdownAllLabel?: string;
+  shutdownItemIcon?: LabIcon;
   translator?: ITranslator;
 }) {
   return (
@@ -161,7 +174,8 @@ function ListView(props: {
           key={i}
           runningItem={item}
           shutdownLabel={props.shutdownLabel}
-          translator={props.translator || nullTranslator}
+          shutdownItemIcon={props.shutdownItemIcon}
+          translator={props.translator}
         />
       ))}
     </ul>
@@ -170,8 +184,8 @@ function ListView(props: {
 
 function List(props: {
   manager: IRunningSessions.IManager;
-  shutdownLabel: string;
-  shutdownAllLabel: string;
+  shutdownLabel?: string;
+  shutdownAllLabel?: string;
   translator?: ITranslator;
 }) {
   return (
@@ -181,7 +195,8 @@ function List(props: {
           runningItems={props.manager.running()}
           shutdownLabel={props.shutdownLabel}
           shutdownAllLabel={props.shutdownAllLabel}
-          translator={props.translator || nullTranslator}
+          shutdownItemIcon={props.manager.shutdownItemIcon}
+          translator={props.translator}
         />
       )}
     </UseSignal>
@@ -200,7 +215,6 @@ function Section(props: {
 }) {
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
-  const shutdownLabel = props.manager.shutdownLabel || trans.__('Shut Down');
   const shutdownAllLabel =
     props.manager.shutdownAllLabel || trans.__('Shut Down All');
   const shutdownTitle = `${shutdownAllLabel}?`;
@@ -238,7 +252,7 @@ function Section(props: {
         <div className={CONTAINER_CLASS}>
           <List
             manager={props.manager}
-            shutdownLabel={shutdownLabel}
+            shutdownLabel={props.manager.shutdownLabel}
             shutdownAllLabel={shutdownAllLabel}
             translator={props.translator}
           />
@@ -325,8 +339,12 @@ export namespace IRunningSessions {
     runningChanged: ISignal<any, any>;
     // A string used to describe the shutdown action.
     shutdownLabel?: string;
+    // A string used to describe the shutdown all action.
     shutdownAllLabel?: string;
+    // A string used as the body text in the shutdown all confirmation dialog.
     shutdownAllConfirmationText?: string;
+    // The icon to show for shutting down an individual item in this section.
+    shutdownItemIcon?: LabIcon;
   }
 
   /**
@@ -343,5 +361,8 @@ export namespace IRunningSessions {
     label: () => string;
     // called to determine the `title` attribute for each item, which is revealed on hover
     labelTitle?: () => string;
+    // called to determine the `detail` attribute which is shown optionally
+    // in a column after the label
+    detail?: () => string;
   }
 }
