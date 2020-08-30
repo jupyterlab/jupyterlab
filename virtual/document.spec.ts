@@ -63,13 +63,19 @@ describe('VirtualDocument', () => {
     it('disposes, but does not break methods which can be called from async callbacks', () => {
       expect(document.isDisposed).to.equal(false);
       // appending code block here should work fine
-      document.append_code_block('code', {} as CodeEditor.IEditor);
+      document.append_code_block({
+        value: 'code',
+        ce_editor: {} as CodeEditor.IEditor
+      });
       document.dispose();
       expect(document.isDisposed).to.equal(true);
       // mock console.warn
       console.warn = jest.fn();
       // this one should not raise, but just warn
-      document.append_code_block('code', {} as CodeEditor.IEditor);
+      document.append_code_block({
+        value: 'code',
+        ce_editor: {} as CodeEditor.IEditor
+      });
       expect((console.warn as Mock).mock.calls[0][0]).to.equal(
         'Cannot append code block: document disposed'
       );
