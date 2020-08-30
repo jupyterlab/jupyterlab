@@ -2,7 +2,7 @@ import * as CodeMirror from 'codemirror';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../../converter';
 import { IEditorPosition, IVirtualPosition } from '../../positioning';
-import { DiagnosticSeverity, diagnosticSeverityNames } from '../../lsp';
+import { DiagnosticSeverity } from '../../lsp';
 import { DefaultMap, uris_equal } from '../../utils';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import {
@@ -15,7 +15,13 @@ import { FeatureSettings } from '../../feature';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
 import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
-import { diagnosticsIcon } from './index';
+import { LabIcon } from '@jupyterlab/ui-components';
+import diagnosticsSvg from '../../../style/icons/diagnostics.svg';
+
+export const diagnosticsIcon = new LabIcon({
+  name: 'lsp:diagnostics',
+  svgstr: diagnosticsSvg
+});
 
 class DiagnosticsPanel {
   private _content: DiagnosticsListing = null;
@@ -280,7 +286,7 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
             .map(diagnostic => diagnostic.severity || this.defaultSeverity)
             .sort()[0];
 
-          const severity = diagnosticSeverityNames[highest_severity_code];
+          const severity = DiagnosticSeverity[highest_severity_code];
 
           let ce_editor = document.get_editor_at_virtual_line(start);
           let cm_editor = this.virtual_editor.ce_editor_to_cm_editor.get(
@@ -399,17 +405,4 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     diagnostics_panel.update();
     super.remove();
   }
-}
-
-export function message_without_code(diagnostic: lsProtocol.Diagnostic) {
-  let message = diagnostic.message;
-  let code_str = '' + diagnostic.code;
-  if (
-    diagnostic.code != null &&
-    diagnostic.code !== '' &&
-    message.startsWith(code_str + '')
-  ) {
-    return message.slice(code_str.length).trim();
-  }
-  return message;
 }

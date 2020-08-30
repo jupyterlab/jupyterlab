@@ -7,16 +7,13 @@ import {
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { diagnostics_panel, DiagnosticsCM } from './diagnostics';
-import { LabIcon } from '@jupyterlab/ui-components';
-import diagnosticsSvg from '../../../style/icons/diagnostics.svg';
+import {
+  diagnostics_panel,
+  DiagnosticsCM,
+  diagnosticsIcon
+} from './diagnostics';
 
 export const FEATURE_ID = PLUGIN_ID + ':diagnostics';
-
-export const diagnosticsIcon = new LabIcon({
-  name: 'lsp:diagnostics',
-  svgstr: diagnosticsSvg
-});
 
 const COMMANDS: IFeatureCommand[] = [
   {

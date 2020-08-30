@@ -43,6 +43,10 @@ import {
   ICodeOverridesRegistry
 } from './overrides/tokens';
 import { DEFAULT_TRANSCLUSIONS } from './transclusions/defaults';
+import { SYNTAX_HIGHLIGHTING_PLUGIN } from './features/syntax_highlighting';
+import { COMPLETION_THEME_MANAGER } from '@krassowski/completion-theme';
+import { plugin as THEME_VSCODE } from '@krassowski/theme-vscode';
+import { plugin as THEME_MATERIAL } from '@krassowski/theme-material';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -238,7 +242,8 @@ const default_features: JupyterFrontEndPlugin<void>[] = [
   HOVER_PLUGIN,
   RENAME_PLUGIN,
   HIGHLIGHTS_PLUGIN,
-  DIAGNOSTICS_PLUGIN
+  DIAGNOSTICS_PLUGIN,
+  SYNTAX_HIGHLIGHTING_PLUGIN
 ];
 
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -248,6 +253,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   FILE_EDITOR_ADAPTER,
   VIRTUAL_EDITOR_MANAGER,
   CODEMIRROR_VIRTUAL_EDITOR,
+  COMPLETION_THEME_MANAGER,
+  THEME_VSCODE,
+  THEME_MATERIAL,
   plugin,
   ...DEFAULT_TRANSCLUSIONS,
   ...default_features

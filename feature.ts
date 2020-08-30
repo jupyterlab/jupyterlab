@@ -9,6 +9,7 @@ import IEditor = CodeEditor.IEditor;
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { LabIcon } from '@jupyterlab/ui-components';
+import { Signal } from '@lumino/signaling';
 
 export interface IFeatureCommand {
   /**
@@ -51,14 +52,17 @@ export interface IFeatureCommand {
 
 export interface IFeatureSettings<T> {
   readonly composite: T;
+  readonly changed: Signal<IFeatureSettings<T>, void>;
 
   set(setting: keyof T, value: any): void;
 }
 
 export class FeatureSettings<T> implements IFeatureSettings<T> {
   protected settings: ISettingRegistry.ISettings;
+  public changed: Signal<FeatureSettings<T>, void>;
 
   constructor(protected settingRegistry: ISettingRegistry, featureID: string) {
+    this.changed = new Signal(this);
     if (!(featureID in settingRegistry.plugins)) {
       console.warn(
         `${featureID} settings schema could not be found and was not loaded`
@@ -68,8 +72,10 @@ export class FeatureSettings<T> implements IFeatureSettings<T> {
         .load(featureID)
         .then(settings => {
           this.settings = settings;
+          this.changed.emit();
           settings.changed.connect(() => {
             this.settings = settings;
+            this.changed.emit();
           });
         })
         .catch(console.warn);

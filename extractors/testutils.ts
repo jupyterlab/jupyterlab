@@ -3,10 +3,13 @@ import { IVirtualDocumentBlock, VirtualDocument } from '../virtual/document';
 import { expect } from 'chai';
 
 export function extract_code(document: VirtualDocument, code: string) {
-  return document.extract_foreign_code(code, null, {
-    line: 0,
-    column: 0
-  });
+  return document.extract_foreign_code(
+    { value: code, ce_editor: null },
+    {
+      line: 0,
+      column: 0
+    }
+  );
 }
 
 export function get_the_only_pair(
