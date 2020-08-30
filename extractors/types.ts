@@ -25,7 +25,7 @@ export interface IExtractedCode {
  *
  * The typical examples are:
  *  - (X=CSS< Y=HTML), or
- *  - (X=JavaScrip, Y=HTML),
+ *  - (X=JavaScript, Y=HTML),
  *
  * while in the data analysis realm, examples include:
  *   - (X=R, Y=IPython),

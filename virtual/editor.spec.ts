@@ -74,14 +74,14 @@ describe('VirtualEditor', () => {
       let ce_editor_for_cell_2 = {} as CodeEditor.IEditor;
       let editor = notebook_env.virtual_editor;
 
-      editor.virtual_document.append_code_block(
-        'test line in Python 1\n%R test line in R 1',
-        ce_editor_for_cell_1
-      );
-      editor.virtual_document.append_code_block(
-        'test line in Python 2\n%R test line in R 2',
-        ce_editor_for_cell_2
-      );
+      editor.virtual_document.append_code_block({
+        value: 'test line in Python 1\n%R test line in R 1',
+        ce_editor: ce_editor_for_cell_1
+      });
+      editor.virtual_document.append_code_block({
+        value: 'test line in Python 2\n%R test line in R 2',
+        ce_editor: ce_editor_for_cell_2
+      });
 
       // The first (Python) line in the first block
       let root_position = { line: 0, ch: 0 } as IRootPosition;

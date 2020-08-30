@@ -81,10 +81,13 @@ describe('VirtualDocument', () => {
       let {
         cell_code_kept,
         foreign_document_map
-      } = document.extract_foreign_code(R_LINE_MAGICS, null, {
-        line: 0,
-        column: 0
-      });
+      } = document.extract_foreign_code(
+        { value: R_LINE_MAGICS, ce_editor: null },
+        {
+          line: 0,
+          column: 0
+        }
+      );
 
       // note R cell lines are kept in code (keep_in_host=true)
       expect(cell_code_kept).to.equal(R_LINE_MAGICS);
@@ -108,30 +111,31 @@ describe('VirtualDocument', () => {
     let ce_editor_for_cell_3 = {} as CodeEditor.IEditor;
     let ce_editor_for_cell_4 = {} as CodeEditor.IEditor;
     // first block
-    document.append_code_block(
-      'test line in Python 1\n%R 1st test line in R line magic 1',
-      ce_editor_for_cell_1
-    );
+    document.append_code_block({
+      value: 'test line in Python 1\n%R 1st test line in R line magic 1',
+      ce_editor: ce_editor_for_cell_1
+    });
     // second block
-    document.append_code_block(
-      'test line in Python 2\n%R 1st test line in R line magic 2',
-      ce_editor_for_cell_2
-    );
+    document.append_code_block({
+      value: 'test line in Python 2\n%R 1st test line in R line magic 2',
+      ce_editor: ce_editor_for_cell_2
+    });
     // third block
-    document.append_code_block(
-      'test line in Python 3\n%R -i imported_variable 1st test line in R line magic 3',
-      ce_editor_for_cell_2
-    );
+    document.append_code_block({
+      value:
+        'test line in Python 3\n%R -i imported_variable 1st test line in R line magic 3',
+      ce_editor: ce_editor_for_cell_2
+    });
     // fourth block
-    document.append_code_block(
-      '%%R\n1st test line in R cell magic 1',
-      ce_editor_for_cell_3
-    );
+    document.append_code_block({
+      value: '%%R\n1st test line in R cell magic 1',
+      ce_editor: ce_editor_for_cell_3
+    });
     // fifth block
-    document.append_code_block(
-      '%%R -i imported_variable\n1st test line in R cell magic 2',
-      ce_editor_for_cell_4
-    );
+    document.append_code_block({
+      value: '%%R -i imported_variable\n1st test line in R cell magic 2',
+      ce_editor: ce_editor_for_cell_4
+    });
   };
 
   describe('#transform_virtual_to_editor', () => {

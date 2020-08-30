@@ -363,7 +363,10 @@ export abstract class CodeMirrorIntegration
     let raw_value = doc.getValue('\n');
     // extract foreign documents and substitute magics,
     // as it was done when the shadow virtual document was being created
-    let { lines } = document.prepare_code_block(raw_value, editor);
+    let { lines } = document.prepare_code_block({
+      value: raw_value,
+      ce_editor: editor
+    });
     let old_value = lines.join('\n');
 
     if (is_whole_document_edit) {
