@@ -87,6 +87,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     EditorAdapter<IVirtualEditor<IEditor>>
   >;
   public adapterConnected: Signal<WidgetAdapter<T>, IDocumentConnectionData>;
+  public isConnected: boolean;
   public connection_manager: DocumentConnectionManager;
   public status_message: StatusMessage;
   protected isDisposed = false;
@@ -117,6 +118,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.activeEditorChanged = new Signal(this);
     this.adapters = new Map();
     this.status_message = new StatusMessage();
+    this.isConnected = false;
 
     // set up signal connections
     this.widget.context.saveState.connect(this.on_save_state, this);
@@ -142,6 +144,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     if (this.isDisposed) {
       return;
     }
+
     if (this.virtual_editor?.virtual_document) {
       this.disconnect_adapter(this.virtual_editor?.virtual_document);
     }
@@ -171,7 +174,6 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     this.connection_manager = null;
     this.widget = null;
 
-    // actually disposed
     this.isDisposed = true;
   }
 
@@ -249,6 +251,10 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
    * public for use in tests (but otherwise could be private)
    */
   public update_documents() {
+    if (this.isDisposed) {
+      console.warn('Cannot update documents: adapter disposed');
+      return;
+    }
     return this.virtual_editor.virtual_document.update_manager.update_documents(
       this.editors.map(ce_editor => {
         return {
@@ -268,6 +274,7 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
 
     this.connect_adapter(data.virtual_document, data.connection);
     this.adapterConnected.emit(data);
+    this.isConnected = true;
 
     await this.update_documents().then(() => {
       // refresh the document on the LSP server
@@ -385,6 +392,11 @@ export abstract class WidgetAdapter<T extends IDocumentWidget> {
     document: VirtualDocument,
     is_init = false
   ) {
+    if (this.isDisposed) {
+      console.warn('Cannot swap document: adapter disposed');
+      return;
+    }
+
     // TODO only send the difference, using connection.sendSelectiveChange()
     let connection = this.connection_manager.connections.get(
       virtual_document.id_path

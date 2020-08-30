@@ -7,8 +7,7 @@ import { IEditorPosition } from '../../positioning';
 import { VirtualDocument } from '../../virtual/document';
 
 import '../../../style/diagnostics_listing.css';
-import { diagnosticSeverityNames } from '../../lsp';
-import { message_without_code } from './diagnostics';
+import { DiagnosticSeverity } from '../../lsp';
 import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
 import { WidgetAdapter } from '../../adapters/adapter';
 import { IVirtualEditor } from '../../virtual/editor';
@@ -94,7 +93,10 @@ class Column {
   }
 }
 
-function SortableTH(props: { name: string; listing: DiagnosticsListing }): any {
+function SortableTH(props: {
+  name: string;
+  listing: DiagnosticsListing;
+}): ReactElement {
   const is_sort_key = props.name === props.listing.sort_key;
   const sortIcon =
     !is_sort_key || props.listing.sort_direction === 1
@@ -112,6 +114,19 @@ function SortableTH(props: { name: string; listing: DiagnosticsListing }): any {
       </div>
     </th>
   );
+}
+
+export function message_without_code(diagnostic: lsProtocol.Diagnostic) {
+  let message = diagnostic.message;
+  let code_str = '' + diagnostic.code;
+  if (
+    diagnostic.code != null &&
+    diagnostic.code !== '' &&
+    message.startsWith(code_str + '')
+  ) {
+    return message.slice(code_str.length).trim();
+  }
+  return message;
 }
 
 export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
@@ -150,9 +165,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       name: 'Severity',
       // TODO: use default diagnostic severity
       render_cell: row => (
-        <td key={3}>
-          {diagnosticSeverityNames[row.data.diagnostic.severity || 1]}
-        </td>
+        <td key={3}>{DiagnosticSeverity[row.data.diagnostic.severity || 1]}</td>
       ),
       sort: (a, b) =>
         a.data.diagnostic.severity > b.data.diagnostic.severity ? 1 : -1

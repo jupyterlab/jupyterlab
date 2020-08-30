@@ -1,10 +1,6 @@
 import { expect } from 'chai';
 import { TextMarker, TextMarkerOptions } from 'codemirror';
-import {
-  DiagnosticsCM,
-  diagnostics_panel,
-  message_without_code
-} from './diagnostics';
+import { DiagnosticsCM, diagnostics_panel } from './diagnostics';
 import {
   code_cell,
   FileEditorFeatureTestEnvironment,
@@ -19,6 +15,7 @@ import { language_specific_overrides } from '../../magics/defaults';
 import { foreign_code_extractors } from '../../extractors/defaults';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
+import { message_without_code } from './listing';
 
 describe('Diagnostics', () => {
   let feature: DiagnosticsCM;

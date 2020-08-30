@@ -6,7 +6,7 @@ import {
 } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { JSONArray, JSONObject } from '@lumino/coreutils';
-import { completionItemKindNames, CompletionTriggerKind } from '../../lsp';
+import { CompletionItemKind, CompletionTriggerKind } from '../../lsp';
 import * as lsProtocol from 'vscode-languageserver-types';
 import { VirtualDocument } from '../../virtual/document';
 import { IVirtualEditor } from '../../virtual/editor';
@@ -18,11 +18,15 @@ import {
 import { LSPConnection } from '../../connection';
 import { Session } from '@jupyterlab/services';
 import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
-import { kernelIcon } from '@jupyterlab/ui-components';
 
 import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { FeatureSettings } from '../../feature';
 import { PositionConverter } from '../../converter';
+import {
+  ILSPCompletionThemeManager,
+  KernelKind
+} from '@krassowski/completion-theme/lib/types';
+import { LabIcon } from '@jupyterlab/ui-components';
 
 /**
  * A LSP connector for completion handlers.
@@ -40,13 +44,13 @@ export class LSPConnector
   responseType = ICompletionItemsResponseType;
 
   virtual_editor: IVirtualEditor<CodeEditor.IEditor>;
-  private trigger_kind: CompletionTriggerKind;
+  trigger_kind: CompletionTriggerKind;
 
-  private get suppress_auto_invoke_in(): string[] {
+  protected get suppress_auto_invoke_in(): string[] {
     return this.options.settings.composite.suppressInvokeIn;
   }
 
-  private get should_show_documentation(): boolean {
+  protected get should_show_documentation(): boolean {
     return this.options.settings.composite.showDocumentation;
   }
 
@@ -97,7 +101,9 @@ export class LSPConnector
       : this._context_connector;
   }
 
-  transform_from_editor_to_root(position: CodeEditor.IPosition): IRootPosition {
+  protected transform_from_editor_to_root(
+    position: CodeEditor.IPosition
+  ): IRootPosition {
     let editor_position = PositionConverter.ce_to_cm(
       position
     ) as IEditorPosition;
@@ -228,10 +234,11 @@ export class LSPConnector
     let items: CompletionHandler.ICompletionItem[] = [];
     const show_documentation = this.should_show_documentation;
     lspCompletionItems.forEach(match => {
+      let kind = match.kind ? CompletionItemKind[match.kind] : '';
       let completionItem = {
         label: match.label,
         insertText: match.insertText,
-        type: match.kind ? completionItemKindNames[match.kind] : '',
+        type: kind,
         documentation: show_documentation
           ? lsProtocol.MarkupContent.is(match.documentation)
             ? match.documentation.value
@@ -240,7 +247,12 @@ export class LSPConnector
         filterText: match.filterText,
         deprecated: match.deprecated,
         data: { ...match }
-      };
+      } as CompletionHandler.ICompletionItem;
+
+      let icon = this.icon_for(kind);
+      if (icon) {
+        completionItem.icon = icon;
+      }
 
       // Update prefix values
       let text = match.insertText ? match.insertText : match.label;
@@ -277,6 +289,16 @@ export class LSPConnector
     };
   }
 
+  protected icon_for(type: string): LabIcon {
+    if (!this.options.settings.composite.theme) {
+      return undefined;
+    }
+    if (typeof type === 'undefined' || type == '<unknown>') {
+      type = KernelKind;
+    }
+    return (this.options.themeManager.get_icon(type) as LabIcon) || undefined;
+  }
+
   private transform_reply(
     reply: CompletionHandler.IReply
   ): CompletionHandler.ICompletionItemsReply {
@@ -291,10 +313,7 @@ export class LSPConnector
           label: item.text as string,
           insertText: item.text as string,
           type: item.type as string,
-          icon:
-            typeof item.type === 'undefined' || item.type == '<unknown>'
-              ? kernelIcon
-              : undefined
+          icon: this.icon_for(item.type as string)
         };
       });
     } else {
@@ -302,7 +321,7 @@ export class LSPConnector
         return {
           label: match,
           insertText: match,
-          icon: kernelIcon
+          icon: this.icon_for('Kernel')
         };
       });
     }
@@ -400,6 +419,8 @@ export namespace LSPConnector {
     connections: Map<VirtualDocument.id_path, LSPConnection>;
 
     settings: FeatureSettings<LSPCompletionSettings>;
+
+    themeManager: ILSPCompletionThemeManager;
 
     session?: Session.ISessionConnection;
   }

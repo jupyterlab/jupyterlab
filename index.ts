@@ -36,6 +36,9 @@ import codeCheckSvg from '../style/icons/code-check.svg';
 import { DIAGNOSTICS_PLUGIN } from './features/diagnostics';
 import { COMPLETION_PLUGIN } from './features/completion';
 import { SYNTAX_HIGHLIGHTING_PLUGIN } from './features/syntax_highlighting';
+import { COMPLETION_THEME_MANAGER } from '@krassowski/completion-theme';
+import { plugin as THEME_VSCODE } from '@krassowski/theme-vscode';
+import { plugin as THEME_MATERIAL } from '@krassowski/theme-material';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -225,6 +228,9 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   FILE_EDITOR_ADAPTER,
   VIRTUAL_EDITOR_MANAGER,
   CODEMIRROR_VIRTUAL_EDITOR,
+  COMPLETION_THEME_MANAGER,
+  THEME_VSCODE,
+  THEME_MATERIAL,
   plugin,
   ...default_features
 ];
