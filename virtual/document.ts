@@ -251,6 +251,7 @@ export class VirtualDocument {
     if (this.isDisposed) {
       return;
     }
+    this.isDisposed = true;
 
     this.parent = null;
 
@@ -276,9 +277,6 @@ export class VirtualDocument {
     this.line_magics_overrides = null;
     this.lines = null;
     this.overrides_registry = null;
-
-    // actually disposed now
-    this.isDisposed = true;
   }
 
   /**
@@ -595,6 +593,10 @@ export class VirtualDocument {
     editor_shift: CodeEditor.IPosition = { line: 0, column: 0 },
     virtual_shift?: CodeEditor.IPosition
   ) {
+    if (this.isDisposed) {
+      console.warn('Cannot append code block: document disposed');
+      return;
+    }
     let source_cell_lines = cell_code.split('\n');
 
     let { lines, foreign_document_map, skip_inspect } = this.prepare_code_block(

@@ -3,6 +3,7 @@ import { is_within_range, VirtualDocument } from './document';
 import { ISourcePosition, IVirtualPosition } from '../positioning';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { foreign_code_extractors } from '../extractors/defaults';
+import Mock = jest.Mock;
 
 let R_LINE_MAGICS = `%R df = data.frame()
 print("df created")
@@ -45,14 +46,34 @@ describe('is_within_range', () => {
 });
 
 describe('VirtualDocument', () => {
-  let document = new VirtualDocument({
-    language: 'python',
-    path: 'test.ipynb',
-    overrides_registry: {},
-    foreign_code_extractors: foreign_code_extractors,
-    standalone: false,
-    file_extension: 'py',
-    has_lsp_supported_file: false
+  let document: VirtualDocument;
+  beforeEach(() => {
+    document = new VirtualDocument({
+      language: 'python',
+      path: 'test.ipynb',
+      overrides_registry: {},
+      foreign_code_extractors: foreign_code_extractors,
+      standalone: false,
+      file_extension: 'py',
+      has_lsp_supported_file: false
+    });
+  });
+
+  describe('#dispose', () => {
+    it('disposes, but does not break methods which can be called from async callbacks', () => {
+      expect(document.isDisposed).to.equal(false);
+      // appending code block here should work fine
+      document.append_code_block('code', {} as CodeEditor.IEditor);
+      document.dispose();
+      expect(document.isDisposed).to.equal(true);
+      // mock console.warn
+      console.warn = jest.fn();
+      // this one should not raise, but just warn
+      document.append_code_block('code', {} as CodeEditor.IEditor);
+      expect((console.warn as Mock).mock.calls[0][0]).to.equal(
+        'Cannot append code block: document disposed'
+      );
+    });
   });
 
   describe('#extract_foreign_code', () => {
@@ -113,7 +134,7 @@ describe('VirtualDocument', () => {
     );
   };
 
-  describe('transform_virtual_to_editor', () => {
+  describe('#transform_virtual_to_editor', () => {
     it('transforms positions for the top level document', () => {
       init_document_with_Python_and_R();
       // The first (Python) line in the first block

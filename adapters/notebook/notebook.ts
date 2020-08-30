@@ -61,6 +61,7 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     if (this.isDisposed) {
       return;
     }
+
     this.widget.context.sessionContext.kernelChanged.disconnect(
       this.on_kernel_changed,
       this
@@ -69,8 +70,11 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
       this.activeCellChanged,
       this
     );
-    this.ce_editor_to_cell.clear();
+
     super.dispose();
+
+    // editors are needed for the parent dispose() to unbind signals, so they are the last to go
+    this.ce_editor_to_cell.clear();
   }
 
   is_ready = () => {
