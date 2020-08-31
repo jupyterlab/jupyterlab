@@ -6,8 +6,10 @@ import { DiagnosticSeverity } from '../../lsp';
 import { DefaultMap, uris_equal } from '../../utils';
 import { MainAreaWidget } from '@jupyterlab/apputils';
 import {
+  DIAGNOSTICS_LISTING_CLASS,
   DiagnosticsDatabase,
   DiagnosticsListing,
+  IDiagnosticsRow,
   IEditorDiagnostic
 } from './listing';
 import { VirtualDocument } from '../../virtual/document';
@@ -15,13 +17,22 @@ import { FeatureSettings } from '../../feature';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
 import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
-import { LabIcon } from '@jupyterlab/ui-components';
+import { copyIcon, LabIcon } from '@jupyterlab/ui-components';
 import diagnosticsSvg from '../../../style/icons/diagnostics.svg';
+import { Menu } from '@lumino/widgets';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { jumpToIcon } from '../jump_to';
 
 export const diagnosticsIcon = new LabIcon({
   name: 'lsp:diagnostics',
   svgstr: diagnosticsSvg
 });
+
+const CMD_COLUMN_VISIBILITY = 'lsp-set-column-visibility';
+const CMD_JUMP_TO_DIAGNOSTIC = 'lsp-jump-to-diagnostic';
+const CMD_COPY_DIAGNOSTIC = 'lsp-copy-diagnostic';
+const CMD_IGNORE_DIAGNOSTIC_CODE = 'lsp-ignore-diagnostic-code';
+const CMD_IGNORE_DIAGNOSTIC_MSG = 'lsp-ignore-diagnostic-message';
 
 class DiagnosticsPanel {
   private _content: DiagnosticsListing = null;
@@ -60,6 +71,179 @@ class DiagnosticsPanel {
       return;
     }
     this.widget.content.update();
+  }
+
+  register(app: JupyterFrontEnd) {
+    const widget = this.widget;
+
+    let get_column = (name: string) => {
+      // TODO: a hashmap in the panel itself?
+      for (let column of widget.content.columns) {
+        if (column.name === name) {
+          return column;
+        }
+      }
+    };
+
+    /** Columns Menu **/
+    let columns_menu = new Menu({ commands: app.commands });
+    columns_menu.title.label = 'Panel columns';
+
+    app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
+      execute: args => {
+        let column = get_column(args['name'] as string);
+        column.is_visible = !column.is_visible;
+        widget.update();
+      },
+      label: args => args['name'] as string,
+      isToggled: args => {
+        let column = get_column(args['name'] as string);
+        return column.is_visible;
+      }
+    });
+
+    for (let column of widget.content.columns) {
+      columns_menu.addItem({
+        command: CMD_COLUMN_VISIBILITY,
+        args: { name: column.name }
+      });
+    }
+    app.contextMenu.addItem({
+      selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' th',
+      submenu: columns_menu,
+      type: 'submenu'
+    });
+
+    /** Diagnostics Menu **/
+    let ignore_diagnostics_menu = new Menu({ commands: app.commands });
+    ignore_diagnostics_menu.title.label = 'Ignore diagnostics like this';
+
+    let get_row = (): IDiagnosticsRow => {
+      let tr = app.contextMenuHitTest(
+        node => node.tagName.toLowerCase() == 'tr'
+      );
+      if (!tr) {
+        return;
+      }
+      return this.widget.content.get_diagnostic(tr.dataset.key);
+    };
+
+    ignore_diagnostics_menu.addItem({
+      command: CMD_IGNORE_DIAGNOSTIC_CODE
+    });
+    ignore_diagnostics_menu.addItem({
+      command: CMD_IGNORE_DIAGNOSTIC_MSG
+    });
+    app.commands.addCommand(CMD_IGNORE_DIAGNOSTIC_CODE, {
+      execute: () => {
+        const diagnostic = get_row().data.diagnostic;
+        let current = this.content.model.settings.composite.ignoreCodes;
+        this.content.model.settings.set('ignoreCodes', [
+          ...current,
+          diagnostic.code
+        ]);
+        widget.update();
+      },
+      isVisible: () => {
+        const row = get_row();
+        if (!row) {
+          return false;
+        }
+        const diagnostic = row.data.diagnostic;
+        return !!diagnostic.code;
+      },
+      label: () => {
+        const row = get_row();
+        if (!row) {
+          return '';
+        }
+        const diagnostic = row.data.diagnostic;
+        return `Ignore diagnostics with "${diagnostic.code}" code`;
+      }
+    });
+    app.commands.addCommand(CMD_IGNORE_DIAGNOSTIC_MSG, {
+      execute: () => {
+        const row = get_row();
+        const diagnostic = row.data.diagnostic;
+        let current = this.content.model.settings.composite
+          .ignoreMessagesPatterns;
+        this.content.model.settings.set('ignoreMessagesPatterns', [
+          ...current,
+          diagnostic.message
+        ]);
+        // TODO trigger actual db update
+        widget.update();
+      },
+      isVisible: () => {
+        const row = get_row();
+        if (!row) {
+          return false;
+        }
+        const diagnostic = row.data.diagnostic;
+        return !!diagnostic.message;
+      },
+      label: () => {
+        const row = get_row();
+        if (!row) {
+          return '';
+        }
+        const diagnostic = row.data.diagnostic;
+        return `Ignore diagnostics with "${diagnostic.message}" message`;
+      }
+    });
+
+    app.commands.addCommand(CMD_JUMP_TO_DIAGNOSTIC, {
+      execute: () => {
+        const row = get_row();
+        this.widget.content.jump_to(row);
+      },
+      label: 'Jump to location',
+      icon: jumpToIcon
+    });
+
+    app.commands.addCommand(CMD_COPY_DIAGNOSTIC, {
+      execute: () => {
+        const row = get_row();
+        if (!row) {
+          return;
+        }
+        const message = row.data.diagnostic.message;
+        navigator.clipboard
+          .writeText(message)
+          .then(() => {
+            this.content.model.status_message.set(
+              `Successfully copied "${message}" to clipboard`
+            );
+          })
+          .catch(() => {
+            console.log(
+              'Could not copy with clipboard.writeText interface, falling back'
+            );
+            window.prompt(
+              'Your browser protects clipboard from write operations; please copy the message manually',
+              message
+            );
+          });
+      },
+      label: "Copy diagnostics' message",
+      icon: copyIcon
+    });
+
+    app.contextMenu.addItem({
+      selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' tbody tr',
+      command: CMD_COPY_DIAGNOSTIC
+    });
+    app.contextMenu.addItem({
+      selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' tbody tr',
+      command: CMD_JUMP_TO_DIAGNOSTIC
+    });
+    app.contextMenu.addItem({
+      selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' tbody tr',
+      submenu: ignore_diagnostics_menu,
+      type: 'submenu'
+    });
+
+    this.is_registered = true;
   }
 }
 
@@ -105,6 +289,8 @@ export class DiagnosticsCM extends CodeMirrorIntegration {
     diagnostics_panel.content.model.diagnostics = this.diagnostics_db;
     diagnostics_panel.content.model.virtual_editor = this.virtual_editor;
     diagnostics_panel.content.model.adapter = this.adapter;
+    diagnostics_panel.content.model.settings = this.settings;
+    diagnostics_panel.content.model.status_message = this.status_message;
     diagnostics_panel.update();
   };
 

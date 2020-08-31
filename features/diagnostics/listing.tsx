@@ -9,11 +9,13 @@ import { VirtualDocument } from '../../virtual/document';
 import '../../../style/diagnostics_listing.css';
 import { DiagnosticSeverity } from '../../lsp';
 import { CodeMirrorVirtualEditor } from '../../virtual/codemirror_editor';
-import { WidgetAdapter } from '../../adapters/adapter';
+import { StatusMessage, WidgetAdapter } from '../../adapters/adapter';
 import { IVirtualEditor } from '../../virtual/editor';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { DocumentLocator, focus_on } from '../../components/utils';
+import { FeatureSettings } from '../../feature';
+import { CodeDiagnostics as LSPDiagnosticsSettings } from '../../_diagnostics';
 
 /**
  * Diagnostic which is localized at a specific editor (cell) within a notebook
@@ -39,7 +41,7 @@ export class DiagnosticsDatabase extends Map<
   }
 }
 
-interface IDiagnosticsRow {
+export interface IDiagnosticsRow {
   data: IEditorDiagnostic;
   key: string;
   document: VirtualDocument;
@@ -132,6 +134,7 @@ export function message_without_code(diagnostic: lsProtocol.Diagnostic) {
 export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
   sort_key = 'Severity';
   sort_direction = 1;
+  private _diagnostics: Map<string, IDiagnosticsRow>;
 
   columns = [
     new Column({
@@ -245,6 +248,7 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       }
     );
     let flattened: IDiagnosticsRow[] = [].concat.apply([], by_document);
+    this._diagnostics = new Map(flattened.map(row => [row.key, row]));
 
     let sorted_column = this.columns.filter(
       column => column.name === this.sort_key
@@ -263,8 +267,6 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
     );
 
     let elements = sorted.map(row => {
-      let cm_editor = row.data.editor;
-
       let cells = columns_to_display.map(column =>
         column.render_cell(row, context)
       );
@@ -272,10 +274,9 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       return (
         <tr
           key={row.key}
+          data-key={row.key}
           onClick={() => {
-            focus_on(cm_editor.getWrapperElement());
-            cm_editor.getDoc().setCursor(row.data.range.start);
-            cm_editor.focus();
+            this.jump_to(row);
           }}
         >
           {cells}
@@ -296,6 +297,21 @@ export class DiagnosticsListing extends VDomRenderer<DiagnosticsListing.Model> {
       </table>
     );
   }
+
+  get_diagnostic(key: string): IDiagnosticsRow {
+    if (!this._diagnostics.has(key)) {
+      console.warn('Could not find the diagnostics row with key', key);
+      return;
+    }
+    return this._diagnostics.get(key);
+  }
+
+  jump_to(row: IDiagnosticsRow) {
+    const cm_editor = row.data.editor;
+    focus_on(cm_editor.getWrapperElement());
+    cm_editor.getDoc().setCursor(row.data.range.start);
+    cm_editor.focus();
+  }
 }
 
 export namespace DiagnosticsListing {
@@ -306,6 +322,8 @@ export namespace DiagnosticsListing {
     diagnostics: DiagnosticsDatabase;
     virtual_editor: CodeMirrorVirtualEditor;
     adapter: WidgetAdapter<any>;
+    settings: FeatureSettings<LSPDiagnosticsSettings>;
+    status_message: StatusMessage;
 
     constructor() {
       super();

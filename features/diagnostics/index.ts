@@ -1,7 +1,5 @@
 import { ILSPFeatureManager, PLUGIN_ID } from '../../tokens';
 import { FeatureSettings, IFeatureCommand } from '../../feature';
-import { Menu } from '@lumino/widgets';
-import { DIAGNOSTICS_LISTING_CLASS } from './listing';
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
@@ -22,45 +20,11 @@ const COMMANDS: IFeatureCommand[] = [
       let diagnostics_feature = features.get(FEATURE_ID) as DiagnosticsCM;
       diagnostics_feature.switchDiagnosticsPanelSource();
 
-      let panel_widget = diagnostics_panel.widget;
-
-      let get_column = (name: string) => {
-        // TODO: a hashmap in the panel itself?
-        for (let column of panel_widget.content.columns) {
-          if (column.name === name) {
-            return column;
-          }
-        }
-      };
-
       if (!diagnostics_panel.is_registered) {
-        let columns_menu = new Menu({ commands: app.commands });
-        app.commands.addCommand(CMD_COLUMN_VISIBILITY, {
-          execute: args => {
-            let column = get_column(args['name'] as string);
-            column.is_visible = !column.is_visible;
-            panel_widget.update();
-          },
-          label: args => args['name'] as string,
-          isToggled: args => {
-            let column = get_column(args['name'] as string);
-            return column.is_visible;
-          }
-        });
-        columns_menu.title.label = 'Panel columns';
-        for (let column of panel_widget.content.columns) {
-          columns_menu.addItem({
-            command: CMD_COLUMN_VISIBILITY,
-            args: { name: column.name }
-          });
-        }
-        app.contextMenu.addItem({
-          selector: '.' + DIAGNOSTICS_LISTING_CLASS + ' th',
-          submenu: columns_menu,
-          type: 'submenu'
-        });
-        diagnostics_panel.is_registered = true;
+        diagnostics_panel.register(app);
       }
+
+      const panel_widget = diagnostics_panel.widget;
 
       if (!panel_widget.isAttached) {
         app.shell.add(panel_widget, 'main', {
@@ -76,8 +40,6 @@ const COMMANDS: IFeatureCommand[] = [
     icon: diagnosticsIcon
   }
 ];
-
-const CMD_COLUMN_VISIBILITY = 'lsp-set-column-visibility';
 
 export const DIAGNOSTICS_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
