@@ -47,6 +47,7 @@ import { SYNTAX_HIGHLIGHTING_PLUGIN } from './features/syntax_highlighting';
 import { COMPLETION_THEME_MANAGER } from '@krassowski/completion-theme';
 import { plugin as THEME_VSCODE } from '@krassowski/theme-vscode';
 import { plugin as THEME_MATERIAL } from '@krassowski/theme-material';
+import { CODE_OVERRIDES_MANAGER } from './overrides';
 
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
@@ -256,6 +257,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   COMPLETION_THEME_MANAGER,
   THEME_VSCODE,
   THEME_MATERIAL,
+  CODE_OVERRIDES_MANAGER,
   plugin,
   ...DEFAULT_TRANSCLUSIONS,
   ...default_features
