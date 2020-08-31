@@ -322,8 +322,7 @@ const classByStatus: StatusIconClass = {
 const shortMessageByStatus: StatusMap = {
   waiting: 'Waiting...',
   initialized: 'Fully initialized',
-  initialized_but_some_missing:
-    'Initialized (additional servers can be installed)',
+  initialized_but_some_missing: 'Initialized (additional servers needed)',
   initializing: 'Partially initialized',
   connecting: 'Connecting...'
 };
@@ -436,7 +435,22 @@ export namespace LSPStatus {
     }
 
     get status(): IStatus {
-      const detected_documents = this._connection_manager.documents;
+      let detected_documents: Map<string, VirtualDocument>;
+
+      if (!this.adapter?.virtual_editor) {
+        detected_documents = new Map();
+      } else {
+        let main_document = this.adapter.virtual_editor.virtual_document;
+        const all_documents = this._connection_manager.documents;
+        // detected documents that are open in the current virtual editor
+        const detected_documents_set = collect_documents(main_document);
+        detected_documents = new Map(
+          [...all_documents].filter(([id, doc]) =>
+            detected_documents_set.has(doc)
+          )
+        );
+      }
+
       let connected_documents = new Set<VirtualDocument>();
       let initialized_documents = new Set<VirtualDocument>();
       let absent_documents = new Set<VirtualDocument>();
