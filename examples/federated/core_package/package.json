@@ -159,7 +159,7 @@
   "devDependencies": {
     "@jupyterlab/builder": "^3.0.0-beta.0",
     "copy-webpack-plugin": "^6.0.1",
-    "css-loader": "~4.2.2",
+    "css-loader": "~3.2.0",
     "file-loader": "~6.0.0",
     "fs-extra": "^9.0.1",
     "glob": "~7.1.6",

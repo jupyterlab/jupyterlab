@@ -50,7 +50,7 @@
     "ajv": "^6.12.3",
     "child_process": "~1.0.2",
     "commander": "~6.0.0",
-    "css-loader": "~4.2.2",
+    "css-loader": "~3.2.0",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
     "file-loader": "~6.0.0",
     "fs": "~0.0.1-security",

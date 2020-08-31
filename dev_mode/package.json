@@ -170,7 +170,7 @@
     "@jupyterlab/builder": "^3.0.0-beta.0",
     "@jupyterlab/buildutils": "^3.0.0-beta.0",
     "chokidar": "^3.4.0",
-    "css-loader": "~4.2.2",
+    "css-loader": "~3.2.0",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
     "file-loader": "~6.0.0",
     "fs-extra": "^9.0.1",
