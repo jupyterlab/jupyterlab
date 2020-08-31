@@ -190,7 +190,7 @@ export class VirtualDocument {
   foreign_extractors: IForeignCodeExtractor[];
   overrides_registry: ICodeOverridesRegistry;
   protected foreign_extractors_registry: IForeignCodeExtractorsRegistry;
-  protected lines: Array<string>;
+  protected line_blocks: Array<string>;
 
   // TODO: merge into unused documents {standalone: Map, continuous: Map} ?
   protected unused_documents: Set<VirtualDocument>;
@@ -288,7 +288,7 @@ export class VirtualDocument {
     this.foreign_extractors = null;
     this.foreign_extractors_registry = null;
     this.line_magics_overrides = null;
-    this.lines = null;
+    this.line_blocks = null;
     this.overrides_registry = null;
   }
 
@@ -331,7 +331,7 @@ export class VirtualDocument {
     this.source_lines.clear();
     this.last_virtual_line = 0;
     this.last_source_line = 0;
-    this.lines = [];
+    this.line_blocks = [];
   }
 
   private forward_closed_signal(
@@ -650,7 +650,7 @@ export class VirtualDocument {
 
     // one empty line is necessary to separate code blocks, next 'n' lines are to silence linters;
     // the final cell does not get the additional lines (thanks to the use of join, see below)
-    this.lines.push(lines.join('\n') + '\n');
+    this.line_blocks.push(lines.join('\n') + '\n');
 
     // adding the virtual lines for the blank lines
     for (let i = 0; i < this.blank_lines_between_cells; i++) {
@@ -667,11 +667,14 @@ export class VirtualDocument {
 
   get value() {
     let lines_padding = '\n'.repeat(this.blank_lines_between_cells);
-    return this.lines.join(lines_padding);
+    return this.line_blocks.join(lines_padding);
   }
 
   get last_line() {
-    return this.lines[this.lines.length];
+    const lines_in_last_block = this.line_blocks[
+      this.line_blocks.length - 1
+    ].split('\n');
+    return lines_in_last_block[lines_in_last_block.length - 1];
   }
 
   close_expired_documents() {
