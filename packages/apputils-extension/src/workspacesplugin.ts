@@ -180,10 +180,7 @@ namespace Private {
     if (lastSave === undefined) {
       defaultName = 'new-workspace';
     } else {
-      defaultName = (lastSave as string)
-        .split('/')
-        .pop()
-        ?.split('.')[0];
+      defaultName = (lastSave as string).split('/').pop()?.split('.')[0];
     }
 
     const defaultPath = browser.model.path + '/' + defaultName + WORKSPACE_EXT;

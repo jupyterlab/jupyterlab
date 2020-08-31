@@ -1,9 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-// Distributed under the terms of the Modified BSD License.
-
 import encoding from 'text-encoding';
 
 import WebSocket from 'ws';

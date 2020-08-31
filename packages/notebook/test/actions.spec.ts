@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
 import { CodeCell, MarkdownCell, RawCell } from '@jupyterlab/cells';
@@ -55,7 +53,7 @@ describe('@jupyterlab/notebook', () => {
     let sessionContext: ISessionContext;
     let ipySessionContext: ISessionContext;
 
-    beforeAll(async function() {
+    beforeAll(async function () {
       jest.setTimeout(20000);
       rendermime = utils.defaultRenderMime();
 

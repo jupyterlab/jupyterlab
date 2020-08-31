@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 import { MarkdownCodeBlocks } from '@jupyterlab/coreutils';
 
 const BLOCK1 = 'Here is text\n\n```\na = 10\nb = 20\n```\n\nMore text.';

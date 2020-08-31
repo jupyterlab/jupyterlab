@@ -676,12 +676,7 @@ export class DocumentRegistry implements IDisposable {
       if (ft) {
         fts.push(ft);
       }
-      ext =
-        '.' +
-        ext
-          .split('.')
-          .slice(2)
-          .join('.');
+      ext = '.' + ext.split('.').slice(2).join('.');
     }
     return fts;
   }

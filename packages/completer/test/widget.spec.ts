@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 import { MessageLoop, Message } from '@lumino/messaging';
 
 import { Panel } from '@lumino/widgets';

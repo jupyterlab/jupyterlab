@@ -227,7 +227,7 @@ commander
     }
   );
 
-commander.on('--help', function() {
+commander.on('--help', function () {
   console.debug(`
 Examples
 --------

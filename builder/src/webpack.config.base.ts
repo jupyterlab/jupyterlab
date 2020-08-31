@@ -40,16 +40,6 @@ const rules = [
     use: {
       loader: 'raw-loader'
     }
-  },
-  // Workaround for https://github.com/jupyterlab/jupyterlab/issues/8655
-  {
-    test: /vega-statistics\/src\/.*.js$/,
-    use: {
-      loader: 'babel-loader',
-      options: {
-        presets: ['@babel/preset-env']
-      }
-    }
   }
 ];
 

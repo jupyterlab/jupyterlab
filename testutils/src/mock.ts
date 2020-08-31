@@ -1,7 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
+// We explicitly reference the jest typings since the jest.d.ts file shipped
+// with jest 26 masks the @types/jest typings
+
+/// <reference types="jest" />
 
 import { ISessionContext, SessionContext } from '@jupyterlab/apputils';
 
@@ -31,8 +34,8 @@ import { PathExt } from '@jupyterlab/coreutils';
 // The default kernel name
 export const DEFAULT_NAME = 'python3';
 
-export const KERNELSPECS: KernelSpec.ISpecModel[] = [
-  {
+export const KERNELSPECS: { [key: string]: KernelSpec.ISpecModel } = {
+  [DEFAULT_NAME]: {
     argv: [
       '/Users/someuser/miniconda3/envs/jupyterlab/bin/python',
       '-m',
@@ -46,7 +49,7 @@ export const KERNELSPECS: KernelSpec.ISpecModel[] = [
     name: DEFAULT_NAME,
     resources: {}
   },
-  {
+  irkernel: {
     argv: [
       '/Users/someuser/miniconda3/envs/jupyterlab/bin/python',
       '-m',
@@ -60,7 +63,7 @@ export const KERNELSPECS: KernelSpec.ISpecModel[] = [
     name: 'irkernel',
     resources: {}
   }
-];
+};
 
 export const KERNEL_MODELS: Kernel.IModel[] = [
   {
@@ -154,13 +157,7 @@ export const KernelMock = jest.fn<
   Kernel.IKernelConnection,
   [Private.RecursivePartial<Kernel.IKernelConnection.IOptions>]
 >(options => {
-  const model = options.model || {};
-  if (!model.id) {
-    (model! as any).id = 'foo';
-  }
-  if (!model.name) {
-    (model! as any).name = DEFAULT_NAME;
-  }
+  const model = { id: 'foo', name: DEFAULT_NAME, ...options.model };
   options = {
     clientId: UUID.uuid4(),
     username: UUID.uuid4(),
@@ -168,7 +165,7 @@ export const KernelMock = jest.fn<
     model
   };
   let executionCount = 0;
-  const spec = Private.kernelSpecForKernelName(model!.name!)!;
+  const spec = Private.kernelSpecForKernelName(model.name)!;
   const thisObject: Kernel.IKernelConnection = {
     ...jest.requireActual('@jupyterlab/services'),
     ...options,
@@ -233,9 +230,12 @@ export const KernelMock = jest.fn<
           }
         }
       );
-      return new MockShellFuture(reply);
+      return new MockShellFuture(reply) as Kernel.IShellFuture<
+        KernelMessage.IExecuteRequestMsg,
+        KernelMessage.IExecuteReplyMsg
+      >;
     })
-  };
+  } as any; // FIXME: fix the typing error this any cast is ignoring
   // Add signals.
   const iopubMessageSignal = new Signal<
     Kernel.IKernelConnection,
@@ -287,16 +287,19 @@ export const SessionConnectionMock = jest.fn<
     setPath: jest.fn(path => {
       (thisObject as any).path = path;
       propertyChangedSignal.emit('path');
+      return Promise.resolve();
     }),
     setName: jest.fn(name => {
       (thisObject as any).name = name;
       propertyChangedSignal.emit('name');
+      return Promise.resolve();
     }),
     setType: jest.fn(type => {
       (thisObject as any).type = type;
       propertyChangedSignal.emit('type');
+      return Promise.resolve();
     })
-  };
+  } as any; // FIXME: fix the typing error this any cast is ignoring
   const disposedSignal = new Signal<Session.ISessionConnection, undefined>(
     thisObject
   );
@@ -374,16 +377,16 @@ export const SessionContextMock = jest.fn<
     kernel: session.kernel,
     session,
     dispose: jest.fn(),
-    initialize: jest.fn(() => Promise.resolve(void 0)),
-    ready: Promise.resolve(void 0),
+    initialize: jest.fn(() => Promise.resolve()),
+    ready: Promise.resolve(),
     changeKernel: jest.fn(partialModel => {
       return Private.changeKernel(
         session.kernel || Private.RUNNING_KERNELS[0],
         partialModel!
       );
     }),
-    shutdown: jest.fn(() => Promise.resolve(void 0))
-  };
+    shutdown: jest.fn(() => Promise.resolve())
+  } as any; // FIXME: fix the typing error this any cast is ignoring
 
   const disposedSignal = new Signal<ISessionContext, undefined>(thisObject);
 
@@ -453,13 +456,15 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
     }),
     createCheckpoint: jest.fn(path => {
       const lastModified = new Date().toISOString();
-      checkpoints.set(path, { id: UUID.uuid4(), last_modified: lastModified });
+      const data = { id: UUID.uuid4(), last_modified: lastModified };
+      checkpoints.set(path, data);
       checkPointContent.set(path, files.get(path)?.content);
-      return Promise.resolve(checkpoints.get(path));
+      return Promise.resolve(data);
     }),
     listCheckpoints: jest.fn(path => {
-      if (checkpoints.get(path)) {
-        return Promise.resolve([checkpoints.get(path)]);
+      const p = checkpoints.get(path);
+      if (p !== undefined) {
+        return Promise.resolve([p]);
       }
       return Promise.resolve([]);
     }),
@@ -468,14 +473,14 @@ export const ContentsManagerMock = jest.fn<Contents.IManager, []>(() => {
         return Private.makeResponseError(404);
       }
       checkpoints.delete(path);
-      return Promise.resolve(void 0);
+      return Promise.resolve();
     }),
     restoreCheckpoint: jest.fn(path => {
       if (!checkpoints.has(path)) {
         return Private.makeResponseError(404);
       }
       (files.get(path) as any).content = checkPointContent.get(path);
-      return Promise.resolve(void 0);
+      return Promise.resolve();
     }),
     getModelDBFactory: jest.fn(() => {
       return null;
@@ -610,7 +615,7 @@ export const SessionManagerMock = jest.fn<Session.IManager, []>(() => {
       const session = new SessionConnectionMock({ model: options }, null);
       sessions.push(session.model);
       runningChangedSignal.emit(sessions);
-      return session;
+      return Promise.resolve(session);
     }),
     connectTo: jest.fn(options => {
       return new SessionConnectionMock(options, null);
@@ -640,7 +645,7 @@ export const SessionManagerMock = jest.fn<Session.IManager, []>(() => {
 export const KernelSpecManagerMock = jest.fn<KernelSpec.IManager, []>(() => {
   const thisObject: KernelSpec.IManager = {
     ...jest.requireActual('@jupyterlab/services'),
-    specs: { default: KERNELSPECS[0].name, kernelspecs: KERNELSPECS },
+    specs: { default: DEFAULT_NAME, kernelspecs: KERNELSPECS },
     isReady: true,
     ready: Promise.resolve(void 0),
     refreshSpecs: jest.fn(() => Promise.resolve(void 0))
@@ -767,9 +772,7 @@ namespace Private {
     return path;
   }
 
-  export function makeResponseError(
-    status: number
-  ): Promise<ServerConnection.ResponseError> {
+  export function makeResponseError<T>(status: number): Promise<T> {
     const resp = new Response(void 0, { status });
     return Promise.reject(new ServerConnection.ResponseError(resp));
   }
@@ -782,15 +785,11 @@ namespace Private {
 
   // Get the kernel spec for kernel name
   export function kernelSpecForKernelName(name: string) {
-    return KERNELSPECS.find(val => {
-      return val.name === name;
-    });
+    return KERNELSPECS[name];
   }
 
   // Get the kernel info for kernel name
-  export function getInfo(
-    name: string
-  ): KernelMessage.IInfoReplyMsg['content'] {
+  export function getInfo(name: string): KernelMessage.IInfoReply {
     return {
       protocol_version: '1',
       implementation: 'foo',

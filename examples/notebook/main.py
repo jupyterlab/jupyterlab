@@ -72,6 +72,7 @@ class ExampleApp(LabServerApp):
     extension_url = '/example'
     app_url = "/example"
     name = __name__
+    load_other_extensions = False
     app_name = 'JupyterLab Example Notebook'
     app_settings_dir = os.path.join(HERE, 'build', 'application_settings')
     schemas_dir = os.path.join(HERE, 'build', 'schemas')

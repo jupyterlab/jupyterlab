@@ -10,7 +10,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const Handlebars = require('handlebars');
 
-const names = Object.keys(data.dependencies).filter(function(name) {
+const names = Object.keys(data.dependencies).filter(function (name) {
   const packageData = require(path.join(name, 'package.json'));
   return packageData.jupyterlab !== undefined;
 });
@@ -85,20 +85,6 @@ module.exports = [
         name: ['_JUPYTERLAB', 'CORE_OUTPUT']
       },
       filename: 'bundle.js'
-    },
-    module: {
-      rules: [
-        // Workaround for https://github.com/jupyterlab/jupyterlab/issues/8655
-        {
-          test: /vega-statistics\/src\/.*.js$/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env']
-            }
-          }
-        }
-      ]
     },
     plugins: [
       new ModuleFederationPlugin({

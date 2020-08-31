@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 import { simulate } from 'simulate-event';
 
 import { Widget } from '@lumino/widgets';
@@ -233,7 +231,7 @@ describe('@jupyterlab/notebook', () => {
       let context: Context<INotebookModel>;
       let panel: NotebookPanel;
 
-      beforeEach(async function() {
+      beforeEach(async function () {
         context = await utils.createMockContext(true);
         panel = utils.createNotebookPanel(context);
         context.model.fromJSON(utils.DEFAULT_CONTENT);

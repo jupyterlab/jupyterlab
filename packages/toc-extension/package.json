@@ -17,29 +17,22 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "files": [
-    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
-  ],
   "sideEffects": [
     "style/*.css"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "style": "style/index.css",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+  ],
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib",
     "precommit": "lint-staged",
     "prepublishOnly": "npm run build",
-    "prettier": "prettier --write '**/*{.ts,.tsx,.js,.jsx,.css,.json,.md}'",
     "watch": "tsc -w"
-  },
-  "lint-staged": {
-    "**/*{.ts,.tsx,.css,.json,.md}": [
-      "prettier --write",
-      "git add"
-    ]
   },
   "dependencies": {
     "@jupyterlab/application": "^3.0.0-beta.0",
@@ -53,12 +46,7 @@
     "@jupyterlab/ui-components": "^3.0.0-beta.0"
   },
   "devDependencies": {
-    "lint-staged": "^8.2.1",
-    "prettier": "^1.19.1",
     "rimraf": "~3.0.0",
-    "tslint": "^5.20.1",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-plugin-prettier": "^2.1.0",
     "typescript": "~4.0.2"
   },
   "publishConfig": {

@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 import { OutputModel } from '@jupyterlab/rendermime';
 
 import { OutputAreaModel } from '@jupyterlab/outputarea';

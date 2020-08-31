@@ -69,7 +69,8 @@ export interface IObservableUndoableList<T> extends IObservableList<T> {
 /**
  * A concrete implementation of an observable undoable list.
  */
-export class ObservableUndoableList<T> extends ObservableList<T>
+export class ObservableUndoableList<T>
+  extends ObservableList<T>
   implements IObservableUndoableList<T> {
   /**
    * Construct a new undoable observable list.

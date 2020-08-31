@@ -3,8 +3,6 @@
 
 import expect from 'expect';
 
-import 'jest';
-
 import { PageConfig } from '@jupyterlab/coreutils';
 
 import { DocumentManager, IDocumentManager } from '@jupyterlab/docmanager';

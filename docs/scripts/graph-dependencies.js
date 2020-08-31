@@ -11,7 +11,7 @@ const packages = glob.sync(path.join(basePath, 'packages/*'));
 // Begin the graph specification
 let text = ['digraph G {', 'ratio = 0.6;', 'rankdir=LR;'];
 
-packages.forEach(function(packagePath) {
+packages.forEach(function (packagePath) {
   // Load the package.json data.
   const dataPath = path.join(packagePath, 'package.json');
   let data;

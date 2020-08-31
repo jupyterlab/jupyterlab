@@ -46,7 +46,7 @@ export class NbConvertManager {
     const data = await response.json();
     const exportList: NbConvertManager.IExportFormats = {};
     const keys = Object.keys(data);
-    keys.forEach(function(key) {
+    keys.forEach(function (key) {
       const mimeType: string = data[key].output_mimetype;
       exportList[key] = { output_mimetype: mimeType };
     });

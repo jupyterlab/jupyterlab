@@ -17,17 +17,17 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "files": [
-    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
-    "schema/**/*.{json,}",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
-  ],
   "sideEffects": [
     "style/*.css"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "style": "style/index.css",
+  "files": [
+    "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
+    "schema/**/*.{json,}",
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+  ],
   "scripts": {
     "build": "tsc",
     "clean": "rimraf lib tsconfig.tsbuildinfo",
@@ -43,15 +43,12 @@
     "@jupyterlab/mainmenu": "^3.0.0-beta.0",
     "@jupyterlab/settingregistry": "^3.0.0-beta.0",
     "@jupyterlab/translation": "^3.0.0-beta.0",
-    "@lumino/widgets": "^1.11.1"
+    "@lumino/widgets": "^1.14.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^2.25.0",
-    "@typescript-eslint/parser": "^2.25.0",
-    "eslint": "^6.8.0",
-    "eslint-config-prettier": "^6.10.1",
-    "eslint-plugin-prettier": "^3.1.2",
-    "prettier": "^1.19.1",
+    "@typescript-eslint/eslint-plugin": "^3.10.1",
+    "@typescript-eslint/parser": "^3.10.1",
+    "eslint": "^7.7.0",
     "rimraf": "~3.0.0",
     "typescript": "~4.0.2"
   },

@@ -92,13 +92,8 @@ def check_assets():
 
 cmdclass = create_cmdclass('jsdeps', data_files_spec=data_files_spec,
                            package_data_spec=package_data_spec, exclude=exclude)
-# FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
-if os.name == 'nt':
-    build_cmd = 'build'
-else:
-    build_cmd = 'build:prod'
 cmdclass['jsdeps'] = combine_commands(
-    install_npm(build_cmd=build_cmd, path=staging, source_dir=staging,
+    install_npm(build_cmd='build:prod', path=staging, source_dir=staging,
                 build_dir=pjoin(HERE, NAME, 'static'), npm=npm),
     command_for_func(check_assets)
 )
@@ -156,7 +151,7 @@ setup_args = dict(
 setup_args['install_requires'] = [
     'ipython',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
-    'jupyterlab_server~=2.0.0b3',
+    'jupyterlab_server~=2.0.0b5',
     'nbclassic~=0.2.0rc4',
     'jinja2>=2.10'
 ]

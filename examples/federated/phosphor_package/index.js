@@ -8,7 +8,7 @@ const plugins = [
   {
     id: '@jupyterlab/example-federated-phosphor',
     autoStart: true,
-    activate: function(app) {
+    activate: function (app) {
       const mywidget = new Widget();
       mywidget.node.textContent = 'Phosphor extension';
       mywidget.id = '@jupyterlab/example-federated-phosphor';

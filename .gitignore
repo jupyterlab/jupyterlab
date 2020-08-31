@@ -29,6 +29,7 @@ jupyterlab/tests/**/static
 
 packages/nbconvert-css/style/
 packages/services/examples/node/config.json
+packages/services/examples/browser/tmp
 packages/theme-*/static
 
 tests/**/coverage

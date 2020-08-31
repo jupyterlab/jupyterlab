@@ -183,7 +183,11 @@ function activate(
     });
     themeMenu.addItem({
       command: CommandIDs.setTheme,
-      args: { theme: 'light', displayName: trans.__('Light'), isPalette: false }
+      args: {
+        theme: 'light',
+        displayName: trans.__('Light'),
+        isPalette: false
+      }
     });
     themeMenu.addItem({
       command: CommandIDs.setTheme,

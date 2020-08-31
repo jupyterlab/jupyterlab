@@ -24,7 +24,8 @@ import { Printing } from './printing';
  * This widget is automatically disposed when closed.
  * This widget ensures its own focus when activated.
  */
-export class MainAreaWidget<T extends Widget = Widget> extends Widget
+export class MainAreaWidget<T extends Widget = Widget>
+  extends Widget
   implements Printing.IPrintable {
   /**
    * Construct a new main area widget.

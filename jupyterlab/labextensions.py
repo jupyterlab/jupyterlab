@@ -106,10 +106,6 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
             ans = self.run_task()
             if ans and self.should_build:
                 parts = ['build']
-                # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
-                if os.name == 'nt':
-                    self.dev_build = True
-                    self.minimize = False
                 parts.append('none' if self.dev_build is None else
                              'dev' if self.dev_build else
                              'prod')

@@ -7,7 +7,7 @@ var factory = {
   safe: true,
   mimeTypes: ['text/plain'],
   defaultRank: 1000,
-  createRenderer: function() {
+  createRenderer: function () {
     return new Widget();
   }
 };

@@ -70,7 +70,7 @@ class TestBuildAPI:
         assert 'message' in resp
 
 #    @pytest.mark.gen_test(timeout=30)
-    # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
+    # FIXME
     @pytest.mark.skipif(os.name == 'nt',
                     reason="Currently failing on windows")
     async def test_build(self, build_api_tester):
@@ -78,7 +78,7 @@ class TestBuildAPI:
         assert r.code == 200
 
 #    @pytest.mark.gen_test(timeout=30)
-    # FIXME: part of https://github.com/jupyterlab/jupyterlab/issues/8655
+    # FIXME
     @pytest.mark.skipif(os.name == 'nt',
                     reason="Currently failing on windows")
     async def test_clear(self, build_api_tester):

@@ -60,10 +60,7 @@ export function getCorePaths(): string[] {
  */
 export function writePackageData(pkgJsonPath: string, data: any): boolean {
   const text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
-  const orig = fs
-    .readFileSync(pkgJsonPath, 'utf8')
-    .split('\r\n')
-    .join('\n');
+  const orig = fs.readFileSync(pkgJsonPath, 'utf8').split('\r\n').join('\n');
   if (text !== orig) {
     fs.writeFileSync(pkgJsonPath, text, 'utf8');
     return true;
@@ -346,10 +343,7 @@ export function ensureUnixPathSep(source: string) {
  * @returns the last part of the path, sans extension.
  */
 export function stem(pathArg: string): string {
-  return path
-    .basename(pathArg)
-    .split('.')
-    .shift()!;
+  return path.basename(pathArg).split('.').shift()!;
 }
 
 /**
@@ -364,7 +358,7 @@ export function stem(pathArg: string): string {
  * @returns the camel case version of the input string.
  */
 export function camelCase(str: string, upper: boolean = false): string {
-  return str.replace(/(?:^\w|[A-Z]|\b\w|\s+|-+|_+)/g, function(match, index) {
+  return str.replace(/(?:^\w|[A-Z]|\b\w|\s+|-+|_+)/g, function (match, index) {
     if (+match === 0 || match[0] === '-') {
       return '';
     } else if (index === 0 && !upper) {

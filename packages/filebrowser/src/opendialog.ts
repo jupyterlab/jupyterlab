@@ -117,7 +117,8 @@ export namespace FileDialog {
 /**
  * Open dialog widget
  */
-class OpenDialog extends Widget
+class OpenDialog
+  extends Widget
   implements Dialog.IBodyWidget<Contents.IModel[]> {
   constructor(
     manager: IDocumentManager,

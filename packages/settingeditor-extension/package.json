@@ -12,13 +12,6 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
-    "schema/*.json",
-    "style/**/*.css"
-  ],
   "sideEffects": [
     "style/*.css"
   ],
@@ -28,6 +21,13 @@
   "directories": {
     "lib": "lib/"
   },
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "schema/*.json",
+    "style/**/*.css"
+  ],
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
@@ -45,11 +45,11 @@
     "@jupyterlab/statedb": "^3.0.0-beta.0",
     "@jupyterlab/translation": "^3.0.0-beta.0",
     "@jupyterlab/ui-components": "^3.0.0-beta.0",
-    "@lumino/disposable": "^1.3.5"
+    "@lumino/disposable": "^1.4.3"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",
-    "typedoc": "^0.17.7",
+    "typedoc": "0.17.0-3",
     "typescript": "~4.0.2"
   },
   "publishConfig": {

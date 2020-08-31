@@ -152,7 +152,7 @@ export async function ensurePackage(
   }
 
   let names: string[] = Array.from(new Set(imports)).sort();
-  names = names.map(function(name) {
+  names = names.map(function (name) {
     const parts = name.split('/');
     if (name.indexOf('@') === 0) {
       return parts[0] + '/' + parts[1];

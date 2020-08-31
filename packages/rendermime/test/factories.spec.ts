@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 const sampleData = require('../../../examples/filebrowser/sample.md');
 
 import { JSONObject, JSONValue } from '@lumino/coreutils';
@@ -33,10 +31,7 @@ function createModel(
 }
 
 function encodeChars(txt: string): string {
-  return txt
-    .replace('&', '&amp;')
-    .replace('<', '&lt;')
-    .replace('>', '&gt;');
+  return txt.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;');
 }
 
 const sanitizer = defaultSanitizer;
@@ -231,7 +226,7 @@ describe('rendermime/factories', () => {
 
   describe('markdownRendererFactory', () => {
     describe('#mimeTypes', () => {
-      it('should have the text/markdown mimeType', function() {
+      it('should have the text/markdown mimeType', function () {
         expect(markdownRendererFactory.mimeTypes).toEqual(['text/markdown']);
       });
     });

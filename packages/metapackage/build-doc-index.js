@@ -21,7 +21,7 @@ Distributed under the terms of the Modified BSD License.
 
 const data = utils.readJSONFile('./package.json');
 const pkgs = Object.keys(data.dependencies);
-pkgs.forEach(function(pkg) {
+pkgs.forEach(function (pkg) {
   const name = pkg.split('/')[1];
   index += `<a href="${name}/index.html">${name}</a>\n`;
 });

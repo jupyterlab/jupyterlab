@@ -12,11 +12,6 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "files": [
-    "lib/*.d.ts",
-    "lib/*.js",
-    "style/*.*"
-  ],
   "sideEffects": [
     "style/**/*"
   ],
@@ -26,6 +21,11 @@
   "directories": {
     "lib": "lib/"
   },
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js",
+    "style/*.*"
+  ],
   "scripts": {
     "build": "tsc -b",
     "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
@@ -35,8 +35,8 @@
   },
   "dependencies": {
     "@jupyterlab/rendermime-interfaces": "^3.0.0-beta.0",
-    "@lumino/coreutils": "^1.4.3",
-    "@lumino/widgets": "^1.11.1",
+    "@lumino/coreutils": "^1.5.3",
+    "@lumino/widgets": "^1.14.0",
     "vega": "^5.9.0",
     "vega-embed": "^6.2.1",
     "vega-lite": "^4.0.2"
@@ -44,7 +44,7 @@
   "devDependencies": {
     "@types/webpack-env": "^1.14.1",
     "rimraf": "~3.0.0",
-    "typedoc": "^0.17.7",
+    "typedoc": "0.17.0-3",
     "typescript": "~4.0.2"
   },
   "publishConfig": {

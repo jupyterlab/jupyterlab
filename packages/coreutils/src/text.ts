@@ -83,7 +83,7 @@ export namespace Text {
    * @returns the camel case version of the input string.
    */
   export function camelCase(str: string, upper: boolean = false): string {
-    return str.replace(/^(\w)|[\s-_:]+(\w)/g, function(match, p1, p2) {
+    return str.replace(/^(\w)|[\s-_:]+(\w)/g, function (match, p1, p2) {
       if (p2) {
         return p2.toUpperCase();
       } else {

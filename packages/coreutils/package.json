@@ -12,18 +12,18 @@
   },
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
-  "files": [
-    "lib/*.d.ts",
-    "lib/*.js.map",
-    "lib/*.js",
-    "lib/*.json"
-  ],
   "sideEffects": false,
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
   },
+  "files": [
+    "lib/*.d.ts",
+    "lib/*.js.map",
+    "lib/*.js",
+    "lib/*.json"
+  ],
   "scripts": {
     "build": "tsc -b",
     "build:test": "tsc --build tsconfig.test.json",
@@ -37,9 +37,9 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@lumino/coreutils": "^1.4.3",
-    "@lumino/disposable": "^1.3.5",
-    "@lumino/signaling": "^1.3.5",
+    "@lumino/coreutils": "^1.5.3",
+    "@lumino/disposable": "^1.4.3",
+    "@lumino/signaling": "^1.4.3",
     "minimist": "~1.2.0",
     "moment": "^2.24.0",
     "path-posix": "~1.0.0",
@@ -47,12 +47,12 @@
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.0.0-beta.0",
-    "@types/jest": "^24.0.23",
+    "@types/jest": "^26.0.10",
     "@types/minimist": "^1.2.0",
-    "jest": "^25.2.3",
+    "jest": "^26.4.2",
     "rimraf": "~3.0.0",
-    "ts-jest": "^25.2.1",
-    "typedoc": "^0.17.7",
+    "ts-jest": "^26.3.0",
+    "typedoc": "0.17.0-3",
     "typescript": "~4.0.2"
   },
   "publishConfig": {

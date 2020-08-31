@@ -107,7 +107,7 @@ fs.writeFileSync(entryPoint, bootstrap);
 // Set up variables for the watch mode ignore plugins
 const watched = {};
 const ignoreCache = Object.create(null);
-Object.keys(jlab.linkedPackages).forEach(function(name) {
+Object.keys(jlab.linkedPackages).forEach(function (name) {
   if (name in watched) {
     return;
   }
@@ -135,7 +135,7 @@ function maybeSync(localPath, name, rest) {
   if (source === fs.realpathSync(localPath)) {
     return;
   }
-  fs.watchFile(source, { interval: 500 }, function(curr) {
+  fs.watchFile(source, { interval: 500 }, function (curr) {
     if (!curr || curr.nlink === 0) {
       return;
     }

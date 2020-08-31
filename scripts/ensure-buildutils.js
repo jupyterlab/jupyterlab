@@ -18,7 +18,7 @@ function ensurePackage(p) {
   if (fs.existsSync(path.join(basePath, 'lib'))) {
     const srcFiles = glob.sync(path.join(basePath, 'src', '*'));
     const libFiles = glob.sync(path.join(basePath, 'lib', '*'));
-    srcFiles.forEach(function(srcPath) {
+    srcFiles.forEach(function (srcPath) {
       // bail early if already not current
       if (!current) {
         return;

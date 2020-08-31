@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import 'jest';
-
 import { PathExt } from '@jupyterlab/coreutils';
 
 const TESTPATH = 'foo/test/simple/test-path.js';
