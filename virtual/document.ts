@@ -17,6 +17,7 @@ import { DocumentConnectionManager } from '../connection_manager';
 import { create_console, EditorLogConsole } from './console';
 import IRange = CodeEditor.IRange;
 import { ReversibleOverridesMap } from '../overrides/maps';
+import { LanguageIdentifier } from '../lsp';
 
 type language = string;
 
@@ -124,11 +125,17 @@ export class VirtualDocumentInfo implements IDocumentInfo {
 
 export namespace VirtualDocument {
   export interface IOptions {
-    language: string;
+    language: LanguageIdentifier;
     foreign_code_extractors: IForeignCodeExtractorsRegistry;
     overrides_registry: ICodeOverridesRegistry;
     path: string;
     file_extension: string;
+    /**
+     * Notebooks or any other aggregates of documents are not supported
+     * by the LSP specification, and we need to make appropriate
+     * adjustments for them, pretending they are simple files
+     * so that the LSP servers do not refuse to cooperate.
+     */
     has_lsp_supported_file: boolean;
     /**
      * Being standalone is relevant to foreign documents

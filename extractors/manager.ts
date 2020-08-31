@@ -9,6 +9,9 @@ export class CodeExtractorsManager implements ILSPCodeExtractorsManager {
     this.registry = {};
   }
 
+  /**
+   * Register an extractor to extract foreign code from host documents of specified language.
+   */
   register(extractor: IForeignCodeExtractor, host_language: string): void {
     if (!this.registry.hasOwnProperty(host_language)) {
       this.registry[host_language] = [];

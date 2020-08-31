@@ -21,6 +21,7 @@ import {
   IForeignCodeExtractor,
   IForeignCodeExtractorsRegistry
 } from './extractors/types';
+import { LanguageIdentifier } from './lsp';
 
 export type TLanguageServerId = string;
 export type TLanguageId = string;
@@ -173,7 +174,10 @@ export interface ILSPCodeExtractorsManager {
   /**
    * Register the extraction rules to be applied in documents with language `host_language`.
    */
-  register(extractor: IForeignCodeExtractor, host_language: string): void;
+  register(
+    extractor: IForeignCodeExtractor,
+    host_language: LanguageIdentifier
+  ): void;
 }
 
 export const PLUGIN_ID = '@krassowski/jupyterlab-lsp';

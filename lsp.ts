@@ -46,3 +46,75 @@ export enum CompletionTriggerKind {
 }
 
 export type CompletionItemKindStrings = keyof typeof CompletionItemKind;
+
+/**
+ * The language identifier for LSP, with the preferred identifier as defined in the documentation
+ * see the table in https://microsoft.github.io/language-server-protocol/specification#textDocumentItem
+ */
+export enum Languages {
+  'abap' = 'ABAP',
+  'bat' = 'Windows Bat',
+  'bibtex' = 'BibTeX',
+  'clojure' = 'Clojure',
+  'coffeescript' = 'Coffeescript',
+  'c' = 'C',
+  'cpp' = 'C++',
+  'csharp' = 'C#',
+  'css' = 'CSS',
+  'diff' = 'Diff',
+  'dart' = 'Dart',
+  'dockerfile' = 'Dockerfile',
+  'elixir' = 'Elixir',
+  'erlang' = 'Erlang',
+  'fsharp' = 'F#',
+  'git-commit' = 'Git (commit)',
+  'git-rebase' = 'Git (rebase)',
+  'go' = 'Go',
+  'groovy' = 'Groovy',
+  'handlebars' = 'Handlebars',
+  'html' = 'HTML',
+  'ini' = 'Ini',
+  'java' = 'Java',
+  'javascript' = 'JavaScript',
+  'javascriptreact' = 'JavaScript React',
+  'json' = 'JSON',
+  'latex' = 'LaTeX',
+  'less' = 'Less',
+  'lua' = 'Lua',
+  'makefile' = 'Makefile',
+  'markdown' = 'Markdown',
+  'objective-c' = 'Objective-C',
+  'objective-cpp' = 'Objective-C++',
+  'perl' = 'Perl',
+  'perl6' = 'Perl 6',
+  'php' = 'PHP',
+  'powershell' = 'Powershell',
+  'jade' = 'Pug',
+  'python' = 'Python',
+  'r' = 'R',
+  'razor' = 'Razor (cshtml)',
+  'ruby' = 'Ruby',
+  'rust' = 'Rust',
+  'scss' = 'SCSS (syntax using curly brackets)',
+  'sass' = 'SCSS (indented syntax)',
+  'scala' = 'Scala',
+  'shaderlab' = 'ShaderLab',
+  'shellscript' = 'Shell Script (Bash)',
+  'sql' = 'SQL',
+  'swift' = 'Swift',
+  'typescript' = 'TypeScript',
+  'typescriptreact' = 'TypeScript React',
+  'tex' = 'TeX',
+  'vb' = 'Visual Basic',
+  'xml' = 'XML',
+  'xsl' = 'XSL',
+  'yaml' = 'YAML'
+}
+
+export type RecommendedLanguageIdentifier = keyof typeof Languages;
+
+/**
+ * Language identifier for the LSP server, allowing any string but preferring
+ * the identifiers as recommended by the LSP documentation.
+ */
+export type LanguageIdentifier = RecommendedLanguageIdentifier | string;

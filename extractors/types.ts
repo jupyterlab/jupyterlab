@@ -1,4 +1,5 @@
 import { CodeEditor } from '@jupyterlab/codeeditor';
+import { LanguageIdentifier } from '../lsp';
 
 export interface IExtractedCode {
   /**
@@ -40,9 +41,9 @@ export interface IExtractedCode {
  */
 export interface IForeignCodeExtractor {
   /**
-   * The foreign language. TODO what is language, what is host language, ILanguageInfo
+   * The foreign language.
    */
-  language: string;
+  language: LanguageIdentifier;
 
   /**
    * Split the code into the host and foreign code (if any foreign code was detected)

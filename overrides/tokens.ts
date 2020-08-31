@@ -1,5 +1,6 @@
 import { PLUGIN_ID } from '../tokens';
 import { Token } from '@lumino/coreutils';
+import { LanguageIdentifier } from '../lsp';
 
 export type replacer = (...args: string[]) => string;
 
@@ -44,7 +45,10 @@ export interface IScopedCodeOverride extends ICodeOverride {
  */
 export interface ILSPCodeOverridesManager {
   readonly registry: ICodeOverridesRegistry;
-  register(override: IScopedCodeOverride, language: string): void;
+  /**
+   * Register a code override to replace code fragments in documents of specified language.
+   */
+  register(override: IScopedCodeOverride, language: LanguageIdentifier): void;
 }
 
 export const ILSPCodeOverridesManager = new Token<ILSPCodeOverridesManager>(
