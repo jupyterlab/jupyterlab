@@ -937,12 +937,12 @@ works.
 Publishing your extension
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You can publish your Python package to the [pypi](https://pypi.org/) or
-[conda-forge](https://conda-forge.org/) repositories so users can easily
+You can publish your Python package to the `PyPI <https://pypi.org>`_ or
+`conda-forge <https://conda-forge.org>`_ repositories so users can easily
 install the extension using ``pip`` or ``conda``.
 
 You may want to also publish your extension as a JavaScript package to the
-[npm](https://www.npmjs.com/) package repository for several reasons:
+`npm <https://www.npmjs.com>`_ package repository for several reasons:
 
 1. Distributing an extension as an npm package allows users to compile the
    extension into JupyterLab explicitly (similar to how was done in JupyterLab
