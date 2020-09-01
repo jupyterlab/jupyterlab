@@ -16,6 +16,7 @@ from jupyter_core.application import NoStart
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
 from jupyter_server.serverapp import flags
 from jupyter_server.utils import url_path_join as ujoin, url_escape
+from jupyter_server.services.config.manager import ConfigManager, recursive_update
 from jupyter_server._version import version_info as jpserver_version_info
 from traitlets import Bool, Instance, Unicode, default
 
@@ -637,7 +638,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         # Set config for Jupyterlab
         page_config_settings = self.serverapp.web_app.settings.setdefault('page_config_data', {})
         page_config_options = AppOptions(logger=self.log, app_dir=self.app_dir)
-        page_config = get_page_config(app_options=page_config_options).update(page_config_settings)
+        page_config = get_page_config(app_options=page_config_options)
+        recursive_update(page_config, page_config_settings)
 
         page_config.setdefault('buildAvailable', not self.core_mode and not self.dev_mode)
         page_config.setdefault('buildCheck', not self.core_mode and not self.dev_mode)
