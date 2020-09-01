@@ -35,7 +35,6 @@ from jupyterlab.jlpmapp import YARN_PATH, HERE
 from jupyterlab.coreconfig import _get_default_core_data, CoreConfig
 
 from jupyter_server.services.config.manager import ConfigManager
-from jupyter_server._version import version_info as jpserver_version_info
 
 # The regex for expecting the webpack output.
 WEBPACK_EXPECT = re.compile(r'.*/index.out.js')
@@ -312,15 +311,15 @@ def get_page_config(app_options=None):
 
     cm = ConfigManager(config_dir_name="labconfig")
     page_config.update(cm.get('page_config'))
-    
-    # Handle dynamic extensions
-    app_options.page_config = page_config
 
     # Add a recursion guard and get the app info
     page_config['_null'] = False
+    app_options.page_config = page_config
     info = get_app_info(app_options=app_options)
     del page_config['_null']
+    app_options.page_config = dict()
 
+    # Handle dynamic extensions
     extensions = page_config['dynamic_extensions'] = []
     disabled_by_extensions_all = dict()
 
@@ -748,7 +747,7 @@ class _AppHandler(object):
         logger = self.logger
         info = self.info
 
-        print('JupyterLab v%s' % info['version'])
+        logger.info('JupyterLab v%s' % info['version'])
 
         if info['dynamic_exts'] or info['extensions']:
             info['compat_errors'] = self._get_extension_compat()
@@ -1127,8 +1126,10 @@ class _AppHandler(object):
         page_config = self._options.page_config 
         if not page_config:
             page_config = get_page_config(app_options=self._options)
+    
+        disabled = page_config.get('disabled_labextensions', {})
+        info['disabled'] = [name for name in disabled if disabled[name]]
 
-        info['disabled'] = list(page_config.get('disabled_labextensions', {}))
         info['local_extensions'] = self._get_local_extensions()
         info['linked_packages'] = self._get_linked_packages()
         info['app_extensions'] = app = []
