@@ -28,13 +28,14 @@ import warnings
 from jupyter_core.paths import jupyter_config_path, jupyter_path
 from jupyterlab_server.process import which, Process, WatchHelper, list2cmdline
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
-from traitlets import HasTraits, Bool, Unicode, Instance, default
+from traitlets import HasTraits, Bool, Dict, Instance, Unicode, default
 
 from jupyterlab.semver import Range, gte, lt, lte, gt, make_semver
 from jupyterlab.jlpmapp import YARN_PATH, HERE
 from jupyterlab.coreconfig import _get_default_core_data, CoreConfig
 
-from .manager import ConfigManager
+from jupyter_server.services.config.manager import ConfigManager
+from jupyter_server._version import version_info as jpserver_version_info
 
 # The regex for expecting the webpack output.
 WEBPACK_EXPECT = re.compile(r'.*/index.out.js')
@@ -295,10 +296,63 @@ def watch_dev(logger=None):
     return package_procs + [wp_proc]
 
 
-def get_page_config():
+def get_page_config(app_options=None):
+    app_options = _ensure_options(app_options)
+
     """Get the page config for the application"""
-    cm = ConfigManager()
-    return cm.get('page_config')
+
+    # Start with the deprecated `share/jupyter/lab/settings/page_config.json` data
+    page_config = dict()
+    old_page_config = pjoin(app_options.app_dir, 'settings', 'page_config.json')
+    if osp.exists(old_page_config):
+        app_options.log.warn('Using deprecated page_config in %s' % old_page_config)
+        app_options.log.warn('This will no longer have an effect in JupyterLab 4.0')
+        with open(old_page_config) as fid:
+            page_config.update(json.load(fid))
+
+    cm = ConfigManager(config_dir_name="labconfig")
+    page_config.update(cm.get('page_config'))
+    
+    # Handle dynamic extensions
+    app_options.page_config = page_config
+
+    # Add a recursion guard and get the app info
+    page_config['_null'] = False
+    info = get_app_info(app_options=app_options)
+    del page_config['_null']
+
+    extensions = page_config['dynamic_extensions'] = []
+    disabled_by_extensions_all = dict()
+
+    for (ext, ext_data) in info.get('dynamic_exts', dict()).items():
+        extbuild = ext_data['jupyterlab']['_build']
+        extension = {
+            'name': ext_data['name'],
+            'load': extbuild['load']
+        }
+        if 'extension' in extbuild:
+            extension['extension'] = extbuild['extension']
+        if 'mimeExtension' in extbuild:
+            extension['mimeExtension'] = extbuild['mimeExtension']
+        if 'style' in extbuild:
+            extension['style'] = extbuild['style']
+        extensions.append(extension)
+
+        # If there is disabledExtensions metadata, consume it.
+        if ext_data['jupyterlab']['disabledExtensions']:
+            disabled_by_extensions_all[ext_data['name']] = ext_data['jupyterlab']['disabledExtensions']
+
+    disabled_by_extensions = dict()
+    for name in sorted(disabled_by_extensions_all):
+        disabled_list = disabled_by_extensions_all[name]
+        for item in disabled_list:
+            disabled_by_extensions[item] = True
+
+    disabledExtensions = disabled_by_extensions
+    disabledExtensions.update(page_config.get('disabled_labextensions', []))
+    page_config['disabled_labextensions'] = disabledExtensions
+    
+    return page_config
 
 
 class AppOptions(HasTraits):
@@ -317,6 +371,8 @@ class AppOptions(HasTraits):
         super(AppOptions, self).__init__(**kwargs)
 
     app_dir = Unicode(help='The application directory')
+
+    page_config = Dict(help='The page config options')
 
     use_sys_dir = Bool(
         True,
@@ -572,6 +628,7 @@ class _AppHandler(object):
         """Create a new _AppHandler object
         """
         options = _ensure_options(options)
+        self._options = options
         self.app_dir = options.app_dir
         self.sys_dir = get_app_dir() if options.use_sys_dir else self.app_dir
         self.logger = options.logger
@@ -726,10 +783,10 @@ class _AppHandler(object):
             logger.info('\nUninstalled core extensions:')
             [logger.info('    %s' % item) for item in sorted(uninstalled_core)]
 
-        disabled_core = info['disabled_core']
-        if disabled_core:
-            logger.info('\nDisabled core extensions:')
-            [logger.info('    %s' % item) for item in sorted(disabled_core)]
+        disabled = info['disabled']
+        if disabled:
+            logger.info('\nDisabled extensions:')
+            [logger.info('    %s' % item) for item in sorted(disabled)]
 
         messages = self.build_check(fast=True)
         if messages:
@@ -1000,7 +1057,7 @@ class _AppHandler(object):
             did_something = True
         if did_something:
             page_config['disabled_labextensions'] = disabled
-            cm = ConfigManager()
+            cm = ConfigManager(config_dir_name='labconfig')
             cm.set('page_config', page_config)
         return did_something
 
@@ -1067,7 +1124,11 @@ class _AppHandler(object):
         info['core_data'] = core_data = self.core_data
         info['extensions'] = extensions = self._get_extensions(core_data)
 
-        info['disabled'] = list(get_page_config().get('disabled_labextensions', {}))
+        page_config = self._options.page_config 
+        if not page_config:
+            page_config = get_page_config(app_options=self._options)
+
+        info['disabled'] = list(page_config.get('disabled_labextensions', {}))
         info['local_extensions'] = self._get_local_extensions()
         info['linked_packages'] = self._get_linked_packages()
         info['app_extensions'] = app = []

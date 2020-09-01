@@ -77,6 +77,13 @@
       "title": "Discovery metadata",
       "description": "Discovery metadata used to for companion packages",
       "type": "object"
+    },
+    "disabledExtensions": {
+      "title": "List of disabled extension modules and/or regex patterns for extension ids",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
     }
   },
   "additionalProperties": false,

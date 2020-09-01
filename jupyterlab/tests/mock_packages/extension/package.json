@@ -9,6 +9,7 @@
     "@jupyterlab/builder": "^3.0.0-beta.1"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "disabledExtensions": ["@jupyterlab/filebrowser-extension:share-file"]
   }
 }

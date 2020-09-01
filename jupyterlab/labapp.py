@@ -15,7 +15,7 @@ from jupyter_core.application import JupyterApp, base_aliases, base_flags
 from jupyter_core.application import NoStart
 from jupyterlab_server import slugify, WORKSPACE_EXTENSION
 from jupyter_server.serverapp import flags
-from jupyter_server.utils import url_path_join as ujoin
+from jupyter_server.utils import url_path_join as ujoin, url_escape
 from jupyter_server._version import version_info as jpserver_version_info
 from traitlets import Bool, Instance, Unicode, default
 
@@ -700,27 +700,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             page_config['hubUser'] = self.user
             page_config['shareUrl'] = ujoin(self.hub_prefix, 'user-redirect')
             # Assume the server_name property indicates running JupyterHub 1.0.
-            if hasattr(labapp, 'server_name'):
+            if hasattr(self, 'server_name'):
                 page_config['hubServerName'] = self.server_name
             api_token = os.getenv('JUPYTERHUB_API_TOKEN', '')
             page_config['token'] = api_token
-
-        # Handle dynamic extensions
-        info = get_app_info()
-        extensions = page_config['dynamic_extensions'] = []
-        for (ext, ext_data) in info.get('dynamic_exts', dict()).items():
-            extbuild = ext_data['jupyterlab']['_build']
-            extension = {
-                'name': ext_data['name'],
-                'load': extbuild['load']
-            }
-            if 'extension' in extbuild:
-                extension['extension'] = extbuild['extension']
-            if 'mimeExtension' in extbuild:
-                extension['mimeExtension'] = extbuild['mimeExtension']
-            if 'style' in extbuild:
-                extension['style'] = extbuild['style']
-            extensions.append(extension)
 
         # Update Jupyter Server's webapp settings with jupyterlab settings.
         self.serverapp.web_app.settings['page_config_data'] = page_config
