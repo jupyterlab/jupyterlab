@@ -34,7 +34,7 @@ from jupyterlab.semver import Range, gte, lt, lte, gt, make_semver
 from jupyterlab.jlpmapp import YARN_PATH, HERE
 from jupyterlab.coreconfig import _get_default_core_data, CoreConfig
 
-from jupyter_server.services.config.manager import ConfigManager
+from jupyter_server.services.config.manager import ConfigManager, recursive_update
 
 # The regex for expecting the webpack output.
 WEBPACK_EXPECT = re.compile(r'.*/index.out.js')
@@ -49,6 +49,9 @@ PIN_PREFIX = 'pin@'
 
 # Default Yarn registry used in default yarn.lock
 YARN_DEFAULT_REGISTRY = 'https://registry.yarnpkg.com'
+
+# Flag for whether we have warned the user about page_config
+_PAGE_CONFIG_WARNED = False
 
 
 class ProgressProcess(Process):
@@ -296,21 +299,33 @@ def watch_dev(logger=None):
 
 
 def get_page_config(app_options=None):
+    global _PAGE_CONFIG_WARNED
     app_options = _ensure_options(app_options)
 
     """Get the page config for the application"""
 
     # Start with the deprecated `share/jupyter/lab/settings/page_config.json` data
     page_config = dict()
+    keyname = 'disabled_labextensions'
     old_page_config = pjoin(app_options.app_dir, 'settings', 'page_config.json')
     if osp.exists(old_page_config):
-        app_options.log.warn('Using deprecated page_config in %s' % old_page_config)
-        app_options.log.warn('This will no longer have an effect in JupyterLab 4.0')
+        # TODO: Remove in JupyterLab 4.0
+        if not _PAGE_CONFIG_WARNED:
+            app_options.logger.warn('** Using deprecated page_config in %s' % old_page_config)
+            app_options.logger.warn('** This will no longer have an effect in JupyterLab 4.0')
+            app_options.logger.warn('')
+            _PAGE_CONFIG_WARNED = True
         with open(old_page_config) as fid:
-            page_config.update(json.load(fid))
+            data = json.load(fid)
+            # Convert disabled_labextensions list to a dict
+            oldKey = "disabledExtensions"
+            if oldKey in data:
+                data[keyname] = dict((key, True) for key in data[oldKey])
+
+            recursive_update(page_config, data)
 
     cm = ConfigManager(config_dir_name="labconfig")
-    page_config.update(cm.get('page_config'))
+    recursive_update(page_config, cm.get('page_config'))
 
     # Add a recursion guard and get the app info
     page_config['_null'] = False
@@ -347,9 +362,9 @@ def get_page_config(app_options=None):
         for item in disabled_list:
             disabled_by_extensions[item] = True
 
-    disabledExtensions = disabled_by_extensions
-    disabledExtensions.update(page_config.get('disabled_labextensions', []))
-    page_config['disabled_labextensions'] = disabledExtensions
+    disabled_extensions = disabled_by_extensions
+    disabled_extensions.update(page_config.get(keyname, []))
+    page_config[keyname] = disabled_extensions
     
     return page_config
 
@@ -754,15 +769,11 @@ class _AppHandler(object):
 
         if info['dynamic_exts']:
             self._list_dynamic_extensions()
-        else:
-            logger.info('No dynamic extensions found')
-
+  
         if info['extensions']:
-            logger.info('Installed labextensions:')
+            logger.info('Other labextensions (built into JupyterLab)')
             self._list_extensions(info, 'app')
             self._list_extensions(info, 'sys')
-        else:
-            logger.info('No installed extensions found')
 
         local = info['local_extensions']
         if local:
@@ -1052,8 +1063,9 @@ class _AppHandler(object):
             disabled[extension] = True
             did_something = True
         elif not value and extension in disabled:
-            del disabled[extension]
+            disabled[extension] = False
             did_something = True
+
         if did_something:
             page_config['disabled_labextensions'] = disabled
             cm = ConfigManager(config_dir_name='labconfig')
@@ -1560,6 +1572,9 @@ class _AppHandler(object):
         # Write all errors at end:
         _log_multiple_compat_errors(logger, error_accumulator)
 
+        # Write a blank line separator
+        logger.info('')
+
     def _list_dynamic_extensions(self):
         info = self.info
         logger = self.logger
@@ -1588,6 +1603,8 @@ class _AppHandler(object):
                 logger.info('        %s v%s%s' % (name, version, extra))
                 if errors:
                     error_accumulator[name] = (version, errors)
+            # Add a spacer line after
+            logger.info('')
 
         # Write all errors at end:
         _log_multiple_compat_errors(logger, error_accumulator)
