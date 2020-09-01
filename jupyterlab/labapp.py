@@ -27,7 +27,7 @@ from .debuglog import DebugLogFileMixin
 from .commands import (
     DEV_DIR, HERE,
     build, clean, get_app_dir, get_app_version, get_user_settings_dir,
-    get_workspaces_dir, AppOptions, pjoin, get_app_info,
+    get_workspaces_dir, AppOptions, pjoin, get_app_info, get_page_config,
     ensure_core, ensure_dev, watch, watch_dev, ensure_app
 )
 from .coreconfig import CoreConfig
@@ -635,7 +635,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         handlers = []
 
         # Set config for Jupyterlab
-        page_config = self.serverapp.web_app.settings.setdefault('page_config_data', {})
+        page_config_settings = self.serverapp.web_app.settings.setdefault('page_config_data', {})
+        page_config_options = AppOptions(logger=self.log, app_dir=self.app_dir)
+        page_config = get_page_config(app_options=page_config_options).update(page_config_settings)
+
         page_config.setdefault('buildAvailable', not self.core_mode and not self.dev_mode)
         page_config.setdefault('buildCheck', not self.core_mode and not self.dev_mode)
         page_config['devMode'] = self.dev_mode
