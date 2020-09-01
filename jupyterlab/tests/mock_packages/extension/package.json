@@ -10,6 +10,8 @@
   },
   "jupyterlab": {
     "extension": true,
-    "disabledExtensions": ["@jupyterlab/filebrowser-extension:share-file"]
+    "disabledExtensions": [
+      "@jupyterlab/filebrowser-extension:share-file"
+    ]
   }
 }
