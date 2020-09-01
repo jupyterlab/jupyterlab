@@ -1063,7 +1063,7 @@ class _AppHandler(object):
         if value and not is_disabled:
             disabled[extension] = True
             did_something = True
-        elif not value and not is_disabled:
+        elif not value and is_disabled:
             disabled[extension] = False
             did_something = True
 
