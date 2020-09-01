@@ -1059,10 +1059,11 @@ class _AppHandler(object):
         page_config = get_page_config()
         disabled = page_config.get('disabled_labextensions', {})
         did_something = False
-        if value and extension not in disabled:
+        is_disabled = disabled.get(extension, False)
+        if value and not is_disabled:
             disabled[extension] = True
             did_something = True
-        elif not value and extension in disabled:
+        elif not value and not is_disabled:
             disabled[extension] = False
             did_something = True
 
