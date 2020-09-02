@@ -15,10 +15,9 @@ import { IMainMenu } from '@jupyterlab/mainmenu';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import {
-  Gettext,
   ITranslator,
   ITranslatorConnector,
-  TranslationBundle,
+  TranslationManager,
   TranslatorConnector,
   requestTranslationsAPI
 } from '@jupyterlab/translation';
@@ -52,47 +51,12 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
   autoStart: true,
   requires: [ISettingRegistry, ITranslatorConnector],
   provides: ITranslator,
-  activate: async (
-    app: JupyterFrontEnd,
-    settings: ISettingRegistry,
-    connector: ITranslatorConnector
-  ) => {
-    let setting = await settings.load(PLUGIN_ID);
-    let currentLocale: string = setting.get('locale').composite as string;
-    let languageData = await connector.fetch({ language: currentLocale });
-    let domainData: any = languageData?.data;
-    let englishBundle = new Gettext();
-    let translationBundle: Gettext;
-    let translationBundles: any = {};
-    let metadata: any;
-    return {
-      load: (domain: string): TranslationBundle => {
-        if (currentLocale == 'en') {
-          return englishBundle;
-        } else {
-          if (!(domain in translationBundles)) {
-            translationBundle = new Gettext({
-              domain: domain,
-              locale: currentLocale
-            });
-            // TODO: Add language variations on server.
-            // So if language pack es-CO is requested and es exist, then we
-            // can use that as fallback
-            if (domain in domainData) {
-              metadata = domainData[domain][''];
-              if ('plural_forms' in metadata) {
-                metadata.pluralForms = metadata.plural_forms;
-                delete metadata.plural_forms;
-                domainData[domain][''] = metadata;
-              }
-              translationBundle.loadJSON(domainData[domain], domain);
-            }
-            translationBundles[domain] = translationBundle;
-          }
-          return translationBundles[domain];
-        }
-      }
-    };
+  activate: async (app: JupyterFrontEnd, settings: ISettingRegistry) => {
+    const setting = await settings.load(PLUGIN_ID);
+    const currentLocale: string = setting.get('locale').composite as string;
+    const translationManager = new TranslationManager();
+    await translationManager.fetch(currentLocale);
+    return translationManager;
   }
 };
 
