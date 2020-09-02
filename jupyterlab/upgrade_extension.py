@@ -87,6 +87,7 @@ def update_extension(target, interactive=True):
         choice = 'y'
     if choice.upper().startswith('Y'):
         warnings.append('Updated scripts in package.json')
+        data.setdefault('scripts', dict())
         for (key, value) in temp_data['scripts'].items():
             data['scripts'][key] = value
     else:
@@ -100,6 +101,8 @@ def update_extension(target, interactive=True):
     with open(root_jlab_package) as fid:
         root_jlab_data = json.load(fid)
     
+    data.setdefault('dependencies', dict())
+    data.setdefault('devDependencies', dict())
     for (key, value) in root_jlab_data['resolutions'].items():
         if key in data['dependencies']:
             data['dependencies'][key] = value
@@ -108,8 +111,11 @@ def update_extension(target, interactive=True):
 
     # Sort the entries
     for key in ['scripts', 'dependencies', 'devDependencies']:
-        data[key] = dict(sorted(data[key].items()))
-
+        if data[key]:
+            data[key] = dict(sorted(data[key].items()))
+        else:
+            del data[key]
+            
     # Update the root package.json file
     with open(package_file, 'w') as fid:
         json.dump(data, fid, indent=2)
