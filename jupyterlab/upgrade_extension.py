@@ -7,6 +7,11 @@ import shutil
 import sys
 import subprocess
 
+try:
+    import cookiecutter
+except ImportError:
+    raise RuntimeError("Please install cookiecutter")
+
 
 COOKIECUTTER_BRANCH = "3.0"
 
