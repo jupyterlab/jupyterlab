@@ -10,6 +10,18 @@
       "title": "Language locale",
       "description": "Set the interface display language. Examples: 'es_CO', 'fr'.",
       "default": "en"
+    },
+    "stringsPrefix": {
+      "type": "string",
+      "title": "Localized strings prefix",
+      "description": "Add a prefix to localized strings.",
+      "default": "!!"
+    },
+    "displayStringsPrefix": {
+      "type": "boolean",
+      "title": "Display localized strings prefix",
+      "description": "Display the `stringsPrefix` on localized strings.",
+      "default": false
     }
   }
 }

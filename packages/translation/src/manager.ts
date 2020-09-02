@@ -8,8 +8,10 @@ import { ITranslator, TranslationBundle, TranslatorConnector } from './tokens';
  * Translation Manager
  */
 export class TranslationManager implements ITranslator {
-  constructor() {
+  constructor(stringsPrefix?: string) {
     this._connector = new TranslatorConnector();
+    this._stringsPrefix = stringsPrefix || '';
+    this._englishBundle = new Gettext({ stringsPrefix: this._stringsPrefix });
   }
 
   /**
@@ -40,7 +42,8 @@ export class TranslationManager implements ITranslator {
         if (!(domain in this._translationBundles)) {
           let translationBundle = new Gettext({
             domain: domain,
-            locale: this._currentLocale
+            locale: this._currentLocale,
+            stringsPrefix: this._stringsPrefix
           });
           if (domain in this._domainData) {
             let metadata = this._domainData[domain][''];
@@ -63,7 +66,8 @@ export class TranslationManager implements ITranslator {
   private _connector: TranslatorConnector;
   private _currentLocale: string;
   private _domainData: any = {};
-  private _englishBundle = new Gettext();
+  private _englishBundle: Gettext;
   private _languageData: any;
+  private _stringsPrefix: string;
   private _translationBundles: any = {};
 }

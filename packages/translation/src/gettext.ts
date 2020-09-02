@@ -92,6 +92,11 @@ interface IOptions {
   pluralForms?: string;
 
   /**
+   * The string prefix to add to localized strings.
+   */
+  stringsPrefix?: string;
+
+  /**
    * Plural form function.
    */
   pluralFunc?: PluralForm;
@@ -132,7 +137,8 @@ class Gettext {
       pluralFunc: function (n: number) {
         return { nplurals: 2, plural: n != 1 ? 1 : 0 };
       },
-      contextDelimiter: String.fromCharCode(4) // \u0004
+      contextDelimiter: String.fromCharCode(4), // \u0004
+      stringsPrefix: ''
     };
 
     // Ensure the correct separator is used
@@ -140,6 +146,7 @@ class Gettext {
     this._domain = options.domain || this._defaults.domain;
     this._contextDelimiter =
       options.contextDelimiter || this._defaults.contextDelimiter;
+    this._stringsPrefix = options.stringsPrefix || this._defaults.stringsPrefix;
     this._pluralFuncs = {};
     this._dictionary = {};
     this._pluralForms = {};
@@ -206,6 +213,24 @@ class Gettext {
    */
   getDomain(): string {
     return this._domain;
+  }
+
+  /**
+   * Set current strings prefix.
+   *
+   * @param prefix - The string prefix to set.
+   */
+  setStringsPrefix(prefix: string): void {
+    this._stringsPrefix = prefix;
+  }
+
+  /**
+   * Get current strings prefix.
+   *
+   * @return The strings prefix.
+   */
+  getStringsPrefix(): string {
+    return this._stringsPrefix;
   }
 
   /**
@@ -563,7 +588,10 @@ class Gettext {
   ): string {
     // Singular is very easy, just pass dictionary message through strfmt
     if (!options.pluralForm)
-      return Gettext.strfmt(this.removeContext(messages[0]), ...args);
+      return (
+        this._stringsPrefix +
+        Gettext.strfmt(this.removeContext(messages[0]), ...args)
+      );
 
     let plural;
 
@@ -591,9 +619,12 @@ class Gettext {
     )
       plural.plural = 0;
 
-    return Gettext.strfmt(
-      this.removeContext(messages[plural.plural]),
-      ...[n].concat(args)
+    return (
+      this._stringsPrefix +
+      Gettext.strfmt(
+        this.removeContext(messages[plural.plural]),
+        ...[n].concat(args)
+      )
     );
   }
 
@@ -621,6 +652,7 @@ class Gettext {
     this._dictionary[domain][locale] = messages;
   }
 
+  private _stringsPrefix: string;
   private _pluralForms: any;
   private _dictionary: any;
   private _locale: string;
