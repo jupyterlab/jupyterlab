@@ -183,17 +183,18 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension develop extension --debug
     jupyter labextension build extension
 
-    # TODO: reinstate after beta release
-    # python -m jupyterlab.browser_check
+    python -m jupyterlab.browser_check
     jupyter labextension list 1>labextensions 2>&1
     cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
     jupyter labextension build extension --static-url /foo/
     jupyter labextension disable @jupyterlab/mock-extension --debug
     jupyter labextension enable @jupyterlab/mock-extension --debug 
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
-    jupyter labextension list list 1>labextensions 2>&1
-    cat labextensions | grep "No dynamic extensions found"
+    jupyter labextension list 1>labextensions 2>&1
+    # bail if mock-extension was listed
+    cat labextensions | grep -q "mock-extension" && exit 1
     popd
+
     jupyter lab workspaces export > workspace.json --debug
     jupyter lab workspaces import --name newspace workspace.json --debug
     jupyter lab workspaces export newspace > newspace.json --debug

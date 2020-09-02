@@ -544,13 +544,12 @@ class TestExtension(AppHandlerTest):
         assert disable_extension(self.pkg_names['extension'], app_options=options) is True
         assert enable_extension(self.pkg_names['extension'], app_options=options) is True
         info = get_app_info(app_options=options)
+        assert '@jupyterlab/notebook-extension' not in info['disabled']
         name = self.pkg_names['extension']
         assert name not in info['disabled']
         assert check_extension(name, app_options=options)
         assert disable_extension('@jupyterlab/notebook-extension', app_options=options) is True
-        assert name not in info['disabled']
         assert check_extension(name, app_options=options)
-        assert '@jupyterlab/notebook-extension' not in info['disabled']
         assert not check_extension('@jupyterlab/notebook-extension', app_options=options)
 
     @pytest.mark.slow
