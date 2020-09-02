@@ -7,7 +7,7 @@ import { ITranslator, TranslationBundle, TranslatorConnector } from './tokens';
 /**
  * Translation Manager
  */
-class TranslationManager implements ITranslator {
+export class TranslationManager implements ITranslator {
   constructor() {
     this._connector = new TranslatorConnector();
   }
@@ -67,5 +67,3 @@ class TranslationManager implements ITranslator {
   private _languageData: any;
   private _translationBundles: any = {};
 }
-
-export { TranslationManager };
