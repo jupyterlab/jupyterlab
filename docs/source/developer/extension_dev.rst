@@ -20,12 +20,12 @@ A JupyterLab application is comprised of:
 -  A core Application object
 -  Plugins
 
-Starting in JupyterLab 3.0, extensions are distributed at ``pip`` or 
+Starting in JupyterLab 3.0, extensions are distributed at ``pip`` or
 ``conda`` packages that contain federated JavaScript bundles.  You can write extensions in JavaScript or any language that compiles to JavaScript. We recommend writing extensions in `TypeScript <https://www.typescriptlang.org/>`_, which is used for the JupyterLab core extensions and many popular community extensions.  You use our build tool to generate the bundles that are shipped with the package, typically through a cookiecutter.
 
 
 Goals of the Dynamic Extension System
---------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Users should be able to install and use extensions without requiring ``node`` or a build step
 - Extension authors should be able to easily build and distribute extensions
 - The existing capabilities of built-in extensions should still work
@@ -34,7 +34,7 @@ Goals of the Dynamic Extension System
 - Extensions should be discoverable
 
 Implementation
---------------
+~~~~~~~~~~~~~~
 - We provide a ``jupyter labextensions build`` script that is used to build bundles
   - The command produces a set of static assets that are shipped along with a package (notionally on ``pip``/``conda``)
   - It needs to be a Python cli so it can use the dependency metadata from the active JupyterLab
@@ -52,13 +52,13 @@ Implementation
 - We will update the ``extension-manager`` to target metadata on ``pypi``/``conda`` and consume those packages.
 
 Tools
------
+~~~~~
 - ``jupyter labexension build`` python command line tool
 - ``jupyter labextension develop`` python command line tool
 - ``cookiecutter`` for extension authors
 
 Workflow for extension authors
-------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Use the ``cookiecutter`` to create the extension
 - Run ``jupyter labextension develop`` to build and symlink the files
 - Run ``jupyter labextension watch`` to start watching
