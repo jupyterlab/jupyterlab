@@ -27,14 +27,14 @@ import warnings
 
 from jupyter_core.paths import jupyter_config_path, jupyter_path
 from jupyterlab_server.process import which, Process, WatchHelper, list2cmdline
+from jupyterlab_server.config import LabConfig, get_page_config, get_dynamic_extensions, get_static_page_config
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
-from traitlets import HasTraits, Bool, Dict, Instance, Unicode, default
+from traitlets import HasTraits, Bool, Dict, Instance, List, Unicode, default
 
 from jupyterlab.semver import Range, gte, lt, lte, gt, make_semver
 from jupyterlab.jlpmapp import YARN_PATH, HERE
 from jupyterlab.coreconfig import _get_default_core_data, CoreConfig
 
-from jupyter_server.services.config.manager import ConfigManager, recursive_update
 
 # The regex for expecting the webpack output.
 WEBPACK_EXPECT = re.compile(r'.*/index.out.js')
@@ -49,9 +49,6 @@ PIN_PREFIX = 'pin@'
 
 # Default Yarn registry used in default yarn.lock
 YARN_DEFAULT_REGISTRY = 'https://registry.yarnpkg.com'
-
-# Flag for whether we have warned the user about page_config
-_PAGE_CONFIG_WARNED = False
 
 
 class ProgressProcess(Process):
@@ -296,94 +293,6 @@ def watch_dev(logger=None):
                           startup_regex=WEBPACK_EXPECT)
 
     return package_procs + [wp_proc]
-
-
-def get_page_config(app_options=None):
-    global _PAGE_CONFIG_WARNED
-    app_options = _ensure_options(app_options)
-
-    """Get the page config for the application"""
-
-    # Start with the deprecated `share/jupyter/lab/settings/page_config.json` data
-    page_config = dict()
-    keyname = 'disabled_labextensions'
-    old_page_config = pjoin(app_options.app_dir, 'settings', 'page_config.json')
-    if osp.exists(old_page_config):
-        # TODO: Remove in JupyterLab 4.0
-        if not _PAGE_CONFIG_WARNED:
-            app_options.logger.warn('** Using deprecated page_config in %s' % old_page_config)
-            app_options.logger.warn('** This will no longer have an effect in JupyterLab 4.0')
-            app_options.logger.warn('')
-            _PAGE_CONFIG_WARNED = True
-        with open(old_page_config) as fid:
-            data = json.load(fid)
-            # Convert disabled_labextensions list to a dict
-            oldKey = "disabledExtensions"
-            if oldKey in data:
-                data[keyname] = dict((key, True) for key in data[oldKey])
-
-            recursive_update(page_config, data)
-
-    cm = ConfigManager(config_dir_name="labconfig")
-    recursive_update(page_config, cm.get('page_config'))
-
-    # Add a recursion guard and get the app info
-    page_config['_null'] = False
-    app_options.page_config = page_config
-    info = get_app_info(app_options=app_options)
-    del page_config['_null']
-    app_options.page_config = dict()
-
-    # Handle dynamic extensions
-    extensions = page_config['dynamic_extensions'] = []
-    disabled_by_extensions_all = dict()
-
-    for (ext, ext_data) in info.get('dynamic_exts', dict()).items():
-        extbuild = ext_data['jupyterlab']['_build']
-        extension = {
-            'name': ext_data['name'],
-            'load': extbuild['load']
-        }
-        if 'extension' in extbuild:
-            extension['extension'] = extbuild['extension']
-        if 'mimeExtension' in extbuild:
-            extension['mimeExtension'] = extbuild['mimeExtension']
-        if 'style' in extbuild:
-            extension['style'] = extbuild['style']
-        extensions.append(extension)
-
-        # If there is disabledExtensions metadata, consume it.
-        if ext_data['jupyterlab'].get('disabledExtensions'):
-            disabled_by_extensions_all[ext_data['name']] = ext_data['jupyterlab']['disabledExtensions']
-
-    disabled_by_extensions = dict()
-    for name in sorted(disabled_by_extensions_all):
-        disabled_list = disabled_by_extensions_all[name]
-        for item in disabled_list:
-            disabled_by_extensions[item] = True
-
-    disabled_extensions = disabled_by_extensions
-    disabled_extensions.update(page_config.get(keyname, []))
-    page_config[keyname] = disabled_extensions
-    
-    return page_config
-
-
-def _get_dynamic_extensions():
-    dynamic_exts = dict()
-    dynamic_ext_dirs = dict()
-    for ext_dir in jupyter_path('labextensions'):
-        ext_pattern = ext_dir + '/**/package.json'
-        for ext_path in [path for path in glob(ext_pattern, recursive=True)]:
-            with open(ext_path) as fid:
-                data = json.load(fid)
-            if data['name'] not in dynamic_exts:
-                data['ext_dir'] = ext_dir
-                data['ext_path'] = os.path.dirname(ext_path)
-                data['is_local'] = False
-                dynamic_exts[data['name']] = data
-                dynamic_ext_dirs[ext_dir] = True
-    return dynamic_ext_dirs, dynamic_exts
     
 
 class AppOptions(HasTraits):
@@ -403,8 +312,6 @@ class AppOptions(HasTraits):
 
     app_dir = Unicode(help='The application directory')
 
-    page_config = Dict(help='The page config options')
-
     use_sys_dir = Bool(
         True,
         help=('Whether to shadow the default app_dir if that is set to a '
@@ -415,6 +322,8 @@ class AppOptions(HasTraits):
     core_config = Instance(CoreConfig, help='Configuration for core data')
 
     kill_event = Instance(Event, args=(), help='Event for aborting call')
+
+    labextensions_path = List(Unicode(), help='The paths to look in for dynamic JupyterLab extensions')
 
     registry = Unicode(help="NPM packages registry URL")
 
@@ -664,9 +573,14 @@ class _AppHandler(object):
         self.sys_dir = get_app_dir() if options.use_sys_dir else self.app_dir
         self.logger = options.logger
         self.core_data = options.core_config._data
-        self.info = self._get_app_info()
+        self.labextensions_path = options.labextensions_path
         self.kill_event = options.kill_event
         self.registry = options.registry
+
+        # Do this last since it relies on other attributes
+        self.info = self._get_app_info()
+
+        
 
     def install_extension(self, extension, existing=None, pin=None):
         """Install an extension package into JupyterLab.
@@ -1073,7 +987,10 @@ class _AppHandler(object):
 
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
-        page_config = get_page_config()
+        lab_config = LabConfig()
+        app_settings_dir = osp.join(self.app_dir, 'settings')
+        page_config = get_static_page_config(app_settings_dir=app_settings_dir, logger=self.logger)
+
         disabled = page_config.get('disabled_labextensions', {})
         did_something = False
         is_disabled = disabled.get(extension, False)
@@ -1086,8 +1003,7 @@ class _AppHandler(object):
 
         if did_something:
             page_config['disabled_labextensions'] = disabled
-            cm = ConfigManager(config_dir_name='labconfig')
-            cm.set('page_config', page_config)
+            write_page_config(page_config)
         return did_something
 
     def check_extension(self, extension, check_installed_only=False):
@@ -1153,10 +1069,10 @@ class _AppHandler(object):
         info['core_data'] = core_data = self.core_data
         info['extensions'] = extensions = self._get_extensions(core_data)
 
-        page_config = self._options.page_config 
-        if not page_config:
-            page_config = get_page_config(app_options=self._options)
-    
+        labextensions_path = self.labextensions_path
+        app_settings_dir = osp.join(self.app_dir, 'settings')
+        page_config = get_page_config(labextensions_path, app_settings_dir=app_settings_dir, logger=self.logger)
+
         disabled = page_config.get('disabled_labextensions', {})
         info['disabled'] = [name for name in disabled if disabled[name]]
 
@@ -1191,9 +1107,8 @@ class _AppHandler(object):
 
         info['disabled_core'] = disabled_core
 
-        dynamic_ext_dirs, dynamic_exts = _get_dynamic_extensions()
+        dynamic_exts = get_dynamic_extensions(self.labextensions_path)
         info['dynamic_exts'] = dynamic_exts
-        info['dynamic_ext_dirs'] = dynamic_ext_dirs
         return info
 
     def _populate_staging(self, name=None, version=None, static_url=None,
@@ -1587,7 +1502,13 @@ class _AppHandler(object):
 
         error_accumulator = {}
 
-        for ext_dir in info['dynamic_ext_dirs']:
+        ext_dirs = dict((p, False) for p in self.labextensions_path)
+        for value in info['dynamic_exts'].values():
+            ext_dirs[value['ext_dir']] = True
+
+        for ext_dir, has_exts in ext_dirs.items():
+            if not has_exts:
+                continue
             logger.info(ext_dir)
             for name in info['dynamic_exts']:
                 data = info['dynamic_exts'][name]

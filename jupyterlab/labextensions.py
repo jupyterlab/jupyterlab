@@ -209,7 +209,10 @@ class WatchLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        watch_labextension(self.extra_args[0], logger=self.log, development=self.development)
+        # TODO: get the config for labextensions paths from LabApp
+        from jupyter_core.paths import jupyter_path
+        labextensions_path = jupyter_path('labextensions')
+        watch_labextension(self.extra_args[0], labextensions_path, logger=self.log, development=self.development)
 
 
 class UpdateLabExtensionApp(BaseExtensionApp):
@@ -298,8 +301,12 @@ class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
 
     def run_task(self):
+        # TODO: get the config for labextensions paths from LabApp
+        import pdb; pdb.set_trace()
+        from jupyter_core.paths import jupyter_path
+        labextensions_path = jupyter_path('labextensions')
         list_extensions(app_options=AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config))
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, labextensions_path=labextensions_path))
 
 
 class EnableLabExtensionsApp(BaseExtensionApp):

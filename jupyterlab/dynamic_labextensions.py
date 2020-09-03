@@ -27,10 +27,11 @@ from jupyter_core.utils import ensure_dir_exists
 from ipython_genutils.py3compat import string_types, cast_unicode_py2
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_server.config_manager import BaseJSONConfigManager
+from jupyterlab_server.config import get_dynamic_extensions
 
 from traitlets.utils.importstring import import_item
 
-from .commands import build, AppOptions, _test_overlap, _get_dynamic_extensions
+from .commands import build, AppOptions, _test_overlap
 
 
 DEPRECATED_ARGUMENT = object()
@@ -182,7 +183,7 @@ def build_labextension(path, logger=None, development=False, static_url=None):
     subprocess.check_call(arguments, cwd=ext_path)
 
 
-def watch_labextension(path, logger=None, development=True):
+def watch_labextension(path, labextensions_path, logger=None, development=True):
     """Watch a labextension in a given path"""
     core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
@@ -191,7 +192,7 @@ def watch_labextension(path, logger=None, development=True):
         logger.info('Building extension in %s' % path)
 
     # Check to see if we need to create a symlink
-    dynamic_ext_dirs, dynamic_exts = _get_dynamic_extensions()
+    dynamic_exts = get_dynamic_extensions(labextensions_path)
 
     with open(pjoin(ext_path, 'package.json')) as fid:
         ext_data = json.load(fid)
