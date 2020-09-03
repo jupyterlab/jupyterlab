@@ -1393,7 +1393,7 @@ export namespace NotebookActions {
         )}
         <br />
         {trans.__(
-          'For more information, see the <a href="https://jupyter-notebook.readthedocs.io/en/stable/security.html">%1</a>',
+          'For more information, see the <a href="https://jupyter-server.readthedocs.io/en/stable/operators/security.html">%1</a>',
           trans.__('Jupyter security documentation')
         )}
       </p>

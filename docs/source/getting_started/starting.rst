@@ -36,5 +36,5 @@ from ``/lab`` to ``/tree``.
 
 JupyterLab has the same security model as the classic Jupyter Notebook;
 for more information see the `security
-section <https://jupyter-notebook.readthedocs.io/en/stable/security.html>`__
+section <https://jupyter-server.readthedocs.io/en/stable/operators/security.html>`__
 of the classic Notebook's documentation.
