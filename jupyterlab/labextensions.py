@@ -16,7 +16,7 @@ from jupyter_core.application import JupyterApp, base_flags, base_aliases
 from jupyter_core.paths import jupyter_path
 from jupyterlab.coreconfig import CoreConfig
 from jupyterlab.debuglog import DebugLogFileMixin
-from traitlets import Bool, Instance, Unicode, default
+from traitlets import Bool, Instance, List, Unicode, default
 
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
@@ -97,6 +97,8 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
 
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
+
+    labextensions_path = List(Unicode(), help='The standard paths to look in for dynamic JupyterLab extensions')
 
     @default('labextensions_path')
     def _default_labextensions_path(self):
