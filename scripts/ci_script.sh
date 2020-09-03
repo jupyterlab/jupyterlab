@@ -213,6 +213,9 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension enable -h
     jupyter labextension disable -h
 
+    # Make sure we can run JupyterLab under classic notebook
+    python -m jupyterlab.browser_check --notebook
+
     # Make sure we can add and remove a sibling package.
     # jlpm run add:sibling jupyterlab/tests/mock_packages/extension
     # jlpm run build

@@ -584,8 +584,9 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         if self.override_static_url:
             return self.override_static_url
         else:
-            return "/static/{name}/".format(
+            static_url = "/static/{name}/".format(
             name=self.name)
+            return ujoin(self.serverapp.base_url, static_url)
 
     @default('theme_url')
     def _default_theme_url(self):

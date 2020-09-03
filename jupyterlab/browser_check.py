@@ -193,10 +193,38 @@ def _jupyter_server_extension_points():
             }
         ]
 
+
+# TODO: remove handling of --notebook arg and the following two
+# functions in JupyterLab 4.0
+def load_jupyter_server_extension(serverapp):
+    extension = BrowserApp()
+    extension.serverapp = serverapp
+    extension.load_config_file()
+    extension.update_config(serverapp.config)
+    extension.parse_command_line(serverapp.extra_args)
+    extension.initialize()
+
+
+def _jupyter_server_extension_paths():
+    return [
+        {
+            'module': 'jupyterlab.browser_check'
+        }
+    ]
+
+
 if __name__ == '__main__':
     skip_option = "--no-chrome-test"
     if skip_option in sys.argv:
         BrowserApp.test_browser = False
         sys.argv.remove(skip_option)
 
-    BrowserApp.launch_instance()
+    if "--notebook" in sys.argv:
+        from notebook.notebookapp import NotebookApp
+        NotebookApp.default_url = "/lab"
+        sys.argv.remove("--notebook")
+        NotebookApp.nbserver_extensions = {"jupyterlab.browser_check": True}
+        NotebookApp.open_browser = False
+        NotebookApp.launch_instance()
+    else:
+        BrowserApp.launch_instance()
