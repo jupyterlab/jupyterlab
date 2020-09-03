@@ -27,7 +27,7 @@ import warnings
 
 from jupyter_core.paths import jupyter_config_path, jupyter_path
 from jupyterlab_server.process import which, Process, WatchHelper, list2cmdline
-from jupyterlab_server.config import LabConfig, get_page_config, get_dynamic_extensions, get_static_page_config
+from jupyterlab_server.config import LabConfig, get_page_config, get_dynamic_extensions, get_static_page_config, write_page_config
 from notebook.nbextensions import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from traitlets import HasTraits, Bool, Dict, Instance, List, Unicode, default
 
