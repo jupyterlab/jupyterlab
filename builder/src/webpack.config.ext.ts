@@ -172,13 +172,13 @@ class CleanupPlugin {
     compiler.hooks.done.tap('Cleanup', () => {
       // Find the remoteEntry file and add it to the package.json metadata
       const files = glob.sync(path.join(outputPath, 'remoteEntry.*.js'));
-      let bestTime = -1;
+      let newestTime = -1;
       let newestRemote = '';
       files.forEach(fpath => {
         const mtime = fs.statSync(fpath).mtime.getTime();
-        if (mtime > bestTime) {
+        if (mtime > newestTime) {
           newestRemote = fpath;
-          bestTime = mtime;
+          newestTime = mtime;
         }
       });
       const data = readJSONFile(path.join(outputPath, 'package.json'));
