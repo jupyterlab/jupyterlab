@@ -1,12 +1,17 @@
 import {
+  CompletionConnector,
   CompletionHandler,
   ContextConnector,
-  KernelConnector,
-  CompletionConnector
+  KernelConnector
 } from '@jupyterlab/completer';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { JSONArray, JSONObject } from '@lumino/coreutils';
-import { CompletionItemKind, CompletionTriggerKind } from '../../lsp';
+import {
+  AdditionalCompletionTriggerKinds,
+  CompletionItemKind,
+  CompletionTriggerKind,
+  ExtendedCompletionTriggerKind
+} from '../../lsp';
 import * as lsProtocol from 'vscode-languageserver-types';
 import { VirtualDocument } from '../../virtual/document';
 import { IVirtualEditor } from '../../virtual/editor';
@@ -17,7 +22,6 @@ import {
 } from '../../positioning';
 import { LSPConnection } from '../../connection';
 import { Session } from '@jupyterlab/services';
-import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 
 import { CodeCompletion as LSPCompletionSettings } from '../../_completion';
 import { FeatureSettings } from '../../feature';
@@ -27,6 +31,7 @@ import {
   KernelKind
 } from '@krassowski/completion-theme/lib/types';
 import { LabIcon } from '@jupyterlab/ui-components';
+import ICompletionItemsResponseType = CompletionHandler.ICompletionItemsResponseType;
 
 /**
  * A LSP connector for completion handlers.
@@ -44,7 +49,7 @@ export class LSPConnector
   responseType = ICompletionItemsResponseType;
 
   virtual_editor: IVirtualEditor<CodeEditor.IEditor>;
-  trigger_kind: CompletionTriggerKind;
+  trigger_kind: ExtendedCompletionTriggerKind;
 
   protected get suppress_auto_invoke_in(): string[] {
     return this.options.settings.composite.suppressInvokeIn;
@@ -156,6 +161,17 @@ export class LSPConnector
       cursor_in_root
     );
 
+    const lsp_promise = this.fetch_lsp(
+      token,
+      typed_character,
+      virtual_start,
+      virtual_end,
+      virtual_cursor,
+      document,
+      position_in_token
+    );
+    let promise: Promise<CompletionHandler.ICompletionItemsReply> = null;
+
     try {
       if (this._kernel_connector && this._has_kernel) {
         // TODO: this would be awesome if we could connect to rpy2 for R suggestions in Python,
@@ -165,41 +181,34 @@ export class LSPConnector
         const kernelLanguage = await this._kernel_language();
 
         if (document.language === kernelLanguage) {
-          return Promise.all([
+          promise = Promise.all([
             this._kernel_connector.fetch(request),
-            this.fetch_lsp(
-              token,
-              typed_character,
-              virtual_start,
-              virtual_end,
-              virtual_cursor,
-              document,
-              position_in_token
-            )
+            lsp_promise
           ]).then(([kernel, lsp]) =>
             this.merge_replies(this.transform_reply(kernel), lsp, this._editor)
           );
         }
       }
-
-      return this.fetch_lsp(
-        token,
-        typed_character,
-        virtual_start,
-        virtual_end,
-        virtual_cursor,
-        document,
-        position_in_token
-      ).catch(e => {
-        console.warn('LSP: hint failed', e);
-        return this.fallback_connector
-          .fetch(request)
-          .then(this.transform_reply);
-      });
+      if (!promise) {
+        promise = lsp_promise.catch(e => {
+          console.warn('LSP: hint failed', e);
+          return this.fallback_connector
+            .fetch(request)
+            .then(this.transform_reply);
+        });
+      }
     } catch (e) {
       console.warn('LSP: kernel completions failed', e);
-      return this.fallback_connector.fetch(request).then(this.transform_reply);
+      promise = this.fallback_connector
+        .fetch(request)
+        .then(this.transform_reply);
     }
+
+    return promise.then(reply => {
+      reply = this.suppress_if_needed(reply);
+      this.trigger_kind = CompletionTriggerKind.Invoked;
+      return reply;
+    });
   }
 
   async fetch_lsp(
@@ -216,6 +225,11 @@ export class LSPConnector
     console.log('[LSP][Completer] Fetching and Transforming');
     console.log('[LSP][Completer] Token:', token, start, end);
 
+    const trigger_kind =
+      this.trigger_kind == AdditionalCompletionTriggerKinds.AutoInvoked
+        ? CompletionTriggerKind.Invoked
+        : this.trigger_kind;
+
     let lspCompletionItems = ((await connection.getCompletion(
       cursor,
       {
@@ -226,7 +240,7 @@ export class LSPConnector
       document.document_info,
       false,
       typed_character,
-      this.trigger_kind
+      trigger_kind
     )) || []) as lsProtocol.CompletionItem[];
 
     let prefix = token.value.slice(0, position_in_token + 1);
@@ -397,6 +411,19 @@ export class LSPConnector
 
   save(id: CompletionHandler.IRequest, value: void): Promise<any> {
     return Promise.resolve(undefined);
+  }
+
+  private suppress_if_needed(reply: CompletionHandler.ICompletionItemsReply) {
+    if (this.trigger_kind == AdditionalCompletionTriggerKinds.AutoInvoked) {
+      if (reply.start == reply.end) {
+        return {
+          start: reply.start,
+          end: reply.end,
+          items: []
+        };
+      }
+    }
+    return reply;
   }
 }
 

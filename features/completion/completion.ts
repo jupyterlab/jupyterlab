@@ -1,4 +1,8 @@
-import { CompletionTriggerKind } from '../../lsp';
+import {
+  AdditionalCompletionTriggerKinds,
+  CompletionTriggerKind,
+  ExtendedCompletionTriggerKind
+} from '../../lsp';
 import * as CodeMirror from 'codemirror';
 import { CodeMirrorIntegration } from '../../editor_integration/codemirror';
 import { JupyterFrontEnd } from '@jupyterlab/application';
@@ -18,7 +22,6 @@ import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/typ
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];
-  // TODO chek if this works if yest then remove settings from options
   settings: FeatureSettings<LSPCompletionSettings>;
 
   get completionCharacters() {
@@ -44,7 +47,7 @@ export class CompletionCM extends CodeMirrorIntegration {
       this.settings.composite.continuousHinting
     ) {
       (this.feature.labIntegration as CompletionLabIntegration)
-        .invoke_completer(CompletionTriggerKind.Invoked)
+        .invoke_completer(AdditionalCompletionTriggerKinds.AutoInvoked)
         .catch(console.warn);
       return;
     }
@@ -126,7 +129,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     });
   }
 
-  invoke_completer(kind: CompletionTriggerKind) {
+  invoke_completer(kind: ExtendedCompletionTriggerKind) {
     let command: string;
     this.current_completion_connector.trigger_kind = kind;
 
@@ -135,7 +138,7 @@ export class CompletionLabIntegration implements IFeatureLabIntegration {
     } else {
       command = 'completer:invoke-file';
     }
-    return this.app.commands.execute(command).then(() => {
+    return this.app.commands.execute(command).catch(() => {
       this.current_completion_connector.trigger_kind =
         CompletionTriggerKind.Invoked;
     });

@@ -45,6 +45,14 @@ export enum CompletionTriggerKind {
   TriggerForIncompleteCompletions = 3
 }
 
+export enum AdditionalCompletionTriggerKinds {
+  AutoInvoked = 9999
+}
+
+export type ExtendedCompletionTriggerKind =
+  | CompletionTriggerKind
+  | AdditionalCompletionTriggerKinds;
+
 export type CompletionItemKindStrings = keyof typeof CompletionItemKind;
 
 /**
