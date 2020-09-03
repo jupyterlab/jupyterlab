@@ -16,7 +16,7 @@ from jupyter_core.application import JupyterApp, base_flags, base_aliases
 from jupyter_core.paths import jupyter_path
 from jupyterlab.coreconfig import CoreConfig
 from jupyterlab.debuglog import DebugLogFileMixin
-from traitlets import Bool, Instance, Unicode
+from traitlets import Bool, Instance, Unicode, default
 
 from .commands import (
     install_extension, uninstall_extension, list_extensions,
