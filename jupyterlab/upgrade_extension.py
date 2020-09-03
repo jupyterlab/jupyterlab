@@ -71,11 +71,26 @@ def update_extension(target, interactive=True):
 
     python_name = os.listdir(extension_dir)[0]
     extension_dir = osp.join(extension_dir, python_name)
+    
+    # Check whether there are any phosphor dependencies
+    has_phosphor = False
+    for name in ['devDependencies', 'dependencies']:
+        if name not in data:
+            continue
 
-    # From the created package.json, grab the builder dependency
+        for (key, value) in data[name].items():
+            if key.startswith('@phosphor/'):
+                has_phosphor = True
+            data[key.replace('@phosphor/', '@lumino/')] = value
+        
+        for key in list(data[name]):
+            if key.startswith('@phosphor/'):
+                del data[name][key]
+
+    # From the created package.json grab the devDependencies
     with open(osp.join(extension_dir, 'package.json')) as fid:
         temp_data = json.load(fid)
-    
+
     for (key, value) in temp_data['devDependencies'].items():
         data['devDependencies'][key] = value
 
@@ -155,6 +170,9 @@ def update_extension(target, interactive=True):
         print('**', warning)
 
     print('** Remove _temp_extensions directory when finished')
+
+    if has_phosphor:
+        print('** Phosphor dependencies were upgraded to lumino dependencies, update imports as needed')
 
 
 if __name__ == "__main__":
