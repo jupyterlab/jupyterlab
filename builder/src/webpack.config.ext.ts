@@ -170,15 +170,20 @@ __webpack_public_path__ = ${webpackPublicPathString};
 class CleanupPlugin {
   apply(compiler: any) {
     compiler.hooks.done.tap('Cleanup', () => {
-      fs.unlinkSync(publicpath);
       // Find the remoteEntry file and add it to the package.json metadata
       const files = glob.sync(path.join(outputPath, 'remoteEntry.*.js'));
-      if (files.length !== 1) {
-        throw new Error('There is not a single remoteEntry file generated.');
-      }
+      let bestTime = -1;
+      let newestRemote = '';
+      files.forEach(fpath => {
+        const mtime = fs.statSync(fpath).mtime.getTime();
+        if (mtime > bestTime) {
+          newestRemote = fpath;
+          bestTime = mtime;
+        }
+      });
       const data = readJSONFile(path.join(outputPath, 'package.json'));
       const _build: any = {
-        load: path.basename(files[0])
+        load: path.basename(newestRemote)
       };
       if (exposes['./extension'] !== undefined) {
         _build.extension = './extension';

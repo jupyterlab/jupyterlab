@@ -90,6 +90,7 @@ def update_extension(target, interactive=True):
         data.setdefault('scripts', dict())
         for (key, value) in temp_data['scripts'].items():
             data['scripts'][key] = value
+        del data['scripts']['install-ext']
     else:
         warnings.append('package.json scripts must be updated manually')
 

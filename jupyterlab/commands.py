@@ -353,7 +353,7 @@ def get_page_config(app_options=None):
         extensions.append(extension)
 
         # If there is disabledExtensions metadata, consume it.
-        if ext_data['jupyterlab']['disabledExtensions']:
+        if ext_data['jupyterlab'].get('disabledExtensions'):
             disabled_by_extensions_all[ext_data['name']] = ext_data['jupyterlab']['disabledExtensions']
 
     disabled_by_extensions = dict()
@@ -368,6 +368,23 @@ def get_page_config(app_options=None):
     
     return page_config
 
+
+def _get_dynamic_extensions():
+    dynamic_exts = dict()
+    dynamic_ext_dirs = dict()
+    for ext_dir in jupyter_path('labextensions'):
+        ext_pattern = ext_dir + '/**/package.json'
+        for ext_path in [path for path in glob(ext_pattern, recursive=True)]:
+            with open(ext_path) as fid:
+                data = json.load(fid)
+            if data['name'] not in dynamic_exts:
+                data['ext_dir'] = ext_dir
+                data['ext_path'] = os.path.dirname(ext_path)
+                data['is_local'] = False
+                dynamic_exts[data['name']] = data
+                dynamic_ext_dirs[ext_dir] = True
+    return dynamic_ext_dirs, dynamic_exts
+    
 
 class AppOptions(HasTraits):
     """Options object for build system"""
@@ -1174,19 +1191,7 @@ class _AppHandler(object):
 
         info['disabled_core'] = disabled_core
 
-        dynamic_exts = dict()
-        dynamic_ext_dirs = dict()
-        for ext_dir in jupyter_path('labextensions'):
-            ext_pattern = ext_dir + '/**/package.json'
-            for ext_path in [path for path in glob(ext_pattern, recursive=True)]:
-                with open(ext_path) as fid:
-                    data = json.load(fid)
-                if data['name'] not in dynamic_exts:
-                    data['ext_dir'] = ext_dir
-                    data['ext_path'] = os.path.dirname(ext_path)
-                    data['is_local'] = False
-                    dynamic_exts[data['name']] = data
-                    dynamic_ext_dirs[ext_dir] = True
+        dynamic_ext_dirs, dynamic_exts = _get_dynamic_extensions()
         info['dynamic_exts'] = dynamic_exts
         info['dynamic_ext_dirs'] = dynamic_ext_dirs
         return info

@@ -204,7 +204,7 @@ class BuildLabExtensionApp(BaseExtensionApp):
 class WatchLabExtensionApp(BaseExtensionApp):
     description = "Watch labextension"
 
-    development = Bool(False, config=True,
+    development = Bool(True, config=True,
         help="Build in development mode")
 
     def run_task(self):
