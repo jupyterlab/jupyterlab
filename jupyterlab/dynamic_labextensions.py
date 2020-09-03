@@ -27,6 +27,7 @@ from jupyter_core.utils import ensure_dir_exists
 from ipython_genutils.py3compat import string_types, cast_unicode_py2
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_server.config_manager import BaseJSONConfigManager
+from jupyterlab_server.config import get_dynamic_extensions
 
 from traitlets.utils.importstring import import_item
 
@@ -182,7 +183,7 @@ def build_labextension(path, logger=None, development=False, static_url=None):
     subprocess.check_call(arguments, cwd=ext_path)
 
 
-def watch_labextension(path, logger=None, development=False):
+def watch_labextension(path, labextensions_path, logger=None, development=True):
     """Watch a labextension in a given path"""
     core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
@@ -190,11 +191,27 @@ def watch_labextension(path, logger=None, development=False):
     if logger:
         logger.info('Building extension in %s' % path)
 
+    # Check to see if we need to create a symlink
+    dynamic_exts = get_dynamic_extensions(labextensions_path)
+
+    with open(pjoin(ext_path, 'package.json')) as fid:
+        ext_data = json.load(fid)
+    
+    os.makedirs(ext_data['jupyterlab']['outputDir'], exist_ok=True)
+
+    if ext_data['name'] not in dynamic_exts:
+        full_dest = develop_labextension(ext_path, sys_prefix=True)
+    else:
+        full_dest = pjoin(dynamic_exts[ext_data['name']]['ext_dir'], ext_data['name'])
+        if not osp.islink(full_dest):
+            shutil.rmtree(full_dest)
+            os.symlink(ext_path, full_dest)
+
+    builder = _ensure_builder(ext_path, core_path)
     arguments = ['node', builder, '--core-path', core_path,  '--watch', ext_path]
     if development:
         arguments.append('--development')
 
-    builder = _ensure_builder(ext_path, core_path)
     subprocess.check_call(arguments, cwd=ext_path)
 
 

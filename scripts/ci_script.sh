@@ -228,6 +228,10 @@ if [[ $GROUP == usage ]]; then
     jlpm run get:dependency typescript
     jlpm run get:dependency react-native
 
+    # Use the extension upgrade script
+    pip install cookiecutter
+    python -m jupyterlab.upgrade_extension --no-input jupyterlab/tests/mock_packages/extension
+
     # Test theme creation - make sure we can add it as a package, build,
     # and run browser
     pip install -q pexpect
