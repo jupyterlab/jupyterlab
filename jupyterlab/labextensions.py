@@ -14,7 +14,8 @@ from copy import copy
 
 from jupyter_core.application import JupyterApp, base_flags, base_aliases
 from jupyter_core.paths import jupyter_path
-
+from jupyterlab.coreconfig import CoreConfig
+from jupyterlab.debuglog import DebugLogFileMixin
 from traitlets import Bool, Instance, Unicode
 
 from .commands import (
@@ -23,10 +24,8 @@ from .commands import (
     link_package, unlink_package, build, get_app_version, HERE,
     update_extension, AppOptions,
 )
-from jupyterlab.coreconfig import CoreConfig
-from jupyterlab.debuglog import DebugLogFileMixin
-
 from .dynamic_labextensions import develop_labextension_py, build_labextension, watch_labextension
+from .labapp import LabApp
 
 
 flags = dict(base_flags)
@@ -209,9 +208,10 @@ class WatchLabExtensionApp(BaseExtensionApp):
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        # TODO: get the config for labextensions paths from LabApp
-        from jupyter_core.paths import jupyter_path
-        labextensions_path = jupyter_path('labextensions')
+        # Get the labextensions path config from the LabApp
+        lab = LabApp()
+        lab.load_config_file()
+        labextensions_path = lab.extra_labextensions_path + lab.labextensions_path
         watch_labextension(self.extra_args[0], labextensions_path, logger=self.log, development=self.development)
 
 
@@ -301,10 +301,10 @@ class ListLabExtensionsApp(BaseExtensionApp):
     description = "List the installed labextensions"
 
     def run_task(self):
-        # TODO: get the config for labextensions paths from LabApp
-        import pdb; pdb.set_trace()
-        from jupyter_core.paths import jupyter_path
-        labextensions_path = jupyter_path('labextensions')
+        # Get the labextensions path config from the LabApp
+        lab = LabApp()
+        lab.load_config_file()
+        labextensions_path = lab.extra_labextensions_path + lab.labextensions_path
         list_extensions(app_options=AppOptions(
             app_dir=self.app_dir, logger=self.log, core_config=self.core_config, labextensions_path=labextensions_path))
 
