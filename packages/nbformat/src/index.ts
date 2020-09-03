@@ -160,7 +160,7 @@ export interface IBaseCellMetadata extends PartialJSONObject {
    * This is not strictly part of the nbformat spec, but it is added by
    * the contents manager.
    *
-   * See https://jupyter-notebook.readthedocs.io/en/latest/security.html.
+   * See https://jupyter-server.readthedocs.io/en/latest/operators/security.html.
    */
   trusted: boolean;
 
