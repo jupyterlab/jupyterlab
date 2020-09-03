@@ -73,10 +73,9 @@ try {
 }
 
 module.exports = {
-  devtool: 'source-map',
   bail: true,
   module: { rules },
-  resolve: { alias: { url: false, buffer: false, ...phosphorAlias } },
+  resolve: { alias: { 'url': false, 'buffer': false, ...phosphorAlias } },
   watchOptions: {
     poll: 500,
     aggregateTimeout: 1000

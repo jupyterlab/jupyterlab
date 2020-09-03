@@ -20,7 +20,8 @@ import { run } from '@jupyterlab/buildutils';
 
 commander
   .description('Build an extension')
-  .option('--development', 'build in development mode')
+  .option('--development', 'build in development mode (implies --source-map)')
+  .option('--source-map', 'generate source maps')
   .requiredOption('--core-path <path>', 'the core package directory')
   .option(
     '--static-url <url>',
@@ -31,6 +32,7 @@ commander
     const mode = cmd.development ? 'development' : 'production';
     const corePath = path.resolve(cmd.corePath || process.cwd());
     const packagePath = path.resolve(cmd.args[0]);
+    const sourceMap = cmd.sourceMap ? 'true' : '';
 
     const webpack = require.resolve('webpack-cli/bin/cli.js');
     const config = path.join(__dirname, 'webpack.config.ext.js');
@@ -42,7 +44,8 @@ commander
       PACKAGE_PATH: packagePath,
       NODE_ENV: mode,
       CORE_PATH: corePath,
-      STATIC_URL: cmd.staticUrl
+      STATIC_URL: cmd.staticUrl,
+      SOURCE_MAP: sourceMap
     };
     run(cmdText, { env: { ...process.env, ...env } });
   });
