@@ -156,8 +156,12 @@ body.lm-mod-override-cursor .jp-OutputArea-output.jp-mod-isolated:before {
   flex: 1 1 auto;
 }
 
-.jp-OutputArea-executeResult.jp-RenderedText {
+/* Text output with the Out[] prompt needs a top padding to match the
+ * alignment of the Out[] prompt itself.
+ */
+.jp-OutputArea-executeResult .jp-RenderedText.jp-OutputArea-output {
   padding-top: var(--jp-code-padding);
+  border-top: var(--jp-border-width) solid transparent;
 }
 
 /*-----------------------------------------------------------------------------
