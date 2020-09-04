@@ -15,7 +15,7 @@ import { IRunningSessions, IRunningSessionManagers } from '@jupyterlab/running';
 
 import { ITranslator } from '@jupyterlab/translation';
 
-import { fileIcon } from '@jupyterlab/ui-components';
+import { fileIcon, LabIcon } from '@jupyterlab/ui-components';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
 
@@ -113,12 +113,14 @@ export function addOpenTabsSessionManager(
       this._widget.close();
     }
     icon() {
-      // const icon = this._widget.icon;
-      // let labIcon: LabIcon;
-      // if (icon instanceof string) {
-      //   labIcon = new LabIcon();
-      // }
-      return fileIcon;
+      let icon = fileIcon;
+      if (this._widget instanceof MainAreaWidget) {
+        const widgetIcon = this._widget.title.icon;
+        if (icon instanceof LabIcon) {
+          icon = widgetIcon as LabIcon;
+        }
+      }
+      return icon;
     }
     label() {
       return this._widget.title.label;
