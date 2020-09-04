@@ -98,17 +98,17 @@ export namespace Palette {
     settingRegistry: ISettingRegistry | null
   ): ICommandPalette {
     const { commands, shell } = app;
-    console.log('Activating command palette');
     const trans = translator.load('jupyterlab');
     const palette = Private.createPalette(app, translator);
     const modalPalette = new ModalCommandPalette({ commandPalette: palette });
-    let modal = true;
+    let modal = false;
+
+    shell.add(palette, 'left', { rank: 300 });
 
     if (settingRegistry) {
       const loadSettings = settingRegistry.load(PALETTE_PLUGIN_ID);
       const updateSettings = (settings: ISettingRegistry.ISettings): void => {
         const newModal = settings.get('modal').composite as boolean;
-        console.log('update settings', modal, newModal);
         if (modal && !newModal) {
           palette.parent = null;
           modalPalette.detach();
@@ -175,7 +175,6 @@ export namespace Palette {
     restorer: ILayoutRestorer,
     translator: ITranslator
   ): void {
-    console.log('restoring palette');
     const palette = Private.createPalette(app, translator);
     // Let the application restorer track the command palette for restoration of
     // application state (e.g. setting the command palette as the current side bar
@@ -201,7 +200,6 @@ namespace Private {
     translator: ITranslator
   ): CommandPalette {
     if (!palette) {
-      console.log('Creating palette');
       // use a renderer tweaked to use inline svg icons
       palette = new CommandPalette({
         commands: app.commands,
