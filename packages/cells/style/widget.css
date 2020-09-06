@@ -29,7 +29,7 @@
 
 .jp-Cell-inputWrapper,
 .jp-Cell-outputWrapper {
-  display: flex;
+  display: block;
   flex-direction: row;
   padding: 0px;
   margin: 0px;
