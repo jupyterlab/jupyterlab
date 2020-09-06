@@ -164,7 +164,7 @@ def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=Fals
     return full_dests
 
 
-def build_labextension(path, logger=None, development=False, static_url=None):
+def build_labextension(path, logger=None, development=False, static_url=None, source_map = False):
     """Build a labextension in the given path"""
     core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
@@ -179,11 +179,13 @@ def build_labextension(path, logger=None, development=False, static_url=None):
         arguments.extend(['--static-url', static_url])
     if development:
         arguments.append('--development')
+    if source_map:
+        arguments.append('--source-map')
 
     subprocess.check_call(arguments, cwd=ext_path)
 
 
-def watch_labextension(path, labextensions_path, logger=None, development=True):
+def watch_labextension(path, labextensions_path, logger=None, development=False, source_map=False):
     """Watch a labextension in a given path"""
     core_path = osp.join(HERE, 'staging')
     ext_path = osp.abspath(path)
@@ -211,6 +213,8 @@ def watch_labextension(path, labextensions_path, logger=None, development=True):
     arguments = ['node', builder, '--core-path', core_path,  '--watch', ext_path]
     if development:
         arguments.append('--development')
+    if source_map:
+        arguments.append('--source-map')
 
     subprocess.check_call(arguments, cwd=ext_path)
 

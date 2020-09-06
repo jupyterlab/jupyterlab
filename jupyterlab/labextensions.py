@@ -200,13 +200,18 @@ class BuildLabExtensionApp(BaseExtensionApp):
     development = Bool(False, config=True,
         help="Build in development mode")
 
+    source_map = Bool(False, config=True,
+        help="Generage source maps")
+
     aliases = {
-        'static-url': 'BuildLabExtensionApp.static_url'
+        'static-url': 'BuildLabExtensionApp.static_url',
+        'development': 'BuildLabExtensionApp.development',
+        'source-map': 'BuildLabExtensionApp.source_map'
     }
 
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
-        build_labextension(self.extra_args[0], logger=self.log, development=self.development, static_url=self.static_url or None)
+        build_labextension(self.extra_args[0], logger=self.log, development=self.development, static_url=self.static_url or None, source_map = self.source_map)
 
 
 class WatchLabExtensionApp(BaseExtensionApp):
@@ -215,10 +220,18 @@ class WatchLabExtensionApp(BaseExtensionApp):
     development = Bool(True, config=True,
         help="Build in development mode")
 
+    source_map = Bool(False, config=True,
+        help="Generage source maps")
+
+    aliases = {
+        'development': 'BuildLabExtensionApp.development',
+        'source-map': 'BuildLabExtensionApp.source_map'
+
+    }
     def run_task(self):
         self.extra_args = self.extra_args or [os.getcwd()]
         labextensions_path = self.labextensions_path
-        watch_labextension(self.extra_args[0], labextensions_path, logger=self.log, development=self.development)
+        watch_labextension(self.extra_args[0], labextensions_path, logger=self.log, development=self.development, source_map=self.source_map)
 
 
 class UpdateLabExtensionApp(BaseExtensionApp):
