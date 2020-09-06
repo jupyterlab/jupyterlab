@@ -153,6 +153,16 @@
       "selector": ".jp-Notebook:focus"
     },
     {
+      "command": "notebook:paste-cell-above",
+      "keys": ["Shift P"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
+      "command": "notebook:paste-cell-below",
+      "keys": ["P"],
+      "selector": ".jp-Notebook:focus"
+    },
+    {
       "command": "notebook:paste-cell-below",
       "keys": ["V"],
       "selector": ".jp-Notebook:focus"
