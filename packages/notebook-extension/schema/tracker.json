@@ -68,7 +68,7 @@
       "selector": ".jp-Notebook:focus"
     },
     {
-      "command": "notebook:delete-cell",
+      "command": "notebook:cut-cell",
       "keys": ["D", "D"],
       "selector": ".jp-Notebook:focus"
     },
