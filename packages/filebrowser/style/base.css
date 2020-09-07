@@ -36,7 +36,7 @@
 
 .jp-BreadCrumbs {
   flex: 0 0 auto;
-  margin: 4px 12px;
+  margin: 8px 12px 8px 12px;
 }
 
 .jp-BreadCrumbs-item {
@@ -65,6 +65,7 @@
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
   padding: 0px;
+  margin: 8px 12px 0px 12px;
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
@@ -77,6 +78,28 @@
 
 .jp-FileBrowser-toolbar.jp-Toolbar .jp-ToolbarButtonComponent {
   width: 100%;
+}
+
+/*-----------------------------------------------------------------------------
+| Other styles
+|----------------------------------------------------------------------------*/
+
+.jp-FileDialog.jp-mod-conflict input {
+  color: red;
+}
+
+.jp-FileDialog .jp-new-name-title {
+  margin-top: 12px;
+}
+
+.jp-LastModified-hidden {
+  display: none;
+}
+
+.jp-FileBrowser-filterBox {
+  padding: 0px;
+  flex: 0 0 auto;
+  margin: 8px 12px 0px 12px;
 }
 
 /*-----------------------------------------------------------------------------
@@ -237,20 +260,4 @@
   min-width: 120px;
   min-height: 120px;
   outline: none;
-}
-
-.jp-FileDialog.jp-mod-conflict input {
-  color: red;
-}
-
-.jp-FileDialog .jp-new-name-title {
-  margin-top: 12px;
-}
-
-.jp-LastModified-hidden {
-  display: none;
-}
-
-.jp-FileBrowser-filterBox {
-  padding: 4px;
 }
