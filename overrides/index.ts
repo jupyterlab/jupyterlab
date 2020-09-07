@@ -17,7 +17,7 @@ class CodeOverridesManager implements ILSPCodeOverridesManager {
   }
 
   register(override: IScopedCodeOverride, language: string) {
-    if (!(language in override)) {
+    if (!(language in this._overrides)) {
       this._overrides[language] = { cell: [], line: [] };
     }
     let overrides = this._overrides[language];
