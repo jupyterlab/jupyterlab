@@ -69,15 +69,31 @@
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar {
-  justify-content: space-evenly;
+  justify-content: flex-start;
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar .jp-Toolbar-item {
-  flex: 1;
+  flex: 0 0 auto;
+  padding-left: 0px;
+  padding-right: 2px;
 }
 
 .jp-FileBrowser-toolbar.jp-Toolbar .jp-ToolbarButtonComponent {
-  width: 100%;
+  width: 40px;
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar
+  .jp-Toolbar-item:first-child
+  .jp-ToolbarButtonComponent {
+  width: 72px;
+  background: var(--jp-brand-color1);
+}
+
+.jp-FileBrowser-toolbar.jp-Toolbar
+  .jp-Toolbar-item:first-child
+  .jp-ToolbarButtonComponent
+  .jp-icon3 {
+  fill: white;
 }
 
 /*-----------------------------------------------------------------------------
