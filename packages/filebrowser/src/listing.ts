@@ -193,9 +193,9 @@ const DRAG_THRESHOLD = 5;
 const IS_MAC = !!navigator.platform.match(/Mac/i);
 
 /**
- * The factory MIME type supported by phosphor dock panels.
+ * The factory MIME type supported by lumino dock panels.
  */
-const FACTORY_MIME = 'application/vnd.phosphor.widget-factory';
+const FACTORY_MIME = 'application/vnd.lumino.widget-factory';
 
 /**
  * A widget which hosts a file list area.
