@@ -45,6 +45,8 @@ data_files_spec = [
     ('share/jupyter/lab/themes', '%s/themes' % NAME, '**'),
     ('etc/jupyter/jupyter_server_config.d',
      'jupyter-config/jupyter_server_config.d', 'jupyterlab.json'),
+    ('etc/jupyter/jupyter_notebook_config.d',
+     'jupyter-config/jupyter_notebook_config.d', 'jupyterlab.json'),
 ]
 
 package_data_spec = dict()
@@ -152,8 +154,8 @@ setup_args['install_requires'] = [
     'ipython',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
     'jupyterlab_server~=2.0.0b7',
-    'jupyter_server~=1.0.0rc13',
-    'nbclassic~=0.2.0rc4',
+    'jupyter_server~=1.0.0rc16',
+    'nbclassic~=0.2.0rc7',
     'jinja2>=2.10'
 ]
 
