@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-console",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@jupyterlab/codemirror": "^2.2.2",
-    "@jupyterlab/console": "^2.2.4",
+    "@jupyterlab/console": "^2.2.5",
     "@jupyterlab/rendermime": "^2.2.2",
     "@jupyterlab/services": "^5.2.3",
     "@jupyterlab/theme-light-extension": "^2.2.4",

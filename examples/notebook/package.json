@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-notebook",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -12,9 +12,9 @@
     "@jupyterlab/completer": "^2.2.2",
     "@jupyterlab/docmanager": "^2.2.2",
     "@jupyterlab/docregistry": "^2.2.2",
-    "@jupyterlab/documentsearch": "^2.2.4",
+    "@jupyterlab/documentsearch": "^2.2.5",
     "@jupyterlab/mathjax2": "^2.2.0",
-    "@jupyterlab/notebook": "^2.2.4",
+    "@jupyterlab/notebook": "^2.2.5",
     "@jupyterlab/rendermime": "^2.2.2",
     "@jupyterlab/services": "^5.2.3",
     "@jupyterlab/theme-light-extension": "^2.2.4",

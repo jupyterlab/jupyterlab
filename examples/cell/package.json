@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-cell",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^2.2.4",
-    "@jupyterlab/cells": "^2.2.4",
+    "@jupyterlab/cells": "^2.2.5",
     "@jupyterlab/codemirror": "^2.2.2",
     "@jupyterlab/completer": "^2.2.2",
     "@jupyterlab/rendermime": "^2.2.2",

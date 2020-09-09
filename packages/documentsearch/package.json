@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/documentsearch",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "Document Search",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -33,11 +33,11 @@
   },
   "dependencies": {
     "@jupyterlab/apputils": "^2.2.4",
-    "@jupyterlab/cells": "^2.2.4",
+    "@jupyterlab/cells": "^2.2.5",
     "@jupyterlab/codeeditor": "^2.2.3",
     "@jupyterlab/codemirror": "^2.2.2",
     "@jupyterlab/fileeditor": "^2.2.2",
-    "@jupyterlab/notebook": "^2.2.4",
+    "@jupyterlab/notebook": "^2.2.5",
     "@jupyterlab/ui-components": "^2.2.2",
     "@lumino/algorithm": "^1.2.3",
     "@lumino/coreutils": "^1.4.2",

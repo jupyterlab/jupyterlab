@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/logconsole-extension",
-  "version": "2.2.4",
+  "version": "2.2.5",
   "description": "JupyterLab - Log Console Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -39,7 +39,7 @@
     "@jupyterlab/logconsole": "^2.2.2",
     "@jupyterlab/mainmenu": "^2.2.2",
     "@jupyterlab/nbformat": "^2.2.3",
-    "@jupyterlab/notebook": "^2.2.4",
+    "@jupyterlab/notebook": "^2.2.5",
     "@jupyterlab/rendermime": "^2.2.2",
     "@jupyterlab/services": "^5.2.3",
     "@jupyterlab/settingregistry": "^2.2.3",

@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/filebrowser",
-  "version": "2.2.2",
+  "version": "2.2.3",
   "description": "JupyterLab - FileBrowser Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -60,7 +60,7 @@
     "react": "~16.9.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.4",
+    "@jupyterlab/testutils": "^2.2.5",
     "@types/jest": "^24.0.23",
     "jest": "^25.2.3",
     "rimraf": "~3.0.0",
