@@ -16,25 +16,6 @@ except ImportError:
 COOKIECUTTER_BRANCH = "3.0"
 
 
-"""TODO
-[x] use the cookiecuter api directly
-[x] do no overwrite files when --no-input
-[x] make sure the name is all hypen -> underscore for python name
-[x] fix devDependencies
-[x] make sure lint still works
-[x] make sure `yarn && yarn watch` works
-[x] if not installed, run pip develop install
-[x] the symlink is in the wrong directory when running `pip install -e .` and then watching
-[ ] update cookiecutter
-[ ] test all of the advanced extensions
-[ ] test on an example with a server extension
-[ ] make a commit where we apply the auto changes to server ext
-[ ] make another commit where we apply the manual extensiosn
-[ ] write a higher-level script that goes across the whole repo
-   - leaves server extension out 
-   - gives a top level summary of folders that had setup.py in them
-"""
-
 def update_extension(target, interactive=True):
     """Update an extension to the current JupyterLab
 

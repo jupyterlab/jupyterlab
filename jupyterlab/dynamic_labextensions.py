@@ -113,7 +113,7 @@ def develop_labextension(path, symlink=True, overwrite=False,
                 logger.info("Symlinking: %s -> %s" % (full_dest, path))
             os.symlink(path, full_dest)
         elif not os.path.islink(full_dest):
-            raise ValueError("%s exists and is not a symlink" % path)
+            raise ValueError("%s exists and is not a symlink" % full_dest)
 
     elif os.path.isdir(path):
         path = pjoin(os.path.abspath(path), '') # end in path separator
@@ -134,7 +134,7 @@ def develop_labextension(path, symlink=True, overwrite=False,
     return full_dest
 
 
-def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=False, symlink=True, labextensions_dir=None, logger=None):
+def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=True, symlink=True, labextensions_dir=None, logger=None):
     """Develop a labextension bundled in a Python package.
 
     Returns a list of installed/updated directories.
@@ -200,7 +200,7 @@ def watch_labextension(path, labextensions_path, logger=None, development=False,
         ext_data = json.load(fid)
 
     if ext_data['name'] not in dynamic_exts:
-        full_dest = develop_labextension_py(ext_path, sys_prefix=True)
+        develop_labextension_py(ext_path, sys_prefix=True)
     else:
         full_dest = pjoin(dynamic_exts[ext_data['name']]['ext_dir'], ext_data['name'])
         output_dir = pjoin(ext_path, ext_data['jupyterlab']['outputDir'])
