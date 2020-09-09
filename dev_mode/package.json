@@ -234,12 +234,7 @@
       "@jupyterlab/pdf-extension": "",
       "@jupyterlab/vega5-extension": ""
     },
-    "externalExtensions": {
-      "@jupyter-widgets/jupyterlab-manager": "2.0.0",
-      "plotlywidget": "1.5.4",
-      "jupyterlab-plotly": "1.5.4",
-      "fdtmime": "*"
-    },
+    "externalExtensions": {},
     "buildDir": "./static",
     "outputDir": ".",
     "singletonPackages": [
