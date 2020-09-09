@@ -50,7 +50,7 @@
     "xterm-addon-fit": "~0.3.0"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.4",
+    "@jupyterlab/testutils": "^2.2.5",
     "@types/jest": "^24.0.23",
     "canvas": "^2.6.1",
     "jest": "^25.2.3",

@@ -61,7 +61,7 @@
     "sanitize-html": "~1.20.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.4",
+    "@jupyterlab/testutils": "^2.2.5",
     "@types/jest": "^24.0.23",
     "@types/react-dom": "~16.9.4",
     "@types/sanitize-html": "^1.20.2",

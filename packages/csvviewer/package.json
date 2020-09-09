@@ -52,7 +52,7 @@
     "@lumino/widgets": "^1.11.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.4",
+    "@jupyterlab/testutils": "^2.2.5",
     "@types/jest": "^24.0.23",
     "canvas": "^2.6.1",
     "csv-spectrum": "^1.0.0",
