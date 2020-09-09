@@ -7,6 +7,10 @@ JupyterLab Changelog
 `v2.2.x <https://github.com/jupyterlab/jupyterlab/milestone/53>`__
 ------------------------------------------------------------------
 
+v2.2.6
+^^^^^^
+* Update mimetype for dragging files  (`#8966 <https://github.com/jupyterlab/jupyterlab/pull/8966>`__)
+
 v2.2.5
 ^^^^^^
 * Header 'Content-Type' should not be overwritten  (`#8892 <https://github.com/jupyterlab/jupyterlab/pull/8892>`__)
