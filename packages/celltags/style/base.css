@@ -1,15 +1,16 @@
 .tag {
-  height: 32px;
-  width: fit-content;
-  border-radius: 35px;
+  height: 24px;
+  border-radius: 12px;
   margin-right: 5px;
   margin-bottom: 10px;
   padding: 12px;
-  font-size: var(--jp-ui-font-size-1);
+  font-size: var(--jp-ui-font-size1);
   display: inline-flex;
   justify-content: center;
   align-items: center;
   max-width: calc(100% - 25px);
+  border: 1px solid var(--jp-border-color1);
+  color: var(--jp-ui-font-color1);
   -webkit-touch-callout: none;
   -webkit-user-select: none;
   -khtml-user-select: none;
@@ -19,15 +20,11 @@
 }
 
 .unapplied-tag {
-  background-color: var(--jp-layout-color1);
-  border: 1px solid var(--jp-ui-font-color2);
-  color: var(--jp-ui-font-color2);
+  background-color: var(--jp-layout-color2);
 }
 
 .applied-tag {
-  background-color: var(--jp-layout-color2);
-  border: 1px solid var(--jp-ui-font-color1);
-  color: var(--jp-ui-font-color1);
+  background-color: var(--jp-layout-color3);
 }
 
 .add-tag {
@@ -36,19 +33,15 @@
   border: none;
   outline: none;
   resize: horizontal;
-  font-size: var(--jp-ui-font-size-1);
-  color: var(--jp-ui-font-color2);
-  background-color: var(--jp-layout-color1);
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color2);
 }
 
 .tag-holder {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.tag-hover {
-  background-color: var(--jp-layout-color2);
 }
 
 .tag-header {

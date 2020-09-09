@@ -190,7 +190,7 @@ export class TagTool extends NotebookTools.Tool {
   protected onAfterAttach() {
     if (!this.header) {
       const header = document.createElement('header');
-      header.textContent = this._trans.__('Tags in Notebook');
+      header.textContent = this._trans.__('Cell Tags');
       header.className = 'tag-header';
       this.parent!.node.insertBefore(header, this.node);
       this.header = true;
