@@ -9,7 +9,7 @@
 
 /* All input areas */
 .jp-InputArea {
-  display: ;
+  display: block;
   flex-direction: row;
 }
 
