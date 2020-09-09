@@ -54,7 +54,12 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
   activate: async (app: JupyterFrontEnd, settings: ISettingRegistry) => {
     const setting = await settings.load(PLUGIN_ID);
     const currentLocale: string = setting.get('locale').composite as string;
-    const translationManager = new TranslationManager();
+    let stringsPrefix: string = setting.get('stringsPrefix')
+      .composite as string;
+    const displayStringsPrefix: boolean = setting.get('displayStringsPrefix')
+      .composite as boolean;
+    stringsPrefix = displayStringsPrefix ? stringsPrefix : '';
+    const translationManager = new TranslationManager(stringsPrefix);
     await translationManager.fetch(currentLocale);
     return translationManager;
   }
