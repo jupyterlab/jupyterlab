@@ -6,14 +6,18 @@ import {
   rpy2_reverse_pattern,
   rpy2_reverse_replacement
 } from './rpy2';
+import { LINE_MAGIC_PREFIX } from '../ipython/overrides';
 
 export let overrides: IScopedCodeOverride[] = [
   {
     // support up to 10 arguments
-    pattern: '%R' + rpy2_args_pattern(RPY2_MAX_ARGS) + '(.*)(\n)?',
-    replacement: (match, ...args) => {
+    pattern:
+      LINE_MAGIC_PREFIX + '%R' + rpy2_args_pattern(RPY2_MAX_ARGS) + '(.*)(\n)?',
+    replacement: (match, prefix, ...args) => {
       let r = parse_r_args(args, -4);
-      return `${r.outputs}rpy2.ipython.rmagic.RMagics.R("${r.content}", "${r.others}"${r.inputs})`;
+      // note: only supports assignment or -o/--output, not both
+      // TODO assignment like in x = %R 1 should be distinguished from -o
+      return `${prefix}${r.outputs}rpy2.ipython.rmagic.RMagics.R("${r.content}", "${r.others}"${r.inputs})`;
     },
     scope: 'line',
     reverse: {

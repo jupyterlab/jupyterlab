@@ -76,6 +76,12 @@ describe('rpy2 IPython overrides', () => {
       expect(reverse).to.equal(line);
     });
 
+    it('does not substitute magic-like constructs', () => {
+      let line = 'print("%R -i x")';
+      let override = line_magics.override_for(line);
+      expect(override).to.equal(null);
+    });
+
     it('works with the long form arguments', () => {
       let line = '%R --input x';
       let override = line_magics.override_for(line);

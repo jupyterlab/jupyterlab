@@ -36,6 +36,9 @@ function empty_or_escaped(x: string) {
  * This will not always work: e.g.:
  *    x['a = !ls'] = !ls
  * is perfectly valid IPython, but regular expressions cannot help here.
+ *
+ * Look behind could be used to avoid capturing the group,
+ * but at the time of writing support is only at 77%.
  */
 export const LINE_MAGIC_PREFIX = '^(\\s*|\\s*\\S+\\s*=\\s*)';
 
