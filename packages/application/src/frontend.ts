@@ -327,6 +327,7 @@ export namespace JupyterFrontEnd {
       readonly static: string;
       readonly settings: string;
       readonly themes: string;
+      readonly translations: string;
       readonly hubPrefix?: string;
       readonly hubHost?: string;
       readonly hubUser?: string;

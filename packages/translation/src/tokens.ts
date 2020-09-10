@@ -24,9 +24,16 @@ export const ITranslatorConnector = new Token<ITranslatorConnector>(
 export class TranslatorConnector
   extends DataConnector<Language, Language, { language: string }>
   implements ITranslatorConnector {
-  async fetch(opts: { language: string }): Promise<Language> {
-    return requestTranslationsAPI(opts.language);
+  constructor(translationsUrl?: string) {
+    super();
+    this._translationsUrl = translationsUrl;
   }
+
+  async fetch(opts: { language: string }): Promise<Language> {
+    return requestTranslationsAPI(opts.language, this._translationsUrl);
+  }
+
+  private _translationsUrl: string;
 }
 
 export type TranslationBundle = {

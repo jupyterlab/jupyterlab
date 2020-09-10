@@ -14,16 +14,13 @@ import { ServerConnection } from '@jupyterlab/services';
  */
 export async function requestTranslationsAPI<T>(
   locale = '',
+  translationsUrl?: string,
   init: RequestInit = {}
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
-  console.log("LOOK AT ME!", settings.appUrl);
-  const requestUrl = URLExt.join(
-    settings.baseUrl,
-    `${settings.appUrl}/api/translations/`, // API Namespace
-    locale
-  );
+  translationsUrl = translationsUrl || `${settings.appUrl}/api/translations/`;
+  const requestUrl = URLExt.join(settings.baseUrl, translationsUrl, locale);
   let response: Response;
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
