@@ -97,7 +97,12 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm run build:src
 
     # Make sure we can build for release
-    jlpm run build:dev:prod:release
+    if [[ "$OSTYPE" -ne "Windows" ]]; then
+        jlpm run build:dev:prod:release
+    fi
+
+    # Run a browser check
+    python -m jupyterlab.browser_check
 
     # Make sure the storybooks build.
     jlpm run build:storybook
