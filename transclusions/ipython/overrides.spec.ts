@@ -165,6 +165,46 @@ describe('Default IPython overrides', () => {
     it('does not override != comparisons', () => {
       let override = line_magics_map.override_for('1 != None');
       expect(override).to.equal(null);
-    })
+    });
+  });
+
+  describe('IPython help line magics', () => {
+    let line_magics_map = new ReversibleOverridesMap(
+      overrides.filter(override => override.scope == 'line')
+    );
+
+    it('overrides pinfo', () => {
+      let override = line_magics_map.override_for('?int');
+      expect(override).to.equal("get_ipython().run_line_magic('pinfo', 'int')");
+
+      let reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal('?int');
+
+      override = line_magics_map.override_for('int?');
+      expect(override).to.equal(
+        "get_ipython().run_line_magic('pinfo',  'int')"
+      );
+
+      reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal('int?');
+    });
+
+    it('overrides pinfo2', () => {
+      let override = line_magics_map.override_for('??int');
+      expect(override).to.equal(
+        "get_ipython().run_line_magic('pinfo2', 'int')"
+      );
+
+      let reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal('??int');
+
+      override = line_magics_map.override_for('int??');
+      expect(override).to.equal(
+        "get_ipython().run_line_magic('pinfo2',  'int')"
+      );
+
+      reverse = line_magics_map.reverse.override_for(override);
+      expect(reverse).to.equal('int??');
+    });
   });
 });

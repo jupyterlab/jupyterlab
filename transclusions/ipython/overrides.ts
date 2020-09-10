@@ -37,7 +37,7 @@ function empty_or_escaped(x: string) {
  *    x['a = !ls'] = !ls
  * is perfectly valid IPython, but regular expressions cannot help here.
  */
-export const LINE_MAGIC_PREFIX = '^(\\s*|\\s*\\S+\\s*=\\s*)'
+export const LINE_MAGIC_PREFIX = '^(\\s*|\\s*\\S+\\s*=\\s*)';
 
 export let overrides: IScopedCodeOverride[] = [
   /**
@@ -52,6 +52,45 @@ export let overrides: IScopedCodeOverride[] = [
     reverse: {
       pattern: 'get_ipython\\(\\).getoutput\\("(.*?)"\\)(\n)?',
       replacement: '!$1$2',
+      scope: 'line'
+    }
+  },
+  {
+    // note: assignments of pinfo/pinfo2 are not supported by IPython
+    pattern: '^(\\s*)' + '(\\?{1,2})(\\S+)(\n)?',
+    replacement: (match, prefix, marks, name, line_break) => {
+      const cmd = marks == '?' ? 'pinfo' : 'pinfo2';
+      line_break = line_break || '';
+      // trick: use single quotes to distinguish
+      return `${prefix}get_ipython().run_line_magic(\'${cmd}\', \'${name}\')${line_break}`;
+    },
+    scope: 'line',
+    reverse: {
+      pattern:
+        "get_ipython\\(\\).run_line_magic\\('(pinfo2?)', '(.*?)'\\)(\n)?",
+      replacement: (match, cmd, name) => {
+        const marks = cmd == 'pinfo' ? '?' : '??';
+        return `${marks}${name}`;
+      },
+      scope: 'line'
+    }
+  },
+  {
+    pattern: '^(\\s*)' + '([^\\?\\s]+)(\\?{1,2})(\n)?',
+    replacement: (match, prefix, name, marks, line_break) => {
+      const cmd = marks == '?' ? 'pinfo' : 'pinfo2';
+      line_break = line_break || '';
+      // trick: use two spaces to distinguish pinfo using suffix (int?) from the one using prefix (?int)
+      return `${prefix}get_ipython().run_line_magic(\'${cmd}\',  \'${name}\')${line_break}`;
+    },
+    scope: 'line',
+    reverse: {
+      pattern:
+        "get_ipython\\(\\).run_line_magic\\('(pinfo2?)',  '(.*?)'\\)(\n)?",
+      replacement: (match, cmd, name) => {
+        const marks = cmd == 'pinfo' ? '?' : '??';
+        return `${name}${marks}`;
+      },
       scope: 'line'
     }
   },
