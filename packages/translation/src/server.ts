@@ -18,9 +18,10 @@ export async function requestTranslationsAPI<T>(
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
+  console.log("LOOK AT ME!", settings.appUrl);
   const requestUrl = URLExt.join(
     settings.baseUrl,
-    '/lab/api/translations/', // API Namespace
+    `${settings.appUrl}/api/translations/`, // API Namespace
     locale
   );
   let response: Response;
