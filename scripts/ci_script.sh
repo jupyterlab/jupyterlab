@@ -101,8 +101,9 @@ if [[ $GROUP == integrity2 ]]; then
         jlpm run build:dev:prod:release
     fi
 
-    # Run a browser check
-    python -m jupyterlab.browser_check
+    # Run a browser check in dev mode
+    jlpm run build
+    python -m jupyterlab.browser_check --dev-mode
 
     # Make sure the storybooks build.
     jlpm run build:storybook
