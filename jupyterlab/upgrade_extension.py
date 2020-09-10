@@ -8,7 +8,7 @@ import sys
 import subprocess
 
 try:
-    import cookiecutter
+    from cookiecutter.main import cookiecutter
 except ImportError:
     raise RuntimeError("Please install cookiecutter")
 
@@ -45,32 +45,34 @@ def update_extension(target, interactive=True):
     else:
         python_name = data['name']
         if '@' in python_name:
-            python_name = python_name[1:].replace('/', '_')
+            python_name = python_name[1:].replace('/', '_').replace('-', '_')
     
-    arg_data = dict(
+    output_dir = osp.join(target, '_temp_extension')
+    if osp.exists(output_dir):
+        shutil.rmtree(output_dir)
+
+    # Build up the cookiecutter args and run the cookiecutter
+    extra_context = dict(
         author_name = data.get('author', '<author_name>'),
         labextension_name = data['name'],
         project_short_description = data.get('description', '<description>'),
-        has_server_extension = 'y' if osp.exists(setup_file) else 'n',
+        has_server_extension = 'y' if osp.exists(osp.join(target, 'jupyter-config')) else 'n',
         has_binder = 'y' if osp.exists(osp.join(target, 'binder')) else 'n',
         repository = data.get('repository', {}).get('url', '<repository'),
         python_name = python_name
     )
 
-    args = ['%s=%s' % (key, value) for (key, value) in arg_data.items()]
-    repo = 'https://github.com/jupyterlab/extension-cookiecutter-ts'
+    template = 'https://github.com/jupyterlab/extension-cookiecutter-ts'
+    cookiecutter(template=template, checkout=COOKIECUTTER_BRANCH, output_dir=output_dir, 
+                extra_context=extra_context, no_input=not interactive)
 
-    extension_dir = osp.join(target, '_temp_extension')
-    if osp.exists(extension_dir):
-        shutil.rmtree(extension_dir)
+    python_name = os.listdir(output_dir)[0]
 
-    if not interactive:
-        args.append('--no-input')
-
-    subprocess.run(['cookiecutter', repo, '--checkout', COOKIECUTTER_BRANCH, '-o', extension_dir] + args, cwd=target)
-
-    python_name = os.listdir(extension_dir)[0]
-    extension_dir = osp.join(extension_dir, python_name)
+    # hoist the output up one level
+    shutil.move(osp.join(output_dir, python_name), osp.join(output_dir, '_temp'))
+    for filename in os.listdir(osp.join(output_dir, '_temp')):
+        shutil.move(osp.join(output_dir, '_temp', filename), osp.join(output_dir, filename))
+    shutil.rmtree(osp.join(output_dir, '_temp'))
     
     # Check whether there are any phosphor dependencies
     has_phosphor = False
@@ -81,14 +83,14 @@ def update_extension(target, interactive=True):
         for (key, value) in data[name].items():
             if key.startswith('@phosphor/'):
                 has_phosphor = True
-            data[key.replace('@phosphor/', '@lumino/')] = value
+                data[name][key.replace('@phosphor/', '@lumino/')] = value
         
         for key in list(data[name]):
             if key.startswith('@phosphor/'):
                 del data[name][key]
 
     # From the created package.json grab the devDependencies
-    with open(osp.join(extension_dir, 'package.json')) as fid:
+    with open(osp.join(output_dir, 'package.json')) as fid:
         temp_data = json.load(fid)
 
     for (key, value) in temp_data['devDependencies'].items():
@@ -139,7 +141,7 @@ def update_extension(target, interactive=True):
 
     # For the other files, ask about whether to override (when it exists)
     # At the end, list the files that were: added, overridden, skipped
-    path = Path(extension_dir)
+    path = Path(output_dir)
     for p in path.rglob("*"):
         relpath = osp.relpath(p, path)
         if relpath == "package.json":
@@ -160,11 +162,11 @@ def update_extension(target, interactive=True):
             if interactive:
                 choice = input('overwrite "%s"? [n]: ' % relpath)
             else:
-                choice = 'y'
+                choice = 'n'
             if choice.upper().startswith('Y'):
                 shutil.copy(p, file_target)
             else:
-                warnings.append('skipped %s' % relpath)
+                warnings.append('skipped _temp_extension/%s' % relpath)
 
     # Print out all warnings
     for warning in warnings:

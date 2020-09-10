@@ -109,6 +109,7 @@ prompts (``apod`` stands for Astronomy Picture of the Day, the NASA service we
 are using to fetch pictures).
 
 ::
+
     author_name []: Your Name
     python_name [myextension]: jupyterlab_apod
     labextension_name [myextension]: jupyterlab_apod

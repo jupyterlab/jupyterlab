@@ -80,6 +80,10 @@ if [[ $GROUP == integrity ]]; then
 
     # Check yarn.lock file
     jlpm check --integrity
+
+    # Run a browser check in dev mode
+    jlpm run build
+    python -m jupyterlab.browser_check --dev-mode
 fi
 
 

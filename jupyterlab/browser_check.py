@@ -11,6 +11,7 @@ import logging
 from os import path as osp
 import os
 import shutil
+import subprocess
 import sys
 import time
 
@@ -18,8 +19,8 @@ from tornado.ioloop import IOLoop
 from tornado.iostream import StreamClosedError
 from tornado.websocket import WebSocketClosedError
 
-from notebook.notebookapp import flags, aliases
-from notebook.utils import urljoin, pathname2url
+from jupyter_server.serverapp import flags, aliases
+from jupyter_server.utils import urljoin, pathname2url
 from traitlets import Bool
 
 from .labapp import LabApp, get_app_dir
@@ -152,11 +153,22 @@ async def run_browser(url):
     if not osp.exists(osp.join(target, 'node_modules')):
         if not osp.exists(target):
             os.makedirs(osp.join(target))
-        await run_async_process(["npm", "init", "-y"], cwd=target)
-        await run_async_process(["npm", "install", "puppeteer@^4"], cwd=target)
+        await run_async_process(["jlpm", "init", "-y"], cwd=target)
+        await run_async_process(["jlpm", "add", "puppeteer@^4"], cwd=target)
     shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
     await run_async_process(["node", "chrome-test.js", url], cwd=target)
 
+
+def run_browser_sync(url):
+    """Run the browser test and return an exit code.
+    """
+    target = osp.join(get_app_dir(), 'browser_test')
+    if not osp.exists(osp.join(target, 'node_modules')):
+        os.makedirs(target)
+        subprocess.call(["jlpm", "init", "-y"], cwd=target)
+        subprocess.call(["jlpm", "add", "puppeteer@^2"], cwd=target)
+    shutil.copy(osp.join(here, 'chrome-test.js'), osp.join(target, 'chrome-test.js'))
+    return subprocess.check_call(["node", "chrome-test.js", url], cwd=target)
 
 class BrowserApp(LabApp):
     """An app the launches JupyterLab and waits for it to start up, checking for
@@ -181,6 +193,8 @@ class BrowserApp(LabApp):
 
     def initialize_handlers(self):
         func = run_browser if self.test_browser else lambda url: 0
+        if os.name == 'nt' and func == run_browser:
+            func = run_browser_sync
         run_test(self.serverapp, func)
         super().initialize_handlers()
 

@@ -113,7 +113,7 @@ def develop_labextension(path, symlink=True, overwrite=False,
                 logger.info("Symlinking: %s -> %s" % (full_dest, path))
             os.symlink(path, full_dest)
         elif not os.path.islink(full_dest):
-            raise ValueError("%s exists and is not a symlink" % path)
+            raise ValueError("%s exists and is not a symlink" % full_dest)
 
     elif os.path.isdir(path):
         path = pjoin(os.path.abspath(path), '') # end in path separator
@@ -134,7 +134,7 @@ def develop_labextension(path, symlink=True, overwrite=False,
     return full_dest
 
 
-def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=False, symlink=True, labextensions_dir=None, logger=None):
+def develop_labextension_py(module, user=False, sys_prefix=False, overwrite=True, symlink=True, labextensions_dir=None, logger=None):
     """Develop a labextension bundled in a Python package.
 
     Returns a list of installed/updated directories.
@@ -198,16 +198,15 @@ def watch_labextension(path, labextensions_path, logger=None, development=False,
 
     with open(pjoin(ext_path, 'package.json')) as fid:
         ext_data = json.load(fid)
-    
-    os.makedirs(ext_data['jupyterlab']['outputDir'], exist_ok=True)
 
     if ext_data['name'] not in dynamic_exts:
-        full_dest = develop_labextension(ext_path, sys_prefix=True)
+        develop_labextension_py(ext_path, sys_prefix=True)
     else:
         full_dest = pjoin(dynamic_exts[ext_data['name']]['ext_dir'], ext_data['name'])
+        output_dir = pjoin(ext_path, ext_data['jupyterlab']['outputDir'])
         if not osp.islink(full_dest):
             shutil.rmtree(full_dest)
-            os.symlink(ext_path, full_dest)
+            os.symlink(output_dir, full_dest)
 
     builder = _ensure_builder(ext_path, core_path)
     arguments = ['node', builder, '--core-path', core_path,  '--watch', ext_path]
@@ -363,7 +362,6 @@ def _get_labextension_metadata(module):
     if not hasattr(m, '_jupyter_labextension_paths'):
         mod_path = osp.abspath(module)
         if osp.exists(mod_path):
-            sys.path.insert(0, mod_path)
 
             # First see if the module is already installed
             from setuptools import find_packages
@@ -374,10 +372,17 @@ def _get_labextension_metadata(module):
                 name = subprocess.check_output([sys.executable, 'setup.py', '--name'], cwd=mod_path)
                 packages = [name.decode('utf8').strip()]
             
-            # Import the first found package
-            m = import_item(packages[0])
+            package = packages[0]
 
-            sys.path.pop(0)
+            # Make sure the package is installed
+            import pkg_resources
+            try:
+                dist = pkg_resources.get_distribution(package)
+            except pkg_resources.DistributionNotFound:
+                subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-e', mod_path])
+                sys.path.insert(0, mod_path)
+
+            m = import_item(package)
 
     if not hasattr(m, '_jupyter_labextension_paths'):
         raise KeyError('The Python module {} is not a valid labextension, '
