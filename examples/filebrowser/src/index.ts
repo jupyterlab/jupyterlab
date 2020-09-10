@@ -36,16 +36,34 @@ import { FileBrowser, FilterFileBrowserModel } from '@jupyterlab/filebrowser';
 
 import { FileEditorFactory } from '@jupyterlab/fileeditor';
 
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationManager
+} from '@jupyterlab/translation';
+
 import { addIcon } from '@jupyterlab/ui-components';
 
-function main(): void {
+const LANG = 'en';
+
+async function main(): Promise<void> {
+  // init translator
+  const translator = new TranslationManager();
+  await translator.fetch(LANG);
+
   const manager = new ServiceManager();
   void manager.ready.then(() => {
-    createApp(manager);
+    createApp(manager, translator);
   });
 }
 
-function createApp(manager: ServiceManager.IManager): void {
+function createApp(
+  manager: ServiceManager.IManager,
+  translator?: ITranslator
+): void {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
+
   const widgets: Widget[] = [];
   let activeWidget: Widget;
 
@@ -77,7 +95,7 @@ function createApp(manager: ServiceManager.IManager): void {
   const wFactory = new FileEditorFactory({
     editorServices,
     factoryOptions: {
-      name: 'Editor',
+      name: trans.__('Editor'),
       modelName: 'text',
       fileTypes: ['*'],
       defaultFor: ['*'],
@@ -134,7 +152,7 @@ function createApp(manager: ServiceManager.IManager): void {
 
   // Add commands.
   commands.addCommand('file-open', {
-    label: 'Open',
+    label: trans.__('Open'),
     icon: 'fa fa-folder-open-o',
     mnemonic: 0,
     execute: () => {
@@ -144,7 +162,7 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   });
   commands.addCommand('file-rename', {
-    label: 'Rename',
+    label: trans.__('Rename'),
     icon: 'fa fa-edit',
     mnemonic: 0,
     execute: () => {
@@ -158,14 +176,14 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   });
   commands.addCommand('file-cut', {
-    label: 'Cut',
+    label: trans.__('Cut'),
     icon: 'fa fa-cut',
     execute: () => {
       fbWidget.cut();
     }
   });
   commands.addCommand('file-copy', {
-    label: 'Copy',
+    label: trans.__('Copy'),
     icon: 'fa fa-copy',
     mnemonic: 0,
     execute: () => {
@@ -173,7 +191,7 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   });
   commands.addCommand('file-delete', {
-    label: 'Delete',
+    label: trans.__('Delete'),
     icon: 'fa fa-remove',
     mnemonic: 0,
     execute: () => {
@@ -181,7 +199,7 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   });
   commands.addCommand('file-duplicate', {
-    label: 'Duplicate',
+    label: trans.__('Duplicate'),
     icon: 'fa fa-copy',
     mnemonic: 0,
     execute: () => {
@@ -189,7 +207,7 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   });
   commands.addCommand('file-paste', {
-    label: 'Paste',
+    label: trans.__('Paste'),
     icon: 'fa fa-paste',
     mnemonic: 0,
     execute: () => {
@@ -197,27 +215,27 @@ function createApp(manager: ServiceManager.IManager): void {
     }
   });
   commands.addCommand('file-download', {
-    label: 'Download',
+    label: trans.__('Download'),
     icon: 'fa fa-download',
     execute: () => {
       return fbWidget.download();
     }
   });
   commands.addCommand('file-shutdown-kernel', {
-    label: 'Shut Down Kernel',
+    label: trans.__('Shut Down Kernel'),
     icon: 'fa fa-stop-circle-o',
     execute: () => {
       return fbWidget.shutdownKernels();
     }
   });
   commands.addCommand('file-dialog-demo', {
-    label: 'Dialog Demo',
+    label: trans.__('Dialog Demo'),
     execute: () => {
       dialogDemo();
     }
   });
   commands.addCommand('file-info-demo', {
-    label: 'Info Demo',
+    label: trans.__('Info Demo'),
     execute: () => {
       const msg = 'The quick brown fox jumped over the lazy dog';
       void showDialog({
