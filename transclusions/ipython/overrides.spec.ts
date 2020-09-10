@@ -104,15 +104,29 @@ describe('Default IPython overrides', () => {
       expect(reverse).to.equal(LINE_MAGIC_WITH_SPACE);
     });
 
-    it('overrides x =%ls', () => {
+    it('overrides x =%ls and x = %ls', () => {
       // this is a corner-case as described in
       // https://github.com/krassowski/jupyterlab-lsp/issues/281#issuecomment-645286076
       let override = line_magics_map.override_for('x =%ls');
       expect(override).to.equal('x =get_ipython().run_line_magic("ls", "")');
+
+      override = line_magics_map.override_for('x = %ls');
+      expect(override).to.equal('x = get_ipython().run_line_magic("ls", "")');
     });
 
     it('does not override line-magic-like constructs', () => {
       let override = line_magics_map.override_for('list("%")');
+      expect(override).to.equal(null);
+
+      override = line_magics_map.override_for('list(" %test")');
+      expect(override).to.equal(null);
+    });
+
+    it('does not override modulo operators', () => {
+      let override = line_magics_map.override_for('3 % 2');
+      expect(override).to.equal(null);
+
+      override = line_magics_map.override_for('3%2');
       expect(override).to.equal(null);
     });
 
@@ -135,9 +149,22 @@ describe('Default IPython overrides', () => {
       expect(reverse).to.equal('!ls -o');
     });
 
+    it('overrides shell commands assignments: x =!ls and x = !ls', () => {
+      let override = line_magics_map.override_for('x =!ls');
+      expect(override).to.equal('x =get_ipython().getoutput("ls")');
+
+      override = line_magics_map.override_for('x = !ls');
+      expect(override).to.equal('x = get_ipython().getoutput("ls")');
+    });
+
     it('does not override shell-like constructs', () => {
       let override = line_magics_map.override_for('"!ls"');
       expect(override).to.equal(null);
     });
+
+    it('does not override != comparisons', () => {
+      let override = line_magics_map.override_for('1 != None');
+      expect(override).to.equal(null);
+    })
   });
 });

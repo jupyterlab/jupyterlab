@@ -16,20 +16,37 @@ function empty_or_escaped(x: string) {
   }
 }
 
+/**
+ * Line magics do not have to start with the new line, for example:
+ *    x = !ls
+ *    x = %ls
+ *    x =%ls
+ * are all valid.
+ *
+ * The percent may also appear in strings, e.g. ls('%').
+ *
+ * IPython allows magics on start of a line or in assignments (but only there!), thus:
+ *    x = (!ls)
+ * is invalid syntax!
+ *
+ * Therefore we can require that the match starts with either:
+ * - zero or more whitespaces right after the beginning of a line, or
+ * - variable then equals (with optional whitespaces)
+ *
+ * This will not always work: e.g.:
+ *    x['a = !ls'] = !ls
+ * is perfectly valid IPython, but regular expressions cannot help here.
+ */
+export const LINE_MAGIC_PREFIX = '^(\\s*|\\s*\\S+\\s*=\\s*)'
+
 export let overrides: IScopedCodeOverride[] = [
   /**
    * Line magics
    */
   // filter out IPython line magics and shell assignments:
   //  keep the content, keep magic/command name and new line at the end
-
-  // note magics do not have to start with the new line, for example x = !ls or x = %ls are both valid.
-  // x =%ls is also valid. However, percent may also appear in strings, e.g. ls('%').
-  // Hence: (^|\\s|=) for shell commands (!) and line magics (%); see issue #281.
-  // This does not solve all issues, for example `list(" %ls")` still leads to:
-  // `list(" get_ipython().run_line_magic("ls")", "")`.
   {
-    pattern: '(^|\\s|=)!(\\S+)(.*)(\n)?',
+    pattern: LINE_MAGIC_PREFIX + '!([^=\\s]+)(.*)(\n)?',
     replacement: '$1get_ipython().getoutput("$2$3")$4',
     scope: 'line',
     reverse: {
@@ -39,7 +56,7 @@ export let overrides: IScopedCodeOverride[] = [
     }
   },
   {
-    pattern: '(^|\\s|=)%(\\S+)(.*)(\n)?',
+    pattern: LINE_MAGIC_PREFIX + '%(\\S+)(.*)(\n)?',
     replacement: (match, prefix, name, args, line_break) => {
       args = empty_or_escaped(args);
       line_break = line_break || '';
