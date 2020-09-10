@@ -80,6 +80,10 @@ if [[ $GROUP == integrity ]]; then
 
     # Check yarn.lock file
     jlpm check --integrity
+
+    # Run a browser check in dev mode
+    jlpm run build
+    python -m jupyterlab.browser_check --dev-mode
 fi
 
 
@@ -97,13 +101,7 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm run build:src
 
     # Make sure we can build for release
-    if [[ "$OSTYPE" -ne "Windows" ]]; then
-        jlpm run build:dev:prod:release
-    fi
-
-    # Run a browser check in dev mode
-    jlpm run build
-    python -m jupyterlab.browser_check --dev-mode
+    jlpm run build:dev:prod:release
 
     # Make sure the storybooks build.
     jlpm run build:storybook
