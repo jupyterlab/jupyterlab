@@ -42,6 +42,8 @@ function empty_or_escaped(x: string) {
  */
 export const LINE_MAGIC_PREFIX = '^(\\s*|\\s*\\S+\\s*=\\s*)';
 
+export const PYTHON_IDENTIFIER = '([^?s\'"\\(\\)-\\+\\/#]+)';
+
 export let overrides: IScopedCodeOverride[] = [
   /**
    * Line magics
@@ -60,7 +62,10 @@ export let overrides: IScopedCodeOverride[] = [
   },
   {
     // note: assignments of pinfo/pinfo2 are not supported by IPython
-    pattern: '^(\\s*)' + '(\\?{1,2})(\\S+)(\n)?',
+    // and only "simple" identifiers are supported, i.e.
+    //    ?x['a']
+    // would not be solved, leading to "Object `x['a']` not found."
+    pattern: '^(\\s*)' + '(\\?{1,2})' + PYTHON_IDENTIFIER + '(\n)?$',
     replacement: (match, prefix, marks, name, line_break) => {
       const cmd = marks == '?' ? 'pinfo' : 'pinfo2';
       line_break = line_break || '';
@@ -79,7 +84,7 @@ export let overrides: IScopedCodeOverride[] = [
     }
   },
   {
-    pattern: '^(\\s*)' + '([^\\?\\s]+)(\\?{1,2})(\n)?',
+    pattern: '^(\\s*)' + PYTHON_IDENTIFIER + '(\\?{1,2})(\n)?',
     replacement: (match, prefix, name, marks, line_break) => {
       const cmd = marks == '?' ? 'pinfo' : 'pinfo2';
       line_break = line_break || '';

@@ -206,5 +206,19 @@ describe('Default IPython overrides', () => {
       reverse = line_magics_map.reverse.override_for(override);
       expect(reverse).to.equal('int??');
     });
+
+    it('does not override standalone question marks', () => {
+      let override = line_magics_map.override_for("'q?'");
+      expect(override).to.equal(null);
+
+      override = line_magics_map.override_for('#?');
+      expect(override).to.equal(null);
+
+      override = line_magics_map.override_for("?q'");
+      expect(override).to.equal(null);
+
+      override = line_magics_map.override_for("?#'");
+      expect(override).to.equal(null);
+    });
   });
 });
