@@ -23,7 +23,9 @@ pip install jupyter_packaging
 pip install -e ".[test]" || pip install -v -e ".[test]"
 jlpm versions
 jlpm config current
-jupyter server extension enable --py jupyterlab
+jupyter server extension list 1>serverextensions 2>&1
+cat serverextensions | grep -i "jupyterlab.*enabled"
+cat serverextensions | grep -i "jupyterlab.*OK"
 
 if [[ $GROUP == integrity ]]; then
     pip install notebook==4.3.1
