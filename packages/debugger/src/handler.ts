@@ -298,8 +298,8 @@ export class DebuggerHandler {
         : null;
       this._service.session.connection = connection;
     }
-    await this._service.restoreState(false);
     addToolbarButton();
+    await this._service.restoreState(false);
 
     // check the state of the debug session
     if (!this._service.isStarted) {
