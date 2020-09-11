@@ -18,11 +18,23 @@ mkdir ~/.jupyter
 # Install and enable the server extension
 pip install -q --upgrade pip --user
 pip --version
+pip install jupyter_packaging
 # Show a verbose install if the install fails, for debugging
 pip install -e ".[test]" || pip install -v -e ".[test]"
 jlpm versions
 jlpm config current
-jupyter server extension enable --py jupyterlab
+jupyter server extension enable jupyterlab 
+jupyter server extension list 1>serverextensions 2>&1
+cat serverextensions
+cat serverextensions | grep -i "jupyterlab.*enabled"
+cat serverextensions | grep -i "jupyterlab.*OK"
+
+# TODO: remove when we no longer support classic notebook
+jupyter serverextension enable jupyterlab
+jupyter serverextension list 1>serverextensions 2>&1
+cat serverextensions
+cat serverextensions | grep -i "jupyterlab.*enabled"
+cat serverextensions | grep -i "jupyterlab.*OK"
 
 if [[ $GROUP == integrity ]]; then
     pip install notebook==4.3.1

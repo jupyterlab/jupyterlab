@@ -9,27 +9,17 @@ import os
 import sys
 
 # Our own imports
-from setupbase import (
-    create_cmdclass, find_packages, get_version,
-    command_for_func, combine_commands, install_npm, HERE, run,
+from jupyter_packaging import (
+    create_cmdclass, get_version,
+    command_for_func, combine_commands, install_npm, run,
     skip_npm, which, log
 )
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.develop import develop
 
-min_version = (3, 6)
 
-if sys.version_info < min_version:
-    error = """
-Python {0} or above is required, you are using Python {1}.
-
-This may be due to an out of date pip.
-
-Make sure you have pip >= 9.0.1.
-""".format('.'.join(str(n) for n in min_version),
-           '.'.join(str(n) for n in sys.version_info[:3]))
-    sys.exit(error)
+HERE = os.path.abspath(os.path.dirname(__file__))
 
 
 NAME = 'jupyterlab'
@@ -66,7 +56,7 @@ VERSION = get_version('%s/_version.py' % NAME)
 
 
 def check_assets():
-    from distutils.version import LooseVersion
+    from packaging.version import Version
 
     # Representative files that should exist after a successful build
     targets = [
@@ -88,7 +78,7 @@ def check_assets():
     with open(target) as fid:
         version = json.load(fid)['jupyterlab']['version']
 
-    if LooseVersion(version) != LooseVersion(VERSION):
+    if Version(version) != Version(VERSION):
         raise ValueError('Version mismatch, please run `build:update`')
 
 
@@ -135,6 +125,7 @@ setup_args = dict(
     license='BSD',
     platforms='Linux, Mac OS X, Windows',
     keywords=['ipython', 'jupyter', 'Web'],
+    python_requires=">=3.6",
     classifiers=[
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Developers',
@@ -152,6 +143,7 @@ setup_args = dict(
 
 setup_args['install_requires'] = [
     'ipython',
+    'packaging',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
     'jupyterlab_server~=2.0.0b8',
     'jupyter_server~=1.0.0rc16',
@@ -162,7 +154,7 @@ setup_args['install_requires'] = [
 
 setup_args['extras_require'] = {
     'test': [
-        'pytest==5.3.2',
+        'pytest>=6.0',
         'pytest-cov',
         'pytest-tornasync',
         'pytest-console-scripts',

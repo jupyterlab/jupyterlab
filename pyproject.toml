@@ -1,0 +1,12 @@
+[build-system]
+requires=["setuptools", "wheel", "jupyter_packaging~=0.7.3"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths="jupyterlab/tests"
+norecursedirs="node_modules .git _build"
+addopts="--pdbcls=IPython.terminal.debugger:Pdb -v --junitxml=junit.xml"
+ignore="tests examples"
+
+[license]
+file="LICENSE"
