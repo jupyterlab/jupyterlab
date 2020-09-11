@@ -18,6 +18,7 @@ mkdir ~/.jupyter
 # Install and enable the server extension
 pip install -q --upgrade pip --user
 pip --version
+pip install jupyter_packaging
 # Show a verbose install if the install fails, for debugging
 pip install -e ".[test]" || pip install -v -e ".[test]"
 jlpm versions
