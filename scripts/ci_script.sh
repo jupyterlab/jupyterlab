@@ -13,8 +13,6 @@ fi
 
 if [[ $GROUP == python ]]; then
     # Run the python tests
-#    py.test -v --junitxml=junit.xml
-#    Move the flags to setup.cfg
     py.test
 fi
 
@@ -279,6 +277,18 @@ if [[ $GROUP == usage ]]; then
     # Make sure we can non-dev install.
     virtualenv -p $(which python3) test_install
     ./test_install/bin/pip install -q ".[test]"  # this populates <sys_prefix>/share/jupyter/lab
+
+    ./test_install/bin/jupyter server extension list 1>serverextensions 2>&1
+    cat serverextensions
+    cat serverextensions | grep -i "jupyterlab.*enabled"
+    cat serverextensions | grep -i "jupyterlab.*OK"
+
+    # TODO: remove when we no longer support classic notebook
+    ./test_install/bin/jupyter serverextension list 1>serverextensions 2>&1
+    cat serverextensions
+    cat serverextensions | grep -i "jupyterlab.*enabled"
+    cat serverextensions | grep -i "jupyterlab.*OK"
+
     ./test_install/bin/python -m jupyterlab.browser_check
     # Make sure we can run the build
     ./test_install/bin/jupyter lab build

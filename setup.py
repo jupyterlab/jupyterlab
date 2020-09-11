@@ -34,9 +34,9 @@ data_files_spec = [
     ('share/jupyter/lab/schemas', '%s/schemas' % NAME, '**'),
     ('share/jupyter/lab/themes', '%s/themes' % NAME, '**'),
     ('etc/jupyter/jupyter_server_config.d',
-     'jupyter-server-config', 'jupyterlab.json'),
+     'jupyter-config/jupyter_server_config.d', 'jupyterlab.json'),
     ('etc/jupyter/jupyter_notebook_config.d',
-     'jupyter-notebook-config', 'jupyterlab.json'),
+     'jupyter-config/jupyter_notebook_config.d', 'jupyterlab.json'),
 ]
 
 package_data_spec = dict()

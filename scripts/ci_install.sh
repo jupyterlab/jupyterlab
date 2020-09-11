@@ -23,12 +23,14 @@ pip install jupyter_packaging
 pip install -e ".[test]" || pip install -v -e ".[test]"
 jlpm versions
 jlpm config current
+jupyter server extension enable jupyterlab 
 jupyter server extension list 1>serverextensions 2>&1
 cat serverextensions
 cat serverextensions | grep -i "jupyterlab.*enabled"
 cat serverextensions | grep -i "jupyterlab.*OK"
 
 # TODO: remove when we no longer support classic notebook
+jupyter serverextension enable jupyterlab
 jupyter serverextension list 1>serverextensions 2>&1
 cat serverextensions
 cat serverextensions | grep -i "jupyterlab.*enabled"
