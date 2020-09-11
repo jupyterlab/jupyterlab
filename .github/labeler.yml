@@ -84,6 +84,12 @@ pkg:csvviewer:
   - packages/csvviewer-extension/**/*
   - packages/csvviewer-extension/*
 
+pkg:debugger:
+  - packages/debugger/**/*
+  - packages/debugger/*
+  - packages/debugger-extension/**/*
+  - packages/debugger-extension/*
+
 pkg:docmanager:
   - packages/docmanager/**/*
   - packages/docmanager/*
