@@ -144,7 +144,7 @@ export class Dialog<T> extends Widget {
    *
    * @returns a promise that resolves with the result of the dialog.
    */
-  launch(): Promise<Dialog.IResult<T>> {
+  launch(): Promise<Dialog.IResult<T> | undefined> {
     // Return the existing dialog if already open.
     if (this._promise) {
       return this._promise.promise;
@@ -154,7 +154,7 @@ export class Dialog<T> extends Widget {
     Private.launchQueue.push(this._promise.promise);
     return promises.then(() => {
       // Do not show Dialog if it was disposed of before it was at the front of the launch queue
-      if (!this._promise){
+      if (!this._promise) {
         return;
       }
       Widget.attach(this, this._host);
