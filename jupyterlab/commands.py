@@ -4,7 +4,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 import contextlib
-from distutils.version import LooseVersion
+from packaging.version import Version
 import errno
 from glob import glob
 import hashlib
@@ -756,7 +756,7 @@ class _AppHandler(object):
         # Look for mismatched version.
         static_version = old_jlab.get('version', '')
         core_version = old_jlab['version']
-        if LooseVersion(static_version) != LooseVersion(core_version):
+        if Version(static_version) != Version(core_version):
             msg = 'Version mismatch: %s (built), %s (current)'
             return [msg % (static_version, core_version)]
 
