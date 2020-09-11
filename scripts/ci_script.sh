@@ -114,9 +114,8 @@ if [[ $GROUP == integrity2 ]]; then
 
     # run twine check on the python build assets.
     # this must be done before altering any versions below.
-    python -m pip install -U twine wheel
-    python setup.py sdist
-    python setup.py bdist_wheel
+    python -m pip install -U twine wheel pep517
+    python-build
     twine check dist/*
 
     # Make sure we can bump the version
