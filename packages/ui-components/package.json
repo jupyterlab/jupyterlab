@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/ui-components",
-  "version": "3.0.0-beta.3",
+  "version": "3.0.0-beta.4",
   "description": "JupyterLab - UI components written in React",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -44,7 +44,7 @@
   "dependencies": {
     "@blueprintjs/core": "^3.22.2",
     "@blueprintjs/select": "^3.11.2",
-    "@jupyterlab/coreutils": "^5.0.0-beta.3",
+    "@jupyterlab/coreutils": "^5.0.0-beta.4",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/signaling": "^1.4.3",
     "@lumino/virtualdom": "^1.7.3",
@@ -56,7 +56,7 @@
   "devDependencies": {
     "@babel/core": "^7.10.2",
     "@babel/preset-env": "^7.10.2",
-    "@jupyterlab/testutils": "^3.0.0-beta.3",
+    "@jupyterlab/testutils": "^3.0.0-beta.4",
     "@storybook/addon-actions": "^6.0.19",
     "@storybook/react": "^6.0.19",
     "@types/jest": "^26.0.10",
