@@ -2,7 +2,6 @@ include package.json
 include LICENSE
 include CONTRIBUTING.md
 include README.md
-include setupbase.py
 
 # Documentation
 graft docs
