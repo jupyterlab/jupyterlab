@@ -58,8 +58,8 @@ commander
     utils.run('node buildutils/lib/update-core-mode.js');
 
     // Make the Python release.
-    utils.run('python -m pip install -U twine pep517');
-    utils.run('python-build');
+    utils.run('python -m pip install -U twine build');
+    utils.run('python -m build .');
     utils.run('twine check dist/*');
 
     const files = fs.readdirSync(distDir);
