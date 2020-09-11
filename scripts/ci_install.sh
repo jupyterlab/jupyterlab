@@ -25,6 +25,13 @@ jlpm versions
 jlpm config current
 jupyter server extension list 1>serverextensions 2>&1
 cat serverextensions
+ls /opt/hostedtoolcache/Python/3.8.5/x64/etc/jupyter/jupyter_server_config.d/
+cat serverextensions | grep -i "jupyterlab.*enabled"
+cat serverextensions | grep -i "jupyterlab.*OK"
+
+# TODO: remove when we no longer support classic notebook
+jupyter serverextension list 1>serverextensions 2>&1
+cat serverextensions
 cat serverextensions | grep -i "jupyterlab.*enabled"
 cat serverextensions | grep -i "jupyterlab.*OK"
 
