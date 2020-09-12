@@ -116,6 +116,7 @@ export namespace Palette {
         } else if (!modal && newModal) {
           palette.parent = null;
           modalPalette.palette = palette;
+          palette.show();
           modalPalette.attach();
         }
         modal = newModal;
