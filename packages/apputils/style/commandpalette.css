@@ -15,6 +15,20 @@
 | Overall styles
 |----------------------------------------------------------------------------*/
 
+.lm-CommandPalette {
+  padding-bottom: 0px;
+  color: var(--jp-ui-font-color1);
+  background: var(--jp-layout-color1);
+  /* This is needed so that all font sizing of children done in ems is
+   * relative to this base size */
+  font-size: var(--jp-ui-font-size1);
+}
+
+/*-----------------------------------------------------------------------------
+| Modal variant
+|----------------------------------------------------------------------------*/
+
+
 .jp-ModalCommandPalette {
   position: absolute;
   z-index: 10000;
@@ -32,13 +46,21 @@
   max-height: 40vh;
 }
 
-.lm-CommandPalette {
-  padding-bottom: 0px;
-  color: var(--jp-ui-font-color1);
-  background: var(--jp-layout-color1);
-  /* This is needed so that all font sizing of children done in ems is
-   * relative to this base size */
-  font-size: var(--jp-ui-font-size1);
+.jp-ModalCommandPalette .lm-CommandPalette .lm-close-icon::after {
+  display: none;
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette .lm-CommandPalette-header {
+  display: none;
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette .lm-CommandPalette-item {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette .lm-CommandPalette-item.lm-mod-disabled {
+  display: none;
 }
 
 /*-----------------------------------------------------------------------------
@@ -117,7 +139,6 @@
   margin-top: 8px;
   padding: 8px 0 8px 12px;
   text-transform: uppercase;
-  display: none;
 }
 
 .lm-CommandPalette-header.lm-mod-active {
@@ -132,8 +153,6 @@
 
 .lm-CommandPalette-item {
   padding: 4px 12px 4px 4px;
-  margin-left: 4px;
-  margin-right: 4px;
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
   font-weight: 400;
@@ -142,7 +161,6 @@
 
 .lm-CommandPalette-item.lm-mod-disabled {
   color: var(--jp-ui-font-color3);
-  display: none;
 }
 
 .lm-CommandPalette-item.lm-mod-active {

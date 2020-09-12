@@ -58,9 +58,7 @@ export class ModalCommandPalette extends Panel {
     this.addClass('jp-ModalCommandPalette');
     this.id = 'modal-command-palette';
     this._commandPalette = options.commandPalette;
-    this._commandPalette.addClass('jp-ModalCommandPalette-command-palette');
     this.addWidget(this._commandPalette);
-    this.attach();
     this._commandPalette.commands.commandExecuted.connect(() => {
       if (this.isAttached && this.isVisible) {
         this.hideAndReset();
