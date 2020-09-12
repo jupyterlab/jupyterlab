@@ -32,6 +32,7 @@ export class TagTool extends NotebookTools.Tool {
     this.tracker = tracker;
     this.layout = new PanelLayout();
     this.createTagInput();
+    this.addClass('jp-TagTool');
   }
 
   /**
@@ -184,16 +185,16 @@ export class TagTool extends NotebookTools.Tool {
   }
 
   /**
-   * Upon attach, add header if it doesn't already exist and listen for changes
+   * Upon attach, add label if it doesn't already exist and listen for changes
    * from the notebook tracker.
    */
   protected onAfterAttach() {
-    if (!this.header) {
-      const header = document.createElement('header');
-      header.textContent = this._trans.__('Cell Tags');
-      header.className = 'tag-header';
-      this.parent!.node.insertBefore(header, this.node);
-      this.header = true;
+    if (!this.label) {
+      const label = document.createElement('label');
+      label.textContent = this._trans.__('Cell Tags');
+      label.className = 'tag-label';
+      this.parent!.node.insertBefore(label, this.node);
+      this.label = true;
     }
     if (this.tracker.currentWidget) {
       void this.tracker.currentWidget.context.ready.then(() => {
@@ -230,7 +231,7 @@ export class TagTool extends NotebookTools.Tool {
 
   public tracker: INotebookTracker;
   private tagList: string[] = [];
-  private header: boolean = false;
+  private label: boolean = false;
   protected translator: ITranslator;
   private _trans: TranslationBundle;
 }

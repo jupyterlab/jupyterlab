@@ -1,9 +1,9 @@
 .tag {
-  height: 24px;
-  border-radius: 12px;
+  height: 20px;
+  border-radius: 10px;
   margin-right: 5px;
   margin-bottom: 10px;
-  padding: 12px;
+  padding: 0px 8px;
   font-size: var(--jp-ui-font-size1);
   display: inline-flex;
   justify-content: center;
@@ -44,13 +44,19 @@
   align-items: center;
 }
 
-.tag-header {
-  border-bottom: var(--jp-border-width) solid var(--jp-border-color2);
+.tag-label {
   flex: 0 0 auto;
-  font-size: var(--jp-ui-font-size0);
-  font-weight: 600;
-  letter-spacing: 1px;
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  padding: 0px 12px;
+}
+
+/* Need a more specific selector to override another rule on .jp-NotebookTools children. */
+.jp-NotebookTools .tag-label {
   margin: 0px;
-  padding: 8px 12px;
-  text-transform: uppercase;
+}
+
+/* Need a more specific selector to override another rule .jp-NotebookTools children. */
+.jp-NotebookTools div.jp-TagTool {
+  margin-top: 4px;
 }
