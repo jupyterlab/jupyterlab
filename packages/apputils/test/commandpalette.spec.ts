@@ -42,6 +42,7 @@ describe('@jupyterlab/apputils', () => {
       const trans = translator.load('jupyterlab');
       palette.title.label = trans.__('Commands');
       modalPalette = new ModalCommandPalette({ commandPalette: palette });
+      modalPalette.attach();
     });
 
     describe('#constructor()', () => {
