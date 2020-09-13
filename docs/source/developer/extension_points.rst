@@ -291,7 +291,7 @@ and then adds the terminal to the right area:
       app.shell.add(terminal, 'right');
     });
 
-You can use a numeric rank to control the ordering of the left and right tabs:
+You can use a numeric rank to control the ordering of the lef t and right tabs:
 
 .. code:: typescript
 
