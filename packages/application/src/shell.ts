@@ -56,7 +56,7 @@ const ACTIVE_CLASS = 'jp-mod-active';
 /**
  * The default rank of items added to a sidebar.
  */
-const DEFAULT_RANK = 500;
+const DEFAULT_RANK = 900;
 
 const ACTIVITY_CLASS = 'jp-Activity';
 
