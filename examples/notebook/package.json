@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-notebook",
-  "version": "1.2.9",
+  "version": "1.2.10",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,16 +8,16 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/codemirror": "^1.2.8",
-    "@jupyterlab/completer": "^1.2.8",
-    "@jupyterlab/docmanager": "^1.2.8",
-    "@jupyterlab/docregistry": "^1.2.8",
-    "@jupyterlab/documentsearch": "^1.2.9",
+    "@jupyterlab/codemirror": "^1.2.9",
+    "@jupyterlab/completer": "^1.2.9",
+    "@jupyterlab/docmanager": "^1.2.9",
+    "@jupyterlab/docregistry": "^1.2.9",
+    "@jupyterlab/documentsearch": "^1.2.10",
     "@jupyterlab/mathjax2": "^1.2.0",
-    "@jupyterlab/notebook": "^1.2.9",
-    "@jupyterlab/rendermime": "^1.2.8",
-    "@jupyterlab/services": "^4.2.2",
-    "@jupyterlab/theme-light-extension": "^1.2.8",
+    "@jupyterlab/notebook": "^1.2.10",
+    "@jupyterlab/rendermime": "^1.2.9",
+    "@jupyterlab/services": "^4.2.3",
+    "@jupyterlab/theme-light-extension": "^1.2.9",
     "@phosphor/commands": "^1.7.0",
     "@phosphor/widgets": "^1.9.0",
     "es6-promise": "~4.2.6"
