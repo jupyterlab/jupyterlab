@@ -24,7 +24,7 @@ import { IDebugger } from './tokens';
 /**
  * A debugger sidebar.
  */
-export class DebuggerSidebar extends Panel {
+export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
   /**
    * Instantiate a new Debugger.Sidebar
    *
@@ -33,7 +33,7 @@ export class DebuggerSidebar extends Panel {
   constructor(options: DebuggerSidebar.IOptions) {
     super();
     this.id = 'jp-debugger-sidebar';
-    this.title.iconRenderer = bugIcon;
+    this.title.icon = bugIcon;
     this.addClass('jp-DebuggerSidebar');
 
     const {
@@ -79,16 +79,48 @@ export class DebuggerSidebar extends Panel {
       header.title.label = title;
     });
 
-    const body = new SplitPanel();
+    this.body = new SplitPanel();
+    this.body.orientation = 'vertical';
+    this.body.addClass('jp-DebuggerSidebar-body');
+    this.addWidget(this.body);
 
-    body.orientation = 'vertical';
-    body.addWidget(this.variables);
-    body.addWidget(this.callstack);
-    body.addWidget(this.breakpoints);
-    body.addWidget(this.sources);
-    body.addClass('jp-DebuggerSidebar-body');
+    this.addPanel(this.variables);
+    this.addPanel(this.callstack);
+    this.addPanel(this.breakpoints);
+    this.addPanel(this.sources);
+  }
 
-    this.addWidget(body);
+  /**
+   * Add a panel at the end of the sidebar.
+   *
+   * @param panel - The panel to add to the sidebar.
+   *
+   * #### Notes
+   * If the widget is already contained in the sidebar, it will be moved.
+   */
+  addPanel(panel: Panel) {
+    this.body.addWidget(panel);
+  }
+
+  /**
+   * Insert a panel at the specified index.
+   *
+   * @param index - The index at which to insert the panel.
+   *
+   * @param panel - The panel to insert into to the sidebar.
+   *
+   * #### Notes
+   * If the widget is already contained in the sidebar, it will be moved.
+   */
+  insertPanel(index: number, panel: Panel) {
+    this.body.insertWidget(index, panel);
+  }
+
+  /**
+   * A read-only array of the sidebar panels.
+   */
+  get panels(): Panel[] {
+    return this.body.widgets as Panel[];
   }
 
   /**
@@ -125,6 +157,11 @@ export class DebuggerSidebar extends Panel {
    * The sources widget.
    */
   readonly sources: SourcesPanel;
+
+  /**
+   * Container for debugger panels.
+   */
+  private body: SplitPanel;
 }
 
 /**

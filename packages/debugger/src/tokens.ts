@@ -11,6 +11,8 @@ import { IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
+import { Panel } from '@lumino/widgets';
+
 import { DebugProtocol } from 'vscode-debugprotocol';
 
 /**
@@ -485,6 +487,26 @@ export namespace IDebugger {
   }
 
   /**
+   * Debugger sidebar interface.
+   */
+  export interface ISidebar {
+    /**
+     * Add panel at the end of the sidebar.
+     */
+    addPanel(panel: Panel): void;
+
+    /**
+     * Insert panel at a specified index.
+     */
+    insertPanel(index: number, panel: Panel): void;
+
+    /**
+     * Return all panels that were added to sidebar.
+     */
+    readonly panels: Panel[];
+  }
+
+  /**
    * A utility to find text editors used by the debugger.
    */
   export namespace ISources {
@@ -740,4 +762,11 @@ export const IDebuggerConfig = new Token<IDebugger.IConfig>(
  */
 export const IDebuggerSources = new Token<IDebugger.ISources>(
   '@jupyterlab/debugger:IDebuggerSources'
+);
+
+/**
+ * The debugger configuration token.
+ */
+export const IDebuggerSidebar = new Token<IDebugger.ISidebar>(
+  '@jupyterlab/debugger:IDebuggerSidebar'
 );

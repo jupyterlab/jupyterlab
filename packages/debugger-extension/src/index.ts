@@ -25,7 +25,8 @@ import {
   Debugger,
   IDebugger,
   IDebuggerConfig,
-  IDebuggerSources
+  IDebuggerSources,
+  IDebuggerSidebar
 } from '@jupyterlab/debugger';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -333,8 +334,9 @@ const variables: JupyterFrontEndPlugin<void> = {
 /**
  * The main debugger UI plugin.
  */
-const main: JupyterFrontEndPlugin<void> = {
+const main: JupyterFrontEndPlugin<IDebugger.ISidebar | void> = {
   id: '@jupyterlab/debugger-extension:main',
+  provides: IDebuggerSidebar,
   requires: [IDebugger, IEditorServices, ITranslator],
   optional: [
     ILabShell,
@@ -356,7 +358,7 @@ const main: JupyterFrontEndPlugin<void> = {
     settingRegistry: ISettingRegistry | null,
     themeManager: IThemeManager | null,
     debuggerSources: IDebugger.ISources | null
-  ): Promise<void> => {
+  ): Promise<IDebugger.ISidebar | void> => {
     const trans = translator.load('jupyterlab');
     const { commands, shell, serviceManager } = app;
     const { kernelspecs } = serviceManager;
@@ -584,6 +586,8 @@ const main: JupyterFrontEndPlugin<void> = {
         onCurrentSourceOpened(null, source);
       });
     }
+
+    return sidebar;
   }
 };
 
