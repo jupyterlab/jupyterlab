@@ -62,7 +62,7 @@ async function activateTOC(
   toc.title.icon = tocIcon;
   toc.title.caption = trans.__('Table of Contents');
   toc.id = 'table-of-contents';
-  labShell.add(toc, 'left', { rank: 700 });
+  labShell.add(toc, 'left', { rank: 400 });
 
   // Add the ToC widget to the application restorer:
   restorer.add(toc, '@jupyterlab/toc:plugin');

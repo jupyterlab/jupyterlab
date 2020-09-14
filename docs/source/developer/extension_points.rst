@@ -291,6 +291,18 @@ and then adds the terminal to the right area:
       app.shell.add(terminal, 'right');
     });
 
+You can use a numeric rank to control the ordering of the left and right tabs:
+
+.. code:: typescript
+
+  app.shell.add(terminal, 'left', {rank: 600});
+
+The recommended ranges for this rank are:
+
+* 0-500: reserved for first-party JupyterLab extensions.
+* 501-899: reserved for third-party extensions.
+* 900: The default rank if none is specified.
+* 1000: The JupyterLab extension manager.
 
 Main Menu
 ~~~~~~~~~
