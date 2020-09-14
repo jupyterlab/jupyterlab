@@ -7,7 +7,11 @@ JupyterLab Changelog
 `v2.2.x <https://github.com/jupyterlab/jupyterlab/milestone/53>`__
 ------------------------------------------------------------------
 
-v2.2.6
+v2.2.8
+^^^^^^
+* Do not show Dialog If It Has Been Disposed  (`#9003 <https://github.com/jupyterlab/jupyterlab/pull/9003>`__)
+
+v2.2.7
 ^^^^^^
 * Update mimetype for dragging files  (`#8966 <https://github.com/jupyterlab/jupyterlab/pull/8966>`__)
 
