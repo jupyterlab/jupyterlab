@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/nbconvert-css",
-  "version": "2.2.5",
+  "version": "2.2.6",
   "description": "CSS bundle for the JupyterLab nbconvert template",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -34,12 +34,12 @@
     "watch": "webpack --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^2.2.4",
-    "@jupyterlab/cells": "^2.2.5",
-    "@jupyterlab/codemirror": "^2.2.2",
-    "@jupyterlab/notebook": "^2.2.5",
-    "@jupyterlab/outputarea": "^2.2.2",
-    "@jupyterlab/rendermime": "^2.2.2"
+    "@jupyterlab/apputils": "^2.2.5",
+    "@jupyterlab/cells": "^2.2.6",
+    "@jupyterlab/codemirror": "^2.2.3",
+    "@jupyterlab/notebook": "^2.2.6",
+    "@jupyterlab/outputarea": "^2.2.3",
+    "@jupyterlab/rendermime": "^2.2.3"
   },
   "devDependencies": {
     "css-loader": "~3.2.0",
