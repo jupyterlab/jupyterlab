@@ -103,7 +103,6 @@
     "@jupyterlab/statedb": "^3.0.0-beta.4",
     "@jupyterlab/statusbar": "^3.0.0-beta.4",
     "@jupyterlab/statusbar-extension": "^3.0.0-beta.4",
-    "@jupyterlab/tabmanager-extension": "^3.0.0-beta.4",
     "@jupyterlab/terminal": "^3.0.0-beta.4",
     "@jupyterlab/terminal-extension": "^3.0.0-beta.4",
     "@jupyterlab/theme-dark-extension": "^3.0.0-beta.4",

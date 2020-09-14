@@ -289,7 +289,12 @@ function addRunningSessionManager(
       toArray(manager.running()).map(model => new RunningTerminal(model)),
     shutdownAll: () => manager.shutdownAll(),
     refreshRunning: () => manager.refreshRunning(),
-    runningChanged: manager.runningChanged
+    runningChanged: manager.runningChanged,
+    shutdownLabel: trans.__('Shut Down'),
+    shutdownAllLabel: trans.__('Shut Down All'),
+    shutdownAllConfirmationText: trans.__(
+      'Are you sure you want to permanently shut down all running terminals?'
+    )
   });
 
   class RunningTerminal implements IRunningSessions.IRunningItem {

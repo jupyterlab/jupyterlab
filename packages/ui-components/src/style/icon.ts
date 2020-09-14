@@ -314,7 +314,7 @@ export namespace LabIconStyle {
 
     runningItem: {
       container: {
-        margin: '0px 4px 0px 12px'
+        margin: '0px 4px 0px 4px'
       },
       element: {
         height: '16px',

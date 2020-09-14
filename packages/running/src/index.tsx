@@ -57,9 +57,19 @@ const ITEM_CLASS = 'jp-RunningSessions-item';
 const ITEM_LABEL_CLASS = 'jp-RunningSessions-itemLabel';
 
 /**
+ * The class name added to a running session item detail.
+ */
+const ITEM_DETAIL_CLASS = 'jp-RunningSessions-itemDetail';
+
+/**
  * The class name added to a running session item shutdown button.
  */
 const SHUTDOWN_BUTTON_CLASS = 'jp-RunningSessions-itemShutdown';
+
+/**
+ * The class name added to a running session item shutdown button.
+ */
+const SHUTDOWN_ALL_BUTTON_CLASS = 'jp-RunningSessions-shutdownAll';
 
 /* tslint:disable */
 /**
@@ -117,12 +127,17 @@ export class RunningSessionManagers implements IRunningSessionManagers {
 
 function Item(props: {
   runningItem: IRunningSessions.IRunningItem;
+  shutdownLabel?: string;
+  shutdownItemIcon?: LabIcon;
   translator?: ITranslator;
 }) {
   const { runningItem } = props;
+  const icon = runningItem.icon();
+  const detail = runningItem.detail?.();
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
-  const icon = runningItem.icon();
+  const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
+  const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
 
   return (
     <li className={ITEM_CLASS}>
@@ -134,18 +149,22 @@ function Item(props: {
       >
         {runningItem.label()}
       </span>
-      <button
-        className={`${SHUTDOWN_BUTTON_CLASS} jp-mod-styled`}
+      {detail && <span className={ITEM_DETAIL_CLASS}>{detail}</span>}
+      <ToolbarButtonComponent
+        className={SHUTDOWN_BUTTON_CLASS}
+        icon={shutdownItemIcon}
         onClick={() => runningItem.shutdown()}
-      >
-        {trans.__('SHUT DOWN')}
-      </button>
+        tooltip={shutdownLabel}
+      />
     </li>
   );
 }
 
 function ListView(props: {
   runningItems: IRunningSessions.IRunningItem[];
+  shutdownLabel?: string;
+  shutdownAllLabel?: string;
+  shutdownItemIcon?: LabIcon;
   translator?: ITranslator;
 }) {
   return (
@@ -154,7 +173,9 @@ function ListView(props: {
         <Item
           key={i}
           runningItem={item}
-          translator={props.translator || nullTranslator}
+          shutdownLabel={props.shutdownLabel}
+          shutdownItemIcon={props.shutdownItemIcon}
+          translator={props.translator}
         />
       ))}
     </ul>
@@ -163,6 +184,8 @@ function ListView(props: {
 
 function List(props: {
   manager: IRunningSessions.IManager;
+  shutdownLabel?: string;
+  shutdownAllLabel?: string;
   translator?: ITranslator;
 }) {
   return (
@@ -170,7 +193,10 @@ function List(props: {
       {() => (
         <ListView
           runningItems={props.manager.running()}
-          translator={props.translator || nullTranslator}
+          shutdownLabel={props.shutdownLabel}
+          shutdownAllLabel={props.shutdownAllLabel}
+          shutdownItemIcon={props.manager.shutdownItemIcon}
+          translator={props.translator}
         />
       )}
     </UseSignal>
@@ -189,13 +215,19 @@ function Section(props: {
 }) {
   const translator = props.translator || nullTranslator;
   const trans = translator.load('jupyterlab');
+  const shutdownAllLabel =
+    props.manager.shutdownAllLabel || trans.__('Shut Down All');
+  const shutdownTitle = `${shutdownAllLabel}?`;
+  const shutdownAllConfirmationText =
+    props.manager.shutdownAllConfirmationText ||
+    `${shutdownAllLabel} ${props.manager.name}`;
   function onShutdown() {
     void showDialog({
-      title: trans.__('Shut Down All?'),
-      body: `${props.manager.name}`,
+      title: shutdownTitle,
+      body: shutdownAllConfirmationText,
       buttons: [
         Dialog.cancelButton({ label: trans.__('Cancel') }),
-        Dialog.warnButton({ label: trans.__('SHUT DOWN') })
+        Dialog.warnButton({ label: shutdownAllLabel })
       ]
     }).then(result => {
       if (result.button.accept) {
@@ -209,15 +241,21 @@ function Section(props: {
       <>
         <header className={SECTION_HEADER_CLASS}>
           <h2>{props.manager.name}</h2>
-          <ToolbarButtonComponent
-            icon={closeIcon}
+          <button
+            className={`${SHUTDOWN_ALL_BUTTON_CLASS} jp-mod-styled`}
             onClick={onShutdown}
-            tooltip={trans.__('Shut Down All…')}
-          />
+          >
+            {shutdownAllLabel}
+          </button>
         </header>
 
         <div className={CONTAINER_CLASS}>
-          <List manager={props.manager} translator={props.translator} />
+          <List
+            manager={props.manager}
+            shutdownLabel={props.manager.shutdownLabel}
+            shutdownAllLabel={shutdownAllLabel}
+            translator={props.translator}
+          />
         </div>
       </>
     </div>
@@ -299,6 +337,14 @@ export namespace IRunningSessions {
     refreshRunning(): void;
     // A signal that should be emitted when the item list has changed.
     runningChanged: ISignal<any, any>;
+    // A string used to describe the shutdown action.
+    shutdownLabel?: string;
+    // A string used to describe the shutdown all action.
+    shutdownAllLabel?: string;
+    // A string used as the body text in the shutdown all confirmation dialog.
+    shutdownAllConfirmationText?: string;
+    // The icon to show for shutting down an individual item in this section.
+    shutdownItemIcon?: LabIcon;
   }
 
   /**
@@ -315,5 +361,8 @@ export namespace IRunningSessions {
     label: () => string;
     // called to determine the `title` attribute for each item, which is revealed on hover
     labelTitle?: () => string;
+    // called to determine the `detail` attribute which is shown optionally
+    // in a column after the label
+    detail?: () => string;
   }
 }

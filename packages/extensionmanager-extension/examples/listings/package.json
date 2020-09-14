@@ -33,7 +33,6 @@
     "@jupyterlab/settingeditor-extension": "^2.0.2",
     "@jupyterlab/shortcuts-extension": "^2.0.2",
     "@jupyterlab/statusbar-extension": "^2.0.2",
-    "@jupyterlab/tabmanager-extension": "^2.0.2",
     "@jupyterlab/terminal-extension": "^2.0.2",
     "@jupyterlab/theme-dark-extension": "^2.0.2",
     "@jupyterlab/theme-light-extension": "^2.0.2",

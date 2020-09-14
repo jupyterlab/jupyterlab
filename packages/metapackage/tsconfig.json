@@ -220,9 +220,6 @@
       "path": "../statusbar-extension"
     },
     {
-      "path": "../tabmanager-extension"
-    },
-    {
       "path": "../terminal"
     },
     {

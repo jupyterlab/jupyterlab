@@ -102,7 +102,6 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
   '@jupyterlab/help-extension': ['@jupyterlab/application'],
   '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
-  '@jupyterlab/tabmanager-extension': ['@jupyterlab/application'],
   '@jupyterlab/theme-dark-extension': [
     '@jupyterlab/application',
     '@jupyterlab/apputils'

@@ -10,7 +10,13 @@
       "path": "../application"
     },
     {
+      "path": "../apputils"
+    },
+    {
       "path": "../coreutils"
+    },
+    {
+      "path": "../docregistry"
     },
     {
       "path": "../running"

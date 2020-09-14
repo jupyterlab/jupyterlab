@@ -82,45 +82,68 @@
   color: var(--jp-ui-font-color1);
   height: var(--jp-private-running-item-height);
   line-height: var(--jp-private-running-item-height);
+  padding: 0 8px 0 8px;
+}
+
+.jp-RunningSessions-item:hover {
+  background-color: var(--jp-layout-color2);
 }
 
 .jp-RunningSessions-itemLabel {
   font-size: var(--jp-ui-font-size1);
-  flex: 1 1 auto;
-  margin-right: 4px;
-  padding-left: 4px;
+  flex: 1 1 55%;
+  padding: 0 4px 0 4px;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
-  border-radius: 2px;
-  transition: background-color 0.1s ease;
-}
-
-.jp-RunningSessions-itemLabel:hover {
-  background-color: var(--jp-layout-color2);
 }
 
 .jp-RunningSessions-itemLabel:focus {
-  background-color: rgba(153, 153, 153, 0.2);
+  background-color: var(--jp-layout-color2);
 }
 
-.jp-RunningSessions-itemShutdown.jp-mod-styled {
-  margin: 0px 4px;
+.jp-RunningSessions-itemDetail {
+  font-size: var(--jp-ui-font-size1);
+  flex: 1 1 45%;
+  padding: 0 4px 0 4px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.jp-RunningSessions-item .jp-RunningSessions-itemShutdown {
+  border-radius: 0px;
+}
+
+.jp-RunningSessions-item:not(:hover) .jp-RunningSessions-itemShutdown {
+  visibility: hidden;
+  /* display: none; */
+}
+
+.jp-RunningSessions-sectionList
+  .jp-RunningSessions-item
+  .jp-Button.jp-RunningSessions-itemShutdown:hover {
+  background: var(--jp-layout-color3);
+}
+
+.jp-RunningSessions-shutdownAll.jp-mod-styled {
+  margin: 0px 8px;
   color: var(--jp-warn-color1);
-  font-weight: 500;
   background-color: transparent;
   height: var(--jp-private-running-shutdown-button-height);
   line-height: var(--jp-private-running-shutdown-button-height);
-  transition: background-color 0.1s ease;
   border-radius: 2px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-.jp-RunningSessions-itemShutdown.jp-mod-styled:hover {
-  background-color: rgba(153, 153, 153, 0.1);
+.jp-RunningSessions-shutdownAll.jp-mod-styled:hover {
+  background-color: var(--jp-layout-color2);
 }
 
-.jp-RunningSessions-itemShutdown.jp-mod-styled:focus {
+.jp-RunningSessions-shutdownAll.jp-mod-styled:focus {
   border: none;
   box-shadow: none;
-  background-color: rgba(153, 153, 153, 0.2);
+  background-color: var(--jp-layout-color2);
 }
