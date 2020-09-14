@@ -147,6 +147,10 @@ export class Dialog<T> extends Widget {
     const promises = Promise.all(Private.launchQueue);
     Private.launchQueue.push(this._promise.promise);
     return promises.then(() => {
+      // Do not show Dialog if it was disposed of before it was at the front of the launch queue
+      if (!this._promise) {
+        return Promise.resolve({ button: Dialog.cancelButton(), value: null });
+      }
       Widget.attach(this, this._host);
       return promise.promise;
     });
