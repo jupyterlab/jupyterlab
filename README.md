@@ -155,7 +155,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 - Ian Rose, Quansight/City of LA (general core development, extensions).
 - Andrew Schlaepfer, Bloomberg (general development, extensions).
 - Saul Shanabrook, Quansight (general development, extensions)
-- Steven Silvester, AWS (co-creator, release management, packaging,
+- Steven Silvester, Apple (co-creator, release management, packaging,
   prolific contributions throughout the code base).
 
 Maintainer emeritus:
