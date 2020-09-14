@@ -112,12 +112,12 @@ export class SignatureCM extends CodeMirrorIntegration {
       root_position
     );
 
-    let tooltip = this.lab_integration.tooltip.create({
+    this.lab_integration.tooltip.create({
       markup,
       position: editor_position,
-      ce_editor: this.virtual_editor.find_ce_editor(cm_editor)
+      ce_editor: this.virtual_editor.find_ce_editor(cm_editor),
+      className: 'lsp-signature-help'
     });
-    tooltip.addClass('lsp-signature-help');
   }
 
   get signatureCharacters() {

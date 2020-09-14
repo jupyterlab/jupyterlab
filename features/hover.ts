@@ -66,7 +66,7 @@ export class HoverCM extends CodeMirrorIntegration {
     // TODO: make the debounce rate configurable
     this.debounced_get_hover = new Debouncer<Promise<lsProtocol.Hover>>(
       this.on_hover,
-      50
+      this.settings.composite.debouncerDelay
     );
     super.register();
   }
@@ -108,7 +108,7 @@ export class HoverCM extends CodeMirrorIntegration {
     } else {
       return {
         kind: 'markdown',
-        value: '```' + content.language + '\n' + content.value + '```'
+        value: '```' + content.language + '\n' + content.value + '\n```'
       };
     }
   }
@@ -151,7 +151,8 @@ export class HoverCM extends CodeMirrorIntegration {
     this.lab_integration.tooltip.create({
       markup,
       position: editor_position,
-      ce_editor: this.virtual_editor.find_ce_editor(cm_editor)
+      ce_editor: this.virtual_editor.find_ce_editor(cm_editor),
+      className: 'lsp-hover'
     });
   };
 

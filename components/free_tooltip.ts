@@ -95,6 +95,7 @@ export namespace EditorTooltip {
     markup: lsProtocol.MarkupContent;
     ce_editor: CodeEditor.IEditor;
     position: IEditorPosition;
+    className?: string;
   }
 }
 
@@ -123,6 +124,7 @@ export class EditorTooltipManager {
       position: PositionConverter.cm_to_ce(position),
       moveToLineEnd: false
     });
+    tooltip.addClass(options.className);
     Widget.attach(tooltip, document.body);
     this.currentTooltip = tooltip;
     return tooltip;
