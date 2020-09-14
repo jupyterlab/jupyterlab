@@ -28,7 +28,6 @@
 | Modal variant
 |----------------------------------------------------------------------------*/
 
-
 .jp-ModalCommandPalette {
   position: absolute;
   z-index: 10000;
@@ -59,7 +58,9 @@
   margin-right: 4px;
 }
 
-.jp-ModalCommandPalette .lm-CommandPalette .lm-CommandPalette-item.lm-mod-disabled {
+.jp-ModalCommandPalette
+  .lm-CommandPalette
+  .lm-CommandPalette-item.lm-mod-disabled {
   display: none;
 }
 
