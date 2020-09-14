@@ -6,6 +6,10 @@ JupyterLab Changelog
 `v1.2.x <https://github.com/jupyterlab/jupyterlab/milestone/54>`__
 ---------------------------------------------------------------------------
 
+v1.2.18
+^^^^^^^
+* Do not show Dialog If It Has Been Disposed (`#9002 <https://github.com/jupyterlab/jupyterlab/pull/9002>`__)
+
 v1.2.17
 ^^^^^^^
 * Do not use token parameters in websocket urls (`#8837 <https://github.com/jupyterlab/jupyterlab/pull/8837>`__)
