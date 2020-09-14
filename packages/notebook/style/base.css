@@ -249,6 +249,15 @@
   line-height: 1.4;
 }
 
+.jp-NotebookTools .jp-select-wrapper {
+  margin-top: 4px;
+  margin-bottom: 0px;
+}
+
+.jp-NotebookTools .jp-Collapse {
+  margin-top: 16px;
+}
+
 /*-----------------------------------------------------------------------------
 | Presentation Mode (.jp-mod-presentationMode)
 |----------------------------------------------------------------------------*/
