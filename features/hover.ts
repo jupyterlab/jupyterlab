@@ -1,4 +1,4 @@
-import { getModifierState, uris_equal } from '../utils';
+import { getModifierState } from '../utils';
 import { IRootPosition, is_equal, IVirtualPosition } from '../positioning';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import * as CodeMirror from 'codemirror';
@@ -23,6 +23,7 @@ import hoverSvg from '../../style/icons/hover.svg';
 import { IEditorChange } from '../virtual/editor';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import { PositionConverter } from '../converter';
+import { VirtualDocument } from '../virtual/document';
 
 export const hoverIcon = new LabIcon({
   name: 'lsp:hover',
@@ -31,7 +32,7 @@ export const hoverIcon = new LabIcon({
 
 interface IResponseData {
   response: lsProtocol.Hover;
-  uri: string;
+  document: VirtualDocument;
   editor_range: IEditorRange;
   ce_editor: CodeEditor.IEditor;
 }
@@ -91,14 +92,12 @@ export class HoverCM extends CodeMirrorIntegration {
   }
 
   protected restore_from_cache(
-    root_position: IRootPosition
+    root_position: IRootPosition,
+    document: VirtualDocument,
+    virtual_position: IVirtualPosition
   ): IResponseData | null {
-    const virtual_position = this.virtual_editor.root_position_to_virtual_position(
-      root_position
-    );
-    const document_uri = this.virtual_document.document_info.uri;
     const matching_items = this.cache.data.filter(cache_item => {
-      if (!uris_equal(cache_item.uri, document_uri)) {
+      if (cache_item.document !== document) {
         return false;
       }
       let range = cache_item.response.range;
@@ -123,7 +122,17 @@ export class HoverCM extends CodeMirrorIntegration {
         getModifierState(event, this.modifierKey) &&
         typeof this.last_hover_character !== 'undefined'
       ) {
-        let response_data = this.restore_from_cache(this.last_hover_character);
+        const document = this.virtual_editor.document_at_root_position(
+          this.last_hover_character
+        );
+        const virtual_position = this.virtual_editor.root_position_to_virtual_position(
+          this.last_hover_character
+        );
+        let response_data = this.restore_from_cache(
+          this.last_hover_character,
+          document,
+          virtual_position
+        );
         if (response_data == null) {
           return;
         }
@@ -157,6 +166,7 @@ export class HoverCM extends CodeMirrorIntegration {
   protected on_hover = async () => {
     return await this.connection.getHoverTooltip(
       this.virtual_position,
+      // this might be wrong - should not it be using the specific virtual document?
       this.virtual_document.document_info,
       false
     );
@@ -281,7 +291,11 @@ export class HoverCM extends CodeMirrorIntegration {
       this.virtual_position = virtual_position;
       this.last_hover_character = root_position;
 
-      let response_data = this.restore_from_cache(root_position);
+      let response_data = this.restore_from_cache(
+        root_position,
+        document,
+        virtual_position
+      );
 
       if (response_data == null) {
         let response = await this.debounced_get_hover.invoke();
@@ -306,7 +320,7 @@ export class HoverCM extends CodeMirrorIntegration {
               editor_range,
               ce_editor
             ),
-            uri: this.virtual_document.document_info.uri,
+            document: document,
             editor_range: editor_range,
             ce_editor: ce_editor
           };
@@ -341,6 +355,8 @@ export class HoverCM extends CodeMirrorIntegration {
     if (this.hover_marker) {
       this.hover_marker.clear();
       this.hover_marker = null;
+      this.last_hover_response = undefined;
+      this.last_hover_character = undefined;
     }
   };
 
