@@ -7,6 +7,10 @@ export class PositionConverter {
     return { line: position.line, ch: position.character };
   }
 
+  static cm_to_lsp(position: CodeMirror.Position): lsProtocol.Position {
+    return { line: position.line, character: position.ch };
+  }
+
   static lsp_to_ce(position: lsProtocol.Position): CodeEditor.IPosition {
     return { line: position.line, column: position.character };
   }

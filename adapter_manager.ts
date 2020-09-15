@@ -125,6 +125,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     widget.context.pathChanged.connect(reconnect);
 
     // TODO: maybe emit adapterCreated. Should it be handled by statusbar?
+    this.refreshAdapterFromCurrentWidget();
   }
 
   isAnyActive() {
