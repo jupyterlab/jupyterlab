@@ -55,11 +55,6 @@ import 'codemirror/keymap/emacs.js';
 import 'codemirror/keymap/sublime.js';
 // import 'codemirror/keymap/vim.js';  lazy loading of vim mode is available in ../codemirror-extension/index.ts
 
-// @ts-expect-error
-import shadowCss from '!!to-string-loader!css-loader!../style/shadow.css';
-// @ts-expect-error
-import jupyterThemeCSS from '!!to-string-loader!css-loader!../style/jupyter-theme.css';
-
 /**
  * The class name added to CodeMirrorWidget instances.
  */
@@ -79,11 +74,6 @@ const COLLABORATOR_CURSOR_CLASS = 'jp-CollaboratorCursor';
  * The class name for the hover box for collaborator cursors.
  */
 const COLLABORATOR_HOVER_CLASS = 'jp-CollaboratorCursor-hover';
-
-/**
- * The id of the style element containing CodeMirror theme CSS.
- */
-const CODEMIRROR_THEME_STYLE_ID = 'jp-CodeMirror-theme';
 
 /**
  * The key code for the up arrow key.
@@ -112,19 +102,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     this.translator = options.translator || nullTranslator;
     this._trans = this.translator.load('jupyterlab');
 
-    // Attach shadow root to host if host does not have already it.
-    const shadowRoot = host.shadowRoot || host.attachShadow({ mode: 'open' });
-
-    // Add a style element with the CodeMirror core CSS to the shadow root.
-    const shadowStyleEl = document.createElement('style');
-    shadowStyleEl.textContent = shadowCss;
-    shadowRoot.appendChild(shadowStyleEl);
-    // Add CodeMirror theme stylesheet.
-    const themeStyleEl = document.createElement('style');
-    themeStyleEl.id = CODEMIRROR_THEME_STYLE_ID;
-    themeStyleEl.textContent = jupyterThemeCSS;
-    shadowRoot.appendChild(themeStyleEl);
-
     host.classList.add(EDITOR_CLASS);
     host.classList.add('jp-Editor');
     host.addEventListener('focus', this, true);
@@ -146,10 +123,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
       ...CodeMirrorEditor.defaultConfig,
       ...config
     });
-    const editor = (this._editor = Private.createEditor(
-      shadowRoot,
-      fullConfig
-    ));
+    const editor = (this._editor = Private.createEditor(host, fullConfig));
 
     const doc = editor.getDoc();
 
@@ -329,13 +303,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Don't bother setting the option if it is already the same.
     if (this._config[option] !== value) {
       this._config[option] = value;
-      Private.setOption(
-        this.editor,
-        this.host.shadowRoot!,
-        option,
-        value,
-        this._config
-      );
+      Private.setOption(this.editor, option, value, this._config);
     }
   }
 
@@ -396,7 +364,7 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * Test whether the editor has keyboard focus.
    */
   hasFocus(): boolean {
-    return this.host === document.activeElement;
+    return this._editor.getWrapperElement().contains(document.activeElement);
   }
 
   /**
@@ -1351,7 +1319,7 @@ export namespace CodeMirrorEditor {
  */
 namespace Private {
   export function createEditor(
-    host: ShadowRoot,
+    host: HTMLElement,
     config: CodeMirrorEditor.IConfig
   ): CodeMirror.Editor {
     const {
@@ -1483,45 +1451,10 @@ namespace Private {
   }
 
   /**
-   * Set the stylesheet for the selected theme.
-   */
-  async function setTheme(
-    editor: CodeMirror.Editor,
-    shadowRoot: ShadowRoot,
-    theme: string
-  ): Promise<void> {
-    let stylesheet: string;
-
-    if (theme === 'jupyter') {
-      stylesheet = jupyterThemeCSS;
-    } else if (theme === 'default') {
-      stylesheet = '';
-    } else {
-      // Load the theme stylesheet.
-      const filename =
-        theme === 'solarized light' || theme === 'solarized dark'
-          ? 'solarized'
-          : theme;
-
-      const module = await import(
-        `!!to-string-loader!css-loader!codemirror/theme/${filename}.css`
-      );
-      stylesheet = module.default;
-    }
-
-    const themeStyleEl = shadowRoot.getElementById(
-      CODEMIRROR_THEME_STYLE_ID
-    ) as HTMLStyleElement;
-    themeStyleEl.textContent = stylesheet;
-    editor.setOption('theme', theme);
-  }
-
-  /**
    * Set a config option for the editor.
    */
   export function setOption<K extends keyof CodeMirrorEditor.IConfig>(
     editor: CodeMirror.Editor,
-    shadowRoot: ShadowRoot,
     option: K,
     value: CodeMirrorEditor.IConfig[K],
     config: CodeMirrorEditor.IConfig
@@ -1597,9 +1530,6 @@ namespace Private {
       case 'codeFolding':
         (editor.setOption as any)('foldGutter', value);
         editor.setOption('gutters', getActiveGutters(config));
-        break;
-      case 'theme':
-        void setTheme(editor, shadowRoot, value as string);
         break;
       default:
         (editor.setOption as any)(option, value);
