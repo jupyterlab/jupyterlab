@@ -47,24 +47,31 @@ export function getModifierState(
   // Full list of modifier keys and mappings to physical keys on different OSes:
   // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/getModifierState
 
-  if (event.getModifierState !== undefined) {
-    return event.getModifierState(modifierKey);
-  }
+  // the key approach is needed for CodeMirror events which do not set
+  // *key (e.g. ctrlKey) correctly
+  const key = (event as KeyboardEvent).key || null;
+  let value = false;
 
   switch (modifierKey) {
     case 'Shift':
-      return event.shiftKey;
+      value = event.shiftKey || key == 'Shift';
+      break;
     case 'Alt':
-      return event.altKey;
+      value = event.altKey || key == 'Alt';
+      break;
     case 'Control':
-      return event.ctrlKey;
+      value = event.ctrlKey || key == 'Control';
+      break;
     case 'Meta':
-      return event.metaKey;
-    default:
-      console.warn(
-        `State of the modifier key "${modifierKey}" could not be determined.`
-      );
+      value = event.metaKey || key == 'Meta';
+      break;
   }
+
+  if (event.getModifierState !== undefined) {
+    return value || event.getModifierState(modifierKey);
+  }
+
+  return value;
 }
 
 export class DefaultMap<K, V> extends Map<K, V> {

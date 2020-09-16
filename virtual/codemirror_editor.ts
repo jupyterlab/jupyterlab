@@ -23,7 +23,10 @@ import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { JupyterFrontEndPlugin } from '@jupyterlab/application';
 import { ILSPVirtualEditorManager, PLUGIN_ID } from '../tokens';
 
-export type CodeMirrorHandler = (instance: any, ...args: any[]) => void;
+export type CodeMirrorHandler = (
+  instance: CodeMirrorVirtualEditor,
+  ...args: any[]
+) => void;
 type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
@@ -111,7 +114,7 @@ export class CodeMirrorVirtualEditor
       ) {
         if (!(prop in target)) {
           console.warn(
-            `Unimplemented method ${prop.toString()} for VirtualCodeMirrorEditor`
+            `Unimplemented method ${prop.toString()} for CodeMirrorVirtualEditor`
           );
           return;
         } else {
@@ -202,7 +205,10 @@ export class CodeMirrorVirtualEditor
     this.on('change', this.emit_change.bind(this));
   }
 
-  private emit_change(doc: CodeMirror.Doc, change: CodeMirror.EditorChange) {
+  private emit_change(
+    instance: CodeMirrorVirtualEditor,
+    change: CodeMirror.EditorChange
+  ) {
     this.change.emit(change as IEditorChange);
   }
 

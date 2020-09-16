@@ -56,6 +56,35 @@ export interface IEditOutcome {
 }
 
 /**
+ * Interface for storage of HTMLElement event specifications (event name + handler).
+ */
+interface IHTMLEventMap<
+  T extends keyof HTMLElementEventMap = keyof HTMLElementEventMap
+> extends Map<T, (event: HTMLElementEventMap[T]) => void> {
+  set<E extends T>(
+    k: E,
+    handler: (event: HTMLElementEventMap[E]) => void
+  ): this;
+  get<E extends T>(k: E): (event: HTMLElementEventMap[E]) => void;
+}
+
+type CodeMirrorEventName =
+  | CodeMirror.DOMEvent
+  | 'change'
+  | 'changes'
+  | 'beforeChange'
+  | 'cursorActivity'
+  | 'beforeSelectionChange'
+  | 'viewportChange'
+  | 'gutterClick'
+  | 'focus'
+  | 'blur'
+  | 'scroll'
+  | 'update'
+  | 'renderLine'
+  | 'overwriteToggle';
+
+/**
  * One feature of each type exists per VirtualDocument
  * (the initialization is performed by the adapter).
  */
@@ -64,9 +93,16 @@ export abstract class CodeMirrorIntegration
   is_registered: boolean;
   feature: IFeature;
 
-  protected readonly editor_handlers: Map<string, CodeMirrorHandler>;
-  protected readonly connection_handlers: Map<string, any>;
-  protected readonly wrapper_handlers: Map<keyof HTMLElementEventMap, any>;
+  protected readonly editor_handlers: Map<
+    CodeMirrorEventName,
+    CodeMirrorHandler
+  >;
+  // TODO use better type constraints for connection event names and for responses
+  protected readonly connection_handlers: Map<
+    string,
+    (response: object) => void
+  >;
+  protected readonly wrapper_handlers: IHTMLEventMap;
   protected wrapper: HTMLElement;
 
   protected virtual_editor: CodeMirrorVirtualEditor;

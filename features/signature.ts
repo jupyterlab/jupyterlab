@@ -6,7 +6,7 @@ import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin
 } from '@jupyterlab/application';
-import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
+import { ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 import { EditorTooltipManager } from '../components/free_tooltip';
@@ -116,6 +116,7 @@ export class SignatureCM extends CodeMirrorIntegration {
       markup,
       position: editor_position,
       ce_editor: this.virtual_editor.find_ce_editor(cm_editor),
+      adapter: this.adapter,
       className: 'lsp-signature-help'
     });
   }
@@ -163,10 +164,9 @@ class SignatureLabIntegration implements IFeatureLabIntegration {
   constructor(
     app: JupyterFrontEnd,
     settings: FeatureSettings<any>,
-    renderMimeRegistry: IRenderMimeRegistry,
-    adapterManager: ILSPAdapterManager
+    renderMimeRegistry: IRenderMimeRegistry
   ) {
-    this.tooltip = new EditorTooltipManager(renderMimeRegistry, adapterManager);
+    this.tooltip = new EditorTooltipManager(renderMimeRegistry);
   }
 }
 
@@ -174,26 +174,19 @@ const FEATURE_ID = PLUGIN_ID + ':signature';
 
 export const SIGNATURE_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
-  requires: [
-    ILSPFeatureManager,
-    ISettingRegistry,
-    IRenderMimeRegistry,
-    ILSPAdapterManager
-  ],
+  requires: [ILSPFeatureManager, ISettingRegistry, IRenderMimeRegistry],
   autoStart: true,
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
     settingRegistry: ISettingRegistry,
-    renderMimeRegistry: IRenderMimeRegistry,
-    adapterManager: ILSPAdapterManager
+    renderMimeRegistry: IRenderMimeRegistry
   ) => {
     const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
     const labIntegration = new SignatureLabIntegration(
       app,
       settings,
-      renderMimeRegistry,
-      adapterManager
+      renderMimeRegistry
     );
 
     featureManager.register({
