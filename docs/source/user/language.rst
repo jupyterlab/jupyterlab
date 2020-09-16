@@ -19,7 +19,7 @@ Installing
 ''''''''''
 
 Language packs are identified by the four letter code of the language and
-variante they provide. For example, for Simplified Chinese the language
+variant they provide. For example, for Simplified Chinese the language
 pack code is ``zh-CN`` and you can install it with ``conda`` or ``pip``.
 
 If you use conda with conda-forge packages:
@@ -40,7 +40,7 @@ Changing the display language
 To change the interface language, select the Settings menu and then
 select the desired language in the Language submenu.
 
-The Language submenu will inly list any previously installed language
+The Language submenu will only list any previously installed language
 packs.
 
 .. image:: images/language_settings.png
