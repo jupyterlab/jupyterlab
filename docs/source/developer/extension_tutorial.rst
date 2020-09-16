@@ -268,7 +268,7 @@ Finally, run the following to rebuild your extension.
 
 .. code:: bash
 
-    jlpm run build:all
+    jlpm run build
 
 
 .. note::
@@ -289,12 +289,12 @@ build command for errors and correct your code.
     JupyterLab extension jupyterlab_apod is activated!
     ICommandPalette: Palette {_palette: CommandPalette}
 
-Note that we had to run ``jlpm run build:all`` in order for the bundle to
+Note that we had to run ``jlpm run build`` in order for the bundle to
 update. This command does two things: compiles the TypeScript files in `src/`
 into JavaScript files in ``lib/`` (``jlpm run build``), then bundles the
 JavaScript files in ``lib/`` into a JupyterLab extension in
 ``jupyterlab_apod/static`` (``jlpm run build:extension``). If you wish to avoid
-running ``jlpm run build:all`` after each change, you can open a third terminal,
+running ``jlpm run build`` after each change, you can open a third terminal,
 activate the ``jupyterlab-ext`` environment, and run the ``jlpm run watch``
 command from your extension directory, which will automatically compile the
 TypeScript files as they are changed and saved.
@@ -358,7 +358,7 @@ already present and then makes it the active tab. The last new line of code
 uses the command id to add the command to the command palette in a section
 called *Tutorial*.
 
-Build your extension again using ``jlpm run build:all`` (unless you are using
+Build your extension again using ``jlpm run build`` (unless you are using
 ``jlpm run watch`` already) and refresh the browser tab. Open the command
 palette on the left side by clicking on *Commands* and type *Astronomy* in the
 search box. Your *Random Astronomy Picture* command should appear. Click it or
@@ -447,7 +447,7 @@ And update the ``activate`` method to be ``async`` since we are now using
 
         activate: async (app: JupyterFrontEnd, palette: ICommandPalette) =>
 
-Rebuild your extension if necessary (``jlpm run build:all``), refresh your browser
+Rebuild your extension if necessary (``jlpm run build``), refresh your browser
 tab, and run the *Random Astronomy Picture* command again. You should now see a
 picture in the panel when it opens (if that random date had a picture and not a
 video).
@@ -560,7 +560,7 @@ The beginning of the function should read like the following:
       // Keep all the remaining command lines the same
       // as before from here down ...
 
-Build your extension if necessary (``jlpm run build:all``) and refresh your
+Build your extension if necessary (``jlpm run build``) and refresh your
 JupyterLab browser tab. Invoke the *Random Astronomy Picture* command and
 confirm the image is centered with the copyright information below it. Resize
 the browser window or the panel so that the image is larger than the
