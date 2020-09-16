@@ -8,7 +8,7 @@ import { ITranslator, TranslationBundle, TranslatorConnector } from './tokens';
  * Translation Manager
  */
 export class TranslationManager implements ITranslator {
-  constructor(translationsUrl?: string, stringsPrefix?: string) {
+  constructor(translationsUrl: string = '', stringsPrefix?: string) {
     this._connector = new TranslatorConnector(translationsUrl);
     this._stringsPrefix = stringsPrefix || '';
     this._englishBundle = new Gettext({ stringsPrefix: this._stringsPrefix });

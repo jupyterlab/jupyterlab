@@ -24,7 +24,7 @@ export const ITranslatorConnector = new Token<ITranslatorConnector>(
 export class TranslatorConnector
   extends DataConnector<Language, Language, { language: string }>
   implements ITranslatorConnector {
-  constructor(translationsUrl?: string) {
+  constructor(translationsUrl: string = '') {
     super();
     this._translationsUrl = translationsUrl;
   }

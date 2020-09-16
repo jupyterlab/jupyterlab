@@ -13,8 +13,8 @@ import { ServerConnection } from '@jupyterlab/services';
  * @returns The response body interpreted as JSON
  */
 export async function requestTranslationsAPI<T>(
+  translationsUrl: string = '',
   locale = '',
-  translationsUrl?: string,
   init: RequestInit = {}
 ): Promise<T> {
   // Make request to Jupyter API
