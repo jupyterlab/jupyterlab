@@ -16,9 +16,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 import {
   ITranslator,
-  ITranslatorConnector,
   TranslationManager,
-  TranslatorConnector,
   requestTranslationsAPI
 } from '@jupyterlab/translation';
 
@@ -37,21 +35,16 @@ export namespace CommandIDs {
  */
 const PLUGIN_ID = '@jupyterlab/translation-extension:plugin';
 
-const connector: JupyterFrontEndPlugin<ITranslatorConnector> = {
-  id: '@jupyterlab/translation:connector',
-  autoStart: true,
-  provides: ITranslatorConnector,
-  activate: () => {
-    return new TranslatorConnector();
-  }
-};
-
 const translator: JupyterFrontEndPlugin<ITranslator> = {
   id: '@jupyterlab/translation:translator',
   autoStart: true,
-  requires: [ISettingRegistry, ITranslatorConnector],
+  requires: [JupyterFrontEnd.IPaths, ISettingRegistry],
   provides: ITranslator,
-  activate: async (app: JupyterFrontEnd, settings: ISettingRegistry) => {
+  activate: async (
+    app: JupyterFrontEnd,
+    paths: JupyterFrontEnd.IPaths,
+    settings: ISettingRegistry
+  ) => {
     const setting = await settings.load(PLUGIN_ID);
     const currentLocale: string = setting.get('locale').composite as string;
     let stringsPrefix: string = setting.get('stringsPrefix')
@@ -59,7 +52,10 @@ const translator: JupyterFrontEndPlugin<ITranslator> = {
     const displayStringsPrefix: boolean = setting.get('displayStringsPrefix')
       .composite as boolean;
     stringsPrefix = displayStringsPrefix ? stringsPrefix : '';
-    const translationManager = new TranslationManager(stringsPrefix);
+    const translationManager = new TranslationManager(
+      paths.urls.translations,
+      stringsPrefix
+    );
     await translationManager.fetch(currentLocale);
     return translationManager;
   }
@@ -181,5 +177,5 @@ const langMenu: JupyterFrontEndPlugin<void> = {
 /**
  * Export the plugins as default.
  */
-const plugins: JupyterFrontEndPlugin<any>[] = [connector, translator, langMenu];
+const plugins: JupyterFrontEndPlugin<any>[] = [translator, langMenu];
 export default plugins;

@@ -268,6 +268,7 @@ export namespace JupyterLab {
       static: PageConfig.getOption('staticUrl'),
       settings: PageConfig.getOption('settingsUrl'),
       themes: PageConfig.getOption('themesUrl'),
+      translations: PageConfig.getOption('translationsApiUrl'),
       hubHost: PageConfig.getOption('hubHost') || undefined,
       hubPrefix: PageConfig.getOption('hubPrefix') || undefined,
       hubUser: PageConfig.getOption('hubUser') || undefined,
