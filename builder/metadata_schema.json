@@ -93,7 +93,7 @@
     },
     "sharedPackages": {
       "description": "Modules that should be shared in the share scope. When provided, property names are used to match requested modules in this compilation.",
-        "ref": "#/definitions/sharedObject"
+      "ref": "#/definitions/sharedObject"
     },
     "discovery": {
       "title": "Discovery metadata",

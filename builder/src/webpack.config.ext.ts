@@ -101,7 +101,7 @@ const sharedPackages = data.jupyterlab.sharedPackages ?? {};
 Object.keys(sharedPackages).forEach(pkg => {
   if (sharedPackages[pkg] === false) {
     delete shared[pkg];
-    delete sharedPackages[pkg];  
+    delete sharedPackages[pkg];
   }
 });
 
@@ -110,7 +110,10 @@ Object.keys(sharedPackages).forEach(pkg => {
   // Convert `bundled` to `import`
   if (sharedPackages[pkg].bundled === false) {
     sharedPackages[pkg].import = false;
-  } else if (sharedPackages[pkg].bundled === true && shared[pkg]?.import === false) {
+  } else if (
+    sharedPackages[pkg].bundled === true &&
+    shared[pkg]?.import === false
+  ) {
     // We can't delete a key in the merge, so we have to delete it in the source
     delete shared[pkg].import;
   }
@@ -121,7 +124,9 @@ shared = merge(shared, sharedPackages);
 
 // add the root module itself to shared
 if (shared[data.name]) {
-  console.error(`The root package itself '${data.name}' may not specified as a shared dependency.`);
+  console.error(
+    `The root package itself '${data.name}' may not specified as a shared dependency.`
+  );
 }
 shared[data.name] = {
   version: data.version,
