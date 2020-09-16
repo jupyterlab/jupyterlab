@@ -27,7 +27,7 @@ const data = require(path.join(packagePath, 'package.json'));
 
 const ajv = new Ajv({ useDefaults: true });
 const validate = ajv.compile(require('../metadata_schema.json'));
-let valid = validate(data.jupyterlab || {});
+let valid = validate(data.jupyterlab ?? {});
 if (!valid) {
   console.error(validate.errors);
   process.exit(1);
@@ -68,7 +68,7 @@ let shared: any = {};
 // Start with core package versions.
 const coreDeps: any = {
   ...coreData.dependencies,
-  ...(coreData.resolutions || {})
+  ...(coreData.resolutions ?? {})
 };
 
 // TODO: make sure that using an || in package.json translates to a looser requirement here.
@@ -95,7 +95,7 @@ coreData.jupyterlab.singletonPackages.forEach((element: string) => {
 
 // Now we merge in the sharedPackages configuration provided by the extension.
 
-const sharedPackages = data.jupyterlab.sharedPackages;
+const sharedPackages = data.jupyterlab.sharedPackages ?? {};
 
 // Delete any modules that are explicitly not shared
 Object.keys(sharedPackages).forEach(pkg => {
