@@ -543,10 +543,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         app_dir = get_app_dir()
         if self.core_mode:
             app_dir = HERE
-            self.log.info('Running JupyterLab in core mode')
         elif self.dev_mode:
             app_dir = DEV_DIR
-            self.log.info('Running JupyterLab in dev mode')
         return app_dir
 
     @default('app_settings_dir')
@@ -598,7 +596,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         # Determine which model to run JupyterLab
         if self.core_mode or self.app_dir.startswith(HERE):
             self.core_mode = True
-            self.log.info('Running JupyterLab in dev mode')
+            self.log.info('Running JupyterLab in core mode')
 
         if self.dev_mode or self.app_dir.startswith(DEV_DIR):
             self.dev_mode = True
@@ -623,6 +621,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             dev_static_dir = ujoin(HERE, 'static')
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
+            self.labextensions_path = []
+            self.extra_labextensions_path = []
         else:
             self.static_paths = [self.static_dir]
             self.template_paths = [self.templates_dir]
