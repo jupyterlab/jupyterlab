@@ -93,34 +93,34 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
   /**
    * Add a panel at the end of the sidebar.
    *
-   * @param panel - The panel to add to the sidebar.
+   * @param widget - The widget to add to the sidebar.
    *
    * #### Notes
    * If the widget is already contained in the sidebar, it will be moved.
    */
-  addPanel(panel: Panel) {
-    this.body.addWidget(panel);
+  addPanel(widget: Widget) {
+    this.body.addWidget(widget);
   }
 
   /**
    * Insert a panel at the specified index.
    *
-   * @param index - The index at which to insert the panel.
+   * @param index - The index at which to insert the widget.
    *
-   * @param panel - The panel to insert into to the sidebar.
+   * @param widget - The widget to insert into to the sidebar.
    *
    * #### Notes
    * If the widget is already contained in the sidebar, it will be moved.
    */
-  insertPanel(index: number, panel: Panel) {
-    this.body.insertWidget(index, panel);
+  insertPanel(index: number, widget: Widget) {
+    this.body.insertWidget(index, widget);
   }
 
   /**
    * A read-only array of the sidebar panels.
    */
-  get panels(): Panel[] {
-    return this.body.widgets as Panel[];
+  get panels(): readonly Widget[] {
+    return this.body.widgets;
   }
 
   /**

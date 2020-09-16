@@ -11,7 +11,7 @@ import { IObservableDisposable } from '@lumino/disposable';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { Panel } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { DebugProtocol } from 'vscode-debugprotocol';
 
@@ -493,17 +493,17 @@ export namespace IDebugger {
     /**
      * Add panel at the end of the sidebar.
      */
-    addPanel(panel: Panel): void;
+    addPanel(widget: Widget): void;
 
     /**
      * Insert panel at a specified index.
      */
-    insertPanel(index: number, panel: Panel): void;
+    insertPanel(index: number, widget: Widget): void;
 
     /**
      * Return all panels that were added to sidebar.
      */
-    readonly panels: Panel[];
+    readonly panels: readonly Widget[];
   }
 
   /**
