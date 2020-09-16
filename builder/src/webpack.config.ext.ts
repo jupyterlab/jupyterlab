@@ -27,7 +27,7 @@ const data = require(path.join(packagePath, 'package.json'));
 
 const ajv = new Ajv({ useDefaults: true });
 const validate = ajv.compile(require('../metadata_schema.json'));
-let valid = validate(data.jupyterlab || {});
+let valid = validate(data.jupyterlab ?? {});
 if (!valid) {
   console.error(validate.errors);
   process.exit(1);
@@ -63,14 +63,16 @@ if (data.style) {
 
 const coreData = require(path.join(corePath, 'package.json'));
 
-const shared: any = {};
+let shared: any = {};
 
 // Start with core package versions.
 const coreDeps: any = {
   ...coreData.dependencies,
-  ...(coreData.resolutions || {})
+  ...(coreData.resolutions ?? {})
 };
 
+// TODO: make sure that using an || in package.json translates to a looser requirement here.
+// TODO: make sure that the version of jlab compiling matches what we have in the dependencies
 Object.keys(coreDeps).forEach(element => {
   shared[element] = { requiredVersion: coreDeps[element] };
 });
@@ -82,12 +84,7 @@ Object.keys(data.dependencies).forEach(element => {
   }
 });
 
-// Remove non-shared.
-(data.jupyterlab.nonSharedPackages || []).forEach((element: string) => {
-  delete shared[element];
-});
-
-// Start with core singletons.
+// Set core packages as singletons that are not bundled.
 coreData.jupyterlab.singletonPackages.forEach((element: string) => {
   if (!shared[element]) {
     shared[element] = {};
@@ -96,25 +93,40 @@ coreData.jupyterlab.singletonPackages.forEach((element: string) => {
   shared[element].singleton = true;
 });
 
-// Add package singletons.
-(data.jupyterlab.singletonPackages || []).forEach((element: string) => {
-  if (!shared[element]) {
-    shared[element] = {};
+// Now we merge in the sharedPackages configuration provided by the extension.
+
+const sharedPackages = data.jupyterlab.sharedPackages ?? {};
+
+// Delete any modules that are explicitly not shared
+Object.keys(sharedPackages).forEach(pkg => {
+  if (sharedPackages[pkg] === false) {
+    delete shared[pkg];
+    delete sharedPackages[pkg];
   }
-  shared[element].import = false;
 });
 
-// Remove non-singletons.
-(data.jupyterlab.nonSingletonPackages || []).forEach((element: string) => {
-  if (!shared[element]) {
-    shared[element] = {};
+// Transform the sharedPackages information into valid webpack config
+Object.keys(sharedPackages).forEach(pkg => {
+  // Convert `bundled` to `import`
+  if (sharedPackages[pkg].bundled === false) {
+    sharedPackages[pkg].import = false;
+  } else if (
+    sharedPackages[pkg].bundled === true &&
+    shared[pkg]?.import === false
+  ) {
+    // We can't delete a key in the merge, so we have to delete it in the source
+    delete shared[pkg].import;
   }
-  shared[element].singleton = false;
+  delete sharedPackages[pkg].bundled;
 });
 
-// add itself to shared
+shared = merge(shared, sharedPackages);
+
+// add the root module itself to shared
 if (shared[data.name]) {
-  console.error(`Overriding '${data.name}' in module shared list.`);
+  console.error(
+    `The root package itself '${data.name}' may not specified as a shared dependency.`
+  );
 }
 shared[data.name] = {
   version: data.version,
