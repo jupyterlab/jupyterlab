@@ -77,7 +77,7 @@ if (process.env.NODE_ENV === 'production') {
 
 module.exports = [
   merge(baseConfig, {
-    entry: ['./publicpath.js', entryPoint],
+    entry: ['./publicpath.js', './'+path.relative(__dirname, entryPoint)],
     output: {
       path: buildDir,
       library: {
