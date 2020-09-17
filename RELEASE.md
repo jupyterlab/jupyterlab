@@ -15,29 +15,6 @@ setup instructions and for why twine is the recommended method.
 
 ## Getting a clean environment
 
-### Using Docker
-
-If desired, you can use Docker to create a new container with a fresh clone of JupyterLab.
-
-First, build a Docker base image. This container is customized with your git commit information. The build is cached so rebuilding it is fast and easy.
-
-```bash
-docker build -t jlabreleaseimage release/ --build-arg "GIT_AUTHOR_NAME=`git config user.name`" --build-arg "GIT_AUTHOR_EMAIL=`git config user.email`"
-```
-
-Note: if you must rebuild your Docker image from scratch without the cache, you can run the same build command above with `--no-cache --pull`.
-
-Then run a new instance of this container:
-
-```bash
-docker rm jlabrelease # delete any old container
-docker run -it --name jlabrelease -w /usr/src/app jlabreleaseimage bash
-```
-
-Now you should be at a shell prompt as root inside the docker container (the prompt should be something like `root@20dcc0cdc0b4:/usr/src/app`).
-
-### Clean environment
-
 For convenience, here is a script for getting a completely clean repo. This
 makes sure that we don't have any extra tags or commits in our repo (especially
 since we will push our tags later in the process), and that we are on the correct branch. The script creates a conda env, pulls down a git checkout with the
