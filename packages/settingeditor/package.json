@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingeditor",
-  "version": "3.0.0-beta.5",
+  "version": "3.0.0-beta.6",
   "description": "The JupyterLab default setting editor interface",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -35,14 +35,14 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-beta.5",
-    "@jupyterlab/codeeditor": "^3.0.0-beta.5",
-    "@jupyterlab/inspector": "^3.0.0-beta.5",
-    "@jupyterlab/rendermime": "^3.0.0-beta.5",
-    "@jupyterlab/settingregistry": "^3.0.0-beta.5",
-    "@jupyterlab/statedb": "^3.0.0-beta.5",
-    "@jupyterlab/translation": "^3.0.0-beta.5",
-    "@jupyterlab/ui-components": "^3.0.0-beta.5",
+    "@jupyterlab/apputils": "^3.0.0-beta.6",
+    "@jupyterlab/codeeditor": "^3.0.0-beta.6",
+    "@jupyterlab/inspector": "^3.0.0-beta.6",
+    "@jupyterlab/rendermime": "^3.0.0-beta.6",
+    "@jupyterlab/settingregistry": "^3.0.0-beta.6",
+    "@jupyterlab/statedb": "^3.0.0-beta.6",
+    "@jupyterlab/translation": "^3.0.0-beta.6",
+    "@jupyterlab/ui-components": "^3.0.0-beta.6",
     "@lumino/commands": "^1.11.3",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",
