@@ -44,7 +44,7 @@ Implementation
 - We provide a schema for the valid ``jupyterlab`` metadata for an extension's ``package.json`` describing the available options
 - We provide a ``labextensions`` handler in ``jupyterlab_server`` that loads static assets from ``labextensions`` paths, following a similar logic to how ``nbextensions`` are discovered and loaded from disk
 - The ``settings`` and ``themes`` handlers in ``jupyterlab_server`` has been updated to load from the new ``labextensions`` locations, favoring the dynamic extension locations over the bundled ones
-- A ``labextension develop`` command as been added to install an in-development extension into JupyterLab.  The default behavior is to create a symlink in the ``sys-prefix/share/jupyter/labextensions/package-name`` to the static directory of the extension
+- A ``labextension develop`` command has been added to install an in-development extension into JupyterLab.  The default behavior is to create a symlink in the ``sys-prefix/share/jupyter/labextensions/package-name`` to the static directory of the extension
 - We provide a ``cookiecutter`` that handles all of the scaffolding for an extension author, including the shipping of ``data_files`` so that when the user installs the package, the static assets end up in ``share/jupyter/labextensions``
 - We handle disabling of lab extensions using a trait on the ``LabApp`` class, so it can be set by admins and overridden by users.  Extensions are automatically enabled when installed, and must be explicitly disabled.  The disabled config can consist of a package name or a plugin regex pattern
 - Extensions can provide ``disabled`` metadata that can be used to replace an entire extension or individual plugins
@@ -142,7 +142,7 @@ Here is a dependency graph for the core JupyterLab components: |dependencies|
     Installing an extension allows for arbitrary code execution on the
     server, kernel, and in the client's browser. You should therefore
     take steps to protect against malicious changes to your extension's
-    code. This includes ensuring strong authentication for your pypi
+    code. This includes ensuring strong authentication for your PyPI
     account.
 
 
