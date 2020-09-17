@@ -30,7 +30,7 @@ export class TranslatorConnector
   }
 
   async fetch(opts: { language: string }): Promise<Language> {
-    return requestTranslationsAPI(opts.language, this._translationsUrl);
+    return requestTranslationsAPI(this._translationsUrl, opts.language);
   }
 
   private _translationsUrl: string;
