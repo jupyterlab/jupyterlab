@@ -71,14 +71,17 @@ const coreDeps: any = {
   ...(coreData.resolutions ?? {})
 };
 
-// TODO: make sure that using an || in package.json translates to a looser requirement here.
-// TODO: make sure that the version of jlab compiling matches what we have in the dependencies
 Object.keys(coreDeps).forEach(element => {
-  shared[element] = { requiredVersion: coreDeps[element] };
+  shared[element] = {
+    requiredVersion: coreDeps[element],
+    import: false
+  };
 });
 
 // Add package dependencies.
 Object.keys(data.dependencies).forEach(element => {
+  // TODO: make sure that the core dependency semver range is a subset of our
+  // data.depencies version range for any packages in the core deps.
   if (!shared[element]) {
     shared[element] = {};
   }
