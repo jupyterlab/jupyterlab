@@ -145,9 +145,9 @@ setup_args['install_requires'] = [
     'ipython',
     'packaging',
     'tornado!=6.0.0, !=6.0.1, !=6.0.2',
-    'jupyterlab_server~=2.0.0b8',
-    'jupyter_server~=1.0.0rc16',
-    'nbclassic~=0.2.0rc7',
+    'jupyterlab_server~=2.0.0rc0',
+    'jupyter_server~=1.0.1',
+    'nbclassic~=0.2.0',
     'jinja2>=2.10'
 ]
 

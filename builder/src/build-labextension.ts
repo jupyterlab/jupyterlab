@@ -14,9 +14,38 @@
 // Outputs
 // Webpack build assets
 
+///////////////////////////////////////////////////////
+// Portions of the below code handling watch mode and displaying output were
+// adapted from the https://github.com/webpack/webpack-cli project, which has
+// an MIT license (https://github.com/webpack/webpack-cli/blob/4dc6dfbf29da16e61745770f7b48638963fb05c5/LICENSE):
+//
+// Copyright JS Foundation and other contributors
+//
+// Permission is hereby granted, free of charge, to any person obtaining
+// a copy of this software and associated documentation files (the
+// 'Software'), to deal in the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///////////////////////////////////////////////////////
+
 import * as path from 'path';
 import commander from 'commander';
-import { run } from '@jupyterlab/buildutils';
+import webpack from 'webpack';
+import generateConfig from './extensionConfig';
+import { stdout as colors } from 'supports-color';
 
 commander
   .description('Build an extension')
@@ -32,23 +61,83 @@ commander
     const mode = cmd.development ? 'development' : 'production';
     const corePath = path.resolve(cmd.corePath || process.cwd());
     const packagePath = path.resolve(cmd.args[0]);
-    const sourceMap = cmd.sourceMap ? 'true' : '';
+    const devtool = cmd.sourceMap ? 'source-map' : undefined;
 
-    const webpack = require.resolve('webpack-cli/bin/cli.js');
-    const config = path.join(__dirname, 'webpack.config.ext.js');
-    let cmdText = `node "${webpack}" --config "${config}" --mode ${mode}`;
-    if (cmd.watch) {
-      cmdText += ' --watch';
+    const config = generateConfig({
+      packagePath,
+      mode,
+      corePath,
+      staticUrl: cmd.staticUrl,
+      devtool,
+      watchMode: cmd.watch
+    });
+    const compiler = webpack(config);
+
+    let lastHash: string | null = null;
+
+    function compilerCallback(err: any, stats: any) {
+      if (!cmd.watch || err) {
+        // Do not keep cache anymore
+        compiler.purgeInputFileSystem();
+      }
+
+      if (err) {
+        console.error(err.stack || err);
+        if (err.details) {
+          console.error(err.details);
+        }
+        throw new Error(err.details);
+      }
+
+      const info = stats.toJson();
+
+      if (stats.hasErrors()) {
+        console.error(info.errors);
+        if (!cmd.watch) {
+          process.exit(2);
+        }
+      }
+
+      if (stats.hash !== lastHash) {
+        lastHash = stats.hash;
+        const statsString = stats.toString({ colors });
+        const delimiter = '';
+        if (statsString) {
+          process.stdout.write(`${statsString}\n${delimiter}`);
+        }
+      }
     }
-    const env = {
-      PACKAGE_PATH: packagePath,
-      NODE_ENV: mode,
-      CORE_PATH: corePath,
-      STATIC_URL: cmd.staticUrl,
-      SOURCE_MAP: sourceMap
-    };
-    // Run in this directory so we resolve to the right webpack and loaders
-    run(cmdText, { cwd: __dirname, env: { ...process.env, ...env } });
+
+    if (cmd.watch) {
+      compiler.hooks.watchRun.tap('WebpackInfo', () => {
+        console.error('\nWatch Compilation starting…\n');
+      });
+      compiler.hooks.done.tap('WebpackInfo', () => {
+        console.error('\nWatch Compilation finished\n');
+      });
+    } else {
+      compiler.hooks.run.tap('WebpackInfo', () => {
+        console.error('\nCompilation starting…\n');
+      });
+      compiler.hooks.done.tap('WebpackInfo', () => {
+        console.error('\nCompilation finished\n');
+      });
+    }
+
+    if (cmd.watch) {
+      compiler.watch(config[0].watchOptions || {}, compilerCallback);
+      console.error('\nwebpack is watching the files…\n');
+    } else {
+      compiler.run((err: any, stats: any) => {
+        if (compiler.close) {
+          compiler.close((err2: any) => {
+            compilerCallback(err || err2, stats);
+          });
+        } else {
+          compilerCallback(err, stats);
+        }
+      });
+    }
   });
 
 commander.parse(process.argv);
