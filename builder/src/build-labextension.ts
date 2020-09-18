@@ -16,7 +16,10 @@
 
 import * as path from 'path';
 import commander from 'commander';
-import { run } from '@jupyterlab/buildutils';
+import webpack from 'webpack';
+import generateConfig from './extensionConfig';
+
+// import { run } from '@jupyterlab/buildutils';
 
 commander
   .description('Build an extension')
@@ -32,23 +35,54 @@ commander
     const mode = cmd.development ? 'development' : 'production';
     const corePath = path.resolve(cmd.corePath || process.cwd());
     const packagePath = path.resolve(cmd.args[0]);
-    const sourceMap = cmd.sourceMap ? 'true' : '';
+    const devtool = cmd.sourceMap ? 'source-map' : undefined;
 
-    const webpack = require.resolve('webpack-cli/bin/cli.js');
-    const config = path.join(__dirname, 'webpack.config.ext.js');
-    let cmdText = `node "${webpack}" --config "${config}" --mode ${mode}`;
-    if (cmd.watch) {
-      cmdText += ' --watch';
-    }
-    const env = {
-      PACKAGE_PATH: packagePath,
-      NODE_ENV: mode,
-      CORE_PATH: corePath,
-      STATIC_URL: cmd.staticUrl,
-      SOURCE_MAP: sourceMap
-    };
+    // const webpack = require.resolve('webpack-cli/bin/cli.js');
+    // const config = path.join(__dirname, 'webpack.config.ext.js');
+    // let cmdText = `node "${webpack}" --config "${config}" --mode ${mode}`;
+    // if (cmd.watch) {
+    //   cmdText += ' --watch';
+    // }
+    // const env = {
+    //   PACKAGE_PATH: packagePath,
+    //   NODE_ENV: mode,
+    //   CORE_PATH: corePath,
+    //   STATIC_URL: cmd.staticUrl as string,
+    //   SOURCE_MAP: sourceMap
+    // };
+    // Object.keys(env).forEach((k: keyof typeof env) => {
+    //   process.env[k] = env[k];
+    // })
+
+    const config = generateConfig({packagePath, mode, corePath, staticUrl: cmd.staticUrl, devtool})
+
+    webpack(config, (err: any, stats: any) => {
+      if (err) {
+        console.error(err.stack || err);
+        if (err.details) {
+          console.error(err.details);
+        }
+        return;
+      }
+    
+      const info = stats.toJson();
+    
+      if (stats.hasErrors()) {
+        console.error(info.errors);
+      }
+    
+      if (stats.hasWarnings()) {
+        console.warn(info.warnings);
+      }
+
+      // Log result...
+      console.log('Done!!!');
+    
+    });
+
+
     // Run in this directory so we resolve to the right webpack and loaders
-    run(cmdText, { cwd: __dirname, env: { ...process.env, ...env } });
+    // run(cmdText, { cwd: __dirname, env: { ...process.env, ...env } });
   });
 
 commander.parse(process.argv);
