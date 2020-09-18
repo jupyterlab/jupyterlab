@@ -59,6 +59,7 @@
     "path": "~0.12.7",
     "raw-loader": "~4.0.0",
     "style-loader": "~1.2.1",
+    "supports-color": "^7.2.0",
     "svg-url-loader": "~6.0.0",
     "terser-webpack-plugin": "^4.1.0",
     "to-string-loader": "^1.1.6",

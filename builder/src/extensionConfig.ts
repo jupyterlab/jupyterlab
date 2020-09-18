@@ -13,15 +13,6 @@ import { readJSONFile, writeJSONFile } from '@jupyterlab/buildutils';
 const baseConfig = require('./webpack.config.base');
 const { ModuleFederationPlugin } = webpack.container;
 
-// const packagePath: string = process.env.PACKAGE_PATH || '';
-// const corePath: string = process.env.CORE_PATH || '';
-// const staticUrl: string = process.env.STATIC_URL || '';
-// const mode =
-//   process.env.NODE_ENV === 'development' ? 'development' : 'production';
-// const devtool =
-//   mode === 'development' || process.env.SOURCE_MAP === 'true'
-//     ? 'source-map'
-//     : undefined;
 
 export interface IOptions {
   packagePath?: string;
@@ -29,6 +20,7 @@ export interface IOptions {
   staticUrl?: string;
   mode?: 'development' | 'production';
   devtool?: string;
+  watchMode?: boolean;
 }
 
 function generateConfig({
@@ -36,7 +28,8 @@ function generateConfig({
   corePath = '',
   staticUrl = '',
   mode = 'production',
-  devtool = mode === 'development' ? 'source-map' : undefined
+  devtool = mode === 'development' ? 'source-map' : undefined,
+  watchMode = false
 }: IOptions = {}): webpack.Configuration[] {
   const data = require(path.join(packagePath, 'package.json'));
 
@@ -222,8 +215,10 @@ function generateConfig({
         data.jupyterlab._build = _build;
         writeJSONFile(path.join(outputPath, 'package.json'), data);
 
-        // Remove our temporary public path file
-        fs.removeSync(publicpath);
+        // Remove our temporary public path file if not in watch mode
+        if (!watchMode) {
+          fs.removeSync(publicpath);
+        }
       });
     }
   }
