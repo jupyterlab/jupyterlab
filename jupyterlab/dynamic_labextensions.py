@@ -203,7 +203,7 @@ def watch_labextension(path, labextensions_path, logger=None, development=False,
         develop_labextension_py(ext_path, sys_prefix=True)
     else:
         full_dest = pjoin(dynamic_exts[ext_data['name']]['ext_dir'], ext_data['name'])
-        output_dir = pjoin(ext_path, ext_data['jupyterlab']['outputDir'])
+        output_dir = pjoin(ext_path, ext_data['jupyterlab'].get('outputDir', 'static'))
         if not osp.islink(full_dest):
             shutil.rmtree(full_dest)
             os.symlink(output_dir, full_dest)
