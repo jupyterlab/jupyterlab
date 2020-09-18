@@ -13,7 +13,6 @@ import { readJSONFile, writeJSONFile } from '@jupyterlab/buildutils';
 const baseConfig = require('./webpack.config.base');
 const { ModuleFederationPlugin } = webpack.container;
 
-
 export interface IOptions {
   packagePath?: string;
   corePath?: string;
