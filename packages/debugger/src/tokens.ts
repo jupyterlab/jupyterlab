@@ -767,6 +767,7 @@ export const IDebuggerSources = new Token<IDebugger.ISources>(
 /**
  * The debugger configuration token.
  */
-export const IDebuggerSidebar = new Token<IDebugger.ISidebar>(
+export type IDebuggerSidebar = IDebugger.ISidebar | undefined;
+export const IDebuggerSidebar = new Token<IDebuggerSidebar>(
   '@jupyterlab/debugger:IDebuggerSidebar'
 );

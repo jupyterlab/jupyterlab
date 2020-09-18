@@ -334,7 +334,7 @@ const variables: JupyterFrontEndPlugin<void> = {
 /**
  * The main debugger UI plugin.
  */
-const main: JupyterFrontEndPlugin<IDebugger.ISidebar | void> = {
+const main: JupyterFrontEndPlugin<IDebuggerSidebar> = {
   id: '@jupyterlab/debugger-extension:main',
   provides: IDebuggerSidebar,
   requires: [IDebugger, IEditorServices, ITranslator],
@@ -358,7 +358,7 @@ const main: JupyterFrontEndPlugin<IDebugger.ISidebar | void> = {
     settingRegistry: ISettingRegistry | null,
     themeManager: IThemeManager | null,
     debuggerSources: IDebugger.ISources | null
-  ): Promise<IDebugger.ISidebar | void> => {
+  ): Promise<IDebuggerSidebar> => {
     const trans = translator.load('jupyterlab');
     const { commands, shell, serviceManager } = app;
     const { kernelspecs } = serviceManager;
