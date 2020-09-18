@@ -126,7 +126,7 @@ def update_extension(target, interactive=True):
         if key in data['dependencies']:
             data['dependencies'][key] = value
         if key in data['devDependencies']:
-            data['devDependences'][key] = value
+            data['devDependencies'][key] = value
 
     # Sort the entries
     for key in ['scripts', 'dependencies', 'devDependencies']:
