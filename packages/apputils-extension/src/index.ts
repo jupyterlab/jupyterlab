@@ -37,6 +37,8 @@ import { Palette } from './palette';
 
 import { settingsPlugin } from './settingsplugin';
 
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import { themesPlugin, themesPaletteMenuPlugin } from './themesplugins';
 
 import { workspacesPlugin } from './workspacesplugin';
@@ -70,8 +72,13 @@ const palette: JupyterFrontEndPlugin<ICommandPalette> = {
   autoStart: true,
   requires: [ITranslator],
   provides: ICommandPalette,
-  activate: (app: JupyterFrontEnd, translator: ITranslator) => {
-    return Palette.activate(app, translator);
+  optional: [ISettingRegistry],
+  activate: (
+    app: JupyterFrontEnd,
+    translator: ITranslator,
+    settingRegistry: ISettingRegistry | null
+  ) => {
+    return Palette.activate(app, translator, settingRegistry);
   }
 };
 

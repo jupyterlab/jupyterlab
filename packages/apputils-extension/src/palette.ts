@@ -4,13 +4,25 @@
 |----------------------------------------------------------------------------*/
 
 import { find } from '@lumino/algorithm';
+
 import { CommandRegistry } from '@lumino/commands';
+
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+
 import { CommandPalette } from '@lumino/widgets';
 
 import { ILayoutRestorer, JupyterFrontEnd } from '@jupyterlab/application';
-import { ICommandPalette, IPaletteItem } from '@jupyterlab/apputils';
+
+import {
+  ICommandPalette,
+  IPaletteItem,
+  ModalCommandPalette
+} from '@jupyterlab/apputils';
+
 import { ITranslator, nullTranslator } from '@jupyterlab/translation';
+
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
+
 import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 
 /**
@@ -19,6 +31,8 @@ import { CommandPaletteSvg, paletteIcon } from '@jupyterlab/ui-components';
 namespace CommandIDs {
   export const activate = 'apputils:activate-command-palette';
 }
+
+const PALETTE_PLUGIN_ID = '@jupyterlab/apputils-extension:palette';
 
 /**
  * A thin wrapper around the `CommandPalette` class to conform with the
@@ -80,11 +94,45 @@ export namespace Palette {
    */
   export function activate(
     app: JupyterFrontEnd,
-    translator: ITranslator
+    translator: ITranslator,
+    settingRegistry: ISettingRegistry | null
   ): ICommandPalette {
     const { commands, shell } = app;
     const trans = translator.load('jupyterlab');
     const palette = Private.createPalette(app, translator);
+    const modalPalette = new ModalCommandPalette({ commandPalette: palette });
+    let modal = false;
+
+    shell.add(palette, 'left', { rank: 300 });
+
+    if (settingRegistry) {
+      const loadSettings = settingRegistry.load(PALETTE_PLUGIN_ID);
+      const updateSettings = (settings: ISettingRegistry.ISettings): void => {
+        const newModal = settings.get('modal').composite as boolean;
+        if (modal && !newModal) {
+          palette.parent = null;
+          modalPalette.detach();
+          shell.add(palette, 'left', { rank: 300 });
+        } else if (!modal && newModal) {
+          palette.parent = null;
+          modalPalette.palette = palette;
+          palette.show();
+          modalPalette.attach();
+        }
+        modal = newModal;
+      };
+
+      Promise.all([loadSettings, app.restored])
+        .then(([settings]) => {
+          updateSettings(settings);
+          settings.changed.connect(settings => {
+            updateSettings(settings);
+          });
+        })
+        .catch((reason: Error) => {
+          console.error(reason.message);
+        });
+    }
 
     // Show the current palette shortcut in its title.
     const updatePaletteTitle = () => {
@@ -106,14 +154,16 @@ export namespace Palette {
 
     commands.addCommand(CommandIDs.activate, {
       execute: () => {
-        shell.activateById(palette.id);
+        if (modal) {
+          modalPalette.activate();
+        } else {
+          shell.activateById(palette.id);
+        }
       },
       label: trans.__('Activate Command Palette')
     });
 
     palette.inputNode.placeholder = trans.__('SEARCH');
-
-    shell.add(palette, 'left', { rank: 300 });
 
     return new Palette(palette, translator);
   }
@@ -127,7 +177,6 @@ export namespace Palette {
     translator: ITranslator
   ): void {
     const palette = Private.createPalette(app, translator);
-
     // Let the application restorer track the command palette for restoration of
     // application state (e.g. setting the command palette as the current side bar
     // widget).

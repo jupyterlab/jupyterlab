@@ -25,6 +25,46 @@
 }
 
 /*-----------------------------------------------------------------------------
+| Modal variant
+|----------------------------------------------------------------------------*/
+
+.jp-ModalCommandPalette {
+  position: absolute;
+  z-index: 10000;
+  top: 38px;
+  left: 30%;
+  margin: 0;
+  padding: 4px;
+  width: 40%;
+  box-shadow: var(--jp-elevation-z4);
+  border-radius: 4px;
+  background: var(--jp-layout-color0);
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette {
+  max-height: 40vh;
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette .lm-close-icon::after {
+  display: none;
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette .lm-CommandPalette-header {
+  display: none;
+}
+
+.jp-ModalCommandPalette .lm-CommandPalette .lm-CommandPalette-item {
+  margin-left: 4px;
+  margin-right: 4px;
+}
+
+.jp-ModalCommandPalette
+  .lm-CommandPalette
+  .lm-CommandPalette-item.lm-mod-disabled {
+  display: none;
+}
+
+/*-----------------------------------------------------------------------------
 | Search
 |----------------------------------------------------------------------------*/
 
