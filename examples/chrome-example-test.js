@@ -22,6 +22,7 @@ async function main() {
     const text = msg.text();
     if (msg.type() === 'error') {
       console.log(`ERROR>> ${text}`);
+      // console.dir(msg);
       errored = true;
     } else {
       console.log(`>> ${text}`);

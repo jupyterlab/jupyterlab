@@ -47,7 +47,8 @@ commander
       STATIC_URL: cmd.staticUrl,
       SOURCE_MAP: sourceMap
     };
-    run(cmdText, { env: { ...process.env, ...env } });
+    // Run in this directory so we resolve to the right webpack and loaders
+    run(cmdText, { cwd: __dirname, env: { ...process.env, ...env } });
   });
 
 commander.parse(process.argv);

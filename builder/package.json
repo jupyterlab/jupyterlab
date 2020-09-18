@@ -64,7 +64,7 @@
     "terser-webpack-plugin": "^4.1.0",
     "to-string-loader": "^1.1.6",
     "url-loader": "~4.1.0",
-    "webpack": "~5.0.0-beta.30",
+    "webpack": "~5.0.0-beta.31",
     "webpack-cli": "^3.3.10",
     "webpack-merge": "^5.1.2",
     "which": "^2.0.2",

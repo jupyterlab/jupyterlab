@@ -5,7 +5,7 @@
   "main": "./index.js",
   "style": "./style/index.css",
   "scripts": {
-    "build": "npm run clean && build-labextension --core-path ../core_package .",
+    "build": "npm run clean && build-labextension --development --core-path ../core_package .",
     "clean": "rimraf ../labextensions/@jupyterlab/example-federated-md"
   },
   "dependencies": {
