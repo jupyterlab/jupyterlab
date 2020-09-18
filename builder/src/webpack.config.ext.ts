@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as webpack from 'webpack';
 import { Build } from './build';
 import { merge } from 'webpack-merge';
-import * as fs from 'fs';
+import * as fs from 'fs-extra';
 import * as glob from 'glob';
 import Ajv from 'ajv';
 import { readJSONFile, writeJSONFile } from '@jupyterlab/buildutils';
@@ -139,18 +139,7 @@ shared[data.name] = {
 
 // Ensure a clean output directory - remove files but not the directory
 // in case it is a symlink
-if (fs.existsSync(outputPath)) {
-  const outputFiles = fs.readdirSync(outputPath);
-  outputFiles.forEach(filePath => {
-    filePath = path.join(outputPath, filePath);
-    if (fs.statSync(filePath).isFile()) {
-      fs.unlinkSync(filePath);
-    } else {
-      fs.rmdirSync(filePath, { recursive: true });
-    }
-  });
-}
-fs.mkdirSync(outputPath, { recursive: true });
+fs.emptyDirSync(outputPath);
 
 const extras = Build.ensureAssets({
   packageNames: [],
