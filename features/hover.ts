@@ -93,16 +93,15 @@ export class HoverCM extends CodeMirrorIntegration {
   }
 
   protected restore_from_cache(
-    root_position: IRootPosition,
     document: VirtualDocument,
     virtual_position: IVirtualPosition
   ): IResponseData | null {
+    const { line, ch } = virtual_position;
     const matching_items = this.cache.data.filter(cache_item => {
       if (cache_item.document !== document) {
         return false;
       }
       let range = cache_item.response.range;
-      let { line, ch } = virtual_position;
       return (
         line >= range.start.line &&
         line <= range.end.line &&
@@ -110,6 +109,13 @@ export class HoverCM extends CodeMirrorIntegration {
         (line != range.end.line || ch <= range.end.character)
       );
     });
+    if (matching_items.length > 1) {
+      console.warn(
+        'LSP: Potential hover cache malfunction: ',
+        virtual_position,
+        matching_items
+      );
+    }
     return matching_items.length != 0 ? matching_items[0] : null;
   }
 
@@ -157,16 +163,16 @@ export class HoverCM extends CodeMirrorIntegration {
       getModifierState(event, this.modifierKey) &&
       typeof this.last_hover_character !== 'undefined'
     ) {
+      // does not need to be shown if it is already visible (otherwise we would be creating an identical tooltip again!)
+      if (this.tooltip && this.tooltip.isVisible && !this.tooltip.isDisposed) {
+        return;
+      }
       const document = this.virtual_editor.document_at_root_position(
         this.last_hover_character
       );
-      const virtual_position = this.virtual_editor.root_position_to_virtual_position(
-        this.last_hover_character
-      );
       let response_data = this.restore_from_cache(
-        this.last_hover_character,
         document,
-        virtual_position
+        this.virtual_position
       );
       if (response_data == null) {
         return;
@@ -312,6 +318,13 @@ export class HoverCM extends CodeMirrorIntegration {
   protected async _updateUnderlineAndTooltip(
     event: MouseEvent
   ): Promise<boolean> {
+    const target = event.target as HTMLElement;
+
+    // if over an empty space in a line (and not over a token) then not worth checking
+    if (target.classList.contains('CodeMirror-line')) {
+      return;
+    }
+
     const show_tooltip = getModifierState(event, this.modifierKey);
 
     // currently the events are coming from notebook panel; ideally these would be connected to individual cells,
@@ -330,9 +343,6 @@ export class HoverCM extends CodeMirrorIntegration {
     let token = this.virtual_editor.getTokenAt(root_position);
 
     let document = this.virtual_editor.document_at_root_position(root_position);
-    let virtual_position = this.virtual_editor.root_position_to_virtual_position(
-      root_position
-    );
 
     if (
       this.is_token_empty(token) ||
@@ -344,14 +354,13 @@ export class HoverCM extends CodeMirrorIntegration {
     }
 
     if (!is_equal(root_position, this.last_hover_character)) {
+      let virtual_position = this.virtual_editor.root_position_to_virtual_position(
+        root_position
+      );
       this.virtual_position = virtual_position;
       this.last_hover_character = root_position;
 
-      let response_data = this.restore_from_cache(
-        root_position,
-        document,
-        virtual_position
-      );
+      let response_data = this.restore_from_cache(document, virtual_position);
 
       if (response_data == null) {
         let response = await this.debounced_get_hover.invoke();
@@ -470,15 +479,19 @@ export class HoverCM extends CodeMirrorIntegration {
       ...response,
       range: {
         start: PositionConverter.cm_to_lsp(
-          this.virtual_editor.transform_from_editor_to_root(
-            ce_editor,
-            editor_range.start
+          this.virtual_editor.root_position_to_virtual_position(
+            this.virtual_editor.transform_from_editor_to_root(
+              ce_editor,
+              editor_range.start
+            )
           )
         ),
         end: PositionConverter.cm_to_lsp(
-          this.virtual_editor.transform_from_editor_to_root(
-            ce_editor,
-            editor_range.end
+          this.virtual_editor.root_position_to_virtual_position(
+            this.virtual_editor.transform_from_editor_to_root(
+              ce_editor,
+              editor_range.end
+            )
           )
         )
       }
