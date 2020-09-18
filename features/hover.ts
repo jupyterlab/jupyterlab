@@ -322,6 +322,7 @@ export class HoverCM extends CodeMirrorIntegration {
 
     // if over an empty space in a line (and not over a token) then not worth checking
     if (target.classList.contains('CodeMirror-line')) {
+      this.remove_range_highlight();
       return;
     }
 
