@@ -221,6 +221,9 @@ function generateConfig({
         }
         data.jupyterlab._build = _build;
         writeJSONFile(path.join(outputPath, 'package.json'), data);
+
+        // Remove our temporary public path file
+        fs.removeSync(publicpath);
       });
     }
   }
