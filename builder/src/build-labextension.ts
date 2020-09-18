@@ -45,6 +45,7 @@ import * as path from 'path';
 import commander from 'commander';
 import webpack from 'webpack';
 import generateConfig from './extensionConfig';
+import { stdout as colors } from 'supports-color';
 
 commander
   .description('Build an extension')
@@ -71,8 +72,6 @@ commander
       watchMode: cmd.watch
     });
     const compiler = webpack(config);
-
-    let colors = require('supports-color').stdout;
 
     let lastHash: string | null = null;
 
