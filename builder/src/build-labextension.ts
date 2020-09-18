@@ -98,10 +98,6 @@ commander
         }
       }
 
-      if (stats.hasWarnings()) {
-        console.warn(info.warnings);
-      }
-
       if (stats.hash !== lastHash) {
         lastHash = stats.hash;
         const statsString = stats.toString({ colors });
