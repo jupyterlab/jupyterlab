@@ -236,9 +236,15 @@ def _ensure_builder(ext_path, core_path):
     depVersion2 = depVersion2 or ext_data.get('dependencies', dict()).get('@jupyterlab/builder')
     if depVersion2 is None:
         raise ValueError('Extensions require a devDependency on @jupyterlab/builder@%s' % depVersion1)
-    overlap = _test_overlap(depVersion1, depVersion2, drop_prerelease1=True)
+
+    # if we have installed from disk (version is a path), assume we know what
+    # we are doing and do not check versions.
+    if '/' in depVersion2:
+        with open(osp.join(ext_path, depVersion2, 'package.json')) as fid:
+            depVersion2 = json.load(fid).get('version')
+    overlap = _test_overlap(depVersion1, depVersion2, drop_prerelease1=True, drop_prerelease2=True)
     if not overlap:
-        raise ValueError('Extensions require a devDependency on @jupyterlab/builder@%s' % depVersion1)
+        raise ValueError('Extensions require a devDependency on @jupyterlab/builder@%s, you have a dependency on %s' % (depVersion1, depVersion2))
     if not osp.exists(osp.join(ext_path, 'node_modules')):
         subprocess.check_call(['jlpm'], cwd=ext_path)
 
