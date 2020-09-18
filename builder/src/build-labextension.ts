@@ -54,7 +54,13 @@ commander
     //   process.env[k] = env[k];
     // })
 
-    const config = generateConfig({packagePath, mode, corePath, staticUrl: cmd.staticUrl, devtool})
+    const config = generateConfig({
+      packagePath,
+      mode,
+      corePath,
+      staticUrl: cmd.staticUrl,
+      devtool
+    });
 
     webpack(config, (err: any, stats: any) => {
       if (err) {
@@ -64,22 +70,20 @@ commander
         }
         return;
       }
-    
+
       const info = stats.toJson();
-    
+
       if (stats.hasErrors()) {
         console.error(info.errors);
       }
-    
+
       if (stats.hasWarnings()) {
         console.warn(info.warnings);
       }
 
       // Log result...
       console.log('Done!!!');
-    
     });
-
 
     // Run in this directory so we resolve to the right webpack and loaders
     // run(cmdText, { cwd: __dirname, env: { ...process.env, ...env } });
