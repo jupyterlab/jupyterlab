@@ -68,7 +68,7 @@ commander
         if (err.details) {
           console.error(err.details);
         }
-        return;
+        throw new Error(err.details);
       }
 
       const info = stats.toJson();
