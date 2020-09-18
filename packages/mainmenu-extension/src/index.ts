@@ -677,12 +677,22 @@ export function createViewMenu(
     execute: Private.delegateExecute(app, menu.editorViewers, 'toggleWordWrap')
   });
 
+  menu.addGroup([{ command: 'apputils:activate-command-palette' }], 0);
+
+  menu.addGroup(
+    [
+      { command: 'application:toggle-mode' },
+      { command: 'application:toggle-presentation-mode' }
+    ],
+    1
+  );
+
   menu.addGroup(
     [
       { command: 'application:toggle-left-area' },
       { command: 'application:toggle-right-area' }
     ],
-    0
+    2
   );
 
   const editorViewerGroup = [
@@ -693,15 +703,6 @@ export function createViewMenu(
     return { command };
   });
   menu.addGroup(editorViewerGroup, 10);
-
-  // Add the command for toggling single-document mode.
-  menu.addGroup(
-    [
-      { command: 'application:toggle-presentation-mode' },
-      { command: 'application:toggle-mode' }
-    ],
-    1000
-  );
 }
 
 /**
