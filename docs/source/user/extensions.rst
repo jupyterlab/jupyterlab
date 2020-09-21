@@ -32,7 +32,7 @@ Built-in Extensions
 --------------------
 
 In order to install JupyterLab built in (bundled) extensions, you need to have `Node.js
-<https://nodejs.org/>`__ installed.
+<https://nodejs.org/>`__ and npm installed.
 
 If you use ``conda`` with ``conda-forge`` packages, you can get it with:
 
@@ -51,6 +51,13 @@ If you use `Homebrew <https://brew.sh/>`__ on Mac OS X:
 You can also download Node.js from the `Node.js website <https://nodejs.org/>`__ and
 install it directly.
 
+You can get npm with:
+
+.. code:: bash
+
+    conda install npm
+
+Then it's ok.
 
 Disabling Rebuild Checks
 ~~~~~~~~~~~~~~~~~~~~~~~~
