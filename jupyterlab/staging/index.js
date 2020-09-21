@@ -79,7 +79,7 @@ async function main() {
   // This is all the data needed to load and activate plugins. This should be
   // gathered by the server and put onto the initial page template.
   const extension_data = JSON.parse(
-    PageConfig.getOption('dynamic_extensions')
+    PageConfig.getOption('federated_extensions')
   );
 
   const dynamicExtensionPromises = [];

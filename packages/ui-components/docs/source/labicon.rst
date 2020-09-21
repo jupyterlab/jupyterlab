@@ -314,6 +314,6 @@ inline svg node as a child.
 The big limitation of the old icon-as-css-background pattern is that svg
 images rendered as ``background-image`` are invisible to CSS. On the
 other hand, an icon rendered as an inline svg node is fully exposed to
-the CSS. This allows us to dynamicly change icon styling as needed
+the CSS. This allows us to dynamically change icon styling as needed
 simply by modifying our CSS. Most importantly, this allows us to recolor
 icons according to Jupyterlab’s current theme.
