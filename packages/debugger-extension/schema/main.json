@@ -37,6 +37,7 @@
       "default": {
         "xpython": [
           "display",
+          "get_ipython",
           "ptvsd",
           "_xpython_get_connection_filename",
           "_xpython_launch",
