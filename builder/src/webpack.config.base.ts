@@ -48,7 +48,6 @@ const stylePath = path.join(
   path.dirname(require.resolve('@lumino/widgets/package.json')),
   'style'
 );
-console.log('\n\nSTYLE PATH IS:', stylePath, '\n\n');
 
 let phosphorAlias = {};
 
