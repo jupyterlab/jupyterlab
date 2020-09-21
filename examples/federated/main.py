@@ -49,8 +49,8 @@ class ExampleApp(LabServerApp):
         # By default, make terminals available.
         web_app.settings.setdefault('terminals_available', True)
 
-        # Extract the dynamic extension data from lab_extensions
-        dynamic_exts = []
+        # Extract the federated extension data from lab_extensions
+        federated_exts = []
         for ext_path in [path for path in glob('./labextensions/**/package.json', recursive=True)]:
             with open(ext_path) as fid:
                 data = json.load(fid)
@@ -65,9 +65,9 @@ class ExampleApp(LabServerApp):
                 ext['mimeExtension'] = extbuild['mimeExtension']
             if 'style' in extbuild:
                 ext['style'] = extbuild['style']
-            dynamic_exts.append(ext)
+            federated_exts.append(ext)
 
-        page_config['dynamic_extensions'] = dynamic_exts
+        page_config['federated_extensions'] = federated_exts
 
         super().initialize_handlers()
 

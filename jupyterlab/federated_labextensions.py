@@ -27,7 +27,7 @@ from jupyter_core.utils import ensure_dir_exists
 from ipython_genutils.py3compat import string_types, cast_unicode_py2
 from ipython_genutils.tempdir import TemporaryDirectory
 from jupyter_server.config_manager import BaseJSONConfigManager
-from jupyterlab_server.config import get_dynamic_extensions
+from jupyterlab_server.config import get_federated_extensions
 
 from traitlets.utils.importstring import import_item
 
@@ -48,7 +48,7 @@ def develop_labextension(path, symlink=True, overwrite=False,
                         destination=None, 
                         logger=None, sys_prefix=False
                         ):
-    """Install a dynamic extension for JupyterLab
+    """Install a federated extension for JupyterLab
     
     Stages files and/or directories into the labextensions directory.
     By default, this compares modification time, and only stages files that need updating.
@@ -194,15 +194,15 @@ def watch_labextension(path, labextensions_path, logger=None, development=False,
         logger.info('Building extension in %s' % path)
 
     # Check to see if we need to create a symlink
-    dynamic_exts = get_dynamic_extensions(labextensions_path)
+    federated_exts = get_federated_extensions(labextensions_path)
 
     with open(pjoin(ext_path, 'package.json')) as fid:
         ext_data = json.load(fid)
 
-    if ext_data['name'] not in dynamic_exts:
+    if ext_data['name'] not in federated_exts:
         develop_labextension_py(ext_path, sys_prefix=True)
     else:
-        full_dest = pjoin(dynamic_exts[ext_data['name']]['ext_dir'], ext_data['name'])
+        full_dest = pjoin(federated_exts[ext_data['name']]['ext_dir'], ext_data['name'])
         output_dir = pjoin(ext_path, ext_data['jupyterlab'].get('outputDir', 'static'))
         if not osp.islink(full_dest):
             shutil.rmtree(full_dest)

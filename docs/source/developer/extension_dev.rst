@@ -24,18 +24,18 @@ Starting in JupyterLab 3.0, extensions are distributed as ``pip`` or
 ``conda`` packages that contain federated JavaScript bundles.  You can write extensions in JavaScript or any language that compiles to JavaScript. We recommend writing extensions in `TypeScript <https://www.typescriptlang.org/>`_, which is used for the JupyterLab core extensions and many popular community extensions.  You use our build tool to generate the bundles that are shipped with the package, typically through a cookiecutter.
 
 
-Goals of the Dynamic Extension System
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Goals of the Federated Extension System
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Users should be able to install and use extensions without requiring ``node`` or a build step
 - Extension authors should be able to easily build and distribute extensions
 - The existing capabilities of built-in extensions should still work
 - Administrators should retain the ability to set global configuration and packages where possible
-- Dynamic extensions should layer on top of existing extensions similar to how  ``pip install --user`` works
+- Federated extensions should layer on top of existing extensions similar to how  ``pip install --user`` works
 - Extensions should be discoverable
 
 Implementation
 ~~~~~~~~~~~~~~
-- We provide a ``jupyter labextensions build`` script that is used to build bundles
+- We provide a ``jupyter labextension build`` script that is used to build federated bundles
    - The command produces a set of static assets that are shipped along with a package (notionally on ``pip``/``conda``)
    - It is a Python cli so that it can use the dependency metadata from the active JupyterLab
    - The assets include a module federation ``remoteEntry.*.js``, generated bundles, and some other files that we use
@@ -43,18 +43,20 @@ Implementation
    - we use the previously existing ``@jupyterlab/builder -> build`` to generate the ``imports.css``, ``schemas`` and ``themes`` file structure
 - We provide a schema for the valid ``jupyterlab`` metadata for an extension's ``package.json`` describing the available options
 - We provide a ``labextensions`` handler in ``jupyterlab_server`` that loads static assets from ``labextensions`` paths, following a similar logic to how ``nbextensions`` are discovered and loaded from disk
-- The ``settings`` and ``themes`` handlers in ``jupyterlab_server`` has been updated to load from the new ``labextensions`` locations, favoring the dynamic extension locations over the bundled ones
+- The ``settings`` and ``themes`` handlers in ``jupyterlab_server`` has been updated to load from the new ``labextensions`` locations, favoring the federated extension locations over the bundled ones
 - A ``labextension develop`` command has been added to install an in-development extension into JupyterLab.  The default behavior is to create a symlink in the ``sys-prefix/share/jupyter/labextensions/package-name`` to the static directory of the extension
 - We provide a ``cookiecutter`` that handles all of the scaffolding for an extension author, including the shipping of ``data_files`` so that when the user installs the package, the static assets end up in ``share/jupyter/labextensions``
 - We handle disabling of lab extensions using a trait on the ``LabApp`` class, so it can be set by admins and overridden by users.  Extensions are automatically enabled when installed, and must be explicitly disabled.  The disabled config can consist of a package name or a plugin regex pattern
 - Extensions can provide ``disabled`` metadata that can be used to replace an entire extension or individual plugins
 - ``page_config`` and ``overrides`` are also handled with traits so that admins can provide defaults and users can provide overrides
-- We will update the ``extension-manager`` to target metadata on ``pypi``/``conda`` and consume those packages.
+- We provide a script to update extensions: ``python -m jupyterlab.upgrade_extension``
+- We update the ``extension-manager`` to target metadata on ``pypi``/``conda`` and consume those packages.
 
 Tools
 ~~~~~
 - ``jupyter labexension build`` python command line tool
 - ``jupyter labextension develop`` python command line tool
+- ``python -m jupyterlab.upgrade_extension`` python command line tool
 - ``cookiecutter`` for extension authors
 
 Workflow for extension authors

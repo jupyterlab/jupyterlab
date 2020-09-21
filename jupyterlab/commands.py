@@ -27,7 +27,7 @@ import warnings
 
 from jupyter_core.paths import jupyter_config_path, jupyter_path
 from jupyterlab_server.process import which, Process, WatchHelper, list2cmdline
-from jupyterlab_server.config import LabConfig, get_page_config, get_dynamic_extensions, get_static_page_config, write_page_config
+from jupyterlab_server.config import LabConfig, get_page_config, get_federated_extensions, get_static_page_config, write_page_config
 from jupyter_server.extension.serverextension import GREEN_ENABLED, GREEN_OK, RED_DISABLED, RED_X
 from traitlets import HasTraits, Bool, Dict, Instance, List, Unicode, default
 
@@ -323,7 +323,7 @@ class AppOptions(HasTraits):
 
     kill_event = Instance(Event, args=(), help='Event for aborting call')
 
-    labextensions_path = List(Unicode(), help='The paths to look in for dynamic JupyterLab extensions')
+    labextensions_path = List(Unicode(), help='The paths to look in for federated JupyterLab extensions')
 
     registry = Unicode(help="NPM packages registry URL")
 
@@ -331,7 +331,7 @@ class AppOptions(HasTraits):
     def _default_logger(self):
         return logging.getLogger('jupyterlab')
 
-    # These defaults need to be dynamic to pick up
+    # These defaults need to be federated to pick up
     # any changes to env vars:
     @default('app_dir')
     def _default_app_dir(self):
@@ -695,11 +695,11 @@ class _AppHandler(object):
 
         logger.info('JupyterLab v%s' % info['version'])
 
-        if info['dynamic_exts'] or info['extensions']:
+        if info['federated_exts'] or info['extensions']:
             info['compat_errors'] = self._get_extension_compat()
 
-        if info['dynamic_exts']:
-            self._list_dynamic_extensions()
+        if info['federated_exts']:
+            self._list_federated_extensions()
   
         if info['extensions']:
             logger.info('Other labextensions (built into JupyterLab)')
@@ -813,9 +813,9 @@ class _AppHandler(object):
         info = self.info
         logger = self.logger
 
-        # Handle dynamic extensions first
-        if name in info['dynamic_exts']:
-            data = info['dynamic_exts'].pop(name)
+        # Handle federated extensions first
+        if name in info['federated_exts']:
+            data = info['federated_exts'].pop(name)
             target = data['ext_path']
             logger.info("Removing: %s" % target)
             if os.path.isdir(target) and not os.path.islink(target):
@@ -1107,8 +1107,8 @@ class _AppHandler(object):
 
         info['disabled_core'] = disabled_core
 
-        dynamic_exts = get_dynamic_extensions(self.labextensions_path)
-        info['dynamic_exts'] = dynamic_exts
+        federated_exts = get_federated_extensions(self.labextensions_path)
+        info['federated_exts'] = federated_exts
         return info
 
     def _populate_staging(self, name=None, version=None, static_url=None,
@@ -1391,7 +1391,7 @@ class _AppHandler(object):
         compat = dict()
         core_data = self.info['core_data']
         seen = dict()
-        for (name, data) in self.info['dynamic_exts'].items():
+        for (name, data) in self.info['federated_exts'].items():
             deps = data['dependencies']
             compat[name] = _validate_compatibility(name, deps, core_data)
             seen[name] = True
@@ -1465,7 +1465,7 @@ class _AppHandler(object):
 
         logger.info('   %s dir: %s' % (ext_type, dname))
         for name in sorted(names):
-            if name in info['dynamic_exts']:
+            if name in info['federated_exts']:
                 continue
             data = info['extensions'][name]
             version = data['version']
@@ -1496,22 +1496,22 @@ class _AppHandler(object):
         # Write a blank line separator
         logger.info('')
 
-    def _list_dynamic_extensions(self):
+    def _list_federated_extensions(self):
         info = self.info
         logger = self.logger
 
         error_accumulator = {}
 
         ext_dirs = dict((p, False) for p in self.labextensions_path)
-        for value in info['dynamic_exts'].values():
+        for value in info['federated_exts'].values():
             ext_dirs[value['ext_dir']] = True
 
         for ext_dir, has_exts in ext_dirs.items():
             if not has_exts:
                 continue
             logger.info(ext_dir)
-            for name in info['dynamic_exts']:
-                data = info['dynamic_exts'][name]
+            for name in info['federated_exts']:
+                data = info['federated_exts'][name]
                 if data['ext_dir'] != ext_dir:
                     continue
                 version = data['version']

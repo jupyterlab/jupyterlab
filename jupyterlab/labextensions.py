@@ -24,7 +24,7 @@ from .commands import (
     link_package, unlink_package, build, get_app_version, HERE,
     update_extension, AppOptions,
 )
-from .dynamic_labextensions import develop_labextension_py, build_labextension, watch_labextension
+from .federated_labextensions import develop_labextension_py, build_labextension, watch_labextension
 from .labapp import LabApp
 
 
@@ -98,7 +98,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
 
-    labextensions_path = List(Unicode(), help='The standard paths to look in for dynamic JupyterLab extensions')
+    labextensions_path = List(Unicode(), help='The standard paths to look in for federated JupyterLab extensions')
 
     @default('labextensions_path')
     def _default_labextensions_path(self):
@@ -371,9 +371,9 @@ class CheckLabExtensionsApp(BaseExtensionApp):
 
 _examples = """
 jupyter labextension list                        # list all configured labextensions
-jupyter labextension develop                     # develop a dynamic labextension
-jupyter labextension build                       # build a dynamic labextension
-jupyter labextension watch                       # watch a dynamic labextension
+jupyter labextension develop                     # develop a federated labextension
+jupyter labextension build                       # build a federated labextension
+jupyter labextension watch                       # watch a federated labextension
 jupyter labextension install <extension name>    # install a labextension
 jupyter labextension uninstall <extension name>  # uninstall a labextension
 """
