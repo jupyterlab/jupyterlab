@@ -133,7 +133,7 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
     dev_build = Bool(None, allow_none=True, config=True,
         help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (prod mode).")
 
-    minimize = Bool(True, config=True,
+    minimize = Bool(os.name != 'nt', config=True,
         help="Whether to use a minifier during the Webpack build (defaults to True). Only affects production builds.")
 
     pre_clean = Bool(False, config=True,
