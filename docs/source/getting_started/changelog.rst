@@ -21,7 +21,7 @@ In JupyterLab 3.0, a new recommended way of distributing and installing extensio
 The JupyterLab interface is now translatable
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 JupyterLab now provides the ability to set the display language of the user interface.
-See the `internationalization documentation <https://jupyterlab.readthedocs.io/en/latest/user/language.html>`__ for more details.
+See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/language.html>`__ for more details.
 
 
 A new visual debugger
