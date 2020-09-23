@@ -489,7 +489,7 @@ export namespace IDebugger {
   /**
    * Debugger sidebar interface.
    */
-  export interface ISidebar {
+  export interface ISidebar extends Widget {
     /**
      * Add panel at the end of the sidebar.
      */
@@ -767,7 +767,6 @@ export const IDebuggerSources = new Token<IDebugger.ISources>(
 /**
  * The debugger configuration token.
  */
-export type IDebuggerSidebar = IDebugger.ISidebar | undefined;
-export const IDebuggerSidebar = new Token<IDebuggerSidebar>(
+export const IDebuggerSidebar = new Token<IDebugger.ISidebar>(
   '@jupyterlab/debugger:IDebuggerSidebar'
 );
