@@ -202,7 +202,7 @@ function generateConfig({
       output: {
         filename: '[name].[contenthash].js',
         path: outputPath,
-        publicPath: staticUrl || "auto"
+        publicPath: staticUrl || 'auto'
       },
       module: {
         rules: [{ test: /\.html$/, use: 'file-loader' }]
