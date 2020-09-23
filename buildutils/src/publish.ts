@@ -40,7 +40,7 @@ commander
     if (curr.indexOf('rc') === -1 && curr.indexOf('a') === -1) {
       utils.run('lerna publish from-package -m "Publish"');
     } else {
-      utils.run('lerna publish from-package --npm-tag=next -m "Publish"');
+      utils.run('lerna publish from-package --dist-tag=next -m "Publish"');
     }
 
     // Fix up any tagging issues.
