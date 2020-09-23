@@ -18,8 +18,8 @@ Extensions can be installed without building JupyterLab with NodeJS
 
 In JupyterLab 3.0, a new recommended way of distributing and installing extensions as Python pip or conda packages is available. Installing such extensions does not require rebuilding JupyterLab and does not require having NodeJS installed. The previous way of distributing extensions as npm packages requiring rebuilding JupyterLab is still available as well. See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#extensions>`__ for more details.
 
-The JupyterLab interface is now translatable
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The JupyterLab interface supports multiple languages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 JupyterLab now provides the ability to set the display language of the user interface.
 See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/language.html>`__ for more details.
 
