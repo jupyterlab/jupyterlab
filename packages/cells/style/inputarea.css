@@ -11,10 +11,12 @@
 .jp-InputArea {
   display: flex;
   flex-direction: row;
+  overflow: hidden;
 }
 
 .jp-InputArea-editor {
   flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .jp-InputArea-editor {
