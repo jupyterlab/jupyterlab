@@ -50,7 +50,8 @@ For Developers
 ^^^^^^^^^^^^^^
 
 Federated Extensions
-~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~
+
 Users will typically consume federated extensions, which are Python packages with static assets built using ``JupyterLab``.
 See the updated APOD tutorial for the workflow of creating a federated extension from scratch.
 For existing extensions, there is a new ``python -m jupyterlab.upgrade_extension`` script that
