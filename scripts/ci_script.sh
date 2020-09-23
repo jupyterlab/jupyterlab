@@ -12,6 +12,7 @@ fi
 
 
 if [[ $GROUP == python ]]; then
+    jupyter lab build --debug
     # Run the python tests
     py.test
 fi
@@ -105,7 +106,7 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm run build:storybook
 
     # Make sure we have CSS that can be converted with postcss
-    jlpm global add postcss-cli
+    jlpm global add postcss postcss-cli
 
     jlpm config set prefix ~/.yarn
     ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp

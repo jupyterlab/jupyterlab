@@ -663,7 +663,10 @@ class _AppHandler(object):
         # Build the app.
         if parts[1] != 'nobuild':
             dedupe_yarn(staging, self.logger)
-            ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
+            starting_dir = os.getcwd()
+            os.chdir(staging)
+            ret = self._run(['node', YARN_PATH, 'run', command])
+            os.chdir(starting_dir)
             if ret != 0:
                 msg = 'JupyterLab failed to build'
                 self.logger.debug(msg)

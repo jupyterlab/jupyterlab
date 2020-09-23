@@ -94,7 +94,7 @@ def update_extension(target, interactive=True):
         temp_data = json.load(fid)
 
     for (key, value) in temp_data['devDependencies'].items():
-        data['devDependencies'][key] = value
+        data['devDependencies'][key] = value.replace('~', '^')
 
     # Ask the user whether to upgrade the scripts automatically
     warnings = []
@@ -124,9 +124,9 @@ def update_extension(target, interactive=True):
     data.setdefault('devDependencies', dict())
     for (key, value) in root_jlab_data['resolutions'].items():
         if key in data['dependencies']:
-            data['dependencies'][key] = value
+            data['dependencies'][key] = value.replace('~', '^')
         if key in data['devDependencies']:
-            data['devDependencies'][key] = value
+            data['devDependencies'][key] = value.replace('~', '^')
 
     # Sort the entries
     for key in ['scripts', 'dependencies', 'devDependencies']:

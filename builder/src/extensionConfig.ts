@@ -78,9 +78,11 @@ function generateConfig({
     ...(coreData.resolutions ?? {})
   };
 
+  // Alow extensions to match a wider range than the core dependency
+  // To ensure forward compatibility.
   Object.keys(coreDeps).forEach(element => {
     shared[element] = {
-      requiredVersion: coreDeps[element],
+      requiredVersion: coreDeps[element].replace('~', '^'),
       import: false
     };
   });
