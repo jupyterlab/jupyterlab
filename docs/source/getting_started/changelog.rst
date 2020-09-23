@@ -32,7 +32,7 @@ JupyterLab now ships with a debugger front-end by default, available for kernels
 
 Improvements to Single Document Mode and Mobile 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+The single-document user interface is now more streamlined. JupyterLab now supports showing the current file in use in the browser URL bar, similar to the classic Jupyter Notebook.
 
 
 Table of Contents is now in core
