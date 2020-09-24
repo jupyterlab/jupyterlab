@@ -38,6 +38,7 @@ const REGEX_ERROR_CLASS = 'jp-DocumentSearch-regex-error';
 const SEARCH_OPTIONS_CLASS = 'jp-DocumentSearch-search-options';
 const SEARCH_OPTIONS_DISABLED_CLASS =
   'jp-DocumentSearch-search-options-disabled';
+const SEARCH_DOCUMENT_LOADING = 'jp-DocumentSearch-document-loading';
 const REPLACE_ENTRY_CLASS = 'jp-DocumentSearch-replace-entry';
 const REPLACE_BUTTON_CLASS = 'jp-DocumentSearch-replace-button';
 const REPLACE_BUTTON_WRAPPER_CLASS = 'jp-DocumentSearch-replace-button-wrapper';
@@ -554,6 +555,10 @@ class SearchOverlay extends React.Component<
         key={3}
       >
         {this.state.errorMessage}
+      </div>,
+      <div className={SEARCH_DOCUMENT_LOADING} key={4}>
+        This document is still loading. Only loaded content will appear in
+        search results until the entire document loads.
       </div>
     ];
   }

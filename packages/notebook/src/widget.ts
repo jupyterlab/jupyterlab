@@ -212,7 +212,10 @@ export class StaticNotebook extends Widget {
               pl.removeWidgetAt(index);
               pl.insertWidget(index, cell);
               this._toRenderMap.delete(o.target.id);
-              this._renderedCount++;
+              if (this._toRenderMap.size === 0) {
+                this._fullyRendered.emit(true);
+              }
+              this._incrementRenderedCount();
             }
           }
         });
@@ -223,6 +226,13 @@ export class StaticNotebook extends Widget {
         rootMargin: '0px 0px ' + NON_OBSERVERED_BOTTOM_MARGIN + ' 0px'
       }
     );
+  }
+
+  /**
+   * A signal emitted when the notebook is fully rendered.
+   */
+  get fullyRendered(): ISignal<this, boolean> {
+    return this._fullyRendered;
   }
 
   /**
@@ -525,9 +535,9 @@ export class StaticNotebook extends Widget {
 
     const layout = this.layout as PanelLayout;
     this._cellsArray.push(widget);
-    if (this._renderedCount <= CELL_NUM_DIRECT_RENDER) {
+    if (this._renderedCellsCount <= CELL_NUM_DIRECT_RENDER) {
       layout.insertWidget(index, widget);
-      this._renderedCount++;
+      this._incrementRenderedCount();
       this.onCellInserted(index, widget);
     } else {
       this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
@@ -538,6 +548,7 @@ export class StaticNotebook extends Widget {
       placeholder.node.id = widget.model.id;
       layout.insertWidget(index, placeholder);
       this.onCellInserted(index, placeholder);
+      this._fullyRendered.emit(false);
       this._observer.observe(placeholder.node);
     }
 
@@ -551,16 +562,16 @@ export class StaticNotebook extends Widget {
 
   private _renderPlaceholderCells(deadline: any) {
     if (
-      this._renderedCount < this._cellsArray.length &&
-      this._renderedCount >= CELL_NUM_DIRECT_RENDER
+      this._renderedCellsCount < this._cellsArray.length &&
+      this._renderedCellsCount >= CELL_NUM_DIRECT_RENDER
     ) {
-      const index = this._renderedCount;
+      const index = this._renderedCellsCount;
       const cell = this._cellsArray[index];
       const pl = this.layout as PanelLayout;
       pl.removeWidgetAt(index - 1);
       pl.insertWidget(index - 1, cell);
       this._toRenderMap.delete(cell.model.id);
-      this._renderedCount++;
+      this._incrementRenderedCount();
     }
   }
 
@@ -750,6 +761,10 @@ export class StaticNotebook extends Widget {
     );
   }
 
+  private _incrementRenderedCount() {
+    this._renderedCellsCount++;
+  }
+
   private _editorConfig = StaticNotebook.defaultEditorConfig;
   private _notebookConfig = StaticNotebook.defaultNotebookConfig;
   private _mimetype = 'text/plain';
@@ -757,8 +772,9 @@ export class StaticNotebook extends Widget {
   private _mimetypeService: IEditorMimeTypeService;
   private _modelChanged = new Signal<this, void>(this);
   private _modelContentChanged = new Signal<this, void>(this);
+  private _fullyRendered = new Signal<this, boolean>(this);
   private _observer: IntersectionObserver;
-  private _renderedCount = 0;
+  private _renderedCellsCount = 0;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
   private _cellsArray: Array<Cell>;
 }
