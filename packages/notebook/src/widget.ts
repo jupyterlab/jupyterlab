@@ -216,6 +216,7 @@ export class StaticNotebook extends Widget {
                 this._fullyRendered.emit(true);
               }
               this._incrementRenderedCount();
+              this._placeholderCellRendered.emit(cell);
             }
           }
         });
@@ -233,6 +234,13 @@ export class StaticNotebook extends Widget {
    */
   get fullyRendered(): ISignal<this, boolean> {
     return this._fullyRendered;
+  }
+
+  /**
+   * A signal emitted when the a placeholder cell is rendered.
+   */
+  get placeholderCellRendered(): ISignal<this, Cell> {
+    return this._placeholderCellRendered;
   }
 
   /**
@@ -572,6 +580,7 @@ export class StaticNotebook extends Widget {
       pl.insertWidget(index - 1, cell);
       this._toRenderMap.delete(cell.model.id);
       this._incrementRenderedCount();
+      this._placeholderCellRendered.emit(cell);
     }
   }
 
@@ -773,6 +782,7 @@ export class StaticNotebook extends Widget {
   private _modelChanged = new Signal<this, void>(this);
   private _modelContentChanged = new Signal<this, void>(this);
   private _fullyRendered = new Signal<this, boolean>(this);
+  private _placeholderCellRendered = new Signal<this, Cell>(this);
   private _observer: IntersectionObserver;
   private _renderedCellsCount = 0;
   private _toRenderMap: Map<string, { index: number; cell: Cell }>;
