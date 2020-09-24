@@ -165,6 +165,7 @@
   padding: 4px 4px;
   border-left: var(--jp-border-width) solid var(--jp-border-color2);
   text-align: right;
+  color: var(--jp-border-color2);
 }
 
 .jp-DirListing-narrow .jp-id-narrow {
