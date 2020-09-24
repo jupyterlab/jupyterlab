@@ -13,7 +13,7 @@ import {
 
 import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Cell } from '@jupyterlab/cells';
+import { Cell, MarkdownCell } from '@jupyterlab/cells';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -186,7 +186,6 @@ function activateEditorCommands(
     selectionPointer,
     lineWiseCopyCut
   } = CodeMirrorEditor.defaultConfig;
-
   /**
    * Update the setting values.
    */
@@ -194,11 +193,100 @@ function activateEditorCommands(
     settings: ISettingRegistry.ISettings
   ): Promise<void> {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
-
-    // Lazy loading of vim mode
     if (keyMap === 'vim') {
       // @ts-expect-error
       await import('codemirror/keymap/vim.js');
+      const vim = (CodeMirror as any).Vim;
+      vim.defineMotion(
+        'moveByLinesOrCell',
+        (cm: any, head: any, motionArgs: any, vim: any) => {
+          let cur = head;
+          let endCh = cur.ch;
+          let currentCell = activeCell;
+          // TODO: these references will be undefined
+          // Depending what our last motion was, we may want to do different
+          // things. If our last motion was moving vertically, we want to
+          // preserve the HPos from our last horizontal move.  If our last motion
+          // was going to the end of a line, moving vertically we should go to
+          // the end of the line, etc.
+          switch (vim.lastMotion) {
+            case 'moveByLines':
+            case 'moveByDisplayLines':
+            case 'moveByScroll':
+            case 'moveToColumn':
+            case 'moveToEol':
+            // JUPYTER PATCH: add our custom method to the motion cases
+            // eslint-disable-next-line no-fallthrough
+            case 'moveByLinesOrCell':
+              endCh = vim.lastHPos;
+              break;
+            default:
+              vim.lastHPos = endCh;
+          }
+          let repeat = motionArgs.repeat + (motionArgs.repeatOffset || 0);
+          let line = motionArgs.forward ? cur.line + repeat : cur.line - repeat;
+          let first = cm.firstLine();
+          let last = cm.lastLine();
+          // Vim cancels linewise motions that start on an edge and move beyond
+          // that edge. It does not cancel motions that do not start on an edge.
+
+          // JUPYTER PATCH BEGIN
+          // here we insert the jumps to the next cells
+          if (line < first || line > last) {
+            // var currentCell = ns.notebook.get_selected_cell();
+            // var currentCell = tracker.activeCell;
+            // var key = '';
+            if (currentCell?.model.type === 'markdown') {
+              (currentCell as MarkdownCell).rendered = true;
+            }
+            if (motionArgs.forward) {
+              void commands.execute('notebook:move-cursor-down');
+            } else {
+              void commands.execute('notebook:move-cursor-up');
+            }
+            return;
+          }
+          vim.lastHSPos = cm.charCoords(
+            CodeMirror.Pos(line, endCh),
+            'div'
+          ).left;
+          return (CodeMirror as any).Pos(line, endCh);
+        }
+      );
+      vim.mapCommand(
+        'k',
+        'motion',
+        'moveByLinesOrCell',
+        { forward: false, linewise: true },
+        { context: 'normal' }
+      );
+      vim.mapCommand(
+        'j',
+        'motion',
+        'moveByLinesOrCell',
+        { forward: true, linewise: true },
+        { context: 'normal' }
+      );
+      CodeMirror.prototype.save = () => {
+        void commands.execute('docmanager:save');
+      };
+      vim.defineEx('quit', 'q', function (cm: any) {
+        void commands.execute('notebook:enter-command-mode');
+      });
+      vim.defineAction('splitCell', (cm: any, actionArgs: any) => {
+        void commands.execute('notebook:split-cell-at-cursor');
+      });
+      vim.mapCommand('-', 'action', 'splitCell', {}, { extra: 'normal' });
+      commands.addKeyBinding({
+        selector: '.jp-Notebook.jp-mod-editMode',
+        keys: ['Ctrl J'],
+        command: 'notebook:move-cursor-down'
+      });
+      commands.addKeyBinding({
+        selector: '.jp-Notebook.jp-mod-editMode',
+        keys: ['Ctrl K'],
+        command: 'notebook:move-cursor-up'
+      });
       commands.addKeyBinding({
         selector: '.jp-Notebook.jp-mod-editMode',
         keys: ['Escape'],
@@ -216,7 +304,6 @@ function activateEditorCommands(
         command: 'notebook:enter-command-mode'
       });
     }
-
     theme = (settings.get('theme').composite as string | null) || theme;
     // Lazy loading of theme stylesheets
     if (theme !== 'jupyter' && theme !== 'default') {
@@ -271,12 +358,9 @@ function activateEditorCommands(
       widget.content.widgets.forEach(cell => {
         if (cell.inputArea.editor instanceof CodeMirrorEditor) {
           const cm = cell.inputArea.editor.editor;
-          // Do not set scrollPastEnd option.
           cm.setOption('keyMap', keyMap);
           cm.setOption('theme', theme);
           cm.setOption('styleActiveLine', styleActiveLine);
-          cm.setOption('styleSelectedText', styleSelectedText);
-          cm.setOption('selectionPointer', selectionPointer);
           cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
         }
       });
@@ -293,6 +377,16 @@ function activateEditorCommands(
         await updateSettings(settings);
         updateFileEditorTracker();
         updateNotebookTracker();
+      });
+      // connect to signal here to ensure vim keymap has
+      // been imported in case we need it
+      notebookTracker.newCellCreated.connect((sender, cell) => {
+        if (cell?.inputArea.editor instanceof CodeMirrorEditor) {
+          const editor = cell.inputArea.editor.editor;
+          editor.setOption('keyMap', keyMap);
+          editor.setOption('styleActiveLine', styleActiveLine);
+          editor.setOption('lineWiseCopyCut', lineWiseCopyCut);
+        }
       });
     })
     .catch((reason: Error) => {
@@ -328,14 +422,10 @@ function activateEditorCommands(
         cm.setOption('keyMap', keyMap);
         cm.setOption('theme', theme);
         cm.setOption('styleActiveLine', styleActiveLine);
-        cm.setOption('styleSelectedText', styleSelectedText);
-        cm.setOption('selectionPointer', selectionPointer);
         cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
       }
     });
   });
-
-  notebookTracker.activeCellChanged.connect(onActiveCellChanged, this);
 
   let activeCell: Cell | null = null;
 
@@ -346,31 +436,8 @@ function activateEditorCommands(
         let editor = activeCell.editor as CodeMirrorEditor;
         (CodeMirror as any).Vim.handleKey(editor.editor, '<Esc>');
       }
-    },
-    isEnabled
-  });
-
-  function onActiveCellChanged(): void {
-    if (keyMap === 'vim') {
-      activeCell = notebookTracker.activeCell;
-      if (activeCell) {
-        // From https://github.com/axelfahy/jupyterlab-vim/blob/c4e43f940ef4be4c961608b6192412d2f3a33d1f/src/index.ts
-        CodeMirror.prototype.save = () => {
-          void commands.execute('docmanager:save');
-        };
-        const lvim = (CodeMirror as any).Vim as any;
-        if (lvim) {
-          lvim.defineEx('quit', 'q', function(cm: any) {
-            void commands.execute('notebook:enter-command-mode');
-          });
-          lvim.defineAction('splitCell', (cm: any, actionArgs: any) => {
-            void commands.execute('notebook:split-cell-at-cursor');
-          });
-          lvim.mapCommand('-', 'action', 'splitCell', {}, { extra: 'normal' });
-        }
-      }
     }
-  }
+  });
 
   /**
    * A test for whether the tracker has an active widget.
