@@ -9,7 +9,9 @@ import CodeMirror from 'codemirror';
 /**
  * The CodeMirror token.
  */
-export const ICodeMirror = new Token<ICodeMirror>('@jupyterlab/codemirror:ICodeMirror');
+export const ICodeMirror = new Token<ICodeMirror>(
+  '@jupyterlab/codemirror:ICodeMirror'
+);
 /* tslint:enable */
 
 /** The CodeMirror interface. */

@@ -53,7 +53,7 @@ const codemirrorSingleton: JupyterFrontEndPlugin<ICodeMirror> = {
   id: '@jupyterlab/codemirror-extension:codemirror',
   provides: ICodeMirror,
   activate: activateCodeMirror
-}
+};
 
 /**
  * The editor services.
@@ -150,7 +150,7 @@ function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
 function activateCodeMirror(app: JupyterFrontEnd): ICodeMirror {
   return {
     codemirrorSingleton: () => CodeMirror
-  }
+  };
 }
 
 /**
