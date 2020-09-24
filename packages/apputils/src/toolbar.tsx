@@ -802,12 +802,15 @@ namespace Private {
      * Check if status should be shown as busy.
      */
     private _isBusy(status: ISessionContext.KernelDisplayStatus): boolean {
+      console.log('Kernel Status: ' + status);
+
       return (
         status === 'busy' ||
         status === 'starting' ||
         status === 'terminating' ||
         status === 'restarting' ||
-        status === 'initializing'
+        status === 'initializing' ||
+        status === 'connecting'
       );
     }
 
