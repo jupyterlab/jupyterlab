@@ -391,7 +391,7 @@ function activateEditorCommands(
     ['the-matrix', trans.__('the-matrix')],
     ['xq-light', trans.__('xq-light')],
     ['zenburn', trans.__('zenburn')]
-  ].forEach((name, displayName) =>
+  ].forEach(([name, displayName]) =>
     themeMenu.addItem({
       command: CommandIDs.changeTheme,
       args: { theme: name, displayName: displayName }
@@ -404,7 +404,7 @@ function activateEditorCommands(
     ['sublime', trans.__('sublime')],
     ['vim', trans.__('vim')],
     ['emacs', trans.__('emacs')]
-  ].forEach((name, displayName) => {
+  ].forEach(([name, displayName])=> {
     keyMapMenu.addItem({
       command: CommandIDs.changeKeyMap,
       args: { keyMap: name, displayName: displayName }
