@@ -145,27 +145,6 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 const DRAG_THRESHOLD = 5;
 
 /**
- * TODO
- *
- * TODO Migrate to settings
- */
-const CELL_NUM_DIRECT_RENDER = 3;
-
-/**
- * TODO
- *
- * TODO Migrate to settings
- */
-const RENDER_CELLS_ON_IDLE = false;
-
-/**
- * TODO
- *
- * TODO Migrate to settings
- */
-const NON_OBSERVERED_BOTTOM_MARGIN = '-200px';
-
-/**
  * The interactivity modes for the notebook.
  */
 export type NotebookMode = 'command' | 'edit';
@@ -224,7 +203,7 @@ export class StaticNotebook extends Widget {
       {
         root: this.node,
         threshold: 1,
-        rootMargin: '0px 0px ' + NON_OBSERVERED_BOTTOM_MARGIN + ' 0px'
+        rootMargin: '0px 0px ' + this.notebookConfig.nonObservedBottomMargin + ' 0px'
       }
     );
   }
@@ -543,7 +522,7 @@ export class StaticNotebook extends Widget {
 
     const layout = this.layout as PanelLayout;
     this._cellsArray.push(widget);
-    if (this._renderedCellsCount <= CELL_NUM_DIRECT_RENDER) {
+    if (this._renderedCellsCount <= this.notebookConfig.cellNumberToRenderDirectly) {
       layout.insertWidget(index, widget);
       this._incrementRenderedCount();
       this.onCellInserted(index, widget);
@@ -560,7 +539,7 @@ export class StaticNotebook extends Widget {
       this._observer.observe(placeholder.node);
     }
 
-    if (RENDER_CELLS_ON_IDLE) {
+    if (this.notebookConfig.renderCellOnIdle) {
       const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
       (window as any).requestIdleCallback(renderPlaceholderCells, {
         timeout: 1000
@@ -571,7 +550,7 @@ export class StaticNotebook extends Widget {
   private _renderPlaceholderCells(deadline: any) {
     if (
       this._renderedCellsCount < this._cellsArray.length &&
-      this._renderedCellsCount >= CELL_NUM_DIRECT_RENDER
+      this._renderedCellsCount >= this.notebookConfig.cellNumberToRenderDirectly
     ) {
       const index = this._renderedCellsCount;
       const cell = this._cellsArray[index];
@@ -919,6 +898,21 @@ export namespace StaticNotebook {
      * Should timing be recorded in metadata
      */
     recordTiming: boolean;
+
+    /**
+     * TODO(ECH)
+     */
+    cellNumberToRenderDirectly: number;
+
+    /**
+     * TODO(ECH)
+     */
+    renderCellOnIdle: boolean;
+
+    /**
+     * TODO(ECH)
+     */
+    nonObservedBottomMargin: string;
   }
   /**
    * Default configuration options for notebooks.
@@ -926,7 +920,10 @@ export namespace StaticNotebook {
   export const defaultNotebookConfig: INotebookConfig = {
     scrollPastEnd: true,
     defaultCell: 'code',
-    recordTiming: false
+    recordTiming: false,
+    cellNumberToRenderDirectly: 10,
+    renderCellOnIdle: true,
+    nonObservedBottomMargin: '0px'
   };
 
   /**
