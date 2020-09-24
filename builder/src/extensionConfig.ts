@@ -161,31 +161,6 @@ function generateConfig({
     path.join(outputPath, 'package.json')
   );
 
-  const webpackPublicPathString = staticUrl
-    ? `"${staticUrl}"`
-    : `getOption('fullLabextensionsUrl') + '/${data.name}/'`;
-  const publicpath = path.join(outputPath, 'publicPath.js');
-  fs.writeFileSync(
-    publicpath,
-    `
-  function getOption(name) {
-    let configData = Object.create(null);
-    // Use script tag if available.
-    if (typeof document !== 'undefined' && document) {
-      const el = document.getElementById('jupyter-config-data');
-  
-      if (el) {
-        configData = JSON.parse(el.textContent || '{}');
-      }
-    }
-    return configData[name] || '';
-  }
-  
-  // eslint-disable-next-line no-undef
-  __webpack_public_path__ = ${webpackPublicPathString};
-  `
-  );
-
   class CleanupPlugin {
     apply(compiler: any) {
       compiler.hooks.done.tap('Cleanup', () => {
@@ -215,11 +190,6 @@ function generateConfig({
         }
         data.jupyterlab._build = _build;
         writeJSONFile(path.join(outputPath, 'package.json'), data);
-
-        // Remove our temporary public path file if not in watch mode
-        if (!watchMode) {
-          fs.removeSync(publicpath);
-        }
       });
     }
   }
@@ -228,15 +198,11 @@ function generateConfig({
     merge(baseConfig, {
       mode,
       devtool,
-      // This entry point ensures that the public path code is run when
-      // remoteEntry is loaded. See
-      // https://github.com/webpack/webpack/issues/10352#issuecomment-675649389
-      entry: {
-        [data.name]: publicpath
-      },
+      entry: {},
       output: {
         filename: '[name].[contenthash].js',
-        path: outputPath
+        path: outputPath,
+        publicPath: staticUrl || 'auto'
       },
       module: {
         rules: [{ test: /\.html$/, use: 'file-loader' }]
