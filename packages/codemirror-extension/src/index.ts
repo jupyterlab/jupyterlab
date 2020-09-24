@@ -19,7 +19,8 @@ import {
   editorServices,
   EditorSyntaxStatus,
   CodeMirrorEditor,
-  Mode
+  Mode,
+  ICodeMirror
 } from '@jupyterlab/codemirror';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
@@ -45,6 +46,13 @@ namespace CommandIDs {
   export const find = 'codemirror:find';
 
   export const goToLine = 'codemirror:go-to-line';
+}
+
+/** The CodeMirror singleton. */
+const codemirrorSingleton: JupyterFrontEndPlugin<ICodeMirror> = {
+  id: '@jupyterlab/codemirror-extension:codemirror',
+  provides: ICodeMirror,
+  activate: activateCodeMirror
 }
 
 /**
@@ -116,7 +124,8 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
-  editorSyntaxStatus
+  editorSyntaxStatus,
+  codemirrorSingleton
 ];
 export default plugins;
 
@@ -133,6 +142,15 @@ function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
     void app.commands.execute('docmanager:save');
   };
   return editorServices;
+}
+
+/**
+ * Set up the CodeMirror singleton.
+ */
+function activateCodeMirror(app: JupyterFrontEnd): ICodeMirror {
+  return {
+    codemirrorSingleton: () => CodeMirror
+  }
 }
 
 /**
