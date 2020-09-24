@@ -159,6 +159,18 @@
   text-align: right;
 }
 
+.jp-id-narrow {
+  display: none;
+  flex: 0 0 5px;
+  padding: 4px 4px;
+  border-left: var(--jp-border-width) solid var(--jp-border-color2);
+  text-align: right;
+}
+
+.jp-DirListing-narrow .jp-id-narrow {
+  display: block;
+}
+
 .jp-DirListing-narrow .jp-id-modified,
 .jp-DirListing-narrow .jp-DirListing-itemModified {
   display: none;
