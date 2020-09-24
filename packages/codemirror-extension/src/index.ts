@@ -185,6 +185,7 @@ function activateEditorCommands(
     lineWiseCopyCut
   } = CodeMirrorEditor.defaultConfig;
 
+  let toggleComment = 'Accel-/';
   /**
    * Update the setting values.
    */
@@ -226,8 +227,18 @@ function activateEditorCommands(
       selectionPointer;
     lineWiseCopyCut =
       (settings.get('lineWiseCopyCut').composite as boolean) ?? lineWiseCopyCut;
+    toggleComment =
+      (settings.get('toggleComment').composite as string) ?? toggleComment;
   }
 
+  /**
+   * Set the codemirror extraKeys options for an editor
+   */
+  function updateExtraKeys(editor: CodeMirrorEditor) {
+    let extraKeys = editor.getOption('extraKeys') as any;
+    extraKeys[toggleComment] = 'toggleComment';
+    editor.setOption('extraKeys', extraKeys);
+  }
   /**
    * Update the settings of the current tracker instances.
    */
@@ -242,6 +253,7 @@ function activateEditorCommands(
         editor.setOption('styleActiveLine', styleActiveLine);
         editor.setOption('styleSelectedText', styleSelectedText);
         editor.setOption('theme', theme);
+        updateExtraKeys(editor);
       }
     });
   }
@@ -253,14 +265,7 @@ function activateEditorCommands(
     notebookTracker.forEach(widget => {
       widget.content.widgets.forEach(cell => {
         if (cell.inputArea.editor instanceof CodeMirrorEditor) {
-          const cm = cell.inputArea.editor.editor;
-          // Do not set scrollPastEnd option.
-          cm.setOption('keyMap', keyMap);
-          cm.setOption('theme', theme);
-          cm.setOption('styleActiveLine', styleActiveLine);
-          cm.setOption('styleSelectedText', styleSelectedText);
-          cm.setOption('selectionPointer', selectionPointer);
-          cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
+          updateExtraKeys(cell.inputArea.editor);
         }
       });
     });
@@ -297,25 +302,17 @@ function activateEditorCommands(
       editor.setOption('styleActiveLine', styleActiveLine);
       editor.setOption('styleSelectedText', styleSelectedText);
       editor.setOption('theme', theme);
+      updateExtraKeys(editor);
     }
   });
 
   /**
-   * Handle the settings of new widgets.
+   * Handle the settings of new Cells
    */
-  notebookTracker.widgetAdded.connect((sender, widget) => {
-    widget.content.widgets.forEach(cell => {
-      if (cell.inputArea.editor instanceof CodeMirrorEditor) {
-        const cm = cell.inputArea.editor.editor;
-        // Do not set scrollPastEnd option.
-        cm.setOption('keyMap', keyMap);
-        cm.setOption('theme', theme);
-        cm.setOption('styleActiveLine', styleActiveLine);
-        cm.setOption('styleSelectedText', styleSelectedText);
-        cm.setOption('selectionPointer', selectionPointer);
-        cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
-      }
-    });
+  notebookTracker.newCellCreated.connect((sender, cell) => {
+    if (cell?.inputArea.editor instanceof CodeMirrorEditor) {
+      updateExtraKeys(cell.inputArea.editor);
+    }
   });
 
   /**

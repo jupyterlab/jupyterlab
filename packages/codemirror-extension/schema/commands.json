@@ -45,6 +45,12 @@
       "title": "Ctrl-C",
       "description": "When enabled, which is the default, doing copy or cut when there is no selection will copy or cut the whole lines that have cursors on them.",
       "default": true
+    },
+    "toggleComment": {
+      "type": "string",
+      "title": "Block Comment",
+      "description": "Key command for block comment",
+      "default": "Accel-/"
     }
   },
   "type": "object"
