@@ -176,7 +176,7 @@ export class StaticNotebook extends Widget {
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._mimetypeService = options.mimeTypeService;
-
+    // Section for the virtual-notebook behavior.
     this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
     this._cellsArray = new Array<Cell>();
     this._observer = new IntersectionObserver(
@@ -191,9 +191,6 @@ export class StaticNotebook extends Widget {
               pl.removeWidgetAt(index);
               pl.insertWidget(index, cell);
               this._toRenderMap.delete(o.target.id);
-              if (this._toRenderMap.size === 0) {
-                this._fullyRendered.emit(true);
-              }
               this._incrementRenderedCount();
               this._placeholderCellRendered.emit(cell);
             }
@@ -203,7 +200,8 @@ export class StaticNotebook extends Widget {
       {
         root: this.node,
         threshold: 1,
-        rootMargin: '0px 0px ' + this.notebookConfig.nonObservedBottomMargin + ' 0px'
+        rootMargin:
+          '0px 0px ' + this.notebookConfig.nonObservedBottomMargin + ' 0px'
       }
     );
   }
@@ -522,7 +520,9 @@ export class StaticNotebook extends Widget {
 
     const layout = this.layout as PanelLayout;
     this._cellsArray.push(widget);
-    if (this._renderedCellsCount <= this.notebookConfig.cellNumberToRenderDirectly) {
+    if (
+      this._renderedCellsCount <= this.notebookConfig.cellNumberToRenderDirectly
+    ) {
       layout.insertWidget(index, widget);
       this._incrementRenderedCount();
       this.onCellInserted(index, widget);
@@ -750,6 +750,9 @@ export class StaticNotebook extends Widget {
   }
 
   private _incrementRenderedCount() {
+    if (this._toRenderMap.size === 0) {
+      this._fullyRendered.emit(true);
+    }
     this._renderedCellsCount++;
   }
 
