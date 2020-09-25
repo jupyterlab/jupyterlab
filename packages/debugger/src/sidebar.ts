@@ -79,10 +79,10 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
       header.title.label = title;
     });
 
-    this.body = new SplitPanel();
-    this.body.orientation = 'vertical';
-    this.body.addClass('jp-DebuggerSidebar-body');
-    this.addWidget(this.body);
+    this._body = new SplitPanel();
+    this._body.orientation = 'vertical';
+    this._body.addClass('jp-DebuggerSidebar-body');
+    this.addWidget(this._body);
 
     this.addPanel(this.variables);
     this.addPanel(this.callstack);
@@ -99,7 +99,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
    * If the widget is already contained in the sidebar, it will be moved.
    */
   addPanel(widget: Widget) {
-    this.body.addWidget(widget);
+    this._body.addWidget(widget);
   }
 
   /**
@@ -113,14 +113,14 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
    * If the widget is already contained in the sidebar, it will be moved.
    */
   insertPanel(index: number, widget: Widget) {
-    this.body.insertWidget(index, widget);
+    this._body.insertWidget(index, widget);
   }
 
   /**
    * A read-only array of the sidebar panels.
    */
   get panels(): readonly Widget[] {
-    return this.body.widgets;
+    return this._body.widgets;
   }
 
   /**
@@ -161,7 +161,7 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
   /**
    * Container for debugger panels.
    */
-  private body: SplitPanel;
+  private _body: SplitPanel;
 }
 
 /**
