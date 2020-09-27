@@ -84,26 +84,27 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
     this._body.addClass('jp-DebuggerSidebar-body');
     this.addWidget(this._body);
 
-    this.addPanel(this.variables);
-    this.addPanel(this.callstack);
-    this.addPanel(this.breakpoints);
-    this.addPanel(this.sources);
+    this.addItem(this.variables);
+    this.addItem(this.callstack);
+    this.addItem(this.breakpoints);
+    this.addItem(this.sources);
   }
 
   /**
-   * Add a panel at the end of the sidebar.
+   * Add an item at the end of the sidebar.
    *
    * @param widget - The widget to add to the sidebar.
    *
    * #### Notes
    * If the widget is already contained in the sidebar, it will be moved.
+   * The item can be removed from the sidebar by setting its parent to `null`.
    */
-  addPanel(widget: Widget) {
+  addItem(widget: Widget) {
     this._body.addWidget(widget);
   }
 
   /**
-   * Insert a panel at the specified index.
+   * Insert an item at the specified index.
    *
    * @param index - The index at which to insert the widget.
    *
@@ -111,15 +112,16 @@ export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
    *
    * #### Notes
    * If the widget is already contained in the sidebar, it will be moved.
+   * The item can be removed from the sidebar by setting its parent to `null`.
    */
-  insertPanel(index: number, widget: Widget) {
+  insertItem(index: number, widget: Widget) {
     this._body.insertWidget(index, widget);
   }
 
   /**
-   * A read-only array of the sidebar panels.
+   * A read-only array of the sidebar items.
    */
-  get panels(): readonly Widget[] {
+  get items(): readonly Widget[] {
     return this._body.widgets;
   }
 

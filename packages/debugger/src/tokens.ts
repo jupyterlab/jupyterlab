@@ -491,19 +491,19 @@ export namespace IDebugger {
    */
   export interface ISidebar extends Widget {
     /**
-     * Add panel at the end of the sidebar.
+     * Add item at the end of the sidebar.
      */
-    addPanel(widget: Widget): void;
+    addItem(widget: Widget): void;
 
     /**
-     * Insert panel at a specified index.
+     * Insert item at a specified index.
      */
-    insertPanel(index: number, widget: Widget): void;
+    insertItem(index: number, widget: Widget): void;
 
     /**
-     * Return all panels that were added to sidebar.
+     * Return all items that were added to sidebar.
      */
-    readonly panels: readonly Widget[];
+    readonly items: readonly Widget[];
   }
 
   /**
