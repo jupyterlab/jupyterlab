@@ -94,7 +94,7 @@ def update_extension(target, interactive=True):
         temp_data = json.load(fid)
 
     for (key, value) in temp_data['devDependencies'].items():
-        data['devDependencies'][key] = value.replace('~', '^')
+        data['devDependencies'][key] = value
 
     # Ask the user whether to upgrade the scripts automatically
     warnings = []
