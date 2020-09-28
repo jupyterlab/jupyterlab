@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
-
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 
 import { classes, DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
@@ -293,6 +291,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Setup single-document-mode title bar
     const titleWidget = (this._titleWidget = new Widget());
     titleWidget.id = 'jp-title-panel-title';
+    titleWidget.node.appendChild(document.createElement('h1'));
     this.add(titleWidget, 'title');
     if (this._dockPanel.mode == 'multiple-document') {
       this._titleHandler.panel.hide();
@@ -305,19 +304,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       let oldValue = args.oldValue;
 
       // Stop watching the title of the previously current widget
-      if (oldValue && oldValue instanceof MainAreaWidget) {
-        oldValue.content.title.changed.disconnect(
-          this._updateTitlePanelTitle,
-          this
-        );
+      if (oldValue) {
+        oldValue.title.changed.disconnect(this._updateTitlePanelTitle, this);
       }
 
       // Start watching the title of the new current widget
-      if (newValue && newValue instanceof MainAreaWidget) {
-        newValue.content.title.changed.connect(
-          this._updateTitlePanelTitle,
-          this
-        );
+      if (newValue) {
+        newValue.title.changed.connect(this._updateTitlePanelTitle, this);
         this._updateTitlePanelTitle();
       }
 
@@ -822,10 +815,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
-    if (current && current instanceof MainAreaWidget) {
-      this._titleWidget.node.innerHTML =
-        '<h1>' + current.content.title.label + '</h1>';
-    }
+    const h1 = this._titleWidget.node.children[0] as HTMLHeadElement;
+    h1.textContent = current ? current.title.label : '';
+    h1.title = current ? current.title.caption : '';
   }
 
   /**
