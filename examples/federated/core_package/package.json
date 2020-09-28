@@ -169,7 +169,7 @@
     "to-string-loader": "^1.1.6",
     "url-loader": "~4.1.0",
     "watch": "~1.0.2",
-    "webpack": "~5.0.0-rc.0",
+    "webpack": "~5.0.0-rc.1",
     "webpack-cli": "^3.3.10",
     "webpack-merge": "^5.1.2",
     "whatwg-fetch": "^3.0.0"
