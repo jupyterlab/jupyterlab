@@ -3,4 +3,9 @@
 
 export { Debugger } from './debugger';
 
-export { IDebugger, IDebuggerConfig, IDebuggerSources } from './tokens';
+export {
+  IDebugger,
+  IDebuggerConfig,
+  IDebuggerSources,
+  IDebuggerSidebar
+} from './tokens';

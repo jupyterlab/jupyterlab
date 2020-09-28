@@ -24,7 +24,7 @@ import { IDebugger } from './tokens';
 /**
  * A debugger sidebar.
  */
-export class DebuggerSidebar extends Panel {
+export class DebuggerSidebar extends Panel implements IDebugger.ISidebar {
   /**
    * Instantiate a new Debugger.Sidebar
    *
@@ -33,7 +33,7 @@ export class DebuggerSidebar extends Panel {
   constructor(options: DebuggerSidebar.IOptions) {
     super();
     this.id = 'jp-debugger-sidebar';
-    this.title.iconRenderer = bugIcon;
+    this.title.icon = bugIcon;
     this.addClass('jp-DebuggerSidebar');
 
     const {
@@ -79,16 +79,50 @@ export class DebuggerSidebar extends Panel {
       header.title.label = title;
     });
 
-    const body = new SplitPanel();
+    this._body = new SplitPanel();
+    this._body.orientation = 'vertical';
+    this._body.addClass('jp-DebuggerSidebar-body');
+    this.addWidget(this._body);
 
-    body.orientation = 'vertical';
-    body.addWidget(this.variables);
-    body.addWidget(this.callstack);
-    body.addWidget(this.breakpoints);
-    body.addWidget(this.sources);
-    body.addClass('jp-DebuggerSidebar-body');
+    this.addItem(this.variables);
+    this.addItem(this.callstack);
+    this.addItem(this.breakpoints);
+    this.addItem(this.sources);
+  }
 
-    this.addWidget(body);
+  /**
+   * Add an item at the end of the sidebar.
+   *
+   * @param widget - The widget to add to the sidebar.
+   *
+   * #### Notes
+   * If the widget is already contained in the sidebar, it will be moved.
+   * The item can be removed from the sidebar by setting its parent to `null`.
+   */
+  addItem(widget: Widget) {
+    this._body.addWidget(widget);
+  }
+
+  /**
+   * Insert an item at the specified index.
+   *
+   * @param index - The index at which to insert the widget.
+   *
+   * @param widget - The widget to insert into to the sidebar.
+   *
+   * #### Notes
+   * If the widget is already contained in the sidebar, it will be moved.
+   * The item can be removed from the sidebar by setting its parent to `null`.
+   */
+  insertItem(index: number, widget: Widget) {
+    this._body.insertWidget(index, widget);
+  }
+
+  /**
+   * A read-only array of the sidebar items.
+   */
+  get items(): readonly Widget[] {
+    return this._body.widgets;
   }
 
   /**
@@ -125,6 +159,11 @@ export class DebuggerSidebar extends Panel {
    * The sources widget.
    */
   readonly sources: SourcesPanel;
+
+  /**
+   * Container for debugger panels.
+   */
+  private _body: SplitPanel;
 }
 
 /**
