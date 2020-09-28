@@ -568,7 +568,10 @@ export namespace Cell {
      */
     updateEditorOnShow?: boolean;
 
-    placeholder: boolean;
+    /**
+     * Whether this cell is a placeholder for future rendering.
+     */
+    placeholder?: boolean;
   }
 
   /**

@@ -179,31 +179,33 @@ export class StaticNotebook extends Widget {
     // Section for the virtual-notebook behavior.
     this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
     this._cellsArray = new Array<Cell>();
-    this._observer = new IntersectionObserver(
-      (entries, observer) => {
-        entries.forEach(o => {
-          if (o.isIntersecting) {
-            observer.unobserve(o.target);
-            const ci = this._toRenderMap.get(o.target.id);
-            if (ci) {
-              const { index, cell } = ci;
-              const pl = this.layout as PanelLayout;
-              pl.removeWidgetAt(index);
-              pl.insertWidget(index, cell);
-              this._toRenderMap.delete(o.target.id);
-              this._incrementRenderedCount();
-              this._placeholderCellRendered.emit(cell);
+    if ('IntersectionObserver' in window) {
+      this._observer = new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach(o => {
+            if (o.isIntersecting) {
+              observer.unobserve(o.target);
+              const ci = this._toRenderMap.get(o.target.id);
+              if (ci) {
+                const { index, cell } = ci;
+                const pl = this.layout as PanelLayout;
+                pl.removeWidgetAt(index);
+                pl.insertWidget(index, cell);
+                this._toRenderMap.delete(o.target.id);
+                this._incrementRenderedCount();
+                this._placeholderCellRendered.emit(cell);
+              }
             }
-          }
-        });
-      },
-      {
-        root: this.node,
-        threshold: 1,
-        rootMargin:
-          '0px 0px ' + this.notebookConfig.nonObservedBottomMargin + ' 0px'
-      }
-    );
+          });
+        },
+        {
+          root: this.node,
+          threshold: 1,
+          rootMargin:
+            '0px 0px ' + this.notebookConfig.nonObservedBottomMargin + ' 0px'
+        }
+      );
+    }
   }
 
   /**
@@ -521,12 +523,9 @@ export class StaticNotebook extends Widget {
     const layout = this.layout as PanelLayout;
     this._cellsArray.push(widget);
     if (
-      this._renderedCellsCount <= this.notebookConfig.cellNumberToRenderDirectly
+      this._observer &&
+      this._renderedCellsCount > this.notebookConfig.cellNumberToRenderDirectly
     ) {
-      layout.insertWidget(index, widget);
-      this._incrementRenderedCount();
-      this.onCellInserted(index, widget);
-    } else {
       this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
       const placeholder = this._createPlaceholderCell(
         cell as IRawCellModel,
@@ -537,9 +536,13 @@ export class StaticNotebook extends Widget {
       this.onCellInserted(index, placeholder);
       this._fullyRendered.emit(false);
       this._observer.observe(placeholder.node);
+    } else {
+      layout.insertWidget(index, widget);
+      this._incrementRenderedCount();
+      this.onCellInserted(index, widget);
     }
 
-    if (this.notebookConfig.renderCellOnIdle) {
+    if (this._observer && this.notebookConfig.renderCellOnIdle) {
       const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
       (window as any).requestIdleCallback(renderPlaceholderCells, {
         timeout: 1000

@@ -66,7 +66,7 @@ export class InputArea extends Widget {
 
     const layout = (this.layout = new PanelLayout());
     layout.addWidget(prompt);
-    if (!options.placeholder) {      
+    if (!options.placeholder) {
       layout.addWidget(editor);
     }
   }
@@ -176,7 +176,10 @@ export namespace InputArea {
      */
     updateOnShow?: boolean;
 
-    placeholder: boolean
+    /**
+     * Whether this input area is a placeholder for future rendering.
+     */
+    placeholder?: boolean;
   }
 
   /**
