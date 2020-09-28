@@ -305,18 +305,12 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
       // Stop watching the title of the previously current widget
       if (oldValue) {
-        oldValue.title.changed.disconnect(
-          this._updateTitlePanelTitle,
-          this
-        );
+        oldValue.title.changed.disconnect(this._updateTitlePanelTitle, this);
       }
 
       // Start watching the title of the new current widget
       if (newValue) {
-        newValue.title.changed.connect(
-          this._updateTitlePanelTitle,
-          this
-        );
+        newValue.title.changed.connect(this._updateTitlePanelTitle, this);
         this._updateTitlePanelTitle();
       }
 
