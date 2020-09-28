@@ -404,7 +404,7 @@ function activateEditorCommands(
     ['sublime', trans.__('sublime')],
     ['vim', trans.__('vim')],
     ['emacs', trans.__('emacs')]
-  ].forEach(([name, displayName])=> {
+  ].forEach(([name, displayName]) => {
     keyMapMenu.addItem({
       command: CommandIDs.changeKeyMap,
       args: { keyMap: name, displayName: displayName }
