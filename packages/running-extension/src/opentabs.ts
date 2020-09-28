@@ -116,7 +116,7 @@ export function addOpenTabsSessionManager(
       let icon = fileIcon;
       if (this._widget instanceof MainAreaWidget) {
         const widgetIcon = this._widget.title.icon;
-        if (icon instanceof LabIcon) {
+        if (widgetIcon instanceof LabIcon) {
           icon = widgetIcon as LabIcon;
         }
       }
