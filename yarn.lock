@@ -16080,10 +16080,10 @@ webpack@^4.43.0:
     watchpack "^1.7.4"
     webpack-sources "^1.4.1"
 
-webpack@~5.0.0-rc.1:
-  version "5.0.0-rc.1"
-  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.0.0-rc.1.tgz#4fd01376c58dab92ac7918631dfd0cb6f557e87e"
-  integrity sha512-W6vDKlMTftijk6Ty9ae9wFHXjBTdfP7yVXx+k+tu8RUNy7GUjViTdEF2g+3brYuX1DE0XGvVEjxhnTc9E0/ccA==
+webpack@~5.0.0-rc.2:
+  version "5.0.0-rc.2"
+  resolved "https://registry.yarnpkg.com/webpack/-/webpack-5.0.0-rc.2.tgz#ede6dbc767e77e21e2db50d73e97ec3a88499db2"
+  integrity sha512-5ZF3copE25r3WMKrQlo77hu2lNDSlZKBfdOLXi5Z3zdfC55DWki7+9sOwGOvhk+sgZjNncpi4YkEO0vpDVMhZg==
   dependencies:
     "@types/eslint-scope" "^3.7.0"
     "@types/estree" "^0.0.45"
