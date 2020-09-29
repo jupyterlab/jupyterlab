@@ -406,7 +406,7 @@ export class CompleterModel implements Completer.IModel {
       const prefix = index > -1 ? item.label.substring(0, index) : item.label;
       let match = StringExt.matchSumOfSquares(prefix, query);
       // Filter non-matching items.
-      if (match) {
+      if (match !== null) {
         // Highlight label text if there's a match
         let marked = StringExt.highlight(
           item.label,
@@ -421,9 +421,11 @@ export class CompleterModel implements Completer.IModel {
           type: item.type,
           icon: item.icon,
           documentation: item.documentation,
-          deprecated: item.deprecated
-        });
+          deprecated: item.deprecated,
+          score: match.score
+        } as CompletionHandler.ICompletionItem);
       }
+      results.sort((a, b) => (a as any).score - (b as any).score);
     }
     return results;
   }
