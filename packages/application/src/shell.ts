@@ -266,7 +266,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // initially hiding header and bottom panel when no elements inside,
     // and the title panel as we only show that in single document mode.
     this._headerPanel.hide();
-    this._titleHandler.panel.hide();
     this._bottomPanel.hide();
 
     this.layout = rootLayout;
@@ -293,9 +292,36 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     titleWidget.id = 'jp-title-panel-title';
     titleWidget.node.appendChild(document.createElement('h1'));
     this.add(titleWidget, 'title');
-    if (this._dockPanel.mode == 'multiple-document') {
+
+    if (this._dockPanel.mode === 'multiple-document') {
       this._titleHandler.panel.hide();
     }
+
+    // Set up single-document mode switch in menu bar
+    const spacer = new Widget();
+    spacer.id = 'jp-top-spacer';
+    this.add(spacer, 'top', { rank: 1000 });
+
+    const label = document.createElement('label');
+    label.textContent = 'Single-Document Mode';
+    label.title = 'Single-Document Mode';
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.value = 'single-document';
+    checkbox.title = 'Single-Document Mode';
+    this.modeChanged.connect((_, mode) => {
+      checkbox.checked = mode === 'single-document';
+    });
+    checkbox.checked = this.mode === 'single-document';
+    checkbox.addEventListener('change', () => {
+      this.mode = checkbox.checked ? 'single-document' : 'multiple-document';
+    });
+    label.appendChild(checkbox);
+
+    const checkWidget = new Widget();
+    checkWidget.node.appendChild(label);
+    checkWidget.id = 'jp-single-document-mode';
+    this.add(checkWidget, 'top', { rank: 1010 });
 
     // Wire up signals to update the title panel of the single document mode to
     // follow the title of this.currentWidget
