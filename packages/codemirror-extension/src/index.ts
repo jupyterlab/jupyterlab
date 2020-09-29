@@ -145,14 +145,19 @@ function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
 }
 
 /**
+ * Simplest implementation of the CodeMirror singleton provider.
+ */
+class CodeMirrorSingleton implements ICodeMirror {
+  get CodeMirror() { 
+    return CodeMirror;
+  }
+}
+  
+/**
  * Set up the CodeMirror singleton.
  */
 function activateCodeMirror(app: JupyterFrontEnd): ICodeMirror {
-  return {
-    get CodeMirror() { 
-      return CodeMirror;
-    }
-  };
+  return new CodeMirrorSingleton();
 }
 
 /**
