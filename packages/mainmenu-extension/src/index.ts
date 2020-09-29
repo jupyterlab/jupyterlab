@@ -136,6 +136,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
 
     const menu = new MainMenu(commands);
     menu.id = 'jp-MainMenu';
+    menu.addClass('jp-scrollbar-tiny');
 
     const logo = new Widget();
     jupyterIcon.element({
