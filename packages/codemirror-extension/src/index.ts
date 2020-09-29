@@ -187,6 +187,8 @@ function activateEditorCommands(
     lineWiseCopyCut
   } = CodeMirrorEditor.defaultConfig;
 
+  let toggleComment = 'Ctrl-/';
+  let toggleCommentMac = 'Cmd-/';
   /**
    * Update the setting values.
    */
@@ -337,6 +339,11 @@ function activateEditorCommands(
       selectionPointer;
     lineWiseCopyCut =
       (settings.get('lineWiseCopyCut').composite as boolean) ?? lineWiseCopyCut;
+    toggleComment =
+      (settings.get('toggleComment').composite as string) ?? toggleComment;
+    toggleCommentMac =
+      (settings.get('toggleCommentMac').composite as string) ??
+      toggleCommentMac;
   }
 
   /**
@@ -353,6 +360,10 @@ function activateEditorCommands(
         editor.setOption('styleActiveLine', styleActiveLine);
         editor.setOption('styleSelectedText', styleSelectedText);
         editor.setOption('theme', theme);
+        let extraKeys = editor.getOption('extraKeys') as any;
+        extraKeys[toggleComment] = 'toggleComment';
+        extraKeys[toggleCommentMac] = 'toggleComment';
+        editor.setOption('extraKeys', extraKeys);
       }
     });
   }
@@ -369,6 +380,10 @@ function activateEditorCommands(
           cm.setOption('theme', theme);
           cm.setOption('styleActiveLine', styleActiveLine);
           cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
+          let extraKeys = cm.getOption('extraKeys') as any;
+          extraKeys[toggleComment] = 'toggleComment';
+          extraKeys[toggleCommentMac] = 'toggleComment';
+          cm.setOption('extraKeys', extraKeys);
         }
       });
     });
@@ -393,6 +408,10 @@ function activateEditorCommands(
           editor.setOption('keyMap', keyMap);
           editor.setOption('styleActiveLine', styleActiveLine);
           editor.setOption('lineWiseCopyCut', lineWiseCopyCut);
+          let extraKeys = editor.getOption('extraKeys') as any;
+          extraKeys[toggleComment] = 'toggleComment';
+          extraKeys[toggleCommentMac] = 'toggleComment';
+          editor.setOption('extraKeys', extraKeys);
         }
       });
     })
