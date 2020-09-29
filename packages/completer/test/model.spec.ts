@@ -220,7 +220,13 @@ describe('completer/model', () => {
           { insertText: 'qux', label: '<mark>qux</mark>' },
           { insertText: 'quux', label: '<mark>qu</mark>u<mark>x</mark>' }
         ];
-        model.setOptions(['foo', 'bar', 'baz', 'quux', 'qux']);
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' },
+          { label: 'quux' },
+          { label: 'qux' }
+        ]);
         model.query = 'qux';
         expect(model.completionItems!()).toEqual(want);
       });
@@ -231,7 +237,13 @@ describe('completer/model', () => {
           { insertText: 'quux', label: '<mark>qu</mark>ux' },
           { insertText: 'qux', label: '<mark>qu</mark>x' }
         ];
-        model.setOptions(['foo', 'bar', 'baz', 'qux', 'quux']);
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' },
+          { label: 'quux' },
+          { label: 'qux' }
+        ]);
         model.query = 'qu';
         expect(model.completionItems!()).toEqual(want);
       });

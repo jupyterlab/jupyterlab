@@ -414,25 +414,23 @@ export class CompleterModel implements Completer.IModel {
           Private.mark
         );
         results.push({
+          ...item,
           label: marked.join(''),
           // If no insertText is present, preserve original label value
           // by setting it as the insertText.
           insertText: item.insertText ? item.insertText : item.label,
-          type: item.type,
-          icon: item.icon,
-          documentation: item.documentation,
-          deprecated: item.deprecated,
           score: match.score
         });
       }
-      results.sort(Private.scoreCmp2);
-
-      // Delete the extra score attribute to not leak implementation details
-      // to JavaScript callers.
-      results.forEach(x => {
-        delete (x as any).score;
-      });
     }
+    results.sort(Private.scoreCmp2);
+
+    // Delete the extra score attribute to not leak implementation details
+    // to JavaScript callers.
+    results.forEach(x => {
+      delete (x as any).score;
+    });
+
     return results;
   }
 
