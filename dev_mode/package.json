@@ -251,6 +251,7 @@
       "@jupyterlab/application",
       "@jupyterlab/apputils",
       "@jupyterlab/codeeditor",
+      "@jupyterlab/codemirror",
       "@jupyterlab/completer",
       "@jupyterlab/console",
       "@jupyterlab/coreutils",
