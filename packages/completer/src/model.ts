@@ -396,7 +396,7 @@ export class CompleterModel implements Completer.IModel {
    */
   private _markup(query: string): CompletionHandler.ICompletionItems {
     const items = this._completionItems;
-    let results: CompletionHandler.ICompletionItem[] = [];
+    let results: Private.ICompletionMatch[] = [];
     for (let item of items) {
       // See if label matches query string
       // With ICompletionItems, the label may include parameters, so we exclude them from the matcher.
@@ -406,7 +406,7 @@ export class CompleterModel implements Completer.IModel {
       const prefix = index > -1 ? item.label.substring(0, index) : item.label;
       let match = StringExt.matchSumOfSquares(prefix, query);
       // Filter non-matching items.
-      if (match !== null) {
+      if (match) {
         // Highlight label text if there's a match
         let marked = StringExt.highlight(
           item.label,
@@ -423,9 +423,15 @@ export class CompleterModel implements Completer.IModel {
           documentation: item.documentation,
           deprecated: item.deprecated,
           score: match.score
-        } as CompletionHandler.ICompletionItem);
+        });
       }
-      results.sort((a, b) => (a as any).score - (b as any).score);
+      results.sort(Private.scoreCmp2);
+
+      // Delete the extra score attribute to not leak implementation details
+      // to JavaScript callers.
+      results.forEach(x => {
+        delete (x as any).score;
+      });
     }
     return results;
   }
@@ -544,6 +550,33 @@ namespace Private {
       return delta;
     }
     return a.raw.localeCompare(b.raw);
+  }
+
+  /**
+   * A filtered completion menu matching result.
+   */
+  export interface ICompletionMatch extends CompletionHandler.ICompletionItem {
+    /**
+     * A score which indicates the strength of the match.
+     *
+     * A lower score is better. Zero is the best possible score.
+     */
+    score: number;
+  }
+
+  /**
+   * A sort comparison function for item match scores.
+   *
+   * #### Notes
+   * This orders the items first based on score (lower is better), then
+   * by locale order of the item text.
+   */
+  export function scoreCmp2(a: ICompletionMatch, b: ICompletionMatch): number {
+    const delta = a.score - b.score;
+    if (delta !== 0) {
+      return delta;
+    }
+    return a.insertText?.localeCompare(b.insertText ?? '') ?? 0;
   }
 
   /**
