@@ -52,6 +52,15 @@ body {
   display: flex;
 }
 
+#jp-top-spacer {
+  flex-grow: 1;
+}
+
+#jp-single-document-mode {
+  margin: 0px 8px;
+  align-self: center;
+}
+
 /* Sibling imports */
 @import './datagrid.css';
 @import './dockpanel.css';
