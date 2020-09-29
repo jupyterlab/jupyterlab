@@ -149,7 +149,7 @@ function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
  */
 function activateCodeMirror(app: JupyterFrontEnd): ICodeMirror {
   return {
-    codemirrorSingleton: () => CodeMirror
+    get CodeMirror() { return CodeMirror }
   };
 }
 
