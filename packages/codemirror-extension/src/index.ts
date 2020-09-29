@@ -13,7 +13,7 @@ import {
 
 import { IEditMenu, IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Cell, MarkdownCell } from '@jupyterlab/cells';
+import { MarkdownCell } from '@jupyterlab/cells';
 
 import { IEditorServices } from '@jupyterlab/codeeditor';
 
@@ -186,6 +186,7 @@ function activateEditorCommands(
     selectionPointer,
     lineWiseCopyCut
   } = CodeMirrorEditor.defaultConfig;
+
   /**
    * Update the setting values.
    */
@@ -202,7 +203,7 @@ function activateEditorCommands(
         (cm: any, head: any, motionArgs: any, vim: any) => {
           let cur = head;
           let endCh = cur.ch;
-          let currentCell = activeCell;
+          let currentCell = notebookTracker.activeCell;
           // TODO: these references will be undefined
           // Depending what our last motion was, we may want to do different
           // things. If our last motion was moving vertically, we want to
@@ -427,11 +428,10 @@ function activateEditorCommands(
     });
   });
 
-  let activeCell: Cell | null = null;
-
   commands.addCommand('codemirror:leave-vim-insert-mode', {
     label: 'Leave VIM Insert Mode',
     execute: args => {
+      const activeCell = notebookTracker.activeCell;
       if (activeCell) {
         let editor = activeCell.editor as CodeMirrorEditor;
         (CodeMirror as any).Vim.handleKey(editor.editor, '<Esc>');
