@@ -214,6 +214,40 @@ describe('completer/model', () => {
         expect(model.completionItems!()[0].label).toEqual(want);
       });
 
+      it('should order list based on score', () => {
+        const model = new CompleterModel();
+        const want: CompletionHandler.ICompletionItems = [
+          { insertText: 'qux', label: '<mark>qux</mark>' },
+          { insertText: 'quux', label: '<mark>qu</mark>u<mark>x</mark>' }
+        ];
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' },
+          { label: 'quux' },
+          { label: 'qux' }
+        ]);
+        model.query = 'qux';
+        expect(model.completionItems!()).toEqual(want);
+      });
+
+      it('should break ties in score by locale sort', () => {
+        const model = new CompleterModel();
+        const want: CompletionHandler.ICompletionItems = [
+          { insertText: 'quux', label: '<mark>qu</mark>ux' },
+          { insertText: 'qux', label: '<mark>qu</mark>x' }
+        ];
+        model.setCompletionItems!([
+          { label: 'foo' },
+          { label: 'bar' },
+          { label: 'baz' },
+          { label: 'quux' },
+          { label: 'qux' }
+        ]);
+        model.query = 'qu';
+        expect(model.completionItems!()).toEqual(want);
+      });
+
       it('should return { items: [] } if reset', () => {
         let model = new CompleterModel();
         let want: CompletionHandler.ICompletionItems = [];
