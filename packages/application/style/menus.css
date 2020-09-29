@@ -23,6 +23,10 @@
   font-size: var(--jp-ui-font-size1);
 }
 
+.lm-MenuBar:hover {
+  overflow-x: auto;
+}
+
 .lm-MenuBar-menu {
   transform: translateY(calc(-2 * var(--jp-border-width)));
 }
