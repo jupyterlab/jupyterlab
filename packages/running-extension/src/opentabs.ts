@@ -9,8 +9,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { ILabShell } from '@jupyterlab/application';
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
-
 import { IRunningSessions, IRunningSessionManagers } from '@jupyterlab/running';
 
 import { ITranslator } from '@jupyterlab/translation';
