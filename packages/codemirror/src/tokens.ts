@@ -19,5 +19,5 @@ export interface ICodeMirror {
   /**
    * A singleton CodeMirror module, rexported.
    */
-  codemirrorSingleton(): typeof CodeMirror;
+  CodeMirror: typeof CodeMirror;
 }
