@@ -37,7 +37,7 @@ from jupyterlab.coreconfig import _get_default_core_data, CoreConfig
 
 
 # The regex for expecting the webpack output.
-WEBPACK_EXPECT = re.compile(r'.*/index.out.js')
+WEBPACK_EXPECT = re.compile(r'.*theme-light-extension/style/index.css')
 
 # The dev mode directory.
 DEV_DIR = osp.abspath(os.path.join(HERE, '..', 'dev_mode'))
