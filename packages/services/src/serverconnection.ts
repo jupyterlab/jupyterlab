@@ -77,6 +77,12 @@ export namespace ServerConnection {
     readonly token: string;
 
     /**
+     * Whether to append a token to a Websocket url.  The default is `false` in the browser
+     * and `true` in node or jest.
+     */
+    readonly appendToken: boolean;
+
+    /**
      * The `fetch` method to use.
      */
     readonly fetch: (
@@ -238,6 +244,9 @@ namespace Private {
       WebSocket: WEBSOCKET,
       token: PageConfig.getToken(),
       appUrl: PageConfig.getOption('appUrl'),
+      appendToken:
+        typeof window === 'undefined' ||
+        process.env.JEST_WORKER_ID !== undefined,
       ...options,
       baseUrl,
       wsUrl
