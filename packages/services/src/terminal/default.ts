@@ -265,6 +265,12 @@ export class TerminalConnection implements Terminal.ITerminalConnection {
       encodeURIComponent(name)
     );
 
+    // If token authentication is in use.
+    const token = settings.token;
+    if (settings.appendToken && token !== '') {
+      url = url + `?token=${encodeURIComponent(token)}`;
+    }
+
     this._ws = new settings.WebSocket(url);
 
     this._ws.onmessage = this._onWSMessage;
