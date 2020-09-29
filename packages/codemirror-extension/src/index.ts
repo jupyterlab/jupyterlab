@@ -195,6 +195,12 @@ function activateEditorCommands(
   ): Promise<void> {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
     if (keyMap === 'vim') {
+      // This setup for vim in the notebook is derived from extension built by
+      // members of the community
+      // https://github.com/lambdalisue/jupyter-vim-binding (Jupyter notebook)
+      // https://github.com/jwkvam/jupyterlab-vim (JupyterLab 0.x + 1.x)
+      // https://github.com/axelfahy/jupyterlab-vim (JupyterLab 2.x)
+
       // @ts-expect-error
       await import('codemirror/keymap/vim.js');
       const vim = (CodeMirror as any).Vim;
