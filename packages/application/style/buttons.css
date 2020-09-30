@@ -123,11 +123,11 @@ button.jp-mod-styled.jp-mod-warn:active {
   border-radius: 50%;
 }
 
-.jp-slider[aria-checked="true"] .jp-slider-track {
+.jp-slider[aria-checked='true'] .jp-slider-track {
   background-color: var(--jp-warn-color0);
 }
 
-.jp-slider[aria-checked="true"] .jp-slider-track::before {
+.jp-slider[aria-checked='true'] .jp-slider-track::before {
   margin-left: 50%;
   margin-right: 5px;
 }

@@ -307,23 +307,32 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Accessibility_concerns
     const sdmSwitch = document.createElement('button');
     sdmSwitch.className = 'jp-slider jp-slider-sdm';
-    sdmSwitch.setAttribute("role", "switch");
+    sdmSwitch.setAttribute('role', 'switch');
     sdmSwitch.value = 'single-document';
     sdmSwitch.title = 'Single-Document Mode';
     this.modeChanged.connect((_, mode) => {
-      sdmSwitch.setAttribute("aria-checked", mode === 'single-document' ? 'true' : 'false');
+      sdmSwitch.setAttribute(
+        'aria-checked',
+        mode === 'single-document' ? 'true' : 'false'
+      );
     });
-    sdmSwitch.setAttribute("aria-checked", this.mode === 'single-document' ? 'true' : 'false');
+    sdmSwitch.setAttribute(
+      'aria-checked',
+      this.mode === 'single-document' ? 'true' : 'false'
+    );
     sdmSwitch.addEventListener('click', () => {
-      this.mode = sdmSwitch.getAttribute("aria-checked") === "true" ?'multiple-document' : 'single-document';
+      this.mode =
+        sdmSwitch.getAttribute('aria-checked') === 'true'
+          ? 'multiple-document'
+          : 'single-document';
     });
 
     const sdmLabel = document.createElement('label');
-    sdmLabel.className = 'jp-slider-label'
+    sdmLabel.className = 'jp-slider-label';
     sdmLabel.textContent = 'Single-Document Mode';
     sdmLabel.title = 'Single-Document Mode';
     const sdmTrack = document.createElement('div');
-    sdmTrack.className = "jp-slider-track";
+    sdmTrack.className = 'jp-slider-track';
     sdmTrack.setAttribute('aria-hidden', 'true');
     sdmSwitch.appendChild(sdmLabel);
     sdmSwitch.appendChild(sdmTrack);
