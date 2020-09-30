@@ -83,6 +83,7 @@ button.jp-mod-styled.jp-mod-warn:active {
 .jp-slider {
   display: flex;
   align-items: center;
+  font-size: var(--jp-ui-font-size1);
 }
 
 .jp-slider-sdm {
