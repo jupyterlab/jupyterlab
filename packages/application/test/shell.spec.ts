@@ -84,18 +84,15 @@ describe('LabShell', () => {
 
   describe('#isEmpty()', () => {
     it('should test whether the main area is empty', () => {
-      expect(shell.isEmpty('top')).toBe(true);
+      expect(shell.isEmpty('main')).toBe(true);
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'main');
       expect(shell.isEmpty('main')).toBe(false);
     });
 
-    it('should test whether the top area is empty', () => {
-      expect(shell.isEmpty('top')).toBe(true);
-      const widget = new Widget();
-      widget.id = 'foo';
-      shell.add(widget, 'top');
+    it('should test whether the top area is not empty', () => {
+      // account for builtin sdm slider widget
       expect(shell.isEmpty('top')).toBe(false);
     });
 
@@ -152,20 +149,24 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top');
-      expect(shell.isEmpty('top')).toBe(false);
+      // the added widget plus the builtin spacer and sdm slider widgets
+      console.log(toArray(shell.widgets('top')));
+      expect(toArray(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'top');
-      expect(shell.isEmpty('top')).toBe(true);
+      // the builtin spacer and sdm slider widgets alone
+      expect(toArray(shell.widgets('top')).length).toEqual(2);
     });
 
     it('should accept options', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top', { rank: 10 });
-      expect(shell.isEmpty('top')).toBe(false);
+      // the added widget plus the builtin spacer and sdm slider widgets
+      expect(toArray(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should add widgets according to their ranks', () => {
@@ -175,7 +176,7 @@ describe('LabShell', () => {
       bar.id = 'bar';
       shell.add(foo, 'top', { rank: 20 });
       shell.add(bar, 'top', { rank: 10 });
-      expect(toArray(shell.widgets('top'))).toEqual([bar, foo]);
+      expect(toArray(shell.widgets('top')).slice(0, 2)).toEqual([bar, foo]);
     });
   });
 
