@@ -53,6 +53,7 @@
 
 .jp-Notebook .jp-Cell .jp-InputPrompt {
   cursor: move;
+  float: left;
 }
 
 /*-----------------------------------------------------------------------------
@@ -145,7 +146,7 @@
 }
 
 .jp-dragImage {
-  display: flex;
+  display: block;
   flex-direction: row;
   width: var(--jp-private-notebook-dragImage-width);
   height: var(--jp-private-notebook-dragImage-height);

@@ -29,8 +29,8 @@
 
 .jp-Cell-inputWrapper,
 .jp-Cell-outputWrapper {
-  display: flex;
-  flex-direction: row;
+  display: table;
+  width: 100%;
   padding: 0px;
   margin: 0px;
   /* Added to reveal the box-shadow on the input and output collapsers. */
