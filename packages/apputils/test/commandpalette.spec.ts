@@ -1,6 +1,4 @@
 // Copyright (c) Jupyter Development Team.
-
-import 'jest';
 // Distributed under the terms of the Modified BSD License.
 
 // import { expect } from 'chai';
