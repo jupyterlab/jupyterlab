@@ -185,13 +185,8 @@ export class StaticNotebook extends Widget {
               observer.unobserve(o.target);
               const ci = this._toRenderMap.get(o.target.id);
               if (ci) {
-                const { index, cell } = ci;
-                const pl = this.layout as PanelLayout;
-                pl.removeWidgetAt(index);
-                pl.insertWidget(index, cell);
-                this._toRenderMap.delete(o.target.id);
-                this._incrementRenderedCount();
-                this._placeholderCellRendered.emit(cell);
+                const { cell, index } = ci;
+                this._renderPlaceholderCell(cell, index);
               }
             }
           });
@@ -555,14 +550,18 @@ export class StaticNotebook extends Widget {
     ) {
       const index = this._renderedCellsCount;
       const cell = this._cellsArray[index];
-      const pl = this.layout as PanelLayout;
-      pl.removeWidgetAt(index - 1);
-      pl.insertWidget(index - 1, cell);
-      this._toRenderMap.delete(cell.model.id);
-      this._incrementRenderedCount();
-      this._placeholderCellRendered.emit(cell);
+      this._renderPlaceholderCell(cell, index - 1);
     }
   }
+
+  private _renderPlaceholderCell(cell: Cell, index:number) {
+    const pl = this.layout as PanelLayout;
+    pl.removeWidgetAt(index);
+    pl.insertWidget(index, cell);
+    this._toRenderMap.delete(cell.model.id);
+    this._incrementRenderedCount();
+    this._placeholderCellRendered.emit(cell);
+  } 
 
   /**
    * Create a code cell widget from a code cell model.
