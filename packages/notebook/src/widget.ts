@@ -144,7 +144,7 @@ const DRAG_THRESHOLD = 5;
 
 /*
  * TODO(ECH)
-*/
+ */
 type InsertType = 'push' | 'insert' | 'set';
 
 /**
@@ -453,10 +453,10 @@ export class StaticNotebook extends Widget {
       case 'add':
         index = args.newIndex;
         // eslint-disable-next-line no-case-declarations
-        const insertType: InsertType = (args.oldIndex == -1) ? 'push' : 'insert';
+        const insertType: InsertType = args.oldIndex == -1 ? 'push' : 'insert';
         each(args.newValues, value => {
-            this._insertCell(index++, value, insertType);
-          });
+          this._insertCell(index++, value, insertType);
+        });
         break;
       case 'move':
         this._moveCell(args.oldIndex, args.newIndex);
@@ -502,7 +502,11 @@ export class StaticNotebook extends Widget {
   /**
    * Create a cell widget and insert into the notebook.
    */
-  private _insertCell(index: number, cell: ICellModel, insertType: InsertType): void {
+  private _insertCell(
+    index: number,
+    cell: ICellModel,
+    insertType: InsertType
+  ): void {
     let widget: Cell;
     switch (cell.type) {
       case 'code':
@@ -529,7 +533,7 @@ export class StaticNotebook extends Widget {
     ) {
       // We have an observer and we are have been asked to push (not to insert).
       // and we are above the number of cells to render directly, then
-      // we will add a placeholder and let the instersection observer or the 
+      // we will add a placeholder and let the instersection observer or the
       // idle browser render those placeholder cells.
       this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
       const placeholder = this._createPlaceholderCell(
@@ -560,7 +564,8 @@ export class StaticNotebook extends Widget {
   private _renderPlaceholderCells(deadline: any) {
     if (
       this._renderedCellsCount < this._cellsArray.length &&
-      this._renderedCellsCount >= this.notebookConfig.numberCellsToRenderDirectly
+      this._renderedCellsCount >=
+        this.notebookConfig.numberCellsToRenderDirectly
     ) {
       const index = this._renderedCellsCount;
       const cell = this._cellsArray[index];
@@ -568,14 +573,14 @@ export class StaticNotebook extends Widget {
     }
   }
 
-  private _renderPlaceholderCell(cell: Cell, index:number) {
+  private _renderPlaceholderCell(cell: Cell, index: number) {
     const pl = this.layout as PanelLayout;
     pl.removeWidgetAt(index);
     pl.insertWidget(index, cell);
     this._toRenderMap.delete(cell.model.id);
     this._incrementRenderedCount();
     this._placeholderCellRendered.emit(cell);
-  } 
+  }
 
   /**
    * Create a code cell widget from a code cell model.
@@ -917,19 +922,19 @@ export namespace StaticNotebook {
     recordTiming: boolean;
 
     /**
-     * Number of cells to render directly when virtual 
+     * Number of cells to render directly when virtual
      * notebook intersection observer is available.
      */
     numberCellsToRenderDirectly: number;
 
     /**
-     * Defines if the placeholder cells should be rendered 
+     * Defines if the placeholder cells should be rendered
      * when the browser is idle.
      */
     renderCellOnIdle: boolean;
 
     /**
-     * Defines the non-observed bottom margin for the 
+     * Defines the non-observed bottom margin for the
      * virtual notebook, set a positive number of pixels
      * to render cells below the visible view.
      */
