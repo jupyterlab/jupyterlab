@@ -517,7 +517,7 @@ export class StaticNotebook extends Widget {
     this._cellsArray.push(widget);
     if (
       this._observer &&
-      this._renderedCellsCount > this.notebookConfig.cellNumberToRenderDirectly
+      this._renderedCellsCount > this.notebookConfig.numberCellsToRenderDirectly
     ) {
       this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
       const placeholder = this._createPlaceholderCell(
@@ -546,7 +546,7 @@ export class StaticNotebook extends Widget {
   private _renderPlaceholderCells(deadline: any) {
     if (
       this._renderedCellsCount < this._cellsArray.length &&
-      this._renderedCellsCount >= this.notebookConfig.cellNumberToRenderDirectly
+      this._renderedCellsCount >= this.notebookConfig.numberCellsToRenderDirectly
     ) {
       const index = this._renderedCellsCount;
       const cell = this._cellsArray[index];
@@ -903,17 +903,21 @@ export namespace StaticNotebook {
     recordTiming: boolean;
 
     /**
-     * TODO(ECH)
+     * Number of cells to render directly when virtual 
+     * notebook intersection observer is available.
      */
-    cellNumberToRenderDirectly: number;
+    numberCellsToRenderDirectly: number;
 
     /**
-     * TODO(ECH)
+     * Defines if the placeholder cells should be rendered 
+     * when the browser is idle.
      */
     renderCellOnIdle: boolean;
 
     /**
-     * TODO(ECH)
+     * Defines the non-observed bottom margin for the 
+     * virtual notebook, set a positive number of pixels
+     *  to render cells below the visible view.
      */
     nonObservedBottomMargin: string;
   }
@@ -924,7 +928,7 @@ export namespace StaticNotebook {
     scrollPastEnd: true,
     defaultCell: 'code',
     recordTiming: false,
-    cellNumberToRenderDirectly: 10,
+    numberCellsToRenderDirectly: 10,
     renderCellOnIdle: true,
     nonObservedBottomMargin: '0px'
   };

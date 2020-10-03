@@ -642,7 +642,7 @@ function activateNotebookHandler(
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
       recordTiming: settings.get('recordTiming').composite as boolean,
-      cellNumberToRenderDirectly: settings.get('cellNumberToRenderDirectly')
+      numberCellsToRenderDirectly: settings.get('numberCellsToRenderDirectly')
         .composite as number,
       renderCellOnIdle: settings.get('renderCellOnIdle').composite as boolean,
       nonObservedBottomMargin: settings.get('nonObservedBottomMargin')

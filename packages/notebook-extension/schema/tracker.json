@@ -365,21 +365,21 @@
       "type": "boolean",
       "default": false
     },
-    "cellNumberToRenderDirectly": {
+    "numberCellsToRenderDirectly": {
       "title": "Number of cells to render directly",
-      "description": "Number of cells to render directly",
+      "description": "Define the number of cells to render directly when virtual notebook intersection observer is available",
       "type": "number",
       "default": 7
     },
     "renderCellOnIdle": {
       "title": "Render cell on browser idle time",
-      "description": "Render cell on browser idle time",
+      "description": "Defines if the placeholder cells should be rendered when the browser is idle",
       "type": "boolean",
       "default": true
     },
     "nonObservedBottomMargin": {
       "title": "Non-observed bottom margin",
-      "description": "Non-observed bottom margin",
+      "description": "Defines the non-observed bottom margin for the virtual notebook, set a positive number of pixels to render cells below the visible view",
       "type": "string",
       "default": "0px"
     }
