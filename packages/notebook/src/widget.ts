@@ -142,6 +142,11 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
  */
 const DRAG_THRESHOLD = 5;
 
+/*
+ * TODO(ECH)
+*/
+type InsertType = 'push' | 'insert' | 'set';
+
 /**
  * The interactivity modes for the notebook.
  */
@@ -429,7 +434,7 @@ export class StaticNotebook extends Widget {
       );
     }
     each(cells, (cell: ICellModel, i: number) => {
-      this._insertCell(i, cell);
+      this._insertCell(i, cell, 'set');
     });
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
@@ -447,9 +452,11 @@ export class StaticNotebook extends Widget {
     switch (args.type) {
       case 'add':
         index = args.newIndex;
+        // eslint-disable-next-line no-case-declarations
+        const insertType: InsertType = (args.oldIndex == -1) ? 'push' : 'insert';
         each(args.newValues, value => {
-          this._insertCell(index++, value);
-        });
+            this._insertCell(index++, value, insertType);
+          });
         break;
       case 'move':
         this._moveCell(args.oldIndex, args.newIndex);
@@ -482,7 +489,7 @@ export class StaticNotebook extends Widget {
           // Note: this ordering (insert then remove)
           // is important for getting the active cell
           // index for the editable notebook correct.
-          this._insertCell(index, value);
+          this._insertCell(index, value, 'set');
           this._removeCell(index + 1);
           index++;
         });
@@ -495,7 +502,7 @@ export class StaticNotebook extends Widget {
   /**
    * Create a cell widget and insert into the notebook.
    */
-  private _insertCell(index: number, cell: ICellModel): void {
+  private _insertCell(index: number, cell: ICellModel, insertType: InsertType): void {
     let widget: Cell;
     switch (cell.type) {
       case 'code':
@@ -517,8 +524,13 @@ export class StaticNotebook extends Widget {
     this._cellsArray.push(widget);
     if (
       this._observer &&
+      insertType === 'push' &&
       this._renderedCellsCount > this.notebookConfig.numberCellsToRenderDirectly
     ) {
+      // We have an observer and we are have been asked to push (not to insert).
+      // and we are above the number of cells to render directly, then
+      // we will add a placeholder and let the instersection observer or the 
+      // idle browser render those placeholder cells.
       this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
       const placeholder = this._createPlaceholderCell(
         cell as IRawCellModel,
@@ -530,6 +542,8 @@ export class StaticNotebook extends Widget {
       this._fullyRendered.emit(false);
       this._observer.observe(placeholder.node);
     } else {
+      // We have no intersection observer, or we insert, or we are below
+      // the number of cells to render directly, so we render directly.
       layout.insertWidget(index, widget);
       this._incrementRenderedCount();
       this.onCellInserted(index, widget);
@@ -917,10 +931,11 @@ export namespace StaticNotebook {
     /**
      * Defines the non-observed bottom margin for the 
      * virtual notebook, set a positive number of pixels
-     *  to render cells below the visible view.
+     * to render cells below the visible view.
      */
     nonObservedBottomMargin: string;
   }
+
   /**
    * Default configuration options for notebooks.
    */
