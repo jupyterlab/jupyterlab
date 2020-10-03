@@ -3,6 +3,7 @@ import { INotebookTracker } from '@jupyterlab/notebook';
 import { MarkdownCell } from '@jupyterlab/cells';
 import { CommandRegistry } from '@lumino/commands';
 import { IDisposable } from '@lumino/disposable';
+import { CodeMirrorEditor } from '@jupyterlab/codemirror';
 
 export async function setupKeymap(
   keyMap: string,
@@ -14,6 +15,7 @@ export async function setupKeymap(
   removeKeymaps.forEach(element => {
     element.dispose();
   });
+  let keymapRemoval: IDisposable[] = [];
   if (keyMap === 'vim') {
     // This setup for vim in the notebook is derived from extension built by
     // members of the community
@@ -24,7 +26,6 @@ export async function setupKeymap(
     // @ts-expect-error
     await import('codemirror/keymap/vim.js');
     const vim = (CodeMirror as any).Vim;
-    let vimRemoval: IDisposable[] = [];
     vim.defineMotion(
       'moveByLinesOrCell',
       (cm: any, head: any, motionArgs: any, vim: any) => {
@@ -102,7 +103,7 @@ export async function setupKeymap(
       void commands.execute('notebook:split-cell-at-cursor');
     });
     vim.mapCommand('-', 'action', 'splitCell', {}, { extra: 'normal' });
-    vimRemoval = [
+    keymapRemoval = [
       commands.addKeyBinding({
         selector: '.jp-Notebook.jp-mod-editMode',
         keys: ['Ctrl J'],
@@ -124,9 +125,131 @@ export async function setupKeymap(
         command: 'notebook:enter-command-mode'
       })
     ];
-    return vimRemoval;
+    return keymapRemoval;
+  } else if (keyMap === 'sublime') {
+    // The setup for sublime in the notebook is taken from
+    // https://github.com/ryantam626/jupyterlab_sublime
+    function editorExec(id: string) {
+      (notebookTracker.activeCell
+        ?.editor as CodeMirrorEditor).editor.execCommand(id);
+    }
+    keymapRemoval = [
+      // Manage Escape collision
+      // TODO: Check if use has Escape set for command mode
+      commands.addCommand('sublime:exit-editor', {
+        execute: () => {
+          editorExec('singleSelectionTop');
+          void commands.execute('notebook:enter-command-mode');
+        },
+        label: 'Exit Editor'
+      }),
+      commands.addKeyBinding({
+        command: 'sublime:exit-editor',
+        keys: ['Escape'],
+        selector: '.CodeMirror-focused'
+      }),
+
+      // Manage Ctrl-/ collision
+      commands.addCommand('sublime:toggle-comment-indented', {
+        execute: () => {
+          editorExec('toggleCommentIndented');
+        },
+        label: 'Split selection by line'
+      }),
+      commands.addKeyBinding({
+        command: 'sublime:toggle-comment-indented',
+        keys: ['Accel /'],
+        selector: '.CodeMirror-focused'
+      }),
+
+      // Manage Shift-Tab collision
+      commands.addCommand('sublime:indent-less-slash-tooltip', {
+        execute: () => {
+          if (
+            !this.tracker.activeCell.editor.host.classList.contains(
+              'jp-mod-completer-enabled'
+            )
+          ) {
+            editorExec('indentLess');
+          } else {
+            void commands.execute('tooltip:launch-notebook');
+          }
+        },
+        label: 'Indent less or tooltip'
+      }),
+      commands.addKeyBinding({
+        command: 'sublime:indent-less-slash-tooltip',
+        keys: ['Shift Tab'],
+        selector: '.CodeMirror-focused'
+      }),
+
+      // Manage Shift-Ctr-L collision
+      commands.addCommand('sublime:split-selection-by-lLine', {
+        execute: () => {
+          editorExec('splitSelectionByLine');
+        },
+        label: 'Split selection by line'
+      }),
+      commands.addKeyBinding({
+        command: 'sublime:split-selection-by-lLine',
+        keys: ['Accel Shift L'],
+        selector: '.CodeMirror-focused'
+      }),
+
+      // Manage Ctrl-M collision
+      commands.addCommand('sublime:go-to-bracket', {
+        execute: () => {
+          editorExec('goToBracket');
+        },
+        label: 'Go to bracket'
+      }),
+      commands.addKeyBinding({
+        command: 'sublime:go-to-bracket',
+        keys: ['Ctrl M'],
+        selector: '.CodeMirror-focused'
+      }),
+
+      // Manage Shift-Ctrl-D collision
+      commands.addCommand('sublime:duplicate-line', {
+        execute: () => {
+          editorExec('duplicateLine');
+        },
+        label: 'Duplicate line'
+      }),
+      commands.addKeyBinding({
+        command: 'sublime:duplicate-line',
+        keys: ['Accel Shift D'],
+        selector: '.CodeMirror-focused'
+      }),
+
+      // Repurpose Ctrl-Up
+      commands.addCommand('sublime:add-cursor-to-prev-line', {
+        execute: () => {
+          editorExec('addCursorToPrevLine');
+        },
+        label: 'Add cursor to previous line'
+      }),
+      commands.addKeyBinding({
+        command: 'sublime:add-cursor-to-prev-line',
+        keys: ['Ctrl ArrowUp'],
+        selector: '.CodeMirror-focused'
+      }),
+
+      // Repurpose Ctrl-Down
+      commands.addCommand('sublime:add-cursor-to-next-line', {
+        execute: () => {
+          editorExec('addCursorToNextLine');
+        },
+        label: 'Add cursor to next line'
+      }),
+      commands.addKeyBinding({
+        command: 'sublime:add-cursor-to-next-line',
+        keys: ['Ctrl ArrowDown'],
+        selector: '.CodeMirror-focused'
+      })
+    ];
+    return keymapRemoval;
   } else {
-    let keymapRemoval: IDisposable[] = [];
     return keymapRemoval;
   }
 }
