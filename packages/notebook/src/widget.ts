@@ -42,8 +42,6 @@ import { IRenderMimeRegistry } from '@jupyterlab/rendermime';
 
 import { INotebookModel } from './model';
 
-// import { Placedholder } from './placeholder';
-
 /**
  * The data attribute added to a widget that has an active kernel.
  */
