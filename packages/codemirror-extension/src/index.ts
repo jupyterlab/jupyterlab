@@ -25,6 +25,8 @@ import {
   ICodeMirror
 } from '@jupyterlab/codemirror';
 
+import { IDisposable } from '@lumino/disposable';
+
 import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 import { IEditorTracker, FileEditor } from '@jupyterlab/fileeditor';
@@ -190,6 +192,8 @@ function activateEditorCommands(
 
   let toggleComment = 'Ctrl-/';
   let toggleCommentMac = 'Cmd-/';
+  let removeKeymaps: IDisposable[] = [];
+
   /**
    * Update the setting values.
    */
@@ -197,7 +201,7 @@ function activateEditorCommands(
     settings: ISettingRegistry.ISettings
   ): Promise<void> {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
-    await setupKeymap(keyMap, commands, notebookTracker);
+    removeKeymaps = await setupKeymap(keyMap, commands, notebookTracker, removeKeymaps);
     theme = (settings.get('theme').composite as string | null) || theme;
     // Lazy loading of theme stylesheets
     if (theme !== 'jupyter' && theme !== 'default') {

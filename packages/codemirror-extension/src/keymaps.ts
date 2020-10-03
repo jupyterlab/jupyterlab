@@ -2,12 +2,18 @@ import CodeMirror from 'codemirror';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { MarkdownCell } from '@jupyterlab/cells';
 import { CommandRegistry } from '@lumino/commands';
+import { IDisposable } from '@lumino/disposable';
 
 export async function setupKeymap(
   keyMap: string,
   commands: CommandRegistry,
-  notebookTracker: INotebookTracker
-): Promise<void> {
+  notebookTracker: INotebookTracker,
+  removeKeymaps: IDisposable[]
+): Promise<IDisposable[]> {
+  // remove keymaps to make sure we don't mess with user Shortcuts
+  removeKeymaps.forEach(element => {
+    element.dispose();
+  });
   if (keyMap === 'vim') {
     // This setup for vim in the notebook is derived from extension built by
     // members of the community
@@ -18,6 +24,7 @@ export async function setupKeymap(
     // @ts-expect-error
     await import('codemirror/keymap/vim.js');
     const vim = (CodeMirror as any).Vim;
+    let vimRemoval: IDisposable[] = [];
     vim.defineMotion(
       'moveByLinesOrCell',
       (cm: any, head: any, motionArgs: any, vim: any) => {
@@ -95,31 +102,31 @@ export async function setupKeymap(
       void commands.execute('notebook:split-cell-at-cursor');
     });
     vim.mapCommand('-', 'action', 'splitCell', {}, { extra: 'normal' });
-    commands.addKeyBinding({
-      selector: '.jp-Notebook.jp-mod-editMode',
-      keys: ['Ctrl J'],
-      command: 'notebook:move-cursor-down'
-    });
-    commands.addKeyBinding({
-      selector: '.jp-Notebook.jp-mod-editMode',
-      keys: ['Ctrl K'],
-      command: 'notebook:move-cursor-up'
-    });
-    commands.addKeyBinding({
-      selector: '.jp-Notebook.jp-mod-editMode',
-      keys: ['Escape'],
-      command: 'codemirror:leave-vim-insert-mode'
-    });
-    commands.addKeyBinding({
-      selector: '.jp-Notebook.jp-mod-editMode',
-      keys: ['Shift Escape'],
-      command: 'notebook:enter-command-mode'
-    });
+    vimRemoval = [
+      commands.addKeyBinding({
+        selector: '.jp-Notebook.jp-mod-editMode',
+        keys: ['Ctrl J'],
+        command: 'notebook:move-cursor-down'
+      }),
+      commands.addKeyBinding({
+        selector: '.jp-Notebook.jp-mod-editMode',
+        keys: ['Ctrl K'],
+        command: 'notebook:move-cursor-up'
+      }),
+      commands.addKeyBinding({
+        selector: '.jp-Notebook.jp-mod-editMode',
+        keys: ['Escape'],
+        command: 'codemirror:leave-vim-insert-mode'
+      }),
+      commands.addKeyBinding({
+        selector: '.jp-Notebook.jp-mod-editMode',
+        keys: ['Shift Escape'],
+        command: 'notebook:enter-command-mode'
+      })
+    ];
+    return vimRemoval;
   } else {
-    commands.addKeyBinding({
-      selector: '.jp-Notebook.jp-mod-editMode',
-      keys: ['Escape'],
-      command: 'notebook:enter-command-mode'
-    });
+    let keymapRemoval: IDisposable[] = [];
+    return keymapRemoval;
   }
 }
