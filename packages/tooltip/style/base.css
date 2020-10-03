@@ -9,6 +9,7 @@
   font-size: var(--jp-ui-font-size0);
   box-shadow: var(--jp-elevation-z6);
   max-width: 750px;
+  max-height: 750px;
   z-index: 10001;
   padding: 4px;
   display: flex;
