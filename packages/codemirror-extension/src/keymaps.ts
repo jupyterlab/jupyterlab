@@ -114,6 +114,16 @@ export async function setupKeymap(
         keys: ['Ctrl K'],
         command: 'notebook:move-cursor-up'
       }),
+      commands.addCommand('codemirror:leave-vim-insert-mode', {
+        label: 'Leave VIM Insert Mode',
+        execute: args => {
+          const activeCell = notebookTracker.activeCell;
+          if (activeCell) {
+            let editor = activeCell.editor as CodeMirrorEditor;
+            (CodeMirror as any).Vim.handleKey(editor.editor, '<Esc>');
+          }
+        }
+      }),
       commands.addKeyBinding({
         selector: '.jp-Notebook.jp-mod-editMode',
         keys: ['Escape'],

@@ -201,7 +201,12 @@ function activateEditorCommands(
     settings: ISettingRegistry.ISettings
   ): Promise<void> {
     keyMap = (settings.get('keyMap').composite as string | null) || keyMap;
-    removeKeymaps = await setupKeymap(keyMap, commands, notebookTracker, removeKeymaps);
+    removeKeymaps = await setupKeymap(
+      keyMap,
+      commands,
+      notebookTracker,
+      removeKeymaps
+    );
     theme = (settings.get('theme').composite as string | null) || theme;
     // Lazy loading of theme stylesheets
     if (theme !== 'jupyter' && theme !== 'default') {
@@ -236,43 +241,53 @@ function activateEditorCommands(
   }
 
   /**
+   * Set the settings of an editor instance
+   */
+  function setEditorOptions(editor: CodeMirrorEditor) {
+    editor.setOption('keyMap', keyMap);
+    editor.setOption('theme', theme);
+    editor.setOption('lineWiseCopyCut', lineWiseCopyCut);
+    editor.setOption('selectionPointer', selectionPointer);
+    editor.setOption('styleActiveLine', styleActiveLine);
+    editor.setOption('styleSelectedText', styleSelectedText);
+    const extraKeys = editor.getOption('extraKeys') || {};
+    extraKeys[toggleComment] = 'toggleComment';
+    extraKeys[toggleCommentMac] = 'toggleComment';
+    editor.setOption('extraKeys', extraKeys);
+  }
+
+  /**
    * Update the settings of the current tracker instances.
    */
   function updateFileEditorTracker(): void {
     fileEditorTracker.forEach(widget => {
       if (widget.content.editor instanceof CodeMirrorEditor) {
-        const { editor } = widget.content;
-        editor.setOption('keyMap', keyMap);
-        editor.setOption('lineWiseCopyCut', lineWiseCopyCut);
+        const editor = widget.content.editor;
+        setEditorOptions(editor);
         editor.setOption('scrollPastEnd', scrollPastEnd);
-        editor.setOption('selectionPointer', selectionPointer);
-        editor.setOption('styleActiveLine', styleActiveLine);
-        editor.setOption('styleSelectedText', styleSelectedText);
-        editor.setOption('theme', theme);
-        let extraKeys = editor.getOption('extraKeys') as any;
-        extraKeys[toggleComment] = 'toggleComment';
-        extraKeys[toggleCommentMac] = 'toggleComment';
-        editor.setOption('extraKeys', extraKeys);
       }
     });
   }
 
   /**
-   * Update the settings of the current notebook tracker instances.
+   * Handle the settings of FileEditors
+   */
+  fileEditorTracker.widgetAdded.connect((sender, widget) => {
+    if (widget.content.editor instanceof CodeMirrorEditor) {
+      const editor = widget.content.editor;
+      setEditorOptions(editor);
+      editor.setOption('scrollPastEnd', scrollPastEnd);
+    }
+  });
+
+  /**
+   * Update the settings of the current Notebook instances
    */
   function updateNotebookTracker(): void {
     notebookTracker.forEach(widget => {
       widget.content.widgets.forEach(cell => {
         if (cell.inputArea.editor instanceof CodeMirrorEditor) {
-          const cm = cell.inputArea.editor.editor;
-          cm.setOption('keyMap', keyMap);
-          cm.setOption('theme', theme);
-          cm.setOption('styleActiveLine', styleActiveLine);
-          cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
-          let extraKeys = cm.getOption('extraKeys') as any;
-          extraKeys[toggleComment] = 'toggleComment';
-          extraKeys[toggleCommentMac] = 'toggleComment';
-          cm.setOption('extraKeys', extraKeys);
+          setEditorOptions(cell.inputArea.editor);
         }
       });
     });
@@ -291,16 +306,12 @@ function activateEditorCommands(
       });
       // connect to signal here to ensure vim keymap has
       // been imported in case we need it
+      /**
+      * Handle settings of Notebook cells
+      */
       notebookTracker.newCellCreated.connect((sender, cell) => {
         if (cell?.inputArea.editor instanceof CodeMirrorEditor) {
-          const editor = cell.inputArea.editor.editor;
-          editor.setOption('keyMap', keyMap);
-          editor.setOption('styleActiveLine', styleActiveLine);
-          editor.setOption('lineWiseCopyCut', lineWiseCopyCut);
-          let extraKeys = editor.getOption('extraKeys') as any;
-          extraKeys[toggleComment] = 'toggleComment';
-          extraKeys[toggleCommentMac] = 'toggleComment';
-          editor.setOption('extraKeys', extraKeys);
+          setEditorOptions(cell.inputArea.editor);
         }
       });
     })
@@ -310,48 +321,6 @@ function activateEditorCommands(
       updateNotebookTracker();
     });
 
-  /**
-   * Handle the settings of new widgets.
-   */
-  fileEditorTracker.widgetAdded.connect((sender, widget) => {
-    if (widget.content.editor instanceof CodeMirrorEditor) {
-      const { editor } = widget.content;
-      editor.setOption('keyMap', keyMap);
-      editor.setOption('lineWiseCopyCut', lineWiseCopyCut);
-      editor.setOption('selectionPointer', selectionPointer);
-      editor.setOption('scrollPastEnd', scrollPastEnd);
-      editor.setOption('styleActiveLine', styleActiveLine);
-      editor.setOption('styleSelectedText', styleSelectedText);
-      editor.setOption('theme', theme);
-    }
-  });
-
-  /**
-   * Handle the settings of new widgets.
-   */
-  notebookTracker.widgetAdded.connect((sender, widget) => {
-    widget.content.widgets.forEach(cell => {
-      if (cell.inputArea.editor instanceof CodeMirrorEditor) {
-        const cm = cell.inputArea.editor.editor;
-        // Do not set scrollPastEnd option.
-        cm.setOption('keyMap', keyMap);
-        cm.setOption('theme', theme);
-        cm.setOption('styleActiveLine', styleActiveLine);
-        cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
-      }
-    });
-  });
-
-  commands.addCommand('codemirror:leave-vim-insert-mode', {
-    label: 'Leave VIM Insert Mode',
-    execute: args => {
-      const activeCell = notebookTracker.activeCell;
-      if (activeCell) {
-        let editor = activeCell.editor as CodeMirrorEditor;
-        (CodeMirror as any).Vim.handleKey(editor.editor, '<Esc>');
-      }
-    }
-  });
 
   /**
    * A test for whether the tracker has an active widget.
