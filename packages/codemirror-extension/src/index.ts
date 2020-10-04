@@ -192,6 +192,7 @@ function activateEditorCommands(
 
   let toggleComment = 'Ctrl-/';
   let toggleCommentMac = 'Cmd-/';
+  let vimDisableCtrlC = true;
   let removeKeymaps: IDisposable[] = [];
 
   /**
@@ -238,6 +239,9 @@ function activateEditorCommands(
     toggleCommentMac =
       (settings.get('toggleCommentMac').composite as string) ??
       toggleCommentMac;
+    vimDisableCtrlC =
+      (settings.get('vim:CtrlC-to-copy').composite as boolean) ??
+      vimDisableCtrlC;
   }
 
   /**
@@ -253,6 +257,9 @@ function activateEditorCommands(
     const extraKeys = editor.getOption('extraKeys') || {};
     extraKeys[toggleComment] = 'toggleComment';
     extraKeys[toggleCommentMac] = 'toggleComment';
+    if (vimDisableCtrlC && keyMap === 'vim') {
+      extraKeys['Ctrl-C'] = false;
+    }
     editor.setOption('extraKeys', extraKeys);
   }
 
@@ -307,8 +314,8 @@ function activateEditorCommands(
       // connect to signal here to ensure vim keymap has
       // been imported in case we need it
       /**
-      * Handle settings of Notebook cells
-      */
+       * Handle settings of Notebook cells
+       */
       notebookTracker.newCellCreated.connect((sender, cell) => {
         if (cell?.inputArea.editor instanceof CodeMirrorEditor) {
           setEditorOptions(cell.inputArea.editor);
@@ -320,7 +327,6 @@ function activateEditorCommands(
       updateFileEditorTracker();
       updateNotebookTracker();
     });
-
 
   /**
    * A test for whether the tracker has an active widget.
