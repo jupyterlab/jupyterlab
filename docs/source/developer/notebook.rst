@@ -126,6 +126,9 @@ list. An OutputArea uses a notebook-specific
 `RenderMimeRegistry <https://jupyterlab.github.io/jupyterlab/classes/_rendermime_src_index_.rendermimeregistry.html>`__
 object to render ``display_data`` output messages.
 
+Virtual Notebook
+''''''''''''''''
+
 The cells are rendered based on a *Virtual Notebook* logic. A minimun number of cells will be rendered directly, then
 an intersection observer will render any cells being in the observed area (default is the complete notebook panel),
 and then any other non-rendered cells will be rendered when the browser is idle. This ensure that the user has
