@@ -641,7 +641,12 @@ function activateNotebookHandler(
     factory.notebookConfig = {
       scrollPastEnd: settings.get('scrollPastEnd').composite as boolean,
       defaultCell: settings.get('defaultCell').composite as nbformat.CellType,
-      recordTiming: settings.get('recordTiming').composite as boolean
+      recordTiming: settings.get('recordTiming').composite as boolean,
+      numberCellsToRenderDirectly: settings.get('numberCellsToRenderDirectly')
+        .composite as number,
+      renderCellOnIdle: settings.get('renderCellOnIdle').composite as boolean,
+      nonObservedBottomMargin: settings.get('nonObservedBottomMargin')
+        .composite as string
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
       .composite as boolean;
