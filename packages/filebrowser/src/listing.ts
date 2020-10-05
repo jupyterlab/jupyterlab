@@ -1959,7 +1959,7 @@ export namespace DirListing {
       if (text) {
         const indices = !model.indices ? [] : model.indices;
         let highlightedName = StringExt.highlight(model.name, indices, h.mark);
-        VirtualDOM.render(h.div(highlightedName), text);
+        VirtualDOM.render(h.span(highlightedName), text);
       }
 
       let modText = '';

@@ -37,7 +37,7 @@ from jupyterlab.coreconfig import _get_default_core_data, CoreConfig
 
 
 # The regex for expecting the webpack output.
-WEBPACK_EXPECT = re.compile(r'.*/index.out.js')
+WEBPACK_EXPECT = re.compile(r'.*theme-light-extension/style/index.css')
 
 # The dev mode directory.
 DEV_DIR = osp.abspath(os.path.join(HERE, '..', 'dev_mode'))
@@ -663,7 +663,10 @@ class _AppHandler(object):
         # Build the app.
         if parts[1] != 'nobuild':
             dedupe_yarn(staging, self.logger)
-            ret = self._run(['node', YARN_PATH, 'run', command], cwd=staging)
+            starting_dir = os.getcwd()
+            os.chdir(staging)
+            ret = self._run(['node', YARN_PATH, 'run', command])
+            os.chdir(starting_dir)
             if ret != 0:
                 msg = 'JupyterLab failed to build'
                 self.logger.debug(msg)

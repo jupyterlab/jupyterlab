@@ -32,6 +32,7 @@ async function runTest(fn: any): Promise<void> {
  * @param retries The number of retries
  * @param wait The time to wait in milliseconds between retries
  */
+/* eslint-disable jest/no-export */
 export function flakyIt(name: string, fn: any, retries = 3, wait = 1000): void {
   test(name, async () => {
     let latestError;
@@ -47,6 +48,7 @@ export function flakyIt(name: string, fn: any, retries = 3, wait = 1000): void {
     throw latestError;
   });
 }
+/* eslint-enable jest/no-export */
 
 flakyIt.only = it.only;
 flakyIt.skip = it.skip;

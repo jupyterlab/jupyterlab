@@ -49,10 +49,10 @@ jobs:
         env:
           GROUP: ${{ matrix.group }}
         run: |
-          bash ./scripts/ci_install.sh
+          cmd .\scripts\ci_install.bat
 
       - name: Run test ${{ matrix.group }}
         env:
           GROUP: ${{ matrix.group }}
         run: |
-          bash ./scripts/ci_script.sh
+          cmd .\scripts\ci_script.bat

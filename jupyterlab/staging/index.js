@@ -82,11 +82,11 @@ async function main() {
     PageConfig.getOption('federated_extensions')
   );
 
-  const dynamicExtensionPromises = [];
-  const dynamicMimeExtensionPromises = [];
-  const dynamicStylePromises = [];
+  const federatedExtensionPromises = [];
+  const federatedMimeExtensionPromises = [];
+  const federatedStylePromises = [];
 
-  // We first load all dynamic components so that the shared module
+  // We first load all federated components so that the shared module
   // deduplication can run and figure out which shared modules from all
   // components should be actually used.
   const extensions = await Promise.allSettled(extension_data.map( async data => {
@@ -106,13 +106,13 @@ async function main() {
 
     const data = p.value;
     if (data.extension) {
-      dynamicExtensionPromises.push(createModule(data.name, data.extension));
+      federatedExtensionPromises.push(createModule(data.name, data.extension));
     }
     if (data.mimeExtension) {
-      dynamicMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
+      federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
     if (data.style) {
-      dynamicStylePromises.push(createModule(data.name, data.style));
+      federatedStylePromises.push(createModule(data.name, data.style));
     }
   });
 
@@ -158,9 +158,9 @@ async function main() {
   }
   {{/each}}
 
-  // Add the dynamic mime extensions.
-  const dynamicMimeExtensions = await Promise.allSettled(dynamicMimeExtensionPromises);
-  dynamicMimeExtensions.forEach(p => {
+  // Add the federated mime extensions.
+  const federatedMimeExtensions = await Promise.allSettled(federatedMimeExtensionPromises);
+  federatedMimeExtensions.forEach(p => {
     if (p.status === "fulfilled") {
       for (let plugin of activePlugins(p.value)) {
         mimeExtensions.push(plugin);
@@ -181,9 +181,9 @@ async function main() {
   }
   {{/each}}
 
-  // Add the dynamic extensions.
-  const dynamicExtensions = await Promise.allSettled(dynamicExtensionPromises);
-  dynamicExtensions.forEach(p => {
+  // Add the federated extensions.
+  const federatedExtensions = await Promise.allSettled(federatedExtensionPromises);
+  federatedExtensions.forEach(p => {
     if (p.status === "fulfilled") {
       for (let plugin of activePlugins(p.value)) {
         register.push(plugin);
@@ -193,8 +193,8 @@ async function main() {
     }
   });
 
-  // Load all dynamic component styles and log errors for any that do not
-  (await Promise.allSettled(dynamicStylePromises)).filter(({status}) => status === "rejected").forEach(({reason}) => {
+  // Load all federated component styles and log errors for any that do not
+  (await Promise.allSettled(federatedStylePromises)).filter(({status}) => status === "rejected").forEach(({reason}) => {
     console.error(reason);
   });
 

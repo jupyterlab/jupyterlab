@@ -13,67 +13,67 @@ milestone on GitHub for the full list of pull requests and issues closed.
 User-facing changes
 ^^^^^^^^^^^^^^^^^^^
 
+Extensions can be installed without building JupyterLab with NodeJS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+In JupyterLab 3.0, a new recommended way of distributing and installing extensions as Python pip or conda packages is available. Installing such extensions does not require rebuilding JupyterLab and does not require having NodeJS installed. The previous way of distributing extensions as npm packages requiring rebuilding JupyterLab is still available as well. See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#extensions>`__ for more details.
 
-Extensions are now Python packages and do not require ``node``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-In JupyterLab 3.0, extensions are typically pip or conda packages that are dynamically loaded by the application (no more nodejs build step needed). See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#extensions>`__ for more details.
-
-The JupyterLab interface is now translatable
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The JupyterLab interface supports multiple languages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 JupyterLab now provides the ability to set the display language of the user interface.
 See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/language.html>`__ for more details.
 
 
-Added a visual debugger
-~~~~~~~~~~~~~~~~~~~~~~~
-JupyterLab now ships with a Debugger front-end by default.  See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/debugger.html>`__ for more details.
+A new visual debugger
+~~~~~~~~~~~~~~~~~~~~~
+
+JupyterLab now ships with a debugger front-end by default, available for kernels that support the new debugging protocol.  See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/debugger.html>`__ for more details.
 
 
 Improvements to Single Document Mode and Mobile 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The single-document user interface is now more streamlined. JupyterLab now supports showing the current file in use in the browser URL bar, similar to the classic Jupyter Notebook.
 
-TODO
 
 Table of Contents is now in core
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO
+The popular Table of Contents extension is now part of core JupyterLab. This core extension makes it easy to see an outline view of notebooks and other documents.
 
 
 Visual filter in file browser 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO
+The file browser now has a filter input which filters the list of files using the same fuzzy matching as the command palette.
 
 For Developers
 ^^^^^^^^^^^^^^
 
-Dynamic Extensions
-~~~~~~~~~~~~~~~~~~
-Users will typically consume dynamic extensions, which are Python packages with static assets built using ``JupyterLab``.
-See the updated APOD tutorial for the workflow of creating a dynamic extension from scratch.
+Federated Extensions
+~~~~~~~~~~~~~~~~~~~~
+
+Users will typically consume federated extensions, which are Python packages with static assets built using ``JupyterLab``.
+See the updated APOD tutorial for the workflow of creating a federated extension from scratch.
 For existing extensions, there is a new ``python -m jupyterlab.upgrade_extension`` script that
 can be used to upgrade extensions.  The script will update the relevant dependencies and add the 
 boilerplate to create the Python package.  For extensions that already contained Python packages (typically server extensions),
 the files are not overwritten, and some manual copying of content is required.  See the `example <https://github.com/jupyterlab/extension-examples/pull/119>`__, 
 which used this script heavily.  There are two highlighted commits that demonstrate upgrading a server extension.
 
-* Clean up dynamic extension install and upgrade (`#8974 <https://github.com/jupyterlab/jupyterlab/pull/8974>`__)
+* Clean up federated extension install and upgrade (`#8974 <https://github.com/jupyterlab/jupyterlab/pull/8974>`__)
 * Add ``--development`` and ``--source-map`` flags for building extensions. (`#8961 <https://github.com/jupyterlab/jupyterlab/pull/8961>`__, `#8952 <https://github.com/jupyterlab/jupyterlab/issues/8952>`__)
 * Add extension upgrade script (`#8950 <https://github.com/jupyterlab/jupyterlab/pull/8950>`__, `#8870 <https://github.com/jupyterlab/jupyterlab/issues/8870>`__, `#8869 <https://github.com/jupyterlab/jupyterlab/issues/8869>`__)
 * Improved handling of disabled extensions (`#8944 <https://github.com/jupyterlab/jupyterlab/pull/8944>`__, `#7481 <https://github.com/jupyterlab/jupyterlab/issues/7481>`__)
 * Add development mode to lab extension build scripts (`#8918 <https://github.com/jupyterlab/jupyterlab/pull/8918>`__)
-* Pull dynamic extension loading data from the webpack compilation (`#8913 <https://github.com/jupyterlab/jupyterlab/pull/8913>`__, `#8842 <https://github.com/jupyterlab/jupyterlab/issues/8842>`__)
+* Pull federated extension loading data from the webpack compilation (`#8913 <https://github.com/jupyterlab/jupyterlab/pull/8913>`__, `#8842 <https://github.com/jupyterlab/jupyterlab/issues/8842>`__)
 * Update labextension build cli to include a parameter for setting the webpack publicpath option (`#8911 <https://github.com/jupyterlab/jupyterlab/pull/8911>`__)
 * Update apod extension tutorial (`#8905 <https://github.com/jupyterlab/jupyterlab/pull/8905>`__, `#8859 <https://github.com/jupyterlab/jupyterlab/issues/8859>`__)
 * Let webpack automatically determine the required version of dependencies (`#8875 <https://github.com/jupyterlab/jupyterlab/pull/8875>`__)
-* Fix rebuild of dynamic extension and add discovery metadata to schema (`#8874 <https://github.com/jupyterlab/jupyterlab/pull/8874>`__)
+* Fix rebuild of federated extension and add discovery metadata to schema (`#8874 <https://github.com/jupyterlab/jupyterlab/pull/8874>`__)
 * Fix build issues with publicpath (`#8871 <https://github.com/jupyterlab/jupyterlab/pull/8871>`__)
 * Split buildutils into buildutils and builder (`#8863 <https://github.com/jupyterlab/jupyterlab/pull/8863>`__, `#8857 <https://github.com/jupyterlab/jupyterlab/issues/8857>`__)
 * Dynamically set public path in generated extensions according to page config (`#8861 <https://github.com/jupyterlab/jupyterlab/pull/8861>`__, `#8827 <https://github.com/jupyterlab/jupyterlab/issues/8827>`__)
-* Clean up dynamic extension cli (`#8855 <https://github.com/jupyterlab/jupyterlab/pull/8855>`__, `#46 <https://github.com/jupyterlab/jupyterlab-module-federation/issues/46>`__)
+* Clean up federated extension cli (`#8855 <https://github.com/jupyterlab/jupyterlab/pull/8855>`__, `#46 <https://github.com/jupyterlab/jupyterlab-module-federation/issues/46>`__)
 * Fix app example. (`#8852 <https://github.com/jupyterlab/jupyterlab/pull/8852>`__)
 * Add lumino dependencies to buildutils so the phosphor webpack aliasing works (`#8850 <https://github.com/jupyterlab/jupyterlab/pull/8850>`__, `#8822 <https://github.com/jupyterlab/jupyterlab/issues/8822>`__)
 * Add another federated example package. (`#8847 <https://github.com/jupyterlab/jupyterlab/pull/8847>`__, `#5 <https://github.com/jupyterlab/jupyterlab-module-federation/issues/5>`__)

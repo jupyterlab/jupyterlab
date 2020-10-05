@@ -9,8 +9,6 @@ import { ISignal, Signal } from '@lumino/signaling';
 
 import { ILabShell } from '@jupyterlab/application';
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
-
 import { IRunningSessions, IRunningSessionManagers } from '@jupyterlab/running';
 
 import { ITranslator } from '@jupyterlab/translation';
@@ -41,10 +39,8 @@ class OpenTabsSignaler {
    * @param widget A widget whose title may change.
    */
   addWidget(widget: Widget): void {
-    if (widget instanceof MainAreaWidget) {
-      widget.content.title.changed.connect(this._emitTabsChanged, this);
-      this._widgets.push(widget);
-    }
+    widget.title.changed.connect(this._emitTabsChanged, this);
+    this._widgets.push(widget);
   }
 
   /**
@@ -52,7 +48,7 @@ class OpenTabsSignaler {
    */
   private _emitTabsChanged(): void {
     this._widgets.forEach(widget => {
-      widget.content.title.changed.disconnect(this._emitTabsChanged, this);
+      widget.title.changed.disconnect(this._emitTabsChanged, this);
     });
     this._widgets = [];
     this._tabsChanged.emit(void 0);
@@ -60,7 +56,7 @@ class OpenTabsSignaler {
 
   private _tabsChanged = new Signal<this, void>(this);
   private _labShell: ILabShell;
-  private _widgets: MainAreaWidget[] = [];
+  private _widgets: Widget[] = [];
 }
 
 /**
@@ -113,14 +109,8 @@ export function addOpenTabsSessionManager(
       this._widget.close();
     }
     icon() {
-      let icon = fileIcon;
-      if (this._widget instanceof MainAreaWidget) {
-        const widgetIcon = this._widget.title.icon;
-        if (icon instanceof LabIcon) {
-          icon = widgetIcon as LabIcon;
-        }
-      }
-      return icon;
+      const widgetIcon = this._widget.title.icon;
+      return widgetIcon instanceof LabIcon ? widgetIcon : fileIcon;
     }
     label() {
       return this._widget.title.label;

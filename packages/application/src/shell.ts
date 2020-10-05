@@ -1,8 +1,6 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { MainAreaWidget } from '@jupyterlab/apputils';
-
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 
 import { classes, DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
@@ -268,7 +266,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // initially hiding header and bottom panel when no elements inside,
     // and the title panel as we only show that in single document mode.
     this._headerPanel.hide();
-    this._titleHandler.panel.hide();
     this._bottomPanel.hide();
 
     this.layout = rootLayout;
@@ -293,10 +290,57 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     // Setup single-document-mode title bar
     const titleWidget = (this._titleWidget = new Widget());
     titleWidget.id = 'jp-title-panel-title';
+    titleWidget.node.appendChild(document.createElement('h1'));
     this.add(titleWidget, 'title');
-    if (this._dockPanel.mode == 'multiple-document') {
+
+    if (this._dockPanel.mode === 'multiple-document') {
       this._titleHandler.panel.hide();
     }
+
+    // Set up single-document mode switch in menu bar
+    const spacer = new Widget();
+    spacer.id = 'jp-top-spacer';
+    this.add(spacer, 'top', { rank: 1000 });
+
+    // switch accessibility refs:
+    // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/Switch_role
+    // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Accessibility_concerns
+    const sdmSwitch = document.createElement('button');
+    sdmSwitch.className = 'jp-slider jp-slider-sdm';
+    sdmSwitch.setAttribute('role', 'switch');
+    sdmSwitch.value = 'single-document';
+    sdmSwitch.title = 'Single-Document Mode';
+    this.modeChanged.connect((_, mode) => {
+      sdmSwitch.setAttribute(
+        'aria-checked',
+        mode === 'single-document' ? 'true' : 'false'
+      );
+    });
+    sdmSwitch.setAttribute(
+      'aria-checked',
+      this.mode === 'single-document' ? 'true' : 'false'
+    );
+    sdmSwitch.addEventListener('click', () => {
+      this.mode =
+        sdmSwitch.getAttribute('aria-checked') === 'true'
+          ? 'multiple-document'
+          : 'single-document';
+    });
+
+    const sdmLabel = document.createElement('label');
+    sdmLabel.className = 'jp-slider-label';
+    sdmLabel.textContent = 'Single-Document Mode';
+    sdmLabel.title = 'Single-Document Mode';
+    const sdmTrack = document.createElement('div');
+    sdmTrack.className = 'jp-slider-track';
+    sdmTrack.setAttribute('aria-hidden', 'true');
+    sdmSwitch.appendChild(sdmLabel);
+    sdmSwitch.appendChild(sdmTrack);
+
+    const sdmSwitchWidget = new Widget();
+    sdmSwitchWidget.node.appendChild(sdmSwitch);
+    sdmSwitchWidget.id = 'jp-single-document-mode';
+    this.add(sdmSwitchWidget, 'top', { rank: 1010 });
 
     // Wire up signals to update the title panel of the single document mode to
     // follow the title of this.currentWidget
@@ -305,19 +349,13 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       let oldValue = args.oldValue;
 
       // Stop watching the title of the previously current widget
-      if (oldValue && oldValue instanceof MainAreaWidget) {
-        oldValue.content.title.changed.disconnect(
-          this._updateTitlePanelTitle,
-          this
-        );
+      if (oldValue) {
+        oldValue.title.changed.disconnect(this._updateTitlePanelTitle, this);
       }
 
       // Start watching the title of the new current widget
-      if (newValue && newValue instanceof MainAreaWidget) {
-        newValue.content.title.changed.connect(
-          this._updateTitlePanelTitle,
-          this
-        );
+      if (newValue) {
+        newValue.title.changed.connect(this._updateTitlePanelTitle, this);
         this._updateTitlePanelTitle();
       }
 
@@ -822,10 +860,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   private _updateTitlePanelTitle() {
     let current = this.currentWidget;
-    if (current && current instanceof MainAreaWidget) {
-      this._titleWidget.node.innerHTML =
-        '<h1>' + current.content.title.label + '</h1>';
-    }
+    const h1 = this._titleWidget.node.children[0] as HTMLHeadElement;
+    h1.textContent = current ? current.title.label : '';
+    h1.title = current ? current.title.caption : '';
   }
 
   /**

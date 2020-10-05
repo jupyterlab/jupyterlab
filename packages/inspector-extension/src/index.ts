@@ -72,6 +72,7 @@ const inspector: JupyterFrontEndPlugin<IInspector> = {
         });
         inspector.id = 'jp-inspector';
         inspector.title.label = label;
+        inspector.title.icon = inspectorIcon;
         void tracker.add(inspector);
         source = source && !source.isDisposed ? source : null;
         inspector.content.source = source;

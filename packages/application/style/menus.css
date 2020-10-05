@@ -23,6 +23,10 @@
   font-size: var(--jp-ui-font-size1);
 }
 
+.lm-MenuBar:hover {
+  overflow-x: auto;
+}
+
 .lm-MenuBar-menu {
   transform: translateY(calc(-2 * var(--jp-border-width)));
 }
@@ -31,7 +35,8 @@
   padding: 0px 8px;
   border-left: var(--jp-border-width) solid transparent;
   border-right: var(--jp-border-width) solid transparent;
-  line-height: var(--jp-private-menubar-height);
+  border-top: var(--jp-border-width) solid transparent;
+  line-height: calc(var(--jp-private-menubar-height) - var(--jp-border-width));
 }
 
 .lm-MenuBar-item.lm-mod-active {
@@ -44,6 +49,12 @@
   border-left: var(--jp-border-width) solid var(--jp-border-color1);
   border-right: var(--jp-border-width) solid var(--jp-border-color1);
   box-shadow: var(--jp-elevation-z6);
+}
+
+.jp-LabShell[data-shell-mode='single-document']
+  .lm-MenuBar.lm-mod-active
+  .lm-MenuBar-item.lm-mod-active {
+  border-top: var(--jp-border-width) solid var(--jp-border-color1);
 }
 
 .lm-MenuBar-item.lm-mod-disabled {

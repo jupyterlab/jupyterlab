@@ -25,7 +25,8 @@ import {
   Debugger,
   IDebugger,
   IDebuggerConfig,
-  IDebuggerSources
+  IDebuggerSources,
+  IDebuggerSidebar
 } from '@jupyterlab/debugger';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -331,30 +332,79 @@ const variables: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * The main debugger UI plugin.
+ * Debugger sidebar provider plugin.
  */
-const main: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/debugger-extension:main',
+const sidebar: JupyterFrontEndPlugin<IDebugger.ISidebar> = {
+  id: '@jupyterlab/debugger-extension:sidebar',
+  provides: IDebuggerSidebar,
   requires: [IDebugger, IEditorServices, ITranslator],
-  optional: [
-    ILabShell,
-    ILayoutRestorer,
-    ICommandPalette,
-    ISettingRegistry,
-    IThemeManager,
-    IDebuggerSources
-  ],
+  optional: [IThemeManager, ISettingRegistry],
   autoStart: true,
   activate: async (
     app: JupyterFrontEnd,
     service: IDebugger,
     editorServices: IEditorServices,
     translator: ITranslator,
+    themeManager: IThemeManager | null,
+    settingRegistry: ISettingRegistry | null
+  ): Promise<IDebugger.ISidebar> => {
+    const { commands } = app;
+    const CommandIDs = Debugger.CommandIDs;
+
+    const callstackCommands = {
+      registry: commands,
+      continue: CommandIDs.debugContinue,
+      terminate: CommandIDs.terminate,
+      next: CommandIDs.next,
+      stepIn: CommandIDs.stepIn,
+      stepOut: CommandIDs.stepOut
+    };
+
+    const sidebar = new Debugger.Sidebar({
+      service,
+      callstackCommands,
+      editorServices,
+      themeManager,
+      translator
+    });
+
+    if (settingRegistry) {
+      const setting = await settingRegistry.load(main.id);
+      const updateSettings = (): void => {
+        const filters = setting.get('variableFilters').composite as {
+          [key: string]: string[];
+        };
+        const kernel = service.session?.connection?.kernel?.name ?? '';
+        if (kernel && filters[kernel]) {
+          sidebar.variables.filter = new Set<string>(filters[kernel]);
+        }
+      };
+      updateSettings();
+      setting.changed.connect(updateSettings);
+      service.sessionChanged.connect(updateSettings);
+    }
+
+    return sidebar;
+  }
+};
+
+/**
+ * The main debugger UI plugin.
+ */
+const main: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/debugger-extension:main',
+  requires: [IDebugger, IEditorServices, ITranslator, IDebuggerSidebar],
+  optional: [ILabShell, ILayoutRestorer, ICommandPalette, IDebuggerSources],
+  autoStart: true,
+  activate: async (
+    app: JupyterFrontEnd,
+    service: IDebugger,
+    editorServices: IEditorServices,
+    translator: ITranslator,
+    sidebar: IDebugger.ISidebar,
     labShell: ILabShell | null,
     restorer: ILayoutRestorer | null,
     palette: ICommandPalette | null,
-    settingRegistry: ISettingRegistry | null,
-    themeManager: IThemeManager | null,
     debuggerSources: IDebugger.ISources | null
   ): Promise<void> => {
     const trans = translator.load('jupyterlab');
@@ -442,40 +492,6 @@ const main: JupyterFrontEndPlugin<void> = {
         await service.stepOut();
       }
     });
-
-    const callstackCommands = {
-      registry: commands,
-      continue: CommandIDs.debugContinue,
-      terminate: CommandIDs.terminate,
-      next: CommandIDs.next,
-      stepIn: CommandIDs.stepIn,
-      stepOut: CommandIDs.stepOut
-    };
-
-    const sidebar = new Debugger.Sidebar({
-      service,
-      callstackCommands,
-      editorServices,
-      themeManager,
-      translator
-    });
-
-    if (settingRegistry) {
-      const setting = await settingRegistry.load(main.id);
-      const updateSettings = (): void => {
-        const filters = setting.get('variableFilters').composite as {
-          [key: string]: string[];
-        };
-        const kernel = service.session?.connection?.kernel?.name ?? '';
-        if (kernel && filters[kernel]) {
-          sidebar.variables.filter = new Set<string>(filters[kernel]);
-        }
-      };
-
-      updateSettings();
-      setting.changed.connect(updateSettings);
-      service.sessionChanged.connect(updateSettings);
-    }
 
     service.eventMessage.connect((_, event): void => {
       commands.notifyCommandChanged();
@@ -596,6 +612,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   files,
   notebooks,
   variables,
+  sidebar,
   main,
   sources,
   configuration

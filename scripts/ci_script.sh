@@ -12,6 +12,7 @@ fi
 
 
 if [[ $GROUP == python ]]; then
+    jupyter lab build --debug
     # Run the python tests
     py.test
 fi
@@ -105,7 +106,7 @@ if [[ $GROUP == integrity2 ]]; then
     jlpm run build:storybook
 
     # Make sure we have CSS that can be converted with postcss
-    jlpm global add postcss-cli
+    jlpm global add postcss postcss-cli
 
     jlpm config set prefix ~/.yarn
     ~/.yarn/bin/postcss packages/**/style/*.css --dir /tmp
@@ -189,7 +190,7 @@ if [[ $GROUP == usage ]]; then
     cat labextensions | grep "@jupyterlab/mock-extension.*enabled.*OK"
     jupyter labextension build extension --static-url /foo/
     jupyter labextension disable @jupyterlab/mock-extension --debug
-    jupyter labextension enable @jupyterlab/mock-extension --debug 
+    jupyter labextension enable @jupyterlab/mock-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
     jupyter labextension list 1>labextensions 2>&1
     # bail if mock-extension was listed
@@ -335,4 +336,9 @@ if [[ $GROUP == nonode ]]; then
     sleep 5
     kill $TASK_PID
     wait $TASK_PID
+
+    # Make sure we can install the tarball
+    virtualenv -p $(which python3) test_sdist
+    ./test_sdist/bin/pip install dist/*.tar.gz
+    ./test_sdist/bin/python -m jupyterlab.browser_check --no-chrome-test
 fi

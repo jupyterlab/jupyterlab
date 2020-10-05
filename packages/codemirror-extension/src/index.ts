@@ -19,7 +19,8 @@ import {
   editorServices,
   EditorSyntaxStatus,
   CodeMirrorEditor,
-  Mode
+  Mode,
+  ICodeMirror
 } from '@jupyterlab/codemirror';
 
 import { IDocumentWidget } from '@jupyterlab/docregistry';
@@ -46,6 +47,13 @@ namespace CommandIDs {
 
   export const goToLine = 'codemirror:go-to-line';
 }
+
+/** The CodeMirror singleton. */
+const codemirrorSingleton: JupyterFrontEndPlugin<ICodeMirror> = {
+  id: '@jupyterlab/codemirror-extension:codemirror',
+  provides: ICodeMirror,
+  activate: activateCodeMirror
+};
 
 /**
  * The editor services.
@@ -116,7 +124,8 @@ export const editorSyntaxStatus: JupyterFrontEndPlugin<void> = {
 const plugins: JupyterFrontEndPlugin<any>[] = [
   commands,
   services,
-  editorSyntaxStatus
+  editorSyntaxStatus,
+  codemirrorSingleton
 ];
 export default plugins;
 
@@ -133,6 +142,22 @@ function activateEditorServices(app: JupyterFrontEnd): IEditorServices {
     void app.commands.execute('docmanager:save');
   };
   return editorServices;
+}
+
+/**
+ * Simplest implementation of the CodeMirror singleton provider.
+ */
+class CodeMirrorSingleton implements ICodeMirror {
+  get CodeMirror() {
+    return CodeMirror;
+  }
+}
+
+/**
+ * Set up the CodeMirror singleton.
+ */
+function activateCodeMirror(app: JupyterFrontEnd): ICodeMirror {
+  return new CodeMirrorSingleton();
 }
 
 /**
@@ -391,7 +416,7 @@ function activateEditorCommands(
     ['the-matrix', trans.__('the-matrix')],
     ['xq-light', trans.__('xq-light')],
     ['zenburn', trans.__('zenburn')]
-  ].forEach((name, displayName) =>
+  ].forEach(([name, displayName]) =>
     themeMenu.addItem({
       command: CommandIDs.changeTheme,
       args: { theme: name, displayName: displayName }
@@ -404,7 +429,7 @@ function activateEditorCommands(
     ['sublime', trans.__('sublime')],
     ['vim', trans.__('vim')],
     ['emacs', trans.__('emacs')]
-  ].forEach((name, displayName) => {
+  ].forEach(([name, displayName]) => {
     keyMapMenu.addItem({
       command: CommandIDs.changeKeyMap,
       args: { keyMap: name, displayName: displayName }

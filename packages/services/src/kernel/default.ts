@@ -1216,6 +1216,12 @@ export class KernelConnection implements Kernel.IKernelConnection {
       'channels?session_id=' + encodeURIComponent(this._clientId)
     );
 
+    // If token authentication is in use.
+    const token = settings.token;
+    if (settings.appendToken && token !== '') {
+      url = url + `&token=${encodeURIComponent(token)}`;
+    }
+
     this._ws = new settings.WebSocket(url);
 
     // Ensure incoming binary messages are not Blobs
