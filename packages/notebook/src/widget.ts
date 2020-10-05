@@ -143,7 +143,7 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
 const DRAG_THRESHOLD = 5;
 
 /*
- * TODO(ECH)
+ * The type of cell insert provided via signal.
  */
 type InsertType = 'push' | 'insert' | 'set';
 
