@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/settingeditor-extension",
-  "version": "3.0.0-rc.2",
+  "version": "3.0.0-rc.4",
   "description": "JupyterLab - Setting Editor Extension",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -36,15 +36,15 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/application": "^3.0.0-rc.2",
-    "@jupyterlab/apputils": "^3.0.0-rc.2",
-    "@jupyterlab/codeeditor": "^3.0.0-rc.2",
-    "@jupyterlab/rendermime": "^3.0.0-rc.2",
-    "@jupyterlab/settingeditor": "^3.0.0-rc.2",
-    "@jupyterlab/settingregistry": "^3.0.0-rc.2",
-    "@jupyterlab/statedb": "^3.0.0-rc.2",
-    "@jupyterlab/translation": "^3.0.0-rc.2",
-    "@jupyterlab/ui-components": "^3.0.0-rc.2",
+    "@jupyterlab/application": "^3.0.0-rc.4",
+    "@jupyterlab/apputils": "^3.0.0-rc.4",
+    "@jupyterlab/codeeditor": "^3.0.0-rc.4",
+    "@jupyterlab/rendermime": "^3.0.0-rc.4",
+    "@jupyterlab/settingeditor": "^3.0.0-rc.4",
+    "@jupyterlab/settingregistry": "^3.0.0-rc.4",
+    "@jupyterlab/statedb": "^3.0.0-rc.4",
+    "@jupyterlab/translation": "^3.0.0-rc.4",
+    "@jupyterlab/ui-components": "^3.0.0-rc.4",
     "@lumino/disposable": "^1.4.3"
   },
   "devDependencies": {

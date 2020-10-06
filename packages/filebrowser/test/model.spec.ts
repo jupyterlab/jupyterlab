@@ -360,11 +360,8 @@ describe('filebrowser/model', () => {
         expect(contents.name).toBe(fname);
         const promise = model.upload(file);
         await dismissDialog();
-        try {
-          await promise;
-        } catch (e) {
-          expect(e).toBe('File not uploaded');
-        }
+
+        await expect(promise).rejects.toBe('File not uploaded');
       });
 
       it('should emit the fileChanged signal', async () => {
@@ -397,12 +394,10 @@ describe('filebrowser/model', () => {
         it('should not upload large file', async () => {
           const fname = UUID.uuid4() + '.html';
           const file = new File([new ArrayBuffer(LARGE_FILE_SIZE + 1)], fname);
-          try {
-            await model.upload(file);
-            throw new Error('Upload should have failed');
-          } catch (err) {
-            expect(err).toBe(`Cannot upload file (>15 MB). ${fname}`);
-          }
+
+          await expect(model.upload(file)).rejects.toBe(
+            `Cannot upload file (>15 MB). ${fname}`
+          );
         });
 
         afterAll(() => {
