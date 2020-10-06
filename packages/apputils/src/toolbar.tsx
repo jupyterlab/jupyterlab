@@ -790,8 +790,10 @@ namespace Private {
 
       // set the icon
       if (this._isBusy(status)) {
+        LabIcon.remove(this.node);
         circleIcon.element(circleIconProps);
       } else {
+        LabIcon.remove(this.node);
         circleEmptyIcon.element(circleIconProps);
       }
     }
