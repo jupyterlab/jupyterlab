@@ -23,7 +23,8 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "style/*.css"
+    "style/*.css",
+    "typings/codemirror/*.d.ts"
   ],
   "scripts": {
     "build": "tsc -b",
