@@ -59,7 +59,6 @@ enum T {
   V3 = 'variable-3'
 }
 
-
 /**
  * Simple mode states from CodeMirror demo:
  * from https://codemirror.net/demo/simplemode.html
