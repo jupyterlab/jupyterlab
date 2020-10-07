@@ -15,15 +15,6 @@ function fakeMode(name: string) {
   };
 }
 
-function fakeSimpleMode(name: string) {
-  return {
-    mode: name,
-    ext: [name],
-    mime: `text/${name}`,
-    name: name.toUpperCase()
-  };
-}
-
 /**
  * State names used in simple mode.
  */
