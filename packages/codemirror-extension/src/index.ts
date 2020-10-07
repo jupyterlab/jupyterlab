@@ -186,6 +186,8 @@ function activateEditorCommands(
   } = CodeMirrorEditor.defaultConfig;
 
   let toggleComment = 'Accel-/';
+  let indent = 'Tab';
+  let deindent = 'Shift-Tab';
   /**
    * Update the setting values.
    */
@@ -229,6 +231,8 @@ function activateEditorCommands(
       (settings.get('lineWiseCopyCut').composite as boolean) ?? lineWiseCopyCut;
     toggleComment =
       (settings.get('toggleComment').composite as string) ?? toggleComment;
+    indent = (settings.get('indent').composite as string) ?? indent;
+    deindent = (settings.get('deindent').composite as string) ?? deindent;
   }
 
   /**
@@ -237,6 +241,8 @@ function activateEditorCommands(
   function updateExtraKeys(editor: CodeMirrorEditor) {
     let extraKeys = editor.getOption('extraKeys') as any;
     extraKeys[toggleComment] = 'toggleComment';
+    extraKeys[indent] = 'indentMoreOrinsertTab';
+    extraKeys[deindent] = 'indentLess';
     editor.setOption('extraKeys', extraKeys);
   }
   /**

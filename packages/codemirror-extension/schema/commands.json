@@ -51,6 +51,18 @@
       "title": "Block Comment",
       "description": "Key command for block comment",
       "default": "Accel-/"
+    },
+    "indent": {
+      "type": "string",
+      "title": "Keyboard shortcut to indent",
+      "description": "Value is a string defining the keybinding",
+      "default": "Tab"
+    },
+    "deindent": {
+      "type": "string",
+      "title": "Keyboard shortcut to deindent",
+      "description": "Value is a string defining the keybinding",
+      "default": "Shift-Tab"
     }
   },
   "type": "object"

@@ -24,17 +24,13 @@ export class CodeMirrorEditorFactory implements IEditorFactoryService {
       extraKeys: {
         'Cmd-Right': 'goLineRight',
         End: 'goLineRight',
-        'Cmd-Left': 'goLineLeft',
-        Tab: 'indentMoreOrinsertTab',
-        'Shift-Tab': 'indentLess'
+        'Cmd-Left': 'goLineLeft'
       },
       ...defaults
     };
     this.documentCodeMirrorConfig = {
       ...CodeMirrorEditor.defaultConfig,
       extraKeys: {
-        Tab: 'indentMoreOrinsertTab',
-        'Shift-Tab': 'indentLess',
         'Shift-Enter': () => {
           /* no-op */
         }
