@@ -29,7 +29,7 @@ export type CodeMirrorHandler = (
 ) => void;
 type WrappedHandler = (instance: CodeMirror.Editor, ...args: any[]) => void;
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 class DocDispatcher implements CodeMirror.Doc {
   constructor(
@@ -349,10 +349,10 @@ export class CodeMirrorVirtualEditor
 
   addPanel(
     node: HTMLElement,
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     options?: CodeMirror.ShowPanelOptions
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
   ): CodeMirror.Panel {
     return undefined;
@@ -435,7 +435,7 @@ export class CodeMirrorVirtualEditor
 
   getDoc(): CodeMirror.Doc {
     let dummy_doc = new DocDispatcher(this, this.adapter);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return dummy_doc;
   }
@@ -546,7 +546,6 @@ export class CodeMirrorVirtualEditor
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/interface-name-prefix
 export interface CodeMirrorVirtualEditor extends CodeMirror.Editor {}
 
 export const CODEMIRROR_VIRTUAL_EDITOR: JupyterFrontEndPlugin<void> = {

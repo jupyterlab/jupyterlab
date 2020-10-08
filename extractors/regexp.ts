@@ -42,7 +42,7 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
       let position_shift: CodeEditor.IPosition = null;
       let foreign_code_fragment = matched_string.replace(
         this.expression,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         this.options.extract_to_foreign
       );
@@ -50,7 +50,7 @@ export class RegExpForeignCodeExtractor implements IForeignCodeExtractor {
       if (typeof this.options.extract_arguments !== 'undefined') {
         prefix = matched_string.replace(
           this.expression,
-          // eslint-disable-next-line @typescript-eslint/ban-ts-ignore
+          // eslint-disable-next-line @typescript-eslint/ban-ts-comment
           // @ts-ignore
           this.options.extract_arguments
         );

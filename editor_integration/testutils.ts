@@ -178,7 +178,8 @@ export namespace IFeatureTestEnvironment {
 type TestEnvironmentConstructor = new (...args: any[]) => ITestEnvironment;
 
 function FeatureSupport<TBase extends TestEnvironmentConstructor>(Base: TBase) {
-  return class FeatureTestEnvironment extends Base
+  return class FeatureTestEnvironment
+    extends Base
     implements IFeatureTestEnvironment {
     _connections: Map<CodeMirrorIntegration, LSPConnection>;
 
@@ -331,7 +332,7 @@ export class NotebookFeatureTestEnvironment extends FeatureSupport(
 
 export function code_cell(
   source: string[] | string,
-  metadata: object = { trusted: false }
+  metadata: Partial<nbformat.ICodeCellMetadata> = { trusted: false }
 ) {
   return {
     cell_type: 'code',

@@ -100,7 +100,7 @@ export abstract class CodeMirrorIntegration
   // TODO use better type constraints for connection event names and for responses
   protected readonly connection_handlers: Map<
     string,
-    (response: object) => void
+    (response: Record<string, unknown>) => void
   >;
   protected readonly wrapper_handlers: IHTMLEventMap;
   protected wrapper: HTMLElement;
