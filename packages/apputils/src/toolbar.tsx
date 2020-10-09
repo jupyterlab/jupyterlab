@@ -764,6 +764,10 @@ namespace Private {
       this.addClass(TOOLBAR_KERNEL_STATUS_CLASS);
       this._onStatusChanged(sessionContext);
       sessionContext.statusChanged.connect(this._onStatusChanged, this);
+      sessionContext.connectionStatusChanged.connect(
+        this._onStatusChanged,
+        this
+      );
     }
 
     /**
@@ -776,25 +780,21 @@ namespace Private {
 
       const status = sessionContext.kernelDisplayStatus;
 
+      const circleIconProps: LabIcon.IProps = {
+        container: this.node,
+        title: this._trans.__('Kernel %1', Text.titleCase(status)),
+        stylesheet: 'toolbarButton',
+        alignSelf: 'normal',
+        height: '24px'
+      };
+
       // set the icon
       if (this._isBusy(status)) {
-        circleIcon.element({
-          container: this.node,
-          title: this._trans.__('Kernel %1', Text.titleCase(status)),
-
-          stylesheet: 'toolbarButton',
-          alignSelf: 'normal',
-          height: '24px'
-        });
+        LabIcon.remove(this.node);
+        circleIcon.element(circleIconProps);
       } else {
-        circleEmptyIcon.element({
-          container: this.node,
-          title: this._trans.__('Kernel %1', Text.titleCase(status)),
-
-          stylesheet: 'toolbarButton',
-          alignSelf: 'normal',
-          height: '24px'
-        });
+        LabIcon.remove(this.node);
+        circleEmptyIcon.element(circleIconProps);
       }
     }
 
@@ -807,7 +807,9 @@ namespace Private {
         status === 'starting' ||
         status === 'terminating' ||
         status === 'restarting' ||
-        status === 'initializing'
+        status === 'initializing' ||
+        status === 'connecting' ||
+        status === 'unknown'
       );
     }
 
