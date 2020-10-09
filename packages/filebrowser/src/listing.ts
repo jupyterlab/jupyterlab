@@ -128,6 +128,11 @@ const NAME_ID_CLASS = 'jp-id-name';
 const MODIFIED_ID_CLASS = 'jp-id-modified';
 
 /**
+ * The class name added to the narrow column header cell.
+ */
+const NARROW_ID_CLASS = 'jp-id-narrow';
+
+/**
  * The mime type for a contents drag object.
  */
 const CONTENTS_MIME = 'application/x-jupyter-icontents';
@@ -1776,11 +1781,15 @@ export namespace DirListing {
       translator = translator || nullTranslator;
       const trans = translator.load('jupyterlab');
       const name = this._createHeaderItemNode(trans.__('Name'));
+      const narrow = document.createElement('div');
       const modified = this._createHeaderItemNode(trans.__('Last Modified'));
       name.classList.add(NAME_ID_CLASS);
       name.classList.add(SELECTED_CLASS);
       modified.classList.add(MODIFIED_ID_CLASS);
+      narrow.classList.add(NARROW_ID_CLASS);
+      narrow.textContent = '...';
       node.appendChild(name);
+      node.appendChild(narrow);
       node.appendChild(modified);
 
       // set the initial caret icon
