@@ -106,12 +106,16 @@ fs.writeFileSync(entryPoint, bootstrap);
 // Set up variables for the watch mode ignore plugins
 const watched = {};
 const ignoreCache = Object.create(null);
+let watchNodeModules = false;
 Object.keys(jlab.linkedPackages).forEach(function (name) {
   if (name in watched) {
     return;
   }
   const localPkgPath = require.resolve(plib.join(name, 'package.json'));
   watched[name] = plib.dirname(localPkgPath);
+  if (localPkgPath.indexOf('node_modules') !== -1) {
+    watchNodeModules = true;
+  }
 });
 
 // Set up source-map-loader to look in watched lib dirs
@@ -244,6 +248,13 @@ module.exports = [
     plugins
   })
 ].concat(extraConfig);
+
+// Needed to watch changes in linked extensions in node_modules
+// (jupyter lab --watch)
+// See https://github.com/webpack/webpack/issues/11612
+if (watchNodeModules) {
+  module.exports[0].snapshot = { managedPaths: [] };
+}
 
 const logPath = plib.join(buildDir, 'build_log.json');
 fs.writeFileSync(logPath, JSON.stringify(module.exports, null, '  '));
