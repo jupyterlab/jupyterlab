@@ -8,7 +8,8 @@
   border: var(--jp-border-width) solid var(--jp-border-color1);
   font-size: var(--jp-ui-font-size0);
   box-shadow: var(--jp-elevation-z6);
-  max-width: 650px;
+  max-width: 750px;
+  max-height: 350px;
   z-index: 10001;
   padding: 4px;
   display: flex;
