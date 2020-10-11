@@ -174,6 +174,44 @@ export class StaticNotebook extends Widget {
     this.notebookConfig =
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._mimetypeService = options.mimeTypeService;
+    // Section for the virtual-notebook behavior.
+    this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
+    this._cellsArray = new Array<Cell>();
+    if ('IntersectionObserver' in window) {
+      this._observer = new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach(o => {
+            if (o.isIntersecting) {
+              observer.unobserve(o.target);
+              const ci = this._toRenderMap.get(o.target.id);
+              if (ci) {
+                const { cell, index } = ci;
+                this._renderPlaceholderCell(cell, index);
+              }
+            }
+          });
+        },
+        {
+          root: this.node,
+          threshold: 1,
+          rootMargin: `${this.notebookConfig.observedTopMargin} 0px ${this.notebookConfig.observedBottomMargin} 0px`
+        }
+      );
+    }
+  }
+
+  /**
+   * A signal emitted when the notebook is fully rendered.
+   */
+  get fullyRendered(): ISignal<this, boolean> {
+    return this._fullyRendered;
+  }
+
+  /**
+   * A signal emitted when the a placeholder cell is rendered.
+   */
+  get placeholderCellRendered(): ISignal<this, Cell> {
+    return this._placeholderCellRendered;
   }
 
   /**
@@ -520,6 +558,31 @@ export class StaticNotebook extends Widget {
   }
 
   /**
+   * Create a placeholder cell widget from a raw cell model.
+   */
+  private _createPlaceholderCell(model: IRawCellModel, index: number): RawCell {
+    const contentFactory = this.contentFactory;
+    const editorConfig = this.editorConfig.raw;
+    const options = {
+      editorConfig,
+      model,
+      contentFactory,
+      updateEditorOnShow: false,
+      placeholder: true
+    };
+    const cell = this.contentFactory.createRawCell(options, this);
+    cell.node.innerHTML = `
+      <div class="jp-Cell-Placeholder">
+        <div class="jp-Cell-Placeholder-wrapper">
+        </div>
+      </div>`;
+    cell.inputHidden = true;
+    cell.syncCollapse = true;
+    cell.syncEditable = true;
+    return cell;
+  }
+
+  /**
    * Create a raw cell widget from a raw cell model.
    */
   private _createRawCell(model: IRawCellModel): RawCell {
@@ -766,6 +829,32 @@ export namespace StaticNotebook {
      * Should timing be recorded in metadata
      */
     recordTiming: boolean;
+
+    /**
+     * Number of cells to render directly when virtual
+     * notebook intersection observer is available.
+     */
+    numberCellsToRenderDirectly: number;
+
+    /**
+     * Defines if the placeholder cells should be rendered
+     * when the browser is idle.
+     */
+    renderCellOnIdle: boolean;
+
+    /**
+     * Defines the observed top margin for the
+     * virtual notebook, set a positive number of pixels
+     * to render cells below the visible view.
+     */
+    observedTopMargin: string;
+
+    /**
+     * Defines the observed bottom margin for the
+     * virtual notebook, set a positive number of pixels
+     * to render cells below the visible view.
+     */
+    observedBottomMargin: string;
   }
   /**
    * Default configuration options for notebooks.
@@ -773,7 +862,11 @@ export namespace StaticNotebook {
   export const defaultNotebookConfig: INotebookConfig = {
     scrollPastEnd: true,
     defaultCell: 'code',
-    recordTiming: false
+    recordTiming: false,
+    numberCellsToRenderDirectly: 10,
+    renderCellOnIdle: true,
+    observedTopMargin: '1000px',
+    observedBottomMargin: '1000px'
   };
 
   /**

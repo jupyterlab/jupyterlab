@@ -364,6 +364,30 @@
       "description": "Should timing data be recorded in cell metadata",
       "type": "boolean",
       "default": false
+    },
+    "numberCellsToRenderDirectly": {
+      "title": "Number of cells to render directly",
+      "description": "Define the number of cells to render directly when virtual notebook intersection observer is available",
+      "type": "number",
+      "default": 7
+    },
+    "renderCellOnIdle": {
+      "title": "Render cell on browser idle time",
+      "description": "Defines if the placeholder cells should be rendered when the browser is idle",
+      "type": "boolean",
+      "default": true
+    },
+    "observedTopMargin": {
+      "title": "Observed top margin",
+      "description": "Defines the observed top margin for the virtual notebook, set a positive number of pixels to render cells above the visible view",
+      "type": "string",
+      "default": "1000px"
+    },
+    "observedBottomMargin": {
+      "title": "Observed bottom margin",
+      "description": "Defines the observed bottom margin for the virtual notebook, set a positive number of pixels to render cells below the visible view",
+      "type": "string",
+      "default": "1000px"
     }
   },
   "additionalProperties": false,
