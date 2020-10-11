@@ -645,7 +645,8 @@ function activateNotebookHandler(
       numberCellsToRenderDirectly: settings.get('numberCellsToRenderDirectly')
         .composite as number,
       renderCellOnIdle: settings.get('renderCellOnIdle').composite as boolean,
-      nonObservedBottomMargin: settings.get('nonObservedBottomMargin')
+      observedTopMargin: settings.get('observedTopMargin').composite as string,
+      observedBottomMargin: settings.get('observedBottomMargin')
         .composite as string
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
