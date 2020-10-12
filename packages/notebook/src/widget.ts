@@ -180,25 +180,52 @@ export class StaticNotebook extends Widget {
       options.notebookConfig || StaticNotebook.defaultNotebookConfig;
     this._mimetypeService = options.mimeTypeService;
     // Section for the virtual-notebook behavior.
-    this._toRenderMap = new Map<string, { index: number; cell: Cell }>();
+    this._toRenderMap = new Map<
+      string,
+      { index: number; isRendered: boolean; placeholder: Cell; cell: Cell }
+    >();
     this._cellsArray = new Array<Cell>();
     if ('IntersectionObserver' in window) {
       this._observer = new IntersectionObserver(
         (entries, observer) => {
           entries.forEach(o => {
-            if (o.isIntersecting) {
-              observer.unobserve(o.target);
-              const ci = this._toRenderMap.get(o.target.id);
-              if (ci) {
-                const { cell, index } = ci;
-                this._renderPlaceholderCell(cell, index);
+            const ci = this._toRenderMap.get(o.target.id);
+            if (ci) {
+              const { index, isRendered, placeholder, cell } = ci;
+              if (o.isIntersecting && !isRendered) {
+                observer.unobserve(o.target);
+                const pl = this.layout as PanelLayout;
+                pl.removeWidgetAt(index);
+                pl.insertWidget(index, cell);
+                this.onCellInserted(index, cell);
+                this._toRenderMap.set(cell.model.id, {
+                  index: index,
+                  isRendered: true,
+                  placeholder: placeholder,
+                  cell: cell
+                });
+                observer.observe(cell.node);
+              }
+              if (!o.isIntersecting && isRendered) {
+                observer.unobserve(o.target);
+                const pl = this.layout as PanelLayout;
+                pl.removeWidgetAt(index);
+                pl.insertWidget(index, placeholder);
+                this.onCellInserted(index, placeholder);
+                this._toRenderMap.set(cell.model.id, {
+                  index: index,
+                  isRendered: false,
+                  placeholder: placeholder,
+                  cell: cell
+                });
+                observer.observe(placeholder.node);
               }
             }
           });
         },
         {
           root: this.node,
-          threshold: 1,
+          threshold: 1,  // 0 ??
           rootMargin: `${this.notebookConfig.observedTopMargin} 0px ${this.notebookConfig.observedBottomMargin} 0px`
         }
       );
@@ -522,6 +549,7 @@ export class StaticNotebook extends Widget {
         widget = this._createRawCell(cell as IRawCellModel);
     }
     widget.addClass(NB_CELL_CLASS);
+    widget.node.id = widget.model.id;
 
     const layout = this.layout as PanelLayout;
     this._cellsArray.push(widget);
@@ -534,12 +562,17 @@ export class StaticNotebook extends Widget {
       // and we are above the number of cells to render directly, then
       // we will add a placeholder and let the instersection observer or the
       // idle browser render those placeholder cells.
-      this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
       const placeholder = this._createPlaceholderCell(
         cell as IRawCellModel,
         index
       );
       placeholder.node.id = widget.model.id;
+      this._toRenderMap.set(widget.model.id, {
+        index: index,
+        isRendered: false,
+        placeholder: placeholder,
+        cell: widget
+      });
       layout.insertWidget(index, placeholder);
       this.onCellInserted(index, placeholder);
       this._fullyRendered.emit(false);
@@ -551,15 +584,16 @@ export class StaticNotebook extends Widget {
       this._incrementRenderedCount();
       this.onCellInserted(index, widget);
     }
-
+    /*
     if (this._observer && this.notebookConfig.renderCellOnIdle) {
       const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
       (window as any).requestIdleCallback(renderPlaceholderCells, {
         timeout: 1000
       });
     }
+*/
   }
-
+  /*
   private _renderPlaceholderCells(deadline: any) {
     if (
       this._renderedCellsCount < this._cellsArray.length &&
@@ -580,7 +614,7 @@ export class StaticNotebook extends Widget {
     this._incrementRenderedCount();
     this._placeholderCellRendered.emit(cell);
   }
-
+*/
   /**
    * Create a code cell widget from a code cell model.
    */
@@ -779,7 +813,10 @@ export class StaticNotebook extends Widget {
   private _placeholderCellRendered = new Signal<this, Cell>(this);
   private _observer: IntersectionObserver;
   private _renderedCellsCount = 0;
-  private _toRenderMap: Map<string, { index: number; cell: Cell }>;
+  private _toRenderMap: Map<
+    string,
+    { index: number; isRendered: boolean; placeholder: Cell; cell: Cell }
+  >;
   private _cellsArray: Array<Cell>;
 }
 

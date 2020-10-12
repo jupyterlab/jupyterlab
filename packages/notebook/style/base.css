@@ -277,7 +277,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-Cell-Placeholder {
-  /*  height: 200px !important; */
+  height: 0px !important;
   padding-left: 55px;
 }
 
