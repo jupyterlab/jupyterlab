@@ -142,7 +142,7 @@ async def run_async_process(cmd, **kwargs):
             **kwargs)
     stdout, stderr = await proc.communicate()
     if proc.returncode != 0:
-        raise RuntimeError(cmd + ' exited with ' + str(proc.returncode))
+        raise RuntimeError(str(cmd) + ' exited with ' + str(proc.returncode))
     return stdout, stderr
 
 

@@ -21,12 +21,9 @@ async function main() {
   const handleMessage = async msg => {
     const text = msg.text();
     if (msg.type() === 'error') {
-      console.log(`ERROR>> ${text}`);
-      // console.dir(msg);
       errored = true;
-    } else {
-      console.log(`>> ${text}`);
     }
+    console.log(msg.type(), '>>', text);
     const lower = text.toLowerCase();
     if (lower === 'example started!' || lower === 'test complete!') {
       await browser.close();
@@ -36,6 +33,11 @@ async function main() {
       }
       console.info('Example test complete!');
       return;
+    } else {
+      if (errored) {
+        console.error('\n\n***\nExample test failed!\n***\n\n');
+        process.exit(1);
+      }
     }
   };
 
