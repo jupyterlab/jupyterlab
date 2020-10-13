@@ -1,3 +1,4 @@
 jupyter-server-proxy
 matplotlib
 vega-datasets
+xeus-python
