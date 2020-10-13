@@ -1,6 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
+import { init } from './utils';
+
+init();
+
 import { act } from 'react-dom/test-utils';
 
 import { CodeEditorWrapper } from '@jupyterlab/codeeditor';
