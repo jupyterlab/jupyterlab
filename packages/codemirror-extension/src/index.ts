@@ -151,6 +151,13 @@ class CodeMirrorSingleton implements ICodeMirror {
   get CodeMirror() {
     return CodeMirror;
   }
+
+  async ensureVimKeymap() {
+    if (!("Vim" in (CodeMirror as any))){
+      // @ts-expect-error
+      await import('codemirror/keymap/vim.js');
+    }
+  }
 }
 
 /**
