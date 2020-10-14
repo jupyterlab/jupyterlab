@@ -30,6 +30,58 @@ Then at the root folder of the extension, run:
 
    python -m jupyterlab.upgrade_extension .
 
+The upgrade script creates the necessary files for packaging the JupyterLab extension as a Python package, such as
+``setup.py`` and ``pyproject.toml``.
+
+The upgrade script also updates the dependencies in ``package.json`` to the ``^3.0.0`` packages. Here is an example diff:
+
+.. code:: diff
+
+   index 6f1562f..3fcdf37 100644
+   --- a/package.json
+   +++ b/package.json
+   @@ -29,9 +29,13 @@
+      "scripts": {
+   -    "build": "tsc",
+   -    "build:labextension": "npm run clean:labextension && mkdirp myextension/labextension && cd myextension/labextension && npm pack ../..",
+   -    "clean": "rimraf lib tsconfig.tsbuildinfo",
+   +    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
+   +    "build:prod": "jlpm run build:lib && jlpm run build:labextension",
+   +    "build:lib": "tsc",
+   +    "build:labextension": "jupyter labextension build .",
+   +    "build:labextension:dev": "jupyter labextension build --development True .",
+   +    "clean": "rimraf lib tsconfig.tsbuildinfo myextension/labextension",
+   +    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
+      "clean:labextension": "rimraf myextension/labextension",
+      "eslint": "eslint . --ext .ts,.tsx --fix",
+      "eslint:check": "eslint . --ext .ts,.tsx",
+   @@ -59,12 +63,12 @@
+      ]
+      },
+      "dependencies": {
+   -    "@jupyterlab/application": "^2.0.0",
+   -    "@jupyterlab/apputils": "^2.0.0",
+   -    "@jupyterlab/observables": "^3.0.0",
+   +    "@jupyterlab/builder": "^3.0.0",
+   +    "@jupyterlab/application": "^3.0.0",
+   +    "@jupyterlab/apputils": "^3.0.0",
+   +    "@jupyterlab/observables": "^3.0.0",
+      "@lumino/algorithm": "^1.2.3",
+      "@lumino/commands": "^1.10.1",
+      "@lumino/disposable": "^1.3.5",
+   @@ -99,6 +103,13 @@
+   -    "typescript": "~3.8.3"
+   +    "typescript": "~4.0.1"
+      },
+      "jupyterlab": {
+   -    "extension": "lib/plugin"
+   +    "extension": "lib/plugin",
+   +    "outputDir": "myextension/labextension/"
+      }
+   }
+
+
+On the diff above, we see that additional development scripts are also added, as they are used by the new extension system workflow.
 
 Publishing the extension to PyPI and conda-forge
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
