@@ -730,25 +730,21 @@ namespace Private {
 
       const status = sessionContext.kernelDisplayStatus;
 
+      const circleIconProps: LabIcon.IProps = {
+        container: this.node,
+        title: `Kernel ${Text.titleCase(status)}`,
+        stylesheet: 'toolbarButton',
+        alignSelf: 'normal',
+        height: '24px'
+      };
+
       // set the icon
       if (this._isBusy(status)) {
-        circleIcon.element({
-          container: this.node,
-          title: `Kernel ${Text.titleCase(status)}`,
-
-          stylesheet: 'toolbarButton',
-          alignSelf: 'normal',
-          height: '24px'
-        });
+        LabIcon.remove(this.node);
+        circleIcon.element(circleIconProps);
       } else {
-        circleEmptyIcon.element({
-          container: this.node,
-          title: `Kernel ${Text.titleCase(status)}`,
-
-          stylesheet: 'toolbarButton',
-          alignSelf: 'normal',
-          height: '24px'
-        });
+        LabIcon.remove(this.node);
+        circleEmptyIcon.element(circleIconProps);
       }
     }
 
@@ -761,7 +757,9 @@ namespace Private {
         status === 'starting' ||
         status === 'terminating' ||
         status === 'restarting' ||
-        status === 'initializing'
+        status === 'initializing' ||
+        status === 'connecting' ||
+        status === 'unknown'
       );
     }
   }
