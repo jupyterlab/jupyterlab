@@ -58,9 +58,12 @@ export namespace URLExt {
     const slashes = colon && header![3];
 
     // Construct the URL prefix.
-    const prefix = shorthand
-      ? '//'
-      : [protocol, colon, slashes].filter(str => str).join('');
+    let prefix = [protocol, colon, slashes].filter(str => str).join('');
+
+    // Handle relative and shorthand urls
+    if (top.indexOf('/') === 0) {
+      prefix = shorthand ? '//' : '';
+    }
 
     // Construct the URL body omitting the prefix of the top value.
     const body = [top.indexOf(prefix) === 0 ? top.replace(prefix, '') : top]
