@@ -63,8 +63,8 @@ Workflow for extension authors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Use the ``cookiecutter`` to create the extension
 - Run ``jupyter labextension develop`` to build and symlink the files
-- Run ``jupyter labextension watch`` to start watching
-- Run ``jupyter lab``
+- Run ``jlpm run watch`` to start watching
+- Run ``jupyter lab --watch``
 - Make changes to source
 - Refresh the application page
 - When finished, publish the package to ``pypi``/``conda``
