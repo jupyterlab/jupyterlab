@@ -5,8 +5,23 @@ JupyterLab 2.x to 3.x Extension Migration Guide
 
 This is a migration guide for updating extensions that support JupyterLab 2.x to work in JupyterLab 3.x.
 
-Upgrading Library Versions
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Upgrading library versions manually
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To update the extensions so it is compatible with the 3.0 release, update the compatibility
+range of the ``@jupyterlab`` dependencies in the ``package.json``. The diff should be similar to:
+
+.. code:: diff
+
+   index 6f1562f..3fcdf37 100644
+   --- a/package.json
+   +++ b/package.json
+      "dependencies": {
+   -    "@jupyterlab/application": "^2.0.0",
+   +    "@jupyterlab/application": "^3.0.0",
+
+Upgrading library versions using the upgrade script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 JupyterLab 3.0 provides a script to upgrade an existing extension to use the new extension system and packaging.
 
@@ -86,4 +101,7 @@ On the diff above, we see that additional development scripts are also added, as
 Publishing the extension to PyPI and conda-forge
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-TODO
+Starting from JupyterLab 3.0, extensions can be distributed as a Python package.
+
+The extension tutorial provides explanations to package the extension so it can be
+published on PyPI and conda forge: :ref:`extension_tutorial_publish`.

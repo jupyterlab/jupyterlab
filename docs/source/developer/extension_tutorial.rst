@@ -934,6 +934,9 @@ You should see a fresh JupyterLab browser tab appear. When it does,
 execute the *Random Astronomy Picture* command to check that your extension
 works.
 
+
+.. _extension_tutorial_publish:
+
 Publishing your extension
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
