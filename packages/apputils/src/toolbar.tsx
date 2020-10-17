@@ -8,6 +8,7 @@ import {
   circleIcon,
   classes,
   LabIcon,
+  offlineBoltIcon,
   refreshIcon,
   stopIcon
 } from '@jupyterlab/ui-components';
@@ -789,28 +790,24 @@ namespace Private {
       };
 
       // set the icon
-      if (this._isBusy(status)) {
-        LabIcon.remove(this.node);
-        circleIcon.element(circleIconProps);
-      } else {
-        LabIcon.remove(this.node);
-        circleEmptyIcon.element(circleIconProps);
-      }
-    }
-
-    /**
-     * Check if status should be shown as busy.
-     */
-    private _isBusy(status: ISessionContext.KernelDisplayStatus): boolean {
-      return (
+      LabIcon.remove(this.node);
+      if (
         status === 'busy' ||
         status === 'starting' ||
         status === 'terminating' ||
         status === 'restarting' ||
-        status === 'initializing' ||
+        status === 'initializing'
+      ) {
+        circleIcon.element(circleIconProps);
+      } else if (
         status === 'connecting' ||
+        status === 'disconnected' ||
         status === 'unknown'
-      );
+      ) {
+        offlineBoltIcon.element(circleIconProps);
+      } else {
+        circleEmptyIcon.element(circleIconProps);
+      }
     }
 
     protected translator: ITranslator;

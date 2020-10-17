@@ -60,6 +60,7 @@
   --jp-icon-not-trusted: url('icons/statusbar/not-trusted.svg');
   --jp-icon-notebook: url('icons/filetype/notebook.svg');
   --jp-icon-numbering: url('icons/toolbar/numbering.svg');
+  --jp-icon-offline-bolt: url('icons/toolbar/offline-bolt.svg');
   --jp-icon-palette: url('icons/sidebar/palette.svg');
   --jp-icon-paste: url('icons/toolbar/paste.svg');
   --jp-icon-pdf: url('icons/filetype/pdf.svg');
@@ -232,6 +233,9 @@
 }
 .jp-NumberingIcon {
   background-image: var(--jp-icon-numbering);
+}
+.jp-OfflineBoltIcon {
+  background-image: var(--jp-icon-offline-bolt);
 }
 .jp-PaletteIcon {
   background-image: var(--jp-icon-palette);
