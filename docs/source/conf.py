@@ -97,6 +97,40 @@ pygments_style = 'sphinx'
 todo_include_todos = False
 
 
+# build js docs and stage them to the build directory
+import os
+import shutil
+from subprocess import check_call
+
+
+def build_api_docs(out_dir):
+    """build js api docs"""
+    here = os.path.dirname(os.path.abspath(__file__))
+    docs = os.path.join(here, os.pardir)
+    root = os.path.join(docs, os.pardir)
+    docs_api = os.path.join(docs, "api")
+    api_index = os.path.join(docs_api, "index.html")
+    # is this an okay way to specify jlpm
+    # without installing jupyterlab first?
+    jlpm = ["node", os.path.join(root, "jupyterlab", "staging", "yarn.js")]
+
+    if os.path.exists(api_index):
+        # avoid rebuilding docs because it takes forever
+        # `make clean` to force a rebuild
+        print(f"already have {api_index}")
+    else:
+        print("Building jupyterlab API docs")
+        check_call(jlpm, cwd=root)
+        check_call(jlpm + ["build:packages"], cwd=root)
+        check_call(jlpm + ["docs"], cwd=root)
+
+    dest_dir = os.path.join(out_dir, "api")
+    print(f"Copying {docs_api} -> {dest_dir}")
+    if os.path.exists(dest_dir):
+        shutil.rmtree(dest_dir)
+    shutil.copytree(docs_api, dest_dir)
+
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
@@ -245,3 +279,4 @@ def setup(app):
     }, True)
     app.add_transform(AutoStructify)
     app.add_stylesheet('custom.css')  # may also be an URL
+    build_api_docs(app.outdir)
