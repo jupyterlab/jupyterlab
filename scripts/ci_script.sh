@@ -38,23 +38,26 @@ fi
 
 
 if [[ $GROUP == docs ]]; then
-    # Build the tutorial docs
+    # Build the docs (includes API docs)
     pushd docs
-    pip install -r ./requirements.txt
+    conda env create -f environment.yml
+    conda init --all
+    source $CONDA/bin/activate jupyterlab_documentation
     make html
+    conda deactivate
     popd
-
-    # Build the API docs
-    jlpm build:packages
-    jlpm docs
 fi
 
 if [[ $GROUP == linkcheck ]]; then
-    # Build the tutorial docs
+    # Build the docs
     pushd docs
-    pip install -r ./requirements.txt
+    conda env create -f environment.yml
+    conda init --all
+    source $CONDA/bin/activate jupyterlab_documentation
     make html
     popd
+
+    pip install -e ".[test]"
 
     # Run the link check on the built html files
     CACHE_DIR="${HOME}/.cache/pytest-link-check"
@@ -70,6 +73,8 @@ if [[ $GROUP == linkcheck ]]; then
     # Run the link check on md files - allow for a link to fail once (--lf means only run last failed)
     args="--check-links --check-links-cache --check-links-cache-expire-after ${LINKS_EXPIRE} --check-links-cache-name ${CACHE_DIR}/cache"
     py.test $args --links-ext .md -k .md . || py.test $args --links-ext .md -k .md --lf .
+
+    conda deactivate
 fi
 
 
