@@ -81,6 +81,7 @@ class ExampleApp(LabServerApp):
     def initialize_handlers(self):
         """Add example handler to Lab Server's handler list.
         """
+        super().initialize_handlers()
         self.handlers.append(('/example', ExampleHandler))
 
 
