@@ -106,6 +106,8 @@ Extension developers do not need to interact with ``@jupyterlab/builder`` direct
 ``jupyter labextension build`` command. This command is run automatically as part of the ``build`` script
 (``jlpm run build``).
 
+For more details about the new file structure and packaging of the extension, check out the extension tutorial: :ref:`extension_tutorial`
+
 Publishing the extension to PyPI and conda-forge
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
