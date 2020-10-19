@@ -4,6 +4,7 @@ queries:
   - uses: security-and-quality
 
 paths-ignore:
+  - node_modules
   # Ignore our vendored yarn.js
   - jupyterlab/staging/yarn.js
   # Ignore templates, which generate syntax error warnings
