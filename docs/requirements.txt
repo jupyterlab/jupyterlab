@@ -1,8 +1,0 @@
-sphinx>=1.8
-sphinx-copybutton
-sphinx_rtd_theme
-recommonmark
-pytest
-pytest-check-links[cache]>=0.4.3
-jsx-lexer
-requests_cache
