@@ -113,3 +113,9 @@ Starting from JupyterLab 3.0, extensions can be distributed as a Python package.
 
 The extension tutorial provides explanations to package the extension so it can be
 published on PyPI and conda forge: :ref:`extension_tutorial_publish`.
+
+.. note::
+
+   While publishing to PyPI is the new recommended way for distributing extensions to users,
+   it is still useful to continue publishing extensions to ``npm`` as well,
+   so other developers can extend them in their own extensions.
