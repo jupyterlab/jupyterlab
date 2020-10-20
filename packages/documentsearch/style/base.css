@@ -17,6 +17,7 @@
   top: 0;
   right: 0;
   z-index: 7;
+  min-width: 405px;
   padding: 2px;
   font-size: var(--jp-ui-font-size1);
 }
