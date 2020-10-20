@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IIterator, iter, every } from '@lumino/algorithm';
-import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 
