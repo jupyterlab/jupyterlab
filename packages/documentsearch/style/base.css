@@ -17,7 +17,7 @@
   top: 0;
   right: 0;
   z-index: 7;
-  width: 405px;
+  min-width: 405px;
   padding: 2px;
   font-size: var(--jp-ui-font-size1);
 }
@@ -204,7 +204,6 @@
   display: flex;
   background-color: var(--jp-layout-color0);
   font-size: var(--jp-ui-font-size1);
-  width: 186px;
   margin: 2px;
 }
 
