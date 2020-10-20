@@ -162,6 +162,7 @@ dependencies and install the extension into the JupyterLab environment.
 
 .. code:: bash
 
+    pip install jupyter_packaging
     pip install -ve .
 
 The above command copies the frontend part of the extension into JupyterLab.
