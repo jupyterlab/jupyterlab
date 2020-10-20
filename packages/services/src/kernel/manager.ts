@@ -257,12 +257,13 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
 
     if (
       this._models.size === models.length &&
-      every(models, x =>
-        JSONExt.deepEqual(
-          (this._models.get(x.id) as unknown) as JSONObject,
-          (x as unknown) as JSONObject
-        )
-      )
+      every(models, x => {
+        const existing = this._models.get(x.id);
+        if (!existing) {
+          return false;
+        }
+        return existing.name === x.name;
+      })
     ) {
       // Identical models list (presuming models does not contain duplicate
       // ids), so just return
