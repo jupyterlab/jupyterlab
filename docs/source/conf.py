@@ -121,7 +121,7 @@ def build_api_docs(out_dir):
     else:
         print("Building jupyterlab API docs")
         check_call(jlpm, cwd=root)
-        check_call(jlpm + ["build:packages"], cwd=root)
+        check_call(jlpm + ["build:src"], cwd=root)
         check_call(jlpm + ["docs"], cwd=root)
 
     dest_dir = os.path.join(out_dir, "api")
