@@ -1,0 +1,14 @@
+name: "My CodeQL config"
+
+queries:
+  - uses: security-and-quality
+
+paths-ignore:
+  - node_modules
+  # Ignore our vendored yarn.js
+  - jupyterlab/staging/yarn.js
+  # Ignore templates, which generate syntax error warnings
+  - '**/templates/*.html'
+  - examples/federated/core_package/index.js
+  - jupyterlab/staging/index.js
+  - dev_mode/index.js

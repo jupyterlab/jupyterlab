@@ -31,7 +31,7 @@ function createModel(
 }
 
 function encodeChars(txt: string): string {
-  return txt.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;');
+  return txt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 const sanitizer = defaultSanitizer;
