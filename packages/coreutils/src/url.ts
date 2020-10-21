@@ -4,7 +4,7 @@
 import { PartialJSONObject } from '@lumino/coreutils';
 
 import urlparse from 'url-parse';
-import { PathExt } from './path';
+import * as posix from 'path-posix';
 
 /**
  * The namespace for URL-related functions.
@@ -44,14 +44,14 @@ export namespace URLExt {
    * @returns the joined url.
    */
   export function join(...parts: string[]): string {
-    let prefix = '';
-    if (parts[0].indexOf('//') === 0) {
-      prefix = '//';
-    } else if (parts[0].indexOf('/') === 0) {
-      prefix = '/';
+    const first = urlparse(parts[0], {});
+    const prefix = `${first.protocol}${first.slashes ? '//' : ''}${first.auth}${first.host}`;
+    let path = posix.join(first.pathname, ...parts.slice(1));
+    if (path === '.') {
+      path = '';
     }
-
-    return prefix + PathExt.join(...parts).replace(':/', '://');
+    // Put in a slash between the prefix and path if needed
+    return `${prefix}${!!prefix && !!path && path[0] !== '/' ? '/' : ''}${path}`;
   }
 
   /**
