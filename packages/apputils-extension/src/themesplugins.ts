@@ -15,7 +15,7 @@ import {
   ThemeManager
 } from '@jupyterlab/apputils';
 
-import { URLExt } from '@jupyterlab/coreutils';
+import { PageConfig, URLExt } from '@jupyterlab/coreutils';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
@@ -52,7 +52,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
     const trans = translator.load('jupyterlab');
     const host = app.shell;
     const commands = app.commands;
-    const url = URLExt.join(paths.urls.base, paths.urls.themes);
+    const url = URLExt.join(PageConfig.getBaseUrl(), paths.urls.themes);
     const key = themesPlugin.id;
     const manager = new ThemeManager({
       key,

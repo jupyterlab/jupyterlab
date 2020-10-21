@@ -4,6 +4,7 @@
 import { PartialJSONObject } from '@lumino/coreutils';
 
 import urlparse from 'url-parse';
+import { PathExt } from './path';
 
 /**
  * The namespace for URL-related functions.
@@ -43,39 +44,14 @@ export namespace URLExt {
    * @returns the joined url.
    */
   export function join(...parts: string[]): string {
-    parts = parts || [];
-
-    // Isolate the top element.
-    const top = parts[0] || '';
-
-    // Check whether protocol shorthand is being used.
-    const shorthand = top.indexOf('//') === 0;
-
-    // Parse the top element into a header collection.
-    const header = top.match(/(\w+)(:)(\/\/)?/);
-    const protocol = header && header[1];
-    const colon = protocol && header![2];
-    const slashes = colon && header![3];
-
-    // Construct the URL prefix.
-    let prefix = [protocol, colon, slashes].filter(str => str).join('');
-
-    // Handle relative and shorthand urls
-    if (top.indexOf('/') === 0) {
-      prefix = shorthand ? '//' : '';
+    let prefix = '';
+    if (parts[0].indexOf('//') === 0) {
+      prefix = '//';
+    } else if (parts[0].indexOf('/') === 0) {
+      prefix = '/';
     }
 
-    // Construct the URL body omitting the prefix of the top value.
-    const body = [top.indexOf(prefix) === 0 ? top.replace(prefix, '') : top]
-      // Filter out top value if empty.
-      .filter(str => str)
-      // Remove leading slashes in all subsequent URL body elements.
-      .concat(parts.slice(1).map(str => str.replace(/^\//, '')))
-      .join('/')
-      // Replace multiple slashes with one.
-      .replace(/\/+/g, '/');
-
-    return prefix + body;
+    return prefix + PathExt.join(...parts).replace(':/', '://');
   }
 
   /**
