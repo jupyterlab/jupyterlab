@@ -44,14 +44,14 @@ export namespace URLExt {
    * @returns the joined url.
    */
   export function join(...parts: string[]): string {
-    let prefix = '';
+    let joinedUrl = PathExt.join(...parts);
     if (parts[0].indexOf('//') === 0) {
-      prefix = '//';
+      return '//' + joinedUrl;
     } else if (parts[0].indexOf('/') === 0) {
-      prefix = '/';
+      return '/' + joinedUrl;
+    } else {
+      return joinedUrl.replace(':/', '://');
     }
-
-    return prefix + PathExt.join(...parts).replace(':/', '://');
   }
 
   /**
