@@ -36,6 +36,13 @@ describe('@jupyterlab/coreutils', () => {
     describe('.join()', () => {
       it('should join a sequence of url components', () => {
         expect(URLExt.join('/foo/', 'bar/')).toBe('/foo/bar/');
+        expect(URLExt.join('//example.com', 'bar/')).toBe('//example.com/bar/');
+        expect(URLExt.join('//example.com', 'foo:bar/')).toBe(
+          '//example.com/foo:bar/'
+        );
+        expect(URLExt.join('http://www.example.com/', '/bar')).toBe(
+          'http://www.example.com/bar'
+        );
       });
     });
 
