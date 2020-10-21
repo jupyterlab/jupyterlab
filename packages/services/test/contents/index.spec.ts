@@ -290,11 +290,11 @@ describe('contents', () => {
       expect(url).toBe('http://foo/files/b%20ar%3F3.txt');
     });
 
-    it('should not handle relative paths', async () => {
+    it('should handle relative paths', async () => {
       const drive = new Drive({ serverSettings: settings });
       const contents = new ContentsManager({ defaultDrive: drive });
       const url = await contents.getDownloadUrl('fizz/../bar.txt');
-      expect(url).toBe('http://foo/files/fizz/../bar.txt');
+      expect(url).toBe('http://foo/files/bar.txt');
     });
 
     it('should get the url of a file from an additional drive', async () => {
@@ -823,10 +823,10 @@ describe('drive', () => {
       expect(url).toBe('http://foo/files/b%20ar%3F3.txt');
     });
 
-    it('should not handle relative paths', async () => {
+    it('should handle relative paths', async () => {
       const drive = new Drive({ serverSettings: settings });
       const url = await drive.getDownloadUrl('fizz/../bar.txt');
-      expect(url).toBe('http://foo/files/fizz/../bar.txt');
+      expect(url).toBe('http://foo/files/bar.txt');
     });
   });
 

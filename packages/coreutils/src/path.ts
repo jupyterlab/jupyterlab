@@ -17,7 +17,7 @@ export namespace PathExt {
    */
   export function join(...paths: string[]): string {
     const path = posix.join(...paths);
-    return path === '.' ? '' : removeSlash(posix.join(...paths));
+    return path === '.' ? '' : removeSlash(path);
   }
 
   /**
