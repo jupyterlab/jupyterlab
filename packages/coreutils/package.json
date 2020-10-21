@@ -49,6 +49,7 @@
     "@jupyterlab/testutils": "^3.0.0-rc.5",
     "@types/jest": "^26.0.10",
     "@types/minimist": "^1.2.0",
+    "@types/url-parse": "^1.1.0",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "ts-jest": "^26.3.0",
