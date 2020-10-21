@@ -46,12 +46,9 @@ export namespace URLExt {
   export function join(...parts: string[]): string {
     const first = urlparse(parts[0], {});
     const prefix = `${first.protocol}${first.slashes ? '//' : ''}${first.auth}${first.host}`;
-    let path = posix.join(first.pathname, ...parts.slice(1));
-    if (path === '.') {
-      path = '';
-    }
-    // Put in a slash between the prefix and path if needed
-    return `${prefix}${!!prefix && !!path && path[0] !== '/' ? '/' : ''}${path}`;
+    // If there was a prefix, then the first path must start at the root.
+    const path = posix.join(`${!!prefix && first.pathname[0] !== '/' ? '/' : ''}${first.pathname}`, ...parts.slice(1));
+    return `${prefix}${path === '.' ? '' : path}`;
   }
 
   /**
