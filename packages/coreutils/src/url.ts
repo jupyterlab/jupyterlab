@@ -44,10 +44,13 @@ export namespace URLExt {
    * @returns the joined url.
    */
   export function join(...parts: string[]): string {
-    const first = urlparse(parts[0], {});
-    const prefix = `${first.protocol}${first.slashes ? '//' : ''}${first.auth}${first.host}`;
+    const u = urlparse(parts[0], {});
+    const prefix = `${u.protocol}${u.slashes ? '//' : ''}${u.auth}${u.host}`;
     // If there was a prefix, then the first path must start at the root.
-    const path = posix.join(`${!!prefix && first.pathname[0] !== '/' ? '/' : ''}${first.pathname}`, ...parts.slice(1));
+    const path = posix.join(
+      `${!!prefix && u.pathname[0] !== '/' ? '/' : ''}${u.pathname}`,
+      ...parts.slice(1)
+    );
     return `${prefix}${path === '.' ? '' : path}`;
   }
 
