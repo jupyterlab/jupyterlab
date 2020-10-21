@@ -43,6 +43,9 @@ describe('@jupyterlab/coreutils', () => {
         expect(URLExt.join('http://www.example.com/', '/bar')).toBe(
           'http://www.example.com/bar'
         );
+        expect(URLExt.join('http://user:pass@www.example.com/', '/bar')).toBe(
+          'http://user:pass@www.example.com/bar'
+        );
         expect(URLExt.join('//example.com', 'foo:bar:', 'baz')).toBe(
           '//example.com/foo:bar:/baz'
         );
