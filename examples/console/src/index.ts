@@ -27,10 +27,18 @@ import {
   standardRendererFactories as initialFactories
 } from '@jupyterlab/rendermime';
 
-const TITLE = 'Console';
+import {
+  ITranslator,
+  nullTranslator,
+  TranslationManager
+} from '@jupyterlab/translation';
 
-function main(): void {
-  console.debug('in main');
+async function main(): Promise<any> {
+  const translator = new TranslationManager();
+  await translator.fetch('en');
+  const trans = translator.load('jupyterlab');
+
+  console.debug(trans.__('in main'));
   let path = '';
   const query: { [key: string]: string } = Object.create(null);
 
@@ -50,15 +58,22 @@ function main(): void {
 
   const manager = new ServiceManager();
   void manager.ready.then(() => {
-    startApp(path, manager);
+    startApp(path, manager, translator);
   });
 }
 
 /**
  * Start the application.
  */
-function startApp(path: string, manager: ServiceManager.IManager) {
-  console.debug('starting app');
+function startApp(
+  path: string,
+  manager: ServiceManager.IManager,
+  translator?: ITranslator
+) {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
+
+  console.debug(trans.__('starting app'));
   // Initialize the command registry with the key bindings.
   const commands = new CommandRegistry();
 
@@ -78,7 +93,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
     contentFactory,
     mimeTypeService: editorServices.mimeTypeService
   });
-  consolePanel.title.label = TITLE;
+  consolePanel.title.label = trans.__('Console');
 
   const palette = new CommandPalette({ commands });
 
@@ -100,13 +115,13 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   });
 
   const selector = '.jp-ConsolePanel';
-  const category = 'Console';
+  const category = trans.__('Console');
   let command: string;
 
   // Add the commands.
   command = 'console:clear';
   commands.addCommand(command, {
-    label: 'Clear',
+    label: trans.__('Clear'),
     execute: () => {
       consolePanel.console.clear();
     }
@@ -115,7 +130,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
 
   command = 'console:execute';
   commands.addCommand(command, {
-    label: 'Execute Prompt',
+    label: trans.__('Execute Prompt'),
     execute: () => {
       return consolePanel.console.execute();
     }
@@ -125,7 +140,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
 
   command = 'console:execute-forced';
   commands.addCommand(command, {
-    label: 'Execute Cell (forced)',
+    label: trans.__('Execute Cell (forced)'),
     execute: () => {
       return consolePanel.console.execute(true);
     }
@@ -135,7 +150,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
 
   command = 'console:linebreak';
   commands.addCommand(command, {
-    label: 'Insert Line Break',
+    label: trans.__('Insert Line Break'),
     execute: () => {
       consolePanel.console.insertLinebreak();
     }
@@ -143,7 +158,7 @@ function startApp(path: string, manager: ServiceManager.IManager) {
   palette.addItem({ command, category });
   commands.addKeyBinding({ command, selector, keys: ['Ctrl Enter'] });
 
-  console.debug('Example started!');
+  console.debug(trans.__('Example started!'));
 }
 
 window.addEventListener('load', main);

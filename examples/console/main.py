@@ -79,6 +79,7 @@ class ExampleApp(LabServerApp):
 
     def initialize_handlers(self):
         """Initialize JupyterLab handlers."""
+        super().initialize_handlers()
         self.handlers.append(
             ('/example', ExampleHandler)
         )
