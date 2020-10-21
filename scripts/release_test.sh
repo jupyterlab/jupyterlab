@@ -16,19 +16,26 @@ conda activate "$JLAB_TEST_ENV"
 pip install dist/*.whl
 
 cp examples/notebooks/*.ipynb $TEST_DIR/
-pushd $TEST_DIR
 
 python -m jupyterlab.browser_check
+jupyter lab clean --all
 
-jupyter labextension install @jupyterlab/fasta-extension --no-build
-jupyter labextension install @jupyterlab/geojson-extension --no-build
-jupyter labextension install @jupyter-widgets/jupyterlab-manager --no-build
-jupyter labextension install bqplot --no-build
-jupyter labextension install jupyter-leaflet --no-build
-jupyter lab clean
+pushd jupyterlab/tests/mock_packages
+jupyter labextension install mimeextension --no-build --debug
+jupyter labextension develop extension
+jupyter labextension build extension
+popd
+
+# Install third party widgets - allow to fail
+pip install --pre jupyterlab_widgets; true
+
+pushd $TEST_DIR
 
 conda install --override-channels --strict-channel-priority -c conda-forge -c anaconda -y ipywidgets altair matplotlib vega_datasets
-jupyter lab build && python -m jupyterlab.browser_check && jupyter lab
+
+jupyter lab build
+python -m jupyterlab.browser_check
+jupyter lab
 
 # undo our environment changes just in case we are sourcing this script
 conda deactivate
