@@ -63,7 +63,7 @@ new environment named ``jupyterlab-ext``.
 
 .. code:: bash
 
-    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c anaconda cookiecutter nodejs git
+    conda create -n jupyterlab-ext --override-channels --strict-channel-priority -c conda-forge -c anaconda cookiecutter nodejs jupyter-packaging git
 
 Now activate the new environment so that all further commands you run
 work out of that environment.
@@ -162,7 +162,6 @@ dependencies and install the extension into the JupyterLab environment.
 
 .. code:: bash
 
-    pip install jupyter_packaging
     pip install -ve .
 
 The above command copies the frontend part of the extension into JupyterLab.
