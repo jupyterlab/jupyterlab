@@ -554,8 +554,28 @@ function activateNotebookHandler(
     namespace: 'cloned-outputs'
   });
 
+  // Fetch settings if possible.
+  const fetchSettings = settingRegistry
+    ? settingRegistry.load(trackerPlugin.id)
+    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
+
   // Handle state restoration.
   if (restorer) {
+    fetchSettings
+      .then(settings => {
+        updateConfig(settings);
+        settings.changed.connect(() => {
+          updateConfig(settings);
+        });
+      })
+      .catch((reason: Error) => {
+        console.warn(reason.message);
+        updateTracker({
+          editorConfig: factory.editorConfig,
+          notebookConfig: factory.notebookConfig,
+          kernelShutdown: factory.shutdownOnClose
+        });
+      });
     void restorer.restore(tracker, {
       command: 'docmanager:open',
       args: panel => ({ path: panel.context.path, factory: FACTORY }),
@@ -645,7 +665,8 @@ function activateNotebookHandler(
       numberCellsToRenderDirectly: settings.get('numberCellsToRenderDirectly')
         .composite as number,
       renderCellOnIdle: settings.get('renderCellOnIdle').composite as boolean,
-      nonObservedBottomMargin: settings.get('nonObservedBottomMargin')
+      observedTopMargin: settings.get('observedTopMargin').composite as string,
+      observedBottomMargin: settings.get('observedBottomMargin')
         .composite as string
     };
     factory.shutdownOnClose = settings.get('kernelShutdown')
@@ -657,27 +678,6 @@ function activateNotebookHandler(
       kernelShutdown: factory.shutdownOnClose
     });
   }
-
-  // Fetch settings if possible.
-  const fetchSettings = settingRegistry
-    ? settingRegistry.load(trackerPlugin.id)
-    : Promise.reject(new Error(`No setting registry for ${trackerPlugin.id}`));
-  app.restored
-    .then(() => fetchSettings)
-    .then(settings => {
-      updateConfig(settings);
-      settings.changed.connect(() => {
-        updateConfig(settings);
-      });
-    })
-    .catch((reason: Error) => {
-      console.warn(reason.message);
-      updateTracker({
-        editorConfig: factory.editorConfig,
-        notebookConfig: factory.notebookConfig,
-        kernelShutdown: factory.shutdownOnClose
-      });
-    });
 
   // Add main menu notebook menu.
   if (mainMenu) {
