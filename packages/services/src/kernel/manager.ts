@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IIterator, iter, every } from '@lumino/algorithm';
-import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -257,12 +256,13 @@ export class KernelManager extends BaseManager implements Kernel.IManager {
 
     if (
       this._models.size === models.length &&
-      every(models, x =>
-        JSONExt.deepEqual(
-          (this._models.get(x.id) as unknown) as JSONObject,
-          (x as unknown) as JSONObject
-        )
-      )
+      every(models, x => {
+        const existing = this._models.get(x.id);
+        if (!existing) {
+          return false;
+        }
+        return existing.name === x.name;
+      })
     ) {
       // Identical models list (presuming models does not contain duplicate
       // ids), so just return
