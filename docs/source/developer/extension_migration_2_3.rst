@@ -30,7 +30,7 @@ First, make sure to update to JupyterLab 3.0 and install ``jupyter-packaging`` a
 .. code:: bash
 
    pip install jupyterlab -U
-   pip install jupyter_packaging cookiecutter
+   pip install jupyter-packaging cookiecutter
 
 
 Or with ``conda``:
