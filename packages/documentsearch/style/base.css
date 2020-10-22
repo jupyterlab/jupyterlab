@@ -249,13 +249,3 @@
 .jp-DocumentSearch-replace-toggle:hover {
   background-color: var(--jp-layout-color2);
 }
-
-.jp-DocumentSearch-document-loaded .jp-DocumentSearch-document-loading {
-  display: block !important;
-}
-
-.jp-DocumentSearch-document-loading {
-  display: none;
-  margin: 5px;
-  color: var(--jp-ui-font-color2);
-}

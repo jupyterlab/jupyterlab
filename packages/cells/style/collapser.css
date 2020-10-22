@@ -4,8 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 .jp-Collapser {
-  display: table-cell;
-  width: var(--jp-cell-collapser-width);
+  flex: 0 0 var(--jp-cell-collapser-width);
   padding: 0px;
   margin: 0px;
   border: none;

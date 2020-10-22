@@ -196,8 +196,7 @@ export class Cell extends Widget {
     const input = (this._input = new InputArea({
       model,
       contentFactory,
-      updateOnShow: options.updateEditorOnShow,
-      placeholder: options.placeholder
+      updateOnShow: options.updateEditorOnShow
     }));
     input.addClass(CELL_INPUT_AREA_CLASS);
     inputWrapper.addWidget(inputCollapser);
@@ -451,8 +450,7 @@ export class Cell extends Widget {
     const constructor = this.constructor as typeof Cell;
     return new constructor({
       model: this.model,
-      contentFactory: this.contentFactory,
-      placeholder: false
+      contentFactory: this.contentFactory
     });
   }
 
@@ -567,11 +565,6 @@ export namespace Cell {
      * Whether to send an update request to the editor when it is shown.
      */
     updateEditorOnShow?: boolean;
-
-    /**
-     * Whether this cell is a placeholder for future rendering.
-     */
-    placeholder?: boolean;
   }
 
   /**
@@ -700,34 +693,31 @@ export class CodeCell extends Cell {
     const contentFactory = this.contentFactory;
     const model = this.model;
 
-    if (!options.placeholder) {
-      // Insert the output before the cell footer.
-      const outputWrapper = (this._outputWrapper = new Panel());
-      outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-      const outputCollapser = new OutputCollapser();
-      outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
-      const output = (this._output = new OutputArea({
-        model: model.outputs,
-        rendermime,
-        contentFactory: contentFactory
-      }));
-      output.addClass(CELL_OUTPUT_AREA_CLASS);
-      // Set a CSS if there are no outputs, and connect a signal for future
-      // changes to the number of outputs. This is for conditional styling
-      // if there are no outputs.
-      if (model.outputs.length === 0) {
-        this.addClass(NO_OUTPUTS_CLASS);
-      }
-      output.outputLengthChanged.connect(this._outputLengthHandler, this);
-      outputWrapper.addWidget(outputCollapser);
-      outputWrapper.addWidget(output);
-      (this.layout as PanelLayout).insertWidget(2, outputWrapper);
-
-      this._outputPlaceholder = new OutputPlaceholder(() => {
-        this.outputHidden = !this.outputHidden;
-      });
+    // Insert the output before the cell footer.
+    const outputWrapper = (this._outputWrapper = new Panel());
+    outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
+    const outputCollapser = new OutputCollapser();
+    outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
+    const output = (this._output = new OutputArea({
+      model: model.outputs,
+      rendermime,
+      contentFactory: contentFactory
+    }));
+    output.addClass(CELL_OUTPUT_AREA_CLASS);
+    // Set a CSS if there are no outputs, and connect a signal for future
+    // changes to the number of outputs. This is for conditional styling
+    // if there are no outputs.
+    if (model.outputs.length === 0) {
+      this.addClass(NO_OUTPUTS_CLASS);
     }
+    output.outputLengthChanged.connect(this._outputLengthHandler, this);
+    outputWrapper.addWidget(outputCollapser);
+    outputWrapper.addWidget(output);
+    (this.layout as PanelLayout).insertWidget(2, outputWrapper);
 
+    this._outputPlaceholder = new OutputPlaceholder(() => {
+      this.outputHidden = !this.outputHidden;
+    });
     model.stateChanged.connect(this.onStateChanged, this);
   }
 
@@ -923,8 +913,7 @@ export class CodeCell extends Cell {
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory,
-      rendermime: this._rendermime,
-      placeholder: false
+      rendermime: this._rendermime
     });
   }
 
@@ -1538,8 +1527,7 @@ export class MarkdownCell extends AttachmentsCell {
     return new constructor({
       model: this.model,
       contentFactory: this.contentFactory,
-      rendermime: this._rendermime,
-      placeholder: false
+      rendermime: this._rendermime
     });
   }
 
@@ -1594,8 +1582,7 @@ export class RawCell extends Cell {
     const constructor = this.constructor as typeof RawCell;
     return new constructor({
       model: this.model,
-      contentFactory: this.contentFactory,
-      placeholder: false
+      contentFactory: this.contentFactory
     });
   }
 
