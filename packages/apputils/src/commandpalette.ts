@@ -102,8 +102,13 @@ export class ModalCommandPalette extends Panel {
       case 'keydown':
         this._evtKeydown(event as KeyboardEvent);
         break;
-      case 'blur':
-        this.hideAndReset();
+      case 'focus':
+        // if the focus shifted outside of this DOM element, hide and reset.
+        const target = event.target as HTMLElement;
+        if (!this.node.contains(target as HTMLElement)) {
+          event.stopPropagation();
+          this.hideAndReset();
+        }
         break;
       case 'contextmenu':
         event.preventDefault();
@@ -120,7 +125,6 @@ export class ModalCommandPalette extends Panel {
   protected onAfterAttach(msg: Message): void {
     this.node.addEventListener('keydown', this, true);
     this.node.addEventListener('contextmenu', this, true);
-    this.node.addEventListener('blur', this, true);
   }
 
   /**
@@ -129,7 +133,14 @@ export class ModalCommandPalette extends Panel {
   protected onAfterDetach(msg: Message): void {
     this.node.removeEventListener('keydown', this, true);
     this.node.removeEventListener('contextmenu', this, true);
-    this.node.removeEventListener('blur', this, true);
+  }
+
+  protected onBeforeHide(msg: Message): void {
+    document.removeEventListener('focus', this, true);
+  }
+
+  protected onAfterShow(msg: Message): void {
+    document.addEventListener('focus', this, true);
   }
 
   /**
