@@ -1068,10 +1068,9 @@ export namespace CodeCell {
             default:
               return true;
           }
-          const value = msg.header.date;
-          if (!value) {
-            return true;
-          }
+          // If the data is missing, estimate it to now
+          // Date was added in 5.1: https://jupyter-client.readthedocs.io/en/stable/messaging.html#message-header
+          const value = msg.header.date || new Date().toISOString();
           const timingInfo: any = Object.assign(
             {},
             model.metadata.get('execution')
@@ -1088,19 +1087,20 @@ export namespace CodeCell {
       future = cell.outputArea.future;
       const msg = (await msgPromise)!;
       model.executionCount = msg.content.execution_count;
-      const started = msg.metadata.started as string;
-      if (recordTiming && started) {
+      if (recordTiming) {
         const timingInfo = Object.assign(
           {},
           model.metadata.get('execution') as any
         );
+        const started = msg.metadata.started as string;
+        // Started is not in the API, but metadata IPyKernel sends
         if (started) {
           timingInfo['shell.execute_reply.started'] = started;
         }
-        const date = msg.header.date as string;
-        if (date) {
-          timingInfo['shell.execute_reply'] = date;
-        }
+        // Per above, the 5.0 spec does not assume date, so we estimate is required
+        const finished = msg.header.date as string;
+        timingInfo['shell.execute_reply'] =
+          finished || new Date().toISOString();
         model.metadata.set('execution', timingInfo);
       }
       return msg;
