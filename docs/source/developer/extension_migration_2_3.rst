@@ -25,18 +25,19 @@ Upgrading library versions using the upgrade script
 
 JupyterLab 3.0 provides a script to upgrade an existing extension to use the new extension system and packaging.
 
-First, make sure to update to JupyterLab 3.0 with ``pip``:
+First, make sure to update to JupyterLab 3.0 and install ``jupyter-packaging`` and ``cookiecutter``. With ``pip``:
 
 .. code:: bash
 
    pip install jupyterlab -U
+   pip install jupyter-packaging cookiecutter
 
 
 Or with ``conda``:
 
 .. code:: bash
 
-   conda install -c conda-forge jupyterlab=3
+   conda install -c conda-forge jupyterlab=3 jupyter-packaging cookiecutter
 
 
 Then at the root folder of the extension, run:
