@@ -56,6 +56,7 @@ import newFolderSvgstr from '../../style/icons/toolbar/new-folder.svg';
 import notTrustedSvgstr from '../../style/icons/statusbar/not-trusted.svg';
 import notebookSvgstr from '../../style/icons/filetype/notebook.svg';
 import numberingSvgstr from '../../style/icons/toolbar/numbering.svg';
+import offlineBoltSvgstr from '../../style/icons/toolbar/offline-bolt.svg';
 import paletteSvgstr from '../../style/icons/sidebar/palette.svg';
 import pasteSvgstr from '../../style/icons/toolbar/paste.svg';
 import pdfSvgstr from '../../style/icons/filetype/pdf.svg';
@@ -131,6 +132,7 @@ export const newFolderIcon = new LabIcon({ name: 'ui-components:new-folder', svg
 export const notTrustedIcon = new LabIcon({ name: 'ui-components:not-trusted', svgstr: notTrustedSvgstr });
 export const notebookIcon = new LabIcon({ name: 'ui-components:notebook', svgstr: notebookSvgstr });
 export const numberingIcon = new LabIcon({ name: 'ui-components:numbering', svgstr: numberingSvgstr });
+export const offlineBoltIcon = new LabIcon({ name: 'ui-components:offline-bolt', svgstr: offlineBoltSvgstr });
 export const paletteIcon = new LabIcon({ name: 'ui-components:palette', svgstr: paletteSvgstr });
 export const pasteIcon = new LabIcon({ name: 'ui-components:paste', svgstr: pasteSvgstr });
 export const pdfIcon = new LabIcon({ name: 'ui-components:pdf', svgstr: pdfSvgstr });
