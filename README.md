@@ -143,6 +143,7 @@ JupyterLab's current maintainers are listed in alphabetical order, with affiliat
 
 - Mehmet Bektas, Bloomberg (general development, extensions).
 - Eric Charles, Datalayer, (general development, extensions).
+- Martha Cryan, IBM (general development, extensions).
 - Afshin Darian, Two Sigma (co-creator, application/high-level architecture,
   prolific contributions throughout the code base).
 - Vidar T. Fauske, JPMorgan Chase (general development, extensions).
