@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/coreutils",
-  "version": "4.2.4",
+  "version": "4.2.5",
   "description": "JupyterLab - Core Utilities",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -46,7 +46,7 @@
     "url-parse": "~1.4.7"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^2.2.6",
+    "@jupyterlab/testutils": "^2.2.7",
     "@types/jest": "^24.0.23",
     "@types/minimist": "^1.2.0",
     "@types/url-parse": "^1.1.0",
