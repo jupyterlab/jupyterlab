@@ -184,7 +184,7 @@ function ignored(path) {
 const shared = {
   ...package_data.resolutions,
   ...singletons
-}
+};
 
 // Webpack module sharing expects version numbers, so if a resolution was a
 // filename, extract the right version number from what was installed
@@ -193,7 +193,7 @@ Object.keys(shared).forEach(k => {
   if (typeof v === 'string' && v.startsWith('file:')) {
     shared[k] = require(`${k}/package.json`).version;
   }
-})
+});
 
 const plugins = [
   new WPPlugin.NowatchDuplicatePackageCheckerPlugin({
