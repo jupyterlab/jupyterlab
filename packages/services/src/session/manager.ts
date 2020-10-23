@@ -2,7 +2,6 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { IIterator, iter, every } from '@lumino/algorithm';
-import { JSONExt, JSONObject } from '@lumino/coreutils';
 import { Poll } from '@lumino/polling';
 import { ISignal, Signal } from '@lumino/signaling';
 
@@ -267,12 +266,19 @@ export class SessionManager extends BaseManager implements Session.IManager {
 
     if (
       this._models.size === models.length &&
-      every(models, x =>
-        JSONExt.deepEqual(
-          (this._models.get(x.id) as unknown) as JSONObject,
-          (x as unknown) as JSONObject
-        )
-      )
+      every(models, x => {
+        const existing = this._models.get(x.id);
+        if (!existing) {
+          return false;
+        }
+        return (
+          existing.kernel?.id === x.kernel?.id &&
+          existing.kernel?.name === x.kernel?.name &&
+          existing.name === x.name &&
+          existing.path === x.path &&
+          existing.type === x.type
+        );
+      })
     ) {
       // Identical models list (presuming models does not contain duplicate
       // ids), so just return
