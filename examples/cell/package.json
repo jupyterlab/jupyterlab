@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/example-cell",
-  "version": "3.0.0-rc.5",
+  "version": "3.0.0-rc.6",
   "private": true,
   "scripts": {
     "build": "tsc -p src && webpack",
@@ -8,13 +8,13 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-rc.5",
-    "@jupyterlab/cells": "^3.0.0-rc.5",
-    "@jupyterlab/codemirror": "^3.0.0-rc.5",
-    "@jupyterlab/completer": "^3.0.0-rc.5",
-    "@jupyterlab/rendermime": "^3.0.0-rc.5",
-    "@jupyterlab/services": "^6.0.0-rc.5",
-    "@jupyterlab/theme-light-extension": "^3.0.0-rc.5",
+    "@jupyterlab/apputils": "^3.0.0-rc.6",
+    "@jupyterlab/cells": "^3.0.0-rc.6",
+    "@jupyterlab/codemirror": "^3.0.0-rc.6",
+    "@jupyterlab/completer": "^3.0.0-rc.6",
+    "@jupyterlab/rendermime": "^3.0.0-rc.6",
+    "@jupyterlab/services": "^6.0.0-rc.6",
+    "@jupyterlab/theme-light-extension": "^3.0.0-rc.6",
     "@lumino/commands": "^1.11.3",
     "@lumino/widgets": "^1.14.0",
     "es6-promise": "~4.2.8"
