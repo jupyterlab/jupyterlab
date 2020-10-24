@@ -4,35 +4,57 @@ Extensions
 ----------
 
 Fundamentally, JupyterLab is designed as an extensible environment. JupyterLab
-extensions can customize or enhance any part of JupyterLab. They can provide new
-themes, file viewers and editors, or renderers for rich outputs in notebooks.
-Extensions can add items to the menu or command palette, keyboard shortcuts, or
-settings in the settings system. Extensions can provide an API for other
-extensions to use and can depend on other extensions. In fact, the whole of
-JupyterLab itself is simply a collection of extensions that are no more powerful
-or privileged than any custom extension.
+extensions can customize or enhance any part of JupyterLab. They can provide
+new themes, file viewers and editors, or renderers for rich outputs in
+notebooks. Extensions can add items to the menu or command palette, keyboard
+shortcuts, or settings in the settings system. Extensions can provide an API
+for other extensions to use and can depend on other extensions. In fact, the
+whole of JupyterLab itself is simply a collection of extensions that are no
+more powerful or privileged than any custom extension.
+
+We encourage extension authors to add the `jupyterlab-extension GitHub topic
+<https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
+to any GitHub extension repository.
+
+For information about developing extensions, see the :ref:`developer
+documentation <developer_extensions>`.
+
 
 .. contents:: Table of contents
     :local:
     :depth: 1
 
-Starting in JupyterLab 3.0, extensions are typically ``pip`` or ``conda``
-packages that are dynamically loaded by the application (no more build step). You can search using ``pip search "jupyterlab extension"`` to find extensions. For information about developing extensions,
-see the :ref:`developer documentation <developer_extensions>`.
-Once an extension is installed, you can refresh a running application
-or launch a new application to use the new extension.
+Installing Extensions
+~~~~~~~~~~~~~~~~~~~~~
 
-.. note::
+A JupyterLab extension is a JavaScript package that runs in the browser. An
+extension's JavaScript can be distributed as a single JavaScript package (which
+requires a rebuild of JupyterLab to activate it), or starting in JupyterLab
+3.0, can be built into a federated bundle together with its dependencies
+(which does not require a rebuild of JupyterLab to activate it). Rebuilding
+JupyterLab requires NodeJS to be :ref:`installed <installing_nodejs>`.
 
-   If you are a JupyterLab extension developer, please note that the extension
-   developer API is not stable and will evolve in the near future.
+An extension can be installed using the `pip <https://pypi.org/>`__ or `conda
+<https://anaconda.org/>`__ package managers, or using the Jupyter Lab tools to install packages from `npm
+<https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__.
+
+- Python ``pip`` or ``conda`` packages can include extensions as either single
+  JavaScript packages (requiring NodeJS and a JupyterLab rebuild) or federated
+  bundles (not requiring NodeJS nor a JupyterLab rebuild). These packages may
+  also include by a server-side component necessary for the extension to
+  function.
+- The Extension Manager in JupyterLab or the ``jupyter labextension install``
+  command install extension packages from `npm <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__.
+  These require NodeJS and a JupyterLab rebuild to activate. See :ref:`install_command`.
 
 
-Built-in Extensions
---------------------
+.. _installing_nodejs:
 
-In order to install JupyterLab built in (bundled) extensions, you need to have `Node.js
-<https://nodejs.org/>`__ installed.
+Installing NodeJS
+^^^^^^^^^^^^^^^^^
+
+Some extensions require `Node.js <https://nodejs.org/>`__ to rebuild
+JupyterLab and activate the extension.
 
 If you use ``conda`` with ``conda-forge`` packages, you can get it with:
 
@@ -40,64 +62,69 @@ If you use ``conda`` with ``conda-forge`` packages, you can get it with:
 
     conda install -c conda-forge nodejs
     
-If you use ``conda`` with default Anaconda packages (i.e., you don't normally use ``conda-forge``), you should install nodejs with ``conda install nodejs`` instead.
-
-If you use `Homebrew <https://brew.sh/>`__ on Mac OS X:
-
-.. code:: bash
-
-    brew install node
+If you use ``conda`` with default Anaconda packages (i.e., you don't normally use ``conda-forge``), you should install NodeJS from the Anaconda default channel with ``conda install nodejs`` instead.
 
 You can also download Node.js from the `Node.js website <https://nodejs.org/>`__ and
 install it directly.
 
+Managing Extensions
+~~~~~~~~~~~~~~~~~~~
 
-Disabling Rebuild Checks
-~~~~~~~~~~~~~~~~~~~~~~~~
+The ``jupyter labextension`` command or the Extension Manager in JupyterLab
+enable you to list installed extensions, disable extensions without
+uninstalling them, and install or uninstall extensions distributed as npm
+packages. See the help with ``jupyter labextension --help``.
 
-In some cases, such as automated testing, you may wish to disable the startup
-rebuild checks altogether. This can be achieved through setting ``buildCheck``
-and ``buildAvailable`` in ``jupyter_notebook_config.json`` (or ``.py`` equivalent)
-in any of the ``config`` locations returned by ``jupyter --paths``.
-
-
-.. code:: json
-
-    {
-      "LabApp": {
-        "tornado_settings": {
-          "page_config_data": {
-            "buildCheck": false,
-            "buildAvailable": false,
-          }
-        }
-      }
-    }
+.. note::
+   The Extension Manager and ``jupyter labextension`` identify an extension by
+   its JavaScript package name, which may be different from the name of the
+   ``pip`` or ``conda`` package used to distribute the extension.
 
 
+Listing installed extensions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-
-Using the Terminal
-~~~~~~~~~~~~~~~~~~~~~
-
-Another way of managing your extensions is from the terminal on the server,
-using the ``jupyter labextension`` entry point. In general, a simple help text
-is available by typing ``jupyter labextension --help``.
-
-
-Installing Built-in Extensions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You can install new extensions into the application
-using the command:
+List installed extensions from the command line with
 
 .. code:: bash
 
-    jupyter labextension install my-extension
+    jupyter labextension list
 
-where ``my-extension`` is the name of a valid JupyterLab extension npm package
-on `npm <https://www.npmjs.com>`__. Use the ``my-extension@version``
-syntax to install a specific version of an extension, for example:
+or see the list in the Extension Manager in JupyterLab.
+
+
+Disabling Extensions
+^^^^^^^^^^^^^^^^^^^^
+
+You can disable specific JupyterLab extensions (including core
+extensions) without rebuilding the application by running the command:
+
+.. code:: bash
+
+    jupyter labextension disable my-extension
+
+This will prevent the extension from activating in the browser.
+
+You can enable an extension using the command:
+
+.. code:: bash
+
+    jupyter labextension enable my-extension
+
+.. _install_command:
+
+Installing Extensions with ``jupyter labextension``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can install new extensions distributed as single JavaScript packages via
+npm into the application using the command:
+
+.. code:: bash
+
+    jupyter labextension install my-extension my-other-extension
+
+Use the ``my-extension@version`` syntax to install a specific version of an
+extension, for example:
 
 .. code:: bash
 
@@ -106,33 +133,6 @@ syntax to install a specific version of an extension, for example:
 You can also install an extension that is not uploaded to npm, i.e.,
 ``my-extension`` can be a local directory containing the extension, a gzipped
 tarball, or a URL to a gzipped tarball.
-
-We encourage extension authors to add the ``jupyterlab-extension``
-GitHub topic to any repository with a JupyterLab extension to facilitate
-discovery. You can see a list of extensions by searching GitHub for the
-`jupyterlab-extension <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
-topic.
-
-You can list the currently installed extensions by running the command:
-
-.. code:: bash
-
-    jupyter labextension list
-
-Uninstall an extension by running the command:
-
-.. code:: bash
-
-    jupyter labextension uninstall my-extension
-
-where ``my-extension`` is the name of the extension, as printed in the
-extension list. You can also uninstall core extensions using this
-command (you can always re-install core extensions later).
-
-Installing and uninstalling extensions can take some time, as they are
-downloaded, bundled with the core extensions, and the whole application
-is rebuilt. You can install/uninstall more than one extension in the
-same command by listing their names after the ``install`` command.
 
 If you are installing/uninstalling several extensions in several stages,
 you may want to defer rebuilding the application by including the flag
@@ -150,25 +150,6 @@ Windows.  Node modules are stored in a nested file structure, so the path can ge
 long.  If you have administrative access and are on Windows 8 or 10, you can update the
 registry setting using these instructions: https://stackoverflow.com/a/37528731.
 
-
-Disabling Extensions
-^^^^^^^^^^^^^^^^^^^^
-
-You can disable specific JupyterLab extensions (including core
-extensions) without rebuilding the application by running the command:
-
-.. code:: bash
-
-    jupyter labextension disable my-extension
-
-This will prevent the extension from loading in the browser, but does not
-require a rebuild.
-
-You can re-enable an extension using the command:
-
-.. code:: bash
-
-    jupyter labextension enable my-extension
 
 Advanced Usage
 ~~~~~~~~~~~~~~
@@ -412,3 +393,28 @@ By default, the location is ``~/.jupyter/lab/workspaces/``, where ``~`` is the u
 because these files are typically shared across Python environments.
 The location can be modified using the ``JUPYTERLAB_WORKSPACES_DIR`` environment variable. These files can be imported and exported to create default "profiles",
 using the :ref:`workspace command line tool <url-workspaces-cli>`.
+
+Disabling Rebuild Checks
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+JupyterLab automatically checks to see if it needs to rebuild on startup. In
+some cases, such as automated testing, you may wish to disable the startup
+rebuild checks altogether. This can be achieved through setting ``buildCheck``
+and ``buildAvailable`` in ``jupyter_notebook_config.json`` (or ``.py``
+equivalent) in any of the ``config`` locations returned by ``jupyter
+--paths``.
+
+
+.. code:: json
+
+    {
+      "LabApp": {
+        "tornado_settings": {
+          "page_config_data": {
+            "buildCheck": false,
+            "buildAvailable": false,
+          }
+        }
+      }
+    }
+
