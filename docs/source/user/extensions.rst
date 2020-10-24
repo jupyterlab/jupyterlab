@@ -32,40 +32,83 @@ extension's JavaScript can be distributed as a single JavaScript package (which
 requires a rebuild of JupyterLab to activate it), or starting in JupyterLab
 3.0, can be built into a federated bundle together with its dependencies
 (which does not require a rebuild of JupyterLab to activate it). Rebuilding
-JupyterLab requires NodeJS to be :ref:`installed <installing_nodejs>`.
+JupyterLab requires Node.js to be :ref:`installed <installing_nodejs>`.
 
 An extension can be installed using the `pip <https://pypi.org/>`__ or `conda
 <https://anaconda.org/>`__ package managers, or using the Jupyter Lab tools to install packages from `npm
 <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__.
 
 - Python ``pip`` or ``conda`` packages can include extensions as either single
-  JavaScript packages (requiring NodeJS and a JupyterLab rebuild) or federated
-  bundles (not requiring NodeJS nor a JupyterLab rebuild). These packages may
+  JavaScript packages (requiring Node.js and a JupyterLab rebuild) or federated
+  bundles (not requiring Node.js nor a JupyterLab rebuild). These packages may
   also include by a server-side component necessary for the extension to
   function.
 - The Extension Manager in JupyterLab or the ``jupyter labextension install``
-  command install extension packages from `npm <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__.
-  These require NodeJS and a JupyterLab rebuild to activate. See :ref:`install_command`.
-
+  command install extension packages from `npm
+  <https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__. These
+  require Node.js and a JupyterLab rebuild to activate. See
+  :ref:`installing_nodejs` and :ref:`install_command`.
 
 .. _installing_nodejs:
 
-Installing NodeJS
-^^^^^^^^^^^^^^^^^
+Installing Node.js
+^^^^^^^^^^^^^^^^^^
 
 Some extensions require `Node.js <https://nodejs.org/>`__ to rebuild
-JupyterLab and activate the extension.
-
-If you use ``conda`` with ``conda-forge`` packages, you can get it with:
+JupyterLab and activate the extension. If you use ``conda`` with
+``conda-forge`` packages, you can get Node.js with:
 
 .. code:: bash
 
     conda install -c conda-forge nodejs
     
-If you use ``conda`` with default Anaconda packages (i.e., you don't normally use ``conda-forge``), you should install NodeJS from the Anaconda default channel with ``conda install nodejs`` instead.
+If you use ``conda`` with default Anaconda packages (i.e., you don't normally use ``conda-forge``), you should install Node.js from the Anaconda default channel with ``conda install nodejs`` instead.
 
-You can also download Node.js from the `Node.js website <https://nodejs.org/>`__ and
-install it directly.
+You may also be able to get Node.js from your system package manager, or you
+can download Node.js from the `Node.js website <https://nodejs.org/>`__
+and install it directly.
+
+
+.. _install_command:
+
+Installing Extensions with ``jupyter labextension``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+You can install extensions distributed as single JavaScript packages via `npm
+<https://www.npmjs.com/search?q=keywords:jupyterlab-extension>`__ using the
+command:
+
+.. code:: bash
+
+    jupyter labextension install my-extension my-other-extension
+
+Use the ``my-extension@version`` syntax to install a specific version of an
+extension, for example:
+
+.. code:: bash
+
+    jupyter labextension install my-extension@1.2.3
+
+You can also install an extension that is not uploaded to npm, i.e.,
+``my-extension`` can be a local directory containing the extension, a gzipped
+tarball, or a URL to a gzipped tarball.
+
+If you are installing/uninstalling several extensions in several stages,
+you may want to defer rebuilding the application by including the flag
+``--no-build`` in the install/uninstall step. Once you are ready to
+rebuild, you can run the command:
+
+.. code:: bash
+
+    jupyter lab build
+
+.. note::
+   If you are rebuilding JupyterLab on Windows, you may encounter a
+   ``FileNotFoundError`` due to the default path length on Windows.  Node
+   modules are stored in a deeply nested directory structure, so paths can get
+   quite long. If you have administrative access and are on Windows 8 or 10,
+   you can update the registry setting using these instructions:
+   https://stackoverflow.com/a/37528731.
 
 Managing Extensions
 ~~~~~~~~~~~~~~~~~~~
@@ -110,45 +153,6 @@ You can enable an extension using the command:
 .. code:: bash
 
     jupyter labextension enable my-extension
-
-.. _install_command:
-
-Installing Extensions with ``jupyter labextension``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-You can install new extensions distributed as single JavaScript packages via
-npm into the application using the command:
-
-.. code:: bash
-
-    jupyter labextension install my-extension my-other-extension
-
-Use the ``my-extension@version`` syntax to install a specific version of an
-extension, for example:
-
-.. code:: bash
-
-    jupyter labextension install my-extension@1.2.3
-
-You can also install an extension that is not uploaded to npm, i.e.,
-``my-extension`` can be a local directory containing the extension, a gzipped
-tarball, or a URL to a gzipped tarball.
-
-If you are installing/uninstalling several extensions in several stages,
-you may want to defer rebuilding the application by including the flag
-``--no-build`` in the install/uninstall step. Once you are ready to
-rebuild, you can run the command:
-
-.. code:: bash
-
-    jupyter lab build
-
-
-**Note**
-If using Windows, you may encounter a `FileNotFoundError` due to the default PATH length on
-Windows.  Node modules are stored in a nested file structure, so the path can get quite
-long.  If you have administrative access and are on Windows 8 or 10, you can update the
-registry setting using these instructions: https://stackoverflow.com/a/37528731.
 
 
 Advanced Usage
