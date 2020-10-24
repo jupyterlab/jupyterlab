@@ -355,17 +355,6 @@
 }
 
 /*
-  Companion packages dialog
-*/
-
-input[type='checkbox'] {
-  appearance: checkbox;
-  -webkit-appearance: checkbox;
-  -moz-appearance: checkbox;
-  height: auto;
-}
-
-/*
   Generic dialog
 */
 .jp-extensionmanager-dialog .jp-extensionmanager-dialog-subheader {
