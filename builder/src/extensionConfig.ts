@@ -194,33 +194,42 @@ function generateConfig({
     }
   }
 
+  const customConfigPath = path.join(packagePath, 'webpack.config.js');
+  let customWebpackConfig = {};
+  if (fs.existsSync(customConfigPath)) {
+    customWebpackConfig = require(customConfigPath);
+  }
   const config = [
-    merge(baseConfig, {
-      mode,
-      devtool,
-      entry: {},
-      output: {
-        filename: '[name].[contenthash].js',
-        path: outputPath,
-        publicPath: staticUrl || 'auto'
+    merge(
+      baseConfig,
+      {
+        mode,
+        devtool,
+        entry: {},
+        output: {
+          filename: '[name].[contenthash].js',
+          path: outputPath,
+          publicPath: staticUrl || 'auto'
+        },
+        module: {
+          rules: [{ test: /\.html$/, use: 'file-loader' }]
+        },
+        plugins: [
+          new ModuleFederationPlugin({
+            name: data.name,
+            library: {
+              type: 'var',
+              name: ['_JUPYTERLAB', data.name]
+            },
+            filename: 'remoteEntry.[contenthash].js',
+            exposes,
+            shared
+          }),
+          new CleanupPlugin()
+        ]
       },
-      module: {
-        rules: [{ test: /\.html$/, use: 'file-loader' }]
-      },
-      plugins: [
-        new ModuleFederationPlugin({
-          name: data.name,
-          library: {
-            type: 'var',
-            name: ['_JUPYTERLAB', data.name]
-          },
-          filename: 'remoteEntry.[contenthash].js',
-          exposes,
-          shared
-        }),
-        new CleanupPlugin()
-      ]
-    })
+      customWebpackConfig
+    )
   ].concat(extras);
 
   if (mode === 'development') {
