@@ -155,6 +155,330 @@ You can enable an extension using the command:
     jupyter labextension enable my-extension
 
 
+Using the Extension Manager
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To manage your extensions, you can use the extension manager. By default, the
+manager is disabled. You can enable it by searching **Extension Manager** in the command palette.
+
+.. figure:: images/extension_manager_enable_manager.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Enable extension manager by searching in the command palette
+
+You can also enable it with the following steps:
+
+
+   - Go into advanced settings editor.
+   - Open the Extension Manager section.
+   - Add the entry "enabled": true.
+   - Save the settings.
+   - If prompted whether you are sure, read the warning, and click "Enable"
+     if you are still sure.
+
+Once enabled, you should see a new tab appear in the :ref:`left sidebar <left-sidebar>`.
+
+
+.. figure:: images/extension_manager_default.png
+   :align: center
+   :class: jp-screenshotls 
+
+   **Figure:** The default view has three components: a search bar, an "Installed"
+   section, and a "Discover" section.
+
+
+Disclaimer
+^^^^^^^^^^
+
+.. danger::
+
+    Installing an extension allows it to execute arbitrary code on the
+    server, kernel, and in the client's browser. Therefore we ask you 
+    to explicitly acknowledge this.
+
+
+By default, the disclaimer is not acknowledged.
+
+.. figure:: images/listings/disclaimer_unchecked.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** User has not acknowledged the disclaimer
+
+
+As the disclaimer is not acknowledged, you can search for an extension,
+but can not install it (no install button is available).
+
+.. figure:: images/listings/disclaimer_unchecked_noinstall.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** With Disclaimer unchecked, you can not install an extension
+
+
+To install an extension, you first have to explicitly acknowledge the disclaimer.
+Once done, this will remain across sessions and the user does not have to 
+check it again.
+
+.. figure:: images/listings/disclaimer_checked.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Disclaimer checked
+
+For ease of use, you can hide the disclaimer so it takes less space on
+your screen.
+
+.. figure:: images/listings/disclaimer_hidden.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Disclaimer is hidden
+
+
+Finding Extensions
+^^^^^^^^^^^^^^^^^^
+
+You can use the extension manager to find extensions for JupyterLab. To discovery
+freely among the currently available extensions, expand the "Discovery" section.
+This triggers a search for all JupyterLab extensions on the NPM registry, and
+the results are listed according to the `registry's sort order
+<https://docs.npmjs.com/searching-for-and-choosing-packages-to-download#package-search-rank-criteria>`__.
+An exception to this sort order is that extensions released by the Jupyter
+organization are always placed first. These extensions are distinguished by
+a small Jupyter icon next to their name.
+
+
+.. image:: images/extension_manager_discover.png
+   :align: center
+   :class: jp-screenshot
+   :alt: Screenshot showing the discovery extension listing.
+
+
+Alternatively, you can limit your discovery by using the search bar. This
+performs a free-text search of JupyterLab extensions on the NPM registry.
+
+.. image:: images/extension_manager_search.png
+   :align: center
+   :class: jp-screenshot
+   :alt: Screenshot showing an example search result
+
+
+Installing an Extension
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Once you have found an extension that you think is interesting, install
+it by clicking the "Install" button of the extension list entry.
+
+
+.. danger::
+
+    Installing an extension allows it to execute arbitrary code on the
+    server, kernel, and in the client's browser. You should therefore
+    avoid installing extensions you do not trust, and watch out for
+    any extensions trying to masquerade as a trusted extension.
+
+
+A short while after starting the install of an extension, a drop-down should
+appear under the search bar indicating that the extension has been
+downloaded, but that a rebuild is needed to complete the installation.
+
+
+.. image:: images/extension_manager_rebuild.png
+   :align: center
+   :class: jp-screenshot
+   :alt: Screenshot showing the rebuild indicator
+
+
+If you want to install/uninstall other extensions as well, you can ignore
+the rebuild notice until you have made all the changes you want. Once satisfied,
+click the 'Rebuild' button to start a rebuild in the background.
+Once the rebuild completes, a dialog will pop up, indicating that a reload of
+the page is needed in order to load the latest build into the browser.
+
+If you ignore the rebuild notice by mistake, simply refresh your browser
+window to trigger a new rebuild check.
+
+
+Managing Installed Extensions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When there are some installed extensions, they will be shown in the "Installed"
+section. These can then be uninstalled or disabled. Disabling an extension will
+prevent it from being activated, but without rebuilding the application.
+
+
+Companion packages
+^^^^^^^^^^^^^^^^^^
+
+During installation of an extension, JupyterLab will inspect the package
+metadata for any
+:ref:`instructions on companion packages <ext-author-companion-packages>`.
+Companion packages can be:
+
+   - Notebook server extensions (or any other packages that need to be
+     installed on the Notebook server).
+   - Kernel packages. An example of companion packages for the
+     kernel are Jupyter Widget packages, like the `ipywidgets <https://ipywidgets.readthedocs.io/en/stable>`__
+     Python package for the
+     `@jupyter-widgets/jupyterlab-manager package <https://www.npmjs.com/package/@jupyter-widgets/jupyterlab-manager>`__.
+
+If JupyterLab finds instructions for companion packages, it will present
+a dialog to notify you about these. These are informational only, and it
+will be up to you to take these into account or not.
+
+
+.. _extension_listings:
+
+Listings
+~~~~~~~~
+
+When searching extensions, JupyterLab displays the complete search result and 
+the user is free to install any extension. This is the :ref:`default_mode`.
+
+To bring more security, you or your administrator can enable ``blocklists`` or ``allowlists``
+mode. JupyterLab will check the extensions against the defined listings.
+
+.. warning::
+
+    Only one mode at a time is allowed. If you or your server administrator configures
+    both block and allow listings, the JupyterLab server will not start.
+
+
+.. figure:: images/listings/simultaneous_block_allow_listings.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Simultaneous block and allow listings
+
+
+The following details the behavior for the :ref:`blocklist_mode` and the :ref:`allowlist_mode`.
+The details to enable configure the listings can be read :ref:`listings_conf`. 
+
+.. _default_mode:
+
+Default mode
+^^^^^^^^^^^^
+
+In the ``default`` mode, no listing is enabled and the search behavior is unchanged and
+is the one described previously.
+
+.. _blocklist_mode:
+
+Blocklist mode
+^^^^^^^^^^^^^^
+
+Extensions can be freely downloaded without going through a vetting process.
+However, users can add malicious extensions to a blocklist. The extension manager 
+will show all extensions except for those that have 
+been explicitly added to the blocklist. Therfore, the extension manager 
+does not allow you to install blocklisted extensions.
+
+If you, or your administrator, has enabled the blocklist mode,
+JupyterLab will use the blocklist and remove all blocklisted
+extensions from your search result.
+
+If you have installed an extension before it has been blocklisted,
+the extension entry in the installed list will be highlighted
+in red. It is recommended that you uninstall it. You can move
+your mouse on the question mark icon to read the instructions.
+
+.. figure:: images/listings/installed_blocklisted.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** Blocklisted installed extension which should be removed
+
+
+.. _allowlist_mode:
+
+Allowlist mode
+^^^^^^^^^^^^^^
+
+An allowlist maintains a set of approved extensions that users can freely 
+search and install. Extensions need to go through some sort of vetting process 
+before they are added to the allowlist. When using an allowlist, the extension manager 
+will only show extensions that have been explicitly added to the allowlist.
+
+If you, or your administrator, has enabled the allowlist mode
+JupyterLab will use the allowlist and only show extensions present
+in the withelist. The other extensions will not be show in the search result.
+
+If you have installed an allowlisted extension and at some point
+in time that extension is removed from the allowlist, the extension entry 
+in the installed list will be highlighted in red. It is recommended that 
+you uninstall it. You can move your mouse on the question mark icon to
+read the instructions.
+
+.. figure:: images/listings/installed_allowlisted.png
+   :align: center
+   :class: jp-screenshot
+
+   **Figure:** The second of the installed extensions was removed from the allowlist and should be removed
+
+.. _listings_conf:
+
+Listing Configuration
+^^^^^^^^^^^^^^^^^^^^^
+
+You or your administrator can use the following traits to define the listings loading.
+
+- ``blocklist_uris``: A list of comma-separated URIs to fetch a blocklist file from
+- ``allowlist_uris``: A list of comma-separated URIs to fetch an allowlist file from
+- ``listings_refresh_seconds``: The interval delay in seconds to refresh the lists
+- ``listings_request_options``: The optional kwargs to use for the listings HTTP requests
+
+For example, to enable blocklist, launch the server with ``--LabServerApp.blocklist_uris=http://example.com/blocklist.json`` where ``http://example.com/blocklist.json`` is a blocklist JSON file as described below.
+
+The details for the listings_request_options are listed
+on `this page <https://2.python-requests.org/en/v2.7.0/api/#requests.request>`__  
+(for example, you could pass ``{'timeout': 10}`` to change the HTTP request timeout value).
+
+The listings are json files hosted on the URIs you have given.
+
+For each entry, you have to define the `name` of the extension as published in the NPM registry.
+The ``name`` attribute supports regular expressions.
+
+Optionally, you can also add some more fields for your records (``type``, ``reason``, ``creation_date``,
+``last_update_date``). These optional fields are not used in the user interface.
+
+This is an example of a blocklist file.
+
+.. code:: json
+
+   {
+   "blocklist": [
+      {
+         "name": "@jupyterlab-examples/launcher",
+         "type": "jupyterlab",
+         "reason": "@jupyterlab-examples/launcher is blocklisted for test purpose - Do NOT take this for granted!!!",
+         "creation_date": "2020-03-11T03:28:56.782Z",
+         "last_update_date":  "2020-03-11T03:28:56.782Z"
+      }
+   ]
+   }
+
+
+In the following allowlist example a ``@jupyterlab/*`` will allowlist 
+all jupyterlab organization extensions.
+
+.. code:: json
+
+   {
+   "allowlist": [
+      {
+         "name": "@jupyterlab/*",
+         "type": "jupyterlab",
+         "reason": "All @jupyterlab org extensions are allowlisted, of course...",
+         "creation_date": "2020-03-11T03:28:56.782Z",
+         "last_update_date":  "2020-03-11T03:28:56.782Z"
+      }
+   ]
+   }
+
+
+
 Advanced Usage
 ~~~~~~~~~~~~~~
 
