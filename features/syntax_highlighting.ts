@@ -77,11 +77,10 @@ export class CMSyntaxHighlighting extends CodeMirrorIntegration {
           continue;
         }
 
-        let old_mode = editor.getOption('mode');
-
         // change the mode if the majority of the code is the foreign code
         if (coverage > this.settings.composite.foreignCodeThreshold) {
           editors_with_current_highlight.add(ce_editor);
+          let old_mode = editor.getOption('mode');
           if (old_mode != mode.mime) {
             editor.setOption('mode', mode.mime);
           }
