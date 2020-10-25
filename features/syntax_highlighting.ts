@@ -29,10 +29,12 @@ const FEATURE_ID = PLUGIN_ID + ':syntax_highlighting';
 export class CMSyntaxHighlighting extends CodeMirrorIntegration {
   lab_integration: SyntaxLabIntegration;
   settings: IFeatureSettings<LSPSyntaxHighlightingSettings>;
+  editors_with_active_highlight: Set<CodeMirrorEditor>;
 
   constructor(options: IEditorIntegrationOptions) {
     super(options);
     this.virtual_document.changed.connect(this.update_mode.bind(this), this);
+    this.editors_with_active_highlight = new Set();
   }
 
   private get_mode(language: string) {
@@ -52,10 +54,12 @@ export class CMSyntaxHighlighting extends CodeMirrorIntegration {
 
   update_mode() {
     let root = this.virtual_document;
+    let editors_with_current_highlight = new Set<CodeMirrorEditor>();
+
     for (let map of root.foreign_document_maps) {
       for (let [range, block] of map.entries()) {
-        let ce_editor = block.editor;
-        let editor = (ce_editor as CodeMirrorEditor).editor;
+        let ce_editor = block.editor as CodeMirrorEditor;
+        let editor = ce_editor.editor;
         let lines = editor.getValue('\n');
         let total_area = lines.concat('').length;
 
@@ -75,6 +79,7 @@ export class CMSyntaxHighlighting extends CodeMirrorIntegration {
 
         // change the mode if the majority of the code is the foreign code
         if (coverage > this.settings.composite.foreignCodeThreshold) {
+          editors_with_current_highlight.add(ce_editor);
           let old_mode = editor.getOption('mode');
           if (old_mode != mode.mime) {
             editor.setOption('mode', mode.mime);
@@ -82,6 +87,16 @@ export class CMSyntaxHighlighting extends CodeMirrorIntegration {
         }
       }
     }
+
+    if (editors_with_current_highlight != this.editors_with_active_highlight) {
+      for (let ce_editor of this.editors_with_active_highlight) {
+        if (!editors_with_current_highlight.has(ce_editor)) {
+          ce_editor.editor.setOption('mode', ce_editor.model.mimeType);
+        }
+      }
+    }
+
+    this.editors_with_active_highlight = editors_with_current_highlight;
   }
 }
 
