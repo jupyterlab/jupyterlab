@@ -230,7 +230,8 @@ export abstract class CodeMirrorIntegration
 
   protected extract_last_character(change: CodeMirror.EditorChange): string {
     if (change.origin === 'paste') {
-      return change.text[0][change.text.length - 1];
+      let last_line = change.text[change.text.length - 1];
+      return last_line[last_line.length - 1];
     } else {
       return change.text[0][0];
     }
