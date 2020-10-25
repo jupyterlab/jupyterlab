@@ -205,7 +205,7 @@ export class LSPConnector
     }
 
     return promise.then(reply => {
-      reply = this.suppress_if_needed(reply);
+      reply = this.suppress_if_needed(reply, token);
       this.trigger_kind = CompletionTriggerKind.Invoked;
       return reply;
     });
@@ -413,9 +413,17 @@ export class LSPConnector
     return Promise.resolve(undefined);
   }
 
-  private suppress_if_needed(reply: CompletionHandler.ICompletionItemsReply) {
+  private suppress_if_needed(
+    reply: CompletionHandler.ICompletionItemsReply,
+    token: CodeEditor.IToken
+  ) {
     if (this.trigger_kind == AdditionalCompletionTriggerKinds.AutoInvoked) {
-      if (reply.start == reply.end) {
+      if (
+        // do not auto-invoke if no match found
+        reply.start == reply.end ||
+        // do not auto-invoke if only one match found and this match is exactly the same as the current token
+        (reply.items.length === 1 && reply.items[0].insertText === token.value)
+      ) {
         return {
           start: reply.start,
           end: reply.end,
