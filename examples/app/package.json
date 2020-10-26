@@ -40,8 +40,8 @@
     "@jupyterlab/translation-extension": "^3.0.0-rc.6",
     "@jupyterlab/ui-components-extension": "^3.0.0-rc.6",
     "es6-promise": "~4.2.8",
-    "react": "~16.13.1",
-    "react-dom": "~16.13.1"
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
   },
   "devDependencies": {
     "css-loader": "~3.2.0",
