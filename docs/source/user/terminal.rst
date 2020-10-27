@@ -1,6 +1,5 @@
 .. _terminal:
 
-==========
 Terminals
 ==========
 
@@ -43,9 +42,9 @@ re-open it using the Running tab in the left sidebar:
 
 
 
-~~~~~~~~~~~~
+
 Copy/Paste
-~~~~~~~~~~~~
+----------
 
 For macOS users,  ``Cmd+C`` and ``Cmd+V`` work as usual.
 

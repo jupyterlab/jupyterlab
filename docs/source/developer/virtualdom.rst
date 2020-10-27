@@ -1,7 +1,7 @@
 .. _react:
 
 React
------
+=====
 
 
 Many JupyterLab APIs require `Lumino`

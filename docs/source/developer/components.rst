@@ -1,5 +1,5 @@
 Using JupyterLab components
----------------------------
+===========================
 
 JupyterLab is built with many re-usable components that are
 independently `published on npm <https://www.npmjs.com/search?q=%40jupyterlab>`_.
@@ -36,7 +36,7 @@ the ``examples`` directory and enter:
     python main.py
 
 Dissecting the 'filebrowser' example
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------
 
 The filebrowser example provides a stand-alone implementation of a
 filebrowser. Here's what the filebrowser's user interface looks like:

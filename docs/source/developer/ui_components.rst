@@ -32,7 +32,7 @@ current JupyterLab theme.
 icon system introduced in JupyterLab v2.0.
 
 How JupyterLab handles icons
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The @jupyterlab/ui-components package provides icons to the rest of
 JupyterLab, in the form of a set of ``LabIcon`` instances (currently
@@ -40,7 +40,7 @@ about 80). All of the icons in the core JupyterLab packages are rendered
 using one of these ``LabIcon`` instances.
 
 Using the icons in your own code
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can use any of JupyterLab icons in your own code via an ``import``
 statement. For example, to use ``jupyterIcon`` you would first do:
@@ -50,7 +50,7 @@ statement. For example, to use ``jupyterIcon`` you would first do:
    import { jupyterIcon } from '@jupyterlab/ui-components';
 
 How to render an icon into a DOM node
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Icons can be added as children to any ``div`` or ``span`` nodes using
 the ``icon.element(...)`` method (where ``icon`` is any instance of
@@ -72,7 +72,7 @@ parameters into ``.element(...)``. Any valid CSS parameter can be used
 instead of ``foo-bar: '8px'``, you’d need to use ``fooBar: '8px'``.
 
 How to render an icon as a React component
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Icons can also be rendered using React. The ``icon.react`` parameter
 holds a standard React component that will display the icon on render.
@@ -115,7 +115,7 @@ can result in a `memory
 leak <https://stackoverflow.com/a/48198011/425458>`__.
 
 How to create your own custom ``LabIcon``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 You can create your own custom icon by constructing a new instance of
 ``LabIcon``:
@@ -131,7 +131,7 @@ where ``name`` should be of the form “your-pkg:icon-name”, and
 ``svgstr`` is the raw contents of your icon’s svg file.
 
 How to create a new ``LabIcon`` from an external svg file
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Although you can copy-and-paste an svg directly into the ``LabIcon``
 constructor, the best practice is to keep the svg for each of your icons
@@ -159,7 +159,7 @@ You can then ``import`` the contents of an svg file:
    });
 
 Sync icon color to JupyterLab theme
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. raw:: html
 
@@ -171,7 +171,7 @@ Sync icon color to JupyterLab theme
 | In other words, each element of your svg that a ``fill="..."`` or a ``stroke="..."`` property should also have a ``class="jp-icon<whatever>"`` property.
 
 Available icon classes
-^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""
 
 .. raw:: html
 
@@ -218,7 +218,7 @@ lighest/darkest background color, while ``jp-icon-accent1`` is somewhat
 darker/lighter, and so forth.
 
 Adding classes to a one-color icon
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""
 
 For most simple, one-color icons, it is desirable for the icon's color
 to strongly constrast with that of the application's background. You can
@@ -243,7 +243,7 @@ acheive this using one of the ``jp-iconX`` classes.
    </svg>
 
 Adding classes to a multi-colored icon
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""
 
 For more complex icons, each element that needs to match the background
 should be annotated with a ``jp-icon-accentX`` class, while each element
@@ -273,10 +273,10 @@ that needs to contrast with the background should be annotated with a
    </svg>
 
 Background
-~~~~~~~~~~
+^^^^^^^^^^
 
 Icon handling in Jupyterlab
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""""""
 
 Pre JupyterLab 2.0, most icons were created using the icons-as-css-background
 pattern:
@@ -336,7 +336,7 @@ What you end up with is a DOM node (by default a ‘div’) that has an
 inline svg node as a child.
 
 ``background-image`` vs inline svg
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""
 
 The big limitation of the old icon-as-css-background pattern is that svg
 images rendered as ``background-image`` are invisible to CSS. On the

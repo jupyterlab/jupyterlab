@@ -1,7 +1,7 @@
 .. _extension_migration:
 
 JupyterLab 1.x to 2.x Extension Migration Guide
-------------------------------------------------
+===============================================
 
 This is a migration guide for updating extensions that support JupyterLab 1.x
 to work in JupyterLab 2.x. We will look at two examples of extensions that
@@ -14,7 +14,7 @@ cover most of the APIs that extension authors might be using:
   https://github.com/jupyterlab/jupyterlab-shortcutui/pull/53/files
 
 Upgrading library versions
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------
 
 The ``@phosphor/*`` libraries that JupyterLab 1.x uses have been renamed to
 ``@lumino/*``. Updating your ``package.json`` is straightforward. The easiest
@@ -44,7 +44,7 @@ there.
   ``package.json`` should depend on version ``^2.0.0`` of these packages.
 
 Migrating from ``@phosphor`` to ``@lumino``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------
 
 The foundational packages used by JupyterLab are now all prefixed with the NPM
 namespace ``@lumino`` instead of ``@phosphor``. The APIs for these packages
@@ -99,7 +99,7 @@ the new ``@lumino`` namespaced packages:
     e.g. ``lm-dragenter``
 
 Updating former ``@jupyterlab/coreutils`` imports
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------------
 
 JupyterLab 2.0 introduces several new packages with classes and tokens that
 have been moved out of ``@jupyterlab/coreutils`` into their own packages. These
@@ -135,7 +135,7 @@ exports have been moved.
 ============================  =================================
 
 Using ``Session`` and ``SessionContext`` to manage kernel sessions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------------------
 .. note::
 
   For full API documentation and examples of how to use
@@ -170,7 +170,7 @@ For example, consider how the ``@jupyterlab/debugger`` extension's
   from a new kernel connection), you can do ``await kernel.info``.
 
 Using the new icon system and ``LabIcon``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------
 .. note::
 
   For full API documentation and examples of how to use

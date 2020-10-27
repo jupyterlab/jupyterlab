@@ -1,7 +1,7 @@
 .. _user_extensions:
 
 Extensions
-----------
+==========
 
 Fundamentally, JupyterLab is designed as an extensible environment. JupyterLab
 extensions can customize or enhance any part of JupyterLab. They can provide
@@ -21,7 +21,7 @@ documentation <developer_extensions>`.
     :depth: 1
 
 Installing Extensions
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 A JupyterLab extension is a JavaScript package that runs in the browser. An
 extension's JavaScript can be distributed as a single JavaScript package
@@ -71,7 +71,7 @@ and install it directly.
 .. _install_command:
 
 Managing Extensions with ``jupyter labextension``
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------------------
 
 The ``jupyter labextension`` command enables you to install or uninstall
 extensions from `npm
@@ -163,7 +163,7 @@ You can enable a disabled extension with:
 
 
 Managing Extensions Using the Extension Manager
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------------------------
 
 You can use the Extension Manager in JupyterLab to manage extensions that are
 distributed as single JavaScript packages on npm.
@@ -472,7 +472,7 @@ all jupyterlab organization extensions.
 
 
 Advanced Usage
-~~~~~~~~~~~~~~
+--------------
 
 Any information that JupyterLab persists is stored in its application directory,
 including settings and built assets.
@@ -525,7 +525,7 @@ switch back to the default yarn registry, you will need to clean your
 
 
 Disabling Rebuild Checks
-''''''''''''''''''''''''
+""""""""""""""""""""""""
 
 JupyterLab automatically checks to see if it needs to rebuild on startup. In
 some cases, such as automated testing, you may wish to disable the startup
@@ -572,7 +572,7 @@ we can ensure better isolation between conda or other virtual environments.
 .. _extensions-1:
 
 extensions
-''''''''''
+""""""""""
 
 The ``extensions`` directory has the packed tarballs for each of the
 installed extensions for the app. If the application directory is not
@@ -586,7 +586,7 @@ again. If the ``sys-prefix`` version cannot be uninstalled, its plugins
 can still be ignored using ``ignoredPackages`` metadata in ``settings``.
 
 schemas
-'''''''
+"""""""
 
 The ``schemas`` directory contains `JSON
 Schemas <http://json-schema.org/>`__ that describe the settings used by
@@ -594,7 +594,7 @@ individual extensions. Users may edit these settings using the
 JupyterLab Settings Editor.
 
 settings
-''''''''
+""""""""
 
 The ``settings`` directory may contain ``page_config.json``, ``overrides.json``, and/or
 ``build_config.json`` files, depending on which configurations are
@@ -602,9 +602,7 @@ set on your system.
 
 .. _page_configjson:
 
-**page_config.json**
-
-
+*page_config.json*
 
 The ``page_config.json`` data is used to provide configuration data to the
 application environment.
@@ -654,7 +652,7 @@ An example of a ``page_config.json`` file is:
 
 .. _overridesjson:
 
-**overrides.json**
+*overrides.json*
 
 You can override default values of the extension settings by
 defining new default values in an ``overrides.json`` file.
@@ -674,7 +672,7 @@ added in the application settings directory (by default this is the
 
 .. _build_configjson:
 
-**build_config.json**
+*build_config.json*
 
 
 The ``build_config.json`` file is used to track the local directories
@@ -696,7 +694,7 @@ that have been explicitly uninstalled. An example of a
 
 
 staging and static
-''''''''''''''''''
+""""""""""""""""""
 
 The ``static`` directory contains the assets that will be loaded by the
 JupyterLab application. The ``staging`` directory is used to create the
@@ -708,7 +706,7 @@ application directory if they exist. You can run
 (i.e., the application without any extensions) instead.
 
 themes
-''''''
+""""""
 
 The ``themes`` directory contains assets (such as CSS and icons) for
 JupyterLab theme extensions.
@@ -717,7 +715,7 @@ JupyterLab theme extensions.
 JupyterLab User Settings Directory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 The user settings directory contains the user-level settings for Jupyter extensions.
-By default, the location is ``~/.jupyter/lab/user-settings/``, where ``~`` is the user's home directory. This folder is not in the JupyterLab application directory,
+By default, the location is ``-/.jupyter/lab/user-settings/``, where ``-`` is the user's home directory. This folder is not in the JupyterLab application directory,
 because these settings are typically shared across Python environments.
 The location can be modified using the ``JUPYTERLAB_SETTINGS_DIR`` environment variable. Files are automatically created in this folder as modifications are made
 to settings from the JupyterLab UI. They can also be manually created.  The files
@@ -733,7 +731,7 @@ JupyterLab Workspaces Directory
 JupyterLab sessions always reside in a workspace. Workspaces contain the state
 of JupyterLab: the files that are currently open, the layout of the application
 areas and tabs, etc. When the page is refreshed, the workspace is restored.
-By default, the location is ``~/.jupyter/lab/workspaces/``, where ``~`` is the user's home directory. This folder is not in the JupyterLab application directory,
+By default, the location is ``-/.jupyter/lab/workspaces/``, where ``-`` is the user's home directory. This folder is not in the JupyterLab application directory,
 because these files are typically shared across Python environments.
 The location can be modified using the ``JUPYTERLAB_WORKSPACES_DIR`` environment variable. These files can be imported and exported to create default "profiles",
 using the :ref:`workspace command line tool <url-workspaces-cli>`.

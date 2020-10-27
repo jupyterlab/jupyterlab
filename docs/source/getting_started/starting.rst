@@ -1,7 +1,7 @@
 .. _starting:
 
 Starting JupyterLab
--------------------
+===================
 
 Start JupyterLab using:
 

@@ -1,8 +1,8 @@
 Notebook
---------
+========
 
 Background
-~~~~~~~~~~
+----------
 
 .. _architecture-walkthrough:
 
@@ -25,7 +25,7 @@ constructs a new
 from a model and populates the toolbar with default widgets.
 
 Structure of the Notebook plugin
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 The Notebook plugin provides a model and widgets for dealing with
 notebook files.
@@ -49,7 +49,7 @@ A code cell contains a list of **output models**. The list of cells and
 the list of outputs can be observed for changes.
 
 Cell operations
-'''''''''''''''
+"""""""""""""""
 
 The NotebookModel cell list supports single-step operations such as
 moving, adding, or deleting cells. Compound cell list operations, such
@@ -61,7 +61,7 @@ undo feature. (Note: CodeMirror editor's undo does not cover cell
 metadata changes.)
 
 Metadata
-''''''''''''''''''''
+""""""""
 
 The notebook model and the cell model (i.e. notebook cells) support
 getting and setting metadata through an
@@ -93,7 +93,7 @@ The NotebookModel cell list provides ways to do fine-grained changes to
 the cell list.
 
 Higher level actions using NotebookActions
-''''''''''''''''''''''''''''''''''''''''''
+""""""""""""""""""""""""""""""""""""""""""
 
 Higher-level actions are contained in the
 `NotebookActions <https://jupyterlab.github.io/jupyterlab/classes/_notebook_src_index_.notebookactions.html>`__
@@ -102,7 +102,7 @@ cell and select the next cell, merge or split cells at the cursor,
 delete selected cells, etc.
 
 Widget hierarchy
-''''''''''''''''
+""""""""""""""""
 
 A Notebook widget contains a list of `cell
 widgets <https://jupyterlab.github.io/jupyterlab/classes/_cells_src_index_.cell.html>`__,
@@ -127,7 +127,7 @@ list. An OutputArea uses a notebook-specific
 object to render ``display_data`` output messages.
 
 Rendering output messages
-'''''''''''''''''''''''''
+"""""""""""""""""""""""""
 
 A **Rendermime plugin** provides a pluggable system for rendering output
 messages. Default renderers are provided for markdown, html, images,
@@ -142,7 +142,7 @@ notebook-specific widget state.
 .. _extend-notebook-plugin:
 
 How to extend the Notebook plugin
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------
 
 We'll walk through two notebook extensions:
 
