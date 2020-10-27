@@ -24,6 +24,11 @@ Starting in JupyterLab 3.0, extensions are distributed as ``pip`` or
 ``conda`` packages that contain federated JavaScript bundles.  You can write extensions in JavaScript or any language that compiles to JavaScript. We recommend writing extensions in `TypeScript <https://www.typescriptlang.org/>`_, which is used for the JupyterLab core extensions and many popular community extensions.  You use our build tool to generate the bundles that are shipped with the package, typically through a cookiecutter.
 
 
+We encourage extension authors to add the `jupyterlab-extension GitHub topic
+<https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
+to any GitHub extension repository.
+
+
 Goals of the Federated Extension System
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - Users should be able to install and use extensions without requiring ``node`` or a build step
