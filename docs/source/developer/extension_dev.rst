@@ -107,7 +107,8 @@ Here is an example of a custom config that enables the async WebAssembly and top
       }
     };
 
-This custom config will be merged with the default config when building the federated extension with ``jlpm run build``.
+This custom config will be merged with the `default config <https://github.com/jupyterlab/jupyterlab/blob/master/builder/src/webpack.config.base.ts>`_
+when building the federated extension with ``jlpm run build``.
 
 .. note::
    These docs are under construction as we iterate and update tutorials and cookiecutters.
