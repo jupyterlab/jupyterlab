@@ -194,10 +194,17 @@ function generateConfig({
     }
   }
 
-  const customConfigPath = path.join(packagePath, 'webpack.config.js');
-  let customWebpackConfig = {};
-  if (fs.existsSync(customConfigPath)) {
-    customWebpackConfig = require(customConfigPath);
+  // Allow custom webpack config
+  let webpackConfigPath = data.jupyterlab['webpackConfig'];
+  let webpackConfig = {};
+
+  // Use the custom webpack config only if the path to the config
+  // is specified in package.json (opt-in)
+  if (webpackConfigPath) {
+    webpackConfigPath = path.join(packagePath, webpackConfigPath);
+    if (fs.existsSync(webpackConfigPath)) {
+      webpackConfig = require(webpackConfigPath);
+    }
   }
   const config = [
     merge(
@@ -228,7 +235,7 @@ function generateConfig({
           new CleanupPlugin()
         ]
       },
-      customWebpackConfig
+      webpackConfig
     )
   ].concat(extras);
 
