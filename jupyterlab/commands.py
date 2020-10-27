@@ -816,24 +816,6 @@ class _AppHandler(object):
         info = self.info
         logger = self.logger
 
-        # Handle federated extensions first
-        if name in info['federated_exts']:
-            data = info['federated_exts'].pop(name)
-            target = data['ext_path']
-            logger.info("Removing: %s" % target)
-            if os.path.isdir(target) and not os.path.islink(target):
-                shutil.rmtree(target)
-            else:
-                os.remove(target)
-            # Remove empty parent dir if necessary
-            if '/' in data['name']:
-                files = os.listdir(os.path.dirname(target))
-                if not len(files):
-                    target = os.path.dirname(target)
-                    if os.path.isdir(target) and not os.path.islink(target):
-                        shutil.rmtree(target)
-            return False
-
         # Allow for uninstalled core extensions.
         if name in info['core_extensions']:
             config = self._read_build_config()
@@ -861,6 +843,9 @@ class _AppHandler(object):
                     del data[extname]
                     self._write_build_config(config)
                 return True
+
+        if name in info['federated_exts']:
+            logger.warn('%s was installed with a package manager. Use the same package manager to uninstall this extension.' % name)
 
         logger.warn('No labextension named "%s" installed' % name)
         return False
