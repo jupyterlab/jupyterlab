@@ -83,7 +83,7 @@ Custom webpack config for federated extensions
 The JupyterLab Federated Extension System uses ``webpack`` to build federated extensions, relying on the
 `Module Federation System <https://webpack.js.org/concepts/module-federation/>`_ added in webpack 5.
 
-To specify a custom webpack to the federated extension build system, extension authors can add the ``webpackConfig`` subkey to the
+To specify a custom webpack config to the federated extension build system, extension authors can add the ``webpackConfig`` subkey to the
 ``package.json`` of their extension::
 
     "jupyterlab": {
