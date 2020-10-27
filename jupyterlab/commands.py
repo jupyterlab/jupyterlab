@@ -816,6 +816,10 @@ class _AppHandler(object):
         info = self.info
         logger = self.logger
 
+        if name in info['federated_exts']:
+            logger.warn('%s was installed with a package manager. Use the same package manager to uninstall this extension.' % name)
+            return False
+
         # Allow for uninstalled core extensions.
         if name in info['core_extensions']:
             config = self._read_build_config()
@@ -843,9 +847,6 @@ class _AppHandler(object):
                     del data[extname]
                     self._write_build_config(config)
                 return True
-
-        if name in info['federated_exts']:
-            logger.warn('%s was installed with a package manager. Use the same package manager to uninstall this extension.' % name)
 
         logger.warn('No labextension named "%s" installed' % name)
         return False
