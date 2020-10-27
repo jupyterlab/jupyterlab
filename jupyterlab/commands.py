@@ -1379,11 +1379,11 @@ class _AppHandler(object):
         """
         compat = dict()
         core_data = self.info['core_data']
-        seen = dict()
+        seen = set()
         for (name, data) in self.info['federated_exts'].items():
             deps = data['dependencies']
             compat[name] = _validate_compatibility(name, deps, core_data)
-            seen[name] = True
+            seen.add(name)
         for (name, data) in self.info['extensions'].items():
             if name in seen:
                 continue
