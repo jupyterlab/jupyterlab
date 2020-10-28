@@ -26,6 +26,16 @@ export namespace Build {
     output: string;
 
     /**
+     * The directory for the schema directory, defaults to the output directory.
+     */
+    schemaOutput?: string;
+
+    /**
+     * The directory for the theme directory, defaults to the output directory
+     */
+    themeOutput?: string;
+
+    /**
      * The names of the packages to ensure.
      */
     packageNames: ReadonlyArray<string>;
@@ -103,7 +113,12 @@ export namespace Build {
   export function ensureAssets(
     options: IEnsureOptions
   ): webpack.Configuration[] {
-    const { output, packageNames } = options;
+    const {
+      output,
+      schemaOutput = output,
+      themeOutput = output,
+      packageNames
+    } = options;
 
     const themeConfig: webpack.Configuration[] = [];
 
@@ -147,7 +162,7 @@ export namespace Build {
         const schemas = glob.sync(
           path.join(path.join(packageDir, schemaDir), '*')
         );
-        const destination = path.join(output, 'schemas', name);
+        const destination = path.join(schemaOutput, 'schemas', name);
 
         // Remove the existing directory if necessary.
         if (fs.existsSync(destination)) {
@@ -187,7 +202,7 @@ export namespace Build {
           index: path.join(name, themePath)
         },
         output: {
-          path: path.resolve(path.join(output, 'themes', name)),
+          path: path.resolve(path.join(themeOutput, 'themes', name)),
           // we won't use these JS files, only the extracted CSS
           filename: '[name].js'
         },

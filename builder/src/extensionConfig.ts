@@ -40,8 +40,8 @@ function generateConfig({
     process.exit(1);
   }
 
-  let outputPath = data.jupyterlab['outputDir'];
-  outputPath = path.join(packagePath, outputPath);
+  const outputPath = path.join(packagePath, data.jupyterlab['outputDir']);
+  const staticPath = path.join(outputPath, 'static');
 
   // Handle the extension entry point and the lib entry point, if different
   const index = require.resolve(packagePath);
@@ -153,7 +153,9 @@ function generateConfig({
   const extras = Build.ensureAssets({
     packageNames: [],
     packagePaths: [packagePath],
-    output: outputPath
+    output: staticPath,
+    schemaOutput: outputPath,
+    themeOutput: outputPath
   });
 
   fs.copyFileSync(
@@ -165,7 +167,7 @@ function generateConfig({
     apply(compiler: any) {
       compiler.hooks.done.tap('Cleanup', () => {
         // Find the remoteEntry file and add it to the package.json metadata
-        const files = glob.sync(path.join(outputPath, 'remoteEntry.*.js'));
+        const files = glob.sync(path.join(staticPath, 'remoteEntry.*.js'));
         let newestTime = -1;
         let newestRemote = '';
         files.forEach(fpath => {
@@ -177,7 +179,7 @@ function generateConfig({
         });
         const data = readJSONFile(path.join(outputPath, 'package.json'));
         const _build: any = {
-          load: path.basename(newestRemote)
+          load: path.join('static', path.basename(newestRemote))
         };
         if (exposes['./extension'] !== undefined) {
           _build.extension = './extension';
@@ -201,7 +203,7 @@ function generateConfig({
       entry: {},
       output: {
         filename: '[name].[contenthash].js',
-        path: outputPath,
+        path: staticPath,
         publicPath: staticUrl || 'auto'
       },
       module: {
