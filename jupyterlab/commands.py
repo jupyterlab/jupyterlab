@@ -698,10 +698,10 @@ class _AppHandler(object):
 
         logger.info('JupyterLab v%s' % info['version'])
 
-        if info['federated_exts'] or info['extensions']:
+        if info['federated_extensions'] or info['extensions']:
             info['compat_errors'] = self._get_extension_compat()
 
-        if info['federated_exts']:
+        if info['federated_extensions']:
             self._list_federated_extensions()
   
         if info['extensions']:
@@ -816,7 +816,7 @@ class _AppHandler(object):
         info = self.info
         logger = self.logger
 
-        if name in info['federated_exts']:
+        if name in info['federated_extensions']:
             logger.warn('%s was installed with a package manager. Use the same package manager to uninstall this extension.' % name)
             return False
 
@@ -1096,8 +1096,7 @@ class _AppHandler(object):
 
         info['disabled_core'] = disabled_core
 
-        federated_exts = get_federated_extensions(self.labextensions_path)
-        info['federated_exts'] = federated_exts
+        info['federated_extensions'] = get_federated_extensions(self.labextensions_path)
         return info
 
     def _populate_staging(self, name=None, version=None, static_url=None,
@@ -1380,7 +1379,7 @@ class _AppHandler(object):
         compat = dict()
         core_data = self.info['core_data']
         seen = set()
-        for (name, data) in self.info['federated_exts'].items():
+        for (name, data) in self.info['federated_extensions'].items():
             deps = data['dependencies']
             compat[name] = _validate_compatibility(name, deps, core_data)
             seen.add(name)
@@ -1454,7 +1453,7 @@ class _AppHandler(object):
 
         logger.info('   %s dir: %s' % (ext_type, dname))
         for name in sorted(names):
-            if name in info['federated_exts']:
+            if name in info['federated_extensions']:
                 continue
             data = info['extensions'][name]
             version = data['version']
@@ -1492,15 +1491,15 @@ class _AppHandler(object):
         error_accumulator = {}
 
         ext_dirs = dict((p, False) for p in self.labextensions_path)
-        for value in info['federated_exts'].values():
+        for value in info['federated_extensions'].values():
             ext_dirs[value['ext_dir']] = True
 
         for ext_dir, has_exts in ext_dirs.items():
             if not has_exts:
                 continue
             logger.info(ext_dir)
-            for name in info['federated_exts']:
-                data = info['federated_exts'][name]
+            for name in info['federated_extensions']:
+                data = info['federated_extensions'][name]
                 if data['ext_dir'] != ext_dir:
                     continue
                 version = data['version']
