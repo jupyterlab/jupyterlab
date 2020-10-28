@@ -1,12 +1,12 @@
 Terminology
------------
+===========
 
 Learning to use a new technology and its architecture can be complicated
 by the jargon used to describe components. We provide this terminology
 guide to help smooth the learning the components.
 
 Terms
-~~~~~
+-----
 
 -  *Application* - The main application object that hold the application
    shell, command registry, and keymap registry. It is provided to all

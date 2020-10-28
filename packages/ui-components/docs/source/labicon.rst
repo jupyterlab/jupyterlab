@@ -54,7 +54,7 @@ Like any React component, ``icon.react`` can be used in various ways.
 For example, here is how you would add the Jupyter icon to the render
 tree of another React component:
 
-.. code:: jsx
+.. code::
 
      public render() {
        return (
@@ -144,7 +144,7 @@ Sync icon color to JupyterLab theme
 | In other words, each element of your svg that a ``fill="..."`` or a ``stroke="..."`` property should also have a ``class="jp-icon<whatever>"`` property.
 
 Available icon classes
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. raw:: html
 
@@ -154,7 +154,7 @@ Available icon classes
 | All colors shown are for the standard light/dark theme, mouse over for hex values.
 
 ``jp-iconX``: contrast to theme background
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""""""
 
 .. raw:: html
 
@@ -174,7 +174,7 @@ background color, while ``jp-icon1`` is somewhat lighter/darker, and so
 forth.
 
 ``jp-icon-accentX``: match to theme background
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""""""""""""""""""""
 
 .. raw:: html
 
@@ -191,7 +191,7 @@ lighest/darkest background color, while ``jp-icon-accent1`` is somewhat
 darker/lighter, and so forth.
 
 Adding classes to a one-color icon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For most simple, one-color icons, it is desirable for the icon's color
 to strongly constrast with that of the application's background. You can
@@ -216,7 +216,7 @@ acheive this using one of the ``jp-iconX`` classes.
    </svg>
 
 Adding classes to a multi-colored icon
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For more complex icons, each element that needs to match the background
 should be annotated with a ``jp-icon-accentX`` class, while each element
@@ -249,7 +249,7 @@ Background
 ----------
 
 Icon handling in Jupyterlab
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Pre JupyterLab 2.0, most icons were created using the icons-as-css-background
 pattern:
@@ -309,7 +309,7 @@ What you end up with is a DOM node (by default a ‘div’) that has an
 inline svg node as a child.
 
 ``background-image`` vs inline svg
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The big limitation of the old icon-as-css-background pattern is that svg
 images rendered as ``background-image`` are invisible to CSS. On the

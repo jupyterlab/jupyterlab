@@ -1,12 +1,12 @@
 .. _installation:
 
 Installation
-------------
+============
 
 JupyterLab can be installed using ``conda``, ``pip``, ``pipenv`` or ``docker``.
 
 conda
-~~~~~
+-----
 
 If you use ``conda``, you can install it with:
 
@@ -15,7 +15,7 @@ If you use ``conda``, you can install it with:
     conda install -c conda-forge jupyterlab
 
 pip
-~~~
+---
 
 If you use ``pip``, you can install it with:
 
@@ -30,7 +30,7 @@ If installing using ``pip install --user``, you must add the user-level
 OS X), you can achieve this by using ``export PATH="$HOME/.local/bin:$PATH"`` command.
 
 pipenv
-~~~~~~
+------
 
 If you use ``pipenv``, you can install it as:
 
@@ -61,7 +61,7 @@ Alternatively, you can run ``jupyter lab`` inside the virtualenv with
     pipenv run jupyter lab
 
 Docker
-~~~~~~
+------
 
 If you have `Docker installed <https://docs.docker.com/install/>`__, you can install and use JupyterLab by selecting one
 of the many `ready-to-run Docker images <https://jupyter-docker-stacks.readthedocs.io/en/latest/using/selecting.html>`__
@@ -72,7 +72,7 @@ JupyterLab is enabled in your container.
 
 
 Installing with Previous Versions of Notebook
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------------------
 
 If you are using a version of Jupyter Notebook earlier than 5.3, then you must also run the following command to enable the JupyterLab
 server extension:
@@ -83,7 +83,7 @@ server extension:
 
 
 Prerequisites
-~~~~~~~~~~~~~
+-------------
 
 JupyterLab requires the Jupyter Notebook version 4.3 or later. To check
 the version of the ``notebook`` package that you have installed:
@@ -94,13 +94,13 @@ the version of the ``notebook`` package that you have installed:
 
 
 Usage with JupyterHub
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 Read the details on our :ref:`JupyterLab on JupyterHub documentation page <jupyterhub>`.
 
 
 Supported browsers
-~~~~~~~~~~~~~~~~~~
+------------------
 
 The latest versions of the following browsers are currently known to work:
 
@@ -117,7 +117,7 @@ A tool like `postcss <https://postcss.org/>`__ can be used to convert the CSS fi
 ``jupyterlab/build`` directory manually if desired.
 
 Usage with private NPM registry
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------
 
 To install extensions, you will need access to a NPM packages registry. Some companies do not allow
 reaching directly public registry and have a private registry. To use it, you need to configure ``npm``
@@ -137,7 +137,7 @@ JupyterLab will pick up that registry automatically.
       python -c "from jupyterlab.commands import AppOptions; print(AppOptions().registry)"
 
 Installation problems
-~~~~~~~~~~~~~~~~~~~~~
+---------------------
 
 If your computer is behind corporate proxy or firewall,
 you may encounter HTTP and SSL errors due to custom security profiles managed by corporate IT departments.
@@ -230,7 +230,7 @@ on connectivity problems to HTTPS servers, you can disable using SSL for ``npm``
     npm set strict-ssl False
 
 Problems with Extensions and Settings
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------------------
 
 Jupyterlab saves settings via `PUT` requests to the server with a JSON5-compatible payload, even though it claims the PUT request is valid JSON. `JSON5 <https://json5.org/>`__ is a superset of JSON that allows comments, etc. There may be deployment problems, manifest as 400 error return codes when saving settings, if these `PUT` requests are rejected by a routing layer that tries to validate the payload as JSON instead of JSON5.
 

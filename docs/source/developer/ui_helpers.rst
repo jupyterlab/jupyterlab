@@ -1,14 +1,14 @@
 User Interface Helpers
-----------------------
+======================
 
 JupyterLab comes with helpers to show or request simple information from a user.
 Those speed up development and ensure a common look and feel.
 
 Dialogs
-~~~~~~~
+-------
 
 Message Dialogs
-'''''''''''''''
+^^^^^^^^^^^^^^^
 
 Helper functions to show a message to the user are available in the ``apputils`` package.
 These dialogs return a ``Promise`` resolving when the user dismisses the dialog.
@@ -19,7 +19,7 @@ There is one helper:
 
 
 Input Dialogs
-'''''''''''''
+^^^^^^^^^^^^^
 
 Helper functions to request a single input from the user are available in the ``apputils``
 package within the ``InputDialog`` namespace. There are four helpers:
@@ -74,7 +74,7 @@ a ``Promise`` resolving in a ``Dialog.IResult`` object.
 
 
 File Dialogs
-''''''''''''
+^^^^^^^^^^^^
 
 Two helper functions to ask a user to open a file or a directory are
 available in the ``filebrowser`` package under the namespace ``FileDialog``.

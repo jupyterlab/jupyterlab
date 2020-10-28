@@ -1,7 +1,7 @@
 .. _developer-extension-points:
 
 Common Extension Points
------------------------
+=======================
 
 Most of the component parts of JupyterLab are designed to be extensible,
 and they provide public APIs that can be requested in extensions via tokens.
@@ -19,7 +19,7 @@ and more detailed descriptions of their public APIs may be found in the
 
 
 Commands
-~~~~~~~~
+--------
 
 Add a Command to the Command Registry
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -103,7 +103,7 @@ This can be useful to make a single command flexible enough to work in multiple 
 
 
 Context Menu
-~~~~~~~~~~~~
+------------
 
 The application context menu is shown when the user right-clicks,
 and is populated with menu items that are most relevant to the thing that the user clicked.
@@ -147,7 +147,7 @@ For example, if you are building a custom React element, it would look like this
 .. _copy_shareable_link:
 
 Copy Shareable Link
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 The file browser provides a context menu item "Copy Shareable Link". The
 desired behavior will vary by deployment and the users it serves. The file
@@ -204,13 +204,13 @@ default plugin provided by the built-in file browser.
 
 
 Icons
-~~~~~
+-----
 
 See :ref:`ui_components`
 
 
 Keyboard Shortcuts
-~~~~~~~~~~~~~~~~~~
+------------------
 
 There are two ways of adding keyboard shortcuts in JupyterLab.
 If you don't want the shortcuts to be user-configurable,
@@ -255,7 +255,7 @@ Shortcuts added to the settings system will be editable by users.
 
 
 Launcher
-~~~~~~~~
+--------
 
 As with menus, keyboard shortcuts, and the command palette, new items can be added
 to the application launcher via commands.
@@ -273,7 +273,7 @@ In addition to providing a command ID, you also provide a category in which to p
 (e.g. 'Notebook', or 'Other'), as well as a rank to determine its position among other items.
 
 Left/Right Areas
-~~~~~~~~~~~~~~~~
+----------------
 
 The left and right areas of JupyterLab are intended to host more persistent user interface
 elements than the main area. That being said, extension authors are free to add whatever
@@ -305,7 +305,7 @@ The recommended ranges for this rank are:
 * 1000: The JupyterLab extension manager.
 
 Main Menu
-~~~~~~~~~
+---------
 
 There are three main ways to extend JupyterLab's main menu.
 
@@ -414,7 +414,7 @@ The available semantic menu items are:
 
 
 Status Bar
-~~~~~~~~~~
+----------
 
 JupyterLab's status bar is intended to show small pieces of contextual information.
 Like the left and right areas, it only expects a Lumino ``Widget``,
@@ -442,7 +442,7 @@ When the ``labStatus`` busy state changes, we update the text content of the
 .. _widget-tracker:
 
 Widget Tracker
-~~~~~~~~~~~~~~
+--------------
 
 Often extensions will want to interact with documents and activities created by other extensions.
 For instance, an extension may want to inject some text into a notebook cell,

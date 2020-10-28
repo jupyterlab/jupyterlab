@@ -1,7 +1,7 @@
 .. _documents:
 
 Documents
----------
+=========
 
 JupyterLab can be extended in several ways:
 
@@ -16,7 +16,7 @@ For this section, the term 'document' refers to any visual thing that
 is backed by a file stored on disk (i.e. uses Contents API).
 
 Overview of document architecture
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------------
 
 A 'document' in JupyterLab is represented by a model instance implementing the `IModel <https://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_index_.documentregistry.imodel.html>`__ interface. The model interface is intentionally fairly small, and concentrates on representing the data in the document and signaling changes to that data. Each model has an associated `context <https://jupyterlab.github.io/jupyterlab/interfaces/_docregistry_src_index_.documentregistry.icontext.html>`__ instance as well. The context for a model is the bridge between the internal data of the document, stored in the model, and the file metadata and operations possible on the file, such as save and revert. Since many objects will need both the context and the model, the context contains a reference to the model as its `.model` attribute.
 
@@ -37,7 +37,7 @@ uses the Document Registry to create models and widgets for documents.
 The Document Manager handles the lifecycle of documents for the application.
 
 Document Registry
-~~~~~~~~~~~~~~~~~
+-----------------
 
 *Document widget extensions* in the JupyterLab application can register:
 
@@ -105,7 +105,7 @@ re-implemented. Instead, the contexts are intended to be the glue
 between the document model and the wider application.
 
 Document Manager
-~~~~~~~~~~~~~~~~
+----------------
 
 The *Document Manager* handles:
 

@@ -1,13 +1,13 @@
 .. _language:
 
 Localization and language
--------------------------
+=========================
 
 Staring with version 3.0, JupyterLab provides the ability to set
 the display language of the user interface.
 
 Language packs
-~~~~~~~~~~~~~~
+--------------
 
 To be able to provide a new display language, you will need to 
 install a language pack.
@@ -16,7 +16,7 @@ Visit the `language packs repository <https://github.com/jupyterlab/language-pac
 for a list of available packs.
 
 Installing
-''''''''''
+""""""""""
 
 Language packs are identified by the four letter code of the language and
 variant they provide. For example, for Simplified Chinese the language
@@ -35,7 +35,7 @@ If you use Pip:
    pip install jupyterlab-language-pack-zh-CN
 
 Changing the display language
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 To change the interface language, select the Settings menu and then
 select the desired language in the Language submenu.

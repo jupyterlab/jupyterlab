@@ -1,7 +1,7 @@
 .. _overview:
 
 Overview
---------
+========
 
 JupyterLab is a next-generation web-based user interface for Project Jupyter.
 
@@ -58,7 +58,7 @@ classic Jupyter Notebook.
 .. _releases:
 
 JupyterLab Releases
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Since JupyterLab 0.32 (February 2018), the releases of JupyterLab are suitable
 for general daily use by both Jupyter novices and users experienced with the
