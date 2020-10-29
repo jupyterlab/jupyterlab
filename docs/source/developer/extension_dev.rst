@@ -77,7 +77,7 @@ Workflow for extension authors
 
 
 Custom webpack config for federated extensions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------------------------
 
 .. warning::
    This feature is *experimental*, as it makes it possible to override the base config used by the
