@@ -817,7 +817,10 @@ class _AppHandler(object):
         logger = self.logger
 
         if name in info['federated_extensions']:
-            logger.warn('%s was installed with a package manager. Use the same package manager to uninstall this extension.' % name)
+            if info['federated_extensions'][name].get('metadata', dict()).get('uninstallInstructions', None):
+                logger.error('JupyterLab cannot uninstall this extension. %s' % info['federated_extensions'][name]['metadata']['uninstallInstructions'])
+            else:
+                logger.error('JupyterLab cannot uninstall %s since it was installed outside of JupyterLab. Use the same method used to install this extension to uninstall this extension.' % name)
             return False
 
         # Allow for uninstalled core extensions.
@@ -1515,6 +1518,13 @@ class _AppHandler(object):
                     extra += ' %s' % GREEN_OK
                 if data['is_local']:
                     extra += '*'
+
+                md = data.get('metadata')
+                if md:
+                    extra += ' (%s, %s)' % (
+                        md['packageManager'],
+                        md['packageName']
+                    )
                 logger.info('        %s v%s%s' % (name, version, extra))
                 if errors:
                     error_accumulator[name] = (version, errors)
