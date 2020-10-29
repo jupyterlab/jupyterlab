@@ -76,9 +76,48 @@ Workflow for extension authors
 - When finished, publish the package to ``pypi``/``conda``
 
 
+Custom webpack config for federated extensions
+----------------------------------------------
+
+.. warning::
+   This feature is *experimental*, as it makes it possible to override the base config used by the
+   JupyterLab Federated Extension System.
+
+   It also exposes the internals of the federated extension build system (namely ``webpack``) to extension authors, which was until now
+   kept as an implementation detail.
+
+The JupyterLab Federated Extension System uses ``webpack`` to build federated extensions, relying on the
+`Module Federation System <https://webpack.js.org/concepts/module-federation/>`_ added in webpack 5.
+
+To specify a custom webpack config to the federated extension build system, extension authors can add the ``webpackConfig`` subkey to the
+``package.json`` of their extension::
+
+    "jupyterlab": {
+      "webpackConfig": "webpack.config.js"
+    }
+
+The webpack config file can be placed in a different location with a custom name::
+
+    "jupyterlab": {
+      "webpackConfig": "./config/test-config.js"
+    }
+
+Here is an example of a custom config that enables the async WebAssembly and top-level ``await`` experiments:
+
+.. code-block:: javascript
+
+    module.exports = {
+      experiments: {
+          topLevelAwait: true,
+          asyncWebAssembly: true,
+      }
+    };
+
+This custom config will be merged with the `default config <https://github.com/jupyterlab/jupyterlab/blob/master/builder/src/webpack.config.base.ts>`_
+when building the federated extension with ``jlpm run build``.
+
 .. note::
    These docs are under construction as we iterate and update tutorials and cookiecutters.
-
 
 Tutorials
 ---------
