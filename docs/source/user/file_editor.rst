@@ -1,7 +1,7 @@
 .. _file-editor:
 
 Text Editor
------------
+===========
 
 The text editor in JupyterLab enables you to edit text files in
 JupyterLab:

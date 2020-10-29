@@ -1,7 +1,7 @@
 .. _user_export:
 
 Exporting Notebooks
--------------------
+===================
 
 JupyterLab allows you to export your jupyter notebook files (``.ipynb``)
 into other file formats such as:
@@ -28,7 +28,8 @@ information visit the
 .. _user_export_revealjs:
 
 Reveal.js Slides
-~~~~~~~~~~~~~~~~
+----------------
+
 In order to export your notebooks as `Reveal.js <https://github.com/hakimel/reveal.js>`__
 slides, follow these steps:
 

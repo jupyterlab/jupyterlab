@@ -1,7 +1,7 @@
 .. _extension_tutorial:
 
 Let's Make an Astronomy Picture of the Day JupyterLab Extension
-----------------------------------------------------------------
+===============================================================
 
 JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,
@@ -32,7 +32,7 @@ By working through this tutorial, you'll learn:
 Sound like fun? Excellent. Here we go!
 
 Set up a development environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 Install conda using miniconda
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -83,7 +83,7 @@ Now we can install the latest version of JupyterLab.
     pip install jupyterlab --pre
 
 Create a repository
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 Create a new repository for your extension (see, for example, the
 `GitHub instructions <https://help.github.com/articles/create-a-repo/>`__. This is an
@@ -91,7 +91,7 @@ optional step, but highly recommended if you want to share your
 extension.
 
 Create an extension project
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 Initialize the project from a cookiecutter
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -206,7 +206,7 @@ JupyterLab to see the effects of changes below.
 
 
 Add an Astronomy Picture of the Day widget
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------
 
 Show an empty panel
 ^^^^^^^^^^^^^^^^^^^
@@ -474,7 +474,7 @@ in the reference project. When it's working, make another git commit.
     git commit -m 'Show a picture in the panel'
 
 Improve the widget behavior
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+---------------------------
 
 Center the image, add attribution, and error messaging
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -888,7 +888,7 @@ of this tutorial.
 .. _packaging your extension:
 
 Packaging your extension
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 
 JupyterLab extensions for JupyterLab 3.0 can be distributed as Python
 packages. The cookiecutter template we used contains all of the Python
@@ -938,7 +938,7 @@ works.
 .. _extension_tutorial_publish:
 
 Publishing your extension
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 You can publish your Python package to the `PyPI <https://pypi.org>`_ or
 `conda-forge <https://conda-forge.org>`_ repositories so users can easily
@@ -963,7 +963,7 @@ You may want to also publish your extension as a JavaScript package to the
    definition.
 
 Learn more
-~~~~~~~~~~
+----------
 
 You've completed the tutorial. Nicely done! If you want to keep
 learning, here are some suggestions about what to try next:

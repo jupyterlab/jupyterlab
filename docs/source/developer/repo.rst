@@ -1,7 +1,7 @@
 .. _developer-guide:
 
 General Codebase Orientation
-----------------------------
+============================
 
 The ``jupyterlab`` repository is a monorepo: it contains code for many
 packages that are versioned and published independently.
@@ -14,7 +14,7 @@ See the `Contributing Guidelines <https://github.com/jupyterlab/jupyterlab/blob/
 for detailed developer installation instructions.
 
 Directories
-~~~~~~~~~~~
+-----------
 
 The repository contains a number of top-level directories, the contents of which
 are described here.

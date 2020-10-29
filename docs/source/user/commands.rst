@@ -1,7 +1,7 @@
 .. _commands:
 
 Command Palette
----------------
+===============
 
 All user actions in JupyterLab are processed through a centralized
 command system. These commands are shared and used throughout JupyterLab

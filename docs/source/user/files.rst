@@ -1,10 +1,10 @@
 .. _working-with-files:
 
 Working with Files
-------------------
+==================
 
 Opening Files
-~~~~~~~~~~~~~
+-------------
 
 The file browser and File menu enable you to work with files and
 directories on your system. This includes opening, creating, deleting,
@@ -95,7 +95,7 @@ filesystem relative path. This can be used for passing arguments to open
 files in functions called in various kernels.
 
 Creating Files and Activities
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-----------------------------
 
 .. _file-create-plus:
 
@@ -142,7 +142,7 @@ from the context menu:
   </div>
 
 Uploading and Downloading
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 
 .. _file-upload:
 

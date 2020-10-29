@@ -14,35 +14,35 @@ User-facing changes
 ^^^^^^^^^^^^^^^^^^^
 
 Extensions can be installed without building JupyterLab with NodeJS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 In JupyterLab 3.0, a new recommended way of distributing and installing extensions as Python pip or conda packages is available. Installing such extensions does not require rebuilding JupyterLab and does not require having NodeJS installed. The previous way of distributing extensions as npm packages requiring rebuilding JupyterLab is still available as well. See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/extensions.html#extensions>`__ for more details.
 
 The JupyterLab interface supports multiple languages
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""""""""""""""""""""""""""""""
 JupyterLab now provides the ability to set the display language of the user interface.
 See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/language.html>`__ for more details.
 
 
 A new visual debugger
-~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""
 
 JupyterLab now ships with a debugger front-end by default, available for kernels that support the new debugging protocol.  See the `documentation <https://jupyterlab.readthedocs.io/en/latest/user/debugger.html>`__ for more details.
 
 
 Improvements to Single Document Mode and Mobile 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""""""""""""""""""""""
 The single-document user interface is now more streamlined. JupyterLab now supports showing the current file in use in the browser URL bar, similar to the classic Jupyter Notebook.
 
 
 Table of Contents is now in core
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""""""""""
 
 The popular Table of Contents extension is now part of core JupyterLab. This core extension makes it easy to see an outline view of notebooks and other documents.
 
 
 Visual filter in file browser 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""""
 
 The file browser now has a filter input which filters the list of files using the same fuzzy matching as the command palette.
 
@@ -50,7 +50,7 @@ For Developers
 ^^^^^^^^^^^^^^
 
 Federated Extensions
-~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""
 
 Users will typically consume federated extensions, which are Python packages with static assets built using ``JupyterLab``.
 See the updated APOD tutorial for the workflow of creating a federated extension from scratch.
@@ -112,7 +112,7 @@ which used this script heavily.  There are two highlighted commits that demonstr
 * Experiment with module federation (`#8385 <https://github.com/jupyterlab/jupyterlab/pull/8385>`__)
 
 Jupyter Server
-~~~~~~~~~~~~~~
+""""""""""""""
 JupyterLab 3.0 uses Jupyter Server instead of the classic Notebook server.  Existing server extensions will be shimmed, but it 
 is advised to update extensions to use `jupyter_server <https://github.com/jupyter/jupyter_server>`__.
 
@@ -125,7 +125,7 @@ is advised to update extensions to use `jupyter_server <https://github.com/jupyt
 * Jupyterlab as server extension (`#7416 <https://github.com/jupyterlab/jupyterlab/pull/7416>`__)
 
 Internationalization
-~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""
 The JupyterLab UI now supports translation.
 
 * Add options to add prefix to strings (`#8946 <https://github.com/jupyterlab/jupyterlab/pull/8946>`__)
@@ -137,14 +137,14 @@ The JupyterLab UI now supports translation.
 * Add translation package (`#8681 <https://github.com/jupyterlab/jupyterlab/pull/8681>`__)
 
 Visual Debugger
-~~~~~~~~~~~~~~~
+"""""""""""""""
 * Add missing return signatures in debugger sidebar (`#9088 <https://github.com/jupyterlab/jupyterlab/pull/9088>`__)
 * Fix invisible breakpoint in debugger (`#8908 <https://github.com/jupyterlab/jupyterlab/pull/8908>`__)
 * Port ``jupyterlab/debugger`` PR #527 to JupyterLab (`#8878 <https://github.com/jupyterlab/jupyterlab/pull/8878>`__)
 * Add jupyterlab debugger to core (`#8747 <https://github.com/jupyterlab/jupyterlab/pull/8747>`__, `#75 <https://github.com/jupyterlab/team-compass/issues/75>`__)
 
 Table of Contents
-~~~~~~~~~~~~~~~~~
+"""""""""""""""""
 * Add tests for the toc (`#8757 <https://github.com/jupyterlab/jupyterlab/pull/8757>`__, `#8558 <https://github.com/jupyterlab/jupyterlab/issues/8558>`__)
 * Change toc to use labicon (`#8692 <https://github.com/jupyterlab/jupyterlab/pull/8692>`__, `#8557 <https://github.com/jupyterlab/jupyterlab/issues/8557>`__)
 * Switch from using settings registry to a signal for notebook collapsing behavior in toc (`#8601 <https://github.com/jupyterlab/jupyterlab/pull/8601>`__)
@@ -152,7 +152,7 @@ Table of Contents
 * Merge toc extension into core (`#8538 <https://github.com/jupyterlab/jupyterlab/pull/8538>`__)
 
 Other
-~~~~~
+"""""
 * Upgrade to TypeScript 4 (`#8883 <https://github.com/jupyterlab/jupyterlab/pull/8883>`__)
 * File browser filter (`#8615 <https://github.com/jupyterlab/jupyterlab/pull/8615>`__)
 * Update yarn.lock. (`#9095 <https://github.com/jupyterlab/jupyterlab/pull/9095>`__)
@@ -209,7 +209,7 @@ Other
 * Add a debugger section to the user docs and contributing guide (`#8977 <https://github.com/jupyterlab/jupyterlab/pull/8977>`__)
 
 Single Document Mode and Mobile Enhancements
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""""""""""""""""""""""
 * Make the single document title widget work for widgets that are not main area widgets (`#9078 <https://github.com/jupyterlab/jupyterlab/pull/9078>`__)
 * Add border at top of single-document open menus (`#9096 <https://github.com/jupyterlab/jupyterlab/pull/9096>`__, `#9065 <https://github.com/jupyterlab/jupyterlab/issues/9065>`__)
 * Implement a simple checkbox for single-document mode in the menu bar. (`#9100 <https://github.com/jupyterlab/jupyterlab/pull/9100>`__, `#8292 <https://github.com/jupyterlab/jupyterlab/issues/8292>`__)
@@ -221,7 +221,7 @@ Single Document Mode and Mobile Enhancements
 * Incrementally improve jupyterlab mobile ux (`#8456 <https://github.com/jupyterlab/jupyterlab/pull/8456>`__)
 
 Benchmarks (now a separate repository)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+""""""""""""""""""""""""""""""""""""""
 * Move benchmarks to seperate repo (`#8795 <https://github.com/jupyterlab/jupyterlab/pull/8795>`__)
 * Fix off by one error in benchmark samples (`#8785 <https://github.com/jupyterlab/jupyterlab/pull/8785>`__)
 * Benchmark params configurable and increase timeout (`#8786 <https://github.com/jupyterlab/jupyterlab/pull/8786>`__)
@@ -545,7 +545,7 @@ For developers
 See :ref:`extension_migration` for help in migrating extensions to JupyterLab 2.0.
 
 Backward incompatible changes
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""""
 
 * Switch from ``@phosphor`` to ``@lumino`` dependencies. (`#7582 <https://github.com/jupyterlab/jupyterlab/pull/7582>`__, `#7534 <https://github.com/jupyterlab/jupyterlab/issues/7534>`__, `#7763 <https://github.com/jupyterlab/jupyterlab/pull/7763>`__, `#7762 <https://github.com/jupyterlab/jupyterlab/issues/7762>`__, `#7595 <https://github.com/jupyterlab/jupyterlab/pull/7595>`__)
 * Factor out the ``settingsregistry`` and ``statedb`` packages from coreutils (`#7681 <https://github.com/jupyterlab/jupyterlab/pull/7681>`__, `#7615 <https://github.com/jupyterlab/jupyterlab/issues/7615>`__)
@@ -562,7 +562,7 @@ Backward incompatible changes
 
 
 Other changes
-~~~~~~~~~~~~~
+"""""""""""""
 * New property inspector used to display the properties of the currently selected main area widget (`#7665 <https://github.com/jupyterlab/jupyterlab/pull/7665>`__, `#7664 <https://github.com/jupyterlab/jupyterlab/issues/7664>`__, `#7718 <https://github.com/jupyterlab/jupyterlab/pull/7718>`__, `#7686 <https://github.com/jupyterlab/jupyterlab/issues/7686>`__)
 * Allow metadata for launcher items (`#7654 <https://github.com/jupyterlab/jupyterlab/pull/7654>`__, `#7652 <https://github.com/jupyterlab/jupyterlab/issues/7652>`__)
 * Allow default file browser to restore manually. (`#7695 <https://github.com/jupyterlab/jupyterlab/pull/7695>`__, `#4009 <https://github.com/jupyterlab/jupyterlab/issues/4009>`__)

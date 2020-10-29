@@ -1,12 +1,12 @@
 .. _issue:
 
 Reporting an issue
-------------------
+==================
 
 Thank you for providing feedback about JupyterLab.
 
 Diagnosing an Issue
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 If you find a problem in JupyterLab, please follow the steps below to diagnose and report the issue. Following these steps helps you diagnose if the problem is likely from JupyterLab or from a different project.
 
@@ -50,7 +50,7 @@ You might also check your system for:
 .. _create-issue:
 
 Creating an issue
-~~~~~~~~~~~~~~~~~
+-----------------
 
 Before creating an issue, search in the issue tracker for relevant issues. If you find an issue describing your problem, comment there with the following information instead of creating a new issue. If you find a relevant resolved issue (closed and locked for discussion), create a new issue and reference the resolved issue.
 
