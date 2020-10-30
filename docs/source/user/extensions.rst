@@ -23,12 +23,14 @@ documentation <developer_extensions>`.
 Installing Extensions
 ---------------------
 
-A JupyterLab extension is a JavaScript package that runs in the browser. An
-extension's JavaScript can be distributed as a single JavaScript package
-(which requires a rebuild of JupyterLab to activate it), or starting in
-JupyterLab 3.0, can be bundled together with its dependencies (which does not
-require a rebuild of JupyterLab to activate it). Rebuilding JupyterLab
-requires Node.js to be :ref:`installed <installing_nodejs>`.
+A JupyterLab extension is a JavaScript package that can be installed into
+JupyterLab and runs in the browser. An extension contains one or more plugins
+that extend JupyterLab. An extension's JavaScript can be distributed as a
+single JavaScript package (which requires a rebuild of JupyterLab to activate
+it), or starting in JupyterLab 3.0, can be bundled together with its
+dependencies (which does not require a rebuild of JupyterLab to activate it).
+Rebuilding JupyterLab requires Node.js to be :ref:`installed
+<installing_nodejs>`.
 
 An extension can be installed using the `pip <https://pypi.org/>`__ or `conda
 <https://anaconda.org/>`__ package managers, or using the Jupyter Lab tools to

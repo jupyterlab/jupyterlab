@@ -3,26 +3,89 @@
 Extension Developer Guide
 =========================
 
-JupyterLab can be extended in four ways via:
+The JupyterLab application is comprised of a core application object and a set
+of plugins. JupyterLab plugins provide nearly every function in JupyterLab,
+including notebooks, document editors and viewers, code consoles, terminals,
+themes, the file browser, contextual help system, debugger, and settings
+editor. Plugins even provide more fundamental parts of the application, such
+as the menu system, status bar, and the underlying communication mechanism
+with the server.
 
--  **application plugins (top level):** Application plugins extend the
-   functionality of JupyterLab itself.
--  **mime renderer extensions (top level):** Mime Renderer extensions are
-   a convenience for creating an extension that can render mime data and
-   potentially render files of a given type.
--  **theme extensions (top level):** Theme extensions allow you to customize the appearance of
-   JupyterLab by adding your own fonts, CSS rules, and graphics to the application.
--  **document widget extensions (lower level):** Document widget extensions
-   extend the functionality of document widgets added to the
-   application, and we cover them in :ref:`documents`.
+JupyterLab can be extended with several types of plugins:
 
-A JupyterLab application is comprised of:
+-  **application plugins:** Application plugins are the fundamental building
+   block of JupyterLab functionality. Application plugins interact with
+   JupyterLab and other plugins by requiring objects provided by other
+   plugins, and optionally providing their own objects to the system.
+-  **mime renderer plugins:** Mime renderer plugins are a simplified,
+   way to extend JupyterLab to render custom mime data in notebooks and
+   files. These plugins are automatically converted to equivalent application
+   plugins by JupyterLab when they are loaded.
+-  **theme plugins:** Theme plugins are a simplified way to customize the
+   appearance of JupyterLab by adding your own fonts, CSS rules, and graphics
+   to JupyterLab. These plugins are automatically converted to equivalent
+   application plugins by JupyterLab when they are loaded.
 
--  A core Application object
--  Plugins
+Another common pattern for extending JupyterLab document widgets with
+application plugins is covered in :ref:`documents`.
+
+JupyterLab Extensions
+---------------------
+
+Plugins are distributed in JupyterLab extensions. A JupyterLab extension is a
+JavaScript package that can be installed into JupyterLab and exports one or
+more plugins. JuptyerLab extensions are most commonly distributed to users via
+NPM or in Python pip or conda packages. An extension can be installed into
+JupyterLab in one of two ways:
+
+- A single JavaScript package. In this case, JupyterLab will need to
+  rebuild itself as a web application to incorporate the extension and its
+  dependencies. This rebuilding process compiles all extensions installed this
+  way and the core JupyterLab extensions into a single optimized application
+  bundle. This rebuilding step requires Node.js and may take a lot of time and
+  memory, so is inconvenient to end users (and some users have reported that
+  they could not install all the extensions they wanted to because they ran
+  out of memory rebuilding JupyterLab, particularly in resource-limited
+  containers).
+- (new in JupyterLab 3.0, recommended) A "federated" JavaScript bundle. In
+  this case, the extension developer uses tools provided by JupyterLab to
+  compile the extension into a JavaScript bundle that includes the
+  non-JupyterLab JavaScript dependencies, then distributes the resulting
+  bundle in, say, a Python pip or conda package. JupyterLab can load these
+  federated extensions directly from the bundle without having to rebuild
+  itself. This means the end user does not have to have Node.js and can
+  immediately use the extension without a costly rebuild, but may use a little
+  more network bandwidth to load the federated extensions. 
+  
+An extension may be distributed as both a single JavaScript package published
+on NPM and as a federated extension bundle published in a Python package,
+giving users the choice of how to install it. Also, a user may install some
+extensions as single JavaScript packages (rebuilding JupyterLab to incoporate
+those in the base application) and some other extensions as federated bundles
+which are loaded dynamically in the browser.
+
+Because federated extensions do not require a JupyterLab rebuild, they have a
+distinct advantage in multiuser systems where JuptyerLab is installed at the
+system level. On such systems, only the system administrator has permissions
+to rebuild JupyterLab and install single JavaScript package extensions. Since
+federated extensions can be installed at the system level, per-environment
+level, or per-user level, each user can have their own separate set of
+federated extensions that are loaded dynamically in their browser on top of
+the system-wide JuptyerLab.
+
+.. tip::
+   We recommend extensions be distributed as federated bundles in Python
+   packages for user convenience.
+
+Writing extensions
+------------------
 
 Starting in JupyterLab 3.0, extensions are distributed as ``pip`` or
 ``conda`` packages that contain federated JavaScript bundles.  You can write extensions in JavaScript or any language that compiles to JavaScript. We recommend writing extensions in `TypeScript <https://www.typescriptlang.org/>`_, which is used for the JupyterLab core extensions and many popular community extensions.  You use our build tool to generate the bundles that are shipped with the package, typically through a cookiecutter.
+
+
+Packaging extensions
+--------------------
 
 
 We encourage extension authors to add the `jupyterlab-extension GitHub topic
