@@ -65,7 +65,7 @@
     "to-string-loader": "^1.1.6",
     "url-loader": "~4.1.0",
     "webpack": "^5.3.1",
-    "webpack-cli": "^3.3.10",
+    "webpack-cli": "^4.1.0",
     "webpack-merge": "^5.1.2",
     "which": "^2.0.2",
     "worker-loader": "^3.0.2"
