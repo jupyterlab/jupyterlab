@@ -194,15 +194,15 @@ def watch_labextension(path, labextensions_path, logger=None, development=False,
         logger.info('Building extension in %s' % path)
 
     # Check to see if we need to create a symlink
-    federated_exts = get_federated_extensions(labextensions_path)
+    federated_extensions = get_federated_extensions(labextensions_path)
 
     with open(pjoin(ext_path, 'package.json')) as fid:
         ext_data = json.load(fid)
 
-    if ext_data['name'] not in federated_exts:
+    if ext_data['name'] not in federated_extensions:
         develop_labextension_py(ext_path, sys_prefix=True)
     else:
-        full_dest = pjoin(federated_exts[ext_data['name']]['ext_dir'], ext_data['name'])
+        full_dest = pjoin(federated_extensions[ext_data['name']]['ext_dir'], ext_data['name'])
         output_dir = pjoin(ext_path, ext_data['jupyterlab'].get('outputDir', 'static'))
         if not osp.islink(full_dest):
             shutil.rmtree(full_dest)

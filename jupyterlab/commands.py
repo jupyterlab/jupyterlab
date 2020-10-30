@@ -698,10 +698,10 @@ class _AppHandler(object):
 
         logger.info('JupyterLab v%s' % info['version'])
 
-        if info['federated_exts'] or info['extensions']:
+        if info['federated_extensions'] or info['extensions']:
             info['compat_errors'] = self._get_extension_compat()
 
-        if info['federated_exts']:
+        if info['federated_extensions']:
             self._list_federated_extensions()
   
         if info['extensions']:
@@ -816,22 +816,11 @@ class _AppHandler(object):
         info = self.info
         logger = self.logger
 
-        # Handle federated extensions first
-        if name in info['federated_exts']:
-            data = info['federated_exts'].pop(name)
-            target = data['ext_path']
-            logger.info("Removing: %s" % target)
-            if os.path.isdir(target) and not os.path.islink(target):
-                shutil.rmtree(target)
+        if name in info['federated_extensions']:
+            if info['federated_extensions'][name].get('install', dict()).get('uninstallInstructions', None):
+                logger.error('JupyterLab cannot uninstall this extension. %s' % info['federated_extensions'][name]['install']['uninstallInstructions'])
             else:
-                os.remove(target)
-            # Remove empty parent dir if necessary
-            if '/' in data['name']:
-                files = os.listdir(os.path.dirname(target))
-                if not len(files):
-                    target = os.path.dirname(target)
-                    if os.path.isdir(target) and not os.path.islink(target):
-                        shutil.rmtree(target)
+                logger.error('JupyterLab cannot uninstall %s since it was installed outside of JupyterLab. Use the same method used to install this extension to uninstall this extension.' % name)
             return False
 
         # Allow for uninstalled core extensions.
@@ -1110,8 +1099,7 @@ class _AppHandler(object):
 
         info['disabled_core'] = disabled_core
 
-        federated_exts = get_federated_extensions(self.labextensions_path)
-        info['federated_exts'] = federated_exts
+        info['federated_extensions'] = get_federated_extensions(self.labextensions_path)
         return info
 
     def _populate_staging(self, name=None, version=None, static_url=None,
@@ -1393,11 +1381,11 @@ class _AppHandler(object):
         """
         compat = dict()
         core_data = self.info['core_data']
-        seen = dict()
-        for (name, data) in self.info['federated_exts'].items():
+        seen = set()
+        for (name, data) in self.info['federated_extensions'].items():
             deps = data['dependencies']
             compat[name] = _validate_compatibility(name, deps, core_data)
-            seen[name] = True
+            seen.add(name)
         for (name, data) in self.info['extensions'].items():
             if name in seen:
                 continue
@@ -1468,7 +1456,7 @@ class _AppHandler(object):
 
         logger.info('   %s dir: %s' % (ext_type, dname))
         for name in sorted(names):
-            if name in info['federated_exts']:
+            if name in info['federated_extensions']:
                 continue
             data = info['extensions'][name]
             version = data['version']
@@ -1506,15 +1494,15 @@ class _AppHandler(object):
         error_accumulator = {}
 
         ext_dirs = dict((p, False) for p in self.labextensions_path)
-        for value in info['federated_exts'].values():
+        for value in info['federated_extensions'].values():
             ext_dirs[value['ext_dir']] = True
 
         for ext_dir, has_exts in ext_dirs.items():
             if not has_exts:
                 continue
             logger.info(ext_dir)
-            for name in info['federated_exts']:
-                data = info['federated_exts'][name]
+            for name in info['federated_extensions']:
+                data = info['federated_extensions'][name]
                 if data['ext_dir'] != ext_dir:
                     continue
                 version = data['version']
@@ -1530,6 +1518,13 @@ class _AppHandler(object):
                     extra += ' %s' % GREEN_OK
                 if data['is_local']:
                     extra += '*'
+
+                install = data.get('install')
+                if install:
+                    extra += ' (%s, %s)' % (
+                        install['packageManager'],
+                        install['packageName']
+                    )
                 logger.info('        %s v%s%s' % (name, version, extra))
                 if errors:
                     error_accumulator[name] = (version, errors)
