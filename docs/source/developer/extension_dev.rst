@@ -77,6 +77,115 @@ the system-wide JuptyerLab.
    We recommend extensions be distributed as federated bundles in Python
    packages for user convenience.
 
+
+Writing an Extension
+--------------------
+
+
+We encourage extension authors to add the `jupyterlab-extension GitHub topic
+<https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
+to any GitHub extension repository.
+
+
+Resources
+^^^^^^^^^
+
+Tutorials, cookie cutters, and examples
+
+
+
+package.json metadata
+^^^^^^^^^^^^^^^^^^^^^
+
+
+Custom webpack config
+"""""""""""""""""""""
+
+Disabling other extensions
+""""""""""""""""""""""""""
+
+Federation data
+"""""""""""""""
+
+Sharing configuration
+"""""""""""""""""""""
+
+Companion packages
+""""""""""""""""""
+
+
+Packaging extensions
+^^^^^^^^^^^^^^^^^^^^
+
+Federated Extensions
+^^^^^^^^^^^^^^^^^^^^
+
+
+``install.json``
+
+How federated extensions work
+"""""""""""""""""""""""""""""
+
+Steps for building
+""""""""""""""""""
+
+Directory walkthrough
+"""""""""""""""""""""
+
+
+
+Migrating extensions
+^^^^^^^^^^^^^^^^^^^^
+
+
+
+Plugins
+-------
+
+Mime renderers
+^^^^^^^^^^^^^^
+
+Theme plugins
+^^^^^^^^^^^^^
+
+
+Advanced plugins
+----------------
+
+Interacting with other plugins
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Common extension points
+"""""""""""""""""""""""
+
+
+Settings
+^^^^^^^^
+
+Menus
+^^^^^
+
+Context menus
+^^^^^^^^^^^^^
+
+Using React
+^^^^^^^^^^^
+
+
+Development workflow
+--------------------
+
+
+
+
+
+
+
+Older Docs
+==========
+
+
+
 Writing extensions
 ------------------
 
@@ -87,20 +196,10 @@ Starting in JupyterLab 3.0, extensions are distributed as ``pip`` or
 Packaging extensions
 --------------------
 
-
 We encourage extension authors to add the `jupyterlab-extension GitHub topic
 <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
 to any GitHub extension repository.
 
-
-Goals of the Federated Extension System
----------------------------------------
-- Users should be able to install and use extensions without requiring ``node`` or a build step
-- Extension authors should be able to easily build and distribute extensions
-- The existing capabilities of built-in extensions should still work
-- Administrators should retain the ability to set global configuration and packages where possible
-- Federated extensions should layer on top of existing extensions similar to how  ``pip install --user`` works
-- Extensions should be discoverable
 
 Implementation
 --------------
