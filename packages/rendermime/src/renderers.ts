@@ -762,10 +762,10 @@ namespace Private {
       }
       node.setAttribute(name, url);
     } catch (err) {
-        // If there was an error getting the url,
-        // just make it an empty link and report the error.
-        node.setAttribute(name, '');
-        throw err;
+      // If there was an error getting the url,
+      // just make it an empty link and report the error.
+      node.setAttribute(name, '');
+      throw err;
     }
   }
 

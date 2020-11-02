@@ -75,7 +75,7 @@ try {
 module.exports = {
   bail: true,
   module: { rules },
-  resolve: { 
+  resolve: {
     alias: phosphorAlias,
     fallback: { url: false, buffer: false }
   },
