@@ -642,6 +642,8 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         page_config.setdefault('buildCheck', not self.core_mode and not self.dev_mode)
         page_config['devMode'] = self.dev_mode
         page_config['token'] = self.serverapp.token
+        page_config['exposeAppInBrowser'] = self.expose_app_in_browser
+        page_config['quitButton'] = self.serverapp.quit_button
 
         # Client-side code assumes notebookVersion is a JSON-encoded string
         page_config['notebookVersion'] = json.dumps(jpserver_version_info)
