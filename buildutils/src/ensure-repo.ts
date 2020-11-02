@@ -24,8 +24,10 @@ type Dict<T> = { [key: string]: T };
 
 // Data to ignore.
 const MISSING: Dict<string[]> = {
+  '@jupyterlab/coreutils': ['path'],
   '@jupyterlab/buildutils': ['path', 'webpack'],
-  '@jupyterlab/testutils': ['fs'],
+  '@jupyterlab/builder': ['path'],
+  '@jupyterlab/testutils': ['fs',  'path'],
   '@jupyterlab/vega5-extension': ['vega-embed']
 };
 
