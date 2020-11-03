@@ -29,10 +29,6 @@
   padding-bottom: 8px;
 }
 
-.jp-TableOfContents-content li:hover .toc-Collapser-child {
-  background: var(--jp-layout-color2);
-}
-
 .jp-TableOfContents {
   display: flex;
   flex-direction: column;
@@ -176,11 +172,20 @@
   bottom: 0px;
 }
 
+.toc-entry-holder:hover .toc-Collapser-child {
+  background: var(--jp-layout-color2);
+}
+
 .toc-active-cell .toc-Collapser-child {
   background: var(--jp-brand-color1);
 }
 
 .toc-active-cell .toc-Collapser-child:hover {
+  background: var(--jp-brand-color0);
+  opacity: 1;
+}
+
+.toc-active-cell:hover .toc-Collapser-child {
   background: var(--jp-brand-color0);
   opacity: 1;
 }
