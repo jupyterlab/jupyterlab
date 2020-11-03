@@ -1259,6 +1259,10 @@ namespace Private {
    * A class which manages a panel and sorts its widgets by rank.
    */
   export class PanelHandler {
+    constructor() {
+      MessageLoop.installMessageHook(this._panel, this._panelChildHook);
+    }
+
     /**
      * Get the panel managed by the handler.
      */
@@ -1278,6 +1282,39 @@ namespace Private {
       ArrayExt.insert(this._items, index, item);
       this._panel.insertWidget(index, widget);
     }
+
+    /**
+     * A message hook for child add/remove messages on the main area dock panel.
+     */
+    private _panelChildHook = (
+      handler: IMessageHandler,
+      msg: Message
+    ): boolean => {
+      switch (msg.type) {
+        case 'child-added':
+          {
+            const widget = (msg as Widget.ChildMessage).child;
+            // If we already know about this widget, we're done
+            if (this._items.find(v => v.widget === widget)) {
+              break;
+            }
+
+            // Otherwise, add to the end by default
+            const rank = this._items[this._items.length - 1].rank;
+            this._items.push({ widget, rank });
+          }
+          break;
+        case 'child-removed':
+          {
+            const widget = (msg as Widget.ChildMessage).child;
+            ArrayExt.removeFirstWhere(this._items, v => v.widget === widget);
+          }
+          break;
+        default:
+          break;
+      }
+      return true;
+    };
 
     private _items = new Array<Private.IRankItem>();
     private _panel = new Panel();
