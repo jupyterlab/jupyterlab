@@ -19,10 +19,6 @@ export class Switch extends Widget {
     this._button.className = 'jp-switch';
     this._button.setAttribute('role', 'switch');
 
-    this._button.addEventListener('click', () => {
-      this.value = !this.value;
-    });
-
     this._label.className = 'jp-switch-label';
 
     const track = document.createElement('div');
@@ -76,6 +72,24 @@ export class Switch extends Widget {
   set caption(x: string) {
     this._button.title = x;
     this._label.title = x;
+  }
+
+  handleEvent(event: Event): void {
+    switch (event.type) {
+      case 'click':
+        this.value = !this.value;
+        break;
+      default:
+        break;
+    }
+  }
+
+  protected onAfterAttach(): void {
+    this._button.addEventListener('click', this);
+  }
+
+  protected onBeforeDetach() {
+    this._button.removeEventListener('click', this);
   }
 
   private _button = document.createElement('button');
