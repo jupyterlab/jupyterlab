@@ -48,8 +48,10 @@ module.exports = {
   bail: true,
   plugins: [
     new webpack.DefinePlugin({
+      // Needed for Blueprint. See https://github.com/palantir/blueprint/issues/4393
       'process.env': '{}',
-      process: {}
+      // Needed for various packages using cwd(), like the path polyfill
+      process: { cwd: () => '/' }
     })
   ]
 };
