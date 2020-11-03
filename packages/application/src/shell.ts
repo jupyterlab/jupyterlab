@@ -195,9 +195,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const bottomPanel = (this._bottomPanel = new BoxPanel());
     const hboxPanel = new BoxPanel();
 
-    const titleHandler = (this._titleHandler = new Private.PanelHandler());
     const centerPanel = new BoxPanel();
-
+    const titleHandler = (this._titleHandler = new Private.PanelHandler());
     const dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
@@ -234,6 +233,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     hsplitPanel.orientation = 'horizontal';
     bottomPanel.direction = 'bottom-to-top';
 
+    BoxLayout.setStretch(titleHandler.panel, 0);
+    BoxLayout.setStretch(dockPanel, 1);
+
     SplitPanel.setStretch(leftHandler.stackedPanel, 0);
     SplitPanel.setStretch(centerPanel, 1);
     SplitPanel.setStretch(rightHandler.stackedPanel, 0);
@@ -242,11 +244,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     BoxPanel.setStretch(hsplitPanel, 1);
     BoxPanel.setStretch(rightHandler.sideBar, 0);
 
-    BoxLayout.setStretch(titleHandler.panel, 0);
-    BoxLayout.setStretch(dockPanel, 1);
     centerPanel.addWidget(titleHandler.panel);
     centerPanel.addWidget(dockPanel);
-
 
     hsplitPanel.addWidget(leftHandler.stackedPanel);
     hsplitPanel.addWidget(centerPanel);
