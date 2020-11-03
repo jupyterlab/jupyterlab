@@ -7,7 +7,6 @@ import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { INotebookHeading } from '../../utils/headings';
 import { CodeComponent } from './codemirror';
 import { OptionsManager } from './options_manager';
-import { twistButton } from './twist_button';
 
 /**
  * Renders a notebook table of contents item.
@@ -43,15 +42,17 @@ function render(
       );
       // Render the headers:
       if (item.type === 'header') {
-        let collapsed = item.cellRef!.model.metadata.get(
-          'toc-hr-collapsed'
-        ) as boolean;
-
-        let button = twistButton({
-          heading: item,
-          collapsed: collapsed || false,
-          onClick: onClick
-        });
+        let button = (
+          <div
+            className="jp-Collapser p-Widget lm-Widget"
+            onClick={(event: any) => {
+              event.stopPropagation();
+              onClick(item);
+            }}
+          >
+            <div className="toc-Collapser-child" />
+          </div>
+        );
 
         // Render the heading item:
         jsx = (
@@ -79,15 +80,17 @@ function render(
         </span>
       );
       if (item.type === 'header') {
-        let collapsed = item.cellRef!.model.metadata.get(
-          'toc-hr-collapsed'
-        ) as boolean;
-
-        let button = twistButton({
-          heading: item,
-          collapsed: collapsed || false,
-          onClick: onClick
-        });
+        let button = (
+          <div
+            className="jp-Collapser p-Widget lm-Widget"
+            onClick={(event: any) => {
+              event.stopPropagation();
+              onClick(item);
+            }}
+          >
+            <div className="toc-Collapser-child" />
+          </div>
+        );
         jsx = (
           <div
             className={
