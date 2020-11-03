@@ -3,6 +3,10 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
+:root {
+  --jp-private-menu-panel-height: 27px;
+}
+
 .lm-Widget.lm-mod-hidden {
   display: none !important;
 }
@@ -48,7 +52,7 @@ body {
 }
 
 #jp-menu-panel {
-  min-height: 26px;
+  min-height: var(--jp-private-menu-panel-height);
   background: var(--jp-layout-color1);
 }
 
@@ -57,8 +61,10 @@ body {
 }
 
 .jp-LabShell[data-shell-mode='single-document'] #jp-menu-panel {
-  padding-left: 20px;
+  padding-left: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
   border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+  /* Adjust min-height so open menus show up in the right place */
+  min-height: calc(var(--jp-private-menu-panel-height) + var(--jp-border-width));
 }
 
 #jp-MainLogo {
