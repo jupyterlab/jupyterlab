@@ -39,7 +39,7 @@ import { IStateDB } from '@jupyterlab/statedb';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
-import { buildIcon } from '@jupyterlab/ui-components';
+import { buildIcon, Switch } from '@jupyterlab/ui-components';
 
 import { each, iter, toArray } from '@lumino/algorithm';
 
@@ -941,6 +941,34 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
 };
 
 /**
+ * The single-document mode switch in the top area.
+ */
+const modeSwitch: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:mode-switch',
+  requires: [ILabShell],
+  activate: (app: JupyterFrontEnd, shell: ILabShell) => {
+    const spacer = new Widget();
+    spacer.id = 'jp-top-spacer';
+    spacer.node.style.flexGrow = '1';
+    shell.add(spacer, 'top', { rank: 1000 });
+
+    const modeSwitch = new Switch();
+    modeSwitch.id = 'jp-single-document-mode';
+    modeSwitch.label = 'Mode';
+    modeSwitch.caption = 'Single-Document Mode';
+    modeSwitch.valueChanged.connect((_, args) => {
+      shell.mode = args.newValue ? 'single-document' : 'multiple-document';
+    });
+    shell.modeChanged.connect((_, mode) => {
+      modeSwitch.value = mode === 'single-document';
+    });
+    modeSwitch.value = shell.mode === 'single-document';
+    shell.add(modeSwitch, 'top', { rank: 1010 });
+  },
+  autoStart: true
+};
+
+/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -955,7 +983,8 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   status,
   info,
   paths,
-  propertyInspector
+  propertyInspector,
+  modeSwitch
 ];
 
 export default plugins;
