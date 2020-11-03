@@ -297,7 +297,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._titleHandler.panel.hide();
     }
 
-
     // Wire up signals to update the title panel of the single document mode to
     // follow the title of this.currentWidget
     this.currentChanged.connect((sender, args) => {
