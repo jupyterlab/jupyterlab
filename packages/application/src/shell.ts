@@ -3,7 +3,7 @@
 
 import { DocumentRegistry, DocumentWidget } from '@jupyterlab/docregistry';
 
-import { classes, DockPanelSvg, LabIcon } from '@jupyterlab/ui-components';
+import { classes, DockPanelSvg, LabIcon, jupyterIcon } from '@jupyterlab/ui-components';
 
 import { ArrayExt, find, IIterator, iter, toArray } from '@lumino/algorithm';
 
@@ -297,6 +297,17 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     } else {
       rootLayout.insertWidget(2, this._menuHandler.panel);
     }
+
+    const logo = new Widget();
+    jupyterIcon.element({
+      container: logo.node,
+      elementPosition: 'center',
+      margin: '2px 2px 2px 8px',
+      height: 'auto',
+      width: '16px'
+    });
+    logo.id = 'jp-MainLogo';
+    this._topHandler.addWidget(logo, 0);
 
     // Set up single-document mode switch in menu bar
     const spacer = new Widget();
