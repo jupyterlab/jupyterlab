@@ -329,7 +329,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     const sdmLabel = document.createElement('label');
     sdmLabel.className = 'jp-slider-label';
-    sdmLabel.textContent = 'Single-Document Mode';
+    sdmLabel.textContent = 'Mode';
     sdmLabel.title = 'Single-Document Mode';
     const sdmTrack = document.createElement('div');
     sdmTrack.className = 'jp-slider-track';
