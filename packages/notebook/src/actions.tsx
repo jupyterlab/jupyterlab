@@ -1265,7 +1265,7 @@ export namespace NotebookActions {
         (cell as CodeCell).outputsScrolled = true;
       }
     });
-    Private.handleState(notebook, state);
+    Private.handleState(notebook, state, scrollIfNeeded = true);
   }
 
   /**
