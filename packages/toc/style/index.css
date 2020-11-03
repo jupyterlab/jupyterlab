@@ -264,7 +264,6 @@
   font-size: 12px;
   color: var(--jp-ui-font-color1);
   padding-left: 15px;
-  /* padding-top: 7px; */
   user-select: none;
   float: right;
 }
@@ -273,7 +272,6 @@
   font-size: 12px;
   color: var(--jp-ui-font-color2);
   padding-left: 15px;
-  /* padding-top: 7px; */
   user-select: none;
 }
 
@@ -384,11 +382,9 @@
   padding-top: 6px;
 }
 
-/* Font level sizes */
-
-/* .toc-level-size-1 {
-  font-size: 16.89px;
-} */
+/* 
+ * Indentation levels
+ */
 
 .toc-level-size-2 {
   margin-left: 31px;
@@ -405,7 +401,3 @@
 .toc-level-size-5 {
   margin-left: 81px;
 }
-
-/* .toc-level-size-default {
-  font-size: 9px;
-} */

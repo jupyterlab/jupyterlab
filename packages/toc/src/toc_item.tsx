@@ -50,6 +50,7 @@ class TOCItem extends React.Component<IProperties, IState> {
     const onClick = (event: React.SyntheticEvent<HTMLSpanElement>) => {
       event.preventDefault();
       event.stopPropagation();
+      // Change the "active cell" to be the cell that was just clicked
       if (event.currentTarget.parentNode) {
         for (const child of event.currentTarget.parentNode?.children) {
           child.classList.remove('toc-active-cell');
