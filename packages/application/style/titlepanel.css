@@ -4,7 +4,7 @@
 |----------------------------------------------------------------------------*/
 
 :root {
-  --jp-private-title-panel-height: 28px;
+  --jp-private-title-panel-height: 36px;
 }
 
 #jp-title-panel {
@@ -16,11 +16,11 @@
 }
 
 #jp-title-panel-title {
-  margin-left: 40px;
+  margin-left: 10px;
 }
 
 #jp-title-panel-title h1 {
-  font-size: 18px;
+  font-size: 20px;
   color: var(--jp-ui-font-color0);
   margin: 0;
   font-weight: normal;
