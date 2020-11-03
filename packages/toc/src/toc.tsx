@@ -72,6 +72,7 @@ export class TableOfContents extends Widget {
       this._monitor.dispose();
       this._monitor = null;
     }
+    console.log(this._current);
     // If we are wiping the ToC, update and return...
     if (!this._current) {
       this.update();

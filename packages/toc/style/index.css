@@ -173,7 +173,9 @@
 }
 
 .toc-entry-holder:hover .toc-Collapser-child {
-  background: var(--jp-layout-color2);
+  box-shadow: var(--jp-elevation-z2);
+  background: var(--jp-brand-color1);
+  opacity: var(--jp-cell-collapser-not-active-hover-opacity);
 }
 
 .toc-active-cell .toc-Collapser-child {
