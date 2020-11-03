@@ -3,7 +3,7 @@
   "version": "3.0.0-rc.6",
   "private": true,
   "scripts": {
-    "build": "webpack",
+    "build": "jlpm run clean && webpack",
     "build:dev": "jlpm run build",
     "build:dev:minimize": "jlpm run build:dev",
     "build:prod": "ensure-max-old-space webpack --config webpack.prod.config.js",
