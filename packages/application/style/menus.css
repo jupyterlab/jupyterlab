@@ -17,7 +17,7 @@
 |----------------------------------------------------------------------------*/
 
 .lm-MenuBar {
-  padding-left: 5px;
+  padding-left: 8px;
   background: var(--jp-layout-color1);
   color: var(--jp-ui-font-color1);
   font-size: var(--jp-ui-font-size1);
