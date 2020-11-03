@@ -91,8 +91,11 @@ describe('LabShell', () => {
       expect(shell.isEmpty('main')).toBe(false);
     });
 
-    it('should test whether the top area is not empty', () => {
-      // account for builtin sdm slider widget
+    it('should test whether the top area is empty', () => {
+      expect(shell.isEmpty('top')).toBe(true);
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'top');
       expect(shell.isEmpty('top')).toBe(false);
     });
 
@@ -149,9 +152,9 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top');
-      // the added widget plus the builtin spacer and sdm slider widgets
+      // the added widget
       console.log(toArray(shell.widgets('top')));
-      expect(toArray(shell.widgets('top')).length).toEqual(3);
+      expect(toArray(shell.widgets('top')).length).toEqual(1);
     });
 
     it('should be a no-op if the widget has no id', () => {
@@ -166,7 +169,7 @@ describe('LabShell', () => {
       widget.id = 'foo';
       shell.add(widget, 'top', { rank: 10 });
       // the added widget plus the builtin spacer and sdm slider widgets
-      expect(toArray(shell.widgets('top')).length).toEqual(3);
+      expect(toArray(shell.widgets('top')).length).toEqual(1);
     });
 
     it('should add widgets according to their ranks', () => {
