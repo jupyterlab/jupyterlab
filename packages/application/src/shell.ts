@@ -258,8 +258,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     BoxLayout.setStretch(bottomPanel, 0);
 
     rootLayout.addWidget(headerPanel);
-    rootLayout.addWidget(titleHandler.panel);
     rootLayout.addWidget(topHandler.panel);
+    rootLayout.addWidget(titleHandler.panel);
     rootLayout.addWidget(hboxPanel);
     rootLayout.addWidget(bottomPanel);
 
