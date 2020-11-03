@@ -89,6 +89,8 @@ button.jp-mod-styled.jp-mod-warn:active {
 .jp-slider-sdm {
   border: none;
   height: 20px;
+  background-color: transparent;
+  color: var(--jp-ui-font-color1);
 }
 
 .jp-slider:hover {
@@ -100,23 +102,23 @@ button.jp-mod-styled.jp-mod-warn:active {
 }
 
 .jp-slider-track {
-  display: flex;
-  align-items: center;
   cursor: pointer;
   background-color: var(--jp-border-color1);
   -webkit-transition: 0.4s;
   transition: 0.4s;
   border-radius: 34px;
-  height: 15px;
+  height: 16px;
   width: 35px;
+  position: relative;
 }
 
 .jp-slider-track::before {
   content: '';
+  position: absolute;
   height: 10px;
   width: 10px;
-  margin-left: 5px;
-  margin-right: 50%;
+  margin: 3px;
+  left: 0px;
   background-color: white;
   -webkit-transition: 0.4s;
   transition: 0.4s;
@@ -128,6 +130,6 @@ button.jp-mod-styled.jp-mod-warn:active {
 }
 
 .jp-slider[aria-checked='true'] .jp-slider-track::before {
-  margin-left: 50%;
-  margin-right: 5px;
+  /* track width (35) - margins (3 + 3) - thumb width (10) */
+  left: 19px;
 }
