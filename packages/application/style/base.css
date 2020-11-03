@@ -47,6 +47,11 @@ body {
   overflow: visible;
 }
 
+#jp-menu-panel {
+  min-height: 26px;
+  background: var(--jp-layout-color1);
+}
+
 #jp-bottom-panel {
   background: var(--jp-layout-color1);
   display: flex;

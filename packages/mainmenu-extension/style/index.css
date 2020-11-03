@@ -3,8 +3,4 @@
 | Distributed under the terms of the Modified BSD License.
 |----------------------------------------------------------------------------*/
 
-.jp-LabShell[data-shell-mode='single-document'] #jp-top-panel #jp-MainLogo {
-  top: -28px;
-}
-
 @import url('~@jupyterlab/mainmenu/style/index.css');
