@@ -1368,7 +1368,7 @@ export namespace DocumentRegistry {
         icon: markdownIcon
       },
       {
-        name: 'pdf',
+        name: 'PDF',
         displayName: trans.__('PDF File'),
         extensions: ['.pdf'],
         mimeTypes: ['application/pdf'],
