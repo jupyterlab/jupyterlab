@@ -58,7 +58,8 @@ body {
 
 #jp-single-document-mode {
   margin: 0px 8px;
-  align-self: center;
+  display: flex;
+  align-items: center;
 }
 
 /* Sibling imports */
