@@ -3,7 +3,6 @@
 
 import * as React from 'react';
 import { IHeading } from '../../utils/headings';
-import { caretDownIcon, caretRightIcon } from '@jupyterlab/ui-components';
 
 /**
  * Callback invoked upon encountering a "click" event.
@@ -45,14 +44,14 @@ interface ITwistButtonProps {
 function twistButton(props: ITwistButtonProps) {
   if (props.collapsed) {
     return (
-      <div className="toc-collapse-button" onClick={wrapper}>
-        <caretRightIcon.react width="25px" />
+      <div className="jp-Collapser p-Widget lm-Widget" onClick={wrapper}>
+        <div className="toc-Collapser-child" />
       </div>
     );
   }
   return (
-    <div className="toc-collapse-button" onClick={wrapper}>
-      <caretDownIcon.react width="25px" />
+    <div className="jp-Collapser p-Widget lm-Widget" onClick={wrapper}>
+      <div className="toc-Collapser-child" />
     </div>
   );
 

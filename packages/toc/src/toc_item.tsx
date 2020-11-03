@@ -9,7 +9,7 @@ import { IHeading } from './utils/headings';
  *
  * @private
  */
-interface IProperties extends React.Props<TOCItem> {
+interface IProperties {
   /**
    * Heading to render.
    */
@@ -50,6 +50,12 @@ class TOCItem extends React.Component<IProperties, IState> {
     const onClick = (event: React.SyntheticEvent<HTMLSpanElement>) => {
       event.preventDefault();
       event.stopPropagation();
+      if (event.currentTarget.parentNode) {
+        for (const child of event.currentTarget.parentNode?.children) {
+          child.classList.remove('toc-active-cell');
+        }
+      }
+      event.currentTarget.classList.add('toc-active-cell');
       heading.onClick();
     };
 

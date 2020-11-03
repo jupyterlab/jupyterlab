@@ -38,7 +38,7 @@ function render(
               numbering +
               options.sanitizer.sanitize(item.html, sanitizerOptions)
           }}
-          className={item.type + '-cell toc-cell-item ' + fontSizeClass}
+          className={item.type + '-cell toc-cell-item'}
         />
       );
       // Render the headers:
@@ -55,7 +55,15 @@ function render(
 
         // Render the heading item:
         jsx = (
-          <div className="toc-entry-holder">
+          <div
+            className={
+              'toc-entry-holder ' +
+              fontSizeClass +
+              (tracker.activeCell?.id === item.cellRef.id
+                ? ''
+                : ' toc-active-cell')
+            }
+          >
             {button}
             {jsx}
           </div>
@@ -66,7 +74,7 @@ function render(
     if (item.type === 'header' || options.showMarkdown) {
       // Render headers/markdown for plain text:
       jsx = (
-        <span className={item.type + '-cell toc-cell-item ' + fontSizeClass}>
+        <span className={item.type + '-cell toc-cell-item'}>
           {numbering + item.text}
         </span>
       );
@@ -81,7 +89,15 @@ function render(
           onClick: onClick
         });
         jsx = (
-          <div className="toc-entry-holder">
+          <div
+            className={
+              'toc-entry-holder ' +
+              fontSizeClass +
+              (tracker.activeCell?.id === item.cellRef.id
+                ? ''
+                : 'toc-active-cell')
+            }
+          >
             {button}
             {jsx}
           </div>
