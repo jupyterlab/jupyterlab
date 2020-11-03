@@ -52,6 +52,15 @@ body {
   background: var(--jp-layout-color1);
 }
 
+.jp-LabShell[data-shell-mode='single-document'] #jp-top-panel {
+  border-bottom: none;
+}
+
+.jp-LabShell[data-shell-mode='single-document'] #jp-menu-panel {
+  padding-left: 20px;
+  border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
+}
+
 #jp-bottom-panel {
   background: var(--jp-layout-color1);
   display: flex;
