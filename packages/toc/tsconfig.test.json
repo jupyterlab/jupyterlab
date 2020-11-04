@@ -1,6 +1,9 @@
 {
   "extends": "../../tsconfigbase.test",
   "include": ["src/*", "test/*"],
+  "compilerOptions": {
+    "lib": ["DOM", "DOM.Iterable"]
+  },
   "references": [
     {
       "path": "../apputils"
