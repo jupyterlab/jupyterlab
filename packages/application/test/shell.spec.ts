@@ -160,15 +160,13 @@ describe('LabShell', () => {
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'top');
-      // the builtin spacer and sdm slider widgets alone
-      expect(toArray(shell.widgets('top')).length).toEqual(2);
+      expect(toArray(shell.widgets('top')).length).toEqual(0);
     });
 
     it('should accept options', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top', { rank: 10 });
-      // the added widget plus the builtin spacer and sdm slider widgets
       expect(toArray(shell.widgets('top')).length).toEqual(1);
     });
 
