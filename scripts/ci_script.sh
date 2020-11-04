@@ -174,17 +174,17 @@ if [[ $GROUP == usage ]]; then
     jupyter lab build --debug
     jupyter lab path --debug
     pushd jupyterlab/tests/mock_packages
-    jupyter labextension link extension --no-build --debug
-    jupyter labextension unlink extension --no-build --debug
-    jupyter labextension link extension --no-build --debug
-    jupyter labextension unlink  @jupyterlab/mock-extension --no-build --debug
+    jupyter labextension link mimeextension --no-build --debug
+    jupyter labextension unlink mimeextension --no-build --debug
+    jupyter labextension link mimeextension --no-build --debug
+    jupyter labextension unlink  @jupyterlab/mock-mime-extension --no-build --debug
     # Test with a full install
-    jupyter labextension install extension  --no-build --debug
+    jupyter labextension install mimeextension  --no-build --debug
     jupyter labextension list --debug
-    jupyter labextension disable @jupyterlab/mock-extension --debug
-    jupyter labextension enable @jupyterlab/mock-extension --debug
+    jupyter labextension disable @jupyterlab/mock-mime-extension --debug
+    jupyter labextension enable @jupyterlab/mock-mime-extension --debug
     jupyter labextension disable @jupyterlab/notebook-extension --debug
-    jupyter labextension uninstall @jupyterlab/mock-extension --no-build --debug
+    jupyter labextension uninstall @jupyterlab/mock-mime-extension --no-build --debug
     jupyter labextension uninstall @jupyterlab/notebook-extension --no-build --debug
     # Test with a dynamic install
     jupyter labextension develop extension --debug
@@ -198,8 +198,8 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension enable @jupyterlab/mock-extension --debug
     jupyter labextension uninstall @jupyterlab/mock-extension --debug
     jupyter labextension list 1>labextensions 2>&1
-    # bail if mock-extension was listed
-    cat labextensions | grep -q "mock-extension" && exit 1
+    # check the federated extension is still listed after jupyter labextension uninstall
+    cat labextensions | grep -q "mock-extension"
     popd
 
     jupyter lab workspaces export > workspace.json --debug
