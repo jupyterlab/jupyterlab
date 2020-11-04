@@ -297,51 +297,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       this._titleHandler.panel.hide();
     }
 
-    // Set up single-document mode switch in menu bar
-    const spacer = new Widget();
-    spacer.id = 'jp-top-spacer';
-    this.add(spacer, 'top', { rank: 1000 });
-
-    // switch accessibility refs:
-    // https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/Roles/Switch_role
-    // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/button#Accessibility_concerns
-    const sdmSwitch = document.createElement('button');
-    sdmSwitch.className = 'jp-slider jp-slider-sdm';
-    sdmSwitch.setAttribute('role', 'switch');
-    sdmSwitch.value = 'single-document';
-    sdmSwitch.title = 'Single-Document Mode';
-    this.modeChanged.connect((_, mode) => {
-      sdmSwitch.setAttribute(
-        'aria-checked',
-        mode === 'single-document' ? 'true' : 'false'
-      );
-    });
-    sdmSwitch.setAttribute(
-      'aria-checked',
-      this.mode === 'single-document' ? 'true' : 'false'
-    );
-    sdmSwitch.addEventListener('click', () => {
-      this.mode =
-        sdmSwitch.getAttribute('aria-checked') === 'true'
-          ? 'multiple-document'
-          : 'single-document';
-    });
-
-    const sdmLabel = document.createElement('label');
-    sdmLabel.className = 'jp-slider-label';
-    sdmLabel.textContent = 'Single-Document Mode';
-    sdmLabel.title = 'Single-Document Mode';
-    const sdmTrack = document.createElement('div');
-    sdmTrack.className = 'jp-slider-track';
-    sdmTrack.setAttribute('aria-hidden', 'true');
-    sdmSwitch.appendChild(sdmLabel);
-    sdmSwitch.appendChild(sdmTrack);
-
-    const sdmSwitchWidget = new Widget();
-    sdmSwitchWidget.node.appendChild(sdmSwitch);
-    sdmSwitchWidget.id = 'jp-single-document-mode';
-    this.add(sdmSwitchWidget, 'top', { rank: 1010 });
-
     // Wire up signals to update the title panel of the single document mode to
     // follow the title of this.currentWidget
     this.currentChanged.connect((sender, args) => {
