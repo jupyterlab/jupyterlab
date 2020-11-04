@@ -66,7 +66,7 @@
     "@jupyterlab/testutils": "^3.0.0-rc.6",
     "@types/codemirror": "^0.0.97",
     "@types/jest": "^26.0.10",
-    "@types/react-dom": "~16.9.8",
+    "@types/react-dom": "^16.9.8",
     "jest": "^26.4.2",
     "jest-junit": "^11.1.0",
     "jest-raw-loader": "^1.0.1",

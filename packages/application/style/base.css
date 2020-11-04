@@ -76,10 +76,6 @@ body {
   display: flex;
 }
 
-#jp-top-spacer {
-  flex-grow: 1;
-}
-
 #jp-single-document-mode {
   margin: 0px 8px;
   display: flex;
