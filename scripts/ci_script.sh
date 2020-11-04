@@ -196,10 +196,10 @@ if [[ $GROUP == usage ]]; then
     jupyter labextension build extension --static-url /foo/
     jupyter labextension disable @jupyterlab/mock-extension --debug
     jupyter labextension enable @jupyterlab/mock-extension --debug
-    # jupyter labextension uninstall @jupyterlab/mock-extension --debug
+    jupyter labextension uninstall @jupyterlab/mock-extension --debug
     jupyter labextension list 1>labextensions 2>&1
-    # bail if mock-extension was listed
-    # cat labextensions | grep -q "mock-extension" && exit 1
+    # check the federated extension is still listed after jupyter labextension uninstall
+    cat labextensions | grep -q "mock-extension"
     popd
 
     jupyter lab workspaces export > workspace.json --debug
