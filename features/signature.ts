@@ -15,7 +15,10 @@ import { IEditorChange } from '../virtual/editor';
 export class SignatureCM extends CodeMirrorIntegration {
   protected signature_character: IRootPosition;
   protected _signatureCharacters: string[];
-  lab_integration: SignatureLabIntegration;
+
+  get lab_integration() {
+    return super.lab_integration as SignatureLabIntegration;
+  }
 
   protected get_markup_for_signature_help(
     response: lsProtocol.SignatureHelp,

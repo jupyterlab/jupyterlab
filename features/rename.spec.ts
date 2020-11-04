@@ -34,7 +34,7 @@ describe('Rename', () => {
       await feature.handleRename(
         {
           changes: {
-            ['file://' + env.document_options.path]: [
+            ['file:///' + env.document_options.path]: [
               {
                 range: {
                   start: { line: 0, character: 0 },

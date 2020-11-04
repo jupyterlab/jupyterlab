@@ -22,7 +22,10 @@ import { ILSPCompletionThemeManager } from '@krassowski/completion-theme/lib/typ
 
 export class CompletionCM extends CodeMirrorIntegration {
   private _completionCharacters: string[];
-  settings: FeatureSettings<LSPCompletionSettings>;
+
+  get settings() {
+    return super.settings as FeatureSettings<LSPCompletionSettings>;
+  }
 
   get completionCharacters() {
     if (

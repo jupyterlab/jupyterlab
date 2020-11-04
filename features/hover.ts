@@ -81,8 +81,6 @@ export class HoverCM extends CodeMirrorIntegration {
   private last_hover_response: lsProtocol.Hover;
   protected hover_marker: CodeMirror.TextMarker;
   private virtual_position: IVirtualPosition;
-  lab_integration: HoverLabIntegration;
-  settings: FeatureSettings<LSPHoverSettings>;
   protected cache: ResponseCache;
 
   private debounced_get_hover: Throttler<Promise<lsProtocol.Hover>>;
@@ -90,6 +88,14 @@ export class HoverCM extends CodeMirrorIntegration {
 
   protected get modifierKey(): ModifierKey {
     return this.settings.composite.modifierKey;
+  }
+
+  get lab_integration() {
+    return super.lab_integration as HoverLabIntegration;
+  }
+
+  get settings() {
+    return super.settings as FeatureSettings<LSPHoverSettings>;
   }
 
   protected restore_from_cache(
