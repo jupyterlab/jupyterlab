@@ -199,7 +199,7 @@ export namespace Build {
       themeConfig.push({
         mode: 'production',
         entry: {
-          index: path.join(name, themePath)
+          index: path.join(packageDir, themePath)
         },
         output: {
           path: path.resolve(path.join(themeOutput, 'themes', name)),
