@@ -283,6 +283,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
     this._renderTimeout = options.renderTimeout || 1000;
     this._dataType = options.dataType || 'string';
     this._fileType = options.primaryFileType;
+    this._factory = options.factory;
   }
 
   /**
@@ -295,7 +296,19 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
     const rendermime = this._rendermime.clone({
       resolver: context.urlResolver
     });
-    const renderer = rendermime.createRenderer(mimeType);
+
+    let renderer: IRenderMime.IRenderer;
+    if (this._factory && this._factory.mimeTypes.includes(mimeType)) {
+      renderer = this._factory.createRenderer({
+        mimeType,
+        resolver: rendermime.resolver,
+        sanitizer: rendermime.sanitizer,
+        linkHandler: rendermime.linkHandler,
+        latexTypesetter: rendermime.latexTypesetter,
+      });
+    } else {
+      renderer = rendermime.createRenderer(mimeType);
+    }
 
     const content = new MimeContent({
       context,
@@ -318,6 +331,7 @@ export class MimeDocumentFactory extends ABCWidgetFactory<MimeDocument> {
   private _renderTimeout: number;
   private _dataType: 'string' | 'json';
   private _fileType: DocumentRegistry.IFileType | undefined;
+  private _factory: IRenderMime.IRendererFactory | undefined;
 }
 
 /**
@@ -348,6 +362,11 @@ export namespace MimeDocumentFactory {
      * Preferred data type from the model.
      */
     dataType?: 'string' | 'json';
+
+    /**
+     * Optional renderer to use (overriding the renderer in the registry)
+     */
+    factory?: IRenderMime.IRendererFactory
   }
 }
 
