@@ -275,14 +275,8 @@ export class LayoutRestorer implements ILayoutRestorer {
     }
 
     const dehydrated: Private.ILayout = {};
-
-    // Dehydrate main area.
     dehydrated.main = this._dehydrateMainArea(data.mainArea);
-
-    // Dehydrate left area.
     dehydrated.left = this._dehydrateSideArea(data.leftArea);
-
-    // Dehydrate right area.
     dehydrated.right = this._dehydrateSideArea(data.rightArea);
 
     return this._connector.save(KEY, dehydrated);
@@ -354,9 +348,7 @@ export class LayoutRestorer implements ILayoutRestorer {
       return { collapsed: true, currentWidget: null, widgets: null };
     }
     const internal = this._widgets;
-    const collapsed = area.hasOwnProperty('collapsed')
-      ? !!area.collapsed
-      : false;
+    const collapsed = area.collapsed ?? false;
     const currentWidget =
       area.current && internal.has(`${area.current}`)
         ? internal.get(`${area.current}`)
