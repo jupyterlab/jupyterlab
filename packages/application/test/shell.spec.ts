@@ -203,7 +203,6 @@ describe('LabShell', () => {
     });
   });
 
-
   describe('#add(widget, "left")', () => {
     it('should add a widget to the left area', () => {
       const widget = new Widget();
