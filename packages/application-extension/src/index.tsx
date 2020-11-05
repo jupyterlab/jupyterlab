@@ -39,7 +39,7 @@ import { IStateDB } from '@jupyterlab/statedb';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
-import { buildIcon, Switch } from '@jupyterlab/ui-components';
+import { buildIcon, jupyterIcon, Switch } from '@jupyterlab/ui-components';
 
 import { each, iter, toArray } from '@lumino/algorithm';
 
@@ -942,6 +942,23 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
   }
 };
 
+const JupyterLogo: JupyterFrontEndPlugin<void> = {
+  id: '@jupyterlab/application-extension:logo',
+  requires: [ILabShell],
+  activate: (app: JupyterFrontEnd, shell: ILabShell) => {
+    const logo = new Widget();
+    jupyterIcon.element({
+      container: logo.node,
+      elementPosition: 'center',
+      margin: '2px 2px 2px 8px',
+      height: 'auto',
+      width: '16px'
+    });
+    logo.id = 'jp-MainLogo';
+    shell.add(logo, 'top', { rank: 0 });
+  }
+};
+
 /**
  * The single-document mode switch in the top area.
  */
@@ -1011,6 +1028,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   info,
   paths,
   propertyInspector,
+  JupyterLogo,
   modeSwitch
 ];
 

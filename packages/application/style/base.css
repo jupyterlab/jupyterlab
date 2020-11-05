@@ -71,10 +71,6 @@ body {
   );
 }
 
-#jp-MainLogo {
-  width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
-}
-
 #jp-bottom-panel {
   background: var(--jp-layout-color1);
   display: flex;
