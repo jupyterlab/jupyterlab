@@ -96,6 +96,14 @@ describe('LabShell', () => {
       expect(shell.isEmpty('top')).toBe(false);
     });
 
+    it('should test whether the menu area is empty', () => {
+      expect(shell.isEmpty('menu')).toBe(true);
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'menu');
+      expect(shell.isEmpty('menu')).toBe(false);
+    });
+
     it('should test whether the left area is empty', () => {
       expect(shell.isEmpty('left')).toBe(true);
       const widget = new Widget();

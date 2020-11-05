@@ -708,6 +708,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._headerPanel.widgets.length === 0;
       case 'top':
         return this._topHandler.panel.widgets.length === 0;
+      case 'menu':
+        return this._menuHandler.panel.widgets.length === 0;
       case 'bottom':
         return this._bottomPanel.widgets.length === 0;
       case 'right':
