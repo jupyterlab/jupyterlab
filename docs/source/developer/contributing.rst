@@ -92,6 +92,10 @@ something (this may take a few minutes to load):
 
 .. image:: https://mybinder.org/badge_logo.svg
    :target: https://mybinder.org/v2/gh/jupyterlab/jupyterlab/master?urlpath=lab-dev/
+   
+If you want to test your own branch hosted on GitHub, just enter it on https://mybinder.org.
+If everything goes right, filling out the form takes about 2 minutes, and the build takes about 7 minutes 
+to complete.
 
 Installing Node.js and jlpm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
