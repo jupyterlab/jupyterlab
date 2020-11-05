@@ -469,8 +469,14 @@ describe('LabShell', () => {
       widget.id = 'main';
       shell.add(widget, 'main');
 
-      expect(toArray(shell.widgets('header')).map(v => v.id)).toEqual(['header']);
-      expect(toArray(shell.widgets('top')).slice(-1).map(v => v.id)).toEqual(['top']);
+      expect(toArray(shell.widgets('header')).map(v => v.id)).toEqual([
+        'header'
+      ]);
+      expect(
+        toArray(shell.widgets('top'))
+          .slice(-1)
+          .map(v => v.id)
+      ).toEqual(['top']);
       expect(toArray(shell.widgets('menu')).map(v => v.id)).toEqual(['menu']);
       expect(toArray(shell.widgets('left')).map(v => v.id)).toEqual(['left']);
       expect(toArray(shell.widgets('right')).map(v => v.id)).toEqual(['right']);
@@ -488,8 +494,6 @@ describe('LabShell', () => {
       expect(() => shell.widgets('foo' as any)).toThrowError(/Invalid area/);
     });
   });
-
-
 
   describe('#titlePanel', () => {
     it('should be hidden in multiple document mode and visible in single document mode', () => {
