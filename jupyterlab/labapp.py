@@ -484,7 +484,11 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     )
     flags['expose-app-in-browser'] = (
         {'LabApp': {'expose_app_in_browser': True}},
-        "Expose the global app instance to browser via window.jupyterlab"
+        "Expose the global app instance to browser via window.jupyterlab."
+    )
+    flags['extensions-in-dev-mode'] = (
+        {'LabApp': {'extensions_in_dev_mode': True}},
+        "Load extensions in dev-mode."
     )
 
     subcommands = dict(
@@ -526,6 +530,10 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         show a red stripe at the top of the page.  It can only be used if JupyterLab
         is installed as `pip install -e .`.
         """)
+
+    extensions_in_dev_mode = Bool(False, config=True,
+        help="""Whether to load federated extensions in dev mode. Use this to
+        test federated extensions in development installs of JupyterLab.""")
 
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
@@ -615,8 +623,9 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
             dev_static_dir = ujoin(DEV_DIR, 'static')
             self.static_paths = [dev_static_dir]
             self.template_paths = [dev_static_dir]
-            self.labextensions_path = []
-            self.extra_labextensions_path = []
+            if not self.extensions_in_dev_mode:
+                self.labextensions_path = []
+                self.extra_labextensions_path = []
         elif self.core_mode:
             dev_static_dir = ujoin(HERE, 'static')
             self.static_paths = [dev_static_dir]
