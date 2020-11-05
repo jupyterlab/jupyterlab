@@ -179,25 +179,23 @@ describe('LabShell', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top');
-      // the added widget
-      console.log(toArray(shell.widgets('top')));
-      // top-level menu area is added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(2);
+      // top-level title and menu area are added by default
+      expect(toArray(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should be a no-op if the widget has no id', () => {
       const widget = new Widget();
       shell.add(widget, 'top');
-      // top-level menu area is added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(1);
+      // top-level title and menu area are added by default
+      expect(toArray(shell.widgets('top')).length).toEqual(2);
     });
 
     it('should accept options', () => {
       const widget = new Widget();
       widget.id = 'foo';
       shell.add(widget, 'top', { rank: 10 });
-      // top-level menu area is added by default
-      expect(toArray(shell.widgets('top')).length).toEqual(2);
+      // top-level title and menu area are added by default
+      expect(toArray(shell.widgets('top')).length).toEqual(3);
     });
 
     it('should add widgets according to their ranks', () => {
@@ -205,9 +203,13 @@ describe('LabShell', () => {
       const bar = new Widget();
       foo.id = 'foo';
       bar.id = 'bar';
-      shell.add(foo, 'top', { rank: 20 });
-      shell.add(bar, 'top', { rank: 10 });
-      expect(toArray(shell.widgets('top')).slice(-2)).toEqual([bar, foo]);
+      shell.add(foo, 'top', { rank: 10001 });
+      shell.add(bar, 'top', { rank: 10000 });
+      expect(
+        toArray(shell.widgets('top'))
+          .slice(-2)
+          .map(v => v.id)
+      ).toEqual(['bar', 'foo']);
     });
   });
 
