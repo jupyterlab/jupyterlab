@@ -61,14 +61,18 @@ body {
 }
 
 .jp-LabShell[data-shell-mode='single-document'] #jp-menu-panel {
-  padding-left: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
+  padding-left: calc(
+    var(--jp-private-sidebar-tab-width) + var(--jp-border-width)
+  );
   border-bottom: var(--jp-border-width) solid var(--jp-border-color0);
   /* Adjust min-height so open menus show up in the right place */
-  min-height: calc(var(--jp-private-menu-panel-height) + var(--jp-border-width));
+  min-height: calc(
+    var(--jp-private-menu-panel-height) + var(--jp-border-width)
+  );
 }
 
 #jp-MainLogo {
-  width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width))
+  width: calc(var(--jp-private-sidebar-tab-width) + var(--jp-border-width));
 }
 
 #jp-bottom-panel {

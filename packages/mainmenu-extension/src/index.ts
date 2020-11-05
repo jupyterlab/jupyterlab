@@ -136,7 +136,6 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     menu.id = 'jp-MainMenu';
     menu.addClass('jp-scrollbar-tiny');
 
-
     // Only add quit button if the back-end supports it by checking page config.
     const quitButton = PageConfig.getOption('quitButton').toLowerCase();
     menu.fileMenu.quitEntry = quitButton === 'true';
@@ -225,7 +224,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       });
     }
 
-    app.shell.add(menu, 'menu', {rank: 100});
+    app.shell.add(menu, 'menu', { rank: 100 });
 
     return menu;
   }
