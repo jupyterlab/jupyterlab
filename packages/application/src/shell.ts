@@ -198,7 +198,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
     const dockPanel = (this._dockPanel = new DockPanelSvg());
     MessageLoop.installMessageHook(dockPanel, this._dockChildHook);
 
-    const hsplitPanel = new SplitPanel();
+    const hsplitPanel = (this._hsplitPanel = new SplitPanel());
     const leftHandler = (this._leftHandler = new Private.SideBarHandler());
     const rightHandler = (this._rightHandler = new Private.SideBarHandler());
     const rootLayout = new BoxLayout();
@@ -246,10 +246,6 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
 
     rootLayout.direction = 'top-to-bottom';
     rootLayout.spacing = 0; // TODO make this configurable?
-    // Use relative sizing to set the width of the side panels.
-    // This will still respect the min-size of children widget in the stacked
-    // panel.
-    hsplitPanel.setRelativeSizes([1, 2.5, 1]);
 
     BoxLayout.setStretch(headerPanel, 0);
     BoxLayout.setStretch(menuHandler.panel, 0);
@@ -820,6 +816,9 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    */
   protected onAfterAttach(msg: Message): void {
     this.node.dataset.shellMode = this.mode;
+    // Use relative sizing to set the width of the side panels. This will
+    // still respect the min-width of children.
+    this._hsplitPanel.setRelativeSizes([1, 2.5, 1]);
   }
 
   /**
@@ -1169,6 +1168,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
   private _restored = new PromiseDelegate<ILabShell.ILayout>();
   private _rightHandler: Private.SideBarHandler;
   private _tracker = new FocusTracker<Widget>();
+  private _hsplitPanel: SplitPanel;
   private _headerPanel: Panel;
   private _topHandler: Private.PanelHandler;
   private _menuHandler: Private.PanelHandler;
