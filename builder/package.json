@@ -15,7 +15,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "bin": {
-    "build-labextension": "./lib/build-labextension.js",
+    "build-labextension": "./lib/build-labextension.js"
   },
   "directories": {
     "lib": "lib/"
