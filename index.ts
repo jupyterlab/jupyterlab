@@ -5,6 +5,7 @@ import {
 import { ICommandPalette } from '@jupyterlab/apputils';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IDocumentManager } from '@jupyterlab/docmanager';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 import { Signal } from '@lumino/signaling';
 import { LanguageServerManager } from './manager';
 import '../style/index.css';
@@ -13,6 +14,7 @@ import { IStatusBar } from '@jupyterlab/statusbar';
 import { LSPStatus } from './components/statusbar';
 import { DocumentConnectionManager } from './connection_manager';
 import {
+  IAdapterTypeOptions,
   ILSPAdapterManager,
   ILSPCodeExtractorsManager,
   ILSPFeatureManager,
@@ -26,7 +28,7 @@ import { SIGNATURE_PLUGIN } from './features/signature';
 import { HOVER_PLUGIN } from './features/hover';
 import { RENAME_PLUGIN } from './features/rename';
 import { HIGHLIGHTS_PLUGIN } from './features/highlights';
-import { WIDGET_ADAPTER_MANAGER } from './adapter_manager';
+import { WidgetAdapterManager, WIDGET_ADAPTER_MANAGER } from './adapter_manager';
 import { FILE_EDITOR_ADAPTER } from './adapters/file_editor';
 import { NOTEBOOK_ADAPTER } from './adapters/notebook';
 import { VIRTUAL_EDITOR_MANAGER } from './virtual/editor';
@@ -166,9 +168,7 @@ export class LSPExtension implements ILSPExtension {
         console.error(reason.message);
       });
 
-    adapterManager.registerExtension(this);
-
-    adapterManager.adapterTypeAdded.connect((manager, type) => {
+    const registerContextCommandManager = (type: IAdapterTypeOptions<IDocumentWidget>): void => {
       let command_manger = new ContextCommandManager({
         adapter_manager: adapterManager,
         app: app,
@@ -179,6 +179,18 @@ export class LSPExtension implements ILSPExtension {
         ...type.context_menu
       });
       this.feature_manager.registerCommandManager(command_manger);
+    };
+
+    // Register context commands with already added types
+    adapterManager.types.forEach((type: IAdapterTypeOptions<IDocumentWidget>) => {
+      registerContextCommandManager(type);
+    });
+
+    adapterManager.registerExtension(this);
+
+    // Register context commands with any types that may be added later
+    adapterManager.adapterTypeAdded.connect((manager: WidgetAdapterManager, type: IAdapterTypeOptions<IDocumentWidget>) => {
+      registerContextCommandManager(type);
     });
   }
 
