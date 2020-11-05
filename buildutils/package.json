@@ -48,7 +48,6 @@
     "glob": "~7.1.6",
     "inquirer": "^7.0.0",
     "package-json": "^6.5.0",
-    "path": "~0.12.7",
     "prettier": "^2.1.1",
     "semver": "^7.3.2",
     "sort-package-json": "~1.44.0",

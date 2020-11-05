@@ -14,6 +14,9 @@
   "author": "Project Jupyter",
   "sideEffects": false,
   "main": "lib/index.js",
+  "browser": {
+    "path": "path-browserify"
+  },
   "types": "lib/index.d.ts",
   "directories": {
     "lib": "lib/"
@@ -42,13 +45,14 @@
     "@lumino/signaling": "^1.4.3",
     "minimist": "~1.2.0",
     "moment": "^2.24.0",
-    "path-posix": "~1.0.0",
+    "path-browserify": "^1.0.0",
     "url-parse": "~1.4.7"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.0.0-rc.6",
     "@types/jest": "^26.0.10",
     "@types/minimist": "^1.2.0",
+    "@types/node": "^14.6.1",
     "@types/url-parse": "^1.1.0",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",

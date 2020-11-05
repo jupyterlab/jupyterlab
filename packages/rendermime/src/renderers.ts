@@ -740,7 +740,7 @@ namespace Private {
   /**
    * Handle a node with a `src` or `href` attribute.
    */
-  function handleAttr(
+  async function handleAttr(
     node: HTMLElement,
     name: 'src' | 'href',
     resolver: IRenderMime.IResolver
@@ -750,28 +750,23 @@ namespace Private {
       ? resolver.isLocal(source)
       : URLExt.isLocal(source);
     if (!source || !isLocal) {
-      return Promise.resolve(undefined);
+      return;
     }
-    node.setAttribute(name, '');
-    return resolver
-      .resolveUrl(source)
-      .then(urlPath => {
-        return resolver.getDownloadUrl(urlPath);
-      })
-      .then(url => {
-        // Check protocol again in case it changed:
-        if (URLExt.parse(url).protocol !== 'data:') {
-          // Bust caching for local src attrs.
-          // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache
-          url += (/\?/.test(url) ? '&' : '?') + new Date().getTime();
-        }
-        node.setAttribute(name, url);
-      })
-      .catch(err => {
-        // If there was an error getting the url,
-        // just make it an empty link.
-        node.setAttribute(name, '');
-      });
+    try {
+      const urlPath = await resolver.resolveUrl(source);
+      let url = await resolver.getDownloadUrl(urlPath);
+      if (URLExt.parse(url).protocol !== 'data:') {
+        // Bust caching for local src attrs.
+        // https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/Using_XMLHttpRequest#Bypassing_the_cache
+        url += (/\?/.test(url) ? '&' : '?') + new Date().getTime();
+      }
+      node.setAttribute(name, url);
+    } catch (err) {
+      // If there was an error getting the url,
+      // just make it an empty link and report the error.
+      node.setAttribute(name, '');
+      throw err;
+    }
   }
 
   /**

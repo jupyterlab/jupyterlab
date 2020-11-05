@@ -75,15 +75,20 @@ try {
 module.exports = {
   bail: true,
   module: { rules },
-  resolve: { alias: { url: false, buffer: false, ...phosphorAlias } },
+  resolve: {
+    alias: phosphorAlias,
+    fallback: { url: false, buffer: false }
+  },
   watchOptions: {
     poll: 500,
     aggregateTimeout: 1000
   },
   plugins: [
     new webpack.DefinePlugin({
+      // Needed for Blueprint. See https://github.com/palantir/blueprint/issues/4393
       'process.env': '{}',
-      process: {}
+      // Needed for various packages using cwd(), like the path polyfill
+      process: { cwd: () => '/' }
     })
   ]
 };
