@@ -46,6 +46,7 @@ export class WidgetAdapterManager implements ILSPAdapterManager {
     type.tracker.widgetAdded.connect((tracker, widget) => {
       this.connectWidget(extension, widget, type);
     });
+    extension.registerAdapterType(this, type);
   }
 
   public registerExtension(extension: LSPExtension) {

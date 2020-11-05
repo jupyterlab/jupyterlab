@@ -28,7 +28,7 @@ import { SIGNATURE_PLUGIN } from './features/signature';
 import { HOVER_PLUGIN } from './features/hover';
 import { RENAME_PLUGIN } from './features/rename';
 import { HIGHLIGHTS_PLUGIN } from './features/highlights';
-import { WidgetAdapterManager, WIDGET_ADAPTER_MANAGER } from './adapter_manager';
+import { WIDGET_ADAPTER_MANAGER } from './adapter_manager';
 import { FILE_EDITOR_ADAPTER } from './adapters/file_editor';
 import { NOTEBOOK_ADAPTER } from './adapters/notebook';
 import { VIRTUAL_EDITOR_MANAGER } from './virtual/editor';
@@ -125,7 +125,7 @@ export class LSPExtension implements ILSPExtension {
   constructor(
     public app: JupyterFrontEnd,
     private setting_registry: ISettingRegistry,
-    palette: ICommandPalette,
+    private palette: ICommandPalette,
     documentManager: IDocumentManager,
     paths: IPaths,
     status_bar: IStatusBar,
@@ -168,30 +168,23 @@ export class LSPExtension implements ILSPExtension {
         console.error(reason.message);
       });
 
-    const registerContextCommandManager = (type: IAdapterTypeOptions<IDocumentWidget>): void => {
-      let command_manger = new ContextCommandManager({
-        adapter_manager: adapterManager,
-        app: app,
-        palette: palette,
-        tracker: type.tracker,
-        suffix: type.name,
-        entry_point: type.entrypoint,
-        ...type.context_menu
-      });
-      this.feature_manager.registerCommandManager(command_manger);
-    };
-
-    // Register context commands with already added types
-    adapterManager.types.forEach((type: IAdapterTypeOptions<IDocumentWidget>) => {
-      registerContextCommandManager(type);
-    });
-
     adapterManager.registerExtension(this);
+  }
 
-    // Register context commands with any types that may be added later
-    adapterManager.adapterTypeAdded.connect((manager: WidgetAdapterManager, type: IAdapterTypeOptions<IDocumentWidget>) => {
-      registerContextCommandManager(type);
+  registerAdapterType(
+    adapterManager: ILSPAdapterManager,
+    type: IAdapterTypeOptions<IDocumentWidget>
+  ): void {
+    let command_manger = new ContextCommandManager({
+      adapter_manager: adapterManager,
+      app: this.app,
+      palette: this.palette,
+      tracker: type.tracker,
+      suffix: type.name,
+      entry_point: type.entrypoint,
+      ...type.context_menu
     });
+    this.feature_manager.registerCommandManager(command_manger);
   }
 
   get foreign_code_extractors() {
