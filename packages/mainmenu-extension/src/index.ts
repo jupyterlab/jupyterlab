@@ -36,8 +36,6 @@ import { ServerConnection } from '@jupyterlab/services';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
-import { jupyterIcon } from '@jupyterlab/ui-components';
-
 /**
  * A namespace for command IDs of semantic extension points.
  */
@@ -138,16 +136,6 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
     menu.id = 'jp-MainMenu';
     menu.addClass('jp-scrollbar-tiny');
 
-    const logo = new Widget();
-    jupyterIcon.element({
-      container: logo.node,
-      elementPosition: 'center',
-      margin: '2px 2px 2px 8px',
-      height: 'auto',
-      width: '16px'
-    });
-    logo.id = 'jp-MainLogo';
-
     // Only add quit button if the back-end supports it by checking page config.
     const quitButton = PageConfig.getOption('quitButton').toLowerCase();
     menu.fileMenu.quitEntry = quitButton === 'true';
@@ -236,8 +224,7 @@ const plugin: JupyterFrontEndPlugin<IMainMenu> = {
       });
     }
 
-    app.shell.add(logo, 'top');
-    app.shell.add(menu, 'top');
+    app.shell.add(menu, 'menu', { rank: 100 });
 
     return menu;
   }
