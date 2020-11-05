@@ -944,6 +944,7 @@ const propertyInspector: JupyterFrontEndPlugin<IPropertyInspectorProvider> = {
 
 const JupyterLogo: JupyterFrontEndPlugin<void> = {
   id: '@jupyterlab/application-extension:logo',
+  autoStart: true,
   requires: [ILabShell],
   activate: (app: JupyterFrontEnd, shell: ILabShell) => {
     const logo = new Widget();
