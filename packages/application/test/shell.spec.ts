@@ -144,6 +144,28 @@ describe('LabShell', () => {
     });
   });
 
+  describe('#add(widget, "menu")', () => {
+    it('should add a widget to the menu', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'menu');
+      expect(shell.isEmpty('menu')).toBe(false);
+    });
+
+    it('should be a no-op if the widget has no id', () => {
+      const widget = new Widget();
+      shell.add(widget, 'menu');
+      expect(shell.isEmpty('menu')).toBe(true);
+    });
+
+    it('should accept options', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'menu', { rank: 10 });
+      expect(shell.isEmpty('menu')).toBe(false);
+    });
+  });
+
   describe('#add(widget, "top")', () => {
     it('should add a widget to the top area', () => {
       const widget = new Widget();
@@ -180,6 +202,7 @@ describe('LabShell', () => {
       expect(toArray(shell.widgets('top')).slice(-2)).toEqual([bar, foo]);
     });
   });
+
 
   describe('#add(widget, "left")', () => {
     it('should add a widget to the left area', () => {
