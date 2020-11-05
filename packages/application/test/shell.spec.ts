@@ -441,6 +441,56 @@ describe('LabShell', () => {
     });
   });
 
+  describe('#widgets', () => {
+    it('should list widgets in each area', () => {
+      let widget: Widget;
+
+      widget = new Widget();
+      widget.id = 'header';
+      shell.add(widget, 'header');
+
+      widget = new Widget();
+      widget.id = 'top';
+      shell.add(widget, 'top');
+
+      widget = new Widget();
+      widget.id = 'menu';
+      shell.add(widget, 'menu');
+
+      widget = new Widget();
+      widget.id = 'left';
+      shell.add(widget, 'left');
+
+      widget = new Widget();
+      widget.id = 'right';
+      shell.add(widget, 'right');
+
+      widget = new Widget();
+      widget.id = 'main';
+      shell.add(widget, 'main');
+
+      expect(toArray(shell.widgets('header')).map(v => v.id)).toEqual(['header']);
+      expect(toArray(shell.widgets('top')).slice(-1).map(v => v.id)).toEqual(['top']);
+      expect(toArray(shell.widgets('menu')).map(v => v.id)).toEqual(['menu']);
+      expect(toArray(shell.widgets('left')).map(v => v.id)).toEqual(['left']);
+      expect(toArray(shell.widgets('right')).map(v => v.id)).toEqual(['right']);
+      expect(toArray(shell.widgets('main')).map(v => v.id)).toEqual(['main']);
+    });
+
+    it('should default to main area', () => {
+      const widget = new Widget();
+      widget.id = 'foo';
+      shell.add(widget, 'main');
+      expect(toArray(shell.widgets()).map(v => v.id)).toEqual(['foo']);
+    });
+
+    it('should throw an error when an unrecognized area is given', () => {
+      expect(() => shell.widgets('foo' as any)).toThrowError(/Invalid area/);
+    });
+  });
+
+
+
   describe('#titlePanel', () => {
     it('should be hidden in multiple document mode and visible in single document mode', () => {
       const widget = new Widget();

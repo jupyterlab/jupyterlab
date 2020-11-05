@@ -795,7 +795,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
    * Returns the widgets for an application area.
    */
   widgets(area?: ILabShell.Area): IIterator<Widget> {
-    switch (area || 'main') {
+    switch (area ?? 'main') {
       case 'main':
         return this._dockPanel.widgets();
       case 'left':
@@ -806,6 +806,8 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
         return this._headerPanel.children();
       case 'top':
         return this._topHandler.panel.children();
+      case 'menu':
+        return this._menuHandler.panel.children();
       case 'bottom':
         return this._bottomPanel.children();
       default:
