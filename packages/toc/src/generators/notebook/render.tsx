@@ -3,6 +3,7 @@
 
 import * as React from 'react';
 import { INotebookTracker } from '@jupyterlab/notebook';
+import { ellipsesIcon } from '@jupyterlab/ui-components';
 import { sanitizerOptions } from '../../utils/sanitizer_options';
 import { INotebookHeading } from '../../utils/headings';
 import { CodeComponent } from './codemirror';
@@ -54,17 +55,40 @@ function render(
           </div>
         );
 
+        let collapsed;
+        if (item.cellRef!.model.metadata.has('toc-hr-collapsed')) {
+          collapsed = item.cellRef!.model.metadata.get(
+            'toc-hr-collapsed'
+          ) as boolean;
+        }
+        let ellipseButton = collapsed ? (
+          <div
+            className="toc-Ellipses"
+            onClick={(event: any) => {
+              event.stopPropagation();
+              onClick(item);
+            }}
+          >
+            <ellipsesIcon.react />
+          </div>
+        ) : (
+          <div />
+        );
+
         // Render the heading item:
         jsx = (
           <div
             className={
               'toc-entry-holder ' +
               fontSizeClass +
-              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
+              (tracker.activeCell === item.cellRef || collapsed
+                ? ' toc-active-cell'
+                : '')
             }
           >
             {button}
             {jsx}
+            {ellipseButton}
           </div>
         );
       }
@@ -89,16 +113,38 @@ function render(
             <div className="toc-Collapser-child" />
           </div>
         );
+        let collapsed;
+        if (item.cellRef!.model.metadata.has('toc-hr-collapsed')) {
+          collapsed = item.cellRef!.model.metadata.get(
+            'toc-hr-collapsed'
+          ) as boolean;
+        }
+        let ellipseButton = collapsed ? (
+          <div
+            className="toc-Ellipses"
+            onClick={(event: any) => {
+              event.stopPropagation();
+              onClick(item);
+            }}
+          >
+            <ellipsesIcon.react />
+          </div>
+        ) : (
+          <div />
+        );
         jsx = (
           <div
             className={
               'toc-entry-holder ' +
               fontSizeClass +
-              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
+              (tracker.activeCell === item.cellRef || collapsed
+                ? ' toc-active-cell'
+                : '')
             }
           >
             {button}
             {jsx}
+            {ellipseButton}
           </div>
         );
       }
@@ -123,7 +169,7 @@ function render(
    * Callback invoked upon encountering a "click" event.
    *
    * @private
-   * @param cellRef - cell reference
+   * @param heading - notebook heading that was clicked
    */
   function onClick(heading?: INotebookHeading) {
     let collapsed;
