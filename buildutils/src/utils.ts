@@ -58,7 +58,10 @@ export function getCorePaths(): string[] {
  *
  * @returns Whether the file has changed.
  */
-export function writePackageData(pkgJsonPath: string, data: any): boolean {
+export function writePackageData(
+  pkgJsonPath: string,
+  data: coreutils.JSONObject
+): boolean {
   const text = JSON.stringify(sortPackageJson(data), null, 2) + '\n';
   const orig = fs.readFileSync(pkgJsonPath, 'utf8').split('\r\n').join('\n');
   if (text !== orig) {
@@ -82,7 +85,10 @@ export function readJSONFile(filePath: string): any {
 /**
  * Write a json file.
  */
-export function writeJSONFile(filePath: string, data: any): boolean {
+export function writeJSONFile(
+  filePath: string,
+  data: coreutils.JSONObject
+): boolean {
   function sortObjByKey(value: any): any {
     // https://stackoverflow.com/a/35810961
     return typeof value === 'object'
