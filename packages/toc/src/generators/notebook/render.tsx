@@ -60,9 +60,7 @@ function render(
             className={
               'toc-entry-holder ' +
               fontSizeClass +
-              (tracker.activeCell?.id === item.cellRef.id
-                ? ''
-                : ' toc-active-cell')
+              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
             }
           >
             {button}
@@ -96,9 +94,7 @@ function render(
             className={
               'toc-entry-holder ' +
               fontSizeClass +
-              (tracker.activeCell?.id === item.cellRef.id
-                ? ''
-                : 'toc-active-cell')
+              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
             }
           >
             {button}
