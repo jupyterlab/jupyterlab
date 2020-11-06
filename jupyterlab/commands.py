@@ -87,6 +87,7 @@ class ProgressProcess(Process):
             stderr=subprocess.STDOUT,
             stdout=subprocess.PIPE,
             universal_newlines=True,
+            encoding='utf-8',
         )
         self._kill_event = kill_event or Event()
 
