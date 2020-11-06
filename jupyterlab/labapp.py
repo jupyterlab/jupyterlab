@@ -488,7 +488,7 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
     )
     flags['extensions-in-dev-mode'] = (
         {'LabApp': {'extensions_in_dev_mode': True}},
-        "Load extensions in dev-mode."
+        "Load federated extensions in dev-mode."
     )
 
     subcommands = dict(
@@ -532,8 +532,11 @@ class LabApp(NBClassicConfigShimMixin, LabServerApp):
         """)
 
     extensions_in_dev_mode = Bool(False, config=True,
-        help="""Whether to load federated extensions in dev mode. Use this to
-        test federated extensions in development installs of JupyterLab.""")
+        help="""Whether to load federated extensions in dev mode. This may be
+        useful to run and test federated extensions in development installs of
+        JupyterLab. APIs in a JupyterLab development install may be
+        incompatible with published packages, so federated extensions compiled
+        against published packages may not work correctly.""")
 
     watch = Bool(False, config=True,
         help="Whether to serve the app in watch mode")
