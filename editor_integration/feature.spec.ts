@@ -118,7 +118,7 @@ describe('Feature', () => {
 
         let outcome = await feature.do_apply_edit({
           changes: {
-            ['file://' + environment.document_options.path]: [
+            ['file:///' + environment.document_options.path]: [
               {
                 range: {
                   start: { line: 0, character: 0 },
@@ -145,7 +145,7 @@ describe('Feature', () => {
 
         let outcome = await feature.do_apply_edit({
           changes: {
-            ['file://' + environment.document_options.path]: []
+            ['file:///' + environment.document_options.path]: []
           }
         });
         let raw_value = environment.ce_editor.doc.getValue();
@@ -162,7 +162,7 @@ describe('Feature', () => {
 
         let result = await feature.do_apply_edit({
           changes: {
-            ['file://' + environment.document_options.path]: js_partial_edits
+            ['file:///' + environment.document_options.path]: js_partial_edits
           }
         });
         let raw_value = environment.ce_editor.doc.getValue();

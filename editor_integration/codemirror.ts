@@ -15,7 +15,7 @@ import {
 } from '../positioning';
 import * as lsProtocol from 'vscode-languageserver-protocol';
 import { PositionConverter } from '../converter';
-import { DefaultMap } from '../utils';
+import { DefaultMap, uris_equal } from '../utils';
 import { CodeEditor } from '@jupyterlab/codeeditor';
 import {
   CodeMirrorHandler,
@@ -100,7 +100,7 @@ export abstract class CodeMirrorIntegration
   // TODO use better type constraints for connection event names and for responses
   protected readonly connection_handlers: Map<
     string,
-    (response: object) => void
+    (response: Record<string, any>) => void
   >;
   protected readonly wrapper_handlers: IHTMLEventMap;
   protected wrapper: HTMLElement;
@@ -279,10 +279,7 @@ export abstract class CodeMirrorIntegration
     for (let change of changes) {
       let uri = change.textDocument.uri;
 
-      if (
-        decodeURI(uri) !== decodeURI(current_uri) &&
-        decodeURI(uri) !== '/' + decodeURI(current_uri)
-      ) {
+      if (!uris_equal(uri, current_uri)) {
         errors.push(
           'Workspace-wide edits not implemented (' +
             decodeURI(uri) +

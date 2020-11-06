@@ -896,7 +896,7 @@ export class UpdateManager {
    *  - no update will happen when executing the callback
    * @param fn - the callback to execute in update lock
    */
-  public async with_update_lock(fn: Function): Promise<void> {
+  public async with_update_lock(fn: () => void): Promise<void> {
     await until_ready(() => this.can_update(), 12, 10).then(() => {
       try {
         this.update_lock = true;

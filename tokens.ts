@@ -101,7 +101,7 @@ export interface ILSPFeatureManager {
 export interface IAdapterRegistration {
   id: string;
   adapter: WidgetAdapter<IDocumentWidget>;
-  re_connector: Function;
+  re_connector: () => void;
 }
 
 export type WidgetAdapterConstructor<T extends IDocumentWidget> = {

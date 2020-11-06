@@ -265,8 +265,11 @@ export const diagnostics_databases = new WeakMap<
 >();
 
 export class DiagnosticsCM extends CodeMirrorIntegration {
-  settings: FeatureSettings<LSPDiagnosticsSettings>;
   private last_response: lsProtocol.PublishDiagnosticsParams;
+
+  get settings() {
+    return super.settings as FeatureSettings<LSPDiagnosticsSettings>;
+  }
 
   register(): void {
     this.connection_handlers.set('diagnostic', this.handleDiagnostic);

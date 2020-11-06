@@ -27,14 +27,20 @@ export const syntaxHighlightingIcon = new LabIcon({
 const FEATURE_ID = PLUGIN_ID + ':syntax_highlighting';
 
 export class CMSyntaxHighlighting extends CodeMirrorIntegration {
-  lab_integration: SyntaxLabIntegration;
-  settings: IFeatureSettings<LSPSyntaxHighlightingSettings>;
   editors_with_active_highlight: Set<CodeMirrorEditor>;
 
   constructor(options: IEditorIntegrationOptions) {
     super(options);
     this.virtual_document.changed.connect(this.update_mode.bind(this), this);
     this.editors_with_active_highlight = new Set();
+  }
+
+  get lab_integration() {
+    return super.lab_integration as SyntaxLabIntegration;
+  }
+
+  get settings() {
+    return super.settings as IFeatureSettings<LSPSyntaxHighlightingSettings>;
   }
 
   private get_mode(language: string) {
