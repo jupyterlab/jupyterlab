@@ -3,7 +3,7 @@ channels:
   - conda-forge
 dependencies:
   - jupyter-server-proxy
-  - matplotlib
+  - matplotlib-base
   - nodejs
   - numpy
   - pip
