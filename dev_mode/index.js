@@ -149,7 +149,8 @@ async function main() {
   const mimeExtensions = [];
   {{#each jupyterlab_mime_extensions}}
   try {
-    for (let plugin of activePlugins(require('{{@key}}/{{this}}'))) {
+    let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+    for (let plugin of activePlugins(ext)) {
       mimeExtensions.push(plugin);
     }
   } catch (e) {
@@ -172,7 +173,8 @@ async function main() {
   // Handled the registered standard extensions.
   {{#each jupyterlab_extensions}}
   try {
-    for (let plugin of activePlugins(require('{{@key}}/{{this}}'))) {
+    let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+    for (let plugin of activePlugins(ext)) {
       register.push(plugin);
     }
   } catch (e) {
