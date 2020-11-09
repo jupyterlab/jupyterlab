@@ -7,6 +7,6 @@ dependencies:
   - nodejs
   - numpy
   - pip
-  - python
+  - python=3.8
   - vega_datasets
   - xeus-python
