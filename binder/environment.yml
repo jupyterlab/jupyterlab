@@ -8,6 +8,5 @@ dependencies:
   - numpy
   - pip
   - python
+  - vega_datasets
   - xeus-python
-  - pip:
-    - vega-datasets
