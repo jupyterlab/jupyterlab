@@ -113,7 +113,7 @@ def update_extension(target, interactive=True):
         warnings.append('package.json scripts must be updated manually')
 
     # Set the output directory
-    data['jupyterlab']['outputDir'] = python_name + '/static'
+    data['jupyterlab']['outputDir'] = python_name + '/labextension'
 
     # Look for resolutions in JupyterLab metadata and upgrade those as well
     root_jlab_package = pkg_resources.resource_filename('jupyterlab', 'staging/package.json')
