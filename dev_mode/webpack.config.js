@@ -20,17 +20,22 @@ const package_data = require('./package.json');
 
 // Handle the extensions.
 const jlab = package_data.jupyterlab;
-const extensions = jlab.extensions;
-const mimeExtensions = jlab.mimeExtensions;
-const { externalExtensions } = jlab;
-const packageNames = Object.keys(mimeExtensions).concat(
-  Object.keys(extensions),
-  Object.keys(externalExtensions)
-);
+// TODO: what exactly are externalExtensions?
+const { extensions, mimeExtensions, externalExtensions } = jlab;
+const packageNames = [
+  ...Object.keys(extensions),
+  ...Object.keys(mimeExtensions),
+  ...Object.keys(externalExtensions)
+];
 
-// go throught each external extension
+// Go through each external extension
 // add to mapping of extension and mime extensions, of package name
 // to path of the extension.
+
+// TODO: what is this really doing? I thought extensions and mimeExtensions
+// was a list of packages, but this seems to be the entry points to these
+// things? If they are lists of packages, why is this not done before the
+// packageNames thing above is constructed?
 for (const key in externalExtensions) {
   const {
     jupyterlab: { extension, mimeExtension }
@@ -58,38 +63,18 @@ const extraConfig = Build.ensureAssets({
   output: outputDir
 });
 
-// Build up singleton metadata for module federation.
-const singletons = {};
-
-package_data.jupyterlab.singletonPackages.forEach(element => {
-  singletons[element] = { singleton: true };
-});
-
-// Go through each external extension
-// add to mapping of extension and mime extensions, of package name
-// to path of the extension.
-for (const key in externalExtensions) {
-  const {
-    jupyterlab: { extension, mimeExtension }
-  } = require(`${key}/package.json`);
-  if (extension !== undefined) {
-    extensions[key] = extension === true ? '' : extension;
-  }
-  if (mimeExtension !== undefined) {
-    mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
-  }
-}
-
-// Create the entry point file.
+// Create the entry point and other assets in build directory.
 const source = fs.readFileSync('index.js').toString();
 const template = Handlebars.compile(source);
 const extData = {
   jupyterlab_extensions: extensions,
   jupyterlab_mime_extensions: mimeExtensions
 };
-const result = template(extData);
+fs.writeFileSync(plib.join(buildDir, 'index.out.js'), template(extData));
 
-fs.writeFileSync(plib.join(buildDir, 'index.out.js'), result);
+const entryPoint = plib.join(buildDir, 'bootstrap.js');
+fs.writeFileSync(entryPoint, 'import("./index.out.js");');
+
 fs.copySync('./package.json', plib.join(buildDir, 'package.json'));
 if (outputDir !== buildDir) {
   fs.copySync(
@@ -97,11 +82,6 @@ if (outputDir !== buildDir) {
     plib.join(buildDir, 'imports.css')
   );
 }
-
-// Make a bootstrap entrypoint
-const entryPoint = plib.join(buildDir, 'bootstrap.js');
-const bootstrap = 'import("./index.out.js");';
-fs.writeFileSync(entryPoint, bootstrap);
 
 // Set up variables for the watch mode ignore plugins
 const watched = {};
@@ -181,19 +161,22 @@ function ignored(path) {
   return ignore;
 }
 
-const shared = {
-  ...package_data.resolutions,
-  ...singletons
-};
+// Set up module federation sharing config
+const shared = {};
 
-// Webpack module sharing expects version numbers, so if a resolution was a
-// filename, extract the right version number from what was installed
-Object.keys(shared).forEach(k => {
-  const v = shared[k];
-  if (typeof v === 'string' && v.startsWith('file:')) {
-    shared[k] = require(`${k}/package.json`).version;
+for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
+  // Webpack module sharing expects version numbers, so if a resolution was a
+  // filename, extract the right version number from what was installed
+  if (requiredVersion.startsWith('file:')) {
+    requiredVersion = require(`${key}/package.json`).version;
   }
-});
+  shared[key] = { requiredVersion };
+}
+
+// Add singleton package information
+for (let key of jlab.singletonPackages) {
+  shared[key].singleton = true;
+}
 
 const plugins = [
   new WPPlugin.NowatchDuplicatePackageCheckerPlugin({
