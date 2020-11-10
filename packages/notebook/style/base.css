@@ -277,8 +277,10 @@
 |----------------------------------------------------------------------------*/
 
 .jp-Cell-Placeholder {
-  height: 0px !important;
-  padding-left: 55px;
+/*  height: 0px !important; */
+  margin-left: 75px;
+  background-color: var(--jp-layout-color2);
+  color: var(--jp-content-font-color2);
 }
 
 .jp-Cell-Placeholder-wrapper {
