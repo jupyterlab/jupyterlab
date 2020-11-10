@@ -36,6 +36,11 @@ for (const key in externalExtensions) {
   }
 }
 
+// Deduplicated list of extension package names.
+const extensionPackages = [
+  ...new Set([...Object.keys(extensions), ...Object.keys(mimeExtensions)])
+];
+
 // Ensure a clear build directory.
 const buildDir = plib.resolve(jlab.buildDir);
 if (fs.existsSync(buildDir)) {
@@ -48,9 +53,7 @@ const outputDir = plib.resolve(jlab.outputDir);
 // Build the assets
 const extraConfig = Build.ensureAssets({
   // Deduplicate the extension package names
-  packageNames: [
-    ...new Set([...Object.keys(extensions), ...Object.keys(mimeExtensions)])
-  ],
+  packageNames: extensionPackages,
   output: outputDir
 });
 
@@ -156,14 +159,30 @@ function ignored(path) {
 const shared = {};
 
 for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
-  // Webpack module sharing expects version numbers, so if a resolution was a
-  // filename, extract the right version number from what was installed
-  if (requiredVersion.startsWith('file:')) {
-    requiredVersion = require(`${key}/package.json`).version;
-  }
   // eager so that built-in extensions can be bundled together into just a few
   // js files to load
   shared[key] = { requiredVersion, eager: true };
+}
+
+// Add dependencies of extension packages if they are not already in
+// resolutions. This means that if there is a conflict, the resolutions
+// package version is the one that is shared.
+for (let pkg of extensionPackages) {
+  let { dependencies } = require(`${pkg}/package.json`);
+  for (let [dep, requiredVersion] of Object.entries(dependencies)) {
+    if (!shared[dep]) {
+      shared[dep] = { requiredVersion, eager: true };
+    }
+  }
+}
+
+// Transform any file:// requiredVersion to the version number from the
+// imported package. This assumes (for simplicity) that the version we get
+// importing was installed from the file.
+for (let [key, { requiredVersion }] of Object.entries(shared)) {
+  if (requiredVersion.startsWith('file:')) {
+    shared[key].requiredVersion = require(`${key}/package.json`).version;
+  }
 }
 
 // Add singleton package information
