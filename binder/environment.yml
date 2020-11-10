@@ -1,0 +1,12 @@
+name: example-environment
+channels:
+  - conda-forge
+dependencies:
+  - jupyter-server-proxy
+  - matplotlib-base
+  - nodejs
+  - numpy
+  - pip
+  - python=3.8
+  - vega_datasets
+  - xeus-python
