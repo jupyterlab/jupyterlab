@@ -170,7 +170,9 @@ for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
   if (requiredVersion.startsWith('file:')) {
     requiredVersion = require(`${key}/package.json`).version;
   }
-  shared[key] = { requiredVersion };
+  // eager so that built-in extensions can be bundled together into just a few
+  // js files to load
+  shared[key] = { requiredVersion, eager: true };
 }
 
 // Add singleton package information
