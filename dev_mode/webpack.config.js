@@ -20,22 +20,10 @@ const package_data = require('./package.json');
 
 // Handle the extensions.
 const jlab = package_data.jupyterlab;
-// TODO: what exactly are externalExtensions?
 const { extensions, mimeExtensions, externalExtensions } = jlab;
-const packageNames = [
-  ...Object.keys(extensions),
-  ...Object.keys(mimeExtensions),
-  ...Object.keys(externalExtensions)
-];
 
-// Go through each external extension
-// add to mapping of extension and mime extensions, of package name
-// to path of the extension.
-
-// TODO: what is this really doing? I thought extensions and mimeExtensions
-// was a list of packages, but this seems to be the entry points to these
-// things? If they are lists of packages, why is this not done before the
-// packageNames thing above is constructed?
+// Add external extensions to the extensions/mimeExtensions data as
+// appropriate
 for (const key in externalExtensions) {
   const {
     jupyterlab: { extension, mimeExtension }
@@ -59,7 +47,10 @@ const outputDir = plib.resolve(jlab.outputDir);
 
 // Build the assets
 const extraConfig = Build.ensureAssets({
-  packageNames: packageNames,
+  // Deduplicate the extension package names
+  packageNames: [
+    ...new Set([...Object.keys(extensions), ...Object.keys(mimeExtensions)])
+  ],
   output: outputDir
 });
 
