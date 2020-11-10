@@ -164,17 +164,64 @@ for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
   shared[key] = { requiredVersion, eager: true };
 }
 
-// Add dependencies of extension packages if they are not already in
-// resolutions. This means that if there is a conflict, the resolutions
-// package version is the one that is shared.
+// Add dependencies and sharedPackage config from extension packages if they
+// are not already in the shared config. This means that if there is a
+// conflict, the resolutions package version is the one that is shared.
+extraShared = [];
 for (let pkg of extensionPackages) {
-  let { dependencies } = require(`${pkg}/package.json`);
+  let pkgShared = {};
+  let {
+    dependencies = {},
+    jupyterlab: { sharedPackages = {} } = {}
+  } = require(`${pkg}/package.json`);
   for (let [dep, requiredVersion] of Object.entries(dependencies)) {
     if (!shared[dep]) {
-      shared[dep] = { requiredVersion, eager: true };
+      pkgShared[dep] = { requiredVersion, eager: true };
+    }
+  }
+
+  // Overwrite automatic dependency sharing with custom sharing config
+  for (let [pkg, config] of Object.entries(sharedPackages)) {
+    if (config === false) {
+      delete pkgShared[pkg];
+    } else {
+      if ('bundled' in config) {
+        config.import = config.bundled;
+        delete config.bundled;
+      }
+      pkgShared[pkg] = config;
+    }
+  }
+  extraShared.push(pkgShared);
+}
+
+// Now merge the extra shared config
+const mergedShare = {};
+for (let sharedConfig of extraShared) {
+  for (let [pkg, config] of Object.entries(sharedConfig)) {
+    // Do not override the basic share config from resolutions
+    if (shared[pkg]) {
+      continue;
+    }
+
+    // Add if we haven't seen the config before
+    if (!mergedShare[pkg]) {
+      mergedShare[pkg] = config;
+      continue;
+    }
+
+    // Choose between the existing config and this new config. We do not try
+    // to merge configs, which may yield a config no one wants
+    let oldConfig = mergedShare[pkg];
+
+    // if the old one has import: false, use the new one
+    if (oldConfig.import === false) {
+      mergedShare[pkg] = config;
     }
   }
 }
+
+Object.assign(shared, mergedShare);
 
 // Transform any file:// requiredVersion to the version number from the
 // imported package. This assumes (for simplicity) that the version we get
