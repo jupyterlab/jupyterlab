@@ -66,8 +66,10 @@ const extData = {
 };
 fs.writeFileSync(plib.join(buildDir, 'index.out.js'), template(extData));
 
+// Create the bootstrap file that loads federated extensions and calls the
+// initialization logic in index.out.js
 const entryPoint = plib.join(buildDir, 'bootstrap.js');
-fs.writeFileSync(entryPoint, 'import("./index.out.js");');
+fs.copySync('./bootstrap.js', entryPoint);
 
 fs.copySync('./package.json', plib.join(buildDir, 'package.json'));
 if (outputDir !== buildDir) {
@@ -161,7 +163,7 @@ const shared = {};
 for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
   // eager so that built-in extensions can be bundled together into just a few
   // js files to load
-  shared[key] = { requiredVersion, eager: true };
+  shared[key] = { requiredVersion };
 }
 
 // Add dependencies and sharedPackage config from extension packages if they
@@ -176,7 +178,7 @@ for (let pkg of extensionPackages) {
   } = require(`${pkg}/package.json`);
   for (let [dep, requiredVersion] of Object.entries(dependencies)) {
     if (!shared[dep]) {
-      pkgShared[dep] = { requiredVersion, eager: true };
+      pkgShared[dep] = { requiredVersion };
     }
   }
 
