@@ -453,15 +453,15 @@ def clean(app_options=None):
 
 
 def build(name=None, version=None, static_url=None,
-          command='build:prod', kill_event=None,
-          clean_staging=False, app_options=None):
+          kill_event=None,
+          clean_staging=False, app_options=None, production=True, minimize=True):
     """Build the JupyterLab application.
     """
     app_options = _ensure_options(app_options)
     _node_check(app_options.logger)
     handler = _AppHandler(app_options)
     return handler.build(name=name, version=version, static_url=static_url,
-                         command=command, clean_staging=clean_staging)
+                         production=production, minimize=minimize, clean_staging=clean_staging)
 
 
 def get_app_info(app_options=None):
@@ -630,19 +630,19 @@ class _AppHandler(object):
         return True
 
     def build(self, name=None, version=None, static_url=None,
-              command='build:prod:minimize', clean_staging=False):
+              clean_staging=False, production=True, minimize=True):
         """Build the application.
         """
-        # resolve the build type
-        parts = command.split(':')
-        if len(parts) < 2:
-            parts.append('dev')
-        elif parts[1] == 'none':
-            parts[1] = ('dev' if self.info['linked_packages'] or self.info['local_extensions'] else
-                        'prod')
-        command = ':'.join(parts)
+        if production is None:
+            production = not (self.info['linked_packages'] or self.info['local_extensions'])
 
-        self.logger.info('Building jupyterlab assets (%s)' % command)
+        if not production:
+            minimize = False
+
+        info = ['production' if production else 'development']
+        if production:
+            info.append('minimized' if minimize else 'not minimized')
+        self.logger.info(f'Building jupyterlab assets ({", ".join(info)})')
 
         # Set up the build directory.
         app_dir = self.app_dir
@@ -662,16 +662,16 @@ class _AppHandler(object):
             raise RuntimeError(msg)
 
         # Build the app.
-        if parts[1] != 'nobuild':
-            dedupe_yarn(staging, self.logger)
-            starting_dir = os.getcwd()
-            os.chdir(staging)
-            ret = self._run(['node', YARN_PATH, 'run', command])
-            os.chdir(starting_dir)
-            if ret != 0:
-                msg = 'JupyterLab failed to build'
-                self.logger.debug(msg)
-                raise RuntimeError(msg)
+        dedupe_yarn(staging, self.logger)
+        starting_dir = os.getcwd()
+        os.chdir(staging)
+        command = f'build:{"prod" if production else "dev"}{":minimize" if minimize else ""}'
+        ret = self._run(['node', YARN_PATH, 'run', command])
+        os.chdir(starting_dir)
+        if ret != 0:
+            msg = 'JupyterLab failed to build'
+            self.logger.debug(msg)
+            raise RuntimeError(msg)
 
     def watch(self):
         """Start the application watcher and then run the watch in

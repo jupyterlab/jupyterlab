@@ -100,13 +100,13 @@ class Builder(object):
             app_dir=app_dir, logger=logger, kill_event=kill_event,
             core_config=core_config)
         try:
-            return build(command='build', app_options=app_options)
+            return build(app_options=app_options)
         except Exception as e:
             if self._kill_event.is_set():
                 return
             self.log.warn('Build failed, running a clean and rebuild')
             clean(app_options=app_options)
-            return build(command='build', app_options=app_options)
+            return build(app_options=app_options)
 
 
 class BuildHandler(ExtensionHandlerMixin, APIHandler):

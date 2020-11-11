@@ -93,7 +93,7 @@ jupyter --paths
 Explanation:
 
 - `dev-build`: This option controls whether a `dev` or a more streamlined
-`production` build is used. This option will default to `False` (ie the
+`production` build is used. This option will default to `False` (i.e., the
 `production` build) for most users. However, if you have any labextensions
 installed from local files, this option will instead default to `True`.
 Explicitly setting `dev-build` to `False` will ensure that the `production`
@@ -131,23 +131,15 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
         help="The version of the built application")
 
     dev_build = Bool(None, allow_none=True, config=True,
-        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (prod mode).")
+        help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (production mode).")
 
     minimize = Bool(True, config=True,
-        help="Whether to use a minifier during the Webpack build (defaults to True). Only affects production builds.")
+        help="Whether to minimize a production build (defaults to True).")
 
     pre_clean = Bool(False, config=True,
         help="Whether to clean before building (defaults to False)")
 
     def start(self):
-        parts = ['build']
-        parts.append('none' if self.dev_build is None else
-                     'dev' if self.dev_build else
-                     'prod')
-        if self.minimize:
-            parts.append('minimize')
-        command = ':'.join(parts)
-
         app_dir = self.app_dir or get_app_dir()
         app_options = AppOptions(
             app_dir=app_dir, logger=self.log, core_config=self.core_config
@@ -159,8 +151,9 @@ class LabBuildApp(JupyterApp, DebugLogFileMixin):
                 clean(app_options=app_options)
             self.log.info('Building in %s', app_dir)
             try:
+                production = None if self.dev_build is None else not self.dev_build
                 build(name=self.name, version=self.version,
-                  command=command, app_options=app_options)
+                  app_options=app_options, production = production, minimize=self.minimize)
             except Exception as e:
                 print(buildFailureMsg)
                 raise e
