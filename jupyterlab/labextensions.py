@@ -33,6 +33,14 @@ flags['no-build'] = (
     {'BaseExtensionApp': {'should_build': False}},
     "Defer building the app after the action."
 )
+flags['dev-build'] = (
+    {'BaseExtensionApp': {'dev_build': True}},
+    "Build in development mode."
+)
+flags['no-minimize'] = (
+    {'BaseExtensionApp': {'minimize': False}},
+    "Do not minimize a production build."
+)
 flags['clean'] = (
     {'BaseExtensionApp': {'should_clean': True}},
     "Cleanup intermediate files after the action."

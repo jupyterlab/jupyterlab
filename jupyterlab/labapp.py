@@ -64,6 +64,15 @@ build_aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 
 build_flags = dict(flags)
 
+build_flags['dev-build'] = (
+    {'LabBuildApp': {'dev_build': True}},
+    "Build in development mode."
+)
+build_flags['no-minimize'] = (
+    {'LabBuildApp': {'minimize': False}},
+    "Do not minimize a production build."
+)
+
 version = __version__
 app_version = get_app_version()
 if version != app_version:
