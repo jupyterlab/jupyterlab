@@ -81,9 +81,7 @@ function render(
             className={
               'toc-entry-holder ' +
               fontSizeClass +
-              (tracker.activeCell === item.cellRef || collapsed
-                ? ' toc-active-cell'
-                : '')
+              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
             }
           >
             {button}
@@ -137,9 +135,7 @@ function render(
             className={
               'toc-entry-holder ' +
               fontSizeClass +
-              (tracker.activeCell === item.cellRef || collapsed
-                ? ' toc-active-cell'
-                : '')
+              (tracker.activeCell === item.cellRef ? ' toc-active-cell' : '')
             }
           >
             {button}
