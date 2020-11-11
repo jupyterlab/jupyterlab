@@ -81,7 +81,7 @@ async function loadComponent(url, scope) {
   await container.init(__webpack_share_scopes__.default);
 }
 
-(async function bootstrap() {
+void (async function bootstrap() {
   // This is all the data needed to load and activate plugins. This should be
   // gathered by the server and put onto the initial page template.
   const extension_data = getOption('federated_extensions');
