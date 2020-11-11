@@ -160,10 +160,16 @@ function ignored(path) {
 // Set up module federation sharing config
 const shared = {};
 
+// Make sure any resolutions are shared
 for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
-  // eager so that built-in extensions can be bundled together into just a few
-  // js files to load
   shared[key] = { requiredVersion };
+}
+
+// Add any extension packages that are not in resolutions (i.e., installed from npm)
+for (let pkg in extensionPackages) {
+  if (shared[pkg] === undefined) {
+    shared[pkg] = { requiredVersion: package_data.dependencies[pkg] };
+  }
 }
 
 // Add dependencies and sharedPackage config from extension packages if they
