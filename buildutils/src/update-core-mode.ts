@@ -39,6 +39,7 @@ const notice =
 
 [
   'index.js',
+  'bootstrap.js',
   'publicpath.js',
   'webpack.config.js',
   'webpack.prod.config.js',

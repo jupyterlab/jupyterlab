@@ -20,17 +20,10 @@ const package_data = require('./package.json');
 
 // Handle the extensions.
 const jlab = package_data.jupyterlab;
-const extensions = jlab.extensions;
-const mimeExtensions = jlab.mimeExtensions;
-const { externalExtensions } = jlab;
-const packageNames = Object.keys(mimeExtensions).concat(
-  Object.keys(extensions),
-  Object.keys(externalExtensions)
-);
+const { extensions, mimeExtensions, externalExtensions } = jlab;
 
-// go throught each external extension
-// add to mapping of extension and mime extensions, of package name
-// to path of the extension.
+// Add external extensions to the extensions/mimeExtensions data as
+// appropriate
 for (const key in externalExtensions) {
   const {
     jupyterlab: { extension, mimeExtension }
@@ -42,6 +35,11 @@ for (const key in externalExtensions) {
     mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
   }
 }
+
+// Deduplicated list of extension package names.
+const extensionPackages = [
+  ...new Set([...Object.keys(extensions), ...Object.keys(mimeExtensions)])
+];
 
 // Ensure a clear build directory.
 const buildDir = plib.resolve(jlab.buildDir);
@@ -54,42 +52,25 @@ const outputDir = plib.resolve(jlab.outputDir);
 
 // Build the assets
 const extraConfig = Build.ensureAssets({
-  packageNames: packageNames,
+  // Deduplicate the extension package names
+  packageNames: extensionPackages,
   output: outputDir
 });
 
-// Build up singleton metadata for module federation.
-const singletons = {};
-
-package_data.jupyterlab.singletonPackages.forEach(element => {
-  singletons[element] = { singleton: true };
-});
-
-// Go through each external extension
-// add to mapping of extension and mime extensions, of package name
-// to path of the extension.
-for (const key in externalExtensions) {
-  const {
-    jupyterlab: { extension, mimeExtension }
-  } = require(`${key}/package.json`);
-  if (extension !== undefined) {
-    extensions[key] = extension === true ? '' : extension;
-  }
-  if (mimeExtension !== undefined) {
-    mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
-  }
-}
-
-// Create the entry point file.
+// Create the entry point and other assets in build directory.
 const source = fs.readFileSync('index.js').toString();
 const template = Handlebars.compile(source);
 const extData = {
   jupyterlab_extensions: extensions,
   jupyterlab_mime_extensions: mimeExtensions
 };
-const result = template(extData);
+fs.writeFileSync(plib.join(buildDir, 'index.out.js'), template(extData));
 
-fs.writeFileSync(plib.join(buildDir, 'index.out.js'), result);
+// Create the bootstrap file that loads federated extensions and calls the
+// initialization logic in index.out.js
+const entryPoint = plib.join(buildDir, 'bootstrap.js');
+fs.copySync('./bootstrap.js', entryPoint);
+
 fs.copySync('./package.json', plib.join(buildDir, 'package.json'));
 if (outputDir !== buildDir) {
   fs.copySync(
@@ -97,11 +78,6 @@ if (outputDir !== buildDir) {
     plib.join(buildDir, 'imports.css')
   );
 }
-
-// Make a bootstrap entrypoint
-const entryPoint = plib.join(buildDir, 'bootstrap.js');
-const bootstrap = 'import("./index.out.js");';
-fs.writeFileSync(entryPoint, bootstrap);
 
 // Set up variables for the watch mode ignore plugins
 const watched = {};
@@ -181,19 +157,93 @@ function ignored(path) {
   return ignore;
 }
 
-const shared = {
-  ...package_data.resolutions,
-  ...singletons
-};
+// Set up module federation sharing config
+const shared = {};
 
-// Webpack module sharing expects version numbers, so if a resolution was a
-// filename, extract the right version number from what was installed
-Object.keys(shared).forEach(k => {
-  const v = shared[k];
-  if (typeof v === 'string' && v.startsWith('file:')) {
-    shared[k] = require(`${k}/package.json`).version;
+// Make sure any resolutions are shared
+for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
+  shared[key] = { requiredVersion };
+}
+
+// Add any extension packages that are not in resolutions (i.e., installed from npm)
+for (let pkg of extensionPackages) {
+  if (shared[pkg] === undefined) {
+    shared[pkg] = { requiredVersion: require(`${pkg}/package.json`).version };
   }
-});
+}
+
+// Add dependencies and sharedPackage config from extension packages if they
+// are not already in the shared config. This means that if there is a
+// conflict, the resolutions package version is the one that is shared.
+extraShared = [];
+for (let pkg of extensionPackages) {
+  let pkgShared = {};
+  let {
+    dependencies = {},
+    jupyterlab: { sharedPackages = {} } = {}
+  } = require(`${pkg}/package.json`);
+  for (let [dep, requiredVersion] of Object.entries(dependencies)) {
+    if (!shared[dep]) {
+      pkgShared[dep] = { requiredVersion };
+    }
+  }
+
+  // Overwrite automatic dependency sharing with custom sharing config
+  for (let [pkg, config] of Object.entries(sharedPackages)) {
+    if (config === false) {
+      delete pkgShared[pkg];
+    } else {
+      if ('bundled' in config) {
+        config.import = config.bundled;
+        delete config.bundled;
+      }
+      pkgShared[pkg] = config;
+    }
+  }
+  extraShared.push(pkgShared);
+}
+
+// Now merge the extra shared config
+const mergedShare = {};
+for (let sharedConfig of extraShared) {
+  for (let [pkg, config] of Object.entries(sharedConfig)) {
+    // Do not override the basic share config from resolutions
+    if (shared[pkg]) {
+      continue;
+    }
+
+    // Add if we haven't seen the config before
+    if (!mergedShare[pkg]) {
+      mergedShare[pkg] = config;
+      continue;
+    }
+
+    // Choose between the existing config and this new config. We do not try
+    // to merge configs, which may yield a config no one wants
+    let oldConfig = mergedShare[pkg];
+
+    // if the old one has import: false, use the new one
+    if (oldConfig.import === false) {
+      mergedShare[pkg] = config;
+    }
+  }
+}
+
+Object.assign(shared, mergedShare);
+
+// Transform any file:// requiredVersion to the version number from the
+// imported package. This assumes (for simplicity) that the version we get
+// importing was installed from the file.
+for (let [key, { requiredVersion }] of Object.entries(shared)) {
+  if (requiredVersion.startsWith('file:')) {
+    shared[key].requiredVersion = require(`${key}/package.json`).version;
+  }
+}
+
+// Add singleton package information
+for (let key of jlab.singletonPackages) {
+  shared[key].singleton = true;
+}
 
 const plugins = [
   new WPPlugin.NowatchDuplicatePackageCheckerPlugin({
