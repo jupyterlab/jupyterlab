@@ -58,13 +58,11 @@ commander
     });
 
     // Pause to allow npm some time to update their servers to list the published packages.
-    const pause = 10000;
+    const pause = 5; // minutes
     console.log(
-      `Pausing ${
-        pause / 1000
-      } seconds after publishing to allow npmjs.com to update their package listing.`
+      `Pausing ${pause} minutes after publishing to allow npmjs.com to update their package listing.`
     );
-    await sleep(pause);
+    await sleep(pause * 60 * 1000);
 
     // Update core mode.  This cannot be done until the JS packages are
     // released.
