@@ -698,7 +698,9 @@ export class ListModel extends VDomModel {
     for (const key of Object.keys(installedMap)) {
       installed.push(installedMap[key]);
     }
-    for (const federated_extension of JSON.parse(PageConfig.getOption('federated_extensions'))) {
+    for (const federated_extension of JSON.parse(
+      PageConfig.getOption('federated_extensions')
+    )) {
       installed.push({
         name: federated_extension['name'],
         description: '',
@@ -710,7 +712,7 @@ export class ListModel extends VDomModel {
         installed_version: '',
         federated: true,
         blockedExtensionsEntry: undefined,
-        allowedExtensionsEntry: undefined,
+        allowedExtensionsEntry: undefined
       });
     }
     this._installed = installed.sort(Private.comparator);
