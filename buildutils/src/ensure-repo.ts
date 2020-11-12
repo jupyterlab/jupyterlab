@@ -207,11 +207,6 @@ function ensureJupyterlab(): string[] {
       return;
     }
 
-    // TODO: reinstate once we update the extension-manager
-    if (data.name === '@jupyterlab/extensionmanager') {
-      return;
-    }
-
     coreData.set(data.name, data);
 
     // If the package has a tokens.ts file, make sure it is noted as a singleton
