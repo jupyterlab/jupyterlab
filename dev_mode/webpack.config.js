@@ -240,7 +240,7 @@ Object.assign(shared, mergedShare);
 // imported package. This assumes (for simplicity) that the version we get
 // importing was installed from the file.
 for (let [key, { requiredVersion }] of Object.entries(shared)) {
-  if (requiredVersion.startsWith('file:')) {
+  if (requiredVersion?.startsWith('file:')) {
     shared[key].requiredVersion = require(`${key}/package.json`).version;
   }
 }
