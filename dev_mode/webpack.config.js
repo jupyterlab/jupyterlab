@@ -170,7 +170,10 @@ for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
 // Add any extension packages that are not in resolutions (i.e., installed from npm)
 for (let pkg of extensionPackages) {
   if (shared[pkg] === undefined) {
-    shared[pkg] = { requiredVersion: require(`${pkg}/package.json`).version, eager: true };
+    shared[pkg] = {
+      requiredVersion: require(`${pkg}/package.json`).version,
+      eager: true
+    };
   }
 }
 
