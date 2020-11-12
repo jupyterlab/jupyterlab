@@ -162,13 +162,18 @@ const shared = {};
 
 // Make sure any resolutions are shared
 for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
-  shared[key] = { requiredVersion };
+  // eager so that built-in extensions can be bundled together into just a few
+  // js files to load
+  shared[key] = { requiredVersion, eager: true };
 }
 
 // Add any extension packages that are not in resolutions (i.e., installed from npm)
 for (let pkg of extensionPackages) {
   if (shared[pkg] === undefined) {
-    shared[pkg] = { requiredVersion: require(`${pkg}/package.json`).version };
+    shared[pkg] = {
+      requiredVersion: require(`${pkg}/package.json`).version,
+      eager: true
+    };
   }
 }
 
@@ -184,7 +189,7 @@ for (let pkg of extensionPackages) {
   } = require(`${pkg}/package.json`);
   for (let [dep, requiredVersion] of Object.entries(dependencies)) {
     if (!shared[dep]) {
-      pkgShared[dep] = { requiredVersion };
+      pkgShared[dep] = { requiredVersion, eager: true };
     }
   }
 

@@ -33,6 +33,14 @@ flags['no-build'] = (
     {'BaseExtensionApp': {'should_build': False}},
     "Defer building the app after the action."
 )
+flags['dev-build'] = (
+    {'BaseExtensionApp': {'dev_build': True}},
+    "Build in development mode."
+)
+flags['no-minimize'] = (
+    {'BaseExtensionApp': {'minimize': False}},
+    "Do not minimize a production build."
+)
 flags['clean'] = (
     {'BaseExtensionApp': {'should_clean': True}},
     "Cleanup intermediate files after the action."
@@ -93,7 +101,7 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         help="Whether to build in dev mode. Defaults to True (dev mode) if there are any locally linked extensions, else defaults to False (production mode).")
 
     minimize = Bool(True, config=True,
-        help="Whether to use a minifier during the Webpack build (defaults to True). Only affects production builds.")
+        help="Whether to minimize a production build (defaults to True).")
 
     should_clean = Bool(False, config=True,
         help="Whether temporary files should be cleaned up after building jupyterlab")
@@ -112,17 +120,11 @@ class BaseExtensionApp(JupyterApp, DebugLogFileMixin):
         with self.debug_logging():
             ans = self.run_task()
             if ans and self.should_build:
-                parts = ['build']
-                parts.append('none' if self.dev_build is None else
-                             'dev' if self.dev_build else
-                             'prod')
-                if self.minimize:
-                    parts.append('minimize')
-                command = ':'.join(parts)
+                production = None if self.dev_build is None else not self.dev_build
                 app_options = AppOptions(app_dir=self.app_dir, logger=self.log,
                       core_config=self.core_config)
                 build(clean_staging=self.should_clean,
-                      command=command, app_options=app_options)
+                      production = production, minimize = self.minimize, app_options=app_options)
 
     def run_task(self):
         pass

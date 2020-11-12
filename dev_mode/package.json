@@ -5,7 +5,6 @@
   "scripts": {
     "build": "jlpm run clean && webpack",
     "build:dev": "jlpm run build",
-    "build:dev:minimize": "jlpm run build:dev",
     "build:prod": "webpack --config webpack.prod.config.js",
     "build:prod:minimize": "webpack --config webpack.prod.minimize.config.js",
     "build:prod:release": "webpack --config webpack.prod.release.config.js",
