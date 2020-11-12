@@ -7,6 +7,7 @@ config[0] = merge(config[0], {
   mode: 'production',
   devtool: 'source-map',
   optimization: {
+    minimize: true,
     minimizer: [
       new TerserPlugin({
         parallel: true,
