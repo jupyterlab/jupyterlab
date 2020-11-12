@@ -2,7 +2,12 @@
 // Distributed under the terms of the Modified BSD License.
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { VDomRenderer, ToolbarButtonComponent, Dialog, showDialog } from '@jupyterlab/apputils';
+import {
+  VDomRenderer,
+  ToolbarButtonComponent,
+  Dialog,
+  showDialog
+} from '@jupyterlab/apputils';
 import { ServiceManager } from '@jupyterlab/services';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
@@ -277,36 +282,38 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
           <div className="jp-extensionmanager-entry-description">
             {entry.description}
           </div>
-          {entry.federated && entry.installed &&
+          {entry.federated && entry.installed && (
             <div className="jp-extensionmanager-entry-buttons">
               <Button
-                onClick={() => showDialog({
-                  title,
-                  body: <div>
-                      <p>
-                        {trans.__(`This is a Federated Extension. To uninstall it, please
+                onClick={() =>
+                  showDialog({
+                    title,
+                    body: (
+                      <div>
+                        <p>
+                          {trans.__(`This is a Federated Extension. To uninstall it, please
                 read the user guide on https://jupyterlab.readthedocs.io/en/stable/user/extensions.html`)}
-                      </p>
-                    </div>
-                  ,
-                  buttons: [
-                    Dialog.okButton({
-                      label: trans.__('OK'),
-                      caption: trans.__('OK')
-                    })
-                  ]
-                }).then(result => {
-                  return result.button.accept;
-                })
-              }
+                        </p>
+                      </div>
+                    ),
+                    buttons: [
+                      Dialog.okButton({
+                        label: trans.__('OK'),
+                        caption: trans.__('OK')
+                      })
+                    ]
+                  }).then(result => {
+                    return result.button.accept;
+                  })
+                }
                 minimal
                 small
               >
                 {trans.__('About')}
               </Button>
             </div>
-          }
-          {!entry.federated &&
+          )}
+          {!entry.federated && (
             <div className="jp-extensionmanager-entry-buttons">
               {!entry.installed &&
                 !entry.blockedExtensionsEntry &&
@@ -360,7 +367,7 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                 </Button>
               )}
             </div>
-          }
+          )}
         </div>
       </div>
     </li>
