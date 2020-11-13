@@ -190,7 +190,7 @@ for (let pkg of extensionPackages) {
 // Add dependencies and sharedPackage config from extension packages if they
 // are not already in the shared config. This means that if there is a
 // conflict, the resolutions package version is the one that is shared.
-extraShared = [];
+const extraShared = [];
 // dependencies of eager shared packages must also be eager.
 for (let pkg of extensionPackages) {
   let eager = eagerPackages.has(pkg);
