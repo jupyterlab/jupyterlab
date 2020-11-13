@@ -3,6 +3,7 @@ lab_command = ' '.join([
     'lab',
     '--dev-mode',
     '--debug',
+    '--extensions-in-dev-mode',
     '--no-browser',
     '--port={port}',
     '--ServerApp.ip=127.0.0.1',
