@@ -392,16 +392,12 @@ export class DocumentManager implements IDocumentManager {
     kernel?: Partial<Kernel.IModel>,
     options?: DocumentRegistry.IOpenOptions
   ): IDocumentWidget | undefined {
-    if (this.mode == 'single-document' && options?.maybeNewWorkspace) {
-      this._openInNewWorkspace(path);
-    } else {
-      const widget = this.findWidget(path, widgetName);
-      if (widget) {
-        this._opener.open(widget, options || {});
-        return widget;
-      }
-      return this.open(path, widgetName, kernel, options || {});
+    const widget = this.findWidget(path, widgetName);
+    if (widget) {
+      this._opener.open(widget, options || {});
+      return widget;
     }
+    return this.open(path, widgetName, kernel, options || {});
   }
 
   /**
