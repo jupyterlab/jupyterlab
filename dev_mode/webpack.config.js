@@ -169,7 +169,7 @@ for (let pkg of Object.keys(jlab.linkedPackages)) {
 
 // Make sure any resolutions are shared
 for (let [pkg, requiredVersion] of Object.entries(package_data.resolutions)) {
-  shared[pkg] = { requiredVersion};
+  shared[pkg] = { requiredVersion };
   if (eagerPackages.has(pkg)) {
     shared[pkg].eager = true;
   }
