@@ -42,14 +42,6 @@ export interface IDocumentManager extends IDisposable {
   readonly activateRequested: ISignal<this, string>;
 
   /**
-   * The mode of the document manager, either 'single-document' or
-   * 'multiple-document' and usually matches that of the shell. When this
-   * is 'single-document' the document manager will open documents in a
-   * separate browser tab.
-   */
-  mode: string;
-
-  /**
    * Whether to autosave documents.
    */
   autosave: boolean;

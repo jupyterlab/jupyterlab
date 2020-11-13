@@ -3,7 +3,7 @@
 
 import { ISessionContext, sessionContextDialogs } from '@jupyterlab/apputils';
 
-import { PathExt, PageConfig } from '@jupyterlab/coreutils';
+import { PathExt } from '@jupyterlab/coreutils';
 
 import { UUID } from '@lumino/coreutils';
 
@@ -25,7 +25,7 @@ import { AttachedProperty } from '@lumino/properties';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { DockPanel, Widget } from '@lumino/widgets';
+import { Widget } from '@lumino/widgets';
 
 import { SaveHandler } from './savehandler';
 
@@ -80,22 +80,6 @@ export class DocumentManager implements IDocumentManager {
    */
   get activateRequested(): ISignal<this, string> {
     return this._activateRequested;
-  }
-
-  /**
-   * The document mode of the document manager, either 'single-document' or 'multiple-document'.
-   *
-   * This is usually synced with the `mode` attribute of the shell.
-   */
-  get mode(): DockPanel.Mode {
-    return this._mode;
-  }
-
-  /**
-   * Set the mode of the document manager, either 'single-document' or 'multiple-document'.
-   */
-  set mode(value: DockPanel.Mode) {
-    this._mode = value;
   }
 
   /**
@@ -539,15 +523,6 @@ export class DocumentManager implements IDocumentManager {
     return registry.getWidgetFactory(widgetName);
   }
 
-  private _openInNewWorkspace(path: string) {
-    const newUrl = PageConfig.getUrl({
-      mode: this.mode,
-      workspace: 'default',
-      treePath: path
-    });
-    window.open(newUrl);
-  }
-
   /**
    * Creates a new document, or loads one from disk, depending on the `which` argument.
    * If `which==='create'`, then it creates a new document. If `which==='open'`,
@@ -630,7 +605,6 @@ export class DocumentManager implements IDocumentManager {
   private _isDisposed = false;
   private _autosave = true;
   private _autosaveInterval = 120;
-  private _mode: DockPanel.Mode = 'multiple-document';
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
