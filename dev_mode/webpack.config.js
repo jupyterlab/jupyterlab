@@ -24,15 +24,15 @@ const { extensions, mimeExtensions, externalExtensions } = jlab;
 
 // Add external extensions to the extensions/mimeExtensions data as
 // appropriate
-for (const key in externalExtensions) {
+for (const pkg in externalExtensions) {
   const {
     jupyterlab: { extension, mimeExtension }
-  } = require(`${key}/package.json`);
+  } = require(`${pkg}/package.json`);
   if (extension !== undefined) {
-    extensions[key] = extension === true ? '' : extension;
+    extensions[pkg] = extension === true ? '' : extension;
   }
   if (mimeExtension !== undefined) {
-    mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
+    mimeExtensions[pkg] = mimeExtension === true ? '' : mimeExtension;
   }
 }
 
@@ -160,28 +160,40 @@ function ignored(path) {
 // Set up module federation sharing config
 const shared = {};
 
+// eager so that built-in extensions can be bundled together into just a few
+// js files to load
+const eagerPackages = new Set(Object.keys(package_data.resolutions));
+for (let pkg of Object.keys(jlab.linkedPackages)) {
+  eagerPackages.delete(pkg);
+}
+
 // Make sure any resolutions are shared
-for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
-  // eager so that built-in extensions can be bundled together into just a few
-  // js files to load
-  shared[key] = { requiredVersion, eager: true };
+for (let [pkg, requiredVersion] of Object.entries(package_data.resolutions)) {
+  shared[pkg] = { requiredVersion };
+  if (eagerPackages.has(pkg)) {
+    shared[pkg].eager = true;
+  }
 }
 
 // Add any extension packages that are not in resolutions (i.e., installed from npm)
 for (let pkg of extensionPackages) {
-  if (shared[pkg] === undefined) {
+  if (!shared[pkg]) {
     shared[pkg] = {
-      requiredVersion: require(`${pkg}/package.json`).version,
-      eager: true
+      requiredVersion: require(`${pkg}/package.json`).version
     };
+    if (eagerPackages.has(pkg)) {
+      shared[pkg].eager = true;
+    }
   }
 }
 
 // Add dependencies and sharedPackage config from extension packages if they
 // are not already in the shared config. This means that if there is a
 // conflict, the resolutions package version is the one that is shared.
-extraShared = [];
+const extraShared = [];
+// dependencies of eager shared packages must also be eager.
 for (let pkg of extensionPackages) {
+  let eager = eagerPackages.has(pkg);
   let pkgShared = {};
   let {
     dependencies = {},
@@ -189,20 +201,27 @@ for (let pkg of extensionPackages) {
   } = require(`${pkg}/package.json`);
   for (let [dep, requiredVersion] of Object.entries(dependencies)) {
     if (!shared[dep]) {
-      pkgShared[dep] = { requiredVersion, eager: true };
+      pkgShared[dep] = { requiredVersion };
+      if (eager) {
+        pkgShared[dep].eager = true;
+      }
+    } else if (eager) {
+      // Even if we already have this dependency, make sure it is eager if it
+      // is the dependency of an eager package.
+      shared[dep].eager = true;
     }
   }
 
   // Overwrite automatic dependency sharing with custom sharing config
-  for (let [pkg, config] of Object.entries(sharedPackages)) {
+  for (let [dep, config] of Object.entries(sharedPackages)) {
     if (config === false) {
-      delete pkgShared[pkg];
+      delete pkgShared[dep];
     } else {
       if ('bundled' in config) {
         config.import = config.bundled;
         delete config.bundled;
       }
-      pkgShared[pkg] = config;
+      pkgShared[dep] = config;
     }
   }
   extraShared.push(pkgShared);
@@ -239,15 +258,15 @@ Object.assign(shared, mergedShare);
 // Transform any file:// requiredVersion to the version number from the
 // imported package. This assumes (for simplicity) that the version we get
 // importing was installed from the file.
-for (let [key, { requiredVersion }] of Object.entries(shared)) {
+for (let [pkg, { requiredVersion }] of Object.entries(shared)) {
   if (requiredVersion && requiredVersion.startsWith('file:')) {
-    shared[key].requiredVersion = require(`${key}/package.json`).version;
+    shared[pkg].requiredVersion = require(`${pkg}/package.json`).version;
   }
 }
 
 // Add singleton package information
-for (let key of jlab.singletonPackages) {
-  shared[key].singleton = true;
+for (let pkg of jlab.singletonPackages) {
+  shared[pkg].singleton = true;
 }
 
 const plugins = [
