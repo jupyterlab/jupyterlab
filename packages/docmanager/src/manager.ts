@@ -25,7 +25,7 @@ import { AttachedProperty } from '@lumino/properties';
 
 import { ISignal, Signal } from '@lumino/signaling';
 
-import { Widget } from '@lumino/widgets';
+import { DockPanel, Widget } from '@lumino/widgets';
 
 import { SaveHandler } from './savehandler';
 
@@ -87,14 +87,14 @@ export class DocumentManager implements IDocumentManager {
    *
    * This is usually synced with the `mode` attribute of the shell.
    */
-  get mode(): string {
+  get mode(): DockPanel.Mode {
     return this._mode;
   }
 
   /**
    * Set the mode of the document manager, either 'single-document' or 'multiple-document'.
    */
-  set mode(value: string) {
+  set mode(value: DockPanel.Mode) {
     this._mode = value;
   }
 
@@ -634,7 +634,7 @@ export class DocumentManager implements IDocumentManager {
   private _isDisposed = false;
   private _autosave = true;
   private _autosaveInterval = 120;
-  private _mode = '';
+  private _mode: DockPanel.Mode = 'multiple-document';
   private _when: Promise<void>;
   private _setBusy: (() => IDisposable) | undefined;
   private _dialogs: ISessionContext.IDialogs;
