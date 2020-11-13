@@ -16,7 +16,7 @@ import {
   PLUGIN_ID
 } from '../tokens';
 import { WidgetAdapter } from '../adapters/adapter';
-import { IDocumentWidget } from '@jupyterlab/docregistry/lib/registry';
+import { IDocumentWidget } from '@jupyterlab/docregistry';
 
 export interface IWindowCoordinates {
   /**
