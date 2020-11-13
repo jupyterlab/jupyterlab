@@ -24,15 +24,15 @@ const { extensions, mimeExtensions, externalExtensions } = jlab;
 
 // Add external extensions to the extensions/mimeExtensions data as
 // appropriate
-for (const key in externalExtensions) {
+for (const pkg in externalExtensions) {
   const {
     jupyterlab: { extension, mimeExtension }
-  } = require(`${key}/package.json`);
+  } = require(`${pkg}/package.json`);
   if (extension !== undefined) {
-    extensions[key] = extension === true ? '' : extension;
+    extensions[pkg] = extension === true ? '' : extension;
   }
   if (mimeExtension !== undefined) {
-    mimeExtensions[key] = mimeExtension === true ? '' : mimeExtension;
+    mimeExtensions[pkg] = mimeExtension === true ? '' : mimeExtension;
   }
 }
 
@@ -168,16 +168,16 @@ for (let pkg of Object.keys(jlab.linkedPackages)) {
 }
 
 // Make sure any resolutions are shared
-for (let [key, requiredVersion] of Object.entries(package_data.resolutions)) {
-  shared[key] = { requiredVersion};
-  if (eagerPackages.has(key)) {
-    shared[key].eager = true;
+for (let [pkg, requiredVersion] of Object.entries(package_data.resolutions)) {
+  shared[pkg] = { requiredVersion};
+  if (eagerPackages.has(pkg)) {
+    shared[pkg].eager = true;
   }
 }
 
 // Add any extension packages that are not in resolutions (i.e., installed from npm)
 for (let pkg of extensionPackages) {
-  if (shared[pkg] === undefined) {
+  if (!shared[pkg]) {
     shared[pkg] = {
       requiredVersion: require(`${pkg}/package.json`).version
     };
@@ -213,15 +213,15 @@ for (let pkg of extensionPackages) {
   }
 
   // Overwrite automatic dependency sharing with custom sharing config
-  for (let [pkg, config] of Object.entries(sharedPackages)) {
+  for (let [dep, config] of Object.entries(sharedPackages)) {
     if (config === false) {
-      delete pkgShared[pkg];
+      delete pkgShared[dep];
     } else {
       if ('bundled' in config) {
         config.import = config.bundled;
         delete config.bundled;
       }
-      pkgShared[pkg] = config;
+      pkgShared[dep] = config;
     }
   }
   extraShared.push(pkgShared);
@@ -258,15 +258,15 @@ Object.assign(shared, mergedShare);
 // Transform any file:// requiredVersion to the version number from the
 // imported package. This assumes (for simplicity) that the version we get
 // importing was installed from the file.
-for (let [key, { requiredVersion }] of Object.entries(shared)) {
+for (let [pkg, { requiredVersion }] of Object.entries(shared)) {
   if (requiredVersion && requiredVersion.startsWith('file:')) {
-    shared[key].requiredVersion = require(`${key}/package.json`).version;
+    shared[pkg].requiredVersion = require(`${pkg}/package.json`).version;
   }
 }
 
 // Add singleton package information
-for (let key of jlab.singletonPackages) {
-  shared[key].singleton = true;
+for (let pkg of jlab.singletonPackages) {
+  shared[pkg].singleton = true;
 }
 
 const plugins = [
