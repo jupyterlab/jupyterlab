@@ -150,7 +150,7 @@ const connectionlost: JupyterFrontEndPlugin<IConnectionLost> = {
       }
       showingError = true;
       const result = await showDialog({
-        title: trans.__('Server Not Running'),
+        title: trans.__('Server unavailable or unreachable'),
         body: trans.__(
           'Your server at %1 is not running.\nWould you like to restart it?',
           baseUrl
