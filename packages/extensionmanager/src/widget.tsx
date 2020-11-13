@@ -292,7 +292,16 @@ function ListEntry(props: ListEntry.IProperties): React.ReactElement<any> {
                       <div>
                         <p>
                           {trans.__(`This is a Federated Extension. To uninstall it, please
-                read the user guide on https://jupyterlab.readthedocs.io/en/stable/user/extensions.html`)}
+                read the user guide on:`)}
+                        </p>
+                        <p>
+                          <a
+                            href="https://jupyterlab.readthedocs.io/en/stable/user/extensions.html"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            https://jupyterlab.readthedocs.io/en/stable/user/extensions.html
+                          </a>
                         </p>
                       </div>
                     ),

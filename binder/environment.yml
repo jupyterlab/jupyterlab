@@ -4,7 +4,7 @@ channels:
 dependencies:
   - jupyter-server-proxy
   - matplotlib-base
-  - nodejs
+  - nodejs=14
   - numpy
   - pip
   - python=3.8
