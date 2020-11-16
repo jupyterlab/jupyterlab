@@ -136,7 +136,7 @@ export function uri_to_contents_path(child: string, parent?: string) {
     return null;
   }
   if (child.startsWith(parent)) {
-    return child.replace(parent, '');
+    return decodeURI(child.replace(parent, ''));
   }
   return null;
 }
