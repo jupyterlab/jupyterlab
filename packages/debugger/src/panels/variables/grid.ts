@@ -268,23 +268,28 @@ class GridModel extends DataModel {
       type: 'model-reset',
       region: 'body'
     });
+    let span = 0;
     scopes.forEach(scope => {
       const filtered = scope.variables.filter(
         variable =>
-          variable.evaluateName && !this._filter.has(variable.evaluateName)
+          variable.evaluateName &&
+          variable.type &&
+          !this._filter.has(variable.evaluateName)
       );
       filtered.forEach((variable, index) => {
-        this._data.name[index] = variable.evaluateName!;
-        this._data.type[index] = variable.type || '';
-        this._data.value[index] = variable.value;
-        this._data.variablesReference[index] = variable.variablesReference;
+        this._data.name[span + index] = variable.evaluateName!;
+        this._data.type[span + index] = variable.type || '';
+        this._data.value[span + index] = variable.value;
+        this._data.variablesReference[span + index] =
+          variable.variablesReference;
       });
-      this.emitChanged({
-        type: 'rows-inserted',
-        region: 'body',
-        index: 1,
-        span: filtered.length
-      });
+      span += filtered.length;
+    });
+    this.emitChanged({
+      type: 'rows-inserted',
+      region: 'body',
+      index: 1,
+      span
     });
   }
 
