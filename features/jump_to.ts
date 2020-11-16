@@ -136,7 +136,10 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       }
 
       this.jumper.global_jump(
-        { contents_path: URLExt.join('.lsp_symlink', contents_path), ...jump_data },
+        {
+          contents_path: URLExt.join('.lsp_symlink', contents_path),
+          ...jump_data
+        },
         true
       );
     }
