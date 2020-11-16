@@ -79,6 +79,14 @@ aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 install_aliases = copy(aliases)
 install_aliases['pin-version-as'] = 'InstallLabExtensionApp.pin'
 
+enable_aliases = copy(aliases)
+enable_aliases['user'] = 'EnableLabExtensionsApp.user'
+enable_aliases['sys-prefix'] = 'EnableLabExtensionsApp.sys_prefix'
+
+disable_aliases = copy(aliases)
+disable_aliases['user'] = 'DisableLabExtensionsApp.user'
+disable_aliases['sys-prefix'] = 'DisableLabExtensionsApp.sys_prefix'
+
 VERSION = get_app_version()
 
 
@@ -332,22 +340,30 @@ class ListLabExtensionsApp(BaseExtensionApp):
 
 class EnableLabExtensionsApp(BaseExtensionApp):
     description = "Enable labextension(s) by name"
+    aliases = enable_aliases
+
+    user = Bool(False, config=True, help="Whether to do a user install")
+    sys_prefix = Bool(True, config=True, help="Use the sys.prefix as the prefix")
 
     def run_task(self):
         app_options = AppOptions(
             app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
             labextensions_path=self.labextensions_path)
-        [enable_extension(arg, app_options=app_options) for arg in self.extra_args]
+        [enable_extension(arg, app_options=app_options, user=self.user, sys_prefix=self.sys_prefix) for arg in self.extra_args]
 
 
 class DisableLabExtensionsApp(BaseExtensionApp):
     description = "Disable labextension(s) by name"
+    aliases = disable_aliases
+
+    user = Bool(False, config=True, help="Whether to do a user install")
+    sys_prefix = Bool(True, config=True, help="Use the sys.prefix as the prefix")
 
     def run_task(self):
         app_options = AppOptions(
             app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
             labextensions_path=self.labextensions_path)
-        [disable_extension(arg, app_options=app_options) for arg in self.extra_args]
+        [disable_extension(arg, app_options=app_options, user=self.user, sys_prefix=self.sys_prefix) for arg in self.extra_args]
 
 
 class CheckLabExtensionsApp(BaseExtensionApp):

@@ -471,22 +471,22 @@ def get_app_info(app_options=None):
     return handler.info
 
 
-def enable_extension(extension, app_options=None):
+def enable_extension(extension, app_options=None, user=False, sys_prefix=False):
     """Enable a JupyterLab extension.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(app_options)
-    return handler.toggle_extension(extension, False)
+    return handler.toggle_extension(extension, False, user=user, sys_prefix=sys_prefix)
 
 
-def disable_extension(extension, app_options=None):
+def disable_extension(extension, app_options=None, user=False, sys_prefix=False):
     """Disable a JupyterLab package.
 
     Returns `True` if a rebuild is recommended, `False` otherwise.
     """
     handler = _AppHandler(app_options)
-    return handler.toggle_extension(extension, True)
+    return handler.toggle_extension(extension, True, user=user, sys_prefix=sys_prefix)
 
 
 def check_extension(extension, installed=False, app_options=None):
@@ -975,14 +975,20 @@ class _AppHandler(object):
         self._write_build_config(config)
         return True
 
-    def toggle_extension(self, extension, value):
+    def toggle_extension(self, extension, value, user=False, sys_prefix=False):
         """Enable or disable a lab extension.
 
         Returns `True` if a rebuild is recommended, `False` otherwise.
         """
         lab_config = LabConfig()
         app_settings_dir = osp.join(self.app_dir, 'settings')
-        page_config = get_static_page_config(app_settings_dir=app_settings_dir, logger=self.logger)
+        if user:
+            level = 'user'
+        elif sys_prefix:
+            level = 'sys_prefix'
+        else:
+            level = 'system'
+        page_config = get_static_page_config(app_settings_dir=app_settings_dir, logger=self.logger, level=level)
 
         disabled = page_config.get('disabled_labextensions', {})
         did_something = False
