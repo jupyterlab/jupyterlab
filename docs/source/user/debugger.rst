@@ -20,7 +20,7 @@ To install ``xeus-python`` in a new ``conda`` environment:
 
 .. code:: bash
 
-   conda create -n jupyterlab-debugger -c conda-forge jupyterlab=3 xeus-python ptvsd
+   conda create -n jupyterlab-debugger -c conda-forge jupyterlab=3 xeus-python
    conda activate jupyterlab-debugger
 
 Usage
