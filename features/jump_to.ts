@@ -22,6 +22,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { LabIcon } from '@jupyterlab/ui-components';
 import jumpToSvg from '../../style/icons/jump-to.svg';
+import { URLExt } from '@jupyterlab/coreutils';
 
 export const jumpToIcon = new LabIcon({
   name: 'lsp:jump-to',
@@ -128,14 +129,14 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
             content: false
           }
         );
-        this.jumper.global_jump({ uri: contents_path, ...jump_data }, false);
+        this.jumper.global_jump({ contents_path, ...jump_data }, false);
         return;
       } catch (err) {
         console.warn(err);
       }
 
       this.jumper.global_jump(
-        { uri: '.lsp_symlink/' + contents_path, ...jump_data },
+        { contents_path: URLExt.join('.lsp_symlink', contents_path), ...jump_data },
         true
       );
     }
