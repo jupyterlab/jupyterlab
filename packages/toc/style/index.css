@@ -29,10 +29,6 @@
   padding-bottom: 8px;
 }
 
-.jp-TableOfContents-content li:hover {
-  background: var(--jp-layout-color2);
-}
-
 .jp-TableOfContents {
   display: flex;
   flex-direction: column;
@@ -159,10 +155,51 @@
 }
 
 .toc-entry-holder {
-  display: inline-flex;
-  position: relative;
-  align-items: center;
   width: 100%;
+  display: flex;
+  flex-direction: row;
+  padding: 0px;
+  margin: 0px;
+  overflow: visible;
+}
+
+.toc-Collapser-child {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+}
+
+.toc-entry-holder:hover .toc-Collapser-child {
+  box-shadow: var(--jp-elevation-z2);
+  background: var(--jp-brand-color1);
+  opacity: var(--jp-cell-collapser-not-active-hover-opacity);
+}
+
+.toc-active-cell .toc-Collapser-child {
+  background: var(--jp-brand-color1);
+}
+
+.toc-active-cell .toc-Collapser-child:hover {
+  background: var(--jp-brand-color0);
+  opacity: 1;
+}
+
+.toc-active-cell:hover .toc-Collapser-child {
+  background: var(--jp-brand-color0);
+  opacity: 1;
+}
+
+.toc-Collapser-child {
+  background: transparent;
+}
+
+.toc-Collapser-child:hover {
+  box-shadow: var(--jp-elevation-z2);
+  background: var(--jp-brand-color1);
+  opacity: var(--jp-cell-collapser-not-active-hover-opacity);
 }
 
 .toc-twist-placeholder {
@@ -227,7 +264,6 @@
   font-size: 12px;
   color: var(--jp-ui-font-color1);
   padding-left: 15px;
-  /* padding-top: 7px; */
   user-select: none;
   float: right;
 }
@@ -236,7 +272,6 @@
   font-size: 12px;
   color: var(--jp-ui-font-color2);
   padding-left: 15px;
-  /* padding-top: 7px; */
   user-select: none;
 }
 
@@ -296,6 +331,7 @@
 
 .toc-cell-item {
   padding-left: 10px;
+  font-size: var(--jp-ui-font-size1);
 }
 
 /* styles for tags */
@@ -346,32 +382,33 @@
   padding-top: 6px;
 }
 
-/* Font level sizes */
-
-.toc-level-size-1 {
-  font-size: 16.89px;
+.toc-Ellipses {
+  height: 16px;
+  margin-left: auto;
 }
 
+.toc-Ellipses:hover {
+  border: 1px solid var(--jp-border-color1);
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.25);
+  background-color: var(--jp-layout-color0);
+}
+
+/* 
+ * Indentation levels
+ */
+
 .toc-level-size-2 {
-  font-size: 14.82px;
+  margin-left: 16px;
 }
 
 .toc-level-size-3 {
-  font-size: 13px;
+  margin-left: 36px;
 }
 
 .toc-level-size-4 {
-  font-size: 11.4px;
+  margin-left: 56px;
 }
 
 .toc-level-size-5 {
-  font-size: 10px;
-}
-
-.toc-level-size-6 {
-  font-size: 9px;
-}
-
-.toc-level-size-default {
-  font-size: 9px;
+  margin-left: 76px;
 }

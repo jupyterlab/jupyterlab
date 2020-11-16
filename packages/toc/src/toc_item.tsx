@@ -9,7 +9,7 @@ import { IHeading } from './utils/headings';
  *
  * @private
  */
-interface IProperties extends React.Props<TOCItem> {
+interface IProperties {
   /**
    * Heading to render.
    */
