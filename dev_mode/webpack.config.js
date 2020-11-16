@@ -160,11 +160,35 @@ function ignored(path) {
 // Set up module federation sharing config
 const shared = {};
 
-// eager so that built-in extensions can be bundled together into just a few
-// js files to load
-const eagerPackages = new Set(Object.keys(package_data.resolutions));
-for (let pkg of Object.keys(jlab.linkedPackages)) {
-  eagerPackages.delete(pkg);
+// Core packages and their transitive dependencies are loaded eagerly so they
+// can be bundled more effectively.
+const eagerPackages = new Set();
+
+/**
+ * Recursively add pkg and all transitive dependencies to the cache set.
+ */
+function transitiveDependencies(pkg, cache) {
+  if (cache.has(pkg)) {
+    return;
+  }
+  cache.add(pkg);
+  // Some packages do interesing things with their exports, so requiring
+  // pkg/package.json does not always work.
+  try {
+    let { dependencies = {} } = require(`${pkg}/package.json`);
+    for (dep of Object.keys(dependencies)) {
+      transitiveDependencies(dep, cache);
+    }
+  } catch (e) {
+    console.log(`Error adding dependencies of ${pkg} to eagerly shared packages`);
+  }
+}
+
+const linkedPackages = Object.keys(jlab.linkedPackages);
+for (pkg of Object.keys(package_data.resolutions)) {
+  if (!linkedPackages.includes(pkg)) {
+    transitiveDependencies(pkg, eagerPackages);
+  }
 }
 
 // Make sure any resolutions are shared
