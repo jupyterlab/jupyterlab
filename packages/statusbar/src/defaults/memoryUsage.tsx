@@ -304,7 +304,10 @@ namespace Private {
   /**
    * The url endpoint for making requests to the server.
    */
-  const METRIC_URL = URLExt.join(SERVER_CONNECTION_SETTINGS.baseUrl, 'api/materials/v1');
+  const METRIC_URL = URLExt.join(
+    SERVER_CONNECTION_SETTINGS.baseUrl,
+    'api/metrics/v1'
+  );
 
   /**
    * The shape of a response from the metrics server extension.
