@@ -35,14 +35,14 @@ export class VariablesBodyGrid extends Panel {
    */
   constructor(options: VariablesBodyGrid.IOptions) {
     super();
-    const { model, commands, themeManager } = options;
+    const { model, commands, themeManager, scopes } = options;
     this._grid = new Grid({ commands, themeManager });
     this._grid.addClass('jp-DebuggerVariables-grid');
     this._model = model;
     this._model.changed.connect((model: VariablesModel): void => {
       this._update();
     }, this);
-    this._update();
+    this._grid.dataModel.setData(scopes ?? []);
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariables-body');
   }
@@ -63,7 +63,7 @@ export class VariablesBodyGrid extends Panel {
    * @param scope The current scope for the variables.
    */
   set scope(scope: string) {
-    this._scope = scope;
+    (this._grid.dataModel as GridModel).scope = scope;
     this._update();
   }
 
@@ -71,14 +71,10 @@ export class VariablesBodyGrid extends Panel {
    * Update the underlying data model
    */
   private _update(): void {
-    const scope =
-      this._model.scopes.find(scope => scope.name === this._scope) ??
-      this._model.scopes[0];
-    this._grid.dataModel.setData(scope?.variables ?? []);
+    this._grid.dataModel.setData(this._model.scopes ?? []);
   }
 
   private _grid: Grid;
-  private _scope: string | null;
   private _model: IDebugger.Model.IVariables;
 }
 
@@ -99,6 +95,11 @@ export namespace VariablesBodyGrid {
      * The commands registry.
      */
     commands: CommandRegistry;
+
+    /**
+     * The optional initial scopes data.
+     */
+    scopes?: IDebugger.IScope[];
 
     /**
      * An optional application theme manager to detect theme changes.
@@ -125,7 +126,8 @@ class Grid extends Panel {
     mouseHandler.doubleClicked.connect((_, hit) =>
       commands.execute(Debugger.CommandIDs.inspectVariable, {
         variableReference: dataModel.getVariableReference(hit.row),
-        title: dataModel.getVariableName(hit.row)
+        title: dataModel.getVariableName(hit.row),
+        scope: dataModel.scope
       })
     );
     grid.dataModel = dataModel;
@@ -152,6 +154,16 @@ class Grid extends Panel {
    */
   set filter(filter: Set<string>) {
     (this._grid.dataModel as GridModel).filter = filter;
+    this.update();
+  }
+
+  /**
+   * Set the scope for the variables data model.
+   *
+   * @param scope The scopes for the variables
+   */
+  set scope(scope: string) {
+    (this._grid.dataModel as GridModel).scope = scope;
     this.update();
   }
 
@@ -213,6 +225,20 @@ class GridModel extends DataModel {
    */
   set filter(filter: Set<string>) {
     this._filter = filter;
+  }
+
+  /**
+   * Get the current scope for the variables.
+   */
+  get scope(): string {
+    return this._scope;
+  }
+
+  /**
+   * Set the variable scope
+   */
+  set scope(scope: string) {
+    this._scope = scope;
   }
 
   /**
@@ -278,12 +304,14 @@ class GridModel extends DataModel {
    *
    * @param variables The list of variables.
    */
-  setData(variables: IDebugger.IVariable[]): void {
+  setData(scopes: IDebugger.IScope[]): void {
     this._clearData();
     this.emitChanged({
       type: 'model-reset',
       region: 'body'
     });
+    const scope = scopes.find(scope => scope.name === this._scope) ?? scopes[0];
+    const variables = scope?.variables ?? [];
     const filtered = variables.filter(
       variable =>
         variable.evaluateName &&
@@ -317,6 +345,7 @@ class GridModel extends DataModel {
   }
 
   private _filter = new Set<string>();
+  private _scope = '';
   private _data: {
     name: string[];
     type: string[];

@@ -313,6 +313,7 @@ const variables: JupyterFrontEndPlugin<void> = {
           content: new Debugger.VariablesGrid({
             model,
             commands,
+            scopes: [{ name: title, variables }],
             themeManager
           })
         });
