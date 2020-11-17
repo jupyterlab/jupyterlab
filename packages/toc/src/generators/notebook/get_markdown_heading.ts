@@ -26,37 +26,42 @@ type onClickFactory = (line: number) => () => void;
  * @param cellRef - cell reference
  * @returns notebook heading
  */
-function getMarkdownHeading(
+function getMarkdownHeadings(
   text: string,
   onClick: onClickFactory,
   dict: any,
   lastLevel: number,
   cellRef: Cell
-): INotebookHeading {
+): INotebookHeading[] {
   const clbk = onClick(0);
-  const heading = parseHeading(text);
-  if (heading) {
-    return {
-      text: heading.text,
-      level: heading.level,
-      numbering: generateNumbering(dict, heading.level),
-      onClick: clbk,
-      type: 'header',
-      cellRef: cellRef,
-      hasChild: false
-    };
+  let headings: INotebookHeading[] = [];
+  for (const line of text.split('\n')) {
+    const heading = parseHeading(line);
+    if (heading) {
+      headings.push({
+        text: heading.text,
+        level: heading.level,
+        numbering: generateNumbering(dict, heading.level),
+        onClick: clbk,
+        type: 'header',
+        cellRef: cellRef,
+        hasChild: false
+      });
+    } else {
+      headings.push({
+        text: text,
+        level: lastLevel + 1,
+        onClick: clbk,
+        type: 'markdown',
+        cellRef: cellRef,
+        hasChild: false
+      });
+    }
   }
-  return {
-    text: text,
-    level: lastLevel + 1,
-    onClick: clbk,
-    type: 'markdown',
-    cellRef: cellRef,
-    hasChild: false
-  };
+  return headings;
 }
 
 /**
  * Exports.
  */
-export { getMarkdownHeading };
+export { getMarkdownHeadings };
