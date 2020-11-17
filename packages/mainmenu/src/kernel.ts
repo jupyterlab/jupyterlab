@@ -56,6 +56,11 @@ export namespace IKernelMenu {
     interruptKernel?: (widget: T) => Promise<void>;
 
     /**
+     * A function to reconnect to the kernel
+     */
+    reconnectToKernel?: (widget: T) => Promise<void>;
+
+    /**
      * A function to restart the kernel, which
      * returns a promise of whether the kernel was restarted.
      */
