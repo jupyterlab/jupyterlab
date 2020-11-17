@@ -39,6 +39,7 @@ const ScopeSwitcherComponent = ({
     const value = event.target.value;
     setValue(value);
     tree.scope = value;
+    grid.scope = value;
   };
 
   return (

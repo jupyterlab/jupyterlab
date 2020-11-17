@@ -35,14 +35,14 @@ export class VariablesBodyGrid extends Panel {
    */
   constructor(options: VariablesBodyGrid.IOptions) {
     super();
-    const { model, commands, scopes, themeManager } = options;
+    const { model, commands, themeManager } = options;
     this._grid = new Grid({ commands, themeManager });
     this._grid.addClass('jp-DebuggerVariables-grid');
     this._model = model;
     this._model.changed.connect((model: VariablesModel): void => {
-      this._grid.dataModel.setData(model.scopes);
+      this._update();
     }, this);
-    this._grid.dataModel.setData(scopes ?? []);
+    this._update();
     this.addWidget(this._grid);
     this.addClass('jp-DebuggerVariables-body');
   }
@@ -54,10 +54,31 @@ export class VariablesBodyGrid extends Panel {
    */
   set filter(filter: Set<string>) {
     (this._grid.dataModel as GridModel).filter = filter;
-    this._grid.dataModel.setData(this._model.scopes);
+    this._update();
+  }
+
+  /**
+   * Set the current scope.
+   *
+   * @param scope The current scope for the variables.
+   */
+  set scope(scope: string) {
+    this._scope = scope;
+    this._update();
+  }
+
+  /**
+   * Update the underlying data model
+   */
+  private _update(): void {
+    const scope =
+      this._model.scopes.find(scope => scope.name === this._scope) ??
+      this._model.scopes[0];
+    this._grid.dataModel.setData(scope?.variables ?? []);
   }
 
   private _grid: Grid;
+  private _scope: string | null;
   private _model: IDebugger.Model.IVariables;
 }
 
@@ -78,11 +99,6 @@ export namespace VariablesBodyGrid {
      * The commands registry.
      */
     commands: CommandRegistry;
-
-    /**
-     * The optional initial scopes data.
-     */
-    scopes?: IDebugger.IScope[];
 
     /**
      * An optional application theme manager to detect theme changes.
@@ -258,38 +274,33 @@ class GridModel extends DataModel {
   }
 
   /**
-   * Set the datagrid model data from the variable scopes.
+   * Set the datagrid model data from the list of variables.
    *
-   * @param scopes The scopes.
+   * @param variables The list of variables.
    */
-  setData(scopes: IDebugger.IScope[]): void {
+  setData(variables: IDebugger.IVariable[]): void {
     this._clearData();
     this.emitChanged({
       type: 'model-reset',
       region: 'body'
     });
-    let span = 0;
-    scopes.forEach(scope => {
-      const filtered = scope.variables.filter(
-        variable =>
-          variable.evaluateName &&
-          variable.type &&
-          !this._filter.has(variable.evaluateName)
-      );
-      filtered.forEach((variable, index) => {
-        this._data.name[span + index] = variable.evaluateName!;
-        this._data.type[span + index] = variable.type || '';
-        this._data.value[span + index] = variable.value;
-        this._data.variablesReference[span + index] =
-          variable.variablesReference;
-      });
-      span += filtered.length;
+    const filtered = variables.filter(
+      variable =>
+        variable.evaluateName &&
+        variable.type &&
+        !this._filter.has(variable.evaluateName)
+    );
+    filtered.forEach((variable, index) => {
+      this._data.name[index] = variable.evaluateName!;
+      this._data.type[index] = variable.type || '';
+      this._data.value[index] = variable.value;
+      this._data.variablesReference[index] = variable.variablesReference;
     });
     this.emitChanged({
       type: 'rows-inserted',
       region: 'body',
       index: 1,
-      span
+      span: filtered.length
     });
   }
 
