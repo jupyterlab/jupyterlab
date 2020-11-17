@@ -43,7 +43,7 @@
     "react-dom": "^17.0.1"
   },
   "devDependencies": {
-    "css-loader": "~3.2.0",
+    "css-loader": "~5.0.1",
     "file-loader": "~5.0.2",
     "fs-extra": "^8.1.0",
     "glob": "~7.1.6",
