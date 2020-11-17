@@ -160,19 +160,9 @@ function ignored(path) {
 // Set up module federation sharing config
 const shared = {};
 
-// eager so that built-in extensions can be bundled together into just a few
-// js files to load
-const eagerPackages = new Set(Object.keys(package_data.resolutions));
-for (let pkg of Object.keys(jlab.linkedPackages)) {
-  eagerPackages.delete(pkg);
-}
-
 // Make sure any resolutions are shared
 for (let [pkg, requiredVersion] of Object.entries(package_data.resolutions)) {
   shared[pkg] = { requiredVersion };
-  if (eagerPackages.has(pkg)) {
-    shared[pkg].eager = true;
-  }
 }
 
 // Add any extension packages that are not in resolutions (i.e., installed from npm)
@@ -181,9 +171,6 @@ for (let pkg of extensionPackages) {
     shared[pkg] = {
       requiredVersion: require(`${pkg}/package.json`).version
     };
-    if (eagerPackages.has(pkg)) {
-      shared[pkg].eager = true;
-    }
   }
 }
 
@@ -191,9 +178,7 @@ for (let pkg of extensionPackages) {
 // are not already in the shared config. This means that if there is a
 // conflict, the resolutions package version is the one that is shared.
 const extraShared = [];
-// dependencies of eager shared packages must also be eager.
 for (let pkg of extensionPackages) {
-  let eager = eagerPackages.has(pkg);
   let pkgShared = {};
   let {
     dependencies = {},
@@ -202,13 +187,6 @@ for (let pkg of extensionPackages) {
   for (let [dep, requiredVersion] of Object.entries(dependencies)) {
     if (!shared[dep]) {
       pkgShared[dep] = { requiredVersion };
-      if (eager) {
-        pkgShared[dep].eager = true;
-      }
-    } else if (eager) {
-      // Even if we already have this dependency, make sure it is eager if it
-      // is the dependency of an eager package.
-      shared[dep].eager = true;
     }
   }
 
