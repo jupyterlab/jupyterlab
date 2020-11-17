@@ -15,6 +15,8 @@ import { VariablesBodyGrid } from './grid';
 
 import { VariablesHeader } from './header';
 
+import { ScopeSwitcher } from './scope';
+
 import { VariablesBodyTree } from './tree';
 
 /**
@@ -37,7 +39,7 @@ export class Variables extends Panel {
     this._table = new VariablesBodyGrid({ model, commands, themeManager });
     this._table.hide();
 
-    const onClick = (): void => {
+    const onViewChange = (): void => {
       if (this._table.isHidden) {
         this._tree.hide();
         this._table.show();
@@ -51,10 +53,20 @@ export class Variables extends Panel {
     };
 
     this._header.toolbar.addItem(
+      'scope-switcher',
+      new ScopeSwitcher({
+        translator,
+        model,
+        tree: this._tree,
+        grid: this._table
+      })
+    );
+
+    this._header.toolbar.addItem(
       'view-VariableSwitch',
       new ToolbarButton({
         iconClass: 'jp-ToggleSwitch',
-        onClick,
+        onClick: onViewChange,
         tooltip: trans.__('Table / Tree View')
       })
     );

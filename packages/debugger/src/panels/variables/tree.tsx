@@ -9,12 +9,13 @@ import { ArrayExt } from '@lumino/algorithm';
 
 import React, { useEffect, useState } from 'react';
 
+import { DebugProtocol } from 'vscode-debugprotocol';
+
 import { IDebugger } from '../../tokens';
 
 import { convertType } from '.';
 
 import { VariablesModel } from './model';
-import { DebugProtocol } from 'vscode-debugprotocol';
 
 /**
  * The body for tree of variables.
@@ -39,18 +40,20 @@ export class VariablesBodyTree extends ReactWidget {
    * Render the VariablesBodyTree.
    */
   render(): JSX.Element {
+    const scope =
+      this._scopes.find(scope => scope.name === this._scope) ?? this._scopes[0];
+
+    if (!scope) {
+      return <div></div>;
+    }
+
     return (
-      <>
-        {this._scopes.map(scope => (
-          <VariablesComponent
-            key={scope.name}
-            scope={scope.name}
-            service={this._service}
-            data={scope.variables}
-            filter={this._filter}
-          />
-        ))}
-      </>
+      <VariablesComponent
+        key={scope.name}
+        service={this._service}
+        data={scope.variables}
+        filter={this._filter}
+      />
     );
   }
 
@@ -59,6 +62,14 @@ export class VariablesBodyTree extends ReactWidget {
    */
   set filter(filter: Set<string>) {
     this._filter = filter;
+    this.update();
+  }
+
+  /**
+   * Set the current scope
+   */
+  set scope(scope: string) {
+    this._scope = scope;
     this.update();
   }
 
@@ -75,6 +86,7 @@ export class VariablesBodyTree extends ReactWidget {
     this.update();
   }
 
+  private _scope: string | null;
   private _scopes: IDebugger.IScope[] = [];
   private _filter = new Set<string>();
   private _service: IDebugger;
