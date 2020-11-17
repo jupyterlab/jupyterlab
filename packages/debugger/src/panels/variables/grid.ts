@@ -126,8 +126,7 @@ class Grid extends Panel {
     mouseHandler.doubleClicked.connect((_, hit) =>
       commands.execute(Debugger.CommandIDs.inspectVariable, {
         variableReference: dataModel.getVariableReference(hit.row),
-        title: dataModel.getVariableName(hit.row),
-        scope: dataModel.scope
+        title: dataModel.getVariableName(hit.row)
       })
     );
     grid.dataModel = dataModel;
