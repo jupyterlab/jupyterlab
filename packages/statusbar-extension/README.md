@@ -18,6 +18,5 @@ Component Interactions
 - [nbresuse](https://github.com/yuvipanda/nbresuse)
 
 ```bash
-pip install nbresuse
-jupyter serverextension enable --py nbresuse
+pip install nbresuse>=0.4.0
 ```
