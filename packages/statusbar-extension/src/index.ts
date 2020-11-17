@@ -389,7 +389,7 @@ export const runningSessionsItem: JupyterFrontEndPlugin<void> = {
  * The single-document mode switch in the top area.
  */
 const modeSwitch: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/application-extension:mode-switch',
+  id: '@jupyterlab/statusbar-extension:mode-switch',
   requires: [ILabShell, ITranslator, IStatusBar],
   activate: (
     app: JupyterFrontEnd,
@@ -429,7 +429,7 @@ const modeSwitch: JupyterFrontEndPlugin<void> = {
     modeSwitch.label = trans.__('Mode');
 
     statusBar.registerStatusItem(
-      '@jupyterlab/application-extension:mode-switch',
+      '@jupyterlab/statusbar-extension:mode-switch',
       {
         item: modeSwitch,
         align: 'left',
