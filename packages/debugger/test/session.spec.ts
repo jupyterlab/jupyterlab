@@ -304,7 +304,7 @@ describe('protocol', () => {
   });
 
   describe('#loadedSources', () => {
-    it('should *not* retrieve the list of loaded sources', async () => {
+    it.skip('should *not* retrieve the list of loaded sources', async () => {
       // `loadedSources` is not supported at the moment "unknown command"
       const reply = await debugSession.sendRequest('loadedSources', {});
       expect(reply.success).toBe(false);
