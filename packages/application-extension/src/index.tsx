@@ -39,11 +39,9 @@ import { IStateDB } from '@jupyterlab/statedb';
 
 import { ITranslator, TranslationBundle } from '@jupyterlab/translation';
 
-import { buildIcon, jupyterIcon, Switch } from '@jupyterlab/ui-components';
+import { buildIcon, jupyterIcon } from '@jupyterlab/ui-components';
 
 import { each, iter, toArray } from '@lumino/algorithm';
-
-import { CommandRegistry } from '@lumino/commands';
 
 import { PromiseDelegate } from '@lumino/coreutils';
 
@@ -961,59 +959,6 @@ const JupyterLogo: JupyterFrontEndPlugin<void> = {
 };
 
 /**
- * The single-document mode switch in the top area.
- */
-const modeSwitch: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/application-extension:mode-switch',
-  requires: [ILabShell, ITranslator],
-  activate: (
-    app: JupyterFrontEnd,
-    shell: ILabShell,
-    translator: ITranslator
-  ) => {
-    const trans = translator.load('jupyterlab');
-
-    const spacer = new Widget();
-    spacer.id = 'jp-top-spacer';
-    spacer.node.style.flexGrow = '1';
-    shell.add(spacer, 'top', { rank: 1000 });
-
-    const modeSwitch = new Switch();
-    modeSwitch.id = 'jp-single-document-mode';
-
-    modeSwitch.valueChanged.connect((_, args) => {
-      shell.mode = args.newValue ? 'single-document' : 'multiple-document';
-    });
-    shell.modeChanged.connect((_, mode) => {
-      modeSwitch.value = mode === 'single-document';
-    });
-    modeSwitch.value = shell.mode === 'single-document';
-
-    // Show the current file browser shortcut in its title.
-    const updateModeSwitchTitle = () => {
-      const binding = app.commands.keyBindings.find(
-        b => b.command === CommandIDs.toggleMode
-      );
-      if (binding) {
-        const ks = CommandRegistry.formatKeystroke(binding.keys.join(' '));
-        modeSwitch.caption = trans.__('Single-Document Mode (%1)', ks);
-      } else {
-        modeSwitch.caption = trans.__('Single-Document Mode');
-      }
-    };
-    updateModeSwitchTitle();
-    app.commands.keyBindingChanged.connect(() => {
-      updateModeSwitchTitle();
-    });
-
-    modeSwitch.label = trans.__('Mode');
-
-    shell.add(modeSwitch, 'top', { rank: 1010 });
-  },
-  autoStart: true
-};
-
-/**
  * Export the plugins as default.
  */
 const plugins: JupyterFrontEndPlugin<any>[] = [
@@ -1029,8 +974,7 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   info,
   paths,
   propertyInspector,
-  JupyterLogo,
-  modeSwitch
+  JupyterLogo
 ];
 
 export default plugins;
