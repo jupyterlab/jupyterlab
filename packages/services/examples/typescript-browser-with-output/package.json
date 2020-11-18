@@ -24,7 +24,7 @@
   "devDependencies": {
     "css-loader": "~5.0.1",
     "rimraf": "~3.0.0",
-    "style-loader": "~1.2.1",
+    "style-loader": "~2.0.0",
     "typescript": "~4.0.2",
     "webpack": "^5.3.1",
     "webpack-cli": "^4.1.0"
