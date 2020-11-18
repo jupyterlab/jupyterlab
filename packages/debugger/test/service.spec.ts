@@ -171,6 +171,7 @@ describe('DebuggerService', () => {
     ].join('\n');
 
     let breakpoints: IDebugger.IBreakpoint[];
+    let sourceBreakpoints: IDebugger.IBreakpoint[];
     let sourceId: string;
 
     beforeEach(async () => {
@@ -186,6 +187,13 @@ describe('DebuggerService', () => {
           source: {
             path: sourceId
           }
+        };
+      });
+      // create the list of source breakpoints expected from a restore
+      sourceBreakpoints = breakpoints.map(breakpoint => {
+        return {
+          line: breakpoint.line,
+          verified: breakpoint.verified
         };
       });
       await service.updateBreakpoints(code, breakpoints);
@@ -209,7 +217,7 @@ describe('DebuggerService', () => {
         expect(bpList1.length).toEqual(0);
         await service.restoreState(true);
         const bpList2 = model.breakpoints.getBreakpoints(sourceId);
-        expect(bpList2).toEqual(breakpoints);
+        expect(bpList2).toEqual(sourceBreakpoints);
       });
     });
 
@@ -224,7 +232,7 @@ describe('DebuggerService', () => {
         const bpList = model.breakpoints.getBreakpoints(sourceId);
         breakpoints[0].id = 2;
         breakpoints[1].id = 3;
-        expect(bpList).toEqual(breakpoints);
+        expect(bpList).toEqual(sourceBreakpoints);
       });
     });
 
