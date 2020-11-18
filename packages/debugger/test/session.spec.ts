@@ -230,8 +230,10 @@ describe('protocol', () => {
         frameId
       });
       const scopes = scopesReply.body.scopes;
-      expect(scopes.length).toEqual(1);
-      expect(scopes[0].name).toEqual('Locals');
+      expect(scopes.length).toBeGreaterThanOrEqual(1);
+
+      const locals = scopes.find(scope => scope.name === 'Locals');
+      expect(locals).toBeTruthy();
     });
   });
 
