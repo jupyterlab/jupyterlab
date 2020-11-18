@@ -133,7 +133,7 @@ export class DebuggerSession implements IDebugger.ISession {
   async stop(): Promise<void> {
     await this.sendRequest('disconnect', {
       restart: false,
-      terminateDebuggee: true
+      terminateDebuggee: false
     });
     this._isStarted = false;
   }
