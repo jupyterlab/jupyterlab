@@ -11,7 +11,9 @@ import { HTMLSelect } from '@jupyterlab/ui-components';
 import React, { useState } from 'react';
 
 import { IDebugger } from '../../tokens';
+
 import { VariablesBodyGrid } from './grid';
+
 import { VariablesBodyTree } from './tree';
 
 /**
@@ -19,18 +21,20 @@ import { VariablesBodyTree } from './tree';
  *
  * @param {object} props The component props.
  * @param props.model The variables model.
+ * @param props.tree The variables tree widget.
+ * @param props.grid The variables grid widget.
  * @param props.trans The translation bundle.
  */
 const ScopeSwitcherComponent = ({
   model,
-  trans,
   tree,
-  grid
+  grid,
+  trans
 }: {
   model: IDebugger.Model.IVariables;
-  trans: TranslationBundle;
   tree: VariablesBodyTree;
   grid: VariablesBodyGrid;
+  trans: TranslationBundle;
 }): JSX.Element => {
   const [value, setValue] = useState('-');
   const scopes = model.scopes;
@@ -76,6 +80,9 @@ export class ScopeSwitcher extends ReactWidget {
     this._trans = (translator || nullTranslator).load('jupyterlab');
   }
 
+  /**
+   * Render the scope switcher.
+   */
   render(): JSX.Element {
     return (
       <UseSignal signal={this._model.changed} initialSender={this._model}>
@@ -91,9 +98,9 @@ export class ScopeSwitcher extends ReactWidget {
     );
   }
 
+  private _model: IDebugger.Model.IVariables;
   private _tree: VariablesBodyTree;
   private _grid: VariablesBodyGrid;
-  private _model: IDebugger.Model.IVariables;
   private _trans: TranslationBundle;
 }
 
@@ -121,8 +128,8 @@ export namespace ScopeSwitcher {
     grid: VariablesBodyGrid;
 
     /**
-     * The translator.
+     * An optional translator.
      */
-    translator: ITranslator;
+    translator?: ITranslator;
   }
 }

@@ -13,9 +13,9 @@ import { DebugProtocol } from 'vscode-debugprotocol';
 
 import { IDebugger } from '../../tokens';
 
-import { convertType } from '.';
-
 import { VariablesModel } from './model';
+
+import { convertType } from '.';
 
 /**
  * The body for tree of variables.
@@ -43,17 +43,15 @@ export class VariablesBodyTree extends ReactWidget {
     const scope =
       this._scopes.find(scope => scope.name === this._scope) ?? this._scopes[0];
 
-    if (!scope) {
-      return <div></div>;
-    }
-
-    return (
+    return scope ? (
       <VariablesComponent
         key={scope.name}
         service={this._service}
         data={scope.variables}
         filter={this._filter}
       />
+    ) : (
+      <div></div>
     );
   }
 
@@ -86,7 +84,7 @@ export class VariablesBodyTree extends ReactWidget {
     this.update();
   }
 
-  private _scope: string | null;
+  private _scope = '';
   private _scopes: IDebugger.IScope[] = [];
   private _filter = new Set<string>();
   private _service: IDebugger;
