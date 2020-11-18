@@ -77,7 +77,11 @@ module.exports = {
   module: { rules },
   resolve: {
     alias: phosphorAlias,
-    fallback: { url: false, buffer: false }
+    fallback: {
+      url: false,
+      buffer: false,
+      path: require.resolve('path-browserify')
+    }
   },
   watchOptions: {
     poll: 500,
