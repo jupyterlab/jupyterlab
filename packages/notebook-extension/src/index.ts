@@ -2213,6 +2213,13 @@ function populateMenus(
       }
       return Promise.resolve(void 0);
     },
+    reconnectToKernel: current => {
+      const kernel = current.sessionContext.session?.kernel;
+      if (kernel) {
+        return kernel.reconnect();
+      }
+      return Promise.resolve(void 0);
+    },
     restartKernelAndClearLabel: (n: number) =>
       trans.__('Restart Kernel and Clear All Outputs…'),
     restartKernel: current =>

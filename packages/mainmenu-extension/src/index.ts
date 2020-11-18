@@ -68,6 +68,8 @@ export namespace CommandIDs {
 
   export const interruptKernel = 'kernelmenu:interrupt';
 
+  export const reconnectToKernel = 'kernelmenu:reconnect-to-kernel';
+
   export const restartKernel = 'kernelmenu:restart';
 
   export const restartKernelAndClear = 'kernelmenu:restart-and-clear';
@@ -512,6 +514,16 @@ export function createKernelMenu(
     execute: Private.delegateExecute(app, menu.kernelUsers, 'interruptKernel')
   });
 
+  commands.addCommand(CommandIDs.reconnectToKernel, {
+    label: trans.__('Reconnect to Kernel'),
+    isEnabled: Private.delegateEnabled(
+      app,
+      menu.kernelUsers,
+      'reconnectToKernel'
+    ),
+    execute: Private.delegateExecute(app, menu.kernelUsers, 'reconnectToKernel')
+  });
+
   commands.addCommand(CommandIDs.restartKernel, {
     label: trans.__('Restart Kernel…'),
     isEnabled: Private.delegateEnabled(app, menu.kernelUsers, 'restartKernel'),
@@ -591,6 +603,7 @@ export function createKernelMenu(
 
   menu.addGroup([{ command: CommandIDs.interruptKernel }], 0);
   menu.addGroup(restartGroup, 1);
+  menu.addGroup([{ command: CommandIDs.reconnectToKernel }], 1.5);
   menu.addGroup(
     [
       { command: CommandIDs.shutdownKernel },
