@@ -73,7 +73,9 @@ describe('Debugger.Session', () => {
       });
       await debugSession.start();
       await debugSession.stop();
-      expect(events).toEqual(['output', 'initialized', 'process']);
+      expect(events).toEqual(
+        expect.arrayContaining(['output', 'initialized', 'process'])
+      );
     });
   });
 
