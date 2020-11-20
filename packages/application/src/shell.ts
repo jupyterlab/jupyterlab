@@ -298,7 +298,7 @@ export class LabShell extends Widget implements JupyterFrontEnd.IShell {
       rootLayout.insertWidget(2, this._menuHandler.panel);
     }
 
-    // Wire up signals to update the title panel of the single document mode to
+    // Wire up signals to update the title panel of the simple interface mode to
     // follow the title of this.currentWidget
     this.currentChanged.connect((sender, args) => {
       let newValue = args.newValue;
