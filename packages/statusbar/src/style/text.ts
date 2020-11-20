@@ -14,8 +14,3 @@ export const textItem = style(baseText, {
   lineHeight: '24px',
   color: vars.textColor
 });
-
-export const nbresuse = style(baseText, {
-  backgroundColor: '#FFD2D2',
-  color: '#D8000C'
-});

@@ -38,7 +38,6 @@ import {
   IStatusBar,
   KernelStatus,
   LineCol,
-  MemoryUsage,
   RunningSessions,
   StatusBar
 } from '@jupyterlab/statusbar';
@@ -324,37 +323,6 @@ export const lineColItem: JupyterFrontEndPlugin<void> = {
   }
 };
 
-/**
- * A plugin providing memory usage statistics to the application.
- *
- * #### Notes
- * This plugin will not work unless the memory usage server extension
- * is installed.
- */
-export const memoryUsageItem: JupyterFrontEndPlugin<void> = {
-  id: '@jupyterlab/statusbar-extension:memory-usage-status',
-  autoStart: true,
-  requires: [IStatusBar, ITranslator],
-  activate: (
-    app: JupyterFrontEnd,
-    statusBar: IStatusBar,
-    translator: ITranslator
-  ) => {
-    const item = new MemoryUsage(translator);
-
-    statusBar.registerStatusItem(
-      '@jupyterlab/statusbar-extension:memory-usage-status',
-      {
-        item,
-        align: 'left',
-        rank: 2,
-        isActive: () => item.model!.metricsAvailable,
-        activeStateChanged: item.model!.stateChanged
-      }
-    );
-  }
-};
-
 /*
  * A plugin providing running terminals and sessions information
  * to the status bar.
@@ -446,7 +414,6 @@ const plugins: JupyterFrontEndPlugin<any>[] = [
   lineColItem,
   kernelStatus,
   runningSessionsItem,
-  memoryUsageItem,
   modeSwitch
 ];
 
