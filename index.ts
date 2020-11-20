@@ -51,6 +51,8 @@ import { plugin as THEME_VSCODE } from '@krassowski/theme-vscode';
 import { plugin as THEME_MATERIAL } from '@krassowski/theme-material';
 import { CODE_OVERRIDES_MANAGER } from './overrides';
 
+export * from './tokens';
+
 export const codeCheckIcon = new LabIcon({
   name: 'lsp:codeCheck',
   svgstr: codeCheckSvg
