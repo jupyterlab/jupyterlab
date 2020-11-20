@@ -562,10 +562,7 @@ export class StaticNotebook extends Widget {
       // and we are above the number of cells to render directly, then
       // we will add a placeholder and let the instersection observer or the
       // idle browser render those placeholder cells.
-      const placeholder = this._createPlaceholderCell(
-        cell as IRawCellModel,
-        index
-      );
+      const placeholder = this._createPlaceholderCell(cell, index);
       placeholder.node.id = widget.model.id;
       this._toRenderMap.set(widget.model.id, {
         index: index,
@@ -633,20 +630,57 @@ export class StaticNotebook extends Widget {
   /**
    * Create a placeholder cell widget from a raw cell model.
    */
-  private _createPlaceholderCell(model: IRawCellModel, index: number): RawCell {
+  private _createPlaceholderCell(
+    model: ICellModel,
+    index: number
+  ): CodeCell | RawCell | MarkdownCell {
     const contentFactory = this.contentFactory;
     const editorConfig = this.editorConfig.raw;
-    const options = {
-      editorConfig,
-      model,
-      contentFactory,
-      updateEditorOnShow: false,
-      placeholder: true
-    };
-    const cell = this.contentFactory.createRawCell(options, this);
-    cell.node.innerHTML = `<div class="jp-Cell-Placeholder">
-        <pre>${cell.model.value.text}</pre>
+    const rendermime = this.rendermime;
+    let widget: CodeCell | RawCell | MarkdownCell;
+    switch (model.type) {
+      case 'code':
+        const codeOptions = {
+          editorConfig,
+          model: model as ICodeCellModel,
+          rendermime,
+          contentFactory,
+          updateEditorOnShow: false,
+          placeholder: true
+        };
+        widget = this.contentFactory.createCodeCell(codeOptions, this);
+        widget.model.mimeType = this._mimetype;
+        break;
+      case 'markdown':
+        const markdownOptions = {
+          editorConfig,
+          model: model as IMarkdownCellModel,
+          rendermime,
+          contentFactory,
+          updateEditorOnShow: false,
+          placeholder: true
+        };
+        widget = this.contentFactory.createMarkdownCell(markdownOptions, this);
+        if (model.value.text === '') {
+          (widget as MarkdownCell).rendered = false;
+        }
+        break;
+      default:
+        const rawOptions = {
+          editorConfig,
+          model: model as IRawCellModel,
+          rendermime,
+          contentFactory,
+          updateEditorOnShow: false,
+          placeholder: true
+        };
+        widget = this.contentFactory.createRawCell(rawOptions, this);
+    }
+    /*
+    widget.node.innerHTML = `<div class="jp-Cell-Placeholder">
+        <pre>${widget.model.value.text}</pre>
     </div>`
+    */
     /*
     cell.node.innerHTML = `
       <div class="jp-Cell-Placeholder">
@@ -655,10 +689,10 @@ export class StaticNotebook extends Widget {
       </div>
     </div>`;
     */
-    cell.inputHidden = true;
-    cell.syncCollapse = true;
-    cell.syncEditable = true;
-    return cell;
+    //    widget.inputHidden = true;
+    widget.syncCollapse = true;
+    widget.syncEditable = true;
+    return widget;
   }
 
   /**

@@ -202,6 +202,12 @@ export class Cell extends Widget {
     input.addClass(CELL_INPUT_AREA_CLASS);
     inputWrapper.addWidget(inputCollapser);
     inputWrapper.addWidget(input);
+    if (options.placeholder) {
+      input.node.innerHTML = `<div class="jp-Cell-Placeholder">
+          <pre>${options.model.value.text}</pre>
+      </div>`;
+    }
+
     (this.layout as PanelLayout).addWidget(inputWrapper);
 
     this._inputPlaceholder = new InputPlaceholder(() => {
@@ -707,33 +713,34 @@ export class CodeCell extends Cell {
     const contentFactory = this.contentFactory;
     const model = this.model;
 
-    if (!options.placeholder) {
-      // Insert the output before the cell footer.
-      const outputWrapper = (this._outputWrapper = new Panel());
-      outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
-      const outputCollapser = new OutputCollapser();
-      outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
-      const output = (this._output = new OutputArea({
-        model: model.outputs,
-        rendermime,
-        contentFactory: contentFactory,
-        maxNumberOutputs: options.maxNumberOutputs
-      }));
-      output.addClass(CELL_OUTPUT_AREA_CLASS);
-      // Set a CSS if there are no outputs, and connect a signal for future
-      // changes to the number of outputs. This is for conditional styling
-      // if there are no outputs.
-      if (model.outputs.length === 0) {
-        this.addClass(NO_OUTPUTS_CLASS);
-      }
-      output.outputLengthChanged.connect(this._outputLengthHandler, this);
-      outputWrapper.addWidget(outputCollapser);
-      outputWrapper.addWidget(output);
-      (this.layout as PanelLayout).insertWidget(2, outputWrapper);
-      this._outputPlaceholder = new OutputPlaceholder(() => {
-        this.outputHidden = !this.outputHidden;
-      });
+    //    if (!options.placeholder) {
+    // Insert the output before the cell footer.
+    const outputWrapper = (this._outputWrapper = new Panel());
+    outputWrapper.addClass(CELL_OUTPUT_WRAPPER_CLASS);
+    const outputCollapser = new OutputCollapser();
+    outputCollapser.addClass(CELL_OUTPUT_COLLAPSER_CLASS);
+    const output = (this._output = new OutputArea({
+      model: model.outputs,
+      rendermime,
+      contentFactory: contentFactory
+    }));
+    output.addClass(CELL_OUTPUT_AREA_CLASS);
+    // Set a CSS if there are no outputs, and connect a signal for future
+    // changes to the number of outputs. This is for conditional styling
+    // if there are no outputs.
+    if (model.outputs.length === 0) {
+      this.addClass(NO_OUTPUTS_CLASS);
     }
+    output.outputLengthChanged.connect(this._outputLengthHandler, this);
+    outputWrapper.addWidget(outputCollapser);
+    outputWrapper.addWidget(output);
+    (this.layout as PanelLayout).insertWidget(2, outputWrapper);
+
+    this._outputPlaceholder = new OutputPlaceholder(() => {
+      this.outputHidden = !this.outputHidden;
+    });
+    //    }
+
     model.stateChanged.connect(this.onStateChanged, this);
   }
 
