@@ -257,11 +257,6 @@ Available file types:
     // regenerate the settings description with the available options.
     registry.changed.connect(() => settingRegistry.reload(pluginId));
 
-    docManager.mode = labShell!.mode;
-    labShell!.modeChanged.connect((_, args) => {
-      docManager.mode = args as string;
-    });
-
     return docManager;
   }
 };
