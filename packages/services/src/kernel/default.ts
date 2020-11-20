@@ -440,6 +440,9 @@ export class KernelConnection implements Kernel.IKernelConnection {
     this._updateStatus('restarting');
     this._kernelSession = RESTARTING_KERNEL_SESSION;
     await restapi.restartKernel(this.id, this.serverSettings);
+    // Reconnect to the kernel to address cases where kernel ports
+    // have changed during the restart.
+    await this.reconnect();
   }
 
   /**
