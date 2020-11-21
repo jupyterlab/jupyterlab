@@ -48,6 +48,8 @@ module.exports = {
     '@typescript-eslint/no-empty-interface': 'off',
     '@typescript-eslint/triple-slash-reference': 'warn',
     '@typescript-eslint/no-inferrable-types': 'off',
+    'jest/no-conditional-expect': 'warn',
+    'jest/valid-title': 'warn',
     'no-inner-declarations': 'off',
     'no-prototype-builtins': 'off',
     'no-control-regex': 'warn',
