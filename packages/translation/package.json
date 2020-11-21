@@ -54,9 +54,6 @@
   "devDependencies": {
     "@jupyterlab/testutils": "^3.0.0-rc.10",
     "@types/jest": "^26.0.10",
-    "@typescript-eslint/eslint-plugin": "^3.10.1",
-    "@typescript-eslint/parser": "^3.10.1",
-    "eslint": "^7.7.0",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
     "typescript": "~4.0.2"
