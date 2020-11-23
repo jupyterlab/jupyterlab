@@ -48,7 +48,6 @@ const ScopeSwitcherComponent = ({
 
   return (
     <HTMLSelect
-      className={''}
       onChange={onChange}
       value={value}
       aria-label={trans.__('Scope')}
