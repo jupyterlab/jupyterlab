@@ -16,11 +16,6 @@
   overflow: auto;
 }
 
-.jp-DebuggerVariables-body .jp-DebuggerVariables-marker {
-  padding: 5px 5px 0 5px;
-  color: var(--jp-content-font-color1);
-}
-
 .jp-DebuggerVariables-body ul {
   list-style: none;
   margin: 0;

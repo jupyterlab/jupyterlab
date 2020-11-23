@@ -99,7 +99,6 @@ export class VariablesBodyTree extends ReactWidget {
  * @param props.filter Optional variable filter list.
  */
 const VariablesComponent = ({
-  scope,
   data,
   service,
   filter
@@ -107,7 +106,6 @@ const VariablesComponent = ({
   data: IDebugger.IVariable[];
   service: IDebugger;
   filter?: Set<string>;
-  scope?: string;
 }): JSX.Element => {
   const [variables, setVariables] = useState(data);
 
@@ -116,26 +114,23 @@ const VariablesComponent = ({
   }, [data]);
 
   return (
-    <>
-      {scope && <span className="jp-DebuggerVariables-marker">{scope}:</span>}
-      <ul>
-        {variables
-          ?.filter(
-            variable => !(filter || new Set()).has(variable.evaluateName || '')
-          )
-          .map(variable => {
-            const key = `${variable.name}-${variable.evaluateName}-${variable.type}-${variable.value}`;
-            return (
-              <VariableComponent
-                key={key}
-                data={variable}
-                service={service}
-                filter={filter}
-              />
-            );
-          })}
-      </ul>
-    </>
+    <ul>
+      {variables
+        ?.filter(
+          variable => !(filter || new Set()).has(variable.evaluateName || '')
+        )
+        .map(variable => {
+          const key = `${variable.name}-${variable.evaluateName}-${variable.type}-${variable.value}`;
+          return (
+            <VariableComponent
+              key={key}
+              data={variable}
+              service={service}
+              filter={filter}
+            />
+          );
+        })}
+    </ul>
   );
 };
 
