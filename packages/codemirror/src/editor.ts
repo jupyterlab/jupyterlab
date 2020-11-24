@@ -121,7 +121,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     // Handle initial values for text, mimetype, and selections.
     doc.setValue(model.value.text);
     this.clearHistory();
-    this._onMimeTypeChanged();
     this._onCursorActivity();
     this._poll = new Poll({
       factory: async () => {
