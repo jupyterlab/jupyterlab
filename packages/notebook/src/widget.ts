@@ -740,9 +740,11 @@ export class StaticNotebook extends Widget {
           config = this._editorConfig.raw;
           break;
       }
+      let editorOptions: any = {};
       Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
-        cell.editor.setOption(key, config[key] ?? null);
+        editorOptions[key] = config[key] ?? null;
       });
+      cell.editor.setOptions(editorOptions);
       cell.editor.refresh();
     }
   }

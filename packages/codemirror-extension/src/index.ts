@@ -195,20 +195,23 @@ function activateEditorCommands(
       (settings.get('lineWiseCopyCut').composite as boolean) ?? lineWiseCopyCut;
   }
 
+  const editorOptions: any = {
+    keyMap,
+    theme,
+    scrollPastEnd,
+    styleActiveLine,
+    styleSelectedText,
+    selectionPointer,
+    lineWiseCopyCut
+  };
+
   /**
    * Update the settings of the current tracker instances.
    */
   function updateTracker(): void {
     tracker.forEach(widget => {
       if (widget.content.editor instanceof CodeMirrorEditor) {
-        const cm = widget.content.editor.editor;
-        cm.setOption('keyMap', keyMap);
-        cm.setOption('theme', theme);
-        cm.setOption('scrollPastEnd', scrollPastEnd);
-        cm.setOption('styleActiveLine', styleActiveLine);
-        cm.setOption('styleSelectedText', styleSelectedText);
-        cm.setOption('selectionPointer', selectionPointer);
-        cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
+        widget.content.editor.setOptions(editorOptions);
       }
     });
   }
@@ -233,14 +236,7 @@ function activateEditorCommands(
    */
   tracker.widgetAdded.connect((sender, widget) => {
     if (widget.content.editor instanceof CodeMirrorEditor) {
-      const cm = widget.content.editor.editor;
-      cm.setOption('keyMap', keyMap);
-      cm.setOption('theme', theme);
-      cm.setOption('scrollPastEnd', scrollPastEnd);
-      cm.setOption('styleActiveLine', styleActiveLine);
-      cm.setOption('styleSelectedText', styleSelectedText);
-      cm.setOption('selectionPointer', selectionPointer);
-      cm.setOption('lineWiseCopyCut', lineWiseCopyCut);
+      widget.content.editor.setOptions(editorOptions);
     }
   });
 

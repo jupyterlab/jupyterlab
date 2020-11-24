@@ -425,6 +425,11 @@ export namespace CodeEditor {
     setOption<K extends keyof IConfig>(option: K, value: IConfig[K]): void;
 
     /**
+     * Set config options for the editor.
+     */
+    setOptions(options: any): void;
+
+    /**
      * Returns the content for the given line number.
      *
      * @param line - The line of interest.
