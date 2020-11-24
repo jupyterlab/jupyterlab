@@ -69,7 +69,7 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
           }
           content.disposed.connect(() => this.dispose());
           const active = document.activeElement === this._spinner.node;
-          this._disposeSpinner()
+          this._disposeSpinner();
           this._isRevealed = true;
           if (active) {
             this._focusContent();
@@ -83,7 +83,7 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
           pre.textContent = String(e);
           error.node.appendChild(pre);
           BoxLayout.setStretch(error, 1);
-          this._disposeSpinner()
+          this._disposeSpinner();
           content.dispose();
           this._content = null!;
           toolbar.dispose();
@@ -171,7 +171,7 @@ export class MainAreaWidget<T extends Widget = Widget> extends Widget
 
   private _disposeSpinner() {
     this.node.removeChild(this._spinner.node);
-    this._spinner.dispose();  
+    this._spinner.dispose();
     this.removeClass('jp-MainAreaWidget-ContainStrict');
   }
 
