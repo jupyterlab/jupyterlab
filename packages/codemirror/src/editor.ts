@@ -298,6 +298,25 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   }
 
   /**
+   * Set config options for the editor.
+   *
+   * This method is prefered when setting several options. The
+   * options are set within an operation, which only performs
+   * the costly update at the end, and not after every option
+   * is set.
+   */
+  setOptions(options: any) {
+    const editor = this._editor;
+    editor.startOperation();
+    for (let key in options) {
+      editor.operation(() => {
+        this.setOption(key as any, options[key]);
+      });
+    }
+    editor.endOperation();
+  }
+
+  /**
    * Returns the content for the given line number.
    */
   getLine(line: number): string | undefined {
@@ -690,11 +709,6 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
   private _onMimeTypeChanged(): void {
     const mime = this._model.mimeType;
     const editor = this._editor;
-    // TODO: should we provide a hook for when the
-    // mode is done being set?
-    void Mode.ensure(mime).then(spec => {
-      editor.setOption('mode', spec?.mime ?? 'null');
-    });
     const extraKeys = editor.getOption('extraKeys') || {};
     const isCode = mime !== 'text/plain' && mime !== 'text/x-ipythongfm';
     if (isCode) {
@@ -702,7 +716,17 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     } else {
       delete extraKeys['Backspace'];
     }
-    editor.setOption('extraKeys', extraKeys);
+
+    // TODO: should we provide a hook for when the
+    // mode is done being set?
+    void Mode.ensure(mime).then(
+      spec => {
+        this.setOptions({ extraKeys: extraKeys, mode: spec?.mime ?? 'null' });
+      },
+      reason => {
+        this.setOption('extraKeys', extraKeys);
+      }
+    );
   }
 
   /**

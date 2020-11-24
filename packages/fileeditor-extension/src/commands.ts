@@ -172,11 +172,13 @@ export namespace Commands {
   export function updateWidget(widget: FileEditor): void {
     const transientConfigs = ['lineNumbers', 'lineWrap', 'matchBrackets'];
     const editor = widget.editor;
+    let editorOptions: any = {};
     Object.keys(config).forEach((key: keyof CodeEditor.IConfig) => {
       if (!transientConfigs.includes(key)) {
-        editor.setOption(key, config[key]);
+        editorOptions[key] = config[key];
       }
     });
+    editor.setOptions(editorOptions);
   }
 
   /**
