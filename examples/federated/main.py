@@ -1,12 +1,11 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from jupyterlab_server import LabServerApp, LabConfig
-from jupyterlab_server.server import FileFindHandler
-import json
 import os
-from traitlets import Unicode
+import json
+
 from glob import glob
+from jupyterlab_server import LabServerApp
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
