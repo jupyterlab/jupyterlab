@@ -193,6 +193,8 @@ export class DebuggerService implements IDebugger, IDisposable {
         threadId: this._currentThread()
       });
       this._model.stoppedThreads.delete(this._currentThread());
+      this._clearModel();
+      this._clearSignals();
     } catch (err) {
       console.error('Error:', err.message);
     }
