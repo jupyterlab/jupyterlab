@@ -3,6 +3,7 @@
   "include": [
     "packages/**/src/**/*",
     "packages/**/test/**/*",
+    "packages/**/style/**/*",
     "testutils/src/*",
     "builder/**/*",
     "buildutils/**/*",
