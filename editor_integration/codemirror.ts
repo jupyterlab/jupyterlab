@@ -281,11 +281,7 @@ export abstract class CodeMirrorIntegration
 
       if (!uris_equal(uri, current_uri)) {
         errors.push(
-          'Workspace-wide edits not implemented (' +
-            decodeURI(uri) +
-            ' != ' +
-            decodeURI(current_uri) +
-            ')'
+          `Workspace-wide edits not implemented: ${uri} != ${current_uri}`
         );
       } else {
         is_whole_document_edit =

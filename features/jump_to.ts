@@ -22,6 +22,7 @@ import { IDocumentManager } from '@jupyterlab/docmanager';
 import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { LabIcon } from '@jupyterlab/ui-components';
 import jumpToSvg from '../../style/icons/jump-to.svg';
+import { URLExt } from '@jupyterlab/coreutils';
 
 export const jumpToIcon = new LabIcon({
   name: 'lsp:jump-to',
@@ -57,12 +58,12 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
 
     if ('targetUri' in location_or_link) {
       return {
-        uri: decodeURI(location_or_link.targetUri),
+        uri: location_or_link.targetUri,
         range: location_or_link.targetRange
       };
     } else if ('uri' in location_or_link) {
       return {
-        uri: decodeURI(location_or_link.uri),
+        uri: location_or_link.uri,
         range: location_or_link.range
       };
     }
@@ -105,12 +106,10 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       console.log('Jump target (source location):', source_position_ce);
 
       // can it be resolved vs our guessed server root?
-      const contents_path = uri_to_contents_path(uri);
+      let contents_path = uri_to_contents_path(uri);
 
-      if (contents_path) {
-        uri = contents_path;
-      } else if (uri.startsWith('file://')) {
-        uri = uri.slice(7);
+      if (contents_path == null && uri.startsWith('file://')) {
+        contents_path = decodeURI(uri.slice(7));
       }
 
       let jump_data = {
@@ -124,17 +123,23 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       //  with different OSes but also with JupyterHub and other platforms.
 
       try {
-        await this.jumper.document_manager.services.contents.get(uri, {
-          content: false
-        });
-        this.jumper.global_jump({ uri, ...jump_data }, false);
+        await this.jumper.document_manager.services.contents.get(
+          contents_path,
+          {
+            content: false
+          }
+        );
+        this.jumper.global_jump({ contents_path, ...jump_data }, false);
         return;
       } catch (err) {
         console.warn(err);
       }
 
       this.jumper.global_jump(
-        { uri: '.lsp_symlink/' + uri, ...jump_data },
+        {
+          contents_path: URLExt.join('.lsp_symlink', contents_path),
+          ...jump_data
+        },
         true
       );
     }

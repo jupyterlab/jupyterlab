@@ -735,10 +735,11 @@ export class VirtualDocument {
   }
 
   get uri(): string {
+    const encodedPath = encodeURI(this.path);
     if (!this.parent) {
-      return this.path;
+      return encodedPath;
     }
-    return this.path + '.' + this.id_path + '.' + this.file_extension;
+    return encodedPath + '.' + this.id_path + '.' + this.file_extension;
   }
 
   transform_source_to_editor(pos: ISourcePosition): IEditorPosition {
