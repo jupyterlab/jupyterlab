@@ -313,13 +313,12 @@ class GridModel extends DataModel {
     const variables = scope?.variables ?? [];
     const filtered = variables.filter(
       variable =>
-        variable.evaluateName &&
-        variable.type &&
-        !this._filter.has(variable.evaluateName)
+        variable.name &&
+        !this._filter.has(variable.name)
     );
     filtered.forEach((variable, index) => {
-      this._data.name[index] = variable.evaluateName!;
-      this._data.type[index] = variable.type || '';
+      this._data.name[index] = variable.name;
+      this._data.type[index] = variable.type ?? '';
       this._data.value[index] = variable.value;
       this._data.variablesReference[index] = variable.variablesReference;
     });
