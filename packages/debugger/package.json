@@ -78,7 +78,7 @@
     "@jupyterlab/testutils": "^3.0.0-rc.10",
     "@types/codemirror": "^0.0.97",
     "@types/jest": "^26.0.10",
-    "@types/react-dom": "^16.9.8",
+    "@types/react-dom": "^17.0.0",
     "@types/text-encoding": "^0.0.35",
     "canvas": "^2.6.1",
     "jest": "^26.4.2",
