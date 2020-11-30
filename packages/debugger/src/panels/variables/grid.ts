@@ -312,9 +312,7 @@ class GridModel extends DataModel {
     const scope = scopes.find(scope => scope.name === this._scope) ?? scopes[0];
     const variables = scope?.variables ?? [];
     const filtered = variables.filter(
-      variable =>
-        variable.name &&
-        !this._filter.has(variable.name)
+      variable => variable.name && !this._filter.has(variable.name)
     );
     filtered.forEach((variable, index) => {
       this._data.name[index] = variable.name;
