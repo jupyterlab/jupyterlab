@@ -1393,7 +1393,7 @@ export class KernelConnection implements Kernel.IKernelConnection {
         0,
         1e3 * (Math.pow(2, this._reconnectAttempt) - 1)
       );
-      console.error(
+      console.warn(
         `Connection lost, reconnecting in ${Math.floor(
           timeout / 1000
         )} seconds.`
