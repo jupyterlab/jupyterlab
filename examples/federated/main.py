@@ -41,7 +41,6 @@ class ExampleApp(LabServerApp):
     def initialize_handlers(self):
         # Handle labextension assets
         web_app = self.serverapp.web_app
-        base_url = web_app.settings['base_url']
         page_config = web_app.settings.get('page_config_data', {})
         web_app.settings['page_config_data'] = page_config
 
