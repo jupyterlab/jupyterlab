@@ -53,7 +53,7 @@
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",
     "@lumino/signaling": "^1.4.3",
-    "@lumino/widgets": "^1.14.0",
+    "@lumino/widgets": "^1.16.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },

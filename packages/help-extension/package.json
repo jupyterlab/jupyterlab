@@ -44,7 +44,7 @@
     "@jupyterlab/services": "^6.0.0-rc.10",
     "@jupyterlab/translation": "^3.0.0-rc.10",
     "@jupyterlab/ui-components": "^3.0.0-rc.10",
-    "@lumino/widgets": "^1.14.0",
+    "@lumino/widgets": "^1.16.0",
     "react": "^17.0.1"
   },
   "devDependencies": {

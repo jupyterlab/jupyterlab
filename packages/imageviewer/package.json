@@ -45,7 +45,7 @@
     "@jupyterlab/docregistry": "^3.0.0-rc.10",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",
-    "@lumino/widgets": "^1.14.0"
+    "@lumino/widgets": "^1.16.0"
   },
   "devDependencies": {
     "@jupyterlab/testutils": "^3.0.0-rc.10",
