@@ -1,12 +1,11 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-from jupyterlab_server import LabServerApp, LabConfig
-from jupyterlab_server.server import FileFindHandler
-import json
 import os
-from traitlets import Unicode
+import json
+
 from glob import glob
+from jupyterlab_server import LabServerApp
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
@@ -42,7 +41,6 @@ class ExampleApp(LabServerApp):
     def initialize_handlers(self):
         # Handle labextension assets
         web_app = self.serverapp.web_app
-        base_url = web_app.settings['base_url']
         page_config = web_app.settings.get('page_config_data', {})
         web_app.settings['page_config_data'] = page_config
 

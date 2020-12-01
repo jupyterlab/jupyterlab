@@ -1,11 +1,11 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
+import os
+import json
+
 from jupyterlab_server import LabServerApp
 from jupyter_server.utils import url_path_join as ujoin
-import json
-import os
-from traitlets import Unicode
 
 HERE = os.path.dirname(__file__)
 
