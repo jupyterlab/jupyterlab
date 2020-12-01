@@ -341,13 +341,11 @@ const router: JupyterFrontEndPlugin<IRouter> = {
 const tree: JupyterFrontEndPlugin<JupyterFrontEnd.ITreeResolver> = {
   id: '@jupyterlab/application-extension:tree-resolver',
   autoStart: true,
-  requires: [JupyterFrontEnd.IPaths, IRouter, IWindowResolver],
+  requires: [IRouter],
   provides: JupyterFrontEnd.ITreeResolver,
   activate: (
     app: JupyterFrontEnd,
-    paths: JupyterFrontEnd.IPaths,
-    router: IRouter,
-    resolver: IWindowResolver
+    router: IRouter
   ): JupyterFrontEnd.ITreeResolver => {
     const { commands } = app;
     const set = new DisposableSet();
