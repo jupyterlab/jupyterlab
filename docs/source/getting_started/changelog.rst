@@ -3,6 +3,13 @@
 JupyterLab Changelog
 ====================
 
+`v2.3.x <https://github.com/jupyterlab/jupyterlab/milestone/59>`__
+------------------------------------------------------------------
+
+v2.3.0
+^^^^^^
+* Better performance with Virtual Notebook  (`#8972 <https://github.com/jupyterlab/jupyterlab/pull/8972>`__), read more on `the doc <https://jupyterlab.readthedocs.io/en/stable/developer/notebook.html#virtual-notebook>`__
+* Update the use of CSS Display for better performance  (`#8968 <https://github.com/jupyterlab/jupyterlab/pull/8968>`__)
 
 `v2.2.x <https://github.com/jupyterlab/jupyterlab/milestone/53>`__
 ------------------------------------------------------------------

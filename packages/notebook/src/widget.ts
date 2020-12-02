@@ -142,6 +142,11 @@ const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
  */
 const DRAG_THRESHOLD = 5;
 
+/*
+ * The type of cell insert provided via signal.
+ */
+type InsertType = 'push' | 'insert' | 'set';
+
 /**
  * The interactivity modes for the notebook.
  */
@@ -428,7 +433,7 @@ export class StaticNotebook extends Widget {
       );
     }
     each(cells, (cell: ICellModel, i: number) => {
-      this._insertCell(i, cell);
+      this._insertCell(i, cell, 'set');
     });
     cells.changed.connect(this._onCellsChanged, this);
     newValue.contentChanged.connect(this.onModelContentChanged, this);
@@ -446,8 +451,10 @@ export class StaticNotebook extends Widget {
     switch (args.type) {
       case 'add':
         index = args.newIndex;
+        // eslint-disable-next-line no-case-declarations
+        const insertType: InsertType = args.oldIndex == -1 ? 'push' : 'insert';
         each(args.newValues, value => {
-          this._insertCell(index++, value);
+          this._insertCell(index++, value, insertType);
         });
         break;
       case 'move':
@@ -481,7 +488,7 @@ export class StaticNotebook extends Widget {
           // Note: this ordering (insert then remove)
           // is important for getting the active cell
           // index for the editable notebook correct.
-          this._insertCell(index, value);
+          this._insertCell(index, value, 'set');
           this._removeCell(index + 1);
           index++;
         });
@@ -494,7 +501,11 @@ export class StaticNotebook extends Widget {
   /**
    * Create a cell widget and insert into the notebook.
    */
-  private _insertCell(index: number, cell: ICellModel): void {
+  private _insertCell(
+    index: number,
+    cell: ICellModel,
+    insertType: InsertType
+  ): void {
     let widget: Cell;
     switch (cell.type) {
       case 'code':
@@ -511,9 +522,63 @@ export class StaticNotebook extends Widget {
         widget = this._createRawCell(cell as IRawCellModel);
     }
     widget.addClass(NB_CELL_CLASS);
+
     const layout = this.layout as PanelLayout;
-    layout.insertWidget(index, widget);
-    this.onCellInserted(index, widget);
+    this._cellsArray.push(widget);
+    if (
+      this._observer &&
+      insertType === 'push' &&
+      this._renderedCellsCount > this.notebookConfig.numberCellsToRenderDirectly
+    ) {
+      // We have an observer and we are have been asked to push (not to insert).
+      // and we are above the number of cells to render directly, then
+      // we will add a placeholder and let the instersection observer or the
+      // idle browser render those placeholder cells.
+      this._toRenderMap.set(widget.model.id, { index: index, cell: widget });
+      const placeholder = this._createPlaceholderCell(
+        cell as IRawCellModel,
+        index
+      );
+      placeholder.node.id = widget.model.id;
+      layout.insertWidget(index, placeholder);
+      this.onCellInserted(index, placeholder);
+      this._fullyRendered.emit(false);
+      this._observer.observe(placeholder.node);
+    } else {
+      // We have no intersection observer, or we insert, or we are below
+      // the number of cells to render directly, so we render directly.
+      layout.insertWidget(index, widget);
+      this._incrementRenderedCount();
+      this.onCellInserted(index, widget);
+    }
+
+    if (this._observer && this.notebookConfig.renderCellOnIdle) {
+      const renderPlaceholderCells = this._renderPlaceholderCells.bind(this);
+      (window as any).requestIdleCallback(renderPlaceholderCells, {
+        timeout: 1000
+      });
+    }
+  }
+
+  private _renderPlaceholderCells(deadline: any) {
+    if (
+      this._renderedCellsCount < this._cellsArray.length &&
+      this._renderedCellsCount >=
+        this.notebookConfig.numberCellsToRenderDirectly
+    ) {
+      const index = this._renderedCellsCount;
+      const cell = this._cellsArray[index];
+      this._renderPlaceholderCell(cell, index - 1);
+    }
+  }
+
+  private _renderPlaceholderCell(cell: Cell, index: number) {
+    const pl = this.layout as PanelLayout;
+    pl.removeWidgetAt(index);
+    pl.insertWidget(index, cell);
+    this._toRenderMap.delete(cell.model.id);
+    this._incrementRenderedCount();
+    this._placeholderCellRendered.emit(cell);
   }
 
   /**
@@ -528,7 +593,8 @@ export class StaticNotebook extends Widget {
       model,
       rendermime,
       contentFactory,
-      updateEditorOnShow: false
+      updateEditorOnShow: false,
+      placeholder: false
     };
     const cell = this.contentFactory.createCodeCell(options, this);
     cell.syncCollapse = true;
@@ -549,7 +615,8 @@ export class StaticNotebook extends Widget {
       model,
       rendermime,
       contentFactory,
-      updateEditorOnShow: false
+      updateEditorOnShow: false,
+      placeholder: false
     };
     const cell = this.contentFactory.createMarkdownCell(options, this);
     cell.syncCollapse = true;
@@ -592,7 +659,8 @@ export class StaticNotebook extends Widget {
       editorConfig,
       model,
       contentFactory,
-      updateEditorOnShow: false
+      updateEditorOnShow: false,
+      placeholder: false
     };
     const cell = this.contentFactory.createRawCell(options, this);
     cell.syncCollapse = true;
@@ -692,6 +760,13 @@ export class StaticNotebook extends Widget {
     );
   }
 
+  private _incrementRenderedCount() {
+    if (this._toRenderMap.size === 0) {
+      this._fullyRendered.emit(true);
+    }
+    this._renderedCellsCount++;
+  }
+
   private _editorConfig = StaticNotebook.defaultEditorConfig;
   private _notebookConfig = StaticNotebook.defaultNotebookConfig;
   private _mimetype = 'text/plain';
@@ -699,6 +774,12 @@ export class StaticNotebook extends Widget {
   private _mimetypeService: IEditorMimeTypeService;
   private _modelChanged = new Signal<this, void>(this);
   private _modelContentChanged = new Signal<this, void>(this);
+  private _fullyRendered = new Signal<this, boolean>(this);
+  private _placeholderCellRendered = new Signal<this, Cell>(this);
+  private _observer: IntersectionObserver;
+  private _renderedCellsCount = 0;
+  private _toRenderMap: Map<string, { index: number; cell: Cell }>;
+  private _cellsArray: Array<Cell>;
 }
 
 /**
@@ -858,6 +939,7 @@ export namespace StaticNotebook {
      */
     observedBottomMargin: string;
   }
+
   /**
    * Default configuration options for notebooks.
    */
