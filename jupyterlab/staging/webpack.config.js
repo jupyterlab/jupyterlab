@@ -75,8 +75,8 @@ fs.copySync('./bootstrap.js', entryPoint);
 fs.copySync('./package.json', plib.join(buildDir, 'package.json'));
 if (outputDir !== buildDir) {
   fs.copySync(
-    plib.join(outputDir, 'imports.css'),
-    plib.join(buildDir, 'imports.css')
+    plib.join(outputDir, 'style.js'),
+    plib.join(buildDir, 'style.js')
   );
 }
 
@@ -294,7 +294,13 @@ module.exports = [
     },
     optimization: {
       splitChunks: {
-        chunks: 'all'
+        chunks: 'all',
+        cacheGroups: {
+          jlab_core: {
+            test: /[\\/]node_modules[\\/]@(jupyterlab|lumino)[\\/]/,
+            name: 'jlab_core'
+          }
+        }
       }
     },
     module: {
