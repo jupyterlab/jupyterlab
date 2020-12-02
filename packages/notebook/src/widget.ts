@@ -863,7 +863,7 @@ export namespace StaticNotebook {
     scrollPastEnd: true,
     defaultCell: 'code',
     recordTiming: false,
-    numberCellsToRenderDirectly: 10,
+    numberCellsToRenderDirectly: 20,
     renderCellOnIdle: true,
     observedTopMargin: '1000px',
     observedBottomMargin: '1000px'
