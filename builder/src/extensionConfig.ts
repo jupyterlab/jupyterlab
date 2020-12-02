@@ -65,7 +65,15 @@ function generateConfig({
   }
 
   if (data.style) {
-    exposes['./style'] = path.join(packagePath, data.style);
+    let style = path.join(packagePath, data.style);
+    if (path.extname(style) === '.css') {
+      // See if there is a corresponding js file we can load instead
+      const jsFile = `${style.slice(0, style.length - 4)}.js`;
+      if (fs.existsSync(jsFile)) {
+        style = jsFile;
+      }
+    }
+    exposes['./style'] = style;
   }
 
   const coreData = require(path.join(corePath, 'package.json'));
