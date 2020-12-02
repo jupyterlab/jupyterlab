@@ -306,7 +306,9 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
    * the costly update at the end, and not after every option
    * is set.
    */
-  setOptions(options: any) {
+  setOptions<K extends keyof CodeMirrorEditor.IConfig>(
+    options: CodeMirrorEditor.IConfigOptions<K>[]
+  ): void {
     const editor = this._editor;
     editor.startOperation();
     for (let key in options) {
@@ -717,17 +719,12 @@ export class CodeMirrorEditor implements CodeEditor.IEditor {
     } else {
       delete extraKeys['Backspace'];
     }
+    this.setOption('extraKeys', extraKeys);
 
-    // TODO: should we provide a hook for when the
-    // mode is done being set?
-    void Mode.ensure(mime).then(
-      spec => {
-        this.setOptions({ extraKeys: extraKeys, mode: spec?.mime ?? 'null' });
-      },
-      reason => {
-        this.setOption('extraKeys', extraKeys);
-      }
-    );
+    // TODO: should we provide a hook for when the mode is done being set?
+    void Mode.ensure(mime).then(spec => {
+      this.setOption('mode', spec?.mime ?? 'null');
+    });
   }
 
   /**
@@ -1304,6 +1301,13 @@ export namespace CodeMirrorEditor {
     foldGutter: false,
     handlePaste: true
   };
+
+  /**
+   * The options used to set several options at once with setOptions.
+   */
+  export interface IConfigOptions<K extends keyof IConfig> {
+    K: IConfig[K];
+  }
 
   /**
    * Add a command to CodeMirror.
