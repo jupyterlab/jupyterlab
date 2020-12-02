@@ -427,7 +427,7 @@ export namespace CodeEditor {
     /**
      * Set config options for the editor.
      */
-    setOptions(options: any): void;
+    setOptions<K extends keyof IConfig>(options: IConfigOptions<K>[]): void;
 
     /**
      * Returns the content for the given line number.
@@ -681,6 +681,13 @@ export namespace CodeEditor {
     rulers: [],
     codeFolding: false
   };
+
+  /**
+   * The options used to set several options at once with setOptions.
+   */
+  export interface IConfigOptions<K extends keyof IConfig> {
+    K: IConfig[K];
+  }
 
   /**
    * The options used to initialize an editor.
