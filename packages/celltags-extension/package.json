@@ -18,7 +18,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": [
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -28,7 +29,8 @@
   },
   "files": [
     "lib/*.{d.ts,js}",
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc",

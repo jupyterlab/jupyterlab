@@ -8,7 +8,8 @@
   "style": "style/index.css",
   "files": [
     "style/index.css",
-    "lib/*"
+    "lib/*",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc && webpack",

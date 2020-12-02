@@ -13,7 +13,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": [
-    "style/**/*.css"
+    "style/**/*.css",
+    "style/index.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -26,7 +27,8 @@
     "lib/*.js.map",
     "lib/*.js",
     "schema/*.json",
-    "style/**/*.css"
+    "style/**/*.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
