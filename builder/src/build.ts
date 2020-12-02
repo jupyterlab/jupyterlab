@@ -253,7 +253,7 @@ export namespace Build {
       if ((jsImport = cssJS(cssImport))) {
         styleContents.push(`import '${jsImport}';`);
       } else {
-        styleContents.push(`// import '${cssImport}';`);
+        styleContents.push(`import '${cssImport}';`);
       }
     });
     styleContents.push('');
