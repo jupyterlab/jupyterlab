@@ -1,0 +1,17 @@
+/*-----------------------------------------------------------------------------
+| Copyright (c) Jupyter Development Team.
+| Distributed under the terms of the Modified BSD License.
+|----------------------------------------------------------------------------*/
+@import './breakpoints.css';
+@import './editor.css';
+@import './callstack.css';
+@import './variables.css';
+@import './icons.css';
+@import './sidebar.css';
+@import './sources.css';
+
+.jp-left-truncated {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  direction: rtl;
+}

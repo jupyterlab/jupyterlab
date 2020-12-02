@@ -13,7 +13,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": [
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -25,7 +26,8 @@
     "lib/*.d.ts",
     "lib/*.js.map",
     "lib/*.js",
-    "style/*.css"
+    "style/*.css",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -43,11 +45,11 @@
     "@jupyterlab/statedb": "^3.0.0-rc.10",
     "@jupyterlab/translation": "^3.0.0-rc.10",
     "@jupyterlab/ui-components": "^3.0.0-rc.10",
-    "@lumino/commands": "^1.11.3",
+    "@lumino/commands": "^1.12.0",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",
     "@lumino/signaling": "^1.4.3",
-    "@lumino/widgets": "^1.14.0",
+    "@lumino/widgets": "^1.16.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },

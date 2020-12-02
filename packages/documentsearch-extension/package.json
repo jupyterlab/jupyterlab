@@ -24,7 +24,8 @@
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "schema/*.json",
-    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}"
+    "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -38,7 +39,7 @@
     "@jupyterlab/documentsearch": "^3.0.0-rc.10",
     "@jupyterlab/mainmenu": "^3.0.0-rc.10",
     "@jupyterlab/translation": "^3.0.0-rc.10",
-    "@lumino/widgets": "^1.14.0"
+    "@lumino/widgets": "^1.16.0"
   },
   "devDependencies": {
     "rimraf": "~3.0.0",

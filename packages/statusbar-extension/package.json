@@ -26,7 +26,8 @@
     "lib/**/*.js.map",
     "lib/**/*.js",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
-    "schema/*.json"
+    "schema/*.json",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -48,8 +49,8 @@
     "@jupyterlab/statusbar": "^3.0.0-rc.10",
     "@jupyterlab/translation": "^3.0.0-rc.10",
     "@jupyterlab/ui-components": "^3.0.0-rc.10",
-    "@lumino/commands": "^1.11.3",
-    "@lumino/widgets": "^1.14.0"
+    "@lumino/commands": "^1.12.0",
+    "@lumino/widgets": "^1.16.0"
   },
   "devDependencies": {
     "@types/react": "^17.0.0",

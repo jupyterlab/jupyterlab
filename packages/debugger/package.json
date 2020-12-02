@@ -18,7 +18,8 @@
   "license": "BSD-3-Clause",
   "author": "Project Jupyter",
   "sideEffects": [
-    "style/**/*.css"
+    "style/**/*.css",
+    "style/index.js"
   ],
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -32,7 +33,8 @@
     "lib/**/*.js",
     "schema/*.json",
     "style/**/*.css",
-    "style/**/*.svg"
+    "style/**/*.svg",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -62,12 +64,12 @@
     "@jupyterlab/translation": "^3.0.0-rc.10",
     "@jupyterlab/ui-components": "^3.0.0-rc.10",
     "@lumino/algorithm": "^1.3.3",
-    "@lumino/commands": "^1.11.3",
+    "@lumino/commands": "^1.12.0",
     "@lumino/coreutils": "^1.5.3",
-    "@lumino/datagrid": "^0.14.0",
+    "@lumino/datagrid": "^0.16.0",
     "@lumino/disposable": "^1.4.3",
     "@lumino/signaling": "^1.4.3",
-    "@lumino/widgets": "^1.14.0",
+    "@lumino/widgets": "^1.16.0",
     "codemirror": "~5.57.0",
     "react": "^17.0.1",
     "vscode-debugprotocol": "^1.37.0"

@@ -5,10 +5,7 @@
 
 import { PageConfig } from '@jupyterlab/coreutils';
 
-
-// This must be after the public path is set.
-// This cannot be extracted because the public path is dynamic.
-require('./imports.css');
+import './style.js';
 
 async function createModule(scope, module) {
   try {

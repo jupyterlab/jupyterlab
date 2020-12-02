@@ -24,7 +24,8 @@
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
     "style/**/*.{css,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
-    "schema/*.json"
+    "schema/*.json",
+    "style/index.js"
   ],
   "scripts": {
     "build": "tsc -b",
@@ -46,7 +47,7 @@
     "@jupyterlab/ui-components": "^3.0.0-rc.10",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/signaling": "^1.4.3",
-    "@lumino/widgets": "^1.14.0",
+    "@lumino/widgets": "^1.16.0",
     "react": "^17.0.1"
   },
   "devDependencies": {

@@ -88,6 +88,20 @@ const DIFFERENT_VERSIONS: Array<string> = ['vega-lite', 'vega', 'vega-embed'];
 const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/application': ['@jupyterlab/rendermime'],
   '@jupyterlab/application-extension': ['@jupyterlab/apputils'],
+  '@jupyterlab/builder': [
+    '@lumino/algorithm',
+    '@lumino/application',
+    '@lumino/commands',
+    '@lumino/coreutils',
+    '@lumino/disposable',
+    '@lumino/domutils',
+    '@lumino/dragdrop',
+    '@lumino/messaging',
+    '@lumino/properties',
+    '@lumino/signaling',
+    '@lumino/virtualdom',
+    '@lumino/widgets'
+  ],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
   '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be used by status reporters
   '@jupyterlab/docregistry': [
@@ -105,14 +119,97 @@ const SKIP_CSS: Dict<string[]> = {
   '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
   '@jupyterlab/help-extension': ['@jupyterlab/application'],
-  '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
-  '@jupyterlab/theme-dark-extension': [
+  '@jupyterlab/metapackage': [
+    '@jupyterlab/ui-components',
+    '@jupyterlab/apputils',
+    '@jupyterlab/codeeditor',
+    '@jupyterlab/statusbar',
+    '@jupyterlab/codemirror',
+    '@jupyterlab/rendermime-interfaces',
+    '@jupyterlab/rendermime',
+    '@jupyterlab/docregistry',
     '@jupyterlab/application',
-    '@jupyterlab/apputils'
+    '@jupyterlab/property-inspector',
+    '@jupyterlab/application-extension',
+    '@jupyterlab/docmanager',
+    '@jupyterlab/filebrowser',
+    '@jupyterlab/mainmenu',
+    '@jupyterlab/apputils-extension',
+    '@jupyterlab/attachments',
+    '@jupyterlab/outputarea',
+    '@jupyterlab/cells',
+    '@jupyterlab/notebook',
+    '@jupyterlab/celltags',
+    '@jupyterlab/celltags-extension',
+    '@jupyterlab/fileeditor',
+    '@jupyterlab/codemirror-extension',
+    '@jupyterlab/completer',
+    '@jupyterlab/console',
+    '@jupyterlab/completer-extension',
+    '@jupyterlab/launcher',
+    '@jupyterlab/console-extension',
+    '@jupyterlab/csvviewer',
+    '@jupyterlab/documentsearch',
+    '@jupyterlab/csvviewer-extension',
+    '@jupyterlab/debugger',
+    '@jupyterlab/debugger-extension',
+    '@jupyterlab/docmanager-extension',
+    '@jupyterlab/documentsearch-extension',
+    '@jupyterlab/extensionmanager',
+    '@jupyterlab/extensionmanager-extension',
+    '@jupyterlab/filebrowser-extension',
+    '@jupyterlab/fileeditor-extension',
+    '@jupyterlab/inspector',
+    '@jupyterlab/help-extension',
+    '@jupyterlab/htmlviewer',
+    '@jupyterlab/htmlviewer-extension',
+    '@jupyterlab/hub-extension',
+    '@jupyterlab/imageviewer',
+    '@jupyterlab/imageviewer-extension',
+    '@jupyterlab/inspector-extension',
+    '@jupyterlab/javascript-extension',
+    '@jupyterlab/json-extension',
+    '@jupyterlab/launcher-extension',
+    '@jupyterlab/logconsole',
+    '@jupyterlab/logconsole-extension',
+    '@jupyterlab/mainmenu-extension',
+    '@jupyterlab/markdownviewer',
+    '@jupyterlab/markdownviewer-extension',
+    '@jupyterlab/mathjax2',
+    '@jupyterlab/mathjax2-extension',
+    '@jupyterlab/nbconvert-css',
+    '@jupyterlab/notebook-extension',
+    '@jupyterlab/pdf-extension',
+    '@jupyterlab/rendermime-extension',
+    '@jupyterlab/running',
+    '@jupyterlab/running-extension',
+    '@jupyterlab/settingeditor',
+    '@jupyterlab/settingeditor-extension',
+    '@jupyterlab/statusbar-extension',
+    '@jupyterlab/terminal',
+    '@jupyterlab/terminal-extension',
+    '@jupyterlab/theme-dark-extension',
+    '@jupyterlab/theme-light-extension',
+    '@jupyterlab/toc',
+    '@jupyterlab/toc-extension',
+    '@jupyterlab/tooltip',
+    '@jupyterlab/tooltip-extension',
+    '@jupyterlab/translation-extension',
+    '@jupyterlab/ui-components-extension',
+    '@jupyterlab/vdom',
+    '@jupyterlab/vdom-extension',
+    '@jupyterlab/vega5-extension'
   ],
-  '@jupyterlab/theme-light-extension': [
-    '@jupyterlab/application',
-    '@jupyterlab/apputils'
+  '@jupyterlab/rendermime-interfaces': ['@lumino/widgets'],
+  '@jupyterlab/shortcuts-extension': ['@jupyterlab/application'],
+  '@jupyterlab/testutils': [
+    '@jupyterlab/apputils',
+    '@jupyterlab/codeeditor',
+    '@jupyterlab/codemirror',
+    '@jupyterlab/rendermime',
+    '@jupyterlab/docregistry',
+    '@jupyterlab/cells',
+    '@jupyterlab/notebook'
   ],
   '@jupyterlab/ui-extension': ['@blueprintjs/icons']
 };
@@ -383,16 +480,19 @@ export async function ensureIntegrity(): Promise<boolean> {
       });
     }
 
-    Object.keys(deps).forEach(depName => {
-      // Bail for skipped imports and known extra styles.
-      if (skip.indexOf(depName) !== -1 || depName in cssData) {
-        return;
-      }
-      const depData = graph.getNodeData(depName);
-      if (typeof depData.style === 'string') {
-        cssData[depName] = [depData.style];
-      }
-    });
+    // Add dependency css if package is not a theme package
+    if (!(data.jupyterlab && data.jupyterlab.themePath)) {
+      Object.keys(deps).forEach(depName => {
+        // Bail for skipped imports and known extra styles.
+        if (skip.indexOf(depName) !== -1 || depName in cssData) {
+          return;
+        }
+        const depData = graph.getNodeData(depName);
+        if (typeof depData.style === 'string') {
+          cssData[depName] = [depData.style];
+        }
+      });
+    }
 
     // Get our CSS imports in dependency order.
     cssImports[name] = [];

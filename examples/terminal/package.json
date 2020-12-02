@@ -11,11 +11,11 @@
     "@jupyterlab/services": "^6.0.0-rc.10",
     "@jupyterlab/terminal": "^3.0.0-rc.10",
     "@jupyterlab/theme-light-extension": "^3.0.0-rc.10",
-    "@lumino/widgets": "^1.14.0",
+    "@lumino/widgets": "^1.16.0",
     "es6-promise": "~4.2.8"
   },
   "devDependencies": {
-    "css-loader": "~3.2.0",
+    "css-loader": "^5.0.1",
     "file-loader": "~6.0.0",
     "mini-css-extract-plugin": "~0.11.0",
     "raw-loader": "~4.0.0",

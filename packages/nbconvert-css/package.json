@@ -42,7 +42,7 @@
     "@jupyterlab/rendermime": "^3.0.0-rc.10"
   },
   "devDependencies": {
-    "css-loader": "~3.2.0",
+    "css-loader": "^5.0.1",
     "file-loader": "~6.0.0",
     "mini-css-extract-plugin": "~0.11.0",
     "null-loader": "^4.0.0",
