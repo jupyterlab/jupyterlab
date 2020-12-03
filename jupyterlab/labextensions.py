@@ -79,6 +79,12 @@ aliases['debug-log-path'] = 'DebugLogFileMixin.debug_log_path'
 install_aliases = copy(aliases)
 install_aliases['pin-version-as'] = 'InstallLabExtensionApp.pin'
 
+enable_aliases = copy(aliases)
+enable_aliases['level'] = 'EnableLabExtensionsApp.level'
+
+disable_aliases = copy(aliases)
+disable_aliases['level'] = 'DisableLabExtensionsApp.level'
+
 VERSION = get_app_version()
 
 
@@ -176,7 +182,7 @@ class InstallLabExtensionApp(BaseExtensionApp):
 class DevelopLabExtensionApp(BaseExtensionApp):
     desciption = "Develop labextension"
     flags = develop_flags
-    
+
     user = Bool(False, config=True, help="Whether to do a user install")
     sys_prefix = Bool(True, config=True, help="Use the sys.prefix as the prefix")
     overwrite = Bool(False, config=True, help="Whether to overwrite files")
@@ -326,28 +332,34 @@ class ListLabExtensionsApp(BaseExtensionApp):
 
     def run_task(self):
         list_extensions(app_options=AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path))
 
 
 class EnableLabExtensionsApp(BaseExtensionApp):
     description = "Enable labextension(s) by name"
+    aliases = enable_aliases
+
+    level = Unicode('sys_prefix', help="Level at which to enable: sys_prefix, user, system").tag(config=True)
 
     def run_task(self):
         app_options = AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path)
-        [enable_extension(arg, app_options=app_options) for arg in self.extra_args]
+        [enable_extension(arg, app_options=app_options, level=self.level) for arg in self.extra_args]
 
 
 class DisableLabExtensionsApp(BaseExtensionApp):
     description = "Disable labextension(s) by name"
+    aliases = disable_aliases
+
+    level = Unicode('sys_prefix', help="Level at which to enable: sys_prefix, user, system").tag(config=True)
 
     def run_task(self):
         app_options = AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path)
-        [disable_extension(arg, app_options=app_options) for arg in self.extra_args]
+        [disable_extension(arg, app_options=app_options, level=self.level) for arg in self.extra_args]
 
 
 class CheckLabExtensionsApp(BaseExtensionApp):
@@ -359,7 +371,7 @@ class CheckLabExtensionsApp(BaseExtensionApp):
 
     def run_task(self):
         app_options = AppOptions(
-            app_dir=self.app_dir, logger=self.log, core_config=self.core_config, 
+            app_dir=self.app_dir, logger=self.log, core_config=self.core_config,
             labextensions_path=self.labextensions_path)
         all_enabled = all(
             check_extension(
