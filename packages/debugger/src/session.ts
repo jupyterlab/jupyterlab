@@ -109,7 +109,7 @@ export class DebuggerSession implements IDebugger.ISession {
    * Start a new debug session
    */
   async start(): Promise<void> {
-    await this.sendRequest('initialize', {
+    const reply = await this.sendRequest('initialize', {
       clientID: 'jupyterlab',
       clientName: 'JupyterLab',
       adapterID: this.connection?.kernel?.name ?? '',
@@ -121,6 +121,10 @@ export class DebuggerSession implements IDebugger.ISession {
       supportsRunInTerminalRequest: true,
       locale: document.documentElement.lang
     });
+
+    if (!reply.success) {
+      throw new Error(`Could not start the debugger: ${reply.message}`);
+    }
 
     this._isStarted = true;
 
