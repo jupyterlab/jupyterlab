@@ -48,5 +48,6 @@
   "jupyterlab": {
     "extension": true,
     "themePath": "style/index.css"
-  }
+  },
+  "styleModule": "style/index.js"
 }

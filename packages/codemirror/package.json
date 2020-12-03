@@ -78,5 +78,6 @@
         "addon/fold/foldgutter.css"
       ]
     }
-  }
+  },
+  "styleModule": "style/index.js"
 }

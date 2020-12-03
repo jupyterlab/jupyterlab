@@ -83,5 +83,6 @@
         "css/v4-shims.min.css"
       ]
     }
-  }
+  },
+  "styleModule": "style/index.js"
 }

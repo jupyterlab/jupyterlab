@@ -75,5 +75,6 @@
   },
   "publishConfig": {
     "access": "public"
-  }
+  },
+  "styleModule": "style/index.js"
 }

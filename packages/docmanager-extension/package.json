@@ -64,5 +64,6 @@
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"
-  }
+  },
+  "styleModule": "style/index.js"
 }

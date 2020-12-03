@@ -50,5 +50,6 @@
   },
   "jupyterlab": {
     "extension": true
-  }
+  },
+  "styleModule": "style/index.js"
 }

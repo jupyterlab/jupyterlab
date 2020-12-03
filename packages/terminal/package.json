@@ -71,5 +71,6 @@
         "css/xterm.css"
       ]
     }
-  }
+  },
+  "styleModule": "style/index.js"
 }

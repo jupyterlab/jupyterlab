@@ -86,5 +86,6 @@
         "core/lib/css/blueprint.css"
       ]
     }
-  }
+  },
+  "styleModule": "style/index.js"
 }
