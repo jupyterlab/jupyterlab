@@ -50,7 +50,7 @@
     "@jupyterlab/translation": "^3.0.0-rc.11",
     "@jupyterlab/ui-components": "^3.0.0-rc.11",
     "@lumino/commands": "^1.12.0",
-    "@lumino/widgets": "^1.16.0"
+    "@lumino/widgets": "^1.16.1"
   },
   "devDependencies": {
     "@types/react": "^17.0.0",
@@ -65,5 +65,6 @@
   "jupyterlab": {
     "extension": true,
     "schemaDir": "schema"
-  }
+  },
+  "styleModule": "style/index.js"
 }

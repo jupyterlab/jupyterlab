@@ -47,16 +47,6 @@ const ICON_CSS_CLASSES_TEMPLATE = `
 `;
 
 /**
- * Replace the extension on a file path with a new extension newExt
- *
- * changeExt('some/path/file.ext', '.newext') -> 'some/path/file.newext'
- * changeExt('some/path/file.ext') -> 'some/path/file'
- */
-function changeExt(file: string, newExt: string = '') {
-  return `${file.slice(0, file.length - path.extname(file).length)}${newExt}`;
-}
-
-/**
  * Ensure the integrity of a package.
  *
  * @param options - The options used to ensure the package.
@@ -75,6 +65,7 @@ export async function ensurePackage(
   const messages: string[] = [];
   const locals = options.locals || {};
   const cssImports = options.cssImports || [];
+  const cssModuleImports = options.cssModuleImports || [];
   const differentVersions = options.differentVersions || [];
 
   // Verify dependencies are consistent.
@@ -193,22 +184,19 @@ export async function ensurePackage(
   await Promise.all(promises);
 
   // Template the CSS index file.
-  let cssIndexContents: string[] = [];
   if (
     cssImports.length > 0 ||
     fs.existsSync(path.join(pkgPath, 'style/base.css'))
   ) {
     const funcName = 'ensurePackage';
-    cssIndexContents.push(
-      utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' })
-    );
-    cssImports.forEach(cssImport => {
-      cssIndexContents.push(`@import url('~${cssImport}');`);
-    });
+    const cssIndexContents = [
+      utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
+      ...cssImports.map(x => `@import url('~${x}');`),
+      ''
+    ];
     if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
-      cssIndexContents.push("\n@import url('./base.css');");
+      cssIndexContents.push("@import url('./base.css');\n");
     }
-    cssIndexContents.push('');
 
     // write out cssIndexContents, if needed
     const cssIndexPath = path.join(pkgPath, 'style/index.css');
@@ -220,42 +208,21 @@ export async function ensurePackage(
     );
   }
 
-  function cssJS(cssImport: string): string | undefined {
-    const ext = path.extname(cssImport);
-    if (ext === '.css') {
-      try {
-        let jsImport = changeExt(cssImport);
-        // errors if we do not find it
-        require.resolve(jsImport);
-        return jsImport;
-      } catch (err) {
-        /* no-op */
-      }
-    }
-  }
-
-  // Template the CSS JS index file.
-  let jsIndexContents: string[] = [];
+  // Template the style module index file.
   if (
-    cssImports.length > 0 ||
+    cssModuleImports.length > 0 ||
     fs.existsSync(path.join(pkgPath, 'style/base.css'))
   ) {
     const funcName = 'ensurePackage';
-    jsIndexContents.push(
-      utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' })
-    );
-    let jsImport: string | undefined;
-    cssImports.forEach(cssImport => {
-      if ((jsImport = cssJS(cssImport))) {
-        jsIndexContents.push(`import '${jsImport}';`);
-      } else {
-        jsIndexContents.push(`import '${cssImport}';`);
-      }
-    });
+    const jsIndexContents = [
+      utils.fromTemplate(HEADER_TEMPLATE, { funcName }, { end: '' }),
+      ...cssModuleImports.map(x => `import '${x}';`),
+      ''
+    ];
     if (fs.existsSync(path.join(pkgPath, 'style/base.css'))) {
-      jsIndexContents.push("\nimport './base.css';");
+      jsIndexContents.push("import './base.css';\n");
     }
-    jsIndexContents.push('');
+
     // write out jsIndexContents, if needed
     const jsIndexPath = path.join(pkgPath, 'style/index.js');
     if (!fs.existsSync(jsIndexPath)) {
@@ -402,24 +369,31 @@ export async function ensurePackage(
   // Ensure that the `style` directories match what is in the `package.json`
   const styles = glob.sync(path.join(pkgPath, 'style', '**/*.*'));
   const styleIndex: { [key: string]: string } = {};
-  // If we have styles, ensure that 'style' field is declared and we have a
-  // corresponding js file.
+  // If we have styles, ensure that 'style' and 'styleModule' fields are declared
   if (styles.length > 0) {
     if (data.style === undefined) {
       data.style = 'style/index.css';
     }
     styleIndex[path.join(pkgPath, data.style)] = data.style;
-    let jsFile = changeExt(data.style, '.js');
-    if (fs.existsSync(path.join(pkgPath, jsFile))) {
-      styleIndex[path.join(pkgPath, jsFile)] = jsFile;
-    } else {
+    if (!fs.existsSync(path.join(pkgPath, data.style))) {
       messages.push(
-        `Style file ${data.style} has no corresponding js import file ${jsFile}`
+        `Style file from .style package.json key (${data.style}) does not exist`
+      );
+    }
+
+    if (data.styleModule === undefined) {
+      data.styleModule = 'style/index.js';
+    }
+    styleIndex[path.join(pkgPath, data.styleModule)] = data.styleModule;
+    if (!fs.existsSync(path.join(pkgPath, data.styleModule))) {
+      messages.push(
+        `Style module file from .styleModule package.json key (${data.styleModule}) does not exist`
       );
     }
   } else {
     // Delete the style field
     delete data.style;
+    delete data.styleModule;
   }
 
   for (const style of styles) {
@@ -643,6 +617,11 @@ export interface IEnsurePackageOptions {
    * The css import list for the package.
    */
   cssImports?: string[];
+
+  /**
+   * The css module import list for the package.
+   */
+  cssModuleImports?: string[];
 
   /**
    * Packages which are allowed to have multiple versions pulled in

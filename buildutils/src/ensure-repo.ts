@@ -102,7 +102,9 @@ const SKIP_CSS: Dict<string[]> = {
     '@lumino/virtualdom',
     '@lumino/widgets'
   ],
+  '@jupyterlab/codemirror-extension': ['codemirror'],
   '@jupyterlab/completer': ['@jupyterlab/codeeditor'],
+  '@jupyterlab/debugger': ['codemirror'],
   '@jupyterlab/docmanager': ['@jupyterlab/statusbar'], // Statusbar styles should not be used by status reporters
   '@jupyterlab/docregistry': [
     '@jupyterlab/codeeditor', // Only used for model
@@ -114,7 +116,8 @@ const SKIP_CSS: Dict<string[]> = {
     '@jupyterlab/codeeditor',
     '@jupyterlab/codemirror',
     '@jupyterlab/fileeditor',
-    '@jupyterlab/notebook'
+    '@jupyterlab/notebook',
+    'codemirror'
   ],
   '@jupyterlab/filebrowser': ['@jupyterlab/statusbar'],
   '@jupyterlab/fileeditor': ['@jupyterlab/statusbar'],
@@ -445,7 +448,8 @@ export async function ensureIntegrity(): Promise<boolean> {
   paths.push('./jupyterlab/tests/mock_packages/extension');
   paths.push('./jupyterlab/tests/mock_packages/mimeextension');
 
-  const cssImports: Dict<Array<string>> = {};
+  const cssImports: Dict<string[]> = {};
+  const cssModuleImports: Dict<string[]> = {};
 
   // Get the package graph.
   const graph = utils.getPackageGraph();
@@ -472,35 +476,47 @@ export async function ensureIntegrity(): Promise<boolean> {
     const data = pkgData[name];
     const deps: Dict<string> = data.dependencies || {};
     const skip = SKIP_CSS[name] || [];
-    const cssData: Dict<Array<string>> = {};
+    // Initialize cssData with explicit css imports if available
+    const cssData: Dict<string[]> = {
+      ...(data.jupyterlab && data.jupyterlab.extraStyles)
+    };
+    const cssModuleData: Dict<string[]> = {
+      ...(data.jupyterlab && data.jupyterlab.extraStyles)
+    };
 
-    if (data.jupyterlab && data.jupyterlab.extraStyles) {
-      Object.keys(data.jupyterlab.extraStyles).forEach(depName => {
-        cssData[depName] = data.jupyterlab.extraStyles[depName];
-      });
-    }
-
-    // Add dependency css if package is not a theme package
+    // Add automatic dependency css if package is not a theme package
     if (!(data.jupyterlab && data.jupyterlab.themePath)) {
       Object.keys(deps).forEach(depName => {
         // Bail for skipped imports and known extra styles.
-        if (skip.indexOf(depName) !== -1 || depName in cssData) {
+        if (skip.includes(depName) || depName in cssData) {
           return;
         }
-        const depData = graph.getNodeData(depName);
+
+        const depData = graph.getNodeData(depName) as any;
         if (typeof depData.style === 'string') {
           cssData[depName] = [depData.style];
+        }
+        if (typeof depData.styleModule === 'string') {
+          cssModuleData[depName] = [depData.styleModule];
+        } else if (typeof depData.style === 'string') {
+          cssModuleData[depName] = [depData.style];
         }
       });
     }
 
     // Get our CSS imports in dependency order.
     cssImports[name] = [];
+    cssModuleImports[name] = [];
 
     graph.dependenciesOf(name).forEach(depName => {
       if (depName in cssData) {
         cssData[depName].forEach(cssPath => {
           cssImports[name].push(`${depName}/${cssPath}`);
+        });
+      }
+      if (depName in cssModuleData) {
+        cssModuleData[depName].forEach(cssModulePath => {
+          cssModuleImports[name].push(`${depName}/${cssModulePath}`);
         });
       }
     });
@@ -536,6 +552,7 @@ export async function ensureIntegrity(): Promise<boolean> {
       unused,
       locals,
       cssImports: cssImports[name],
+      cssModuleImports: cssModuleImports[name],
       differentVersions: DIFFERENT_VERSIONS
     };
 
