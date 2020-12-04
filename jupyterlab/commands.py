@@ -735,6 +735,18 @@ class _AppHandler(object):
             logger.info('\nDisabled extensions:')
             [logger.info('    %s' % item) for item in sorted(disabled)]
 
+        # Here check if modules are improperly shadowed
+        improper_shadowed = []
+        for ext_name in self.info['shadowed_exts']:
+           source_version = self.info['extensions'][ext_name]['version']
+           prebuilt_version = self.info['federated_extensions'][ext_name]['version']
+           if not gte(prebuilt_version, source_version, True):
+               improper_shadowed.append(ext_name)
+
+        if improper_shadowed:
+            logger.info('\nThe following source extensions are overshadowed by older prebuilt extensions:')
+            [logger.info('    %s' % name) for name in sorted(improper_shadowed)]
+
         messages = self.build_check(fast=True)
         if messages:
             logger.info('\nBuild recommended, please run `jupyter lab build`:')
@@ -766,6 +778,8 @@ class _AppHandler(object):
             msg = 'Version mismatch: %s (built), %s (current)'
             return [msg % (static_version, core_version)]
 
+        shadowed_exts = self.info['shadowed_exts']
+
         # Look for mismatched extensions.
         new_package = self._get_package_template(silent=fast)
         new_jlab = new_package['jupyterlab']
@@ -774,11 +788,15 @@ class _AppHandler(object):
         for ext_type in ['extensions', 'mimeExtensions']:
             # Extensions that were added.
             for ext in new_jlab[ext_type]:
+                if ext in shadowed_exts:
+                    continue
                 if ext not in old_jlab[ext_type]:
                     messages.append('%s needs to be included in build' % ext)
 
             # Extensions that were removed.
             for ext in old_jlab[ext_type]:
+                if ext in shadowed_exts:
+                    continue
                 if ext not in new_jlab[ext_type]:
                     messages.append('%s needs to be removed from build' % ext)
 
@@ -795,7 +813,7 @@ class _AppHandler(object):
 
         # Look for updated local extensions.
         for (name, source) in local.items():
-            if fast:
+            if fast or name in shadowed_exts:
                 continue
             dname = pjoin(app_dir, 'extensions')
             if self._check_local(name, source, dname):
@@ -803,7 +821,7 @@ class _AppHandler(object):
 
         # Look for updated linked packages.
         for (name, item) in linked.items():
-            if fast:
+            if fast or name in shadowed_exts:
                 continue
             dname = pjoin(app_dir, 'staging', 'linked_packages')
             if self._check_local(name, item['source'], dname):
@@ -1090,6 +1108,7 @@ class _AppHandler(object):
         info['core_extensions'] = _get_core_extensions(self.core_data)
 
         info['federated_extensions'] = get_federated_extensions(self.labextensions_path)
+        info['shadowed_exts'] = [ext for ext in info['extensions'] if ext in info['federated_extensions']]
         return info
 
     def _ensure_disabled_info(self):
@@ -1229,6 +1248,7 @@ class _AppHandler(object):
         local = self.info['local_extensions']
         linked = self.info['linked_packages']
         extensions = self.info['extensions']
+        shadowed_exts = self.info['shadowed_exts']
         jlab = data['jupyterlab']
 
         def format_path(path):
@@ -1242,11 +1262,15 @@ class _AppHandler(object):
 
         # Handle local extensions.
         for (key, source) in local.items():
+            if key in shadowed_exts:
+                continue
             jlab['linkedPackages'][key] = source
             data['resolutions'][key] = 'file:' + self.info['extensions'][key]['path']
 
         # Handle linked packages.
         for (key, item) in linked.items():
+            if key in shadowed_exts:
+                continue
             path = pjoin(self.app_dir, 'staging', 'linked_packages')
             path = pjoin(path, item['filename'])
             data['dependencies'][key] = format_path(path)

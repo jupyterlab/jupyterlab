@@ -37,11 +37,15 @@ export async function main() {
     PageConfig.getOption('federated_extensions')
   );
 
+  const queuedFederated = [];
+
   extensions.forEach(data => {
     if (data.extension) {
+      queuedFederated.push(data.name);
       federatedExtensionPromises.push(createModule(data.name, data.extension));
     }
     if (data.mimeExtension) {
+      queuedFederated.push(data.name);
       federatedMimeExtensionPromises.push(createModule(data.name, data.mimeExtension));
     }
     if (data.style) {
@@ -82,13 +86,15 @@ export async function main() {
   // Handle the registered mime extensions.
   const mimeExtensions = [];
   {{#each jupyterlab_mime_extensions}}
-  try {
-    let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
-    for (let plugin of activePlugins(ext)) {
-      mimeExtensions.push(plugin);
+  if (queuedFederated.indexOf('{{@key}}') === -1) {
+    try {
+      let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+      for (let plugin of activePlugins(ext)) {
+        mimeExtensions.push(plugin);
+      }
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
   }
   {{/each}}
 
@@ -106,13 +112,15 @@ export async function main() {
 
   // Handled the registered standard extensions.
   {{#each jupyterlab_extensions}}
-  try {
-    let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
-    for (let plugin of activePlugins(ext)) {
-      register.push(plugin);
+  if (queuedFederated.indexOf('{{@key}}') === -1) {
+    try {
+      let ext = require('{{@key}}{{#if this}}/{{this}}{{/if}}');
+      for (let plugin of activePlugins(ext)) {
+        register.push(plugin);
+      }
+    } catch (e) {
+      console.error(e);
     }
-  } catch (e) {
-    console.error(e);
   }
   {{/each}}
 
