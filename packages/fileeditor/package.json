@@ -1,6 +1,6 @@
 {
   "name": "@jupyterlab/fileeditor",
-  "version": "3.0.0-rc.12",
+  "version": "3.0.0-rc.13",
   "description": "JupyterLab - Editor Widget",
   "homepage": "https://github.com/jupyterlab/jupyterlab",
   "bugs": {
@@ -42,19 +42,19 @@
     "watch": "tsc -b --watch"
   },
   "dependencies": {
-    "@jupyterlab/apputils": "^3.0.0-rc.12",
-    "@jupyterlab/codeeditor": "^3.0.0-rc.12",
-    "@jupyterlab/docregistry": "^3.0.0-rc.12",
-    "@jupyterlab/statusbar": "^3.0.0-rc.12",
-    "@jupyterlab/translation": "^3.0.0-rc.12",
-    "@jupyterlab/ui-components": "^3.0.0-rc.12",
+    "@jupyterlab/apputils": "^3.0.0-rc.13",
+    "@jupyterlab/codeeditor": "^3.0.0-rc.13",
+    "@jupyterlab/docregistry": "^3.0.0-rc.13",
+    "@jupyterlab/statusbar": "^3.0.0-rc.13",
+    "@jupyterlab/translation": "^3.0.0-rc.13",
+    "@jupyterlab/ui-components": "^3.0.0-rc.13",
     "@lumino/coreutils": "^1.5.3",
     "@lumino/messaging": "^1.4.3",
     "@lumino/widgets": "^1.16.1",
     "react": "^17.0.1"
   },
   "devDependencies": {
-    "@jupyterlab/testutils": "^3.0.0-rc.12",
+    "@jupyterlab/testutils": "^3.0.0-rc.13",
     "@types/jest": "^26.0.10",
     "jest": "^26.4.2",
     "rimraf": "~3.0.0",
