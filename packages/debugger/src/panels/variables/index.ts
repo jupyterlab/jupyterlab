@@ -1,9 +1,10 @@
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
 
-import { IThemeManager, ToolbarButton } from '@jupyterlab/apputils';
+import { IThemeManager } from '@jupyterlab/apputils';
 
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { Switch } from '@jupyterlab/ui-components';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -31,7 +32,7 @@ export class Variables extends Panel {
 
     const { model, service, commands, themeManager } = options;
     const translator = options.translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
+    // const trans = translator.load('jupyterlab');
     this._header = new VariablesHeader(translator);
     this._tree = new VariablesBodyTree({ model, service });
     this._table = new VariablesBodyGrid({ model, commands, themeManager });
@@ -50,14 +51,14 @@ export class Variables extends Panel {
       this.update();
     };
 
-    this._header.toolbar.addItem(
-      'view-VariableSwitch',
-      new ToolbarButton({
-        iconClass: 'jp-ToggleSwitch',
-        onClick,
-        tooltip: trans.__('Table / Tree View')
-      })
-    );
+    const button = new Switch();
+    button.id = 'jp-debugger';
+    button.valueChanged.connect((_, args) => {
+      onClick();
+    });
+    // button.tooltip = trans.__('Table / Tree View');
+
+    this._header.toolbar.addItem('view-VariableSwitch', button);
 
     this.addWidget(this._header);
     this.addWidget(this._tree);

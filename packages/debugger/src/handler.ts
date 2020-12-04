@@ -23,7 +23,7 @@ import { Kernel, Session } from '@jupyterlab/services';
 
 import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
-import { bugIcon } from '@jupyterlab/ui-components';
+import { bugIcon, Switch } from '@jupyterlab/ui-components';
 
 import { DisposableSet } from '@lumino/disposable';
 
@@ -58,11 +58,13 @@ function updateToolbar(
   });
   widget.toolbar.addItem('debugger-icon', icon);
 
-  const button = new ToolbarButton({
-    iconClass: 'jp-ToggleSwitch',
-    tooltip: trans.__('Enable / Disable Debugger'),
-    onClick
+  const button = new Switch();
+  button.id = 'jp-debugger';
+  button.valueChanged.connect((_, args) => {
+    onClick();
   });
+  // button.tooltip = trans.__('Enable / Disable Debugger');
+
   widget.toolbar.addItem('debugger-button', button);
 
   const elements = new DisposableSet();

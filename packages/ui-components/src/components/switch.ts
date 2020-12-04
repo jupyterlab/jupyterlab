@@ -25,7 +25,9 @@ export class Switch extends Widget {
     track.className = 'jp-switch-track';
     track.setAttribute('aria-hidden', 'true');
 
-    this._button.appendChild(this._label);
+    if (this._label.textContent !== '') {
+      this._button.appendChild(this._label);
+    }
     this._button.appendChild(track);
     this.node.appendChild(this._button);
   }
