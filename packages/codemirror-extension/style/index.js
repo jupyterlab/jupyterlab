@@ -7,7 +7,6 @@
 import '@lumino/widgets/style/index.css';
 import '@jupyterlab/codeeditor/style/index.js';
 import '@jupyterlab/statusbar/style/index.js';
-import 'codemirror/lib/codemirror.css';
 import '@jupyterlab/codemirror/style/index.js';
 import '@jupyterlab/docregistry/style/index.js';
 import '@jupyterlab/application/style/index.js';
