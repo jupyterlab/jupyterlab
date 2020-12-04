@@ -27,7 +27,6 @@
 }
 
 .jp-InputPrompt {
-  flex: 0 0 var(--jp-cell-prompt-width);
   color: var(--jp-cell-inprompt-font-color);
   font-family: var(--jp-cell-prompt-font-family);
   padding: var(--jp-code-padding);
@@ -47,4 +46,8 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+}
+
+body[data-format='desktop'] .jp-InputPrompt {
+  flex: 0 0 var(--jp-cell-prompt-width);
 }
