@@ -30,17 +30,17 @@ Because prebuilt extensions do not require a JupyterLab rebuild, they have a dis
    We recommend developing prebuilt extensions in Python packages for user convenience.
 
 
-Concepts
---------
+Plugins interacting with each other
+-----------------------------------
 
 One of the foundational features of the JupyterLab plugin system is that plugins can interact with other plugins by providing an object to the system and requiring objects provided by other plugins.
 
 In the following discussion, the plugin that is providing an object to the system is the *provider* plugin, and the plugin that is requiring and using the object is the *consumer* plugin.
 
-An object provided by a plugin is identified by a *token*, a JavaScript Token object instance. The provider plugin provides the token in its plugin metadata, and returns the object from its ``activate`` function. Consumer plugins import the token (for example, from the provider plugin's extension JavaScript package) and list the token in their plugin metadata. Since consumers will need to import a token used by a provider, the token should be exported in a published JavaScript package.
+An object provided by a plugin is identified by a *token*, a concrete instance of the Lumino Token class. The provider plugin provides the token in its plugin metadata, and returns the object from its ``activate`` function. Consumer plugins import the token (for example, from the provider plugin's extension JavaScript package) and list the token in their plugin metadata. Since consumers will need to import a token used by a provider, the token should be exported in a published JavaScript package.
 
 .. note::
-   JupyterLab uses tokens to identify plugins (rather than strings, for example) to prevent conflicts between identifiers and to enable type-checking when using TypeScript. 
+   JupyterLab uses tokens to identify objects provided by plugins (instead of strings, for example) to prevent conflicts between identifiers and to enable type-checking when using TypeScript.
 
 .. note::
    A pattern in JupyterLab's codebase is that a plugin's token is exported by a third package that both the provider and consumer extensions import. This enables a user to swap out the provider extension for a different extension that provides the same token with an alternative implementation.
@@ -53,8 +53,6 @@ A extension that wants to provide an object to the system from a plugin for othe
 
 A plugin returns an object from its ``activate`` function conforming to the token type interface. JupyterLab stores the object associated with the token. Another extension can import the token from the provider extension 
 
-One of the challenges a web application like JupyterLab has, that tries to consolidate many different packages
-
 One of the challenges in JupyterLab is deduplicating dependencies of extensions. We need to deduplicate dependencies for several reasons:
 
 1. Some dependencies contain package-level state such as internal variables, and consumers of the dependencies depend on that state being the same across the application. For example, the Lumino event and widget system on which JupyterLab relies for communication across the application requires all packages use the same copies of the Lumino packages.
@@ -64,7 +62,119 @@ Deduplication in JupyterLab happens in two ways. For source extensions, JupyterL
 
 For prebuilt extensions, JupyterLab relies on the Webpack module federation system to share dependencies across different bundles (including the core JupyterLab application bundle).
 
-To ensure that a consumer gets the system copy of a token, any required tokens that are imported by a consumer extension should list the exporting extension as a singleton package in their ``jupyterlab.sharedPackages`` config. Required token packages should be listed as ``bundled: false`` - this will generate a JavaScript error if the package (and thus the token) is not present in the system at runtime. Optional token packages will need to be listed as singletons that are bundled (otherwise, if they are not present in the system, it will cause a js error when you try to import them).
+To ensure that a consumer gets the same token instance as the provider provided to the sytem, any required tokens that are imported by a consumer extension should list the exporting extension as a singleton package in their ``jupyterlab.sharedPackages`` config. Required token packages should be listed as ``bundled: false`` - this will generate a JavaScript error if the package (and thus the token) is not present in the system at runtime. Optional token packages will need to be listed as singletons that are bundled (otherwise, if they are not present in the system, it will cause a js error when you try to import them).
+
+
+.. _tokens:
+
+Core Tokens
+^^^^^^^^^^^
+
+The core packages of JupyterLab provide a set of tokens,
+which are listed here, along with short descriptions of when you
+might want to use them in your extensions.
+
+- ``@jupyterlab/application:IConnectionLost``: A token for invoking the dialog shown
+  when JupyterLab has lost its connection to the server. Use this if, for some reason,
+  you want to bring up the "connection lost" dialog under new circumstances.
+- ``@jupyterlab/application:IInfo``: A token providing metadata about the current
+  application, including currently disabled extensions and whether dev mode is enabled.
+- ``@jupyterlab/application:IPaths``: A token providing information about various
+  URLs and server paths for the current application. Use this token if you want to
+  assemble URLs to use the JupyterLab REST API.
+- ``@jupyterlab/application:ILabStatus``: An interface for interacting with the application busy/dirty
+  status. Use this if you want to set the application "busy" favicon, or to set
+  the application "dirty" status, which asks the user for confirmation before leaving.
+- ``@jupyterlab/application:ILabShell``: An interface to the JupyterLab shell.
+  The top-level application object also has a reference to the shell, but it has a restricted
+  interface in order to be agnostic to different spins on the application.
+  Use this to get more detailed information about currently active widgets and layout state.
+- ``@jupyterlab/application:ILayoutRestorer``: An interface to the application layout
+  restoration functionality. Use this to have your activities restored across
+  page loads.
+- ``@jupyterlab/application:IMimeDocumentTracker``: A widget tracker for documents
+  rendered using a mime renderer extension. Use this if you want to list and interact
+  with documents rendered by such extensions.
+- ``@jupyterlab/application:IRouter``: The URL router used by the application.
+  Use this to add custom URL-routing for your extension (e.g., to invoke
+  a command if the user navigates to a sub-path).
+- ``@jupyterlab/apputils:ICommandPalette``: An interface to the application command palette
+  in the left panel. Use this to add commands to the palette.
+- ``@jupyterlab/apputils:ISplashScreen``: An interface to the splash screen for the application.
+  Use this if you want to show the splash screen for your own purposes.
+- ``@jupyterlab/apputils:IThemeManager``: An interface to the theme manager for the application.
+  Most extensions will not need to use this, as they can register a
+  `theme extension <#themes>`__.
+- ``@jupyterlab/apputils:IWindowResolver``: An interface to a window resolver for the
+  application. JupyterLab workspaces are given a name, which are determined using
+  the window resolver. Require this if you want to use the name of the current workspace.
+- ``@jupyterlab/codeeditor:IEditorServices``: An interface to the text editor provider
+  for the application. Use this to create new text editors and host them in your
+  UI elements.
+- ``@jupyterlab/completer:ICompletionManager``: An interface to the completion manager
+  for the application. Use this to allow your extension to invoke a completer.
+- ``@jupyterlab/console:IConsoleTracker``: A widget tracker for code consoles.
+  Use this if you want to be able to iterate over and interact with code consoles
+  created by the application.
+- ``@jupyterlab/console:IContentFactory``: A factory object that creates new code
+  consoles. Use this if you want to create and host code consoles in your own UI elements.
+- ``@jupyterlab/docmanager:IDocumentManager``: An interface to the manager for all
+  documents used by the application. Use this if you want to open and close documents,
+  create and delete files, and otherwise interact with the file system.
+- ``@jupyterlab/documentsearch:ISearchProviderRegistry``: An interface for a registry of search
+  providers for the application. Extensions can register their UI elements with this registry
+  to provide find/replace support.
+- ``@jupyterlab/filebrowser:IFileBrowserFactory``: A factory object that creates file browsers.
+  Use this if you want to create your own file browser (e.g., for a custom storage backend),
+  or to interact with other file browsers that have been created by extensions.
+- ``@jupyterlab/fileeditor:IEditorTracker``: A widget tracker for file editors.
+  Use this if you want to be able to iterate over and interact with file editors
+  created by the application.
+- ``@jupyterlab/htmlviewer:IHTMLViewerTracker``: A widget tracker for rendered HTML documents.
+  Use this if you want to be able to iterate over and interact with HTML documents
+  viewed by the application.
+- ``@jupyterlab/imageviewer:IImageTracker``: A widget tracker for images.
+  Use this if you want to be able to iterate over and interact with images
+  viewed by the application.
+- ``@jupyterlab/inspector:IInspector``: An interface for adding variable inspectors to widgets.
+  Use this to add the ability to hook into the variable inspector to your extension.
+- ``@jupyterlab/launcher:ILauncher``: An interface to the application activity launcher.
+  Use this to add your extension activities to the launcher panel.
+- ``@jupyterlab/mainmenu:IMainMenu``: An interface to the main menu bar for the application.
+  Use this if you want to add your own menu items.
+- ``@jupyterlab/markdownviewer:IMarkdownViewerTracker``: A widget tracker for markdown
+  document viewers. Use this if you want to iterate over and interact with rendered markdown documents.
+- ``@jupyterlab/notebook:INotebookTools``: An interface to the ``Notebook Tools`` panel in the
+  application left area. Use this to add your own functionality to the panel.
+- ``@jupyterlab/notebook:IContentFactory``: A factory object that creates new notebooks.
+  Use this if you want to create and host notebooks in your own UI elements.
+- ``@jupyterlab/notebook:INotebookTracker``: A widget tracker for notebooks.
+  Use this if you want to be able to iterate over and interact with notebooks
+  created by the application.
+- ``@jupyterlab/rendermime:IRenderMimeRegistry``: An interface to the rendermime registry
+  for the application. Use this to create renderers for various mime-types in your extension.
+  Most extensions will not need to use this, as they can register a
+  `mime renderer extension <#mime-renderer-extensions>`__.
+- ``@jupyterlab/rendermime:ILatexTypesetter``: An interface to the LaTeX typesetter for the
+  application. Use this if you want to typeset math in your extension.
+- ``@jupyterlab/settingeditor:ISettingEditorTracker``: A widget tracker for setting editors.
+  Use this if you want to be able to iterate over and interact with setting editors
+  created by the application.
+- ``@jupyterlab/settingregistry:ISettingRegistry``: An interface to the JupyterLab settings system.
+  Use this if you want to store settings for your application.
+  See `extension settings <#extension-settings>`__ for more information.
+- ``@jupyterlab/statedb:IStateDB``: An interface to the JupyterLab state database.
+  Use this if you want to store data that will persist across page loads.
+  See `state database <#state-database>`__ for more information.
+- ``@jupyterlab/statusbar:IStatusBar``: An interface to the status bar on the application.
+  Use this if you want to add new status bar items.
+- ``@jupyterlab/terminal:ITerminalTracker``: A widget tracker for terminals.
+  Use this if you want to be able to iterate over and interact with terminals
+  created by the application.
+- ``@jupyterlab/tooltip:ITooltipManager``: An interface to the tooltip manager for the application.
+  Use this to allow your extension to invoke a tooltip.
+- ``@jupyterlab/vdom:IVDOMTracker``: A widget tracker for virtual DOM (VDOM) documents.
+  Use this to iterate over and interact with VDOM instances created by the application.
 
 
 
@@ -80,6 +190,29 @@ Resources
 ^^^^^^^^^
 
 Tutorials, cookie cutters, and examples
+
+
+Plugin metadata
+^^^^^^^^^^^^^^^
+
+A typical plugin is specified by the following metadata:
+
+.. code::
+
+   const plugin: JupyterFrontEndPlugin<MyToken> = {
+     id: 'MyExtension:my_plugin',
+     requires: [ILabShell, ITranslator],
+     optional: [ICommandPalette],
+     provides: MyToken,
+     autoStart: true
+     activate: activateFunction
+   };
+
+- ``id`` is a required unique string. The convention is to use the NPM extension package name and a string identifying the plugin inside the extension, separated by a colon.
+- ``requires`` and ``optional`` are optional lists of tokens. The corresponding objects in the system will be provided to the ``activate`` function when the plugin is instantiated. Tokens in the ``requires`` list will be required for your plugin to work, and your plugin will error if a ``required`` token is not registered with JupyterLab. Tokens in the ``optional`` list may or may not be registered, but will be provided to your plugin if they exist.
+- ``provides`` is the token associated with the object your plugin is providing to the system. A token can only be registered with the system once. If your plugin does not provide an object to the system, omit this field and do not return a value from your ``activate`` function.
+- ``autostart`` indicates whether your plugin should be activated at application startup. Typically this is ``true``. If it is ``false`` or omitted, your plugin will be instantiated when any other plugin requests the token your plugin is providing.
+- ``activate`` is the function called when your plugin is instantiated. The arguments are, in order, the Application object, the list of objects corresponding to the ``requires`` tokens, then the list of objects corresponding to the ``optional`` tokens (or ``null`` if that particular ``optional`` token does not exist in the system). The return value of the ``activate`` function (or resolved value if a promise is returned) is associated with the ``provides`` token in the system.
 
 
 
@@ -106,13 +239,13 @@ Companion packages
 Packaging extensions
 ^^^^^^^^^^^^^^^^^^^^
 
-Federated Extensions
-^^^^^^^^^^^^^^^^^^^^
+Prebuilt Extensions
+^^^^^^^^^^^^^^^^^^^
 
 
 ``install.json``
 
-How federated extensions work
+How prebuilt extensions work
 """""""""""""""""""""""""""""
 
 Steps for building
@@ -656,116 +789,7 @@ with each other through typed interfaces that are provided by ``Token`` objects.
 An extension can provide a ``Token`` to the application,
 which other extensions can then request for their own use.
 
-.. _tokens:
 
-Core Tokens
-^^^^^^^^^^^
-
-The core packages of JupyterLab provide a set of tokens,
-which are listed here, along with short descriptions of when you
-might want to use them in your extensions.
-
-- ``@jupyterlab/application:IConnectionLost``: A token for invoking the dialog shown
-  when JupyterLab has lost its connection to the server. Use this if, for some reason,
-  you want to bring up the "connection lost" dialog under new circumstances.
-- ``@jupyterlab/application:IInfo``: A token providing metadata about the current
-  application, including currently disabled extensions and whether dev mode is enabled.
-- ``@jupyterlab/application:IPaths``: A token providing information about various
-  URLs and server paths for the current application. Use this token if you want to
-  assemble URLs to use the JupyterLab REST API.
-- ``@jupyterlab/application:ILabStatus``: An interface for interacting with the application busy/dirty
-  status. Use this if you want to set the application "busy" favicon, or to set
-  the application "dirty" status, which asks the user for confirmation before leaving.
-- ``@jupyterlab/application:ILabShell``: An interface to the JupyterLab shell.
-  The top-level application object also has a reference to the shell, but it has a restricted
-  interface in order to be agnostic to different spins on the application.
-  Use this to get more detailed information about currently active widgets and layout state.
-- ``@jupyterlab/application:ILayoutRestorer``: An interface to the application layout
-  restoration functionality. Use this to have your activities restored across
-  page loads.
-- ``@jupyterlab/application:IMimeDocumentTracker``: A widget tracker for documents
-  rendered using a mime renderer extension. Use this if you want to list and interact
-  with documents rendered by such extensions.
-- ``@jupyterlab/application:IRouter``: The URL router used by the application.
-  Use this to add custom URL-routing for your extension (e.g., to invoke
-  a command if the user navigates to a sub-path).
-- ``@jupyterlab/apputils:ICommandPalette``: An interface to the application command palette
-  in the left panel. Use this to add commands to the palette.
-- ``@jupyterlab/apputils:ISplashScreen``: An interface to the splash screen for the application.
-  Use this if you want to show the splash screen for your own purposes.
-- ``@jupyterlab/apputils:IThemeManager``: An interface to the theme manager for the application.
-  Most extensions will not need to use this, as they can register a
-  `theme extension <#themes>`__.
-- ``@jupyterlab/apputils:IWindowResolver``: An interface to a window resolver for the
-  application. JupyterLab workspaces are given a name, which are determined using
-  the window resolver. Require this if you want to use the name of the current workspace.
-- ``@jupyterlab/codeeditor:IEditorServices``: An interface to the text editor provider
-  for the application. Use this to create new text editors and host them in your
-  UI elements.
-- ``@jupyterlab/completer:ICompletionManager``: An interface to the completion manager
-  for the application. Use this to allow your extension to invoke a completer.
-- ``@jupyterlab/console:IConsoleTracker``: A widget tracker for code consoles.
-  Use this if you want to be able to iterate over and interact with code consoles
-  created by the application.
-- ``@jupyterlab/console:IContentFactory``: A factory object that creates new code
-  consoles. Use this if you want to create and host code consoles in your own UI elements.
-- ``@jupyterlab/docmanager:IDocumentManager``: An interface to the manager for all
-  documents used by the application. Use this if you want to open and close documents,
-  create and delete files, and otherwise interact with the file system.
-- ``@jupyterlab/documentsearch:ISearchProviderRegistry``: An interface for a registry of search
-  providers for the application. Extensions can register their UI elements with this registry
-  to provide find/replace support.
-- ``@jupyterlab/filebrowser:IFileBrowserFactory``: A factory object that creates file browsers.
-  Use this if you want to create your own file browser (e.g., for a custom storage backend),
-  or to interact with other file browsers that have been created by extensions.
-- ``@jupyterlab/fileeditor:IEditorTracker``: A widget tracker for file editors.
-  Use this if you want to be able to iterate over and interact with file editors
-  created by the application.
-- ``@jupyterlab/htmlviewer:IHTMLViewerTracker``: A widget tracker for rendered HTML documents.
-  Use this if you want to be able to iterate over and interact with HTML documents
-  viewed by the application.
-- ``@jupyterlab/imageviewer:IImageTracker``: A widget tracker for images.
-  Use this if you want to be able to iterate over and interact with images
-  viewed by the application.
-- ``@jupyterlab/inspector:IInspector``: An interface for adding variable inspectors to widgets.
-  Use this to add the ability to hook into the variable inspector to your extension.
-- ``@jupyterlab/launcher:ILauncher``: An interface to the application activity launcher.
-  Use this to add your extension activities to the launcher panel.
-- ``@jupyterlab/mainmenu:IMainMenu``: An interface to the main menu bar for the application.
-  Use this if you want to add your own menu items.
-- ``@jupyterlab/markdownviewer:IMarkdownViewerTracker``: A widget tracker for markdown
-  document viewers. Use this if you want to iterate over and interact with rendered markdown documents.
-- ``@jupyterlab/notebook:INotebookTools``: An interface to the ``Notebook Tools`` panel in the
-  application left area. Use this to add your own functionality to the panel.
-- ``@jupyterlab/notebook:IContentFactory``: A factory object that creates new notebooks.
-  Use this if you want to create and host notebooks in your own UI elements.
-- ``@jupyterlab/notebook:INotebookTracker``: A widget tracker for notebooks.
-  Use this if you want to be able to iterate over and interact with notebooks
-  created by the application.
-- ``@jupyterlab/rendermime:IRenderMimeRegistry``: An interface to the rendermime registry
-  for the application. Use this to create renderers for various mime-types in your extension.
-  Most extensions will not need to use this, as they can register a
-  `mime renderer extension <#mime-renderer-extensions>`__.
-- ``@jupyterlab/rendermime:ILatexTypesetter``: An interface to the LaTeX typesetter for the
-  application. Use this if you want to typeset math in your extension.
-- ``@jupyterlab/settingeditor:ISettingEditorTracker``: A widget tracker for setting editors.
-  Use this if you want to be able to iterate over and interact with setting editors
-  created by the application.
-- ``@jupyterlab/settingregistry:ISettingRegistry``: An interface to the JupyterLab settings system.
-  Use this if you want to store settings for your application.
-  See `extension settings <#extension-settings>`__ for more information.
-- ``@jupyterlab/statedb:IStateDB``: An interface to the JupyterLab state database.
-  Use this if you want to store data that will persist across page loads.
-  See `state database <#state-database>`__ for more information.
-- ``@jupyterlab/statusbar:IStatusBar``: An interface to the status bar on the application.
-  Use this if you want to add new status bar items.
-- ``@jupyterlab/terminal:ITerminalTracker``: A widget tracker for terminals.
-  Use this if you want to be able to iterate over and interact with terminals
-  created by the application.
-- ``@jupyterlab/tooltip:ITooltipManager``: An interface to the tooltip manager for the application.
-  Use this to allow your extension to invoke a tooltip.
-- ``@jupyterlab/vdom:IVDOMTracker``: A widget tracker for virtual DOM (VDOM) documents.
-  Use this to iterate over and interact with VDOM instances created by the application.
 
 Standard Extension Example
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
