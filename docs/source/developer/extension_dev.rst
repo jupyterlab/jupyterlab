@@ -62,10 +62,9 @@ One of the challenges in JupyterLab is deduplicating dependencies of extensions.
 
 Deduplication in JupyterLab happens in two ways. For source extensions, JupyterLab deduplicates dependencies when it is rebuilt to include the extension during the extension installation process. This is one of the main reasons JupyterLab needs to be rebuilt when installing source extensions.
 
-For prebuilt extensions, JupyterLab relies on the Webpack module federation system to share dependencies across different bundles (including the core JupyterLab application bundle). To ensure that a consumer gets the system copy of a token, any required tokens that are imported by a consumer extension should list the exporting extension as a singleton package in their ``sharedPackages`` config. Required token packages should be listed as ``bundled: false``, while optional token packages will need to be listed as singletons that are bundled (otherwise, if they are not present in the system, it will cause a js error when you try to import them) - but you are okay getting such an error if you try to import a required token.
+For prebuilt extensions, JupyterLab relies on the Webpack module federation system to share dependencies across different bundles (including the core JupyterLab application bundle).
 
-
-
+To ensure that a consumer gets the system copy of a token, any required tokens that are imported by a consumer extension should list the exporting extension as a singleton package in their ``jupyterlab.sharedPackages`` config. Required token packages should be listed as ``bundled: false`` - this will generate a JavaScript error if the package (and thus the token) is not present in the system at runtime. Optional token packages will need to be listed as singletons that are bundled (otherwise, if they are not present in the system, it will cause a js error when you try to import them).
 
 
 
