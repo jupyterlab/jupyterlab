@@ -3,84 +3,74 @@
 Extension Developer Guide
 =========================
 
-The JupyterLab application is comprised of a core application object and a set
-of plugins. JupyterLab plugins provide nearly every function in JupyterLab,
-including notebooks, document editors and viewers, code consoles, terminals,
-themes, the file browser, contextual help system, debugger, and settings
-editor. Plugins even provide more fundamental parts of the application, such
-as the menu system, status bar, and the underlying communication mechanism
-with the server.
+The JupyterLab application is comprised of a core application object and a set of plugins. JupyterLab plugins provide nearly every function in JupyterLab, including notebooks, document editors and viewers, code consoles, terminals, themes, the file browser, contextual help system, debugger, and settings editor. Plugins even provide more fundamental parts of the application, such as the menu system, status bar, and the underlying communication mechanism with the server.
 
 JupyterLab can be extended with several types of plugins:
 
--  **application plugins:** Application plugins are the fundamental building
-   block of JupyterLab functionality. Application plugins interact with
-   JupyterLab and other plugins by requiring objects provided by other
-   plugins, and optionally providing their own objects to the system.
--  **mime renderer plugins:** Mime renderer plugins are a simplified,
-   way to extend JupyterLab to render custom mime data in notebooks and
-   files. These plugins are automatically converted to equivalent application
-   plugins by JupyterLab when they are loaded.
--  **theme plugins:** Theme plugins are a simplified way to customize the
-   appearance of JupyterLab by adding your own fonts, CSS rules, and graphics
-   to JupyterLab. These plugins are automatically converted to equivalent
-   application plugins by JupyterLab when they are loaded.
+-  **application plugins:** Application plugins are the fundamental building block of JupyterLab functionality. Application plugins interact with JupyterLab and other plugins by requiring objects provided by other plugins, and optionally providing their own objects to the system.
+-  **mime renderer plugins:** Mime renderer plugins are a simplified, restricted way to extend JupyterLab to render custom mime data in notebooks and files. These plugins are automatically converted to equivalent application plugins by JupyterLab when they are loaded.
+-  **theme plugins:** Theme plugins provide a way to customize the appearance of JupyterLab by adding their fonts, CSS rules, and graphics to JupyterLab.
 
-Another common pattern for extending JupyterLab document widgets with
-application plugins is covered in :ref:`documents`.
+Another common pattern for extending JupyterLab document widgets with application plugins is covered in :ref:`documents`.
 
 JupyterLab Extensions
 ---------------------
 
-Plugins are distributed in JupyterLab extensions. A JupyterLab extension is a
-JavaScript package that can be installed into JupyterLab and exports one or
-more plugins. JuptyerLab extensions are most commonly distributed to users via
-NPM or in Python pip or conda packages. An extension can be installed into
-JupyterLab in one of two ways:
+Plugins are distributed in JupyterLab extensions—one extension can contain multiple plugins. JuptyerLab extensions are most commonly distributed to users via NPM or in Python pip or conda packages. An extension can be distributed in one of two ways:
 
-- A single JavaScript package. In this case, JupyterLab will need to
-  rebuild itself as a web application to incorporate the extension and its
-  dependencies. This rebuilding process compiles all extensions installed this
-  way and the core JupyterLab extensions into a single optimized application
-  bundle. This rebuilding step requires Node.js and may take a lot of time and
-  memory, so is inconvenient to end users (and some users have reported that
-  they could not install all the extensions they wanted to because they ran
-  out of memory rebuilding JupyterLab, particularly in resource-limited
-  containers).
-- (new in JupyterLab 3.0, recommended) A "federated" JavaScript bundle. In
-  this case, the extension developer uses tools provided by JupyterLab to
-  compile the extension into a JavaScript bundle that includes the
-  non-JupyterLab JavaScript dependencies, then distributes the resulting
-  bundle in, say, a Python pip or conda package. JupyterLab can load these
-  federated extensions directly from the bundle without having to rebuild
-  itself. This means the end user does not have to have Node.js and can
-  immediately use the extension without a costly rebuild, but may use a little
-  more network bandwidth to load the federated extensions. 
-  
-An extension may be distributed as both a single JavaScript package published
-on NPM and as a federated extension bundle published in a Python package,
-giving users the choice of how to install it. Also, a user may install some
-extensions as single JavaScript packages (rebuilding JupyterLab to incoporate
-those in the base application) and some other extensions as federated bundles
-which are loaded dynamically in the browser.
 
-Because federated extensions do not require a JupyterLab rebuild, they have a
-distinct advantage in multiuser systems where JuptyerLab is installed at the
-system level. On such systems, only the system administrator has permissions
-to rebuild JupyterLab and install single JavaScript package extensions. Since
-federated extensions can be installed at the system level, per-environment
-level, or per-user level, each user can have their own separate set of
-federated extensions that are loaded dynamically in their browser on top of
-the system-wide JuptyerLab.
+- A "source" extension is a JavaScript (npm) package that exports one or more plugins. Installing a source extension requires a user to rebuild JupyterLab. This rebuilding step requires Node.js and may take a lot of time and memory, so some users may not be able to install the extension.
+- A "prebuilt" extension (new in JupyterLab 3.0) is a bundle of JavaScript code that can be loaded into JupyterLab without rebuilding JupyterLab. In this case, the extension developer uses tools provided by JupyterLab to compile a source extension into a JavaScript bundle that includes the non-JupyterLab JavaScript dependencies, then distributes the resulting bundle in, for example, a Python pip or conda package. Users installing prebuilt extensions do not have to have Node.js installed and can immediately use the extension without a JupyterLab rebuild.
+
+An extension may be distributed as both a source JavaScript package published on NPM and as a prebuilt extension bundle published in a Python package, giving users the choice of how to install it.
+
+Because prebuilt extensions do not require a JupyterLab rebuild, they have a distinct advantage in multiuser systems where JuptyerLab is installed at the system level. On such systems, only the system administrator has permissions to rebuild JupyterLab and install source extensions. Since prebuilt extensions can be installed at the system level, per-environment level, or per-user level, each user can have their own separate set of prebuilt extensions that are loaded dynamically in their browser on top of the system-wide JuptyerLab.
 
 .. tip::
-   We recommend extensions be distributed as federated bundles in Python
-   packages for user convenience.
+   We recommend developing prebuilt extensions in Python packages for user convenience.
+
+
+Concepts
+--------
+
+One of the foundational features of the JupyterLab plugin system is that plugins can interact with other plugins by providing an object to the system and requiring objects provided by other plugins.
+
+In the following discussion, the plugin that is providing an object to the system is the *provider* plugin, and the plugin that is requiring and using the object is the *consumer* plugin.
+
+An object provided by a plugin is identified by a *token*, a JavaScript Token object instance. The provider plugin provides the token in its plugin metadata, and returns the object from its ``activate`` function. Consumer plugins import the token (for example, from the provider plugin's extension JavaScript package) and list the token in their plugin metadata. Since consumers will need to import a token used by a provider, the token should be exported in a published JavaScript package.
+
+.. note::
+   JupyterLab uses tokens to identify plugins (rather than strings, for example) to prevent conflicts between identifiers and to enable type-checking when using TypeScript. 
+
+.. note::
+   A pattern in JupyterLab's codebase is that a plugin's token is exported by a third package that both the provider and consumer extensions import. This enables a user to swap out the provider extension for a different extension that provides the same token with an alternative implementation.
+   
+   For example, the core JupyterLab ``filebrowser`` package exports a token representing the file browser, the ``filebrowser-extension`` package contains a plugin that implements the filebrowser and provides it to the system, and other plugins in JupyterLab import the token from the ``filebrowser`` package to interact with the file browser. This pattern enables users to seamlessly change the file browser in JupyterLab by writing their own extension that imports the same token from the ``filebrowser`` package and providing it to the system with their own alternative file browser.
+
+   Another pattern core JupyterLab packages use is to create and export all tokens in a package from a ``tokens`` JavaScript module which has minimal dependencies. This enables consumers to import a token directly from the package's ``tokens`` module (e.g., ``import { MyToken } from 'provider/tokens';``) and use tree-shaking to not have to bundle all of the provider's JavaScript.
+
+A extension that wants to provide an object to the system from a plugin for other plugins to use should create and export a *token*. An extension written in TypeScript can define an interface associated with the token, which enables consumers use type-checking for the object.
+
+A plugin returns an object from its ``activate`` function conforming to the token type interface. JupyterLab stores the object associated with the token. Another extension can import the token from the provider extension 
+
+One of the challenges a web application like JupyterLab has, that tries to consolidate many different packages
+
+One of the challenges in JupyterLab is deduplicating dependencies of extensions. We need to deduplicate dependencies for several reasons:
+
+1. Some dependencies contain package-level state such as internal variables, and consumers of the dependencies depend on that state being the same across the application. For example, the Lumino event and widget system on which JupyterLab relies for communication across the application requires all packages use the same copies of the Lumino packages.
+2. Plugin tokens are another example of package-level state that needs to be shared across JupyterLab. A consumer that imports a plugin needs to use the exact same object instance as the provider provides to the system, so the dependency providing the token needs to be deduplicated.
+
+Deduplication in JupyterLab happens in two ways. For source extensions, JupyterLab deduplicates dependencies when it is rebuilt to include the extension during the extension installation process. This is one of the main reasons JupyterLab needs to be rebuilt when installing source extensions.
+
+For prebuilt extensions, JupyterLab relies on the Webpack module federation system to share dependencies across different bundles (including the core JupyterLab application bundle). To ensure that a consumer gets the system copy of a token, any required tokens that are imported by a consumer extension should list the exporting extension as a singleton package in their ``sharedPackages`` config. Required token packages should be listed as ``bundled: false``, while optional token packages will need to be listed as singletons that are bundled (otherwise, if they are not present in the system, it will cause a js error when you try to import them) - but you are okay getting such an error if you try to import a required token.
+
+
+
+
 
 
 Writing an Extension
 --------------------
-
 
 We encourage extension authors to add the `jupyterlab-extension GitHub topic
 <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
