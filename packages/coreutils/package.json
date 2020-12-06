@@ -46,7 +46,6 @@
     "minimist": "~1.2.0",
     "moment": "^2.24.0",
     "path-browserify": "^1.0.0",
-    "system-font-families": "^0.4.1",
     "url-parse": "~1.4.7"
   },
   "devDependencies": {

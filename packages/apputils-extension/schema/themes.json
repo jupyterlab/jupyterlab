@@ -14,22 +14,23 @@
           "type": ["string", "null"],
           "description": "font-family"
         },
-        "content-font-family": {
-          "type": ["string", "null"],
-          "description": "font-family"
-        },
-        "ui-font-family": {
-          "type": ["string", "null"],
-          "description": "font-family"
-        },
-
         "code-font-size": {
           "type": ["string", "null"],
           "description": "font-size"
         },
+
+        "content-font-family": {
+          "type": ["string", "null"],
+          "description": "font-family"
+        },
         "content-font-size1": {
           "type": ["string", "null"],
           "description": "font-size"
+        },
+
+        "ui-font-family": {
+          "type": ["string", "null"],
+          "description": "font-family"
         },
         "ui-font-size1": {
           "type": ["string", "null"],
@@ -57,11 +58,12 @@
       "$ref": "#/definitions/cssOverrides",
       "default": {
         "code-font-family": null,
-        "content-font-family": null,
-        "ui-font-family": null,
-
         "code-font-size": null,
+
+        "content-font-family": null,
         "content-font-size1": null,
+
+        "ui-font-family": null,
         "ui-font-size1": null
       }
     }

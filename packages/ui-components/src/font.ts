@@ -8,9 +8,9 @@
 // font.ts has ended up in @jupyuterlab/ui-components, which is not
 // meant to run in a node env in any case
 
-import { VirtualElement, h } from '@phosphor/virtualdom';
+import { VirtualElement, h } from '@lumino/virtualdom';
 
-import { Menu } from '@phosphor/widgets';
+import { Menu } from '@lumino/widgets';
 
 const fontCandidates = [
   'Adobe Arabic',
@@ -376,7 +376,7 @@ export namespace FontChecker {
 export const getFonts = (): string[] => {
   const fontChecker = new FontChecker();
 
-  return fontCandidates.reduce((arr, font) => {
+  return fontCandidates.reduce((arr: string[], font: string) => {
     if (fontChecker.check(font)) {
       arr.push(font);
     }

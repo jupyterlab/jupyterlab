@@ -131,13 +131,15 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.incrFontSize, {
       // args['label'] should already be localized
-      label: args => (args['label'] ? `${args['label']}: ${incrLabel}` : incrLabel),
+      label: args =>
+        args['label'] ? `${args['label']}: ${incrLabel}` : incrLabel,
       execute: args => manager.incrFontSize(args['key'] as string)
     });
 
     commands.addCommand(CommandIDs.decrFontSize, {
       // args['label'] should already be localized
-      label: args => (args['label'] ? `${args['label']}: ${decrLabel}` : decrLabel),
+      label: args =>
+        args['label'] ? `${args['label']}: ${decrLabel}` : decrLabel,
       execute: args => manager.decrFontSize(args['key'] as string)
     });
 
