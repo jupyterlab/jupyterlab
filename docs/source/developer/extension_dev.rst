@@ -11,7 +11,42 @@ JupyterLab can be extended with several types of plugins:
 -  **mime renderer plugins:** Mime renderer plugins are simplified, restricted ways to extend JupyterLab to render custom mime data in notebooks and files. These plugins are automatically converted to equivalent application plugins by JupyterLab when they are loaded.
 -  **theme plugins:** Theme plugins provide a way to customize the appearance of JupyterLab by changing themeable values (i.e., CSS variable values) and providing additional fonts and graphics to JupyterLab.
 
-Another common pattern for extending JupyterLab document widgets with application plugins is covered in :ref:`documents`.
+
+Getting Started
+---------------
+
+The documentation in this section covers the basic and advanced concepts for writing extensions. If you would rather get hands-on practice or more in-depth reference documentation, we have a number of tutorials, examples, cookiecutters, and generated reference documentation.
+
+Tutorials
+^^^^^^^^^
+
+We provide a set of guides to get started writing extensions for JupyterLab:
+
+- :ref:`extension_tutorial`: An in-depth tutorial to learn how to make a simple JupyterLab extension.
+- The `JupyterLab Extension Examples Repository <https://github.com/jupyterlab/extension-examples>`_: A short tutorial series
+  to learn how to develop extensions for JupyterLab, by example.
+- :ref:`developer-extension-points`: A list of the most common JupyterLab extension points.
+- Another common pattern for extending JupyterLab document widgets with application plugins is covered in :ref:`documents`.
+
+Cookiecutters
+^^^^^^^^^^^^^
+
+We provide several cookiecutters to create JupyterLab extensions:
+
+- `extension-cookiecutter-ts <https://github.com/jupyterlab/extension-cookiecutter-ts>`_: Create a JupyterLab extension in TypeScript
+- `extension-cookiecutter-js <https://github.com/jupyterlab/extension-cookiecutter-js>`_: Create a JupyterLab extension in JavaScript
+- `mimerender-cookiecutter-ts <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`_: Create a MIME Renderer JupyterLab extension in TypeScript
+- `theme-cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_: Create a new theme for JupyterLab
+
+API Reference Documentation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If you are looking for generated reference API documentation on the JupyterLab and Lumino API:
+
+- `JupyterLab API Documentation <https://jupyterlab.github.io/jupyterlab/>`_
+- `Lumino API Documentation <https://jupyterlab.github.io/lumino/>`_
+
+
 
 JupyterLab Extensions
 ---------------------
@@ -30,7 +65,102 @@ Because prebuilt extensions do not require a JupyterLab rebuild, they have a dis
    We recommend developing prebuilt extensions in Python packages for user convenience.
 
 
-Plugins interacting with each other
+
+Writing an Extension
+--------------------
+
+We encourage extension authors to add the `jupyterlab-extension GitHub topic
+<https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
+to any GitHub extension repository.
+
+
+Resources
+^^^^^^^^^
+
+Tutorials, cookie cutters, and examples
+
+
+Plugin metadata
+^^^^^^^^^^^^^^^
+
+A typical plugin is specified by the following metadata. The ``id`` and ``activate`` fields are required and the other fields may be omitted. For more information about the ``requires``, ``optional``, or ``provides`` fields, see :ref:`services`.
+
+.. code::
+
+   const plugin: JupyterFrontEndPlugin<MyToken> = {
+     id: 'MyExtension:my_plugin',
+     autoStart: true,
+     requires: [ILabShell, ITranslator],
+     optional: [ICommandPalette],
+     provides: MyToken,
+     activate: activateFunction
+   };
+
+- ``id`` is a required unique string. The convention is to use the NPM extension package name and a string identifying the plugin inside the extension, separated by a colon.
+- ``autostart`` indicates whether your plugin should be activated at application startup. Typically this should be ``true``. If it is ``false`` or omitted, your plugin will be instantiated when any other plugin requests the token your plugin is providing.
+- ``requires`` and ``optional`` are lists of tokens. The corresponding objects in the system will be provided to the ``activate`` function when the plugin is instantiated. Tokens in the ``requires`` list will be required for your plugin to work, and your plugin activation will error if a ``required`` token is not registered with JupyterLab. Tokens in the ``optional`` list may or may not be registered, but will be provided to your plugin if they exist.
+- ``provides`` is the token associated with the service your plugin is providing to the system. A token can only be registered with the system once. If your plugin does not provide a service to the system, omit this field and do not return a value from your ``activate`` function.
+- ``activate`` is the function called when your plugin is activated. The arguments are, in order, the Application object, the services corresponding to the ``requires`` tokens, then the services corresponding to the ``optional`` tokens (or ``null`` if that particular ``optional`` token is not registered in the system). The return value of the ``activate`` function (or resolved return value if a promise is returned) will be stored in the system as the service associated with the ``provides`` token.
+
+
+
+package.json metadata
+^^^^^^^^^^^^^^^^^^^^^
+
+
+Custom webpack config
+"""""""""""""""""""""
+
+Disabling other extensions
+""""""""""""""""""""""""""
+
+Federation data
+"""""""""""""""
+
+Sharing configuration
+"""""""""""""""""""""
+
+Companion packages
+""""""""""""""""""
+
+
+Packaging extensions
+^^^^^^^^^^^^^^^^^^^^
+
+Prebuilt Extensions
+^^^^^^^^^^^^^^^^^^^
+
+
+``install.json``
+
+How prebuilt extensions work
+"""""""""""""""""""""""""""""
+
+Steps for building
+""""""""""""""""""
+
+Directory walkthrough
+"""""""""""""""""""""
+
+
+
+Migrating extensions
+^^^^^^^^^^^^^^^^^^^^
+
+
+
+Plugins
+-------
+
+Mime renderers
+^^^^^^^^^^^^^^
+
+Theme plugins
+^^^^^^^^^^^^^
+
+.. _services:
+
+Plugins Interacting with Each Other
 -----------------------------------
 
 One of the foundational features of the JupyterLab plugin system is that plugins can interact with other plugins by providing a service to the system and requiring services provided by other plugins. A service can be any JavaScript value, and typically is a JavaScript object with methods and data attributes. For example, the plugin that supplies the JupyterLab main menu provides a service object to the system with methods and attributes other plugins can use to interact with the main menu.
@@ -173,121 +303,131 @@ might want to use the services in your extensions.
 
 
 
-
-Writing an Extension
---------------------
-
-We encourage extension authors to add the `jupyterlab-extension GitHub topic
-<https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
-to any GitHub extension repository.
-
-
-Resources
-^^^^^^^^^
-
-Tutorials, cookie cutters, and examples
-
-
-Plugin metadata
-^^^^^^^^^^^^^^^
-
-A typical plugin is specified by the following metadata:
-
-.. code::
-
-   const plugin: JupyterFrontEndPlugin<MyToken> = {
-     id: 'MyExtension:my_plugin',
-     requires: [ILabShell, ITranslator],
-     optional: [ICommandPalette],
-     provides: MyToken,
-     autoStart: true
-     activate: activateFunction
-   };
-
-- ``id`` is a required unique string. The convention is to use the NPM extension package name and a string identifying the plugin inside the extension, separated by a colon.
-- ``requires`` and ``optional`` are optional lists of tokens. The corresponding objects in the system will be provided to the ``activate`` function when the plugin is instantiated. Tokens in the ``requires`` list will be required for your plugin to work, and your plugin will error if a ``required`` token is not registered with JupyterLab. Tokens in the ``optional`` list may or may not be registered, but will be provided to your plugin if they exist.
-- ``provides`` is the token associated with the object your plugin is providing to the system. A token can only be registered with the system once. If your plugin does not provide an object to the system, omit this field and do not return a value from your ``activate`` function.
-- ``autostart`` indicates whether your plugin should be activated at application startup. Typically this is ``true``. If it is ``false`` or omitted, your plugin will be instantiated when any other plugin requests the token your plugin is providing.
-- ``activate`` is the function called when your plugin is instantiated. The arguments are, in order, the Application object, the list of objects corresponding to the ``requires`` tokens, then the list of objects corresponding to the ``optional`` tokens (or ``null`` if that particular ``optional`` token does not exist in the system). The return value of the ``activate`` function (or resolved value if a promise is returned) is associated with the ``provides`` token in the system.
-
-
-
-package.json metadata
-^^^^^^^^^^^^^^^^^^^^^
-
-
-Custom webpack config
-"""""""""""""""""""""
-
-Disabling other extensions
-""""""""""""""""""""""""""
-
-Federation data
-"""""""""""""""
-
-Sharing configuration
-"""""""""""""""""""""
-
-Companion packages
-""""""""""""""""""
-
-
-Packaging extensions
-^^^^^^^^^^^^^^^^^^^^
-
-Prebuilt Extensions
-^^^^^^^^^^^^^^^^^^^
-
-
-``install.json``
-
-How prebuilt extensions work
-"""""""""""""""""""""""""""""
-
-Steps for building
-""""""""""""""""""
-
-Directory walkthrough
-"""""""""""""""""""""
-
-
-
-Migrating extensions
-^^^^^^^^^^^^^^^^^^^^
-
-
-
-Plugins
--------
-
-Mime renderers
-^^^^^^^^^^^^^^
-
-Theme plugins
-^^^^^^^^^^^^^
-
-
-Advanced plugins
+Advanced Plugins
 ----------------
 
-Interacting with other plugins
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Plugin Settings
+^^^^^^^^^^^^^^^
 
-Common extension points
-"""""""""""""""""""""""
+In addition to the file system that is accessed by using the
+``@jupyterlab/services`` package, JupyterLab exposes a plugin settings
+system that can be used to provide default setting values and user overrides.
+
+An extension can specify user settings using a JSON Schema. The schema
+definition should be in a file that resides in the ``schemaDir``
+directory that is specified in the ``package.json`` file of the
+extension. The actual file name should use is the part that follows the
+package name of extension. So for example, the JupyterLab
+``apputils-extension`` package hosts several plugins:
+
+-  ``'@jupyterlab/apputils-extension:menu'``
+-  ``'@jupyterlab/apputils-extension:palette'``
+-  ``'@jupyterlab/apputils-extension:settings'``
+-  ``'@jupyterlab/apputils-extension:themes'``
+
+And in the ``package.json`` for ``@jupyterlab/apputils-extension``, the
+``schemaDir`` field is a directory called ``schema``. Since the
+``themes`` plugin requires a JSON schema, its schema file location is:
+``schema/themes.json``. The plugin's name is used to automatically
+associate it with its settings file, so this naming convention is
+important. Ensure that the schema files are included in the ``"files"``
+metadata in ``package.json``.
+
+See the
+`fileeditor-extension <https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension>`__
+for another example of an extension that uses settings.
+
+.. _setting_overrides:
+
+System Overrides
+""""""""""""""""
+
+You can override default values of the extension settings by
+defining new default values in an ``overrides.json`` file in the
+application settings directory. For example, if you would like
+to set the dark theme by default instead of the light one, an
+``overrides.json`` file containing the following lines needs to be
+added in the application settings directory (by default this is the
+``share/jupyter/lab/settings`` folder).
+
+.. code:: json
+
+  {
+    "@jupyterlab/apputils-extension:themes": {
+      "theme": "JupyterLab Dark"
+    }
+  }
 
 
-Settings
-^^^^^^^^
+Context Menus
+^^^^^^^^^^^^^
+
+JupyterLab has an application-wide context menu available as
+``app.contextMenu``. See the Lumino
+`docs <https://jupyterlab.github.io/lumino/widgets/interfaces/contextmenu.iitemoptions.html>`__
+for the item creation options. If you wish to preempt the
+application context menu, you can use a 'contextmenu' event listener and
+call ``event.stopPropagation`` to prevent the application context menu
+handler from being called (it is listening in the bubble phase on the
+``document``). At this point you could show your own Lumino
+`contextMenu <https://jupyterlab.github.io/lumino/widgets/classes/contextmenu.html>`__,
+or simply stop propagation and let the system context menu be shown.
+This would look something like the following in a ``Widget`` subclass:
+
+.. code:: javascript
+
+    // In `onAfterAttach()`
+    this.node.addEventListener('contextmenu', this);
+
+    // In `handleEvent()`
+    case 'contextmenu':
+      event.stopPropagation();
+
 
 Menus
 ^^^^^
 
-Context menus
-^^^^^^^^^^^^^
-
 Using React
 ^^^^^^^^^^^
+
+
+State Database
+^^^^^^^^^^^^^^
+
+The state database can be accessed by importing ``IStateDB`` from
+``@jupyterlab/statedb`` and adding it to the list of ``requires`` for
+a plugin:
+
+.. code:: typescript
+
+    const id = 'foo-extension:IFoo';
+
+    const IFoo = new Token<IFoo>(id);
+
+    interface IFoo {}
+
+    class Foo implements IFoo {}
+
+    const plugin: JupyterFrontEndPlugin<IFoo> = {
+      id,
+      autoStart: true,
+      requires: [IStateDB],
+      provides: IFoo,
+      activate: (app: JupyterFrontEnd, state: IStateDB): IFoo => {
+        const foo = new Foo();
+        const key = `${id}:some-attribute`;
+
+        // Load the saved plugin state and apply it once the app
+        // has finished restoring its former layout.
+        Promise.all([state.fetch(key), app.restored])
+          .then(([saved]) => { /* Update `foo` with `saved`. */ });
+
+        // Fulfill the plugin contract by returning an `IFoo`.
+        return foo;
+      }
+    };
+
+.. _ext-author-companion-packages:
 
 
 Development workflow
@@ -398,34 +538,6 @@ when building the federated extension with ``jlpm run build``.
 
 .. note::
    These docs are under construction as we iterate and update tutorials and cookiecutters.
-
-Tutorials
----------
-
-We provide a set of guides to get started writing third-party extensions for JupyterLab:
-
-- :ref:`extension_tutorial`: An in-depth tutorial to learn how to make a simple JupyterLab extension.
-- The `JupyterLab Extension Examples Repository <https://github.com/jupyterlab/extension-examples>`_: A short tutorial series
-  to learn how to develop extensions for JupyterLab, by example.
-- :ref:`developer-extension-points`: A list of the most common JupyterLab extension points.
-
-Cookiecutters
--------------
-
-We provide several cookiecutters to create JupyterLab plugin extensions:
-
-- `extension-cookiecutter-ts <https://github.com/jupyterlab/extension-cookiecutter-ts>`_: Create a JupyterLab extension in TypeScript
-- `extension-cookiecutter-js <https://github.com/jupyterlab/extension-cookiecutter-js>`_: Create a JupyterLab extension in JavaScript
-- `mimerender-cookiecutter-ts <https://github.com/jupyterlab/mimerender-cookiecutter-ts>`_: Create a MIME Renderer JupyterLab extension in TypeScript
-- `theme-cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`_: Create a new theme for JupyterLab
-
-API Documentation
------------------
-
-If you are looking for lower level details on the JupyterLab and Lumino API:
-
-- `JupyterLab API Documentation <https://jupyterlab.github.io/jupyterlab/>`_
-- `Lumino API Documentation <https://jupyterlab.github.io/lumino/>`_
 
 Plugins
 -------
@@ -796,126 +908,6 @@ simplified interface to JupyterLab's extension system. Modifying the
 notebook plugin requires the full, general-purpose interface to the
 extension system.
 
-Storing Extension Data
-^^^^^^^^^^^^^^^^^^^^^^
-
-In addition to the file system that is accessed by using the
-``@jupyterlab/services`` package, JupyterLab exposes a plugin settings
-system that can be used to provide default setting values and user overrides.
-
-Extension Settings
-""""""""""""""""""
-
-An extension can specify user settings using a JSON Schema. The schema
-definition should be in a file that resides in the ``schemaDir``
-directory that is specified in the ``package.json`` file of the
-extension. The actual file name should use is the part that follows the
-package name of extension. So for example, the JupyterLab
-``apputils-extension`` package hosts several plugins:
-
--  ``'@jupyterlab/apputils-extension:menu'``
--  ``'@jupyterlab/apputils-extension:palette'``
--  ``'@jupyterlab/apputils-extension:settings'``
--  ``'@jupyterlab/apputils-extension:themes'``
-
-And in the ``package.json`` for ``@jupyterlab/apputils-extension``, the
-``schemaDir`` field is a directory called ``schema``. Since the
-``themes`` plugin requires a JSON schema, its schema file location is:
-``schema/themes.json``. The plugin's name is used to automatically
-associate it with its settings file, so this naming convention is
-important. Ensure that the schema files are included in the ``"files"``
-metadata in ``package.json``.
-
-See the
-`fileeditor-extension <https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension>`__
-for another example of an extension that uses settings.
-
-Note: You can override default values of the extension settings by
-defining new default values in an ``overrides.json`` file in the
-application settings directory. So for example, if you would like
-to set the dark theme by default instead of the light one, an
-``overrides.json`` file containing the following lines needs to be
-added in the application settings directory (by default this is the
-``share/jupyter/lab/settings`` folder).
-
-.. code:: json
-
-  {
-    "@jupyterlab/apputils-extension:themes": {
-      "theme": "JupyterLab Dark"
-    }
-  }
-
-State Database
-""""""""""""""
-
-The state database can be accessed by importing ``IStateDB`` from
-``@jupyterlab/statedb`` and adding it to the list of ``requires`` for
-a plugin:
-
-.. code:: typescript
-
-    const id = 'foo-extension:IFoo';
-
-    const IFoo = new Token<IFoo>(id);
-
-    interface IFoo {}
-
-    class Foo implements IFoo {}
-
-    const plugin: JupyterFrontEndPlugin<IFoo> = {
-      id,
-      requires: [IStateDB],
-      provides: IFoo,
-      activate: (app: JupyterFrontEnd, state: IStateDB): IFoo => {
-        const foo = new Foo();
-        const key = `${id}:some-attribute`;
-
-        // Load the saved plugin state and apply it once the app
-        // has finished restoring its former layout.
-        Promise.all([state.fetch(key), app.restored])
-          .then(([saved]) => { /* Update `foo` with `saved`. */ });
-
-        // Fulfill the plugin contract by returning an `IFoo`.
-        return foo;
-      },
-      autoStart: true
-    };
-
-Context Menus
-^^^^^^^^^^^^^
-
-JupyterLab has an application-wide context menu available as
-``app.contextMenu``. See the Lumino
-`docs <https://jupyterlab.github.io/lumino/widgets/interfaces/contextmenu.iitemoptions.html>`__
-for the item creation options. If you wish to preempt the
-application context menu, you can use a 'contextmenu' event listener and
-call ``event.stopPropagation`` to prevent the application context menu
-handler from being called (it is listening in the bubble phase on the
-``document``). At this point you could show your own Lumino
-`contextMenu <https://jupyterlab.github.io/lumino/widgets/classes/contextmenu.html>`__,
-or simply stop propagation and let the system context menu be shown.
-This would look something like the following in a ``Widget`` subclass:
-
-.. code:: javascript
-
-    // In `onAfterAttach()`
-    this.node.addEventListener('contextmenu', this);
-
-    // In `handleEvent()`
-    case 'contextmenu':
-      event.stopPropagation();
-
-.. |dependencies| image:: dependency-graph.svg
-
-
-Using React
-^^^^^^^^^^^
-We also provide support for using :ref:`react` in your JupyterLab
-extensions, as well as in the core codebase.
-
-
-.. _ext-author-companion-packages:
 
 
 Companion Packages
@@ -1032,3 +1024,6 @@ release process, but this could also be done manually.
 Technically, a package that contains only a JupyterLab extension could be created
 and published on ``conda-forge``, but it would not be discoverable by the JupyterLab
 extension manager.
+
+
+.. |dependencies| image:: dependency-graph.svg
