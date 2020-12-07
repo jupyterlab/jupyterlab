@@ -32,7 +32,7 @@ export class Variables extends Panel {
 
     const { model, service, commands, themeManager } = options;
     const translator = options.translator || nullTranslator;
-    // const trans = translator.load('jupyterlab');
+    const trans = translator.load('jupyterlab');
     this._header = new VariablesHeader(translator);
     this._tree = new VariablesBodyTree({ model, service });
     this._table = new VariablesBodyGrid({ model, commands, themeManager });
@@ -56,7 +56,7 @@ export class Variables extends Panel {
     button.valueChanged.connect((_, args) => {
       onClick();
     });
-    // button.tooltip = trans.__('Table / Tree View');
+    button.caption = trans.__('Table / Tree View');
 
     this._header.toolbar.addItem('view-VariableSwitch', button);
 
