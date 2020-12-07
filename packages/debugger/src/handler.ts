@@ -70,8 +70,12 @@ function updateToggleButton(
   onClick: () => void,
   translator?: ITranslator
 ): Switch {
+  translator = translator || nullTranslator;
+  const trans = translator.load('jupyterlab');
+
   const button = new Switch();
   button.id = 'jp-debugger';
+  button.caption = trans.__('Enable / Disable Debugger');
   button.handleEvent = (event: Event) => {
     event.preventDefault();
     switch (event.type) {
@@ -82,7 +86,6 @@ function updateToggleButton(
         break;
     }
   };
-  // button.tooltip = trans.__('Enable / Disable Debugger');
 
   widget.toolbar.addItem('debugger-button', button);
   return button;
