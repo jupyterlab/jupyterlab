@@ -36,7 +36,7 @@ import { FileHandler } from './handlers/file';
 import { NotebookHandler } from './handlers/notebook';
 
 /**
- * Add a button to the widget toolbar to enable and disable debugging.
+ * Add a bug icon to the widget toolbar to enable and disable debugging.
  *
  * @param widget The widget to add the debug toolbar button to.
  * @param onClick The callback when the toolbar button is clicked.
@@ -60,7 +60,7 @@ function updateIconButton(
 }
 
 /**
- * Add a button to the widget toolbar to enable and disable debugging.
+ * Add a toggle button to the widget toolbar to enable and disable debugging.
  *
  * @param widget The widget to add the debug toolbar button to.
  * @param onClick The callback when the toolbar button is clicked.
