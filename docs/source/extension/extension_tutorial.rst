@@ -22,7 +22,7 @@ By working through this tutorial, you'll learn:
 -  How to version control your work with git
 -  How to release your extension for others to enjoy
 
-.. figure:: extension_tutorial_complete.png
+.. figure:: images/extension_tutorial_complete.png
    :align: center
    :class: jp-screenshot
    :alt: The completed extension, showing the Astronomy Picture of the Day for 24 Jul 2015.
@@ -369,7 +369,7 @@ click one of the launcher tabs so that the *Astronomy Picture* panel is still
 open but no longer active. Now run the *Random Astronomy Picture* command one
 more time. The single *Astronomy Picture* tab should come to the foreground.
 
-.. figure:: extension_tutorial_empty.png
+.. figure:: images/extension_tutorial_empty.png
    :align: center
    :class: jp-screenshot
    :alt: The in-progress extension, showing a blank panel.
@@ -452,7 +452,7 @@ tab, and run the *Random Astronomy Picture* command again. You should now see a
 picture in the panel when it opens (if that random date had a picture and not a
 video).
 
-.. figure:: extension_tutorial_single.png
+.. figure:: images/extension_tutorial_single.png
    :align: center
    :class: jp-screenshot
 
@@ -865,7 +865,7 @@ see an Astronomy Picture panel reappear immediately without running the command.
 the panel and refresh the browser tab. You should then not see an Astronomy Picture tab
 after the refresh.
 
-.. figure:: extension_tutorial_complete.png
+.. figure:: images/extension_tutorial_complete.png
    :align: center
    :class: jp-screenshot
    :alt: The completed extension, showing the Astronomy Picture of the Day for 24 Jul 2015.

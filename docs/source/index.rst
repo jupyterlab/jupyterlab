@@ -50,23 +50,27 @@ JupyterLab is the next-generation web-based user interface for Project Jupyter. 
 
 .. toctree::
    :maxdepth: 1
-   :caption: Developer Guide
+   :caption: Extension Developer Guide
+
+   extension/extension_dev
+   extension/extension_points
+   extension/ui_components
+   extension/documents
+   extension/notebook
+   extension/virtualdom
+   extension/ui_helpers
+   extension/extension_tutorial
+   extension/extension_migration
+   extension/extension_migration_2_3
+
+.. toctree::
+   :maxdepth: 1
+   :caption: JupyterLab Developer Guide
 
    developer/repo
-   developer/extension_dev
-   developer/extension_points
    developer/contributing
    developer/components
-   developer/ui_components
-   developer/documents
-   developer/notebook
    developer/patterns
    developer/css
-   developer/virtualdom
-   developer/ui_helpers
-   developer/terminology
-   developer/extension_tutorial
-   developer/extension_migration
-   developer/extension_migration_2_3
    developer/api
 

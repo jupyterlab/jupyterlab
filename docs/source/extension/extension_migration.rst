@@ -23,14 +23,14 @@ way to do this is to look in the
 and to simply adopt the versions of the relevant libraries that are used
 there.
 
-.. figure:: extension_migration_dependencies_debugger.png
+.. figure:: images/extension_migration_dependencies_debugger.png
    :align: center
    :class: jp-screenshot
    :alt: Updating the debugger extension's libraries in package.json
 
    Updating the debugger extension's libraries in ``package.json``
 
-.. figure:: extension_migration_dependencies_shortcuts.png
+.. figure:: images/extension_migration_dependencies_shortcuts.png
    :align: center
    :class: jp-screenshot
    :alt: Updating the shortcuts UI extension's libraries in package.json
@@ -153,7 +153,7 @@ Any widget that matches the ``interface IDocumentWidget`` has a
 For example, consider how the ``@jupyterlab/debugger`` extension's
 ``DebuggerService`` updated its ``isAvailable()`` method.
 
-.. figure:: extension_migration_session.png
+.. figure:: images/extension_migration_session.png
    :align: center
    :class: jp-screenshot
    :alt: Updating the isAvailable method of the debugger service
