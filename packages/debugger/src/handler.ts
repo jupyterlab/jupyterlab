@@ -67,6 +67,7 @@ function updateIconButton(
  */
 function updateToggleButton(
   widget: DebuggerHandler.SessionWidget[DebuggerHandler.SessionType],
+  sessionStarted: boolean,
   onClick: () => void,
   translator?: ITranslator
 ): Switch {
@@ -75,6 +76,7 @@ function updateToggleButton(
 
   const button = new Switch();
   button.id = 'jp-debugger';
+  button.value = sessionStarted;
   button.caption = trans.__('Enable / Disable Debugger');
   button.handleEvent = (event: Event) => {
     event.preventDefault();
@@ -268,7 +270,11 @@ export class DebuggerHandler {
         this.iconButton = updateIconButton(widget, toggleDebugging);
       }
       if (!this.toggleButton) {
-        this.toggleButton = updateToggleButton(widget, toggleDebugging);
+        this.toggleButton = updateToggleButton(
+          widget,
+          this._service.isStarted,
+          toggleDebugging
+        );
       }
     };
 
@@ -331,8 +337,8 @@ export class DebuggerHandler {
         : null;
       this._service.session.connection = connection;
     }
-    addToolbarButton();
     await this._service.restoreState(false);
+    addToolbarButton();
 
     // check the state of the debug session
     if (!this._service.isStarted) {
