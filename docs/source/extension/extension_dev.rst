@@ -802,7 +802,8 @@ It is also possible to create a new theme using the
 
 
 Shipping Packages
-^^^^^^^^^^^^^^^^^
+-----------------
+
 Most extensions are single JavaScript packages, and can be shipped on npmjs.org.
 This makes them discoverable by the JupyterLab extension manager, provided they
 have the ``jupyterlab-extension`` keyword  in their ``package.json``.  If the package also
