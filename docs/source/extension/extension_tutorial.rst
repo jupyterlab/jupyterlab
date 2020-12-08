@@ -1,7 +1,7 @@
 .. _extension_tutorial:
 
-Let's Make an Astronomy Picture of the Day JupyterLab Extension
-===============================================================
+Extension Tutorial
+==================
 
 JupyterLab extensions add features to the user experience. This page
 describes how to create one type of extension, an *application plugin*,
@@ -147,7 +147,7 @@ initialize it as a git repository and commit the current code.
 
 Note: This step is not technically necessary, but it is good practice to
 track changes in version control system in case you need to rollback to
-an earlier version or want to collaborate with others. For example, you
+an earlier version or want to collaborate with others. You
 can compare your work throughout this tutorial with the commits in a
 reference version of ``jupyterlab_apod`` on GitHub at
 https://github.com/jupyterlab/jupyterlab_apod.
@@ -951,16 +951,16 @@ You may want to also publish your extension as a JavaScript package to the
    extension into JupyterLab explicitly (similar to how was done in JupyterLab
    versions 1 and 2), which leads to a more optimal JupyterLab package.
 
-2. As we saw above, JupyterLab enables extensions to use objects provided by
-   other extensions. If you want to provide an object to the JupyterLab system
-   for other extensions to use, you will need to publish your JavaScript
-   package to npm so other extensions can depend on it and import and require
-   your token. For example, our extension above uses the ``ICommandPalette``
-   and ``ILayoutRestorer`` objects provided by some core extensions in
-   JupyterLab. We were able to tell JupyterLab we required these objects by
+2. As we saw above, JupyterLab enables extensions to use services provided by
+   other extensions. For example, our extension above uses the ``ICommandPalette``
+   and ``ILayoutRestorer`` services provided by core extensions in
+   JupyterLab. We were able to tell JupyterLab we required these services by
    importing their tokens from the ``@jupyterlab/apputils`` and
    ``@jupyterlab/application`` npm packages and listing them in our plugin
-   definition.
+   definition. If you want to provide a service to the JupyterLab system
+   for other extensions to use, you will need to publish your JavaScript
+   package to npm so other extensions can depend on it and import and require
+   your token.
 
 Learn more
 ----------
