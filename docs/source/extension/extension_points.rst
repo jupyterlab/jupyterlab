@@ -4,10 +4,10 @@ Common Extension Points
 =======================
 
 Most of the component parts of JupyterLab are designed to be extensible,
-and they provide public APIs that can be requested in extensions via tokens.
-A list of tokens that extension authors can request is documented in :ref:`tokens`.
+and they provide services that can be requested in extensions via tokens.
+A list of common core tokens that extension authors can request is given in :ref:`tokens`.
 
-This is intended to be a guide for some of JupyterLab's most commonly-used extension points.
+Following the list of core tokens is a guide for using some of JupyterLab's most commonly-used extension points.
 However, it is not an exhaustive account of how to extend the application components,
 and more detailed descriptions of their public APIs may be found in the
 `JupyterLab <http://jupyterlab.github.io/jupyterlab/index.html>`__ and
@@ -16,6 +16,114 @@ and more detailed descriptions of their public APIs may be found in the
 .. contents:: Table of contents
     :local:
     :depth: 1
+
+.. _tokens:
+
+Core Tokens
+-----------
+
+The core packages of JupyterLab provide many services for plugins. The tokens
+for these services are listed here, along with short descriptions of when you
+might want to use the services in your extensions.
+
+- ``@jupyterlab/application:IConnectionLost``: A service for invoking the dialog shown
+  when JupyterLab has lost its connection to the server. Use this if, for some reason,
+  you want to bring up the "connection lost" dialog under new circumstances.
+- ``@jupyterlab/application:IInfo``: A service providing metadata about the current
+  application, including disabled extensions and whether dev mode is enabled.
+- ``@jupyterlab/application:IPaths``: A service providing information about various
+  URLs and server paths for the current application. Use this service if you want to
+  assemble URLs to use the JupyterLab REST API.
+- ``@jupyterlab/application:ILabStatus``: A service for interacting with the application busy/dirty
+  status. Use this if you want to set the application "busy" favicon, or to set
+  the application "dirty" status, which asks the user for confirmation before leaving the application page.
+- ``@jupyterlab/application:ILabShell``: A service for interacting with the JupyterLab shell.
+  The top-level ``application`` object also has a reference to the shell, but it has a restricted
+  interface in order to be agnostic to different shell implementations on the application.
+  Use this to get more detailed information about currently active widgets and layout state.
+- ``@jupyterlab/application:ILayoutRestorer``: A service providing application layout
+  restoration functionality. Use this to have your activities restored across
+  page loads.
+- ``@jupyterlab/application:IMimeDocumentTracker``: A widget tracker for documents
+  rendered using a mime renderer extension. Use this if you want to list and interact
+  with documents rendered by such extensions.
+- ``@jupyterlab/application:IRouter``: The URL router used by the application.
+  Use this to add custom URL-routing for your extension (e.g., to invoke
+  a command if the user navigates to a sub-path).
+- ``@jupyterlab/apputils:ICommandPalette``: A service for the application command palette
+  in the left panel. Use this to add commands to the palette.
+- ``@jupyterlab/apputils:ISplashScreen``: A service for the splash screen for the application.
+  Use this if you want to show the splash screen for your own purposes.
+- ``@jupyterlab/apputils:IThemeManager``: A service for the theme manager for the application. This is used primarily in theme extensions to register new themes.
+- ``@jupyterlab/apputils:IWindowResolver``: A service for a window resolver for the
+  application. JupyterLab workspaces are given a name, which are determined using
+  the window resolver. Require this if you want to use the name of the current workspace.
+- ``@jupyterlab/codeeditor:IEditorServices``: A service for the text editor provider
+  for the application. Use this to create new text editors and host them in your
+  UI elements.
+- ``@jupyterlab/completer:ICompletionManager``: A service for the completion manager
+  for the application. Use this to allow your extension to invoke a completer.
+- ``@jupyterlab/console:IConsoleTracker``: A widget tracker for code consoles.
+  Use this if you want to be able to iterate over and interact with code consoles
+  created by the application.
+- ``@jupyterlab/console:IContentFactory``: A factory object that creates new code
+  consoles. Use this if you want to create and host code consoles in your own UI elements.
+- ``@jupyterlab/docmanager:IDocumentManager``: A service for the manager for all
+  documents used by the application. Use this if you want to open and close documents,
+  create and delete files, and otherwise interact with the file system.
+- ``@jupyterlab/documentsearch:ISearchProviderRegistry``: A service for a registry of search
+  providers for the application. Plugins can register their UI elements with this registry
+  to provide find/replace support.
+- ``@jupyterlab/filebrowser:IFileBrowserFactory``: A factory object that creates file browsers.
+  Use this if you want to create your own file browser (e.g., for a custom storage backend),
+  or to interact with other file browsers that have been created by extensions.
+- ``@jupyterlab/fileeditor:IEditorTracker``: A widget tracker for file editors.
+  Use this if you want to be able to iterate over and interact with file editors
+  created by the application.
+- ``@jupyterlab/htmlviewer:IHTMLViewerTracker``: A widget tracker for rendered HTML documents.
+  Use this if you want to be able to iterate over and interact with HTML documents
+  viewed by the application.
+- ``@jupyterlab/imageviewer:IImageTracker``: A widget tracker for images.
+  Use this if you want to be able to iterate over and interact with images
+  viewed by the application.
+- ``@jupyterlab/inspector:IInspector``: A service for adding contextual help to widgets (visible using "Show Contextual Help" from the Help menu).
+  Use this to hook into the contextual help system in your extension.
+- ``@jupyterlab/launcher:ILauncher``: A service for the application activity launcher.
+  Use this to add your extension activities to the launcher panel.
+- ``@jupyterlab/mainmenu:IMainMenu``: A service for the main menu bar for the application.
+  Use this if you want to add your own menu items or provide implementations for standardized menu items for specific activities.
+- ``@jupyterlab/markdownviewer:IMarkdownViewerTracker``: A widget tracker for markdown
+  document viewers. Use this if you want to iterate over and interact with rendered markdown documents.
+- ``@jupyterlab/notebook:INotebookTools``: A service for the ``Notebook Tools`` panel in the
+  right sidebar. Use this to add your own functionality to the panel.
+- ``@jupyterlab/notebook:IContentFactory``: A factory object that creates new notebooks.
+  Use this if you want to create and host notebooks in your own UI elements.
+- ``@jupyterlab/notebook:INotebookTracker``: A widget tracker for notebooks.
+  Use this if you want to be able to iterate over and interact with notebooks
+  created by the application.
+- ``@jupyterlab/rendermime:IRenderMimeRegistry``: A service for the rendermime registry
+  for the application. Use this to create renderers for various mime-types in your extension. Many times it will be easier to create a `mime renderer extension <#mime-renderer-extensions>`__ rather than using this service directly.
+- ``@jupyterlab/rendermime:ILatexTypesetter``: A service for the LaTeX typesetter for the
+  application. Use this if you want to typeset math in your extension.
+- ``@jupyterlab/settingeditor:ISettingEditorTracker``: A widget tracker for setting editors.
+  Use this if you want to be able to iterate over and interact with setting editors
+  created by the application.
+- ``@jupyterlab/settingregistry:ISettingRegistry``: A service for the JupyterLab settings system.
+  Use this if you want to store settings for your application.
+  See `extension settings <#extension-settings>`__ for more information.
+- ``@jupyterlab/statedb:IStateDB``: A service for the JupyterLab state database.
+  Use this if you want to store data that will persist across page loads.
+  See `state database <#state-database>`__ for more information.
+- ``@jupyterlab/statusbar:IStatusBar``: A service for the status bar on the application.
+  Use this if you want to add new status bar items.
+- ``@jupyterlab/terminal:ITerminalTracker``: A widget tracker for terminals.
+  Use this if you want to be able to iterate over and interact with terminals
+  created by the application.
+- ``@jupyterlab/tooltip:ITooltipManager``: A service for the tooltip manager for the application.
+  Use this to allow your extension to invoke a tooltip.
+- ``@jupyterlab/vdom:IVDOMTracker``: A widget tracker for virtual DOM (VDOM) documents.
+  Use this to iterate over and interact with VDOM document instances created by the application.
+
 
 
 Commands
@@ -293,6 +401,24 @@ You can do this by requesting the ``ILauncher`` token in your extension:
 
 In addition to providing a command ID, you also provide a category in which to put your item,
 (e.g. 'Notebook', or 'Other'), as well as a rank to determine its position among other items.
+
+
+Jupyter Front-End Shell
+-----------------------
+
+The Jupyter front-end
+`shell <https://jupyterlab.github.io/jupyterlab/interfaces/_application_src_index_.jupyterfrontend.ishell.html>`__
+is used to add and interact with content in the application. The ``IShell``
+interface provides an ``add()`` method for adding widgets to the application.
+In JupyterLab, the application shell consists of:
+
+-  A ``top`` area for things like top-level toolbars and information.
+-  A ``menu`` area for top-level menus, which is collapsed into the ``top`` area in multiple-document mode and put below it in single-document mode.
+-  ``left`` and ``right`` side bar areas for collapsible content.
+-  A ``main`` work area for user activity.
+-  A ``bottom`` area for things like status bars.
+-  A ``header`` area for custom elements.
+
 
 Left/Right Areas
 ----------------
