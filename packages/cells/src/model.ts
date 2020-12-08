@@ -467,10 +467,28 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     const cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
     const executionCount = this.modelDB.createValue('executionCount');
+    const maximumTopBottomOutput = options.maximumTopBottomOutput || 10;
+    console.log('maximumTopBottomOutput', maximumTopBottomOutput);
     if (!executionCount.get()) {
       if (cell && cell.cell_type === 'code') {
         executionCount.set(cell.execution_count || null);
         outputs = cell.outputs;
+        let start = outputs.slice(0, maximumTopBottomOutput);
+        let middle: any = [
+          {
+            output_type: 'display_data',
+            data: {
+              'application/json': {
+                trimmedOutput: `Output has been trimmed!\nTotal output: ${outputs.length}, displaying the first ${maximumTopBottomOutput} top and last bottom outputs`
+              }
+            }
+          }
+        ];
+        let end = outputs.slice(
+          Math.max(outputs.length - maximumTopBottomOutput, 0)
+        );
+        outputs = start.concat(middle);
+        outputs = outputs.concat(end);
       } else {
         executionCount.set(null);
       }
@@ -611,6 +629,11 @@ export namespace CodeCellModel {
      * The factory for output area model creation.
      */
     contentFactory?: IContentFactory;
+
+    /**
+     * The maximum number of output items to display on top and bottom of cell output.
+     */
+    maximumTopBottomOutput?: number;
   }
 
   /**
