@@ -105,7 +105,8 @@ This can be useful to make a single command flexible enough to work in multiple 
 Context Menu
 ------------
 
-The application context menu is shown when the user right-clicks,
+JupyterLab has an application-wide context menu available as
+``app.contextMenu``. The application context menu is shown when the user right-clicks,
 and is populated with menu items that are most relevant to the thing that the user clicked.
 
 The context menu system determines which items to show based on
@@ -113,7 +114,10 @@ The context menu system determines which items to show based on
 It propagates up the DOM tree and tests whether a given HTML element
 matches the CSS selector provided by a given command.
 
-Here is an example showing how to add a command to the application context menu:
+Here is an example showing how to add a command to the application context
+menu.  See the Lumino `docs
+<https://jupyterlab.github.io/lumino/widgets/interfaces/contextmenu.iitemoptions.html>`__
+for the item creation options.
 
 .. code:: typescript
 
@@ -143,6 +147,24 @@ For example, if you are building a custom React element, it would look like this
         </div>
       )
     }
+
+
+Alternatively, you can use a 'contextmenu' event listener and
+call ``event.stopPropagation`` to prevent the application context menu
+handler from being called (it is listening in the bubble phase on the
+``document``). At this point you could show your own Lumino
+`contextMenu <https://jupyterlab.github.io/lumino/widgets/classes/contextmenu.html>`__,
+or simply stop propagation and let the system context menu be shown.
+This would look something like the following in a ``Widget`` subclass:
+
+.. code:: javascript
+
+    // In `onAfterAttach()`
+    this.node.addEventListener('contextmenu', this);
+
+    // In `handleEvent()`
+    case 'contextmenu':
+      event.stopPropagation();
 
 .. _copy_shareable_link:
 

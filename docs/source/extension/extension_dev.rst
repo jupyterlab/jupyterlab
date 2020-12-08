@@ -5,12 +5,6 @@ Extension Developer Guide
 
 The JupyterLab application is comprised of a core application object and a set of plugins. JupyterLab plugins provide nearly every function in JupyterLab, including notebooks, document editors and viewers, code consoles, terminals, themes, the file browser, contextual help system, debugger, and settings editor. Plugins even provide more fundamental parts of the application, such as the menu system, status bar, and the underlying communication mechanism with the server.
 
-JupyterLab can be extended with several types of plugins:
-
--  **application plugins:** Application plugins are the fundamental building block of JupyterLab functionality. Application plugins interact with JupyterLab and other plugins by requiring services provided by other plugins, and optionally providing their own service to the system.
--  **mime renderer plugins:** Mime renderer plugins are simplified, restricted ways to extend JupyterLab to render custom mime data in notebooks and files. These plugins are automatically converted to equivalent application plugins by JupyterLab when they are loaded.
--  **theme plugins:** Theme plugins provide a way to customize the appearance of JupyterLab by changing themeable values (i.e., CSS variable values) and providing additional fonts and graphics to JupyterLab.
-
 
 Getting Started
 ---------------
@@ -47,12 +41,16 @@ If you are looking for generated reference API documentation on the JupyterLab a
 - `Lumino API Documentation <https://jupyterlab.github.io/lumino/>`_
 
 
-
 JupyterLab Extensions
 ---------------------
 
-Plugins are distributed in JupyterLab extensions—one extension can contain multiple plugins. An extension can be distributed in several ways:
+A plugin is the basic unit of extensibility in JupyterLab. JupyterLab supports several types of plugins:
 
+-  **application plugins:** Application plugins are the fundamental building block of JupyterLab functionality. Application plugins interact with JupyterLab and other plugins by requiring services provided by other plugins, and optionally providing their own service to the system.
+-  **mime renderer plugins:** Mime renderer plugins are simplified, restricted ways to extend JupyterLab to render custom mime data in notebooks and files. These plugins are automatically converted to equivalent application plugins by JupyterLab when they are loaded.
+-  **theme plugins:** Theme plugins provide a way to customize the appearance of JupyterLab by changing themeable values (i.e., CSS variable values) and providing additional fonts and graphics to JupyterLab.
+
+Plugins are distributed in JupyterLab extensions—one extension can contain multiple plugins. An extension can be distributed in several ways:
 
 - A "source" extension is a JavaScript (npm) package that exports one or more plugins. Installing a source extension requires a user to rebuild JupyterLab. This rebuilding step requires Node.js and may take a lot of time and memory, so some users may not be able to install the extension.
 - A "prebuilt" extension (new in JupyterLab 3.0) is a bundle of JavaScript code that can be loaded into JupyterLab without rebuilding JupyterLab. In this case, the extension developer uses tools provided by JupyterLab to compile a source extension into a JavaScript bundle that includes the non-JupyterLab JavaScript dependencies, then distributes the resulting bundle in, for example, a Python pip or conda package. Users installing prebuilt extensions do not have to have Node.js installed and can immediately use the extension without a JupyterLab rebuild.
@@ -65,19 +63,12 @@ Because prebuilt extensions do not require a JupyterLab rebuild, they have a dis
    We recommend developing prebuilt extensions in Python packages for user convenience.
 
 
-
 Writing an Extension
 --------------------
 
 We encourage extension authors to add the `jupyterlab-extension GitHub topic
 <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
 to any GitHub extension repository.
-
-
-Resources
-^^^^^^^^^
-
-Tutorials, cookie cutters, and examples
 
 
 Plugin metadata
@@ -358,39 +349,6 @@ added in the application settings directory (by default this is the
     }
   }
 
-
-Context Menus
-^^^^^^^^^^^^^
-
-JupyterLab has an application-wide context menu available as
-``app.contextMenu``. See the Lumino
-`docs <https://jupyterlab.github.io/lumino/widgets/interfaces/contextmenu.iitemoptions.html>`__
-for the item creation options. If you wish to preempt the
-application context menu, you can use a 'contextmenu' event listener and
-call ``event.stopPropagation`` to prevent the application context menu
-handler from being called (it is listening in the bubble phase on the
-``document``). At this point you could show your own Lumino
-`contextMenu <https://jupyterlab.github.io/lumino/widgets/classes/contextmenu.html>`__,
-or simply stop propagation and let the system context menu be shown.
-This would look something like the following in a ``Widget`` subclass:
-
-.. code:: javascript
-
-    // In `onAfterAttach()`
-    this.node.addEventListener('contextmenu', this);
-
-    // In `handleEvent()`
-    case 'contextmenu':
-      event.stopPropagation();
-
-
-Menus
-^^^^^
-
-Using React
-^^^^^^^^^^^
-
-
 State Database
 ^^^^^^^^^^^^^^
 
@@ -427,97 +385,10 @@ a plugin:
       }
     };
 
-.. _ext-author-companion-packages:
 
 
-Development workflow
---------------------
-
-
-
-
-
-
-
-Older Docs
-==========
-
-Terms
------
-
-Learning to use a new technology and its architecture can be complicated
-by the jargon used to describe components. We provide this terminology
-guide to help smooth the learning the components.
-
-
--  *Application* - The main application object that hold the application
-   shell, command registry, and keymap registry. It is provided to all
-   plugins in their activate method.
--  *Extension* - an npm package containing one or more *Plugins* that can
-   be used to extend JupyterLab's functionality.
--  *Plugin* - An object that provides a service and or extends the
-   application.
--  *Lumino* - The JavaScript library that provides the foundation of
-   JupyterLab, enabling desktop-like applications in the browser.
--  *Standalone example* - An example in the ``examples/`` directory that
-   demonstrates the usage of one or more components of JupyterLab.
--  TypeScript - A statically typed language that compiles to JavaScript.
-
-
-Writing extensions
-------------------
-
-Starting in JupyterLab 3.0, extensions are distributed as ``pip`` or
-``conda`` packages that contain federated JavaScript bundles.  You can write extensions in JavaScript or any language that compiles to JavaScript. We recommend writing extensions in `TypeScript <https://www.typescriptlang.org/>`_, which is used for the JupyterLab core extensions and many popular community extensions.  You use our build tool to generate the bundles that are shipped with the package, typically through a cookiecutter.
-
-
-Packaging extensions
---------------------
-
-We encourage extension authors to add the `jupyterlab-extension GitHub topic
-<https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
-to any GitHub extension repository.
-
-
-Implementation
---------------
-- We provide a ``jupyter labextension build`` script that is used to build federated bundles
-   - The command produces a set of static assets that are shipped along with a package (notionally on ``pip``/``conda``)
-   - It is a Python cli so that it can use the dependency metadata from the active JupyterLab
-   - The assets include a module federation ``remoteEntry.*.js``, generated bundles, and some other files that we use
-   - ``package.json`` is the original ``package.json`` file that we use to gather metadata about the package, with some included build metadata
-   - we use the previously existing ``@jupyterlab/builder -> build`` to generate the ``imports.css``, ``schemas`` and ``themes`` file structure
-- We provide a schema for the valid ``jupyterlab`` metadata for an extension's ``package.json`` describing the available options
-- We provide a ``labextensions`` handler in ``jupyterlab_server`` that loads static assets from ``labextensions`` paths, following a similar logic to how ``nbextensions`` are discovered and loaded from disk
-- The ``settings`` and ``themes`` handlers in ``jupyterlab_server`` has been updated to load from the new ``labextensions`` locations, favoring the federated extension locations over the bundled ones
-- A ``labextension develop`` command has been added to install an in-development extension into JupyterLab.  The default behavior is to create a symlink in the ``sys-prefix/share/jupyter/labextensions/package-name`` to the static directory of the extension
-- We provide a ``cookiecutter`` that handles all of the scaffolding for an extension author, including the shipping of ``data_files`` so that when the user installs the package, the static assets end up in ``share/jupyter/labextensions``
-- We handle disabling of lab extensions using a trait on the ``LabApp`` class, so it can be set by admins and overridden by users.  Extensions are automatically enabled when installed, and must be explicitly disabled.  The disabled config can consist of a package name or a plugin regex pattern
-- Extensions can provide ``disabled`` metadata that can be used to replace an entire extension or individual plugins
-- ``page_config`` and ``overrides`` are also handled with traits so that admins can provide defaults and users can provide overrides
-- We provide a script to update extensions: ``python -m jupyterlab.upgrade_extension``
-- We update the ``extension-manager`` to target metadata on ``pypi``/``conda`` and consume those packages.
-
-Tools
------
-- ``jupyter labexension build`` python command line tool
-- ``jupyter labextension develop`` python command line tool
-- ``python -m jupyterlab.upgrade_extension`` python command line tool
-- ``cookiecutter`` for extension authors
-
-Workflow for extension authors
-------------------------------
-- Use the ``cookiecutter`` to create the extension
-- Run ``jupyter labextension develop`` to build and symlink the files
-- Run ``jlpm run watch`` to start watching
-- Run ``jupyter lab``
-- Make changes to source
-- Refresh the application page
-- When finished, publish the package to ``pypi``/``conda``
-
-
-Custom webpack config for federated extensions
-----------------------------------------------
+Custom webpack config for prebuilt extensions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. warning::
    This feature is *experimental*, as it makes it possible to override the base config used by the
@@ -556,8 +427,169 @@ Here is an example of a custom config that enables the async WebAssembly and top
 This custom config will be merged with the `default config <https://github.com/jupyterlab/jupyterlab/blob/master/builder/src/webpack.config.base.ts>`_
 when building the federated extension with ``jlpm run build``.
 
-.. note::
-   These docs are under construction as we iterate and update tutorials and cookiecutters.
+Companion Packages
+^^^^^^^^^^^^^^^^^^
+
+If your extensions depends on the presence of one or more packages in the
+kernel, or on a notebook server extension, you can add metadata to indicate
+this to the extension manager by adding metadata to your package.json file.
+The full options available are::
+
+    "jupyterlab": {
+      "discovery": {
+        "kernel": [
+          {
+            "kernel_spec": {
+              "language": "<regexp for matching kernel language>",
+              "display_name": "<regexp for matching kernel display name>"   // optional
+            },
+            "base": {
+              "name": "<the name of the kernel package>"
+            },
+            "overrides": {   // optional
+              "<manager name, e.g. 'pip'>": {
+                "name": "<name of kernel package on pip, if it differs from base name>"
+              }
+            },
+            "managers": [   // list of package managers that have your kernel package
+                "pip",
+                "conda"
+            ]
+          }
+        ],
+        "server": {
+          "base": {
+            "name": "<the name of the server extension package>"
+          },
+          "overrides": {   // optional
+            "<manager name, e.g. 'pip'>": {
+              "name": "<name of server extension package on pip, if it differs from base name>"
+            }
+          },
+          "managers": [   // list of package managers that have your server extension package
+              "pip",
+              "conda"
+          ]
+        }
+      }
+    }
+
+
+A typical setup for e.g. a jupyter-widget based package will then be::
+
+    "keywords": [
+        "jupyterlab-extension",
+        "jupyter",
+        "widgets",
+        "jupyterlab"
+    ],
+    "jupyterlab": {
+      "extension": true,
+      "discovery": {
+        "kernel": [
+          {
+            "kernel_spec": {
+              "language": "^python",
+            },
+            "base": {
+              "name": "myipywidgetspackage"
+            },
+            "managers": [
+                "pip",
+                "conda"
+            ]
+          }
+        ]
+      }
+    }
+
+
+Currently supported package managers are:
+
+- ``pip``
+- ``conda``
+
+
+
+
+.. _ext-author-companion-packages:
+
+
+Development workflow
+--------------------
+
+We encourage extension authors to add the `jupyterlab-extension GitHub topic
+<https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__
+to any GitHub extension repository.
+
+
+Older Docs
+==========
+
+Terms
+-----
+
+Learning to use a new technology and its architecture can be complicated
+by the jargon used to describe components. We provide this terminology
+guide to help smooth the learning the components.
+
+
+-  *Application* - The main application object that hold the application
+   shell, command registry, and keymap registry. It is provided to all
+   plugins in their activate method.
+-  *Extension* - an npm package containing one or more *Plugins* that can
+   be used to extend JupyterLab's functionality.
+-  *Plugin* - An object that provides a service and or extends the
+   application.
+-  *Lumino* - The JavaScript library that provides the foundation of
+   JupyterLab, enabling desktop-like applications in the browser.
+-  *Standalone example* - An example in the ``examples/`` directory that
+   demonstrates the usage of one or more components of JupyterLab.
+
+
+Writing extensions
+------------------
+
+Starting in JupyterLab 3.0, extensions are distributed as ``pip`` or
+``conda`` packages that contain federated JavaScript bundles.  You can write extensions in JavaScript or any language that compiles to JavaScript. We recommend writing extensions in `TypeScript <https://www.typescriptlang.org/>`_, which is used for the JupyterLab core extensions and many popular community extensions.  You use our build tool to generate the bundles that are shipped with the package, typically through a cookiecutter.
+
+
+Implementation
+--------------
+- We provide a ``jupyter labextension build`` script that is used to build federated bundles
+   - The command produces a set of static assets that are shipped along with a package (notionally on ``pip``/``conda``)
+   - It is a Python cli so that it can use the dependency metadata from the active JupyterLab
+   - The assets include a module federation ``remoteEntry.*.js``, generated bundles, and some other files that we use
+   - ``package.json`` is the original ``package.json`` file that we use to gather metadata about the package, with some included build metadata
+   - we use the previously existing ``@jupyterlab/builder -> build`` to generate the ``imports.css``, ``schemas`` and ``themes`` file structure
+- We provide a schema for the valid ``jupyterlab`` metadata for an extension's ``package.json`` describing the available options
+- We provide a ``labextensions`` handler in ``jupyterlab_server`` that loads static assets from ``labextensions`` paths, following a similar logic to how ``nbextensions`` are discovered and loaded from disk
+- The ``settings`` and ``themes`` handlers in ``jupyterlab_server`` has been updated to load from the new ``labextensions`` locations, favoring the federated extension locations over the bundled ones
+- A ``labextension develop`` command has been added to install an in-development extension into JupyterLab.  The default behavior is to create a symlink in the ``sys-prefix/share/jupyter/labextensions/package-name`` to the static directory of the extension
+- We provide a ``cookiecutter`` that handles all of the scaffolding for an extension author, including the shipping of ``data_files`` so that when the user installs the package, the static assets end up in ``share/jupyter/labextensions``
+- We handle disabling of lab extensions using a trait on the ``LabApp`` class, so it can be set by admins and overridden by users.  Extensions are automatically enabled when installed, and must be explicitly disabled.  The disabled config can consist of a package name or a plugin regex pattern
+- Extensions can provide ``disabled`` metadata that can be used to replace an entire extension or individual plugins
+- ``page_config`` and ``overrides`` are also handled with traits so that admins can provide defaults and users can provide overrides
+- We provide a script to update extensions: ``python -m jupyterlab.upgrade_extension``
+- We update the ``extension-manager`` to target metadata on ``pypi``/``conda`` and consume those packages.
+
+Tools
+-----
+- ``jupyter labexension build`` python command line tool
+- ``jupyter labextension develop`` python command line tool
+- ``python -m jupyterlab.upgrade_extension`` python command line tool
+- ``cookiecutter`` for extension authors
+
+Workflow for extension authors
+------------------------------
+- Use the ``cookiecutter`` to create the extension
+- Run ``jupyter labextension develop`` to build and symlink the files
+- Run ``jlpm run watch`` to start watching
+- Run ``jupyter lab``
+- Make changes to source
+- Refresh the application page
+- When finished, publish the package to ``pypi``/``conda``
+
 
 Plugins
 -------
@@ -908,109 +940,7 @@ The theme extension is installed in the same way as a regular extension (see
 It is also possible to create a new theme using the
 `TypeScript theme cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`__.
 
-Standard (General-Purpose) Extensions
--------------------------------------
 
-JupyterLab's modular architecture is based around the idea
-that all extensions are on equal footing, and that they interact
-with each other through typed interfaces that are provided by ``Token`` objects.
-An extension can provide a ``Token`` to the application,
-which other extensions can then request for their own use.
-
-
-
-Standard Extension Example
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-For a concrete example of a standard extension, see :ref:`How to extend the Notebook plugin <extend-notebook-plugin>`.
-Notice that the mime renderer extensions use a limited,
-simplified interface to JupyterLab's extension system. Modifying the
-notebook plugin requires the full, general-purpose interface to the
-extension system.
-
-
-
-Companion Packages
-^^^^^^^^^^^^^^^^^^
-
-If your extensions depends on the presence of one or more packages in the
-kernel, or on a notebook server extension, you can add metadata to indicate
-this to the extension manager by adding metadata to your package.json file.
-The full options available are::
-
-    "jupyterlab": {
-      "discovery": {
-        "kernel": [
-          {
-            "kernel_spec": {
-              "language": "<regexp for matching kernel language>",
-              "display_name": "<regexp for matching kernel display name>"   // optional
-            },
-            "base": {
-              "name": "<the name of the kernel package>"
-            },
-            "overrides": {   // optional
-              "<manager name, e.g. 'pip'>": {
-                "name": "<name of kernel package on pip, if it differs from base name>"
-              }
-            },
-            "managers": [   // list of package managers that have your kernel package
-                "pip",
-                "conda"
-            ]
-          }
-        ],
-        "server": {
-          "base": {
-            "name": "<the name of the server extension package>"
-          },
-          "overrides": {   // optional
-            "<manager name, e.g. 'pip'>": {
-              "name": "<name of server extension package on pip, if it differs from base name>"
-            }
-          },
-          "managers": [   // list of package managers that have your server extension package
-              "pip",
-              "conda"
-          ]
-        }
-      }
-    }
-
-
-A typical setup for e.g. a jupyter-widget based package will then be::
-
-    "keywords": [
-        "jupyterlab-extension",
-        "jupyter",
-        "widgets",
-        "jupyterlab"
-    ],
-    "jupyterlab": {
-      "extension": true,
-      "discovery": {
-        "kernel": [
-          {
-            "kernel_spec": {
-              "language": "^python",
-            },
-            "base": {
-              "name": "myipywidgetspackage"
-            },
-            "managers": [
-                "pip",
-                "conda"
-            ]
-          }
-        ]
-      }
-    }
-
-
-Currently supported package managers are:
-
-- ``pip``
-- ``conda``
 
 
 
