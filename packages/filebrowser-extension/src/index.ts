@@ -158,8 +158,8 @@ const factory: JupyterFrontEndPlugin<IFileBrowserFactory> = {
   activate: activateFactory,
   id: '@jupyterlab/filebrowser-extension:factory',
   provides: IFileBrowserFactory,
-  requires: [ILabShell, IDocumentManager, ITranslator],
-  optional: [IStateDB, IRouter, JupyterFrontEnd.ITreeResolver]
+  requires: [IDocumentManager, ITranslator],
+  optional: [ILabShell, IStateDB, IRouter, JupyterFrontEnd.ITreeResolver]
 };
 
 /**
@@ -238,9 +238,9 @@ export default plugins;
  */
 async function activateFactory(
   app: JupyterFrontEnd,
-  labShell: ILabShell,
   docManager: IDocumentManager,
   translator: ITranslator,
+  labShell: ILabShell | null,
   state: IStateDB | null,
   router: IRouter | null,
   tree: JupyterFrontEnd.ITreeResolver | null
@@ -265,27 +265,29 @@ async function activateFactory(
     const widget = new FileBrowser({ id, model, restore, translator });
 
     // Add a launcher toolbar item.
-    const launcher = new ToolbarButton({
-      icon: addIcon,
-      onClick: () => {
-        if (
-          labShell.mode === 'multiple-document' &&
-          commands.hasCommand('launcher:create')
-        ) {
-          return Private.createLauncher(commands, widget);
-        } else {
-          const newUrl = PageConfig.getUrl({
-            mode: labShell.mode,
-            workspace: PageConfig.defaultWorkspace,
-            treePath: model.path
-          });
-          window.open(newUrl, '_blank');
-        }
-      },
-      tooltip: trans.__('New Launcher'),
-      actualOnClick: true
-    });
-    widget.toolbar.insertItem(0, 'launch', launcher);
+    if (labShell) {
+      const launcher = new ToolbarButton({
+        icon: addIcon,
+        onClick: () => {
+          if (
+            labShell.mode === 'multiple-document' &&
+            commands.hasCommand('launcher:create')
+          ) {
+            return Private.createLauncher(commands, widget);
+          } else {
+            const newUrl = PageConfig.getUrl({
+              mode: labShell.mode,
+              workspace: PageConfig.defaultWorkspace,
+              treePath: model.path
+            });
+            window.open(newUrl, '_blank');
+          }
+        },
+        tooltip: trans.__('New Launcher'),
+        actualOnClick: true
+      });
+      widget.toolbar.insertItem(0, 'launch', launcher);
+    }
 
     // Track the newly created file browser.
     void tracker.add(widget);
