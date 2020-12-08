@@ -467,20 +467,26 @@ export class CodeCellModel extends CellModel implements ICodeCellModel {
     const cell = options.cell as nbformat.ICodeCell;
     let outputs: nbformat.IOutput[] = [];
     const executionCount = this.modelDB.createValue('executionCount');
-    const maximumTopBottomOutput = options.maximumTopBottomOutput || 10;
+    const maximumTopBottomOutput = options.maximumTopBottomOutput || 100;
     console.log('maximumTopBottomOutput', maximumTopBottomOutput);
+    console.log('options', options);
     if (!executionCount.get()) {
       if (cell && cell.cell_type === 'code') {
         executionCount.set(cell.execution_count || null);
         outputs = cell.outputs;
+        console.log('outputs', outputs);
         let start = outputs.slice(0, maximumTopBottomOutput);
         let middle: any = [
           {
             output_type: 'display_data',
             data: {
-              'application/json': {
-                trimmedOutput: `Output has been trimmed!\nTotal output: ${outputs.length}, displaying the first ${maximumTopBottomOutput} top and last bottom outputs`
-              }
+              'text/plain': `\n\n
+  ...Output has been trimmed!...
+  \n\n
+  Total output: ${outputs.length}, displaying the first ${maximumTopBottomOutput} top and last bottom outputs.
+  \n\n\n`},
+            metadata: {
+              isolated: true,
             }
           }
         ];
