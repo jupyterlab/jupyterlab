@@ -119,7 +119,7 @@ export const themesPlugin: JupyterFrontEndPlugin<IThemeManager> = {
 
     commands.addCommand(CommandIDs.changeFont, {
       label: args =>
-        args['enabled'] ? `${args['font']}` : trans.__(`waiting for fonts`),
+        args['enabled'] ? `${args['font']}` : trans.__('waiting for fonts'),
       isEnabled: args => args['enabled'] as boolean,
       isToggled: args => manager.getCSS(args['key'] as string) === args['font'],
       execute: args =>
