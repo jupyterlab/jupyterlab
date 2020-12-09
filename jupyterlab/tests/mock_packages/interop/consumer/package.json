@@ -12,8 +12,8 @@
     "extension": true,
     "sharedPackages": {
       "@jupyterlab/mock-token": {
-        singleton: true,
-        bundled: false
+        "singleton": true,
+        "bundled": false
       }
     }
   }
