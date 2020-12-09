@@ -17,6 +17,6 @@ setup(name=name,
       py_modules = [name],
       data_files = [
         (f'share/jupyter/labextensions/{js_name}', glob('static/package.json')),
-        (f'share/jupyter/labextensions/{js_name}', glob('static/static/*'))
+        (f'share/jupyter/labextensions/{js_name}/static', glob('static/static/*'))
     ],
      )
