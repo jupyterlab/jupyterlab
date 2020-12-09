@@ -144,10 +144,9 @@ const browser: JupyterFrontEndPlugin<void> = {
     ILabShell,
     ILayoutRestorer,
     ISettingRegistry,
-    ITreePathUpdater,
     ITranslator
   ],
-  optional: [ICommandPalette, IMainMenu],
+  optional: [ITreePathUpdater, ICommandPalette, IMainMenu],
   autoStart: true
 };
 
@@ -315,8 +314,8 @@ function activateBrowser(
   labShell: ILabShell,
   restorer: ILayoutRestorer,
   settingRegistry: ISettingRegistry,
-  treePathUpdater: ITreePathUpdater,
   translator: ITranslator,
+  treePathUpdater: ITreePathUpdater | null,
   commandPalette: ICommandPalette | null,
   mainMenu: IMainMenu | null
 ): void {
@@ -427,9 +426,11 @@ function activateBrowser(
       }
     });
 
-    browser.model.pathChanged.connect((sender, args) => {
-      treePathUpdater(args.newValue);
-    });
+    if (treePathUpdater) {
+      browser.model.pathChanged.connect((sender, args) => {
+        treePathUpdater(args.newValue);
+      });
+    }
 
     maybeCreate();
   });
