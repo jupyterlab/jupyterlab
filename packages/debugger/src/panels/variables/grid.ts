@@ -35,12 +35,12 @@ export class VariablesBodyGrid extends Panel {
    */
   constructor(options: VariablesBodyGrid.IOptions) {
     super();
-    const { model, commands, scopes, themeManager } = options;
+    const { model, commands, themeManager, scopes } = options;
     this._grid = new Grid({ commands, themeManager });
     this._grid.addClass('jp-DebuggerVariables-grid');
     this._model = model;
     this._model.changed.connect((model: VariablesModel): void => {
-      this._grid.dataModel.setData(model.scopes);
+      this._update();
     }, this);
     this._grid.dataModel.setData(scopes ?? []);
     this.addWidget(this._grid);
@@ -54,7 +54,24 @@ export class VariablesBodyGrid extends Panel {
    */
   set filter(filter: Set<string>) {
     (this._grid.dataModel as GridModel).filter = filter;
-    this._grid.dataModel.setData(this._model.scopes);
+    this._update();
+  }
+
+  /**
+   * Set the current scope.
+   *
+   * @param scope The current scope for the variables.
+   */
+  set scope(scope: string) {
+    (this._grid.dataModel as GridModel).scope = scope;
+    this._update();
+  }
+
+  /**
+   * Update the underlying data model
+   */
+  private _update(): void {
+    this._grid.dataModel.setData(this._model.scopes ?? []);
   }
 
   private _grid: Grid;
@@ -140,6 +157,16 @@ class Grid extends Panel {
   }
 
   /**
+   * Set the scope for the variables data model.
+   *
+   * @param scope The scopes for the variables
+   */
+  set scope(scope: string) {
+    (this._grid.dataModel as GridModel).scope = scope;
+    this.update();
+  }
+
+  /**
    * Get the data model for the data grid.
    */
   get dataModel(): GridModel {
@@ -197,6 +224,20 @@ class GridModel extends DataModel {
    */
   set filter(filter: Set<string>) {
     this._filter = filter;
+  }
+
+  /**
+   * Get the current scope for the variables.
+   */
+  get scope(): string {
+    return this._scope;
+  }
+
+  /**
+   * Set the variable scope
+   */
+  set scope(scope: string) {
+    this._scope = scope;
   }
 
   /**
@@ -258,9 +299,9 @@ class GridModel extends DataModel {
   }
 
   /**
-   * Set the datagrid model data from the variable scopes.
+   * Set the datagrid model data from the list of variables.
    *
-   * @param scopes The scopes.
+   * @param variables The list of variables.
    */
   setData(scopes: IDebugger.IScope[]): void {
     this._clearData();
@@ -268,23 +309,22 @@ class GridModel extends DataModel {
       type: 'model-reset',
       region: 'body'
     });
-    scopes.forEach(scope => {
-      const filtered = scope.variables.filter(
-        variable =>
-          variable.evaluateName && !this._filter.has(variable.evaluateName)
-      );
-      filtered.forEach((variable, index) => {
-        this._data.name[index] = variable.evaluateName!;
-        this._data.type[index] = variable.type || '';
-        this._data.value[index] = variable.value;
-        this._data.variablesReference[index] = variable.variablesReference;
-      });
-      this.emitChanged({
-        type: 'rows-inserted',
-        region: 'body',
-        index: 1,
-        span: filtered.length
-      });
+    const scope = scopes.find(scope => scope.name === this._scope) ?? scopes[0];
+    const variables = scope?.variables ?? [];
+    const filtered = variables.filter(
+      variable => variable.name && !this._filter.has(variable.name)
+    );
+    filtered.forEach((variable, index) => {
+      this._data.name[index] = variable.name;
+      this._data.type[index] = variable.type ?? '';
+      this._data.value[index] = variable.value;
+      this._data.variablesReference[index] = variable.variablesReference;
+    });
+    this.emitChanged({
+      type: 'rows-inserted',
+      region: 'body',
+      index: 1,
+      span: filtered.length
     });
   }
 
@@ -301,6 +341,7 @@ class GridModel extends DataModel {
   }
 
   private _filter = new Set<string>();
+  private _scope = '';
   private _data: {
     name: string[];
     type: string[];

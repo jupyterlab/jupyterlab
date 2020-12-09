@@ -16,6 +16,8 @@ import { VariablesBodyGrid } from './grid';
 
 import { VariablesHeader } from './header';
 
+import { ScopeSwitcher } from './scope';
+
 import { VariablesBodyTree } from './tree';
 
 /**
@@ -38,7 +40,16 @@ export class Variables extends Panel {
     this._table = new VariablesBodyGrid({ model, commands, themeManager });
     this._table.hide();
 
-    const onClick = (): void => {
+    this._header.toolbar.addItem(
+      'scope-switcher',
+      new ScopeSwitcher({
+        translator,
+        model,
+        tree: this._tree,
+        grid: this._table
+      })
+    );
+    const onViewChange = (): void => {
       if (this._table.isHidden) {
         this._tree.hide();
         this._table.show();
@@ -54,10 +65,9 @@ export class Variables extends Panel {
     const button = new Switch();
     button.id = 'jp-debugger';
     button.valueChanged.connect((_, args) => {
-      onClick();
+      onViewChange();
     });
     button.caption = trans.__('Table / Tree View');
-
     this._header.toolbar.addItem('view-VariableSwitch', button);
 
     this.addWidget(this._header);
@@ -116,7 +126,7 @@ export const convertType = (variable: IDebugger.IVariable): string | number => {
     case 'str':
       return value.slice(1, value.length - 1);
     default:
-      return type ?? '';
+      return type ?? value;
   }
 };
 

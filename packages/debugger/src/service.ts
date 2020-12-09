@@ -454,15 +454,15 @@ export class DebuggerService implements IDebugger, IDisposable {
    */
   private _convertScopes(
     scopes: DebugProtocol.Scope[],
-    variables: DebugProtocol.Variable[]
+    variables: DebugProtocol.Variable[][]
   ): IDebugger.IScope[] {
     if (!variables || !scopes) {
       return [];
     }
-    return scopes.map(scope => {
+    return scopes.map((scope, i) => {
       return {
         name: scope.name,
-        variables: variables.map(variable => {
+        variables: variables[i].map(variable => {
           return { ...variable };
         })
       };
@@ -639,7 +639,9 @@ export class DebuggerService implements IDebugger, IDisposable {
       return;
     }
     const scopes = await this._getScopes(frame);
-    const variables = await this._getVariables(scopes[0]);
+    const variables = await Promise.all(
+      scopes.map(scope => this._getVariables(scope))
+    );
     const variableScopes = this._convertScopes(scopes, variables);
     this._model.variables.scopes = variableScopes;
   }
