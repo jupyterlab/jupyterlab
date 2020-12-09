@@ -14,3 +14,7 @@
   text-overflow: ellipsis;
   direction: rtl;
 }
+
+#jp-debugger .jp-switch-label {
+  margin-right: 0px;
+}
