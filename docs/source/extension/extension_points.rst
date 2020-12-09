@@ -607,3 +607,40 @@ Widget tracker tokens are provided for many activities in JupyterLab, including
 notebooks, consoles, text files, mime documents, and terminals.
 If you are adding your own activities to JupyterLab, you might consider providing
 a ``WidgetTracker`` token of your own, so that other extensions can make use of it.
+
+
+State Database
+--------------
+
+The state database can be accessed by importing ``IStateDB`` from
+``@jupyterlab/statedb`` and adding it to the list of ``requires`` for
+a plugin:
+
+.. code:: typescript
+
+    const id = 'foo-extension:IFoo';
+
+    const IFoo = new Token<IFoo>(id);
+
+    interface IFoo {}
+
+    class Foo implements IFoo {}
+
+    const plugin: JupyterFrontEndPlugin<IFoo> = {
+      id,
+      autoStart: true,
+      requires: [IStateDB],
+      provides: IFoo,
+      activate: (app: JupyterFrontEnd, state: IStateDB): IFoo => {
+        const foo = new Foo();
+        const key = `${id}:some-attribute`;
+
+        // Load the saved plugin state and apply it once the app
+        // has finished restoring its former layout.
+        Promise.all([state.fetch(key), app.restored])
+          .then(([saved]) => { /* Update `foo` with `saved`. */ });
+
+        // Fulfill the plugin contract by returning an `IFoo`.
+        return foo;
+      }
+    };
