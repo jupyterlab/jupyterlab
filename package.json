@@ -16,7 +16,8 @@
       "tests",
       "tests/test-*",
       "testutils",
-      "jupyterlab/tests/mock_packages/extension"
+      "jupyterlab/tests/mock_packages/extension",
+      "jupyterlab/tests/mock_packages/interop/*"
     ]
   },
   "scripts": {
