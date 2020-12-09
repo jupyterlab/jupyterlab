@@ -9,6 +9,12 @@
     "@jupyterlab/builder": "^3.0.0-rc.13"
   },
   "jupyterlab": {
-    "extension": true
+    "extension": true,
+    "sharedPackages": {
+      "@jupyterlab/mock-token": {
+        singleton: true,
+        bundled: false
+      }
+    }
   }
 }
