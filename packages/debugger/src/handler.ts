@@ -266,11 +266,11 @@ export class DebuggerHandler {
     };
 
     const addToolbarButton = (): void => {
-      if (!this.iconButton) {
-        this.iconButton = updateIconButton(widget, toggleDebugging);
+      if (!this._iconButton) {
+        this._iconButton = updateIconButton(widget, toggleDebugging);
       }
-      if (!this.toggleButton) {
-        this.toggleButton = updateToggleButton(
+      if (!this._toggleButton) {
+        this._toggleButton = updateToggleButton(
           widget,
           this._service.isStarted,
           toggleDebugging
@@ -279,18 +279,18 @@ export class DebuggerHandler {
     };
 
     const removeToolbarButton = (): void => {
-      if (!this.iconButton) {
+      if (!this._iconButton) {
         return;
       } else {
-        this.iconButton.dispose();
-        delete this.iconButton;
+        this._iconButton.dispose();
+        delete this._iconButton;
       }
 
-      if (!this.toggleButton) {
+      if (!this._toggleButton) {
         return;
       } else {
-        this.toggleButton.dispose();
-        delete this.toggleButton;
+        this._toggleButton.dispose();
+        delete this._toggleButton;
       }
     };
 
@@ -304,15 +304,15 @@ export class DebuggerHandler {
         this._service.isStarted &&
         this._previousConnection?.id === connection?.id
       ) {
-        if (this.toggleButton) {
-          this.toggleButton.value = false;
+        if (this._toggleButton) {
+          this._toggleButton.value = false;
         }
         this._service.session!.connection = connection;
         await this._service.stop();
         removeHandlers();
       } else {
-        if (this.toggleButton) {
-          this.toggleButton.value = true;
+        if (this._toggleButton) {
+          this._toggleButton.value = true;
         }
         this._service.session!.connection = connection;
         this._previousConnection = connection;
@@ -390,8 +390,8 @@ export class DebuggerHandler {
       status: Kernel.Status
     ) => void;
   } = {};
-  private iconButton?: ToolbarButton;
-  private toggleButton?: Switch;
+  private _iconButton?: ToolbarButton;
+  private _toggleButton?: Switch;
 }
 
 /**

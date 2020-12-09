@@ -93,6 +93,9 @@
       "path": "./packages/extensionmanager-extension"
     },
     {
+      "path": "./packages/faq-extension"
+    },
+    {
       "path": "./packages/filebrowser"
     },
     {
@@ -229,6 +232,9 @@
     },
     {
       "path": "./packages/statusbar-extension"
+    },
+    {
+      "path": "./packages/tabmanager-extension"
     },
     {
       "path": "./packages/terminal"
