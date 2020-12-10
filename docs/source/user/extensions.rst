@@ -144,6 +144,9 @@ List all installed extensions, including those installed with ``pip`` or
    name, which may be different from the name of the ``pip`` or ``conda``
    package used to distribute the extension.
 
+
+.. _enable_disable_config:
+
 Enabling and Disabling Extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -182,6 +185,8 @@ An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as fol
             "@jupyterlab/notebook-extension": true
       }
    }
+
+See :ref:`documentation on LabConfig directory <labconfig_directories>` for more information.
 
 Managing Extensions Using the Extension Manager
 -----------------------------------------------

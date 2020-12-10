@@ -74,6 +74,8 @@ equivalent) in any of the ``config`` locations returned by ``jupyter
     }
 
 
+.. _labconfig_directories:
+
 LabConfig Directories
 ---------------------
 These directories for are used configuration data that allow layering of config in file(s) in ``<jupyter_config_path>/labconfig``.
@@ -130,6 +132,8 @@ An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as fol
       },
       "terminalsAvailable": false
    }
+
+See :ref:`documentation on enabling and disabling extensions <enable_disable_config>` for more information.
 
 
 JupyterLab Application Directory
