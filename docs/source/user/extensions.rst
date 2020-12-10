@@ -186,7 +186,7 @@ An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as fol
       }
    }
 
-See :ref:`documentation on LabConfig directory <labconfig_directories>` for more information.
+See :ref:`documentation on LabConfig directories <labconfig_directories>` for more information.
 
 Managing Extensions Using the Extension Manager
 -----------------------------------------------
