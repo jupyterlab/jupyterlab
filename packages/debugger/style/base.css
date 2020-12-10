@@ -6,7 +6,6 @@
 @import './editor.css';
 @import './callstack.css';
 @import './variables.css';
-@import './icons.css';
 @import './sidebar.css';
 @import './sources.css';
 
@@ -14,4 +13,8 @@
   overflow: hidden;
   text-overflow: ellipsis;
   direction: rtl;
+}
+
+#jp-debugger .jp-switch-label {
+  margin-right: 0px;
 }
