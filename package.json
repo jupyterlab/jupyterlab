@@ -104,7 +104,6 @@
     "lerna": "^3.19.0",
     "lint-staged": "^10.2.13",
     "prettier": "^2.1.1",
-    "react-docgen-typescript-loader": "^3.7.2",
     "shell-quote": "^1.7.2",
     "typedoc": "0.17.0-3",
     "yarn": "1.21.1"
