@@ -8,8 +8,11 @@ JupyterLab manages several different locations for its data. These locations are
 - **User Settings Directory**: where JupyterLab stores user-level settings for JupyterLab extensions
 - **Workspaces Directory**: where JupyterLab stores workspaces
 
+JupyterLab also honors **LabConfig Directories** directories for configuration data from the ``labconfig`` subdirectories of the Jupyter ``config`` directories in the Jupyter path hierarchy.
 
-Additionally, JupyterLab can load dynamic federated extensions, i.e., extensions that bundle their dependencies, from the ``labextensions`` subdirectories of the Jupyter ``data`` directories in the Jupyter path hierarchy. See the locations of these ``data`` paths by running ``jupyter --path``.
+Additionally, JupyterLab can load dynamic federated extensions, i.e., extensions that bundle their dependencies, from the ``labextensions`` subdirectories of the Jupyter ``data`` directories. 
+
+See the locations of these Jupyter config paths by running ``jupyter --path``.
 
 JupyterLab Build Process
 ------------------------
@@ -69,6 +72,64 @@ equivalent) in any of the ``config`` locations returned by ``jupyter
         }
       }
     }
+
+
+LabConfig Directories
+---------------------
+These directories for are used configuration data that allow layering of config in file(s) in ``<jupyter_config_path>/labconfig``.
+
+The Jupyter configuration path priority order can be seen by typing ``jupyter --paths``.  The values are combined into a single config object.
+
+The primary file used by JupyterLab is ``page_config.json``.  
+The ``page_config.json`` data is used to provide configuration data to the
+application environment.
+
+The following configurations may be present in this file:
+
+1. ``terminalsAvailable`` identifies whether a terminal (i.e. ``bash/tsch``
+   on Mac/Linux OR ``PowerShell`` on Windows) is available to be launched
+   via the Launcher. (This configuration was predominantly required for
+   Windows prior to PowerShell access being enabled in Jupyter Lab.) The
+   value for this field is a Boolean: ``true`` or ``false``.
+2. ``disabledExtensions`` controls which extensions should not load at all.
+3. ``deferredExtensions`` controls which extensions should not load until
+   they are required by something, irrespective of whether they set
+   ``autoStart`` to ``true``.
+
+The values for the ``disabledExtensions`` and ``deferredExtensions`` fields
+are objects with boolean values. The following sequence of checks are performed
+against the patterns in ``disabledExtensions`` and ``deferredExtensions``.
+
+-  If an identical string match occurs between a config value and a
+   package name (e.g., ``"@jupyterlab/apputils-extension"``), then the
+   entire package is disabled (or deferred).
+-  If the string value is compiled as a regular expression and tests
+   positive against a package name (e.g.,
+   ``"@jupyterlab/apputils*$"``), then the
+   entire package is disabled (or deferred).
+-  If an identical string match occurs between a config value and an
+   individual plugin ID within a package (e.g.,
+   ``"@jupyterlab/apputils-extension:settings``),
+   then that specific plugin is disabled (or deferred).
+-  If the string value is compiled as a regular expression and tests
+   positive against an individual plugin ID within a package (e.g.,
+   ``"@jupyterlab/apputils-extension:set.*$"``),
+   then that specific plugin is disabled (or deferred).
+
+An example ``<jupyter_config_path>/labconfig/pageconfig.json`` could look as follows:
+
+.. code:: json
+
+   {
+      "disabledExtensions": {
+            "@jupyterlab/notebook-extension": true,
+            "@jupyterlab/apputils-extension:settings": true
+      },
+      "deferredExtensions": {
+             "@jupyterlab/apputils-extension:set.*$": true
+      },
+      "terminalsAvailable": false
+   }
 
 
 JupyterLab Application Directory
@@ -134,43 +195,11 @@ set on your system.
 
 .. _page_configjson:
 
-page_config.json
-""""""""""""""""
+page_config.json (deprecated)
+"""""""""""""""""""""""""""""
 
-The ``page_config.json`` data is used to provide configuration data to the
-application environment.
-
-The following configurations may be present in this file:
-
-1. ``terminalsAvailable`` identifies whether a terminal (i.e. ``bash/tsch``
-   on Mac/Linux OR ``PowerShell`` on Windows) is available to be launched
-   via the Launcher. (This configuration was predominantly required for
-   Windows prior to PowerShell access being enabled in Jupyter Lab.) The
-   value for this field is a Boolean: ``true`` or ``false``.
-2. ``disabledExtensions`` controls which extensions should not load at all.
-3. ``deferredExtensions`` controls which extensions should not load until
-   they are required by something, irrespective of whether they set
-   ``autoStart`` to ``true``.
-
-The values for the ``disabledExtensions`` and ``deferredExtensions`` fields
-are arrays of strings. The following sequence of checks are performed
-against the patterns in ``disabledExtensions`` and ``deferredExtensions``.
-
--  If an identical string match occurs between a config value and a
-   package name (e.g., ``"@jupyterlab/apputils-extension"``), then the
-   entire package is disabled (or deferred).
--  If the string value is compiled as a regular expression and tests
-   positive against a package name (e.g.,
-   ``"disabledExtensions": ["@jupyterlab/apputils*$"]``), then the
-   entire package is disabled (or deferred).
--  If an identical string match occurs between a config value and an
-   individual plugin ID within a package (e.g.,
-   ``"disabledExtensions": ["@jupyterlab/apputils-extension:settings"]``),
-   then that specific plugin is disabled (or deferred).
--  If the string value is compiled as a regular expression and tests
-   positive against an individual plugin ID within a package (e.g.,
-   ``"disabledExtensions": ["-@jupyterlab/apputils-extension:set.*$"]``),
-   then that specific plugin is disabled (or deferred).
+This file is considered deprecated.  This file can have similar data as the ``page_config.json``
+file in the LabConfig Directories, except that ``disabledExtensions`` and ``deferredExtensions`` are given as arrays of strings.
 
 An example of a ``page_config.json`` file is:
 
