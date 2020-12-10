@@ -404,26 +404,8 @@ See the
 `fileeditor-extension <https://github.com/jupyterlab/jupyterlab/tree/master/packages/fileeditor-extension>`__
 for another example of an extension that uses settings.
 
-.. _setting_overrides:
+A system administrator or user can override default values of extension settings with the :ref:`overrides.json <overridesjson>` file.
 
-System Overrides
-""""""""""""""""
-
-You can override default values of the extension settings by
-defining new default values in an ``overrides.json`` file in the
-application settings directory. For example, if you would like
-to set the dark theme by default instead of the light one, an
-``overrides.json`` file containing the following lines needs to be
-added in the application settings directory (by default this is the
-``share/jupyter/lab/settings`` folder).
-
-.. code:: json
-
-  {
-    "@jupyterlab/apputils-extension:themes": {
-      "theme": "JupyterLab Dark"
-    }
-  }
 
 
 Development workflow
