@@ -34,6 +34,7 @@
     "watch": "webpack --watch"
   },
   "dependencies": {
+    "@jupyterlab/application": "^3.0.0-rc.13",
     "@jupyterlab/apputils": "^3.0.0-rc.13",
     "@jupyterlab/cells": "^3.0.0-rc.13",
     "@jupyterlab/codemirror": "^3.0.0-rc.13",
