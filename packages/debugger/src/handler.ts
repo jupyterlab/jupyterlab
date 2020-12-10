@@ -276,6 +276,7 @@ export class DebuggerHandler {
           toggleDebugging
         );
       }
+      this._toggleButton.value = this._service.isStarted;
     };
 
     const removeToolbarButton = (): void => {
