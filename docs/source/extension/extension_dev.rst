@@ -664,4 +664,3 @@ enabler is in `setup.py <https://github.com/matplotlib/jupyter-matplotlib/blob/c
 file has additional logic to automatically create the JS tarball as part of the
 release process, but this could also be done manually.
 
-.. |dependencies| image:: images/dependency-graph.svg
