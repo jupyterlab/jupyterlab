@@ -51,7 +51,7 @@
     "raw-loader": "~4.0.0",
     "read-package-tree": "^5.3.1",
     "rimraf": "~3.0.0",
-    "style-loader": "~1.0.1",
+    "style-loader": "~2.0.0",
     "svg-url-loader": "~3.0.3",
     "url-loader": "~3.0.0",
     "watch": "~1.0.2",

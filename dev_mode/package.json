@@ -180,7 +180,7 @@
     "rimraf": "~3.0.0",
     "sort-package-json": "~1.44.0",
     "source-map-loader": "~1.0.2",
-    "style-loader": "~1.2.1",
+    "style-loader": "~2.0.0",
     "svg-url-loader": "~6.0.0",
     "terser-webpack-plugin": "^4.1.0",
     "url-loader": "~4.1.0",
