@@ -664,9 +664,4 @@ enabler is in `setup.py <https://github.com/matplotlib/jupyter-matplotlib/blob/c
 file has additional logic to automatically create the JS tarball as part of the
 release process, but this could also be done manually.
 
-Technically, a package that contains only a JupyterLab extension could be created
-and published on ``conda-forge``, but it would not be discoverable by the JupyterLab
-extension manager.
-
-
 .. |dependencies| image:: images/dependency-graph.svg
