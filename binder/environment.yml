@@ -8,5 +8,6 @@ dependencies:
   - numpy
   - pip
   - python=3.8
+  - tornado>=6.1
   - vega_datasets
   - xeus-python
