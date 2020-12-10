@@ -245,6 +245,26 @@ package.json metadata
 
 We provide a schema for the valid ``jupyterlab`` metadata for an extension's ``package.json`` describing the available options
 
+-  Has a ``jupyterlab`` key in its ``package.json`` which has
+   ``"extension"`` metadata. The value can be ``true`` to use the main
+   module of the package, or a string path to a specific module (e.g.
+   ``"lib/foo"``). Example::
+
+        "jupyterlab": {
+          "extension": true
+        }
+
+-  It is also recommended to include the keyword ``jupyterlab-extension``
+   in the ``package.json``, to aid with discovery (e.g. by the extension
+   manager). Example::
+
+       "keywords": [
+         "jupyter",
+         "jupyterlab",
+         "jupyterlab-extension"
+       ],
+
+
 Custom webpack config
 """""""""""""""""""""
 
@@ -450,37 +470,7 @@ Runtime configuration
 Development workflow
 --------------------
 
-
-
-Extension Authoring
--------------------
-
-
-An Extension is a valid `npm
-package <https://docs.npmjs.com/getting-started/what-is-npm>`__ that
-meets the following criteria:
-
--  Exports one or more JupyterLab plugins as the default export in its
-   main file.
--  Has a ``jupyterlab`` key in its ``package.json`` which has
-   ``"extension"`` metadata. The value can be ``true`` to use the main
-   module of the package, or a string path to a specific module (e.g.
-   ``"lib/foo"``). Example::
-
-        "jupyterlab": {
-          "extension": true
-        }
-
--  It is also recommended to include the keyword ``jupyterlab-extension``
-   in the ``package.json``, to aid with discovery (e.g. by the extension
-   manager). Example::
-
-       "keywords": [
-         "jupyter",
-         "jupyterlab",
-         "jupyterlab-extension"
-       ],
-- We encourage extension authors to add the `jupyterlab-extension GitHub topic
+We encourage extension authors to add the `jupyterlab-extension GitHub topic
 <https://github.com/search?utf8=%E2%9C%93&q=topic%3Ajupyterlab-extension&type=Repositories>`__ to any GitHub extension repository.
 
 While authoring the extension, you can use the command:
