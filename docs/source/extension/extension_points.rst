@@ -402,6 +402,7 @@ You can do this by requesting the ``ILauncher`` token in your extension:
 In addition to providing a command ID, you also provide a category in which to put your item,
 (e.g. 'Notebook', or 'Other'), as well as a rank to determine its position among other items.
 
+.. _shell:
 
 Jupyter Front-End Shell
 -----------------------
@@ -414,16 +415,16 @@ In JupyterLab, the application shell consists of:
 
 -  A ``top`` area for things like top-level toolbars and information.
 -  A ``menu`` area for top-level menus, which is collapsed into the ``top`` area in multiple-document mode and put below it in single-document mode.
--  ``left`` and ``right`` side bar areas for collapsible content.
+-  ``left`` and ``right`` sidebar areas for collapsible content.
 -  A ``main`` work area for user activity.
 -  A ``bottom`` area for things like status bars.
 -  A ``header`` area for custom elements.
 
 
 Left/Right Areas
-----------------
+^^^^^^^^^^^^^^^^
 
-The left and right areas of JupyterLab are intended to host more persistent user interface
+The left and right sidebar areas of JupyterLab are intended to host more persistent user interface
 elements than the main area. That being said, extension authors are free to add whatever
 components they like to these areas. The outermost-level of the object that you add is expected
 to be a Lumino ``Widget``, but that can host any content you like (such as React components).
@@ -451,6 +452,8 @@ The recommended ranges for this rank are:
 * 501-899: reserved for third-party extensions.
 * 900: The default rank if none is specified.
 * 1000: The JupyterLab extension manager.
+
+.. _mainmenu:
 
 Main Menu
 ---------
