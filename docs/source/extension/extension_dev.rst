@@ -237,81 +237,47 @@ It is also possible to create a new theme using the
 `TypeScript theme cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`__.
 
 
-Writing a Source Extension
+Creating a Source Extension
 --------------------------
+
+A source extension is a JavaScript package that exports one or more plugins. 
 
 package.json metadata
 ^^^^^^^^^^^^^^^^^^^^^
 
-We provide a schema for the valid ``jupyterlab`` metadata for an extension's ``package.json`` describing the available options
+A source extension has metadata in the ``jupyterlab`` field of its ``package.json`` file. The JSON schema for the metadata is `distributed <https://github.com/jupyterlab/jupyterlab/blob/master/builder/metadata_schema.json>`__ in the ``@jupyterlab/builder`` package.
 
--  Has a ``jupyterlab`` key in its ``package.json`` which has
-   ``"extension"`` metadata. The value can be ``true`` to use the main
-   module of the package, or a string path to a specific module (e.g.
-   ``"lib/foo"``). Example::
+We recommended including the keyword ``jupyterlab-extension`` in ``package.json`` to enable the extension manager to search for the extension in the npm repository::
+
+       "keywords": [
+         "jupyterlab-extension"
+       ],
+
+``extension``
+"""""""""""""
+
+
+The ``"extension"`` field signifies that this package is an extension and exports a plugin or list of plugins as the default exports from one of its JavaScript modules. Set the value to ``true`` if plugins are the default exports from the main package module (i.e., the file listed in the ``main`` key of ``package.json``). If your plugins are exported by a different module, set this to the relative path to the module (e.g., ``"lib/foo"``). Example::
 
         "jupyterlab": {
           "extension": true
         }
 
--  It is also recommended to include the keyword ``jupyterlab-extension``
-   in the ``package.json``, to aid with discovery (e.g. by the extension
-   manager). Example::
-
-       "keywords": [
-         "jupyter",
-         "jupyterlab",
-         "jupyterlab-extension"
-       ],
-
-
-Custom webpack config
-"""""""""""""""""""""
-
-.. warning::
-   This feature is *experimental*, as it makes it possible to override the base config used by the
-   JupyterLab Federated Extension System.
-
-   It also exposes the internals of the federated extension build system (namely ``webpack``) to extension authors, which was until now
-   kept as an implementation detail.
-
-The JupyterLab Federated Extension System uses ``webpack`` to build federated extensions, relying on the
-`Module Federation System <https://webpack.js.org/concepts/module-federation/>`_ added in webpack 5.
-
-To specify a custom webpack config to the federated extension build system, extension authors can add the ``webpackConfig`` subkey to the
-``package.json`` of their extension::
-
-    "jupyterlab": {
-      "webpackConfig": "webpack.config.js"
-    }
-
-The webpack config file can be placed in a different location with a custom name::
-
-    "jupyterlab": {
-      "webpackConfig": "./config/test-config.js"
-    }
-
-Here is an example of a custom config that enables the async WebAssembly and top-level ``await`` experiments:
-
-.. code-block:: javascript
-
-    module.exports = {
-      experiments: {
-          topLevelAwait: true,
-          asyncWebAssembly: true,
-      }
-    };
-
-This custom config will be merged with the `default config <https://github.com/jupyterlab/jupyterlab/blob/master/builder/src/webpack.config.base.ts>`_
-when building the federated extension with ``jlpm run build``.
-
-
 Disabling other extensions
 """"""""""""""""""""""""""
 
+The ``disabledExtensions`` field gives a list of extensions or regex patterns for extensions or plugins to disable when this extension is installed, with the same semantics as the ``disabledExtensions`` field of :ref:`page_config.json <page_configjson>`. This can be used to automatically override and disable built-in extensions. For example, if an extension replaces the plugins provided by the core status bar extension, you can disable the core status bar extension automatically with::
+
+        "jupyterlab": {
+          "disabledExtensions": ["@jupyterlab/statusbar-extension"]
+        }
 
 Sharing configuration
 """""""""""""""""""""
+
+By default, an extension's dependencies will be shared and deduplicated with other extension's direct dependencies, and JupyterLab will bundle a copy of the dependency. The ``sharedPackages`` key enables you to control how dependencies are bundled with your extension when building JupyterLab (or when building your extension when creating a prebuilt extension). ``sharedPackages`` is an object where the keys are JavaScript package names and values are sharing configuration. Set the value to ``false`` to not share a dependency with other packages. Set the value to an object to control how it is shared. 
+
+Usually the only fields needed here are ``bundled: false`` to not bundle a dependency (but rely on another extension to bundle the dependency). Do this if you import a token from the dependency, 
 
 
 .. _ext-author-companion-packages:
@@ -394,6 +360,47 @@ A typical setup for e.g. a jupyter-widget based package will then be::
 
 
 Currently supported package managers are ``pip`` and ``conda``.
+
+Custom webpack config
+"""""""""""""""""""""
+
+.. warning::
+   This feature is *experimental*, as it makes it possible to override the base config used by the
+   JupyterLab Federated Extension System.
+
+   It also exposes the internals of the federated extension build system (namely ``webpack``) to extension authors, which was until now
+   kept as an implementation detail.
+
+The JupyterLab Federated Extension System uses ``webpack`` to build federated extensions, relying on the
+`Module Federation System <https://webpack.js.org/concepts/module-federation/>`_ added in webpack 5.
+
+To specify a custom webpack config to the federated extension build system, extension authors can add the ``webpackConfig`` subkey to the
+``package.json`` of their extension::
+
+    "jupyterlab": {
+      "webpackConfig": "webpack.config.js"
+    }
+
+The webpack config file can be placed in a different location with a custom name::
+
+    "jupyterlab": {
+      "webpackConfig": "./config/test-config.js"
+    }
+
+Here is an example of a custom config that enables the async WebAssembly and top-level ``await`` experiments:
+
+.. code-block:: javascript
+
+    module.exports = {
+      experiments: {
+          topLevelAwait: true,
+          asyncWebAssembly: true,
+      }
+    };
+
+This custom config will be merged with the `default config <https://github.com/jupyterlab/jupyterlab/blob/master/builder/src/webpack.config.base.ts>`_
+when building the federated extension with ``jlpm run build``.
+
 
 
 Packaging extensions
