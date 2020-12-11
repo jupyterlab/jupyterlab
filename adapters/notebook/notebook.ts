@@ -136,6 +136,42 @@ export class NotebookAdapter extends WidgetAdapter<NotebookPanel> {
     );
 
     this.widget.content.activeCellChanged.connect(this.activeCellChanged, this);
+    this.widget.model.cells.changed.connect((cells, change) => {
+      console.log(change);
+
+      if (change.type !== 'set') {
+        return;
+      }
+      let convertedToMarkdown = [];
+
+      if (change.newValues.length !== change.oldValues.length) {
+        // during conversion the cells should not get deleted nor added
+        return;
+      }
+
+      for (let i = 0; i < change.newValues.length; i++) {
+        if (
+          change.oldValues[i].type === 'code' &&
+          change.newValues[i].type === 'markdown'
+        ) {
+          convertedToMarkdown.push(change.newValues[i]);
+        }
+      }
+
+      for (let cellModel of convertedToMarkdown) {
+        let cellWidget = this.widget.content.widgets.find(
+          cell => cell.model.id === cellModel.id
+        );
+
+        // for practical purposes this editor got removed from our consideration;
+        // it might seem that we should instead look for the editor indicated by
+        // the oldValues[i] cellModel, but this one got already transferred to the
+        // markdown cell in newValues[i]
+        this.editorRemoved.emit({
+          editor: cellWidget.editor
+        });
+      }
+    });
   }
 
   get editors(): CodeEditor.IEditor[] {
