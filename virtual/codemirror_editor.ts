@@ -519,8 +519,10 @@ export class CodeMirrorVirtualEditor
       callback(cm_editor);
     }
     if (monitor_for_new_blocks) {
-
-      let activation_callback = (adapter: WidgetAdapter<IDocumentWidget>, data: IEditorChangedData) => {
+      let activation_callback = (
+        adapter: WidgetAdapter<IDocumentWidget>,
+        data: IEditorChangedData
+      ) => {
         let { editor } = data;
         if (editor == null) {
           return;
@@ -529,9 +531,9 @@ export class CodeMirrorVirtualEditor
         if (!editors_with_handlers.has(cm_editor)) {
           callback(cm_editor);
         }
-      }
+      };
 
-      this.adapter.editorAdded.connect(activation_callback)
+      this.adapter.editorAdded.connect(activation_callback);
       this.adapter.editorRemoved.connect(
         (adapter, data: IEditorChangedData) => {
           let { editor } = data;
