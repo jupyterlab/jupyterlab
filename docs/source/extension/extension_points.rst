@@ -5,7 +5,7 @@ Common Extension Points
 
 Most of the component parts of JupyterLab are designed to be extensible,
 and they provide services that can be requested in extensions via tokens.
-A list of common core tokens that extension authors can request is given in :ref:`tokens`.
+A list of common core tokens that extension authors can request is given in :ref:`core_tokens`.
 
 Following the list of core tokens is a guide for using some of JupyterLab's most commonly-used extension points.
 However, it is not an exhaustive account of how to extend the application components,
@@ -17,7 +17,7 @@ and more detailed descriptions of their public APIs may be found in the
     :local:
     :depth: 1
 
-.. _tokens:
+.. _core_tokens:
 
 Core Tokens
 -----------

@@ -86,9 +86,9 @@ A typical application plugin might look like this in TypeScript:
 
 - ``id`` is a required unique string. The convention is to use the NPM extension package name, a colon, then a string identifying the plugin inside the extension.
 - ``autostart`` indicates whether your plugin should be activated at application startup. Typically this should be ``true``. If it is ``false`` or omitted, your plugin will be activated when any other plugin requests the token your plugin is providing.
-- ``requires`` and ``optional`` are lists of tokens corresponding to services other plugins provide. These services will be given as arguments to the ``activate`` function when the plugin is activated. If a ``requires`` service is not registered with JupyterLab, an error will be thrown and the plugin will not be activated.
-- ``provides`` is the token associated with the service your plugin is providing to the system. If your plugin does not provide a service to the system, omit this field and do not return a value from your ``activate`` function.
-- ``activate`` is the function called when your plugin is activated. The arguments are, in order, the :ref:`application_object`, the services corresponding to the ``requires`` tokens, then the services corresponding to the ``optional`` tokens (or ``null`` if that particular ``optional`` token is not registered in the system). If a ``provides`` token is given, the return value of the ``activate`` function (or resolved return value if a promise is returned) will be registered as the service associated with the token.
+- ``requires`` and ``optional`` are lists of :ref:`tokens <tokens>` corresponding to services other plugins provide. These services will be given as arguments to the ``activate`` function when the plugin is activated. If a ``requires`` service is not registered with JupyterLab, an error will be thrown and the plugin will not be activated.
+- ``provides`` is the :ref:`token <tokens>` associated with the service your plugin is providing to the system. If your plugin does not provide a service to the system, omit this field and do not return a value from your ``activate`` function.
+- ``activate`` is the function called when your plugin is activated. The arguments are, in order, the :ref:`application object <application_object>`, the services corresponding to the ``requires`` tokens, then the services corresponding to the ``optional`` tokens (or ``null`` if that particular ``optional`` token is not registered in the system). If a ``provides`` token is given, the return value of the ``activate`` function (or resolved return value if a promise is returned) will be registered as the service associated with the token.
 
 .. _application_object:
 
@@ -114,6 +114,11 @@ One of the foundational features of the JupyterLab plugin system is that applica
 
 In the following discussion, the plugin that is providing a service to the system is the *provider* plugin, and the plugin that is requiring and using the service is the *consumer* plugin.
 
+.. _tokens:
+
+Tokens
+""""""
+
 A service provided by a plugin is identified by a *token*, i.e., a concrete instance of the Lumino Token class. The provider plugin lists the token in its plugin metadata ``provides`` field, and returns the associated service from its ``activate`` function. Consumer plugins import the token (for example, from the provider plugin's extension JavaScript package) and list the token in their plugin metadata ``requires`` or ``optional`` fields. When JupyterLab instantiates the consumer plugin, it will pass in the service associated with the token. JupyterLab orders plugin activation to ensure that a provider of a service is activated before its consumers. A token can only be registered with the system once.
 
 A token defined in TypeScript can also define a TypeScript interface for the service associated with the token. If the provider or consumer uses TypeScript, the service will be type-checked against this interface.
@@ -124,23 +129,11 @@ A token defined in TypeScript can also define a TypeScript interface for the ser
 Publishing Tokens
 """""""""""""""""
 
-Since consumers will need to import a token used by a provider, the token should be exported in a published JavaScript package. A pattern in core JupyterLab is to create and export tokens from a self-contained ``tokens`` JavaScript module in a package. This enables consumers to import a token directly from the package's ``tokens`` module (e.g., ``import { MyToken } from 'provider/tokens';``), thus enabling a tree-shaking bundling optimization to possibly bundle only the tokens and not other code from the package.
+Since consumers will need to import a token used by a provider, the token should be exported in a published JavaScript package. Tokens will need to be deduplicated in JupyterLab—see :ref:`deduplication` for more details.
+
+A pattern in core JupyterLab is to create and export tokens from a self-contained ``tokens`` JavaScript module in a package. This enables consumers to import a token directly from the package's ``tokens`` module (e.g., ``import { MyToken } from 'provider/tokens';``), thus enabling a tree-shaking bundling optimization to possibly bundle only the tokens and not other code from the package.
 
 Another pattern in core JupyterLab is to create and export a token from a third package that both the provider and consumer extensions import, rather than defining the token in the provider's package. This enables a user to swap out the provider extension for a different extension that provides the same token with an alternative service implementation. For example, the core JupyterLab ``filebrowser`` package exports a token representing the file browser service (enabling interactions with the file browser). The ``filebrowser-extension`` package contains a plugin that implements the file browser in JupyterLab and provides the file browser service to JupyterLab (identified with the token imported from the ``filebrowser`` package). Extensions in JupyterLab that want to interact with the filebrowser thus do not need to have a JavaScript dependency on the ``filebrowser-extension`` package, but only need to import the token from the ``filebrowser`` package. This pattern enables users to seamlessly change the file browser in JupyterLab by writing their own extension that imports the same token from the ``filebrowser`` package and provides it to the system with their own alternative file browser service.
-
-.. _deduplication:
-
-Deduplication of Dependencies
-"""""""""""""""""""""""""""""
-
-..
-   TODO: Maybe put this part in the place where we talk about the sharedPackages metadata? It's an important implementation detail in JupyterLab that has consequences for extension metadata.
-
-One important concern and challenge in the JupyterLab extension system is deduplicating dependencies of extensions instead of having extensions use their own bundled copies of dependencies. For example, the Lumino widgets system on which JupyterLab relies for communication across the application requires all packages use the same copy of the ``@lumino/widgets`` package. Tokens identifying plugin services also need to be shared across the providers and consumers of the services, so dependencies that export tokens need to be deduplicated.
-
-Deduplication in JupyterLab happens in two ways. For source extensions, JupyterLab deduplicates dependencies when rebuilds itself to include the extension during the extension installation process. Deduplication is one of the main reasons JupyterLab needs to be rebuilt when installing source extensions. For prebuilt extensions, JupyterLab relies on the Webpack 5.0 module federation system to share dependencies across different bundles (including the core JupyterLab application bundle).
-
-To ensure that a consumer gets the same token instance that the provider provided to the sytem, the consumer should list the package it imported the tokens from as unbundled package in its ``package.json`` ``jupyterlab.sharedPackages`` config—this will generate a JavaScript error if the package (and thus the token) is not present in the system at runtime. Optional token packages should be listed as singletons that are bundled (otherwise, if they are not present in the system, it will cause a js error when you try to import them).
 
 
 
@@ -192,7 +185,7 @@ document can then be saved by the user in the usual manner.
 Theme plugins
 ^^^^^^^^^^^^^
 
-A theme is a JupyterLab plugin that uses a ``ThemeManager`` and can
+A theme is an application plugin that requires the ``ThemeManager`` service and can
 be loaded and unloaded dynamically. The package must include all static
 assets that are referenced by ``url()`` in its CSS files. Local URLs can
 be used to reference files relative to the location of the referring sibling CSS files. For example ``url('images/foo.png')`` or
@@ -206,22 +199,13 @@ for an example. Ensure that the theme files are included in the
 ``"files"`` metadata in ``package.json``.  Note that if you want to use SCSS, SASS, or LESS files,
 you must compile them to CSS and point JupyterLab to the CSS files.
 
-The theme extension is installed in the same way as a regular extension (see
-`extension authoring <#extension-authoring>`__).
-
-It is also possible to create a new theme using the
-`TypeScript theme cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`__.
+See the `TypeScript theme cookiecutter <https://github.com/jupyterlab/theme-cookiecutter>`__ for a quick start to developing a theme plugin.
 
 
 Source Extensions
 -----------------
 
-A source extension is a JavaScript package that exports one or more plugins. 
-
-package.json metadata
-^^^^^^^^^^^^^^^^^^^^^
-
-A source extension has metadata in the ``jupyterlab`` field of its ``package.json`` file. The JSON schema for the metadata is `distributed <https://github.com/jupyterlab/jupyterlab/blob/master/builder/metadata_schema.json>`__ in the ``@jupyterlab/builder`` package.
+A source extension is a JavaScript (npm) package that exports one or more plugins. A source extension has metadata in the ``jupyterlab`` field of its ``package.json`` file. The JSON schema for the metadata is `distributed <https://github.com/jupyterlab/jupyterlab/blob/master/builder/metadata_schema.json>`__ in the ``@jupyterlab/builder`` package.
 
 We recommend including the keyword ``jupyterlab-extension`` in ``package.json`` to enable the extension manager to search for the extension in the npm repository::
 
@@ -230,7 +214,7 @@ We recommend including the keyword ``jupyterlab-extension`` in ``package.json`` 
        ],
 
 Main entry point
-""""""""""""""""
+^^^^^^^^^^^^^^^^
 
 The ``jupyterlab.extension`` field signifies that this package is a JupyterLab extension and gives the module that exports a plugin or list of plugins as default exports. Set the value to ``true`` if plugins are the default exports from the main package module (i.e., the file listed in the ``main`` key of ``package.json``). If your plugins are exported by a different module, set this to the relative path to the module (e.g., ``"lib/foo"``). Example::
 
@@ -239,7 +223,7 @@ The ``jupyterlab.extension`` field signifies that this package is a JupyterLab e
         }
 
 Plugin Settings
-"""""""""""""""
+^^^^^^^^^^^^^^^
 
 JupyterLab exposes a plugin settings system that can be used to provide
 default setting values and user overrides. This uses the ``jupyterlab.schemaDir`` field of the extension metadata.
@@ -271,7 +255,7 @@ for another example of an extension that uses settings.
 A system administrator or user can override default values of extension settings with the :ref:`overrides.json <overridesjson>` file.
 
 Disabling other extensions
-""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``disabledExtensions`` field gives a list of extensions or regex patterns for extensions or plugins to disable when this extension is installed, with the same semantics as the ``disabledExtensions`` field of :ref:`page_config.json <page_configjson>`. This can be used to automatically override and disable built-in extensions. For example, if an extension replaces the plugins provided by the core status bar extension, you can disable the core status bar extension automatically with::
 
@@ -279,18 +263,28 @@ The ``disabledExtensions`` field gives a list of extensions or regex patterns fo
           "disabledExtensions": ["@jupyterlab/statusbar-extension"]
         }
 
-Sharing configuration
-"""""""""""""""""""""
+.. _deduplication:
+
+Deduplication of Dependencies
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+One important concern and challenge in the JupyterLab extension system is deduplicating dependencies of extensions instead of having extensions use their own bundled copies of dependencies. For example, the Lumino widgets system on which JupyterLab relies for communication across the application requires all packages use the same copy of the ``@lumino/widgets`` package. Tokens identifying plugin services also need to be shared across the providers and consumers of the services, so dependencies that export tokens need to be deduplicated.
+
+Deduplication in JupyterLab happens in two ways. For source extensions, JupyterLab deduplicates dependencies when rebuilds itself to include the extension during the extension installation process. Deduplication is one of the main reasons JupyterLab needs to be rebuilt when installing source extensions. For prebuilt extensions, JupyterLab relies on the Webpack 5.0 module federation system to share dependencies across different bundles (including the core JupyterLab application bundle).
+
+To ensure that a consumer gets the same token instance that the provider provided to the sytem, the consumer should list the package it imported the tokens from as unbundled package in its ``package.json`` ``jupyterlab.sharedPackages`` config—this will generate a JavaScript error if the package (and thus the token) is not present in the system at runtime. Optional token packages should be listed as singletons that are bundled (otherwise, if they are not present in the system, it will cause a js error when you try to import them).
+
 
 By default, an extension's dependencies will be shared and deduplicated with other extension's direct dependencies, and JupyterLab will bundle a copy of the dependency. The ``sharedPackages`` key enables you to control how dependencies are bundled with your extension when building JupyterLab (or when building your extension when creating a prebuilt extension). ``sharedPackages`` is an object where the keys are JavaScript package names and values are sharing configuration. Set the value to ``false`` to not share a dependency with other packages. Set the value to an object to control how it is shared. 
 
 Usually the only fields needed here are ``bundled: false`` to not bundle a dependency (but rely on another extension to bundle the dependency). Do this if you import a token from the dependency, 
 
 
+
 .. _ext-author-companion-packages:
 
 Companion packages
-""""""""""""""""""
+^^^^^^^^^^^^^^^^^^
 
 If your extension depends on the presence of one or more packages in the
 kernel, or on a notebook server extension, you can add metadata to indicate
@@ -368,17 +362,43 @@ A typical setup for e.g. a jupyter-widget based package will then be::
 
 Currently supported package managers are ``pip`` and ``conda``.
 
+CSS Imports
+^^^^^^^^^^^
+
+- Discuss how JupyterLab puts your extension CSS on the page
+- Cover duplication of CSS issues
+- Mention the package.json styleModule key
+
+JupyterLab will prefer to put the styleModule key, then the style key, if they exist.
+
+
+Theme path
+^^^^^^^^^^
+
+
+
+Prebuilt Extensions
+-------------------
+
+package.json metadata
+^^^^^^^^^^^^^^^^^^^^^
+
+In addition to the package metadata for source extensions, prebuilt extensions have extra metadata for where the prebuilt assets should go.
+
+Output Directory
+""""""""""""""""
+
+
+
 Custom webpack config
 """""""""""""""""""""
 
 .. warning::
-   This feature is *experimental*, as it makes it possible to override the base config used by the
-   JupyterLab Federated Extension System.
+   This feature is *experimental*, as it makes it possible to override the base config used by the prebuilt extension builder.
 
-   It also exposes the internals of the federated extension build system (namely ``webpack``) to extension authors, which was until now
-   kept as an implementation detail.
+   It also exposes the internals of the prebuilt extension build system (namely ``webpack``) to extension authors, which was until now kept as an implementation detail.
 
-The JupyterLab Federated Extension System uses ``webpack`` to build federated extensions, relying on the
+The prebuilt extension system uses ``webpack`` to build federated extensions, relying on the
 `Module Federation System <https://webpack.js.org/concepts/module-federation/>`_ added in webpack 5.
 
 To specify a custom webpack config to the federated extension build system, extension authors can add the ``webpackConfig`` subkey to the
@@ -408,10 +428,38 @@ Here is an example of a custom config that enables the async WebAssembly and top
 This custom config will be merged with the `default config <https://github.com/jupyterlab/jupyterlab/blob/master/builder/src/webpack.config.base.ts>`_
 when building the federated extension with ``jlpm run build``.
 
+Packaging Information
+^^^^^^^^^^^^^^^^^^^^^
+
+Since prebuilt extensions are distributed in many ways (Python pip packages, conda packages, and potentially in many other packaging systems), there is an extra file, ``install.json`` that helps the user know how a prebuilt extension was installed. This file is put there by the packaging system distributing the prebuilt extension.
+
+Steps for building
+^^^^^^^^^^^^^^^^^^
+- We provide a ``jupyter labextension build`` script that is used to build prebuilt bundles
+   - The command produces a set of static assets that are shipped along with a package (notionally on ``pip``/``conda``)
+   - It is a Python cli so that it can use the dependency metadata from the active JupyterLab
+   - The assets include a module federation ``remoteEntry.*.js``, generated bundles, and some other files that we use
+   - ``package.json`` is the original ``package.json`` file that we use to gather metadata about the package, with some included build metadata
+   - we use the previously existing ``@jupyterlab/builder -> build`` to generate the ``imports.css``, ``schemas`` and ``themes`` file structure
+- We provide a ``labextensions`` handler in ``jupyterlab_server`` that loads static assets from ``labextensions`` paths, following a similar logic to how ``nbextensions`` are discovered and loaded from disk
+- The ``settings`` and ``themes`` handlers in ``jupyterlab_server`` has been updated to load from the new ``labextensions`` locations, favoring the prebuilt extension locations over the bundled ones
+- A ``labextension develop`` command has been added to install an in-development extension into JupyterLab.  The default behavior is to create a symlink in the ``sys-prefix/share/jupyter/labextensions/package-name`` to the static directory of the extension
+- We provide a ``cookiecutter`` that handles all of the scaffolding for an extension author, including the shipping of ``data_files`` so that when the user installs the package, the static assets end up in ``share/jupyter/labextensions``
+
+Implementation details
+^^^^^^^^^^^^^^^^^^^^^^
+
+How prebuilt extensions work
+""""""""""""""""""""""""""""
+
+
+Directory walkthrough
+"""""""""""""""""""""
+
 
 
 Packaging extensions
-^^^^^^^^^^^^^^^^^^^^
+--------------------
 
 Most extensions are single JavaScript packages, and can be shipped on npmjs.org.
 This makes them discoverable by the JupyterLab extension manager, provided they
@@ -439,39 +487,9 @@ file has additional logic to automatically create the JS tarball as part of the
 release process, but this could also be done manually.
 
 
-Prebuilt Extensions
--------------------
-
-package.json metadata
-^^^^^^^^^^^^^^^^^^^^^
-
-In addition to the package metadata given above, prebuilt extensions have extra metadata for where the prebuilt assets should go.
 
 
-Packaging Information
-^^^^^^^^^^^^^^^^^^^^^
 
-Since prebuilt extensions are distributed in many ways, there is an extra file, ``install.json`` that helps the user know how a prebuilt extension was installed. This file is put there by the packaging system distributing the prebuilt extension.
-
-
-How prebuilt extensions work
-"""""""""""""""""""""""""""""
-
-Steps for building
-""""""""""""""""""
-- We provide a ``jupyter labextension build`` script that is used to build prebuilt bundles
-   - The command produces a set of static assets that are shipped along with a package (notionally on ``pip``/``conda``)
-   - It is a Python cli so that it can use the dependency metadata from the active JupyterLab
-   - The assets include a module federation ``remoteEntry.*.js``, generated bundles, and some other files that we use
-   - ``package.json`` is the original ``package.json`` file that we use to gather metadata about the package, with some included build metadata
-   - we use the previously existing ``@jupyterlab/builder -> build`` to generate the ``imports.css``, ``schemas`` and ``themes`` file structure
-- We provide a ``labextensions`` handler in ``jupyterlab_server`` that loads static assets from ``labextensions`` paths, following a similar logic to how ``nbextensions`` are discovered and loaded from disk
-- The ``settings`` and ``themes`` handlers in ``jupyterlab_server`` has been updated to load from the new ``labextensions`` locations, favoring the prebuilt extension locations over the bundled ones
-- A ``labextension develop`` command has been added to install an in-development extension into JupyterLab.  The default behavior is to create a symlink in the ``sys-prefix/share/jupyter/labextensions/package-name`` to the static directory of the extension
-- We provide a ``cookiecutter`` that handles all of the scaffolding for an extension author, including the shipping of ``data_files`` so that when the user installs the package, the static assets end up in ``share/jupyter/labextensions``
-
-Directory walkthrough
-"""""""""""""""""""""
 
 Runtime configuration
 ---------------------
