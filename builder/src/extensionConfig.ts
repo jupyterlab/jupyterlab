@@ -64,16 +64,10 @@ function generateConfig({
     );
   }
 
-  if (data.style) {
-    let style = path.join(packagePath, data.style);
-    if (path.extname(style) === '.css') {
-      // See if there is a corresponding js file we can load instead
-      const jsFile = `${style.slice(0, style.length - 4)}.js`;
-      if (fs.existsSync(jsFile)) {
-        style = jsFile;
-      }
-    }
-    exposes['./style'] = style;
+  if (typeof data.styleModule === 'string') {
+    exposes['./style'] = path.join(packagePath, data.styleModule);
+  } else if (typeof data.style === 'string') {
+    exposes['./style'] = path.join(packagePath, data.style);
   }
 
   const coreData = require(path.join(corePath, 'package.json'));
