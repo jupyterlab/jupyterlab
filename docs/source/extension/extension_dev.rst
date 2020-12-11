@@ -175,7 +175,7 @@ JupyterLab package needed to create a mime renderer extension (using the
 interfaces in TypeScript or as a form of documentation if using plain
 JavaScript).
 
-The only other difference from a standard extension is that has a
+The only other difference from a standard extension is that it has a
 ``jupyterlab`` key in its ``package.json`` with ``"mimeExtension"``
 metadata. The value can be ``true`` to use the main module of the
 package, or a string path to a specific module (e.g. ``"lib/foo"``).
@@ -223,7 +223,7 @@ package.json metadata
 
 A source extension has metadata in the ``jupyterlab`` field of its ``package.json`` file. The JSON schema for the metadata is `distributed <https://github.com/jupyterlab/jupyterlab/blob/master/builder/metadata_schema.json>`__ in the ``@jupyterlab/builder`` package.
 
-We recommended including the keyword ``jupyterlab-extension`` in ``package.json`` to enable the extension manager to search for the extension in the npm repository::
+We recommend including the keyword ``jupyterlab-extension`` in ``package.json`` to enable the extension manager to search for the extension in the npm repository::
 
        "keywords": [
          "jupyterlab-extension"
@@ -292,7 +292,7 @@ Usually the only fields needed here are ``bundled: false`` to not bundle a depen
 Companion packages
 """"""""""""""""""
 
-If your extensions depends on the presence of one or more packages in the
+If your extension depends on the presence of one or more packages in the
 kernel, or on a notebook server extension, you can add metadata to indicate
 this to the extension manager by adding metadata to your package.json file.
 The full options available are::
