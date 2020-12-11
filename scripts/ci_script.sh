@@ -326,6 +326,71 @@ if [[ $GROUP == usage ]]; then
     jupyter lab clean --all
 fi
 
+if [[ $GROUP == interop ]]; then
+    cd jupyterlab/tests/mock_packages/interop
+
+    # Install a source extension that depends on a prebuilt extension
+    pushd token
+    jupyter labextension link . --no-build
+    popd
+    pushd provider
+    jupyter labextension build .
+    pip install .
+    popd
+    pushd consumer
+    jupyter labextension install .
+    popd
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
+    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
+
+    python -m jupyterlab.browser_check
+
+    # Clear install
+    pip uninstall -y jlab_mock_provider
+    jupyter lab clean --all
+
+    # Install a prebuilt extension that depends on a source extension
+    pushd token
+    jupyter labextension link . --no-build
+    popd
+    pushd provider
+    jupyter labextension install .
+    popd
+    pushd consumer
+    jupyter labextension build .
+    pip install .
+    popd
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
+    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
+    python -m jupyterlab.browser_check
+
+    # Clear install
+    pip uninstall -y jlab_mock_consumer
+    jupyter lab clean --all
+
+    # Install the mock consumer as a source extension and as a
+    # prebuilt extension to test shadowing
+    pushd token
+    jupyter labextension link . --no-build
+    popd
+    pushd provider
+    jupyter labextension install . --no-build
+    popd
+    pushd consumer
+    # Need to install source first because it would get ignored
+    # if installed after
+    jupyter labextension install .
+    jupyter labextension build .
+    pip install .
+    popd
+    jupyter labextension list 1>labextensions 2>&1
+    cat labextensions | grep -q "@jupyterlab/mock-consumer.*OK"
+    cat labextensions | grep -q "@jupyterlab/mock-provider.*OK"
+    python -m jupyterlab.browser_check
+fi
+
 if [[ $GROUP == nonode ]]; then
     # Make sure we can install the wheel
     virtualenv -p $(which python3) test_install
