@@ -3,7 +3,7 @@ import { FileEditorJumper } from '@krassowski/jupyterlab_go_to_definition/lib/ju
 import { NotebookJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/notebook';
 import { PositionConverter } from '../converter';
 import { IVirtualPosition } from '../positioning';
-import { uri_to_contents_path, uris_equal } from '../utils';
+import { getModifierState, uri_to_contents_path, uris_equal } from '../utils';
 import { AnyLocation } from 'lsp-ws-connection/lib/types';
 import {
   FeatureSettings,
@@ -23,6 +23,8 @@ import { ILSPAdapterManager, ILSPFeatureManager, PLUGIN_ID } from '../tokens';
 import { LabIcon } from '@jupyterlab/ui-components';
 import jumpToSvg from '../../style/icons/jump-to.svg';
 import { URLExt } from '@jupyterlab/coreutils';
+import { CodeJump as LSPJumpSettings, ModifierKey } from '../_jump_to';
+import { ISettingRegistry } from '@jupyterlab/settingregistry';
 
 export const jumpToIcon = new LabIcon({
   name: 'lsp:jump-to',
@@ -34,6 +36,45 @@ const FEATURE_ID = PLUGIN_ID + ':jump-to';
 export class CMJumpToDefinition extends CodeMirrorIntegration {
   get jumper() {
     return (this.feature.labIntegration as JumperLabIntegration).jumper;
+  }
+
+  get settings() {
+    return super.settings as FeatureSettings<LSPJumpSettings>;
+  }
+
+  protected get modifierKey(): ModifierKey {
+    return this.settings.composite.modifierKey;
+  }
+
+  register() {
+    this.editor_handlers.set(
+      'mousedown',
+      (virtual_editor, event: MouseEvent) => {
+        let root_position = this.position_from_mouse(event);
+        let document = virtual_editor.document_at_root_position(root_position);
+        let virtual_position = virtual_editor.root_position_to_virtual_position(
+          root_position
+        );
+
+        const { button } = event;
+        if (
+          button === 0 &&
+          getModifierState(event, this.modifierKey as string)
+        ) {
+          this.connection
+            .getDefinition(virtual_position, document.document_info, false)
+            .then(targets => {
+              this.handle_jump(targets, document.document_info.uri).catch(
+                console.warn
+              );
+            })
+            .catch(console.warn);
+          event.preventDefault();
+          event.stopPropagation();
+        }
+      }
+    );
+    super.register();
   }
 
   get_uri_and_range(location_or_locations: AnyLocation) {
@@ -85,6 +126,7 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
 
     if (uris_equal(uri, document_uri)) {
       let editor_index = this.adapter.get_editor_index_at(virtual_position);
+      console.log('Editor index: ', editor_index);
       // if in current file, transform from the position within virtual document to the editor position:
       let editor_position = this.virtual_editor.transform_virtual_to_editor(
         virtual_position
@@ -92,25 +134,23 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       let editor_position_ce = PositionConverter.cm_to_ce(editor_position);
       console.log(`Jumping to ${editor_index}th editor of ${uri}`);
       console.log('Jump target within editor:', editor_position_ce);
-      this.jumper.jump({
-        token: {
-          offset: this.jumper.getOffset(editor_position_ce, editor_index),
-          value: ''
-        },
-        index: editor_index
+
+      let contents_path = this.adapter.widget.context.path;
+      console.log('path', this.adapter.widget.context.path);
+      console.log('localPath', this.adapter.widget.context.localPath);
+
+      this.jumper.global_jump({
+        line: editor_position_ce.line,
+        column: editor_position.ch,
+        editor_index: editor_index,
+        is_symlink: false,
+        contents_path: contents_path
       });
     } else {
       // otherwise there is no virtual document and we expect the returned position to be source position:
       let source_position_ce = PositionConverter.cm_to_ce(virtual_position);
       console.log(`Jumping to external file: ${uri}`);
       console.log('Jump target (source location):', source_position_ce);
-
-      // can it be resolved vs our guessed server root?
-      let contents_path = uri_to_contents_path(uri);
-
-      if (contents_path == null && uri.startsWith('file://')) {
-        contents_path = decodeURI(uri.slice(7));
-      }
 
       let jump_data = {
         editor_index: 0,
@@ -122,6 +162,13 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
       // TODO use is_relative() or something? It would need to be not only compatible
       //  with different OSes but also with JupyterHub and other platforms.
 
+      // can it be resolved vs our guessed server root?
+      let contents_path = uri_to_contents_path(uri);
+
+      if (contents_path == null && uri.startsWith('file://')) {
+        contents_path = decodeURI(uri.slice(7));
+      }
+
       try {
         await this.jumper.document_manager.services.contents.get(
           contents_path,
@@ -129,19 +176,21 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
             content: false
           }
         );
-        this.jumper.global_jump({ contents_path, ...jump_data }, false);
+        this.jumper.global_jump({
+          contents_path,
+          ...jump_data,
+          is_symlink: false
+        });
         return;
       } catch (err) {
         console.warn(err);
       }
 
-      this.jumper.global_jump(
-        {
-          contents_path: URLExt.join('.lsp_symlink', contents_path),
-          ...jump_data
-        },
-        true
-      );
+      this.jumper.global_jump({
+        contents_path: URLExt.join('.lsp_symlink', contents_path),
+        ...jump_data,
+        is_symlink: true
+      });
     }
   }
 }
@@ -149,15 +198,16 @@ export class CMJumpToDefinition extends CodeMirrorIntegration {
 class JumperLabIntegration implements IFeatureLabIntegration {
   private adapterManager: ILSPAdapterManager;
   private jumpers: Map<string, CodeJumper>;
-  // settings should be implemented in the future
-  settings?: FeatureSettings<any>;
+  settings: FeatureSettings<any>;
 
   constructor(
+    settings: FeatureSettings<any>,
     adapterManager: ILSPAdapterManager,
     fileEditorTracker: IEditorTracker,
     notebookTracker: INotebookTracker,
     documentManager: IDocumentManager
   ) {
+    this.settings = settings;
     this.adapterManager = adapterManager;
     this.jumpers = new Map();
 
@@ -198,6 +248,16 @@ const COMMANDS: IFeatureCommand[] = [
     is_enabled: ({ connection }) => connection.isDefinitionSupported(),
     label: 'Jump to definition',
     icon: jumpToIcon
+  },
+  {
+    id: 'jump-back',
+    execute: async ({ connection, virtual_position, document, features }) => {
+      const jump_feature = features.get(FEATURE_ID) as CMJumpToDefinition;
+      jump_feature.jumper.global_jump_back();
+    },
+    is_enabled: ({ connection }) => connection.isDefinitionSupported(),
+    label: 'Jump back',
+    icon: jumpToIcon
   }
 ];
 
@@ -205,6 +265,7 @@ export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
   id: FEATURE_ID,
   requires: [
     ILSPFeatureManager,
+    ISettingRegistry,
     ILSPAdapterManager,
     IEditorTracker,
     INotebookTracker,
@@ -214,12 +275,15 @@ export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
   activate: (
     app: JupyterFrontEnd,
     featureManager: ILSPFeatureManager,
+    settingRegistry: ISettingRegistry,
     adapterManager: ILSPAdapterManager,
     fileEditorTracker: IEditorTracker,
     notebookTracker: INotebookTracker,
     documentManager: IDocumentManager
   ) => {
+    const settings = new FeatureSettings(settingRegistry, FEATURE_ID);
     let labIntegration = new JumperLabIntegration(
+      settings,
       adapterManager,
       fileEditorTracker,
       notebookTracker,
@@ -234,7 +298,8 @@ export const JUMP_PLUGIN: JupyterFrontEndPlugin<void> = {
         commands: COMMANDS,
         id: FEATURE_ID,
         name: 'Jump to definition',
-        labIntegration: labIntegration
+        labIntegration: labIntegration,
+        settings: settings
       }
     });
   }
