@@ -326,6 +326,10 @@ export namespace DocumentConnectionManager {
       language
     });
 
+    if (language_server_id === null) {
+      throw `No language server installed for language ${language}`;
+    }
+
     return {
       base: baseUri,
       document: URLExt.join(baseUri, virtual_document.uri),
