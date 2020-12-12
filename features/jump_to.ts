@@ -1,6 +1,6 @@
-import { CodeJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/jumper';
-import { FileEditorJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/fileeditor';
-import { NotebookJumper } from '@krassowski/jupyterlab_go_to_definition/lib/jumpers/notebook';
+import { CodeJumper } from '@krassowski/code-jumpers/lib/jumpers/jumper';
+import { FileEditorJumper } from '@krassowski/code-jumpers/lib/jumpers/fileeditor';
+import { NotebookJumper } from '@krassowski/code-jumpers/lib/jumpers/notebook';
 import { PositionConverter } from '../converter';
 import { IVirtualPosition } from '../positioning';
 import { getModifierState, uri_to_contents_path, uris_equal } from '../utils';
